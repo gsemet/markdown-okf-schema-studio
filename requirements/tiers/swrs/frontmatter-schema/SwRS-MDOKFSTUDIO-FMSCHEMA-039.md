@@ -10,7 +10,8 @@ description: When the frontmatter has errors or warnings, the extension SHALL
   that names the missing required fields.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -103,3 +104,18 @@ When the frontmatter has errors or warnings, the extension SHALL show in the tab
 - Method: test/integration/realInput/markers.ts (link problems count in the badge).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario (missing required fields summary).
 - Criteria: The info count is shown only when errors and warnings are both zero. The first row carrying an error, warning or info class is chosen, in table order; its value cell is focused when the row has an editable value cell, otherwise its name cell. Missing names follow the order in which the effective schema collected its required lists. Link issues carry the origin link, which the field editor ignores when saving, so a link problem does not block the saving of other fields.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-038](SwRS-MDOKFSTUDIO-FMSCHEMA-038.md): Missing required fields are summarised under the table
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-040](SwRS-MDOKFSTUDIO-FMSCHEMA-040.md): The badge jumps to the first row with an issue
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-085](SwRS-MDOKFSTUDIO-FMSCHEMA-085.md): The badge counts infos only when there is no error or warning
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-087](SwRS-MDOKFSTUDIO-FMSCHEMA-087.md): A link problem counts in the badge
+<!-- okf:links:end -->

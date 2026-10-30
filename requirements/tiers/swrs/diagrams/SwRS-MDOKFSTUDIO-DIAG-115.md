@@ -8,7 +8,8 @@ description: When a theme change switches the preview between a light and a dark
   variant.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a theme change switches the preview between a light and a dark background, 
 
 - Method: Visual scenarios diagrams v10 and v11; no unit test of the theme observer.
 - Criteria: The variant change redraws all diagrams.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-023](SwRS-MDOKFSTUDIO-DIAG-023.md): PlantUML fences become centred inert pictures drawn by the built-in engine
+<!-- okf:links:end -->

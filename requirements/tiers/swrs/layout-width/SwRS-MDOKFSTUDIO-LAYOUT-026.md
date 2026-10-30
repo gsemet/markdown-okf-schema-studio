@@ -7,7 +7,8 @@ description: When an element is under edit, or a figure has a size given in %,
   em or rem, the extension SHALL keep it at the column width in Auto width mode.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,14 @@ When an element is under edit, or a figure has a size given in %, em or rem, the
 
 - Method: Unit test T10 the saved width mode applies at startup and an edited element keeps the column; the relative-size path is verified by inspection of widthMode.ts.
 - Criteria: Marked elements never include an element under edit or a relative-sized figure.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-023](SwRS-MDOKFSTUDIO-LAYOUT-023.md): Auto width lets wide blocks break out of the column
+<!-- okf:links:end -->

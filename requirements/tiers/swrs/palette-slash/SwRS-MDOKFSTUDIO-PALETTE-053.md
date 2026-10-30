@@ -8,7 +8,8 @@ description: When the writer runs Numbered list, the extension SHALL put 1. , 2.
   and remove the markers when every non-blank touched line already has one.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -66,3 +67,12 @@ The action exists only as a slash menu entry, like Bulleted list (see SwRS-MDOKF
 - Method: test/page/modules/slashMenu.test.ts (P11 r2: choosing the list entries writes the list prefix as one edit; the /numbered row of the boundary scenario)
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Criteria: The recognised markers are digits (one to nine) followed by a dot or a parenthesis.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

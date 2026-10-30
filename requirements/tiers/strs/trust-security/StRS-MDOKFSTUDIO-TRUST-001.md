@@ -11,7 +11,8 @@ description: When a reader previews a document in an untrusted workspace or a
   theme, following links and copying code work as in a writable preview.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -46,3 +47,15 @@ As a reader, I open a document in Restricted Mode, or a file from outside my wor
 - This record holds the rule that applies to every kind of change. The wording of each refusal is specified with the feature that owns the action (block editing, table editing, frontmatter editing, labels, checkboxes, images, comments).
 - An action that changes no file is never refused because the preview is read-only; the theme mode and the zoom only change how the preview looks, never the document, so no trust is needed.
 - The viewing actions themselves are specified in the theme and zoom, toolbar and navigation, and code block scopes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-026](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-026.md): The side preview follows the active Markdown editor
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+<!-- okf:links:end -->

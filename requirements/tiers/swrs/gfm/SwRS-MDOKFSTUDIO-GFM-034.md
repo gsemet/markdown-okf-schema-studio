@@ -12,7 +12,8 @@ description: When a span style declares color or background-color as a named
   unsafe style attribute.') for a removed declaration.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,15 @@ When a span style declares color or background-color as a named colour (a closed
 - Method: test/page/modules/spanColors.test.ts (valid attribute applied, hand-edited invalid attribute: page unit tests).
 - Method: test/core/security/spanColors.test.ts (grammar and injection shapes), test/core/render/mystFeatures.test.ts (a colour span in a raw HTML table).
 - Criteria: Only valid named, hex, rgb/rgba and hsl/hsla values are retained and only grammar-valid values reach styles; the diagnostic is present only when something is removed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-GFM-035](SwRS-MDOKFSTUDIO-GFM-035.md): The page revalidates span colours before applying
+  - [SwRS-MDOKFSTUDIO-GFM-036](SwRS-MDOKFSTUDIO-GFM-036.md): Removed span styles record a diagnostic
+<!-- okf:links:end -->

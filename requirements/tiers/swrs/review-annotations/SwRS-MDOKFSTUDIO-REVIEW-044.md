@@ -10,7 +10,8 @@ description: When a reader writes a comment in the comment box, the page SHALL
   answers that the comment is saved.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -119,3 +120,15 @@ When a create or reply message passes the protocol with a body that is blank or 
 - Method: real window review-annotations/r04-thread-created (Box content, Save sends the comment, A saved comment closes the box).
 - Method: test/core/comments/commentEditing.test.ts, unit test `T43: normalizeBody trims and enforces 1 to 10000 characters` (the trimming and length rule of The host answers a blank or invalid comment as empty); the handler answers themselves are untested.
 - Criteria: The dialog holds a textarea with maxlength 10000 and two buttons; the quote is set with textContent. Exactly one create message is posted per save and the post hook is not called for a trimmed empty body. stopImmediatePropagation is called for keydown inside the box only. The result handler returns true and closes only for a create answer while a save is pending. The error line has role alert and holds the reason cut at 500 characters. The no-answer message appears after ANSWER_TIMEOUT_MS = 15000 and a late answer closes the box. The placeholder and the length limit are not asserted. normalizeBody returns undefined for a blank body and the host answers with the reason, without a warning.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When the reader scrolls the preview to another source line or
   shows that file or the report names another file.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -112,3 +113,15 @@ When the reader scrolls the preview to another source line or activates a render
 - Method: test/session/lifeReq.requirements.test.ts (scenarios 6 and 7: "a reveal that names another source file moves nothing" and "a revealed line is clamped between the first and the last line of the document", by reading revealFromPage and revealEditorLine, Math.max(0, Math.min(lineCount - 1, line - 1)))
 - Method: scenario 8 is checked by the envelope tests of SwRS-MDOKFSTUDIO-TRUST-052 and by reading hasValidStateFields in src/core/protocol/pageToHost.ts (untested for the two message types themselves)
 - Criteria: previewScroll is posted only when the rounded line changed; lastRevealedSourceLine equals the message line; visibleTextEditors is unchanged and the document equals the file on disk when no editor shows the file; revealEditorLine runs only when the resolved paths are equal or no file is named; the zero-based line is between 0 and lineCount - 1.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: 'When the built-in engine reports an error or throws, the page SHAL
   hint, show no picture, and set data-render-state to error.'
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,14 @@ When the built-in engine reports an error or throws, the page SHALL show "The bu
 
 - Method: Unit test of an engine failure.
 - Criteria: The reason is text, the prefix is stripped.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-032](SwRS-MDOKFSTUDIO-DIAG-032.md): The built-in engine refuses what needs a URL, a library or more than 1 MiB
+<!-- okf:links:end -->

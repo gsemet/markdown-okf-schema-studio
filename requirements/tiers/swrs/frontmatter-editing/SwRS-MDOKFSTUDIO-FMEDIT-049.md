@@ -8,7 +8,8 @@ description: When the edited field has no schema error other than a link
   the frontmatter are invalid.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the edited field has no schema error other than a link problem, the extensi
 
 - Method: Unit test on the candidate check (test/core/edits/frontmatterEdit.test.ts).
 - Criteria: Only the edited field's issues with origin other than link are considered.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-016](SwRS-MDOKFSTUDIO-FMEDIT-016.md): The host refuses a value that breaks YAML, the field type or the schema
+<!-- okf:links:end -->

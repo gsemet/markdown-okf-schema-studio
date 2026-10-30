@@ -8,7 +8,8 @@ description: When a schema file is edited while a preview is open, the extension
   re-render or settings change.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When a schema file is edited while a preview is open, the extension SHALL leave 
 - Method: Unit test `editing a schema file refreshes nothing by itself; the next document change re-analyses the table` in `test/session/diagReq.settings.requirements.test.ts`.
 - Criteria: No watcher observes `_schema` folders; only linked targets and Markdown stems are watched.
 - Known issue: a schema author must touch the document or refresh the preview to see the effect of a schema edit.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-027](SwRS-MDOKFSTUDIO-FMSCHEMA-027.md): Schema edits are picked up on the next analysis
+<!-- okf:links:end -->

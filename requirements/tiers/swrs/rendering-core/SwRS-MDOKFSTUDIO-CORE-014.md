@@ -8,7 +8,8 @@ description: When an `{include}` has an empty argument, the `:literal:` option
   as an unresolved placeholder.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,15 @@ When an `{include}` has an empty argument, the `:literal:` option or an option o
 
 - Method: Unit test "an include with :literal:, an empty argument or an other option stays a placeholder; :class: expands" in test/core/render/renderReq.renderingCore.requirements.test.ts
 - Criteria: Only plain, `:class:` and `:label:` includes expand.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-002](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-002.md): A writer composes a document from included files
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-012](SwRS-MDOKFSTUDIO-CORE-012.md): An include is expanded in place and mapped to its directive
+<!-- okf:links:end -->

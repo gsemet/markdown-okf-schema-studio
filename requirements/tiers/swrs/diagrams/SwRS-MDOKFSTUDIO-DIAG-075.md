@@ -8,7 +8,8 @@ description: When any markdownOkfSchemaStudio.plantuml setting changes, the
   open document again without reopening the preview.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When any markdownOkfSchemaStudio.plantuml setting changes, the extension SHALL r
 
 - Method: Unit test `a plantuml setting change reads the settings again and renders the open document again` in `test/session/diagReq.settings.requirements.test.ts`.
 - Criteria: Only the three configured sections trigger the work.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-024](SwRS-MDOKFSTUDIO-DIAG-024.md): The useJar and jarPath settings choose the PlantUML engine
+<!-- okf:links:end -->

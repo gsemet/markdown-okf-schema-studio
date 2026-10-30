@@ -8,7 +8,8 @@ description: "When the preview content is patched in place, the page SHALL draw 
   untouched."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the preview content is patched in place, the page SHALL draw the Mermaid di
 
 - Method: Unit tests that page events reach the diagram renderers; real VS Code scenario RI-T34 in test/integration/realInput/renderPatching.ts (a Mermaid diagram is drawn again in the same frame).
 - Criteria: Only diagrams without a render state are drawn after a patch.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-009](SwRS-MDOKFSTUDIO-DIAG-009.md): Mermaid diagrams are drawn once and late results are dropped
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When a writer works in a workspace, the Studio SHALL let the writer
   settings, and let the writer reach the choice from the keyboard.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -49,3 +50,18 @@ As a writer, I pick the set of buttons that matches the Markdown flavour of my p
 - When a workspace has not chosen a palette mode yet, its palettes start in the mode given by the settings, and in the GitHub Flavored Markdown mode when the settings give none.
 - A mode the writer chose in the workspace always wins over the setting.
 - The documented key combination in a block editor moves the focus to the palette mode choice and lets the writer come back to the text from the keyboard; it uses the command key of the platform.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-PALETTE-001](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-001.md): The palette mode decides the button sets, in registry order
+  - [SwRS-MDOKFSTUDIO-PALETTE-010](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-010.md): An unknown palette mode is refused and stores nothing
+  - [SwRS-MDOKFSTUDIO-PALETTE-017](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-017.md): Cmd/Ctrl+Shift+M reaches the mode select and Escape or Enter returns to the text
+  - [SwRS-MDOKFSTUDIO-PALETTE-036](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+<!-- okf:links:end -->

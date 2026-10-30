@@ -8,7 +8,8 @@ description: When lines are inserted or removed above a review thread in an
   the same number of lines in memory.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,12 @@ Every change is read in the coordinates of the text before the event and the thr
 - Method: test/core/comments/anchoring.test.ts, `T45: shiftThreadLines follows lines inserted and removed above` (lines inserted, lines removed), `T45: shiftThreadLines applies several changes of one event (multi-cursor, undo order)` (several changes), `T45: shiftThreadLines keeps endLine at or after line` (end line, no edit), `T45: a quote still inside its lines stays anchored` and `T45r2: a copy in the old lines that does not fit the context yields to the copy that does` (quote still inside its lines), `T45: a thread without quote stays where it is while the line exists` (no quote).
 - Method: test/integration/commentAnchors.test.ts (anchors follow edits, two inserts in one event).
 - Criteria: The shifted lines equal the original lines plus the net number of inserted lines above and do not depend on the order of the changes; endLine >= line for every shifted thread; the state is anchored with unchanged lines for a quote in place, and anchored for line 3 and orphaned for line 30 without a quote.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-008](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-008.md): Review threads follow edits and renames of the document
+<!-- okf:links:end -->

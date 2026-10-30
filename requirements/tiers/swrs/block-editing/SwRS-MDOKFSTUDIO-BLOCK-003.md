@@ -11,7 +11,8 @@ description: When a writer presses the VS Code key binding of undo, redo, select
   applies.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -73,3 +74,13 @@ When a writer presses the VS Code key binding of undo, redo, select all or delet
 - Method: test/page/modules/editCommandKey.test.ts (key to command, platform primary key), test/page/modules/textEditing.test.ts (delete line), test/page/runtimeBlockEditor.test.ts (keys cancel the native action and reach VS Code; the command applies to the focused text box), test/page/modules/selectAllKey.test.ts, test/core/protocol/hostToPage.test.ts (the message and its payload check), test/session/editCommands.test.ts (context and routing), test/security/package-contract.test.ts (commands, key bindings and `when` clause)
 - Method: test/integration/editKeys.test.ts (real-input scenario scenarioEditKeysFollowVscode, real keys through VS Code key bindings)
 - Criteria: preventDefault is called and stopPropagation is not for the four default keys in a block or cell text box; the textarea value after delete line equals the text without the touched lines; setPreviewEditing is called only on a change; the commands are absent from the command palette
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-008](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-008.md): A writer types and moves between blocks with text editor keys
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+<!-- okf:links:end -->

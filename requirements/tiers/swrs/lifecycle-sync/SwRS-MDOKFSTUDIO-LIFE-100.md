@@ -10,7 +10,8 @@ description: When the text editor of a previewed document scrolls while the
   reporting that scroll back to the editor.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -115,3 +116,16 @@ When the text editor of a previewed document scrolls while the anchor mode is on
 - Method: test/page/runtimeContentPatch.test.ts and test/page/runtimeBundle.test.ts (scenario 7, page side of the ready report: "T33: the startup sequence of effects and messages is stable" and "the bundled runtime file gives the pinned trace of a page session"; the host answer is checked by reading postPageLiveState)
 - Method: test/session/lifeReq.requirements.test.ts (scenario 7, host without text editors: "a host without text editors reports no pairing"; visibleEditorFor in src/session/features/scrollSync.ts and HostCapabilities.editorPairing)
 - Criteria: The scroll top is within 3 px of the expected one and the editor's top line is unchanged; scroll.anchor equals { line, owner editor } only while scrollPreviewWithEditor is on; no previewScroll follows a sourceScroll; isEcho is true inside the window and false after it; no scroll message returns to its sender; notifyPairing runs for every session on onDidChangeVisibleTextEditors; pageLiveStateMessages returns the pairing and the theme message for a ready report; visibleEditorFor returns undefined when the capability is false.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

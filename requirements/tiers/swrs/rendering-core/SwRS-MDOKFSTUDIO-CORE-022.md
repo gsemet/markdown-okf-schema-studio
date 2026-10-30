@@ -13,7 +13,8 @@ description: When a document holds a construct that only a full project build
   stays successful.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -102,3 +103,21 @@ When a document holds a construct that only a full project build can resolve (an
 - Method: visual scenario unresolved-dark-full in test/visual/scenarioDefinitions1.ts (bibliography directive note, exact text)
 - Method: test/core/preview/previewStyles.test.ts, test "MyST table alignment and notebook output placeholders are styled" (inert styling)
 - Criteria: One warning per placeholder with its line and a ready status; a citation yields a placeholder and no added section or warning; the placeholder classes carry the muted, dashed and dotted styles.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-023](SwRS-MDOKFSTUDIO-CORE-023.md): List a warning for an unavailable directive
+  - [SwRS-MDOKFSTUDIO-CORE-036](SwRS-MDOKFSTUDIO-CORE-036.md): Style placeholders as inert
+  - [SwRS-MDOKFSTUDIO-CORE-047](SwRS-MDOKFSTUDIO-CORE-047.md): Show a citation as an unresolved placeholder
+  - [SwRS-MDOKFSTUDIO-MYST-020](../myst/SwRS-MDOKFSTUDIO-MYST-020.md): Unresolved citations show as muted keys
+  - [SwRS-MDOKFSTUDIO-MYST-021](../myst/SwRS-MDOKFSTUDIO-MYST-021.md): Directives needing a build show an inert placeholder with a warning
+  - [SwRS-MDOKFSTUDIO-MYST-022](../myst/SwRS-MDOKFSTUDIO-MYST-022.md): The bibliography directive explains build-time resolution
+  - [SwRS-MDOKFSTUDIO-MYST-023](../myst/SwRS-MDOKFSTUDIO-MYST-023.md): Notebook output references show a note and a warning
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When the host sends an updated properties table while a field
   closes.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the host sends an updated properties table while a field editor is open, th
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterFields.test.ts).
 - Criteria: Tests T30 previewPropertiesTable is deferred while a frontmatter editor is open, then applied on close.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-193](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-193.md): Page updates wait while an inline editor is open
+<!-- okf:links:end -->

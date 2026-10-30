@@ -9,7 +9,8 @@ description: When a push to main changes the package version, the CI workflow
   step with the heavy jobs skipped.
 project: MDOKFSTUDIO
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -92,3 +93,12 @@ When a push to main changes the package version, the CI workflow SHALL run the h
 
 - Method: test/build/test_workflows.py parses `.github/workflows/ci.yml` and `pages.yml`, evaluates the `if` expressions of the heavy jobs, `tag-release` and its steps for each event and job result, runs the refusal step's script, and checks that every `needs.<job>` reference names a job the job needs. test/build/test_release.py runs `scripts/version.py --bump-since`. test/build/test_select_e2e_run.py checks the run selection, including runs with several attempts. test/build/test_workflows.py also checks that every artifact name of `ci.yml` carries the attempt and that every download names the `artifact` output of a job it needs, and runs the Pages find step. test/site/e2eCampaign.test.ts checks the campaign gap rule.
 - Criteria: every job below a skippable job uses `!cancelled()` with an explicit `needs.<job>.result` check; a version change is tagged only when `checks` and both heavy results are `success`, and every other result of those three on a version change runs the refusal step (truth table over all results).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

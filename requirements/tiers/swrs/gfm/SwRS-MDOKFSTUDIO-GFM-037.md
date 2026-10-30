@@ -7,7 +7,8 @@ description: When the lines after an alert marker stop being quoted, the
   extension SHALL end the admonition at the first unquoted line.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the lines after an alert marker stop being quoted, the extension SHALL end 
 
 - Method: Unit test on the render pipeline output.
 - Criteria: The admonition body contains only quoted lines.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-009](SwRS-MDOKFSTUDIO-GFM-009.md): GitHub alerts render as admonitions
+<!-- okf:links:end -->

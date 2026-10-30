@@ -7,7 +7,8 @@ description: When the page has stored more than 64 built-in results, it SHALL
   drop the least recently used result.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -42,3 +43,12 @@ When the page has stored more than 64 built-in results, it SHALL drop the least 
 
 - Method: Unit test `the built-in result cache keeps 64 results and drops the least recently used` in `test/page/modules/diagReq.diagrams.requirements.test.ts`.
 - Criteria: At most 64 results are kept.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+<!-- okf:links:end -->

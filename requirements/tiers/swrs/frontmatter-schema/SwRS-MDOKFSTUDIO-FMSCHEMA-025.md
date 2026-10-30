@@ -8,7 +8,8 @@ description: 'When a JSON or JSON5 schema file cannot be read or parsed, the ext
   and a warning badge.'
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a JSON or JSON5 schema file cannot be read or parsed, the extension SHALL s
 - Method: Unit test `a JSON5 schema that cannot be parsed gives the generic table and one warning row; a YAML error is not reported as such` in `test/core/frontmatter/diagReq.frontmatter.requirements.test.ts`.
 - Criteria: The summary is 0 errors, 1 warning, 0 infos for a JSON or JSON5 failure; the fields are listed in source order without documentation.
 - Known issue: a YAML syntax error is not reported: the parse errors of the YAML document are never checked, so the partly parsed schema is applied silently.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-023](SwRS-MDOKFSTUDIO-FMSCHEMA-023.md): Schemas in YAML, JSON or JSON5 with relative references compile or report a row
+<!-- okf:links:end -->

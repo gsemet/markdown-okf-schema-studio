@@ -7,7 +7,8 @@ description: When a document holds a `{cite}` role, the extension SHALL render
   an unresolved citation placeholder without appending a bibliography.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,15 @@ When a document holds a `{cite}` role, the extension SHALL render an unresolved 
 
 - Method: Unit test "T30: a {cite} inserted by the edition palette renders the citation placeholder" in test/core/render/mystPaletteRendering.test.ts; Unit test "project-scoped roles and directives degrade to labelled placeholders" in test/core/render/mystFeatures.test.ts
 - Criteria: A citation yields a placeholder and no added section.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-022](SwRS-MDOKFSTUDIO-CORE-022.md): Build-dependent constructs show an inert placeholder with a warning
+<!-- okf:links:end -->

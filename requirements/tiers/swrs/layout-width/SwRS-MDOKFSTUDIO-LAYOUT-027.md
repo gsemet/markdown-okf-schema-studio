@@ -8,7 +8,8 @@ description: When an image carries a pixel width written by its author, the
   instead of the intrinsic size, ignoring a gain of 1 px or less.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When an image carries a pixel width written by its author, the extension SHALL c
 
 - Method: Unit test `Auto measures an image from the width its author wrote, and ignores a gain of 1 px or less` in `test/page/diagReq.layout.requirements.test.ts`.
 - Criteria: Breakout 100 px for the declared case, no mark for a gain of 1 px or less.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-023](SwRS-MDOKFSTUDIO-LAYOUT-023.md): Auto width lets wide blocks break out of the column
+<!-- okf:links:end -->

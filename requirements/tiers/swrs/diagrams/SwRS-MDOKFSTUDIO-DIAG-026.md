@@ -8,7 +8,8 @@ description: When PlantUML diagrams are drawn by the built-in engine, the
   whether the workspace is trusted or not.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,15 @@ When PlantUML diagrams are drawn by the built-in engine, the extension SHALL sta
 
 - Method: Unit tests of the render pipeline; visual scenarios diagrams v10 and v11 (no network request, no Java).
 - Criteria: No spawn call and an empty host result in both trust states.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-024](SwRS-MDOKFSTUDIO-DIAG-024.md): The useJar and jarPath settings choose the PlantUML engine
+<!-- okf:links:end -->

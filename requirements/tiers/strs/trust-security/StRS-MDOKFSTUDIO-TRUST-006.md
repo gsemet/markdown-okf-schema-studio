@@ -10,7 +10,8 @@ description: When a reader previews any document, the Studio SHALL keep the
   neutralising unsafe raw HTML before the page shows it.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -48,3 +49,20 @@ As a reader, and as a reviewer of an untrusted repository, I open any Markdown f
 - Raw HTML with scripts, frames, event handlers, styles or unsafe links is removed or neutralised before the page shows it.
 - Only a small subset of raw HTML is rendered at all (rendering-core and gfm scopes); this record covers what the page-building step does to the HTML that remains.
 - The step removes known dangerous elements and attributes and rewrites links and resource addresses; it does not keep a short list of allowed elements.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-CORE-013](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-013.md): Includes are bounded by depth, budget, size and allowed roots
+  - [SwRS-MDOKFSTUDIO-CORE-041](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-041.md): Right-to-left text aligns to the right and blocks get an automatic direction
+  - [SwRS-MDOKFSTUDIO-TRUST-007](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-007.md): A page loads local files only from its resource roots
+  - [SwRS-MDOKFSTUDIO-TRUST-011](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-011.md): No script of a document reaches the preview
+  - [SwRS-MDOKFSTUDIO-TRUST-012](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-012.md): Every page carries a deny-by-default content security policy
+  - [SwRS-MDOKFSTUDIO-TRUST-022](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-022.md): Each page gets a fresh nonce that every extension script and style carries
+  - [SwRS-MDOKFSTUDIO-TRUST-036](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-036.md): The sanitizer removes active content and keeps the rest
+  - [SwRS-MDOKFSTUDIO-TRUST-042](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-042.md): The sanitizer rewrites links and records each removal
+  - [SwRS-MDOKFSTUDIO-TRUST-050](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-050.md): The sanitizer adds source-mapping attributes to mapped elements
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: "When the built-in engine asks for a standard-library bundle or an 
   a script tag or fetching anything."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the built-in engine asks for a standard-library bundle or an optional scrip
 
 - Method: Unit test of the installed loaders.
 - Criteria: Every library request ends in an error and nothing is loaded.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-032](SwRS-MDOKFSTUDIO-DIAG-032.md): The built-in engine refuses what needs a URL, a library or more than 1 MiB
+<!-- okf:links:end -->

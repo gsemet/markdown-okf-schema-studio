@@ -7,7 +7,8 @@ description: "When a PlantUML installation works, the extension SHALL draw a dia
   as a loaded picture without an error and keep its expandable source."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a PlantUML installation works, the extension SHALL draw a diagram as a load
 
 - Method: Visual scenarios diagrams v04 and v05.
 - Criteria: A loaded image and no error message.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-105](SwRS-MDOKFSTUDIO-DIAG-105.md): JAR results replace the diagrams of the current render in order
+<!-- okf:links:end -->

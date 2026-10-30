@@ -8,7 +8,8 @@ description: When a reader opens the Studio settings in the settings editor, the
   defaults and descriptions.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -35,3 +36,15 @@ As a reader, I find every Studio setting in the settings editor, grouped by what
 ### Rationale and constraints
 
 - A setting that is not set reads as its default; a stored value of the wrong type is normalized.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-069](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-069.md): A render of the loaded document updates the page in place
+  - [SwRS-MDOKFSTUDIO-LIFE-097](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-097.md): Two settings decide how the panes follow each other
+  - [SwRS-MDOKFSTUDIO-LIFE-156](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-156.md): The settings editor lists the Studio settings in titled groups
+  - [SwRS-MDOKFSTUDIO-TRUST-073](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-073.md): A setting description has at most 700 characters
+<!-- okf:links:end -->

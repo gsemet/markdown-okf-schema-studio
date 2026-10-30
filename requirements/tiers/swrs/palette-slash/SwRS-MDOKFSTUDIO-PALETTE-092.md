@@ -10,7 +10,8 @@ description: When the writer presses Enter in the Text or URL field of the link
   focus to the text box.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -91,3 +92,13 @@ When the writer presses Enter in the Text or URL field of the link panel or pres
 - Method: real-window scenario scenarioLinkPanelPrefill in test/integration/realInput/textEditing.ts (scenario link around the caret)
 - Note: the unbalanced-parentheses row is deduced from linkEdit in src/page/modules/linkEditActions.ts; no test covers it.
 - Criteria: The panel closes before the edit and the text box selection is restored first; the caret equals the start of the link plus the length of the opening bracket part; the label is the trimmed text, or the encoded address when the trimmed text is empty; the link pattern needs a target without blanks or a target in angle brackets, and an optional quoted title, and a match preceded by ! is skipped; labels of reference links are compared after trimming, collapsing blanks and lower-casing, and the first definition of a label wins.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

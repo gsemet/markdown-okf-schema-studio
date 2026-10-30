@@ -9,7 +9,8 @@ description: "While edit mode is on, the page SHALL give the insert point of eve
   swap the block with its neighbour."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -122,3 +123,20 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 - Method: test/page/runtimeBlockMoves.test.ts: `the block actions follow whichever moved last: the keyboard selection or the pointer` (owner attribute and shown bar, scenario 8), and test/core/preview/blockReq.requirements.test.ts: `the block actions of a hovered block yield to the keyboard selection, which shows its own bar` (the style rules).
 - Method: test/integration/blockActionsFollowSelection.test.ts (real window, cream and dark preview themes): the computed opacity of the bars and the outline after a keyboard move and after a pointer move.
 - Criteria: Two buttons with data-sphinx-move up and down per body bar. The disabled attribute is set when the neighbour is missing. addMoveButtons is called only for body bars. The stylesheet hides the buttons under the open-editor attribute. postBlockMove returns false when an editor is open. The status lives 6000 ms.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-064](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-064.md): The insert point after the table has no move buttons
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When a document contains a footnote reference and its definition,
   the extension SHALL render the reference and the footnote text.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a document contains a footnote reference and its definition, the extension 
 
 - Method: Unit test on the render pipeline output.
 - Criteria: Footnote reference and definition elements are present for defined notes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-008](SwRS-MDOKFSTUDIO-GFM-008.md): Strikethrough, footnotes and pipe tables render as on GitHub
+<!-- okf:links:end -->

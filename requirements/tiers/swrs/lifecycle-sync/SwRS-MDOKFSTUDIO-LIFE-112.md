@@ -9,7 +9,8 @@ description: When the reader double-clicks a rendered block that is not a link
   reveal the source line of that block in the text editor.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,12 @@ When the reader double-clicks a rendered block that is not a link outside edit m
 ### Archived
 
 Merged into SwRS-MDOKFSTUDIO-LIFE-099, which owns the double-click behaviour and its setting.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+<!-- okf:links:end -->

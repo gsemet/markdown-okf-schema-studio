@@ -8,7 +8,8 @@ description: When a PlantUML process writes more than 8 MiB to its standard
   exceeds the 8 MiB preview limit. on the diagram with state error.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a PlantUML process writes more than 8 MiB to its standard output, the exten
 
 - Method: Unit test `an output over 8 MiB stops the process; an output of exactly 8 MiB is accepted` in `test/core/render/diagReq.jar.requirements.test.ts`.
 - Criteria: Strictly greater than the limit stops the process.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-097](SwRS-MDOKFSTUDIO-DIAG-097.md): A JAR render is bounded in input, output, time, process lifetime and concurrency
+<!-- okf:links:end -->

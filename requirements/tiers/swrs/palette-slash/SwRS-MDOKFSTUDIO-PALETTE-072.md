@@ -12,7 +12,8 @@ description: When the writer presses Emoji, the extension SHALL open a picker
   pictographs, joiners and variation selectors.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -135,3 +136,16 @@ The pattern is Extended_Pictographic plus U+200D and U+FE0F, with a maximum leng
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Method: visual scenarios palette-slash/v01-palette-popups-light-900 (picker contents; the filter warning leaves one emoji), palette-slash/v17-palette-wraps-narrow-dark-360 (picker contents)
 - Criteria: The insertion uses the live selection; each typed word must be contained in the lower-cased name; every emoji has a unique character and a name; the pattern is Extended_Pictographic plus U+200D and U+FE0F with a maximum of 16 code units.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+  - [SwRS-MDOKFSTUDIO-PALETTE-036](SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
+<!-- okf:links:end -->

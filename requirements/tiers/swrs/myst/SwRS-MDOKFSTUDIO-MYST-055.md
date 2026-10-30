@@ -8,7 +8,8 @@ description: When a `{grid-item-card}` is rendered, the extension SHALL show its
   the title one link when `:link:` is given.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a `{grid-item-card}` is rendered, the extension SHALL show its title, an op
 
 - Method: Unit test "a grid-item-card renders header, body, footer and a stretched link" in test/core/render/gridToctree.test.ts
 - Criteria: `:link-alt:` is the tooltip.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-053](SwRS-MDOKFSTUDIO-MYST-053.md): Grids lay out cards in responsive columns
+<!-- okf:links:end -->

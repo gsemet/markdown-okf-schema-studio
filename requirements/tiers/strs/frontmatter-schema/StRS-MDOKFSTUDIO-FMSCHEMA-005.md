@@ -9,7 +9,8 @@ description: When a writer changes a `frontmatter.*` setting, the Studio SHALL
   YAML.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -37,3 +38,12 @@ As a writer, I turn the metadata table off or adjust how frontmatter is checked 
 
 - `frontmatter.propertiesTable` is a boolean, on by default; off, the body (its first heading) still renders. The frontmatter is still parsed and validated while it is off, but nothing is shown.
 - Any change to a `frontmatter.*` setting (table, strict additional properties, bundle root, project root, outside-workspace links) re-analyses the open preview whose document is the active editor's document; other previews are only re-rendered from their last good render (Known issue).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+<!-- okf:links:end -->

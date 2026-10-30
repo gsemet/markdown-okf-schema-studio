@@ -10,7 +10,8 @@ description: "When the reader presses the Table of contents button, the extensio
   or closed, and run the layout update for the changed available width once."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,15 @@ When the reader presses the Table of contents button, the extension SHALL toggle
 - Method: test/page/modules/tocColumn.test.ts (all scenarios: the TOC is off by default and the page is marked closed; the toggle opens the TOC, posts the preference, remembers it and builds the entries; the toolbar markup test checks the initial attributes; the change callback count).
 - Method: test/visual/capture_layout_checks.py (Root attribute follows each press through check_toc_column: state closed, then open).
 - Criteria: aria-pressed and the three texts follow the open flag; the root attribute is open or closed; one callback call per press.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+<!-- okf:links:end -->

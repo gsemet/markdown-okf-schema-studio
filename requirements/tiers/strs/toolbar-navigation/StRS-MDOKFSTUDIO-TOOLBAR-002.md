@@ -8,7 +8,8 @@ description: The preview SHALL let the reader fold a section of the document
   without changing the document.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: StRS
 derives_from: []
@@ -41,3 +42,16 @@ Readers of a long document want to hide the sections they are not reading and se
 - The fold state is a view state of the reader. It is kept for the document across reloads and never written to the file.
 - Folding works in read mode and in edit mode; a block inside a folded section cannot be edited until the section is unfolded.
 - Search in the preview and navigation to an anchor open the folded section that holds their target.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-003](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-003.md): A chevron folds the section under a heading
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-004](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-004.md): The folded sections are a view state kept per document
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-005](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-005.md): Fold all and unfold all fold every section from the toolbar and the command palette
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-006](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-006.md): Search and navigation unfold the folded section of their target
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-008](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-008.md): Blocks in a folded section cannot be edited
+<!-- okf:links:end -->

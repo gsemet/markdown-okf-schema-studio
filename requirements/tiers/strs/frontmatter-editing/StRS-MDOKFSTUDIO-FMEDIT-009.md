@@ -8,7 +8,8 @@ description: When a metadata edit does not match the schema, targets a stale
   reason and leave the document unchanged.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -37,3 +38,12 @@ As a writer, I am protected from saving metadata that the schema rejects or that
 - The schema check covers type, enum, null and conditional rules; link problems do not block a save.
 - Malformed page messages are ignored without a reply.
 - Known issue: the stale-field message is shared by stale renders and schema mismatches.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+<!-- okf:links:end -->

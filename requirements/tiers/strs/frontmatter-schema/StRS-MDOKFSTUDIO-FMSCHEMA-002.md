@@ -8,7 +8,8 @@ description: When a document's frontmatter is not valid YAML or is not a
   while still rendering the Markdown body.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,15 @@ As a writer, I see why my frontmatter is rejected and keep reading my document; 
 
 - Invalid YAML shows one row "Invalid frontmatter YAML: {parser message}" and an error badge of 1; a list, a scalar or an empty block shows "Invalid frontmatter YAML: Frontmatter is not a mapping.". YAML aliases expand up to 100, beyond which the parse fails as invalid YAML.
 - Known issue: the parser message is the raw text of the YAML library, with frontmatter-relative line numbers and caret markers.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-001](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-001.md): The frontmatter block is found by its fences and parsed as a YAML mapping
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-017](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-017.md): Invalid YAML gives one error row and an error badge
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-018](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-018.md): Frontmatter that is not a mapping gives an error row
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-076](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-076.md): Invalid YAML does not stop the body from rendering
+<!-- okf:links:end -->

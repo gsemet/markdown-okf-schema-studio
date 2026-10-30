@@ -8,7 +8,8 @@ description: "When the host handles an include request, it SHALL answer with pre
   or not ok with a reason."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the host handles an include request, it SHALL answer with previewPlantUmlIn
 
 - Method: Unit test `an include request is answered once with the request's edit id: the file, or a refusal` in `test/session/diagReq.plantuml.requirements.test.ts`.
 - Criteria: Every request gets exactly one answer with its edit id.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

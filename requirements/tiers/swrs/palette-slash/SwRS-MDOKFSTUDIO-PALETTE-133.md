@@ -9,7 +9,8 @@ description: When the writer presses Math and chooses a kind of the menu of
   with a begin and end align environment, and refuse any other kind.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -69,3 +70,14 @@ When the writer presses Math and chooses a kind of the menu of `Inline $…$`, `
 
 - Method: test/page/modules/editActions.test.ts, through test/page/modules/editActions.test.ts (unit tests "the MyST actions are myst-only with no shortcut; sub and sup also work in a cell": scenario The menu; "math inline, display and aligned": scenarios Inline, Block, Samples with no selection and Unknown kind, the argument bogus)
 - Criteria: The tooltip reads Math (choose inline, display or aligned); with no selection the inline sample is x and the display sample is E = mc^2.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+<!-- okf:links:end -->

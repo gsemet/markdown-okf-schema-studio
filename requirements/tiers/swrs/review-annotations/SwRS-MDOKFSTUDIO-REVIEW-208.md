@@ -7,7 +7,8 @@ description: When a range received by the page is not a pair of integers with 1
   <= start <= end, the extension SHALL ignore it.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -56,3 +57,14 @@ When a range received by the page is not a pair of integers with 1 <= start <= e
 
 - Method: test/page/modules/incomingChanges.test.ts (unit test `T16: malformed ranges are ignored and enabled is reported`: scenarios valid ranges, bad ranges, not a list).
 - Criteria: Only valid ranges produce marks.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

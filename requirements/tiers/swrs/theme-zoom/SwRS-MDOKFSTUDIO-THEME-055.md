@@ -7,7 +7,8 @@ description: When the workspace storage rejects the write of the view
   preferences, the extension SHALL keep the chosen zoom for the session.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When the workspace storage rejects the write of the view preferences, the extens
 
 - Method: Superseded by SwRS-MDOKFSTUDIO-LIFE-169, whose test (test/session/diagReq.viewState.requirements.test.ts) makes the storage fail and checks the log and the warning.
 - Criteria: See SwRS-MDOKFSTUDIO-LIFE-169.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
+<!-- okf:links:end -->

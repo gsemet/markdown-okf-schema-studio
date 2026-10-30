@@ -13,7 +13,8 @@ description: When the extension builds the policy of a page, it SHALL set its
   the document.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -90,3 +91,12 @@ When the extension builds the policy of a page, it SHALL set its default source 
 - Method: test/integration/trusted-suite.ts (the page carries a Content-Security-Policy without unsafe-inline or a wildcard default) checks the rendered page; only the script-src, img-src, no-wildcard and no-unsafe parts are asserted.
 - Method: test/security/trustReq.requirements.test.ts (fonts and media load only from the webview source; the page may open no connection, frame, object or worker; the page may not change its base address or submit a form; a status page carries the policy and its own nonce and no script) checks the font-src, media-src, connect-src, frame-src, object-src, worker-src, base-uri and form-action rows one by one and the Status page scenario, built with buildStatusWebviewHtml in src/session/webview.ts. The browser effects of the table (a blocked script, style attribute, remote image, remote font, fetch call, base element) are deduced from the policy, not run in a browser.
 - Criteria: The first directive of the policy is default-src 'none'. script-src and style-src each have exactly two sources. img-src is the webview source followed by data:. font-src and media-src each hold the webview source and nothing else. connect-src, frame-src, object-src, worker-src, base-uri and form-action are each 'none'. No source of any directive is a bare *, and the keywords unsafe-inline and unsafe-eval do not appear. Exactly one Content-Security-Policy meta element remains in the head and no earlier policy text survives. The status markup contains a Content-Security-Policy meta and no script element. The base-uri and form-action rows are the second wall for the base element, which the sanitizer leaves in place (SwRS-MDOKFSTUDIO-TRUST-036), and for a form that would escape the sanitizer.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-006](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-006.md): The preview runs no foreign code and unsafe HTML is made inert
+<!-- okf:links:end -->

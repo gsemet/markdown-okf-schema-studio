@@ -8,7 +8,8 @@ description: When the field action menu is shown, the extension SHALL keep the
   other rows, wrapping inside the row at about 520 px.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the field action menu is shown, the extension SHALL keep the menu and its t
 
 - Method: Visual scenario frontmatter-editing/v02-edit-enum-value-dark-900 and the real-input scenario of the field menu.
 - Criteria: Layout check in a real browser; the unit test only checks presence.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-028](SwRS-MDOKFSTUDIO-FMEDIT-028.md): The field action menu offers the missing schema fields or a custom key
+<!-- okf:links:end -->

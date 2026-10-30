@@ -9,7 +9,8 @@ description: When the cell editor or the table bar has handled Tab, Enter,
   use, such as Ctrl+Tab, reach VS Code.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,12 @@ When the cell editor or the table bar has handled Tab, Enter, Escape or an arrow
 
 - Method: Unit tests CR 041: Tab handled by the table cell editor stops at the document; Ctrl+Tab goes on in test/page/runtimeEditorFlush.test.ts and, in test/page/modules/editorKeys.test.ts, CR 041: Tab, Enter, Escape and the arrow keys an open editor handled are the page's and CR 041: keys no editor handled keep reaching VS Code.
 - Criteria: Number of stopPropagation calls per press. The policy is page-wide (block editor and frontmatter editor too); this requirement states the cell and table bar case.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-006](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-006.md): Tab, arrows and editing keys work in a table cell
+<!-- okf:links:end -->

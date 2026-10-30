@@ -8,7 +8,8 @@ description: When the page receives a content patch with a malformed status line
   50 characters, the extension SHALL ignore the whole patch.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,12 @@ When the page receives a content patch with a malformed status line or with more
 ### Archived
 
 Covered by SwRS-MDOKFSTUDIO-TRUST-061 (a content patch must stay within its bounds); the code attribute of each status line is kept by SwRS-MDOKFSTUDIO-LIFE-087.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+<!-- okf:links:end -->

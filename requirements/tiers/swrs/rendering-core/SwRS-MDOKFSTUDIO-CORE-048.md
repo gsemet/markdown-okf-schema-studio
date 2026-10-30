@@ -8,7 +8,8 @@ description: When blocks are updated by a change made outside the preview, the
   `<pre>`.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When blocks are updated by a change made outside the preview, the extension SHAL
 
 - Method: Unit test "CR 046: an update glows on the innermost blocks whose lines meet a range, and only there" in test/page/modules/motion.test.ts
 - Criteria: The glow attribute is set then removed after about 600 ms.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LIFE-094](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-094.md): Blocks changed by another tool glow briefly
+<!-- okf:links:end -->

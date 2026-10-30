@@ -11,7 +11,8 @@ description: When a reader opens a .md file with the optional Markdown
   the preview cannot be created.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,13 @@ When a reader opens a .md file with the optional Markdown OKF-Schema Studio edit
 - Method: test/integration/stockCoexistence.test.ts (Declared editor: opens a file with vscode.openWith and the editor view type; The tab shows its own file: checks the active session's document, the no-follow boundary is by reading createSession(..., followsActiveEditor false) in resolvePreviewEditor; The editor opens before the render ends: "Open With stayed loading while MyST was rendering" uses setRenderDelayForTests(2000) and asserts the pending page, then the delayed fixture view; Other previews stay open: asserts both, "opening the direct MyST editor disposed the existing side preview" and "splitting the MyST editor closed its original liveview tab").
 - Method: test/host/lifeReq.requirements.test.ts, unit tests "the Open With editor explains that it needs a Markdown file" (A document that is not a saved Markdown file: reads resolvePreviewEditor) and "a failure while opening the Open With editor shows its message on the page" (A failure while opening: reads the catch block of resolvePreviewEditor).
 - Criteria: customEditors equals the expected single entry; the session's followsActiveEditor is false and its title is the file name; the open command resolves in under 1000 ms and the status is pending until the render is ready; sidePreviewDisposed is false and the original tab is still in the tab list; the page holds the missing-source status with the message Markdown OKF-Schema Studio requires a Markdown file.; the status region holds the error status with the message.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
+<!-- okf:links:end -->

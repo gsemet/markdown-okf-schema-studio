@@ -9,7 +9,8 @@ description: When a writer asks to convert a table, the Studio SHALL write it in
   the table's padding, alignment, escaping, indentation and line endings.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -49,3 +50,19 @@ As a writer, I convert a table between a Markdown pipe table, a MyST list-table 
 - The HTML table writer of the HTML table button belongs here as the third form.
 - Saving an unchanged table gives back the original text byte for byte for compact, padded, no-spaces, aligned, no-outer-pipes, escaped, indented, CRLF and wider-than-padding tables.
 - A column button keeps the padding, the indentation and the outer pipes of every line, and a pipe inside a code span splits a cell in the editor as it does in the preview.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-234](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-234.md): Preview edits keep the line endings of the document
+  - [SwRS-MDOKFSTUDIO-TABLE-070](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-070.md): The List table button converts the edited table in one final save
+  - [SwRS-MDOKFSTUDIO-TABLE-073](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-073.md): List table converts the table at the caret to a list-table in one edit
+  - [SwRS-MDOKFSTUDIO-TABLE-074](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-074.md): Pipe table converts the table at the caret to a pipe table in one edit
+  - [SwRS-MDOKFSTUDIO-TABLE-076](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-076.md): A conversion that would lose content is refused with a reason
+  - [SwRS-MDOKFSTUDIO-TABLE-080](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-080.md): A conversion keeps cells, escapes and alignment across forms
+  - [SwRS-MDOKFSTUDIO-TABLE-094](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-094.md): Editing one cell changes exactly one line of the source
+  - [SwRS-MDOKFSTUDIO-TABLE-102](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-102.md): Edge pipes are optional and only an escaped pipe stays in its cell
+<!-- okf:links:end -->

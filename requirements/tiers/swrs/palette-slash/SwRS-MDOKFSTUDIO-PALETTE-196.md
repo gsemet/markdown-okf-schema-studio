@@ -14,7 +14,8 @@ description: When previewPasteImage is accepted, the extension SHALL check the
   or the write fails.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -119,3 +120,18 @@ A saved .md document in a folder inside the workspace, reached through a symboli
 - Method: test/session/paletteReq.requirements.test.ts (refusal rows for an unsaved or other document, a folder outside the workspace with links resolved and inside it accepted, a non-Markdown file and a .md file accepted)
 - Method: test/core/protocol/pageToHost.test.ts (message shape: the size bound, plain base64 of an allowed type)
 - Criteria: The name never comes from the page; a name that differs only by case counts as taken; the partial file has a hidden name of the form dot, the file name, a random suffix and .partial; the validator bounds the base64 text to 14,000,000 characters and the host refuses more than 10 MiB of bytes; both folder paths are compared after resolving symbolic links; eligibility needs a file path ending in .md in any case.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

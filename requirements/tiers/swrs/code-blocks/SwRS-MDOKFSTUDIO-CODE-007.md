@@ -12,7 +12,8 @@ description: When a code block is shown, the extension SHALL colour keywords,
   forced white and cream themes.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -96,3 +97,16 @@ When a code block is shown, the extension SHALL colour keywords, strings, number
 - Method: test/core/preview/creamTheme.test.ts (cream and white soft background and readable text)
 - Method: test/visual/scenarioDefinitions1.ts (long line scroll at 460 px with geometry check, exact-fit line)
 - Criteria: each token class has a rule with its Dark+ colour; computed values equal the stated style on top-level and nested blocks; block scrollWidth exceeds clientWidth for the long line, equals it for the exact-fit line and the document never overflows; the white and cream rules set a soft background and a readable text colour
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-012](SwRS-MDOKFSTUDIO-CODE-012.md): Style fenced code blocks with one font scale and the code background
+  - [SwRS-MDOKFSTUDIO-CODE-013](SwRS-MDOKFSTUDIO-CODE-013.md): Scroll long code lines inside their block
+  - [SwRS-MDOKFSTUDIO-CODE-016](SwRS-MDOKFSTUDIO-CODE-016.md): Keep code backgrounds soft and readable in the forced white and cream themes
+<!-- okf:links:end -->

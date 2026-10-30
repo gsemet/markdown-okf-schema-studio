@@ -8,7 +8,8 @@ description: When the VS Code theme is a high-contrast theme and the Current
   variables as for any other theme.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the VS Code theme is a high-contrast theme and the Current mode is shown, t
 
 - Method: Untested: no test or visual scenario uses a high-contrast host (the unit test uses kind 2). The forced-colors media rules of the stylesheet cover the warning banner border, the diff lines, the focus outline and the slash menu only; there is no rule for the page palette.
 - Criteria: By code reading only; the property to test is that no rule overrides the host variables in Current mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
+<!-- okf:links:end -->

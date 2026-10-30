@@ -11,7 +11,8 @@ description: When a maintainer builds the Pages site, the build SHALL write a
   build.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -70,3 +71,12 @@ When a maintainer builds the Pages site, the build SHALL write a Requirements pa
   build test "the built site links and writes the Requirements page" in the same file.
 - Criteria: The counts, the percentages and the degraded text match the fixture; the navigation of
   every page links requirements.html. The published look in light and dark is not asserted.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-014](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-014.md): The extension is built from pinned dependencies and ships what it loads
+<!-- okf:links:end -->

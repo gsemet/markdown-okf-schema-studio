@@ -11,7 +11,8 @@ description: When a code block of two lines or more is shown and the setting
   whatever the setting says.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,12 @@ When a code block of two lines or more is shown and the setting preview.codeBloc
 - Method: test/core/preview/codeBlockStyles.test.ts (numbers as generated, unselectable content, gated by the setting attribute, MyST option rules not gated)
 - Method: test/page/modules/codeCopy.test.ts (copied text of automatically numbered blocks), test/page/pageSettings.test.ts (setting attribute) and test/security/package-contract.test.ts (setting schema)
 - Criteria: the markup carries one line element per line; the number is a CSS pseudo-element; the copied and the DOM text equal the source text
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+<!-- okf:links:end -->

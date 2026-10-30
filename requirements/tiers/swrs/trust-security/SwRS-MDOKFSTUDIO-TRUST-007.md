@@ -11,7 +11,8 @@ description: When the extension shows a document, it SHALL allow the webview to
   page.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -102,3 +103,14 @@ When the extension shows a document, it SHALL allow the webview to load local fi
 - Method: test/session/toolbarReq.requirements.test.ts (in a read-only preview only the document's folder is allowed) checks the link rows; the same roots apply to a preview in an untrusted workspace.
 - Method: test/security/trustReq.requirements.test.ts (a read-only preview reads includes from the folder of its document) checks the include rows by rendering with renderPreviewDocument in src/core/render/renderPipeline.ts with the folder of the document as resource root, an include below the folder and one of ../other.md.
 - Criteria: The resource root of a read-only session equals dirname of the document path; that of a writable session equals the folder returned for the document by the workspace. The roots set on the panel are exactly the resource root plus the bundle folder when a bundle exists, and empty for the pending page that clears the content and for the missing-source page. navigationRoots is [document folder] when read-only. The html of a page holds the bundle URLs and no inline copy of the runtime. The roots of the include policy are the folder of the document and the resource root.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-004](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-004.md): Local files load only from the allowed folders
+  - [StRS-MDOKFSTUDIO-TRUST-006](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-006.md): The preview runs no foreign code and unsafe HTML is made inert
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+<!-- okf:links:end -->

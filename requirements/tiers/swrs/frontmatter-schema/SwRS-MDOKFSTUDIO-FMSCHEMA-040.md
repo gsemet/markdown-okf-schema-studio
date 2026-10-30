@@ -8,7 +8,8 @@ description: When a writer presses the title badge, the extension SHALL scroll
   it for 1.5 seconds.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a writer presses the title badge, the extension SHALL scroll the first row 
 - Method: Unit test of the page behaviour; real-input test.
 - Criteria: The first row carrying an error, warning or info class is chosen, in table order; its value cell is focused when the row has an editable value cell, otherwise its name cell.
 - Known issue: when only info rows carry issues the badge does nothing.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-039](SwRS-MDOKFSTUDIO-FMSCHEMA-039.md): The title badge counts the issues and jumps to the first one
+<!-- okf:links:end -->

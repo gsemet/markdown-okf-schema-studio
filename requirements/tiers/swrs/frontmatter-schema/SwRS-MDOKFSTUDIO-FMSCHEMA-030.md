@@ -8,7 +8,8 @@ description: When a schema table is displayed, the extension SHALL show before
   and after the name the label "({type})".
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a schema table is displayed, the extension SHALL show before each field nam
 
 - Method: Unit test of the table renderer; visual scenario (icon size check).
 - Criteria: Icon titles: Text, Number, List, Checkbox, Options (enum), Date, Time, Date and time, Unknown type.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-029](SwRS-MDOKFSTUDIO-FMSCHEMA-029.md): A schema table lists the declared fields with their type
+<!-- okf:links:end -->

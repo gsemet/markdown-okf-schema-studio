@@ -13,7 +13,8 @@ description: "When the sanitizer finds a link in a page, it SHALL keep an anchor
   the status area of the preview."
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -101,3 +102,12 @@ When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, h
 - Method: Unit test test/security/html-policy.test.ts (keeps deferred relative navigation inert and host-routable; rewrites local resources and removes active HTML content) covers the relative link, javascript: and the stylesheet rewrite. The wiki case, the bad anchor, the xlink:href cases, the diagnostic code blocked-navigation, the removal of a stylesheet and the host diagnostic are untested. The policy method resolveNavigation is covered by test/security/resource-policy.test.ts (allows only explicit navigation schemes).
 - Method: Host harness test test/host/trustReq.requirements.test.ts (the status area lists render diagnostics and nothing the sanitizer or the policy removed) runs the extension host harness over a document with an image outside the roots and a missing include, and reads the status area of the assigned page (updatePreview in src/session/features/rendering.ts passes only the render diagnostics).
 - Criteria: An anchor or external link has the data-sphinx-preview-navigation attribute. A relative or wiki link never navigates by itself; the host follows it after checking it again. No sanitized link holds a blocked address in an href, and no link element of the sanitized page points outside the roots. Every removal or rewrite adds one entry with a code, a message and, where there is one, a value; the status area lists render diagnostics only and the security diagnostics stay on the record of the page.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-006](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-006.md): The preview runs no foreign code and unsafe HTML is made inert
+<!-- okf:links:end -->

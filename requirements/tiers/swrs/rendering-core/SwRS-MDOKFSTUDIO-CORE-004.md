@@ -7,7 +7,8 @@ description: When a mapped block spans several source lines, the extension SHALL
   give it an end line in addition to its start line.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a mapped block spans several source lines, the extension SHALL give it an e
 
 - Method: Unit test "multiline blocks retain their full mapped source range" in test/core/render/mystFeatures.test.ts
 - Criteria: Multi-line blocks expose their full source range; single-line blocks do not exceed it.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-003](SwRS-MDOKFSTUDIO-CORE-003.md): Every rendered block maps to its absolute source lines
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When an admonition directive contains another directive, the
   closing fence.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -100,3 +101,18 @@ When an admonition directive contains another directive, the extension SHALL ren
 - Method: test/visual/scenarioDefinitions1.ts (admonition gallery, both scenarios: visual scenario admonitions-dark-titled)
 - Method: test/visual/scenarioDefinitions2.ts (MyST gallery: visual scenario `myst/v${20 + index}-myst-gallery-full-${theme}-900`)
 - Criteria: The inner panel is a descendant of the outer panel; the fence length decides which fence closes the directive; data-line and data-end-line match the directive's source lines; the toggle is the native details element; the visual families (one for each gallery, two themes) pass the shared checks.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-003](SwRS-MDOKFSTUDIO-MYST-003.md): Admonition galleries keep one title line per panel without sideways scroll
+  - [SwRS-MDOKFSTUDIO-MYST-007](SwRS-MDOKFSTUDIO-MYST-007.md): A longer outer fence keeps inner fences as literal code
+  - [SwRS-MDOKFSTUDIO-MYST-008](SwRS-MDOKFSTUDIO-MYST-008.md): An admonition is one mapped block over its whole directive
+  - [SwRS-MDOKFSTUDIO-MYST-009](SwRS-MDOKFSTUDIO-MYST-009.md): Dropdown admonitions collapse under their title
+  - [SwRS-MDOKFSTUDIO-MYST-052](SwRS-MDOKFSTUDIO-MYST-052.md): The MyST gallery renders without sideways scroll
+<!-- okf:links:end -->

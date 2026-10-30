@@ -10,7 +10,8 @@ description: When the properties table is displayed, the extension SHALL show
   a table drawn without outer border that fits a preview 640 px wide or less.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -94,3 +95,18 @@ When the properties table is displayed, the extension SHALL show each frontmatte
 - Criteria: Top-level mapping values use the language-yaml code block; mappings with link results use the structured list. The checkbox has aria-disabled and tabindex -1 but not the HTML disabled attribute; clicking it in edit mode is a frontmatter-editing behaviour.
 - Criteria: MAX_LIST_ITEMS is 50; the omitted count is the list length minus 50; both empty-value tokens are literal text in the Value cell.
 - Criteria: Computed styles of [data-okf-properties] and its cells match the lean frame in every theme; the contrast thresholds are those checked by the visual scenarios in `capture.py`; the narrow rules apply under the media query max-width 640px.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-007](SwRS-MDOKFSTUDIO-FMSCHEMA-007.md): Boolean values show as read-only checkboxes
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-008](SwRS-MDOKFSTUDIO-FMSCHEMA-008.md): Long lists are cut after fifty items
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-009](SwRS-MDOKFSTUDIO-FMSCHEMA-009.md): Empty lists and null values show as YAML tokens
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-010](SwRS-MDOKFSTUDIO-FMSCHEMA-010.md): The properties table has a lean frame
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-011](SwRS-MDOKFSTUDIO-FMSCHEMA-011.md): The table fits a narrow preview
+<!-- okf:links:end -->

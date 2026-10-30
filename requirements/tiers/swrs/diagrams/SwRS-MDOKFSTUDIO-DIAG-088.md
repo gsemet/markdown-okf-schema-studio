@@ -7,7 +7,8 @@ description: "When jarPath is a relative path, the extension SHALL resolve it fr
   the workspace folder and use an absolute path as it is."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When jarPath is a relative path, the extension SHALL resolve it from the workspa
 
 - Method: Unit test: renders PlantUML through the configured external JAR (relative path).
 - Criteria: Resolved path equals the workspace folder joined with the setting.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-084](SwRS-MDOKFSTUDIO-DIAG-084.md): The JAR pipeline runs java or plantuml once per diagram on stdin
+<!-- okf:links:end -->

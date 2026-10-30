@@ -11,7 +11,8 @@ description: When the preview page asks the extension to do something or the
   render to a newer one.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -52,3 +53,24 @@ As a reader or writer, I rely on what the preview page asks of the extension bei
 - The bounds of each request kind are specified with the feature that sends it, except the fields every message and every state message share.
 - An answer is addressed by the document, the revision and the render request, or by an identifier of its own.
 - A save or cancel from an older page is answered with an error instead of being dropped (block-editing and frontmatter-editing scopes).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-238](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-238.md): previewEditSave needs both texts and valid optional fields
+  - [SwRS-MDOKFSTUDIO-FMEDIT-054](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-054.md): A frontmatter save message names its editor and field, or is ignored
+  - [SwRS-MDOKFSTUDIO-GFM-027](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-027.md): The host validates checkbox toggle messages
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-055](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-055.md): The validator of the message type must accept the payload
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+  - [SwRS-MDOKFSTUDIO-TRUST-061](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-061.md): A content patch message is applied only within its bounds
+  - [SwRS-MDOKFSTUDIO-TRUST-062](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-062.md): A properties table message needs string markup
+  - [SwRS-MDOKFSTUDIO-TRUST-063](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-063.md): A link targets message needs an array of the current render
+  - [SwRS-MDOKFSTUDIO-TRUST-064](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-064.md): Flush and editor watch messages are addressed by their own id
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-086](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-086.md): The warning banner close message has a bounded key
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

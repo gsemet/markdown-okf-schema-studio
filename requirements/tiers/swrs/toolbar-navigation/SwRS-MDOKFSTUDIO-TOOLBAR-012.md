@@ -8,7 +8,8 @@ description: When the reader replaces matches from the find bar, the extension
   source, and no other text, in one undo step.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: SwRS
 derives_from:
@@ -66,3 +67,12 @@ When the reader replaces matches from the find bar, the extension SHALL replace 
 - Method: test/page/modules/findBar.test.ts (items sent for replace and replace all, the note with the skipped count, the host's refusal shown).
 - Method: test/integration/findInPreview.test.ts, real VS Code window (replace all edits the document at the matched spans only, one undo restores the file); repeated by the `stress` CI job as `find-in-preview` (test/shared/stressPlan.ts).
 - Criteria: the document after the edits equals the source with exactly the matched spans replaced.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-003](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-003.md): The reader finds and replaces text in the preview
+<!-- okf:links:end -->

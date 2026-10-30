@@ -11,7 +11,8 @@ description: When the preview shows a render state, the extension SHALL label
   while a render is pending.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -105,3 +106,15 @@ When the preview shows a render state, the extension SHALL label the status Prev
 - Method: test/host/lifeReq.requirements.test.ts "pending renders say Waiting for the latest edit. then Rendering the active buffer.", "a notice that falls due while the page is loading is posted when the page is ready" and "a failed render of a document that was not shown yet shows Preview unavailable" (checked by reading handleQueueState, armPendingOverlay, onReady and showRenderFailure); the page half of the notice is test/page/pageMessages.test.ts (host message previewPendingOverlay).
 - Method: test/core/preview/previewStyles.test.ts "T43: the pending overlay is fixed, pointer-transparent and never in flow" and "T08: zoom scales the content font size and the column width together" (the 160 px and 62 px offsets).
 - Criteria: the aside of the status region holds the label of the status; the first page holds the pending status region; htmlAssignments does not grow while the render is pending; overlay.message holds the text of the phase; pendingOverlayShown is 1 for the slow case and 0 for the fast case; overlay.due is set by the timer and consumed by onReady; overlay.visible and overlay.due are false after a changed assignment; status is error when the stage identity differs from the session document; the status is recovery once and success afterwards; the stylesheet rule holds position fixed, pointer-events none and the two offsets.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
+<!-- okf:links:end -->

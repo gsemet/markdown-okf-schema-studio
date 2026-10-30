@@ -8,7 +8,8 @@ description: "When the host receives a previewPlantUmlInclude message whose docu
   is one render behind, and drops it for any other document or a closed preview."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the host receives a previewPlantUmlInclude message whose document id is tha
 
 - Method: Unit test `an include request is handled for the current document even one render behind, and dropped otherwise` in `test/session/diagReq.plantuml.requirements.test.ts`.
 - Criteria: Only the document id is compared.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

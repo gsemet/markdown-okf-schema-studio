@@ -9,7 +9,8 @@ description: When a document is renamed or moved, the extension SHALL rename its
   safe.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -77,3 +78,12 @@ When a document is renamed or moved, the extension SHALL rename its comments fil
 - Method: test/integration/commentAnchors.test.ts (rename moves the comments file and keeps thread m1; target exists: both files kept). The move to another folder, the invalid and unsaved cases and the warning texts are untested.
 - Method: test/session/reviewReqComments.requirements.test.ts: `a comments file that names another document stays where it is, without a warning` (names another document; the own document case is untested); `a folder, a comments file itself and a file that is not local move no comments file` (renames that move nothing).
 - Criteria: The new file names the new document and the old file does not exist; no comments file is overwritten and the old file stays under its name; moveSidecars continues silently when a valid file names another document, and continues without a rename for a folder, a comments file and a non-local file.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-008](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-008.md): Review threads follow edits and renames of the document
+<!-- okf:links:end -->

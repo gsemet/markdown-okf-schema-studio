@@ -8,7 +8,8 @@ description: When the workspace is untrusted or the file is standalone, the
   reduced to the document's folder.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the workspace is untrusted or the file is standalone, the extension SHALL s
 
 - Method: test
 - Criteria: The untrusted render succeeds with a document-folder root.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

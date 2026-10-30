@@ -9,7 +9,8 @@ description: When the MyST gallery document renders in dark and light themes at
   and typeset inline math with no horizontal overflow.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When the MyST gallery document renders in dark and light themes at 900 px, the e
 
 - Method: Visual scenario `myst/v${20 + index}-myst-gallery-full-${theme}-900` in test/visual/scenarioDefinitions2.ts
 - Criteria: One visual family, two themes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-006](SwRS-MDOKFSTUDIO-MYST-006.md): Admonitions nest, collapse and map as one block
+<!-- okf:links:end -->

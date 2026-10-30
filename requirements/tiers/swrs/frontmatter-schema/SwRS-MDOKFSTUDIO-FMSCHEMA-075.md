@@ -7,7 +7,8 @@ description: When `markdownOkfSchemaStudio.frontmatter.propertiesTable` is
   false, the extension SHALL still render the body of the document.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When `markdownOkfSchemaStudio.frontmatter.propertiesTable` is false, the extensi
 - Method: Unit test of the table renderer with the setting off; visual scenario with the setting off.
 - Criteria: The renderer returns no markup when the setting is off and does not touch the body.
 - Known issue: the frontmatter is still parsed and validated while the table is off; nothing is shown, so a schema problem cannot be seen.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-004](SwRS-MDOKFSTUDIO-FMSCHEMA-004.md): The propertiesTable setting hides the table while the body renders
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a preview renders a document in the VS Code host, the
   the render is aborted, and render in-process when no worker can start.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -72,3 +73,12 @@ When a preview renders a document in the VS Code host, the extension SHALL run t
 - Method: test/node-services/renderWorker.test.ts with a stub worker script: "a ready worker that dies during a render fails that render; three deaths in a row fall back", "a render waits for the busy worker instead of starting a second thread", "a waiting render that is given up never reaches the worker", "a render aborted while its thread still starts keeps that thread for the next render".
 - Method: the idle stop is untested; the VS Code wiring (vscodeHost.ts) runs in the integration suites through the bundle `out/bundle/renderWorker.js`.
 - Criteria: the renderer's counters (workers started, aborted, worker and in-process renders) and the thread id of the last worker render; the abort settles in under 50 ms.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+<!-- okf:links:end -->

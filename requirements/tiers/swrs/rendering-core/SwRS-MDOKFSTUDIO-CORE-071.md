@@ -12,7 +12,8 @@ description: When a document holds README-style HTML (div and p with align, br,
   already keep.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -75,3 +76,12 @@ When a document holds README-style HTML (div and p with align, br, img with widt
 - Method: test/core/render/mystRawHtml.test.ts (structure, Markdown inside an HTML block, source lines, picture themes, refusals), test/core/preview/previewStyles.test.ts (align, theme and edit-mode frame rules).
 - Method: real-window scenario test/integration/readmeHtmlWindow.ts (the painted layout in read mode, the titles in edit mode, a click that edits the block source).
 - Criteria: the rendered tree and CSS match the table above, no unsafe attribute or element survives, and the painted page shows a centred image and heading.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

@@ -12,7 +12,8 @@ description: When a writer inserts a reference, a document link, a citation or a
   with the result or a reason the writer can read.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -58,3 +59,27 @@ As a writer, I link to a label, a document or a bibliography entry by choosing i
 - A preview that is not trusted does not read the workspace for citations or documents; it refuses what reads or writes files, and reading the labels of the open document stays allowed.
 - A request answered after the editor closed is ignored.
 - The language list includes the short names (aliases) of the languages; plain text is always offered first.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-047](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-047.md): Done, Cmd/Ctrl+Enter or leaving the text box commits the edit
+  - [SwRS-MDOKFSTUDIO-PALETTE-054](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-054.md): The Code block list wraps lines in a fence of a highlighted language
+  - [SwRS-MDOKFSTUDIO-PALETTE-140](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-140.md): Reference and Citation open a filterable list filled by the host
+  - [SwRS-MDOKFSTUDIO-PALETTE-147](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-147.md): A chosen label is written as a ref role
+  - [SwRS-MDOKFSTUDIO-PALETTE-148](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-148.md): Document link picks a Markdown file and writes a doc role
+  - [SwRS-MDOKFSTUDIO-PALETTE-149](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-149.md): A chosen bibliography key is written as a cite role
+  - [SwRS-MDOKFSTUDIO-PALETTE-174](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-174.md): The host drops a request that does not name the render it holds
+  - [SwRS-MDOKFSTUDIO-PALETTE-178](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-178.md): The host lists the label targets of the document
+  - [SwRS-MDOKFSTUDIO-PALETTE-183](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-183.md): The host scans nearby bibliography files for citation keys within bounds
+  - [SwRS-MDOKFSTUDIO-PALETTE-192](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-192.md): The host image picker answers a path relative to the document
+  - [SwRS-MDOKFSTUDIO-PALETTE-196](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-196.md): The host saves a pasted image next to the document under a name it chooses
+  - [SwRS-MDOKFSTUDIO-PALETTE-203](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-203.md): A pasted image is sent to the host and its name inserted on its own paragraph
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

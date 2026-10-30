@@ -7,7 +7,8 @@ description: When a `{numref}` or `{ref}` points to a figure or table without a
   caption, the extension SHALL render a readable link, not an empty one.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a `{numref}` or `{ref}` points to a figure or table without a caption, the 
 
 - Method: Unit test "references to captionless figures and tables stay readable" in test/core/render/mystFeatures.test.ts
 - Criteria: No reference link is empty.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-019](../myst/SwRS-MDOKFSTUDIO-MYST-019.md): Reference roles link to in-page targets
+<!-- okf:links:end -->

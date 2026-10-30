@@ -9,7 +9,8 @@ description: "When the edition palette or the slash menu is in GFM mode, the ext
   it in the other palette modes."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,14 @@ When the edition palette or the slash menu is in GFM mode, the extension SHALL o
 
 - Method: Unit tests of the palette registry, the palette and the slash menu aliases.
 - Criteria: The registry entry lists mode gfm only and the aliases resolve to it.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-017](SwRS-MDOKFSTUDIO-DIAG-017.md): The Mermaid action inserts a starter flowchart in GFM mode
+<!-- okf:links:end -->

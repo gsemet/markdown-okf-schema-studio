@@ -8,7 +8,8 @@ description: When a previewCommentResolve or previewCommentDelete message
   a non-empty thread id and, for resolve, a boolean resolved flag.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,16 @@ When a previewCommentResolve or previewCommentDelete message reaches the host, t
 
 - Method: test/core/protocol/pageToHost.test.ts (unit test `T44: previewCommentResolve and previewCommentDelete validate the thread id and the flag`: scenarios valid messages, invalid messages).
 - Criteria: The validators accept only the valid shapes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

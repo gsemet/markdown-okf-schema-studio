@@ -8,7 +8,8 @@ description: When a PlantUML process runs for more than 30 seconds, the
   within 30 s. on the diagram with state error.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a PlantUML process runs for more than 30 seconds, the extension SHALL kill 
 
 - Method: Unit test: kills a hung child at the timeout with a clear diagnostic (shortened timeout).
 - Criteria: The timeout constant is 30000 ms.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-097](SwRS-MDOKFSTUDIO-DIAG-097.md): A JAR render is bounded in input, output, time, process lifetime and concurrency
+<!-- okf:links:end -->

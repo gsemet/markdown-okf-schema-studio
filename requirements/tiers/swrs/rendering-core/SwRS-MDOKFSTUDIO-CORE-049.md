@@ -8,7 +8,8 @@ description: When a changed block is included, has an open editor, the range
   extension SHALL glow nothing.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a changed block is included, has an open editor, the range list is empty or
 
 - Method: Unit test "CR 046: included blocks, open editors and the block being edited never glow" in test/page/modules/motion.test.ts
 - Criteria: No glow is applied in the excluded cases.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LIFE-094](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-094.md): Blocks changed by another tool glow briefly
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: 'When a frontmatter link is refused, the extension SHALL show the w
   message as the reason.'
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a frontmatter link is refused, the extension SHALL show the warning "Markdo
 
 - Method: Integration test.
 - Criteria: The warning is shown once per activation.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-073](SwRS-MDOKFSTUDIO-FMSCHEMA-073.md): A resolving frontmatter link opens its target, others are refused with a warning
+<!-- okf:links:end -->

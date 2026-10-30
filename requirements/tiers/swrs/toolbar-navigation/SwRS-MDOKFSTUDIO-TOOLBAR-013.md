@@ -10,7 +10,8 @@ description: "When a previewViewPreferenceChanged message reaches the host, the 
   answer."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -67,3 +68,18 @@ When a previewViewPreferenceChanged message reaches the host, the extension SHAL
 
 - Method: test/core/protocol/pageToHost.test.ts (nominal, zoom, refusal: previewViewPreferenceChanged validates the value per preference; the own-key rows are by code only)
 - Criteria: Booleans pass for the four switches; only the integers 70 to 200 pass for the zoom; isOneOf(value, margin, auto, full) for the width mode; every other value or name fails. The envelope and the render gate are those of the page messages (see SwRS-MDOKFSTUDIO-TRUST-052 and SwRS-MDOKFSTUDIO-TRUST-065); a read-only preview keeps the preference like a writable one (see SwRS-MDOKFSTUDIO-TRUST-006).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+  - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When a reader runs Refresh Preview, by the command or by the
   active text editor shows another document.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -111,3 +112,18 @@ When a reader runs Refresh Preview, by the command or by the Refresh button, the
 - Method: test/page/runtimeScroll.test.ts "refresh preserves viewport state while reverse synchronization stays disabled" (button pressed: asserts the message type, scrollTop and a numeric sourceLine; anchorLine, the focused block, the selected text, the open sections, the Description state and the closing of the tooltip are untested); the button over an open editor is checked by the tests of SwRS-MDOKFSTUDIO-BLOCK-041.
 - Method: test/core/protocol/pageStateMessages.test.ts (the previewRefresh message accepted and refused).
 - Criteria: the command entry equals the expected object; requestId grows and the HTML holds the edit marker; refreshActive requests a render only when document.id equals session.documentUri and reads manager.active, which createSession sets and disposeSession resets to the newest live session; the posted message holds the scroll fields of the snapshot; forceNextResult is set and refreshPreviewDocument runs for a current message only.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

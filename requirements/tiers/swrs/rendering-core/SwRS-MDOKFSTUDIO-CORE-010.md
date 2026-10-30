@@ -10,7 +10,8 @@ description: When a document holds `[[Note]]`, `[[Folder/Note#Heading|Label]]`
   link, an image, math, raw HTML or an `![[...]]` embed.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -58,3 +59,14 @@ When a document holds `[[Note]]`, `[[Folder/Note#Heading|Label]]` or `[[#Section
 
 - Method: Unit test "wikilinks render as lazy note targets without changing code or existing links" in test/core/render/mystFeatures.test.ts (nominal, boundary label, refusal inline code and embed; the existing link, image, math and raw HTML cases are named by the test title only)
 - Criteria: Each wikilink form yields the expected link target and text. Wikilinks are converted only in plain text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-011](SwRS-MDOKFSTUDIO-CORE-011.md): Leave wikilink syntax untouched where it is not text
+<!-- okf:links:end -->

@@ -11,7 +11,8 @@ description: When review threads are applied to the page, the extension SHALL
   included content.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -86,3 +87,16 @@ When review threads are applied to the page, the extension SHALL wrap the first 
 - Method: real window review-annotations/r02-review-thread-popover (quote in the block of the line, in preview and in edit mode); visual scenario review-annotations/v18-review-thread-resolved-light-900 (resolved style).
 - Method: the after-the-block placement for the listed tags (block that takes no children) is not asserted by a test (untested).
 - Criteria: A mark element with the thread id wraps exactly the quote in the expected block; figure text is unchanged and no mark or badge is placed inside a figure; no mark element appears under the skipped ancestors; the block holds a button with attribute data-okf-comment-badge and the aria-label and the block text is unchanged; the DOM after the second apply equals the DOM after the first; the attribute data-okf-comment-resolved is set exactly for resolved threads and the stylesheet draws it differently.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-019](../diagrams/SwRS-MDOKFSTUDIO-DIAG-019.md): Comment quotes are never wrapped inside diagrams
+<!-- okf:links:end -->

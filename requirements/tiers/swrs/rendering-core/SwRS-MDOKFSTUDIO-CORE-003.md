@@ -10,7 +10,8 @@ description: When a document is rendered, the extension SHALL give every
   frontmatter block is left out of the body.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -100,3 +101,17 @@ When a document is rendered, the extension SHALL give every paragraph, heading, 
 - Method: Unit test "a lone raw <img> block is a mapped block with a source line" in test/core/render/mystFeatures.test.ts (nominal image-only blocks, refusal raw image without source)
 - Method: Unit tests in test/core/render/alertSourceLines.test.ts (nominal source and end lines of the blocks of a document with GitHub alerts, which are rewritten into longer admonitions before parsing, with and without frontmatter)
 - Criteria: Every mapped block element carries a one-based source line attribute; multi-line blocks expose their full source range and single-line blocks do not exceed it. No frontmatter code block appears in the body and later `---` lines are unchanged. Body source lines equal the absolute file line for every line-break style. Image-only blocks carry source lines; a raw `<img>` without `src` is not rendered.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-004](SwRS-MDOKFSTUDIO-CORE-004.md): Map a multi-line block to its end line
+  - [SwRS-MDOKFSTUDIO-CORE-005](SwRS-MDOKFSTUDIO-CORE-005.md): Hide leading frontmatter from the body
+  - [SwRS-MDOKFSTUDIO-CORE-006](SwRS-MDOKFSTUDIO-CORE-006.md): Keep body lines absolute after frontmatter
+  - [SwRS-MDOKFSTUDIO-CORE-007](SwRS-MDOKFSTUDIO-CORE-007.md): Map image-only blocks
+<!-- okf:links:end -->

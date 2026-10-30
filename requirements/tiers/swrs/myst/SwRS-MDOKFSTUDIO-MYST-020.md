@@ -7,7 +7,8 @@ description: 'When a document uses `{cite}`, the extension SHALL show each key a
   muted `[key]` with the tooltip Unresolved citation: key and list no warning.'
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a document uses `{cite}`, the extension SHALL show each key as muted `[key]
 
 - Method: Unit test "project-scoped roles and directives degrade to labelled placeholders" in test/core/render/mystFeatures.test.ts
 - Criteria: The live preview has no bibliography, so every citation is unresolved.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-022](../rendering-core/SwRS-MDOKFSTUDIO-CORE-022.md): Build-dependent constructs show an inert placeholder with a warning
+<!-- okf:links:end -->

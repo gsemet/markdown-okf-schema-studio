@@ -10,7 +10,8 @@ description: 'When the writer presses Colour, the extension SHALL open a picker 
   edit for a value the sanitizer would strip.'
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -172,3 +173,16 @@ The action returns undefined. Everything the action writes passes the sanitizer 
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Method: visual scenarios palette-slash/v01-palette-popups-light-900 (picker contents; a swatch colours the selection)
 - Criteria: The popover holds a tablist with two tabs, sixteen buttons with data-color-swatch, an input with the aria-label Colour code and a button with data-color-remove; the action receives text:{colour} or background:{colour}; the outer span of a partial selection is unchanged and the new span lies between its tags; the unmatched-span-tag slice is refused as well.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+  - [SwRS-MDOKFSTUDIO-PALETTE-036](SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
+<!-- okf:links:end -->

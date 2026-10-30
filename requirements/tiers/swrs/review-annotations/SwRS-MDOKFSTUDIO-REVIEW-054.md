@@ -13,7 +13,8 @@ description: When the host receives a create message from a writable preview of
   the comments file and never into a comments file that is a symbolic link.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -129,3 +130,16 @@ When the host refuses a comment change, it answers the page ok false with the re
 - Method: test/node-services/nodeServices.test.ts, unit test `the Node file system reports a link itself, a dangling one included, and not a missing path` (the link check of the Node file system).
 - Method: real window review-annotations/r04-thread-created (First comment on a text).
 - Criteria: The written file matches the pattern for ids and dates and holds the anchor as sent, and parses with version 1. After concurrent changes the file holds every change, and the second change is written after the first was refused. The refusal comes before the write when the UTF-8 length exceeds MAX_SIDECAR_BYTES, writeComment refuses when the document uri does not start with file:, and for an unsaved comments file the reason names the file and the disk content is identical. showWarning is called with the prefix and the reason on every refusal in writeComment; the refusals of an empty or too long body, an unknown thread id and an unexpected error are answered to the page without a warning.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

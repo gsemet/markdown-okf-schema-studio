@@ -7,7 +7,8 @@ description: "When a PlantUML picture is wider than the content column, the exte
   SHALL scale it down to the column width keeping its proportions."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a PlantUML picture is wider than the content column, the extension SHALL sc
 
 - Method: Unit test `a PlantUML picture is scaled down to the column and never set to a fixed width` in `test/core/preview/diagReq.styles.requirements.test.ts`.
 - Criteria: max-width 100 percent, height auto, centred.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-023](SwRS-MDOKFSTUDIO-DIAG-023.md): PlantUML fences become centred inert pictures drawn by the built-in engine
+<!-- okf:links:end -->

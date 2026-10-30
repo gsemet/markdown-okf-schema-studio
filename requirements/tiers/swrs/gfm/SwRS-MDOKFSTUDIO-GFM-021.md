@@ -9,7 +9,8 @@ description: When a writer clicks a checkbox in reading or edit mode, the
   few seconds (and as its tooltip) when the host refuses the toggle.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -103,3 +104,22 @@ The reason appears in a status note right after the box and disappears after abo
 - Method: test/page/runtimePageControls.test.ts (toggle with no block editor, busy checkbox, missing position attributes, unit test "a rejected checkbox toggle reverts the box and explains why", which also checks the status note and its removal). test/session/checkboxRefusal.test.ts (read-only reasons). Untested: the host refusal paths (marker gone, open Markdown edit, apply failure). The visual scenario of the refusal note is in the visual suite.
 - Method: test/page/runtimeContentPatch.test.ts (content patch scenario: page unit tests).
 - Criteria: The edit replaces exactly one character; exactly one message per pending toggle; the box is reverted and the matching reason shown, beside the box and as a tooltip, for every refusal; new content is unaffected by stale results.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-GFM-023](SwRS-MDOKFSTUDIO-GFM-023.md): A pending toggle blocks further clicks
+  - [SwRS-MDOKFSTUDIO-GFM-024](SwRS-MDOKFSTUDIO-GFM-024.md): A refused toggle reverts the checkbox with a reason
+  - [SwRS-MDOKFSTUDIO-GFM-028](SwRS-MDOKFSTUDIO-GFM-028.md): Content patches clear pending toggles
+<!-- okf:links:end -->

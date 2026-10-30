@@ -8,7 +8,8 @@ description: When the writer presses Cmd+A (Ctrl+A elsewhere) in the cell text
   select-all to the text box so that only its text is selected.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the writer presses Cmd+A (Ctrl+A elsewhere) in the cell text box, the exten
 
 - Method: Unit tests CR 041: Ctrl+A (Cmd+A on macOS) in a text control is the select-all of that control and CR 041: the shortcut stops at the document, so VS Code's window listener never forwards it in test/page/modules/selectAllKey.test.ts and test/page/runtimeEditorFlush.test.ts.
 - Criteria: Propagation stopped once, default action not prevented. The policy is page-wide; this requirement states the cell case.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-006](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-006.md): Tab, arrows and editing keys work in a table cell
+<!-- okf:links:end -->

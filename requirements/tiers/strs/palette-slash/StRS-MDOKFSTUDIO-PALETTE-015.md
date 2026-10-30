@@ -11,9 +11,13 @@ description: When a writer types a slash at the start of a line or after a space
   technology.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: approved
+req_lifecycle: approved
+status: stable
 approved_by: gaetan@xeberon.net
-approved_on: 2026-10-28
+approved_at: '2026-10-28T00:00:00Z'
+verified:
+  by: human:gaetan@xeberon.net
+  at: '2026-10-28T00:00:00Z'
 origin: native
 tier: StRS
 derives_from: []
@@ -57,3 +61,21 @@ As a writer, I get a command menu from the slash without it getting in the way o
 - A command is run as its palette button is, in one undoable step.
 - In forced-colours mode the highlighted command stays readable.
 - The cell menu lists only the commands that make sense in a table cell and follows the palette mode like the block menu does.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-039](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-039.md): A palette action edits in one undo step or leaves the text unchanged and says why
+  - [SwRS-MDOKFSTUDIO-PALETTE-052](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-052.md): Bulleted list toggles a dash prefix, from the slash menu only
+  - [SwRS-MDOKFSTUDIO-PALETTE-232](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-232.md): A slash opens the slash menu only where a command is meant
+  - [SwRS-MDOKFSTUDIO-PALETTE-238](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-238.md): The slash menu lists the palette commands of the mode and scope
+  - [SwRS-MDOKFSTUDIO-PALETTE-240](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-240.md): The slash query ranks matches and leaves loose matches to the text
+  - [SwRS-MDOKFSTUDIO-PALETTE-242](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-242.md): Keys and clicks drive the slash menu and run the lit command
+  - [SwRS-MDOKFSTUDIO-PALETTE-252](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-252.md): The slash menu is an announced listbox of text-only rows
+  - [SwRS-MDOKFSTUDIO-PALETTE-256](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-256.md): The slash menu stays next to the caret inside the viewport
+  - [SwRS-MDOKFSTUDIO-PALETTE-263](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-263.md): Slash commands have short alternative names
+  - [SwRS-MDOKFSTUDIO-TABLE-085](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-085.md): The table bar's cell group formats the cell text
+<!-- okf:links:end -->

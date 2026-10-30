@@ -9,7 +9,8 @@ description: 'When a link annotation sets `show_line_number: true` and a `basena
   identity.'
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -52,3 +53,14 @@ When a link annotation sets `show_line_number: true` and a `basename_marker`, th
 
 - Method: Unit test of the link details; integration and visual scenarios.
 - Criteria: The identity is the string value of the id_marker field of the document; the file name without extension is used only when the annotation has no id_marker. The line must hold the marker, whitespace, then the identity, followed by the end of the line or a character that is not a letter, digit, underscore or hyphen (Evidence dd does not match Evidence ddx). The marker must start the line or follow whitespace (`xEvidence dd` does not match). The file name stem used without an id_marker is the document's own, not the target's.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-067](SwRS-MDOKFSTUDIO-FMSCHEMA-067.md): A link tooltip shows the fields and an excerpt of the linked file
+<!-- okf:links:end -->

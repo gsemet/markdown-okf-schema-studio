@@ -8,7 +8,8 @@ description: "When the reader presses the Theme button, the extension SHALL swit
   and show the active mode and the next one on the button."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -105,3 +106,17 @@ When the reader presses the Theme button, the extension SHALL switch the preview
 - Method: test/core/preview/creamTheme.test.ts, unit tests `cream is an accepted preview theme mode with its own coffee toolbar icon` and `toolbar theme icons are well-formed sibling svgs, one per mode` (icon set well formed); test/visual/scenarioDefinitions1.ts, visual scenarios theme-zoom/v02 and v08 (one icon per mode, visible icon asserted); the Current and White icons are not asserted by a visual scenario.
 - Method: test/page/diagReq.themeZoom.requirements.test.ts, unit test `an unknown theme mode is ignored: the saved mode comes next, Cream last` (the three rows of the unknown mode table).
 - Criteria: The mode attribute and the button attribute equal the next mode of the fixed order after each click, and the fifth state equals the first. The three attributes carry exactly the listed texts for each mode. The list of visible icons equals the active mode and the four icons appear once each in the fixed order. An unknown mode never shows.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
+  - [StRS-MDOKFSTUDIO-THEME-004](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-004.md): The theme choice holds for the workspace and survives slow loads and bad values
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+<!-- okf:links:end -->

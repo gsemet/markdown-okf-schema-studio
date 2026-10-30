@@ -9,7 +9,8 @@ description: When the writer chooses a key in the Citation list, the extension
   backtick, an angle bracket or a line break.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,14 @@ When the writer chooses a key in the Citation list, the extension SHALL write {c
 
 - Method: test/page/modules/editActions.test.ts (T30: cite inserts {cite} with the chosen key; checks the nominal, refusal and boundary scenarios), with its requirement markers in test/page/modules/editActions.test.ts
 - Criteria: An empty key or one with a blank, a comma, a backtick, an angle bracket or a line break gives no edit; a selection is replaced and the caret follows the role.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-039](SwRS-MDOKFSTUDIO-PALETTE-039.md): A palette action edits in one undo step or leaves the text unchanged and says why
+<!-- okf:links:end -->

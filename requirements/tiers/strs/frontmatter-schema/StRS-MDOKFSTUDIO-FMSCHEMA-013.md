@@ -8,7 +8,8 @@ description: When a writer edits the frontmatter, the Studio SHALL refresh the
   preview.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -35,3 +36,12 @@ As a writer, I see validation results update while I type, without the preview j
 ### Rationale and constraints
 
 - The frontmatter is re-analysed 300 ms after the last change; while a field editor is open the new table waits until it closes; a page not ready for the current render loads the full document instead.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+<!-- okf:links:end -->

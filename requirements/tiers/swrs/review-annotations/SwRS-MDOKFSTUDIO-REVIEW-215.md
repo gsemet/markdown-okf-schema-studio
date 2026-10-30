@@ -11,7 +11,8 @@ description: When the page receives line ranges that meet the lines of a front
   table.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,15 @@ When the page receives line ranges that meet the lines of a front matter field, 
 
 - SwRS-MDOKFSTUDIO-REVIEW-207: the bar of a changed block, which a field row reuses.
 - SwRS-MDOKFSTUDIO-REVIEW-195: the host that posts the ranges.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+- Relates to:
+  - [SwRS-MDOKFSTUDIO-REVIEW-195](SwRS-MDOKFSTUDIO-REVIEW-195.md): The host posts the lines that differ from the last commit
+  - [SwRS-MDOKFSTUDIO-REVIEW-207](SwRS-MDOKFSTUDIO-REVIEW-207.md): Changed blocks get a thin change bar that moves nothing
+<!-- okf:links:end -->

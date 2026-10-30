@@ -10,7 +10,8 @@ description: "When the reader presses the Zoom in button below 200 % or the Zoom
   at its limit."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -107,3 +108,16 @@ When the reader presses the Zoom in button below 200 % or the Zoom out button ab
 - Method: test/page/runtimePageControls.test.ts, unit test `T08: zoom buttons set the zoom variable, post the preference and keep the state` (zoom in 100 to 110, zoom out 110 to 100 to 90, the start variable 1, the attribute 100 and the tooltips between the limits; that both buttons are enabled at start and that no zoom message is posted at start are not asserted); unit test `T08: the zoom limits disable the buttons and post nothing more` (80 to 70, the limit click, the page started at 200). The step 190 to 200 is untested (no test clicks it; code in change() of src/page/modules/viewControls.ts). The non-number start is untested. The two limit tooltip texts are not asserted.
 - Method: test/page/diagReq.themeZoom.requirements.test.ts, unit test `a zoom change keeps the text at the reading line, with or without an anchor already set` (both anchor cases).
 - Criteria: The variable, the attribute and the posted value equal the old zoom plus or minus 10. The zoom equals 100 and no zoom message is posted at start. The tooltip texts (title and data-tooltip, set together) equal the listed strings. The disabled flags are set at the limits only and the message count does not change after a click at the limit.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+<!-- okf:links:end -->

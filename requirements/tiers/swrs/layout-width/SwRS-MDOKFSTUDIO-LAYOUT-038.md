@@ -7,7 +7,8 @@ description: When the preview page starts, the extension SHALL apply the saved
   webview state first, then the stored workspace preference, then Margin.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the preview page starts, the extension SHALL apply the saved webview state 
 
 - Method: Unit tests T10 the saved width mode applies at startup and an edited element keeps the column, and the view preference normaliser (invalid value gives margin).
 - Criteria: The first valid value among the webview state, the workspace preference and Margin is applied.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a leading frontmatter block is stripped, the extension SHALL
   and CR line breaks.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a leading frontmatter block is stripped, the extension SHALL number the bod
 
 - Method: Unit test "block source ranges stay absolute when leading frontmatter is stripped" in test/core/render/mystFeatures.test.ts
 - Criteria: Body source lines equal the absolute file line for every line-break style.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-003](SwRS-MDOKFSTUDIO-CORE-003.md): Every rendered block maps to its absolute source lines
+<!-- okf:links:end -->

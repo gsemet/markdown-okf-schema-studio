@@ -10,7 +10,8 @@ description: When a document opens in read mode or in edit mode, the extension
   button of an empty document.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -72,3 +73,16 @@ When a document opens in read mode or in edit mode, the extension SHALL start it
 - Method: test/core/preview/previewStyles.test.ts (paragraph first, elements with their own margin, open first-block editor): the unit test of the first-child rule (and the absence of 40 px column padding) and of the first-block editor margin rule.
 - Method: test/visual/capture_comment_checks.py (all scenarios): the first-element gap visual checks of the family v10 to v65 in read mode, the edit-mode half, the frame (v10 to v20, v24 to v29, v50) and the empty state (v39 to v41, v54, v59 and v62).
 - Criteria: The first child of the content column has margin-top 40 px and measures 40 px (within 4 px) from the top; the frame record measures 40 px within 4 px from the top in the visual checks; the measured top of the Start writing button is 40 px within 4 px in every case.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-008](SwRS-MDOKFSTUDIO-LAYOUT-008.md): The first element starts 40 px below the top in edit mode
+  - [SwRS-MDOKFSTUDIO-LAYOUT-009](SwRS-MDOKFSTUDIO-LAYOUT-009.md): The open first-block editor keeps the 40 px gap
+  - [SwRS-MDOKFSTUDIO-LAYOUT-010](SwRS-MDOKFSTUDIO-LAYOUT-010.md): The Start writing button starts 40 px below the top
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When a schema node is exactly a relative `$ref` to another schema
   `.yaml` and `.yml`.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -76,3 +77,14 @@ When a schema node is exactly a relative `$ref` to another schema file of the sc
 - Known issue: a missing target becomes a reference to the schema root, not an unresolved reference.
 - Known issue: a reference with a sibling keyword next to `$ref` is not inlined.
 - Known issue: the reference cycle scenario has no test.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-023](SwRS-MDOKFSTUDIO-FMSCHEMA-023.md): Schemas in YAML, JSON or JSON5 with relative references compile or report a row
+<!-- okf:links:end -->

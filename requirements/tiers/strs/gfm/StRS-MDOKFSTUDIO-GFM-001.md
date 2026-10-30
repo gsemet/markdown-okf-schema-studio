@@ -8,7 +8,8 @@ description: When a writer types a bare http(s) or www URL in prose, the Studio
   schemes as plain text.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -35,3 +36,12 @@ As a writer, I paste plain URLs and get working links without breaking code or e
 ### Rationale and constraints
 
 - Only http(s) and www addresses become links; trailing sentence punctuation stays outside the link, and editing a paragraph still shows the raw URL text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-GFM-002](StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When the width mode is Auto, the extension SHALL widen a table,
   measuring it again whenever the layout may have changed.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -112,3 +113,18 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 - Method: test/core/preview/previewStyles.test.ts (table with row handles): unit test `T10: the auto measure lifts every cap, the row-handle one included`.
 - Method: test/visual/capture_layout_checks.py (wide table and oversized block): visual checks with a minimum margin of 15 px from the pane edge, and visual scenario v84 (table uncapped and rounded up).
 - Criteria: Breakout equals the needed width minus the column, capped at the pane minus the TOC reserve minus 32 px (312 px and shift 72 px in the tested TOC layout); the breakout is the ceiling of the largest of scroll width, declared width, intrinsic width and box width, minus the column; marked elements never include an element under edit or a relative-sized figure; no mark for a gain of 1 px or less (breakout 100 px for the declared case); every listed event calls the width update.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-024](SwRS-MDOKFSTUDIO-LAYOUT-024.md): Auto width excludes the open table-of-contents column
+  - [SwRS-MDOKFSTUDIO-LAYOUT-025](SwRS-MDOKFSTUDIO-LAYOUT-025.md): Auto measures a wide table uncapped and rounds up
+  - [SwRS-MDOKFSTUDIO-LAYOUT-026](SwRS-MDOKFSTUDIO-LAYOUT-026.md): Auto leaves edited and relatively sized elements in the column
+  - [SwRS-MDOKFSTUDIO-LAYOUT-027](SwRS-MDOKFSTUDIO-LAYOUT-027.md): Auto uses the author's pixel width for an image breakout
+  - [SwRS-MDOKFSTUDIO-LAYOUT-031](SwRS-MDOKFSTUDIO-LAYOUT-031.md): Auto measures wide elements again when the layout changes
+<!-- okf:links:end -->

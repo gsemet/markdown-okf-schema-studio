@@ -8,7 +8,8 @@ description: When the page runs in forced-colours mode, the extension SHALL
   system Highlight colour.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the page runs in forced-colours mode, the extension SHALL colour diff addit
 
 - Method: Inspection of the forced-colours media rules or a forced-colours browser run.
 - Criteria: The rules exist inside the forced-colours media query for both line classes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-008](SwRS-MDOKFSTUDIO-CODE-008.md): Diff blocks show additions and deletions
+<!-- okf:links:end -->

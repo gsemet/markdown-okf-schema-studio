@@ -10,7 +10,8 @@ description: When a preview is scrolled, rebuilt, re-laid out or edited, the
   anchor through the update.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -112,3 +113,15 @@ When a preview is scrolled, rebuilt, re-laid out or edited, the extension SHALL 
 - Method: test/integration/sourceMapping.test.ts (scenario 7: the attributes, the block ids, the figure tabindex and that no zero or negative line appears; block ids are per render)
 - Method: test/page/lifeReq.requirements.test.ts (scenario 8: "the page uses only mapped blocks of its own document and file that are visible", by reading parseMappings in src/page/features/scrollCore.ts) and test/core/mapping/sourceMapping.test.ts (the same rules on parseSourceMappings: "keeps only active-document mappings in DOM order for ties", "accepts Windows separators without weakening document identity")
 - Criteria: lineAtScrollTop(0) is 1 and editorTopLine floors the anchor; buildAnchorMap holds one point per measured line; initialAnchorLine returns the stored anchor first, then the editor line, then undefined; the anchor line is unchanged and the heading offset stays within 40 px; shiftLineForEdits returns line + delta only for changes that end above the anchor; the element's viewport top is unchanged while typing and follows an explicit scroll; the html matches the attribute patterns; parseMappings returns only elements that pass the checks.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-CORE-003](../rendering-core/SwRS-MDOKFSTUDIO-CORE-003.md): Every rendered block maps to its absolute source lines
+<!-- okf:links:end -->

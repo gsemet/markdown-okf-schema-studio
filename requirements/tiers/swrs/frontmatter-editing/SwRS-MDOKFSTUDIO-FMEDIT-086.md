@@ -7,7 +7,8 @@ description: When the schema root forbids additional properties, the extension
   SHALL flag the properties section with data-okf-additional-properties="false".
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the schema root forbids additional properties, the extension SHALL flag the
 
 - Method: Unit test on the renderer (test/core/frontmatter/propertiesTable.test.ts).
 - Criteria: Test T25 the section flags a schema that forbids additional properties; the Add field picker reads this flag and then lists no "Custom key..." entry (SwRS-MDOKFSTUDIO-FMEDIT-035).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-084](../frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-084.md): Every schema violation is reported on its field or in a row of its own
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When the writer runs Bulleted list, the extension SHALL put - and a
   palette button and without a shortcut.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,13 @@ In this table `[ ]` marks the selection and `|` marks the caret; the input is gi
 - Method: test/page/modules/slashMenu.test.ts (P11 r2: choosing the list entries writes the list prefix as one edit)
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Criteria: Both actions carry the slash flag menuOnly, the scope block and the mode strict; a marker of the other kind (1. ) is replaced; a marker written with * or + counts as present.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+<!-- okf:links:end -->

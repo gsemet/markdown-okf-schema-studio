@@ -11,7 +11,8 @@ description: "When the band is shown, hidden or changes its number of lines, the
   a one pixel rule."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -96,3 +97,13 @@ When the band is shown, hidden or changes its number of lines, the extension SHA
 - Method: test/visual/capture_final_checks.py (check_sticky_headings on toolbar-navigation/v01 to v04: Band grows, Pointer, Text aligned with the column, Text stops before the toolbar as min(column right, toolbar left - 8), Flat, bold style with a rule; the rightmost toolbar button is not covered). The visual check_toc_column never shows a band (it measures after scrolling to the top, where the band is hidden), so the overlap with the column is asserted only by the CSS unit test.
 - Method: test/visual/scenarioDefinitions2.ts (Long heading path wraps: scenario toolbar-navigation/v05-sticky-wrapped-growth-dark-460).
 - Criteria: position fixed, inset-block-start 0, width 100 percent, pointer-events none; text left within 1 px of the content column; text right within 1 px of min(column right, toolbar left - 8); variable = toolbar width + 22, or 0; band max-width is 100 percent minus the reserve, which is 256 px at 760 px or more, else 0; white-space pre-wrap and overflow-wrap anywhere with height >= rendered lines times line height; weight >= 600, font larger than body, border-bottom 1 px, radius 0.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-004](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-004.md): The reader always sees the section being read
+  - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
+<!-- okf:links:end -->

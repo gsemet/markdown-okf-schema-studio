@@ -8,7 +8,8 @@ description: When a Markdown file is created, changed or deleted in a workspace
   and removed workspace folders.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a Markdown file is created, changed or deleted in a workspace folder, the e
 - Method: Unit test of the stem index; host events test.
 - Criteria: One Markdown watcher per workspace root invalidates the cached index of that root.
 - Known issue: a bundle root outside the workspace folders is not watched: its index refreshes only when the root folder's own modification time changes, so new files in its sub-folders can be missed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-055](SwRS-MDOKFSTUDIO-FMSCHEMA-055.md): A filename stem resolves when exactly one file matches
+<!-- okf:links:end -->

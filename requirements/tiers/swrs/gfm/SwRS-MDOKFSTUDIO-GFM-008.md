@@ -10,7 +10,8 @@ description: When prose contains ~~text~~, a footnote reference with its
   ~x~ pair and tildes in code literal.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -87,3 +88,15 @@ When prose contains ~~text~~, a footnote reference with its definition, or a GFM
 - Method: test/core/render/mystPaletteRendering.test.ts (footnote and pipe table scenarios: unit tests on the render pipeline output).
 - Method: test/core/render/mystTablesTree.test.ts (Source lines of a table without a second parse): "a pipe table gets its source lines from the syntax tree, with no second parse of the HTML", "aligned columns and list-tables still go through the HTML pass", "only list-tables, raw HTML tables and aligned columns need the HTML pass".
 - Criteria: Strikethrough elements exist only for double-tilde prose pairs; footnote reference and definition elements are present for defined notes; alignment appears on all cells of aligned columns only.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-GFM-014](SwRS-MDOKFSTUDIO-GFM-014.md): Footnotes render reference and text
+  - [SwRS-MDOKFSTUDIO-GFM-015](SwRS-MDOKFSTUDIO-GFM-015.md): Pipe tables keep header and column alignment
+<!-- okf:links:end -->

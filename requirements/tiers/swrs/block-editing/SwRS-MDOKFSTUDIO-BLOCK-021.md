@@ -8,7 +8,8 @@ description: When a writer clicks the title or the body of an admonition in edit
   opening fence to the closing fence.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When a writer clicks the title or the body of an admonition in edit mode, the pa
 
 - Method: Visual scenario block-editing/v05 (admonition editor open). No unit test.
 - Criteria: The editor range equals the mapped range of the admonition block.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+<!-- okf:links:end -->

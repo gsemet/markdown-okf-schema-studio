@@ -8,7 +8,8 @@ description: When the quote of a review thread cannot be found and its old lines
   its stored lines and comments.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -70,3 +71,13 @@ When the quote has no acceptable place but at least 60 percent of its words occu
 
 - Method: test/core/comments/anchoring.test.ts, `T45: a deleted quote orphans the thread and keeps its old line` (deleted quote), `T45: reanchorThreads updates moved threads, keeps orphans untouched and loses nothing` (orphan among several threads), `T45r2: the old lines are checked before the candidate cap` (old lines first; the cap itself is untested), `T45r2: a short quote never re-attaches when the surroundings disagree` and `T45r2: several copies and no context match is no move` (surroundings disagree), `T45r2: a quote that resembles the old lines (60 % of its words, in order) is not orphaned` (resemblance; the role case is covered by `T45r2: text that renders differently from its source stays anchored at the original line`).
 - Criteria: The orphan set holds the thread id and the thread object is unchanged; MAX_CANDIDATES = 200 limits the search and the old lines are searched directly before it; the state is orphaned in both disagreeing cases; RESEMBLANCE = 0.6 of the words in order.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-008](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-008.md): Review threads follow edits and renames of the document
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+<!-- okf:links:end -->

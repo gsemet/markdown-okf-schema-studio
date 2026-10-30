@@ -8,7 +8,8 @@ description: When a document contains inline, display or aligned maths, the
   formula readable.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -37,3 +38,17 @@ As a writer, I want formulas rendered offline and failures left legible so that 
 ### Rationale and constraints
 
 - Works with no network; an invalid formula is shown as its source text, not dropped.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-MYST-024](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-024.md): Maths is typeset offline by KaTeX and bad formulas stay readable
+  - [SwRS-MDOKFSTUDIO-MYST-025](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-025.md): Maths typesets offline without inline styles
+  - [SwRS-MDOKFSTUDIO-MYST-026](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-026.md): Unparsable formulas stay readable
+  - [SwRS-MDOKFSTUDIO-MYST-027](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-027.md): Maths cannot run active content
+  - [SwRS-MDOKFSTUDIO-MYST-028](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-028.md): Sphinx-style math delimiters are typeset
+  - [SwRS-MDOKFSTUDIO-MYST-029](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-029.md): Long display equations scroll inside their box
+<!-- okf:links:end -->

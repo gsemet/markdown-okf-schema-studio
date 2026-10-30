@@ -9,7 +9,8 @@ description: When a `{list-table}` has `:header-rows:`, `:widths:` or an
   not numbers.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a `{list-table}` has `:header-rows:`, `:widths:` or an alignment, the exten
 
 - Method: Unit test "CR038: a list-table renders its title, header rows, widths and alignment as one editable block" in test/core/render/mystFeatures.test.ts
 - Criteria: Header, widths and alignment follow the options.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-063](../myst/SwRS-MDOKFSTUDIO-MYST-063.md): Table directives render as ordinary tables
+<!-- okf:links:end -->

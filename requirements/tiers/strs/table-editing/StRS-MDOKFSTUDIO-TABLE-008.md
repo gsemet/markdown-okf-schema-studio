@@ -10,7 +10,8 @@ description: While a writer edits a table cell, the Studio SHALL show a labelled
   button is pressed, keeping the editor open on the new position.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -53,3 +54,19 @@ As a writer, I see the table actions with text labels above the table and I alwa
 - A bar that appears hidden under the sticky headings or the preview controls is scrolled into view when that does not push the selected cell out of the pane.
 - Known issue: the separator before the cell formatting group can stay at the end of a line when the group wraps in a narrow pane.
 - Known issue: a column operation rewrites the whole table in one fixed style, so the table's own padding and indentation are lost.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-TABLE-001](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-001.md): A click on a pipe table cell opens a cell editor in place
+  - [SwRS-MDOKFSTUDIO-TABLE-003](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-003.md): Row above inserts an empty row above the selected body row
+  - [SwRS-MDOKFSTUDIO-TABLE-004](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-004.md): Col left inserts an empty column to the left of the selected column
+  - [SwRS-MDOKFSTUDIO-TABLE-005](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-005.md): The row and column buttons also edit a plain list-table
+  - [SwRS-MDOKFSTUDIO-TABLE-048](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-048.md): A labelled table bar above the table tells the position and holds the buttons
+  - [SwRS-MDOKFSTUDIO-TABLE-055](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-055.md): Row and column buttons add and remove rows and columns
+  - [SwRS-MDOKFSTUDIO-TABLE-064](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-064.md): The table bar rides down with a tall table and stays visible
+  - [SwRS-MDOKFSTUDIO-TABLE-118](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-118.md): A table cell editor that opens late leaves the focus in a field that took it
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a GFM pipe table has alignment markers in its delimiter row,
   of the column.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a GFM pipe table has alignment markers in its delimiter row, the extension 
 
 - Method: Unit test on the render pipeline output.
 - Criteria: Alignment appears on all cells of aligned columns only.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-008](SwRS-MDOKFSTUDIO-GFM-008.md): Strikethrough, footnotes and pipe tables render as on GitHub
+<!-- okf:links:end -->

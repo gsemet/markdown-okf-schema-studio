@@ -13,7 +13,8 @@ description: When a link annotation has the resolution `document-relative`,
   `allowOutsideWorkspaceLinks` is true.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -99,3 +100,21 @@ When a link annotation has the resolution `document-relative`, `bundle-relative`
 
 - Method: test/core/frontmatter/fileLinks.test.ts (sibling file, missing file, project root found, git root inside and outside the workspace, absolute and escaping targets), test/core/frontmatter/diagReq.frontmatter.requirements.test.ts (absolute target, parent traversal, symbolic link out), test/core/frontmatter/okfFrontmatter.test.ts (both bundle forms, convention bundle root, no bundle root).
 - Criteria: Containment is checked on the path and again on the real path (symlinks). Without a workspace folder the navigation root is the document's folder. The project root is the configured one, else the nearest git root inside a workspace folder. Otherwise bundle-relative and project-relative links show the warning W15 with the label Link root unavailable.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-046](SwRS-MDOKFSTUDIO-FMSCHEMA-046.md): x-okf-link annotations declare link fields and their syntax
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-051](SwRS-MDOKFSTUDIO-FMSCHEMA-051.md): Bundle-relative links resolve from the bundle root
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-052](SwRS-MDOKFSTUDIO-FMSCHEMA-052.md): Project-relative links resolve from the project root
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-053](SwRS-MDOKFSTUDIO-FMSCHEMA-053.md): Absolute link targets are refused
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-054](SwRS-MDOKFSTUDIO-FMSCHEMA-054.md): Bundle and project targets cannot leave their root
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-079](SwRS-MDOKFSTUDIO-FMSCHEMA-079.md): The bundle root defaults to the schema folder's parent
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-080](SwRS-MDOKFSTUDIO-FMSCHEMA-080.md): The project root defaults to the nearest git root
+<!-- okf:links:end -->

@@ -11,7 +11,8 @@ description: When the writer presses Cmd+Shift+M on macOS or Ctrl+Shift+M
   Escape or Enter, or clicks a second time, on the select.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -80,3 +81,12 @@ When the writer presses Cmd+Shift+M on macOS or Ctrl+Shift+M elsewhere in the bl
 - Method: test/page/runtimeEditPalette.test.ts (platform key, tooltip, wrong modifier: Ctrl+Shift+M focuses the select, Cmd+Shift+M on macOS and the tooltip shows it; return to the text box: opening and dismissing the select without a change hands the focus back, Escape on the select returns to the text box, Cmd/Ctrl+Enter finishes the edit)
 - Method: the composition boundary is deduced from the code, not tested
 - Criteria: After the key the active element is the select; with the other platform's modifier the active element is still the text box. The title attribute of the select equals the accessible name followed by the shortcut in parentheses for the platform of the page. The text box is the active element after Escape, Enter or the second click and no mode change was reported.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
+<!-- okf:links:end -->

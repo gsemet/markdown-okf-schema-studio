@@ -9,7 +9,8 @@ description: When PlantUML diagrams are drawn, the extension SHALL select the
   markdownOkfSchemaStudio.plantuml.jarPath, when it is true.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -125,3 +126,22 @@ When PlantUML diagrams are drawn, the extension SHALL select the built-in engine
 - Method: test/core/configuration/settingsRegistry.test.ts (category title and order)
 - Method: untested: no test draws a themed or icon diagram or a class diagram without Graphviz (the scenario "The built-in engine needs nothing outside the extension" is to be checked by a visual scenario)
 - Criteria: Only the boolean true leaves the built-in engine; jar-untrusted never becomes builtin; no spawn call and an empty host result in both trust states; the path takes effect only when useJar becomes true; only the three configured sections trigger a render; type, default, order, description limit, category title and order match the manifest.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-025](SwRS-MDOKFSTUDIO-DIAG-025.md): useJar in an untrusted workspace keeps the JAR pipeline
+  - [SwRS-MDOKFSTUDIO-DIAG-026](SwRS-MDOKFSTUDIO-DIAG-026.md): The built-in engine starts no process
+  - [SwRS-MDOKFSTUDIO-DIAG-027](SwRS-MDOKFSTUDIO-DIAG-027.md): jarPath is ignored until useJar is on
+  - [SwRS-MDOKFSTUDIO-DIAG-031](SwRS-MDOKFSTUDIO-DIAG-031.md): The built-in engine needs nothing outside the extension
+  - [SwRS-MDOKFSTUDIO-DIAG-075](SwRS-MDOKFSTUDIO-DIAG-075.md): Changing a PlantUML setting renders the open document again
+  - [SwRS-MDOKFSTUDIO-DIAG-076](SwRS-MDOKFSTUDIO-DIAG-076.md): The useJar setting is contributed with an explanation
+  - [SwRS-MDOKFSTUDIO-DIAG-077](SwRS-MDOKFSTUDIO-DIAG-077.md): The jarPath setting is contributed with an explanation
+  - [SwRS-MDOKFSTUDIO-DIAG-078](SwRS-MDOKFSTUDIO-DIAG-078.md): The PlantUML settings form their own category
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a writer switches the preview theme, the Studio SHALL draw
   theme colours are unavailable.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -37,3 +38,12 @@ As a reader, I want Mermaid diagrams to match the dark, white, cream or light pr
 - Node, text, border, line and background colours come from the preview theme variables; the diagrams are drawn again when the theme mode changes (dark, white, cream, light), labels kept.
 - When a theme variable is missing or is a CSS system colour keyword such as `Canvas`, built-in fallback colours are used and the diagram stays readable. Edge labels keep a contrast of at least 4.5:1 in the dark, light and fallback themes.
 - A theme change that leaves the colours as they were draws nothing again. Evidence for the redraw is limited to dark, white and cream in the visual check; light and custom VS Code themes rely on the same observer.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-DIAG-001](StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+<!-- okf:links:end -->

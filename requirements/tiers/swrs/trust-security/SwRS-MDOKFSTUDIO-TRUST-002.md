@@ -11,7 +11,8 @@ description: When a preview is read-only (no workspace folder, or Restricted
   showing the reason as a diagnostic.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -67,3 +68,12 @@ When a preview is read-only (no workspace folder, or Restricted Mode), the exten
 
 - Method: Unit test test/security/readOnlyRoot.requirements.test.ts covers the broad roots, the policy refusals with their codes, the symbolic link into a dot-directory, the render of includes with diagnostics and the unchanged trusted behaviour.
 - Criteria: The home folder is read from USERPROFILE (HOME first outside Windows), then HOMEDRIVE+HOMEPATH, after realpath, compared case-insensitively on Windows and macOS (the core layer cannot import node:os); a folder is broad when it equals or contains it, or is a file-system root. The dot-segment test runs on the path relative to the root, before and after resolving symbolic links. The webview resource roots (previewLocalResourceRoots in src/session/features/rendering.ts) are covered by test/session/readOnlyLocalRoots.test.ts.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-004](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-004.md): Local files load only from the allowed folders
+<!-- okf:links:end -->

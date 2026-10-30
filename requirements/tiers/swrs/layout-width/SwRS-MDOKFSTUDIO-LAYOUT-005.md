@@ -8,7 +8,8 @@ description: When the extension builds the HTML of a preview page, it SHALL
   style.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the extension builds the HTML of a preview page, it SHALL include the width
 
 - Method: Unit test of the width rule builder, and the full-page test PERF-11 in previewRuntimeFile.test.ts (a page built with maxContentWidth 720 carries 720 in its inline style, which holds the width rule only); the call site passes preview.configuration.maxContentWidth.
 - Criteria: The page style contains exactly one width rule and its value is the normalised setting.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-002](SwRS-MDOKFSTUDIO-LAYOUT-002.md): The text column width follows the maxContentWidth setting
+<!-- okf:links:end -->

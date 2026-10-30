@@ -8,7 +8,8 @@ description: While a field editor is open, the extension SHALL ignore the Edit
   figure button and the Enter key on an insert point.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ While a field editor is open, the extension SHALL ignore the Edit figure button 
 
 - Method: Inspection of openFigureEditor (src/page/features/editorChrome.ts) and the insert point key handler (src/page/features/insertPoints.ts).
 - Criteria: Both return when activeFrontmatterEdit is set.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When any part of the review comments file of a shown document is
   distinct content of the file, and refuse every change to it.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -94,3 +95,13 @@ When any part of the review comments file of a shown document is not valid or go
 - Method: test/integration/reviewComments.test.ts asserts that an invalid file posts nothing ("an invalid file posts nothing", first sight). The warning text and the once-only rule are not asserted (untested).
 - Method: test/core/comments/commentEditing.test.ts: `T43: an invalid existing file is never overwritten, and a refusal does not stop the queue`; test/integration/commentWrite.test.ts (invalid {not json is not overwritten and the reason matches not valid) (change while the file is not valid, change when the file is valid).
 - Criteria: Every malformed input gives at least one error and an empty thread list; MAX_THREADS = 1000, MAX_COMMENTS_PER_THREAD = 200 and MAX_STRING_LENGTH = 10000 are accepted and one more is refused; the posted-threads count stays 0 and the warning calls showWarning once per distinct text (code inspection); the file bytes are identical after a refusal and the reason starts with "the comments file is not valid".
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+<!-- okf:links:end -->

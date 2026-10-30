@@ -10,7 +10,8 @@ description: When a reader runs Open Preview to Side on a saved Markdown file,
   extension is .md.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -107,3 +108,13 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 - Method: test/integration/lifecycle.test.ts (First preview: runs the command on preview.md and waits for a ready render and the title Studio · preview.md; Another document: runs the command with the URI of the second file while the preview follows the first and waits for the preview to show the second file).
 - Method: test/host/lifeReq.requirements.test.ts, unit tests "Open Preview to Side on the shown document reveals the preview and renders it again" (The shown document again: reads openPreview, sidePreview.panel.reveal, then requestDocument when document.id equals sidePreview.documentUri), "Open Preview to Side ignores previews that do not follow the active editor" (Previews that do not follow the active editor: reads manager.latest(followsActiveEditor)) and "the side preview and the Open With editor do not retain their page while hidden" (Hidden preview: reads createWebviewPanel and registerCustomEditorProvider in src/host-vscode/activation.ts and asserts retainContextWhenHidden is not true).
 - Criteria: One session exists and its requestId grows when the shown document is previewed again; the session's documentUri equals the active file after a switch; a panel exists with the view type markdown-okf-schema-studio.preview, the file's HTML and the title Studio · preview.md; latest() skips sessions whose followsActiveEditor is false; neither panel creation passes retainContextWhenHidden: true, so a hidden preview releases its webview process and restores from the saved state.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
+<!-- okf:links:end -->

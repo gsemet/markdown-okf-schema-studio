@@ -9,9 +9,13 @@ description: When a document holds wide content, long words or long URLs, the
   sideways inside its own box.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: approved
+req_lifecycle: approved
+status: stable
 approved_by: gaetan@xeberon.net
-approved_on: 2026-10-28
+approved_at: '2026-10-28T00:00:00Z'
+verified:
+  by: human:gaetan@xeberon.net
+  at: '2026-10-28T00:00:00Z'
 origin: native
 tier: StRS
 derives_from: []
@@ -55,3 +59,19 @@ As a reader, I never have to scroll the whole page sideways to read a document, 
 - Each layout check is not applicable, hence passing, when the page has no matching DOM; `identifier-split` flags only a cell whose own text node wraps over several lines.
 - Known issue: this is a page-wide promise that no documentation states; it is only locked by visual checks (no sideways scroll) and the wrapping unit test.
 - Known issue: the layout-check behaviour is undocumented outside its unit test.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-001](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-001.md): The preview page never scrolls sideways
+  - [SwRS-MDOKFSTUDIO-LAYOUT-032](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-032.md): A wide table scrolls inside its own box with shaded edges
+  - [SwRS-MDOKFSTUDIO-LAYOUT-033](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-033.md): A scrolling table shades its overflowing edges
+  - [SwRS-MDOKFSTUDIO-LAYOUT-034](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-034.md): Short identifiers stay on one line in a scrolling table
+  - [SwRS-MDOKFSTUDIO-LAYOUT-035](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-035.md): Machine geometry checks report four layout defects
+- Supersedes:
+  - [StRS-MDOKFSTUDIO-LAYOUT-002](StRS-MDOKFSTUDIO-LAYOUT-002.md): Wide tables scroll inside their own box
+  - [StRS-MDOKFSTUDIO-LAYOUT-009](StRS-MDOKFSTUDIO-LAYOUT-009.md): Layout measurements stay trustworthy for maintainers
+<!-- okf:links:end -->

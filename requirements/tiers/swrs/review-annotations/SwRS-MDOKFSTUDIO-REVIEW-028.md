@@ -7,7 +7,8 @@ description: When the page cannot place a review thread, the extension SHALL
   list it as an entry of an Orphaned comments region placed after the content.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,14 @@ When the page cannot place a review thread, the extension SHALL list it as an en
 - Method: test/core/preview/previewStyles.test.ts (`T44: the Orphaned comments box sits in the content's bottom padding and adds no scroll height`); visual scenario review-annotations/v01-orphan-box-end-padding-dark-900.
 - Untested: the exact meta text and the 120-character cut of an entry are not asserted.
 - Criteria: The region has role region and the label Orphaned comments, is a sibling after the content element and exists only while an orphan exists. The entry text follows the template in renderOrphans. The post hook is never called while orphans are applied and opened. The stylesheet gives the box a negative top margin equal to the padding and the measured heights match. No mark is created for orphaned true; for orphaned false without a block no search happens; with a block the mark is created in the block of the posted line only. MIN_MOVED_QUOTE = 12 and a total count of exactly one occurrence decide the placement.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a PlantUML diagram text is longer than 1 MiB, the extension
   with state error, without starting a process.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a PlantUML diagram text is longer than 1 MiB, the extension SHALL show Plan
 
 - Method: Unit test `a diagram text over 1 MiB is refused without a process, a text of exactly 1 MiB is rendered` in `test/core/render/diagReq.jar.requirements.test.ts`.
 - Criteria: The limit is strictly greater than 1 MiB.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-097](SwRS-MDOKFSTUDIO-DIAG-097.md): A JAR render is bounded in input, output, time, process lifetime and concurrency
+<!-- okf:links:end -->

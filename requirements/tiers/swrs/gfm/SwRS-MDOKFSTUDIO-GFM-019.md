@@ -7,7 +7,8 @@ description: When a document uses CRLF line endings, the extension SHALL give
   each checkbox the same line and column as in the LF document.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a document uses CRLF line endings, the extension SHALL give each checkbox t
 
 - Method: Unit test on the render pipeline output.
 - Criteria: Positions equal the source in CRLF.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-016](SwRS-MDOKFSTUDIO-GFM-016.md): Task list markers render as checkboxes with their source position
+<!-- okf:links:end -->

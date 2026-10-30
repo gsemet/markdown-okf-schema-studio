@@ -10,7 +10,8 @@ description: When several previews are open, the extension SHALL give each its
   file name.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -62,3 +63,13 @@ When several previews are open, the extension SHALL give each its own session wi
 
 - Method: test/integration/serializer.test.ts asserts two live sessions (getLivePreviewRolesForTests length 2) and, for two restored panels, the roles [false, true] (followsActiveEditor) and the older title (two restored panels coexist); the independence of the queues and watchers (two previews, same document twice) is by reading createSession; the single restored panel is untested.
 - Criteria: manager.sessions() holds one session per panel and each owns a BuildQueue and a watcher; getLivePreviewRolesForTests returns followsActiveEditor [false, true].
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+<!-- okf:links:end -->

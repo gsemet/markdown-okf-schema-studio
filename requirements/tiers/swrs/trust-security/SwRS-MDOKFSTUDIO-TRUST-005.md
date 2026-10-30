@@ -9,7 +9,8 @@ description: When the host receives a write request from a read-only preview for
   writes a file, and change nothing.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -149,3 +150,28 @@ When the host receives a write request from a read-only preview for the render i
 - Method: test/session/paletteReq.requirements.test.ts, unit tests the citation list is refused in a read-only preview and no file is read, and the document picker is refused in a read-only preview and opens no dialog; a writable preview opens it (citation and document picker rows, writable scenario).
 - Method: test/integration/imagePaste.test.ts (refusals write nothing and the document is unchanged; image paste row); the answered text of the paste is untested. Unlike the pickers, the paste handler does not check the render revision.
 - Criteria: EDIT_REQUEST_TYPES holds exactly previewEditOpen, previewEditSave, previewEditCancel, previewFrontmatterSave and previewCheckboxToggle, and handlePageState refuses them after the render check; every other handler in the table checks readOnly first and answers before reading the document, opening a dialog or writing a file; the disabled state and the refusal text of the checkbox match.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document outside a trusted folder opens read-only and keeps the viewing actions
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-065](SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-051](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-051.md): A save in an untrusted workspace is refused
+  - [SwRS-MDOKFSTUDIO-GFM-026](../gfm/SwRS-MDOKFSTUDIO-GFM-026.md): Read-only previews disable checkboxes
+  - [SwRS-MDOKFSTUDIO-MYST-042](../myst/SwRS-MDOKFSTUDIO-MYST-042.md): The host refuses a rename in an untrusted or read-only preview
+<!-- okf:links:end -->

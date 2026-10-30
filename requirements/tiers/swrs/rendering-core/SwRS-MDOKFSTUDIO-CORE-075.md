@@ -9,7 +9,8 @@ description: When a release version is set, the version script SHALL write the
   version differs from package.json.
 project: MDOKFSTUDIO
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,12 @@ When a release version is set, the version script SHALL write the same version t
 
 - Method: test/build/test_release.py runs the script in an isolated repository; test/build/test_plugin_manifests.py compares the manifests of the repository with `package.json`; both run in `just release-tests` and `just check`.
 - Criteria: All four files change in one commit; any drift or dirty manifest fails.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

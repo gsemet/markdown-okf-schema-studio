@@ -8,7 +8,8 @@ description: When a raw HTML table element has a style, the extension SHALL keep
   gradients, removing other declarations with a diagnostic.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a raw HTML table element has a style, the extension SHALL keep only text an
 
 - Method: Unit test on the render pipeline output.
 - Criteria: Only whitelisted declarations remain.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-031](SwRS-MDOKFSTUDIO-GFM-031.md): Raw HTML tables are rebuilt from an allow-list
+<!-- okf:links:end -->

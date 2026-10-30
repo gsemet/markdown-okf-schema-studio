@@ -8,7 +8,8 @@ description: "When the edits planned for a move, a cut or a paste overlap each o
   document unchanged."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the edits planned for a move, a cut or a paste overlap each other or lie ou
 
 - Method: Unit tests `text edits apply in offset order, whatever order they come in` and `overlapping or out-of-range text edits are refused` in test/core/edits/textEdit.test.ts. The refusal is a thrown RangeError of applyTextEdits; no integration test reaches it.
 - Criteria: Non-integer, negative, reversed and overlapping offsets are all refused.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+<!-- okf:links:end -->

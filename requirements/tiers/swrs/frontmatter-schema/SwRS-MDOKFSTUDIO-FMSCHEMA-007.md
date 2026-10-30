@@ -8,7 +8,8 @@ description: When a frontmatter value is a boolean in read mode, the extension
   checked for true, followed by the word true or false.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a frontmatter value is a boolean in read mode, the extension SHALL show a c
 
 - Method: Unit test of the table renderer; visual scenarios v01 and v05.
 - Criteria: The input has aria-disabled and tabindex -1 but not the HTML disabled attribute; clicking it in edit mode is a frontmatter-editing behaviour.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-006](SwRS-MDOKFSTUDIO-FMSCHEMA-006.md): Property values read like YAML in a lean table
+<!-- okf:links:end -->

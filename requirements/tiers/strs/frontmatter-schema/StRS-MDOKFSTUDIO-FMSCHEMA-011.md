@@ -8,7 +8,8 @@ description: When a document's frontmatter violates its schema, the Studio SHALL
   required fields.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -39,3 +40,12 @@ As a writer, I see exactly which metadata is wrong, and can jump to it.
 - The title badge counts errors, warnings and (only when neither exists) infos; pressing it scrolls the first row with an issue to the centre, focuses its value cell and highlights it for 1.5 s. Known issue: when only info rows carry issues the badge does nothing.
 - A root `additionalProperties: false` reports every undeclared field as a schema error row "must NOT have additional properties" regardless of the strict setting. Known issue: that error is not attached to the field row.
 - Messages are the English texts of the validator (for example "must be <= 5"); unknown schema keywords are ignored silently.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+<!-- okf:links:end -->

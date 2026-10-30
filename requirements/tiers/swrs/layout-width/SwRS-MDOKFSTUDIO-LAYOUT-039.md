@@ -7,7 +7,8 @@ description: When the width mode is Full width, the extension SHALL centre text,
   tables, code blocks and figures on the pane with gutters of at least 15 px.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the width mode is Full width, the extension SHALL centre text, tables, code
 
 - Method: Visual scenarios v80 and v83 (and the Full width halves of v66 to v71).
 - Criteria: Gutters of at least 15 px and side margins of 16 px within 2 px.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-022](SwRS-MDOKFSTUDIO-LAYOUT-022.md): Margin keeps blocks in the column and Full removes the limit
+<!-- okf:links:end -->

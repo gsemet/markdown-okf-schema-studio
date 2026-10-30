@@ -8,7 +8,8 @@ description: 'When the frontmatter block is not valid YAML, the extension SHALL 
   1.'
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the frontmatter block is not valid YAML, the extension SHALL show one error
 - Method: Unit test of the frontmatter extraction (extractFrontmatter reports invalid YAML); the row text and the badge of 1 are asserted by the visual scenario only.
 - Criteria: The error row has role alert and spans every column; the summary is 1 error, 0 warnings, 0 infos.
 - Known issue: the parser message is the raw text of the YAML library, with line numbers relative to the frontmatter and caret markers.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-002](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-002.md): Invalid frontmatter is explained and the body still renders
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-001](SwRS-MDOKFSTUDIO-FMSCHEMA-001.md): The frontmatter block is found by its fences and parsed as a YAML mapping
+<!-- okf:links:end -->

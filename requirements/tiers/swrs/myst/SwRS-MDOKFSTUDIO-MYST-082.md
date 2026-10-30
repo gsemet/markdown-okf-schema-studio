@@ -9,7 +9,8 @@ description: When the banner shows, the extension SHALL place it in the 40 px
   stay readable in every theme and add no sideways scroll.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the banner shows, the extension SHALL place it in the 40 px gap left of the
 
 - Method: Visual scenario `myst/v${number}-conf-warning-banner-${mode ?? theme}-900` in test/visual/scenarioDefinitions2.ts
 - Criteria: Visual-only checks.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-081](SwRS-MDOKFSTUDIO-MYST-081.md): A closable banner announces conf.py warnings
+<!-- okf:links:end -->

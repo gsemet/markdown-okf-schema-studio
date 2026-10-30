@@ -8,7 +8,8 @@ description: When a writer previews a MyST code directive with line numbers,
   the code.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -35,3 +36,12 @@ Authors need listings that point readers at specific lines and name their source
 ### Rationale and constraints
 
 - Applies to MyST code directives; plain fences are covered by the highlighted code samples need.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-CODE-001](StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+<!-- okf:links:end -->

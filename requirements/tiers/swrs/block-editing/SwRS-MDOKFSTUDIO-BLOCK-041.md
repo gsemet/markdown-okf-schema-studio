@@ -9,7 +9,8 @@ description: "While a block editor or a field editor is open, the extension SHAL
   toggle and a refresh) with the reason of its row in the table below and change nothing."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -156,3 +157,30 @@ The page refuses with the open editor's status line unless the row says otherwis
 - Method: test/page/modules/inlineThread.test.ts (an open edit blocks the change with its reason and the text is kept; no editor sends the request).
 - Method: test/session/reviewReqThreads.requirements.test.ts (an open Markdown edit on the host side refuses a thread change before the document is read; no open edit applies the delete).
 - Criteria: openBlockEditor returns at once while state.activeBlockEdit is set; openFrontmatterValueEditor and openFrontmatterKeyEditor return when activeBlockEdit or activeFrontmatterEdit is set; blockSelectionView and blockMoves return when activeFrontmatterEdit is set; handleThreadChange answers before reading the document when edits.active is true; every reason text equals the one in the table; the Refresh button is disabled on open and enabled on close.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+  - [StRS-MDOKFSTUDIO-REVIEW-008](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-008.md): Review threads follow edits and renames of the document
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-002](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-002.md): A field editor does not open while another editor is open
+  - [SwRS-MDOKFSTUDIO-FMEDIT-058](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-058.md): Refresh is blocked while a field editor is open
+  - [SwRS-MDOKFSTUDIO-FMEDIT-059](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-059.md): A checkbox toggle is refused while a field editor is open
+  - [SwRS-MDOKFSTUDIO-FMEDIT-072](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-072.md): Block selection and block moves ignore input while a field editor is open
+  - [SwRS-MDOKFSTUDIO-FMEDIT-073](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-073.md): The figure editor and the Start writing Enter shortcut ignore input while a field editor is open
+  - [SwRS-MDOKFSTUDIO-GFM-025](../gfm/SwRS-MDOKFSTUDIO-GFM-025.md): Checkbox clicks are refused during an open edit
+  - [SwRS-MDOKFSTUDIO-MYST-043](../myst/SwRS-MDOKFSTUDIO-MYST-043.md): The host refuses a rename while an edit is open
+  - [SwRS-MDOKFSTUDIO-MYST-050](../myst/SwRS-MDOKFSTUDIO-MYST-050.md): Rename is blocked while an editor is open in the page
+<!-- okf:links:end -->

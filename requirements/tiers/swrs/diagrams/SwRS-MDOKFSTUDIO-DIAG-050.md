@@ -9,7 +9,8 @@ description: When the host receives a previewPlantUmlInclude message, it SHALL
   non-empty bounded edit id.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -60,3 +61,15 @@ When the host receives a previewPlantUmlInclude message, it SHALL accept it only
 ### Verification notes
 - Method: test/core/protocol/pageToHost.test.ts `previewPlantUmlInclude carries a bounded file name, the including file id or null, and an edit id` (all scenarios; the 100-character bound of the edit id and a from of 4097 characters are not asserted there).
 - Criteria: Boundaries 4096 and 4097 behave as stated.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

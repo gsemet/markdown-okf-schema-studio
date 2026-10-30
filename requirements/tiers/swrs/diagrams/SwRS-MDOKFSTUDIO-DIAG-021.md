@@ -8,7 +8,8 @@ description: When the width mode is Auto and a Mermaid diagram or a diagram
   use the available width, unless the diagram is being edited.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,13 @@ When the width mode is Auto and a Mermaid diagram or a diagram figure is wider t
 
 - Method: Unit test of the width mode; the width rules are owned by layout-width.
 - Criteria: Wide figures are marked, edited ones are not.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+<!-- okf:links:end -->

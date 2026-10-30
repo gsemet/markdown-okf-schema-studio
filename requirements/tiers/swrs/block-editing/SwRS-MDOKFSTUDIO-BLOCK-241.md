@@ -7,7 +7,8 @@ description: "The host SHALL accept previewBlocksCopy only with positive integer
   and endLine."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,15 @@ The host SHALL accept previewBlocksCopy only with positive integer line and endL
 
 - Method: Unit test `T40: the block clipboard messages validate their lines and the optional pin` in test/core/protocol/pageToHost.test.ts (both scenarios).
 - Criteria: The order of the two lines is checked by the planner, not here.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+<!-- okf:links:end -->

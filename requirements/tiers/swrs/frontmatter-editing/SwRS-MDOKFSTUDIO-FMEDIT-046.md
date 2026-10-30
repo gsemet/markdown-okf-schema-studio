@@ -7,7 +7,8 @@ description: When a field value ends in ... or ---, the extension SHALL keep it
   inside the frontmatter block when editing another field.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a field value ends in ... or ---, the extension SHALL keep it inside the fr
 
 - Method: Unit test on the frontmatter patch (test/core/frontmatter/frontmatterFence.test.ts).
 - Criteria: Tests frontmatter fence fixtures: value ending in three dots, four dots, three dashes, dot-dot-dot closing fence.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-043](SwRS-MDOKFSTUDIO-FMEDIT-043.md): A frontmatter edit changes only the lines of its field
+<!-- okf:links:end -->

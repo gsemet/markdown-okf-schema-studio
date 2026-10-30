@@ -10,7 +10,8 @@ description: When a preview is read-only (created for a document that lies in no
   writable.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -167,3 +168,23 @@ A preview whose folder is removed turns read-only on the same panel: see SwRS-MD
 - Method: Unit test "adding a workspace folder makes the read-only previews of its files writable on the same panel" in test/host/lifeReq.requirements.test.ts (folder added rows: same panel, readOnly false, the added folder as root, the reading state kept, the active preview kept, a preview outside the folder left read-only).
 - Method: Unit test "the manifest declares limited support for untrusted workspaces" in test/security/trustReq.requirements.test.ts, which asserts the declaration, its description and the five restricted settings in package.json (and that the list is the registry's), the inputs VS Code reads to decide (extensionManifestPropertiesService, VS Code 1.143.1 bundle: an extension with a main entry point and no declaration is disabled in Restricted Mode). The Restricted Mode integration suite test/integration/untrusted-suite.ts loads the extension from the development path, which is not disabled either way, so it asserts the declaration through the installed extension manifest instead; a packaged VSIX is not run in a Restricted Mode window.
 - Criteria: The readOnly flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; a read-only page has a greyed Edit button with its reason, no palette, no Comment button, no reply, Resolve or Delete control, no edit cell, no edit-target mark and no editor element after the clicks; after onTrustGranted an open preview of a workspace file is a new trusted session on the same panel (readOnly false, the workspace folders as roots) and the active preview stays the active one; after a folder that holds its file is added, a read-only preview is a new writable session on the same panel with the folder as root, and a preview of another file is unchanged; package.json declares capabilities.untrustedWorkspaces.supported as limited.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document outside a trusted folder opens read-only and keeps the viewing actions
+  - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
+  - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-LIFE-026](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-026.md): The side preview follows the active Markdown editor
+  - [SwRS-MDOKFSTUDIO-BLOCK-017](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-017.md): The hover outline shows what a click would edit
+  - [SwRS-MDOKFSTUDIO-FMEDIT-001](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-001.md): A click on a field in edit mode opens its editor in place
+  - [SwRS-MDOKFSTUDIO-TABLE-001](../table-editing/SwRS-MDOKFSTUDIO-TABLE-001.md): A click on a pipe table cell opens a cell editor in place
+<!-- okf:links:end -->

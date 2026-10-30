@@ -11,7 +11,8 @@ description: When a cell editor opens in a table, the extension SHALL create
   cells of that table, and remove it when the editor closes.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -116,3 +117,12 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 - Method: test/visual/capture_edit_checks.py: check_cell_bar_formatting (seven operations; narrow pane at 460 px on table-editing/v03 and v05) and check_cell_editor_chrome (status centring, on table-editing/v01 to v05).
 - Method: test/core/preview/previewStyles.test.ts (status centring style) and test/core/preview/fmtableReq.requirements.test.ts (the table bar status takes no room when it is empty).
 - Criteria: The toolbar role and name, its position before the table, and in the visual check a bottom edge not below the table top; seven elements with data-sphinx-table-operation, each with an icon and a title; the exact status strings, T being the number of body rows of the model; a centre difference of at most 2 px, or a status below the button row; no cell group button outside the bar and no horizontal overflow at 460 px. The tooltip display and position are not asserted for this bar. The rule style is a style rule in src/core/preview/styles/editModeStyles.ts selecting the first button of the column group and of the table group (adjacent-sibling selectors); the style test in previewStyles.test.ts reads that selector and the flex rule of the wrapper that holds the cell group's separator (editPaletteStyles.ts); the wrapping itself is shown by the visual scenarios. Scenarios table-editing/v24 and v25 (360 px) reach the branch of the check that expects wrapping at 400 px or less; the check also reads the computed rule of each operation button and the position of the cell group's separator against its first button. The descriptions of visual scenarios table-editing/v02 to v05 in test/visual/scenarioIds.ts still say "four-action row and column bar", which is stale: the bar has seven operations and the check asserts seven.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-008](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-008.md): A table bar locates the writer and edits rows and columns
+<!-- okf:links:end -->

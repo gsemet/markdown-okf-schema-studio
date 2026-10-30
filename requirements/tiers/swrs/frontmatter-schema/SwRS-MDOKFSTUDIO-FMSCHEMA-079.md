@@ -8,7 +8,8 @@ description: When `markdownOkfSchemaStudio.frontmatter.bundleRoot` is empty, the
   contains the document and an `index.md` or `log.md`.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When `markdownOkfSchemaStudio.frontmatter.bundleRoot` is empty, the extension SH
 
 - Method: Unit test of the root resolution.
 - Criteria: Otherwise bundle-relative links show the warning W15 with the label Link root unavailable.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the document, bundle or project root and stay inside it
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When a render fails, the Studio SHALL keep the last good page
   page until the newer render is ready.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -34,3 +35,12 @@ Writers need the preview to stay trustworthy while they type and when something 
 ### Rationale and constraints
 
 - A newer edit supersedes a render in progress; the previous page stays visible until a new one is ready.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-CORE-003](StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+<!-- okf:links:end -->

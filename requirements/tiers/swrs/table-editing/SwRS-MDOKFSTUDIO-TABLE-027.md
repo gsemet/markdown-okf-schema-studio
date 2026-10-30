@@ -7,7 +7,8 @@ description: When the writer presses Cancel in a cell editor, the extension
   SHALL cancel the edit exactly as Escape does.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When the writer presses Cancel in a cell editor, the extension SHALL cancel the 
 
 - Method: Unit test Cancel in the table cell editor does what Escape does in test/page/runtimeTableCellEditor.test.ts.
 - Criteria: The sequence of messages equals the one produced by Escape in the same state.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+<!-- okf:links:end -->

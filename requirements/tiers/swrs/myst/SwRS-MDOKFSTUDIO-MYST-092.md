@@ -8,7 +8,8 @@ description: When a document holds a `{table}`, `{list-table}` or `{csv-table}`
   table palette action.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a document holds a `{table}`, `{list-table}` or `{csv-table}` directive, th
 
 - Method: Unit test "every plug-in renders, styles the preview and names MyST palette actions that exist" in test/core/directives/registry.test.ts
 - Criteria: Table family behaves per name.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-063](SwRS-MDOKFSTUDIO-MYST-063.md): Table directives render as ordinary tables
+<!-- okf:links:end -->

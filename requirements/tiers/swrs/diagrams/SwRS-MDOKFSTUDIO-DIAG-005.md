@@ -9,7 +9,8 @@ description: "When the page draws a Mermaid diagram, the extension SHALL take it
   theme colours change."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -91,3 +92,16 @@ The built-in fallbacks are #f0f0f0, #1f1f1f, #808080 and #ffffff. The font is no
 - Method: test/core/preview/themeTokens.test.ts (colours come from the theme variables: every token the Mermaid theme reads is in the token map)
 - Method: test/visual/scenarioDefinitions1.ts (diagrams v01: node fills equal the code block background in dark, white, cream and the original mode, and the theme switch check keeps the label count; v03: theme fallback draws a loaded picture; v01 to v03: edge label count against the source and contrast ratio)
 - Criteria: Node fills follow --studio-textCodeBlock-background in every checked theme mode; node fills follow the theme after each switch and the label count is unchanged; the picture loads and is readable with no host colour variable; label count equals the source and every ratio is at least 4.5. The unchanged-colours case and the border and secondary colours are untested.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-006](SwRS-MDOKFSTUDIO-DIAG-006.md): Mermaid diagrams are drawn again when the theme changes
+  - [SwRS-MDOKFSTUDIO-DIAG-007](SwRS-MDOKFSTUDIO-DIAG-007.md): Mermaid falls back to built-in colours
+  - [SwRS-MDOKFSTUDIO-DIAG-008](SwRS-MDOKFSTUDIO-DIAG-008.md): Mermaid edge labels stay readable
+<!-- okf:links:end -->

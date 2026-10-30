@@ -8,7 +8,8 @@ description: When the host holds an open block edit and receives a reply to, or
   Markdown edit before changing a thread." and change nothing.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the host holds an open block edit and receives a reply to, or the deletion 
 
 - Method: Untested here. The same guard for checkboxes is SwRS-MDOKFSTUDIO-GFM-025 and for the label rename SwRS-MDOKFSTUDIO-MYST-043 and SwRS-MDOKFSTUDIO-MYST-050; moves and clipboard keys are refused by the block moves and clipboard requirements above.
 - Criteria: handleThreadChange checks edits.active before the thread lines.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+<!-- okf:links:end -->

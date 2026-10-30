@@ -9,7 +9,8 @@ description: The repository SHALL pin Node.js 24 in its .nvmrc file, resolve
   1.2026.6 or later, and not at a range.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -77,3 +78,15 @@ The repository SHALL pin Node.js 24 in its .nvmrc file, resolve every package of
 
 - Method: Unit test test/security/package-contract.test.ts (pins Node 24 and keeps the lockfile on the official npm registry; the built-in PlantUML engine ships pinned and the JAR is an explicit opt-in setting) covers the Node.js pin, the registry and credentials check and the exact engine version.
 - Criteria: The trimmed content of .nvmrc is 24. The lock file lists at least one resolved address and all of them pass. The engine value matches the pattern of three dot-separated numbers; the pin exists because versions before 1.2026.6 carry a copyleft licence and the engine internals still change between releases; the test checks the pattern only, not the comparison with 1.2026.6 (it holds today).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-014](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-014.md): The extension is built from pinned dependencies and ships what it loads
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-079](../diagrams/SwRS-MDOKFSTUDIO-DIAG-079.md): The built-in engine is pinned to an exact version
+<!-- okf:links:end -->

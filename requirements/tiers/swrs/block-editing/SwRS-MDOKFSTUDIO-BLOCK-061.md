@@ -9,7 +9,8 @@ description: When a writer presses Tab, Shift+Tab or Enter in the text box of a
   current line, and leave the key to the text box when no rule applies.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -96,3 +97,12 @@ Only the indentation of the current line is continued while an odd number of fen
 - Method: test/page/runtimeBlockEditor.test.ts (`Tab and Shift+Tab indent the block editor without closing it`: Tab and Shift+Tab; `Enter in a list item continues the list, and Shift+Enter stays native`: list marker and Shift+Enter; `Enter on an empty list item empties the line and Enter in plain text stays native`: empty item and plain text).
 - Method: test/integration/realInput/markers.ts (scenarioTabIndents, screenshot block-editing/r10; scenarioEnterContinuesList, screenshot block-editing/r09); visual scenarios block-editing/v01 and v02 (Enter continues the list).
 - Criteria: The edit equals the expected text of every case of the table in the unit test; only a non-list line receives spaces at the caret; an outdent without a removable character returns no edit; continueOnEnter returns no edit in the native cases; an odd number of fence lines above the caret switches to indentation-only continuation.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-008](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-008.md): A writer types and moves between blocks with text editor keys
+<!-- okf:links:end -->

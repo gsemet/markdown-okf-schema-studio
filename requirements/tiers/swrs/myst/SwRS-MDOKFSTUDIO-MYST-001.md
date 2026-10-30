@@ -9,7 +9,8 @@ description: When a document holds an admonition directive, the extension SHALL
   its own title and decoration.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -144,3 +145,21 @@ When a document holds an admonition directive, the extension SHALL render a pane
 - Method: test/visual/scenarioDefinitions1.ts (accent and badge: visual scenario admonitions-dark-full)
 - Method: test/core/directives/registry.test.ts (named kind and kind outside the list: "each directive name has one plug-in, found by its exact name")
 - Criteria: Every named kind shows its default title and accent; an unregistered name falls back to Admonition; every version, custom, untitled, simple, icon-less and Quarto form changes only its own title or decoration.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-061](../rendering-core/SwRS-MDOKFSTUDIO-CORE-061.md): Render version admonitions
+  - [SwRS-MDOKFSTUDIO-MYST-002](SwRS-MDOKFSTUDIO-MYST-002.md): Admonitions take an accent colour and badge by kind
+  - [SwRS-MDOKFSTUDIO-MYST-004](SwRS-MDOKFSTUDIO-MYST-004.md): Custom admonitions show their written title and class colour
+  - [SwRS-MDOKFSTUDIO-MYST-005](SwRS-MDOKFSTUDIO-MYST-005.md): Untitled admonitions take their title from a leading bold line or heading
+  - [SwRS-MDOKFSTUDIO-MYST-010](SwRS-MDOKFSTUDIO-MYST-010.md): Simple and icon-less admonitions drop their decoration
+  - [SwRS-MDOKFSTUDIO-MYST-011](SwRS-MDOKFSTUDIO-MYST-011.md): Version admonitions show their version title
+  - [SwRS-MDOKFSTUDIO-MYST-012](SwRS-MDOKFSTUDIO-MYST-012.md): Quarto callouts render as simple admonitions
+  - [SwRS-MDOKFSTUDIO-MYST-087](SwRS-MDOKFSTUDIO-MYST-087.md): Each admonition kind renders under its own directive name
+<!-- okf:links:end -->

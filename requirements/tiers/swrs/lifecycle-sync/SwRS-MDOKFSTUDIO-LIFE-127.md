@@ -9,7 +9,8 @@ description: When VS Code restores a Studio preview panel, the extension SHALL
   Preview source missing with the reason the panel cannot be restored.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -112,3 +113,16 @@ The identity is kept in every row.
 - Method: test/integration/reload-suite.ts covers the view choices that survive a window reload.
 - Method: the file outside a folder scenario is untested; it is checked by reading deserializePreviewPanel.
 - Criteria: sourceLine, scrollTop and descriptionsCollapsed equal the saved values; parsePreviewPanelState returns undefined for an invalid identity and each optional field is present only inside its bound; the page holds the message of the row and lockedColumn equals the panel column of each restored panel.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+<!-- okf:links:end -->

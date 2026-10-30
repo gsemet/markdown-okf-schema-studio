@@ -9,7 +9,8 @@ description: "When the data-sphinx-preview-theme-mode, data-sphinx-preview-theme
   each one whose theme colours differ from those it was drawn with, keeping the labels."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,14 @@ When the data-sphinx-preview-theme-mode, data-sphinx-preview-theme, class or sty
 
 - Method: Visual scenario diagrams v01 (theme switch check over dark, white, cream and the original mode).
 - Criteria: Node fills follow the theme after each switch and the label count is unchanged.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-005](SwRS-MDOKFSTUDIO-DIAG-005.md): Mermaid colours follow the preview theme
+<!-- okf:links:end -->

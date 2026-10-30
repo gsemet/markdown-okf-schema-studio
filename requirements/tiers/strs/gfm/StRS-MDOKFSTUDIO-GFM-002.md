@@ -10,9 +10,13 @@ description: When a document uses bare http(s) or www URLs, GitHub alerts,
   HTML, unsafe colours and unsafe link schemes.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: approved
+req_lifecycle: approved
+status: stable
 approved_by: gaetan@xeberon.net
-approved_on: 2026-10-28
+approved_at: '2026-10-28T00:00:00Z'
+verified:
+  by: human:gaetan@xeberon.net
+  at: '2026-10-28T00:00:00Z'
 origin: native
 tier: StRS
 derives_from: []
@@ -71,3 +75,44 @@ Writers expect a pasted address to be clickable as on GitHub, without code sampl
 - Applies to documents using LF or CRLF line endings; alerts inside code fences stay literal.
 - Only http(s) and www addresses become links; code, existing links and unsafe schemes stay plain text, trailing sentence punctuation stays outside the link, and editing a paragraph still shows the raw URL text.
 - Scripts, styles, frames and other active content are removed; only hex and rgb colours are kept on coloured text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-CORE-012](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-012.md): An include is expanded in place and mapped to its directive
+  - [SwRS-MDOKFSTUDIO-CORE-044](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-044.md): Drop unsupported raw HTML
+  - [SwRS-MDOKFSTUDIO-CORE-045](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-045.md): Expand alerts in included files and context tags
+  - [SwRS-MDOKFSTUDIO-CORE-056](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-056.md): Rebuild raw HTML tables from an allow-list
+  - [SwRS-MDOKFSTUDIO-CORE-062](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-062.md): Render details and kbd blocks
+  - [SwRS-MDOKFSTUDIO-GFM-001](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-001.md): Bare URLs become safe links
+  - [SwRS-MDOKFSTUDIO-GFM-002](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-002.md): Trailing punctuation stays outside bare URLs
+  - [SwRS-MDOKFSTUDIO-GFM-003](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-003.md): Text with a meaning is not autolinked
+  - [SwRS-MDOKFSTUDIO-GFM-004](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-004.md): Only http, https and www hosts are autolinked
+  - [SwRS-MDOKFSTUDIO-GFM-005](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-005.md): Autolinks follow the Markdown link policy
+  - [SwRS-MDOKFSTUDIO-GFM-006](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-006.md): Editing an autolink shows the raw URL
+  - [SwRS-MDOKFSTUDIO-GFM-007](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-007.md): Pathological URLs render in linear time
+  - [SwRS-MDOKFSTUDIO-GFM-008](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-008.md): Strikethrough, footnotes and pipe tables render as on GitHub
+  - [SwRS-MDOKFSTUDIO-GFM-009](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-009.md): GitHub alerts render as admonitions
+  - [SwRS-MDOKFSTUDIO-GFM-010](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-010.md): Alert marker text becomes the title
+  - [SwRS-MDOKFSTUDIO-GFM-011](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-011.md): Legacy bold markers render as admonitions
+  - [SwRS-MDOKFSTUDIO-GFM-012](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-012.md): Alert markers inside fences stay literal
+  - [SwRS-MDOKFSTUDIO-GFM-013](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-013.md): Alerts render the same in CRLF documents
+  - [SwRS-MDOKFSTUDIO-GFM-014](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-014.md): Footnotes render reference and text
+  - [SwRS-MDOKFSTUDIO-GFM-015](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-015.md): Pipe tables keep header and column alignment
+  - [SwRS-MDOKFSTUDIO-GFM-029](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
+  - [SwRS-MDOKFSTUDIO-GFM-030](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-030.md): Raw kbd renders as a key cap
+  - [SwRS-MDOKFSTUDIO-GFM-031](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-031.md): Raw HTML tables are rebuilt from an allow-list
+  - [SwRS-MDOKFSTUDIO-GFM-032](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-032.md): Raw table styles keep a sanitized subset
+  - [SwRS-MDOKFSTUDIO-GFM-033](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-033.md): Unsupported raw HTML is dropped
+  - [SwRS-MDOKFSTUDIO-GFM-034](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-034.md): Colour spans keep safe colours only
+  - [SwRS-MDOKFSTUDIO-GFM-035](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-035.md): The page revalidates span colours before applying
+  - [SwRS-MDOKFSTUDIO-GFM-036](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-036.md): Removed span styles record a diagnostic
+  - [SwRS-MDOKFSTUDIO-GFM-037](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-037.md): Alerts end at the first unquoted line
+  - [SwRS-MDOKFSTUDIO-GFM-038](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-038.md): Raw HTML tables remove active content
+- Supersedes:
+  - [StRS-MDOKFSTUDIO-GFM-001](StRS-MDOKFSTUDIO-GFM-001.md): Bare URLs become safe links
+  - [StRS-MDOKFSTUDIO-GFM-004](StRS-MDOKFSTUDIO-GFM-004.md): Small raw HTML subset renders safely
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When the extension is packaged, it SHALL depend on @plantuml/core
   at one exact version without a range.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,14 @@ When the extension is packaged, it SHALL depend on @plantuml/core at one exact v
 
 - Method: Unit test: the built-in PlantUML engine ships pinned.
 - Criteria: Exact version string, 1.2026.6 or later.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-075](../trust-security/SwRS-MDOKFSTUDIO-TRUST-075.md): The extension is built from pinned, official dependencies
+<!-- okf:links:end -->

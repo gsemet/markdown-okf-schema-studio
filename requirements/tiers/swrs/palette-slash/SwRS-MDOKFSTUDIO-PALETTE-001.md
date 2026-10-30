@@ -10,7 +10,8 @@ description: When the extension builds the edition palette of a block editor,
   the start of each group.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -122,3 +123,16 @@ When the extension builds the edition palette of a block editor, the extension S
 - Method: test/page/modules/editPalette.test.ts (select in the palette, each mode adds its buttons, choosing another mode, order); test/page/runtimeEditPalette.test.ts (each mode adds its buttons, the editor opened from an insert point, a mode change does not save the block and the next editor opens in the new mode, order of all 38 buttons); test/page/runtimePaletteActions.test.ts (strict mode shows no GitHub buttons, the MyST buttons show in MyST mode only, the cell bar keeps the table operations and adds the inline group); test/page/modules/paletteReq.requirements.test.ts (a select value outside the three modes is put back); test/core/configuration/editingConfiguration.test.ts (the setting, an unknown or non-string value); test/core/palette/paletteActions.test.ts (the registry lists every palette action once, in display order); visual scenarios palette-slash/v05-mode-strict-light-900, palette-slash/v06-mode-strict-dark-900, palette-slash/v07-mode-gfm-light-900, palette-slash/v08-mode-gfm-dark-900, palette-slash/v09-mode-myst-light-900, palette-slash/v10-mode-myst-dark-900 (each mode, and the editor opened from an insert point)
 - Method: the same-mode case is deduced from the code (the change handler returns when the value equals the mode), not tested; the mode follow-up of the cell group and the MyST additions are deduced from the code (cellPalette.setMode and the scopes of the registry), not asserted by a test; the absence of the select in a cell is covered by the cell group requirement of the table editing scope; the contributed setting in package.json lists the same three values and the default gfm
 - Criteria: The select has the aria-label Palette buttons, the four options in the order strict, gfm, myst, full with the four labels, and its value equals the mode of the palette. The visible buttons equal the actions registered for the mode and the modes before it with the block scope, in registry order, and the palette root carries the mode. The button ids of the paragraph editor and of the editor opened from an insert point are equal for each mode. After a mode change the palette root carries the new data-palette-mode, the text box value and focus are unchanged and no previewEditSave was posted. After a foreign value the select value equals the mode of the palette and no onModeChange call happened. The normalizer returns the value when it is a palette mode and gfm otherwise; the setting changes the buttons and the slash menu only, never the rendering of the preview (see SwRS-MDOKFSTUDIO-CORE-001). The buttons of the cell group equal the registry actions with the cell scope and a mode rank at or below the current one; the palette of scope cell appends no select.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+<!-- okf:links:end -->

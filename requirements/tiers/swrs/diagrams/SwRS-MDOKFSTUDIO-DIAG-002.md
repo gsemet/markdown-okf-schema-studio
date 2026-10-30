@@ -8,7 +8,8 @@ description: "When the rendered content contains a Mermaid figure, the extension
   nonce, and adds no Mermaid script when the content has none."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,14 @@ When the rendered content contains a Mermaid figure, the extension SHALL add the
 
 - Method: Unit test on the page shell and the shell key; integration test that the script tag and the bundle folder resource root exist.
 - Criteria: The script tag appears only with a Mermaid figure; the shell key changes when Mermaid appears or disappears.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-001](SwRS-MDOKFSTUDIO-DIAG-001.md): Mermaid fences become inert diagram pictures
+<!-- okf:links:end -->

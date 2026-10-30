@@ -13,7 +13,8 @@ description: When the writer pastes into the block text box a clipboard that
   and inserting nothing.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -99,3 +100,15 @@ The alternative text equals the file name; no dialog asks for it.
 - Method: visual scenario palette-slash/v22-pasted-image-paragraph-light-900 (paragraph of its own, trailing spaces dropped, file name selected)
 - Method: untested, deduced from the code (pasteImage.ts, blockSourceEditor.ts): the refusal without a reason, the answer that reaches a closed or finishing editor and the autosave after the insertion
 - Criteria: Items of other types, such as svg, leave the paste native; the insertion uses the selection of the moment of the paste; the status message is shown only while the same editor and text box are open and not finishing.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a toctree glob scan runs, the extension SHALL read at most 200
   and `out`.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a toctree glob scan runs, the extension SHALL read at most 200 matches, 400
 
 - Method: Unit test "listGlobDocuments returns the sorted matching Markdown documents below the folder" in test/core/render/gridToctree.test.ts
 - Criteria: Limits and skipped folders hold.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-012](../../strs/myst/StRS-MDOKFSTUDIO-MYST-012.md): A toctree shows the linked documents and marks missing ones
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-057](../myst/SwRS-MDOKFSTUDIO-MYST-057.md): Toctree lists linked documents and marks missing ones
+<!-- okf:links:end -->

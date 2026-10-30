@@ -13,7 +13,8 @@ description: When the writer pastes into the block text box a clipboard that
   still open.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -99,3 +100,17 @@ No conversion is requested and the browser pastes the plain text.
 - Method: visual scenarios in test/visual/scenarioDefinitions1.ts, block-editing/v15 (dark, 460 px) and v16 (light, 900 px) (rich text with a heading, bold text, a link and a list replaces the selection in one native edit, one undo restores the text, autosave)
 - Method: untested, deduced from the code (pasteHtml.ts, hostRequests.ts, blockSourceEditor.ts): the page length limit (MAX_HTML_LENGTH), the error answer of the host, the guard for a closed editor and the clamp of the positions
 - Criteria: A blank html text is not taken over; nothing is inserted when both the Markdown and the plain text are empty; the insert hook clamps the range to the text length and applies one text edit followed by the autosave.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

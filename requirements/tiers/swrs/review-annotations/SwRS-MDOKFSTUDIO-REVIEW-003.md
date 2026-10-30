@@ -10,7 +10,8 @@ description: While edit mode is on, when the writer opens an HTML comment chip,
   TODO comment.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -73,3 +74,12 @@ While edit mode is on, when the writer opens an HTML comment chip, the preview S
 - Method: test/core/render/commentMarkers.test.ts (`a TODO comment is detected in any case, with or without a colon, on one or several lines`, `a comment body carries its literal edit-mode tag as data`), test/core/render/blockTagTitle.test.ts (title rules), test/core/preview/previewStyles.test.ts (`edit mode titles an open comment with its literal tag`).
 - Method: real-window scenario test/integration/commentTitleWindow.ts (the title painted for each comment in edit and read mode).
 - Criteria: the body of each comment carries the constant data-okf-tag, a lower-case todo comment is of kind todo, the stylesheet shows the tag in code font only when edit mode is on, and the painted title equals the expected tag.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-012](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-012.md): A writer sees HTML comments and TODO notes as chips and toggles them
+<!-- okf:links:end -->

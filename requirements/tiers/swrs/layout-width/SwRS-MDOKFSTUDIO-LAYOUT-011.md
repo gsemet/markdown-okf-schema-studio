@@ -11,7 +11,8 @@ description: When the floating toolbar covers the first control of the page (the
   above the 40 px gap, so that the first element keeps exactly 40 px.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -89,3 +90,19 @@ When the floating toolbar covers the first control of the page (the open first-b
 - Method: test/page/modules/firstClearance.test.ts (all scenarios): nothing is pushed when the toolbar is beside the column; a toolbar that ends above the 40px gap needs no clearance and no inset; P3 an open first-block editor keeps its 40px gap and gives up the width the toolbar covers; P3 a hidden Start writing button counts as an open first-block editor; P3 first-block editor in a pane too narrow to be narrowed is pushed below the toolbar (content top measured in document coordinates, which also checks the palette bottom edge); P3 the Start writing button is pushed only when the button itself is under the toolbar; P3 a Description toggle under the toolbar makes the table give up the toolbar's width; P3 a left-aligned badge under the toolbar in a narrow pane is pushed below it; P3 a properties table with no control under the toolbar keeps its 40px gap. The narrow-table fallback is verified by inspection of firstClearance.ts (untested).
 - Method: test/visual/capture_comment_checks.py (first-block editor and Start writing button): first-element gap checks at 900 and 1600 px, in panes of 480 px or less (down to 360 px), and v39 to v41, v54, v59 and v62.
 - Criteria: The values written to the root style are --sphinx-preview-first-clearance: 0px and --sphinx-preview-first-inset: 0px when nothing is covered; clearance equals toolbar bottom plus 8 minus content top minus 40 and never below 0; inset equals the content right edge minus the toolbar left edge plus 8, with clearance 0; clearance is greater than 0 for the Start writing button only when the rectangles of the button and the toolbar share horizontal space; the bottom edge variable is 0px when the inset is above 0, otherwise the toolbar bottom edge plus 8 px (92px for a toolbar ending at 84 px).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-012](SwRS-MDOKFSTUDIO-LAYOUT-012.md): A first-block editor too narrow to be narrowed is pushed below the toolbar
+  - [SwRS-MDOKFSTUDIO-LAYOUT-014](SwRS-MDOKFSTUDIO-LAYOUT-014.md): A first-block editor gives up the width the toolbar covers
+  - [SwRS-MDOKFSTUDIO-LAYOUT-015](SwRS-MDOKFSTUDIO-LAYOUT-015.md): The Start writing button is pushed only when it sits under the toolbar
+  - [SwRS-MDOKFSTUDIO-LAYOUT-016](SwRS-MDOKFSTUDIO-LAYOUT-016.md): A leading properties table gives up the toolbar width for its Description toggle
+  - [SwRS-MDOKFSTUDIO-LAYOUT-037](SwRS-MDOKFSTUDIO-LAYOUT-037.md): A leading properties table is pushed down for a control under the toolbar
+  - [SwRS-MDOKFSTUDIO-LAYOUT-042](SwRS-MDOKFSTUDIO-LAYOUT-042.md): A first-block editor's palette keeps its place unless the frame is under the toolbar
+<!-- okf:links:end -->

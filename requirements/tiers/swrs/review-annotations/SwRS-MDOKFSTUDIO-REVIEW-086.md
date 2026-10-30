@@ -9,7 +9,8 @@ description: When a reader presses Resolve or Reopen in a thread popover, the
   the highlight only when the thread is posted again.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -80,3 +81,17 @@ When a reader presses Resolve or Reopen in a thread popover, the extension SHALL
 - Method: test/page/modules/commentThreads.test.ts, `T44: Resolve sends the flag, waits for ok, and the mark changes style after the re-post` (Resolve and Reopen), `T44: Delete asks inside the popover first; No cancels, Yes sends and waits for ok` (Delete confirmation), `T44: a refused resolve shows the reason as text in an alert and can be retried` (refused resolve; the no-answer text and the default text are not asserted), `T44: a refused delete keeps the thread, shows the reason and returns to the buttons` (refused delete; the no-answer case is not asserted), `T44 r2: a pending reply disables Resolve and Delete, and a pending resolve disables Reply` (one action at a time).
 - Method: real window review-annotations/r06-thread-resolved (Resolve changes the highlight).
 - Criteria: The button label follows the resolved flag and no style changes before the re-post; no window.confirm call and one delete message follows Yes; the alert holds the reason cut at 500 characters, or the timeout text; confirming is cleared after a refusal and after the timeout; the disabled attribute is set on the other controls while an action is pending.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+<!-- okf:links:end -->

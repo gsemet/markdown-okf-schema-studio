@@ -7,12 +7,13 @@ tiers:
 id_policy: scope-prefix-sequence
 strs_test_coverage_mode: linked-swrs-and-validation-test
 lifecycle:
-  field: lifecycle
+  field: req_lifecycle
 markers:
   implements: '@implements_req'
   tests: '@tests_req'
   id_pattern: '[A-Za-z][A-Za-z0-9_-]*'
-generated_fields: [derived_by, supersedes, implemented_in_files, tested_in_files, default_owner_email]
+generated_fields: [derived_by, supersedes, implemented_in_files, tested_in_files, default_owner_email,
+  status, verified]
 scopes:
   rendering-core:
     id_token: CORE

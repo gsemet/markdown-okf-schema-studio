@@ -10,7 +10,8 @@ description: When a built-in diagram needs a URL, a library, a theme read from a
   instead of a picture, and fetch or load nothing.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -116,3 +117,22 @@ When a built-in diagram needs a URL, a library, a theme read from a folder or mo
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario diagrams v12 (library include: message, useJar hint, source kept)
 - Method: test/core/preview/diagReq.styles.requirements.test.ts (messages use the error style: theme colour with a red fallback, in italics)
 - Criteria: The engine is not run and the host is not asked for an unsupported directive; every library request ends in an error and nothing is loaded; no file text reaches the engine without a render or a host; no theme file is read; the refusing file is named and the result is not cached; the reason is text and the prefix is stripped; the comparison with the limit is strictly greater than; error colour and italic style hold.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-033](SwRS-MDOKFSTUDIO-DIAG-033.md): The library loaders of the built-in engine refuse every request
+  - [SwRS-MDOKFSTUDIO-DIAG-034](SwRS-MDOKFSTUDIO-DIAG-034.md): The file loader refuses local files without a render or a host
+  - [SwRS-MDOKFSTUDIO-DIAG-035](SwRS-MDOKFSTUDIO-DIAG-035.md): A theme read from a folder is refused
+  - [SwRS-MDOKFSTUDIO-DIAG-036](SwRS-MDOKFSTUDIO-DIAG-036.md): Unsupported directives inside included files name the file
+  - [SwRS-MDOKFSTUDIO-DIAG-037](SwRS-MDOKFSTUDIO-DIAG-037.md): A built-in engine failure shows its reason
+  - [SwRS-MDOKFSTUDIO-DIAG-038](SwRS-MDOKFSTUDIO-DIAG-038.md): The built-in engine refuses a source over 1 MiB
+  - [SwRS-MDOKFSTUDIO-DIAG-082](SwRS-MDOKFSTUDIO-DIAG-082.md): PlantUML messages use the error style
+  - [SwRS-MDOKFSTUDIO-DIAG-112](SwRS-MDOKFSTUDIO-DIAG-112.md): Unsupported directives never reach the engine or the host
+<!-- okf:links:end -->

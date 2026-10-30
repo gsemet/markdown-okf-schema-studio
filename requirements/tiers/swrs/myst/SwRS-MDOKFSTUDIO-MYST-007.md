@@ -8,7 +8,8 @@ description: When an admonition uses a longer fence than an inner `markdown`
   code in the body.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When an admonition uses a longer fence than an inner `markdown` fence or inner a
 
 - Method: Unit test "nested backtick and colon delimiters preserve their enclosing Markdown" in test/core/render/mystFeatures.test.ts
 - Criteria: The fence length decides which fence closes the directive.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-006](SwRS-MDOKFSTUDIO-MYST-006.md): Admonitions nest, collapse and map as one block
+<!-- okf:links:end -->

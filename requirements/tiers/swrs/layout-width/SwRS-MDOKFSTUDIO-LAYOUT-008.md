@@ -7,7 +7,8 @@ description: When a document opens in edit mode, the extension SHALL start its
   first element 40 px below the top of the pane, as it does in read mode.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,14 @@ When a document opens in edit mode, the extension SHALL start its first element 
 
 - Method: Visual scenarios of the first-element gap family (edit-mode half); the CSS rule is unit-tested through the read-mode requirement.
 - Criteria: The measured top of the first element is 40 px within 4 px.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-007](SwRS-MDOKFSTUDIO-LAYOUT-007.md): The first element starts 40 px below the top
+<!-- okf:links:end -->

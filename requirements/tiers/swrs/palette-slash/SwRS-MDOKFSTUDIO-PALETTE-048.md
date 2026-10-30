@@ -9,7 +9,8 @@ description: When the writer presses Strikethrough, the extension SHALL wrap the
   there.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -64,3 +65,12 @@ The button has no keyboard shortcut.
 - Method: test/page/modules/editActions.test.ts (data-driven rows named editActions strikethrough: all scenarios)
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Criteria: The edges of the selection ignore surrounding blanks; the button has no keyboard shortcut.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

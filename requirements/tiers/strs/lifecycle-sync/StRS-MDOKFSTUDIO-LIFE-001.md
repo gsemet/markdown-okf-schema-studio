@@ -11,7 +11,8 @@ description: When a writer or reader asks for a preview of a Markdown file, the
   untouched.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -60,3 +61,25 @@ As a writer, I open a rendered preview of the Markdown file I am editing beside 
 - Closing the preview releases the group it locked, but never a group that holds anything else.
 - Several previews can be open at once, the side preview and one or more Open With tabs; each keeps its own state, render and file watching, and shows its own document and its own place.
 - Refresh Preview acts on one preview, the newest one still open.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-001](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-001.md): The extension activates only on its own entry points
+  - [SwRS-MDOKFSTUDIO-LIFE-003](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-003.md): Open Preview to Side opens or reveals a side preview
+  - [SwRS-MDOKFSTUDIO-LIFE-010](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-010.md): Open Preview to Side checks the file it is given
+  - [SwRS-MDOKFSTUDIO-LIFE-018](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-018.md): The Open With editor shows its own Markdown file
+  - [SwRS-MDOKFSTUDIO-LIFE-026](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-026.md): The side preview follows the active Markdown editor
+  - [SwRS-MDOKFSTUDIO-LIFE-032](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-032.md): Refresh Preview renders the shown document again
+  - [SwRS-MDOKFSTUDIO-LIFE-038](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-038.md): Each preview has its own state and only the newest follows
+  - [SwRS-MDOKFSTUDIO-LIFE-049](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-049.md): The status names the render state and shows pending, failed and recovered notices
+  - [SwRS-MDOKFSTUDIO-LIFE-127](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-127.md): A restored panel reopens its document or explains why it cannot
+  - [SwRS-MDOKFSTUDIO-LIFE-149](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-149.md): The Studio runs beside the built-in Markdown preview
+  - [SwRS-MDOKFSTUDIO-LIFE-151](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-151.md): A side preview locks its editor group
+  - [SwRS-MDOKFSTUDIO-LIFE-156](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-156.md): The settings editor lists the Studio settings in titled groups
+  - [SwRS-MDOKFSTUDIO-LIFE-171](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-171.md): The manifest declares Agents window support
+  - [SwRS-MDOKFSTUDIO-TRUST-072](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-072.md): The extension contributes no language, grammar or editors entry
+<!-- okf:links:end -->

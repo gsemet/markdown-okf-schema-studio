@@ -8,7 +8,8 @@ description: When the extension reads a conf.py, the extension SHALL never run
   nothing when no conf, no parser or an uncertain list.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the extension reads a conf.py, the extension SHALL never run it and check o
 
 - Method: Unit test "no conf.py, no myst_parser or an uncertain conf.py give no set" in test/core/myst/confLocator.test.ts
 - Criteria: The file is never executed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-066](SwRS-MDOKFSTUDIO-MYST-066.md): The governing conf.py is found and read as text
+<!-- okf:links:end -->

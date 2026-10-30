@@ -7,7 +7,8 @@ description: When a display equation is wider than the pane, the extension SHALL
   scroll it sideways inside its own box and not widen the page.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a display equation is wider than the pane, the extension SHALL scroll it si
 
 - Method: Visual scenario chapter-dark-half in test/visual/scenarioDefinitions1.ts
 - Criteria: Overflow is local.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-006](../../strs/myst/StRS-MDOKFSTUDIO-MYST-006.md): Maths is typeset offline and bad formulas stay readable
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-024](SwRS-MDOKFSTUDIO-MYST-024.md): Maths is typeset offline by KaTeX and bad formulas stay readable
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a document holds an `{admonition}` directive with a title
   rendered and colour the panel by its `:class:` kind.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a document holds an `{admonition}` directive with a title argument, the ext
 
 - Method: Unit test "custom admonition titles preserve inline Markdown and their class" in test/core/render/mystFeatures.test.ts
 - Criteria: Title inline Markdown is rendered; the class selects the accent; no class gives the neutral accent.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-001](SwRS-MDOKFSTUDIO-MYST-001.md): Admonitions render as coloured callouts with a title
+<!-- okf:links:end -->

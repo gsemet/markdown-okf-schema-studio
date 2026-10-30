@@ -8,7 +8,8 @@ description: When the reader presses the copy button, the extension SHALL keep
   letting the click reach the block's own click handling.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the reader presses the copy button, the extension SHALL keep the focus of a
 
 - Method: Unit tests of mousedown and click handling.
 - Criteria: mousedown is default-prevented; click does not propagate.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-019](SwRS-MDOKFSTUDIO-CODE-019.md): The copy button copies the raw code and confirms it
+<!-- okf:links:end -->

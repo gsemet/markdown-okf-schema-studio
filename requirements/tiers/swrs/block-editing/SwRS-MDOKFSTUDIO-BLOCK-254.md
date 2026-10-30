@@ -11,7 +11,8 @@ description: When edit mode is on and no editor is open, the page SHALL move the
   Enter.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -76,3 +77,12 @@ Escape returns the selection to the table block. Enter opens the cell editor thr
 - Method: test/visual/scenarioDefinitions1.ts, visual scenarios block-editing/v20 (light) and v21 (dark): Down then Right leaves the first header cell outlined, with no editor open.
 - Method: test/integration/realInput/blockKeys.ts, real VS Code window: Right into the first cell and Escape back to the table block.
 - Criteria: The structural listener of features/blockSelectionView.ts runs before the plain-key listener and the page input; the model is modules/structuralCursor.ts.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+<!-- okf:links:end -->

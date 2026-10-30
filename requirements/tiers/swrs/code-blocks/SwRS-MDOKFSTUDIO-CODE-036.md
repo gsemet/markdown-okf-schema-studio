@@ -7,7 +7,8 @@ description: When a `diff` or `patch` block is shown, the extension SHALL
   display it as a full-width panel with square corners and no border.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a `diff` or `patch` block is shown, the extension SHALL display it as a ful
 
 - Method: Stylesheet unit test and the diff visual scenarios.
 - Criteria: Computed radius 0, border none, width equal to container.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-008](SwRS-MDOKFSTUDIO-CODE-008.md): Diff blocks show additions and deletions
+<!-- okf:links:end -->

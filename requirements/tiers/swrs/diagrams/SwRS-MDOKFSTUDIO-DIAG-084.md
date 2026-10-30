@@ -18,7 +18,8 @@ description: When useJar is true in a trusted workspace, the extension SHALL
   tag to the last svg end tag.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -124,3 +125,21 @@ When useJar is true in a trusted workspace, the extension SHALL render each Plan
 - Method: test/core/configuration/plantUmlConfiguration.test.ts (reads and trims the configured PlantUML JAR path; uses an empty path for non-string configuration values: boundary rows for padding and non-string).
 - Method: test/core/render/diagReq.jar.requirements.test.ts (`the JAR pipeline starts one process per diagram before any of them finishes`: one process per diagram).
 - Criteria: The spawned command and arguments match; the picture equals the SVG span; trim and empty fallback hold; the resolved path equals the workspace folder joined with the setting; input on stdin and cwd is the workspace folder; process count equals diagram count. The blank-path row and the empty-document case are checked only through these tests, with no test of their own.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-024](SwRS-MDOKFSTUDIO-DIAG-024.md): The useJar and jarPath settings choose the PlantUML engine
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-085](SwRS-MDOKFSTUDIO-DIAG-085.md): Without a JAR the plantuml command is run
+  - [SwRS-MDOKFSTUDIO-DIAG-086](SwRS-MDOKFSTUDIO-DIAG-086.md): The JAR pipeline takes the SVG from the process output
+  - [SwRS-MDOKFSTUDIO-DIAG-087](SwRS-MDOKFSTUDIO-DIAG-087.md): jarPath is read as a trimmed string
+  - [SwRS-MDOKFSTUDIO-DIAG-088](SwRS-MDOKFSTUDIO-DIAG-088.md): A relative jarPath is resolved from the workspace folder
+  - [SwRS-MDOKFSTUDIO-DIAG-104](SwRS-MDOKFSTUDIO-DIAG-104.md): The JAR pipeline starts one process per diagram
+  - [SwRS-MDOKFSTUDIO-DIAG-120](SwRS-MDOKFSTUDIO-DIAG-120.md): The JAR pipeline feeds the text on stdin in the workspace folder
+<!-- okf:links:end -->

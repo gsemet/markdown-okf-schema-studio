@@ -12,7 +12,8 @@ description: When a document holds `$...$`, `$$...$$`, the `{math}` role or
   own box.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -145,3 +146,18 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 - Method: test/core/render/contentCaches.test.ts (a formula and a rejected formula run KaTeX once across two renders)
 - Criteria: Typesetting runs on the host-rendered page and makes no external request; failure is local to the formula; trust is off and the bounds maxExpand 1000 and maxSize 100 are set; typesetting is idempotent; overflow is local.
 - Method: test/build/bundleSplit.test.ts (KaTeX is outside extension.js and in lazy/katex.js; the split bundle typesets an equation)
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-006](../../strs/myst/StRS-MDOKFSTUDIO-MYST-006.md): Maths is typeset offline and bad formulas stay readable
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-025](SwRS-MDOKFSTUDIO-MYST-025.md): Maths typesets offline without inline styles
+  - [SwRS-MDOKFSTUDIO-MYST-026](SwRS-MDOKFSTUDIO-MYST-026.md): Unparsable formulas stay readable
+  - [SwRS-MDOKFSTUDIO-MYST-027](SwRS-MDOKFSTUDIO-MYST-027.md): Maths cannot run active content
+  - [SwRS-MDOKFSTUDIO-MYST-028](SwRS-MDOKFSTUDIO-MYST-028.md): Sphinx-style math delimiters are typeset
+  - [SwRS-MDOKFSTUDIO-MYST-029](SwRS-MDOKFSTUDIO-MYST-029.md): Long display equations scroll inside their box
+<!-- okf:links:end -->

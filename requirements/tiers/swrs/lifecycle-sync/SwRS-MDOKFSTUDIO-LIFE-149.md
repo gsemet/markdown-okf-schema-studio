@@ -9,7 +9,8 @@ description: While the Studio runs, the extension SHALL open its side preview
   the built-in Markdown preview as they were.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -60,3 +61,12 @@ While the Studio runs, the extension SHALL open its side preview beside an open 
 
 - Method: test/integration/stockCoexistence.test.ts (both open, stock settings snapshot by snapshotStockSettings before and after, native diff). The Studio settings scenario is untested; it is checked by reading the code, where no write to a markdown.* key exists.
 - Criteria: the two snapshots are equal, the stock custom editor tab count does not drop and the diff tab opens.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+<!-- okf:links:end -->

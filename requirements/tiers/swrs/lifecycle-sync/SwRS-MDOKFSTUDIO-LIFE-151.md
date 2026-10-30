@@ -9,7 +9,8 @@ description: When a new side preview opens in an editor group that holds only
   preview occupies it.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -81,3 +82,12 @@ When a new side preview opens in an editor group that holds only that panel, the
 - Method: test/host/lifeReq.requirements.test.ts "the recorded column of a locked preview follows its group" (the recorded column scenario).
 - The unlock also restores the focus to the group that had it; a focus held outside the editor area cannot be restored through the API (known limit of the code).
 - Criteria: the opened file's column is the source column and the group count is unchanged; only empty groups without a live preview are unlocked; focusGroupCommand returns undefined for a column below 1, past the group count or past 8; session.lockedColumn equals panel.column after the event for a locked session.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+<!-- okf:links:end -->

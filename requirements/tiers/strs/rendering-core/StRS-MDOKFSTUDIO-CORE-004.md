@@ -8,7 +8,8 @@ description: When a document contains CJK, right-to-left text or long
   column.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -33,3 +34,12 @@ Writers need to read documents in any script and direction without horizontal sc
 ### Rationale and constraints
 
 - Covers Japanese, Chinese, Korean, Hebrew and Arabic text and long URLs.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-CORE-001](StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

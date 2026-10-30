@@ -8,7 +8,8 @@ description: When a table with pending links has been shown, the extension SHALL
   while a block or field editor is open and dropping results that became stale.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a table with pending links has been shown, the extension SHALL resolve the 
 
 - Method: Unit test of the frontmatter controller; visual scenario.
 - Criteria: A new request restarts the timer.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-063](SwRS-MDOKFSTUDIO-FMSCHEMA-063.md): Each link value shows whether it resolves
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a fenced code block is shown, the extension SHALL use the
   the code-block background, with no box of its own on the inner code.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a fenced code block is shown, the extension SHALL use the editor foreground
 
 - Method: Stylesheet unit test and computed-style visual check.
 - Criteria: Computed values equal the stated style on top-level and nested blocks.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-007](SwRS-MDOKFSTUDIO-CODE-007.md): Code blocks use one font scale, the theme colours and scroll long lines
+<!-- okf:links:end -->

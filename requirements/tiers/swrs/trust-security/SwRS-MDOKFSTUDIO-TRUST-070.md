@@ -7,7 +7,8 @@ description: When the extension shows a text to the reader, it SHALL NOT mention
   Sphinx.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,12 @@ When the extension shows a text to the reader, it SHALL NOT mention Sphinx.
 
 - Method: Unit test test/security/userFacingText.test.ts (no user-facing string literal mentions Sphinx; the literal scanner skips comments and finds strings in templates) covers both scenarios. The scan covers three source locations only; since the layout refactor most visible strings live in src/session/features, src/core/preview and src/page, which it does not scan. A search of those folders for string literals that mention Sphinx found none.
 - Criteria: The product path holds no string literal that mentions Sphinx.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-012](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-012.md): Visible text and the icon speak of the product
+<!-- okf:links:end -->

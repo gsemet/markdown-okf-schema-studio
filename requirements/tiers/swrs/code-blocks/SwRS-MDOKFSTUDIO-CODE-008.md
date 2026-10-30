@@ -9,7 +9,8 @@ description: When a `diff` or `patch` block is shown, the extension SHALL mark
   panel with square corners and no border.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -94,3 +95,16 @@ A two-file diff has two deletion and two addition lines; `patch` blocks are mark
 - Method: test/core/preview/previewStyles.test.ts (square borderless panel, forced-colours rules)
 - Method: test/visual/scenarioDefinitions1.ts (diff visual scenarios: marks and panel)
 - Criteria: line classes match the first character and the markers stay in the text; two deletion and two addition lines for a two-file diff; computed radius 0, border none, width equal to the container; the Mark and Highlight rules exist inside the forced-colours media query for both line classes
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-009](SwRS-MDOKFSTUDIO-CODE-009.md): Colour diff file header lines like ordinary lines
+  - [SwRS-MDOKFSTUDIO-CODE-010](SwRS-MDOKFSTUDIO-CODE-010.md): Use system colours for diff lines in forced-colours mode
+  - [SwRS-MDOKFSTUDIO-CODE-036](SwRS-MDOKFSTUDIO-CODE-036.md): Show diff blocks as a full-width square panel
+<!-- okf:links:end -->

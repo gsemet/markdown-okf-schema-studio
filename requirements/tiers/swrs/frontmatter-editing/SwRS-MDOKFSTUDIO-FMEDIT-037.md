@@ -11,7 +11,8 @@ description: 'When a writer adds a field, the extension SHALL insert it as one l
   at the end of the block.'
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -104,3 +105,20 @@ When a writer adds a field, the extension SHALL insert it as one line where its 
 - Method: test/page/runtimeFrontmatterFields.test.ts (scenarios: T25 a pending frontmatter edit opens the editor, reload keeps it and a later render does not reopen it, a pending edit outside edit mode, for a missing row or after an error result is dropped).
 - Method: test/page/runtimeFrontmatterEditor.test.ts (scenarios: T41 a new custom key opens a one-line text editor, plain scalar safety).
 - Criteria: the plain scalar rule holds when the text reads back as the same string.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-038](SwRS-MDOKFSTUDIO-FMEDIT-038.md): Without a schema, an added field follows the row whose menu was used
+  - [SwRS-MDOKFSTUDIO-FMEDIT-040](SwRS-MDOKFSTUDIO-FMEDIT-040.md): The editor of an added field opens by itself once
+  - [SwRS-MDOKFSTUDIO-FMEDIT-041](SwRS-MDOKFSTUDIO-FMEDIT-041.md): A pending new-field editor is dropped when it cannot be used
+  - [SwRS-MDOKFSTUDIO-FMEDIT-042](SwRS-MDOKFSTUDIO-FMEDIT-042.md): A new custom key is saved as a plain scalar when that is safe
+<!-- okf:links:end -->

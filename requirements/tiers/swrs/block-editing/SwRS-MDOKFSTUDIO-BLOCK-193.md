@@ -9,7 +9,8 @@ description: "While the page has an inline editor open, the extension SHALL hold
   of those that waited once the editor closes."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -105,3 +106,16 @@ While the page has an inline editor open, the extension SHALL hold back the rend
 - Method: test/page/runtimeFrontmatterFields.test.ts (properties update waits for the field editor, T30 previewPropertiesTable is deferred while a frontmatter editor is open, then applied on close).
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (a content patch closes an open field editor without a save and drops the waiting properties update).
 - Criteria: shouldDeferReload and shouldDeferResult answer as the unit tests assert; defer replaces the entry of the same key and runs discard; forgetPage clears the editor id and the queue; applyContentPatch calls closeBlockEdit(false); closeFrontmatterEditor is called with the reason content patch. Only the render path is tested; the held-back theme change, PlantUML work, link refresh and include change are supported by the callers of deferWhileEditing (src/session/hostEvents.ts, viewState.ts, frontmatter.ts, plantUml.ts) and are untested. The case of no open block editor on a patch and the case of no open field editor on a patch are untested.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-060](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-060.md): A properties update waits until the field editor closes
+  - [SwRS-MDOKFSTUDIO-FMEDIT-061](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-061.md): A content patch closes the field editor
+<!-- okf:links:end -->

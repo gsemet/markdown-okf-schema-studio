@@ -9,7 +9,8 @@ description: While a writer edits a document, the Studio SHALL show a handle
   the columns as one undoable edit.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -40,3 +41,13 @@ As a writer, I reorder the rows and the columns of a table by dragging a handle,
 - The handle is the same mark as the one of the frontmatter list editor; it sits just left of the table, outside it, centred on its row, and shows in edit mode only.
 - The handle of a column is the same mark, turned; it sits just above the table, outside its cells, centred on its column. Only a pipe table and a `{list-table}` show them.
 - A move is one edit of the document, so one undo reverts it.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-TABLE-002](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-002.md): Table row handle reorders body rows in edit mode
+  - [SwRS-MDOKFSTUDIO-TABLE-007](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-007.md): Table column handle reorders columns in edit mode
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When a reader clicks a comment chip, or presses Enter or Space on a
   are open for the panel.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -90,3 +91,13 @@ The boxes are drawn with an admonition-like shape; v04 asserts the contrast of 4
 - Method: test/core/preview/previewStyles.test.ts (`T15: an open comment is an admonition-like box and showComments off hides the gray chips only` for the three titles and the border radius; `the comment boxes (compose, thread popover, open comment) have square corners`).
 - Method: visual scenarios review-annotations/v02-comment-todo-chips-light-900 to v04-comment-todo-chips-cream-900 (chips and boxes; v04 asserts the contrast of 4.5:1 on the cream page).
 - Criteria: The chip aria-expanded and the box hidden attribute follow the clicks and keys; the saved keys have the form {line}:{number} and the boxes open again from them, only keys of existing comments stay; the layout-change callback runs after every toggle, the position itself is deduced from the callback (keepReadingLine), not run; the stylesheet carries the three titles and a border radius of 0 for the boxes. The TODO box title and the accent colours are style rules of the stylesheet, not asserted by a chip test.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-012](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-012.md): A writer sees HTML comments and TODO notes as chips and toggles them
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+<!-- okf:links:end -->

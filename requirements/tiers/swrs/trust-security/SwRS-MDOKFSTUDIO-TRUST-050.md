@@ -9,7 +9,8 @@ description: When an element carries a data-line attribute that is a positive
   tabindex 0 unless it is naturally focusable.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,12 @@ When an element carries a data-line attribute that is a positive integer, the sa
 
 - Method: Unit tests test/security/html-policy.test.ts (maps rendered source lines to the active preview document; keeps the included-block marker next to the source mapping). The invalid-line case is untested. An end line that is not a positive integer, or is before the line, is replaced by the line.
 - Criteria: The source line is a safe positive integer on every mapped element.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-006](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-006.md): The preview runs no foreign code and unsafe HTML is made inert
+<!-- okf:links:end -->

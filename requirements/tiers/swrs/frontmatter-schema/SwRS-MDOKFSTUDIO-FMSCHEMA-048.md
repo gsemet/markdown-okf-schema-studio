@@ -8,7 +8,8 @@ description: When a field annotated with `x-okf-link` holds a non-string value,
   the extension SHALL mark the field with an E10 error.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a field annotated with `x-okf-link` holds a non-string value, a wikilink no
 
 - Method: Unit test of the link inspection (partial: wikilink parsing has no dedicated assertion).
 - Criteria: A non-string value also gets the validator's own type error when the schema declares string.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-046](SwRS-MDOKFSTUDIO-FMSCHEMA-046.md): x-okf-link annotations declare link fields and their syntax
+<!-- okf:links:end -->

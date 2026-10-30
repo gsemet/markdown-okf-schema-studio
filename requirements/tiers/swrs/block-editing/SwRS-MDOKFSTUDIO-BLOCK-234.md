@@ -11,7 +11,8 @@ description: "When the extension plans or writes back a preview edit, it SHALL t
   of a table and the presence or absence of its final line ending."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -87,3 +88,15 @@ When the extension plans or writes back a preview edit, it SHALL treat LF, CR LF
 - Method: Visual scenarios block-editing/v01 and v02 in test/visual/scenarioDefinitions1.ts (A save restores the trailing line ending of the block: the autosave sends the exact text with its newline); test/page/runtimeBlockEditor.test.ts has no CRLF test and no test opens an inline editor on a CRLF block, so the CR LF and CR rows of that scenario are untested.
 - Method: Unit tests `a row inserted into a CRLF table keeps CRLF line endings` in test/page/modules/markdownTable.test.ts and `round trip preserves the source: crlf` in test/page/modules/markdownTablePreservation.test.ts (A CRLF table keeps its line endings).
 - Criteria: start, end and text answer the same line for the same index; the appended ending is the one detected on the original text; no bare line feed in the output of a CRLF table.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

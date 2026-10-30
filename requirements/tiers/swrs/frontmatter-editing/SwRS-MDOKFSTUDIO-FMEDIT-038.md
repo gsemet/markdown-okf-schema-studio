@@ -8,7 +8,8 @@ description: When a writer adds a field to a document without a schema, the
   of the block.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a writer adds a field to a document without a schema, the extension SHALL i
 
 - Method: Unit test on the frontmatter patch (test/core/frontmatter/okfFrontmatter.test.ts).
 - Criteria: Test frontmatter add with afterField reports whether the field was placed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-037](SwRS-MDOKFSTUDIO-FMEDIT-037.md): An added field is one inserted line where its row shows, and its editor opens
+<!-- okf:links:end -->

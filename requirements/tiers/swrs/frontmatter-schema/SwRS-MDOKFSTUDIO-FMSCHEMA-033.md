@@ -9,7 +9,8 @@ description: When a schema table row is built, the extension SHALL display enum
   and unknown otherwise.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When a schema table row is built, the extension SHALL display enum for enum or c
 - Method: Unit test of the field icon type.
 - Criteria: The format test comes before the type test, so a string field with format date shows date. Without a schema the type follows the value: boolean, number or list, else unknown.
 - Known issue: fields declared with type object are labelled (unknown).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-029](SwRS-MDOKFSTUDIO-FMSCHEMA-029.md): A schema table lists the declared fields with their type
+<!-- okf:links:end -->

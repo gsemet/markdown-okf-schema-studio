@@ -7,7 +7,8 @@ description: When a reader presses the Width button, the Studio SHALL cycle
   between Margin, Auto and Full width and remember the choice for the workspace.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,12 @@ As a reader, I switch between a narrow reading column, a column that lets wide c
 - The order is Margin, Auto, Full width, then Margin again; the icon, label and tooltip read "Width: Margin", "Width: Auto" and "Width: Full width".
 - The choice is kept per workspace: at start the saved page state wins over the stored workspace preference, which wins over Margin; an invalid value is ignored and Margin applies (`VIEW_PREFERENCE_VALIDATORS` in `src/core/protocol/pageToHost.ts`).
 - Known issue: the code and docs/user/toolbar.md put the button on row 4, while the file header of `widthMode.ts` and an older bullet of the Unreleased change-log entry say row 2.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+<!-- okf:links:end -->

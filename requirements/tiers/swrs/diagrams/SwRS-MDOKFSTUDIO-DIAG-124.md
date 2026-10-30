@@ -9,7 +9,8 @@ description: When the rendered content contains a chart figure, the extension
   policy keeps no unsafe-eval and no network access.
 project: MDOKFSTUDIO
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -60,3 +61,12 @@ When the rendered content contains a chart figure, the extension SHALL add the c
 - Method: test/page/chartCsp.test.ts (headless Chromium, the real page builder and policy: two charts drawn, no violation, the control that the policy refuses code from strings)
 - Method: test/page/modules/vegaChart.test.ts (charts with expressions draw with eval and new Function refused)
 - Criteria: The chart runtime loads only on a page with a chart, and charts draw under a policy without eval and without network.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+<!-- okf:links:end -->

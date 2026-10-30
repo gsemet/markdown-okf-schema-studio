@@ -8,7 +8,8 @@ description: When an image is written inside a line of text, the extension SHALL
   paragraph stays a centred figure paragraph.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When an image is written inside a line of text, the extension SHALL render it in
 
 - Method: Visual scenario rendering-core/v23-inline-image-in-text-light-900 in test/visual/scenarioDefinitions2.ts
 - Criteria: Both placements load, also in edit mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-008](SwRS-MDOKFSTUDIO-CORE-008.md): Images fit the column, sit on the line and survive a missing file
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a writer pastes prompt-style context tags, the Studio SHALL
   HTML.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -33,3 +34,12 @@ As a writer, I want pasted context tags to stay readable and inert so that I nev
 ### Rationale and constraints
 
 - Pasted text is shown as a panel, never executed; unknown tags stay visible as text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-MYST-001](StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+<!-- okf:links:end -->

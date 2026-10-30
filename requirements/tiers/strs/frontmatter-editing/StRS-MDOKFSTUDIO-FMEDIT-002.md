@@ -8,7 +8,8 @@ description: 'When a writer edits a metadata value, the Studio SHALL offer a con
   time inputs, a checkbox, an item list or a YAML text box.'
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -38,3 +39,12 @@ As a writer, I change a metadata value with a control suited to its type so that
 - A nullable field offers Set to null; the schema is not applied to the controls, so out-of-range values are caught only at save time.
 - Known issue: the schema minimum, maximum and pattern are not applied to the number and text inputs.
 - Known issue: without a schema a boolean is edited as text, and date-time fields are edited as plain text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+<!-- okf:links:end -->

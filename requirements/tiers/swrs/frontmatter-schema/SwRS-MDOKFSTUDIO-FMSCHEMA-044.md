@@ -8,7 +8,8 @@ description: When a refreshed properties table arrives while a frontmatter field
   after the editor closes.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a refreshed properties table arrives while a frontmatter field editor is op
 
 - Method: Unit test of the page host handlers.
 - Criteria: Only the latest deferred markup is kept.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-043](SwRS-MDOKFSTUDIO-FMSCHEMA-043.md): The table is refreshed in place after edits, after the field editor closes
+<!-- okf:links:end -->

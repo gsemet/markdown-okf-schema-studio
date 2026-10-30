@@ -8,7 +8,8 @@ description: When the host is processing a checkbox toggle, the extension SHALL
   arrives.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the host is processing a checkbox toggle, the extension SHALL mark the chec
 
 - Method: Page unit test.
 - Criteria: Exactly one message per pending toggle.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-021](SwRS-MDOKFSTUDIO-GFM-021.md): Clicking a checkbox toggles one source character
+<!-- okf:links:end -->

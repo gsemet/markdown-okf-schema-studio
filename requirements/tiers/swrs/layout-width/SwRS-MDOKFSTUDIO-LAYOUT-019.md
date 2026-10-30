@@ -8,7 +8,8 @@ description: When more than 200 clearance updates occur within one second, the
   change in one trailing update.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When more than 200 clearance updates occur within one second, the extension SHAL
 
 - Method: Unit test a change inside a burst of skipped updates is measured by one trailing update.
 - Criteria: Exactly one timer is pending after the burst and the final measurement is published after it fires.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-018](SwRS-MDOKFSTUDIO-LAYOUT-018.md): The clearance is measured again after layout events, in bounded bursts
+<!-- okf:links:end -->

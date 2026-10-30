@@ -7,7 +7,8 @@ description: When a document contains a URL with 50 000 closing parentheses or
   100 000 characters, the extension SHALL render it in under one second.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a document contains a URL with 50 000 closing parentheses or 100 000 charac
 
 - Method: Unit test with a timing bound.
 - Criteria: Both inputs render in under 1 s.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-001](SwRS-MDOKFSTUDIO-GFM-001.md): Bare URLs become safe links
+<!-- okf:links:end -->

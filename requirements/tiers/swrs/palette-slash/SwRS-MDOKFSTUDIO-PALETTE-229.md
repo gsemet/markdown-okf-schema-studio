@@ -9,7 +9,8 @@ description: When the clipboard HTML of a paste is converted, the extension
   only the text of a link or image whose address is not safe.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -72,3 +73,12 @@ When the clipboard HTML of a paste is converted, the extension SHALL drop script
 ### Verification notes
 - Method: test/core/paste/htmlToMarkdown.test.ts, data-driven unit test T1 htmlToMarkdown, rows "web page: link, inline code, image as link, blockquote, script and onclick dropped" (script, style and onclick dropped, the href read and the title dropped) and "unsafe link and data image keep only their text, hidden content is dropped" (javascript link, data image, display none); no row checks the hidden attribute, visibility hidden, mso-hide all, the dropped element kinds other than script and style, or the control character.
 - Criteria: The hidden rules are the hidden attribute and the styles display none, visibility hidden and mso-hide all. The attribute list is the one read by htmlToMarkdown; no other attribute reaches the output. A relative path without a scheme colon before its first slash is accepted.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
+<!-- okf:links:end -->

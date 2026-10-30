@@ -8,7 +8,8 @@ description: When a paragraph holds only an image, an `{image}` directive or a
   its source lines.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a paragraph holds only an image, an `{image}` directive or a lone raw `<img
 
 - Method: Unit test "a lone raw <img> block is a mapped block with a source line" in test/core/render/mystFeatures.test.ts
 - Criteria: Image-only blocks carry source lines; a raw `<img>` without `src` is not rendered.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-003](SwRS-MDOKFSTUDIO-CORE-003.md): Every rendered block maps to its absolute source lines
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When a document re-renders, its preview closes or its document
   changes, the extension SHALL replace or remove its Problems entries.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a document re-renders, its preview closes or its document changes, the exte
 
 - Method: Integration suite run() in test/integration/mystDiagnostics.test.ts
 - Criteria: No unit test of the controller.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-078](SwRS-MDOKFSTUDIO-MYST-078.md): Extension warnings appear in the Problems view and follow conf.py
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When the extension writes a status, it SHALL write an aside with
   and never as markup.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,13 @@ When the extension writes a status, it SHALL write an aside with role status and
 - Method: test/page/runtimeContentPatch.test.ts "T34: the patch rebuilds the status region from plain text" (status with diagnostics, markup in a message, region replaced), "T34: a page loaded without a status region gets one as the first child of the body" and "CR 050: a patch keeps the code of each status line and refuses a malformed one" (code attribute); the host markup escaping (escapeHtml in statusMarkup, the quote in a code) has no direct test.
 - Method: test/page/pageMessages.test.ts (host message previewPendingOverlay: pending notice).
 - Criteria: the aside has the two ARIA attributes and the three kinds of child; no element is created from message text; the page html matches the body marker, the token definitions and the nonce; document.body.firstChild is the new aside.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
+<!-- okf:links:end -->

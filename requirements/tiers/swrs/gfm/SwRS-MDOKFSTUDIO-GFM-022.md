@@ -7,7 +7,8 @@ description: When a checkbox toggle is applied, the extension SHALL apply it as
   a single undo step of the source document.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a checkbox toggle is applied, the extension SHALL apply it as a single undo
 
 - Method: Integration suite run() in test/integration/checkboxToggle.test.ts (real window). Untested: the no-editor path.
 - Criteria: One undo restores the source in both cases.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

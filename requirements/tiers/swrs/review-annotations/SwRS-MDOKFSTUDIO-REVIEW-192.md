@@ -9,7 +9,8 @@ description: When the host applies a delete of an inline thread, the extension
   ends the file, and change nothing else.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -70,3 +71,19 @@ When the host applies a delete of an inline thread, the extension SHALL remove t
 - Method: test/core/edits/sourceEdits.test.ts (unit tests `deleting a thread removes whole lines and one of two surrounding blank lines`, `deleting a thread at the end of the file removes the line break before it`, `thread lines are read only when they are exactly one thread comment`: scenarios blank neighbours, position of the thread in the file, lines that are not exactly one thread).
 - Method: test/integration/inlineThread.test.ts (delete between paragraphs; lines that are not exactly the thread change nothing: scenarios blank neighbours, lines that are not exactly one thread).
 - Criteria: The result text equals the document without the thread and one blank line; the document text is identical after a refused request.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-015](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-015.md): A writer keeps a discussion in the Markdown source and answers it from the preview
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

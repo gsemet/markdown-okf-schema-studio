@@ -9,7 +9,8 @@ description: When a right-aligned Description toggle of a leading properties
   by the width the toolbar covers.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,14 @@ When a right-aligned Description toggle of a leading properties table sits under
 
 - Method: Unit test P3 a Description toggle under the toolbar makes the table give up the toolbar's width; the narrow fallback is verified by inspection of firstClearance.ts.
 - Criteria: Inset 292 px in the tested layout, and 0 with a positive clearance below 320 px of remaining width.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-011](SwRS-MDOKFSTUDIO-LAYOUT-011.md): A control under the floating toolbar is moved or narrowed out of its way
+<!-- okf:links:end -->

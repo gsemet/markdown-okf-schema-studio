@@ -14,7 +14,8 @@ description: When the text of a document changes, saved or not, the extension
   same document, revision and render options SHALL share one render.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -125,3 +126,15 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 - Method: the source gone scenario is untested.
 - Method: test/session/previewManager.test.ts "two previews of one document and revision share one render, each with its own request id" and "a hidden panel does not render until it is shown, then renders once" (renders counted through the render override: 2 before the change for two previews and 2 for a hidden panel, 1 and 0 after); test/session/sharedRenders.test.ts (join, release with the last copy, new revision, invalidation).
 - Criteria: the HTML of the ready render contains the typed marker; debounceMs is 40 in the session's queue (until a render time is known) and a burst yields one build; the final page holds only the newest marker and the request ids grow; both hashes equal their values before the test; isUnchangedSave is true only for the active document at the staged revision.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

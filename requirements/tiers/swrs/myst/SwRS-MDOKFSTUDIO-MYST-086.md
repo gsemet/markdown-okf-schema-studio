@@ -8,7 +8,8 @@ description: When the workspace is untrusted, the extension SHALL not publish
   listing the warnings in its tooltip, with the close button kept.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the workspace is untrusted, the extension SHALL not publish warnings to the
 
 - Method: Unit test "CR 050: in Restricted Mode the banner has no Problems button and lists the warnings in its tooltip" in test/page/modules/warningBanner.test.ts; Integration suite run() in test/integration/mystDiagnostics.test.ts
 - Criteria: Standalone variant has no assertion.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-081](SwRS-MDOKFSTUDIO-MYST-081.md): A closable banner announces conf.py warnings
+<!-- okf:links:end -->

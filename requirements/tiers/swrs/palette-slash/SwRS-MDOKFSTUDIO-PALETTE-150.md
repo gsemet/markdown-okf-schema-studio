@@ -9,7 +9,8 @@ description: "When the host answers a path for the Figure button outside a figur
   caption."
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -101,3 +102,15 @@ When the host answers a path for the Figure button outside a figure, the extensi
 - Method: test/page/runtimePaletteActions.test.ts (CR117: inserting a figure from a picked image opens the figure form on its caption; Escape keeps the inserted figure; checks the form-opens-after-the-pick scenario)
 - Method: test/integration/realWindowGaps.ts (real window, image dialog stubbed: the form opens on the caption after the pick, a caption typed and applied is saved)
 - Criteria: The path is written as picked, with no angle brackets; the outer fence is never shorter than three colons.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-039](SwRS-MDOKFSTUDIO-PALETTE-039.md): A palette action edits in one undo step or leaves the text unchanged and says why
+<!-- okf:links:end -->

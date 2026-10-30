@@ -9,7 +9,8 @@ description: While a section is folded, the extension SHALL leave the blocks of
   unfolded.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,12 @@ While a section is folded, the extension SHALL leave the blocks of that section 
 
 - Method: test/page/mappedBlocks.test.ts (selectableBlocks and bodyBlockAtLine leave out a block marked data-okf-folded; topLevelMappedBlocks keeps it).
 - Criteria: no block with data-okf-folded is returned by selectableBlocks or bodyBlockAtLine.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-002](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-002.md): The reader folds and unfolds the sections of the document
+<!-- okf:links:end -->

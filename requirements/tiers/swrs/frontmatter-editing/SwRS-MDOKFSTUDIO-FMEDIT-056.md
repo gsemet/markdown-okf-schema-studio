@@ -8,7 +8,8 @@ description: When a writer presses the undo or redo keys in a field editor
   the document.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a writer presses the undo or redo keys in a field editor control, the exten
 
 - Method: Unit test undo and redo keys in a field editor stop at the control, in the value and the key editor in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: keepUndoInControl calls stopPropagation for Z and Y with Cmd or Ctrl.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-019](SwRS-MDOKFSTUDIO-FMEDIT-019.md): A field editor saves a changed value and Escape cancels it
+<!-- okf:links:end -->

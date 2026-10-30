@@ -10,7 +10,8 @@ description: When the repository is checked, the packaging SHALL provide a
   of the VSIX.
 project: MDOKFSTUDIO
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,12 @@ When the repository is checked, the packaging SHALL provide a Claude Code plugin
 
 - Method: test/build/test_plugin_manifests.py validates the manifests against the pinned schema in test/fixtures/agent-plugins/; `claude plugin validate . --strict` checks the Claude Code plugin and marketplace.
 - Criteria: The schema validates, the names and paths agree, one skill tree exists, and the VSIX excludes the manifests.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

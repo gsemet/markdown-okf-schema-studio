@@ -8,7 +8,8 @@ description: When a Mermaid diagram has invalid syntax, the Studio SHALL show
   readable.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -37,3 +38,12 @@ As a writer, I see at once that my Mermaid diagram does not parse and why, witho
 - The message reads "Unable to render Mermaid diagram. Its source remains available below." and sits above the diagram; a collapsed "Show the parser error" section holds the parser's reason as plain text, never HTML; the message uses the theme error colour.
 - However many times the theme changes, the invalid diagram keeps exactly one message and one details section; the earlier one is replaced.
 - Known issue: a failed Mermaid diagram posts no diagnostic to the status line or the Problems list, because the drawing happens in the page.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-DIAG-001](StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+<!-- okf:links:end -->

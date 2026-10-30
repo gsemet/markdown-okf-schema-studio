@@ -10,7 +10,8 @@ description: When a Vega-Lite or Vega chart names a relative data url, the
   message.
 project: MDOKFSTUDIO
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -68,3 +69,12 @@ When a Vega-Lite or Vega chart names a relative data url, the extension SHALL re
 - Method: test/page/modules/vegaChart.test.ts (a chart draws the rows of a CSV file with new Function refused, the loader serves only what it was given)
 - Method: test/page/chartCsp.test.ts (the Vega chart of a real page draws data/series.csv)
 - Criteria: A relative data file inside the roots is drawn; every remote url and every refused file shows a message and loads nothing.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+<!-- okf:links:end -->

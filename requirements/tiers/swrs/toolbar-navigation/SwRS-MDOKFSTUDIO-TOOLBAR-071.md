@@ -7,7 +7,8 @@ description: 'When the reader follows a link whose request does not start with #
   an editor is open, the extension SHALL post the final save and then the link request.'
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When the reader follows a link whose request does not start with # while an edit
 
 - Method: Unit test CR 025: following a link right after typing posts the final save before the link; the no-handler case is the default branch and untested.
 - Criteria: The save is posted before the link.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+<!-- okf:links:end -->

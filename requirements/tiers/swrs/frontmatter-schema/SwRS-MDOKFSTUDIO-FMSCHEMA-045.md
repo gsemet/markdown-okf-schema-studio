@@ -9,7 +9,8 @@ description: When any `markdownOkfSchemaStudio.frontmatter.*` setting changes,
   document.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When any `markdownOkfSchemaStudio.frontmatter.*` setting changes, the extension 
 - Method: Unit test `a frontmatter setting change reads the settings again and analyses the table of the active document only` in `test/session/diagReq.settings.requirements.test.ts`.
 - Criteria: The change event is filtered by section; the preview and plantuml sections also trigger the same refresh. Other previews are re-rendered from their last good render with the new settings, not re-analysed.
 - Known issue: a preview whose document is not the active editor's document is not re-analysed by this path; it only re-renders from its last good render.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-004](SwRS-MDOKFSTUDIO-FMSCHEMA-004.md): The propertiesTable setting hides the table while the body renders
+<!-- okf:links:end -->

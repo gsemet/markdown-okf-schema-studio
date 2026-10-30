@@ -7,7 +7,8 @@ description: When a document contains raw HTML outside the supported subset, the
   extension SHALL omit it from the rendering.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a document contains raw HTML outside the supported subset, the extension SH
 
 - Method: Unit test "a div block and an inline marquee element are absent from the HTML, while kbd stays" in test/core/render/renderReq.gfm.requirements.test.ts.
 - Criteria: Unsupported tags are absent.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-029](SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
+<!-- okf:links:end -->

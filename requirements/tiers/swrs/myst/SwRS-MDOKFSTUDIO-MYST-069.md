@@ -8,7 +8,8 @@ description: When a conf.py writes `extensions` or `myst_enable_extensions` as
   quoting, prefix, comment, continuation or line ending.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a conf.py writes `extensions` or `myst_enable_extensions` as list or tuple 
 
 - Method: Unit test "comments, tuples, single quotes, trailing commas and string joins are understood" in test/core/myst/confParser.test.ts
 - Criteria: Literal forms are parsed; CRLF and prefixes have no dedicated assertion today.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-066](SwRS-MDOKFSTUDIO-MYST-066.md): The governing conf.py is found and read as text
+<!-- okf:links:end -->

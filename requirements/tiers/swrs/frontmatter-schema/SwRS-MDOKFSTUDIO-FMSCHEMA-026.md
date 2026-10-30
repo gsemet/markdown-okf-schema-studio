@@ -9,7 +9,8 @@ description: 'When the validator cannot compile a schema, the extension SHALL sh
   in schema order.'
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the validator cannot compile a schema, the extension SHALL show a red alert
 
 - Method: Unit test of the analysis; visual scenario (dark and light, 900 px and 460 px).
 - Criteria: The same error is reported at every analysis; the declared fields keep their schema order and documentation.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-023](SwRS-MDOKFSTUDIO-FMSCHEMA-023.md): Schemas in YAML, JSON or JSON5 with relative references compile or report a row
+<!-- okf:links:end -->

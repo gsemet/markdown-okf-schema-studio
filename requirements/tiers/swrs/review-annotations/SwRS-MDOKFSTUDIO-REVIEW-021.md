@@ -9,7 +9,8 @@ description: When a reader clicks, or presses Enter or Space on, a thread
   stays inside the pane.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -98,3 +99,15 @@ When a reader clicks, or presses Enter or Space on, a thread highlight, a thread
 - Method: test/page/modules/reviewReq.requirements.test.ts (Enter and Space on a focused highlight or badge toggle its popover and another key does nothing; the popover is at most 360 px wide and stays 8 px inside the pane edges).
 - Untested: the toggle and replacement as such, the absence of the Resolved note for an open thread, the Thread-no-longer-posted column (popover, reply draft), the question shown for another thread, and the click outside a question.
 - Criteria: At most one popover element exists and it names the clicked thread. Each entry holds an author, a date and a body set with textContent. The note and the resolved attribute exist exactly for resolved threads. The keydown handler toggles the thread for Enter and Space only, and stops the event. Left is clamped between 8 px and the window width minus the popover width minus 8 px; width is min(360, max(200, window width - 16)); the vertical position is not specified. stopImmediatePropagation is called only when a popover was open. After apply the popover element names the same thread id, the new reply box value equals the old one, and confirming equals the open thread id; confirming is undefined after close().
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

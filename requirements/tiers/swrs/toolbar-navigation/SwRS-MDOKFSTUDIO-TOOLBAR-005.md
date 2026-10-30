@@ -10,7 +10,8 @@ description: When the reader presses the Fold button of the toolbar, or runs the
   in the preview that has the focus.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: SwRS
 derives_from:
@@ -69,3 +70,12 @@ When the reader presses the Fold button of the toolbar, or runs the command Fold
 - Method: test/core/preview/previewStyles.test.ts (the Fold button of the toolbar).
 - Method: test/visual/capture_layout_checks.py (check_heading_fold: the Fold button folds every section with content in Chromium, shows aria-pressed true, and a second press unfolds them).
 - Criteria: after fold all each heading with a section carries data-okf-fold="closed"; after unfold all no block carries data-okf-folded.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-002](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-002.md): The reader folds and unfolds the sections of the document
+<!-- okf:links:end -->

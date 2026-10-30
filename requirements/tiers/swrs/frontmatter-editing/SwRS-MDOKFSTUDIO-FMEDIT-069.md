@@ -7,7 +7,8 @@ description: When the host refuses a flush save, the extension SHALL show a
   warning that the typed text was not saved.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the host refuses a flush save, the extension SHALL show a warning that the 
 
 - Method: Unit test on flushRefusalMessage (test/core/preview/flushWait.test.ts) and inspection of postEditError.
 - Criteria: The page is about to be replaced, so only a host warning is visible.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-067](SwRS-MDOKFSTUDIO-FMEDIT-067.md): A navigation saves the open field editor as an unchecked flush
+<!-- okf:links:end -->

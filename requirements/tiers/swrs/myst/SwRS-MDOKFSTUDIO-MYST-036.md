@@ -10,7 +10,8 @@ description: "When a document holds a `(name)=` label, the extension SHALL show 
   absolute source line of its label."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -64,3 +65,14 @@ When a document holds a `(name)=` label, the extension SHALL show a faint anchor
 - Method: test/core/render/mystPaletteRendering.test.ts ("a label before a paragraph renders an anchor icon span that is the link target": scenarios 1, 3 and 4)
 - Method: visual scenario `figure-anchors-${theme}-${mode ?? "theme"}` in test/visual/scenarioDefinitions2.ts (scenarios 1 and 2: icon in the margin, zero-height row)
 - Criteria: Label characters are letters, digits and _ . : -; consecutive labels each get an icon. The icon has role img and aria-label Anchor: name.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-037](SwRS-MDOKFSTUDIO-MYST-037.md): The anchor icon is not a mapped block and carries its source line
+<!-- okf:links:end -->

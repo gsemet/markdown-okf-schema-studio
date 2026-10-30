@@ -8,7 +8,8 @@ description: When the preview shows an editor, a bar, a menu, a closed editor or
   scenarios and apply no preview motion when the user prefers reduced motion.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,19 @@ When the preview shows an editor, a bar, a menu, a closed editor or a theme chan
 - Method: test/core/preview/previewStyles.test.ts, tests "CR 046: prefers-reduced-motion: reduce turns off every animation and transition of the motion layer" (reduced motion; the palette, popover and slash menu selectors are listed in the reduced-motion rule) and "CR 046: the motion layer is short and never animates layout or the table bar's transform" (palette, popovers and slash menu); the 3 px offset is not asserted
 - Method: test/page/diagReq.themeZoom.requirements.test.ts, test "the page root records whether the system prefers reduced motion" (reduced-motion attribute)
 - Criteria: Motion styles are disabled under the preference; the motion attribute is removed by a content patch and set again by input; one colour transition per switch; the fade class is applied on close; the palette rules are in propertiesStyles.ts under html[data-sphinx-preview-motion=on] with a starting-style of opacity 0 and, for the popovers and the slash menu, translate 0 -3px.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-051](SwRS-MDOKFSTUDIO-CORE-051.md): Enable soft appearance after the first input
+  - [SwRS-MDOKFSTUDIO-CORE-052](SwRS-MDOKFSTUDIO-CORE-052.md): Fade a closed editor back to its block
+  - [SwRS-MDOKFSTUDIO-CORE-053](SwRS-MDOKFSTUDIO-CORE-053.md): Transition colours once on theme change
+  - [SwRS-MDOKFSTUDIO-CORE-068](SwRS-MDOKFSTUDIO-CORE-068.md): Disable soft appearance after a content patch
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When the reader changes the width mode, the extension SHALL keep
   preference.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,14 @@ When the reader changes the width mode, the extension SHALL keep the choice in t
 
 - Method: Unit tests T10 the width button cycles margin, auto, full width and posts widthMode, and the protocol validator and view preference normaliser.
 - Criteria: Accepted values are exactly margin, auto and full.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+<!-- okf:links:end -->

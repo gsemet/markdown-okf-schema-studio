@@ -9,7 +9,8 @@ description: When a writer saves a value, the extension SHALL change only the
   that does not parse or whose keys are not exactly the expected ones.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -86,3 +87,21 @@ When a writer saves a value, the extension SHALL change only the lines of that f
 - Method: test/core/frontmatter/frontmatterFence.test.ts (scenarios: fence fixtures for a value ending in three dots, four dots, three dashes and a dot-dot-dot closing fence; patch guard refuses patches that lose, duplicate or corrupt a key).
 - Method: test/core/frontmatter/okfFrontmatter.test.ts and test/core/frontmatter/okfFrontmatter.test.ts (scenarios: value patch rewrites only the edited field line, value patch for an anchored value still writes correct data, a nested map written as an object yields the same data).
 - Criteria: every edit is compared with the original text, so any byte outside the lines of the edited field must be identical, except for the whole-block rewrite of an anchored or aliased value, which must keep the data.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-039](SwRS-MDOKFSTUDIO-FMEDIT-039.md): An added field is a single inserted line in the file's line endings
+  - [SwRS-MDOKFSTUDIO-FMEDIT-044](SwRS-MDOKFSTUDIO-FMEDIT-044.md): Anchored or aliased values fall back to a whole-block rewrite
+  - [SwRS-MDOKFSTUDIO-FMEDIT-045](SwRS-MDOKFSTUDIO-FMEDIT-045.md): A frontmatter edit that loses or corrupts a key is refused
+  - [SwRS-MDOKFSTUDIO-FMEDIT-046](SwRS-MDOKFSTUDIO-FMEDIT-046.md): Values ending in three dots or dashes stay inside the block
+<!-- okf:links:end -->

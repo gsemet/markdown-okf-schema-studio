@@ -9,7 +9,8 @@ description: When the properties table is displayed, the extension SHALL draw it
   title without background.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -53,3 +54,14 @@ When the properties table is displayed, the extension SHALL draw it without an o
 - Method: Visual scenarios v01 and v05 and their style checks.
 - Criteria: Computed styles of [data-okf-properties] and its cells match the lean frame in every theme.
 - Criteria: The contrast thresholds (title badge 2.5:1, description text 2.2:1, value text 4:1) are those checked by the visual scenarios in `capture.py`.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-006](SwRS-MDOKFSTUDIO-FMSCHEMA-006.md): Property values read like YAML in a lean table
+<!-- okf:links:end -->

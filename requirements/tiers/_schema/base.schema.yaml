@@ -35,11 +35,19 @@ properties:
     minLength: 1
     description: Domain used for organization, ID allocation, and evidence
       scanning.
-  lifecycle:
+  req_lifecycle:
     type: string
     enum: [draft, proposed, approved, deprecated, superseded]
+    x-okf-status-projection:
+      draft: draft
+      proposed: stable
+      approved: stable
+      deprecated: deprecated
+      superseded: deprecated
     description: |
-      Explicit, human-controlled lifecycle state.
+      Explicit, human-controlled okfreq lifecycle state. Named req_lifecycle so it
+      never competes with the OKF status field, generated from it through
+      x-okf-status-projection.
       - draft: a requirement proposal that is not implemented yet. A project whose
         requirements are delivered with the code they describe should not keep drafts
         on its default branch.
@@ -47,10 +55,30 @@ properties:
         usual plan and review, without an explicit owner agreement.
       - approved: frozen by its owner. Any significant change (normative statement,
         scenarios, criteria, deprecation or supersession) needs the owner's explicit,
-        justified agreement, recorded in approved_by and approved_on. Allowed only where
+        justified agreement, recorded in approved_by and approved_at. Allowed only where
         approval_lock is true for the requirement's tier and scope.
       - deprecated: no longer in force and not replaced; kept for history.
       - superseded: replaced by the requirements listed in superseded_by; kept for history.
+  status:
+    type: string
+    enum: [draft, stable, deprecated]
+    description: >-
+      Generated OKF v0.2 lifecycle (section 5.4), mapped from req_lifecycle by its
+      x-okf-status-projection.
+  verified:
+    type: object
+    additionalProperties: false
+    required: [by, at]
+    properties:
+      by:
+        type: string
+        pattern: '^human:'
+      at:
+        type: string
+        format: date-time
+    description: >-
+      Generated OKF v0.2 verification event (section 5.2) of the owner approval:
+      human:<approved_by> at approved_at.
   owner_email:
     type: string
     format: email
@@ -68,10 +96,11 @@ properties:
     description: Email of the owner who approved the current content. Required when
       the lifecycle is approved; set only on the owner's explicit agreement, never by
       an agent's own decision.
-  approved_on:
+  approved_at:
     type: string
-    format: date
-    description: ISO date (YYYY-MM-DD) of the owner's approval of the current content.
+    format: date-time
+    description: ISO 8601 datetime with an explicit UTC offset (for example
+      2026-10-28T09:00:00+01:00) of the owner's approval of the current content.
       Required when the lifecycle is approved; updated with every agreed change.
   origin:
     type: string
@@ -90,6 +119,7 @@ properties:
         id_marker: id
         tooltip_shows_fields: [description]
         preview_shows_fields: [description]
+        link-projection: Derives from
     description: Authored parent IDs; file navigation uses matching Markdown
       filename stems.
   derived_by:
@@ -102,6 +132,7 @@ properties:
         id_marker: id
         tooltip_shows_fields: [description]
         preview_shows_fields: [description]
+        link-projection: Derived by
     description: Generated reverse IDs; file navigation uses matching Markdown
       filename stems.
   depends_on:
@@ -112,6 +143,7 @@ properties:
         resolution: filename-stem
         syntax: plain
         id_marker: id
+        link-projection: Depends on
     description: Authored dependency IDs; file navigation uses matching Markdown
       filename stems.
   superseded_by:
@@ -124,6 +156,7 @@ properties:
         id_marker: id
         tooltip_shows_fields: [description]
         preview_shows_fields: [description]
+        link-projection: Superseded by
     description: Requirement IDs that replace this one; required when the lifecycle
       is superseded and forbidden otherwise.
   supersedes:
@@ -136,6 +169,7 @@ properties:
         id_marker: id
         tooltip_shows_fields: [description]
         preview_shows_fields: [description]
+        link-projection: Supersedes
     description: Generated IDs of the requirements this one replaces.
   relates_to:
     type: array
@@ -147,6 +181,7 @@ properties:
         id_marker: id
         tooltip_shows_fields: [description]
         preview_shows_fields: [description]
+        link-projection: Relates to
     description: Requirement IDs this one is laterally related to; carries no
       derivation, supersession or coverage meaning.
   external_id:
@@ -185,7 +220,7 @@ properties:
   owner:
     type: string
     description: Project team responsible for maintaining the contract.
-required: [type, id, uuid, title, description, project, scope, lifecycle, origin,
+required: [type, id, uuid, title, description, project, scope, req_lifecycle, origin,
   tier]
 examples:
 - type: StRS
@@ -195,6 +230,7 @@ examples:
   description: The tool SHALL validate requirement frontmatter.
   project: markdown-okf-schema-studio
   scope: core
-  lifecycle: proposed
+  req_lifecycle: proposed
+  status: stable
   origin: native
   tier: StRS

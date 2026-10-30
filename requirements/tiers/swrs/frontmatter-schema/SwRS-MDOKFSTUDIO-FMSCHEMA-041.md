@@ -8,7 +8,8 @@ description: 'When a schema root declares `additionalProperties: false`, the ext
   properties", whatever the strict setting.'
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a schema root declares `additionalProperties: false`, the extension SHALL r
 - Method: Unit test of the analysis; integration test; unit tests "T25 ..." in the okfFrontmatter and propertiesTable tests for the section flag.
 - Criteria: The strict setting has no effect on this error; one row is reported per undeclared key, including type when the schema does not declare it. A closed schema also flags the properties section `data-okf-additional-properties="false"`, which the editing picker reads to offer no custom key (see SwRS-MDOKFSTUDIO-FMEDIT-035).
 - Known issue: the error is not attached to the field row (the validator reports it at the document root), so the undeclared row itself carries no underline.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-084](SwRS-MDOKFSTUDIO-FMSCHEMA-084.md): Every schema violation is reported on its field or in a row of its own
+<!-- okf:links:end -->

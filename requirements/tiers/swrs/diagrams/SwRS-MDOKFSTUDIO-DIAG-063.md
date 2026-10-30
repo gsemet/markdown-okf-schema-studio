@@ -9,7 +9,8 @@ description: When the text of a built-in diagram plus its included files would
   limit.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the text of a built-in diagram plus its included files would exceed 1 MiB, 
 
 - Method: Unit test: a diagram includes at most 64 files and at most 1 MiB of text with its includes.
 - Criteria: The diagram's own text counts toward the limit.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-061](SwRS-MDOKFSTUDIO-DIAG-061.md): Includes nest at most 8 deep, 64 files and 1 MiB
+<!-- okf:links:end -->

@@ -73,7 +73,8 @@ examples:
     description: The validator SHALL report invalid requirement frontmatter.
     project: markdown-okf-schema-studio
     scope: core
-    lifecycle: draft
+    req_lifecycle: draft
+    status: draft
     origin: native
     tier: SwRS
     derives_from: [StRS-MDOKFSTUDIO-CORE-001]

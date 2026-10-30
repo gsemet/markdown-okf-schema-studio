@@ -9,7 +9,8 @@ description: When a writer clicks a field name in edit mode, the extension SHALL
   changed name, changing only the key text and keeping the comments.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,20 @@ A flush does not refuse: it trims the key and an empty key keeps the old one (se
 - Method: test/core/frontmatter/frontmatterPreservation.test.ts (scenario: Enter renames and the trailing comment is kept, structural F2 rename of title to heading).
 - Method: test/core/edits/frontmatterEdit.test.ts (scenario: the host refuses a rename to a used name or an invalid name).
 - Criteria: the page-side check and the host check are separate; the host check also holds for a request that did not come from the key editor.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-025](SwRS-MDOKFSTUDIO-FMEDIT-025.md): Enter or leaving the key editor renames the key
+  - [SwRS-MDOKFSTUDIO-FMEDIT-026](SwRS-MDOKFSTUDIO-FMEDIT-026.md): An empty or padded key name is refused in the key editor
+  - [SwRS-MDOKFSTUDIO-FMEDIT-027](SwRS-MDOKFSTUDIO-FMEDIT-027.md): The host refuses a rename to a name already used
+<!-- okf:links:end -->

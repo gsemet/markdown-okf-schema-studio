@@ -8,7 +8,8 @@ description: When a preview is read-only because the workspace is untrusted or
   text to the clipboard and edit nothing.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a preview is read-only because the workspace is untrusted or the file is st
 
 - Method: Integration test in the untrusted and standalone suites.
 - Criteria: Clipboard written; no document edit.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+<!-- okf:links:end -->

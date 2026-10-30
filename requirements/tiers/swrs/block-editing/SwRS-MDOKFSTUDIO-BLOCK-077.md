@@ -7,7 +7,8 @@ description: When a keydown is not one an open editor handled, the page SHALL
   NOT stop its propagation.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When a keydown is not one an open editor handled, the page SHALL NOT stop its pr
 
 - Method: Unit test `CR 041: keys no editor handled keep reaching VS Code` in test/page/modules/editorKeys.test.ts.
 - Criteria: isHandledEditorKey is false when defaultPrevented is not true, during composition and outside editors.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-008](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-008.md): A writer types and moves between blocks with text editor keys
+<!-- okf:links:end -->

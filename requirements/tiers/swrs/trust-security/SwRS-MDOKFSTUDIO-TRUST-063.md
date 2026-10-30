@@ -7,7 +7,8 @@ description: When the page receives previewLinkTargets, it SHALL accept it only
   if its targets are an array and it names the render of the page.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -59,3 +60,15 @@ When the page receives previewLinkTargets, it SHALL accept it only if its target
 - Method: Unit test test/core/protocol/hostToPage.test.ts (the payload checks refuse what the page used to refuse) covers the array and the object.
 - Method: Unit test test/page/runtimeContentPatch.test.ts (link target hints of a stale render are ignored) covers the stale render and the current render.
 - Criteria: The items of the array are read by the handler of the link hints. The host-message filter drops answers whose identifiers differ.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

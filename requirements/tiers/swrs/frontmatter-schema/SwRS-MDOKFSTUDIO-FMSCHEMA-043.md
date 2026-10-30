@@ -11,7 +11,8 @@ description: When the frontmatter of the shown document changes, the extension
   closes.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,14 @@ When the frontmatter of the shown document changes, the extension SHALL re-analy
 - Method: test/integration/realInput/markers.ts (typing in the frontmatter, page not ready; unit test of the frontmatter controller and real-input test).
 - Method: test/page/runtimeFrontmatterFields.test.ts (new table while a field editor is open, editor closed).
 - Criteria: Each new change restarts the 300 ms timer; unchanged markup posts nothing. Only the latest deferred markup is kept.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-044](SwRS-MDOKFSTUDIO-FMSCHEMA-044.md): A new table waits while a field editor is open
+<!-- okf:links:end -->

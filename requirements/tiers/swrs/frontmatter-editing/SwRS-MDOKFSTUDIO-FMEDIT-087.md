@@ -9,7 +9,8 @@ description: When the preview is 460 px wide in edit mode with a tall properties
   the preview to line 1 on a source sync to line 1.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the preview is 460 px wide in edit mode with a tall properties table, the e
 
 - Method: Visual scenario frontmatter-editing/v06-okf-schema-narrow-scroll-stress-edit-dark-460.
 - Criteria: Real browser at 460 px width; scroll positions are asserted at the bottom, at the top and after the source sync to line 1.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-001](SwRS-MDOKFSTUDIO-FMEDIT-001.md): A click on a field in edit mode opens its editor in place
+<!-- okf:links:end -->

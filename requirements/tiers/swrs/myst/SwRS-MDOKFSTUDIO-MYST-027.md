@@ -8,7 +8,8 @@ description: When a formula uses `\href`, `\htmlStyle` or another trusted
   style, and bound expansion and size.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a formula uses `\href`, `\htmlStyle` or another trusted command, the extens
 
 - Method: Unit test "math cannot inject trusted HTML commands or external links" in test/core/render/mathRenderer.test.ts
 - Criteria: Trust is off and the bounds maxExpand 1000 and maxSize 100 are set.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-006](../../strs/myst/StRS-MDOKFSTUDIO-MYST-006.md): Maths is typeset offline and bad formulas stay readable
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-024](SwRS-MDOKFSTUDIO-MYST-024.md): Maths is typeset offline by KaTeX and bad formulas stay readable
+<!-- okf:links:end -->

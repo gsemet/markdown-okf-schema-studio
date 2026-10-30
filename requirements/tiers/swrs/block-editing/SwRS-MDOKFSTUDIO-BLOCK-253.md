@@ -9,7 +9,8 @@ description: While edit mode is on and the body of the document is empty, the
   show the hint "Enter to create a new block" under it.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -63,3 +64,12 @@ While edit mode is on and the body of the document is empty, the page SHALL make
 - Method: test/page/runtimeEmptyDocumentStart.test.ts (Enter and Arrow Down with each focus target open the editor with insertAfterLine 0; Arrow Up does nothing; the marker and the hint exist on the Start writing point only; the refusals above) and test/page/runtimeBlockEditor.test.ts (Enter on the preview content, modifiers, fields, reading mode, failed render, filled document).
 - Method: test/visual/capture_start_hint.py, scenarios layout-width/v86 and v87 (empty-start-writing-hint, light and dark) (the hint line is visible under the button, in light and dark, and keeps the button 20 px below the top).
 - Criteria: the keys act only on the page target or on the Start writing button, the message equals the one of a click, and the hint text equals "Enter to create a new block".
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-011](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-011.md): A writer adds blocks and starts an empty document from the preview
+<!-- okf:links:end -->

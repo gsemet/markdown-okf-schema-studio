@@ -8,7 +8,8 @@ description: When a Mermaid map with edge labels is drawn in the dark, light or
   a text contrast of at least 4.5:1 against its background.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a Mermaid map with edge labels is drawn in the dark, light or fallback them
 
 - Method: Visual scenarios diagrams v01 to v03 (edge label count against the source and contrast ratio).
 - Criteria: Label count equals the source and every ratio is at least 4.5.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-005](SwRS-MDOKFSTUDIO-DIAG-005.md): Mermaid colours follow the preview theme
+<!-- okf:links:end -->

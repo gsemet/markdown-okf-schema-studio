@@ -9,7 +9,8 @@ description: When the browser find reaches text inside a folded section, or the
   before it is shown.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: SwRS
 derives_from:
@@ -55,3 +56,12 @@ When the browser find reaches text inside a folded section, or the page navigate
 - Method: test/page/modules/headingFold.test.ts (reveal unfolds the sections around a block and leaves the others folded, returns false when nothing was folded; the beforematch event unfolds the section).
 - Criteria: after the reveal no block between the opened heading and the target carries data-okf-folded.
 - Boundary: the browser find and the scroll to the target are not driven in a unit test; the real-window run of CR 143 covers a table-of-contents jump.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-002](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-002.md): The reader folds and unfolds the sections of the document
+<!-- okf:links:end -->

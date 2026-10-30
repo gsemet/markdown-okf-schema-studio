@@ -8,7 +8,8 @@ description: When a previewFrontmatterSave message is malformed, because it does
   accepted shape, the extension SHALL ignore it without a reply.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -72,3 +73,18 @@ The envelope, the size bound and the pin fields (pinLine, pinViewportTop) are ch
 ### Verification notes
 - Method: test/core/protocol/pageStateMessages.test.ts (scenarios: valid save accepted, missing names, value and format refused, bounds of the optional fields, fields refused on another message type; the page-state validators accept exactly what the frozen validator accepted).
 - Criteria: a valid save has a non-empty editId and fieldName, a fieldValue unless it removes, a fieldValueStyle plain only on a plain value save, an afterField of 1 to 1024 characters without line breaks only with an add, and a frontmatterAction add or remove.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

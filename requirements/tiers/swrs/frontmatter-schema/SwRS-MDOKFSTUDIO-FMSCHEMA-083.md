@@ -8,7 +8,8 @@ description: When the navigation request of a frontmatter link is malformed, the
   invalid.".
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the navigation request of a frontmatter link is malformed, the extension SH
 
 - Method: Unit test `a malformed frontmatter link request is refused with its own reason` in `test/session/diagReq.links.requirements.test.ts`.
 - Criteria: The reason is shown in the same warning as other refusals.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-113](../toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-113.md): A link message needs a request, else it is ignored or refused
+<!-- okf:links:end -->

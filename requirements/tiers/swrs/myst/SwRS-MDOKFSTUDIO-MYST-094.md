@@ -8,7 +8,8 @@ description: When the writer clicks the anchor icon of a label whose name starts
   no rename field.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the writer clicks the anchor icon of a label whose name starts with an unde
 
 - Method: Superseded; see SwRS-MDOKFSTUDIO-MYST-038 for the test that now covers labels starting with a symbol.
 - Criteria: Superseded; the behaviour is specified by SwRS-MDOKFSTUDIO-MYST-038.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-038](SwRS-MDOKFSTUDIO-MYST-038.md): The anchor icon opens a rename field that sends valid names
+<!-- okf:links:end -->

@@ -11,7 +11,8 @@ description: When the extension resolves a resource reference of a page, it
   the attribute that held it.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -118,3 +119,12 @@ When the extension resolves a resource reference of a page, it SHALL give the pa
 - Method: Unit test test/security/trustReq.requirements.test.ts (a resource must be an existing regular file; a resource root that does not exist is dropped with the diagnostic missing-root) covers the existing file, the missing file, the directory with its candidate path, the missing root and the second root.
 - Method: Unit test test/security/html-policy.test.ts (resolves parent-relative figure images through the workspace root; strips figure images that escape even the workspace root; rewrites local resources and removes active HTML content) covers the parent-relative figure, the removed src with blocked-resource, the local image, video and poster rewrite and the mixed srcset.
 - Criteria: Containment is tested on the resolved path with path.relative against each root; the real path of the file is returned. The refusal is recorded as a diagnostic of the policy. A Windows drive path with a forward slash starts with a scheme and is refused as blocked-resource-scheme; one with a backslash is refused as invalid-resource-path. createPreviewResourcePolicy builds two roots: the folder of the document and the resource root. The suffix is the text from the first query or fragment mark of the trimmed reference. No src, poster or data attribute keeps a value the policy refused, and the rewritten srcset holds only webview addresses.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-004](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-004.md): Local files load only from the allowed folders
+<!-- okf:links:end -->

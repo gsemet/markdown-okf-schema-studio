@@ -9,7 +9,8 @@ description: When a MyST code directive sets `:filename:` or `:caption:`, the
   the block's top as a left-aligned monospace title bar.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -82,3 +83,15 @@ When a MyST code directive sets `:filename:` or `:caption:`, the extension SHALL
 - Method: test/core/render/mystFeatures.test.ts (file name present only when the option is set, figure id equals the label, caption without label)
 - Method: test/core/preview/previewStyles.test.ts (title bar styles in all themes) and the three caption visual scenarios
 - Criteria: the file-name element is present only when the option is set; figure id equals the label and the caption text is present; caption styles match the statement in all themes
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-015](SwRS-MDOKFSTUDIO-CODE-015.md): Render a captioned code directive as a figure with a reference target
+  - [SwRS-MDOKFSTUDIO-CODE-028](SwRS-MDOKFSTUDIO-CODE-028.md): Join a code caption to its block as a title bar
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When a task the extension starts without waiting for it (a
   rejection or writing to the console.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -56,3 +57,12 @@ When a task the extension starts without waiting for it (a background write, a d
 
 - Method: test/host-memory/memoryHost.test.ts (a rejected task is recorded by the memory logger, a resolved or missing one is not) and test/session/diagReq.viewState.requirements.test.ts (a rejected storage write is recorded by the logger of the host).
 - Criteria: the entry names the context and carries the error; the source of src/ writes nothing to the console.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+<!-- okf:links:end -->

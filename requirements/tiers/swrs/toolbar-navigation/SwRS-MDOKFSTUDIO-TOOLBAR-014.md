@@ -8,7 +8,8 @@ description: While the preview is read-only or a block editor is open, the find
   without editing the document.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,12 @@ While the preview is read-only or a block editor is open, the find bar SHALL kee
 - Method: test/page/modules/findBar.test.ts (the replace toggle is disabled with the reason, the row stays closed, finding works, the host is not asked).
 - Method: test/session/reviewReqThreads.requirements.test.ts (a read-only preview and an open edit are refused before the document is read) and test/session/trustReq.requirements.test.ts (an older render is answered with the out-of-date reason).
 - Criteria: no edit is applied and the answer carries the reason.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-003](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-003.md): The reader finds and replaces text in the preview
+<!-- okf:links:end -->

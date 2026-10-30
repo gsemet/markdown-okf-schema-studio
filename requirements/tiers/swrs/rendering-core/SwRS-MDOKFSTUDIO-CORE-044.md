@@ -8,7 +8,8 @@ description: When a document holds a raw HTML block outside the supported subset
   SHALL drop it from the rendered page.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,15 @@ When a document holds a raw HTML block outside the supported subset (tables, det
 
 - Method: Unit test "raw HTML outside the supported subset is dropped and a kbd element is kept" in test/core/render/renderReq.renderingCore.requirements.test.ts
 - Criteria: Only the supported subset survives rendering.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-029](../gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
+<!-- okf:links:end -->

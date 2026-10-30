@@ -11,9 +11,13 @@ description: When a writer in edit mode clicks a cell of a pipe table, the
   Cancel, and save the typed text before the preview leaves the document.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: approved
+req_lifecycle: approved
+status: stable
 approved_by: gaetan@xeberon.net
-approved_on: 2026-10-28
+approved_at: '2026-10-28T00:00:00Z'
+verified:
+  by: human:gaetan@xeberon.net
+  at: '2026-10-28T00:00:00Z'
 origin: native
 tier: StRS
 derives_from: []
@@ -73,3 +77,22 @@ As a writer, I click a table cell in edit mode and edit its Markdown right where
 - When the page is hidden or closed, typing that is still waiting to be saved is sent at once; the editor is not closed because the page is going away.
 - The causes of a refusal (stale revision, changed text, read-only preview) are host-side and belong to the block-editing and trust-security scopes; in a read-only preview edit mode is unavailable, so no cell editor opens.
 - The refusal message is shown in the status line of the editor: in the table bar once the cell text box exists, and in the cell editor while the source is loading; the navigation that waited for the save does not carry on.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-205](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-205.md): Open editors are saved before the page hides or leaves the document
+  - [SwRS-MDOKFSTUDIO-BLOCK-228](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-228.md): Opening, saving and closing an editor keep the reading position
+  - [SwRS-MDOKFSTUDIO-TABLE-001](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-001.md): A click on a pipe table cell opens a cell editor in place
+  - [SwRS-MDOKFSTUDIO-TABLE-006](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-006.md): The cell text box wraps and fits its text in the block editor font
+  - [SwRS-MDOKFSTUDIO-TABLE-013](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-013.md): A cell edit saves the whole table and moves between cells without reopening
+  - [SwRS-MDOKFSTUDIO-TABLE-018](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-018.md): Enter, Done, leaving the cell or a click elsewhere commits the cell
+  - [SwRS-MDOKFSTUDIO-TABLE-025](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-025.md): Escape cancels the cell edit, except during a composition
+  - [SwRS-MDOKFSTUDIO-TABLE-026](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-026.md): Cancelling after an autosave asks the host to restore the original table
+  - [SwRS-MDOKFSTUDIO-TABLE-027](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-027.md): The Cancel button does what Escape does
+  - [SwRS-MDOKFSTUDIO-TABLE-030](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-030.md): Following a link or pressing Back or Next saves an open cell first
+  - [SwRS-MDOKFSTUDIO-TABLE-034](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-034.md): A host refusal is shown in the cell and keeps the typed text
+<!-- okf:links:end -->

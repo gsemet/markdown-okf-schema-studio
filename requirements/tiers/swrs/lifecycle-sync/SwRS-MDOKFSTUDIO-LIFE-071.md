@@ -9,7 +9,8 @@ description: When a render changes the page shell, for example a diagram engine
   of a content patch.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -100,3 +101,14 @@ When a render changes the page shell, for example a diagram engine or math appea
 - Method: test/core/preview/contentPatch.test.ts (Shell change, Content bounds, Status line bounds, Another document, folders or startup setting, Page created again by VS Code): "T34: shell keys differ when Mermaid appears or disappears, and when math appears", "T34: canPatch refuses next content that carries a script or a nonce", "T34: status lines that the runtime would reject keep the patch from being sent", "T34: the runtime context key covers the startup settings and nothing the page follows itself", "T34: a ready report with the identifiers of the last assignment is a webview that was created again". The size bound of Content bounds has no test (untested); the resource folders check (sameResourceRoots) is by reading updatePreview.
 - Method: test/host/previewTiming.test.ts (Page not ready for the previous render, The wait of 2 seconds for a patched page, Page created again by VS Code): "a patched page that does not report ready within 2000 ms gets the full document", "a patched page that reports ready in time keeps its document", "a ready report for an earlier patch of a chain restarts the 2000 ms wait for the newest", "a page reloaded by the webview after patches gets the current document again". The refusal row of Page not ready for the previous render is untested; the chain acknowledgement is covered by "a patched page that reports ready in time keeps its document" and checked by reading pageHasStage and updatePreview.
 - Criteria: shellKey differs when an engine appears and is equal otherwise; planContentPatch returns undefined for those contents; diagnosticsFitPatch is false past each of the three bounds; runtimeContextKey and the resource folders are compared before a patch; the patch condition requires readyRequestId or patchedRequestId to equal the previous stage's request; htmlAssignments grows after 2000 ms for a silent page and stays for an answering page; the fallback timer is re-armed for the stage after an earlier ready report; reportsReloadedDocument is true only when the request id equals the assigned one and differs from the stage's.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+<!-- okf:links:end -->

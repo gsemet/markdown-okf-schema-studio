@@ -8,7 +8,8 @@ description: "The host SHALL accept previewEditOpen only with a non-empty string
   that is absent or a non-negative integer, and no save or pin fields."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -55,3 +56,14 @@ The host SHALL accept previewEditOpen only with a non-empty string editId, posit
 
 - Method: Unit test `the page-state validators accept exactly what the frozen validator accepted` in test/core/protocol/pageStateMessages.test.ts (both scenarios). The edit id has no upper length bound here (only previewEditClosed and previewEditFlushed bound theirs to 100).
 - Criteria: isEditRequest and hasValidStateFields decide.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+<!-- okf:links:end -->

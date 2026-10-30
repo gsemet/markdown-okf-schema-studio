@@ -10,7 +10,8 @@ description: When a writer clicks the insert point after a block in edit mode,
   each side.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -45,3 +46,15 @@ As a writer, I add a paragraph, a list or a heading between two blocks, or after
 - A document with Windows line endings gets Windows line endings in the inserted text.
 - The Start writing button is not offered when the render failed.
 - Escape in the first editor brings the button back.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-087](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-087.md): Edit mode places an insert point with a plus button after every body block
+  - [SwRS-MDOKFSTUDIO-BLOCK-094](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-094.md): The host inserts a new block with clean blank lines
+  - [SwRS-MDOKFSTUDIO-BLOCK-102](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-102.md): An empty body offers one Start writing button
+  - [SwRS-MDOKFSTUDIO-BLOCK-253](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-253.md): Start writing is the keyboard selection of an empty document
+<!-- okf:links:end -->

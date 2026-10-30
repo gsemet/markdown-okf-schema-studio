@@ -10,7 +10,8 @@ description: When the writer presses Document link, the extension SHALL ask the
   selection, or nothing when the dialog is cancelled.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -86,3 +87,18 @@ See SwRS-MDOKFSTUDIO-TRUST-052, SwRS-MDOKFSTUDIO-TRUST-005, SwRS-MDOKFSTUDIO-TRU
 - Method: test/page/runtimePaletteActions.test.ts (T30: the editor stays open while the host's file dialog has the focus and the answer is inserted; a cancelled file dialog inserts nothing and the blur saves again; checks the picked and cancelled scenarios)
 - Method: test/core/mapping/mystTargets.test.ts (docReference gives a POSIX path relative to the document, without the extension; checks the dialog and path scenario)
 - Criteria: The dialog options and the answers of the host are deduced from the code (handlePickDocument); no integration test opens this dialog, so the dialog scenario and the refused answers are untested beyond docReference.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+  - [SwRS-MDOKFSTUDIO-PALETTE-039](SwRS-MDOKFSTUDIO-PALETTE-039.md): A palette action edits in one undo step or leaves the text unchanged and says why
+<!-- okf:links:end -->

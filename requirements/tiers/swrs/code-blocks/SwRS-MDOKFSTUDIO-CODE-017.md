@@ -10,7 +10,8 @@ description: When the pointer is over a code block of the preview content, or
   pointer, a click, scrolling, a resize or a content patch makes it unusable.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -131,3 +132,24 @@ When the pointer is over a code block of the preview content, or the block holds
 - Method: test/page/modules/codeCopy.test.ts (keyboard: tab stop on copyable blocks only, focus reveals the button, Tab and Shift+Tab between block and button, Enter on the button copies)
 - Method: test/visual/scenarioDefinitions1.ts (copy-button visual scenarios: geometry and placement; keyboard focus scenarios in light and dark with the focus rings)
 - Criteria: button geometry matches the statement; the button is created only on first hover; no button for the excluded block kinds or for blocks outside the content element; visibility toggles at the 30 px threshold; hide is called once per applied patch; button position follows the block rect after resize; state reset only when the hovered block changes; button top is not above the bottom of the band or toolbar
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-018](SwRS-MDOKFSTUDIO-CODE-018.md): Hide the copy button below 30 px of visible block
+  - [SwRS-MDOKFSTUDIO-CODE-022](SwRS-MDOKFSTUDIO-CODE-022.md): Offer no copy button for edited blocks, editors, diagram sources and blocks outside the content
+  - [SwRS-MDOKFSTUDIO-CODE-023](SwRS-MDOKFSTUDIO-CODE-023.md): Hide the copy button on a click inside the block until the pointer moves
+  - [SwRS-MDOKFSTUDIO-CODE-024](SwRS-MDOKFSTUDIO-CODE-024.md): Hide the copy button when a content patch updates the page
+  - [SwRS-MDOKFSTUDIO-CODE-029](SwRS-MDOKFSTUDIO-CODE-029.md): Hide the copy button when the pointer leaves the block
+  - [SwRS-MDOKFSTUDIO-CODE-032](SwRS-MDOKFSTUDIO-CODE-032.md): Hide the copy button when scrolling stops outside the block
+  - [SwRS-MDOKFSTUDIO-CODE-033](SwRS-MDOKFSTUDIO-CODE-033.md): Reposition the copy button on window resize
+  - [SwRS-MDOKFSTUDIO-CODE-034](SwRS-MDOKFSTUDIO-CODE-034.md): Keep the copy button clear of the sticky band and toolbar
+  - [SwRS-MDOKFSTUDIO-CODE-035](SwRS-MDOKFSTUDIO-CODE-035.md): Reset the Copied state when another block is hovered
+<!-- okf:links:end -->

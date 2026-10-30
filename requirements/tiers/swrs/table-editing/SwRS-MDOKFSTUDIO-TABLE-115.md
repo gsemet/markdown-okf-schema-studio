@@ -9,7 +9,8 @@ description: When the writer runs Table with caption, the extension SHALL wrap
   word Caption.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -58,3 +59,12 @@ When the writer runs Table with caption, the extension SHALL wrap the pipe table
 ### Verification notes
 - Method: test/page/modules/editActions.test.ts (T30: tableCaption wraps the pipe table at the caret, or inserts a new one; wrap and paragraph scenarios; the list-table and HTML table rows are in test/page/modules/tableInsertAfterTable.test.ts; the "Already captioned" refusal is read from tableCaption in src/page/modules/tableEditActions.ts and is untested; the mode rule is checked by the test that ref, doc, cite, dropdown, tableCaption and roleKbd are myst-only without shortcut).
 - Criteria: The wrapped or inserted text and the selection of the word Caption.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+<!-- okf:links:end -->

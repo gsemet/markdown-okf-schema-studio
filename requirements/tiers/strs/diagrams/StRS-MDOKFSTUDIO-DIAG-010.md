@@ -7,7 +7,8 @@ description: When the preview content or theme changes, the Studio SHALL redraw
   only the bundled-engine diagrams that need it and reuse the others.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -35,3 +36,12 @@ As a writer, I keep typing while the diagrams I did not touch stay drawn and the
 
 - Bundled-engine pictures are kept by source, include base and light/dark variant (64 most recent); results with a refused include, or with an unsupported directive in an included file, are not kept and are asked again next time. Known issue: a plain engine failure (for example a syntax error) is kept until the source or the variant changes. The engine draws one diagram at a time, and a render superseded by a newer one of the same element does not overwrite it.
 - After a content patch only the diagrams without a render state are drawn. Known issue: the page-side event wiring and the 64-entry eviction have no unit test; only the visual campaign covers them.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-DIAG-006](StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+<!-- okf:links:end -->

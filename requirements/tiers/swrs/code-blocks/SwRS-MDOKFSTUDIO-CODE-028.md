@@ -8,7 +8,8 @@ description: When a MyST code-block has a caption, the extension SHALL keep the
   joined to the block's top with the same width and border and a square joint.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a MyST code-block has a caption, the extension SHALL keep the code left-ali
 
 - Method: Stylesheet unit test and the three caption visual scenarios.
 - Criteria: Caption styles match the statement in all themes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-014](SwRS-MDOKFSTUDIO-CODE-014.md): A code directive shows its file name or caption above the code
+<!-- okf:links:end -->

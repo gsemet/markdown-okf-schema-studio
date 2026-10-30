@@ -10,7 +10,8 @@ description: When a trusted document holds an `{include}` directive for a
   unresolved placeholder.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -103,3 +104,20 @@ When a trusted document holds an `{include}` directive for a Markdown file insid
 - Method: Unit test "an include with :literal:, an empty argument or an other option stays a placeholder; :class: expands" in test/core/render/renderReq.renderingCore.requirements.test.ts (refusal unsupported forms, including the placeholder and warning of an empty argument)
 - Method: Unit test "a GitHub alert in an included file or in a grouped context tag renders as a note panel" in test/core/render/renderReq.renderingCore.requirements.test.ts (nominal alerts)
 - Criteria: The included Markdown is rendered at the directive position with its frontmatter stripped. Only plain, `:class:` and `:label:` includes expand. Included blocks carry the host directive line and the included attribute at any depth. A single read per render and distinct lines per use. Alerts render in these two contexts as at top level.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-002](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-002.md): A writer composes a document from included files
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-014](SwRS-MDOKFSTUDIO-CORE-014.md): Keep unsupported include forms as placeholders
+  - [SwRS-MDOKFSTUDIO-CORE-015](SwRS-MDOKFSTUDIO-CORE-015.md): Map included blocks to the include directive
+  - [SwRS-MDOKFSTUDIO-CORE-017](SwRS-MDOKFSTUDIO-CORE-017.md): Read a repeated include once per render
+  - [SwRS-MDOKFSTUDIO-CORE-045](SwRS-MDOKFSTUDIO-CORE-045.md): Expand alerts in included files and context tags
+<!-- okf:links:end -->

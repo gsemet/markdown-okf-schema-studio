@@ -12,7 +12,8 @@ description: When the extension reads a Markdown source to render it, to anchor
   front matter.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -57,3 +58,12 @@ When the extension reads a Markdown source to render it, to anchor a review comm
 
 - Method: one table test run through comment anchoring, link-fragment navigation, label targets, GitHub alerts and the first-heading scan.
 - Criteria: every consumer gives the same answer for every row of the tables above.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+<!-- okf:links:end -->

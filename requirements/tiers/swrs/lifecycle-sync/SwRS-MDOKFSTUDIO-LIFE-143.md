@@ -12,7 +12,8 @@ description: When a preview panel is closed, a document is closed, a workspace
   panel and shows its file read-only.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -97,3 +98,12 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 - Method: test/host/lifeReq.requirements.test.ts "previews of one root share one file watcher, which closing the last preview removes with its subscriptions" (watchers removed, second preview keeps the shared watcher), test/session/eventFanOut.test.ts (one dependency watcher for several previews of a root, released with the last; linked-target watches shared and released with the last preview), "closing a preview clears the Problems entries that no preview shows" (Problems entries cleared and kept), "deactivating the extension disposes the sessions and leaves the panels to VS Code" (deactivation, disposed twice).
 - Method: test/host/lifeReq.requirements.test.ts "removing the folder of a preview keeps its panel read-only until the folder is added back" (folder removed: same panel, old session and its folder watcher disposed, read-only session rooted at the file's directory with the reading state, writable again when the folder is added back), and test/integration/workspaceDisposal.test.ts in a real VS Code (multi-root only, it asserts at least two folders: the tab stays, the active preview becomes read-only on the same panel). The standalone file row, the row of a file another folder still holds and the row of a preview with no document are deduced from the code (demoteSessionsOf in src/session/previewManager.ts), not tested.
 - Criteria: no post follows disposal and the live set no longer holds the session; the shared dependency watcher is disposed once, when the last preview of its root releases it; sink.delete is called only when no live session has the document; after a folder removal the panel is not disposed, the active preview is read-only on that panel and the source directory exists; disposeAll(false) leaves the panels undisposed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+<!-- okf:links:end -->

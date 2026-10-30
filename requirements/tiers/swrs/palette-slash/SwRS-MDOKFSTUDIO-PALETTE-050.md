@@ -8,7 +8,8 @@ description: When the writer presses Horizontal rule, the extension SHALL insert
   ends on, with the caret after it.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -61,3 +62,12 @@ In this table `[ ]` marks the selection and `|` marks the caret; the rule is wri
 - Method: test/page/modules/editActions.test.ts (data-driven rows named editActions rule: all scenarios)
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Criteria: No extra blank line is added where one already exists.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

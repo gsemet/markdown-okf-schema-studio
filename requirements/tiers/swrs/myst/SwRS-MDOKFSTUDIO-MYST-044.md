@@ -8,7 +8,8 @@ description: When a rename is for a document revision the host has moved past,
   again once it has refreshed.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a rename is for a document revision the host has moved past, the extension 
 - Method: Integration suite run() in test/integration/labelRename.test.ts
 - Method: test/session/trustReq.requirements.test.ts (a label rename from an older render is answered with the stale-line refusal)
 - Criteria: The page shows the stale-line refusal in the second case.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

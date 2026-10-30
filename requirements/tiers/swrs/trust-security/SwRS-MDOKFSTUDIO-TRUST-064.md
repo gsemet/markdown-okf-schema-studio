@@ -8,7 +8,8 @@ description: When the page receives previewFlushEdit or previewEditorWatch, it
   whatever the document the message names.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -58,3 +59,16 @@ When the page receives previewFlushEdit or previewEditorWatch, it SHALL accept i
 - Method: Unit test test/core/protocol/hostToPage.test.ts (the payload checks refuse what the page used to refuse; each rule matches the identity it names, and only that) covers the string identifier and the missing identifier.
 - Method: Unit test test/page/runtimeBlockEditor.test.ts (STAB-03: a watch sent while the host already follows another document is still answered) covers the watch naming the next document.
 - Criteria: These two messages are matched by their own identifier (own-id addressing) because the host may already follow the next document.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

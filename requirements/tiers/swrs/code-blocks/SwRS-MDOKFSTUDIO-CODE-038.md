@@ -8,7 +8,8 @@ description: When the white or cream theme is forced, the extension SHALL colour
   YAML code text with the link colour.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the white or cream theme is forced, the extension SHALL colour YAML code te
 
 - Method: Stylesheet unit test.
 - Criteria: The YAML language rule sets the link colour in white and cream only.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-028](../rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and inline code are typeset readably
+<!-- okf:links:end -->

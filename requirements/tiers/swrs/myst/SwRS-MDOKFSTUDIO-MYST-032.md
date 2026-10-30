@@ -8,7 +8,8 @@ description: When a figure image path points to a sibling folder such as
   landmark in the frame.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a figure image path points to a sibling folder such as `../external-img/dep
 
 - Method: Unit test "resolves parent-relative figure images through the workspace root" in test/security/html-policy.test.ts; Visual scenario chapter-figure-dark in test/visual/scenarioDefinitions1.ts
 - Criteria: Loading follows the resource policy.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-031](SwRS-MDOKFSTUDIO-MYST-031.md): Figures render with image, caption, label, width and alignment
+<!-- okf:links:end -->

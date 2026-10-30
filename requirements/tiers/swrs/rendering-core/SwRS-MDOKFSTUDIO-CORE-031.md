@@ -9,7 +9,8 @@ description: When the preview shows inline code, the extension SHALL draw a tint
   headings.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the preview shows inline code, the extension SHALL draw a tint and hairline
 
 - Method: Unit test "inline code is a subtle tinted pill derived from the text colour" in test/core/preview/inlineCode.test.ts
 - Criteria: Computed styles and line height match.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-028](SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and inline code are typeset readably
+<!-- okf:links:end -->

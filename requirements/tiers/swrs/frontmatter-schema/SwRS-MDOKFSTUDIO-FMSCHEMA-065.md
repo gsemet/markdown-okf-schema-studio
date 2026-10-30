@@ -8,7 +8,8 @@ description: When the table is first rendered, the extension SHALL show each
   being resolved", without the Studio link tooltip.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the table is first rendered, the extension SHALL show each annotated link v
 - Method: Unit test of the table renderer; visual scenario.
 - Criteria: The first render and the 300 ms table refresh do not touch the file system for links.
 - Known issue: a pending link still carries the native title "Loading linked file" and its spinner the native title "File links are being resolved", so the browser may show a plain tooltip.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-063](SwRS-MDOKFSTUDIO-FMSCHEMA-063.md): Each link value shows whether it resolves
+<!-- okf:links:end -->

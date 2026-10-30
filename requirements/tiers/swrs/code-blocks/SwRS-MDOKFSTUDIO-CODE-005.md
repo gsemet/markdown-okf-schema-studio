@@ -10,7 +10,8 @@ description: When a numbered, emphasized or diff block is shown, the extension
   listed lines relative to it and show each special character once.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -92,3 +93,15 @@ When a numbered, emphasized or diff block is shown, the extension SHALL wrap it 
 - Method: test/core/render/highlight.test.ts (numbered and emphasized lines without broken multiline spans, special characters shown once, unknown named reference)
 - Method: test/core/render/mystFeatures.test.ts (MyST directive numbering, start value, emphasis and invalid values)
 - Criteria: line wrappers present; no highlight class for unknown languages; line numbers and emphasized lines match the options and invalid values fall back; no `&amp;amp;` appears in the output and the displayed text equals the source
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-006](SwRS-MDOKFSTUDIO-CODE-006.md): Show special characters once in highlighted code
+  - [SwRS-MDOKFSTUDIO-CODE-011](SwRS-MDOKFSTUDIO-CODE-011.md): Number and emphasize lines of MyST code directives
+<!-- okf:links:end -->

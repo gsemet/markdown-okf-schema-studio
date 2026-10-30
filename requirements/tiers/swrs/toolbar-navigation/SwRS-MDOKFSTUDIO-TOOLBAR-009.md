@@ -11,7 +11,8 @@ description: When the reader presses Cmd+F (macOS) or Ctrl+F (other systems)
   the text editor.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: SwRS
 derives_from:
@@ -66,3 +67,12 @@ When the reader presses Cmd+F (macOS) or Ctrl+F (other systems) with the focus i
 - Method: test/page/runtimeFindFromBlockEditor.test.ts, page runtime (from a block editor text box, a table cell and a frontmatter field: the bar opens at once, the keys typed next end in the query, the Markdown saves hold only the edits made before the key, a later host find command changes nothing; unsaved multi-line edits made before the key are saved once, whole, by the blur, and Escape does not give the focus back to the committed text box).
 - Method: test/integration/findInPreview.test.ts, real VS Code window (the bar opens on the key, the native webview find widget stays closed, the cream and dark shots; from the title's block editor, the query typed right after the key ends in the find field and the Markdown is unchanged). The same scenario is repeated by the `stress` CI job as `find-in-preview` (test/shared/stressPlan.ts), cream and dark, so a late focus change shows up as a stress failure.
 - Criteria: the bar is visible and its field has the focus; no webview find widget is shown.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-003](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-003.md): The reader finds and replaces text in the preview
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When the writer opens the figure form, from the Edit figure button
   each problem under its field while the form stays open and unchanged.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -148,3 +149,15 @@ The range recorded at opening is never applied to a different text.
 - Method: test/integration/realInput/editorWidgets.ts (scenarioFigureEditor, with its markers in test/integration/realInput/markers.ts; checks the fields and keys scenarios)
 - Method: test/page/paletteReq.requirements.test.ts (a figure form submitted on a text that changed is closed without writing; checks the stale submit rows)
 - Criteria: Only the width message is asserted by a panel test; the two status messages (YAML option block, No figure at the caret) are deduced from the code (openFigurePanel in src/page/features/editorChrome.ts) and not tested; parseFigure returns undefined for the YAML block and locateFigure returns undefined outside a figure or a lone image.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+<!-- okf:links:end -->

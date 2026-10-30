@@ -9,7 +9,8 @@ description: When a document shows an image, the extension SHALL size it to at
   text in document order when its local file is missing.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,16 @@ When a document shows an image, the extension SHALL size it to at most the conte
 - Method: Visual scenario rendering-core/v19-missing-image-dark-900 in test/visual/scenarioDefinitions2.ts (refusal missing file, boundary existing file)
 - Method: Visual scenario rendering-core/v23-inline-image-in-text-light-900 in test/visual/scenarioDefinitions2.ts (nominal inline placement)
 - Criteria: The image style sets max width 100 percent and automatic height. The missing-file image keeps its alt text without a `src` attribute. Both placements load, also in edit mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-009](SwRS-MDOKFSTUDIO-CORE-009.md): Keep an image whose file is missing
+  - [SwRS-MDOKFSTUDIO-CORE-065](SwRS-MDOKFSTUDIO-CORE-065.md): Place inline images on the text line
+<!-- okf:links:end -->

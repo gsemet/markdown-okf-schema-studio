@@ -9,7 +9,8 @@ description: When a writer runs the TODO action in a block editor on lines that
   when every non-blank touched line is already wrapped.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -87,3 +88,12 @@ When a writer runs the TODO action in a block editor on lines that are not wrapp
 - Method: test/page/modules/editActions.test.ts (marker file of the tile).
 - Method: test/page/runtimeEditPalette.test.ts (T21: the TODO button tooltip has no shortcut).
 - Criteria: The produced text equals the expected wrapped text for each case, the caret offset equals the end of the opening marker on a blank line, a line with --> is returned unchanged, the TODO action has no shortcut, its tooltip has none, and the registry entry todo has the title and the three aliases and the block scope. The aliases are not asserted by name.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-012](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-012.md): A writer sees HTML comments and TODO notes as chips and toggles them
+<!-- okf:links:end -->

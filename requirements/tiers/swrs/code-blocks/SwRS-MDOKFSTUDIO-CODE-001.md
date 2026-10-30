@@ -11,7 +11,8 @@ description: When a document contains a fenced code block, the extension SHALL
   and the text of every code block as literal text.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -121,3 +122,19 @@ When a document contains a fenced code block, the extension SHALL colour the key
 - Method: test/core/render/contentCaches.test.ts (an unchanged block runs no grammar the second time, an edited block does; the bound of the cache)
 - Criteria: token spans exist for each token class of the supported grammars; an empty block yields an empty block; an unlisted label, an empty leading word and an absent label yield none and no `shiki` class; only pre/code pairs are processed; rendered code text equals the source text; the fallback output is escaped wrapped text for wrapped blocks and the original block otherwise
 - Method: test/build/bundleSplit.test.ts (the grammars are outside extension.js and in lazy/highlight.js; the split bundle highlights a block)
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-002](SwRS-MDOKFSTUDIO-CODE-002.md): Resolve common fence labels to a supported grammar
+  - [SwRS-MDOKFSTUDIO-CODE-003](SwRS-MDOKFSTUDIO-CODE-003.md): Read the fence label case-insensitively up to its first separator
+  - [SwRS-MDOKFSTUDIO-CODE-004](SwRS-MDOKFSTUDIO-CODE-004.md): Leave unknown-language code as plain text
+  - [SwRS-MDOKFSTUDIO-CODE-030](SwRS-MDOKFSTUDIO-CODE-030.md): Never highlight inline code
+  - [SwRS-MDOKFSTUDIO-CODE-031](SwRS-MDOKFSTUDIO-CODE-031.md): Show fenced code text literally
+  - [SwRS-MDOKFSTUDIO-CODE-037](SwRS-MDOKFSTUDIO-CODE-037.md): Fall back to escaped text lines when a grammar fails
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When the writer presses Collapsible, the extension SHALL wrap the
   select the summary text and leave a blank line after the summary.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,12 @@ When the writer presses Collapsible, the extension SHALL wrap the touched lines,
 
 - Method: test/page/modules/editActions.test.ts (T26: details inserts a collapsible sample after the selection, summary selected; details wraps the touched lines and keeps them as content; scenarios sample, selection)
 - Criteria: The blank line after the summary makes the content render as Markdown.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

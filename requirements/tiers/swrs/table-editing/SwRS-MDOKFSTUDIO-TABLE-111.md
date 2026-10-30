@@ -9,7 +9,8 @@ description: When the writer runs Column alignment with left, center or right,
   on the right (right) of its dashes, keeping at least three dashes.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -83,3 +84,13 @@ When the writer runs Column alignment with left, center or right, the extension 
 - Method: test/page/modules/editActions.test.ts (T26: columnAlign rewrites only the delimiter cell of the caret's column; keeps the width of a padded column and replaces an existing alignment; works from a body row, outside pipes and in tables without edge pipes; its last assertions cover the unknown choice "justify" and the missing choice; the caret in a paragraph gives an undefined edit).
 - Method: test/page/modules/editPalette.test.ts (T26: Column alignment lists left, center and right; a choice rewrites the delimiter cell; strict mode has no button).
 - Criteria: The edit range is the delimiter cell and the text is the new marker; a longer delimiter cell keeps its dashes, minus the room taken by the colons, with at least three left; the delimiter line length is unchanged when a dash or a trailing space can give way; the changed delimiter cell index; an undefined edit for every refusal.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

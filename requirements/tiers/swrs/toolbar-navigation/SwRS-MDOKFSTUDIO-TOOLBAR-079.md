@@ -9,7 +9,8 @@ description: "When a link with a navigation request scrolls into view, the exten
   for each request in order, its kind and its path or reason."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -127,3 +128,15 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 - Method: test/session/toolbarReq.requirements.test.ts (the host answers a discovery with one target per request, in order; a discovery of another render gets no answer; a failed discovery shows a warning and sends no answer).
 - Method: test/session/eventFanOut.test.ts (the search for a link target skips node_modules, .git, _build, .venv and venv and returns at most 50 files).
 - Criteria: each request string is sent at most once per page until the window regains focus or the preview becomes visible, which forgets what was asked; each message holds at most 64 requests; the search passes DISCOVERY_EXCLUDE and MAX_DISCOVERED_FILES (src/session/features/links.ts) to findFiles; the skip pattern is the start of the request; one target per request in the order of the request; no previewLinkTargets after the render changed; showWarning is called once per failed batch.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: "When useJar is true and jarPath is set but java cannot be started 
   diagram with state unavailable."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,14 @@ When useJar is true and jarPath is set but java cannot be started because it is 
 
 - Method: Unit test `a missing java is reported like a missing command; other spawn errors keep their text` in `test/core/render/diagReq.jar.requirements.test.ts`.
 - Criteria: Only ENOENT gives the missing-executable wording.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-089](SwRS-MDOKFSTUDIO-DIAG-089.md): JAR failures are reported on the diagram and in the status line
+<!-- okf:links:end -->

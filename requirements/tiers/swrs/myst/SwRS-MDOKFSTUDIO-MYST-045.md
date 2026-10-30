@@ -10,7 +10,8 @@ description: "When the host receives a label rename, the extension SHALL change 
   the preview, without searching other lines."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -74,3 +75,19 @@ When the host receives a label rename, the extension SHALL change only the `(old
 - Method: test/core/edits/sourceEdits.test.ts ("a label rename changes the label line only and counts the remaining references": nominal edit, remaining uses)
 - Method: test/integration/labelRename.test.ts (run(): one undo step in the source editor)
 - Criteria: Only the stated line is checked; the edit is a single editor operation.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-046](SwRS-MDOKFSTUDIO-MYST-046.md): A valid rename edits only the label text as one undo step
+<!-- okf:links:end -->

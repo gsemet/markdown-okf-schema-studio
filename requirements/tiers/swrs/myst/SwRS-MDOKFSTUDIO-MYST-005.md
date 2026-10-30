@@ -8,7 +8,8 @@ description: When an admonition has no title argument and its body starts with a
   and keep the rest as body.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When an admonition has no title argument and its body starts with a bold line or
 
 - Method: Unit test "a leading bold paragraph or heading supplies the MyST admonition title" in test/core/render/mystFeatures.test.ts
 - Criteria: Both leading forms become the title; the rest stays body.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-001](SwRS-MDOKFSTUDIO-MYST-001.md): Admonitions render as coloured callouts with a title
+<!-- okf:links:end -->

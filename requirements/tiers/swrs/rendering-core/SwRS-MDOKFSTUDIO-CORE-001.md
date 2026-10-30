@@ -8,7 +8,8 @@ description: When the active Markdown buffer changes, the extension SHALL render
   process and keep only the result of the newest edit.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -113,3 +114,19 @@ When the active Markdown buffer changes, the extension SHALL render the buffer t
 - Method: Unit test "the warm-up loads the engine once, shares it with the render and a warm-up call never throws" in test/core/render/renderReq.renderingCore.requirements.test.ts (boundary warm-up) and "a failed engine load is not cached: the next render retries it"
 - Method: Visual scenario rendering-core/v20-huge-document-bottom-dark-900 in test/visual/scenarioDefinitions2.ts (boundary very long document)
 - Criteria: A render of a dirty buffer returns HTML for the buffer text and spawns no subprocess. The rendered HTML holds one matching element per CommonMark construct. Rendered HTML is the same in all three modes. All headings and the last paragraph are present. The pipeline throws the trust message only without the reduced-mode allowance (production always passes `allowUntrusted: true`, so this refusal is a guard tested at pipeline level). A late result of a superseded render is never applied. One engine load is shared; a warm-up failure is swallowed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-002](SwRS-MDOKFSTUDIO-CORE-002.md): Render the CommonMark blocks
+  - [SwRS-MDOKFSTUDIO-CORE-021](SwRS-MDOKFSTUDIO-CORE-021.md): Refuse the render when trust is required
+  - [SwRS-MDOKFSTUDIO-CORE-026](SwRS-MDOKFSTUDIO-CORE-026.md): Cancel a superseded render
+  - [SwRS-MDOKFSTUDIO-CORE-038](SwRS-MDOKFSTUDIO-CORE-038.md): Render a very long document completely
+  - [SwRS-MDOKFSTUDIO-CORE-046](SwRS-MDOKFSTUDIO-CORE-046.md): Render identically in every palette mode
+<!-- okf:links:end -->

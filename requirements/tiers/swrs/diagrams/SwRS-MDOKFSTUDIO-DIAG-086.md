@@ -8,7 +8,8 @@ description: When the JAR pipeline runs a process for a diagram, the extension
   svg end tag.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the JAR pipeline runs a process for a diagram, the extension SHALL take as 
 
 - Method: Unit tests: renders PlantUML through the configured external JAR; decodes a multibyte character split across stdout chunks.
 - Criteria: Picture equals the SVG span.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-084](SwRS-MDOKFSTUDIO-DIAG-084.md): The JAR pipeline runs java or plantuml once per diagram on stdin
+<!-- okf:links:end -->

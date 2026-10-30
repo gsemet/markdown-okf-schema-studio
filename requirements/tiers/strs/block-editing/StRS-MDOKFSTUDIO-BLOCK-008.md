@@ -10,7 +10,8 @@ description: While a block editor has the focus, the Studio SHALL give the keys
   block and open the editor of the neighbour block.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -47,3 +48,16 @@ As a writer, I type Markdown in the block editor and the keys do what I expect: 
 - Ctrl or Cmd+A in a text box selects the text of that box only.
 - Up and Down leave only from the first or last wrapped line; Left and Right leave at the very start or end.
 - The properties table is skipped: its fields have their own editor.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-003](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-003.md): Edit-mode text box follows VS Code undo, redo, select-all and delete-line key bindings
+  - [SwRS-MDOKFSTUDIO-BLOCK-061](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-061.md): Tab, Shift+Tab and Enter indent and continue lists, quotes and fences
+  - [SwRS-MDOKFSTUDIO-BLOCK-069](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-069.md): Marker keys wrap a selection; Home, End, select-all and undo stay in the text box
+  - [SwRS-MDOKFSTUDIO-BLOCK-077](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-077.md): Keys no editor handled still reach VS Code
+  - [SwRS-MDOKFSTUDIO-BLOCK-079](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-079.md): Arrow keys at the edges open the previous or next block
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When
   workspace folder with the E10 error "escapes its navigation root".
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When `markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks` is false, 
 
 - Method: Unit test of the link resolver.
 - Criteria: Boolean, default false.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-060](SwRS-MDOKFSTUDIO-FMSCHEMA-060.md): The bundleRoot, projectRoot and allowOutsideWorkspaceLinks settings set the roots
+<!-- okf:links:end -->

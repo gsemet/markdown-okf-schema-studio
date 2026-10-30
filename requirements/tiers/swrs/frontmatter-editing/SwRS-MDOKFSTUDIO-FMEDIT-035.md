@@ -8,7 +8,8 @@ description: "When the Add field picker lists schema fields and the schema allow
   show a \"New field name\" input that adds the typed key with an empty value on Enter."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the Add field picker lists schema fields and the schema allows additional p
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterFields.test.ts).
 - Criteria: Tests T25 the picker offers Custom key only when additional properties are allowed; choosing Custom key shows the name input; Enter adds the field.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-028](SwRS-MDOKFSTUDIO-FMEDIT-028.md): The field action menu offers the missing schema fields or a custom key
+<!-- okf:links:end -->

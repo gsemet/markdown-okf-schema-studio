@@ -8,7 +8,8 @@ description: When a fenced code block holds Markdown syntax, inner fences,
   rendering it.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a fenced code block holds Markdown syntax, inner fences, tables or links, t
 
 - Method: Unit test on the rendered HTML and the visual source-fragment scenarios.
 - Criteria: Rendered code text equals the source text; no table or anchor element is created inside the block.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-001](SwRS-MDOKFSTUDIO-CODE-001.md): Fenced code in a supported language is highlighted, other code stays literal
+<!-- okf:links:end -->

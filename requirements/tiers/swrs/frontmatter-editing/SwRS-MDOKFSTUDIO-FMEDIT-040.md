@@ -8,7 +8,8 @@ description: When the table is re-rendered after an add, the extension SHALL
   follows.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the table is re-rendered after an add, the extension SHALL open the editor 
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterFields.test.ts).
 - Criteria: Tests T25 a pending frontmatter edit opens the editor; a reload of the render that posted the add keeps it; a later render does not reopen it.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-037](SwRS-MDOKFSTUDIO-FMEDIT-037.md): An added field is one inserted line where its row shows, and its editor opens
+<!-- okf:links:end -->

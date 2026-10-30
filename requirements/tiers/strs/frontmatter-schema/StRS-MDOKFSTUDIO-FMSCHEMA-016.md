@@ -7,7 +7,8 @@ description: When a frontmatter link value is displayed, the Studio SHALL show
   whether it resolves and, if not, why, without blocking the first paint.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -34,3 +35,12 @@ As a writer, I see at a glance which references are broken and why.
 
 - A resolving link shows as a link; otherwise the text shows with an error or warning mark and a plain label ("File not found", "Outside the allowed folder", "Link root unavailable", "Absolute paths are not allowed", "Several files match", "Empty link", "Invalid link" or "Link unavailable"), is keyboard-focusable, carries the full "[E10]" or "[W15]" message in its tooltip and counts in the badge. Link issues do not block saving other fields.
 - Link inspection is deferred: the first paint shows each annotated value with a spinner and "File links are being resolved" (and no Studio link tooltip; Known issue: native title attributes remain); about 150 ms after the render the host resolves the links and swaps the table in place; it waits while a block or field editor is open and drops stale results.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+<!-- okf:links:end -->

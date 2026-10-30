@@ -8,7 +8,8 @@ description: When a maintainer runs the layout checks on a rendered preview, the
   two-line statuses, and pass when the page has no matching content.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,12 @@ As a maintainer, I can run machine layout checks on any preview and trust that t
 - The checks are tooling (`studioGeometryChecks` in `test/shared/geometry-checks.js`) and have no user-visible effect; they report four ids: `overlay-covers-text`, `overlay-clipped`, `identifier-split` and `status-two-lines`.
 - Each check is not applicable, hence passing, when the page has no matching DOM; `identifier-split` flags only a cell whose own text node wraps over several lines.
 - Known issue: this behaviour is undocumented outside its unit test.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-LAYOUT-001](StRS-MDOKFSTUDIO-LAYOUT-001.md): The preview never scrolls sideways and wide content scrolls in its box
+<!-- okf:links:end -->

@@ -11,7 +11,8 @@ description: When a document is checked, the extension SHALL take its enabled
   never run, and report nothing when no certain list results.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -104,3 +105,18 @@ Certainty is all or nothing.
 - Method: test/core/myst/confLocator.test.ts ("the nearest conf.py wins and the enabled set comes from it": nearest, workspace root; "D29: a single conf.py in a common folder of the root is the fallback": common folder; "no conf.py, no myst_parser or an uncertain conf.py give no set": read as text, nothing reported, uncertain)
 - Method: test/core/myst/confParser.test.ts ("comments, tuples, single quotes, trailing commas and string joins are understood": list literal forms; "+=, append, extend and later assignments are applied in order": mutations; "anything that is not a plain string list is uncertain": uncertain)
 - Criteria: Standalone and untrusted previews use the same lookup. The file is never executed. CRLF line endings and r or u prefixes have no dedicated assertion (untested).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-067](SwRS-MDOKFSTUDIO-MYST-067.md): A single conf-folder candidate governs when no ancestor conf exists
+  - [SwRS-MDOKFSTUDIO-MYST-068](SwRS-MDOKFSTUDIO-MYST-068.md): conf.py is read as text and the check needs a MyST parser
+  - [SwRS-MDOKFSTUDIO-MYST-069](SwRS-MDOKFSTUDIO-MYST-069.md): The conf.py reader understands list literal forms
+  - [SwRS-MDOKFSTUDIO-MYST-070](SwRS-MDOKFSTUDIO-MYST-070.md): Uncertain conf.py lists suppress all warnings
+  - [SwRS-MDOKFSTUDIO-MYST-089](SwRS-MDOKFSTUDIO-MYST-089.md): The conf.py reader applies list mutations in order
+<!-- okf:links:end -->

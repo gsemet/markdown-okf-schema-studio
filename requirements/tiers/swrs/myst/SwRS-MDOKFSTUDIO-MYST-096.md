@@ -13,7 +13,8 @@ description: When a document holds a directive or fence the parser cannot build
   the document renders.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -68,3 +69,12 @@ Markdown runs an unclosed fence to the end of the file; the preview departs from
 - Method: test/core/render/alertSourceLines.test.ts (an unclosed fence after a GitHub alert: the warning and the opening line shown as code carry the fence's own line).
 - Criteria: the render never fails; each broken construct is one code block of its own lines; the rest of the document renders.
 - Known issue: only a fence left open before a heading reports a diagnostic; a directive shown raw for another reason (no body, or open to the end of the file with no heading after it) has no hint.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+<!-- okf:links:end -->

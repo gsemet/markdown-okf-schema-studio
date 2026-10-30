@@ -7,7 +7,8 @@ description: When a writer renames a label from its anchor icon, the Studio
   SHALL apply it as one undoable edit, or explain why it refuses.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -32,3 +33,12 @@ As a writer, I want safe label renaming so that references do not silently break
 ### Rationale and constraints
 
 - A refused rename tells the writer why and leaves the document unchanged.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-MYST-009](StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+<!-- okf:links:end -->

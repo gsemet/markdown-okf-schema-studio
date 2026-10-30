@@ -7,7 +7,8 @@ description: When the value of a text field holds a line break, the extension
   SHALL add a line on Enter and save it on Cmd or Ctrl+Enter.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the value of a text field holds a line break, the extension SHALL add a lin
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterEditor.test.ts).
 - Criteria: Tests Enter in a multi-line frontmatter text value inserts a line; Cmd/Ctrl+Enter saves.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-004](SwRS-MDOKFSTUDIO-FMEDIT-004.md): Text values are edited as one or several lines
+<!-- okf:links:end -->

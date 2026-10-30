@@ -7,7 +7,8 @@ description: When an edit operation returns a result, isRefusal SHALL be true
   exactly for a result that carries a refused reason.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When an edit operation returns a result, isRefusal SHALL be true exactly for a r
 
 - Method: Unit test `a refusal is told apart from a plan` in test/core/edits/textEdit.test.ts.
 - Criteria: The test is the presence of the refused key.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+<!-- okf:links:end -->

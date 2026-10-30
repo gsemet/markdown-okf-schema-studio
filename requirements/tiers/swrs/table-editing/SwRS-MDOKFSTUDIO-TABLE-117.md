@@ -10,7 +10,8 @@ description: When the writer runs HTML table, the extension SHALL replace the
   selection, set apart by blank lines, with Column 1 selected.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -77,3 +78,12 @@ When the writer runs HTML table, the extension SHALL replace the pipe table at t
 - Method: test/page/modules/editActions.test.ts (T25: htmlTable converts the pipe table under the caret, text escaped, alignment kept; T25: htmlTable finds the table from its header, delimiter or last row, and from a table after text; T25: htmlTable outside a pipe table inserts a new 2 x 2 table set apart by blank lines; the list-table and HTML table rows are in test/page/modules/tableInsertAfterTable.test.ts; the no table tools row is read from htmlTable in src/page/modules/tableEditActions.ts and is untested).
 - Method: test/page/modules/markdownTable.test.ts (T25: toHtmlTable writes thead and tbody with escaped text and alignment attributes; T25: toHtmlTable omits tbody without rows and alignment attributes without colons; T25: toHtmlTable keeps a model's unicode and empty cells).
 - Criteria: The replaced range, the exact HTML text for each case, and the inserted text with the selection of Column 1. The button itself belongs to the palette-slash scope.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+<!-- okf:links:end -->

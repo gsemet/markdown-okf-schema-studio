@@ -10,9 +10,13 @@ description: When a writer applies bold, italic, a link, a colour or another
   the table at the caret.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: approved
+req_lifecycle: approved
+status: stable
 approved_by: gaetan@xeberon.net
-approved_on: 2026-10-28
+approved_at: '2026-10-28T00:00:00Z'
+verified:
+  by: human:gaetan@xeberon.net
+  at: '2026-10-28T00:00:00Z'
 origin: native
 tier: StRS
 derives_from: []
@@ -51,3 +55,19 @@ As a writer, I format text in a cell from the bar or with a shortcut and the tab
 - Table inserts a pipe table of 1 to 9 rows and 1 to 9 columns (the header counts as a row) after the selection and on its own lines; with the caret inside a pipe table, a `{list-table}` or an HTML table, the new table (Table, HTML table, Table with caption) goes after that table and never splits it.
 - Column alignment (GFM and MyST) rewrites only the delimiter cell of the caret's column; Table with caption (MyST) wraps the pipe table at the caret in a `{table}` directive.
 - The size chooser popover and the palette buttons and slash entries themselves belong to the palette-slash scope.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+  - [SwRS-MDOKFSTUDIO-TABLE-018](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-018.md): Enter, Done, leaving the cell or a click elsewhere commits the cell
+  - [SwRS-MDOKFSTUDIO-TABLE-085](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-085.md): The table bar's cell group formats the cell text
+  - [SwRS-MDOKFSTUDIO-TABLE-091](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-091.md): Pipes in cell text are escaped and line breaks become spaces
+  - [SwRS-MDOKFSTUDIO-TABLE-106](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-106.md): The Table action inserts a pipe table of the chosen size on its own lines
+  - [SwRS-MDOKFSTUDIO-TABLE-111](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-111.md): Column alignment sets the colons of the caret's column
+  - [SwRS-MDOKFSTUDIO-TABLE-115](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-115.md): Table with caption wraps the table at the caret in a table directive
+  - [SwRS-MDOKFSTUDIO-TABLE-117](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-117.md): HTML table converts or inserts an HTML table
+<!-- okf:links:end -->

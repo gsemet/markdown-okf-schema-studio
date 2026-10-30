@@ -7,7 +7,8 @@ description: When a writer types in a field or key editor, the extension SHALL
   NOT show the edition palette or the slash menu.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a writer types in a field or key editor, the extension SHALL NOT show the e
 
 - Method: Unit test typing in a field or key editor opens neither the slash menu nor the edition palette in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: Only the block editors bind the palette and slash menu.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-001](SwRS-MDOKFSTUDIO-FMEDIT-001.md): A click on a field in edit mode opens its editor in place
+<!-- okf:links:end -->

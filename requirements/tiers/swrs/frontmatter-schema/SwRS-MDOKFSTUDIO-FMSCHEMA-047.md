@@ -10,7 +10,8 @@ description: When an `x-okf-link` annotation is not an object, has a missing or
   '{field}'".
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -53,3 +54,14 @@ When an `x-okf-link` annotation is not an object, has a missing or unknown `reso
 
 - Method: Unit test of the annotation parser.
 - Criteria: A field list entry must be a non-empty string; show_line_number must be a boolean.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-046](SwRS-MDOKFSTUDIO-FMSCHEMA-046.md): x-okf-link annotations declare link fields and their syntax
+<!-- okf:links:end -->

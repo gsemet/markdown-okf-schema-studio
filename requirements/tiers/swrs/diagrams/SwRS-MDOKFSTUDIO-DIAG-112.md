@@ -8,7 +8,8 @@ description: "When a built-in diagram has a line starting with !includeurl, !inc
   with from, the page SHALL NOT run the engine or ask the host for a file."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a built-in diagram has a line starting with !includeurl, !includedef or !im
 
 - Method: Unit test: a diagram with a standard-library include shows the useJar hint, keeps its source and never reaches the engine.
 - Criteria: No engine call and no host request for an unsupported directive.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-032](SwRS-MDOKFSTUDIO-DIAG-032.md): The built-in engine refuses what needs a URL, a library or more than 1 MiB
+<!-- okf:links:end -->

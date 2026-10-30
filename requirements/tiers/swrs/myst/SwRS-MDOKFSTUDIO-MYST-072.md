@@ -9,7 +9,8 @@ description: When a document uses syntax of a MyST extension that the governing
   itself, at most 10 per render, and leave the rendering unchanged.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -98,3 +99,20 @@ The detected extensions are colon_fence, dollarmath, amsmath, deflist, fieldlist
 - Method: test/core/render/renderReq.myst.requirements.test.ts ("at most 10 extension warnings are kept and 10 or fewer are all kept": cap; "an included file is not checked against conf.py while the document's own text is": includes)
 - Method: test/page/modules/warningBanner.test.ts ("CR 050: the status region marks the conf.py warnings with their code": status list code myst-extension)
 - Criteria: One warning per extension, capped at 10 (MAX_EXTENSION_WARNINGS). The wording is fixed. Only the document's own text is read. CRLF and CR line breaks have no dedicated assertion (untested).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-064](../rendering-core/SwRS-MDOKFSTUDIO-CORE-064.md): Warn about MyST syntax of a disabled extension
+  - [SwRS-MDOKFSTUDIO-MYST-030](SwRS-MDOKFSTUDIO-MYST-030.md): Prices are not reported as missing dollarmath
+  - [SwRS-MDOKFSTUDIO-MYST-073](SwRS-MDOKFSTUDIO-MYST-073.md): At most 10 extension warnings are kept
+  - [SwRS-MDOKFSTUDIO-MYST-074](SwRS-MDOKFSTUDIO-MYST-074.md): Detection ignores code, comments, roles and look-alikes
+  - [SwRS-MDOKFSTUDIO-MYST-075](SwRS-MDOKFSTUDIO-MYST-075.md): Warnings carry the line of the syntax
+  - [SwRS-MDOKFSTUDIO-MYST-076](SwRS-MDOKFSTUDIO-MYST-076.md): Included files are not checked against conf.py
+  - [SwRS-MDOKFSTUDIO-MYST-077](SwRS-MDOKFSTUDIO-MYST-077.md): Extension warnings use the fixed wording and status list
+<!-- okf:links:end -->

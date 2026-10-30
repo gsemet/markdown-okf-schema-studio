@@ -8,7 +8,8 @@ description: While a field editor is open, the Studio SHALL block refresh,
   table out of block selection, movement and navigation.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -37,3 +38,12 @@ As a writer, I am not surprised by other edits or refreshes interfering with a m
 - Toolbar Refresh is disabled and checkbox toggles are refused with a status message while a field editor is open.
 - Known issue: a content patch of the page closes an open field editor and drops its text, and the waiting properties update.
 - ArrowUp from the first block editor does not step into the properties table.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+<!-- okf:links:end -->

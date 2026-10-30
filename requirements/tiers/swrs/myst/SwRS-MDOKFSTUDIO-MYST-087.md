@@ -8,7 +8,8 @@ description: When a document holds an admonition directive, the extension SHALL
   name.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a document holds an admonition directive, the extension SHALL render it wit
 
 - Method: Unit test "each directive name has one plug-in, found by its exact name" in test/core/directives/registry.test.ts
 - Criteria: Admonition family behaves per name.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-001](SwRS-MDOKFSTUDIO-MYST-001.md): Admonitions render as coloured callouts with a title
+<!-- okf:links:end -->

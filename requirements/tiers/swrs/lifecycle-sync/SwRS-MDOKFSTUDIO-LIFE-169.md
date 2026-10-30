@@ -9,7 +9,8 @@ description: When the writer changes a view choice on the page, the extension
   workspace according to the table of view choices.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -160,3 +161,25 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 - Method: test/session/diagReq.viewState.requirements.test.ts (a theme mode or a view preference that cannot be saved still holds for the session, is logged by the logger of the host, and warns the reader once).
 - Method: test/integration/previewEditing.test.ts (previewAnchorModeChanged false then true sets the configuration of the preview; the update of the loaded context is untested).
 - Criteria: after each change the saved state, the posted message and the stored value equal the value shown; an invalid value leaves the stored value unchanged.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+  - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+  - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
+  - [StRS-MDOKFSTUDIO-THEME-004](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-004.md): The theme choice holds for the workspace and survives slow loads and bad values
+  - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+  - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
+  - [StRS-MDOKFSTUDIO-TOOLBAR-013](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-013.md): The reader decides how the panes scroll together and sees the cursor block
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-170](SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-021](../layout-width/SwRS-MDOKFSTUDIO-LAYOUT-021.md): A width mode choice is saved for the workspace
+<!-- okf:links:end -->

@@ -13,7 +13,8 @@ description: "When a preview page is built, the extension SHALL render the toolb
   without overlap between its rows."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -101,3 +102,12 @@ anchor rather than moving left by half the label width.
 - Method: test/visual/capture_final_checks.py (Every button has a tooltip: label per control; Tooltip on hover through check_tooltip_contrast, run on every visual scenario, which hovers the Refresh button; the keyboard case follows from the shared CSS rule and is not measured).
 - Method: test/integration/tableMoves.ts (Table handle strip at the top of the page: `elementFromPoint` at the strip point is not inside the toolbar, with the measured geometry logged).
 - Criteria: The markup holds 14 buttons in five rows with the listed controls; the visual probe reports the same rows and Tab order; every button has data-tooltip equal to title; ::after content is attr(data-tooltip) with visibility visible and opacity 1 on hover and focus-visible; contrast ratio >= 4.5, content not none, opacity not 0; no two rows overlap (0.5 px tolerance), left is 0 or more and right is at most the pane width at both zoom limits; the toolbar is position fixed, 12 px from the top and 14 px from the end, with z-index 1100.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+<!-- okf:links:end -->

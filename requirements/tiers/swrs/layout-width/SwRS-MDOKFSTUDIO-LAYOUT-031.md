@@ -9,7 +9,8 @@ description: When the layout may have changed, the extension SHALL measure the
   edited element.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,14 @@ When the layout may have changed, the extension SHALL measure the wide elements 
 
 - Method: Unit test T10 the saved width mode applies at startup and an edited element keeps the column; inspection of the stabilizeLayout, content patch and toolbar callbacks.
 - Criteria: Every listed event calls the width update.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-023](SwRS-MDOKFSTUDIO-LAYOUT-023.md): Auto width lets wide blocks break out of the column
+<!-- okf:links:end -->

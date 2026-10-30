@@ -12,7 +12,8 @@ description: When previewPickImage reaches the host for a trusted, saved
   with a reason the page shows, and read or write nothing.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -81,3 +82,18 @@ When previewPickImage reaches the host for a trusted, saved document, the extens
 - Method: test/core/mapping/imageReference.test.ts (relativeImageReference gives a POSIX path relative to the document folder; accepts Windows separators and refuses another drive; refuses a path that cannot be written in a reference; isImageFileName accepts png, jpeg, gif, webp and svg only; checks the picked image, refused picks and shape scenarios)
 - Method: test/integration/imagePicker.test.ts (the relative path, the dialog folder and filter, the cancel, that picking edits nothing, and that a file outside the workspace and a non-image are refused; checks the picked image, cancelled and refused picks scenarios)
 - Criteria: The read-only, out-of-date and failed-dialog answers are deduced from the code (handlePickImage), not tested.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

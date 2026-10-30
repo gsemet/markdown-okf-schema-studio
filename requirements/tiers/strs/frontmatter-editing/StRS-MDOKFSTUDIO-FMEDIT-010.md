@@ -8,7 +8,8 @@ description: When a writer navigates away or the preview needs to flush an open
   it, and warn if it is refused.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,12 @@ As a writer, I do not lose what I typed in a metadata field when I follow a link
 
 - A flush saves the typed text without the type and schema check, so the preview shows any problem.
 - A plain save refused by the host is saved again as a flush when a navigation waits for it; a save that gets no result still lets the navigation go after a bounded wait.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+<!-- okf:links:end -->

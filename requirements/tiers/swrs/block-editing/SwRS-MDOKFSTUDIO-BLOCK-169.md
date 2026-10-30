@@ -10,7 +10,8 @@ description: "When a writer cuts selected blocks, the host SHALL put their Markd
   clipboard write."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -107,3 +108,19 @@ A cut never leaves three line breaks in a row and never merges two paragraphs.
 - Method: test/session/blockReq.requirements.test.ts (pin only when a block follows the span: `a cut stores a pin for the first line of the span only when a block follows it`; changed document: `a cut is refused when the document changed while the clipboard was written`).
 - Method: test/page/runtimeBlockSelection.test.ts (`T40: a copy answer says so and a cut answer clears the selection`; the paste path shares the branch and is not asserted; the refused-cut selection case is not asserted by this test).
 - Criteria: The resulting text has no run of three line breaks and no merged paragraphs; storePendingPin is called only when followingLine is defined; the revision of the document is compared with the one of the request after the write; receiveBlocksResult clears the selection for every answered op except copy.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: "When a document holds a term followed by `: Definition` lines or a
   or an inert placeholder for the numbered reference."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -72,3 +73,15 @@ When a document holds a term followed by `: Definition` lines or an inline `{sub
 - Method: test/core/render/mystPaletteRendering.test.ts (palette-written kbd role: "T30: a {kbd} role inserted by the edition palette renders a kbd element")
 - Method: test/core/render/renderReq.myst.requirements.test.ts (doc and download links, numref placeholder: "doc and download roles render as plain links and numref as an inert placeholder")
 - Criteria: Term and definition become dt and dd; each role maps to its element; doc and download are plain links with the written target; the doc and download text is the label, or the written target (file name for a download) without a label; the numref placeholder holds the role name and the written key.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-018](SwRS-MDOKFSTUDIO-MYST-018.md): Inline roles sub, sup, abbr and kbd render
+  - [SwRS-MDOKFSTUDIO-MYST-095](SwRS-MDOKFSTUDIO-MYST-095.md): Doc and download roles render as plain links
+<!-- okf:links:end -->

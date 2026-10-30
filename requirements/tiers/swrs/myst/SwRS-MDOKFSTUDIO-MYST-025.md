@@ -8,7 +8,8 @@ description: When the preview typesets maths, the extension SHALL load the KaTeX
   and need no script or network request.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the preview typesets maths, the extension SHALL load the KaTeX stylesheet a
 
 - Method: Unit test "typesets inline and display math with local assets and CSP-compatible styles" in test/core/render/mathRenderer.test.ts
 - Criteria: No external request is made.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-006](../../strs/myst/StRS-MDOKFSTUDIO-MYST-006.md): Maths is typeset offline and bad formulas stay readable
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-024](SwRS-MDOKFSTUDIO-MYST-024.md): Maths is typeset offline by KaTeX and bad formulas stay readable
+<!-- okf:links:end -->

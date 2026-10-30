@@ -7,7 +7,8 @@ description: When no schema lookup is made for the document, the extension SHALL
   show the generic frontmatter table.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When no schema lookup is made for the document, the extension SHALL show the gen
 - Method: Unit test of the analysis with schema resolution off; integration test (the generic table only; no test asserts the info row in Restricted Mode).
 - Criteria: The table lists the fields without schema, error or enum information; the lookup itself is specified in SwRS-MDOKFSTUDIO-FMSCHEMA-022.
 - Known issue: a file outside every workspace folder in a trusted workspace is also told that schema validation requires a trusted workspace, which is misleading (see 022).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-005](SwRS-MDOKFSTUDIO-FMSCHEMA-005.md): Without a schema the table lists the keys in source order, escaped
+<!-- okf:links:end -->

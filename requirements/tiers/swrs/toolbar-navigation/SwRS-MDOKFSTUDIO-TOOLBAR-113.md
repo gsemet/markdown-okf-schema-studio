@@ -9,7 +9,8 @@ description: "When previewLink reaches the host, the extension SHALL record the 
   reason The frontmatter link request is invalid."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -79,3 +80,19 @@ When previewLink reaches the host, the extension SHALL record the page's scroll 
 - Method: test/session/diagReq.links.requirements.test.ts (malformed and well-formed frontmatter link request: a malformed frontmatter link request is refused with its own reason)
 - Method: the request that is not a string is checked with the shared optional fields (see SwRS-MDOKFSTUDIO-TRUST-052)
 - Criteria: The handler returns without work when request is falsy. The reason is shown in the same warning as other refusals.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-083](../frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-083.md): A malformed frontmatter link request is refused
+<!-- okf:links:end -->

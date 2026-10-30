@@ -10,7 +10,8 @@ description: When the preview shows paragraphs, list items, table cells, quotes,
   the document by the rules of the scenarios.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -114,3 +115,22 @@ When the preview shows paragraphs, list items, table cells, quotes, captions, he
 - Method: visual scenarios theme-zoom/v04, v05 and v07 in test/visual/capture_page_checks.py (check_frontmatter_rendering, check_forced_cream_theme) (link colour in the forced themes)
 - Method: visual scenario handbook-dark-bottom in test/visual/scenarioDefinitions1.ts (reach the end of the document)
 - Criteria: Computed styles of body text, headings, list margins and indent and inline code match the values above; the last block bottom is at least 30 px from the frame bottom. Fenced blocks in the forced modes are specified in SwRS-MDOKFSTUDIO-CODE-007.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-038](../code-blocks/SwRS-MDOKFSTUDIO-CODE-038.md): Colour YAML code text with the link colour in the forced white and cream themes
+  - [SwRS-MDOKFSTUDIO-CORE-029](SwRS-MDOKFSTUDIO-CORE-029.md): Style headings
+  - [SwRS-MDOKFSTUDIO-CORE-030](SwRS-MDOKFSTUDIO-CORE-030.md): Tighten list spacing
+  - [SwRS-MDOKFSTUDIO-CORE-031](SwRS-MDOKFSTUDIO-CORE-031.md): Style inline code as a pill
+  - [SwRS-MDOKFSTUDIO-CORE-032](SwRS-MDOKFSTUDIO-CORE-032.md): Keep inline code readable inside links
+  - [SwRS-MDOKFSTUDIO-CORE-033](SwRS-MDOKFSTUDIO-CORE-033.md): Keep inline code compact in tables
+  - [SwRS-MDOKFSTUDIO-CORE-037](SwRS-MDOKFSTUDIO-CORE-037.md): Reach the end of the document
+<!-- okf:links:end -->

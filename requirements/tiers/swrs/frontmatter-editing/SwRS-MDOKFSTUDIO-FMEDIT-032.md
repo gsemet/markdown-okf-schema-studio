@@ -8,7 +8,8 @@ description: When the host receives a remove that would leave a required field
   frontmatter field "{name}".'
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,15 @@ When the host receives a remove that would leave a required field missing, the e
 
 - Method: Unit test on the candidate check (test/core/edits/frontmatterEdit.test.ts).
 - Criteria: A remove that makes another field newly missing through a conditional required rule is refused the same way.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-029](SwRS-MDOKFSTUDIO-FMEDIT-029.md): Remove field deletes exactly the lines of a non-required field
+<!-- okf:links:end -->

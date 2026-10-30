@@ -8,7 +8,8 @@ description: When a built-in diagram includes files, the page SHALL refuse the
   and stop at an include cycle, with a reason shown on the diagram.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -67,3 +68,18 @@ Each limit refuses the include that crosses it; the reason is shown on the diagr
 
 - Method: test/page/modules/plantumlDiagram.test.ts (includes nested deeper than 8 files are refused: eighth level and ninth level; a diagram includes at most 64 files and at most 1 MiB of text with its includes: 65th file, repeated include, crossing the limit, same file twice; an include cycle is stopped with a message, also back to the diagram's own file: cycle scenario).
 - Criteria: Depth 8 passes, depth 9 fails; the count is of distinct requests; the diagram's own text counts toward the 1 MiB limit; no unbounded recursion.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-046](SwRS-MDOKFSTUDIO-DIAG-046.md): PlantUML includes are read through the extension and refusals reach the diagram
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-062](SwRS-MDOKFSTUDIO-DIAG-062.md): A diagram includes at most 64 files
+  - [SwRS-MDOKFSTUDIO-DIAG-063](SwRS-MDOKFSTUDIO-DIAG-063.md): A diagram and its includes hold at most 1 MiB of text
+  - [SwRS-MDOKFSTUDIO-DIAG-064](SwRS-MDOKFSTUDIO-DIAG-064.md): An include cycle stops with a message
+<!-- okf:links:end -->

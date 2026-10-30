@@ -8,7 +8,8 @@ description: When the floating toolbar would cover the first element of a
   width or moving it down only as far as needed.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -39,3 +40,12 @@ As a writer, I can click the first block editor, the Start writing button and th
 - The clearance is measured again after a resize, a content or toolbar change, a toolbar collapse, a web font load and the next animation frames until quiet, throttled to avoid a burst of updates.
 - The page publishes the toolbar's bottom edge so that the edition palette sticks below the toolbar only where the toolbar shares space with the column.
 - Known issue: the 480 px limit between wide and narrow is a rule of the visual tests only; the code decides by overlap with the toolbar and a 320 px minimum frame width, so a 481 px pane with a long toolbar could also push content down.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+<!-- okf:links:end -->

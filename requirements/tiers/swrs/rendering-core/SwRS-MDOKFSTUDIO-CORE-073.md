@@ -8,7 +8,8 @@ description: When the repository is checked, the writing skill for Studio SHALL
   or an unresolved directive, and that cover the syntaxes the skill lists.
 project: MDOKFSTUDIO
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -54,3 +55,12 @@ When the repository is checked, the writing skill for Studio SHALL contain only 
 
 - Method: test/core/render/writingSkill.test.ts renders every example through `renderPreviewDocument` and checks the shape of the skill folder.
 - Criteria: zero diagnostics and zero unresolved directives over all examples; each listed syntax family present and rendered; the shape rules above hold.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

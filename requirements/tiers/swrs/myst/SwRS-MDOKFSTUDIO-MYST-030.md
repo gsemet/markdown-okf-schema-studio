@@ -8,7 +8,8 @@ description: When a document holds dollar amounts such as `$19 base ... ($200)`,
   dollarmath extension for them.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a document holds dollar amounts such as `$19 base ... ($200)`, `$5 and $6` 
 
 - Method: Unit test "prices and ordinary braces are not math or substitutions" in test/core/render/mystSyntaxDetect.test.ts
 - Criteria: Only real spans count; render divergence of currency is an open question.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-072](SwRS-MDOKFSTUDIO-MYST-072.md): MyST syntax of a disabled extension is reported with its line
+<!-- okf:links:end -->

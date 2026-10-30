@@ -11,7 +11,8 @@ description: When the extension compares a base text with the current text, it
   when more than 20 000 lines differ or more than 2000 edits are needed.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,12 @@ When the extension compares a base text with the current text, it SHALL report t
 
 - Method: test/core/mapping/lineDiff.test.ts (unit tests `T16: identical text has no changed range`, `T16: added lines are reported in current line numbers`, `T16: a modified line is one range and two separate edits are two ranges`: scenario added, modified and separate edits; `T16: line endings do not count as changes`, `T16: a base without a trailing newline matches one with it`, `T16: deleted-only lines give no range`: scenario differences that do not count; `T16: above the size cap the whole middle counts as changed`, `T16: many differences beyond the edit budget fall back to the whole middle`: scenario size limits).
 - Criteria: The ranges equal the expected start and end lines; the result is an empty list in each no-range case; MAX_DIFF_LINES = 20000 and MAX_DIFF_EDITS = 2000 switch to one range.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+<!-- okf:links:end -->

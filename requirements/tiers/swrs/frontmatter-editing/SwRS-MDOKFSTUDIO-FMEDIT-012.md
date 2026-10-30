@@ -8,7 +8,8 @@ description: When a writer presses ArrowUp or ArrowDown on the handle of a list
   and show the insertion position.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a writer presses ArrowUp or ArrowDown on the handle of a list item, or drag
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterEditor.test.ts).
 - Criteria: Tests frontmatter list editor supports add, reorder, remove, and direct array saves; list dragging shows the insertion boundary.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-010](SwRS-MDOKFSTUDIO-FMEDIT-010.md): List fields and link lists are edited item by item
+<!-- okf:links:end -->

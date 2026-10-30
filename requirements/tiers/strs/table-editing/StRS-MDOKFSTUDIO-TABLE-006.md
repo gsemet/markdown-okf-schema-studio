@@ -9,7 +9,8 @@ description: When a writer presses Tab, Shift+Tab or an arrow key in a table
   redo, select all or a wrapping marker act on the text of that cell only.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -44,3 +45,16 @@ As a writer, I move through a table with the keyboard, cell by cell, and add a r
 - The arrow keys stay native with a selection, with Shift, Alt, Cmd or Ctrl held and during an IME composition.
 - Home and End move the caret to the start or end of the cell text and do not scroll the page or a wide table.
 - Undo, redo, select all, wrapping a selection with a marker and keeping handled keys away from VS Code work in a cell as in any text box of the block editor, and are specified there (see SwRS-MDOKFSTUDIO-BLOCK-069); keys the editor does not use, such as Ctrl+Tab, still reach VS Code.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-TABLE-035](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-035.md): Tab and the arrow keys move through the table cells
+  - [SwRS-MDOKFSTUDIO-TABLE-044](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-044.md): Typing a marker character over a selection in a cell wraps it as one undoable step
+  - [SwRS-MDOKFSTUDIO-TABLE-045](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-045.md): Undo and redo shortcuts stay in the cell text box
+  - [SwRS-MDOKFSTUDIO-TABLE-046](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-046.md): A key the cell editor handled does not reach VS Code
+  - [SwRS-MDOKFSTUDIO-TABLE-047](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-047.md): Select all in the cell text box selects only the box text
+<!-- okf:links:end -->

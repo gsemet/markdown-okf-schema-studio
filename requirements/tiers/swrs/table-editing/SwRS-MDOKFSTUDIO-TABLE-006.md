@@ -11,7 +11,8 @@ description: When a cell editor is open, the extension SHALL style its text box
   at least 8em wide and the cell being edited at least 300 px wide.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -89,3 +90,12 @@ When a cell editor is open, the extension SHALL style its text box with the same
 - Method: test/core/preview/previewStyles.test.ts ("in edit mode table cells keep a minimum width and the edited cell is wider": the 8em and 300 px rules are scoped to edit mode); visual check check_cell_editor_chrome asserts the edited cell is at least 300 px wide and the other columns keep their width.
 - Method: real-window test test/integration/tableEmptyColumn.test.ts (cream preview theme on a dark VS Code theme): a column is added with the toolbar Col +, saved with Done, its empty header is opened; the empty column cells are measured at least 8em wide, the edited cell at least 300 px wide and the editor inside it (it fails on the old CSS: the column was 23 px wide).
 - Criteria: The computed font family, size and line height of the cell text box equal those of the block editor rule; the style comes from the shared textarea rule. The visual check fails when the selected cell is more than 1 px wider or narrower than before the editor opened (a cell that was narrower than 300 px must be 300 px wide, an exception to the 1 px rule), or when the cell is shorter than before. The wrapping rule (pre-wrap, overflow-wrap anywhere, overflow hidden, height from scrollHeight) is read from the style and the field's resize function; no scenario asserts the absence of a scrollbar or the unbreakable-text boundary. The resizeTextarea hook of the active edit is called by the layout stabiliser and sets the height; the no-editor boundary is not tested. Both buttons are descendants of the cell editor region and below the text box. Wide tables themselves are specified in layout-width.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+<!-- okf:links:end -->

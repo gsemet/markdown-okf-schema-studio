@@ -9,7 +9,8 @@ description: When a document holds a `{figure}` directive with colon or backtick
   block from opening line to closing fence.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -103,3 +104,19 @@ The figure still renders when its width is dropped.
 - Method: visual scenario chapter-figure-dark in test/visual/scenarioDefinitions1.ts (image outside the folder, landmark in the frame)
 - Method: visual scenario `figure-anchors-${theme}-${mode ?? "theme"}` in test/visual/scenarioDefinitions2.ts (width applied by the page, floats)
 - Criteria: Both fence forms render alike. Only plain lengths and the three alignments survive. Loading follows the resource policy.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-059](../rendering-core/SwRS-MDOKFSTUDIO-CORE-059.md): Use a figure body as its caption
+  - [SwRS-MDOKFSTUDIO-CORE-063](../rendering-core/SwRS-MDOKFSTUDIO-CORE-063.md): Keep figure width and alignment
+  - [SwRS-MDOKFSTUDIO-MYST-032](SwRS-MDOKFSTUDIO-MYST-032.md): Figure images outside the document folder load
+  - [SwRS-MDOKFSTUDIO-MYST-033](SwRS-MDOKFSTUDIO-MYST-033.md): Figure width values are validated
+  - [SwRS-MDOKFSTUDIO-MYST-035](SwRS-MDOKFSTUDIO-MYST-035.md): Figure alignment sets align classes and float
+  - [SwRS-MDOKFSTUDIO-MYST-091](SwRS-MDOKFSTUDIO-MYST-091.md): The figure directive renders with its own styles and actions
+<!-- okf:links:end -->

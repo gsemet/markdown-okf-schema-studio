@@ -10,7 +10,8 @@ description: "When a followed link names a fragment or a frontmatter marker, the
   the marker followed by the exact identity, and select nothing when no line matches."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -87,3 +88,12 @@ When a followed link names a fragment or a frontmatter marker, the extension SHA
 - Method: test/core/navigation/previewNavigation.test.ts (line range, block id, heading, fences and the refusal rows: Markdown fragments select headings and source lines, not fenced examples; label and the label in a fence: a MyST (label)= line is the target of its fragment, but not inside a fence; frontmatter marker: marker navigation selects exact marker identities; the HTML id and CRLF rows are untested)
 - Method: test/session/links.test.ts (frontmatter marker: a frontmatter link finds its marker with the identity of the text it was analysed from)
 - Criteria: start <= end <= line count; fence open and close follow the marker character and length; the first matching line of the file wins.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+<!-- okf:links:end -->

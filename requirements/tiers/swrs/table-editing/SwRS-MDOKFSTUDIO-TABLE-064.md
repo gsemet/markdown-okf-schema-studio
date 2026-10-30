@@ -12,7 +12,8 @@ description: When a cell editor is open and the table bar would lie under the
   for a button of the bar.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -114,3 +115,12 @@ The inset is measured when the bar is filled, never on a scroll, so a scroll nev
 - Method: visual scenarios palette-slash/v19 and v20 (cited by the palette-slash scope) check the bar riding down with a tall table.
 - Method: "Near the end of the table" is checked by the assertion of a bar not below the table end in the CR 034 test above; the exact translation value (usable top plus 4 minus the natural top, limited by the room to the table bottom) is the stickyBarShift formula and is not asserted.
 - Criteria: A positive shift, the stuck mark, a bar inside the viewport and a bar not below the table end; the shift value (0 px) for the tall bar; the shift changing with the resize and the listeners removed at close; the scroll target equal to the previous offset minus the delta; no programmatic scroll in the three no-scroll cases; a new programmatic scroll when the status wraps and none when the size is unchanged.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-008](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-008.md): A table bar locates the writer and edits rows and columns
+<!-- okf:links:end -->

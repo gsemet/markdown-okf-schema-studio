@@ -8,7 +8,8 @@ description: When a {uml} directive has neither a file path nor a body, the
   diagram body. in place of the diagram and report a warning.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a {uml} directive has neither a file path nor a body, the extension SHALL s
 
 - Method: Unit test: a {uml} directive with neither a file nor a body says so.
 - Criteria: Only {uml} gets the message.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-068](SwRS-MDOKFSTUDIO-DIAG-068.md): A {uml} directive renders a PUML file as a render dependency
+<!-- okf:links:end -->

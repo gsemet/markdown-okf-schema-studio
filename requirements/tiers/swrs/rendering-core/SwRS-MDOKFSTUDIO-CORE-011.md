@@ -8,7 +8,8 @@ description: When `[[...]]` appears in code, an existing link, an image, math or
   wikilink.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When `[[...]]` appears in code, an existing link, an image, math or raw HTML, or
 
 - Method: Unit test "wikilinks render as lazy note targets without changing code or existing links" in test/core/render/mystFeatures.test.ts
 - Criteria: Wikilinks are converted only in plain text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-010](SwRS-MDOKFSTUDIO-CORE-010.md): Wikilinks render as links where they are text
+<!-- okf:links:end -->

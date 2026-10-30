@@ -7,7 +7,8 @@ description: "When the reader follows a link whose request starts with #, the ex
   SHALL post it at once and leave an open editor open."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When the reader follows a link whose request starts with #, the extension SHALL 
 
 - Method: Unit test CR 025: an anchor link inside the page keeps the open editor.
 - Criteria: No save message for a request that starts with #.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+<!-- okf:links:end -->

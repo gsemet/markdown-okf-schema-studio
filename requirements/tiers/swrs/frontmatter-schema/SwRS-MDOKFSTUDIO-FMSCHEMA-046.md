@@ -12,7 +12,8 @@ description: When a schema annotates a property with `x-okf-link`, the extension
   from its `?query` and `#fragment`.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -96,3 +97,16 @@ When a schema annotates a property with `x-okf-link`, the extension SHALL find t
 - Method: test/core/frontmatter/fileLinks.test.ts (array items, oneOf with two matching branches, invalid annotation, accepted annotation values; the other annotation positions were probed against the inspection and have no test).
 - Method: test/core/frontmatter/okfFrontmatter.test.ts (invalid link value, query and fragment; both partial: wikilink parsing has no dedicated assertion).
 - Criteria: Duplicate links (same field, index, resolution, syntax and target) are reported once; nested results attach to their top-level field row. A field list entry must be a non-empty string; show_line_number must be a boolean. A non-string value also gets the validator's own type error when the schema declares string. The fragment is cut first, then the query; the target is trimmed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-047](SwRS-MDOKFSTUDIO-FMSCHEMA-047.md): An invalid x-okf-link annotation marks the field
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-048](SwRS-MDOKFSTUDIO-FMSCHEMA-048.md): Link values are checked for type and syntax
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-049](SwRS-MDOKFSTUDIO-FMSCHEMA-049.md): Query and fragment are split off a link target
+<!-- okf:links:end -->

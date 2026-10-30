@@ -9,7 +9,8 @@ description: When a section is folded or unfolded, the extension SHALL keep the
   change the document text.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: SwRS
 derives_from:
@@ -52,3 +53,12 @@ When a section is folded or unfolded, the extension SHALL keep the folded headin
 - Method: test/core/state/headingFold.test.ts (key shape and occurrence, normalisation of a malformed state, replacement and bound of the per-document keys).
 - Method: test/page/modules/headingFold.test.ts (the state written after a fold, other documents' keys kept, folds applied from the saved state and again on replaced content, the text of the blocks unchanged).
 - Criteria: headingFolds in the webview state lists the folded keys of each document; nothing is posted to the host and no document edit is made.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-002](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-002.md): The reader folds and unfolds the sections of the document
+<!-- okf:links:end -->

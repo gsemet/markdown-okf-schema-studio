@@ -8,7 +8,8 @@ description: When a fence label is a common alias such as `py`, `js`, `sh`, `rs`
   names.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a fence label is a common alias such as `py`, `js`, `sh`, `rs` or `patch`, 
 
 - Method: Unit test over the alias table.
 - Criteria: Every listed alias yields the highlighted output of its target grammar; an unlisted label yields none.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-001](SwRS-MDOKFSTUDIO-CODE-001.md): Fenced code in a supported language is highlighted, other code stays literal
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When the writer types text into a table cell or inserts text into a
   of text inserted from the bar or pasted into the cell with a space.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -75,3 +76,14 @@ When the writer types text into a table cell or inserts text into a cell from th
 - Method: test/page/runtimePaletteActions.test.ts (T35: link text and URL with a pipe are escaped and newlines become spaces in a cell; scenarios "Link text and URL inserted from the bar"; the rows of the boundary table are read from cellSafeEdit in src/page/modules/textEditing.ts and are untested).
 - Method: test/page/fmtableReqTable.requirements.test.ts (a line break pasted into the cell text box becomes a space in the source row).
 - Criteria: The saved line and the reparsed rows, the inserted text in the cell with the unchanged cell count, and one saved line for the paste case.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TABLE-102](SwRS-MDOKFSTUDIO-TABLE-102.md): Edge pipes are optional and only an escaped pipe stays in its cell
+<!-- okf:links:end -->

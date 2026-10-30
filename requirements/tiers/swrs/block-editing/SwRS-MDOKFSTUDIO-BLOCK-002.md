@@ -9,7 +9,8 @@ description: The extension SHALL give every rendered horizontal rule a box 25 px
   the rule's block editor.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,12 @@ The extension SHALL give every rendered horizontal rule a box 25 px tall (the 1 
 
 - Method: test/core/preview/previewStyles.test.ts (the hr rule has 12px padding, content-box and a margin reduced by the padding); visual scenarios palette-slash/v23-edit-bar-tooltip-rule-cream-900 and v24-edit-bar-tooltip-rule-dark-900 (element at 10 px above and below the line is the rule, box 25 px tall)
 - Criteria: The rule box is at least 24 px tall and document.elementFromPoint 10 px above and below its line returns the rule.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+<!-- okf:links:end -->

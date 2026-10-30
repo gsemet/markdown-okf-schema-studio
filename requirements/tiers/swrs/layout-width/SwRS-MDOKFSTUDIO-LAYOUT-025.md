@@ -8,7 +8,8 @@ description: When the width mode is Auto, the extension SHALL measure a wide
   no cell wraps in the broken-out table.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the width mode is Auto, the extension SHALL measure a wide table without th
 
 - Method: Unit test T10b a wide table gets its fractional max-content width rounded up, so no cell wraps; visual scenario v84.
 - Criteria: Breakout is the ceiling of the largest of scroll width, declared width, intrinsic width and box width, minus the column.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-023](SwRS-MDOKFSTUDIO-LAYOUT-023.md): Auto width lets wide blocks break out of the column
+<!-- okf:links:end -->

@@ -11,7 +11,8 @@ description: "When the reader follows an anchor, the extension SHALL post naviga
   or element is found or the request names another render."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -76,3 +77,12 @@ When the reader follows an anchor, the extension SHALL post navigateAnchor with 
 - Method: test/page/runtimeScroll.test.ts (page scrolls to host-approved anchors; ignores invalid, unknown and stale requests, including an escape left after four rounds such as %41; id fallback; source line wins).
 - Method: visual scenario in test/visual/scenarioDefinitions2.ts, toolbar-navigation/v30-back-enabled-after-anchor-light-900 (the target heading is near the top of the pane).
 - Criteria: the lines are those of markdownFragmentRange; the scroll position is the target top minus the reading offset, within the scroll limits; no scroll without a target element.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+<!-- okf:links:end -->

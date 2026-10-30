@@ -8,7 +8,8 @@ description: "When the engine is the built-in one and the rendered content conta
   to the page with the page's script nonce, and adds it in no other case."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the engine is the built-in one and the rendered content contains a PlantUML
 
 - Method: Unit test `the built-in PlantUML script is added once with the page nonce, only for the built-in engine and a figure` in `test/session/diagReq.webview.requirements.test.ts`.
 - Criteria: The script tag follows the engine and the figure.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-023](SwRS-MDOKFSTUDIO-DIAG-023.md): PlantUML fences become centred inert pictures drawn by the built-in engine
+<!-- okf:links:end -->

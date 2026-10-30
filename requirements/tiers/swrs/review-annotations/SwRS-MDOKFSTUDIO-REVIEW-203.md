@@ -10,7 +10,8 @@ description: When the extension needs the text of a file at HEAD, it SHALL read
   only when the HEAD commit id has changed.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -68,3 +69,12 @@ When the extension needs the text of a file at HEAD, it SHALL read it through th
 
 - Method: test/host-vscode/headBaseline.test.ts (unit tests `T16: no Git extension, no repository or a failing show give undefined`: scenario Git missing or failing; `T16: only file documents under 1 MB are compared, big blobs are skipped`: scenario only file documents under 1 MiB; `T16: a state change with the same commit id does not notify, a new commit does`, `T16: watch gives nothing without the extension, a repository or an active API`: scenario a new HEAD commit is announced). The scenario Git available is checked with the same test file (the commit id and the text are returned) and by the real window review-annotations/r03-incoming-change-bars.
 - Criteria: read() returns undefined in the failing cases; MAX_BASELINE_BYTES = 1048576 gates the read; the listener runs once per commit change.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+<!-- okf:links:end -->

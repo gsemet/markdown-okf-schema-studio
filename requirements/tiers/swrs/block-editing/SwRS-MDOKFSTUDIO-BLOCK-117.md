@@ -10,7 +10,8 @@ description: When the host moves a block past its neighbour, it SHALL replace
   the swap would glue a block to a non-blank line.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -91,3 +92,15 @@ When the host moves a block past its neighbour, it SHALL replace only the lines 
 - Method: test/core/edits/sourceEdits.test.ts: `a list mapped up to its trailing blank line moves like any block` (scenario 6).
 - Method: test/integration/blockMove.test.ts: the move in the real host (scenarios 1 and 5, down then up), and `runMappedRanges`, a document with a frontmatter, headings and a list moved with the ranges the renderer maps (scenario 6).
 - Criteria: Applying the edit gives the expected text and the reported new first line. No two blocks that were separate become one paragraph. Identity for blank-separated blocks.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

@@ -11,7 +11,8 @@ description: When the host receives a value from the page, it SHALL hand it to a
   bounds, ignoring any other value without a visible change.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -107,3 +108,15 @@ When the host receives a value from the page, it SHALL hand it to a handler only
 - Method: test/core/protocol/pageToHost.test.ts (nominal; refusal; identity fields and size bound: accepts a valid registered message, rejects non-objects, unregistered and prototype-key types, rejects missing or non-integer ids and oversize documentId, the shipped registry rejects an unregistered type)
 - Method: test/core/protocol/pageStateMessages.test.ts (identity fields, shared optional fields, owned fields, block edit lines: non-objects and inherited keys are not page messages; a page-state message keeps accepting a document id longer than the registered bound; the page-state validators accept exactly what the frozen validator accepted, a differential corpus of more than 100 000 messages, every single-field variant and every pair, against the frozen earlier validator)
 - Criteria: isPageToHostMessage returns false for every inherited key of the table. Revisions are opaque to the page: only equality with the revision the host holds is ever tested. The page-state family keeps the unbounded identifier for compatibility; every other type is bounded. Source lines are safe integers of at least 1; the pin pair is complete or absent; no other type carries flush, final or blockEditOpen. Only validated messages reach handlers.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-066](../rendering-core/SwRS-MDOKFSTUDIO-CORE-066.md): Ignore invalid page messages
+<!-- okf:links:end -->

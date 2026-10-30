@@ -10,7 +10,8 @@ description: When the text editor is scrolled or a block of the preview is
   on by default) allow.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -84,3 +85,13 @@ When the text editor is scrolled or a block of the preview is scrolled to or cli
 - Method: test/page/runtimeScroll.test.ts (The preview does not follow the editor, The preview never moves the editor, A double click reveals the source): "disabling editor anchoring stops preview-to-editor scrolling", "executes source and preview synchronization across layout changes" (a click posts previewReveal; a dblclick posts nothing more). The click path with scrollEditorWithPreview off has no test (untested); checked by reading revealFromPage and revealEditorLine.
 - Method: test/integration/sourceMapping.test.ts (A click reveals the source): a previewReveal with activation click reaches the host and the editor line is revealed.
 - Criteria: readPreviewConfiguration returns true for no value of the first two settings; the host posts sourceScroll only with the setting or the mark on; revealEditorLine returns before any reveal when scrollEditorWithPreview is false; the page registers no double-click listener.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+  - [StRS-MDOKFSTUDIO-LIFE-021](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-021.md): The settings editor lists the Studio settings in clear groups
+<!-- okf:links:end -->

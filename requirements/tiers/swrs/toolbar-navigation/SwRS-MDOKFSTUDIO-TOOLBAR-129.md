@@ -10,7 +10,8 @@ description: When the reader hovers or focuses a button of the floating toolbar,
   prefers reduced motion.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,12 @@ The three bubbles share one keyframes rule (sphinx-preview-tooltip-in) and the f
 ### Verification notes
 - Method: test/core/preview/previewStyles.test.ts, tests "CR 162: every tooltip bubble slides in from the left with one shared animation" (nominal) and "CR 162: reduced motion turns off the tooltip slide-in and the toolbar rows unroll" (refusal)
 - Criteria: the hover and focus rules of the three bubbles name the shared keyframes with the 120 ms fast time; the keyframes start at translate -6px and opacity 0; the reduced-motion rule lists the three bubbles
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+<!-- okf:links:end -->

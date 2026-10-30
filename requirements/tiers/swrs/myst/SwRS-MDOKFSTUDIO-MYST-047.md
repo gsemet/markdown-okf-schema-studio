@@ -8,7 +8,8 @@ description: When a rename succeeds, the extension SHALL show Renamed. N use(s)
   use of the old name remains.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a rename succeeds, the extension SHALL show Renamed. N use(s) of old remain
 
 - Method: Unit test "the result shows how many {ref} uses of the old name remain" in test/page/modules/labelRename.test.ts; Unit test "counts {ref} uses with and without a title, not other roles or names" in test/core/mapping/labelRename.test.ts
 - Criteria: Message text and `{ref}`-only counting match.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-038](SwRS-MDOKFSTUDIO-MYST-038.md): The anchor icon opens a rename field that sends valid names
+<!-- okf:links:end -->

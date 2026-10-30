@@ -8,7 +8,8 @@ description: When KaTeX cannot parse a formula, the extension SHALL keep its raw
   by KaTeX, and still render the other equations.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When KaTeX cannot parse a formula, the extension SHALL keep its raw TeX with a w
 
 - Method: Unit test "invalid LaTeX stays readable without breaking valid equations" in test/core/render/mathRenderer.test.ts
 - Criteria: Failure is local to the formula.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-006](../../strs/myst/StRS-MDOKFSTUDIO-MYST-006.md): Maths is typeset offline and bad formulas stay readable
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-024](SwRS-MDOKFSTUDIO-MYST-024.md): Maths is typeset offline by KaTeX and bad formulas stay readable
+<!-- okf:links:end -->

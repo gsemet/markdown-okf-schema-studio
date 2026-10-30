@@ -12,7 +12,8 @@ description: When a page message reaches the host, the extension SHALL pass it
   date. Try again once it has refreshed." or a reopen hint.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -170,3 +171,31 @@ A message that passes its gate but writes for a document newer than the render i
 - Method: test/session/reviewReqThreads.requirements.test.ts (thread request that names another revision gets the out-of-date answer).
 - Method: test/session/toolbarReq.requirements.test.ts (link request of a stale page or a disposed preview is ignored).
 - Criteria: the reason texts equal those of the tables (the move and clipboard messages have no assertion on the text). currentPreviewDocument returns nothing when the revision differs, the stage differs, or the document is not a .md file (eligibility needs a file path ending in .md in any case). The ready reports and the stale-save cases beyond the open-editor save are covered by the tests of SwRS-MDOKFSTUDIO-LIFE-071.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+  - [StRS-MDOKFSTUDIO-REVIEW-015](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-015.md): A writer keeps a discussion in the Markdown source and answers it from the preview
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-027](../code-blocks/SwRS-MDOKFSTUDIO-CODE-027.md): Drop a copy request from a stale page
+  - [SwRS-MDOKFSTUDIO-DIAG-051](../diagrams/SwRS-MDOKFSTUDIO-DIAG-051.md): Include requests are handled for the current document
+  - [SwRS-MDOKFSTUDIO-FMEDIT-052](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-052.md): A save from an older render is refused with a reopen hint
+  - [SwRS-MDOKFSTUDIO-MYST-044](../myst/SwRS-MDOKFSTUDIO-MYST-044.md): The host refuses a rename for an out-of-date preview
+<!-- okf:links:end -->

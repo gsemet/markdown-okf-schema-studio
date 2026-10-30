@@ -8,7 +8,8 @@ description: When two directive families declare the same directive name, the
   duplicate.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When two directive families declare the same directive name, the extension SHALL
 
 - Method: Unit test "a directive name registered twice raises an error naming it; distinct names register" in test/core/directives/renderReq.registry.requirements.test.ts
 - Criteria: Duplicate registration raises an error.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+<!-- okf:links:end -->

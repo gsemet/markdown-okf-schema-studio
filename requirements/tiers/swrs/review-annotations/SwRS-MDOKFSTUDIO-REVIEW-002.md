@@ -9,7 +9,8 @@ description: When a review comment thread is shown in the preview in the Dark,
   surface, without dimming text through opacity.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -55,3 +56,12 @@ When a review comment thread is shown in the preview in the Dark, White or Cream
 
 - Method: test/core/preview/commentContrast.test.ts, unit tests `comment thread text reaches WCAG AA 4.5:1 on its surface in every theme mode` and `the comment popover and boxes never dim their text with opacity`.
 - Criteria: Every computed ratio is at least 4.5. No text rule of the comment boxes sets opacity.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+<!-- okf:links:end -->

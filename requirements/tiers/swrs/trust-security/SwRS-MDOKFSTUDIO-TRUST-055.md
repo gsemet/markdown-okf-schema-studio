@@ -7,7 +7,8 @@ description: When the host receives a page message, it SHALL accept it only if
   the validator registered for its type accepts the message.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,12 @@ When the host receives a page message, it SHALL accept it only if the validator 
 
 - Method: Unit tests test/core/protocol/pageToHost.test.ts and test/core/protocol/pageStateMessages.test.ts (rejects a message the validator refuses; each message type has its own bounds test, for example previewHistoryGo accepts only back or forward).
 - Criteria: The bounds of each type are specified with the feature that sends it, for example SwRS-MDOKFSTUDIO-CODE-026 for the copied text, SwRS-MDOKFSTUDIO-TOOLBAR-083 for link discovery, SwRS-MDOKFSTUDIO-DIAG-050 for a PlantUML include and SwRS-MDOKFSTUDIO-BLOCK-244 and SwRS-MDOKFSTUDIO-BLOCK-245 for the editor and flush identifiers.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When a document is shown, the extension SHALL look for its review
   fields of the format, and write them back in one stable form.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -70,3 +71,13 @@ When a document is shown, the extension SHALL look for its review threads in a f
 - Method: test/page/modules/commentThreads.test.ts: `T42: the popover shows author, date and bodies as text, never as HTML`, `T42: hostile ids and malformed threads are tolerated` (text that looks like markup, popover row).
 - Method: test/integration/reviewComments.test.ts reads a comments file next to its document and posts the body `<b>Why?</b>` as stored (name of the comments file, valid file, text that looks like markup).
 - Criteria: The name function returns the stem of the file name plus .comments.json in the same directory for names with and without an extension; a valid file parses with no error and fields outside the format are absent from the result; the parsed strings equal the input and the popover holds text nodes only; the serialized text starts with the expected 2-space layout, ends with a closing brace and a newline, and is a fixed point of parse then serialize.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+<!-- okf:links:end -->

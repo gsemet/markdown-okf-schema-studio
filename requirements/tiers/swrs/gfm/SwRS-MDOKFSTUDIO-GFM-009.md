@@ -10,7 +10,8 @@ description: When a block quote starts with [!NOTE], [!TIP], [!IMPORTANT],
   admonition at the first unquoted line.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -148,3 +149,18 @@ its own, and a container nested in another must use a shorter fence than the out
 - Method: visual scenario gfm/v09-alert-body-opens-whole-alert-dark-900 in test/visual/alertEditingScenarios.ts (a real click on the second paragraph of a two-paragraph note: one `previewEditOpen` for lines 5 to 8, the editor holds the whole alert and the alerts after it stay rendered). The tab item row is not asserted for the click.
 - Method: test/core/render/alertInsideColonContainer.test.ts (alerts inside a card, a tab item and a nested grid card: unit tests on the rendered structure and on the `data-line` and `data-end-line` of the blocks).
 - Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains only quoted lines; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written; a click in the body of a mapped alert posts the alert's own range, never a paragraph's or the enclosing list's; an alert inside a colon container is a backtick directive whose fence is longer than any backtick fence of its body, so neither the body nor its closing line ends the container.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-GFM-010](SwRS-MDOKFSTUDIO-GFM-010.md): Alert marker text becomes the title
+  - [SwRS-MDOKFSTUDIO-GFM-011](SwRS-MDOKFSTUDIO-GFM-011.md): Legacy bold markers render as admonitions
+  - [SwRS-MDOKFSTUDIO-GFM-012](SwRS-MDOKFSTUDIO-GFM-012.md): Alert markers inside fences stay literal
+  - [SwRS-MDOKFSTUDIO-GFM-013](SwRS-MDOKFSTUDIO-GFM-013.md): Alerts render the same in CRLF documents
+  - [SwRS-MDOKFSTUDIO-GFM-037](SwRS-MDOKFSTUDIO-GFM-037.md): Alerts end at the first unquoted line
+<!-- okf:links:end -->

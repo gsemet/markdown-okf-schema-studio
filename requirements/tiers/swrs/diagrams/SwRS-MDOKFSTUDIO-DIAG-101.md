@@ -8,7 +8,8 @@ description: "When a render is cancelled by a newer render stage or the closing 
   PlantUML process on POSIX, falling back to the direct child."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a render is cancelled by a newer render stage or the closing of the preview
 
 - Method: Unit tests: cancels an active PlantUML process; spawns detached and kills the process group on POSIX; abort falls back to child.kill; does not group-kill a child that already exited.
 - Criteria: Group kill with fallback; exited children untouched.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-097](SwRS-MDOKFSTUDIO-DIAG-097.md): A JAR render is bounded in input, output, time, process lifetime and concurrency
+<!-- okf:links:end -->

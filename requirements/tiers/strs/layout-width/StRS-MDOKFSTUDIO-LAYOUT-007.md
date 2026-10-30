@@ -8,7 +8,8 @@ description: When the width mode is Auto, the Studio SHALL let tables, figures,
   width, centred and clear of the pane edges.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -38,3 +39,12 @@ As a reader, I see wide tables, pictures and diagrams in full when the pane has 
 - An element under edit keeps the column width while its editor is open, and a figure sized in %, em or rem stays relative to the column; an image uses the author's pixel width before its intrinsic size.
 - The wide elements are measured again after a content patch, a window or content resize, image load, toolbar collapse, table-of-contents toggle and when an element enters or leaves edit.
 - Known issue: the paths for %/em/rem figures, declared pixel widths, the Mermaid wrapper and the 1 px tolerance are not directly tested, and no visual scenario combines the open table-of-contents column with Auto.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: "When a previewBlockMoveResult names another document, revision or 
   than the page shows, the page SHALL ignore it."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -59,3 +60,15 @@ When a previewBlockMoveResult names another document, revision or request than t
 - Method: Unit test `T36: a refused move says why next to the bar; a result of another context is ignored` in test/page/runtimeBlockMoves.test.ts (both scenarios; the differing requestId case is the one run, the document and revision rows follow from the same addressing rule); the addressing rule is `previewBlockMoveResult: render` in src/core/protocol/hostToPage.ts.
 - Method: Unit test `T36: a move refused as stale is sent once more after the next render, before any message` in test/page/runtimeBlockMoves.test.ts (the stale scenario).
 - Criteria: createHostMessageFilter accepts the message only for the render the page shows.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

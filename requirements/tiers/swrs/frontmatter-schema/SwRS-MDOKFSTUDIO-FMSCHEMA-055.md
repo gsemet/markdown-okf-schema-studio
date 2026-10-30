@@ -10,7 +10,8 @@ description: "When a link annotation has the resolution `filename-stem`, the ext
   W15 for an unreadable candidate."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -98,3 +99,19 @@ When a link annotation has the resolution `filename-stem`, the extension SHALL l
 - Method: test/core/frontmatter/okfFrontmatter.test.ts (unique stem, fragment, ambiguous and unknown stem, broken symbolic link, readable candidate), test/core/frontmatter/stemIndex.test.ts (unique stem, excluded folders, ordinary folder, unavailable flag, file created, folder removed, host events). The case "Same.md does not satisfy the stem same" has no test (untested).
 - Method: test/session/eventFanOut.test.ts (saving a Markdown file keeps the cached index; creating or deleting one rebuilds it).
 - Criteria: The cached index of a workspace root is invalidated by a created or deleted Markdown file, not by a change. The stem is the file name without .md; a match whose real path leaves its root is refused. A stale index is rebuilt once before the answer is given. An unreadable candidate is neither a match nor a not-found. The exclusion of node_modules, .git, _build, .venv, out, dist, output and dot-folders applies at every depth. Stems are compared case-sensitively and only files whose name ends in lowercase `.md` are indexed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the document, bundle or project root and stay inside it
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-056](SwRS-MDOKFSTUDIO-FMSCHEMA-056.md): An ambiguous or unknown stem is an error
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-057](SwRS-MDOKFSTUDIO-FMSCHEMA-057.md): An unreadable stem candidate gives a warning
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-058](SwRS-MDOKFSTUDIO-FMSCHEMA-058.md): The stem index skips build and hidden folders
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-059](SwRS-MDOKFSTUDIO-FMSCHEMA-059.md): The stem index is rebuilt when a Markdown file changes
+<!-- okf:links:end -->

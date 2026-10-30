@@ -7,7 +7,8 @@ description: When the preview panel is created, the extension SHALL enable the
   find widget so that Cmd/Ctrl+F searches the rendered page.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When the preview panel is created, the extension SHALL enable the find widget so
 - Method: test/integration/projectFeatures.test.ts, suite run() (preview panel: the panel options set the find widget on); the custom editor case is not asserted by a named test (untested)
 - Criteria: The panel options set the find widget on.
 - Note: with the focus in the page, Cmd/Ctrl+F is taken by the extension's own find bar (SwRS-MDOKFSTUDIO-TOOLBAR-009); the widget option stays on for the entry points that do not go through the page.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

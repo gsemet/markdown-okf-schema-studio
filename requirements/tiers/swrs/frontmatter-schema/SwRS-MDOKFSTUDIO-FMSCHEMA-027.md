@@ -8,7 +8,8 @@ description: When a schema file or a file it refers to changes content, the
   rather than modification time, without refreshing an open preview by itself.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -66,3 +67,14 @@ When a schema file or a file it refers to changes content, the extension SHALL u
 - Method: test/core/frontmatter/schemaRegistry.test.ts (edited schema, reverted and deleted).
 - Method: test/session/diagReq.settings.requirements.test.ts, test `editing a schema file refreshes nothing by itself; the next document change re-analyses the table` (no refresh by itself, document edited afterwards).
 - Criteria: Every file read and every probed reference registers a re-check; a deleted file or a changed existence of a probed reference counts as a change. No watcher observes `_schema` folders; only linked targets and Markdown stems are watched. The table is also refreshed by a refresh, a re-render or a settings change.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-028](SwRS-MDOKFSTUDIO-FMSCHEMA-028.md): Editing a schema does not refresh open previews by itself
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When an admonition renders, the extension SHALL map it as one block
   from its opening line to its closing fence.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When an admonition renders, the extension SHALL map it as one block from its ope
 
 - Method: Unit test "MyST admonitions retain the directive range through the closing fence" in test/core/render/mystFeatures.test.ts
 - Criteria: data-line and data-end-line match the directive's source lines.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-006](SwRS-MDOKFSTUDIO-MYST-006.md): Admonitions nest, collapse and map as one block
+<!-- okf:links:end -->

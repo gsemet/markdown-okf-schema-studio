@@ -7,7 +7,8 @@ description: When a toctree has `:reversed:`, the extension SHALL flip the entry
   order.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a toctree has `:reversed:`, the extension SHALL flip the entry order.
 
 - Method: Unit test "a toctree with :reversed: flips the entry order and keeps the written order otherwise" in test/core/render/renderReq.myst.requirements.test.ts
 - Criteria: `:reversed:` flips the order; without it the written order is kept.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-012](../../strs/myst/StRS-MDOKFSTUDIO-MYST-012.md): A toctree shows the linked documents and marks missing ones
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-057](SwRS-MDOKFSTUDIO-MYST-057.md): Toctree lists linked documents and marks missing ones
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When a writer plain-clicks a link inside a field value in edit
   mode, the extension SHALL open the field editor instead of following the link.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a writer plain-clicks a link inside a field value in edit mode, the extensi
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterFields.test.ts).
 - Criteria: Tests T21 click on an okf link in edit mode, Cmd or Ctrl click, reading mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-001](SwRS-MDOKFSTUDIO-FMEDIT-001.md): A click on a field in edit mode opens its editor in place
+<!-- okf:links:end -->

@@ -11,7 +11,8 @@ description: "When Open Preview to Side runs, the extension SHALL preview only a
   and open no preview."
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -93,3 +94,12 @@ When Open Preview to Side runs, the extension SHALL preview only a saved file wi
 - Method: test/host/lifeReq.requirements.test.ts, unit test "Open Preview to Side from a Studio Open With tab previews that tab's file" (Studio Open With tab active, Another custom editor active: the fake window reports a custom editor tab and no text editor).
 - Method: test/integration/lifecycle.test.ts (File passed by a menu: runs the command with secondDocument.uri and asserts the preview document and that the passed Uri is the active text editor; Argument that is not the file to open: asserts the plain-object case; the other-scheme case is untested; the already-active case is by reading the code).
 - Criteria: The information message reads Open a Markdown file to use Markdown OKF-Schema Studio. and no panel is created; preview.documentUri and the active text editor equal the passed URI; the preview document is unchanged after an ignored argument; the error message starts with Cannot open and the file path.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+<!-- okf:links:end -->

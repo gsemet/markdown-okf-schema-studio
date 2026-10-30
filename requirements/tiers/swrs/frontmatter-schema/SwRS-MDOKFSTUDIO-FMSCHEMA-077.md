@@ -9,7 +9,8 @@ description: When no schema is looked up because the workspace is not trusted or
   frontmatter." if the frontmatter has a string `type`.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When no schema is looked up because the workspace is not trusted or the document
 - Method: Unit test of the analysis with schema resolution off; the untrusted integration suite does not assert the row.
 - Criteria: The summary counts one info for a typed document.
 - Known issue: a file outside every workspace folder in a trusted workspace gets the same message, which mentions a trusted workspace.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-019](SwRS-MDOKFSTUDIO-FMSCHEMA-019.md): A typed document finds its schema in the nearest schema folder
+<!-- okf:links:end -->

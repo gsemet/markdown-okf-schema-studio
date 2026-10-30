@@ -10,7 +10,8 @@ description: "When the writer presses the Heading button, the extension SHALL op
   and removing the prefix for Paragraph."
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,12 @@ When the writer presses the Heading button, the extension SHALL open a menu name
 
 - Method: test/page/runtimeEditPalette.test.ts (choosing a level, menu entries and tooltip: the heading list opens as a menu and choosing a level replaces the prefix); test/page/modules/editActions.test.ts (the palette actions declare their popovers, options and tooltips; data-driven unit tests named editActions heading, rows for two lines and the line table; heading without a change or with an unknown level returns no edit), with its marker file test/page/modules/editActions.test.ts
 - Criteria: The menu items carry the option values 0 to 5 with the labels Paragraph, Heading 1 to Heading 5. A line of seven # signs, or a # followed by text without a space, is not a heading and gets the prefix, while a line holding only one to six number signs is a heading; a single blank line gets the prefix; other blank lines of a selection are left alone.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

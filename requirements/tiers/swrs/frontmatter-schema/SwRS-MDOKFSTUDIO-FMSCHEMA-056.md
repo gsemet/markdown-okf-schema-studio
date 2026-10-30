@@ -7,7 +7,8 @@ description: When a filename stem matches several files or none, the extension
   SHALL report the E10 error "is ambiguous" or "was not found".
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a filename stem matches several files or none, the extension SHALL report t
 
 - Method: Unit test of the link resolver.
 - Criteria: A stale index is rebuilt once before the answer is given.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-055](SwRS-MDOKFSTUDIO-FMSCHEMA-055.md): A filename stem resolves when exactly one file matches
+<!-- okf:links:end -->

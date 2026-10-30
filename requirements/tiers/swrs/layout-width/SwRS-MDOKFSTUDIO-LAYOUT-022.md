@@ -10,7 +10,8 @@ description: When the width mode is Margin or Full width, the extension SHALL
   at their own width in every width mode.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,17 @@ When the width mode is Margin or Full width, the extension SHALL keep tables, co
 - Method: test/core/preview/previewStyles.test.ts (Full width in a wide pane): unit tests P7 full width uses the 16 px gutter a broken-out table keeps in auto and T10 full width lifts the column limit.
 - Method: test/visual/capture_layout_checks.py (all visual cases): visual checks of width-mode breaks, the width-mode checks including the Full width halves of v66 to v71, v80 and v83, and the narrow table and figure checks; the centring rule has no unit test.
 - Criteria: No wide mark exists in Margin and the page has no sideways scroll; the Full width rule sets column width 100000px and gutter 16px; gutters are at least 15 px and side margins 16 px within 2 px; left and right free space of the table and figure are equal and the code block starts at the column edge; the figure attribute is present exactly on image-only top-level paragraphs.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-028](SwRS-MDOKFSTUDIO-LAYOUT-028.md): Full width removes the column limit
+  - [SwRS-MDOKFSTUDIO-LAYOUT-029](SwRS-MDOKFSTUDIO-LAYOUT-029.md): Narrow tables and figures are centred in every width mode
+  - [SwRS-MDOKFSTUDIO-LAYOUT-030](SwRS-MDOKFSTUDIO-LAYOUT-030.md): A paragraph holding only an image is marked as a figure
+  - [SwRS-MDOKFSTUDIO-LAYOUT-039](SwRS-MDOKFSTUDIO-LAYOUT-039.md): Full width centres the content with gutters of at least 15 px
+<!-- okf:links:end -->

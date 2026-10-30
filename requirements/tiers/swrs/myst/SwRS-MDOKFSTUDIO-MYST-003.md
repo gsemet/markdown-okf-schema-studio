@@ -10,7 +10,8 @@ description: When the preview renders an admonition gallery at any theme and
   overflow.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When the preview renders an admonition gallery at any theme and pane width, the 
 
 - Method: Visual scenario admonitions-dark-titled in test/visual/scenarioDefinitions1.ts
 - Criteria: The visual gallery scenarios (one family) pass the shared admonition checks.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-006](SwRS-MDOKFSTUDIO-MYST-006.md): Admonitions nest, collapse and map as one block
+<!-- okf:links:end -->

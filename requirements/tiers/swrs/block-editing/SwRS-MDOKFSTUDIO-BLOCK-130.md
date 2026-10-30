@@ -10,7 +10,8 @@ description: When a writer presses Alt+ArrowUp or Alt+ArrowDown on a focused
   the caret where it was.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -114,3 +115,17 @@ The move chord is Cmd+Alt with ArrowUp or ArrowDown on macOS and Ctrl+Alt elsewh
 - Method: test/integration/realInput/markers.ts: real-input scenario scenarioBlockMoveKeys (screenshots block-editing/r21 for scenario 1 and block-editing/r22 for scenario 6).
 - Method: test/page/runtimeBlockMoves.test.ts (`T37: Alt+ArrowDown on a focused block and Alt+ArrowUp on its bar button post the move`, changed: the refusal after a key press shows its reason) and test/page/blockReq.requirements.test.ts (`a keyboard move that never lands is forgotten after five seconds`, changed: the flight timer is replaced by the six-second reason timer).
 - Criteria: A single message per key press. blockOfTarget returns the block of the bar. inFlight blocks requestBlockMove. moveChordDirection and the target checks of the keydown listener return no move for other chords. blockMoveInFlight is undefined after a refusal and after 5000 ms. The pending navigation carries direction and caretOffset. closeBlockEdit(true) precedes requestBlockMove. moveBlockFromEditor returns true for every handled chord.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

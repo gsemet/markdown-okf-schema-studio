@@ -8,7 +8,8 @@ description: When a writer collapses the Description column of a properties
   for that document.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,12 @@ As a writer, I hide the Description column when I need room and find it hidden a
 
 - A toggle in the column headers collapses and restores the column; error rows re-span the visible columns; the choice survives a refresh and is kept for the 200 most recent documents.
 - Without a remembered choice, a preview 640 px wide or less starts collapsed (measured when the page starts).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+<!-- okf:links:end -->

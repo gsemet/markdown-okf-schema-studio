@@ -8,7 +8,8 @@ description: When a render has expanded 2000 includes or 10 Mi characters of
   remaining includes as placeholders.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,15 @@ When a render has expanded 2000 includes or 10 Mi characters of included text, t
 
 - Method: Unit test "include fan-out stops at the budget with one diagnostic" in test/core/render/includeBudget.test.ts
 - Criteria: One "Include budget exhausted" warning appears at the limit and none below it.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-002](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-002.md): A writer composes a document from included files
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-013](SwRS-MDOKFSTUDIO-CORE-013.md): Includes are bounded by depth, budget, size and allowed roots
+<!-- okf:links:end -->

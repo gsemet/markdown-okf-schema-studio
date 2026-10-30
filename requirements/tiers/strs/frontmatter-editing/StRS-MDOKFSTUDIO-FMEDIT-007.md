@@ -8,7 +8,8 @@ description: When a writer chooses Remove field from a field editor, the Studio
   requires.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,12 @@ As a writer, I remove an obsolete metadata field safely, without losing other fi
 
 - Comment lines above the field are kept; removing the only field leaves a valid empty mapping.
 - A field the schema requires has a disabled Remove button and the host also refuses the removal.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+<!-- okf:links:end -->

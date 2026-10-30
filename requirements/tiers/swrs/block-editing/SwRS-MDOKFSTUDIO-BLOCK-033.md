@@ -10,7 +10,8 @@ description: When a writer opens a block editor, the page SHALL insert the
   button.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,13 @@ The keys before the done key read "Enter: new line · Tab: indent · Esc: cancel
 - Method: test/page/runtimeBlockMoves.test.ts (`T28: an empty source reply opens an empty textarea with a placeholder; Done saves the insertion`: the New block text).
 - Method: test/page/blockReq.requirements.test.ts (`the editor frame appears at once, empty, and is filled when the source arrives`: frame at once and filled; `a click inside the editor frame does not reach the document listeners`: click in the frame).
 - Criteria: The text before the first separator dot is exactly one of the three forms; the hint equals the string built by blockEditHint for the platform; two buttons with the quoted labels, the primary style coming from the first-child rule of the stylesheet; the mousedown event of both buttons is default-prevented; openBlockEditor appends the status line to the frame at once, for a block and for a table cell; the frame has a click listener that stops propagation.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a URL-like string sits in code, math, raw HTML, an existing
   preceding word character, the extension SHALL leave it unlinked.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a URL-like string sits in code, math, raw HTML, an existing link, image, re
 
 - Method: Unit test on the render pipeline output.
 - Criteria: No nested or extra link element appears in any excluded context.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-001](SwRS-MDOKFSTUDIO-GFM-001.md): Bare URLs become safe links
+<!-- okf:links:end -->

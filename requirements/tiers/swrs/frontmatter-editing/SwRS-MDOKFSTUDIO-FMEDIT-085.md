@@ -7,7 +7,8 @@ description: When the page is hidden or closed while a field editor is open, the
   extension SHALL save the typed text as a flush.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the page is hidden or closed while a field editor is open, the extension SH
 
 - Method: Unit test on the page runtime (test/page/runtimeEditorFlush.test.ts).
 - Criteria: Test CR 025 pagehide and a hidden page save an open frontmatter editor as a flush.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-067](SwRS-MDOKFSTUDIO-FMEDIT-067.md): A navigation saves the open field editor as an unchecked flush
+<!-- okf:links:end -->

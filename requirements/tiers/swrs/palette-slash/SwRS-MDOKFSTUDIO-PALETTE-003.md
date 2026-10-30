@@ -9,7 +9,8 @@ description: When the user runs the Table of contents action from the edition
   selection ends on and place the caret after it, in every palette mode.
 project: MDOKFSTUDIO
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -55,3 +56,12 @@ The `/` menu also finds the action by `toc`, `contents`, `table of contents`, `o
 
 - Method: test/page/modules/tocAction.test.ts (the edit, the listing and the slash aliases), test/core/palette/paletteActions.test.ts (registry order and icon)
 - Criteria: the written text, the caret position and the registry match the scenarios above.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

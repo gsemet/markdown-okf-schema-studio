@@ -9,7 +9,8 @@ description: When a read-only preview sends a page message that is none of the
   refuses a write.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -100,3 +101,23 @@ A preview is read-only because the workspace is untrusted or the file is standal
 - Method: test/session/toolbarReq.requirements.test.ts (`a read-only preview stores a view preference like a writable one`: toc row; `Back and Next work in a read-only preview`; `a read-only preview follows a link to a sibling Markdown file`; `a read-only preview answers the link discovery`).
 - Untested: view preferences from a read-only preview at host level in the integration suite (the toc row is checked by a unit test only).
 - Criteria: No type outside the five edit requests is stopped by the read-only check of the dispatcher. The label list handler reads only the document text of the render and touches no file.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document outside a trusted folder opens read-only and keeps the viewing actions
+  - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+  - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-001](SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-025](../code-blocks/SwRS-MDOKFSTUDIO-CODE-025.md): Allow copying in read-only previews
+<!-- okf:links:end -->

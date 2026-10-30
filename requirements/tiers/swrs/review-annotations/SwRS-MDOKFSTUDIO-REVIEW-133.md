@@ -9,7 +9,8 @@ description: When a document holds an HTML comment that is not a tool comment,
   written as HTML.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -100,3 +101,12 @@ When a document holds an HTML comment that is not a tool comment, the renderer S
 - Method: test/core/render/commentMarkers.test.ts: `a block comment renders as a positioned gray chip with a hidden body`, `a multi-line block comment spans its source lines`, `data-line follows the frontmatter offset` (block comments); `an inline comment renders as a chip inside its paragraph`, `a comment in a heading does not change the heading's id or attributes` (inline comment; the table cell row is untested); `comment text never reaches the DOM as HTML`, `a comment followed by markup is never rendered as HTML` (text never rendered as HTML); `comments written on one line, one after the other, are separate chips`, `comments before and after a list each render as a real comment chip, never as a <!-- label`, `a list item can hold a comment chip between its items`, `a raw HTML table next to comments is unchanged` (several comments and lists; the tool comment mixed case is untested); `tool comments stay hidden` (tool comments); `context tags still produce their admonition, with and without a comment inside` (context tags); `chip markup survives the sanitizer without event attributes` (sanitizer).
 - Method: visual scenarios review-annotations/v02-comment-todo-chips-light-900, v03-comment-todo-chips-dark-900 and v04-comment-todo-chips-cream-900 (block comment chips); review-annotations/v07-comment-list-chips-visible-light-900 to v10-comment-list-chips-hidden-dark-900 (comments next to lists).
 - Criteria: The rendered HTML holds the wrapper, the chip and the hidden body with the stated attributes; the wrapper of an inline comment is a span without data-line and the heading attributes are equal with and without the comment; the DOM holds no element created from the comment text and the chip keeps role, tabindex and title only; the number of chips equals the number of non-tool comments; each list comment becomes one chip and the table markup is identical with and without comments; no okf-comment element exists for the tool comments; the admonition element exists and contains the chip or the wrapper; the sanitized chip has no attribute starting with on.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-012](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-012.md): A writer sees HTML comments and TODO notes as chips and toggles them
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: "When a writer clicks, or presses Enter or Space on, a name or valu
   inside that cell."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -99,3 +100,20 @@ When a writer clicks, or presses Enter or Space on, a name or value cell of the 
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (typing in a field or key editor opens neither the slash menu nor the edition palette).
 - Method: visual scenario frontmatter-editing/v06-okf-schema-narrow-scroll-stress-edit-dark-460 in test/visual/scenarioDefinitions2.ts and test/visual/capture_page_checks.py (editor opens and Escape closes at 460 px without horizontal scroll; scroll positions at the bottom, at the top and after the source sync to line 1).
 - Criteria: The editor exists in edit mode only; real browser at 460 px width for the two visual scenarios.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-013](SwRS-MDOKFSTUDIO-FMEDIT-013.md): A plain click on a link value edits the field
+  - [SwRS-MDOKFSTUDIO-FMEDIT-065](SwRS-MDOKFSTUDIO-FMEDIT-065.md): A field editor opens and closes on Escape in a 460 px preview without page overflow
+  - [SwRS-MDOKFSTUDIO-FMEDIT-066](SwRS-MDOKFSTUDIO-FMEDIT-066.md): Field and key editors have no palette or slash menu
+  - [SwRS-MDOKFSTUDIO-FMEDIT-087](SwRS-MDOKFSTUDIO-FMEDIT-087.md): A tall properties table scrolls to both ends at 460 px and returns to line 1 on source sync
+<!-- okf:links:end -->

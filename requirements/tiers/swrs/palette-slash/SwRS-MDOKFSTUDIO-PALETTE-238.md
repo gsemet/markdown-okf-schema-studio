@@ -11,7 +11,8 @@ description: When the slash menu opens, the extension SHALL list the actions of
   when the query matches nothing.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -105,3 +106,15 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 - Method: test/integration/realInput/markers.ts and the real-window scenario scenarioSlashMenu in test/integration/realInput/textEditing.ts (palette-slash/r01-slash-no-command) (No command).
 - Method: visual scenarios palette-slash/v11-slash-strict-light-900, palette-slash/v12-slash-gfm-light-900, palette-slash/v13-slash-myst-light-900 (mode lists and grouping), palette-slash/v14-slash-myst-filtered-dark-900 (ranked list with categories), palette-slash/v12-slash-gfm-light-900 (the nomatch state), palette-slash/v09-mode-myst-light-900 (the kbd role button).
 - Criteria: The entries are those returned by the palette, so the menu rebuilds with the palette mode. The groups follow the first appearance of each palette group; the shortcut text is the one of the palette tooltip. The aliases are h1 title heading1, h2 heading2 and so on, text plain p for Paragraph, the type name callout github for alerts and the type name callout admonition for admonitions (see also for See also). The No command row has the role option, aria-disabled true and data-slash-none. SwRS-MDOKFSTUDIO-PALETTE-001 states that both Key buttons are offered in MyST mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-001](SwRS-MDOKFSTUDIO-PALETTE-001.md): The palette mode decides the button sets, in registry order
+<!-- okf:links:end -->

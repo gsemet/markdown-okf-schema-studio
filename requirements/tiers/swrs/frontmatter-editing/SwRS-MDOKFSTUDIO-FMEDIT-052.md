@@ -8,7 +8,8 @@ description: "When a frontmatter save comes from an editor opened on an older re
   field was being edited. Reopen the field.\""
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a frontmatter save comes from an editor opened on an older render than the 
 
 - Method: Unit test a frontmatter save from an older render is answered with a reopen hint; another document gets no answer in test/host/fmtableReq.requirements.test.ts.
 - Criteria: Read-only and disposed previews also get no stale answer.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

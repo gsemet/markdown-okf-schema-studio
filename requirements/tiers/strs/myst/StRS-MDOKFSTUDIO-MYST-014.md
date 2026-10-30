@@ -8,7 +8,8 @@ description: When the Sphinx configuration check finds syntax warnings, the
   view, including in Restricted Mode.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -33,3 +34,12 @@ As a Sphinx author, I want a quiet warning with a path to details so that I can 
 ### Rationale and constraints
 
 - The banner can be closed and does not block editing; it also appears in Restricted Mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-MYST-007](StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+<!-- okf:links:end -->

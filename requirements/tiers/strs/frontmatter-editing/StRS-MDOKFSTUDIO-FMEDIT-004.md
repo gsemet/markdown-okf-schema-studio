@@ -8,7 +8,8 @@ description: When a writer commits or cancels a metadata edit, the Studio SHALL
   keep the properties table in place, and leave the document undoable.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -38,3 +39,12 @@ As a writer, I know whether my metadata edit was saved, refused or cancelled, an
 - Known issue: leaving edit mode discards an unsaved field value while block editors save theirs.
 - A refusal keeps the editor open with the host message shown and the controls enabled again.
 - Each save is one edit of the document, so one Undo reverts it; undo keys typed in a field editor act on the field text only.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+<!-- okf:links:end -->

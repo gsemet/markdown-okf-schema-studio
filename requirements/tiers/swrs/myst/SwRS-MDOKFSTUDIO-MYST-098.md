@@ -10,7 +10,8 @@ description: 'When a document holds a {tab-set} with {tab-item} children, the ex
   on the tabs.'
 project: MDOKFSTUDIO
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -66,3 +67,12 @@ When a document holds a {tab-set} with {tab-item} children, the extension SHALL 
 
 - Method: test/core/render/cardsTabs.test.ts (roles, ids, selection, hidden panels, sync attributes, source lines, nesting, sanitized output without script or handler, style rules) the screenshot scenarios myst/v41-cards-tabs-version-cream-900 and myst/v42-cards-tabs-version-dark-900 (the painted bar and one shown panel in both themes) and the real-window scenario test/integration/mystBlocksWindow.ts (the painted bar and panel, the click on a panel in edit mode)
 - Criteria: the sanitized tree matches the table above and the painted page shows one panel at a time; the sanitizer is unchanged, the roles and ids pass its allow-list.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+<!-- okf:links:end -->

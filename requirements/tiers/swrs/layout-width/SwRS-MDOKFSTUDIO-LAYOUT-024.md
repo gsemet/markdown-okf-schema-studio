@@ -8,7 +8,8 @@ description: When the table-of-contents column is open in Auto width mode, the
   the breakout and from the cap.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the table-of-contents column is open in Auto width mode, the extension SHAL
 
 - Method: Unit test T10b with the TOC open the available area, its centre and the cap exclude the TOC column; the reserve is published by the CSS for panes of 760 px and more.
 - Criteria: Breakout 312 px and shift 72 px in the tested layout.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-023](SwRS-MDOKFSTUDIO-LAYOUT-023.md): Auto width lets wide blocks break out of the column
+<!-- okf:links:end -->

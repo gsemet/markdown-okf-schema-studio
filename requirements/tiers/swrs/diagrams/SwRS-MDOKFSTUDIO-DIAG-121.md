@@ -9,7 +9,8 @@ description: When a document contains a vega-lite or vega fenced code block, the
   document source.
 project: MDOKFSTUDIO
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -60,3 +61,12 @@ When a document contains a vega-lite or vega fenced code block, the extension SH
 - Method: test/core/render/chartRendering.test.ts (the figure of a vega-lite and a vega fence, other fences, a broken specification); test/core/render/chartData.test.ts (the fence languages, JSON and YAML specifications)
 - Method: test/page/chartCsp.test.ts (the figures of a real page become charts)
 - Criteria: A vega-lite or vega fence renders as one chart figure with the specification text, its kind and a collapsed Chart source section, in every palette mode, and no other fence does.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+<!-- okf:links:end -->

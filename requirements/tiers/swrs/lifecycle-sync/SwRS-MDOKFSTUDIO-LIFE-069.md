@@ -9,7 +9,8 @@ description: When a render finishes and the loaded page can take its content,
   document.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -135,3 +136,15 @@ When a render finishes and the loaded page can take its content, the extension S
 - Method: test/page/modules/contentMorph.test.ts (A line inserted above keeps the blocks below, What the key of a block holds): "P-07: the key leaves out the source-position attributes and a hash replaces the HTML", "P-07: a line inserted above keeps every block below it and moves its line attributes in place", "P-07: the insertion bars of kept blocks stay with them and bars of dropped blocks go".
 - Method: test/page/runtimeContentPatch.test.ts (What the key of a block holds, edit mode row): "P-07: edit mode keeps the insertion point of a block that did not change and moves its line".
 - Criteria: Equal shell keys and context keys give a patch and the page document is not reassigned; readPreviewConfiguration returns true for no value and false for false, and updatePreview patches only when the value is true; the page identifiers equal those of the last applied patch; the posted message carries the new documentId, revision and requestId; context.initialState.openDisclosures lists the open indexes before restoreState; window.scrollY after the patch equals the anchor target or the previous value; no element with data-sphinx-preview-pending-overlay and no link tooltip element remains; kept nodes are identical objects in the document.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+  - [StRS-MDOKFSTUDIO-LIFE-021](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-021.md): The settings editor lists the Studio settings in clear groups
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When the source of a preview is not an existing Markdown file
   its file is created.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -83,3 +84,13 @@ When the source of a preview is not an existing Markdown file inside its root, t
 - Method: test/integration/serializer.test.ts (Restored panel, missing-source status of a restored panel).
 - Method: test/host/lifeReq.requirements.test.ts (Deleted file, Reason of each case, Recreated source, Created file is not the source): "deleting the shown file shows The active Markdown source was deleted.", "renaming the shown file shows The active Markdown source was renamed or deleted.", "the default reason of a missing source is The active Markdown source is unavailable.", "a document that is not a saved .md file shows The restored or active source is not a Markdown file.", "a source whose symbolic link leaves the root counts as missing", "a missing source that comes back renders again by itself".
 - Criteria: status is missing-source, stage is undefined and the queue state is canceled; the status message reads as the table says; sourceAvailable is false for a path outside the root or for a directory (isPathWithin on canonical paths, and the file must exist as a regular file); refreshPreviewDocument runs only when the source is available.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
+  - [StRS-MDOKFSTUDIO-TRUST-004](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-004.md): Local files load only from the allowed folders
+<!-- okf:links:end -->

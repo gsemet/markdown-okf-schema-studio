@@ -8,7 +8,8 @@ description: "When a writer saves a field, the extension SHALL send the properti
   screen position after the re-render."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a writer saves a field, the extension SHALL send the properties section's s
 
 - Method: Unit test a field save carries the source line and viewport top of the properties section in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: Add and remove actions carry the same fields; a section with an empty rectangle sends no pin fields.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-228](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-228.md): Opening, saving and closing an editor keep the reading position
+<!-- okf:links:end -->

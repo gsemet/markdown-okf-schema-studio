@@ -8,7 +8,8 @@ description: When a table is more than 1 px wider than its box, the extension
   the mark when the table fits.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a table is more than 1 px wider than its box, the extension SHALL mark it a
 
 - Method: Unit tests markWideTables marks short cells and the overflow of a wide table, never the properties table, and markWideTables sets the overflow attribute only past a one pixel tolerance and is idempotent; CSS test for the shadows.
 - Criteria: The attribute is true only when scroll width exceeds client width by more than 1 px.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-001](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-001.md): The preview never scrolls sideways and wide content scrolls in its box
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-032](SwRS-MDOKFSTUDIO-LAYOUT-032.md): A wide table scrolls inside its own box with shaded edges
+<!-- okf:links:end -->
