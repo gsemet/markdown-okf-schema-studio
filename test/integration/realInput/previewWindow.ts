@@ -353,59 +353,73 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
     } finally {
       await workbench.update("colorTheme", originalTheme, vscode.ConfigurationTarget.Workspace);
     }
-    await withCurrentFrame(page, async (frame) => {
-      const themeButton = frame.locator("[data-sphinx-preview-theme-toggle]");
-      for (let attempt = 0; attempt < 3; attempt += 1) {
-        if (await themeButton.getAttribute("data-theme-mode") === "white") break;
-        await themeButton.click();
-      }
-      // The theme button fades the colours (CR 046): read them once the switch has ended.
-      await frame.locator("html:not([data-sphinx-preview-theme-switching])").waitFor();
-      assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-theme-mode"), "white");
-      assert.equal(await frame.locator("body").evaluate((body) => getComputedStyle(body).backgroundColor),
-        "rgb(255, 255, 255)");
-      assert.equal(await frame.locator(".admonition.tip").count(), 1);
-      assert.equal(await frame.locator(".admonition.warning").count(), 1);
-      await waitFor("the demo Mermaid and SVG images to load", async () => {
-        const diagram = frame.locator("img.myst-mermaid-image");
-        const svg = frame.locator('img[alt="Fleet operating loop: plan, dispatch, observe, and correct."]');
-        return await diagram.count() === 1 && await svg.count() === 1
-          && await diagram.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)
-          && await svg.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0);
-      }).catch(async (error: unknown) => {
-        console.error("Demo asset state:", await frame.locator("img").evaluateAll((images) =>
-          images.map((image) => ({
-            alt: image.getAttribute("alt"),
-            className: image.className,
-            complete: (image as HTMLImageElement).complete,
-            naturalWidth: (image as HTMLImageElement).naturalWidth,
-            source: image.getAttribute("src")?.slice(0, 180),
-          }))));
-        console.error("Demo Mermaid errors:", await frame.locator(".myst-mermaid-error").allTextContents());
-        throw error;
+    // The boxes start below the expanded toolbar, so the demo needs more than the 900 px of the run.
+    await page.setViewportSize({ width: 1400, height: 1040 });
+    try {
+      await withCurrentFrame(page, async (frame) => {
+        const themeButton = frame.locator("[data-sphinx-preview-theme-toggle]");
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          if (await themeButton.getAttribute("data-theme-mode") === "white") break;
+          await themeButton.click();
+        }
+        // The theme button fades the colours (CR 046): read them once the switch has ended.
+        await frame.locator("html:not([data-sphinx-preview-theme-switching])").waitFor();
+        assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-theme-mode"), "white");
+        assert.equal(await frame.locator("body").evaluate((body) => getComputedStyle(body).backgroundColor),
+          "rgb(255, 255, 255)");
+        assert.equal(await frame.locator(".admonition.tip").count(), 1);
+        assert.equal(await frame.locator(".admonition.warning").count(), 1);
+        await waitFor("the demo Mermaid and SVG images to load", async () => {
+          const diagram = frame.locator("img.myst-mermaid-image");
+          const svg = frame.locator('img[alt="Fleet operating loop: plan, dispatch, observe, and correct."]');
+          return await diagram.count() === 1 && await svg.count() === 1
+            && await diagram.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)
+            && await svg.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0);
+        }).catch(async (error: unknown) => {
+          console.error("Demo asset state:", await frame.locator("img").evaluateAll((images) =>
+            images.map((image) => ({
+              alt: image.getAttribute("alt"),
+              className: image.className,
+              complete: (image as HTMLImageElement).complete,
+              naturalWidth: (image as HTMLImageElement).naturalWidth,
+              source: image.getAttribute("src")?.slice(0, 180),
+            }))));
+          console.error("Demo Mermaid errors:", await frame.locator(".myst-mermaid-error").allTextContents());
+          throw error;
+        });
+        assert.equal(await frame.locator(".myst-mermaid-error").count(), 0);
+        // A label box narrower than its text cuts the text's last characters. Each label is HTML in a
+        // foreignObject: its text must fit its foreignObject and, for a node, the node shape, as the
+        // shown SVG image draws it (no page style sheet, no page font), not as the page would.
+        const src = await frame.locator("img.myst-mermaid-image").getAttribute("src") ?? "";
+        const labels = await frame.evaluate(measureMermaidImageLabels, src);
+        assert.deepEqual(labels.map((label) => label.label).sort(),
+          ["Dispatch fleet", "Hold and inspect", "No", "Ready?", "Review telemetry", "Yes"],
+          `every flowchart label was found in the image: ${JSON.stringify(labels)}`);
+        assert.deepEqual(cutLabels(labels), [], `every label fits its box in the image: ${JSON.stringify(labels)}`);
+        for (const selector of [".admonition.tip", "img.myst-mermaid-image",
+          'img[alt="Fleet operating loop: plan, dispatch, observe, and correct."]']) {
+          // The layout settles after the resize: wait for the box to fit, then report where it was.
+          let seen = "not measured";
+          await waitFor(`${selector} must be fully visible in the demo capture`, async () => {
+            const bounds = await frame.locator(selector).evaluate((element) => {
+              const rect = element.getBoundingClientRect();
+              return { width: rect.width, height: rect.height, top: rect.top, bottom: rect.bottom, innerHeight: window.innerHeight };
+            });
+            seen = `top ${bounds.top}, bottom ${bounds.bottom}, window.innerHeight ${bounds.innerHeight}`;
+            return bounds.width > 0 && bounds.height > 0 && bounds.top >= 0 && bounds.bottom <= bounds.innerHeight;
+          }).catch((error: unknown) => {
+            throw new Error(`${selector} is not fully visible in the demo capture: ${seen}`, { cause: error });
+          });
+        }
       });
-      assert.equal(await frame.locator(".myst-mermaid-error").count(), 0);
-      // A label box narrower than its text cuts the text's last characters. Each label is HTML in a
-      // foreignObject: its text must fit its foreignObject and, for a node, the node shape, as the
-      // shown SVG image draws it (no page style sheet, no page font), not as the page would.
-      const src = await frame.locator("img.myst-mermaid-image").getAttribute("src") ?? "";
-      const labels = await frame.evaluate(measureMermaidImageLabels, src);
-      assert.deepEqual(labels.map((label) => label.label).sort(),
-        ["Dispatch fleet", "Hold and inspect", "No", "Ready?", "Review telemetry", "Yes"],
-        `every flowchart label was found in the image: ${JSON.stringify(labels)}`);
-      assert.deepEqual(cutLabels(labels), [], `every label fits its box in the image: ${JSON.stringify(labels)}`);
-      for (const selector of [".admonition.tip", "img.myst-mermaid-image",
-        'img[alt="Fleet operating loop: plan, dispatch, observe, and correct."]']) {
-        assert.equal(await frame.locator(selector).evaluate((element) => {
-          const bounds = element.getBoundingClientRect();
-          return bounds.width > 0 && bounds.height > 0 && bounds.top >= 0 && bounds.bottom <= window.innerHeight;
-        }), true, `${selector} must be fully visible in the demo capture`);
-      }
-    });
-    await page.mouse.move(10, 10);
-    await captureAfter(evidence, page, "lifecycle-sync/r08-edit-mode-remembered",
-      "A white-background preview restores edit mode and renders a nested MyST admonition, "
-      + "a Mermaid dispatch flowchart, and a local SVG fleet operating loop.");
+      await page.mouse.move(10, 10);
+      await captureAfter(evidence, page, "lifecycle-sync/r08-edit-mode-remembered",
+        "A white-background preview restores edit mode and renders a nested MyST admonition, "
+        + "a Mermaid dispatch flowchart, and a local SVG fleet operating loop.");
+    } finally {
+      await page.setViewportSize({ width: 1400, height: 900 });
+    }
   });
 
   // A previewState message carries editMode: true; the host must accept it (scrollTop is recorded).
