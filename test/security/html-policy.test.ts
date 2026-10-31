@@ -189,6 +189,22 @@ test("keeps the included-block marker next to the source mapping", () => {
   assert.match(result.html, /data-sphinx-source-line="3"[^>]*data-sphinx-source-end-line="4"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+test("keeps the single-line marker of a one-line card part next to the source mapping", () => {
+  const result = rewriteSphinxHtml(
+    '<html><body><main><div class="myst-grid-card-option" data-line="4" data-end-line="4" data-single-line="true">H</div></main></body></html>',
+    {
+      outputRoot: "/workspace",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      sourceMapping: { sourceFile: "/workspace/active.md", documentId: "preview-1" },
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+  assert.match(result.html, /data-single-line="true"[^>]*data-sphinx-source-line="4"[^>]*data-sphinx-source-end-line="4"/u);
+});
+
 test("CR038: a column width in percent becomes a stylesheet rule; other widths are dropped", () => {
   const result = rewriteSphinxHtml(
     '<html><head></head><body><table><colgroup>'

@@ -684,6 +684,7 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "myst/v43-tabs-keyboard-light-900": "In the light theme at 900 px, a click on the third tab and then the Home, ArrowRight and End keys move the selection and the focus, and the last tab ends selected, focused and alone in showing its panel.",
   "myst/v44-tab-panel-edit-light-900": "In the light theme at 900 px in edit mode, a click on the paragraph of the shown Node tab panel opens exactly one Markdown editor holding the whole tab item, with its opening line, :selected: option and body.",
   "myst/v45-tab-panel-edit-dark-900": "In the dark theme at 900 px in edit mode, a click on the paragraph of the shown Node tab panel opens exactly one Markdown editor holding the whole tab item, with its opening line, :selected: option and body.",
+  "block-editing/v35-card-header-enter-commits-line-cream-900": "In edit mode in the cream preview at 900 px, a click on the header of a standalone card, End, a typed \" Q\" and Enter send one final save of the :header: line alone, so the document keeps :footer: right after the header line with no blank line between them, and the text box gets no newline."
 };
 
 /**

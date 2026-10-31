@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockMoves.test.ts
+- test/page/runtimeCardOptionEnter.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -58,7 +59,7 @@ The text before the first separator dot is exactly one of the three forms.
 | macOS | "Esc: cancel · ⌘↩: done" |
 | Windows or Linux | "Esc: cancel · Ctrl+Enter: done" |
 
-The keys before the done key read "Enter: new line · Tab: indent · Esc: cancel".
+The keys before the done key read "Enter: new line · Tab: indent · Esc: cancel". In an editor opened on a one-line card part (a card title, `:header:` or `:footer:` line, SwRS-MDOKFSTUDIO-BLOCK-258), where Enter is done, they read "Enter: done · Esc: cancel": the whole hint is "Line 18 · Enter: done · Esc: cancel · ⌘↩: done" on macOS and ends with "Ctrl+Enter: done" on Windows or Linux.
 
 ### Scenario (nominal): Done and Cancel buttons
 - GIVEN an open block editor
@@ -83,6 +84,7 @@ The keys before the done key read "Enter: new line · Tab: indent · Esc: cancel
 
 ### Verification notes
 - Method: test/page/runtimeBlockEditor.test.ts (`an opened block editor shows its line range, Done and Cancel on one row`: line range, key hints for one platform only, both buttons; `Done posts a final save and both buttons keep the textarea focused on press`: focus on press); visual scenario block-editing/v04 (buttons).
+- Method: test/page/runtimeCardOptionEnter.test.ts (`card one-line part: the status hint says Enter is done and drops Tab`: the one-line card hint on both platforms; `a one-line paragraph … keeps Enter as a new line and its hint`: the usual hint on a one-line block).
 - Method: test/page/runtimeBlockMoves.test.ts (`T28: an empty source reply opens an empty textarea with a placeholder; Done saves the insertion`: the New block text).
 - Method: test/page/blockReq.requirements.test.ts (`the editor frame appears at once, empty, and is filled when the source arrives`: frame at once and filled; `a click inside the editor frame does not reach the document listeners`: click in the frame).
 - Criteria: The text before the first separator dot is exactly one of the three forms; the hint equals the string built by blockEditHint for the platform; two buttons with the quoted labels, the primary style coming from the first-child rule of the stylesheet; the mousedown event of both buttons is default-prevented; openBlockEditor appends the status line to the frame at once, for a block and for a table cell; the frame has a click listener that stops propagation.

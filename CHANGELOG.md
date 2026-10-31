@@ -11,6 +11,10 @@
   under the edition palette: the card widens and pushes the other cards of its row aside, the
   palette sits above the text box (it may be wider than the card and scrolls vertically past a
   maximum height) and the text box keeps a readable width.
+- Enter in the editor of a card title or of its `:header:` or `:footer:` line now saves the line and
+  closes the editor, like Done: it no longer adds a blank line that ended the card's options and
+  cut the card. Shift+Enter, Alt+Enter, Tab and Shift+Tab do nothing there, and the status line
+  reads "Enter: done".
 
 ## 1.1.0 - 2026-10-29
 

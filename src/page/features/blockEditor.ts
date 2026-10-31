@@ -297,6 +297,11 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       ...(insertAfterLine !== undefined ? { insertAfterLine } : {}),
       ...(selectedCell ? { selectedCell, renderedCellContent, tableRowIndex: rowIndex, tableColumnIndex: columnIndex } : {}),
       initialCaretPosition,
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+      // A one-line card part (marked by the renderer): a blank line would end the card's options.
+      ...(!selectedCell && sourceRange === undefined && target.getAttribute("data-single-line") !== null
+        ? { singleLine: true }
+        : {}),
       // @implements_req SwRS-MDOKFSTUDIO-BLOCK-255
       focusAtOpen: document.activeElement,
     };
@@ -466,8 +471,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       : edit.endLine > edit.line
       ? "Lines " + edit.line + "–" + edit.endLine
       : "Line " + edit.line;
-    return lines + " · Enter: new line · Tab: indent · Esc: cancel · "
-      + (applePlatform ? "⌘↩" : "Ctrl+Enter") + ": done";
+    const keys = edit.singleLine ? " · Enter: done · Esc: cancel · " : " · Enter: new line · Tab: indent · Esc: cancel · ";
+    return lines + keys + (applePlatform ? "⌘↩" : "Ctrl+Enter") + ": done";
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-006

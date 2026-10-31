@@ -124,6 +124,12 @@ export interface BlockEdit {
   tableRowIndex?: number;
   tableColumnIndex?: number;
   initialCaretPosition: CaretPosition;
+  /**
+   * The editor edits one line that must stay one line (a card's `:header:` or `:footer:` option, or
+   * its title line; the renderer marks them `data-single-line`): plain Enter saves like Done,
+   * Shift+Enter and Alt+Enter do nothing, and Tab and Shift+Tab do nothing.
+   */
+  singleLine?: boolean;
   /** The element that held the focus when the editor opened (its source was not there yet). */
   focusAtOpen?: Element | null;
   /** The host refused to open this editor: the frame holds the reason and a way out. */
