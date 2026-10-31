@@ -51,13 +51,30 @@ function setup(options: {
   sourceOf?: (element: Element) => FindSourceBlock | undefined;
   rect?: { top: number; bottom: number; height: number };
   canRestoreFocus?: (target: Element) => boolean;
+  /** The host answers only when the test calls `held[i].done(...)`. */
+  holdAnswers?: boolean;
 } = {}) {
   const page = new Page();
   const keyListeners: Array<(event: any) => void> = [];
   const focusListeners: Array<() => void> = [];
+  // Timers run only when the test calls `tick()`.
+  const timers = new Map<number, { run: () => void; delay: number }>();
+  let nextTimer = 1;
+  const delays: number[] = [];
+  const tick = (): void => {
+    const due = [...timers.entries()];
+    timers.clear();
+    for (const [, timer] of due) timer.run();
+  };
   const window = {
     navigator: { platform: "Linux" },
     innerHeight: 800,
+    setTimeout: (run: () => void, delay: number) => {
+      timers.set(nextTimer, { run, delay });
+      delays.push(delay);
+      return nextTimer++;
+    },
+    clearTimeout: (id: number) => { timers.delete(id); },
     addEventListener: (type: string, listener: (event: any) => void) => {
       if (type === "keydown") keyListeners.push(listener);
       if (type === "focus") focusListeners.push(listener as () => void);
@@ -66,6 +83,7 @@ function setup(options: {
   const painted: Painted[] = [];
   const asked: Array<{ type: string; payload: Record<string, unknown> }> = [];
   const answers: FindReplaceAnswer[] = [];
+  const held: Array<{ payload: Record<string, unknown>; done: (result: FindReplaceAnswer) => void }> = [];
   const revealed: Element[] = [];
   const hooks: FindHooks = {
     content: () => page.content as unknown as Element,
@@ -73,7 +91,11 @@ function setup(options: {
     sourceBlockOf: options.sourceOf ?? (() => undefined),
     replaceBlockedReason: () => options.blocked,
     reveal: (target) => { revealed.push(target); return false; },
-    ask: (type, payload, done) => { asked.push({ type, payload }); done(answers.shift() ?? { ok: true, replaced: 0, skipped: 0 }); },
+    ask: (type, payload, done) => {
+      asked.push({ type, payload });
+      if (options.holdAnswers) held.push({ payload, done });
+      else done(answers.shift() ?? { ok: true, replaced: 0, skipped: 0 });
+    },
     onLayoutChange: () => undefined,
     paint: (ranges, current) => { painted.push({ ranges: [...ranges], current }); },
     createRange: (match) => ({ match, getBoundingClientRect: () => options.rect ?? { top: 100, bottom: 120, height: 20 } }) as unknown as Range,
@@ -102,7 +124,7 @@ function setup(options: {
     for (const listener of query(selector).listeners.get("click") ?? []) listener({ target: query(selector) });
   };
   const focusWindow = (): void => { for (const listener of focusListeners) listener(); };
-  return { page, bar, key, focusWindow, query, type, click, painted, asked, answers, revealed, hooks };
+  return { page, bar, key, focusWindow, query, type, click, painted, asked, answers, held, revealed, hooks, tick, timers, delays };
 }
 
 const COUNT = "[data-find-count]";
@@ -393,6 +415,105 @@ test("replace replaces the current match only and moves on; a refusal of the hos
   assert.equal(text(harness, "[data-find-note]"), "Replaced 1 match");
   harness.key({ key: "Enter" }, harness.query("[data-find-replace-input]"));
   assert.equal(text(harness, "[data-find-note]"), "The preview is out of date.");
+});
+
+/** The paragraphs are mapped to their own source line; the table cells are not replaceable. */
+const mapParagraphs = (element: Element): FindSourceBlock | undefined => {
+  for (let node: Element | null = element; node; node = node.parentElement) {
+    if (node.tagName === "P") return { line: 3, endLine: 3, element: node };
+  }
+  return undefined;
+};
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+test("with the replace row open, the note counts the matches the host would skip before any click", () => {
+  const harness = setup({ sourceOf: mapParagraphs });
+  harness.page.node("p", ["Para needle one."]);
+  harness.page.node("p", ["link needle"]);
+  harness.page.node("td", ["a needle cell"]);
+  harness.answers.push({ ok: true, replaced: 1, skipped: 1 });
+  harness.bar.open({ replace: true });
+  harness.type("[data-find-input]", "need");
+  harness.type("[data-find-input]", "needle");
+  assert.equal(text(harness, "[data-find-note]"), "1 match cannot be replaced from the preview", "the page's count first");
+  assert.equal(harness.asked.length, 0, "nothing is asked before the debounce");
+  assert.equal(harness.timers.size, 1, "each search restarts the debounce");
+  assert.equal(harness.delays.at(-1), 150);
+  harness.tick();
+  assert.equal(harness.asked.length, 1);
+  assert.equal(harness.asked[0]!.type, "previewFindReplace");
+  assert.equal(harness.asked[0]!.payload.dryRun, true);
+  assert.deepEqual((harness.asked[0]!.payload.items as unknown[]).length, 2, "every mapped match is planned");
+  assert.equal(text(harness, "[data-find-note]"), "2 matches cannot be replaced from the preview");
+  harness.type("[data-find-replace-input]", "PIN");
+  assert.equal(text(harness, "[data-find-note]"), "2 matches cannot be replaced from the preview", "typing the replacement keeps it");
+  harness.bar.refresh();
+  assert.equal(text(harness, "[data-find-note]"), "1 match cannot be replaced from the preview", "a refresh drops the old answer");
+  harness.tick();
+  assert.equal(harness.asked.length, 2, "and asks again after the content refresh");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+test("no dry run while the replace row is closed; opening it asks, closing it drops the host's count", () => {
+  const harness = setup({ sourceOf: mapParagraphs });
+  harness.page.node("p", ["Para needle one."]);
+  harness.page.node("td", ["a needle cell"]);
+  harness.bar.open();
+  harness.type("[data-find-input]", "needle");
+  harness.tick();
+  assert.equal(harness.asked.length, 0, "a reader who only searches causes no host request");
+  assert.equal(text(harness, "[data-find-note]"), "1 match cannot be replaced from the preview");
+  harness.answers.push({ ok: true, replaced: 0, skipped: 1 });
+  harness.click("[data-find-toggle-replace]");
+  harness.tick();
+  assert.deepEqual(harness.asked.map((entry) => [entry.type, entry.payload.dryRun]), [["previewFindReplace", true]]);
+  assert.equal(text(harness, "[data-find-note]"), "2 matches cannot be replaced from the preview");
+  harness.click("[data-find-toggle-replace]");
+  assert.equal(text(harness, "[data-find-note]"), "1 match cannot be replaced from the preview");
+  harness.type("[data-find-input]", "Para");
+  harness.tick();
+  assert.equal(harness.asked.length, 1, "still nothing asked with the row closed");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+test("a dry-run answer of an older search is ignored, and a refusal keeps the page's count", () => {
+  const harness = setup({ sourceOf: mapParagraphs, holdAnswers: true });
+  harness.page.node("p", ["one needle, one pin"]);
+  harness.page.node("td", ["a needle pin cell"]);
+  harness.bar.open({ replace: true });
+  harness.type("[data-find-input]", "needle");
+  harness.tick();
+  harness.type("[data-find-input]", "pin");
+  harness.tick();
+  assert.equal(harness.held.length, 2);
+  assert.deepEqual((harness.held[1]!.payload.items as Array<{ find: string }>).map((item) => item.find), ["pin"]);
+  harness.held[0]!.done({ ok: true, replaced: 0, skipped: 5 });
+  assert.equal(text(harness, "[data-find-note]"), "1 match cannot be replaced from the preview", "the stale answer is ignored");
+  harness.held[1]!.done({ ok: false, reason: "The preview is out of date." });
+  assert.equal(text(harness, "[data-find-note]"), "1 match cannot be replaced from the preview", "a refusal keeps the page's count");
+  harness.bar.refresh();
+  harness.tick();
+  harness.held[2]!.done({ ok: true, replaced: 0, skipped: 1 });
+  assert.equal(text(harness, "[data-find-note]"), "2 matches cannot be replaced from the preview");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+test("the dry run sends no replacement text, so a replacement too long to apply still gets the announcement", () => {
+  const harness = setup({ sourceOf: mapParagraphs });
+  harness.page.node("p", ["Para needle one."]);
+  harness.page.node("td", ["a needle cell"]);
+  harness.bar.open({ replace: true });
+  harness.type("[data-find-replace-input]", "x".repeat(2001));
+  harness.answers.push({ ok: true, replaced: 0, skipped: 1 });
+  harness.type("[data-find-input]", "needle");
+  harness.tick();
+  assert.equal(harness.asked.length, 1, "the dry run is asked whatever the replacement's length");
+  assert.equal(harness.asked[0]!.payload.dryRun, true);
+  assert.deepEqual((harness.asked[0]!.payload.items as Array<{ replacement: string }>).map((item) => item.replacement), [""]);
+  assert.equal(text(harness, "[data-find-note]"), "2 matches cannot be replaced from the preview");
+  harness.click("[data-find-replace-all]");
+  assert.equal(harness.asked.length, 1, "the click still refuses the long replacement");
+  assert.equal(text(harness, "[data-find-note]"), "The replacement text is too long.");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-014

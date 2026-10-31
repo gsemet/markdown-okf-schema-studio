@@ -66,6 +66,8 @@ export interface FindBar {
 
 const REPLACE_ALL_LIMIT = 5000;
 const MAX_FIND_REPLACEMENT = 2000;
+/** How long the bar waits after a search before it asks the host which matches it would skip. */
+const DRY_RUN_DELAY_MS = 150;
 
 const ICON_CASE = '<path d="M3 17 7 7l4 10M4.4 14h5.2M14 13.5a3 3 0 1 0 6 0 3 3 0 0 0-6 0M20 10.5V17"></path>';
 const ICON_WORD = '<path d="M3 17V9M3 13h5v4M8 13V9M13 9v8M13 13h3a2 2 0 0 0 0-4h-3M4 20h16"></path>';
@@ -100,11 +102,13 @@ const fieldSelection = (element: Element | null): string | undefined => {
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-011
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-014
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-131
 /**
  * The find bar: Cmd/Ctrl+F opens it over the preview, the matches in the rendered text are painted,
  * Enter / Shift+Enter / F3 walk them and Escape closes it. The replace row asks the host to edit the
- * matched source spans only (see `core/edits/findReplace.ts`). Nothing is written to the document
- * by the search itself.
+ * matched source spans only (see `core/edits/findReplace.ts`). While the replace row is open, the
+ * bar asks the host for a dry run of Replace all after each search, so its note counts the matches
+ * that cannot be replaced before any click. Nothing is written to the document by the search itself.
  */
 export function installFindBar(
   document: Document,
@@ -130,6 +134,11 @@ export function installFindBar(
   let desiredIndex: number | undefined;
   let busy = false;
   let message = "";
+  /** The matches the host's last dry run of Replace all would skip (0 until it answers). */
+  let hostSkipped = 0;
+  /** Bumped by each search: a dry-run answer of an older one is ignored. */
+  let dryRunGeneration = 0;
+  let dryRunTimer: number | undefined;
 
   const mac = isMac(window);
   const modifier = mac ? "Cmd" : "Ctrl";
@@ -165,6 +174,8 @@ export function installFindBar(
 
   const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? "" : "es"}`;
 
+  const replaceRowOpen = (): boolean => bar !== undefined && replaceRow.hidden === false;
+
   const updateNote = (): void => {
     if (!bar) return;
     if (message !== "") {
@@ -176,7 +187,7 @@ export function installFindBar(
       note.textContent = blocked;
       return;
     }
-    const skipped = unreplaceableCount();
+    const skipped = unreplaceableCount() + (replaceRowOpen() ? hostSkipped : 0);
     note.textContent = skipped === 0 ? "" : `${plural(skipped, "match")} cannot be replaced from the preview`;
   };
 
@@ -246,7 +257,7 @@ export function installFindBar(
     scrollToCurrent();
   };
 
-  const search = (keepIndex: boolean): void => {
+  const findMatches = (keepIndex: boolean): void => {
     if (!bar) return;
     const previous = current;
     const compiled = compileFind(findInput.value, options);
@@ -296,6 +307,43 @@ export function installFindBar(
     updateReplaceState();
   };
 
+  /** Forgets the host's skipped count and drops the planned or pending dry run. */
+  const cancelDryRun = (): void => {
+    dryRunGeneration += 1;
+    hostSkipped = 0;
+    if (dryRunTimer !== undefined) window.clearTimeout(dryRunTimer);
+    dryRunTimer = undefined;
+  };
+
+  /**
+   * With the replace row open and matches on the page, asks the host 150 ms later to plan Replace
+   * all without applying it; its skipped count joins the note. A refusal keeps the page's count.
+   */
+  const scheduleDryRun = (): void => {
+    cancelDryRun();
+    if (!opened || !replaceRowOpen() || matches.length === 0 || hooks.replaceBlockedReason() !== undefined) return;
+    const generation = dryRunGeneration;
+    dryRunTimer = window.setTimeout(() => {
+      dryRunTimer = undefined;
+      if (generation !== dryRunGeneration || busy) return;
+      // The counts do not depend on the replacement text: the dry run sends none, so a long one
+      // (refused only at the click) does not stop the announcement.
+      const items = itemsFor(matches, false);
+      if (items.length === 0 || items.length > REPLACE_ALL_LIMIT) return;
+      hooks.ask("previewFindReplace", { items, dryRun: true }, (answer) => {
+        if (generation !== dryRunGeneration || answer.ok !== true) return;
+        hostSkipped = answer.skipped ?? 0;
+        updateNote();
+      });
+    }, DRY_RUN_DELAY_MS);
+  };
+
+  const search = (keepIndex: boolean): void => {
+    cancelDryRun();
+    findMatches(keepIndex);
+    scheduleDryRun();
+  };
+
   const move = (step: number): void => {
     if (matches.length === 0) return;
     current = (current + step + matches.length) % matches.length;
@@ -320,12 +368,17 @@ export function installFindBar(
     replaceRow.hidden = !open;
     replaceToggle.setAttribute("aria-expanded", String(open));
     bar?.setAttribute("data-replace", open ? "open" : "closed");
+    if (open) scheduleDryRun();
+    else cancelDryRun();
     updateNote();
     updateReplaceState();
   };
 
-  /** Turns matches into the items of the host request: where they are and what they become. */
-  const itemsFor = (selected: readonly PageMatch[]): Array<Record<string, unknown>> => {
+  /**
+   * Turns matches into the items of the host request: where they are and what they become (an
+   * empty replacement without `withReplacement`, for a dry run).
+   */
+  const itemsFor = (selected: readonly PageMatch[], withReplacement = true): Array<Record<string, unknown>> => {
     const items: Array<Record<string, unknown>> = [];
     const compiled = compileFind(findInput.value, options);
     const regex = options.regex && compiled !== undefined && !("error" in compiled);
@@ -346,7 +399,7 @@ export function installFindBar(
         find: match.text,
         occurrence: before,
         occurrences: total,
-        replacement: expandReplacement(replaceInput.value, match.match, regex),
+        replacement: withReplacement ? expandReplacement(replaceInput.value, match.match, regex) : "",
       });
     }
     return items;
@@ -555,6 +608,7 @@ export function installFindBar(
       if (!opened || !bar) return;
       opened = false;
       bar.hidden = true;
+      cancelDryRun();
       matches = [];
       ranges = [];
       current = -1;
