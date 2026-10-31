@@ -38,6 +38,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewHistoryState: { canBack: true, canForward: false },
   previewShowComments: { showComments: true },
   previewIncomingChanges: { enabled: true, ranges: [] },
+  previewBaselineDiff: { html: "<p>x</p>", hunks: [{ baseStart: 1, baseEnd: 1, start: 1, end: 1 }] },
   previewComments: { threads: [] },
   previewCommentResult: { ok: true, kind: "create" },
   previewFlushEdit: { flushId: "flush-1" },
@@ -128,4 +129,20 @@ test("values that are not host messages are refused", () => {
   for (const type of ["__proto__", "constructor", "toString", "hasOwnProperty"]) {
     assert.equal(filter.accepts({ type, ...page }, page), false, type);
   }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-007
+test("CR147: a baseline message needs an html string and well-formed hunks", () => {
+  const send = (extra: Record<string, unknown>): boolean => filter.accepts({ type: "previewBaselineDiff", ...page, ...extra }, page);
+  const hunk = { baseStart: 2, baseEnd: 1, start: 2, end: 3 };
+  assert.equal(send({ html: "", hunks: [hunk] }), true, "an empty base side ends one line before its start");
+  assert.equal(send({ html: "x", hunks: [] }), true);
+  assert.equal(send({ html: 5, hunks: [] }), false);
+  assert.equal(send({ html: "x" }), false);
+  assert.equal(send({ html: "x", hunks: [{ ...hunk, end: 0 }] }), false, "an end more than one before its start");
+  assert.equal(send({ html: "x", hunks: [{ ...hunk, start: -1 }] }), false);
+  assert.equal(send({ html: "x", hunks: [{ ...hunk, baseStart: 1.5 }] }), false);
+  assert.equal(send({ html: "x", hunks: [null] }), false);
+  assert.equal(send({ html: "x".repeat(20 * 1024 * 1024 + 1), hunks: [] }), false);
+  assert.equal(send({ html: "x", hunks: new Array(100_001).fill(hunk) }), false);
 });

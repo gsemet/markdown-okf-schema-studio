@@ -485,7 +485,8 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 test("preview toolbar has five rows: actions with the collapse button, navigation, appearance, layout, content", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
-  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 14);
+  // Row 4 holds Width, TOC and Side-by-side (15 buttons in all).
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 15);
   const [mainRow, rest] = toolbar.split('<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">');
   const [navigationRow, afterNavigation] = rest.split('<div data-sphinx-preview-toolbar-row="appearance">');
   const [appearanceRow, afterAppearance] = afterNavigation.split('<div data-sphinx-preview-toolbar-row="layout">');
@@ -500,8 +501,8 @@ test("preview toolbar has five rows: actions with the collapse button, navigatio
   assert.match(navigationRow, /data-sphinx-preview-anchor[\s\S]*data-sphinx-preview-back[\s\S]*data-sphinx-preview-next/u);
   assert.equal(count(appearanceRow), 3);
   assert.match(appearanceRow, /data-sphinx-preview-theme-toggle[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in/u);
-  assert.equal(count(layoutRow), 2);
-  assert.match(layoutRow, /data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[^>]*><svg[\s\S]*<\/svg><\/button><\/div>$/u);
+  assert.equal(count(layoutRow), 3);
+  assert.match(layoutRow, /data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-sbs-toggle aria-pressed="false"[^>]*><svg[\s\S]*<\/svg><\/button><\/div>$/u);
   assert.equal(count(contentRow), 3);
   assert.match(contentRow, /^<button[^>]*data-sphinx-preview-fold-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
   assert.match(contentRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><button[^>]*data-sphinx-preview-comments-toggle aria-pressed="true"[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
@@ -511,11 +512,11 @@ test("preview toolbar has five rows: actions with the collapse button, navigatio
   const order = [...toolbar.matchAll(/<button type="button" data-sphinx-preview-([a-z-]+)/gu)].map((match) => match[1]);
   assert.deepEqual(order, [
     "refresh", "edit-toggle", "toolbar-collapse", "anchor", "back", "next", "theme-toggle", "zoom-out", "zoom-in",
-    "width-toggle", "toc-toggle", "fold-toggle", "diff-toggle", "comments-toggle",
+    "width-toggle", "toc-toggle", "sbs-toggle", "fold-toggle", "diff-toggle", "comments-toggle",
   ]);
   // Read-only previews: the Edit button stays, greyed (aria-disabled) with the reason as tooltip.
   const readOnly = renderPreviewToolbar(false);
-  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 14);
+  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 15);
   assert.match(readOnly, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"[^>]*title="Editing is unavailable: this file is not in a trusted workspace"[^>]*data-tooltip="Editing is unavailable: this file is not in a trusted workspace"/u);
   assert.doesNotMatch(toolbar, /aria-disabled/u);
   assert.match(PREVIEW_THEME_CSS, /button\[aria-disabled="true"\]\s*\{[^}]*cursor: not-allowed;/u);
@@ -531,7 +532,7 @@ test("preview toolbar has five rows: actions with the collapse button, navigatio
   ]) {
     assert.ok(toolbar.includes(control), `expected toolbar control ${control}`);
   }
-  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 14);
+  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 15);
   assert.match(
     PREVIEW_THEME_CSS,
     /button\[data-tooltip\]::after\s*\{[^}]*content: attr\(data-tooltip\);[^}]*visibility: hidden;[^}]*opacity: 0;/u,
@@ -1409,5 +1410,21 @@ test("the find bar and the match paint read the theme tokens, in forced colours 
   assert.match(PREVIEW_THEME_CSS, /::highlight\(studio-find-current\)\s*\{[^}]*background-color/u);
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-find\]\s*\{[^}]*position: fixed;[^}]*--studio-editorWidget-background/u);
   assert.match(PREVIEW_THEME_CSS, /@media \(forced-colors: active\)\s*\{\s*::highlight\(studio-find\)/u);
-  assert.doesNotMatch(renderPreviewToolbar(), /data-sphinx-preview-find/u, "the bar is created by the page, not by the toolbar");
+  assert.doesNotMatch(renderPreviewToolbar(), /data-sphinx-preview-find/u, "the bar is created by the page, not by the toolbar");});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
+test("CR147: the toolbar offers a Side-by-side button in the layout row after the Table of contents button, not pressed at first", () => {
+  const toolbar = renderPreviewToolbar();
+  assert.match(toolbar, /data-sphinx-preview-toc-toggle[\s\S]*data-sphinx-preview-sbs-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-fold-toggle/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+test("CR147: the side-by-side cards are two columns, switch off with the page attribute and never show in edit mode", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /\[data-okf-sbs-card\] \{[^}]*display: grid;[^}]*grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\);/u);
+  assert.match(css, /html\[data-sphinx-preview-sbs="off"\] \[data-okf-sbs-card\],\s*html\[data-sphinx-preview-edit-mode="on"\] \[data-okf-sbs-card\] \{\s*display: none;/u);
+  assert.match(css, /html\[data-sphinx-preview-sbs="on"\]:not\(\[data-sphinx-preview-edit-mode="on"\]\) \[data-okf-sbs-replaced\] \{\s*display: none;/u);
+  assert.match(css, /\[data-okf-sbs-word="removed"\] \{[^}]*text-decoration: line-through;/u);
+  assert.match(css, /\[data-okf-sbs-word="added"\] \{[^}]*text-decoration: underline;/u);
+  assert.match(css, /html\[data-okf-incoming-changes="false"\] \[data-sphinx-preview-sbs-toggle\] \{\s*display: none;/u);
 });

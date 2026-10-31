@@ -106,7 +106,9 @@ while a wide table or figure breaks out of it and is centred
 
 Blocks changed since the last Git commit, unsaved edits included, are marked with a green bar in
 the live preview, and so is each changed or added front matter field in the properties table. A
-toolbar button toggles the marks.
+toolbar button toggles the marks. A second button turns each changed block into a small
+side-by-side diff (the block at the last commit on the left, as it is now on the right, with the
+removed and added words marked) in reading mode.
 
 ![Blocks changed since the last commit marked with a green bar](images/readme/showcase-diff-cream.png)
 

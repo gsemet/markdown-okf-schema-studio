@@ -76,6 +76,9 @@ export function installEditMode(rt: PageRuntime): EditMode {
     syncLinkFollowHints(document, enabled);
     rt.tableRowMove.refresh();
     rt.insertPoints.refreshInsertPoints();
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-008
+    // The side-by-side diff is a read-mode view: its button is disabled and its cards go in edit mode.
+    rt.parts?.sideBySide?.sync();
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-026
