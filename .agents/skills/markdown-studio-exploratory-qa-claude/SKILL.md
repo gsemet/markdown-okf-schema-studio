@@ -12,6 +12,11 @@ metadata:
 
 ## Purpose
 
+A campaign exists to find **bad behaviours that no test and no requirement covers yet**. A finding
+with no requirement (a **Gap**) is the main target, not a weaker kind of bug. Searching
+`requirements/` only tells a real gap (nothing specified) apart from a **Decision** (a requirement
+says the opposite); it must never discourage reporting.
+
 Use the extension the way an author does every day, in a real VS Code window, and report the
 frictions, defects, and test gaps that the automated campaign misses. Inputs are real mouse and
 keyboard events; the spy extension gives the ground truth of the buffer.
@@ -157,6 +162,23 @@ candidates** (`q scenario <id>-<slug>.json` in a fresh session), merges duplicat
 group, and returns at most 40 lines to the Foreman. A `partial` charter gets a follow-up charter
 from the Driver if it is worth the budget.
 
+Before writing a sheet, the charter agent searches `requirements/` (`okfreq`, or grep on the area
+and keywords) and records the matching IDs in the sheet's `Requirements:` field (`none found` is an
+answer). Every sheet has a **Verdict** (`Bug`, `Gap` or `Decision`, defined in
+[references/qa-bug-template.md](references/qa-bug-template.md)), a **Why this is wrong** section of
+3 to 6 lines right after Currently / Expected, and an Expected that names its source (a requirement
+ID, an invariant, an in-product working case or a convention). A **Decision** is never filed as a
+bug: it is an owner question.
+
+Proposals follow a balance rule: propose a test only when the defect could come back silently and no
+existing test is close (data loss, buffer diff, regression of a fixed bug, invariant); requirements
+follow the same rule. Each proposal section ends with `Uncheck to disagree: [x]` and the fix CR
+carries out only the sections still ticked.
+
+**Triage (coordinator).** Read "Why this is wrong" first. A weak reason sends the sheet back to the
+charter agent, or downgrades it to Low as an intent question. A Bug with a cited requirement carries
+that ID into the backlog item; a Gap becomes a backlog item as is; Decisions go to the owner.
+
 Every sheet starts with a **Currently / Expected** block (two columns, an image or diff each side,
 one caption line each): Currently is a clipped shot of the symptom, mandatory when the symptom is
 visible; Expected is the working case, the same shot annotated, or a pair of code blocks for a
@@ -172,24 +194,26 @@ and never drives a window except the smoke check.
 ### 6. Report
 
 Write the index and the sheets as described in
-[bug-sheet-template.md](references/bug-sheet-template.md) (the owner reads them in the Studio).
+[qa-bug-template.md](references/qa-bug-template.md) (the owner reads them in the Studio).
 
 Under `.agents/changes/03-requests/<campaign-folder>/` (for a follow-up, a new folder or a `part-N/`
 subfolder linked from the previous index):
 
 - `00-index.md`: date, revision, status (`partial`/`completed`), summary, findings table sorted by
-  severity with an `approved` column (`[ ]`), the **new-feature coverage table**, severity scale,
+  severity with an `approved` column (`[ ]`), **Decisions for the owner** (the findings whose
+  verdict is `Decision`, each with its requirement ID and the question), the **new-feature coverage
+  table**, severity scale (with the line "an intent question is Low unless data is lost"),
   method, QA Drivers and charters run with their budgets used, limits, and **Tests to promote**: the
   replay scenarios that should become product E2E tests, so the next campaign does not explore them
   again.
 - One subfolder per logical group (`01-inline-block-editing/`, `02-table-editing/`, …) with one
-  file per bug, following [references/bug-sheet-template.md](references/bug-sheet-template.md):
+  file per bug, following [references/qa-bug-template.md](references/qa-bug-template.md):
   full sheet for High/Medium, short sheet for Low.
 - `08-test-campaign-gaps/` for wrong or missing asserts and the coverage note (what was and was
   not exercised, per charter).
 - `evidence/`: at most two JPEGs per finding, the **Currently** and **Expected** shots of the
   sheet's first block (shots are already JPEG at 1000 px; use `q shot NAME --clip preview` or a
-  tighter clip). See [references/bug-sheet-template.md](references/bug-sheet-template.md).
+  tighter clip). See [references/qa-bug-template.md](references/qa-bug-template.md).
 - Replay scenarios stay in `$SK/scenarios/`, named after the finding ID.
 
 **Header lines of `00-index.md`** (the next campaign's scripts read them):
@@ -252,7 +276,7 @@ launched one. Prefix every call with `QA_SESSION=<name>` when several windows ru
 | `check '<json>' [--since S]` | Run checks only (oracles over the last S seconds) |
 | `stop` | Terminate the session's VS Code (SIGTERM, then SIGKILL) |
 | `use NAME` | Make another session current (single-agent use only) |
-| `shot NAME [--clip preview\|x,y,w,h\|SELECTOR] [--png] [--px 1000]` | Screenshot, JPEG by default |
+| `shot NAME [--clip preview\|x,y,w,h\|SELECTOR] [--png] [--px 1000] [--annotate SEL\|x,y,w,h --note TEXT --color red\|green]…` | Screenshot, JPEG by default; `--annotate` (repeatable, `--note` and `--color` pair by position) outlines the element in the shot, boxes printed (see [How to annotate](references/qa-bug-template.md#how-to-annotate)) |
 | `click X Y [--right] [--count 2]`, `dblclick X Y`, `move X Y`, `drag X1 Y1 X2 Y2` | Real mouse input |
 | `wheel X Y DY [--steps N]` | Mouse wheel |
 | `key CHORD...` | Key presses (`Meta+s`, `Escape`, `ArrowDown`) |
