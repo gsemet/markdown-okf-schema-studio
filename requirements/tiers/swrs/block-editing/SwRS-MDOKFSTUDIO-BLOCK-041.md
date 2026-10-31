@@ -46,6 +46,7 @@ implemented_in_files:
 - src/session/features/viewState.ts
 tested_in_files:
 - test/host/previewTiming.test.ts
+- test/integration/radioChoice.test.ts
 - test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
@@ -56,6 +57,7 @@ tested_in_files:
 - test/page/runtimeContentPatch.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimePageControls.test.ts
+- test/page/runtimeRadioGroups.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/renderReq.labelRename.requirements.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
@@ -98,6 +100,7 @@ The page refuses with the open editor's status line unless the row says otherwis
 | Reply or Delete thread of an inline thread | block editor or field (frontmatter) editor | page | Nothing is sent; the message "Save or cancel the open edit before changing a thread." is shown and the typed reply text is kept |
 | Reply or delete of an inline thread | block edit held by the host | host | The answer is "Save or cancel the open Markdown edit before changing a thread." and the document is unchanged; the host answers before it reads the document |
 | Task-list checkbox click | block editor or field (frontmatter) editor | page | The toggle is cancelled, no `previewCheckboxToggle` is posted and the editor status shows "Save or cancel this edit before toggling a checkbox." |
+| Radio option press and click (SwRS-MDOKFSTUDIO-GFM-039) | block editor or field (frontmatter) editor | page | The guard runs on the press (mousedown, capture phase), before the editor's blur: the press is prevented, so the focus and the caret stay in the editor and nothing is committed; the click sends no `previewCheckboxToggle`, the editor stays open and its status shows "Save or cancel this edit before choosing an option." |
 | Task-list checkbox toggle (`previewCheckboxToggle`) | block edit held by the host | host | The checkbox answer carries the error "Save or cancel the open Markdown edit before toggling a checkbox." (untested) |
 | Refresh requested from the page (`refreshPreview`) | block editor or field editor | page | No `previewRefresh` is posted; the editor status shows "Save or cancel this edit before refreshing." |
 | Refresh button of the toolbar | block editor or field editor | page | The button is disabled while the editor is open and enabled again when it closes |
@@ -151,6 +154,7 @@ The page refuses with the open editor's status line unless the row says otherwis
 - Method: test/session/blockReq.requirements.test.ts (a block move is refused while a block edit is held and planned otherwise; copy, cut and paste of blocks are refused while a block edit is held; a second open while the host holds an edit is refused).
 - Method: test/host/previewTiming.test.ts (Refresh Preview brings the render to the page even over an open inline editor; the later edit waits; the message sent by the page toolbar button is not tested).
 - Method: test/page/runtimePageControls.test.ts (checkbox click refused with an open block editor).
+- Method: test/page/runtimeRadioGroups.test.ts (a press on a radio option that would blur the editor is prevented, nothing is sent and the editor stays open). test/integration/radioChoice.test.ts (real window: a real mouse click on an option reached by a wheel scroll while a block editor is open writes nothing and keeps the editor open).
 - Method: test/page/modules/labelRename.test.ts (an open block editor blocks the rename; the properties editor half is untested).
 - Method: test/session/renderReq.labelRename.requirements.test.ts (a rename while a block edit is open changes nothing and answers the reason; the document is unchanged).
 - Method: test/page/modules/inlineThread.test.ts (an open edit blocks the change with its reason and the text is kept; no editor sends the request).

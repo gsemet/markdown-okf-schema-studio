@@ -6,7 +6,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { MALFORMED_TOGGLE, RADIO_GONE, READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
+import { MALFORMED_TOGGLE, RADIO_GONE, READ_ONLY_FILE, READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
 import { applyTextEdits, type TextEdit } from "../../src/core/edits/textEdit";
 import { isPageToHostMessage, type PageToHostMessage } from "../../src/core/protocol/pageToHost";
 import { createMessageRouter } from "../../src/core/protocol/router";
@@ -26,14 +26,23 @@ function choice(extra: Record<string, unknown> = {}): Record<string, unknown> {
   };
 }
 
-function controller(options: { text?: string; blockEditOpen?: boolean } = {}) {
+/**
+ * `applyWritesNothing` models a document VS Code will not change (`files.readonlyInclude`): the apply
+ * resolves true and the text stays as it was. Otherwise the apply changes the text, as VS Code does.
+ */
+function controller(options: { text?: string; blockEditOpen?: boolean; applyWritesNothing?: boolean } = {}) {
   const applied: Array<{ edits: readonly TextEdit[]; options: unknown }> = [];
+  const document = { id: DOCUMENT, revision: 4, path: "/ws/plan.md", text: options.text ?? TEXT, getText: () => document.text };
   const posted: Array<Record<string, unknown>> = [];
   const manager = {
     host: {
       documents: {
         applyEdits: (_document: unknown, edits: readonly TextEdit[], applyOptions: unknown) => {
           applied.push({ edits, options: applyOptions });
+          if (!options.applyWritesNothing) {
+            document.text = applyTextEdits(document.text, edits);
+            document.revision += 1;
+          }
           return Promise.resolve(true);
         },
       },
@@ -45,7 +54,7 @@ function controller(options: { text?: string; blockEditOpen?: boolean } = {}) {
   new SourceEditController(manager).register(router);
   const preview = {
     documentUri: DOCUMENT,
-    document: { id: DOCUMENT, revision: 4, path: "/ws/plan.md", getText: () => options.text ?? TEXT },
+    document,
     stage: { activeDocumentRevision: 4 },
     edits: { active: options.blockEditOpen ? { editId: "e1" } : undefined },
     postToPage: (message: Record<string, unknown>) => { posted.push(message); return Promise.resolve(true); },
@@ -53,6 +62,7 @@ function controller(options: { text?: string; blockEditOpen?: boolean } = {}) {
   return {
     applied,
     posted,
+    document,
     run: async (message: Record<string, unknown>) => {
       const outcome = router.dispatch(message as unknown as PageToHostMessage, preview);
       await (outcome.handled ? outcome.result : undefined);
@@ -160,4 +170,33 @@ test("a malformed radio group is answered as not understood, and a read-only pre
   readOnly.dispatcher.handle(readOnly.session, choice());
   assert.deepEqual(readOnly.answers, [{ editId: "checkbox-9-1", result: { error: READ_ONLY_NO_FOLDER } }]);
   assert.deepEqual(readOnly.handled, []);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+test("a choice whose apply resolves but leaves the document unchanged (a read-only file) is answered with an error, not as saved", async () => {
+  const host = controller({ applyWritesNothing: true });
+  await host.run(choice());
+  assert.equal(host.document.getText(), TEXT, "VS Code wrote nothing");
+  assert.equal(host.posted.length, 1);
+  assert.notEqual(host.posted[0].saved, true, "the page must not keep the new choice");
+  assert.equal(typeof host.posted[0].error, "string", "the page shows why next to the option");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+test("on a file VS Code keeps read-only, a choice and a plain checkbox toggle are answered with the read-only reason", async () => {
+  const radio = controller({ applyWritesNothing: true });
+  await radio.run(choice());
+  assert.deepEqual(radio.posted.map((answer) => answer.error), [READ_ONLY_FILE]);
+
+  const text = "Tasks:\n\n- [ ] write the fix\n";
+  const checkbox = controller({ text, applyWritesNothing: true });
+  await checkbox.run(choice({ line: 3, endLine: 3, column: 2, checked: true, radioGroup: undefined }));
+  assert.equal(checkbox.applied.length, 1, "the toggle was planned and sent to VS Code");
+  assert.equal(checkbox.document.getText(), text);
+  assert.deepEqual(checkbox.posted.map((answer) => answer.error), [READ_ONLY_FILE]);
+
+  const writable = controller({ text });
+  await writable.run(choice({ line: 3, endLine: 3, column: 2, checked: true, radioGroup: undefined }));
+  assert.deepEqual(writable.posted.map((answer) => answer.saved), [true], "a toggle that writes is saved");
 });

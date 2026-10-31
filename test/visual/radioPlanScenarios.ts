@@ -1,7 +1,7 @@
 /**
  * The radio choice plan scenarios (CR 214): a short plan with a bulleted and an ordered radio group
  * (the recommended option preselected) and a task list, in the cream and dark previews (the README
- * images "Decide in the page").
+ * images "Decide in the page"); then one Tab from the label of the first group (CR 222).
  */
 
 import { MAIN } from "./scenarioAssertions";
@@ -28,10 +28,19 @@ const PLAN_ASSERTIONS: ContentAssertion[] = [
   { message: "the plan stays inside the pane", selector: FIX, insidePane: true },
 ];
 
-export const RADIO_PLAN_SCENARIOS: ScenarioDefinition[] = ([
+const FIX_LABEL = `${MAIN} > p:has(+ ul[role='radiogroup'])`;
+
+const TAB_ASSERTIONS: ContentAssertion[] = [
+  { message: "one Tab from the label focuses the selected option of the group, not its list, item or paragraph", selector: FIX, expr: "(() => { const focused = document.activeElement; return focused?.getAttribute('role') === 'radio' && focused.getAttribute('aria-checked') === 'true' && focused.closest('ul[role=\"radiogroup\"]') !== null; })()" },
+  { message: "the focused option shows its focus ring", selector: `${FIX} [role='radio']:focus-visible`, count: 1 },
+];
+
+const VARIANTS = [
   { name: "cream", theme: "light", mode: "cream" },
   { name: "dark", theme: "dark", mode: undefined },
-] as const).map((variant, index) => ({
+] as const;
+
+export const RADIO_PLAN_SCENARIOS: ScenarioDefinition[] = [...VARIANTS.map((variant, index) => ({
   // @tests_req SwRS-MDOKFSTUDIO-GFM-039
   id: `gfm/v${10 + index}-radio-plan-${variant.name}-900`,
   fixture: "74-radio-plan",
@@ -43,4 +52,17 @@ export const RADIO_PLAN_SCENARIOS: ScenarioDefinition[] = ([
   toolbarState: "collapsed" as const,
   contentAssertions: PLAN_ASSERTIONS,
   description: `A plan with a bulleted and an ordered radio group (the recommended options selected) and a task list, ${variant.name} preview, 900 px pane, toolbar collapsed.`,
-}));
+})), ...VARIANTS.map((variant, index) => ({
+  // @tests_req SwRS-MDOKFSTUDIO-GFM-039
+  id: `gfm/v${12 + index}-radio-tab-entry-${variant.name}-900`,
+  fixture: "74-radio-plan",
+  theme: variant.theme,
+  ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
+  width: 900,
+  height: 1000,
+  scroll: { kind: "top" as const },
+  toolbarState: "collapsed" as const,
+  pageActions: [{ click: FIX_LABEL }, { press: "Tab" }],
+  contentAssertions: TAB_ASSERTIONS,
+  description: `A click on the "Fix direction:" label, then one Tab: the focus lands on the selected option of the group, ${variant.name} preview, 900 px pane, toolbar collapsed.`,
+}))];

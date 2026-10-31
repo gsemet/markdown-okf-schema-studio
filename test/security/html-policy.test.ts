@@ -319,6 +319,25 @@ test("keeps deferred relative navigation inert and host-routable", () => {
   assert.match(result.html, /href="#"[^>]+data-sphinx-preview-navigation="chapter-two\.md"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+test("a mapped block that already carries a tabindex keeps it, so a radio group list stays out of the Tab order", () => {
+  const result = rewriteSphinxHtml(
+    '<html><body><ul role="radiogroup" tabindex="-1" data-sphinx-source-file="/workspace/active.md" data-sphinx-source-line="3" data-sphinx-preview-block="list">'
+      + '<li tabindex="-1"><p>Option</p></li></ul><p data-sphinx-source-file="/workspace/active.md" data-sphinx-source-line="6" data-sphinx-preview-block="after">After</p></body></html>',
+    {
+      outputRoot: "/tmp",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+
+  assert.match(result.html, /<ul[^>]+tabindex="-1"[^>]*data-sphinx-preview-block="list"|<ul[^>]+data-sphinx-preview-block="list"[^>]*tabindex="-1"/u);
+  assert.doesNotMatch(result.html, /<ul[^>]+tabindex="0"/u);
+  assert.match(result.html, /data-sphinx-source-line="6"[^>]+tabindex="0"/u, "a mapped block without one still gets a tab stop");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-MYST-031
 test("resolves parent-relative figure images through the workspace root", () => {
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-figure-test-"));

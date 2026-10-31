@@ -28,6 +28,25 @@
   block-editing/v35-card-header-enter-commits-line-cream-900 (real key input), all passing;
   they failed on the previous code. Multi-line paste in these editors is unchanged.
 
+### Radio choice lists: keyboard focus and the write guards
+
+- SwRS-MDOKFSTUDIO-GFM-039 (proposed): the list, items and option paragraphs of a group are out of
+  the Tab order (tabindex -1), so one Tab from the label lands on the selected option; after a
+  choice the option of the same line and column gets the focus back once the content patch is
+  applied; the open-editor guard runs on the press of an option, before the editor's blur, and the
+  editor stays open; new refusal row for a file VS Code keeps read-only ('This file is read-only in
+  VS Code.'), checked by comparing the text before and after the apply; the workspace.applyEdit
+  path (no editor shows the document) is noted as untested.
+- SwRS-MDOKFSTUDIO-GFM-021 (proposed): read-only file row for checkbox toggles, with the same
+  untested note.
+- SwRS-MDOKFSTUDIO-BLOCK-041 (proposed): new radio option row, the guard runs on the press; the
+  checkbox row is unchanged (task checkboxes keep only the click guard).
+- SwRS-MDOKFSTUDIO-LIFE-119 (proposed): a mapped block that already carries a tabindex keeps it.
+- Verification: unit tests in test/core/render/radioGroups.test.ts, test/security/html-policy.test.ts,
+  test/page/runtimeRadioGroups.test.ts and test/session/radioChoice.test.ts; screenshot scenarios
+  gfm/v12 and gfm/v13; the real-window cases of test/integration/radioChoice.test.ts run in the
+  heavy integration job (not run locally).
+
 ### Radio choice lists
 
 - Added SwRS-MDOKFSTUDIO-GFM-039 (gfm, `proposed`, derives from StRS-MDOKFSTUDIO-GFM-003): a run

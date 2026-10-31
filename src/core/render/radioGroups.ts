@@ -113,8 +113,10 @@ function convertRun(list: MystNode, run: RadioOption[], before: MystNode | undef
       ...(option.rest ? [{ ...option.text, value: option.rest }] : []),
       ...children.slice(1),
     ];
-    mergeProperties(option.paragraph, { id: `${radioId(option.marker)}-label` });
-    mergeProperties(option.item, { class: "myst-radio-item", ...(wholeList ? { role: "none" } : {}) });
+    // The item and its paragraph stay focusable by a click or a script, out of the Tab order: the
+    // option is the group's only tab stop.
+    mergeProperties(option.paragraph, { id: `${radioId(option.marker)}-label`, tabindex: "-1" });
+    mergeProperties(option.item, { class: "myst-radio-item", tabindex: "-1", ...(wholeList ? { role: "none" } : {}) });
   });
   const groupProperties = {
     class: "myst-radio-group",
@@ -123,7 +125,8 @@ function convertRun(list: MystNode, run: RadioOption[], before: MystNode | undef
     ...(label ? { "aria-labelledby": label } : {}),
   };
   if (wholeList) {
-    mergeProperties(list, groupProperties);
+    // A mapped block, but not a tab stop: one Tab from the label lands on the selected option.
+    mergeProperties(list, { ...groupProperties, tabindex: "-1" });
     return;
   }
   // The group is a part of the list: an empty radiogroup at its first option owns its radios.

@@ -33,6 +33,7 @@ tested_in_files:
 - test/core/edits/sourceEdits.test.ts
 - test/page/runtimeContentPatch.test.ts
 - test/page/runtimePageControls.test.ts
+- test/session/radioChoice.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -82,6 +83,7 @@ For the open editor, the stale render and the read-only preview, see SwRS-MDOKFS
 | a toggle for a marker removed from the source | refused with 'The checkbox is no longer in the source. Refresh the preview.' |
 | a toggle while a Markdown edit is open | refused with 'Save or cancel the open Markdown edit before toggling a checkbox.' |
 | VS Code fails to apply the edit | refused with 'VS Code could not apply the checkbox edit.' or the edit error |
+| a file VS Code keeps read-only (files.readonlyInclude, or read-only in the session): the apply resolves and changes nothing | refused with 'This file is read-only in VS Code.' |
 | a toggle message the validator rejects (see SwRS-MDOKFSTUDIO-GFM-027) | refused with 'The checkbox request was not understood. Refresh the preview.' |
 | a toggle in a preview of a file outside every workspace folder | refused with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 
@@ -101,7 +103,7 @@ The reason appears in a status note right after the box and disappears after abo
 ### Verification notes
 
 - Method: test/core/edits/sourceEdits.test.ts (toggle in reading mode, table cell, uppercase marker: unit tests of the one-character edit).
-- Method: test/page/runtimePageControls.test.ts (toggle with no block editor, busy checkbox, missing position attributes, unit test "a rejected checkbox toggle reverts the box and explains why", which also checks the status note and its removal). test/session/checkboxRefusal.test.ts (read-only reasons). Untested: the host refusal paths (marker gone, open Markdown edit, apply failure). The visual scenario of the refusal note is in the visual suite.
+- Method: test/page/runtimePageControls.test.ts (toggle with no block editor, busy checkbox, missing position attributes, unit test "a rejected checkbox toggle reverts the box and explains why", which also checks the status note and its removal). test/session/checkboxRefusal.test.ts (read-only reasons). test/session/radioChoice.test.ts (a plain toggle on a read-only file: the apply changes nothing and the answer is the read-only reason). Untested: the host refusal paths (marker gone, open Markdown edit, apply failure). Untested: when no editor shows the document, the host applies the toggle through workspace.applyEdit; on a read-only file that call may resolve false, and the page then shows 'VS Code could not apply the checkbox edit.' instead of the read-only reason. The visual scenario of the refusal note is in the visual suite.
 - Method: test/page/runtimeContentPatch.test.ts (content patch scenario: page unit tests).
 - Criteria: The edit replaces exactly one character; exactly one message per pending toggle; the box is reverted and the matching reason shown, beside the box and as a tooltip, for every refusal; new content is unaffected by stale results.
 
