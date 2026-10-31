@@ -40,6 +40,7 @@ import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioWideTableTab } from "./wideTableTab";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
 import { scenarioLinkClickEditsInEditMode } from "./linkEditMode";
+import { QA210_REPLAYS } from "./qa210Replays";
 
 /**
  * The scenarios `just ci-stress` repeats in this window (see stressPlan.ts): the CR 041 ones failed
@@ -167,6 +168,9 @@ export async function run(): Promise<void> {
       "find-after-click": () => scenarioFindRightAfterClick(page),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
       "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),
+      "qa210-replays": async () => {
+        for (const replay of QA210_REPLAYS) await replay(page);
+      },
     };
     const only = single[process.env.STUDIO_REAL_INPUT_SCENARIO ?? ""];
     if (only) {
@@ -222,6 +226,8 @@ export async function run(): Promise<void> {
     await scenarioAddFieldPositionAndEscape(page, evidence);
     await scenarioReadableLinkDiagnostics(page, evidence);
     await scenarioRefusedValueKeepsEditorUsable(page);
+    // QA 210 replays (CR 228): one fixture each, real mouse and keys.
+    for (const replay of QA210_REPLAYS) await replay(page);
     await scenarioInsertBlocksFromPreview(page, evidence);
     await scenarioInsertAfterFinalFigure(page, evidence);
     await scenarioBlockMoveKeys(page, evidence);
