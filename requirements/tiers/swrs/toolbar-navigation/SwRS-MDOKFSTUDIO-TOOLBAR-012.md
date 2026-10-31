@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/find/findMatches.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/integration/findInPreview.test.ts
+- test/integration/realInput/qa210Replays.ts
 - test/page/modules/findBar.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
 - test/visual/capture_find_checks.py

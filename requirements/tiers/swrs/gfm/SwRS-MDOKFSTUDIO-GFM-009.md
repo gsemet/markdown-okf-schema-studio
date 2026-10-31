@@ -33,6 +33,7 @@ tested_in_files:
 - test/core/render/crlfAlerts.test.ts
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
+- test/integration/realInput/qa210Replays.ts
 - test/session/alertBlockEditOpen.test.ts
 - test/visual/alertEditingScenarios.ts
 default_owner_email: gaetan@xeberon.net
