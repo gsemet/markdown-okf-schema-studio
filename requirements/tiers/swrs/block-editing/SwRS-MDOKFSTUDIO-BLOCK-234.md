@@ -31,6 +31,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/edits/sourceEdits.test.ts
 - test/core/edits/textEdit.test.ts
+- test/integration/realInput/qa210Replays.ts
 - test/page/modules/markdownTable.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
