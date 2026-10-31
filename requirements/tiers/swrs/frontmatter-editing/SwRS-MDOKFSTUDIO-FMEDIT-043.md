@@ -29,6 +29,7 @@ tested_in_files:
 - test/core/frontmatter/frontmatterFence.test.ts
 - test/core/frontmatter/frontmatterPreservation.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
+- test/integration/realInput/qa210Replays.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-FMEDIT-039
