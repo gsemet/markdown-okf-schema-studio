@@ -1,0 +1,74 @@
+{
+ "name": "c4-1-comments-button-leaves-review-threads",
+ "file": "synth/review-threads.md",
+ "steps": [
+  {
+   "comment": "Was run on docs/VISION.md with a hand-made comments file; replays on synth/review-threads.md, whose comments file ships in assets/synth."
+  },
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelectorAll('mark[data-okf-comment-thread]').length>=1",
+   "timeout": 15000,
+   "label": "QA215-06 review threads rendered (synth/review-threads.comments.json)"
+  },
+  {
+   "clicksel": "button[aria-label='Show view controls']",
+   "optional": true
+  },
+  {
+   "wait": 400
+  },
+  {
+   "check": "feval",
+   "expr": "D.querySelector('[data-sphinx-preview-comments-toggle]').getAttribute('aria-pressed')==='true'",
+   "label": "QA215-06 comments shown at start"
+  },
+  {
+   "clicksel": "[data-sphinx-preview-comments-toggle]"
+  },
+  {
+   "wait": 500
+  },
+  {
+   "check": "feval",
+   "expr": "D.documentElement.getAttribute('data-sphinx-preview-comments')==='off'",
+   "label": "QA215-06 button is off"
+  },
+  {
+   "shot": "c4-1-currently",
+   "clip": "preview",
+   "annotate": [
+    "mark[data-okf-comment-thread]"
+   ],
+   "note": [
+    "Comments hidden, thread still highlighted"
+   ],
+   "color": [
+    "red"
+   ]
+  },
+  {
+   "clicksel": "mark[data-okf-comment-thread]",
+   "nth": 0
+  },
+  {
+   "wait": 500
+  },
+  {
+   "check": "feval",
+   "expr": "!D.querySelector('[data-okf-comment-popover]')",
+   "label": "QA215-06 no thread popover opens while comments are hidden"
+  },
+  {
+   "check": "feval",
+   "expr": "Array.from(D.querySelectorAll('mark[data-okf-comment-thread]')).every(m=>getComputedStyle(m).backgroundColor==='rgba(0, 0, 0, 0)')",
+   "label": "QA215-06 thread highlights hidden while comments are hidden"
+  }
+ ]
+}

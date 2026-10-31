@@ -5,7 +5,7 @@ compatibility: macOS with Visual Studio Code installed at /Applications, fnm wit
 metadata:
   owner: "Gaetan Semet <gaetan.semet@ampere.cars>"
   keywords: [markdown, okf, studio, vscode, exploratory, qa, ux, cdp]
-  previous-campaigns: [".agents/changes/04-archives/001-deep-UX-analysis/", ".agents/changes/04-archives/210-qa-campaign-2026-10-31/"]
+  previous-campaigns: [".agents/changes/04-archives/001-deep-UX-analysis/", ".agents/changes/04-archives/210-qa-campaign-2026-10-31/", ".agents/changes/04-archives/215-qa-campaign-2026-10-31/"]
 ---
 
 # Markdown Studio Exploratory QA (Claude)
@@ -34,6 +34,9 @@ commands and screenshots with scenario files whose checks print one line each.
   originals.
 - **Private content stays out of the repository.** Vault copies may be used for exploration, but
   their screenshots never go into `evidence/`; reproduce such findings on a synthetic fixture.
+  Check every shot for private paths, real folder names or vault content before saving it to
+  `evidence/`, and never shoot a window outside the QA workspace (recent-folder lists, the welcome
+  page, the Agents window).
 - **Real input.** Actions go through real mouse and keyboard events (driver commands or scenario
   steps). Never call extension test hooks or post webview messages to simulate the user.
 - **Verify before reporting.** Every editing scenario ends with a `diff` check against the disk or
@@ -81,7 +84,8 @@ sha that is not an ancestor of HEAD is reported and skipped.
 
 `new-features.py` runs `gh pr list --state merged --search "merged:>=DATE"` and prints the
 **new-feature coverage table** (PR, feature, charter, result) and a list of PRs that look
-non-user-facing (chore/ci/build/test/docs titles or labels); confirm that list by hand. Every other
+non-user-facing (chore/ci/build/test/docs titles or labels); confirm that list by hand. It also
+carries forward the previous index's rows left at TODO or "not run". Every other
 user-facing PR needs a charter or an automated test: write the **new-feature charters first** and
 run them first. Read the previous campaign's `00-index.md` findings table and its coverage note
 (`QA-04`), not the sheets. Then write 4–8 charters following
@@ -96,15 +100,16 @@ the report states both.
 fnm exec -- npm run compile && fnm exec -- npm run bundle
 BOOK_DIR=~/Projects/Nestor/agentic-coding-white-paper/book \
   VAULT_DIR=~/Projects/Obsidian/obsidian-private-vault $SK/scripts/setup-workspace.sh --force
-QA_SESSION=smoke $SK/scripts/q launch --name smoke
-QA_SESSION=smoke $SK/scripts/q run observe.mjs &        # console + navigation log (background)
-QA_SESSION=smoke $SK/scripts/q doctor
-QA_SESSION=smoke $SK/scripts/q scenario smoke
-QA_SESSION=smoke $SK/scripts/q stop
+export QA_SESSION=smoke
+$SK/scripts/q launch --name smoke
+$SK/scripts/q run observe.mjs &        # console + navigation log (background)
+$SK/scripts/q doctor                   # waits up to 3 s for the observer
+$SK/scripts/q scenario smoke
+$SK/scripts/q stop                     # alone, never chained with pkill
 ```
 
 Continue only when `doctor` shows no `FAIL` and the smoke scenario passes. Open its screenshot once
-to confirm a real workbench with a rendered preview.
+to confirm a rendered preview (the shot is clipped to the preview, not the whole workbench).
 
 `setup-workspace.sh` builds `$QA_ROOT/ws` (default `output/qa/markdown-studio-claude/ws`) with no
 manual step; every corpus is an environment variable and a missing source is skipped with a message:
@@ -115,27 +120,35 @@ manual step; every corpus is an environment variable and a missing source is ski
 | `BOOK_DIR` | `book/` | `~/Projects/Nestor/agentic-coding-white-paper/book` when present; `BOOK_DIR=""` skips it |
 | `VISUAL_DIR` | `fixtures-visual/` | `<repo>/test/visual/fixtures` |
 | `DOCS_DIR` | `docs/` | `<repo>/docs` |
-| `SYNTH_DIR` | `synth/` | the skill's `assets/synth` |
+| `SYNTH_DIR` | `synth/` | the skill's `assets/synth` (`crlf-source.md` becomes `crlf.md`, CRLF) |
 | `FIXTURES_QA_DIR` | `fixtures-qa/` | the sibling QA skill's `assets/fixtures` when present |
 | `VAULT_DIR` | `vault/` (only `*.md`) | unset: not copied |
 
-The okf-schema repository is never copied. `setup-workspace.sh --clone NAME` copies the built
-workspace to `ws-NAME` for one charter.
+The okf-schema repository is never copied. `setup-workspace.sh --clone NAME` refreshes `ws/synth`
+from `SYNTH_DIR` (copy-over, so fixtures added since the build arrive), then copies the workspace to
+`ws-NAME` for one charter. `QA_CHANGES_ROOT` only serves the scope scripts; `launch`, `scenario` and
+`setup-workspace.sh` use `QA_ROOT` and `--ws`.
 
 ### 3. Sweeps (charter C0, through a QA Driver)
 
 Scripted checks over real documents, without an agent decision per step. C0 is a charter like any
 other: put it in a Driver's group (the Driver launches it with the charter prompt in
-[references/charters.md](references/charters.md)), with this mission: for each
-of 3–5 chapters and `synth/tables.md`, `synth/frontmatter-edge.md`, open the side preview and run
+[references/charters.md](references/charters.md)), with this mission: for 2–3 chapters (more only
+if the budget allows) and `synth/tables.md`, `synth/frontmatter-edge.md`,
+open the side preview and run
 
 ```bash
-QA_SESSION=c0 $SK/scripts/q run noop-sweep.mjs <file> all      # open + commit without typing: buffer must not change
-QA_SESSION=c0 $SK/scripts/q run latency-probe.mjs 12            # on the largest chapter, source editor focused
+export QA_SESSION=c0
+$SK/scripts/q run noop-sweep.mjs <file> all --from 0 --limit 30  # buffer must not change
+$SK/scripts/q scenario open-side-preview-edit --file <largest chapter>  # focus in the source
+$SK/scripts/q run latency-probe.mjs 12
 ```
 
-then reproduce each `CHANGED` target once and write sheets for the real ones. A long chapter can
-take several minutes: use `--limit`/`--from` to split it, or run the command in the background.
+then reproduce each `CHANGED` target once and write sheets for the real ones. **`--limit`/`--from`
+are mandatory on a long chapter**: one chapter of about 60 blocks plus its table cells takes more
+than 4 minutes, so sweep it in slices of about 30 targets per kind (`--from 0`, `--from 30`, …).
+Budget about 5 minutes per chapter. The sweep never clicks a radio option or a checkbox (a click on
+them writes by design): such targets are counted as "control skipped".
 The sweep clicks each block only where no link sits under the pointer (checked in the page with
 `elementFromPoint`); a link-only block is clicked beside its link, and skipped (counted as
 "link-only skipped") only when every candidate point is on a link (`--follow-links` clicks them
@@ -216,7 +229,8 @@ subfolder linked from the previous index):
 - `evidence/`: at most two JPEGs per finding, the **Currently** and **Expected** shots of the
   sheet's first block (shots are already JPEG at 1000 px; use `q shot NAME --clip preview` or a
   tighter clip). See [references/qa-bug-template.md](references/qa-bug-template.md).
-- Replay scenarios stay in `$SK/scenarios/`, named after the finding ID.
+- Replay scenarios stay in `$SK/scenarios/`, named after the finding ID. A replay ships with its
+  fixture: a new `synth/` file goes to `$SK/assets/synth/` in the same change.
 
 **Header lines of `00-index.md`** (the next campaign's scripts read them):
 
@@ -247,7 +261,8 @@ Check every relative link before finishing.
 ### 7. Clean up
 
 ```bash
-pgrep -fl msq- || true                                   # no isolated VS Code left
+$SK/scripts/q sessions                                   # windows: 0
+pgrep -fl msq- || true                                   # no isolated VS Code process left
 command rm -rf output/qa/markdown-studio-claude/ws-*     # charter workspace clones
 ```
 
@@ -259,7 +274,7 @@ Profiles in `$TMPDIR/msq-*` can be removed.
 | Scope | Budget |
 | --- | --- |
 | Campaign | 8 charters plus C0; stop and report after that, even if areas remain (list them) |
-| Windows | 2–3 VS Code windows open at a time across all Drivers; check with `pgrep -fl msq-` |
+| Windows | 2–3 VS Code windows open at a time across all Drivers; check with `q sessions` (one line per window; `pgrep -fl msq-` counts about seven processes per window) |
 | Foreman | Under about 80k tokens of context; no screenshots; no driving except the smoke check |
 | QA Driver (one row per Driver) | Its charters one after another within its window allowance; 1 replay of each of its High candidates; reads only charter returns; returns ≤ 40 lines |
 | Charter | 40 driver calls, 6 screenshots opened, 45 minutes; one replay of each High candidate |
@@ -272,9 +287,10 @@ launched one. Prefix every call with `QA_SESSION=<name>` when several windows ru
 
 | Command | Effect |
 | --- | --- |
-| `launch --name N [--ws N] [--theme light] [--userData DIR] [--untrusted] [--workspace DIR]` | Start an isolated VS Code with the extension and the spy; `--ws N` uses the `ws-N` clone |
+| `launch --name N [--ws N] [--theme light] [--userData DIR] [--untrusted] [--workspace DIR]` | Start an isolated VS Code with the extension and the spy; `--ws N` uses the `ws-N` clone; Restricted Mode needs `--untrusted --workspace <dir outside the trusted parent>` |
 | `doctor` | Pre-flight: one OK/WARN/FAIL line per harness pitfall |
-| `scenario FILE [--file F] [--var k=v] [--keep-going]` | Run a JSON scenario of steps and checks in one connection |
+| `sessions` | One line per VS Code window of the isolated profiles (with its session), and the total against the 2–3 budget |
+| `scenario FILE [--file F] [--var k=v]… [--keep-going]` | Run a JSON scenario of steps and checks in one connection; `--var` repeats, quote a value with spaces (`--var 't=3. Quoted'`); `--keep-going` runs on after a failing action |
 | `check '<json>' [--since S]` | Run checks only (oracles over the last S seconds) |
 | `stop` | Terminate the session's VS Code (SIGTERM, then SIGKILL) |
 | `use NAME` | Make another session current (single-agent use only) |
@@ -287,24 +303,27 @@ launched one. Prefix every call with `QA_SESSION=<name>` when several windows ru
 | `palette TEXT` | Run a command by name |
 | `open FILE` | Quick Open and Enter |
 | `seq step...` | Legacy multi-step form (`key:`, `type:`, `wait:`, `click:x,y`, `dbl:x,y`, `shot:`, `rows`, `pick:label`); prefer `scenario` |
-| `frames` | Visible/hidden webviews with geometry |
-| `box SELECTOR [--limit N]`, `clicksel SELECTOR [--nth i]` | Locate preview elements in window coordinates; click one |
-| `feval JS` / `peval JS` | Evaluate in the visible preview (`D`, `W`, `box(el)`) / in the workbench page |
+| `frames [--json]` | Visible webviews with their index for `--frame`, then hidden ones |
+| `box SELECTOR [--limit N]`, `clicksel SELECTOR [--nth i]` | Locate preview elements in window coordinates; click one (fails on a 0×0 box) |
+| `feval JS` / `peval JS` | Evaluate in the visible preview (`D`, `W`, `box(el)`; `document` is the outer frame) / in the workbench page; an expression, or statements with `return` |
 | `notifs` | Visible notification toasts |
 | `spy` | One-line summary of the active editor, tabs, and documents (`--json` for the full state) |
 | `spy --diff SUFFIX [--against disk\|mark]`, `spy --mark SUFFIX` | Diff of the live buffer; save a baseline |
 | `spy --text SUFFIX [--lines A-B]` | Part of the live buffer (prefer `--diff`) |
 | `run SCRIPT [args]` | Run a scenario module with `{ page, wv, shot, ctx, readSpy, lineDiff, … }` |
 
-Every input command accepts `--wait ms` and `--shot NAME` (with `--clip`). Outputs are capped at
-2000 characters; `--full` lifts the cap.
+Every input command accepts `--wait ms` and `--shot NAME` (with `--clip`). Commands that read the
+preview (`box`, `clicksel`, `feval`, `shot --clip`, `--annotate`) take `--frame <n>` (alias
+`--which`) when two webviews are visible. Outputs are capped at 2000 characters; `--full` lifts the
+cap.
 
 Scripts (`q run <script>`):
 
 - `noop-sweep.mjs <file> [blocks|cells|fields|all] [--limit N] [--from N] [--shots]
   [--follow-links]`:
   open and commit every editable target without typing; reports the targets that changed the buffer.
-  Skips a block only when every click point is on a link; `--limit` bounds each kind.
+  Never clicks a radio option or a checkbox; skips a block only when every click point is on a link
+  or a control; `--limit` bounds each kind.
 - `probe-blocks.mjs '<json selectors>' <prefix>`: what the inline editor opened for each selector;
   pipe to `python3 $SK/scripts/fmt-probe.py`.
 - `flicker-probe.mjs "<text>" <prefix>`: DOM sampling while typing (Mermaid, KaTeX, height, scroll).

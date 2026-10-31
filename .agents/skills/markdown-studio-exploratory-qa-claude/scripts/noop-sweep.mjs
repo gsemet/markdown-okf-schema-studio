@@ -12,6 +12,9 @@
 // target), the sweep expands the collapsed toolbar, clicks the preview's Back button and waits for
 // the original document id; if it never returns, the WHOLE sweep stops with an error (exit non-zero,
 // report marked "aborted").
+// A click on a radio option or a checkbox is a write by design (campaign 215 counted it as a false
+// CHANGED): click points on `[role=radio]`, `.myst-radio`, `input[type=checkbox]`, `[role=checkbox]`
+// or inside them are never used, and a target with no other point is listed as "control skipped".
 // The document is a QA copy: a changed target leaves its change in the buffer, and the next
 // targets are compared with that new text.
 import fs from "node:fs";
@@ -21,20 +24,28 @@ import path from "node:path";
 export function selectTargets(targets, { from = 0, limit = 500 } = {}) {
   return targets.slice(from, from + limit);
 }
-// In-page click-point search, shared text: candidate points of a block, first one not on a link.
-const PICK_POINT = `(el) => { const r = el.getBoundingClientRect();
+// Controls whose click writes the source by design: never a no-op target.
+export const CONTROLS = "[role=radio], .myst-radio, input[type=checkbox], [role=checkbox]";
+// In-page click-point search, shared text: candidate points of a target, first one inside it, not on
+// a control and (unless links are allowed) not on a link. Returns {x, y} or {skip: "link"|"control"}.
+const PICK_POINT = `(el, allowLinks) => { const r = el.getBoundingClientRect();
   const xs = [Math.min(40, r.width / 2), 4, r.width / 2, r.width - 4, r.width * 0.75];
   const ys = [Math.min(10, r.height / 2), r.height / 2, Math.max(2, r.height - 4)];
+  let control = false;
   for (const dy of ys) for (const dx of xs) {
     const px = r.left + dx, py = r.top + dy;
     const hit = D.elementFromPoint(px, py);
-    if (hit && el.contains(hit) && !hit.closest('a[href]')) return { x: Math.round(BASE.x + r.left + dx), y: Math.round(BASE.y + r.top + dy) };
+    if (!hit || !el.contains(hit)) continue;
+    if (hit.closest(${JSON.stringify(CONTROLS)})) { control = true; continue; }
+    if (!allowLinks && hit.closest('a[href]')) continue;
+    return { x: Math.round(BASE.x + r.left + dx), y: Math.round(BASE.y + r.top + dy) };
   }
-  return null; }`;
+  return { skip: control ? 'control' : 'link' }; }`;
 
 const TARGETS = {
   blocks: `Array.from(D.querySelectorAll('[data-sphinx-source-line]'))
     .filter((el) => !el.closest('[data-okf-properties], table, [data-sphinx-preview-toolbar], [data-sphinx-preview-sticky-headings]'))
+    .filter((el) => !el.closest(${JSON.stringify(CONTROLS)}))
     .filter((el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; })
     .map((el) => ({ key: 'L' + el.getAttribute('data-sphinx-source-line'), tag: el.tagName }))
     .filter((t, i, all) => all.findIndex((o) => o.key === t.key) === i)`,
@@ -120,7 +131,7 @@ export default async function ({ page, wv, out, delay, shot, session, positional
   for (const kind of kinds) {
     if (aborted) break;
     const targets = selectTargets(await wv(TARGETS[kind]), { from, limit });
-    const stats = { tried: 0, opened: 0, changed: [], notEditable: [], errors: [], skipped: [] };
+    const stats = { tried: 0, opened: 0, changed: [], notEditable: [], errors: [], skipped: [], controlSkipped: [] };
     report.kinds[kind] = stats;
     for (const target of targets) {
       stats.tried += 1;
@@ -143,11 +154,13 @@ export default async function ({ page, wv, out, delay, shot, session, positional
         await delay(250);
         const b = await wv(`box(${LOCATE[kind](target.key)})`);
         let px = b.x + Math.min(40, b.w / 2), py = b.y + Math.min(10, b.h / 2);
-        if (kind === "blocks" && !followLinks) {
-          // Click only where no link sits under the pointer (elementFromPoint in the page).
-          const pt = await wv(`(${PICK_POINT})(${LOCATE[kind](target.key)})`);
-          if (!pt) { stats.skipped.push(target.key); stats.tried -= 1; continue; }
-          px = pt.x; py = pt.y;
+        if (kind !== "fields") {
+          // Click only where no control (radio, checkbox) and, for blocks, no link sits under the
+          // pointer (elementFromPoint in the page). Cells keep their link clicks, as before.
+          const pt = await wv(`(${PICK_POINT})(${LOCATE[kind](target.key)}, ${kind === "cells" || followLinks})`);
+          if (pt?.skip === "control") { stats.controlSkipped.push(target.key); stats.tried -= 1; continue; }
+          if (pt?.skip && kind === "blocks") { stats.skipped.push(target.key); stats.tried -= 1; continue; }
+          if (pt && !pt.skip) { px = pt.x; py = pt.y; }
         }
         await page.mouse.click(px, py);
         await delay(500);
@@ -179,7 +192,7 @@ export default async function ({ page, wv, out, delay, shot, session, positional
         stats.errors.push(`${target.key}: ${String(error?.message ?? error).split("\n")[0]}`);
       }
     }
-    out(`${kind}: ${stats.tried} tried, ${stats.opened} opened, ${stats.changed.length} CHANGED, ${stats.notEditable.length} not editable, ${stats.errors.length} error(s), ${stats.skipped.length} link-only skipped`);
+    out(`${kind}: ${stats.tried} tried, ${stats.opened} opened, ${stats.changed.length} CHANGED, ${stats.notEditable.length} not editable, ${stats.errors.length} error(s), ${stats.skipped.length} link-only skipped, ${stats.controlSkipped.length} control skipped`);
     for (const c of stats.changed) out(`  CHANGED ${kind} ${c.key} <${c.tag}>: -${c.removed} +${c.added} at L${c.firstLine}${c.shot ? ` ${path.basename(c.shot)}` : ""}\n${c.diff.split("\n").map((line) => `     ${line}`).join("\n")}`);
     for (const e of stats.errors.slice(0, 5)) out(`  error ${e}`);
   }

@@ -13,6 +13,9 @@
 #   VAULT_DIR       optional Obsidian vault -> ws/vault; only *.md files are copied, and only when
 #                   set. Private content: never copy its screenshots into the repository.
 # okf-schema is never copied. Usage: setup-workspace.sh [--force | --clone NAME]
+# synth/crlf.md is generated from assets/synth/crlf-source.md (CRLF endings), which is not kept.
+# --clone NAME first refreshes ws/synth from SYNTH_DIR (copy-over, nothing deleted), so a workspace
+# built before a fixture was added still gets it, then copies ws to ws-NAME.
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 skill="$(cd "$here/.." && pwd)"
@@ -36,10 +39,20 @@ copy_corpus() {
   fi
 }
 
+# make_crlf: the CRLF variant is generated at setup time so Git attributes cannot normalise it.
+make_crlf() {
+  if [[ -f "$ws/synth/crlf-source.md" ]]; then
+    perl -pe 's/\r?\n/\r\n/' "$ws/synth/crlf-source.md" >| "$ws/synth/crlf.md"
+    rm -f "$ws/synth/crlf-source.md"
+  fi
+}
+
 # --clone NAME: copy the built workspace to ws-NAME, so parallel charters never edit the same files.
 if [[ "${1:-}" == "--clone" ]]; then
   name="${2:?usage: setup-workspace.sh --clone NAME}"
   [[ -d "$ws" ]] || { echo "Build the workspace first: setup-workspace.sh" >&2; exit 1; }
+  copy_corpus synth "$synth_dir" synth
+  make_crlf
   rm -rf "$qa_root/ws-$name"
   rsync -a "$ws/" "$qa_root/ws-$name/"
   echo "Workspace clone ready: $qa_root/ws-$name"
@@ -58,12 +71,8 @@ copy_corpus visual "$visual_dir" fixtures-visual
 copy_corpus docs "$docs_dir" docs
 copy_corpus fixtures-qa "$fixtures_qa_dir" fixtures-qa
 copy_corpus synth "$synth_dir" synth
+make_crlf
 copy_corpus vault "${VAULT_DIR:-}" vault --exclude='.git/' --exclude='.obsidian/' --include='*/' --include='*.md' --exclude='*' --prune-empty-dirs
-# CRLF variant generated at setup time so Git attributes cannot normalise it.
-if [[ -f "$ws/synth/crlf-source.md" ]]; then
-  perl -pe 's/\n/\r\n/' "$ws/synth/crlf-source.md" > "$ws/synth/crlf.md"
-  rm "$ws/synth/crlf-source.md"
-fi
 # A Git root makes project-relative x-okf-link resolution behave like a real repository.
 git -C "$ws" init -q
 echo "Workspace ready: $ws ($(find "$ws" -name '*.md' | wc -l | tr -d ' ') Markdown files)"

@@ -2,7 +2,8 @@
 
 Read this before driving VS Code. Each item cost time in the first campaign. `q doctor` checks the
 ones that can be checked automatically (socket path, custom dialogs, spy, observer, native sheet,
-stale bundle): run it after every launch.
+stale bundle, window count): run it after every launch. It waits up to 3 s for an observer started
+just before it.
 
 ## Launching
 
@@ -17,6 +18,13 @@ stale bundle): run it after every launch.
   into fresh profiles; for an old profile, set them and restart. `scripts/sheet.applescript read`
   lists a pending native sheet; `osascript scripts/sheet.applescript "Cancel"` dismisses it.
 - Save or revert dirty buffers before **Close All Editors**, or a dialog appears.
+- **Restricted Mode needs an untrusted folder.** `--untrusted` only turns workspace trust on
+  (`security.workspace.trust.enabled`); a QA workspace under an already trusted parent inherits the
+  trust and opens normally. Use `q launch --untrusted --workspace <dir outside the trusted parent>`,
+  for example a copy in `$TMPDIR/msq-untrusted-<name>`.
+- **The Agents window is not supported.** `code --agents` opens it as a second CDP page
+  (`sessions.html`); `q` always targets the first workbench page, and the isolated profile is not
+  signed in. Do not drive it, and do not shoot it: it lists the user's real folders.
 
 ## Reaching the webview
 
@@ -42,6 +50,18 @@ stale bundle): run it after every launch.
   `rows` before pressing Enter.
 - `keyboard.type` delivers real per-character key events (autosave paths); `insert` pastes in one
   event. Prefer `type` for editing scenarios.
+- **Quick Open needs time.** Give the `open` step about `"wait": 2500` before a palette step. A
+  file that does not exist in the workspace fails later as "quick pick row not found" or a missing
+  preview: check the path first (`ls` in the clone).
+- **The palette-mode `<select>` is native**: arrow keys and Enter do not change it through CDP.
+  Focus it, type the first letter of the option, then Enter.
+- **Narrow pane:** the preview toolbar collapses; its buttons (Comments, theme toggle, Back) are
+  0×0 until `button[aria-label='Show view controls']` is clicked. `clicksel` fails on an empty box.
+- **`clicksel` scrolls the element into view**, which can close an open inline editor and moves
+  every box (it hid finding QA215-04 at first). Locate again after every editor change.
+- **Latency probe:** after "Open Preview to Side" and the edit-mode toggle, focus stays in the
+  preview and `latency-probe.mjs` reports 5000 ms per key. Run
+  `q scenario open-side-preview-edit --file <doc>` first: it ends with focus in the source.
 
 ## Observing
 
@@ -61,20 +81,46 @@ stale bundle): run it after every launch.
   report histograms, not screenshots.
 - `scripts/latency-probe.mjs` types a unique token and reports per-key latency until the preview
   shows it; compare a large chapter with a small fixture.
-- Two webviews can be visible at once (Open With editor plus side preview). `frames` lists them;
-  pass `--which <index>` to `feval`/`box`/`clicksel`.
+- **Two webviews visible at once** (Open With editor plus side preview): `q frames` prints each
+  visible webview with an index (`[0]`, `[1]`, in DOM order, hidden ones after). Pass `--frame <n>`
+  (alias `--which`, or `left`/`right`) to `box`, `clicksel`, `feval`, `shot --clip preview` and
+  `--annotate`, or `"which"`/`"frame"` in a scenario step. Campaign 215 saw only one webview
+  listed in this layout and could not drive the Open With webview; a re-check (CR 216) listed and
+  drove both. The driver now also matches a frame to its CDP target by webview id, and an index
+  that is not visible is an error instead of a silent fall-back to webview 0. Check `q frames`
+  before driving this layout.
+- **"Reopen Editor With…" leaves three editors open**: the text tab, the custom editor and the side
+  preview. Go to Line and other text commands then reach the text tab, not the editor you see.
+  With focus in the custom editor, Quick Open and the palette can stop reaching the workbench
+  (seen once in CR 216): run Open With journeys last, then relaunch with a fresh clone.
+- **Undo with the side preview open:** Meta+z with focus in the Open With webview did not undo
+  while the side preview was also open; with Open With alone it undoes a paragraph commit and a
+  radio click (campaign 215 re-check, not a product defect). Undo after a side-preview edit with
+  Meta+1 then Meta+z.
 
 ## Sessions
 
-- **Parallel charters:** prefix every call with `QA_SESSION=<name>` instead of relying on
-  `runs/current` (each `launch` rewrites it, so two agents would drive each other's window). Give
-  each charter its own workspace copy (`setup-workspace.sh --clone <name>`, `launch --ws <name>`).
+- **Parallel charters:** prefix every call with `QA_SESSION=<name>` (or `export QA_SESSION=<name>`)
+  instead of relying on `runs/current` (each `launch` rewrites it, so two agents would drive each
+  other's window). Give each charter its own workspace copy (`setup-workspace.sh --clone <name>`,
+  `launch --ws <name>`). `--clone` first refreshes `ws/synth` from `assets/synth`, so new fixtures
+  reach a workspace built earlier.
+- **Count windows with `q sessions`**, not `pgrep -fl msq-`: one VS Code window has about seven
+  `msq-` processes (helpers, renderers). `q sessions` lists one line per window (main process per
+  `--user-data-dir`) with its session, and the total against the 2–3 budget.
+- **After a navigation, relaunch.** A scenario that follows a link leaves the window on another
+  document, maybe dirty; "Open Preview to Side" does not reset it and Back hides in the collapsed
+  toolbar. Stop, clone again (`setup-workspace.sh --clone <name>`) and launch.
 - `q use <name>` switches the current session; do not write `runs/current` by hand (zsh
   `noclobber` makes `>` fail and later commands then target a dead session and hang).
 - VS Code can ignore SIGTERM (dirty buffers): `q stop` escalates to SIGKILL and prints
-  "still running" if it failed. Check `pgrep -fl msq-` at the end of a campaign.
-- Private vault content: when a screenshot shows the vault in the Explorer, crop it to the preview
-  region (`sips -c <h> <w> --cropOffset <y> <x>`) or leave it out of `evidence/`.
+  "still running" if it failed. Run `q stop` as its own command: chained with `pkill` it was
+  denied by the auto-mode permission check. Check `q sessions` at the end of a campaign.
+- **Private content in shots.** Before saving a shot to `evidence/`, look for real folder names,
+  user paths and vault content. Never shoot a window outside the QA workspace (recent-folder lists,
+  the welcome page, the Agents window). When a shot shows the vault in the Explorer, crop it to the
+  preview region (`sips -c <h> <w> --cropOffset <y> <x>`) or leave it out of `evidence/`.
+- **The smoke shot is clipped to the preview**: it shows a rendered preview, not the workbench.
 
 ## Lessons of campaign 210
 
@@ -104,9 +150,14 @@ stale bundle): run it after every launch.
 
 ## Shell
 
-- `rm` may be aliased to `rm -i` and zsh may have `noclobber`: use `command rm -f`, and write files
-  with the editor tool rather than `>` redirection.
+- `rm` may be aliased to `rm -i` and zsh may have `noclobber`: use `command rm -f` (or `\rm -f`)
+  before rewriting a scenario file, `>|` to overwrite on purpose, or the editor tool.
+- `env QA_SESSION=x $Q …` with the command stored in a variable fails: `export QA_SESSION=x` once.
 - `grep` may be wrapped by a token-saving proxy; use `rtk proxy grep` for raw output.
+- `sed -i ''` may behave as GNU sed (a `sed` from Homebrew first in `PATH`): edit files with the
+  editor tool, or check `sed --version` first.
+- `QA_CHANGES_ROOT` only tells `coverage-map.py` and `new-features.py` where `.agents/changes` is.
+  `launch`, `scenario` and `setup-workspace.sh` ignore it; they use `QA_ROOT` and `--ws`.
 
 ## Cost
 

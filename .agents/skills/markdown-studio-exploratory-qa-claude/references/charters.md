@@ -55,7 +55,8 @@ charter agent per charter and replay High candidates.
 Read first: .agents/skills/markdown-studio-exploratory-qa-claude/SKILL.md (Roles, Workflow,
 Budgets), references/charters.md (the charter prompt below), references/harness-pitfalls.md.
 
-Campaign folder: <campaign> (sheets go in <campaign>/<group>/). Environment to export:
+Campaign folder: <campaign> (sheets go in <campaign>/<group>/). Environment to export (it only
+affects the scope scripts, not launch or scenario):
   QA_CHANGES_ROOT=<changes root, when .agents/changes is not in this checkout>
 Charters (in this order; new-feature charters first):
 <paste the charter blocks>
@@ -76,7 +77,11 @@ Method:
   charter agents of your group itself, and your step then reduces to replay and merge.
 - Merge duplicates inside your group. A `partial` charter: start a follow-up charter only if the
   remaining budget allows, else list it under NOT COVERED.
-- Never change product code or tests. At the end run `pgrep -fl msq-` and stop windows you left.
+- Before a charter starts, run `q sessions`: it counts VS Code windows (not helper processes)
+  across all Drivers; start the charter only if the campaign stays within 2–3 windows.
+- Check every evidence shot your charters return for private paths or vault content (see Rules in
+  SKILL.md); delete such a shot and ask for a synthetic reproduction.
+- Never change product code or tests. At the end run `q sessions` and stop windows you left.
 
 Return at most 40 lines, nothing else:
   DRIVER <group>: <done|partial> — <charters done>/<charters planned>, <replays done>
@@ -106,14 +111,19 @@ Setup, once:
   QA_SESSION=<session> $SK/scripts/q launch --name <session> --ws <session>
   QA_SESSION=<session> $SK/scripts/q run observe.mjs   (in the background)
   QA_SESSION=<session> $SK/scripts/q doctor            (every line OK or INFO before going on)
-Prefix every driver call with QA_SESSION=<session>.
+Prefix every driver call with QA_SESSION=<session>, or `export QA_SESSION=<session>` once (a
+command stored in a shell variable cannot carry the `QA_SESSION=x` prefix).
 
 Method:
 - Prefer `q scenario` files (write them under runs/<session>/scenarios-src/) with checks over
   single commands. Open a screenshot only when a check fails or when the charter needs a visual
   judgement; take shots with --clip preview.
 - Use `q spy --diff FILE --against mark` instead of `q spy --text`.
-- Verify before reporting: re-run each High candidate once from a clean state.
+- Verify before reporting: re-run each High candidate once from a clean state. A scenario that
+  followed a link or left the window dirty is not a clean state: stop, clone again, relaunch.
+- Privacy: before saving a shot to evidence/, look at it for real folder names, user paths or vault
+  content, and never shoot a window outside the QA workspace (recent folders, the Agents window,
+  the welcome page). Such a shot stays out of the repository; reproduce on a synthetic fixture.
 - For each finding capture both shots of its Currently / Expected block (see
   references/qa-bug-template.md): `q shot <id>-currently --clip preview` (or a tighter clip) of
   the symptom, then the Expected shot: the working case, else the same shot annotated, else (buffer
@@ -141,9 +151,11 @@ Method:
 - Write each confirmed finding as a sheet in <campaign>/<group>/ following
   references/qa-bug-template.md (full sheet for High/Medium, short sheet for Low), starting with
   its Currently / Expected block and at most two evidence JPEGs (currently + expected, clipped to
-  about 1000 px), and save its replay scenario as $SK/scenarios/<id>-<slug>.json.
+  about 1000 px), and save its replay scenario as $SK/scenarios/<id>-<slug>.json. A replay ships
+  with its fixture: a new synth file goes to $SK/assets/synth/ in the same change.
   Use provisional IDs <session>-1, <session>-2; the Foreman renumbers.
-- Never change product code or tests. Stop the window at the end (q stop, then pgrep -fl msq-).
+- Never change product code or tests. Stop the window at the end: run `q stop` alone (not chained
+  with pkill), then `q sessions`.
 - For a new-feature charter, add a NEWFEATURE line to the return naming the PR behaviours you
   exercised and the result.
 

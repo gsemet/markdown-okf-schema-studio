@@ -1,0 +1,18 @@
+{
+  "name": "215-c1-1-radio-tab-entry-extra-stops",
+  "file": "synth/radio-c1.md",
+  "steps": [
+    {"open": "${file}"},
+    {"palette": "Markdown OKF-Schema Studio: Open Preview to Side", "wait": 4000},
+    {"waitFor": "D.querySelector('[role=radiogroup]')", "timeout": 15000},
+    {"mark": true},
+    {"clicksel": "p", "text": "Two items:", "wait": 300},
+    {"key": "Tab", "wait": 200},
+    {"shot": "215-c1-1-currently", "clip": "preview", "annotate": ["ul[role=radiogroup]"], "note": ["1st Tab stops on the list, not an option"], "color": ["red"]},
+    {"check": "feval", "expr": "D.activeElement.getAttribute('role')", "equals": "radio", "label": "QA215-02 first Tab from the label lands on the radio option"},
+    {"key": "Space", "wait": 700},
+    {"check": "diff", "against": "mark", "equal": true, "label": "QA215-02 Space on the container writes nothing (sanity)"},
+    {"check": "errors"},
+    {"check": "notifs", "none": true}
+  ]
+}

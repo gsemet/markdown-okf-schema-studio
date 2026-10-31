@@ -1,0 +1,75 @@
+{
+ "name": "215-c2-1-radio-choice-drops-keyboard-focus",
+ "file": "fixtures-visual/74-radio-plan.md",
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector('[role=radiogroup]')",
+   "timeout": 15000
+  },
+  {
+   "clicksel": "ul[role=radiogroup] [role=radio]",
+   "nth": 0,
+   "wait": 900,
+   "optional": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "h1",
+   "wait": 300
+  },
+  {
+   "key": [
+    "Tab",
+    "Tab",
+    "Tab",
+    "Tab",
+    "Tab",
+    "Tab",
+    "Tab"
+   ],
+   "gap": 80,
+   "wait": 200
+  },
+  {
+   "check": "feval",
+   "expr": "D.activeElement.getAttribute('role')",
+   "equals": "radio",
+   "label": "QA215-03 precondition: 7 Tabs reach the selected option"
+  },
+  {
+   "key": "ArrowDown",
+   "wait": 200
+  },
+  {
+   "key": "Space",
+   "wait": 1000
+  },
+  {
+   "check": "diff",
+   "file": "${file}",
+   "against": "mark",
+   "maxLines": 2
+  },
+  {
+   "check": "feval",
+   "expr": "D.activeElement.getAttribute('role')",
+   "equals": "radio",
+   "label": "QA215-03 focus stays on a radio after Space"
+  },
+  {
+   "check": "feval",
+   "expr": "D.querySelectorAll('ul[role=radiogroup] [tabindex=\"0\"], ul[role=radiogroup][tabindex=\"0\"]').length",
+   "equals": 1,
+   "label": "QA215-02 one tab stop in the group (UL and LI add more)"
+  }
+ ]
+}

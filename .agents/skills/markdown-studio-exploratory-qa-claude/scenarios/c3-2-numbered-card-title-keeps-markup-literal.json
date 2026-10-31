@@ -1,0 +1,42 @@
+{
+ "name": "c3-2-numbered-card-title-keeps-markup-literal",
+ "file": "synth/c3-cards.md",
+ "steps": [
+  {
+   "comment": "Fixture synth/c3-cards.md ships with this replay (assets/synth). Both checks pass once QA215-07 is fixed."
+  },
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 3500
+  },
+  {
+   "waitFor": "D.querySelector('.myst-grid-card-title')",
+   "timeout": 15000
+  },
+  {
+   "check": "feval",
+   "expr": "[...D.querySelectorAll('.myst-grid-card-title')][0].querySelector('em')!==null",
+   "label": "QA215-07 numbered grid-card title renders *card* as emphasis"
+  },
+  {
+   "check": "feval",
+   "expr": "[...D.querySelectorAll('.myst-grid-card-title')].slice(-1)[0].querySelector('strong')!==null",
+   "label": "QA215-07 working case: unnumbered title renders bold"
+  },
+  {
+   "shot": "c3-2",
+   "clip": "preview",
+   "annotate": [
+    {
+     "at": ".myst-grid-card-title",
+     "note": "Defect: *card* stays literal",
+     "color": "red"
+    }
+   ],
+   "onFail": true
+  }
+ ]
+}

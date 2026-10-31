@@ -1,0 +1,54 @@
+{
+ "name": "c7-2-readonly-radio-click-silent",
+ "file": "fixtures-visual/74-radio-plan.md",
+ "steps": [
+  {
+   "comment": "Precondition (not automated): the clone's .vscode/settings.json has \"files.readonlyInclude\": {\"**/74-radio-plan.md\": true}, the window was reloaded, and the fixture on disk is the original."
+  },
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 3000
+  },
+  {
+   "waitFor": "D.querySelector('[role=radiogroup]')",
+   "timeout": 15000
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "ul[role=radiogroup] [role=radio]",
+   "nth": 2,
+   "wait": 300
+  },
+  {
+   "eval": "'t0.3 sel:'+[...D.querySelectorAll('[role=radio]')].map(e=>e.getAttribute('aria-checked')[0]).join('')+' note:'+(D.body.innerText.match(/[^\\n]*(read-only|Read-only|cannot|refus|no longer)[^\\n]*/g)||[]).join('/')"
+  },
+  {
+   "wait": 2500
+  },
+  {
+   "eval": "'t2.8 sel:'+[...D.querySelectorAll('[role=radio]')].map(e=>e.getAttribute('aria-checked')[0]).join('')+' tips:'+[...D.querySelectorAll('[role=radio]')].map(e=>e.title).join('|')+' note:'+(D.body.innerText.match(/[^\\n]*(read-only|Read-only|cannot|refus|no longer)[^\\n]*/g)||[]).join('/')"
+  },
+  {
+   "check": "diff",
+   "against": "disk",
+   "equal": true,
+   "label": "QA215-05 read-only click writes nothing"
+  },
+  {
+   "check": "notifs",
+   "none": true,
+   "label": "QA215-05 toast"
+  },
+  {
+   "check": "feval",
+   "expr": "[...D.querySelectorAll('[role=radio]')][0].getAttribute('aria-checked')==='true'",
+   "label": "QA215-05 shown selection matches source after refusal"
+  }
+ ],
+ "precondition": "clone .vscode/settings.json has files.readonlyInclude for **/74-radio-plan.md; window reloaded; original fixture on disk"
+}

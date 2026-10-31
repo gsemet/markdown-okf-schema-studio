@@ -8,7 +8,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
-import { bufferDiff, cap, doctor, freshSpy, lineDiff, loadScenario, runSteps, saveMark, setEditMode } from "./engine.mjs";
+import { asExpression, asPageExpression, bufferDiff, cap, doctor, freshSpy, lineDiff, listWindows, loadScenario, runSteps, saveMark, setEditMode } from "./engine.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 // scripts/ -> skill -> skills -> .agents -> repository root
@@ -20,15 +20,19 @@ const { chromium } = require("playwright-core");
 const runsDir = path.join(qaRoot, "runs");
 const codeExe = "/Applications/Visual Studio Code.app/Contents/MacOS/Code";
 
-const REPEATABLE = new Set(["annotate", "note", "color"]);
+const REPEATABLE = new Set(["annotate", "note", "color", "var"]);
 
-function args(argv) {
+// Exported for the scratch checks of the parser. `--key=value` splits at the first `=` only, so
+// `--var=t=a=b` keeps `t=a=b`; quote a value with spaces (`--var 't=3. Quoted'`).
+export function args(argv) {
   const positional = [];
   const options = {};
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (token.startsWith("--")) {
-      const [key, inline] = token.slice(2).split("=", 2);
+      const eq = token.indexOf("=");
+      const key = eq < 0 ? token.slice(2) : token.slice(2, eq);
+      const inline = eq < 0 ? undefined : token.slice(eq + 1);
       let value = true;
       if (inline !== undefined) value = inline;
       else if (argv[i + 1] !== undefined && !argv[i + 1].startsWith("--")) value = argv[++i];
@@ -36,7 +40,17 @@ function args(argv) {
       options[key] = REPEATABLE.has(key) ? [...(options[key] ?? []), value] : value;
     } else positional.push(token);
   }
+  // `--frame` is an alias of `--which` (the webview index printed by `q frames`).
+  if (options.frame !== undefined && options.which === undefined) options.which = options.frame;
   return { positional, options };
+}
+
+// `--var k=v` pairs (repeatable) to an object; the value keeps any further `=` and spaces.
+export function varPairs(list) {
+  return Object.fromEntries([].concat(list ?? []).filter((pair) => typeof pair === "string").map((pair) => {
+    const eq = pair.indexOf("=");
+    return eq < 0 ? [pair, ""] : [pair.slice(0, eq), pair.slice(eq + 1)];
+  }));
 }
 
 function currentSession(name) {
@@ -192,7 +206,7 @@ async function shot(page, session, name, options = {}) {
   const base = name.replace(/\.(png|jpe?g)$/, "");
   const file = path.join(session.shots, `${base}.${png ? "png" : "jpg"}`);
   const shotOptions = { path: file, scale: "css", ...(png ? {} : { type: "jpeg", quality: 70 }) };
-  if (options.clip) shotOptions.clip = await resolveClip(page, session, options.clip, options.annotate ? 34 : 12);
+  if (options.clip) shotOptions.clip = await resolveClip(page, session, options.clip, options.annotate ? 34 : 12, options.which ?? options.frame ?? 0);
   const clearOverlay = () => page.evaluate(() => document.querySelectorAll("#qa-annotations").forEach((e) => e.remove()));
   try {
     const bounds = shotOptions.clip ?? await page.evaluate(() => ({ x: 0, y: 0, width: innerWidth, height: innerHeight }));
@@ -226,7 +240,7 @@ async function annotations(session, page, options, bounds) {
     console.error(`annotate: ${list.length} --annotate but ${notes.length} --note and ${colors.length} --color: they pair by position`);
   }
   const visible = list.length ? (await webviewInfo(session, page)).filter((f) => f.visible) : [];
-  const view = visible[Math.min(Number(options.which ?? 0), visible.length - 1)];
+  const view = visible.length ? pickFrame(visible, options.which ?? 0) : undefined;
   const out = [];
   for (const [i, item] of list.entries()) {
     const a = typeof item === "object" && !Array.isArray(item) ? item : { at: item, note: notes[i], color: colors.length === 1 ? colors[0] : colors[i] };
@@ -291,20 +305,24 @@ async function drawAnnotations(page, notes, bounds) {
   }, { items: notes, b: bounds });
 }
 
-async function resolveClip(page, session, clip, pad = 12) {
+async function resolveClip(page, session, clip, pad = 12, which = 0) {
   if (Array.isArray(clip)) { const [x, y, width, height] = clip.map(Number); return { x, y, width, height }; }
   if (/^\d+,\d+,\d+,\d+$/.test(clip)) { const [x, y, width, height] = clip.split(",").map(Number); return { x, y, width, height }; }
   if (clip === "preview") {
-    const frame = (await webviewInfo(session, page)).find((f) => f.visible);
-    if (!frame) throw new Error("clip preview: no visible webview");
+    const visible = (await webviewInfo(session, page)).filter((f) => f.visible);
+    if (!visible.length) throw new Error("clip preview: no visible webview");
+    const frame = pickFrame(visible, which);
     return { x: frame.x, y: frame.y, width: frame.width, height: frame.height };
   }
-  const b = await wv(session, page, `box(D.querySelector(${JSON.stringify(clip)}))`);
+  const b = await wv(session, page, `box(D.querySelector(${JSON.stringify(clip)}))`, which);
   if (!b) throw new Error(`clip: element not found: ${clip}`);
   return { x: Math.max(0, b.x - pad), y: Math.max(0, b.y - pad), width: b.w + 2 * pad, height: b.h + 2 * pad };
 }
 
 // --- Raw CDP access to webview content (Playwright does not attach pre-existing OOPIFs). ---
+// Every webview iframe of the workbench, in DOM order, with its CDP target. A target is matched by
+// its URL, else by the webview `id` query parameter (the URL can change after the frame loads).
+// Visible frames get `index`: the number that `--frame`/`--which` and the `which` step field take.
 async function webviewInfo(session, page) {
   const res = await fetch(`http://127.0.0.1:${session.port}/json/list`);
   const targets = (await res.json()).filter((t) => t.type === "iframe" && t.url.startsWith("vscode-webview://"));
@@ -315,7 +333,34 @@ async function webviewInfo(session, page) {
       || f.closest("[style*='display: none']") !== null;
     return { src: f.src, x: r.x, y: r.y, width: r.width, height: r.height, visible: !hidden };
   }));
-  return frames.map((f) => ({ ...f, target: targets.find((t) => t.url === f.src) })).filter((f) => f.target);
+  const idOf = (url) => { try { return new URL(url).searchParams.get("id"); } catch { return null; } };
+  const used = new Set();
+  const out = [];
+  for (const f of frames) {
+    const target = targets.find((t) => !used.has(t.id) && t.url === f.src)
+      ?? targets.find((t) => !used.has(t.id) && idOf(t.url) && idOf(t.url) === idOf(f.src));
+    if (!target) continue;
+    used.add(target.id);
+    let purpose = null;
+    try { purpose = new URL(f.src).searchParams.get("purpose"); } catch {}
+    out.push({ ...f, purpose, target });
+  }
+  let index = 0;
+  for (const f of out) if (f.visible) f.index = index++;
+  return out;
+}
+
+// `which`: the index among visible webviews (as `q frames` prints it), or `left` / `right`.
+function pickFrame(list, which = 0) {
+  if (which === "left" || which === "right") {
+    const sorted = [...list].sort((a, b) => a.x - b.x);
+    return which === "left" ? sorted[0] : sorted.at(-1);
+  }
+  const n = Number(which);
+  if (!Number.isInteger(n) || n < 0 || n >= list.length) {
+    throw new Error(`webview ${which} is not visible: ${list.length} visible (q frames lists them)`);
+  }
+  return list[n];
 }
 
 async function rawEval(wsUrl, expression) {
@@ -337,11 +382,12 @@ async function wv(session, page, body, which = 0) {
   const all = await webviewInfo(session, page);
   const list = all.filter((f) => f.visible);
   if (!list.length) throw new Error("No VISIBLE webview found (" + all.length + " hidden)");
-  const frame = list[Math.min(Number(which), list.length - 1)];
+  const frame = pickFrame(list, which);
   const expression = `(async () => { const F = document.getElementById('active-frame'); const D = F && F.contentDocument; const W = F && F.contentWindow;
     const OFF = F ? F.getBoundingClientRect() : {x:0,y:0}; const BASE = {x: ${frame.x} + OFF.x, y: ${frame.y} + OFF.y};
     const box = (el) => { if (!el) return null; const r = el.getBoundingClientRect(); return {x: Math.round(BASE.x + r.x), y: Math.round(BASE.y + r.y), w: Math.round(r.width), h: Math.round(r.height)}; };
-    return (${body}); })()`;
+    return (${body}
+    ); })()`;
   return rawEval(frame.target.webSocketDebuggerUrl, expression);
 }
 
@@ -363,11 +409,34 @@ function spyBrief(session, state) {
   return lines.join("\n");
 }
 
+// One line per VS Code window of an isolated profile (main process per --user-data-dir, helpers
+// excluded), named after its session when one matches, then the total against the 2-3 budget.
+async function sessions() {
+  const known = fs.readdirSync(runsDir, { withFileTypes: true }).filter((e) => e.isDirectory())
+    .map((e) => { try { return JSON.parse(fs.readFileSync(path.join(runsDir, e.name, "session.json"), "utf8")); } catch { return null; } })
+    .filter(Boolean);
+  const real = (p) => { try { return fs.realpathSync(p); } catch { return p; } };
+  const windows = listWindows();
+  for (const w of windows) {
+    const s = known.find((k) => real(k.userData) === real(w.userData));
+    let pages = "?";
+    if (s) {
+      try {
+        const targets = await (await fetch(`http://127.0.0.1:${s.port}/json/list`, { signal: AbortSignal.timeout(1500) })).json();
+        pages = String(targets.filter((t) => t.type === "page" && /workbench/.test(t.url)).length);
+      } catch {}
+    }
+    console.log(`${s ? s.name : "(no session)"} pid ${w.pid} workbench pages ${pages} profile ${w.userData}${s ? ` ws ${path.basename(s.target ?? "")}` : ""}`);
+  }
+  console.log(`windows: ${windows.length} (budget 2-3 across all Drivers)${windows.length > 3 ? " OVER BUDGET: q stop some" : ""}`);
+}
+
 async function main() {
   const [command, ...rest] = process.argv.slice(2);
   const { positional, options } = args(rest);
   if (command === "launch") return launch(options);
   fs.mkdirSync(runsDir, { recursive: true });
+  if (command === "sessions") return sessions();
   if (command === "use") {
     if (!fs.existsSync(path.join(runsDir, positional[0] ?? "", "session.json"))) throw new Error(`Unknown session ${positional[0]}`);
     fs.writeFileSync(path.join(runsDir, "current"), positional[0]);
@@ -474,7 +543,14 @@ async function main() {
         await page.keyboard.press("Enter"); await delay(Number(options.wait ?? 1200));
         if (options.shot) out(await shot(page, session, options.shot, options)); break;
       }
-      case "frames": out(await webviewInfo(session, page)); break;
+      case "frames": {
+        // Visible webviews first, with the index that --frame/--which takes; hidden ones after.
+        const all = await webviewInfo(session, page);
+        const id = (f) => { try { return new URL(f.src).searchParams.get("id")?.slice(0, 8) ?? ""; } catch { return ""; } };
+        const line = (f) => `${f.visible ? `[${f.index}]` : "[hidden]"} x=${Math.round(f.x)} y=${Math.round(f.y)} ${Math.round(f.width)}x${Math.round(f.height)} id=${id(f)}${f.purpose ? ` ${f.purpose}` : ""}`;
+        out(options.json ? all : [...all.filter((f) => f.visible), ...all.filter((f) => !f.visible)].map(line).join("\n") || "no webview");
+        break;
+      }
       case "box": {
         const sel = JSON.stringify(positional[0]);
         out(await wv(session, page, `Array.from(D.querySelectorAll(${sel})).slice(0, ${Number(options.limit ?? 10)}).map((el, i) => ({ i, ...box(el), text: (el.innerText || el.value || '').slice(0, ${Number(options.chars ?? 70)}).replace(/\\s+/g, ' ') }))`, options.which ?? 0));
@@ -484,6 +560,7 @@ async function main() {
         const sel = JSON.stringify(positional[0]);
         const b = await wv(session, page, `box(D.querySelectorAll(${sel})[${Number(options.nth ?? 0)}])`, options.which ?? 0);
         if (!b) throw new Error("element not found: " + positional[0]);
+        if (!b.w || !b.h) throw new Error(`${positional[0]} has an empty box (collapsed toolbar? click button[aria-label='Show view controls'] first)`);
         const x = b.x + (options.dx !== undefined ? Number(options.dx) : b.w / 2);
         const y = b.y + (options.dy !== undefined ? Number(options.dy) : Math.min(b.h / 2, 12));
         if (options.dbl) await page.mouse.dblclick(x, y); else await page.mouse.click(x, y);
@@ -492,8 +569,8 @@ async function main() {
         if (options.shot) out(await shot(page, session, options.shot, options));
         break;
       }
-      case "feval": out(await wv(session, page, positional.join(" "), options.which ?? 0)); break;
-      case "peval": out(await page.evaluate(positional.join(" "))); break;
+      case "feval": out(await wv(session, page, asExpression(positional.join(" ")), options.which ?? 0)); break;
+      case "peval": out(await page.evaluate(asPageExpression(positional.join(" ")))); break;
       case "seq": {
         // Several actions in one CDP connection (quick picks close when reconnecting).
         for (const step of positional) {
@@ -527,7 +604,7 @@ async function main() {
         // q scenario FILE.json [--file synth/x.md] [--var k=v] [--keep-going]
         const file = path.isAbsolute(positional[0]) ? positional[0]
           : fs.existsSync(path.resolve(positional[0])) ? path.resolve(positional[0]) : path.join(here, "..", "scenarios", positional[0]);
-        const overrides = Object.fromEntries([].concat(options.var ?? []).map((pair) => pair.split("=", 2)));
+        const overrides = varPairs(options.var);
         if (options.file) overrides.file = options.file;
         const scenario = loadScenario(file.endsWith(".json") ? file : `${file}.json`, overrides);
         const result = await runSteps(ctx, scenario.steps, { name: scenario.name, vars: scenario.vars, keepGoing: Boolean(options["keep-going"]) });
@@ -558,4 +635,7 @@ async function main() {
   }
 }
 
-main().then(() => process.exit(0), (error) => { console.error(error?.stack ?? String(error)); process.exit(1); });
+// Run only as the CLI, so the scratch checks can import args() and varPairs().
+if (process.argv[1] && fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().then(() => process.exit(0), (error) => { console.error(error?.stack ?? String(error)); process.exit(1); });
+}
