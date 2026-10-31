@@ -54,6 +54,7 @@ tested_in_files:
 - test/page/modules/labelRename.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/page/runtimeContentPatch.test.ts
+- test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimePageControls.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/renderReq.labelRename.requirements.test.ts
@@ -85,7 +86,7 @@ The page refuses with the open editor's status line unless the row says otherwis
 | Open a second block editor (click, insert point or key) | block editor | page | The request is ignored and the first editor stays open; no message |
 | Open a second block editor | block edit held by the host | host (`previewEditOpen`) | `previewEditSource` carries the error "Another Markdown block is already being edited." |
 | Click on a block or a plus insert point | field editor | page | The field editor's plain save is posted first and the block editor waits for its answer. Saved: the block editor opens. Refused (invalid YAML, a value the schema refuses): the field editor is cancelled, the field shows its saved value again, the refused text is discarded and the block editor opens |
-| Open a field editor, a key editor or a second value editor | field editor or block editor | page | No second field editor opens and the first stays open; no message |
+| Open a field editor, a key editor or a second value editor | field editor or block editor | page | No second field editor opens and the first stays open; no message. Exception: a field editor whose save was refused and that still holds the refused text is closed without a save (the field shows its saved value, the refused text is discarded) and the clicked field's editor opens in the same click |
 | Edit figure button | field editor | page | No figure editor opens; no message |
 | Enter shortcut of the empty-document Start writing insert point | field editor | page | No block editor opens; no message |
 | Extend a block selection (Shift+click, Shift+Arrow) | field editor | page | No block is selected; the keys are also ignored inside a text box, a field and the property table |
@@ -133,10 +134,6 @@ The page refuses with the open editor's status line unless the row says otherwis
 - WHEN the writer clicks another block
 - THEN the first editor is saved through its blur and stays open until the render of its save arrives, and the second block opens once, when that render arrives, without a second click; the save in flight is not posted again; an editor with unchanged text closes at the blur and the same click opens the second editor
 
-### Known issues
-
-- Known issue: an editor left in an error state keeps blocking every other field until it is cancelled with Escape in that editor; clicking another field or the page background does not close it (clicking a block or a plus insert point does).
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-191: the host holds an open block edit and ends it when the block changes.
@@ -149,6 +146,7 @@ The page refuses with the open editor's status line unless the row says otherwis
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (field editor blocks the key editor and a second value editor, a block editor blocks the field editor; refresh refused with a message while a field editor is open and works once it is closed; checkbox click refused while a field editor is open; Edit figure and the Start writing Enter shortcut ignore input; rows: field editor, refresh, checkbox).
 - Method: test/page/runtimeBlockSelection.test.ts and test/page/runtimeBlockMoves.test.ts (selection and move input ignored while a field editor is open).
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (a click on a block or a plus insert point after a blur save: the block waits for the answer, opens after a saved value, and opens after cancelling a refused one).
+- Method: test/page/runtimeFrontmatterEditor.test.ts (a click on another field after a refused value save closes the refused editor without a save and opens the clicked field) and test/integration/realInput/frontmatterFields.ts, marked in test/integration/realInput/markers.ts (scenario scenarioRefusedValueKeepsEditorUsable: the same with the real mouse).
 - Method: test/page/blockReq.requirements.test.ts (the Refresh button is disabled while a block editor is open and enabled again; a refresh asked from the page over an open block editor shows a message and posts no refresh).
 - Method: test/session/blockReq.requirements.test.ts (a block move is refused while a block edit is held and planned otherwise; copy, cut and paste of blocks are refused while a block edit is held; a second open while the host holds an edit is refused).
 - Method: test/host/previewTiming.test.ts (Refresh Preview brings the render to the page even over an open inline editor; the later edit waits; the message sent by the page toolbar button is not tested).
@@ -157,7 +155,7 @@ The page refuses with the open editor's status line unless the row says otherwis
 - Method: test/session/renderReq.labelRename.requirements.test.ts (a rename while a block edit is open changes nothing and answers the reason; the document is unchanged).
 - Method: test/page/modules/inlineThread.test.ts (an open edit blocks the change with its reason and the text is kept; no editor sends the request).
 - Method: test/session/reviewReqThreads.requirements.test.ts (an open Markdown edit on the host side refuses a thread change before the document is read; no open edit applies the delete).
-- Criteria: openBlockEditor returns at once while state.activeBlockEdit is set; openFrontmatterValueEditor and openFrontmatterKeyEditor return when activeBlockEdit or activeFrontmatterEdit is set; blockSelectionView and blockMoves return when activeFrontmatterEdit is set; handleThreadChange answers before reading the document when edits.active is true; every reason text equals the one in the table; the Refresh button is disabled on open and enabled on close.
+- Criteria: openBlockEditor returns at once while state.activeBlockEdit is set; openFrontmatterValueEditor and openFrontmatterKeyEditor return when activeBlockEdit or activeFrontmatterEdit is set; a field click or key first calls closeRefusedEditorFor, which closes only an idle editor that still holds its refused text; blockSelectionView and blockMoves return when activeFrontmatterEdit is set; handleThreadChange answers before reading the document when edits.active is true; every reason text equals the one in the table; the Refresh button is disabled on open and enabled on close.
 
 <!-- okf:links:start -->
 ### Links

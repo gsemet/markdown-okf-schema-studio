@@ -33,7 +33,7 @@ import { installWorkbenchFocusTrace, withFocusDumpOnFailure, workbenchFocusDump 
 import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
 import { scenarioEnterCommitsTextField, scenarioEscapeCancels, scenarioFrontmatterStructuralMinimalPatch, scenarioFrontmatterValueMinimalPatch, scenarioLinkPanel, scenarioLinkPanelPrefill, scenarioPalette, scenarioShortcuts, scenarioSlashMenu, scenarioTypingUndoGrouping, scenarioUndoStaysInEditor } from "./textEditing";
 import { scenarioAlertDropdown, scenarioCaretAtClick, scenarioEditAffordances, scenarioEditModeNoReflow, scenarioEnterContinuesList, scenarioFigureEditor, scenarioPreviewKeepsMarkdown, scenarioSaveKeepsBlockInPlace, scenarioTabIndents, scenarioTableTab, scenarioTableToolbar } from "./editorWidgets";
-import { scenarioAddFieldPositionAndEscape, scenarioBooleanOneClick, scenarioCommentBlockEdit, scenarioCustomKeyAndOpenNewField, scenarioFrontmatterActionsLayout, scenarioListEditorClickAndKeys, scenarioListLinkCompletion, scenarioReadableLinkDiagnostics, scenarioRequiredAndPositionedAdd } from "./frontmatterFields";
+import { scenarioAddFieldPositionAndEscape, scenarioBooleanOneClick, scenarioCommentBlockEdit, scenarioCustomKeyAndOpenNewField, scenarioFrontmatterActionsLayout, scenarioListEditorClickAndKeys, scenarioListLinkCompletion, scenarioReadableLinkDiagnostics, scenarioRefusedValueKeepsEditorUsable, scenarioRequiredAndPositionedAdd } from "./frontmatterFields";
 import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfterFinalFigure, scenarioInsertBlocksFromPreview, scenarioLargeDocumentPatched, scenarioPendingOverlayWithoutReload, scenarioPropertiesTableWithoutReload, scenarioStatusPageTwoLines, withIncrementalUpdates } from "./renderPatching";
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
 import { scenarioFindRightAfterClick } from "./findAfterClick";
@@ -215,6 +215,7 @@ export async function run(): Promise<void> {
     await scenarioCustomKeyAndOpenNewField(page, evidence);
     await scenarioAddFieldPositionAndEscape(page, evidence);
     await scenarioReadableLinkDiagnostics(page, evidence);
+    await scenarioRefusedValueKeepsEditorUsable(page);
     await scenarioInsertBlocksFromPreview(page, evidence);
     await scenarioInsertAfterFinalFigure(page, evidence);
     await scenarioBlockMoveKeys(page, evidence);

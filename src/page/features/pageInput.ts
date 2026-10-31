@@ -24,6 +24,7 @@ export function bindEditModeCaptureClicks(rt: PageRuntime): void {
       || row.getAttribute("data-okf-editable") !== "true") return;
     event.preventDefault?.();
     event.stopImmediatePropagation?.();
+    rt.frontmatter.closeRefusedEditorFor(cell);
     rt.frontmatter.openFrontmatterEditor(row);
   }, true);
   document.addEventListener("click", (event) => {
@@ -151,7 +152,9 @@ export function installPageInput(rt: PageRuntime): PageInput {
           ...snapshot,
         });
       });
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
       // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-001
+      // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
       document.addEventListener("click", (event) => {
         if (event.target instanceof Element
           && event.target.closest('a[data-sphinx-preview-navigation^="okf-link:"]')) return;
@@ -166,6 +169,8 @@ export function installPageInput(rt: PageRuntime): PageInput {
         if (!cell || !row || !state.editMode) return;
         event.preventDefault?.();
         event.stopPropagation?.();
+        // An editor left with its refused text closes without a save and this field opens (CR 218).
+        rt.frontmatter.closeRefusedEditorFor(cell);
         if (cell.getAttribute("data-okf-edit-cell") === "name") {
           rt.frontmatter.openFrontmatterKeyEditor(row, cell);
         } else if (row.getAttribute("data-okf-type") === "checkbox") {
@@ -237,6 +242,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
         const row = cell?.closest("tr[data-okf-field]");
         if (!frontmatterEditor && cell && row && state.editMode) {
           event.preventDefault?.();
+          rt.frontmatter.closeRefusedEditorFor(cell);
           if (cell.getAttribute("data-okf-edit-cell") === "name") {
             rt.frontmatter.openFrontmatterKeyEditor(row, cell);
           } else {

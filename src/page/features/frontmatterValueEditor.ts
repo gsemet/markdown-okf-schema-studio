@@ -152,6 +152,7 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
     fieldValue: value,
     setNullButton,
     setDisabled: setListEditorDisabled,
+    focusControl: listEditor ? () => listEditor?.focus() : undefined,
     cancel: () => { cancelled = true; },
   };
   const resizeTextarea = control.tagName === "TEXTAREA"
@@ -268,6 +269,7 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
         || editor.contains?.(relatedTarget)
         || relatedTarget.closest?.("[data-okf-frontmatter-menu]")
       )) return;
+      if (rt.frontmatter.holdsRefusedText()) return;
       saveValue();
     });
   } else {
@@ -277,6 +279,8 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
         + (relatedTarget && relatedTarget.tagName ? String(relatedTarget.tagName).toLowerCase() : "none") + " " + traceFocus());
       if ((setNullButton && relatedTarget === setNullButton)
         || relatedTarget?.closest?.("[data-okf-frontmatter-menu]")) return;
+      // The refused text, unchanged, is not posted again (CR 218).
+      if (rt.frontmatter.holdsRefusedText()) return;
       saveValue();
     });
   }

@@ -1078,3 +1078,150 @@ test("T41: Escape outside the properties section does not touch an open frontmat
   assert.ok(editor.parentElement, "the editor stays open");
   assert.ok(outside);
 });
+
+// CR 218: after a refused value save the control is enabled again but the focus is gone (the control
+// was disabled during the save). The editor must stay usable: focus back, Escape, a click elsewhere.
+function refusedNumberEditor() {
+  const harness = createRuntimeHarness({
+    mapFrontmatter: true,
+    trackFocus: true,
+    blurOnFocusChange: true,
+    frontmatterRowAttributes: {
+      "data-okf-field": "priority",
+      "data-okf-type": "number",
+      "data-okf-value": "2",
+      "data-okf-value-yaml": "2\n",
+    },
+  });
+  const titleRow = new RuntimeElement({
+    "data-okf-editable": "true",
+    "data-okf-field": "title",
+    "data-okf-schema-found": "true",
+    "data-okf-type": "text",
+    "data-okf-value": '"Saved title"',
+    "data-okf-value-yaml": "Saved title\n",
+  }, harness.windowState, 0, 30, "tr");
+  const titleDisplay = new RuntimeElement({ "data-okf-value-display": "true" }, harness.windowState, 0, 30, "span");
+  const titleCell = new RuntimeElement({
+    "data-okf-edit-cell": "value",
+    "data-okf-value-cell": "true",
+  }, harness.windowState, 0, 30, "td");
+  titleCell.appendChild(titleDisplay);
+  titleRow.appendChild(titleCell);
+  harness.frontmatterRow.parentElement?.appendChild(titleRow);
+  harness.editModeButton.dispatch("click");
+  const click = (target: RuntimeElement) => harness.dispatchDocument("click", {
+    target,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  click(harness.frontmatterValueCell);
+  const control = harness.createdElements.find((element) => element.getAttribute("aria-label") === "Frontmatter priority");
+  assert.ok(control);
+  control.value = "7";
+  control.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  assert.equal(frontmatterSaves(harness).length, 1);
+  // A browser drops the focus to the body when the focused control becomes disabled.
+  (harness.windowState as { focused?: RuntimeElement }).focused = undefined;
+  harness.dispatchMessage({
+    type: "previewFrontmatterResult",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    editId: frontmatterSaves(harness)[0].editId,
+    error: "Schema validation failed: must be <= 5",
+  });
+  assert.equal(control.disabled, false);
+  return { harness, control, click, titleCell, titleDisplay };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a refused frontmatter value save puts the focus back in the control", () => {
+  const { harness, control } = refusedNumberEditor();
+  assert.equal(harness.document.activeElement, control);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("Escape closes the editor after a refused frontmatter value save", () => {
+  const { harness, control } = refusedNumberEditor();
+  const before = frontmatterSaves(harness).length;
+  // The focus is where the browser left it (the body), as the document Escape handler sees it.
+  harness.dispatchDocument("keydown", { key: "Escape", target: harness.body, preventDefault: () => undefined });
+  if (harness.document.activeElement === control) {
+    control.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  }
+  assert.equal(harness.frontmatterValueDisplay.getAttribute("hidden"), null);
+  assert.equal(harness.frontmatterValueCell.getAttribute("data-okf-editing"), null);
+  assert.equal(frontmatterSaves(harness).length, before);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a click on another field after a refused value save closes the refused editor and opens the other", () => {
+  const { harness, control, click, titleCell, titleDisplay } = refusedNumberEditor();
+  const before = frontmatterSaves(harness).length;
+  // The writer clicks back into the control, leaves the text as refused, then clicks another field.
+  control.focus();
+  titleCell.focus();
+  assert.equal(frontmatterSaves(harness).length, before, "the unchanged refused text is not posted again");
+  click(titleCell);
+  assert.equal(frontmatterSaves(harness).length, before, "closing the refused editor saves nothing");
+  assert.equal(harness.frontmatterValueDisplay.getAttribute("hidden"), null, "priority shows its saved value");
+  assert.equal(harness.frontmatterValueCell.getAttribute("data-okf-editing"), null);
+  assert.equal(titleDisplay.getAttribute("hidden"), "", "the clicked field's editor opened in the same click");
+  assert.ok(harness.createdElements.some((element) => element.getAttribute("aria-label") === "Frontmatter title"));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a corrected value and Enter after a refused value save post exactly one new save", () => {
+  const { harness, control } = refusedNumberEditor();
+  const before = frontmatterSaves(harness).length;
+  control.focus();
+  control.value = "4";
+  control.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  const saves = frontmatterSaves(harness);
+  assert.equal(saves.length, before + 1);
+  assert.equal(saves.at(-1)?.fieldValue, 4);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a changed value after a refused value save is saved once by the blur", () => {
+  const { harness, control, titleCell } = refusedNumberEditor();
+  const before = frontmatterSaves(harness).length;
+  control.value = "4";
+  titleCell.focus();
+  const saves = frontmatterSaves(harness);
+  assert.equal(saves.length, before + 1);
+  assert.equal(saves.at(-1)?.fieldValue, 4);
+  assert.equal(control.disabled, true, "the changed value is saving");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a refused key save puts the focus back in the key control and its blur posts nothing again", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true, trackFocus: true, blurOnFocusChange: true });
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterNameCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const keyInput = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter key lifecycle");
+  assert.ok(keyInput);
+  keyInput.value = "stage";
+  keyInput.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  assert.equal(frontmatterSaves(harness).length, 1);
+  (harness.windowState as { focused?: RuntimeElement }).focused = undefined;
+  harness.dispatchMessage({
+    type: "previewFrontmatterResult",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    editId: frontmatterSaves(harness)[0].editId,
+    error: "The key stage is not allowed.",
+  });
+  assert.equal(keyInput.disabled, false);
+  assert.equal(harness.document.activeElement, keyInput);
+  keyInput.blur();
+  assert.equal(frontmatterSaves(harness).length, 1, "the unchanged refused key is not posted again");
+});
