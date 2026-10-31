@@ -198,6 +198,8 @@ export async function scenarioIncomingChanges(page: Page, evidence: Evidence): P
     assert.equal(await vscode.workspace.applyEdit(edit), true);
     await openSidePreview(document);
     await waitForPreviewReady(document);
+    // The toggle is disabled in edit mode, which an earlier scenario may have left on.
+    await leaveEditMode(page);
     await waitFor("the host to mark the changed lines", () => {
       const last = getActivePreviewForTests()?.incomingChanges.last;
       return last?.enabled === true && last.ranges.length >= 2;
