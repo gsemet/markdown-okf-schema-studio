@@ -25,6 +25,7 @@ implemented_in_files:
 - src/core/preview/styles/contentLayoutStyles.ts
 - src/page/modules/firstClearance.ts
 tested_in_files:
+- test/integration/realInput/qa210Replays.ts
 - test/page/modules/firstClearance.test.ts
 - test/visual/toolbarFloatScenarios.ts
 default_owner_email: gaetan@xeberon.net
