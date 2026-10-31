@@ -37,6 +37,7 @@ import { scenarioAddFieldPositionAndEscape, scenarioBooleanOneClick, scenarioCom
 import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfterFinalFigure, scenarioInsertBlocksFromPreview, scenarioLargeDocumentPatched, scenarioPendingOverlayWithoutReload, scenarioPropertiesTableWithoutReload, scenarioStatusPageTwoLines, withIncrementalUpdates } from "./renderPatching";
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
 import { scenarioFindRightAfterClick } from "./findAfterClick";
+import { scenarioWideTableTab } from "./wideTableTab";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
 import { scenarioLinkClickEditsInEditMode } from "./linkEditMode";
 
@@ -65,6 +66,8 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
   },
   "find-in-preview": (page) => scenarioFindInPreview(page),
+  // CR 227: real Tab presses through a wide table; new, proved here before it stays required.
+  "wide-table-tab": scenarioWideTableTab,
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */
@@ -206,6 +209,8 @@ export async function run(): Promise<void> {
     await scenarioEditModeNoReflow(page, evidence);
     await scenarioTableTab(page, evidence);
     await scenarioTableToolbar(page, evidence);
+    // QA replay c5-1: Tab through a table wider than the preview keeps the cell editor in view.
+    await scenarioWideTableTab(page, evidence);
     await scenarioTableStructure(page);
     await scenarioTableMoves(page);
     await scenarioBooleanOneClick(page, evidence);

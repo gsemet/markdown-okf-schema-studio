@@ -71,6 +71,8 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "toc",
     // Find in preview: a late block editor focus once failed it on a heavy run only.
     "find-in-preview",
+    // CR 227: real Tab presses through a wide table; new, proved here before it stays required.
+    "wide-table-tab",
   ],
   untrusted: ["untrusted-read-only"],
 };
