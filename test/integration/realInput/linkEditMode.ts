@@ -67,8 +67,10 @@ function assertStayedOn(source: vscode.TextDocument, target: vscode.Uri, label: 
 /**
  * CR 217: in edit mode a real click on a link-only paragraph and on the footer of a `:link:` card
  * opens the block editor and leaves the active file as it is; keys typed after the footer click go
- * to that editor, never to the card's target (QA215-01: ` F` landed in `targets/alpha.md`). A
- * Cmd/Ctrl+click on the same link, and on the card title, still navigates to its target.
+ * to that editor, never to the card's target (QA215-01: ` F` landed in `targets/alpha.md`). A plain
+ * click on the card header, and on the linked card title (its directive line), opens an editor too
+ * (QA 210 c1-1). A Cmd/Ctrl+click on the same link, and on the card title, still navigates to its
+ * target.
  */
 export async function scenarioLinkClickEditsInEditMode(page: Page, _evidence: Evidence): Promise<void> {
   const fixture = createFixture("realinput-cr217", {
@@ -104,6 +106,24 @@ export async function scenarioLinkClickEditsInEditMode(page: Page, _evidence: Ev
       });
       assertStayedOn(source, alpha, "keys typed after the card footer click");
       await escapeBlockEditor(page, "the card footer editor to close");
+
+      // QA 210 c1-1: one plain click on the header of the linked card opens an editor in the card.
+      await withCurrentFrame(page, (frame) => frame.locator(".myst-grid-card-header", { hasText: "Header of the card" }).click());
+      await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+      assertStayedOn(source, alpha, "card header click");
+      await escapeBlockEditor(page, "the card header editor to close");
+
+      // QA 210 c1-1: a plain click on the linked title opens its directive line, never the target.
+      await withCurrentFrame(page, (frame) => frame.locator("a.myst-grid-card-link", { hasText: "Linked card" }).click());
+      await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+      const titleLine = await withCurrentFrame(page, (frame) =>
+        frame.locator("[data-sphinx-preview-block-editor] textarea").inputValue());
+      assert.equal(titleLine.trim(), ":::{grid-item-card} Linked card",
+        "a plain click on the linked card title edits its directive line");
+      assertStayedOn(source, alpha, "linked card title click");
+      await escapeBlockEditor(page, "the card title editor to close");
+      // Escape restored the footer text typed above: the clicks leave links.md as it was.
+      await waitFor("links.md to hold its original text", () => source.getText() === LINKS);
 
       // Cmd/Ctrl+click on the same link follows it.
       await withCurrentFrame(page, (frame) =>
