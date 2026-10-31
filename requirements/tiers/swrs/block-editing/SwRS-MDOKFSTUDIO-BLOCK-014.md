@@ -24,19 +24,24 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/preview/styles/editModeStyles.ts
 - src/core/render/mystRenderer.ts
 - src/page/features/blockEditor.ts
 - src/page/features/editMode.ts
+- src/page/features/linkEditing.ts
 - src/page/features/mappedBlocks.ts
 - src/page/features/pageInput.ts
+- src/page/modules/linkNavigation.ts
 tested_in_files:
 - test/core/render/includeMapping.test.ts
 - test/integration/previewEditing.test.ts
 - test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
+- test/page/linkEditModeClick.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/session/alertBlockEditOpen.test.ts
 - test/visual/alertEditingScenarios.ts
+- test/visual/linkEditModeScenarios.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -71,12 +76,32 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 | a block that comes from an {include} | previewEditOpen names the lines of the {include} directive in the edited document and the editor holds the directive text; the included block carries data-sphinx-preview-included true |
 | the words Diagram source of the collapsed disclosure of a Mermaid or PlantUML figure | the default toggle is prevented, the disclosure stays closed and the editor of the figure opens on the lines of the diagram block |
 
-### Scenario (boundary): A linked image
+### Scenario (boundary): A link inside a mapped block
 
-| Input | Outcome |
+A link here is any link inside a mapped block: a link inside a paragraph, a paragraph made only of a link (the closing "Next: Related" line of a chapter), the title, header, body or footer of a `:link:` card (SwRS-MDOKFSTUDIO-BLOCK-258), a linked image, a same-page anchor, a footnote reference or an external URL.
+
+| Input, edit mode on | Outcome |
 | --- | --- |
-| click on an image inside a link, edit mode, no modifier | the default action is prevented, the link is not followed and the block's editor opens |
-| the same click with Cmd or Ctrl held | the link navigation runs and no editor opens |
+| click on a link, no modifier | the default action is prevented, the link is not followed (no previewLink) and the editor of the block that holds the link opens, as a click on the text around it does |
+| Enter or Space on a focused link | the same as a click: the default action is prevented and the block's editor opens |
+| click on a mapped block that is itself inside a link | the editor of that block opens and the link is not followed |
+| click on a link with Cmd or Ctrl held, or Cmd/Ctrl+Enter on a focused link | the link navigation runs (SwRS-MDOKFSTUDIO-TOOLBAR-077) and no editor opens |
+| middle click on a link | the link navigation runs and no editor opens |
+| click on a link while the editor of another block is open | as a click on any other block (SwRS-MDOKFSTUDIO-BLOCK-041): the open editor is saved first, no other file opens, so the keys typed next never reach the link target |
+| the pointer over a link | the block that holds it gets the edit-hover outline (SwRS-MDOKFSTUDIO-BLOCK-017) and the text cursor, like the text around the link; on a `:link:` card only the part under the pointer is outlined; a link whose click keeps its own behaviour (properties table, comment thread, open editor, outside a mapped block) keeps the pointer cursor and gets no outline |
+
+| Input, edit mode off (reading) | Outcome |
+| --- | --- |
+| click, Enter or Space on a link | unchanged: the link is followed and no editor opens |
+
+### Scenario (nominal): The tooltip says how to follow a link in edit mode
+
+| Given | When | Then |
+| --- | --- | --- |
+| a link inside a mapped block whose tooltip is its target path, its blocked reason or its `link-alt` text | edit mode is turned on | the tooltip keeps that text on its first line and gets the second line "Cmd+click to follow" on macOS, "Ctrl+click to follow" elsewhere; a link without a tooltip shows only that line |
+| the same link in edit mode | the host answers a target discovery for it, or the content is rendered again | the new target is the first line and the second line stays |
+| the same link | edit mode is turned off | the second line is removed and the tooltip is the text it had without it |
+| a link value of the properties table | edit mode is turned on | its tooltip is unchanged |
 
 ### Scenario (refusal): Targets that open no block editor
 
@@ -85,8 +110,7 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 | Enter or Space with focus on a text box, a button, a link value of the properties table, a comment chip, an insert point or the Description toggle | no block editor opens |
 | click on a comment chip in a paragraph | the chip expands and no editor opens |
 | click on the body of an open comment thread | no editor opens |
-| click on a mapped block that is itself inside a link | no editor opens |
-| click, Enter or Space on a link inside a paragraph, edit mode on | the link is followed and no editor opens; a click on the text of the paragraph outside the link still opens it |
+| click, Enter or Space on a link value of the properties table, in a comment thread or on the anchor icon of a label | the link keeps its own behaviour (field editor, thread, label rename) and no block editor opens |
 | click on a cell of the properties table | no block editor opens; the field editor of the cell is specified by SwRS-MDOKFSTUDIO-FMEDIT-001 |
 | click on a paragraph below the properties table | its block editor opens as usual |
 
@@ -129,14 +153,17 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 ### Verification notes
 
 - Method: test/page/runtimeBlockEditor.test.ts (`edit mode loads raw Markdown and saves changes when the block loses focus`: paragraph click and previewEditSource fills the text box; `fenced Markdown editors sit outside the rendered pre and preserve source when saving`: fenced code row). The reading mode paragraph row is not asserted here.
-- Method: test/page/blockReq.requirements.test.ts (`a click on a link inside a paragraph follows the link and opens no editor`, `Enter or Space on a link inside a paragraph opens no editor`: link inside a paragraph row).
-- Method: test/page/blockReq.requirements.test.ts (`Enter or Space on a focused block opens its editor with the caret at the end`: Enter scenario; `a click on a comment chip, an open thread or a block inside a link opens no editor`: chip, open thread and linked block rows; `a click on a cell of the properties table never opens a block editor`: properties table rows; `a click on Diagram source in edit mode opens the editor of the figure and not the disclosure`: Diagram source row and reading mode row). The insert point part of the Enter and Space row is asserted by `T28: document-level click and keydown on an insertion point never open a block editor` in test/page/runtimeBlockMoves.test.ts.
-- Method: test/integration/realInput/renderPatching.ts (scenarioImageEditing, screenshot block-editing/r04, clicks plain, linked and raw img blocks: paragraph or image scenario; scenarioSaveKeepsBlockInPlace: fenced code row). No unit test covers the capture listener or the Cmd and Ctrl click of the linked image scenario.
+- Method: test/page/blockReq.requirements.test.ts (`a click on a link inside a paragraph opens the paragraph editor; a Cmd click follows the link`, `Enter or Space on a link inside a paragraph opens the paragraph editor; Cmd+Enter does not`: link rows of the link scenario).
+- Method: test/page/linkEditModeClick.test.ts (link scenario: click, Enter and Space on a link inside a paragraph and on a link-only paragraph open the paragraph editor and post no previewLink; Cmd and Ctrl click, Cmd and Ctrl+Enter and a middle click follow; a click on the title, body and footer of a `:link:` card opens lines 14, 19 and 21; a click on a link while another editor is open saves it and follows nothing; reading mode follows; the properties table link keeps its field editor; tooltip scenario: the second line in edit mode on a non-Apple and an Apple platform, its removal in reading mode, after a target discovery and a content render, none on a properties table link).
+- Method: test/integration/realInput/linkEditMode.ts (scenarioLinkClickEditsInEditMode, real window: a real click on the link of a link-only paragraph and on the footer of a `:link:` card opens a block editor and leaves the preview and the editors on the edited file; " F" typed after the footer click goes to that editor and the card target is neither opened nor dirty; a Cmd/Ctrl+click on the same link navigates to its target).
+- Method: visual scenarios block-editing/v27 to v34 in test/visual/linkEditModeScenarios.ts (cream and dark, 900 px: a click on the link-only paragraph and on the footer of a linked card opens the editor; the pointer over the link-only paragraph and over the body of a linked card outlines that block only). The native tooltip is not captured.
+- Method: test/page/blockReq.requirements.test.ts (`Enter or Space on a focused block opens its editor with the caret at the end`: Enter scenario; `a click on a comment chip or an open thread opens no editor, a block inside a link opens its own`: chip and open thread rows and the linked block row of the link scenario; `a click on a cell of the properties table never opens a block editor`: properties table rows; `a click on Diagram source in edit mode opens the editor of the figure and not the disclosure`: Diagram source row and reading mode row). The insert point part of the Enter and Space row is asserted by `T28: document-level click and keydown on an insertion point never open a block editor` in test/page/runtimeBlockMoves.test.ts.
+- Method: test/integration/realInput/renderPatching.ts (scenarioImageEditing, screenshot block-editing/r04, clicks plain, linked and raw img blocks: paragraph or image scenario; scenarioSaveKeepsBlockInPlace: fenced code row). The Cmd and Ctrl click of a linked image is covered by the link rows of test/page/linkEditModeClick.test.ts.
 - Method: test/session/alertBlockEditOpen.test.ts (GitHub alert row and the alert of the nominal scenario: the range `editingElementFor` gives for a click in the body of an alert of the rendered page, answered by the real `PreviewManager`; a click on a paragraph or a list item of a MyST admonition body, in a backtick or a colon fence, gives the lines of the whole directive) and visual scenarios gfm/v09-alert-body-opens-whole-alert-dark-900 and block-editing/v22-admonition-body-opens-whole-directive-dark-900 in test/visual/alertEditingScenarios.ts (real click on the body of an alert and of a MyST note directive).
 - Method: visual scenarios in test/visual/scenarioDefinitions2.ts, block-editing/v04 (paragraph click), block-editing/v05 (admonition title click and fenced block) and block-editing/v12 (edit-list-narrow: list item row). The nested list case, the line range of a list (sourceRangeForList in src/page/features/mappedBlocks.ts) and lists that mix files are untested.
 - Method: test/core/render/includeMapping.test.ts and test/integration/previewEditing.test.ts (an included block maps to the directive lines and carries data-sphinx-preview-included; a changed include target renders only after the edit: include row).
 - Method: the previewEditSource scenarios (nominal answer, error and malformed rows) are not asserted by a dedicated test; the page receives the answer in the unit tests of test/page/runtimeBlockEditor.test.ts and in the integration flow of test/integration/previewEditing.test.ts.
-- Criteria: One previewEditOpen per click, carrying the mapped line range of the clicked block; the keydown listener opens the editor only for a mapped block outside the listed controls; the line range of a list is the span of the mapped elements of the nearest list that belong to the same source file and document; the line range of a block inside a mapped element carrying data-okf-github-alert, or an aside or details element of class admonition other than a context-tag panel (class myst-context-admonition, SwRS-MDOKFSTUDIO-MYST-013, which keeps the range of the clicked block), of the same source file and document is the range of the nearest such element, before any list; the frame is never inside the pre and the rendered text of the fence is the raw source; the capture listener of bindEditModeCaptureClicks acts only for an IMG inside an anchor outside the properties table and the editors; the click handler returns before openMappedEditor for the excluded targets and openMappedEditor returns at once when the event target is inside [data-okf-properties]; the editor range equals the directive lines and the included file is never opened; the click target of Diagram source resolves to the figure through the mapped-block selector and event.preventDefault is called in edit mode.
+- Criteria: One previewEditOpen per click, carrying the mapped line range of the clicked block; the keydown listener opens the editor only for a mapped block outside the listed controls; the line range of a list is the span of the mapped elements of the nearest list that belong to the same source file and document; the line range of a block inside a mapped element carrying data-okf-github-alert, or an aside or details element of class admonition other than a context-tag panel (class myst-context-admonition, SwRS-MDOKFSTUDIO-MYST-013, which keeps the range of the clicked block), of the same source file and document is the range of the nearest such element, before any list; the frame is never inside the pre and the rendered text of the fence is the raw source; the capture listener of bindEditModeCaptureClicks acts only for an IMG inside an anchor outside the properties table and the editors; linkActivationEdits (src/page/features/linkEditing.ts) is true only in edit mode, without Cmd or Ctrl, for a click, Enter or Space (never an auxclick) whose target is inside a link and inside a mapped block, outside the properties table, an open editor, a comment body, a chip, a label anchor and an okf-link value; while it is true the link navigation posts nothing and the page input opens the editor; the click handler returns before openMappedEditor for the excluded targets and openMappedEditor returns at once when the event target is inside [data-okf-properties]; the editor range equals the directive lines and the included file is never opened; the click target of Diagram source resolves to the figure through the mapped-block selector and event.preventDefault is called in edit mode.
 
 <!-- okf:links:start -->
 ### Links

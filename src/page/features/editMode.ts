@@ -5,6 +5,7 @@
  * from block to block, Tab past the last cell).
  */
 
+import { inLinkThatKeepsItsBehaviour, syncLinkFollowHints } from "./linkEditing";
 import { MAPPINGS_SELECTOR, type CaretPoint, type CaretPosition, type EditMode, type PageRuntime } from "./pageRuntime";
 
 /** Edit mode of a page. */
@@ -31,8 +32,11 @@ export function installEditMode(rt: PageRuntime): EditMode {
       || node.closest(".myst-tab-list")) {
       return undefined;
     }
+    // A link inside a block is outlined like the rest of the block, since a plain click there edits
+    // it (CR 217); a link whose click keeps its own behaviour (comment thread, ...) is not.
+    if (inLinkThatKeepsItsBehaviour(node)) return undefined;
     const mapped = node.closest<HTMLElement>(MAPPINGS_SELECTOR);
-    if (!mapped || mapped.closest("a") || node.closest("a")) return undefined;
+    if (!mapped) return undefined;
     const cell = node.closest("td, th");
     const editing = rt.blocks.editingElementFor(mapped).element;
     const element = cell && cell.closest("table")
@@ -69,6 +73,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
     editModeButton?.setAttribute?.("title", tooltip);
     editModeButton?.setAttribute?.("data-tooltip", tooltip);
     rt.frontmatter.setFrontmatterEditCells(enabled);
+    syncLinkFollowHints(document, enabled);
     rt.tableRowMove.refresh();
     rt.insertPoints.refreshInsertPoints();
   }

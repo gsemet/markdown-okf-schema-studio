@@ -49,6 +49,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
+- test/page/linkEditModeClick.test.ts
 - test/page/modules/inlineThread.test.ts
 - test/page/modules/labelRename.test.ts
 - test/page/runtimeBlockSelection.test.ts

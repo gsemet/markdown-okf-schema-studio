@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/features/pageInput.ts
 tested_in_files:
 - test/page/fmtableReqFrontmatter.requirements.test.ts
+- test/page/linkEditModeClick.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
 - test/visual/capture_page_checks.py

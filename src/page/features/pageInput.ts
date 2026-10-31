@@ -5,6 +5,7 @@
  * The order in which these listeners are bound matters (see `../runtime.ts`).
  */
 
+import { linkActivationEdits } from "./linkEditing";
 import { MAPPINGS_SELECTOR, type PageInput, type PageRuntime } from "./pageRuntime";
 
 /**
@@ -193,8 +194,11 @@ export function installPageInput(rt: PageRuntime): PageInput {
         const target = event.target instanceof Element
           ? event.target.closest<HTMLElement>(MAPPINGS_SELECTOR)
           : undefined;
-        // In edit mode a click on a link inside a block only follows the link.
-        if (!target || target.closest("a") || (state.editMode && event.target instanceof Element && event.target.closest("a"))) {
+        // In edit mode a plain click on a link inside a block edits the block (CR 217); a Cmd/Ctrl
+        // click only follows the link, and so does any click in reading mode.
+        const linkEdits = linkActivationEdits(state.editMode, event);
+        if (!target || (!linkEdits && (target.closest("a")
+          || (state.editMode && event.target instanceof Element && event.target.closest("a"))))) {
           if (state.editMode && state.activeBlockEdit?.selectedCell && !state.activeBlockEdit.finishing) {
             rt.blockEditor.postBlockEditSave(true);
           }
@@ -241,9 +245,10 @@ export function installPageInput(rt: PageRuntime): PageInput {
           return;
         }
         const target = element ? element.closest<HTMLElement>(MAPPINGS_SELECTOR) : undefined;
-        if (!target || target.closest("a")) return;
-        // In edit mode Enter or Space on a link inside a block only follows the link.
-        if (state.editMode && element!.closest("a")) return;
+        if (!target) return;
+        // In edit mode Enter or Space on a link inside a block edits the block (CR 217); with Cmd or
+        // Ctrl, or in reading mode, it only follows the link.
+        if (element!.closest("a") && !linkActivationEdits(state.editMode, event)) return;
         event.preventDefault?.();
         if (state.editMode) {
           rt.editMode.openMappedEditor(target, element!);

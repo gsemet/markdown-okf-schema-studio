@@ -1,3 +1,5 @@
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-017
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-029
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
@@ -26,8 +28,17 @@ body {
   display: none;
 }
 
-html[data-sphinx-preview-edit-mode="on"] [data-sphinx-source-file][data-sphinx-source-line] {
+/* A plain click on a link edits its block too (CR 217): the link shows the text cursor of the block.
+   The page marks only those links (linkEditing.ts); every other link keeps its pointer. */
+html[data-sphinx-preview-edit-mode="on"] [data-sphinx-source-file][data-sphinx-source-line],
+html[data-sphinx-preview-edit-mode="on"] a[data-sphinx-preview-link-edits="true"] {
   cursor: text;
+}
+
+/* Edit mode: the stretched overlay of a linked card no longer catches the pointer, so the part of
+   the card under it (title, header, body, footer) decides what opens (CR 217). */
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content .myst-grid-card-link::after {
+  pointer-events: none;
 }
 
 [data-sphinx-preview-editing="true"] {
