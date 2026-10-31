@@ -1,0 +1,10 @@
+{"name":"c3-1-alert-lazy-continuation-outside","file":"synth/admon.md","steps":[
+{"open":"${file}"},
+{"palette":"Markdown OKF-Schema Studio: Open Preview to Side","wait":3500},
+{"waitFor":"D.querySelector('#sphinx-myst-preview-content h1')","timeout":15000},
+{"editMode":true},
+{"check":"feval","expr":"D.querySelector('aside[data-okf-github-alert]').textContent.includes('lazy continuation')","label":"c3-1 lazy line is inside the alert"},
+{"clicksel":"aside[data-okf-github-alert] p","text":"Line one","nth":0},
+{"waitFor":"D.querySelector('.sphinx-preview-block-editor textarea')","timeout":4000},
+{"check":"feval","expr":"D.activeElement.value.includes('lazy continuation')","label":"c3-1 lazy line is in the block editor"}
+]}

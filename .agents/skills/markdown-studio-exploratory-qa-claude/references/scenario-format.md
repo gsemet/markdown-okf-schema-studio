@@ -36,7 +36,8 @@ Preconditions (which file is open, preview visible) go in the scenario's first s
 
 Each action waits a default pause afterwards; `"wait": ms` overrides it. `"which": i` targets the
 i-th visible webview (Open With editor plus side preview). `"optional": true` lets the scenario
-continue when the action fails.
+continue when the action fails: the failure is noted as `optional step skipped` and is not counted
+as a FAIL.
 
 | Step | Effect |
 | --- | --- |

@@ -1,0 +1,65 @@
+{
+ "name": "ux-38-invalid-field-does-not-block-others",
+ "file": "synth/frontmatter-edge.md",
+ "vars": {},
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "File: Revert File",
+   "wait": 800
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector('tr[data-okf-field=priority]')",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "tr[data-okf-field=priority] td[data-okf-value-cell]"
+  },
+  {
+   "key": "Meta+a"
+  },
+  {
+   "type": "9"
+  },
+  {
+   "key": "Enter"
+  },
+  {
+   "wait": 800
+  },
+  {
+   "clicksel": "tr[data-okf-field=reviewed_on] td[data-okf-value-cell]"
+  },
+  {
+   "wait": 800
+  },
+  {
+   "check": "feval",
+   "expr": "!!D.querySelector('tr[data-okf-field=reviewed_on] input, tr[data-okf-field=reviewed_on] textarea')",
+   "label": "UX-38 another field opens while one is invalid"
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "equal": true,
+   "label": "UX-38 buffer untouched"
+  },
+  {
+   "shot": "ux-38",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

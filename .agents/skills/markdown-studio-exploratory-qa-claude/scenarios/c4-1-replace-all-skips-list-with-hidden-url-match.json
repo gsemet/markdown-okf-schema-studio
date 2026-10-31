@@ -1,0 +1,21 @@
+{
+  "name": "c4-1-replace-all-skips-list-with-hidden-url-match",
+  "file": "synth/find-list-b.md",
+  "vars": {},
+  "steps": [
+    {"open": "${file}"},
+    {"palette": "Markdown OKF-Schema Studio: Open Preview to Side", "wait": 4000},
+    {"waitFor": "D.querySelector('#sphinx-myst-preview-content h1')", "timeout": 15000},
+    {"mark": true},
+    {"clicksel": "h1"},
+    {"key": "Meta+f"}, {"wait": 400},
+    {"type": "needle"}, {"wait": 500},
+    {"clicksel": "[data-find-toggle-replace]"},
+    {"clicksel": "[data-find-replace-input]"},
+    {"type": "PIN"},
+    {"clicksel": "[data-find-replace-all]"}, {"wait": 1200},
+    {"check": "diff", "against": "mark", "contains": "list PIN", "show": true, "label": "c4-1 list item replaced by Replace all"},
+    {"check": "diff", "against": "mark", "contains": "[link PIN]", "label": "c4-1 link text replaced by Replace all"},
+    {"check": "errors"}
+  ]
+}

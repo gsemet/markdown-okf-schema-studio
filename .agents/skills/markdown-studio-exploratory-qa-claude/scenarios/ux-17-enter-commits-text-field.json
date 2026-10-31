@@ -1,0 +1,63 @@
+{
+ "name": "ux-17-enter-commits-text-field",
+ "file": "synth/frontmatter-edge.md",
+ "vars": {},
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "File: Revert File",
+   "wait": 800
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector('tr[data-okf-field=title]')",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "tr[data-okf-field=title] td[data-okf-value-cell]"
+  },
+  {
+   "key": "Meta+a"
+  },
+  {
+   "type": "Write CSV output: with quotes \"and\" colons",
+   "delay": 20
+  },
+  {
+   "key": "Enter"
+  },
+  {
+   "wait": 1200
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "notContains": "title: |",
+   "label": "UX-17 no block scalar"
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "contains": "Write CSV output",
+   "maxLines": 1,
+   "show": true,
+   "label": "UX-17 Enter commits one line"
+  },
+  {
+   "shot": "ux-17",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

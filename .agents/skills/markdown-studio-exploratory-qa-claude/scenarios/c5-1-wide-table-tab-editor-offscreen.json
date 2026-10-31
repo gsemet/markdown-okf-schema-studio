@@ -1,0 +1,19 @@
+{"name":"c5-1-wide-table-tab-editor-offscreen","file":"synth/c5-tables.md","steps":[
+{"open":"${file}"},
+{"palette":"Markdown OKF-Schema Studio: Open Preview to Side","wait":3000},
+{"waitFor":"D.querySelector('#sphinx-myst-preview-content h1')","timeout":15000},
+{"waitFor":"[...D.querySelectorAll('td')].some(t=>t.textContent.includes('LASTCELL'))","label":"unfolded wide table (fold state may persist from earlier runs)"},
+{"mark":true},{"editMode":true},
+{"clicksel":"td","text":"LASTCELL","exact":false},
+{"waitFor":"D.querySelector('[data-sphinx-preview-table-cell-editor] textarea')","label":"editor"},
+{"key":"Tab","wait":1000},
+{"check":"feval","expr":"(()=>{const e=D.querySelector('[data-sphinx-preview-table-cell-editor]');const r=e.getBoundingClientRect();return r.left>=0&&r.right<=W.innerWidth})()","equals":true,"label":"c5-1 editor visible after Tab wrap to first column"},
+{"key":"Escape","wait":600},
+{"clicksel":"td","text":"aaaaaaaaaaaaaaaaaaaaaaaa","exact":true},
+{"waitFor":"D.querySelector('[data-sphinx-preview-table-cell-editor] textarea')","label":"editor A"},
+{"key":["Tab","Tab","Tab","Tab","Tab","Tab","Tab","Tab","Tab"],"gap":500,"wait":900},
+{"check":"feval","expr":"(()=>{const e=D.querySelector('[data-sphinx-preview-table-cell-editor]');const r=e.getBoundingClientRect();return r.left>=0&&r.right<=W.innerWidth})()","equals":true,"label":"c5-1 editor visible after 9 Tabs (col J)"},
+{"key":"Escape","wait":600},
+{"check":"diff","against":"mark","equal":true},
+{"shot":"c5-1","clip":"preview","onFail":true}
+]}

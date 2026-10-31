@@ -4,9 +4,18 @@
 Prints (1) what the automated suites already exercise, so charters skip it, and (2) the extension
 files changed since the last campaign, mapped to use-case areas (references/use-cases.md).
 
+Baseline revision, in order: --since REV; the revision recorded in the index of --campaign DIR; the
+newest archived QA campaign under <changes-root>/04-archives/*qa-campaign*/. The index records it as
+a line `Revision: `<sha>`` or as the prose "at commit `<sha>`" (campaign 210 form). A sha that is not
+an ancestor of HEAD is reported and skipped.
+
+The changes root is $QA_CHANGES_ROOT, else <repo>/.agents/changes (git-ignored: absent in a
+worktree, so point the variable at the main checkout's folder).
+
 Usage: python3 coverage-map.py [--since REV] [--campaign DIR]
 """
 import argparse
+import os
 import re
 import subprocess
 from collections import Counter, defaultdict
@@ -44,22 +53,91 @@ def words(name):
     return re.sub(r"(?<!^)(?=[A-Z])", " ", name).lower()
 
 
-def last_campaign_rev(campaign):
-    """Most recent commit named in the campaign's index files (`commit `abc1234``)."""
+def changes_root():
+    return Path(os.environ.get("QA_CHANGES_ROOT") or REPO / ".agents/changes")
+
+
+REV_PATTERNS = [
+    r"^Revision:\s*`([0-9a-f]{7,40})`",          # explicit field (canonical)
+    r"\bat commit `([0-9a-f]{7,40})`",           # campaign 210 prose form
+    r"\bcommit `([0-9a-f]{7,40})`",              # older campaigns
+]
+
+
+def index_revs(index, canonical_only=False):
+    """Revisions named in one 00-index.md, canonical form first (only it with canonical_only)."""
+    text = Path(index).read_text(encoding="utf-8")
     revs = []
-    for index in sorted(Path(campaign).glob("**/00-index.md")):
-        match = re.search(r"commit `([0-9a-f]{7,40})`", index.read_text(encoding="utf-8"))
-        if match:
-            revs.append(match.group(1))
-    dated = [(git("show", "-s", "--format=%ct", rev), rev) for rev in revs]
+    for pattern in REV_PATTERNS[:1] if canonical_only else REV_PATTERNS:
+        revs += re.findall(pattern, text, re.M)
+    return list(dict.fromkeys(revs))
+
+
+def index_date(index):
+    match = re.search(r"^Date:\s*(\d{4}-\d{2}-\d{2})", Path(index).read_text(encoding="utf-8"), re.M)
+    return match.group(1) if match else None
+
+
+def known_ancestor(rev):
+    if subprocess.run(["git", "-C", str(REPO), "cat-file", "-e", f"{rev}^{{commit}}"], capture_output=True).returncode:
+        return False
+    return subprocess.run(["git", "-C", str(REPO), "merge-base", "--is-ancestor", rev, "HEAD"],
+                          capture_output=True).returncode == 0
+
+
+def campaign_indexes(campaign):
+    campaign = Path(campaign)
+    top = campaign / "00-index.md"
+    return [top] if top.exists() else sorted(campaign.glob("**/00-index.md"))
+
+
+def newest_archived_campaign(root):
+    """Newest <root>/04-archives/*qa-campaign*/ by the date in its name, else by name."""
+    found = [p.parent for p in Path(root).glob("04-archives/*qa-campaign*/00-index.md")]
+    return max(found, key=lambda p: (re.findall(r"\d{4}-\d{2}-\d{2}", p.name) or [""])[-1] + p.name, default=None)
+
+
+def resolve_campaign(campaign=None):
+    """Return (campaign dir or None, how it was chosen)."""
+    if campaign:
+        return Path(campaign), "--campaign"
+    root = changes_root()
+    newest = newest_archived_campaign(root)
+    if newest:
+        return newest, f"newest archived QA campaign under {root}/04-archives"
+    legacy = root / "04-archives/001-deep-UX-analysis"
+    if legacy.exists():
+        return legacy, f"legacy default under {root}"
+    return None, f"no campaign found (changes root {root}; set QA_CHANGES_ROOT or pass --campaign)"
+
+
+def last_campaign_rev(campaign):
+    """Most recent usable commit named in the campaign's index files. Returns (rev, note)."""
+    notes = []
+    revs = []
+    # A recorded `Revision:` line wins; prose "commit <sha>" mentions count only without one.
+    for index in campaign_indexes(campaign):
+        revs += index_revs(index, canonical_only=True)
+    if not revs:
+        for index in campaign_indexes(campaign):
+            revs += index_revs(index)
+    if not revs:
+        return None, f"no revision found in {campaign}/00-index.md (expected a `Revision: `<sha>`` line)"
+    usable = []
+    for rev in dict.fromkeys(revs):
+        if known_ancestor(rev):
+            usable.append(rev)
+        else:
+            notes.append(f"{rev} is not a known ancestor of HEAD; skipped")
+    dated = [(git("show", "-s", "--format=%ct", rev), rev) for rev in usable]
     dated = [(int(t), rev) for t, rev in dated if t.isdigit()]
-    return max(dated)[1] if dated else None
+    return (max(dated)[1] if dated else None), "; ".join(notes)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--since")
-    parser.add_argument("--campaign", default=str(REPO / ".agents/changes/04-archives/001-deep-UX-analysis"))
+    parser.add_argument("--campaign", help="campaign folder holding 00-index.md (default: newest archived QA campaign)")
     args = parser.parse_args()
 
     print("## Automated coverage (do not re-explore; extend instead)")
@@ -85,8 +163,18 @@ def main():
             shown = "; ".join(t[:60] for t in titles[:8]) + ("; …" if len(titles) > 8 else "")
             print(f"{suite.stem} ({len(titles)}): {shown}")
 
-    since = args.since or last_campaign_rev(args.campaign)
     print()
+    if args.since:
+        since, how, note = args.since, "--since", ""
+    else:
+        campaign, how = resolve_campaign(args.campaign)
+        since, note = last_campaign_rev(campaign) if campaign else (None, how)
+        if campaign:
+            how = f"{campaign} ({how})"
+    if since:
+        print(f"## Baseline: {since} from {how}")
+    if note:
+        print(f"note: {note}")
     if not since:
         print("## Changes: no previous campaign revision found; explore every area")
         return

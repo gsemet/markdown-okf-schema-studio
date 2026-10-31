@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "document": "review-threads.md",
+  "threads": [
+    {"id":"t1","anchor":{"line":3,"endLine":3,"quote":"retry budget","prefix":"The ","suffix":" is exceeded"},"resolved":false,"createdAt":"2026-10-21T10:00:00Z","comments":[{"id":"c1","author":"Ada","createdAt":"2026-10-21T10:00:00Z","body":"Why three?"}]},
+    {"id":"t3","anchor":{"line":7,"endLine":7,"quote":"resolved topic","prefix":"thread on ","suffix":"."},"resolved":true,"createdAt":"2026-10-21T10:00:00Z","comments":[{"id":"c3","author":"Ada","createdAt":"2026-10-21T10:00:00Z","body":"Done already."}]}
+  ]
+}

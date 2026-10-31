@@ -332,10 +332,18 @@ async function runCheck(ctx, step, state) {
   }
 }
 
-function substitute(value, vars) {
-  if (typeof value === "string") return value.replace(/\$\{(\w+)\}/g, (match, key) => vars[key] ?? match);
-  if (Array.isArray(value)) return value.map((item) => substitute(item, vars));
-  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, substitute(v, vars)]));
+// Step fields that must be numbers: `--var nth=3` arrives as the string "3", so a field that is
+// exactly one placeholder (`"nth": "${nth}"`) is coerced to a Number when the value is an integer.
+const NUMERIC_FIELDS = new Set(["nth", "which", "count", "delay", "gap", "wait", "timeout", "dx", "dy", "steps", "px", "max", "maxLines"]);
+
+function substitute(value, vars, key) {
+  if (typeof value === "string") {
+    const whole = /^\$\{(\w+)\}$/.exec(value);
+    if (whole && NUMERIC_FIELDS.has(key) && /^-?\d+$/.test(String(vars[whole[1]] ?? ""))) return Number(vars[whole[1]]);
+    return value.replace(/\$\{(\w+)\}/g, (match, name) => vars[name] ?? match);
+  }
+  if (Array.isArray(value)) return value.map((item) => substitute(item, vars, key));
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, substitute(v, vars, k)]));
   return value;
 }
 
@@ -358,8 +366,13 @@ export async function runSteps(ctx, steps, { name = "adhoc", vars = {}, startIso
         if (note) ctx.out(`..   ${n} ${note}`);
       }
     } catch (error) {
-      state.failed += 1;
       const message = String(error?.message ?? error).split("\n")[0];
+      if (step.optional) {
+        // An optional step that cannot run is not a failure: note it and continue.
+        ctx.out(`..   ${n} optional step skipped: ${cap(JSON.stringify(raw), 90)}: ${message}`);
+        continue;
+      }
+      state.failed += 1;
       results.push({ n, ok: false, check: "step", detail: message });
       ctx.out(`FAIL ${n} step ${cap(JSON.stringify(raw), 90)}: ${message}`);
       if (!keepGoing && !step.optional) {

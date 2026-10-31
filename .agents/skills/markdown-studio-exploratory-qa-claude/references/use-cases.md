@@ -16,7 +16,7 @@ the agent triage only their failures.
 | --- | --- | --- |
 | A1 | Find and open the side preview (palette, title bar, context menus, keybinding) | any chapter |
 | A2 | Open With → Markdown OKF-Schema Studio; compare with built-in Markdown Preview and Markdown Editor | `fixtures-visual/01-handbook-overview.md` |
-| A3 | Side preview follows the active editor: Markdown → Markdown, Markdown → code/YAML/settings → back | chapters, `okf/okfreq-examples` |
+| A3 | Side preview follows the active editor: Markdown → Markdown, Markdown → code/YAML/settings → back | chapters, `docs/` |
 | A4 | Close and reopen; Developer: Reload Window; restore of scroll, theme, edit mode | chapter 08 |
 | A5 | Untitled Markdown, `.markdown` extension, file outside the workspace, empty file, untrusted workspace | `synth/empty.md` |
 
@@ -57,10 +57,10 @@ the agent triage only their failures.
 
 | ID | Journey | Corpus |
 | --- | --- | --- |
-| E1 | Properties table display, schema validation messages, strict additional properties | `okf/*`, `synth/frontmatter-edge.md` |
+| E1 | Properties table display, schema validation messages, strict additional properties | `fixtures-visual/07-frontmatter.md`, `fixtures-visual/08-okf-schema.md`, `synth/frontmatter-edge.md` |
 | E2 | Edit each type: text, enum, number, date, boolean, list, object; formatting preservation | `synth/frontmatter-edge.md` |
-| E3 | Add, remove, rename fields; required fields | `okfreq-examples` |
-| E4 | x-okf-link: resolution modes, tooltips, preview fields, marker line navigation, project root per bundle | `okfreq-examples`, `synth/related-target.md` |
+| E3 | Add, remove, rename fields; required fields | `fixtures-visual/08-okf-schema.md`, `synth/frontmatter-edge.md` |
+| E4 | x-okf-link: resolution modes, tooltips, preview fields, marker line navigation, project root per bundle | `fixtures-visual/08-okf-schema.md`, `synth/related-target.md` |
 | E5 | Invalid YAML frontmatter and recovery | `synth/broken.md` |
 
 ## F. Robustness

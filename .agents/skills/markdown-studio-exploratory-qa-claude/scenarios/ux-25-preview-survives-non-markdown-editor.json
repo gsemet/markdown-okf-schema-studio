@@ -1,0 +1,36 @@
+{
+ "name": "ux-25-preview-survives-non-markdown-editor",
+ "file": "synth/ux25-nonmd-link.md",
+ "vars": {},
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector('a')",
+   "timeout": 15000
+  },
+  {
+   "open": "synth/ux25-export.py",
+   "wait": 2000
+  },
+  {
+   "check": "editor",
+   "visible": "synth/ux25-export.py"
+  },
+  {
+   "check": "feval",
+   "expr": "!/Preview source missing/i.test(D.body.innerText) && !!D.querySelector('a')",
+   "label": "UX-25 preview keeps last Markdown document"
+  },
+  {
+   "shot": "ux-25",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

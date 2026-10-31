@@ -1,0 +1,79 @@
+{
+ "name": "ux-04-enter-keeps-list-indentation",
+ "file": "fixtures-visual/04-code-and-tables.md",
+ "vars": {},
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "File: Revert File",
+   "wait": 800
+  },
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector(\"h1, h2, p\")",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "li li li li",
+   "text": "Dry goods"
+  },
+  {
+   "key": "End"
+  },
+  {
+   "key": "Enter"
+  },
+  {
+   "type": "Frozen goods",
+   "delay": 20
+  },
+  {
+   "wait": 500
+  },
+  {
+   "key": "Tab"
+  },
+  {
+   "wait": 1200
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "contains": "Frozen goods",
+   "show": true,
+   "label": "UX-04 diff"
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "notContains": "-  - Deduplication",
+   "label": "UX-04 Deduplication keeps its parent"
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "contains": "      - Frozen goods",
+   "maxLines": 1,
+   "label": "UX-04 Enter continues the nested list at the same indentation"
+  },
+  {
+   "shot": "ux-04",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

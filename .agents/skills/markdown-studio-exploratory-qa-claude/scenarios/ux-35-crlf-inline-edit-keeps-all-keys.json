@@ -1,0 +1,73 @@
+{
+ "name": "ux-35-crlf-inline-edit-keeps-all-keys",
+ "file": "synth/crlf.md",
+ "vars": {},
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "File: Revert File",
+   "wait": 800
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector(\"h1, h2, p\")",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "aside.admonition",
+   "text": "A GitHub alert in a CRLF document"
+  },
+  {
+   "key": "End"
+  },
+  {
+   "type": " Edited.",
+   "delay": 20
+  },
+  {
+   "key": "Enter"
+  },
+  {
+   "type": "New line inside.",
+   "delay": 20
+  },
+  {
+   "wait": 800
+  },
+  {
+   "check": "feval",
+   "expr": "!/stale/i.test(D.body.innerText)",
+   "label": "UX-35 no stale status"
+  },
+  {
+   "clicksel": "p",
+   "text": "Last paragraph"
+  },
+  {
+   "wait": 1200
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "contains": "New line inside.",
+   "show": true,
+   "label": "UX-35 all typed text reaches buffer"
+  },
+  {
+   "shot": "ux-35",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

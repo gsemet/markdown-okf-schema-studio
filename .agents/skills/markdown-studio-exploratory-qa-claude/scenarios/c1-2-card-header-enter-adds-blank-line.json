@@ -1,0 +1,18 @@
+{
+  "name": "c1-2-card-header-enter-adds-blank-line",
+  "file": "fixtures-visual/68-cards-tabs-version.md",
+  "steps": [
+    {"open": "${file}"},
+    {"waitFor": "D.querySelector('[class*=card]')", "timeout": 8000},
+    {"key": "Meta+z", "optional": true},
+    {"mark": true},
+    {"clicksel": "[class*=card] [class*=header]", "text": "Since v2.1.154"},
+    {"waitFor": "D.querySelector('textarea')"},
+    {"key": "End"},
+    {"type": " Q"},
+    {"key": "Enter", "wait": 900},
+    {"eval": "'open after Enter: '+!!D.querySelector('textarea')+' footer-in-body: '+[...D.querySelectorAll('[class*=card] *')].some(e=>!e.children.length&&e.textContent.includes(':footer:'))"},
+    {"check": "diff", "against": "mark", "maxLines": 1, "show": true, "label": "c1-2 Enter in :header: editor changes only that line"},
+    {"shot": "c1-2-fail", "clip": "preview", "onFail": true}
+  ]
+}
