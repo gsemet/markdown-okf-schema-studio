@@ -23,6 +23,7 @@ implemented_in_files:
 - src/core/render/mystGridToctree.ts
 tested_in_files:
 - test/core/render/cardsTabs.test.ts
+- test/core/render/gridCardTitleSourceLine.test.ts
 - test/integration/mystBlocksWindow.ts
 - test/visual/cardsTabsScenarios.ts
 default_owner_email: gaetan@xeberon.net
@@ -46,7 +47,7 @@ When a document holds a {card} directive outside a grid, the extension SHALL ren
 | a line `+++` in the body | the blocks after it are the footer, after the `:footer:` line when both are given |
 | `:link:` (with `:link-type:` and `:link-alt:`) | the title is one link and the whole card is its click target, like a grid card |
 | `:class-card:` with plain names | the names are added to the card's classes, on a `{card}` and on a `{grid-item-card}` |
-| the option text of `:header:` and `:footer:` | inline Markdown, rendered in the part and never a mapped block |
+| the option text of `:header:` and `:footer:` | inline Markdown, rendered in the part as inline text only (a leading "4." stays literal) and mapped to its own option line, so a click opens the editor on it (see SwRS-MDOKFSTUDIO-BLOCK-258) |
 
 ### Scenario: Boundary or refusal
 

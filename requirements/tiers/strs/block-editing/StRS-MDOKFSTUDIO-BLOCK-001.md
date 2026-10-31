@@ -23,6 +23,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-012
 - SwRS-MDOKFSTUDIO-BLOCK-236
 - SwRS-MDOKFSTUDIO-BLOCK-257
+- SwRS-MDOKFSTUDIO-BLOCK-258
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TRUST-001
@@ -60,6 +61,7 @@ As a writer, I turn edit mode on to change my document in the preview and off to
   - [SwRS-MDOKFSTUDIO-BLOCK-012](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-012.md): A read-only preview has no Edit button
   - [SwRS-MDOKFSTUDIO-BLOCK-236](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-236.md): previewEditModeChanged carries a boolean edit mode
   - [SwRS-MDOKFSTUDIO-BLOCK-257](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-257.md): A block editor in a grid card widens the card and keeps the palette above a readable text box
+  - [SwRS-MDOKFSTUDIO-BLOCK-258](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-258.md): A click on a card title opens the editor on the directive line and the title is inline text
   - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance

@@ -174,6 +174,8 @@ test("an alert inside a grid card keeps the lines of the grid, the card, the ale
   assert.deepEqual(await blocks(source), [
     ["div", 1, 7],
     ["div", 2, 6],
+    // The card title is mapped to the directive line, so a click on it edits that line.
+    ["div", 2, 2],
     ["aside", 3, 4],
     ["p", 4, 4],
     ["p", 9, 9],
