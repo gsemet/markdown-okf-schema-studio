@@ -20,6 +20,8 @@ const { chromium } = require("playwright-core");
 const runsDir = path.join(qaRoot, "runs");
 const codeExe = "/Applications/Visual Studio Code.app/Contents/MacOS/Code";
 
+const REPEATABLE = new Set(["annotate", "note", "color"]);
+
 function args(argv) {
   const positional = [];
   const options = {};
@@ -27,9 +29,11 @@ function args(argv) {
     const token = argv[i];
     if (token.startsWith("--")) {
       const [key, inline] = token.slice(2).split("=", 2);
-      if (inline !== undefined) options[key] = inline;
-      else if (argv[i + 1] !== undefined && !argv[i + 1].startsWith("--")) options[key] = argv[++i];
-      else options[key] = true;
+      let value = true;
+      if (inline !== undefined) value = inline;
+      else if (argv[i + 1] !== undefined && !argv[i + 1].startsWith("--")) value = argv[++i];
+      // Repeatable options keep every value (in order); all others keep the last one.
+      options[key] = REPEATABLE.has(key) ? [...(options[key] ?? []), value] : value;
     } else positional.push(token);
   }
   return { positional, options };
@@ -188,13 +192,106 @@ async function shot(page, session, name, options = {}) {
   const base = name.replace(/\.(png|jpe?g)$/, "");
   const file = path.join(session.shots, `${base}.${png ? "png" : "jpg"}`);
   const shotOptions = { path: file, scale: "css", ...(png ? {} : { type: "jpeg", quality: 70 }) };
-  if (options.clip) shotOptions.clip = await resolveClip(page, session, options.clip);
-  await page.screenshot(shotOptions);
+  if (options.clip) shotOptions.clip = await resolveClip(page, session, options.clip, options.annotate ? 34 : 12);
+  const clearOverlay = () => page.evaluate(() => document.querySelectorAll("#qa-annotations").forEach((e) => e.remove()));
+  try {
+    const bounds = shotOptions.clip ?? await page.evaluate(() => ({ x: 0, y: 0, width: innerWidth, height: innerHeight }));
+    const notes = await annotations(session, page, options, bounds);
+    await clearOverlay();
+    if (notes.length) for (const w of await drawAnnotations(page, notes, bounds)) console.error(`annotate: ${w}`);
+    await page.screenshot(shotOptions);
+  } finally {
+    await clearOverlay();
+  }
   if (!png) spawnSync("sips", ["-Z", String(options.px ?? 1000), file], { stdio: "ignore" });
   return file;
 }
 
-async function resolveClip(page, session, clip) {
+const overlaps = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+// Annotations: `annotate` (selector in the preview, or "x,y,w,h" in window CSS px), `note` and `color`
+// (red = defect, the default; green = expected/working case). From the CLI they are repeatable and
+// pair by position: the nth --note and --color go with the nth --annotate (a single --color applies
+// to all). From `q run`/scenarios pass strings or {at, note, color} objects. Boxes are taken now (same
+// scroll as the shot) and printed, one line each. An empty box is an error; a box outside the shot
+// (`bounds`) or, for a selector, outside the visible preview is a warning.
+async function annotations(session, page, options, bounds) {
+  const list = [].concat(options.annotate ?? []);
+  if (list.includes(true)) throw new Error("annotate: --annotate needs a selector or x,y,w,h");
+  const notes = [].concat(options.note ?? []);
+  const colors = [].concat(options.color ?? []);
+  for (const c of colors) if (c !== "red" && c !== "green") console.error(`annotate: unknown color ${c} (red or green); using red`);
+  if (notes.includes(true)) throw new Error("annotate: --note needs a text");
+  if (notes.length > list.length || (colors.length > 1 && colors.length !== list.length)) {
+    console.error(`annotate: ${list.length} --annotate but ${notes.length} --note and ${colors.length} --color: they pair by position`);
+  }
+  const visible = list.length ? (await webviewInfo(session, page)).filter((f) => f.visible) : [];
+  const view = visible[Math.min(Number(options.which ?? 0), visible.length - 1)];
+  const out = [];
+  for (const [i, item] of list.entries()) {
+    const a = typeof item === "object" && !Array.isArray(item) ? item : { at: item, note: notes[i], color: colors.length === 1 ? colors[0] : colors[i] };
+    const at = Array.isArray(a.at) ? a.at.join(",") : String(a.at);
+    const coords = /^\d+(\.\d+)?(,\d+(\.\d+)?){3}$/.test(at);
+    let box;
+    if (coords) { const [x, y, w, h] = at.split(",").map(Number); box = { x, y, w, h }; }
+    else box = await wv(session, page, `box(D.querySelector(${JSON.stringify(at)}))`, options.which ?? 0);
+    if (!box) throw new Error(`annotate: element not found: ${at}`);
+    if (!box.w || !box.h) throw new Error(`annotate: ${at} has an empty box (hidden or collapsed)`);
+    const rect = { x: box.x, y: box.y, width: box.w, height: box.h };
+    if (!overlaps(rect, bounds)) console.error(`annotate: ${at} is outside the shot clip`);
+    else if (!coords && view && !overlaps(rect, view)) console.error(`annotate: ${at} is outside the visible preview (scrolled away?)`);
+    out.push({ ...box, at, note: a.note ?? "", color: a.color === "green" ? "#1e8c32" : "#c81e1e" });
+    console.log(`annotate ${at} -> x=${box.x} y=${box.y} w=${box.w} h=${box.h}${a.note ? ` "${a.note}"` : ""}`);
+  }
+  return out;
+}
+
+// Overlay in the workbench page (window CSS px), so the shot's own clip and scale apply to it: no
+// manual window -> image pixel conversion. Labels are measured once attached, then tried outside
+// their outline above, then below, else inside its top-right corner. The first spot inside `bounds`
+// that touches no other frame or label wins; if none does, the label goes above, with a warning.
+// Returns the warnings.
+async function drawAnnotations(page, notes, bounds) {
+  return page.evaluate(({ items, b }) => {
+    const m = 4;
+    const root = document.createElement("div");
+    root.id = "qa-annotations";
+    root.style.cssText = "position:fixed;inset:0;z-index:2147483647;pointer-events:none";
+    document.body.append(root);
+    const hit = (p, q) => p.x < q.x + q.w && q.x < p.x + p.w && p.y < q.y + q.h && q.y < p.y + p.h;
+    const frames = items.map((n) => ({ x: n.x - m, y: n.y - m, w: n.w + 2 * m, h: n.h + 2 * m }));
+    for (const [i, n] of items.entries()) {
+      const f = frames[i];
+      const el = document.createElement("div");
+      el.style.cssText = `position:fixed;box-sizing:border-box;border:3px solid ${n.color};left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px`;
+      root.append(el);
+    }
+    const placed = [...frames];
+    const warnings = [];
+    for (const [i, n] of items.entries()) {
+      if (!n.note) continue;
+      const f = frames[i];
+      const label = document.createElement("div");
+      label.textContent = n.note;
+      label.style.cssText = `position:fixed;max-width:360px;padding:2px 6px;font:600 13px/1.3 sans-serif;color:#fff;background:${n.color}`;
+      root.append(label);
+      const { width: w, height: h } = label.getBoundingClientRect();
+      const left = Math.max(b.x, Math.min(f.x, b.x + b.width - w));
+      const spots = [{ x: left, y: f.y - h - 2 }, { x: left, y: f.y + f.h + 2 }, { x: Math.max(b.x, f.x + f.w - w - 4), y: f.y + 4 }];
+      const free = (s) => s.y >= b.y && s.y + h <= b.y + b.height && s.x + w <= b.x + b.width + 0.5
+        && !placed.some((r) => r !== f && hit({ x: s.x, y: s.y, w, h }, r));
+      const spot = spots.find(free);
+      if (!spot) warnings.push(`label of ${n.at} overlaps another annotation or leaves the shot`);
+      const { x, y } = spot ?? spots[0];
+      label.style.left = `${x}px`;
+      label.style.top = `${y}px`;
+      placed.push({ x, y, w, h });
+    }
+    return warnings;
+  }, { items: notes, b: bounds });
+}
+
+async function resolveClip(page, session, clip, pad = 12) {
   if (Array.isArray(clip)) { const [x, y, width, height] = clip.map(Number); return { x, y, width, height }; }
   if (/^\d+,\d+,\d+,\d+$/.test(clip)) { const [x, y, width, height] = clip.split(",").map(Number); return { x, y, width, height }; }
   if (clip === "preview") {
@@ -204,7 +301,6 @@ async function resolveClip(page, session, clip) {
   }
   const b = await wv(session, page, `box(D.querySelector(${JSON.stringify(clip)}))`);
   if (!b) throw new Error(`clip: element not found: ${clip}`);
-  const pad = 12;
   return { x: Math.max(0, b.x - pad), y: Math.max(0, b.y - pad), width: b.w + 2 * pad, height: b.h + 2 * pad };
 }
 
