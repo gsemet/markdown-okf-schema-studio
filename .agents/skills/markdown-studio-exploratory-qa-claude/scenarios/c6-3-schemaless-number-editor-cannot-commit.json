@@ -9,9 +9,10 @@
     {"editMode": true},
     {"mark": true},
     {"clicksel": "tr[data-okf-field=rating] td[data-okf-value-cell]"}, {"wait": 600},
-    {"key": "Meta+a"}, {"type": "3.5"}, {"key": "Enter"}, {"wait": 900},
-    {"check": "diff", "against": "mark", "contains": "rating: 3.5", "show": true, "label": "c6-3 Enter commits the number"},
-    {"check": "feval", "expr": "!D.querySelector('[aria-label=\"Frontmatter rating\"]')", "label": "c6-3 editor closed after Enter"},
+    {"key": "Meta+a"}, {"type": "3.5"}, {"key": "Enter"}, {"wait": 300},
+    {"key": "Meta+Enter"}, {"wait": 900},
+    {"check": "diff", "against": "mark", "contains": "rating: 3.5", "show": true, "label": "c6-3 Cmd+Enter commits the number"},
+    {"check": "feval", "expr": "!D.querySelector('[aria-label=\"Frontmatter rating\"]')", "label": "c6-3 editor closed after Cmd+Enter"},
     {"check": "errors"},
     {"shot": "c6-3", "clip": "preview", "onFail": true}
   ]
