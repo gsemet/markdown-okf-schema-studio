@@ -4,6 +4,7 @@
  * of the rewritten text back to the lines of the document.
  */
 
+import { blockQuoteEnd, dedent, lazyLineAsText } from "../syntax/blockQuoteRange";
 import { advanceFence } from "../syntax/markdownSyntax";
 import type { MystNode } from "./mystNode";
 
@@ -87,6 +88,8 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
     rewritten = true;
     const indent = marker[1];
     const title = alertMarker?.[3];
+    // The alert runs over its quoted lines and its lazy continuation lines (CommonMark).
+    const end = blockQuoteEnd(lines, index, indent.length);
     // A colon fence closes at the first colon line at least as long as the container's own, and
     // an inner container must be shorter than the enclosing one, so inside a colon container
     // (the shortest has three colons) the alert is a backtick directive instead: its closing
@@ -95,7 +98,7 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
     if (colonFences.length > 0) {
       // Longer than any backtick fence opened in the quoted body, so the body cannot close it.
       let longest = 3;
-      for (let at = index + 1; at < lines.length && /^\s*>/u.test(lines[at]); at += 1) {
+      for (let at = index + 1; at <= end; at += 1) {
         const run = stripQuote(lines[at]).match(/^\s*(`{3,})/u);
         if (run) longest = Math.max(longest, run[1].length);
       }
@@ -103,14 +106,16 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
     }
     alertLines.push(output.length + 1);
     push(index, `${indent}${colons}{${kind}}${title ? ` ${title}` : ""}`, `${indent}:class: simple`);
-    let cursor = index + 1;
-    while (cursor < lines.length && /^\s*>/u.test(lines[cursor])) {
-      push(cursor, indent + stripQuote(lines[cursor]));
-      cursor += 1;
+    // A lazy line is unquoted into the body, where it is no longer lazy: it is written so that
+    // it stays paragraph text (a `===` would otherwise underline a heading).
+    for (let at = index + 1; at <= end; at += 1) {
+      const source = lines[at];
+      push(at, indent + (/^\s*>/u.test(source) ? stripQuote(source) : lazyLineAsText(dedent(source, indent.length))));
     }
-    // The admonition ends on the alert's last line: its closing fence (and the blank line added
-    // before an unquoted line) map there.
-    const last = cursor - 1;
+    // The admonition ends on the alert's last line, quoted or lazy: its closing fence (and the
+    // blank line added before an unquoted line) map there.
+    const last = end;
+    let cursor = end + 1;
     if (cursor < lines.length && lines[cursor].trim() === "") {
       push(last, `${indent}${colons}`);
     } else {

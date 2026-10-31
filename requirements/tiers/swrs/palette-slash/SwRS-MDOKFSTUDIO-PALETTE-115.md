@@ -23,9 +23,11 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/syntax/blockQuoteRange.ts
 - src/page/modules/blockEditActions.ts
 - src/page/modules/editPalette.ts
 tested_in_files:
+- test/page/modules/alertLazyEditAction.test.ts
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/runtimeEditPalette.test.ts
@@ -45,6 +47,8 @@ When the writer presses Alert, the extension SHALL quote the touched lines under
 | An empty line and the caret on it | The text is the head line `> [!NOTE]` and a quoted empty line with the caret on it, and the type list is open with no type lit |
 | A selection of two lines and a blank line between them | The head is added, both lines are quoted and the blank line is kept as a bare quote line |
 | A quote that is not an alert, or a caret after the alert | A new alert is inserted |
+| The caret on a line right under a block quote line, quoted or lazy (`> quote`, then `Second` with the caret) | A new alert is inserted after a blank line, so it does not join the quote above: `> quote`, blank, `> [!NOTE]`, `> Second`, with the caret after `> ` at its column; in a selection, the quoted lines are selected |
+| The caret on a line right under a plain paragraph | The new alert follows the paragraph directly, without a blank line |
 
 ### Scenario (nominal): Choosing a type
 
@@ -59,6 +63,10 @@ When the writer presses Alert, the extension SHALL quote the touched lines under
 | Input | Outcome |
 | --- | --- |
 | Alert pressed with the caret inside an alert | The type list opens and the text is unchanged (the action without an argument returns no edit) |
+| The caret on a lazy continuation line of an alert (`> [!TIP]`, `> first`, then `Second` with the caret), or on a quoted line after such lazy lines | The caret is in that alert: without an argument no edit; with WARNING the head reads `> [!WARNING]` and the lazy line is unchanged |
+| The caret after the end of an alert (after a blank line, on a list item of any number right under it such as `2. x`, or on the line right after a table in it) | The caret is not in the alert: its head is never changed and a new alert is inserted after a blank line |
+| The caret on a lazy delimiter row (`> [!TIP]`, `> \| a \| b \|`, then `\| - \| - \|`), or on a lazy line after a closed HTML comment and a paragraph | The caret is in that alert: with WARNING the head reads `> [!WARNING]` |
+| The caret in fenced code that holds a `> [!NOTE]` line, on a lazy or quoted line after it | The caret is in no alert: the line in the code block is never changed |
 | Alert pressed again while the list is open after an insertion | The list closes without another edit |
 | Tip chosen with the caret in an alert of type TIP | No edit is made |
 | Alert action with the argument INFO, or any value other than the five upper-case names NOTE, TIP, IMPORTANT, WARNING, CAUTION | No edit is produced (the check is case-sensitive) |
@@ -94,11 +102,12 @@ A list opened by the insertion itself is not closed by the input event of that i
 ### Verification notes
 
 - Method: test/page/modules/editActions.test.ts, through test/page/modules/editActions.test.ts (unit tests "alert on an empty line writes the NOTE head and a quoted line with the caret in it", "alert quotes the touched lines under the head and keeps blank lines quoted", "a quote that is not an alert, or a caret after the alert, inserts a new alert", "with the caret in an alert the action changes its type and keeps the caret in place", "alert takes the type from the argument and refuses an unknown one": scenarios "Alert outside an alert", "Choosing a type", "Alert with the caret already in an alert")
+- Method: test/page/modules/alertLazyEditAction.test.ts (unit tests "alert: a caret on a lazy line is in the alert above it", "alert: quoted lines after lazy lines stay in the same alert", "alert: an alert the caret is not in keeps its head", "alert: a new alert under a quoted or lazy line starts after a blank line", "alert: a list item of any number after a quoted line is out of the alert", "alert: the line after a table in the alert is out of it", "alert: a closed HTML comment in the alert leaves the next paragraph's lazy line in it", "alert: an alert head inside fenced code is not an alert": the lazy line, after-the-alert, fenced code and blank-line rows of scenarios "Alert outside an alert" and "Alert with the caret already in an alert")
 - Method: test/page/modules/editPalette.test.ts (unit tests "Alert writes the alert first, then lists the five types, none lit", "choosing a type changes the head of the alert the caret is in, in one more edit", "the dropdown acts on the live selection, not the one at opening time", "Alert on an existing alert only opens the list", "a second click on Alert closes the list without another edit", "the list opens at the caret, in the bar's coordinates", "without a caret position the list opens under its button like the others", "arrows light a type, Enter picks it; moving the caret or typing ends the list", "Escape dismisses the dropdown, keeps NOTE and puts the focus in the text box": scenarios "Where the list opens", "Keys in the open list")
 - Method: test/page/runtimeEditPalette.test.ts (unit tests "Alert writes the head, opens the type list near the caret and picking changes the type", "dismissing the type list leaves NOTE, the focus in the text box and the editor open": scenarios "Alert outside an alert", "Choosing a type" and the Escape rows)
 - Method: test/integration/realInput/editorWidgets.ts (real-window scenario scenarioAlertDropdown: Alert outside an alert, choosing a type)
 - Method: visual scenario palette-slash/v01-palette-popups-light-900 (choosing Warning rewrites the alert head)
-- Criteria: The button runs the action without an argument and then opens the popover; the five options carry the values NOTE, TIP, IMPORTANT, WARNING and CAUTION; the alert head is the first line of the run of quoted lines around the caret and must match `> [!TYPE]` with one of the five types; with the caret in an alert and no argument the action returns no edit; the vertical offset of the list is the caret bottom minus the bar top plus 2 px; arrow keys with Alt, Cmd or Ctrl and Shift+Enter are not taken.
+- Criteria: The button runs the action without an argument and then opens the popover; the five options carry the values NOTE, TIP, IMPORTANT, WARNING and CAUTION; the alert head is the first line of the block quote around the caret, its lazy continuation lines included (the range of SwRS-MDOKFSTUDIO-GFM-009), outside fenced code, and must match `> [!TYPE]` with one of the five types; with the caret in an alert and no argument the action returns no edit; the vertical offset of the list is the caret bottom minus the bar top plus 2 px; arrow keys with Alt, Cmd or Ctrl and Shift+Enter are not taken.
 
 <!-- okf:links:start -->
 ### Links

@@ -5,6 +5,7 @@
  */
 
 import { ADMONITION_TYPES, ALERT_TYPES } from "../../core/palette/paletteActions";
+import { blockQuoteAround } from "../../core/syntax/blockQuoteRange";
 import {
   editLinePrefixes,
   insertBlockAfterSelection,
@@ -161,28 +162,34 @@ export function insertToc(ctx: EditActionContext): TextEdit | undefined {
 
 const ALERT_HEAD = /^(\s{0,3}>\s?\[!)(NOTE|TIP|IMPORTANT|WARNING|CAUTION)(\][ \t]*)$/iu;
 
+/** The zero-based index of the line holding `offset`, and the lines of `value`. */
+function lineAt(value: string, offset: number): { lines: string[]; index: number } {
+  const lines = value.split("\n");
+  const index = value.slice(0, offset).split("\n").length - 1;
+  return { lines, index };
+}
+
 /**
- * The type word of the alert the caret is in: the head line is the first line of the run of
- * quoted lines around the caret (`> [!TYPE]`).
+ * The type word of the alert the caret is in: the head line (`> [!TYPE]`) is the first line of
+ * the block quote around the caret, lazy continuation lines included.
  */
 function alertAtCaret(ctx: EditActionContext): { start: number; end: number; type: string } | undefined {
-  const { value } = ctx;
-  const lineEndOf = (start: number): number => {
-    const end = value.indexOf("\n", start);
-    return end === -1 ? value.length : end;
-  };
-  const quoted = (start: number): boolean => /^\s{0,3}>/u.test(value.slice(start, lineEndOf(start)));
-  let lineStart = value.lastIndexOf("\n", ctx.selectionStart - 1) + 1;
-  if (!quoted(lineStart)) return undefined;
-  while (lineStart > 0) {
-    const previousStart = value.lastIndexOf("\n", lineStart - 2) + 1;
-    if (!quoted(previousStart)) break;
-    lineStart = previousStart;
-  }
-  const head = ALERT_HEAD.exec(value.slice(lineStart, lineEndOf(lineStart)));
+  const { lines, index } = lineAt(ctx.value, ctx.selectionStart);
+  const quote = blockQuoteAround(lines, index);
+  if (!quote) return undefined;
+  const head = ALERT_HEAD.exec(lines[quote.start]);
   if (!head) return undefined;
+  let lineStart = 0;
+  for (let line = 0; line < quote.start; line += 1) lineStart += lines[line].length + 1;
   const start = lineStart + head[1].length;
   return { start, end: start + head[2].length, type: head[2].toUpperCase() };
+}
+
+/** True when a quoted line put at the start of line `index` would join a block quote above it. */
+function joinsQuoteAbove(value: string, lineStart: number): boolean {
+  if (lineStart === 0) return false;
+  const { lines, index } = lineAt(value, lineStart);
+  return blockQuoteAround(lines, index - 1) !== undefined;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-115
@@ -207,8 +214,9 @@ export function insertAlert(ctx: EditActionContext): TextEdit | undefined {
       selectionEnd: move(ctx.selectionEnd),
     };
   }
-  const head = "> [!" + (ctx.arg ?? "NOTE") + "]\n";
   const { firstStart, lastEnd, lines } = touchedLines(ctx);
+  // A blank line keeps the new alert out of a block quote right above it.
+  const head = (joinsQuoteAbove(ctx.value, firstStart) ? "\n" : "") + "> [!" + (ctx.arg ?? "NOTE") + "]\n";
   const quoted = lines.map((line) => (line.trim() === "" && lines.length > 1 ? ">" : "> " + line));
   const text = head + quoted.join("\n");
   if (ctx.selectionStart !== ctx.selectionEnd) {
