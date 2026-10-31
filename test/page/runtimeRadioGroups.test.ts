@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { createRuntimeHarness, type RuntimeElement } from "./runtimeHarness";
+import { openBlockEditorWithSource, patchMessage } from "./runtimeTestSupport";
 
 /**
  * Radio choice options in the page (features/checkboxes.ts): a click or Space / Enter selects an
@@ -222,4 +223,92 @@ test("in edit mode and in every palette mode a radio click selects the option wi
     assert.equal(harness.createdElements.some((element) =>
       element.getAttribute("data-sphinx-preview-block-editor") !== null), false);
   }
+});
+
+/**
+ * The content patch of a write replaces the list block, so the focused option leaves the document
+ * and the browser moves the focus to the body. The harness keeps the same option elements, so the
+ * replacement is modelled by dropping the focus when the patch writes the new content.
+ */
+function dropFocusOnContentPatch(harness: ReturnType<typeof createRuntimeHarness>): void {
+  const document = harness.document as { activeElement?: unknown };
+  let html = "";
+  Object.defineProperty(harness.previewContent, "innerHTML", {
+    configurable: true,
+    get: () => html,
+    set: (value: string) => {
+      html = value;
+      document.activeElement = undefined;
+    },
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+test("after a choice with Space or a click and the content patch that follows, the option of the same line and column has the focus", () => {
+  for (const way of ["space", "click"] as const) {
+    const harness = createRuntimeHarness({ radioGroup: ["x", " ", " "], captureOrder: true, trackFocus: true });
+    const { radios } = harness;
+    const focused = (): unknown => (harness.document as { activeElement?: unknown }).activeElement;
+    dropFocusOnContentPatch(harness);
+    let chosen: RuntimeElement;
+    if (way === "space") {
+      radios[0].focus();
+      harness.dispatchDocument("keydown", fakeEvent(radios[0], "ArrowDown"));
+      chosen = radios[1];
+      harness.dispatchDocument("keydown", fakeEvent(chosen, " "));
+    } else {
+      chosen = radios[2];
+      chosen.focus();
+      harness.dispatchDocument("click", fakeEvent(chosen));
+    }
+    const toggle = harness.messages.at(-1)!;
+    assert.equal(toggle.type, "previewCheckboxToggle", way);
+    harness.dispatchMessage(result(toggle.editId, { saved: true }));
+    harness.dispatchMessage(patchMessage());
+    const where = (element: unknown): string => {
+      const option = element as RuntimeElement | null | undefined;
+      return option?.getAttribute?.("role") === "radio"
+        ? `radio ${option.getAttribute("data-myst-radio-line")}:${option.getAttribute("data-myst-radio-column")}`
+        : String(option ?? "nothing (the body)");
+    };
+    assert.equal(where(focused()), where(chosen), `${way}: the chosen option keeps the focus`);
+    assert.equal(focused(), chosen, way);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+test("a content patch while no option has the focus (an external rewrite) gives the focus to no option", () => {
+  const harness = createRuntimeHarness({ radioGroup: ["x", " "], trackFocus: true });
+  const focused = (): unknown => (harness.document as { activeElement?: unknown }).activeElement;
+  harness.mappings[0].focus();
+  harness.dispatchMessage(patchMessage());
+  assert.equal(harness.radios.includes(focused() as RuntimeElement), false, "the focus stays where the author left it");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+test("with a block editor open, a press on an option that blurs the editor before the click writes nothing and keeps the editor open", () => {
+  const harness = createRuntimeHarness({
+    radioGroup: ["x", " "], captureOrder: true, trackFocus: true, blurOnFocusChange: true,
+  });
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.focus();
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-block-editor") !== null)!;
+  const before = harness.messages.length;
+  const option = harness.radios[1];
+  // As a browser does: mousedown, then (unless it was prevented) the option takes the focus, which
+  // blurs the text box and runs its blur-commit, then the click.
+  const press = { ...fakeEvent(option), button: 0 };
+  harness.dispatchDocument("mousedown", press);
+  if (!press.defaultPrevented) option.focus();
+  harness.dispatchDocument("click", { ...fakeEvent(option), button: 0 });
+
+  assert.deepEqual(harness.messages.slice(before).filter((message) => message.type === "previewCheckboxToggle"), [],
+    "no choice is sent while the editor is open");
+  assert.equal(states(harness.radios), "x ");
+  assert.equal(editor.removed, false, "the block editor stays open");
+  const status = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-edit-status") !== null);
+  assert.equal(status?.textContent, "Save or cancel this edit before choosing an option.");
 });

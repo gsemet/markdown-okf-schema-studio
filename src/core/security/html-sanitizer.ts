@@ -470,11 +470,14 @@ function rewriteNode(
     setAttr(node, "dir", "auto");
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // A mapped block is a tab stop unless it already says otherwise (a radio group's list is not).
   if (
     attr(node, "data-sphinx-source-file")
     && attr(node, "data-sphinx-source-line")
     && attr(node, "data-sphinx-preview-block")
     && !NATURALLY_FOCUSABLE_ELEMENTS.has(tagName)
+    && !attr(node, "tabindex")
   ) {
     setAttr(node, "tabindex", "0");
   }

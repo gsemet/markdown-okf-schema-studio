@@ -32,6 +32,7 @@ export { FIND_REPLACE_NOTHING, planFindReplace } from "./findReplace";
 export {
   EDIT_UNAVAILABLE_NO_FOLDER,
   EDIT_UNAVAILABLE_UNTRUSTED,
+  READ_ONLY_FILE,
   READ_ONLY_NO_FOLDER,
   READ_ONLY_UNTRUSTED,
 } from "./readOnlyReasons";

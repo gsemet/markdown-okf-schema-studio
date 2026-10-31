@@ -20,6 +20,7 @@ import {
   planRadioSelect,
   planThreadDelete,
   planThreadReply,
+  READ_ONLY_FILE,
   readThreadLines,
   STALE_REQUEST,
 } from "../../core/edits/sourceEdits";
@@ -105,10 +106,17 @@ export class SourceEditController {
       this.postCheckboxResult(preview, message, { saved: true });
       return undefined;
     }
+    const before = document.getText();
     return this.apply(document, "edits" in toggle ? toggle.edits : [toggle.edit]).then((applied) => {
-      this.postCheckboxResult(preview, message, applied
+      // VS Code accepts an edit of a read-only file (`files.readonlyInclude`) and changes nothing.
+      // An external change during the apply can make this answer saved once; benign, as its
+      // content patch re-renders the page from the source right after.
+      // @implements_req SwRS-MDOKFSTUDIO-GFM-021
+      // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+      const written = applied && document.getText() !== before;
+      this.postCheckboxResult(preview, message, written
         ? { saved: true }
-        : { error: "VS Code could not apply the checkbox edit." });
+        : { error: applied ? READ_ONLY_FILE : "VS Code could not apply the checkbox edit." });
     }, (error: unknown) => {
       this.postCheckboxResult(preview, message, { error: error instanceof Error ? error.message : String(error) });
     });

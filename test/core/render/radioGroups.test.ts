@@ -157,3 +157,74 @@ test("the webview sanitizer keeps the radio roles, states and source attributes"
   const group = findElement(parseHtml(rewritten.html), (element) => attribute(element, "role") === "radiogroup");
   assert.ok(group && attribute(group, "aria-labelledby"), "the sanitizer keeps the group and its label");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+test("in the mapped webview HTML the selected option is the group's only tab stop: its list, items and option paragraphs are out of the Tab order", async () => {
+  const source = [
+    "Fix direction:",
+    "",
+    "- (x) margin click",
+    "- ( ) Alt+click",
+    "- ( ) leave as is",
+    "",
+    "Rollout:",
+    "",
+    "1. ( ) behind a setting",
+    "2. (x) on by default",
+    "",
+  ].join("\n");
+  const { html } = await renderMyst(source);
+  const rewritten = rewriteSphinxHtml(html, {
+    outputRoot: workspaceRoot,
+    policy: new ResourcePolicy([]),
+    nonce: "unit-nonce",
+    sourceMapping: { sourceFile: "plan.md", documentId: "file:///plan.md" },
+    resolveResource: () => undefined,
+    resolveNavigation: () => ({ kind: "blocked" }),
+  });
+  const document = parseHtml(rewritten.html);
+  const lists = findElements(document, (element) => attribute(element, "role") === "radiogroup");
+  assert.deepEqual(lists.map((list) => list.tagName), ["ul", "ol"]);
+  for (const list of lists) {
+    assert.ok(attribute(list, "data-sphinx-preview-block"), "the list stays a mapped block");
+    const stops = findElements(list, (element) => attribute(element, "tabindex") !== undefined)
+      .map((element) => `${element.tagName}${attribute(element, "role") === "radio" ? "[radio]" : ""}=${attribute(element, "tabindex")}`);
+    // tabindex -1 keeps an element focusable by a click or a script and out of the Tab order.
+    assert.deepEqual(stops.filter((stop) => !stop.endsWith("=-1")), ["span[radio]=0"],
+      `${list.tagName}: one Tab from the label must land on the selected option`);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+test("in a list that mixes task items and options, and in a nested group, the option items and paragraphs are out of the Tab order", async () => {
+  const source = [
+    "Plan:",
+    "",
+    "- [ ] write the fix",
+    "- (x) margin click",
+    "- ( ) Alt+click",
+    "  - (x) nested one",
+    "  - ( ) nested two",
+    "",
+  ].join("\n");
+  const { html } = await renderMyst(source);
+  const rewritten = rewriteSphinxHtml(html, {
+    outputRoot: workspaceRoot,
+    policy: new ResourcePolicy([]),
+    nonce: "unit-nonce",
+    sourceMapping: { sourceFile: "plan.md", documentId: "file:///plan.md" },
+    resolveResource: () => undefined,
+    resolveNavigation: () => ({ kind: "blocked" }),
+  });
+  const document = parseHtml(rewritten.html);
+  const items = findElements(document, (element) => element.tagName === "li" && hasClass(element, "myst-radio-item"));
+  assert.equal(items.length, 4, "two options in the mixed list, two in the nested group");
+  for (const item of items) {
+    assert.equal(attribute(item, "tabindex"), "-1", "an option item is not a tab stop");
+    const paragraph = findElement(item, (element) => element.tagName === "p");
+    assert.equal(paragraph && attribute(paragraph, "tabindex"), "-1", "an option paragraph is not a tab stop");
+  }
+  const nested = findElements(document, (element) => attribute(element, "role") === "radiogroup" && element.tagName === "ul");
+  assert.deepEqual(nested.map((list) => attribute(list, "tabindex")), ["-1"], "the nested list is the group, out of the Tab order");
+  assert.deepEqual(groups(rewritten.html), [["4:2:x*", "5:2: "], ["6:4:x*", "7:4: "]]);
+});

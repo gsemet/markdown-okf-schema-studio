@@ -42,6 +42,11 @@ export interface Checkboxes {
   /** Forgets the toggles still waiting for the host (the content was replaced). */
   clearPending(): void;
   /**
+   * Called before the content is replaced: when a radio option has the focus, returns what puts
+   * the focus back on the option of the same source line and column in the new content.
+   */
+  keepRadioFocus(): (() => void) | undefined;
+  /**
    * Handles clicks on boxes and radio options, and the keys of a focused radio option; registered
    * before the block handlers, so a box or an option never edits or reveals its block.
    */
@@ -112,15 +117,32 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
       event.preventDefault?.();
       return false;
     }
+    // Toggling now would race the open editor's save and be rejected as stale.
+    return !refuseForOpenEdit(event, action);
+  }
+
+  /** With an editor open: prevents `event` and says on its status line why. True when refused. */
+  function refuseForOpenEdit(event: Event, action: string): boolean {
     const pendingEdit = deps.openEdit();
-    if (pendingEdit) {
-      // Toggling now would race the open editor's save and be rejected as stale.
-      event.preventDefault?.();
-      pendingEdit.status.textContent = `Save or cancel this edit before ${action}.`;
-      pendingEdit.status.setAttribute?.("data-visible", "true");
-      return false;
-    }
+    if (!pendingEdit) return false;
+    event.preventDefault?.();
+    pendingEdit.status.textContent = `Save or cancel this edit before ${action}.`;
+    pendingEdit.status.setAttribute?.("data-visible", "true");
     return true;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  /**
+   * The press on a radio option, before the browser moves the focus: with an editor open, the
+   * focus stays in it (no blur, so no commit, and the caret is kept). The click that follows is
+   * refused by the click guard. Task checkboxes keep only the click guard.
+   */
+  function guardPress(event: MouseEvent): void {
+    if (!checkboxEditingEnabled) return;
+    const target = event.target instanceof Element ? event.target : undefined;
+    if (target?.closest(CHECKBOX_SELECTOR)) return;
+    if (target?.closest(RADIO_SELECTOR)) refuseForOpenEdit(event, "choosing an option");
   }
 
   /** Sends one toggle request; `pending` settles it when the host answers. */
@@ -243,6 +265,22 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
     (next as HTMLElement).focus?.();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  function keepRadioFocus(): (() => void) | undefined {
+    const active = document.activeElement;
+    const radio = active instanceof Element ? active.closest(RADIO_SELECTOR) : null;
+    const position = radio ? sourcePosition(radio, "radio") : undefined;
+    if (!position) return undefined;
+    return () => {
+      let match: Element | undefined;
+      document.querySelectorAll?.(RADIO_SELECTOR).forEach((option) => {
+        const at = sourcePosition(option, "radio");
+        if (!match && at?.line === position.line && at.column === position.column) match = option;
+      });
+      (match as HTMLElement | undefined)?.focus?.({ preventScroll: true });
+    };
+  }
+
   router.on("previewCheckboxResult", (message) => {
     const pending = pendingToggles.get(message.editId);
     if (!pending) return;
@@ -254,6 +292,7 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
   return {
     initialize: initializeCheckboxes,
     clearPending: () => pendingToggles.clear(),
+    keepRadioFocus,
     bindClicks() {
       document.addEventListener("click", (event) => {
         const target = event.target instanceof Element ? event.target : undefined;
@@ -264,6 +303,8 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
         if (checkbox) toggleCheckbox(checkbox, event);
         else selectRadio(radio!, event);
       });
+      // Capture phase: runs before the focus moves and before the page's block press handlers.
+      document.addEventListener("mousedown", guardPress, true);
       // Capture phase: the group's keys run before the page's block and selection keys.
       document.addEventListener("keydown", handleRadioKey, true);
     },
