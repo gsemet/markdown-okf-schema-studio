@@ -8,7 +8,8 @@ description: When the writer presses Tab, Shift+Tab or an arrow key at the edge
   next, previous or neighbouring rendered cell, with the caret at the end of its
   text (at the start for the cell to the right and the cell below), and leave
   the key to the browser or hand it to block-to-block navigation when no cell
-  can take it.
+  can take it, and bring that cell and its editor into the visible part of the
+  table's sideways scroll box without scrolling the page.
 project: markdown-okf-schema-studio
 scope: table-editing
 req_lifecycle: proposed
@@ -37,7 +38,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text in a cell text box, the extension SHALL move the editor to the next, previous or neighbouring rendered cell, with the caret at the end of its text (at the start for the cell to the right and the cell below), and leave the key to the browser or hand it to block-to-block navigation when no cell can take it.
+When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text in a cell text box, the extension SHALL move the editor to the next, previous or neighbouring rendered cell, with the caret at the end of its text (at the start for the cell to the right and the cell below), and leave the key to the browser or hand it to block-to-block navigation when no cell can take it, and bring that cell and its editor into the visible part of the table's sideways scroll box without scrolling the page.
 
 ### Scenario (nominal): Tab along a row and across rows
 
@@ -107,18 +108,32 @@ The same hand-over to the next block applies with the editor in the last column 
 
 Home moves the caret to the start of the text, and Shift extends the selection.
 
+### Scenario (nominal): Tab in a table wider than the pane
+
+- GIVEN a ten-column table wider than the pane, which scrolls sideways in its own box, and the editor in the first body cell
+- WHEN the writer presses Tab through the row and across the wrap to the next row, then Shift+Tab back
+- THEN after each key the table box scrolls sideways, instantly and by the smallest amount, so that the cell and its editor lie inside the box with a 16 px margin; the page does not scroll
+
+| Input | Outcome |
+| --- | --- |
+| Tab or Shift+Tab to a cell already inside the table box | The table does not scroll |
+| Tab to a cell whose cell and editor together are wider than the box less both margins | The table scrolls so that their start lies 16 px inside the left edge of the box |
+| Click on a cell partly hidden by the box edge | The editor opens in that cell and the table scrolls by the hidden part plus the margin |
+| Editor reopened after a re-render (Tab in the last cell, a structural button of the table bar) | The table scrolls to the reopened cell the same way |
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TABLE-048: the table bar above the table that shows the position of the selected cell after each move.
 
 ### Verification notes
 
-- Method: test/page/runtimeTableCellEditor.test.ts (Tab and Shift+Tab, Tab in the last cell, Shift+Tab in the first header cell, arrow keys in every direction, native arrows with a selection, modifiers, IME or a caret inside a multi-line cell, arrow without a matching model cell, block navigation fallback for ArrowUp, Home and End; scenarios Tab along a row, Tab in the last cell, Shift+Tab, ArrowLeft and ArrowRight, ArrowUp and ArrowDown, keys that stay native, no cell in the arrow direction, Home and End).
+- Method: test/page/runtimeTableCellEditor.test.ts (Tab and Shift+Tab, Tab in the last cell, Shift+Tab in the first header cell, arrow keys in every direction, native arrows with a selection, modifiers, IME or a caret inside a multi-line cell, arrow without a matching model cell, block navigation fallback for ArrowUp, Home and End, the table box scrolled to a cell right of it, left of it across the wrap and with Shift+Tab, a visible cell, a target wider than the box, a click on a partly hidden cell; scenarios Tab along a row, Tab in the last cell, Shift+Tab, ArrowLeft and ArrowRight, ArrowUp and ArrowDown, keys that stay native, no cell in the arrow direction, Home and End, Tab in a table wider than the pane).
 - Method: test/integration/realInput/markers.ts and real-window scenario scenarioTableTab (id table-editing/r05-tab-adds-row) in test/integration/realInput/editorWidgets.ts (Tab along a row, Tab in the last cell).
+- Method: test/integration/realInput/markers.ts and real-window scenario scenarioWideTableTab in test/integration/realInput/wideTableTab.ts, assertion only (Tab in a table wider than the pane: real Tab and Shift+Tab presses through the row and across the wrap, and from the last cell of a table scrolled to its end, in Margin and Auto width).
 - Method: test/page/runtimeBlockEditor.test.ts (a table cell arrow inside a wrapped cell does not move to another cell; keys that stay native, wrapped cell row).
 - Method: test/page/runtimeEditorFlush.test.ts (Ctrl+Tab pass-through; Shift+Tab and held modifiers, Ctrl+Tab row).
 - Method: visual scenario table-editing/v02 (step arrowdown, ArrowDown only) and check_cell_end_key in test/visual/capture_edit_checks.py on scenario table-editing/v01 (Home and End); the scroll assertions bite on macOS only, because headless Chromium on Linux moves the caret natively.
-- Criteria: The text box parent, value and selection range after each key, one previewEditOpen only for the moves inside the table; not prevented and no message posted for every native case; one extra row in editedText and the editor reopened in column 0 of the new row. The cleared pending navigation is read from tabThroughTableCells and has no dedicated test; Shift+Ctrl+Tab has no test; the other block-navigation directions follow the same branch and are not asserted separately.
+- Criteria: The text box parent, value and selection range after each key, one previewEditOpen only for the moves inside the table; not prevented and no message posted for every native case; one extra row in editedText and the editor reopened in column 0 of the new row. In a wide table: the table scrollLeft after each move (unit) and, in the real window, the editor rect inside the webview viewport and no horizontal page scroll after every key. The cleared pending navigation is read from tabThroughTableCells and has no dedicated test; the reveal runs at the end of renderTableCellEditor and is asserted for three cases: a click on a visible cell (no scroll), a click on a partly hidden cell, and an editor that opens in a hidden cell on its source reply; the reopen after a re-render (Tab in the last cell, a structural button of the table bar) goes through the same source-reply open path and has no dedicated test; Shift+Ctrl+Tab has no test; the other block-navigation directions follow the same branch and are not asserted separately.
 
 <!-- okf:links:start -->
 ### Links
