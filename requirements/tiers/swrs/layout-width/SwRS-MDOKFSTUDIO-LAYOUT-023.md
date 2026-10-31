@@ -27,6 +27,8 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_layout_checks.py
+- test/visual/capture_width_scroll.py
+- test/visual/widthScrollScenarios.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-LAYOUT-024
@@ -91,6 +93,12 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 | Auto mode with a wide table and the window is resized | The table is measured again and is marked wide with its breakout |
 | A content patch, an image load, a toolbar collapse, a table-of-contents toggle or a change of the edited element | The wide elements are measured again |
 
+### Scenario (nominal): Re-measure keeps the sideways scroll
+- GIVEN Auto mode and a wide table that the reader scrolled sideways
+- WHEN a layout pass measures it again (a cell editor closes, the pane is resized, an image loads)
+- THEN its scrollLeft is kept, clamped to the new maximum scroll (scroll width minus box width)
+- AND when the breakout width changes the table keeps the same pixel offset, clamped, not a proportional one
+
 ### Scenario (boundary): Several triggers in one frame
 
 | Input | Outcome |
@@ -107,12 +115,13 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 - Known issue: An element entering edit loses its mark through a mutation observer; the unit test covers the start-up and resize path.
 
 ### Verification notes
-- Method: test/page/runtimePageControls.test.ts (wide table and oversized block, column off the centre, table-of-contents column, uncapped table, elements kept in the column, resize): unit tests T10 only elements wider than the column are flagged; T10b a wide element is centred on the available area; T10b a narrow element is not flagged; T10b with the TOC open the available area, its centre and the cap exclude the TOC column (the reserve is published by the CSS for panes of 760 px and more); T10b a wide table gets its fractional max-content width rounded up, so no cell wraps; T10b a table with row handles keeps their room left of it when it breaks out; T10 the saved width mode applies at startup and an edited element keeps the column. The relative-size path is verified by inspection of widthMode.ts; the stabilizeLayout, content patch and toolbar callbacks are verified by inspection.
+- Method: test/page/runtimePageControls.test.ts (wide table and oversized block, column off the centre, table-of-contents column, uncapped table, elements kept in the column, resize): unit tests T10 only elements wider than the column are flagged; T10b a wide element is centred on the available area; T10b a narrow element is not flagged; T10b with the TOC open the available area, its centre and the cap exclude the TOC column (the reserve is published by the CSS for panes of 760 px and more); T10b a wide table gets its fractional max-content width rounded up, so no cell wraps; T10b a table with row handles keeps their room left of it when it breaks out; T10b a layout pass in Auto keeps the sideways scroll of a wide table (re-measure keeps the sideways scroll); T10 the saved width mode applies at startup and an edited element keeps the column. The relative-size path is verified by inspection of widthMode.ts; the stabilizeLayout, content patch and toolbar callbacks are verified by inspection.
 - Method: test/page/runtimeScroll.test.ts (Several triggers in one frame): unit test `P-08: layout triggers within one frame measure the page once`.
 - Method: test/page/diagReq.layout.requirements.test.ts (author pixel width and a gain of 1 px): unit test `Auto measures an image from the width its author wrote, and ignores a gain of 1 px or less`.
 - Method: test/core/preview/previewStyles.test.ts (table with row handles): unit test `T10: the auto measure lifts every cap, the row-handle one included`.
 - Method: test/visual/capture_layout_checks.py (wide table and oversized block): visual checks with a minimum margin of 15 px from the pane edge, and visual scenario v84 (table uncapped and rounded up).
-- Criteria: Breakout equals the needed width minus the column, capped at the pane minus the TOC reserve minus 32 px (312 px and shift 72 px in the tested TOC layout); the breakout is the ceiling of the largest of scroll width, declared width, intrinsic width and box width, minus the column; marked elements never include an element under edit or a relative-sized figure; no mark for a gain of 1 px or less (breakout 100 px for the declared case); every listed event calls the width update.
+- Method: test/visual/capture_width_scroll.py (re-measure keeps the sideways scroll): visual scenario v91 (Auto, edit mode, 656 px: the wide table scrolled to its end keeps its scrollLeft after a cell editor closes and after a 3 px pane resize).
+- Criteria: Breakout equals the needed width minus the column, capped at the pane minus the TOC reserve minus 32 px (312 px and shift 72 px in the tested TOC layout); the breakout is the ceiling of the largest of scroll width, declared width, intrinsic width and box width, minus the column; marked elements never include an element under edit or a relative-sized figure; no mark for a gain of 1 px or less (breakout 100 px for the declared case); every listed event calls the width update; a re-measure leaves a sideways scroll at the same pixel offset, clamped to the new maximum.
 
 <!-- okf:links:start -->
 ### Links

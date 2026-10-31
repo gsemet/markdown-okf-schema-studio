@@ -33,6 +33,7 @@ import { LINK_EDIT_MODE_SCENARIOS } from "./linkEditModeScenarios";
 import { FRONTMATTER_CHANGE_BAR_SCENARIOS } from "./frontmatterChangeBarScenarios";
 import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
 import { TOOLBAR_FLOAT_SCENARIOS } from "./toolbarFloatScenarios";
+import { WIDTH_SCROLL_SCENARIOS } from "./widthScrollScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   {
@@ -457,6 +458,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...REVIEW_MARKS_HIDDEN_SCENARIOS,
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
   ...TOOLBAR_FLOAT_SCENARIOS,
+  ...WIDTH_SCROLL_SCENARIOS,
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",

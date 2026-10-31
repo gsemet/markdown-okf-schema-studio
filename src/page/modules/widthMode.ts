@@ -66,11 +66,52 @@ export function installWidthMode(
     return undefined;
   };
 
+  // The elements that may break out in Auto: an element under edit, or a figure sized relative to
+  // the column, keeps the column width.
+  const eligibleWrappers = (content: HTMLElement): Element[] => {
+    const wrappers: Element[] = [];
+    for (const element of Array.from(content.querySelectorAll("table, figure, img, pre, .myst-mermaid-diagram"))) {
+      const wrapper = wrapperOf(element, content);
+      if (!wrapper || wrappers.includes(wrapper)) continue;
+      // A figure sized in %, em or rem asks for a size relative to the column: it never breaks out.
+      const sized = (wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img"))?.getAttribute("data-okf-width");
+      if (sized && /(?:%|r?em)$/u.test(sized)) continue;
+      if (wrapper.getAttribute("data-sphinx-preview-editing") === "true"
+        || wrapper.querySelector?.('[data-sphinx-preview-editing="true"], textarea')) continue;
+      wrappers.push(wrapper);
+    }
+    return wrappers;
+  };
+
+  // The boxes scrolled sideways: each wrapper, and the table or code block inside a wrapper that
+  // is not itself the scrolling box.
+  const scrolledBoxes = (wrappers: Element[]): Array<[Element, number]> => {
+    const scrolled: Array<[Element, number]> = [];
+    for (const wrapper of wrappers) {
+      for (const box of [wrapper, ...Array.from(wrapper.querySelectorAll?.("table, pre") ?? [])]) {
+        if (box.scrollLeft > 0) scrolled.push([box, box.scrollLeft]);
+      }
+    }
+    return scrolled;
+  };
+
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
+  // The same pixel offset, clamped to the new maximum; written only when it changed.
+  const restoreScroll = (scrolled: Array<[Element, number]>): void => {
+    for (const [box, left] of scrolled) {
+      const target = Math.max(0, Math.min(left, box.scrollWidth - box.clientWidth));
+      if (box.scrollLeft !== target) box.scrollLeft = target;
+    }
+  };
+
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
   const update = (): void => {
-    clear();
     const content = document.getElementById(contentId);
+    const wrappers = content && mode === "auto" ? eligibleWrappers(content) : undefined;
+    // The measure below uncaps each wrapper, which makes the browser reset its sideways scroll.
+    const scrolled = wrappers ? scrolledBoxes(wrappers) : [];
+    clear();
     if (!content) return;
     // A paragraph holding only an image is a figure: CSS centres it in every width mode. Only the
     // top-level blocks are looked at, and only the difference is written, so a re-measure of a long
@@ -94,19 +135,7 @@ export function installWidthMode(
         figures.add(holder);
       }
     }
-    if (mode !== "auto") return;
-    const wrappers: Element[] = [];
-    for (const element of Array.from(content.querySelectorAll("table, figure, img, pre, .myst-mermaid-diagram"))) {
-      const wrapper = wrapperOf(element, content);
-      if (!wrapper || wrappers.includes(wrapper)) continue;
-      // A figure sized in %, em or rem asks for a size relative to the column: it never breaks out.
-      const sized = (wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img"))?.getAttribute("data-okf-width");
-      if (sized && /(?:%|r?em)$/u.test(sized)) continue;
-      // An element under edit keeps the column width.
-      if (wrapper.getAttribute("data-sphinx-preview-editing") === "true"
-        || wrapper.querySelector?.('[data-sphinx-preview-editing="true"], textarea')) continue;
-      wrappers.push(wrapper);
-    }
+    if (mode !== "auto" || !wrappers) return;
     const style = window.getComputedStyle?.(content);
     const column = content.clientWidth
       - (parseFloat(style?.paddingLeft ?? "") || 0) - (parseFloat(style?.paddingRight ?? "") || 0);
@@ -148,6 +177,7 @@ export function installWidthMode(
       (wrapper as HTMLElement).style.setProperty(shiftProperty, shift + "px");
       marked.add(wrapper);
     });
+    restoreScroll(scrolled);
   };
 
   const apply = (): void => {
