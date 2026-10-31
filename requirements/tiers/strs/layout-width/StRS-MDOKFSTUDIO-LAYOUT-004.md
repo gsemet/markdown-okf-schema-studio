@@ -35,6 +35,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LAYOUT-019
 - SwRS-MDOKFSTUDIO-LAYOUT-037
 - SwRS-MDOKFSTUDIO-LAYOUT-042
+- SwRS-MDOKFSTUDIO-LAYOUT-043
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-LAYOUT-005
@@ -85,6 +86,7 @@ As a reader or writer, I see every document start at the same comfortable distan
   - [SwRS-MDOKFSTUDIO-LAYOUT-019](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-019.md): Bursts of clearance updates are limited
   - [SwRS-MDOKFSTUDIO-LAYOUT-037](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-037.md): A leading properties table is pushed down for a control under the toolbar
   - [SwRS-MDOKFSTUDIO-LAYOUT-042](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-042.md): A first-block editor's palette keeps its place unless the frame is under the toolbar
+  - [SwRS-MDOKFSTUDIO-LAYOUT-043](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-043.md): Body text keeps clear of the floating toolbar
 - Supersedes:
   - [StRS-MDOKFSTUDIO-LAYOUT-005](StRS-MDOKFSTUDIO-LAYOUT-005.md): Nothing clickable hides under the floating toolbar
 <!-- okf:links:end -->

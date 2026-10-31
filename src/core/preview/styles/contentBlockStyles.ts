@@ -16,6 +16,7 @@ import { gridColumnCss } from "../../render/mystGridToctree";
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-023
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-032
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-032
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-043
 /**
  * Rendered blocks: inline images, label anchors, figures, admonitions, code and highlighting,
  * diagrams, tables, project-only placeholders, grids, toctrees and math.
@@ -32,7 +33,10 @@ export const CONTENT_BLOCK_CSS = `
 }
 
 ${directiveStyle("figure")}
-#sphinx-myst-preview-content > :is(h1, h2, h3, h4, h5, h6) {
+/* Top-level headings clear images, figures and tables aligned left or right (MyST :align:, HTML
+   align), never the toolbar float (CONTENT_LAYOUT_CSS): such a page has none. One test on the
+   column, not a scan of each heading's earlier siblings (too slow in a long document). */
+#sphinx-myst-preview-content:has(:is(img, figure, table):is(.align-left, .align-right, [align="left" i], [align="right" i])) > :is(h1, h2, h3, h4, h5, h6) {
   clear: both;
 }
 

@@ -14,10 +14,14 @@ type Kind = "frame" | "start" | "properties" | "none";
 function setup(
   column: Rect,
   toolbar: Rect,
-  options: { scrollY?: number; kind?: Kind; box?: Rect; toggles?: Rect[]; others?: Rect[] } = {},
+  options: { scrollY?: number; kind?: Kind; box?: Rect; toggles?: Rect[]; others?: Rect[]; firstClear?: string; floatDisplay?: string } = {},
 ) {
   const published = new Map<string, string>();
-  const content = { getBoundingClientRect: () => column };
+  // The column's first block, with the computed clear the page's CSS gives it.
+  const firstBlock = { clear: options.firstClear ?? "none", nextElementSibling: null, getBoundingClientRect: () => rect(40, 16, 361, 30) };
+  // An empty label anchor row before it is skipped.
+  const anchorRow = { nextElementSibling: firstBlock, getBoundingClientRect: () => rect(40, 16, 361, 0) };
+  const content = { getBoundingClientRect: () => column, firstElementChild: anchorRow };
   const bar = { getBoundingClientRect: () => toolbar };
   const kind = options.kind ?? "none";
   const box = options.box ?? column;
@@ -43,7 +47,11 @@ function setup(
   const window = {
     scrollY: options.scrollY ?? 0,
     addEventListener: () => undefined,
-    getComputedStyle: () => ({ paddingLeft: "16px", paddingRight: "16px" }),
+    getComputedStyle: (element: unknown, pseudo?: string) => {
+      if (element === firstBlock) return { clear: firstBlock.clear };
+      if (pseudo === "::before") return { display: options.floatDisplay ?? "block" };
+      return { paddingLeft: "16px", paddingRight: "16px" };
+    },
   };
   const clearance = installFirstClearance(document as never, window as never);
   return { clearance, published };
@@ -319,4 +327,65 @@ test("CR 041: describe() tells a stale published clearance from the layout it me
   assert.equal(after.published.inset, 140);
   assert.equal(after.lastTrigger, "window resize");
   assert.equal(after.lastChangeTrigger, "window resize");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043
+test("CR 226: the part of the toolbar inside a narrow column is published as the size of the text float", () => {
+  // A 393 px pane: column 0..393 (content box 16..377), expanded toolbar 277..379 from 12 to 178.
+  const narrow = setup(rect(0, 0, 393, 2000), rect(12, 277, 102, 166));
+  // Width 377 - 277 + 8; height 178 + 8 from the content top.
+  assert.equal(narrow.published.get("--sphinx-preview-toolbar-float-width"), "108px");
+  assert.equal(narrow.published.get("--sphinx-preview-toolbar-float-height"), "186px");
+  // Scrolled by 300 px (the column top at -300): the same float, measured in document coordinates.
+  const scrolled = setup(rect(-300, 0, 393, 2000), rect(12, 277, 102, 166), { scrollY: 300 });
+  assert.equal(scrolled.published.get("--sphinx-preview-toolbar-float-width"), "108px");
+  assert.equal(scrolled.published.get("--sphinx-preview-toolbar-float-height"), "186px");
+  // A collapsed toolbar (one row) reserves its own, smaller rectangle.
+  const collapsed = setup(rect(0, 0, 393, 2000), rect(12, 337, 42, 42));
+  assert.equal(collapsed.published.get("--sphinx-preview-toolbar-float-width"), "48px");
+  assert.equal(collapsed.published.get("--sphinx-preview-toolbar-float-height"), "62px");
+});
+
+test("CR 226: a toolbar beside the column reserves no float", () => {
+  const beside = setup(rect(0, 100, 600, 2000), rect(12, 800, 150, 166));
+  assert.equal(beside.published.get("--sphinx-preview-toolbar-float-width"), "0px");
+  assert.equal(beside.published.get("--sphinx-preview-toolbar-float-height"), "0px");
+});
+
+test("CR 226: an interactive first element keeps its own remedy and the float is 0", () => {
+  const toolbar = rect(12, 277, 102, 166);
+  const cases: Array<[Kind, Rect | undefined]> = [
+    ["frame", undefined],
+    ["start", rect(40, 16, 300, 24)],
+    ["start", rect(0, 0, 0, 0)],
+    ["properties", undefined],
+  ];
+  for (const [kind, box] of cases) {
+    const { published } = setup(rect(0, 0, 393, 2000), toolbar, { kind, box });
+    assert.equal(published.get("--sphinx-preview-toolbar-float-width"), "0px", kind);
+    assert.equal(published.get("--sphinx-preview-toolbar-float-height"), "0px", kind);
+  }
+});
+
+test("CR 226: a toolbar nearer the column's left edge reserves no float on the physical right", () => {
+  // A right-to-left root would put the toolbar at the left: the right float would cover the wrong side.
+  const left = setup(rect(0, 0, 393, 2000), rect(12, 14, 102, 166));
+  assert.equal(left.published.get("--sphinx-preview-toolbar-float-width"), "0px");
+  assert.equal(left.published.get("--sphinx-preview-toolbar-float-height"), "0px");
+});
+
+test("CR 226: a first block that is a box (it clears the float) keeps its 40px gap and the float is 0", () => {
+  const toolbar = rect(12, 277, 102, 166);
+  const box = setup(rect(0, 0, 393, 2000), toolbar, { firstClear: "right" });
+  assert.equal(box.published.get("--sphinx-preview-toolbar-float-width"), "0px");
+  assert.equal(box.published.get("--sphinx-preview-toolbar-float-height"), "0px");
+  // A heading or a paragraph first (no clear): the float is published.
+  const text = setup(rect(0, 0, 393, 2000), toolbar, { firstClear: "none" });
+  assert.equal(text.published.get("--sphinx-preview-toolbar-float-width"), "108px");
+});
+
+test("CR 226: no float is published when the page's CSS hides it (a document with an aligned float)", () => {
+  const hidden = setup(rect(0, 0, 393, 2000), rect(12, 277, 102, 166), { floatDisplay: "none" });
+  assert.equal(hidden.published.get("--sphinx-preview-toolbar-float-width"), "0px");
+  assert.equal(hidden.published.get("--sphinx-preview-toolbar-float-height"), "0px");
 });

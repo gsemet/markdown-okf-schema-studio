@@ -106,6 +106,22 @@
   test/session/reviewReqThreads.requirements.test.ts; `just check` and
   `okfreq validate --check-links` pass.
 
+### Body text keeps clear of the floating toolbar
+
+- Added SwRS-MDOKFSTUDIO-LAYOUT-043 (layout-width, `proposed`, derives from
+  StRS-MDOKFSTUDIO-LAYOUT-004): when the floating toolbar overlaps the text column at the top of a
+  document whose first block is running text, the runtime publishes the toolbar's rectangle inside
+  the column (`--sphinx-preview-toolbar-float-width` / `-height`), an invisible right float of that
+  size makes the text of the first blocks wrap around the toolbar, and every other top-level block
+  (tables, figures, code, notes, block editor frames) within its reach starts below it; 0 beside the
+  column, under an interactive first element, under a first block that is a box and in a document
+  with an aligned image, figure or table. Top-level headings clear left or right aligned images,
+  figures and tables (MyST `:align:` or HTML `align`) before them, never the toolbar float.
+- SwRS-MDOKFSTUDIO-LAYOUT-011 (proposed): the known issue on non-interactive first elements points
+  to the new requirement.
+- Verification: unit tests "CR 226" in test/page/modules/firstClearance.test.ts and the headless
+  visual scenarios layout-width/v88, v89 and v90 (test/visual/toolbarFloatScenarios.ts).
+
 ### Radio choice lists
 
 - Added SwRS-MDOKFSTUDIO-GFM-039 (gfm, `proposed`, derives from StRS-MDOKFSTUDIO-GFM-003): a run

@@ -17,10 +17,19 @@
  * viewport coordinates (plus a small margin) while it shares horizontal space with the column, 0
  * otherwise. The edition palette sticks below it, except the palette of a first-block editor that
  * gave up the toolbar's width, which uses `--sphinx-preview-first-bar-bottom` (0 in that case).
+ *
+ * Any other first element (a heading, a paragraph) gets no remedy of its own: the part of the
+ * toolbar inside the column at the top of the document is published as
+ * `--sphinx-preview-toolbar-float-width` and `--sphinx-preview-toolbar-float-height`, the size of an
+ * invisible float at the start of the column, so the text of the first blocks wraps around the
+ * toolbar, while the boxes near the top (tables, figures, code, notes, block editor frames) clear it
+ * and start below it (CSS). Both are 0 when the toolbar sits beside the column, when an interactive
+ * first element (above) has its own remedy, when the first block is itself a box (it keeps its 40px
+ * gap), and when the page's CSS shows no float (a document with an aligned image, figure or table).
  */
 /** What the page published, what its layout gives now, and which event measured last (tests only). */
 export interface FirstClearanceDiagnostics {
-  published: { clearance: number; inset: number; toolbarBottom: number };
+  published: { clearance: number; inset: number; toolbarBottom: number; floatWidth: number; floatHeight: number };
   measuredNow: { clearance: number; inset: number; bottom: number };
   lastTrigger: string;
   lastChangeTrigger: string;
@@ -47,26 +56,40 @@ export function installFirstClearance(
   // width (nothing of it is under the toolbar), so the palette stays in its 40px place.
   const firstBottomProperty = "--sphinx-preview-first-bar-bottom";
   let currentFirstBottom = -1;
+  const floatWidthProperty = "--sphinx-preview-toolbar-float-width";
+  const floatHeightProperty = "--sphinx-preview-toolbar-float-height";
+  let currentFloatWidth = -1;
+  let currentFloatHeight = -1;
 
   type Box = { top: number; left: number; right: number; bottom: number; width: number; height: number };
   const sharesColumn = (a: Box, b: Box): boolean => a.left < b.right && a.right > b.left;
+
+  // The toolbar's rectangle and the column's content box (viewport coordinates) and the content top
+  // (document coordinates), while the toolbar is shown and shares horizontal space with the column;
+  // undefined otherwise. Both measurements below start from it.
+  const geometry = (): { bar: DOMRect; left: number; right: number; contentTop: number } | undefined => {
+    const content = document.getElementById(contentId);
+    const toolbar = document.querySelector("[data-sphinx-preview-toolbar]");
+    if (!content || !toolbar) return undefined;
+    const column = content.getBoundingClientRect();
+    const bar = toolbar.getBoundingClientRect();
+    if (!bar.width || !bar.height) return undefined;
+    const style = window.getComputedStyle(content);
+    const left = column.left + (parseFloat(style.paddingLeft) || 0);
+    const right = column.right - (parseFloat(style.paddingRight) || 0);
+    if (!(bar.left < right && bar.right > left)) return undefined;
+    // The column's top padding is 0 (contentLayoutStyles.ts), so its top is the content top.
+    return { bar, left, right, contentTop: column.top + window.scrollY };
+  };
 
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-011
   // The toolbar's bottom edge (viewport coordinates, margin included), the extra room below the
   // 40px gap and the width the toolbar takes from a first-block editor.
   const measure = (): { clearance: number; inset: number; bottom: number } => {
     const none = { clearance: 0, inset: 0, bottom: 0 };
-    const content = document.getElementById(contentId);
-    const toolbar = document.querySelector("[data-sphinx-preview-toolbar]");
-    if (!content || !toolbar) return none;
-    const column = content.getBoundingClientRect();
-    const bar = toolbar.getBoundingClientRect();
-    if (!bar.width || !bar.height) return none;
-    const style = window.getComputedStyle(content);
-    const left = column.left + (parseFloat(style.paddingLeft) || 0);
-    const right = column.right - (parseFloat(style.paddingRight) || 0);
-    if (!(bar.left < right && bar.right > left)) return none;
-    const contentTop = column.top + window.scrollY;
+    const shared = geometry();
+    if (!shared) return none;
+    const { bar, left, right, contentTop } = shared;
     const barBottom = Math.max(0, Math.ceil(bar.bottom + margin));
     // Pushing an element down to this offset puts its top just under the toolbar.
     const below = (top: number): number => Math.max(0, Math.ceil(bar.bottom + margin - top));
@@ -118,6 +141,38 @@ export function installFirstClearance(
     if (right - left - inset >= minimumFrameWidth) result.inset = inset;
     else result.clearance = below(contentTop + gap);
     return result;
+  };
+
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-043
+  // The part of the toolbar inside the column at the top of the document, margin included: the width
+  // from its left edge to the column's inner right edge, the height from the content top (document
+  // coordinates, so the same at any scroll position) to its bottom edge. Only the toolbar and the
+  // column are measured, never the text the float moved, so the answer cannot depend on itself.
+  // Physical sides on purpose: the float is `float: right` and the boxes `clear: right` (the page
+  // sets no writing direction and the toolbar sits at the right edge); a toolbar nearer the column's
+  // left edge (a right-to-left root) reserves nothing rather than a float on the wrong side.
+  const measureFloat = (): { width: number; height: number } => {
+    const none = { width: 0, height: 0 };
+    // An interactive first element keeps its own remedy (inset or clearance), never both.
+    if (document.querySelector("#" + contentId + " .sphinx-preview-block-editor--first")) return none;
+    if (document.querySelector("#" + contentId + " .sphinx-preview-insert-point--first button")) return none;
+    if (document.querySelector("#" + contentId + " > [data-okf-properties]")) return none;
+    // A first block that is a box (the page's CSS makes it clear the float: a table, a figure, a
+    // code block, a note) keeps the 40px gap: no float, so it is never pushed below the toolbar.
+    // Empty leading elements (a label's anchor row) are not the first block.
+    const content = document.getElementById(contentId);
+    let first = content?.firstElementChild ?? null;
+    while (first && !first.getBoundingClientRect().height) first = first.nextElementSibling;
+    if (first && window.getComputedStyle(first).clear === "right") return none;
+    // The page's CSS shows no float (a document with an aligned image, figure or table).
+    if (content && window.getComputedStyle(content, "::before").display === "none") return none;
+    const shared = geometry();
+    if (!shared) return none;
+    const { bar, left, right, contentTop } = shared;
+    if (bar.left - left < right - bar.right) return none;
+    const height = Math.max(0, Math.ceil(bar.bottom + margin - contentTop));
+    const width = Math.min(Math.max(0, Math.ceil(right - bar.left + margin)), Math.max(0, Math.floor(right - left)));
+    return height && width ? { width, height } : none;
   };
 
   // The observers below watch what update() changes: a layout that never settles must not loop.
@@ -194,6 +249,17 @@ export function installFirstClearance(
       currentInset = measured.inset;
       changed = true;
       document.documentElement.style.setProperty(insetProperty, measured.inset + "px");
+    }
+    const float = measureFloat();
+    if (float.width !== currentFloatWidth) {
+      currentFloatWidth = float.width;
+      changed = true;
+      document.documentElement.style.setProperty(floatWidthProperty, float.width + "px");
+    }
+    if (float.height !== currentFloatHeight) {
+      currentFloatHeight = float.height;
+      changed = true;
+      document.documentElement.style.setProperty(floatHeightProperty, float.height + "px");
     }
     const next = measured.clearance;
     if (next !== current) {
@@ -280,7 +346,13 @@ export function installFirstClearance(
     inset: () => Math.max(0, currentInset),
     // Read-only: measuredNow differing from published means no event re-measured the last change.
     describe: () => ({
-      published: { clearance: current, inset: currentInset, toolbarBottom: currentBottom },
+      published: {
+        clearance: current,
+        inset: currentInset,
+        toolbarBottom: currentBottom,
+        floatWidth: currentFloatWidth,
+        floatHeight: currentFloatHeight,
+      },
       measuredNow: measure(),
       lastTrigger,
       lastChangeTrigger,
