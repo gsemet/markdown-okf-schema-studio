@@ -69,6 +69,7 @@ export class RuntimeElement {
 
   public scrollHeight = 2_000;
   public scrollWidth = 0;
+  public scrollLeft = 0;
   public clientWidth = 0;
   public className = "";
   public textContent = "";
