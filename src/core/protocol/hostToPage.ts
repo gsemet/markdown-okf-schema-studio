@@ -154,7 +154,10 @@ export interface HostRequestResultMessage extends RenderMessage<`${HostRequestTy
   fileName?: string;
   /** Pasted HTML: the Markdown it became. */
   markdown?: string;
-  /** Find and replace: the matches replaced, and the ones the host could not map to the source. */
+  /**
+   * Find and replace: the matches replaced (a dry run: that would be replaced), and the ones the
+   * host could not map to the source.
+   */
   replaced?: number;
   skipped?: number;
   /** PlantUML include: the id of the file read and its text. */

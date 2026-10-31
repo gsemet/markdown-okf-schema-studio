@@ -281,9 +281,13 @@ export interface FindReplaceItem {
   replacement: string;
 }
 
-/** Replace matches of the find bar: the host edits only the matched source spans. */
+/**
+ * Replace matches of the find bar: the host edits only the matched source spans. A dry run plans
+ * the replacement and answers its counts without editing the document.
+ */
 export interface PreviewFindReplaceMessage extends PageMessageBase<"previewFindReplace">, HostRequestFields {
   items: FindReplaceItem[];
+  dryRun?: boolean;
 }
 
 /** Move of a body block past its neighbour from the "+" bar. */

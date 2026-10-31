@@ -322,6 +322,17 @@ test("previewFindReplace validates the edit id and every item of the replacement
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+test("previewFindReplace takes an optional boolean dry-run flag", () => {
+  const item = { line: 3, endLine: 4, find: "studio", occurrence: 1, occurrences: 2, replacement: "atelier" };
+  const base = { type: "previewFindReplace", documentId: "doc", revision: 1, requestId: 1, editId: "find-1", items: [item] };
+  assert.equal(isRegisteredPreviewMessage({ ...base, dryRun: true }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, dryRun: false }), true);
+  for (const dryRun of ["true", 1, null, {}]) {
+    assert.equal(isRegisteredPreviewMessage({ ...base, dryRun }), false, JSON.stringify(dryRun));
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-050
 test("previewPlantUmlInclude carries a bounded file name, the including file id or null, and an edit id", () => {
   const base = { type: "previewPlantUmlInclude", documentId: "doc", revision: 1, requestId: 1, editId: "plantuml-1", path: "styles/common.puml", from: null };

@@ -86,6 +86,26 @@
   scenarios review-annotations/v29 and v30 (light, dark); the real-input scenario
   `scenarioHiddenReviewMarks` runs in the heavy integration job (not run locally).
 
+### Replace all and a link target that repeats the query
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-012 (draft): the source text the reader cannot see (link and image
+  targets and titles, a whole inline image with its alt text, reference definition lines) is left
+  out of the source occurrences. A match in a link label whose target repeats the text is now
+  replaced and the target kept; before, the whole block was skipped. Autolinks, links in code
+  spans and links or definitions in fenced code blocks (or a definition indented as code) stay
+  counted; no link inside a link. New boundary rows and verification notes; the real-window
+  scenario test/integration/findInPreview.test.ts now expects the link label replaced.
+- Added SwRS-MDOKFSTUDIO-TOOLBAR-131 (toolbar-navigation, `proposed`, derives from
+  StRS-MDOKFSTUDIO-TOOLBAR-003): with the replace row open, the page asks the host for a dry run
+  of Replace all (`previewFindReplace` with `dryRun: true`) 150 ms after each search, row opening
+  or content refresh, and the note counts the matches that cannot be replaced before any click.
+  Stale and refused answers keep the page's count; no request while the row is closed. The
+  request holds no replacement text, so its length never stops it.
+- Verification: unit tests in test/core/edits/findReplace.test.ts,
+  test/page/modules/findBar.test.ts, test/core/protocol/pageToHost.test.ts and
+  test/session/reviewReqThreads.requirements.test.ts; `just check` and
+  `okfreq validate --check-links` pass.
+
 ### Radio choice lists
 
 - Added SwRS-MDOKFSTUDIO-GFM-039 (gfm, `proposed`, derives from StRS-MDOKFSTUDIO-GFM-003): a run
