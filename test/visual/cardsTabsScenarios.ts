@@ -38,6 +38,21 @@ const TAB_PANEL_EDIT_ASSERTIONS: ContentAssertion[] = [
   { message: "the editor holds the whole Node tab item (opening line, :selected: option and body), not only its paragraph", selector: `${EDITOR} textarea, ${EDITOR} .cm-content`, min: 1, expr: `(() => { const field = document.querySelector('${EDITOR} textarea'); const value = field ? field.value : document.querySelector('${EDITOR} .cm-content').innerText; return value.replace(/\\r/g, '').trim() === ${JSON.stringify(NODE_ITEM_SOURCE)}; })()` },
 ];
 
+const HEADER_LINE = ":header: Since v2.1.154, published 2026-05-28";
+const FINAL_SAVES = "window.visualMessages.filter((message) => message.type === 'previewEditSave' && message.final === true)";
+/** The document after the final save: the visual host's source with the saved range replaced. */
+const SAVED_BUFFER = `(() => { const save = ${FINAL_SAVES}[0]; if (!save) return ''; `
+  + "const range = sourceRangeForLines(visualSource, Number(save.line), Number(save.endLine)); "
+  + "return visualSource.slice(0, range.start) + save.editedText + visualSource.slice(range.end); })()";
+
+// A blank line ends the options of a MyST directive: Enter in the `:header:` editor must commit the
+// line, never add a line after it.
+const HEADER_ENTER_ASSERTIONS: ContentAssertion[] = [
+  { message: "Enter sent exactly one final save, of the :header: line alone (line 18) with the typed \" Q\"", selector: MAIN, expr: `(() => { const saves = ${FINAL_SAVES}; return saves.length === 1 && saves[0].line === 18 && saves[0].endLine === 18 && saves[0].editedText === ${JSON.stringify(HEADER_LINE + " Q\n")}; })()` },
+  { message: "the saved buffer changes one line (-1 +1): :footer: follows the :header: line, no blank line before it", selector: MAIN, expr: `(() => { const next = ${SAVED_BUFFER}; return next.split('\\n').length === visualSource.split('\\n').length && next.includes(${JSON.stringify(HEADER_LINE + " Q\n:footer: Documented in the workflows guide\n")}); })()` },
+  { message: "the text box got no newline and the editor finishes as Done does (Saving Markdown…)", selector: EDITOR, count: 1, expr: "(() => { const field = document.querySelector('[data-sphinx-preview-block-editor] textarea'); const status = document.querySelector('[data-sphinx-preview-block-editor] [data-sphinx-preview-edit-status]'); return field !== null && !field.value.includes('\\n') && status !== null && status.textContent === 'Saving Markdown\u2026'; })()" },
+];
+
 export const CARDS_TABS_SCENARIOS: ScenarioDefinition[] = [
   ...([
     { name: "cream", theme: "light", mode: "cream" },
@@ -89,4 +104,24 @@ export const CARDS_TABS_SCENARIOS: ScenarioDefinition[] = [
     contentAssertions: TAB_PANEL_EDIT_ASSERTIONS,
     description: `A click on the paragraph of the shown tab panel in edit mode opens the whole Node tab item in one Markdown editor, ${variant.name} theme, 900 px pane.`,
   })),
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+    id: "block-editing/v35-card-header-enter-commits-line-cream-900",
+    fixture: "68-cards-tabs-version",
+    theme: "light",
+    previewThemeMode: "cream",
+    width: 900,
+    height: 1000,
+    scroll: { kind: "selector" as const, value: "main h1", offset: -24 },
+    editMode: true,
+    pageActions: [
+      { click: `${MAIN} > .myst-card .myst-grid-card-header`, waitMs: 500 },
+      { press: "End" },
+      { press: "Space" },
+      { press: "Q" },
+      { press: "Enter", waitMs: 500 },
+    ],
+    contentAssertions: HEADER_ENTER_ASSERTIONS,
+    description: "Edit mode, cream preview, 900 px pane: a click on the card header, End, \" Q\" typed and Enter commit the :header: line as one line, with no blank line before :footer:.",
+  },
 ];

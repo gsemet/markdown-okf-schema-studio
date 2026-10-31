@@ -13,6 +13,21 @@
   the screenshot scenarios frontmatter-editing/v07-link-hint-known-stem-cream-900 and
   frontmatter-editing/v08-link-hint-known-stem-dark-900.
 
+### Enter in a card's one-line editors
+
+- SwRS-MDOKFSTUDIO-BLOCK-258 (proposed): in the editor opened on a card title, `:header:` or
+  `:footer:` line, plain Enter saves and closes the editor as Done does, Shift+Enter and Alt+Enter
+  insert nothing and Tab and Shift+Tab do nothing, so no blank line ends the card's options;
+  new scenarios for Enter and for one-line paragraphs and headings that keep Enter as a new line.
+  The renderer marks these parts `data-single-line` (a linked title is marked too);
+  detection never uses the line range.
+- SwRS-MDOKFSTUDIO-BLOCK-033 (proposed): the status hint of these editors reads
+  "Enter: done · Esc: cancel" before the done key.
+- Verification: test/page/runtimeCardOptionEnter.test.ts, test/core/render/gridCardTitleSourceLine.test.ts,
+  test/security/html-policy.test.ts, and the visual scenario
+  block-editing/v35-card-header-enter-commits-line-cream-900 (real key input), all passing;
+  they failed on the previous code. Multi-line paste in these editors is unchanged.
+
 ### Radio choice lists
 
 - Added SwRS-MDOKFSTUDIO-GFM-039 (gfm, `proposed`, derives from StRS-MDOKFSTUDIO-GFM-003): a run
