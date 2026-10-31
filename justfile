@@ -160,7 +160,11 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py
+    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_generate_orchestrator.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py
+
+# Rebuild .agents/changes/03-requests/ORCHESTRATOR.md from the STATE.md headers, the backlog and the archives.
+orchestrator CHANGES=".agents/changes":
+    uv run --no-sync python scripts/generate_orchestrator.py "{{ CHANGES }}"
 
 # Generate user-facing notes for an exact Git range with gh copilot.
 release-notes FROM_REF TO_REF OUTPUT="release-notes.md":
