@@ -81,7 +81,7 @@ Method:
 Return at most 40 lines, nothing else:
   DRIVER <group>: <done|partial> — <charters done>/<charters planned>, <replays done>
   CHARTER <id>: <done|partial> — <calls used>/<budget> calls
-  FINDING <provisional id> | <High|Medium|Low> | <Reproduced|Observed once> | <title> | <sheet path> | <scenario path> | <currently jpg> | <expected jpg or "diff" or "none: <reason>">
+  FINDING <provisional id> | <High|Medium|Low> | <Reproduced|Observed once> | <Bug|Gap|Decision> | <title> | <sheet path> | <scenario path> | <currently jpg> | <expected jpg or "diff" or "none: <reason>">
   NEWFEATURE <PR> | <feature> | <charter id or "automated: <test>"> | <PASS|finding ids|not run>
   GAP <test-campaign gap, if any> | <sheet path>
   NOT COVERED <journeys left untested>
@@ -115,13 +115,30 @@ Method:
 - Use `q spy --diff FILE --against mark` instead of `q spy --text`.
 - Verify before reporting: re-run each High candidate once from a clean state.
 - For each finding capture both shots of its Currently / Expected block (see
-  references/bug-sheet-template.md): `q shot <id>-currently --clip preview` (or a tighter clip) of
+  references/qa-bug-template.md): `q shot <id>-currently --clip preview` (or a tighter clip) of
   the symptom, then the Expected shot: the working case, else the same shot annotated, else (buffer
   defect) two code blocks in the sheet. If no visual is possible, say why in one line and give
   measurements.
+- Before writing a sheet, search `requirements/` (`okfreq` or grep on the area and keywords) and
+  record the matching IDs. No match is a **Gap**, the main target of the campaign: report it. A
+  requirement that specifies the observed behaviour makes it a **Decision** (an owner question).
+  Fill `Verdict`, `Requirements` and a "Why this is wrong" section (3 to 6 lines: what the author
+  was doing and what it costs, which expectation breaks and its source, why an author would not
+  accept it); Expected names its source.
+- How to annotate: when no working case exists, outline the symptom and the missing behaviour with
+  the driver, no ImageMagick:
+  `q shot <id>-currently --clip preview --annotate 'aside[data-okf-github-alert] ~ p'
+  --note 'Defect: lazy line leaves the Note' --color red --annotate 'blockquote'
+  --note 'Works: quote keeps it' --color green`
+  (`--annotate`, `--note`, `--color` repeat and pair by position; red = defect, green = expected).
+  Check the printed boxes and open the image once. A label can cover nearby text that is not
+  annotated: shorten or drop the note if it hides something that matters.
+- Propose a test or a requirement only when the defect could come back silently and no existing
+  test is close; otherwise write "No test: <reason>". Each proposal ends with
+  `Uncheck to disagree: [x]`.
 - Stay within the budget. When it runs out, stop and report what is known.
 - Write each confirmed finding as a sheet in <campaign>/<group>/ following
-  references/bug-sheet-template.md (full sheet for High/Medium, short sheet for Low), starting with
+  references/qa-bug-template.md (full sheet for High/Medium, short sheet for Low), starting with
   its Currently / Expected block and at most two evidence JPEGs (currently + expected, clipped to
   about 1000 px), and save its replay scenario as $SK/scenarios/<id>-<slug>.json.
   Use provisional IDs <session>-1, <session>-2; the Foreman renumbers.
@@ -131,7 +148,7 @@ Method:
 
 Return at most 30 lines, nothing else:
   CHARTER <id>: <done|partial> — <calls used>/<budget> calls, <shots> shots
-  FINDING <provisional id> | <High|Medium|Low> | <Reproduced|Observed once> | <title> | <sheet path> | <scenario path> | <currently jpg> | <expected jpg, "diff", or "none: <reason>">
+  FINDING <provisional id> | <High|Medium|Low> | <Reproduced|Observed once> | <Bug|Gap|Decision> | <title> | <sheet path> | <scenario path> | <currently jpg> | <expected jpg, "diff", or "none: <reason>">
   NEWFEATURE <PR> | <behaviours exercised> | <PASS|finding ids|not run>
   GAP <test-campaign gap, if any> | <sheet path>
   NOT COVERED <journeys of the charter left untested>

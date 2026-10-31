@@ -55,7 +55,7 @@ as a FAIL.
 | `{"waitForPage": "<workbench JS>"}` | Same, in the workbench page |
 | `{"editMode": true}` | Switch preview edit mode with the toolbar button |
 | `{"mark": true}` or `{"mark": "synth/x.md"}` | Save the live buffer as the baseline for `diff` `against: mark` |
-| `{"shot": "name", "clip": "preview", "onFail": true, "png": true, "px": 1000}` | Screenshot; `onFail` only when a check already failed |
+| `{"shot": "name", "clip": "preview", "onFail": true, "png": true, "px": 1000, "annotate": ["sel"], "note": ["text"], "color": ["red"]}` (or `"annotate": [{"at": "sel", "note": "text", "color": "green"}]`) | Screenshot; `onFail` only when a check already failed; `annotate`/`note`/`color` outline elements (lists pair by position) |
 | `{"eval": "<webview JS>", "max": 600}` | Print a value (diagnosis only; prefer a check) |
 | `{"wait": 500}` | Pause |
 
