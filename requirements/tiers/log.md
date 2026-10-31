@@ -47,6 +47,30 @@
   gfm/v12 and gfm/v13; the real-window cases of test/integration/radioChoice.test.ts run in the
   heavy integration job (not run locally).
 
+### Alert lazy continuation lines
+
+- SwRS-MDOKFSTUDIO-GFM-009 (proposed): an alert now ends where its block quote ends under
+  CommonMark 0.31.2 section 5.1, lazy paragraph continuation lines included, as GitHub renders it
+  (checked through the GitHub Markdown API in gfm mode); it used to end at the first unquoted line.
+  The boundary scenario and the line-mapping rows were rewritten: a lazy line is inside the
+  admonition, which ends on the alert's last line, quoted or lazy; a blank line, a block start or a
+  line after a quoted heading, code block, blank quote line or thematic break stays outside.
+  SwRS-MDOKFSTUDIO-GFM-037 (superseded) is left as it was.
+- SwRS-MDOKFSTUDIO-PALETTE-115 (proposed): a caret on a lazy line of an alert is in that alert (no
+  edit without an argument, a type replaces that alert's head); a new alert inserted under a quoted
+  or lazy line starts after a blank line. The render pass and the palette share one rule
+  (`src/core/syntax/blockQuoteRange.ts`).
+- Both follow GitHub (gh api markdown, gfm mode) on the edge cases: any list marker on a lazy line
+  ends the alert, a lazy `===`, `--` or delimiter row stays paragraph text, a quoted table closes
+  the paragraph, HTML blocks of kinds 1 to 5 end on their end marker and a lone tag (kind 7) cannot
+  interrupt a paragraph. A lazy MyST block break `+++` stays paragraph text too (it used to reach
+  the block-break path inside the admonition and stop the render). Other MyST-only block syntax on
+  a lazy line (comment, target, footnote definition, math block) keeps its MyST meaning inside the
+  admonition, where GitHub shows text; GFM-009 says so. The palette finds no alert head inside
+  fenced code.
+- Verification: unit tests in test/core/render/alertLazyContinuation.test.ts,
+  test/core/render/alertSourceLines.test.ts and test/page/modules/alertLazyEditAction.test.ts.
+
 ### Radio choice lists
 
 - Added SwRS-MDOKFSTUDIO-GFM-039 (gfm, `proposed`, derives from StRS-MDOKFSTUDIO-GFM-003): a run
