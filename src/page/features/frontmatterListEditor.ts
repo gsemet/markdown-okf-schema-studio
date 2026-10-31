@@ -57,25 +57,27 @@ export function buildFrontmatterListEditor(rt: PageRuntime, parts: FrontmatterLi
   let linkStems: Set<string> | undefined;
   let linkDatalistId = "";
   let linkDatalist: HTMLDataListElement | undefined;
-  try {
-    const parsedStems: unknown = JSON.parse(row.getAttribute("data-okf-link-suggestions") || "null");
-    if (Array.isArray(parsedStems)) {
-      const stems = parsedStems.filter((stem): stem is string => typeof stem === "string");
-      if (stems.length > 0) {
-        linkStems = new Set(stems);
-        linkDatalistId = "okf-frontmatter-link-options-" + context.requestId + "-" + (++state.editSequence);
-        linkDatalist = document.createElement("datalist");
-        linkDatalist.setAttribute("id", linkDatalistId);
-        for (const stem of stems) {
-          const option = document.createElement("option");
-          option.value = stem;
-          option.setAttribute("value", stem);
-          linkDatalist.appendChild(option);
-        }
-      }
+  const stemsOf = (attribute: string): string[] | undefined => {
+    try {
+      const parsed: unknown = JSON.parse(row.getAttribute(attribute) || "null");
+      return Array.isArray(parsed) ? parsed.filter((stem): stem is string => typeof stem === "string") : undefined;
+    } catch {
+      return undefined;
     }
-  } catch {
-    linkStems = undefined;
+  };
+  const suggestedStems = stemsOf("data-okf-link-suggestions") ?? [];
+  if (suggestedStems.length > 0) {
+    // The dropdown is capped; the warning checks every known stem (the suggestions included).
+    linkStems = new Set([...suggestedStems, ...stemsOf("data-okf-link-known") ?? []]);
+    linkDatalistId = "okf-frontmatter-link-options-" + context.requestId + "-" + (++state.editSequence);
+    linkDatalist = document.createElement("datalist");
+    linkDatalist.setAttribute("id", linkDatalistId);
+    for (const stem of suggestedStems) {
+      const option = document.createElement("option");
+      option.value = stem;
+      option.setAttribute("value", stem);
+      linkDatalist.appendChild(option);
+    }
   }
   // Marks unknown link targets without blocking the save.
   const refreshLinkWarning = (current: HTMLInputElement): void => {

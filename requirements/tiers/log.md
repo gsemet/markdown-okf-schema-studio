@@ -2,6 +2,17 @@
 
 ## 2026-10-31
 
+### Link list suggestions and warning in large workspaces
+
+- SwRS-MDOKFSTUDIO-FMEDIT-010 (proposed): the list editor of a filename-stem link list warns only
+  for a value outside every known stem (the index the table resolves links with, sent uncapped as
+  a second row attribute); the dropdown suggestions start with the document's folder, then by
+  folder distance, then alphabetically, deduplicated and still capped at 500.
+- Verification: test/core/frontmatter/linkSuggestions.test.ts,
+  test/core/frontmatter/propertiesTable.test.ts, test/page/runtimeFrontmatterFields.test.ts and
+  the screenshot scenarios frontmatter-editing/v07-link-hint-known-stem-cream-900 and
+  frontmatter-editing/v08-link-hint-known-stem-dark-900.
+
 ### Radio choice lists
 
 - Added SwRS-MDOKFSTUDIO-GFM-039 (gfm, `proposed`, derives from StRS-MDOKFSTUDIO-GFM-003): a run

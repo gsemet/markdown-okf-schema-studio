@@ -154,9 +154,22 @@ export function resolveFrontmatterLinkRoots(options: FileLinkInspectionOptions):
   return { bundleRoot, projectRoot, filenameRoots, navigationRoots };
 }
 
+/** The Markdown filename stems of a filename-stem link field, for its list editor. */
+export interface FilenameStemSuggestions {
+  /** The dropdown entries: the stems closest to the document first, at most `limit`. */
+  suggestions: string[];
+  /** Every known stem, sorted: the same index the table resolves the links with. */
+  known: string[];
+}
+
 /** Known Markdown filename stems under the roots used by filename-stem resolution. */
-export function filenameStemSuggestions(options: FileLinkInspectionOptions, limit = 500): string[] {
-  return getCachedMarkdownStemIndex(resolveFrontmatterLinkRoots(options).filenameRoots).stems(limit);
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-010
+export function filenameStemSuggestions(options: FileLinkInspectionOptions, limit = 500): FilenameStemSuggestions {
+  const index = getCachedMarkdownStemIndex(resolveFrontmatterLinkRoots(options).filenameRoots);
+  return {
+    suggestions: index.nearestStems(path.dirname(path.resolve(options.filePath)), limit),
+    known: index.stems(),
+  };
 }
 
 function rejectAbsolute(target: string): boolean {

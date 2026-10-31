@@ -246,8 +246,13 @@ export function renderPropertiesTable(
     const valueJson = JSON.stringify(field.value) ?? "null";
     const valueYaml = stringify(field.value === undefined ? null : field.value, { lineWidth: 0 });
     const enumsJson = field.enums ? JSON.stringify(field.enums) : undefined;
+    // The dropdown entries (capped, closest first) and every known stem (the warning's set).
+    // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-010
     const suggestionsAttribute = field.linkSuggestions?.length
       ? ` data-okf-link-suggestions="${escapeHtml(JSON.stringify(field.linkSuggestions))}"`
+        + (field.linkKnownStems?.length
+          ? ` data-okf-link-known="${escapeHtml(JSON.stringify(field.linkKnownStems))}"`
+          : "")
       : "";
     const fieldLinks = field.linkResults ?? [];
     const scalarLink = fieldLinks.find((link) => link.arrayIndex === undefined);

@@ -53,6 +53,11 @@ export interface ScenarioRenderOptions {
    */
   readonly mystExtensions?: readonly string[];
   /**
+   * `true`: the fixtures folder is the workspace folder, so filename-stem links resolve against
+   * its Markdown files (CR 220). Default: no workspace folder.
+   */
+  readonly fixturesWorkspace?: true;
+  /**
    * Messages the mock host sends to the page after load, in order. The document id, version and
    * request id of the page are added to each message unless `data` sets them.
    */
@@ -63,7 +68,7 @@ const OPTION_ORDER: readonly (keyof ScenarioRenderOptions)[] = [
   "trusted", "readOnly", "strictAdditionalProperties", "propertiesTable",
   "maxContentWidth", "paletteMode", "zoom", "incomingChanges", "markEditorSelection", "commentsEnabled", "hostMessages",
   "codeBlocksDarkBackground", "codeBlocksLineNumbers",
-  "freshWorkspace", "mystExtensions",
+  "freshWorkspace", "mystExtensions", "fixturesWorkspace",
 ];
 
 /**

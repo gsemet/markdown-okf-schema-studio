@@ -2,6 +2,7 @@
  * The screenshot scenarios, second part, in campaign order (after `scenarioDefinitions1.ts`).
  */
 
+import { LINK_HINT_SCENARIOS } from "./linkHintScenarios";
 import { RELEASE_SHOWCASE_SCENARIOS } from "./releaseShowcaseScenarios";
 import {
   BACK_ENABLED_ASSERTIONS,
@@ -195,6 +196,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description:
       "The checkbox starts checked, is clicked once, and is captured unchecked after posting a false save to the mock host.",
   },
+  ...LINK_HINT_SCENARIOS,
   {
     // @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
     id: "preview-edit-activation-scroll-wide",
