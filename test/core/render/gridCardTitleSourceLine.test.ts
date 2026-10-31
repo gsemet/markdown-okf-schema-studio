@@ -83,10 +83,24 @@ test("a plain grid card title maps to its directive line too", async () => {
   assertTitleMapped(await titleMappings(source, "Plain"), 4);
 });
 
-test("a card title with a link option has no source line: a click on it follows the link", async () => {
+// CR 217: the owner changed the rule. A linked title is now mapped like a plain one, so in edit mode
+// a plain click on it opens its directive line (Cmd/Ctrl+click still follows the link).
+test("a card title with a link option maps to its directive line like a plain title", async () => {
   const source = ["# Doc", "", ":::{card} 3. Linked", ":link: https://example.com", "Body text.", ":::", ""].join("\n");
-  const mapping = await titleMappings(source, "Linked");
-  assert.deepEqual(mapping, { lines: [], endLines: [] });
+  assertTitleMapped(await titleMappings(source, "Linked"), 3);
+});
+
+test("a linked grid card title maps to its directive line and keeps its link", async () => {
+  const source = fs.readFileSync(path.resolve(__dirname, "../../../../test/visual/fixtures/46-grid-cards.md"), "utf8");
+  const titleLine = source.split("\n").findIndex((line) => line.includes("{grid-item-card} Linked card")) + 1;
+  assert.equal(titleLine, 14);
+  assertTitleMapped(await titleMappings(source, "Linked card"), titleLine);
+  const html = (await renderMyst(source)).html;
+  const title = findElements(parseHtml(html), (element) => hasClass(element, "myst-grid-card-title"))
+    .find((element) => textContent(element).includes("Linked card"));
+  const link = title && findElements(title, (element) => element.tagName === "a")[0];
+  assert.ok(link && hasClass(link, "myst-grid-card-link"), "the title still holds the card link");
+  assert.equal(attribute(link, "href"), "targets/alpha.md");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-100

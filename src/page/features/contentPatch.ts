@@ -8,7 +8,7 @@
  */
 
 import { applyFigureSizes } from "../modules/figureSizes";
-import { applyLinkHint } from "../modules/linkNavigation";
+import { applyLinkHint, linkBaseTitle } from "../modules/linkNavigation";
 import { applySpanColors, isSafeOkfColor } from "../modules/spanColors";
 import type { ContentPatch, PageRuntime } from "./pageRuntime";
 
@@ -33,12 +33,13 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     const openDisclosures = Array.from(document.querySelectorAll("details"))
       .map((element, index) => element.open ? index : undefined)
       .filter((index): index is number => index !== undefined);
-    // Target hints the host already gave for links; the new link elements start without them.
+    // Target hints the host already gave for links; the new link elements start without them. The
+    // title is saved without the edit-mode follow hint, which edit mode adds back after the render.
     const linkHints = new Map<string, { state: string; title: string | null }>();
     Array.from(document.querySelectorAll("a[data-sphinx-preview-navigation]")).forEach((link) => {
       const request = link.getAttribute("data-sphinx-preview-navigation");
       const linkState = link.getAttribute("data-sphinx-preview-link-state");
-      if (request && linkState) linkHints.set(request, { state: linkState, title: link.getAttribute("title") });
+      if (request && linkState) linkHints.set(request, { state: linkState, title: linkBaseTitle(link) });
     });
     // Editors are closed without cancelling: the document keeps whatever was already saved.
     editorTrace.record("content patch", "request " + context.requestId + " -> " + next.requestId);

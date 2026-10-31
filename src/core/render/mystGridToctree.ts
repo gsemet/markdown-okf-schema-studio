@@ -279,9 +279,9 @@ function buildCard(node: GridNode, source: GridSource, parse: GridParse, depth: 
         },
       }]
       : titleChildren;
-    // The title is one line, the directive line: a click opens the editor on it. A linked title is
-    // not mapped, a click on it follows the link.
-    addPart("title", inner, target ? {} : lineProperties(node.position?.start?.line));
+    // The title is one line, the directive line: a click opens the editor on it, linked or not. In
+    // edit mode a plain click on a linked title edits it too; Cmd/Ctrl+click follows (CR 217).
+    addPart("title", inner, lineProperties(node.position?.start?.line));
   }
 
   // The `:header:` and `:footer:` options come before the blocks the `^^^` and `+++` separators cut.

@@ -7,9 +7,15 @@
     {"editMode": true, "optional": true},
     {"check": "feval", "expr": "D.documentElement.getAttribute('data-sphinx-preview-edit-mode')", "equals": "on", "label": "c1-1 edit mode on"},
     {"mark": true},
-    {"clicksel": ".myst-grid-card-header p", "text": "Header of the card", "dbl": true, "wait": 800},
-    {"check": "feval", "expr": "!!D.querySelector('textarea')", "label": "c1-1 a block editor opens on a link-card header (double click)"},
+    {"clicksel": ".myst-grid-card-header p", "text": "Header of the card", "wait": 800},
+    {"check": "feval", "expr": "!!D.querySelector('textarea')", "label": "c1-1 a single click on a link-card header opens a block editor (CR 217)"},
     {"check": "editor", "visible": "${file}", "label": "c1-1 still on the edited file, not the link target"},
+    {"key": "Escape", "wait": 600},
+    {"clicksel": ".myst-grid-card-title a", "text": "Linked card", "wait": 800},
+    {"check": "feval", "expr": "D.querySelector('textarea')?.value.trim()", "equals": ":::{grid-item-card} Linked card", "label": "c1-1 a click on the linked title opens its directive line (CR 217)"},
+    {"check": "editor", "visible": "${file}", "label": "c1-1 the title click does not follow the card link"},
+    {"key": "Escape", "wait": 600},
+    {"check": "diff", "file": "${file}", "against": "mark", "equal": true},
     {"shot": "c1-1-fail", "clip": "preview", "onFail": true}
   ]
 }

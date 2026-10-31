@@ -38,6 +38,7 @@ import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfte
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
 import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
+import { scenarioLinkClickEditsInEditMode } from "./linkEditMode";
 
 /**
  * The scenarios `just ci-stress` repeats in this window (see stressPlan.ts): the CR 041 ones failed
@@ -162,6 +163,7 @@ export async function run(): Promise<void> {
       "table-moves": () => scenarioTableMoves(page),
       "find-after-click": () => scenarioFindRightAfterClick(page),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
+      "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),
     };
     const only = single[process.env.STUDIO_REAL_INPUT_SCENARIO ?? ""];
     if (only) {
@@ -222,6 +224,7 @@ export async function run(): Promise<void> {
     await scenarioFocusChangeKeepsPreviewStill(page, evidence);
     await scenarioHiddenPreviewCatchesUp(page, evidence);
     await scenarioFlushBeforeLink(page, evidence);
+    await scenarioLinkClickEditsInEditMode(page, evidence);
     await scenarioFlushBeforeBack(page, evidence);
     await scenarioFlushBeforeTabSwitch(page, evidence);
     await scenarioFlushCellAndFrontmatter(page, evidence);

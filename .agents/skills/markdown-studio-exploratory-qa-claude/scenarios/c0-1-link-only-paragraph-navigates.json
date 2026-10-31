@@ -9,8 +9,10 @@
     {"mark": true},
     {"clicksel": "p", "text": "Next:", "label": "click centre of link-only paragraph"},
     {"wait": 1500},
-    {"check": "feval", "expr": "!!D.querySelector('[data-sphinx-preview-block-editor]')", "equals": true, "label": "c0-1 block editor opened (author wants to edit the paragraph)"},
+    {"check": "feval", "expr": "!!D.querySelector('[data-sphinx-preview-block-editor]')", "equals": true, "label": "c0-1 block editor opened on the link-only paragraph (CR 217)"},
     {"check": "feval", "expr": "D.querySelector('h1')?.textContent", "equals": "Link only", "label": "c0-1 preview still shows the same document"},
+    {"check": "editor", "visible": "${file}", "label": "c0-1 the link target is not opened"},
+    {"key": "Escape", "wait": 600},
     {"check": "diff", "file": "${file}", "against": "mark", "equal": true},
     {"shot": "c0-1", "clip": "preview", "onFail": true}
   ]

@@ -34,6 +34,7 @@ import { installEditorChrome } from "./features/editorChrome";
 import { installFrontmatterEditor } from "./features/frontmatterEditor";
 import { registerHostHandlers } from "./features/hostHandlers";
 import { installInsertPoints } from "./features/insertPoints";
+import { linkActivationEdits } from "./features/linkEditing";
 import { installLinkTooltip } from "./features/linkTooltip";
 import { createMappedBlocks } from "./features/mappedBlocks";
 import { bindEditModeCaptureClicks, installPageInput } from "./features/pageInput";
@@ -185,7 +186,8 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   }) : undefined;
   bindEditModeCaptureClicks(rt);
   const linkNavigation = installLinkNavigation(document, window, vscode, context,
-    (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate));
+    (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate),
+    (event) => linkActivationEdits(state.editMode, event));
   const firstClearance = installFirstClearance(document, window);
   pageDiagnostics.expose(firstClearance);
   // The button follows the host's answer (`hostRequests` is created below, before any click).
