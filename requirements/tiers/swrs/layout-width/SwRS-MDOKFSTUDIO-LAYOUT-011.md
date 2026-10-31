@@ -81,7 +81,7 @@ When the floating toolbar covers the first control of the page (the open first-b
 
 ### Known issues
 - Known issue: The 480 px limit between wide and narrow is a rule of the visual tests only: the code decides by overlap with the toolbar and a 320 px minimum frame width, so a 481 px pane with a long toolbar could push content down as well.
-- Known issue: A non-interactive first element, such as a paragraph or a table, is never pushed down: only the first-block editor, the Start writing button and a leading properties table take the clearance.
+- Known issue: A non-interactive first element, such as a paragraph or a table, is never pushed down: only the first-block editor, the Start writing button and a leading properties table take the clearance. A first paragraph or heading wraps its text around the toolbar instead, and a first table or other box keeps its 40 px place (SwRS-MDOKFSTUDIO-LAYOUT-043).
 - Known issue: Older documents (archive 004 T8, CHANGELOG 0.2.1) describe a 56 px first-block margin and a 24 px Start writing margin; the uniform 40 px with an inset replaces them. Visual scenarios v07 to v09 keep the older assertion of at least 20 px.
 - Known issue: The fallback for a table too narrow to be shortened has no unit test.
 - Known issue: The variable --sphinx-preview-first-bar-bottom is 0 whenever the inset is above 0, including a leading properties table that gave up the toolbar width; only the first-block editor palette reads it, falling back to --sphinx-preview-toolbar-bottom when it is unset.
