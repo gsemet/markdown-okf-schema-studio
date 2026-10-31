@@ -496,6 +496,58 @@ test("T10: the saved width mode applies at startup and an edited element keeps t
   assert.equal(wide.getAttribute("data-sphinx-preview-wide"), null);
 });
 
+/**
+ * A table box that scrolls sideways, with the browser's clamp: its box is the column (700 px), the
+ * column plus the breakout when it is flagged wide, or its whole content while it is measured
+ * uncapped; scrollLeft never exceeds scrollWidth minus the box width.
+ */
+class ScrollingTable extends RuntimeElement {
+  private left = 0;
+
+  public get scrollLeft(): number {
+    return this.left;
+  }
+
+  public set scrollLeft(value: number) {
+    this.left = Math.max(0, Math.min(value, this.scrollWidth - this.boxWidth()));
+  }
+
+  public override setAttribute(name: string, value: string): void {
+    super.setAttribute(name, value);
+    this.scrollLeft = this.left;
+  }
+
+  public override removeAttribute(name: string): void {
+    super.removeAttribute(name);
+    this.scrollLeft = this.left;
+  }
+
+  private boxWidth(): number {
+    if (this.getAttribute("data-sphinx-preview-measuring") !== null) return this.scrollWidth;
+    const breakout = parseFloat(this.style.getPropertyValue("--sphinx-preview-breakout")) || 0;
+    return 700 + (this.getAttribute("data-sphinx-preview-wide") !== null ? breakout : 0);
+  }
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10b: a layout pass in Auto keeps the sideways scroll of a wide table", () => {
+  const { harness } = widthModeFixture("auto");
+  const table = new ScrollingTable({}, harness.windowState, 0, 40, "table");
+  table.scrollWidth = 1600;
+  harness.previewContent.appendChild(table);
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(table.getAttribute("data-sphinx-preview-wide"), "");
+  table.scrollLeft = 300;
+  assert.equal(table.scrollLeft, 300, "the fake table scrolls sideways");
+  // A window resize (like a content resize, an image load or the close of a cell editor) runs the
+  // layout pass, which measures the table again.
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(table.getAttribute("data-sphinx-preview-wide"), "");
+  assert.equal(table.scrollLeft, 300, `the table keeps its sideways scroll (scrollLeft ${table.scrollLeft})`);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
 test("T11: Back and Next post previewHistoryGo and follow previewHistoryState", () => {
   const harness = createRuntimeHarness();

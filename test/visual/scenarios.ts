@@ -211,6 +211,8 @@ export interface Scenario {
   widthModeSwitch?: "auto";
   /** P2/P7: sets this width mode, records the side margins of text, table, code and figure, asserts the break-out geometry. */
   widthModeBreak?: "margin" | "auto" | "full";
+  /** Auto width: a wide table scrolled to its end keeps its scrollLeft across a layout pass (cell editor closed, 3 px resize). */
+  widthModeScrollChecks?: boolean;
   /** Opens the TOC column and measures it against the toolbar, the content, the width modes and zoom. */
   tocChecks?: boolean;
   /** P1: leaves the TOC open (opened with the toolbar button) in this width mode for the screenshot. */
