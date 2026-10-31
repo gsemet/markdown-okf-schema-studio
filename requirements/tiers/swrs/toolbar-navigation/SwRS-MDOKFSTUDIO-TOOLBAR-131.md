@@ -23,6 +23,7 @@ implemented_in_files:
 - src/session/features/sourceEdits.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
+- test/integration/realInput/qa210Replays.ts
 - test/page/modules/findBar.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
 default_owner_email: gaetan@xeberon.net

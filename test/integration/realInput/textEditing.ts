@@ -178,7 +178,10 @@ function frontmatterOf(text: string): Record<string, unknown> {
   return parseYaml(match[1] ?? "") as Record<string, unknown>;
 }
 
-/** RI-T07: Enter saves a one-line text field; Shift+Enter then Cmd/Ctrl+Enter saves two lines. */
+/**
+ * RI-T07: Enter saves a one-line text field in place (QA 210 ux-17: one line changed); Shift+Enter
+ * then Cmd/Ctrl+Enter saves two lines.
+ */
 export async function scenarioEnterCommitsTextField(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t07", REQ_DOCUMENT, async (document) => {
     await openSidePreview(document);
@@ -195,6 +198,10 @@ export async function scenarioEnterCommitsTextField(page: Page, evidence: Eviden
     await waitFor("the title to reach the source buffer", () =>
       frontmatterOf(bufferText(document)).title === title);
     assert.equal(frontmatterOf(bufferText(document)).title, title);
+    // QA 210 ux-17: Enter writes the title in place as one line: no block scalar, no other line.
+    const delta = lineDelta(REQ_DOCUMENT, bufferText(document));
+    assert.deepEqual(delta.removed, ["title: Write CSV output"], "only the title line is replaced");
+    assert.equal(delta.added.length, 1, `the new title is one line: ${JSON.stringify(delta.added)}`);
     await waitForRender(document);
     await waitFor("the title editor to close after the re-render", async () => {
       const current = await findCurrentFrame(page);
