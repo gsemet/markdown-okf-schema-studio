@@ -117,6 +117,10 @@ export interface Scenario {
   height: number;
   scroll: ScrollMode;
   fullPage?: boolean;
+  /** Playwright default timeout of this scenario's page in ms (default 30000); the capture logs the scenario duration when it is set. */
+  timeoutMs?: number;
+  /** Stopgap for a known intermittent hang: rerun the scenario this many times on a Playwright timeout only (needs timeoutMs); any other failure is never retried. */
+  retryOnTimeout?: number;
   scrollFeedbackStress?: boolean;
   scrollOscillationStress?: boolean;
   editActivationScroll?: boolean;

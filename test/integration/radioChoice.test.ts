@@ -73,6 +73,32 @@ async function focusedOption(frame: Frame): Promise<number | undefined> {
   return line === null ? undefined : Number(line);
 }
 
+/** Where the preview focus is: the active element, its radio line and tabindex, and the option tabindex values of its group. */
+async function describePreviewFocus(frame: Frame): Promise<string> {
+  try {
+    return await frame.evaluate(() => {
+      const active = window.document.activeElement;
+      if (!active) return "no active element";
+      const group = active.closest('[role="radiogroup"]') ?? active.closest("ul, ol");
+      const tabindexes = group
+        ? [...group.querySelectorAll('[role="radio"]')].map((radio) => radio.getAttribute("tabindex") ?? "none").join(",")
+        : "no radio group around the active element";
+      return JSON.stringify({
+        tagName: active.tagName,
+        role: active.getAttribute("role"),
+        id: active.id || null,
+        className: String(active.getAttribute("class") ?? ""),
+        radioLine: active.getAttribute("data-myst-radio-line"),
+        tabindex: active.getAttribute("tabindex"),
+        text: (active.textContent ?? "").slice(0, 60),
+        groupOptionTabindexes: tabindexes,
+      });
+    });
+  } catch (error) {
+    return `unavailable (${String(error)})`;
+  }
+}
+
 /** Waits for the source to become `expected`, then for the preview to render it. */
 async function settle(page: Page, document: vscode.TextDocument, expected: string, description: string): Promise<Frame> {
   await waitFor(description, () => document.getText() === expected);
@@ -162,7 +188,15 @@ async function withPlan(
 export async function run(): Promise<void> {
   const { browser, page } = await bounded("chromium.connectOverCDP to the workbench", connectWorkbench());
   try {
-    await withPlan(page, "radio-e2e", SOURCE, (document, frame) => choices(page, document, frame));
+    await withPlan(page, "radio-e2e", SOURCE, async (document, frame) => {
+      // The workspace remembers the edit mode of an earlier preview (CR 152): note it to restore it.
+      const editModeBefore = await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode");
+      try {
+        await choices(page, document, frame);
+      } finally {
+        if (editModeBefore === "on") await setEditMode(page, true);
+      }
+    });
     await withPlan(page, "radio-editor", LONG_SOURCE, (document) => openEditorGuard(page, document));
     await readOnlyFile(page);
   } finally {
@@ -218,10 +252,18 @@ async function choices(page: Page, document: vscode.TextDocument, first: Frame):
 
   // One Tab from the label lands on the selected option: the list, its items and their
   // paragraphs are not tab stops.
+  // In edit mode a click on a paragraph opens its block editor and Tab then moves inside it, so
+  // this step runs in reading mode, where the click only puts the focus at the label.
   markProgress("Tab from the label");
+  frame = await setEditMode(page, false);
   await frame.locator("p", { hasText: "Fix direction:" }).click();
   await page.keyboard.press("Tab");
-  await waitFor("one Tab from the label to focus the selected option", async () => await focusedOption(frame) === 5);
+  try {
+    await waitFor("one Tab from the label to focus the selected option", async () => await focusedOption(frame) === 5);
+  } catch (error) {
+    throw new Error(`${String(error)} Window focus: ${await windowFocusReport(page)}; `
+      + `preview focus: ${await describePreviewFocus(frame)}`);
+  }
   assert.equal(await frame.evaluate(() => window.document.activeElement?.getAttribute("role")), "radio");
 
   // The arrow keys only move the focus.

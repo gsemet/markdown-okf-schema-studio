@@ -22,10 +22,11 @@ import os
 import pathlib
 import sys
 import subprocess
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
-from playwright.sync_api import Page, sync_playwright
+from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sync_playwright
 
 from capture_support import (
   CheckTrace,
@@ -273,34 +274,59 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                           "group": scenario["group"], "screenshotOf": scenario.get("screenshotOf"),
                           "expectedContent": scenario["description"],
                           "actions": [], "finalState": {}}
-                context = browser.new_context(
-                    viewport={"width": scenario["width"], "height": scenario["height"]},
-                    device_scale_factor=2,
-                    # CR 046: no motion in the campaign, so every reading and capture is of a settled
-                    # page; check_update_glow turns it back on for its own patch.
-                    reduced_motion="reduce",
-                )
-                if scenario.get("mathRenderingChecks"):
-                    context.set_offline(True)
-                page = context.new_page()
-                trace = CheckTrace()
-                trace.attach(page)
-                page.check_trace = trace
-                steps = StepRecorder()
-                page.step_recorder = steps
-                position = "setup failed before scrolling"
-                try:
-                    page.goto((page_directory / scenario["page"]).as_uri())
-                    page.wait_for_load_state("networkidle")
-                    position = run_scenario(page, scenario, failures, result)
-                except Exception as error:
-                    failures.append(Failure(scenario["page"], f"scenario exception: {error}"))
-                try:
-                  if scenario.get('frontmatterLinkState'):
-                    trace.run("check_deferred_frontmatter_links_final", lambda: check_deferred_frontmatter_links(page, scenario, failures))
-                  result["finalState"] = trace.run("check_final_frame", lambda: check_final_frame(page, scenario, failures))
-                except Exception as error:
-                    failures.append(Failure(scenario["page"], f"final frame unavailable: {error}"))
+                # Opt-in stopgap (retryOnTimeout): only a Playwright timeout is retried, so a real
+                # visual diff or any other failure is never hidden by a second attempt.
+                attempts_allowed = 1 + (int(scenario.get("retryOnTimeout") or 0) if scenario.get("timeoutMs") else 0)
+                attempt_log = []
+                for attempt in range(1, attempts_allowed + 1):
+                    timed_out = False
+                    del failures[start_failures:]
+                    result.update({"actions": [], "finalState": {}})
+                    context = browser.new_context(
+                        viewport={"width": scenario["width"], "height": scenario["height"]},
+                        device_scale_factor=2,
+                        # CR 046: no motion in the campaign, so every reading and capture is of a settled
+                        # page; check_update_glow turns it back on for its own patch.
+                        reduced_motion="reduce",
+                    )
+                    if scenario.get("mathRenderingChecks"):
+                        context.set_offline(True)
+                    page = context.new_page()
+                    if scenario.get("timeoutMs"):
+                        page.set_default_timeout(scenario["timeoutMs"])
+                    scenario_started = time.monotonic()
+                    trace = CheckTrace()
+                    trace.attach(page)
+                    page.check_trace = trace
+                    steps = StepRecorder()
+                    page.step_recorder = steps
+                    position = "setup failed before scrolling"
+                    try:
+                        page.goto((page_directory / scenario["page"]).as_uri())
+                        page.wait_for_load_state("networkidle")
+                        position = run_scenario(page, scenario, failures, result)
+                    except Exception as error:
+                        timed_out = isinstance(error, PlaywrightTimeoutError)
+                        failures.append(Failure(scenario["page"], f"scenario exception: {error}"))
+                    try:
+                      if scenario.get('frontmatterLinkState'):
+                        trace.run("check_deferred_frontmatter_links_final", lambda: check_deferred_frontmatter_links(page, scenario, failures))
+                      result["finalState"] = trace.run("check_final_frame", lambda: check_final_frame(page, scenario, failures))
+                    except Exception as error:
+                        timed_out = timed_out or isinstance(error, PlaywrightTimeoutError)
+                        failures.append(Failure(scenario["page"], f"final frame unavailable: {error}"))
+                    if scenario.get("timeoutMs"):
+                        duration_ms = round((time.monotonic() - scenario_started) * 1000)
+                        short_id = scenario['id'].split('/')[-1].split('-')[0]
+                        print(f"{short_id} attempt {attempt} duration {duration_ms} ms ({scenario['id']}, budget {scenario['timeoutMs']} ms)" if attempts_allowed > 1 else f"{short_id} duration {duration_ms} ms ({scenario['id']}, budget {scenario['timeoutMs']} ms)", flush=True)
+                        attempt_log.append(duration_ms)
+                    if timed_out and attempt < attempts_allowed:
+                        print(f"{short_id} attempt {attempt} HUNG after {duration_ms} ms (budget {scenario['timeoutMs']} ms) — retrying once (known hang, see backlog)", flush=True)
+                        context.close()
+                        continue
+                    if timed_out and attempt_log and len(attempt_log) > 1:
+                        failures.append(Failure(scenario["page"], f"timed out on every attempt (attempt durations {attempt_log} ms, budget {scenario['timeoutMs']} ms)"))
+                    break
                 result["checkTrace"] = dict(sorted(trace.counts.items()))
                 result["failures"] = [failure.detail for failure in failures[start_failures:]]
                 if scenario.get("knownIssue") and result["failures"]:
