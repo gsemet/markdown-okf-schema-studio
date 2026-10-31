@@ -117,6 +117,8 @@ export interface Scenario {
   height: number;
   scroll: ScrollMode;
   fullPage?: boolean;
+  /** Playwright default timeout of this scenario's page in ms (default 30000); the capture logs the scenario duration when it is set. */
+  timeoutMs?: number;
   scrollFeedbackStress?: boolean;
   scrollOscillationStress?: boolean;
   editActivationScroll?: boolean;

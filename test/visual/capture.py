@@ -22,6 +22,7 @@ import os
 import pathlib
 import sys
 import subprocess
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
@@ -283,6 +284,9 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                 if scenario.get("mathRenderingChecks"):
                     context.set_offline(True)
                 page = context.new_page()
+                if scenario.get("timeoutMs"):
+                    page.set_default_timeout(scenario["timeoutMs"])
+                scenario_started = time.monotonic()
                 trace = CheckTrace()
                 trace.attach(page)
                 page.check_trace = trace
@@ -301,6 +305,9 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                   result["finalState"] = trace.run("check_final_frame", lambda: check_final_frame(page, scenario, failures))
                 except Exception as error:
                     failures.append(Failure(scenario["page"], f"final frame unavailable: {error}"))
+                if scenario.get("timeoutMs"):
+                    duration_ms = round((time.monotonic() - scenario_started) * 1000)
+                    print(f"{scenario['id'].split('/')[-1].split('-')[0]} duration {duration_ms} ms ({scenario['id']}, budget {scenario['timeoutMs']} ms)", flush=True)
                 result["checkTrace"] = dict(sorted(trace.counts.items()))
                 result["failures"] = [failure.detail for failure in failures[start_failures:]]
                 if scenario.get("knownIssue") and result["failures"]:
