@@ -34,9 +34,17 @@ const LAYOUT_ASSERTIONS: ContentAssertion[] = [
 ];
 
 const variants = [
-  { part: "body", click: `${CARD} .myst-grid-card-body p`, what: "the body of the second card" },
-  { part: "title", click: `${CARD} .myst-grid-card-title`, what: "the title of the second card" },
+  { part: "body", click: `${CARD} .myst-grid-card-body p`, what: "the body of the second card", editsLine: false },
+  { part: "title", click: `${CARD} .myst-grid-card-title`, what: "the title of the second card", editsLine: true },
 ] as const;
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+/** The title editor holds the directive line of the clicked card, not line 1 of the document. */
+const TITLE_LINE_ASSERTION: ContentAssertion = {
+  message: "the open editor holds the directive line of the second card (:::{grid-item-card} 2. Status projection)",
+  selector: MAIN,
+  expr: "document.querySelector('.sphinx-preview-block-editor textarea')?.value.includes('2. Status projection') === true",
+};
 
 export const GRID_CARD_EDITING_SCENARIOS: ScenarioDefinition[] = variants.flatMap((variant, partIndex) =>
   ([
@@ -57,6 +65,7 @@ export const GRID_CARD_EDITING_SCENARIOS: ScenarioDefinition[] = variants.flatMa
     contentAssertions: [
       { message: "exactly one block editor is open", selector: "[data-sphinx-preview-block-editor]", count: 1 },
       { message: "the editor sits inside the second card", selector: `${CARD} [data-sphinx-preview-block-editor]`, count: 1 },
+      ...(variant.editsLine ? [TITLE_LINE_ASSERTION] : []),
       ...LAYOUT_ASSERTIONS,
     ],
   })));

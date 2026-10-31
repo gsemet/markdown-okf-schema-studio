@@ -102,16 +102,23 @@ function directiveBody(node: GridNode, source: GridSource): GridSource {
 }
 
 /** Leading `:name: value` lines of a directive body; the lines are blanked so line numbers hold. */
-function splitOptions(lines: readonly string[]): { options: Map<string, string>; body: string[] } {
+function splitOptions(lines: readonly string[]): {
+  options: Map<string, string>;
+  /** The index in `lines` of each option, to map an option text to its own source line. */
+  indexes: Map<string, number>;
+  body: string[];
+} {
   const options = new Map<string, string>();
+  const indexes = new Map<string, number>();
   const body = [...lines];
   for (let index = 0; index < body.length; index += 1) {
     const match = OPTION_LINE.exec(body[index]);
     if (!match) break;
     options.set(match[1], match[2].trim());
+    indexes.set(match[1], index);
     body[index] = "";
   }
-  return { options, body };
+  return { options, indexes, body };
 }
 
 interface CardSection {
@@ -210,36 +217,56 @@ function userClasses(value: string | undefined): string[] {
     .slice(0, 8);
 }
 
+/** Drops the positions of a snippet parsed on its own: they are relative to the snippet, not the page. */
+function stripPositions(node: GridNode): GridNode {
+  delete node.position;
+  node.children?.forEach(stripPositions);
+  return node;
+}
+
 /**
- * An option text as inline content in a plain `div`: it has no source line of its own, so it must
- * not become a mapped paragraph (a click would edit a line that does not hold it).
+ * A one-line text (card title, `:header:` option) as inline content only. A block construct such as
+ * "2. Status projection" would become a list that loses its number, so only a paragraph is taken and
+ * anything else stays literal text. Positions are dropped: the caller maps the whole text to its line.
  */
-function optionLine(text: string, parse: GridParse): GridNode {
-  const line: GridNode = {
-    type: "mystGridCardOption",
-    children: parse(text).children?.[0]?.children ?? [{ type: "text", value: text }],
-  };
-  setHast(line, "div", { class: "myst-grid-card-option" });
-  return line;
+function inlineContent(text: string, parse: GridParse): GridNode[] {
+  const first = parse(text).children?.[0];
+  return first?.type === "paragraph" && first.children
+    ? first.children.map(stripPositions)
+    : [{ type: "text", value: text }];
+}
+
+/** The properties that map a click on a one-line text to its own source line, the editor's range. */
+function lineProperties(line: number | undefined): Record<string, number> {
+  return line === undefined ? {} : { "data-line": line, "data-end-line": line };
+}
+
+/**
+ * An option text as inline content in a plain `div` mapped to the option's own source line (the
+ * `:header:` line), so a click opens the editor on that line and not on a paragraph it is not in.
+ */
+function optionLine(text: string, parse: GridParse, line: number | undefined): GridNode {
+  const option: GridNode = { type: "mystGridCardOption", children: inlineContent(text, parse) };
+  setHast(option, "div", { class: "myst-grid-card-option", ...lineProperties(line) });
+  return option;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-100
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
 function buildCard(node: GridNode, source: GridSource, parse: GridParse, depth: number, standalone = false): void {
   const raw = directiveBody(node, source);
-  const { options, body } = splitOptions(raw.lines);
+  const { options, indexes, body } = splitOptions(raw.lines);
   const parts: GridNode[] = [];
-  const addPart = (kind: string, children: GridNode[]): void => {
+  const addPart = (kind: string, children: GridNode[], properties: Record<string, unknown> = {}): void => {
     const part: GridNode = { type: "mystGridCardPart", children };
-    setHast(part, "div", { class: `myst-grid-card-${kind}` });
+    setHast(part, "div", { class: `myst-grid-card-${kind}`, ...properties });
     parts.push(part);
   };
 
   const title = (node.args ?? "").trim();
   const target = cardLinkTarget(options);
   const alt = options.get("link-alt");
-  const titleChildren = title
-    ? (parse(title).children?.[0]?.children ?? [{ type: "text", value: title }])
-    : [];
+  const titleChildren = title ? inlineContent(title, parse) : [];
   if (title || target) {
     const inner: GridNode[] = target
       ? [{
@@ -252,15 +279,21 @@ function buildCard(node: GridNode, source: GridSource, parse: GridParse, depth: 
         },
       }]
       : titleChildren;
-    addPart("title", inner);
+    // The title is one line, the directive line: a click opens the editor on it. A linked title is
+    // not mapped, a click on it follows the link.
+    addPart("title", inner, target ? {} : lineProperties(node.position?.start?.line));
   }
 
   // The `:header:` and `:footer:` options come before the blocks the `^^^` and `+++` separators cut.
   const optionHeader = standalone ? options.get("header") : undefined;
   const optionFooter = standalone ? options.get("footer") : undefined;
+  const optionSourceLine = (name: string): number | undefined => {
+    const index = indexes.get(name);
+    return index === undefined ? undefined : raw.firstLine + index;
+  };
   const extra: Record<string, GridNode[]> = {
-    header: optionHeader ? [optionLine(optionHeader, parse)] : [],
-    footer: optionFooter ? [optionLine(optionFooter, parse)] : [],
+    header: optionHeader ? [optionLine(optionHeader, parse, optionSourceLine("header"))] : [],
+    footer: optionFooter ? [optionLine(optionFooter, parse, optionSourceLine("footer"))] : [],
   };
   for (const section of splitCardSections(body)) {
     const children = parseBody(section.lines, raw.firstLine + section.start, parse, depth);
