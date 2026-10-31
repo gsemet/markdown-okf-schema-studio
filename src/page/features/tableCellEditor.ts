@@ -17,6 +17,40 @@ function modelRowOf(renderedRow: number): number {
   return renderedRow === 0 ? 0 : renderedRow + 1;
 }
 
+/** The gap kept between a revealed cell and the side edges of its table's scroll box. */
+const CELL_REVEAL_MARGIN = 16;
+
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+// A table wider than the pane scrolls sideways in its own box. The selected cell and its editor
+// (the editor can be wider than the cell) are brought fully inside that box by moving only the
+// box's scrollLeft, instantly and by the smallest amount, with a margin on the side they enter
+// from. A target already inside the box does not move; a target wider than the box is aligned on
+// its start. The page itself never scrolls for it.
+function revealCellInTable(cell: HTMLTableCellElement, editor: HTMLElement): void {
+  const table = cell.closest?.("table");
+  if (!table) return;
+  const boxWidth = table.clientWidth;
+  const maxScroll = table.scrollWidth - boxWidth;
+  if (!(boxWidth > 0) || !(maxScroll > 0)) return;
+  const rightOf = (rect: { left?: number; right?: number; width?: number }): number =>
+    rect.right ?? (rect.left ?? 0) + (rect.width ?? 0);
+  const tableRect = table.getBoundingClientRect();
+  const cellRect = cell.getBoundingClientRect();
+  const editorRect = editor.getBoundingClientRect();
+  const boxLeft = (tableRect.left ?? 0) + (table.clientLeft || 0);
+  const boxRight = boxLeft + boxWidth;
+  const targetLeft = Math.min(cellRect.left ?? 0, editorRect.left ?? 0);
+  const targetRight = Math.max(rightOf(cellRect), rightOf(editorRect));
+  if (targetLeft >= boxLeft && targetRight <= boxRight) return;
+  const startAligned = targetRight - targetLeft > boxWidth - 2 * CELL_REVEAL_MARGIN || targetLeft < boxLeft;
+  const delta = startAligned
+    ? targetLeft - (boxLeft + CELL_REVEAL_MARGIN)
+    : targetRight - (boxRight - CELL_REVEAL_MARGIN);
+  const current = table.scrollLeft || 0;
+  const next = Math.max(0, Math.min(maxScroll, current + delta));
+  if (next !== current) table.scrollLeft = next;
+}
+
 /** The cell editor of a page. */
 export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
   const { document, window, state } = rt;
@@ -498,6 +532,10 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       editorTrace.record("cell editor focused", "line=" + edit.line + " row=" + edit.tableRowIndex
         + " column=" + edit.tableColumnIndex + " " + traceFocus());
     }
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+    // The editor is now in its cell, so both rects are current: every open, switch and reopen
+    // brings the cell and its editor inside the table's sideways scroll box.
+    revealCellInTable(selectedCell, edit.element);
   }
 
   return {
