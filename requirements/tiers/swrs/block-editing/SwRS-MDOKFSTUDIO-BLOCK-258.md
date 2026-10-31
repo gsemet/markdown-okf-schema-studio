@@ -35,6 +35,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/gridCardTitleSourceLine.test.ts
 - test/integration/realInput/markers.ts
+- test/integration/realInput/qa210Replays.ts
 - test/page/linkEditModeClick.test.ts
 - test/page/runtimeCardOptionEnter.test.ts
 - test/security/html-policy.test.ts
