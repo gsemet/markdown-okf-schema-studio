@@ -830,6 +830,59 @@ test("schema-free frontmatter values use a generic YAML editor", () => {
   assert.equal(prevented, false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
+for (const modifier of ["metaKey", "ctrlKey"] as const) {
+  test(`schema-free number value commits from the YAML editor with ${modifier}+Enter`, () => {
+    const harness = createRuntimeHarness();
+    harness.frontmatterRow.setAttribute("data-okf-schema-found", "false");
+    harness.frontmatterRow.setAttribute("data-okf-type", "number");
+    harness.frontmatterRow.setAttribute("data-okf-value", "4.5");
+    harness.frontmatterRow.setAttribute("data-okf-value-yaml", "4.5\n");
+    harness.editModeButton.dispatch("click");
+    harness.dispatchDocument("click", {
+      target: harness.frontmatterValueCell,
+      preventDefault: () => undefined,
+      stopPropagation: () => undefined,
+    });
+    const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+    assert.ok(textarea);
+    assert.equal(textarea.value, "4.5\n");
+    textarea.value = "3.5\n";
+    textarea.dispatch("keydown", { key: "Enter", [modifier]: true, preventDefault: () => undefined });
+
+    const saves = harness.messages.filter((message) => message.type === "previewFrontmatterSave");
+    assert.equal(saves.length, 1);
+    assert.equal(saves[0]?.fieldName, "lifecycle");
+    assert.equal(saves[0]?.fieldValueFormat, "yaml");
+    assert.equal(saves[0]?.fieldValue, "3.5\n");
+    assert.equal(harness.createdElements.some((element) =>
+      element.getAttribute("role") === "status" && element.textContent === "Enter a valid number."), false);
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
+test("schema-free number value refuses non-numeric text from the YAML editor", () => {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-schema-found", "false");
+  harness.frontmatterRow.setAttribute("data-okf-type", "number");
+  harness.frontmatterRow.setAttribute("data-okf-value", "4.5");
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "4.5\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.value = "high\n";
+  textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
+
+  assert.equal(harness.messages.filter((message) => message.type === "previewFrontmatterSave").length, 0);
+  assert.equal(harness.createdElements.some((element) =>
+    element.getAttribute("role") === "status" && element.textContent === "Enter a valid number."), true);
+});
+
 test("text frontmatter values use a wrapping textarea that grows with its content", () => {
   const harness = createRuntimeHarness();
   const longValue = "A long frontmatter value that needs to wrap. ".repeat(20);

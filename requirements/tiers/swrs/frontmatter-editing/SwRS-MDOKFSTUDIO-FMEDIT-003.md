@@ -77,6 +77,8 @@ When a writer opens the editor of a schema enum, number, date, time, boolean or 
 | Input that is not a finite number, Enter pressed | The same message and no post |
 | Valid number typed, Enter pressed | The value is posted as a number |
 | Navigation while the editor is open (a flush) | The typed text is sent instead, see SwRS-MDOKFSTUDIO-FMEDIT-067 |
+| Number field without a schema, YAML box holding 3.5 and a line break, Cmd or Ctrl+Enter pressed | The YAML text is posted and the host writes rating: 3.5 |
+| Same box holding text that is not a number | The same message and no post |
 
 ### Scenario (refusal): Schema limits are left to the check at save time
 
@@ -125,7 +127,7 @@ When a writer opens the editor of a schema enum, number, date, time, boolean or 
 
 ### Verification notes
 
-- Method: test/page/runtimeFrontmatterEditor.test.ts (enum select entries and selection; the select posts on blur and Enter, a pick alone and an unchanged value post nothing; one click on a boolean value cell toggles and saves, a boolean name cell still opens the key editor; nullable scalar and nullable list editors set the value to null).
+- Method: test/page/runtimeFrontmatterEditor.test.ts (enum select entries and selection; the select posts on blur and Enter, a pick alone and an unchanged value post nothing; one click on a boolean value cell toggles and saves, a boolean name cell still opens the key editor; nullable scalar and nullable list editors set the value to null; a number field without a schema commits its YAML text with Cmd or Ctrl+Enter when the trimmed text is a number and refuses other text with "Enter a valid number.").
 - Method: visual scenario frontmatter-editing/v02-edit-enum-value-dark-900 in test/visual/scenarioDefinitions2.ts (enum select).
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (number, date and time fields get native inputs and a date-time field stays a text input; the number input carries no schema limits and a value out of range is refused at save time).
 - Method: test/page/runtimeEditorFlush.test.ts (an empty or non-finite number is refused with "Enter a valid number." and nothing is posted; a valid number is posted as a number).

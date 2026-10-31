@@ -181,7 +181,11 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
         : fieldType === "number" ? Number(control.value)
           : control.value
       : forcedValue;
-    if (fieldType === "number" && forcedValue !== null && (!control.value || !Number.isFinite(fieldValue))) {
+    // The YAML box posts its text as typed; the trimmed text must still read as a number.
+    const yamlNumberText = useYamlEditor && forcedValue === undefined ? String(control.value).trim() : undefined;
+    const numberText = yamlNumberText ?? control.value;
+    const numberValue = yamlNumberText === undefined ? fieldValue : Number(yamlNumberText);
+    if (fieldType === "number" && forcedValue !== null && (!numberText || !Number.isFinite(numberValue))) {
       // A flush keeps the typed text as it is: the host writes it and the preview shows the problem.
       if (state.flushingEditors) {
         fieldValue = control.value;
