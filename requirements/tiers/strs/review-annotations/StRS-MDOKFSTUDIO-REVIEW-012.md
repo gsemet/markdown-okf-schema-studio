@@ -64,7 +64,7 @@ As a writer, I see the notes left in the source without opening the source, I re
   - [SwRS-MDOKFSTUDIO-REVIEW-133](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-133.md): HTML comments show as gray chips carried as data
   - [SwRS-MDOKFSTUDIO-REVIEW-139](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-139.md): TODO words and TODO comments show as green chips
   - [SwRS-MDOKFSTUDIO-REVIEW-143](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-143.md): A click or Enter on a chip toggles its comment box
-  - [SwRS-MDOKFSTUDIO-REVIEW-152](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-152.md): The showComments setting and the Comments button hide and show the chips
+  - [SwRS-MDOKFSTUDIO-REVIEW-152](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-152.md): The showComments setting and the Comments button hide and show every review mark
   - [SwRS-MDOKFSTUDIO-REVIEW-156](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-156.md): A show-comments message of another render is ignored
   - [SwRS-MDOKFSTUDIO-REVIEW-160](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-160.md): The TODO action wraps or unwraps the touched lines in TODO comments
 <!-- okf:links:end -->

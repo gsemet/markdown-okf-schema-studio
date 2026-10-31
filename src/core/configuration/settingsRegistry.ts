@@ -192,7 +192,7 @@ export const PREVIEW_SETTINGS = {
   showComments: liveSetting<boolean>({
     type: "boolean",
     default: true,
-    markdownDescription: "Shows HTML comments (`<!-- ... -->`) in the preview as small gray chips that open into a box with the comment text when clicked. **On**: the gray comment chips show. **Off**: they are hidden at once in open previews. Green TODO chips always show, and comments used by tools (such as `markdownlint-*` or `prettier-ignore`) are always hidden.",
+    markdownDescription: "Shows HTML comments (`<!-- ... -->`) in the preview as small gray chips that open into a box with the comment text when clicked. **On**: the gray comment chips show. **Off**: they are hidden at once in open previews, together with the review comment marks (thread chips, highlights, badges, Orphaned comments box). Green TODO chips always show, and comments used by tools (such as `markdownlint-*` or `prettier-ignore`) are always hidden.",
     order: 21,
   }, asStored, bootFlag(true)),
   /** The maximum width of the text column, in pixels; 0 is the full panel width. */

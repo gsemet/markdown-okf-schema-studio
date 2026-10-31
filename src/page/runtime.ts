@@ -261,8 +261,12 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // fade of a block an editor gives back and the glow of blocks an outside change or an undo updated.
   const motion = installMotion(document, window);
   installIncomingToggle(document, vscode, context);
-  // Toolbar Comments button: hides the gray and thread chips, which moves the content like expanding one does.
-  installCommentsToggle(document, vscode, context, keepReadingLine);
+  // Toolbar Comments button: hides the chips and every review mark, which moves the content like
+  // expanding a chip does; the thread module closes its popover and updates the Tab order.
+  installCommentsToggle(document, vscode, context, () => {
+    commentThreads.visibilityChanged();
+    keepReadingLine();
+  });
   const historyControls = installHistoryControls(document, vscode, context,
     (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate));
   const viewControls = installViewControls(document, vscode, context, keepReadingLine);

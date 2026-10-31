@@ -55,6 +55,12 @@ export interface PageCommentThread {
  *
  * `trace` (diagnostics only, it changes nothing) hears why an open popover went away: a press
  * outside, Escape, a toggle, a close by the page, or a re-apply that found no thread or holder.
+ *
+ * While comments are hidden (`<html>` carries `data-sphinx-preview-comments="off"` from the toolbar
+ * Comments button or `data-okf-show-comments="false"` from the setting; the stylesheet hides the
+ * paint) every mark is plain text: clicks and keys pass through to the page, highlights leave the
+ * Tab order and no popover opens. `visibilityChanged()` closes an open popover and updates the Tab
+ * order after either attribute changed.
  */
 export function installCommentThreads(
   document: Document,
@@ -70,6 +76,8 @@ export function installCommentThreads(
   apply(): void;
   close(): void;
   openThread(id: string): boolean;
+  /** The comments were hidden or shown: closes an open popover when hidden, updates the Tab order. */
+  visibilityChanged(): void;
   /** Feeds a `previewCommentResult` of the host; true when it answered a reply. */
   result(message: { kind?: unknown; threadId?: unknown; ok?: unknown; reason?: unknown }): boolean;
 } {
@@ -107,6 +115,25 @@ export function installCommentThreads(
   let confirming: string | undefined;
   let orphanBox: Element | undefined;
   let addedOrphans: Element[] = [];
+
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
+  // Read at event time from the attributes the stylesheet hides the marks with.
+  const hidden = (): boolean => {
+    const root = document.documentElement;
+    return root?.getAttribute("data-sphinx-preview-comments") === "off"
+      || root?.getAttribute("data-okf-show-comments") === "false";
+  };
+
+  // A shown highlight is a button in the Tab order; a hidden one is plain text.
+  const paintFocus = (mark: Element): void => {
+    if (hidden()) {
+      for (const name of ["tabindex", "role", "aria-haspopup"]) mark.removeAttribute(name);
+      return;
+    }
+    mark.setAttribute("tabindex", "0");
+    mark.setAttribute("role", "button");
+    mark.setAttribute("aria-haspopup", "dialog");
+  };
 
   const text = (value: unknown): string => (typeof value === "string" ? value.slice(0, MAX_TEXT) : "");
 
@@ -392,9 +419,7 @@ export function installCommentThreads(
         const mark = document.createElement("mark");
         mark.setAttribute(MARK, thread.id);
         if (thread.resolved) mark.setAttribute("data-okf-comment-resolved", "true");
-        mark.setAttribute("tabindex", "0");
-        mark.setAttribute("role", "button");
-        mark.setAttribute("aria-haspopup", "dialog");
+        paintFocus(mark);
         mark.textContent = value.slice(index, index + variant.length);
         if (index === 0) {
           // No empty text node before the mark: clear() then restores the original structure.
@@ -477,8 +502,8 @@ export function installCommentThreads(
 
   const apply = (): void => {
     // An open popover stays open across a re-apply (a render re-posts the same threads) when its
-    // thread is still there; the holder is the new mark, badge or orphan entry.
-    const reopen = openId;
+    // thread is still there; the holder is the new mark, badge or orphan entry. Not while hidden.
+    const reopen = hidden() ? undefined : openId;
     const draft = replyInput()?.value;
     const asking = confirming;
     close();
@@ -611,7 +636,8 @@ export function installCommentThreads(
   const intercept = (event: Event): void => {
     const target = event.target;
     const holder = target instanceof Element ? holderOf(target) : null;
-    if (!holder) return;
+    // Hidden comments: the click is a click on plain text (reveal the source, edit the block).
+    if (!holder || hidden()) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     if (event.type === "click") toggle(holder);
@@ -694,7 +720,7 @@ export function installCommentThreads(
       return;
     }
     const holder = target instanceof Element ? holderOf(target) : null;
-    if ((event.key !== "Enter" && event.key !== " ") || !holder) return;
+    if ((event.key !== "Enter" && event.key !== " ") || !holder || hidden()) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     toggle(holder);
@@ -745,7 +771,13 @@ export function installCommentThreads(
     },
     apply,
     close: () => close("closed by the page"),
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
+    visibilityChanged() {
+      if (hidden()) close("comments hidden");
+      addedMarks.forEach(paintFocus);
+    },
     openThread(id) {
+      if (hidden()) return false;
       // Compared in code, never put into a selector: the id is file data.
       const holder = Array.from(document.querySelectorAll(`[${MARK}], [${BADGE}], [${ORPHAN}]`))
         .find((candidate) => idOf(candidate) === id);

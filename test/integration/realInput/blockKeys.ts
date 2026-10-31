@@ -132,6 +132,91 @@ export async function scenarioReviewComments(page: Page, evidence: Evidence): Pr
   }
 }
 
+/**
+ * The toolbar Comments button hides every review mark: the former highlight is plain text, out of
+ * the Tab order, and a real click on it edits its block (edit mode) instead of opening the popover.
+ */
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+export async function scenarioHiddenReviewMarks(page: Page): Promise<void> {
+  const text = "# Review\n\nThe second paragraph has needle text here.\n";
+  const sidecar = {
+    version: 1,
+    document: "smoke.md",
+    threads: [{
+      id: "t1",
+      anchor: { line: 3, endLine: 3, quote: "needle", prefix: "has ", suffix: " text" },
+      resolved: false,
+      createdAt: "2026-10-21T10:00:00Z",
+      comments: [{ id: "c1", author: "Ada", createdAt: "2026-10-21T10:00:00Z", body: "Why?" }],
+    }],
+  };
+  const fixture = createFixture("realinput-comments-hidden", {
+    "smoke.md": text,
+    "smoke.comments.json": `${JSON.stringify(sidecar, null, 2)}\n`,
+  });
+  const mark = "mark[data-okf-comment-thread]";
+  const commentsState = (): Promise<string | null> => withCurrentFrame(page, (frame) =>
+    frame.locator("html").getAttribute("data-sphinx-preview-comments"));
+  let pressed = false;
+  let expanded = false;
+  const pressComments = async (wanted: "on" | "off"): Promise<void> => {
+    await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-preview-comments-toggle]").click());
+    await waitFor(`the Comments button to turn comments ${wanted}`, async () => await commentsState() === wanted);
+  };
+  try {
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("smoke.md")));
+    try {
+      await openSidePreview(document);
+      await waitForRender(document);
+      await waitFor("the highlight", () => withCurrentFrame(page, async (frame) => await frame.locator(mark).count() === 1));
+      // The Comments button sits in the toolbar rows a fresh workspace keeps collapsed.
+      if (await withCurrentFrame(page, (frame) => frame.locator("html").getAttribute("data-sphinx-preview-toolbar-state")) === "collapsed") {
+        await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-preview-toolbar-collapse]").click());
+        expanded = true;
+      }
+      assert.equal(await commentsState(), "on", "comments start shown");
+      await pressComments("off");
+      pressed = true;
+      await withCurrentFrame(page, async (frame) => {
+        const state = await frame.locator(mark).evaluate((element) => {
+          (element as HTMLElement).focus();
+          return {
+            tabIndex: (element as HTMLElement).tabIndex,
+            focused: element.ownerDocument.activeElement === element,
+            background: getComputedStyle(element).backgroundColor,
+          };
+        });
+        assert.deepEqual(state, { tabIndex: -1, focused: false, background: "rgba(0, 0, 0, 0)" },
+          "the former highlight is plain text, out of the Tab order");
+      });
+      // A real click on it in edit mode edits the block, as a click on plain text does.
+      await setEditMode(page, true);
+      await withCurrentFrame(page, (frame) => frame.locator(mark).click());
+      await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+      await withCurrentFrame(page, async (frame) => {
+        assert.equal(await frame.locator("[data-okf-comment-popover]").count(), 0, "no thread popover");
+      });
+      await press(page, "Escape");
+      await waitForNoBlockEditor(page, "the block editor to close");
+      await setEditMode(page, false);
+      // Show comments again: the highlight is back in the Tab order.
+      await pressComments("on");
+      pressed = false;
+      await withCurrentFrame(page, async (frame) => {
+        assert.equal(await frame.locator(mark).getAttribute("tabindex"), "0");
+      });
+    } finally {
+      // The Comments choice and the toolbar state are stored for the workspace: put them back.
+      if (pressed) await pressComments("on");
+      if (expanded) await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-preview-toolbar-collapse]").click());
+      await leaveEditModeOff();
+      await closeAllEditors();
+    }
+  } finally {
+    fixture.dispose();
+  }
+}
+
 export async function scenarioCtrlEnterCommit(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-s2", async (document) => {
     await openSidePreview(document);

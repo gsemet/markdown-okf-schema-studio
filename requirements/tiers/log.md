@@ -71,6 +71,21 @@
 - Verification: unit tests in test/core/render/alertLazyContinuation.test.ts,
   test/core/render/alertSourceLines.test.ts and test/page/modules/alertLazyEditAction.test.ts.
 
+### Hiding comments hides every review mark
+
+- SwRS-MDOKFSTUDIO-REVIEW-152 (proposed) widened from the chips to every review mark: while the
+  Comments button is off or `preview.showComments` is false, the highlight colour and the dotted
+  underline go (the quoted text stays as plain text), badges and the Orphaned comments box are not
+  displayed, a click or Enter on a former highlight opens no popover and acts as on plain text
+  (reveal the source line, edit the block in edit mode), highlights leave the Tab order and come
+  back on Show, and an open popover closes. Title, description, scenarios and verification notes
+  follow. The owner agreed on 2026-10-31.
+- SwRS-MDOKFSTUDIO-REVIEW-021 (proposed): the popover opens only while comments are shown.
+- Verification: unit tests in test/core/preview/previewStyles.test.ts,
+  test/page/modules/commentThreads.test.ts and test/page/runtimeCommentsHidden.test.ts; visual
+  scenarios review-annotations/v29 and v30 (light, dark); the real-input scenario
+  `scenarioHiddenReviewMarks` runs in the heavy integration job (not run locally).
+
 ### Radio choice lists
 
 - Added SwRS-MDOKFSTUDIO-GFM-039 (gfm, `proposed`, derives from StRS-MDOKFSTUDIO-GFM-003): a run

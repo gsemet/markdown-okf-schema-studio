@@ -224,6 +224,10 @@ export class RuntimeElement {
         || (selector.includes("data-sphinx-source-line") && current.getAttribute("data-sphinx-source-line") !== null)
         || (selector === "[data-edit-option],[data-edit-action]"
           && (current.getAttribute("data-edit-option") !== null || current.getAttribute("data-edit-action") !== null))
+        // The holders of a review thread (modules/commentThreads.ts): highlight, badge, orphan entry.
+        || (selector === "[data-okf-comment-thread], [data-okf-comment-badge], [data-okf-comment-orphan]"
+          && ["data-okf-comment-thread", "data-okf-comment-badge", "data-okf-comment-orphan"]
+            .some((name) => current!.getAttribute(name) !== null))
       ) {
         return current;
       }
