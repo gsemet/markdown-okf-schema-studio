@@ -442,6 +442,29 @@ def test_heavy_jobs_run_on_a_version_change_push_and_on_a_heavy_dispatch(name: s
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_stress_dispatch_inputs_reach_the_stress_recipe_through_env() -> None:
+    import yaml
+
+    inputs = yaml.safe_load(CI.read_text())[True]["workflow_dispatch"]["inputs"]
+    for name in ("stress_repeat", "stress_scenarios"):
+        assert inputs[name]["type"] == "string"
+        assert inputs[name]["default"] == ""
+    step = next(s for s in _ci_jobs()["stress"]["steps"] if "ci-stress" in s.get("run", ""))
+    assert step["run"] == "xvfb-run --auto-servernum just ci-stress"
+    assert step["env"]["STUDIO_STRESS_REPEAT"] == "${{ inputs.stress_repeat || '20' }}"
+    assert step["env"]["STUDIO_STRESS_SCENARIOS"] == "${{ inputs.stress_scenarios }}"
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_ci_stress_recipe_quotes_and_validates_repeat() -> None:
+    recipe = (ROOT / "justfile").read_text().split("\nci-stress ", 1)[1].split("\n\n", 1)[0]
+    assert "{{ quote(REPEAT) }}" in recipe
+    assert recipe.count("{{ REPEAT }}") == 0
+    assert "REPEAT must be an integer from 1 to 100" in recipe
+    assert "exit 2" in recipe
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
 def test_stress_blocks_only_a_version_change() -> None:
     flag = _ci_jobs()["stress"]["continue-on-error"]
     assert _run_if(flag, _context("push", bump="false"))

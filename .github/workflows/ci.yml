@@ -14,6 +14,14 @@ on:
         description: Also build the gallery and the site from the end-to-end reports (needs heavy)
         type: boolean
         default: false
+      stress_repeat:
+        description: Stress rounds per window, 1 to 100 (heavy only; empty means 20). Above about 20, narrow stress_scenarios or the run exceeds the time limits
+        type: string
+        default: ""
+      stress_scenarios:
+        description: Comma-separated stress scenario names to loop (heavy only; empty means all)
+        type: string
+        default: ""
 
 env:
   STUDIO_NPM: npm --registry=https://registry.npmjs.org/
@@ -225,7 +233,11 @@ jobs:
         with:
           just-version: 1.58.0
       - run: just dev-ci
-      - run: xvfb-run --auto-servernum just ci-stress
+      - name: Run the stress rounds
+        env:
+          STUDIO_STRESS_REPEAT: ${{ inputs.stress_repeat || '20' }}
+          STUDIO_STRESS_SCENARIOS: ${{ inputs.stress_scenarios }}
+        run: xvfb-run --auto-servernum just ci-stress
       - name: Publish reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
