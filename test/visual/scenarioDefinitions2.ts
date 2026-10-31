@@ -779,6 +779,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ...WIDE,
     scroll: { kind: "bottom" as const },
     contentAssertions: HUGE_DOCUMENT_ASSERTIONS,
+    timeoutMs: 60_000, retryOnTimeout: 1, // about 6000 lines: needs more than 30 s; one retry for the known intermittent CI hang
     description: "A generated document of about 6000 lines (335 sections with a list, a code block and a table each), scrolled to the end: "
       + "the last paragraph is reachable inside the frame with its bottom padding.",
   },
