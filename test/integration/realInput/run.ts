@@ -30,7 +30,7 @@ import { tocLoopRounds, tocLoopSummary, toggleDelayMaxMs, type TocLoopTally } fr
 import { setWorkbenchPage, takeFailureFocusDump } from "./common";
 import { scenarioAlertTypePickProbe } from "./alertPickProbe";
 import { installWorkbenchFocusTrace, withFocusDumpOnFailure, workbenchFocusDump } from "../../shared/workbenchFocusDump";
-import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
+import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioHiddenReviewMarks, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
 import { scenarioEnterCommitsTextField, scenarioEscapeCancels, scenarioFrontmatterStructuralMinimalPatch, scenarioFrontmatterValueMinimalPatch, scenarioLinkPanel, scenarioLinkPanelPrefill, scenarioPalette, scenarioShortcuts, scenarioSlashMenu, scenarioTypingUndoGrouping, scenarioUndoStaysInEditor } from "./textEditing";
 import { scenarioAlertDropdown, scenarioCaretAtClick, scenarioEditAffordances, scenarioEditModeNoReflow, scenarioEnterContinuesList, scenarioFigureEditor, scenarioPreviewKeepsMarkdown, scenarioSaveKeepsBlockInPlace, scenarioTabIndents, scenarioTableTab, scenarioTableToolbar } from "./editorWidgets";
 import { scenarioAddFieldPositionAndEscape, scenarioBooleanOneClick, scenarioCommentBlockEdit, scenarioCustomKeyAndOpenNewField, scenarioFrontmatterActionsLayout, scenarioListEditorClickAndKeys, scenarioListLinkCompletion, scenarioReadableLinkDiagnostics, scenarioRefusedValueKeepsEditorUsable, scenarioRequiredAndPositionedAdd } from "./frontmatterFields";
@@ -175,6 +175,7 @@ export async function run(): Promise<void> {
     await scenarioCommentBlockEdit(page, evidence);
     await scenarioCtrlEnterCommit(page, evidence);
     await scenarioReviewComments(page, evidence);
+    await scenarioHiddenReviewMarks(page);
     await scenarioArrowNavigation(page, evidence);
     await scenarioTableCellEnter(page, evidence);
     await scenarioTableCellBold(page, evidence);

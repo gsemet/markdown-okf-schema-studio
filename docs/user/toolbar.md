@@ -10,7 +10,8 @@ stays narrow and covers little of the page:
 4. **Layout:** Width and Table of contents.
 5. **Content:** Fold (folds every section, or unfolds them all when any is folded; see
    [Folding sections](folding.md)), the incoming-changes (Diff) toggle and the Comments toggle
-   (hides or shows the gray comment chips, in preview and in edit mode).
+   (hides or shows the gray comment chips and every review mark: the thread chips, the
+   highlighted quotes, the badges and the Orphaned comments box; in preview and in edit mode).
 
 The Table of contents toolbar button shows the outline of the whole document next to the preview. A
 `[TOC]` line (or `[[_TOC_]]`, or a `{contents}` directive) in the text (inserted by the Table of contents button of the edition palette or by

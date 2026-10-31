@@ -27,6 +27,7 @@ import {
 import { ALERT_EDITING_SCENARIOS } from "./alertEditingScenarios";
 import { CARDS_TABS_SCENARIOS } from "./cardsTabsScenarios";
 import { RADIO_PLAN_SCENARIOS } from "./radioPlanScenarios";
+import { REVIEW_MARKS_HIDDEN_SCENARIOS } from "./reviewMarksHiddenScenarios";
 import { GRID_CARD_EDITING_SCENARIOS } from "./gridCardEditingScenarios";
 import { LINK_EDIT_MODE_SCENARIOS } from "./linkEditModeScenarios";
 import { FRONTMATTER_CHANGE_BAR_SCENARIOS } from "./frontmatterChangeBarScenarios";
@@ -452,6 +453,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...LINK_EDIT_MODE_SCENARIOS,
   ...ALERT_EDITING_SCENARIOS,
   ...RADIO_PLAN_SCENARIOS,
+  ...REVIEW_MARKS_HIDDEN_SCENARIOS,
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
   {
     id: "code-dark-top",
