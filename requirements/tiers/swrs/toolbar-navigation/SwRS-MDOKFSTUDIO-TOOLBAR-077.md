@@ -23,10 +23,13 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/page/features/linkEditing.ts
 - src/page/modules/linkNavigation.ts
 - src/session/features/links.ts
 tested_in_files:
 - test/integration/previewHistory.test.ts
+- test/integration/realInput/markers.ts
+- test/page/linkEditModeClick.test.ts
 - test/page/modules/linkNavigation.test.ts
 - test/page/modules/toolbarReq.requirements.test.ts
 - test/session/toolbarReq.requirements.test.ts
@@ -46,6 +49,14 @@ When the reader clicks, middle-clicks or presses Enter or Space on a link that c
 | a local link and a wiki link that the host has not been asked about yet | each is clicked, then the first is middle-clicked | each click posts previewLink with the link's request and the default action is cancelled |
 | a focused link | Enter is pressed | previewLink is posted |
 | a focused link | Space is pressed | previewLink is posted |
+
+### Scenario (boundary): Edit mode keeps a plain click for editing
+
+| Given, edit mode on | When | Then |
+| --- | --- | --- |
+| a link inside a mapped block | it is clicked, or Enter or Space is pressed on it, with no Cmd or Ctrl key | no previewLink is posted; the editor of the block opens (SwRS-MDOKFSTUDIO-BLOCK-014) |
+| the same link | it is clicked with Cmd or Ctrl held, Cmd/Ctrl+Enter is pressed on it, or it is middle-clicked | previewLink is posted |
+| a link value of the properties table, in a comment thread or a label anchor | it is clicked | it keeps its own behaviour, as in reading mode |
 
 ### Scenario (refusal): Other buttons and keys are not posted
 
@@ -85,8 +96,9 @@ When the reader clicks, middle-clicks or presses Enter or Space on a link that c
 - Method: test/page/modules/linkNavigation.test.ts (local and wiki clicks are host-routed even before discovery, including middle click; the auxclick button 2 refusal has no test).
 - Method: test/page/modules/toolbarReq.requirements.test.ts (Enter or Space on a link is routed to the host and another key is not).
 - Method: test/integration/previewHistory.test.ts (link to second.md#target opens the second document; external link with a stubbed openExternal, one call, history unchanged; javascript:alert(1) leaves the history unchanged, the warning text is not asserted; the second.md#missing case has no test).
+- Method: test/page/linkEditModeClick.test.ts (edit mode scenario: a plain click, Enter or Space posts no previewLink; Cmd and Ctrl click, Cmd and Ctrl+Enter and a middle click post one; a click on a link while another editor is open posts none).
 - Method: test/session/toolbarReq.requirements.test.ts (a file that cannot be opened shows a warning with the path and the reason; a link whose resolution fails shows a warning and records nothing).
-- Criteria: one previewLink per accepted event; auxclick counts only for button 1; keys Enter and the space character post one request; showDocument gets the target id and the selection range, if any; openExternal is called once with the URL; showWarning is called once with the reason, or with the path and the error message.
+- Criteria: one previewLink per accepted event, none for an event that linkActivationEdits (src/page/features/linkEditing.ts) gives to the page input in edit mode; auxclick counts only for button 1; keys Enter and the space character post one request; showDocument gets the target id and the selection range, if any; openExternal is called once with the URL; showWarning is called once with the reason, or with the path and the error message.
 
 <!-- okf:links:start -->
 ### Links

@@ -753,6 +753,27 @@ test("T22: link suggestions are rendered as an escaped row attribute only when p
   assert.equal(markup.match(/data-okf-link-suggestions=/gu)?.length, 1);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+test("T220: the known stems are rendered as a second escaped row attribute next to the suggestions", () => {
+  const markup = renderPropertiesTable(resultWith({
+    fields: [
+      fieldWith({
+        name: "refs",
+        value: ["a"],
+        valueKind: "list",
+        fieldType: "list",
+        linkSuggestions: ["near"],
+        linkKnownStems: ['A"B', "near"],
+      }),
+      fieldWith({ name: "tags", value: ["a"], valueKind: "list", fieldType: "list", linkKnownStems: ["orphan"] }),
+    ],
+  }), true);
+  assert.match(markup, /data-okf-field="refs"[^>]* data-okf-link-suggestions="\[&quot;near&quot;\]" data-okf-link-known="\[&quot;A\\&quot;B&quot;,&quot;near&quot;\]"/u);
+  // Without suggestions there is no list editor datalist, so no known set either.
+  assert.equal(markup.match(/data-okf-link-known=/gu)?.length, 1);
+  // Known stems that add nothing to the suggestions are not emitted by the analysis (see linkSuggestions test).
+});
+
 test("T24: required fields render data-okf-required and optional ones do not", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [

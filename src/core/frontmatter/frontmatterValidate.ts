@@ -33,8 +33,13 @@ export interface FieldEntry {
   /** True when the effective schema requires this field; such a field cannot be removed. */
   required?: boolean;
   linkResults?: FrontmatterLinkResult[];
-  /** Known Markdown filename stems, set only for filename-stem link fields after link inspection. */
+  /**
+   * The Markdown filename stems offered in the list editor's dropdown, closest to the document
+   * first and capped; set only for filename-stem link fields after link inspection.
+   */
   linkSuggestions?: string[];
+  /** Every known Markdown filename stem (uncapped, sorted): the list editor warns outside it. */
+  linkKnownStems?: string[];
   /** The source lines of the field (1-based, whole file); set by `analyzeFrontmatter`. */
   sourceLines?: { start: number; end: number };
 }

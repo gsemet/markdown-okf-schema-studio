@@ -30,14 +30,15 @@ import { tocLoopRounds, tocLoopSummary, toggleDelayMaxMs, type TocLoopTally } fr
 import { setWorkbenchPage, takeFailureFocusDump } from "./common";
 import { scenarioAlertTypePickProbe } from "./alertPickProbe";
 import { installWorkbenchFocusTrace, withFocusDumpOnFailure, workbenchFocusDump } from "../../shared/workbenchFocusDump";
-import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
+import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioHiddenReviewMarks, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
 import { scenarioEnterCommitsTextField, scenarioEscapeCancels, scenarioFrontmatterStructuralMinimalPatch, scenarioFrontmatterValueMinimalPatch, scenarioLinkPanel, scenarioLinkPanelPrefill, scenarioPalette, scenarioShortcuts, scenarioSlashMenu, scenarioTypingUndoGrouping, scenarioUndoStaysInEditor } from "./textEditing";
 import { scenarioAlertDropdown, scenarioCaretAtClick, scenarioEditAffordances, scenarioEditModeNoReflow, scenarioEnterContinuesList, scenarioFigureEditor, scenarioPreviewKeepsMarkdown, scenarioSaveKeepsBlockInPlace, scenarioTabIndents, scenarioTableTab, scenarioTableToolbar } from "./editorWidgets";
-import { scenarioAddFieldPositionAndEscape, scenarioBooleanOneClick, scenarioCommentBlockEdit, scenarioCustomKeyAndOpenNewField, scenarioFrontmatterActionsLayout, scenarioListEditorClickAndKeys, scenarioListLinkCompletion, scenarioReadableLinkDiagnostics, scenarioRequiredAndPositionedAdd } from "./frontmatterFields";
+import { scenarioAddFieldPositionAndEscape, scenarioBooleanOneClick, scenarioCommentBlockEdit, scenarioCustomKeyAndOpenNewField, scenarioFrontmatterActionsLayout, scenarioListEditorClickAndKeys, scenarioListLinkCompletion, scenarioReadableLinkDiagnostics, scenarioRefusedValueKeepsEditorUsable, scenarioRequiredAndPositionedAdd } from "./frontmatterFields";
 import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfterFinalFigure, scenarioInsertBlocksFromPreview, scenarioLargeDocumentPatched, scenarioPendingOverlayWithoutReload, scenarioPropertiesTableWithoutReload, scenarioStatusPageTwoLines, withIncrementalUpdates } from "./renderPatching";
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
 import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
+import { scenarioLinkClickEditsInEditMode } from "./linkEditMode";
 
 /**
  * The scenarios `just ci-stress` repeats in this window (see stressPlan.ts): the CR 041 ones failed
@@ -162,6 +163,7 @@ export async function run(): Promise<void> {
       "table-moves": () => scenarioTableMoves(page),
       "find-after-click": () => scenarioFindRightAfterClick(page),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
+      "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),
     };
     const only = single[process.env.STUDIO_REAL_INPUT_SCENARIO ?? ""];
     if (only) {
@@ -173,6 +175,7 @@ export async function run(): Promise<void> {
     await scenarioCommentBlockEdit(page, evidence);
     await scenarioCtrlEnterCommit(page, evidence);
     await scenarioReviewComments(page, evidence);
+    await scenarioHiddenReviewMarks(page);
     await scenarioArrowNavigation(page, evidence);
     await scenarioTableCellEnter(page, evidence);
     await scenarioTableCellBold(page, evidence);
@@ -213,6 +216,7 @@ export async function run(): Promise<void> {
     await scenarioCustomKeyAndOpenNewField(page, evidence);
     await scenarioAddFieldPositionAndEscape(page, evidence);
     await scenarioReadableLinkDiagnostics(page, evidence);
+    await scenarioRefusedValueKeepsEditorUsable(page);
     await scenarioInsertBlocksFromPreview(page, evidence);
     await scenarioInsertAfterFinalFigure(page, evidence);
     await scenarioBlockMoveKeys(page, evidence);
@@ -222,6 +226,7 @@ export async function run(): Promise<void> {
     await scenarioFocusChangeKeepsPreviewStill(page, evidence);
     await scenarioHiddenPreviewCatchesUp(page, evidence);
     await scenarioFlushBeforeLink(page, evidence);
+    await scenarioLinkClickEditsInEditMode(page, evidence);
     await scenarioFlushBeforeBack(page, evidence);
     await scenarioFlushBeforeTabSwitch(page, evidence);
     await scenarioFlushCellAndFrontmatter(page, evidence);

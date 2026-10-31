@@ -994,6 +994,30 @@ test("the Comments toolbar button hides the gray and thread chips at once and go
   assert.match(toolbar, /data-sphinx-preview-comments-toggle aria-pressed="true" aria-label="Hide comments" title="Hide comments" data-tooltip="Hide comments"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+test("comments hidden by the button or the setting: highlights lose their paint, badges and the orphan box go", () => {
+  const css = PREVIEW_THEME_CSS;
+  const ruleOf = (selector: string): string => {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    return new RegExp(`${escaped}[,\\s][^{]*\\{([^}]*)\\}`, "u").exec(css)?.[1] ?? "";
+  };
+  for (const off of ['html[data-sphinx-preview-comments="off"]', 'html[data-okf-show-comments="false"]']) {
+    const mark = ruleOf(`${off} #sphinx-myst-preview-content mark[data-okf-comment-thread]`);
+    assert.ok(mark, `${off}: a rule for the highlights`);
+    assert.match(mark, /background: transparent;/u, `${off}: no highlight colour`);
+    assert.match(mark, /text-decoration: none;/u, `${off}: no dotted underline of a resolved thread`);
+    assert.match(mark, /border-radius: 0;/u, `${off}: no rounded paint`);
+    assert.match(mark, /cursor: inherit;/u, `${off}: no pointer cursor`);
+    assert.doesNotMatch(mark, /display: none/u, `${off}: the quoted text stays`);
+    assert.match(ruleOf(`${off} #sphinx-myst-preview-content button[data-okf-comment-badge]`), /display: none;/u,
+      `${off}: badges hidden`);
+    assert.match(ruleOf(`${off} [data-okf-orphans]`), /display: none;/u, `${off}: Orphaned comments box hidden`);
+  }
+  // The hiding rules come after the paint rules and are more specific than the resolved underline.
+  assert.ok(css.indexOf('html[data-okf-show-comments="false"] #sphinx-myst-preview-content mark[data-okf-comment-thread]')
+    > css.indexOf('mark[data-okf-comment-thread][data-okf-comment-resolved="true"]'));
+});
+
 test("the comment boxes (compose, thread popover, open comment) have square corners", () => {
   const block = (selector: string): string => {
     const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");

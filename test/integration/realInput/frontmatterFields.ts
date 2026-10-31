@@ -673,3 +673,99 @@ export async function scenarioReadableLinkDiagnostics(page: Page, evidence: Evid
     });
   }, LINK_PROBLEM_SCHEMA);
 }
+
+const REFUSED_DOCUMENT = [
+  "---",
+  "type: req",
+  "title: Refused value",
+  "priority: 3",
+  "---",
+  "",
+  "# Requirement",
+  "",
+  "Body text.",
+  "",
+].join("\n");
+
+const REFUSED_SCHEMA = [
+  "type: object",
+  "properties:",
+  "  type:",
+  "    type: string",
+  "  title:",
+  "    type: string",
+  "  priority:",
+  "    type: integer",
+  "    minimum: 1",
+  "    maximum: 5",
+  "",
+].join("\n");
+
+const PRIORITY_INPUT = 'input[aria-label="Frontmatter priority"]';
+const PRIORITY_CELL = 'tr[data-okf-field="priority"] [data-okf-edit-cell="value"]';
+const TITLE_CELL = 'tr[data-okf-field="title"] [data-okf-edit-cell="value"]';
+
+/** Opens `priority`, replaces its value with 7 and waits until the host refused the save. */
+async function refusePriority(page: Page, label: string): Promise<void> {
+  await withCurrentFrame(page, (frame) => frame.locator(PRIORITY_CELL).click());
+  await waitForEditor(page, `[data-okf-frontmatter-editor] ${PRIORITY_INPUT}`);
+  await press(page, `${MOD}+a`);
+  await typeText(page, "7");
+  await waitFor(`${label}: priority holds 7`, async () =>
+    await withCurrentFrame(page, (frame) => frame.locator(PRIORITY_INPUT).inputValue()) === "7");
+  await press(page, "Enter");
+  await waitFor(`${label}: the refusal shown in the priority editor`, async () => {
+    const current = await findCurrentFrame(page);
+    return current !== undefined && await current.locator(
+      '[data-okf-frontmatter-editor] [role="status"][data-state="error"][data-visible="true"]').count() === 1;
+  });
+}
+
+/** The tag name and aria-label of the focused element of the preview. */
+async function activeControl(page: Page): Promise<string> {
+  return withCurrentFrame(page, (frame) => frame.evaluate(() => {
+    const active = globalThis.document.activeElement;
+    return active ? `${active.tagName} ${active.getAttribute("aria-label") ?? ""}`.trim() : "none";
+  }));
+}
+
+/**
+ * RI-T44 (CR 218): a value the schema refuses leaves the field editor usable. The focus comes back
+ * to the control, Escape closes it, and a click on another field closes the refused editor without
+ * a save and opens the clicked field in the same click. The buffer never changes.
+ */
+export async function scenarioRefusedValueKeepsEditorUsable(page: Page): Promise<void> {
+  await withDocument("realinput-t44", REFUSED_DOCUMENT, async (document) => {
+    await openSidePreview(document);
+    await waitForRender(document);
+    await setEditMode(page, true);
+
+    // 1. Refused, then Escape, then another field opens.
+    await refusePriority(page, "RI-T44 Escape");
+    await waitFor("RI-T44: the focus back in the priority input after the refusal", async () =>
+      await activeControl(page) === "INPUT Frontmatter priority");
+    await press(page, "Escape");
+    await waitFor("RI-T44: Escape closed the refused priority editor", async () =>
+      await withCurrentFrame(page, (frame) => frame.locator("[data-okf-frontmatter-editor]").count()) === 0);
+    await withCurrentFrame(page, (frame) => frame.locator(TITLE_CELL).click());
+    await waitForEditor(page, "[data-okf-frontmatter-editor] textarea");
+    assert.equal(await activeControl(page), "TEXTAREA Frontmatter title");
+    assert.equal(bufferText(document), REFUSED_DOCUMENT, "the refused value never reached the buffer");
+    await press(page, "Escape");
+    await waitFor("RI-T44: the title editor closed", async () =>
+      await withCurrentFrame(page, (frame) => frame.locator("[data-okf-frontmatter-editor]").count()) === 0);
+
+    // 2. Refused, then one click on another field: the refused editor closes and title opens.
+    await refusePriority(page, "RI-T44 click");
+    await withCurrentFrame(page, (frame) => frame.locator(TITLE_CELL).click());
+    await waitForEditor(page, "[data-okf-frontmatter-editor] textarea");
+    assert.equal(await activeControl(page), "TEXTAREA Frontmatter title");
+    await withCurrentFrame(page, async (frame) => {
+      assert.equal(await frame.locator(PRIORITY_INPUT).count(), 0, "the refused priority editor closed");
+      assert.equal((await frame.locator(`${PRIORITY_CELL} [data-okf-value-display]`).innerText()).trim(), "3",
+        "priority shows its saved value");
+    });
+    assert.equal(bufferText(document), REFUSED_DOCUMENT, "the refused value is not posted again");
+    await press(page, "Escape");
+  }, REFUSED_SCHEMA);
+}

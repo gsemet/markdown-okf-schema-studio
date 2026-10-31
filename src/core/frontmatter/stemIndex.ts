@@ -31,6 +31,17 @@ function isWithin(root: string, candidate: string): boolean {
   return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
+/** The number of folder steps between two folders (0 for the same folder). */
+function folderDistance(from: string, to: string): number {
+  const relative = path.relative(from, to);
+  if (relative === "") return 0;
+  return path.isAbsolute(relative) ? Number.MAX_SAFE_INTEGER : relative.split(path.sep).length;
+}
+
+function byCodeUnit(first: string, second: string): number {
+  return first < second ? -1 : first > second ? 1 : 0;
+}
+
 function isExcludedDirectory(name: string): boolean {
   return name.startsWith(".") || EXCLUDED_DIRECTORY_NAMES.has(name);
 }
@@ -51,10 +62,28 @@ export class MarkdownStemIndex {
     return this.lookup(stem).paths;
   }
 
-  /** Returns the indexed stems, sorted, at most `limit`. Read-only: no file system access. */
-  stems(limit: number): string[] {
-    const max = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : 0;
+  /** Returns the indexed stems, sorted, at most `limit` (all by default). Read-only: no file system access. */
+  stems(limit = Number.POSITIVE_INFINITY): string[] {
+    const max = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : limit > 0 ? this.candidatesByStem.size : 0;
     return [...this.candidatesByStem.keys()].sort().slice(0, max);
+  }
+
+  /**
+   * Returns the indexed stems closest to `directory` first, at most `limit`: the stems of that
+   * folder, then by the number of folder steps to the file, then alphabetically. A stem found in
+   * several folders counts once, at its closest folder. Read-only: no file system access.
+   */
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-010
+  nearestStems(directory: string, limit: number): string[] {
+    const max = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : limit > 0 ? this.candidatesByStem.size : 0;
+    const from = canonicalRoot(directory);
+    return [...this.candidatesByStem].map(([stem, candidates]) => ({
+      stem,
+      distance: Math.min(...candidates.map((candidate) => folderDistance(from, path.dirname(candidate.path)))),
+    }))
+      .sort((first, second) => first.distance - second.distance || byCodeUnit(first.stem, second.stem))
+      .slice(0, max)
+      .map((entry) => entry.stem);
   }
 
   pathsForStem(stem: string): readonly string[] {

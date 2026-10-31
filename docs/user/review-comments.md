@@ -10,6 +10,11 @@ popover: author, date, the comments as plain text, and a "Resolved" note for clo
 (dimmed). Code, diagrams, math and the properties table are never highlighted. A file that is not
 valid is ignored with a warning and is never overwritten.
 
+The **Comments** button of the floating toolbar hides all of this at once: highlights, badges and
+the Orphaned comments box disappear, the quoted text stays as plain text and a click on it opens no
+popover. Press it again to show them. The setting `markdownOkfSchemaStudio.preview.showComments`
+set to off does the same and removes the button.
+
 To start a thread, select text in the preview: a small **Comment** button appears next to the
 selection (or press Cmd+Alt+M on macOS, Ctrl+Alt+M elsewhere). Write the comment in the box and
 press **Save** (Cmd/Ctrl+Enter); Escape cancels. The thread is saved in the comments file, which is

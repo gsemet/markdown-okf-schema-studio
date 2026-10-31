@@ -9,6 +9,51 @@ export interface LinkRuntimeContext {
 const WARNING_CLASS = "sphinx-preview-link-warning";
 let warningCounter = 0;
 
+/** The second tooltip line a link carries in edit mode, and the title it had without it. */
+const FOLLOW_HINT = "data-sphinx-preview-follow-hint";
+const BASE_TITLE = "data-sphinx-preview-link-title";
+
+const withHint = (base: string, hint: string): string => base ? `${base}\n${hint}` : hint;
+
+/**
+ * The title of a link without its edit-mode follow hint: the tooltip the host gave it. A content
+ * render saves this one, so the rebuilt link does not get the hint line twice.
+ */
+export function linkBaseTitle(link: Element): string | null {
+  const title = link.getAttribute("title");
+  const hint = link.getAttribute(FOLLOW_HINT);
+  if (!hint) return title;
+  const stored = link.getAttribute(BASE_TITLE) ?? "";
+  return title === withHint(stored, hint) ? stored || null : title;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+/**
+ * Sets (`hint`) or removes (undefined) the second line of a link's tooltip, keeping the first line:
+ * the title the link has without the hint. A title rewritten since the hint was set (a later
+ * `applyLinkHint`, a render) becomes the new first line. Safe to call again.
+ */
+export function setLinkFollowHint(link: Element, hint: string | undefined): void {
+  const previousHint = link.getAttribute(FOLLOW_HINT);
+  const title = link.getAttribute("title");
+  let base = title ?? "";
+  if (previousHint) {
+    const stored = link.getAttribute(BASE_TITLE) ?? "";
+    if (title === withHint(stored, previousHint)) base = stored;
+  }
+  if (hint === undefined) {
+    if (!previousHint) return;
+    link.removeAttribute(FOLLOW_HINT);
+    link.removeAttribute(BASE_TITLE);
+    if (base) link.setAttribute("title", base);
+    else link.removeAttribute("title");
+    return;
+  }
+  link.setAttribute(FOLLOW_HINT, hint);
+  link.setAttribute(BASE_TITLE, base);
+  link.setAttribute("title", withHint(base, hint));
+}
+
 /**
  * Marks a link with what the host found at its target: the kind and the tooltip. A blocked target
  * (missing, outside the workspace, refused) also gets a small warning icon right after the link,
@@ -18,6 +63,9 @@ let warningCounter = 0;
 export function applyLinkHint(document: Document, link: Element, kind: string, title: string): void {
   link.setAttribute("data-sphinx-preview-link-state", kind);
   link.setAttribute("title", title);
+  // In edit mode the tooltip keeps its "Cmd/Ctrl+click to follow" line under the new title.
+  const followHint = link.getAttribute(FOLLOW_HINT);
+  if (followHint) setLinkFollowHint(link, followHint);
   const following = link.nextSibling as Element | null;
   const existing = following && typeof following.getAttribute === "function"
     && (following.getAttribute("class") ?? "").split(/\s+/u).includes(WARNING_CLASS)
@@ -48,6 +96,7 @@ export function installLinkNavigation(
   vscode: { postMessage(message: unknown): void },
   context: LinkRuntimeContext,
   beforeNavigate?: (navigate: () => void) => void,
+  editsInstead?: (event: Event) => boolean,
 ): { rescan(): void; applyTargets(message: Pick<PreviewLinkTargetsMessage, "targets">): void } {
   const selector = "a[data-sphinx-preview-navigation]";
   let links = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
@@ -117,6 +166,9 @@ export function installLinkNavigation(
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-077
   const activate = (event: Event): void => {
     if (event.type === "auxclick" && (event as MouseEvent).button !== 1) return;
+    // Edit mode: a plain click, Enter or Space on a link edits its block (CR 217); the page input
+    // opens the editor and keeps the browser from following the link.
+    if (editsInstead?.(event)) return;
     const link = event.target instanceof Element ? event.target.closest(selector) : undefined;
     const request = link?.getAttribute("data-sphinx-preview-navigation");
     if (!request) return;

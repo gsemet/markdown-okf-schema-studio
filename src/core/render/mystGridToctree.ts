@@ -236,9 +236,14 @@ function inlineContent(text: string, parse: GridParse): GridNode[] {
     : [{ type: "text", value: text }];
 }
 
-/** The properties that map a click on a one-line text to its own source line, the editor's range. */
-function lineProperties(line: number | undefined): Record<string, number> {
-  return line === undefined ? {} : { "data-line": line, "data-end-line": line };
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+/**
+ * The properties that map a click on a one-line card part (the title, a `:header:` or `:footer:`
+ * option) to its own source line, the editor's range. `data-single-line` tells the editor the line
+ * must stay one line: a blank line after it would end the card's options.
+ */
+function lineProperties(line: number | undefined): Record<string, number | string> {
+  return line === undefined ? {} : { "data-line": line, "data-end-line": line, "data-single-line": "true" };
 }
 
 /**
@@ -279,9 +284,9 @@ function buildCard(node: GridNode, source: GridSource, parse: GridParse, depth: 
         },
       }]
       : titleChildren;
-    // The title is one line, the directive line: a click opens the editor on it. A linked title is
-    // not mapped, a click on it follows the link.
-    addPart("title", inner, target ? {} : lineProperties(node.position?.start?.line));
+    // The title is one line, the directive line: a click opens the editor on it, linked or not. In
+    // edit mode a plain click on a linked title edits it too; Cmd/Ctrl+click follows (CR 217).
+    addPart("title", inner, lineProperties(node.position?.start?.line));
   }
 
   // The `:header:` and `:footer:` options come before the blocks the `^^^` and `+++` separators cut.
@@ -372,6 +377,7 @@ function unmapPlainBlocks(nodes: readonly GridNode[]): void {
     if (properties) {
       delete properties["data-line"];
       delete properties["data-end-line"];
+      delete properties["data-single-line"];
     }
     node.data = { ...(node.data ?? {}), noSourceLine: true };
     unmapPlainBlocks(node.children ?? []);

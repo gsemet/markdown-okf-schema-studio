@@ -89,7 +89,7 @@ When a preview is scrolled, rebuilt, re-laid out or edited, the extension SHALL 
 - THEN each element with a positive integer source line carries the source file, the source line, the document id and a block id source-block-1, source-block-2 and so on in document order; an element that spans several lines also carries its end line; no line is 0 or negative
 - GIVEN a figure directive and an element whose line attribute is 0, negative or not a number
 - WHEN the host builds the page
-- THEN the figure is keyboard-accessible with tabindex 0 (an element that is naturally focusable keeps its own) and the invalid element gets no mapping attributes
+- THEN the figure is keyboard-accessible with tabindex 0 (an element that is naturally focusable, or one that already carries a tabindex, keeps its own) and the invalid element gets no mapping attributes
 
 ### Scenario (refusal): The page measures only its own visible mapped blocks
 | Input | Outcome |

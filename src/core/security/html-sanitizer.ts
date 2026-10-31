@@ -89,7 +89,11 @@ const ALLOWED_ATTRIBUTES = new Set([
   "separators", "fence", "stretchy", "lspace", "rspace", "accent", "accentunder", "movablelimits",
 ]);
 const ALLOWED_ATTRIBUTE_PREFIXES = ["aria-", "data-sphinx-", "data-okf-", "data-myst-", "data-plantuml-", "data-footnote"];
-const ALLOWED_DATA_ATTRIBUTES = new Set(["data-line", "data-end-line", "data-line-number", "data-footnotes"]);
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+// `data-single-line`: a one-line card part whose editor takes Enter as done.
+const ALLOWED_DATA_ATTRIBUTES = new Set([
+  "data-line", "data-end-line", "data-single-line", "data-line-number", "data-footnotes",
+]);
 
 function isAllowedAttribute(name: string): boolean {
   return ALLOWED_ATTRIBUTES.has(name)
@@ -466,11 +470,14 @@ function rewriteNode(
     setAttr(node, "dir", "auto");
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // A mapped block is a tab stop unless it already says otherwise (a radio group's list is not).
   if (
     attr(node, "data-sphinx-source-file")
     && attr(node, "data-sphinx-source-line")
     && attr(node, "data-sphinx-preview-block")
     && !NATURALLY_FOCUSABLE_ELEMENTS.has(tagName)
+    && !attr(node, "tabindex")
   ) {
     setAttr(node, "tabindex", "0");
   }

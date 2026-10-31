@@ -96,6 +96,9 @@ test("T22: stems returns the indexed stems sorted and limited", () => {
     assert.deepEqual(index.stems(500), ["alpha", "mid", "zeta"]);
     assert.deepEqual(index.stems(2), ["alpha", "mid"]);
     assert.deepEqual(index.stems(0), []);
+    assert.deepEqual(index.stems(Number.POSITIVE_INFINITY), ["alpha", "mid", "zeta"]);
+    assert.deepEqual(index.nearestStems(root, Number.POSITIVE_INFINITY).sort(), ["alpha", "mid", "zeta"]);
+    assert.deepEqual(index.nearestStems(root, Number.NaN), []);
   } finally {
     invalidateStemIndex(root);
     fs.rmSync(root, { recursive: true, force: true });

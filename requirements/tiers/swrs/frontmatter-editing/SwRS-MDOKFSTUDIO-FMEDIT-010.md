@@ -22,10 +22,16 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/frontmatter/fileLinks.ts
+- src/core/frontmatter/propertiesTable.ts
+- src/core/frontmatter/stemIndex.ts
 - src/page/features/frontmatterListEditor.ts
 tested_in_files:
+- test/core/frontmatter/linkSuggestions.test.ts
+- test/core/frontmatter/propertiesTable.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
+- test/visual/linkHintScenarios.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-FMEDIT-011
@@ -92,11 +98,23 @@ When a writer opens the editor of a list field, the extension SHALL show one tex
 - WHEN the writer opens its editor and adds an item
 - THEN each input, the new one included, references the datalist of the stems
 
+### Scenario (nominal): The suggestions start with the stems closest to the document
+
+- GIVEN a list field of filename-stem links in a workspace of more than 500 Markdown files
+- WHEN the link suggestions of its row are computed
+- THEN the stems of the document's own folder come first, then the others by the number of folder steps between the document's folder and the file's folder, then alphabetically; a stem found in several folders appears once, at its closest folder, and the list stops at 500 stems
+
 ### Scenario (boundary): An item matching no stem is warned about and still saved
 
-- GIVEN an item whose value matches no stem
+- GIVEN an item whose value matches no known stem
 - WHEN the writer types it
 - THEN the status warns 'No Markdown file named "x.md" was found. It will be saved as typed.' and saving still posts the value; a missing or invalid suggestion attribute gives no datalist
+
+### Scenario (boundary): The warning checks every known stem, not only the dropdown
+
+- GIVEN a row whose known stems (every Markdown file stem of the index the table resolves links with, sent uncapped, and only when the dropdown was capped) include a stem that is not among the 500 dropdown suggestions
+- WHEN the writer types that stem in an item
+- THEN no warning is shown, and a value outside the known stems (such as zzz) still warns
 
 ### Known issues
 
@@ -111,7 +129,9 @@ When a writer opens the editor of a list field, the extension SHALL show one tex
 ### Verification notes
 
 - Method: test/page/runtimeFrontmatterEditor.test.ts (one input per item with handle, remove and Add item buttons; leaving the editor saves an array of strings, the field menu focus and a drag do not save; ArrowDown reorder and renumbering; add, reorder, remove and direct array saves; drag shows the insertion boundary).
-- Method: test/page/runtimeFrontmatterFields.test.ts (Enter inserts an empty item and focuses it; Enter in an empty last item removes it and saves; Enter with Shift or Alt or while composing does not touch the list; Backspace in an empty item removes it and moves focus; Cmd or Ctrl+Enter saves the list; link list datalist on every input, none for a missing or invalid attribute, the warning, the save still posted).
+- Method: test/page/runtimeFrontmatterFields.test.ts (Enter inserts an empty item and focuses it; Enter in an empty last item removes it and saves; Enter with Shift or Alt or while composing does not touch the list; Backspace in an empty item removes it and moves focus; Cmd or Ctrl+Enter saves the list; link list datalist on every input, none for a missing or invalid attribute, the warning, the save still posted; no warning for a known stem outside the dropdown, a warning for an unknown one).
+- Method: test/core/frontmatter/linkSuggestions.test.ts (a sibling past the 500th stem is known, no known list when nothing was capped, the suggestions start with the document's folder, are ordered by folder distance, deduplicated and capped at 500) and test/core/frontmatter/propertiesTable.test.ts (the known stems are a second escaped row attribute).
+- Method: visual scenarios frontmatter-editing/v07 and v08 (cream and dark): editing a sibling item in a workspace of more than 500 Markdown files shows no missing-file warning.
 - Criteria: Items are shown and saved as strings.
 
 <!-- okf:links:start -->

@@ -102,11 +102,22 @@ test("every alert type, the bold markers and a titled alert keep the lines of th
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-009
-test("an alert followed directly by an unquoted line keeps that line and the next blocks in place", async () => {
+test("an alert followed directly by a lazy line ends on that line and keeps the next blocks in place", async () => {
   assert.deepEqual(await blocks("> [!NOTE]\n> body\nAfter text.\n\nLast.\n"), [
+    ["aside", 1, 3],
+    ["p", 2, 3],
+    ["p", 5, 5],
+  ]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+test("an alert followed directly by a list item ends on its last quoted line and keeps the list in place", async () => {
+  assert.deepEqual(await blocks("> [!NOTE]\n> body\n- item\n\nLast.\n"), [
     ["aside", 1, 2],
     ["p", 2, 2],
-    ["p", 3, 3],
+    ["ul", 3, 4],
+    ["li", 3, 4],
+    ["p", 3, undefined],
     ["p", 5, 5],
   ]);
 });

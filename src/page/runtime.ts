@@ -35,6 +35,7 @@ import { installFileDrop } from "./features/fileDrop";
 import { installFrontmatterEditor } from "./features/frontmatterEditor";
 import { registerHostHandlers } from "./features/hostHandlers";
 import { installInsertPoints } from "./features/insertPoints";
+import { linkActivationEdits } from "./features/linkEditing";
 import { installLinkTooltip } from "./features/linkTooltip";
 import { createMappedBlocks } from "./features/mappedBlocks";
 import { bindEditModeCaptureClicks, installPageInput } from "./features/pageInput";
@@ -186,7 +187,8 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   }) : undefined;
   bindEditModeCaptureClicks(rt);
   const linkNavigation = installLinkNavigation(document, window, vscode, context,
-    (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate));
+    (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate),
+    (event) => linkActivationEdits(state.editMode, event));
   const firstClearance = installFirstClearance(document, window);
   pageDiagnostics.expose(firstClearance);
   // The button follows the host's answer (`hostRequests` is created below, before any click).
@@ -260,8 +262,12 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // fade of a block an editor gives back and the glow of blocks an outside change or an undo updated.
   const motion = installMotion(document, window);
   installIncomingToggle(document, vscode, context);
-  // Toolbar Comments button: hides the gray and thread chips, which moves the content like expanding one does.
-  installCommentsToggle(document, vscode, context, keepReadingLine);
+  // Toolbar Comments button: hides the chips and every review mark, which moves the content like
+  // expanding a chip does; the thread module closes its popover and updates the Tab order.
+  installCommentsToggle(document, vscode, context, () => {
+    commentThreads.visibilityChanged();
+    keepReadingLine();
+  });
   const historyControls = installHistoryControls(document, vscode, context,
     (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate));
   const viewControls = installViewControls(document, vscode, context, keepReadingLine);

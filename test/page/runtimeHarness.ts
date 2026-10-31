@@ -216,12 +216,18 @@ export class RuntimeElement {
         || (selector === ".sphinx-preview-insert-point"
           && current.className.split(" ").includes("sphinx-preview-insert-point"))
         || (selector === "[data-okf-properties]" && current.getAttribute("data-okf-properties") !== null)
+        || ([".okf-comment-body", ".okf-chip", ".okf-anchor"].includes(selector)
+          && (current.getAttribute("class") ?? "").split(" ").includes(selector.slice(1)))
         || (selector === "input.myst-checkbox" && current.tagName === "INPUT"
           && current.getAttribute("class") === "myst-checkbox")
         || (selector === ".myst-radio" && (current.getAttribute("class") ?? "").split(" ").includes("myst-radio"))
         || (selector.includes("data-sphinx-source-line") && current.getAttribute("data-sphinx-source-line") !== null)
         || (selector === "[data-edit-option],[data-edit-action]"
           && (current.getAttribute("data-edit-option") !== null || current.getAttribute("data-edit-action") !== null))
+        // The holders of a review thread (modules/commentThreads.ts): highlight, badge, orphan entry.
+        || (selector === "[data-okf-comment-thread], [data-okf-comment-badge], [data-okf-comment-orphan]"
+          && ["data-okf-comment-thread", "data-okf-comment-badge", "data-okf-comment-orphan"]
+            .some((name) => current!.getAttribute(name) !== null))
       ) {
         return current;
       }

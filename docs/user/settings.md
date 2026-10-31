@@ -22,10 +22,10 @@ width;
 - `preview.incrementalUpdates` (default on): update changed parts in place; off reloads the page.
 - `preview.showComments` (default on): show HTML comments as gray chips; click one (or press Enter
   or Space on it) to open the comment text in a box under the line. Each chip is labelled
-  "comment". The Comments button of the toolbar hides and shows them in both preview and edit mode
-  (remembered per workspace, shown by default). Off here hides the gray chips and the green thread
-chips in open
-  previews at once and removes that button. TODO chips always show.
+  "comment". Off hides every review mark in open previews at once (gray and thread chips,
+  highlighted quotes, badges, the Orphaned comments box) and removes the Comments button.
+  While it is on, the Comments button of the toolbar hides and shows the same review marks in both
+  preview and edit mode (remembered per workspace, shown by default). TODO chips always show.
 - `preview.showIncomingChanges` (default on): mark blocks changed since the last Git commit
   (unsaved edits included) with a green bar on the left, like the editor gutter. A changed or added
   front matter field gets its own bar on its row of the properties table; a removed field puts one

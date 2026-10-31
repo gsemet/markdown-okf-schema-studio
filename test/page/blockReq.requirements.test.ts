@@ -126,7 +126,9 @@ test("turning edit mode off closes the label rename field and posts no rename", 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
-test("the hover outline skips the properties table and an open editor, and an element in a link", () => {
+// CR 217 changed the rule for links: a block inside a link is outlined like any block (a plain click
+// there edits it), where it used to be skipped.
+test("the hover outline skips the properties table and an open editor, and outlines a block inside a link", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   turnEditModeOn(harness);
   const outlined = (): RuntimeElement[] => [...harness.mappings, harness.frontmatterProperties]
@@ -139,8 +141,10 @@ test("the hover outline skips the properties table and an open editor, and an el
   const linked = new SelectorElement(harness, ["a"], {
     "data-sphinx-source-file": "/workspace/active.md", "data-sphinx-source-line": "60",
   });
+  harness.mappings[2].appendChild(linked);
   harness.dispatchDocument("mouseover", { target: linked });
-  assert.deepEqual(outlined(), [], "a block that is itself inside a link is not outlined");
+  assert.equal(linked.getAttribute("data-sphinx-preview-edit-hover"), "true",
+    "a block that is itself inside a link is outlined (CR 217)");
 
   harness.dispatchDocument("mouseover", { target: harness.mappings[0] });
   assert.deepEqual(outlined(), [harness.mappings[0]], "a plain mapped block is outlined");
@@ -150,12 +154,15 @@ test("the hover outline skips the properties table and an open editor, and an el
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
-test("hovering a link inside a paragraph does not outline the paragraph, the text around it does", () => {
+// CR 217 changed the rule: the link used to leave the paragraph without outline.
+test("hovering a link inside a paragraph outlines the paragraph, like the text around it", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
   const link = new SelectorElement(harness, ["a"], {}, "a");
   harness.mappings[1].appendChild(link);
   harness.dispatchDocument("mouseover", { target: link });
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-edit-hover"), "true");
+  harness.dispatchDocument("mouseover", { target: harness.mappings[0] });
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-edit-hover"), null);
   harness.dispatchDocument("mouseover", { target: harness.mappings[1] });
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-edit-hover"), "true");
@@ -176,7 +183,8 @@ test("a click on a cell of the properties table never opens a block editor", () 
   assert.equal(opens[0]!.line, 50);
 });
 
-test("a click on a comment chip, an open thread or a block inside a link opens no editor", () => {
+// CR 217 changed the rule for the block inside a link: it now opens its editor, where it opened none.
+test("a click on a comment chip or an open thread opens no editor, a block inside a link opens its own", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
   const before = harness.messages.length;
@@ -188,25 +196,40 @@ test("a click on a comment chip, an open thread or a block inside a link opens n
   const linked = new SelectorElement(harness, ["a"], {
     "data-sphinx-source-file": "/workspace/active.md", "data-sphinx-source-line": "60",
   });
-  for (const target of [chip, thread, linked]) {
+  for (const target of [chip, thread]) {
     harness.dispatchDocument("click", { target, preventDefault: () => undefined });
   }
   assert.deepEqual(postsOf(harness, "previewEditOpen", before), []);
   harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
   assert.equal(postsOf(harness, "previewEditOpen", before).length, 1, "a plain block still opens its editor");
+  const linkedHarness = createRuntimeHarness();
+  turnEditModeOn(linkedHarness);
+  const linkedBlock = new SelectorElement(linkedHarness, ["a"], {
+    "data-sphinx-source-file": "/workspace/active.md", "data-sphinx-source-line": "60",
+    "data-sphinx-source-end-line": "60",
+  });
+  linkedHarness.mappings[2].appendChild(linkedBlock);
+  linkedHarness.dispatchDocument("click", { target: linkedBlock, preventDefault: () => undefined });
+  const opens = postsOf(linkedHarness, "previewEditOpen");
+  assert.equal(opens.length, 1, "the block inside a link opens its editor (CR 217)");
+  assert.equal(opens[0]!.line, 60);
+  assert.deepEqual(postsOf(linkedHarness, "previewLink"), [], "the link is not followed");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
-test("a click on a link inside a paragraph follows the link and opens no editor", () => {
+// CR 217 changed the rule: a plain click on the link used to follow it and open no editor.
+test("a click on a link inside a paragraph opens the paragraph editor; a Cmd click follows the link", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
   const link = new SelectorElement(harness, ["a"], {}, "a");
   harness.mappings[1].appendChild(link);
   const before = harness.messages.length;
+  harness.dispatchDocument("click", { target: link, preventDefault: () => undefined, metaKey: true });
+  assert.deepEqual(postsOf(harness, "previewEditOpen", before), [], "a Cmd click opens no editor");
   harness.dispatchDocument("click", { target: link, preventDefault: () => undefined });
-  assert.deepEqual(postsOf(harness, "previewEditOpen", before), []);
-  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
-  assert.equal(postsOf(harness, "previewEditOpen", before).length, 1, "the text outside the link still edits");
+  const opens = postsOf(harness, "previewEditOpen", before);
+  assert.equal(opens.length, 1, "a plain click on the link edits the paragraph");
+  assert.equal(opens[0]!.line, 50);
 });
 
 test("Enter or Space on a focused block opens its editor with the caret at the end", () => {
@@ -252,15 +275,22 @@ test("Enter or Space stays with a text box, a button, a chip, a toggle and an in
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
-test("Enter or Space on a link inside a paragraph opens no editor", () => {
-  const harness = createRuntimeHarness();
-  turnEditModeOn(harness);
-  const link = new SelectorElement(harness, ["a"], {}, "a");
-  harness.mappings[1].appendChild(link);
-  for (const name of ["Enter", " "]) harness.dispatchDocument("keydown", key(name, { target: link }).event);
-  assert.deepEqual(postsOf(harness, "previewEditOpen"), []);
-  harness.dispatchDocument("keydown", key("Enter", { target: harness.mappings[1] }).event);
-  assert.equal(postsOf(harness, "previewEditOpen").length, 1);
+// CR 217 changed the rule: Enter or Space on the link used to open no editor.
+test("Enter or Space on a link inside a paragraph opens the paragraph editor; Cmd+Enter does not", () => {
+  for (const name of ["Enter", " "]) {
+    const harness = createRuntimeHarness();
+    turnEditModeOn(harness);
+    const link = new SelectorElement(harness, ["a"], {}, "a");
+    harness.mappings[1].appendChild(link);
+    harness.dispatchDocument("keydown", key("Enter", { target: link, metaKey: true }).event);
+    assert.deepEqual(postsOf(harness, "previewEditOpen"), [], "Cmd+Enter opens no editor");
+    const press = key(name, { target: link });
+    harness.dispatchDocument("keydown", press.event);
+    assert.equal(press.prevented(), true, `${JSON.stringify(name)} is taken by the editor`);
+    const opens = postsOf(harness, "previewEditOpen");
+    assert.equal(opens.length, 1);
+    assert.equal(opens[0]!.line, 50);
+  }
 });
 
 test("a click on Diagram source in edit mode opens the editor of the figure and not the disclosure", () => {

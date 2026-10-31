@@ -448,11 +448,15 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
     linkResults,
   );
   if (options.inspectLinks === true) {
-    let suggestions: string[] | undefined;
+    let stems: ReturnType<typeof filenameStemSuggestions> | undefined;
     for (const field of fields) {
       if (!fieldUsesFilenameStemLinks(effective.properties[field.name])) continue;
-      suggestions ??= filenameStemSuggestions(linkInspectionOptions);
-      if (suggestions.length > 0) field.linkSuggestions = suggestions;
+      stems ??= filenameStemSuggestions(linkInspectionOptions);
+      if (stems.suggestions.length > 0) {
+        field.linkSuggestions = stems.suggestions;
+        // Only a capped dropdown needs the full list; otherwise the suggestions are the known set.
+        if (stems.known.length > stems.suggestions.length) field.linkKnownStems = stems.known;
+      }
     }
   }
   const availableFields = effective.order

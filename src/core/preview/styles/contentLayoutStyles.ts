@@ -35,6 +35,48 @@ const FIRST_ELEMENT_CLEARANCE_CSS = `/*
   margin-inline-end: var(--sphinx-preview-first-inset, 0px);
 }`;
 
+// An image, figure or table floated left or right (MyST :align: or the HTML align attribute).
+const ALIGNED_FLOAT = ':is(img, figure, table):is(.align-left, .align-right, [align="left" i], [align="right" i])';
+
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-043
+/** Text wraps around the floating toolbar where it overlaps the column; boxes start below it. */
+const TOOLBAR_FLOAT_CSS = `/*
+ * An invisible float at the start of the column, the size of the part of the toolbar inside it at the
+ * top of the document (published by the runtime, 0 when the toolbar sits beside the column, when an
+ * interactive first element has its own remedy, or when the first block is a box). A pseudo-element:
+ * :first-child rules and the 40px gap still apply to the first block, and it never takes a click.
+ * Physical right, like the toolbar and the runtime's measure.
+ */
+#sphinx-myst-preview-content::before {
+  content: "";
+  float: right;
+  width: var(--sphinx-preview-toolbar-float-width, 0px);
+  height: var(--sphinx-preview-toolbar-float-height, 0px);
+  pointer-events: none;
+}
+
+/*
+ * Only running text wraps around it. Every other top-level block (a table, figure, code block,
+ * admonition, aside, blockquote, details, grid, tab set, diagram, math block, block editor frame or
+ * its host, an image-only paragraph, a rule) would be narrowed or shifted as a whole beside the
+ * float, so it starts below the toolbar's reach. The list names what stays, not what moves, so a new
+ * kind of box is covered: paragraphs, headings, lists, definition lists, and the blocks that are no
+ * box (edit-mode insert points, label anchor rows, comment chips, hidden and folded blocks); clearing
+ * an empty one would push the text after it down too.
+ */
+#sphinx-myst-preview-content:not(:has(${ALIGNED_FLOAT})) > :not(p:not([data-sphinx-preview-figure]), h1, h2, h3, h4, h5, h6, ul, ol, dl, [hidden], [data-okf-folded], .sphinx-preview-insert-point, .okf-anchor-row, div.okf-comment) {
+  clear: right;
+}
+
+/*
+ * A document with an image, figure or table aligned left or right (anywhere) keeps the layout it had
+ * before: no float, and no box clears (a box would clear the aligned float too, wherever it is, and a
+ * per-block "comes after an aligned float" test costs too much in a long document).
+ */
+#sphinx-myst-preview-content:has(${ALIGNED_FLOAT})::before {
+  display: none;
+}`;
+
 // @implements_req SwRS-MDOKFSTUDIO-CORE-028
 // @implements_req SwRS-MDOKFSTUDIO-CORE-034
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
@@ -419,6 +461,8 @@ ${FIRST_ELEMENT_GAP_CSS}
 }
 
 ${FIRST_ELEMENT_CLEARANCE_CSS}
+
+${TOOLBAR_FLOAT_CSS}
 
 #sphinx-myst-preview-content :where(ul, ol) {
   padding-inline-start: 2em;

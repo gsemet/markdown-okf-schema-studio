@@ -11,7 +11,7 @@ import * as path from "node:path";
 import { test } from "node:test";
 
 import { renderMyst } from "../../../src/core/render/mystRenderer";
-import { attribute, findElements, hasClass, parseHtml, textContent } from "./dom";
+import { attribute, findElements, hasClass, type HtmlElement, parseHtml, textContent } from "./dom";
 
 const FIXTURE = path.resolve(__dirname, "../../../../test/visual/fixtures/73-grid-card-editing.md");
 
@@ -83,10 +83,24 @@ test("a plain grid card title maps to its directive line too", async () => {
   assertTitleMapped(await titleMappings(source, "Plain"), 4);
 });
 
-test("a card title with a link option has no source line: a click on it follows the link", async () => {
+// CR 217: the owner changed the rule. A linked title is now mapped like a plain one, so in edit mode
+// a plain click on it opens its directive line (Cmd/Ctrl+click still follows the link).
+test("a card title with a link option maps to its directive line like a plain title", async () => {
   const source = ["# Doc", "", ":::{card} 3. Linked", ":link: https://example.com", "Body text.", ":::", ""].join("\n");
-  const mapping = await titleMappings(source, "Linked");
-  assert.deepEqual(mapping, { lines: [], endLines: [] });
+  assertTitleMapped(await titleMappings(source, "Linked"), 3);
+});
+
+test("a linked grid card title maps to its directive line and keeps its link", async () => {
+  const source = fs.readFileSync(path.resolve(__dirname, "../../../../test/visual/fixtures/46-grid-cards.md"), "utf8");
+  const titleLine = source.split("\n").findIndex((line) => line.includes("{grid-item-card} Linked card")) + 1;
+  assert.equal(titleLine, 14);
+  assertTitleMapped(await titleMappings(source, "Linked card"), titleLine);
+  const html = (await renderMyst(source)).html;
+  const title = findElements(parseHtml(html), (element) => hasClass(element, "myst-grid-card-title"))
+    .find((element) => textContent(element).includes("Linked card"));
+  const link = title && findElements(title, (element) => element.tagName === "a")[0];
+  assert.ok(link && hasClass(link, "myst-grid-card-link"), "the title still holds the card link");
+  assert.equal(attribute(link, "href"), "targets/alpha.md");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-100
@@ -122,4 +136,41 @@ test("header and footer options that are not the first option line map to their 
     assert.ok(mapped.length > 0, `the ${kind} carries a data-line`);
     assert.deepEqual(mapped.filter(([start, end]) => start !== line || end !== line), [], `${kind}: only line ${line}`);
   }
+});
+
+/** The parts of a rendered element (itself and its descendants) that carry `data-single-line`. */
+function singleLineParts(element: HtmlElement | undefined): string[] {
+  assert.ok(element, "the part is rendered");
+  // findElements visits the element itself too.
+  return findElements(element, (node) => attribute(node, "data-single-line") !== undefined)
+    .map((node) => `${node.tagName}:${attribute(node, "data-line")}-${attribute(node, "data-end-line")}`);
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+test("the header, footer and unlinked title lines are marked single-line; the body is not", async () => {
+  const source = [
+    "# Doc", "", "One line paragraph.", "", ":::{card} Title", ":header: H", ":footer: F", "Body text.", ":::", "",
+    "::::{grid} 2", ":::{grid-item-card} Grid title", "Grid body.", ":::", "::::", "",
+  ].join("\n");
+  const tree = parseHtml((await renderMyst(source)).html);
+  const part = (kind: string, text: string) => findElements(tree, (element) => hasClass(element, `myst-grid-card-${kind}`))
+    .find((element) => textContent(element).includes(text));
+  assert.deepEqual(singleLineParts(part("header", "H")), ["div:6-6"]);
+  assert.deepEqual(singleLineParts(part("footer", "F")), ["div:7-7"]);
+  assert.deepEqual(singleLineParts(part("title", "Title")), ["div:5-5"]);
+  assert.deepEqual(singleLineParts(part("title", "Grid title")), ["div:12-12"]);
+  for (const text of ["Body text.", "Grid body."]) {
+    assert.deepEqual(singleLineParts(part("body", text)), [], `the body "${text}" is no single-line part`);
+  }
+  const outside = findElements(tree, (element) => element.tagName === "p" || element.tagName === "h1")
+    .filter((element) => attribute(element, "data-single-line") !== undefined);
+  assert.deepEqual(outside, [], "a one-line paragraph or heading is no single-line part");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+test("a linked card title is marked single-line like any card title", async () => {
+  const source = ["# Doc", "", ":::{card} Linked", ":link: https://example.com", "Body text.", ":::", ""].join("\n");
+  const tree = parseHtml((await renderMyst(source)).html);
+  const title = findElements(tree, (element) => hasClass(element, "myst-grid-card-title"))[0];
+  assert.deepEqual(singleLineParts(title), ["div:3-3"]);
 });

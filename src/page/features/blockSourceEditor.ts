@@ -346,6 +346,16 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       })) return;
       if (blockEditor.navigateBlockEdit(event, textarea)) return;
       if (textControls.homeEndInControl(event, textarea)) return;
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+      // A one-line card part never takes a newline: Shift+Enter, Alt+Enter and Alt+Shift+Enter do
+      // nothing (plain Enter and Cmd/Ctrl+Enter are done below).
+      if (
+        edit.singleLine && event.key === "Enter" && (event.shiftKey || event.altKey)
+        && !event.metaKey && !event.ctrlKey && !event.isComposing
+      ) {
+        event.preventDefault?.();
+        return;
+      }
       if (
         event.key === "Enter"
         && !event.shiftKey && !event.altKey && !event.metaKey && !event.ctrlKey
@@ -362,6 +372,13 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
         if (afterImage !== undefined) {
           event.preventDefault?.();
           textarea.setSelectionRange(afterImage, afterImage);
+          return;
+        }
+        // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+        // A one-line card part: Enter is done, like Cmd/Ctrl+Enter (a blank line would cut the card).
+        if (edit.singleLine) {
+          event.preventDefault?.();
+          rt.selection.finishEditorWithSelection("save", () => blockEditor.saveBlockEdit());
           return;
         }
         const continuation = textEditing.continueOnEnter(
@@ -385,6 +402,9 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       ) {
         // Tab never leaves the editor; Escape (cancel) and Cmd/Ctrl+Enter (done) are the exits.
         event.preventDefault?.();
+        // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+        // A one-line card part is never indented: Tab and Shift+Tab do nothing.
+        if (edit.singleLine) return;
         const indentation = textEditing.indentSelection(
           textarea.value,
           textarea.selectionStart,

@@ -55,6 +55,7 @@ const SOURCE = [
   "## Details", "",
   "A hidden gem lives in this section, next to a [studio link](https://example.com/studio).", "",
   "Inline math $studio + 1$ is not replaceable from the preview.", "",
+  "A st**udio** split by markup is not replaceable either.", "",
   "## Closing", "",
   "Last words about the Studio.", "",
 ].join("\n");
@@ -305,7 +306,9 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
       await (await liveFrame(page)).locator("h2", { hasText: "Details" }).getAttribute("data-okf-fold") === "open");
     assert.equal(await count(), "1 of 1");
 
-    // Replace all: the matched spans only, one undo step; math, link target and the like are skipped.
+    // Replace all: the matched spans only, one undo step. The link label is replaced and its target
+    // kept; a match split by markup is skipped (the math is no searchable text: KaTeX's output is
+    // hidden from the find index).
     await (await liveFrame(page)).locator("[data-find-input]").fill("studio");
     await (await liveFrame(page)).locator("[data-find-case]").click();
     await assertReplaceAllowed();
@@ -316,8 +319,10 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
     await settle("the document to change", () => notes.getText() !== SOURCE);
     const replaced = SOURCE
       .replace("and the studio keeps", "and the atelier keeps")
-      .replace("the studio table cell", "the atelier table cell");
+      .replace("the studio table cell", "the atelier table cell")
+      .replace("[studio link]", "[atelier link]");
     assert.equal(notes.getText(), replaced);
+    assert.match(notes.getText(), /\[atelier link\]\(https:\/\/example\.com\/studio\)/u, "the link target is kept");
     // The host answers after it applied the edit, so the note holds "Replacing..." until then.
     const readNote = async (): Promise<string> =>
       await (await liveFrame(page)).locator("[data-find-note]").textContent() ?? "";
@@ -329,6 +334,7 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
       throw new Error(`${String(error)} (note: ${JSON.stringify(note)}, document: ${JSON.stringify(notes.getText())})`);
     });
     assert.match(note, /cannot be replaced from the preview/u);
+    assert.equal(note, "Replaced 3 matches; 1 match cannot be replaced from the preview");
     await vscode.window.showTextDocument(notes, vscode.ViewColumn.One);
     await waitForActiveSourceEditor(notes);
     await vscode.commands.executeCommand("undo");

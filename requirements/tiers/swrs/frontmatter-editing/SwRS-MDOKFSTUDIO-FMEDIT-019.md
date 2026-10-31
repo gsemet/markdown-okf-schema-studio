@@ -25,8 +25,10 @@ implemented_in_files:
 - src/page/features/editMode.ts
 - src/page/features/frontmatterEditor.ts
 - src/page/features/frontmatterValueEditor.ts
+- src/page/features/pageInput.ts
 - src/page/features/textControls.ts
 tested_in_files:
+- test/integration/realInput/markers.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeEditorFlush.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
@@ -94,6 +96,11 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 | Input | Outcome |
 | --- | --- |
 | Host answers the posted save with an error message | The message shows in the error state (red) in the editor, the controls are enabled and the editor stays open; Escape still closes it |
+| The refusal arrives while the focus is on the page body or in the editor (the control was disabled during the save) | The focus returns to the control with the caret at the end; the list editor focuses its first item |
+| The refusal arrives after the writer moved the focus to another control | The focus stays where the writer put it |
+| The writer leaves the editor while it still holds the refused text | Nothing is posted again; the editor stays open with its message |
+| The writer clicks another field's value or key cell (or presses Enter or Space on it) while the editor still holds the refused text | The refused editor closes without a save, the field shows its saved value, the refused text is discarded and the clicked field's editor opens in the same click |
+| The writer changes the text after the refusal, then presses Enter or leaves the editor | The new text is saved once; a click on another field then saves it and opens no other editor in that click |
 | Error result without text | The editor shows "The frontmatter edit could not be applied." |
 | Result carrying another editId | It is ignored |
 
@@ -106,7 +113,6 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 ### Known issues
 
 - Known issue: leaving edit mode discards a typed but unsaved field value, while block editors save theirs.
-- Known issue: an editor left in an error state blocks every other field until it is cancelled.
 
 ### Related requirements
 
@@ -119,8 +125,10 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 - Method: test/page/runtimeFrontmatterEditor.test.ts (blur toward the field actions does not save; unchanged value; Escape cancels an unsaved value edit and Escape outside the properties section leaves it open; "Saving frontmatter…" status with disabled controls; "Saved. Refreshing preview…"; validation errors show an explicit error state and the other-editId result is ignored).
 - Method: test/page/runtimeEditorFlush.test.ts (commit by Enter, change or leaving only when the value differs).
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (turning edit mode off closes a field editor without a save but saves a changed block editor; undo and redo keys stop at the control in the value and the key editor).
+- Method: test/page/runtimeFrontmatterEditor.test.ts (after a refused value save: the focus comes back to the control, Escape closes it, the unchanged refused text is not posted by a blur and a click on another field opens it, a corrected value is saved once by Enter or by the blur; a refused key save refocuses the key control and its blur posts nothing again).
+- Method: test/integration/realInput/frontmatterFields.ts, marked in test/integration/realInput/markers.ts (scenario scenarioRefusedValueKeepsEditorUsable, real keyboard and mouse: a value the schema refuses, focus back in the input, Escape closes it, another field opens; a click on another field after the refusal opens it at once; the buffer is unchanged).
 - Method: visual scenario frontmatter-editing/v02-edit-enum-value-dark-900 in test/visual/scenarioDefinitions2.ts (refused save shown in the editor).
-- Criteria: closeFrontmatterEditor is called without a save on edit mode off while the block editor path posts a final save; keepUndoInControl calls stopPropagation for Z and Y with Cmd or Ctrl.
+- Criteria: receiveFrontmatterResult records the refused text and refocuses the control when the focus was lost; holdsRefusedText is true while the idle control holds that text; closeRefusedEditorFor closes such an editor for another cell; closeFrontmatterEditor is called without a save on edit mode off while the block editor path posts a final save; keepUndoInControl calls stopPropagation for Z and Y with Cmd or Ctrl.
 
 <!-- okf:links:start -->
 ### Links

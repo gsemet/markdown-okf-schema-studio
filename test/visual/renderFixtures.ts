@@ -162,6 +162,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
   const withPlantUml = injectPlantUmlDiagrams(rewritten.html, plantUml.diagrams);
   // Mirror the real webview: strip the raw YAML block and inject the same
   // properties table buildPreviewWebviewHtml would produce.
+  const workspaceRoots = options.fixturesWorkspace === true ? { workspaceRoots: [fixtureDirectory] } : {};
   const deferredFrontmatterLinks = SCENARIOS.some((scenario) =>
     scenario.fixture === fixture && scenario.frontmatterLinkState !== undefined);
   const frontmatter = analyzeFrontmatter({
@@ -170,6 +171,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     filePath: sourcePath,
     strictAdditionalProperties: options.strictAdditionalProperties === true,
     inspectLinks: !deferredFrontmatterLinks,
+    ...workspaceRoots,
   });
   const sourceMapping = {
     documentId: pathToFileURL(sourcePath).toString(),
@@ -184,6 +186,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
       filePath: sourcePath,
       strictAdditionalProperties: options.strictAdditionalProperties === true,
       inspectLinks: true,
+      ...workspaceRoots,
     }), tableEnabled, sourceMapping, editingEnabled)
     : "";
   const withPlantUmlAndTable = markup

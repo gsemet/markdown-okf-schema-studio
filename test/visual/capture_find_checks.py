@@ -60,7 +60,8 @@ def check_find_bar(page: Page, toolbar, page_name: str, failures: list[Failure])
         page.locator("[data-find-replace-input]").evaluate("element => { element.value = 'THE-REPLACEMENT'; element.dispatchEvent(new Event('input')); }")
         page.locator("[data-find-replace-all]").evaluate("element => element.click()")
         page.wait_for_timeout(100)
-        sent = page.evaluate("window.visualMessages.filter(item => item.type === 'previewFindReplace')")
+        # The replace row's dry run (`dryRun: true`, sent 150 ms after a search) is no replace request.
+        sent = page.evaluate("window.visualMessages.filter(item => item.type === 'previewFindReplace' && !item.dryRun)")
         note = page.locator("[data-find-note]").inner_text()
         if read_only:
             if sent or not note:

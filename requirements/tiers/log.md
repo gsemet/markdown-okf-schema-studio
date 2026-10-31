@@ -2,6 +2,126 @@
 
 ## 2026-10-31
 
+### Link list suggestions and warning in large workspaces
+
+- SwRS-MDOKFSTUDIO-FMEDIT-010 (proposed): the list editor of a filename-stem link list warns only
+  for a value outside every known stem (the index the table resolves links with, sent uncapped as
+  a second row attribute); the dropdown suggestions start with the document's folder, then by
+  folder distance, then alphabetically, deduplicated and still capped at 500.
+- Verification: test/core/frontmatter/linkSuggestions.test.ts,
+  test/core/frontmatter/propertiesTable.test.ts, test/page/runtimeFrontmatterFields.test.ts and
+  the screenshot scenarios frontmatter-editing/v07-link-hint-known-stem-cream-900 and
+  frontmatter-editing/v08-link-hint-known-stem-dark-900.
+
+### Enter in a card's one-line editors
+
+- SwRS-MDOKFSTUDIO-BLOCK-258 (proposed): in the editor opened on a card title, `:header:` or
+  `:footer:` line, plain Enter saves and closes the editor as Done does, Shift+Enter and Alt+Enter
+  insert nothing and Tab and Shift+Tab do nothing, so no blank line ends the card's options;
+  new scenarios for Enter and for one-line paragraphs and headings that keep Enter as a new line.
+  The renderer marks these parts `data-single-line` (a linked title is marked too);
+  detection never uses the line range.
+- SwRS-MDOKFSTUDIO-BLOCK-033 (proposed): the status hint of these editors reads
+  "Enter: done · Esc: cancel" before the done key.
+- Verification: test/page/runtimeCardOptionEnter.test.ts, test/core/render/gridCardTitleSourceLine.test.ts,
+  test/security/html-policy.test.ts, and the visual scenario
+  block-editing/v35-card-header-enter-commits-line-cream-900 (real key input), all passing;
+  they failed on the previous code. Multi-line paste in these editors is unchanged.
+
+### Radio choice lists: keyboard focus and the write guards
+
+- SwRS-MDOKFSTUDIO-GFM-039 (proposed): the list, items and option paragraphs of a group are out of
+  the Tab order (tabindex -1), so one Tab from the label lands on the selected option; after a
+  choice the option of the same line and column gets the focus back once the content patch is
+  applied; the open-editor guard runs on the press of an option, before the editor's blur, and the
+  editor stays open; new refusal row for a file VS Code keeps read-only ('This file is read-only in
+  VS Code.'), checked by comparing the text before and after the apply; the workspace.applyEdit
+  path (no editor shows the document) is noted as untested.
+- SwRS-MDOKFSTUDIO-GFM-021 (proposed): read-only file row for checkbox toggles, with the same
+  untested note.
+- SwRS-MDOKFSTUDIO-BLOCK-041 (proposed): new radio option row, the guard runs on the press; the
+  checkbox row is unchanged (task checkboxes keep only the click guard).
+- SwRS-MDOKFSTUDIO-LIFE-119 (proposed): a mapped block that already carries a tabindex keeps it.
+- Verification: unit tests in test/core/render/radioGroups.test.ts, test/security/html-policy.test.ts,
+  test/page/runtimeRadioGroups.test.ts and test/session/radioChoice.test.ts; screenshot scenarios
+  gfm/v12 and gfm/v13; the real-window cases of test/integration/radioChoice.test.ts run in the
+  heavy integration job (not run locally).
+
+### Alert lazy continuation lines
+
+- SwRS-MDOKFSTUDIO-GFM-009 (proposed): an alert now ends where its block quote ends under
+  CommonMark 0.31.2 section 5.1, lazy paragraph continuation lines included, as GitHub renders it
+  (checked through the GitHub Markdown API in gfm mode); it used to end at the first unquoted line.
+  The boundary scenario and the line-mapping rows were rewritten: a lazy line is inside the
+  admonition, which ends on the alert's last line, quoted or lazy; a blank line, a block start or a
+  line after a quoted heading, code block, blank quote line or thematic break stays outside.
+  SwRS-MDOKFSTUDIO-GFM-037 (superseded) is left as it was.
+- SwRS-MDOKFSTUDIO-PALETTE-115 (proposed): a caret on a lazy line of an alert is in that alert (no
+  edit without an argument, a type replaces that alert's head); a new alert inserted under a quoted
+  or lazy line starts after a blank line. The render pass and the palette share one rule
+  (`src/core/syntax/blockQuoteRange.ts`).
+- Both follow GitHub (gh api markdown, gfm mode) on the edge cases: any list marker on a lazy line
+  ends the alert, a lazy `===`, `--` or delimiter row stays paragraph text, a quoted table closes
+  the paragraph, HTML blocks of kinds 1 to 5 end on their end marker and a lone tag (kind 7) cannot
+  interrupt a paragraph. A lazy MyST block break `+++` stays paragraph text too (it used to reach
+  the block-break path inside the admonition and stop the render). Other MyST-only block syntax on
+  a lazy line (comment, target, footnote definition, math block) keeps its MyST meaning inside the
+  admonition, where GitHub shows text; GFM-009 says so. The palette finds no alert head inside
+  fenced code.
+- Verification: unit tests in test/core/render/alertLazyContinuation.test.ts,
+  test/core/render/alertSourceLines.test.ts and test/page/modules/alertLazyEditAction.test.ts.
+
+### Hiding comments hides every review mark
+
+- SwRS-MDOKFSTUDIO-REVIEW-152 (proposed) widened from the chips to every review mark: while the
+  Comments button is off or `preview.showComments` is false, the highlight colour and the dotted
+  underline go (the quoted text stays as plain text), badges and the Orphaned comments box are not
+  displayed, a click or Enter on a former highlight opens no popover and acts as on plain text
+  (reveal the source line, edit the block in edit mode), highlights leave the Tab order and come
+  back on Show, and an open popover closes. Title, description, scenarios and verification notes
+  follow. The owner agreed on 2026-10-31.
+- SwRS-MDOKFSTUDIO-REVIEW-021 (proposed): the popover opens only while comments are shown.
+- Verification: unit tests in test/core/preview/previewStyles.test.ts,
+  test/page/modules/commentThreads.test.ts and test/page/runtimeCommentsHidden.test.ts; visual
+  scenarios review-annotations/v29 and v30 (light, dark); the real-input scenario
+  `scenarioHiddenReviewMarks` runs in the heavy integration job (not run locally).
+
+### Replace all and a link target that repeats the query
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-012 (draft): the source text the reader cannot see (link and image
+  targets and titles, a whole inline image with its alt text, reference definition lines) is left
+  out of the source occurrences. A match in a link label whose target repeats the text is now
+  replaced and the target kept; before, the whole block was skipped. Autolinks, links in code
+  spans and links or definitions in fenced code blocks (or a definition indented as code) stay
+  counted; no link inside a link. New boundary rows and verification notes; the real-window
+  scenario test/integration/findInPreview.test.ts now expects the link label replaced.
+- Added SwRS-MDOKFSTUDIO-TOOLBAR-131 (toolbar-navigation, `proposed`, derives from
+  StRS-MDOKFSTUDIO-TOOLBAR-003): with the replace row open, the page asks the host for a dry run
+  of Replace all (`previewFindReplace` with `dryRun: true`) 150 ms after each search, row opening
+  or content refresh, and the note counts the matches that cannot be replaced before any click.
+  Stale and refused answers keep the page's count; no request while the row is closed. The
+  request holds no replacement text, so its length never stops it.
+- Verification: unit tests in test/core/edits/findReplace.test.ts,
+  test/page/modules/findBar.test.ts, test/core/protocol/pageToHost.test.ts and
+  test/session/reviewReqThreads.requirements.test.ts; `just check` and
+  `okfreq validate --check-links` pass.
+
+### Body text keeps clear of the floating toolbar
+
+- Added SwRS-MDOKFSTUDIO-LAYOUT-043 (layout-width, `proposed`, derives from
+  StRS-MDOKFSTUDIO-LAYOUT-004): when the floating toolbar overlaps the text column at the top of a
+  document whose first block is running text, the runtime publishes the toolbar's rectangle inside
+  the column (`--sphinx-preview-toolbar-float-width` / `-height`), an invisible right float of that
+  size makes the text of the first blocks wrap around the toolbar, and every other top-level block
+  (tables, figures, code, notes, block editor frames) within its reach starts below it; 0 beside the
+  column, under an interactive first element, under a first block that is a box and in a document
+  with an aligned image, figure or table. Top-level headings clear left or right aligned images,
+  figures and tables (MyST `:align:` or HTML `align`) before them, never the toolbar float.
+- SwRS-MDOKFSTUDIO-LAYOUT-011 (proposed): the known issue on non-interactive first elements points
+  to the new requirement.
+- Verification: unit tests "CR 226" in test/page/modules/firstClearance.test.ts and the headless
+  visual scenarios layout-width/v88, v89 and v90 (test/visual/toolbarFloatScenarios.ts).
+
 ### Radio choice lists
 
 - Added SwRS-MDOKFSTUDIO-GFM-039 (gfm, `proposed`, derives from StRS-MDOKFSTUDIO-GFM-003): a run

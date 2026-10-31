@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The Comments button of the toolbar, and the setting `preview.showComments`, now hide every review
+  mark and not only the chips: the highlighted quotes and their underline, the badges and the
+  Orphaned comments box go, the quoted text stays as plain text, and a click on it no longer opens a
+  thread popover. Showing the comments brings everything back.
 - Radio choice lists: two or more list items in a row that start with `( )` or `(x)` render as a
   radio group, labelled by the paragraph above the list. One click on another option, or Space or
   Enter on it, moves the `x` in the Markdown: at most two lines change, in one undo step. A plan can
@@ -11,6 +15,10 @@
   under the edition palette: the card widens and pushes the other cards of its row aside, the
   palette sits above the text box (it may be wider than the card and scrolls vertically past a
   maximum height) and the text box keeps a readable width.
+- Enter in the editor of a card title or of its `:header:` or `:footer:` line now saves the line and
+  closes the editor, like Done: it no longer adds a blank line that ended the card's options and
+  cut the card. Shift+Enter, Alt+Enter, Tab and Shift+Tab do nothing there, and the status line
+  reads "Enter: done".
 
 ## 1.1.0 - 2026-10-29
 

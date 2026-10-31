@@ -60,9 +60,10 @@ interface ListHarness {
   addButton: RuntimeElement;
 }
 
-function openListEditor(values: string, suggestions?: string): ListHarness {
+function openListEditor(values: string, suggestions?: string, known?: string): ListHarness {
   const harness = createRuntimeHarness();
   if (suggestions !== undefined) harness.frontmatterRow.setAttribute("data-okf-link-suggestions", suggestions);
+  if (known !== undefined) harness.frontmatterRow.setAttribute("data-okf-link-known", known);
   harness.frontmatterRow.setAttribute("data-okf-type", "list");
   harness.frontmatterRow.setAttribute("data-okf-value", values);
   harness.editModeButton.dispatch("click");
@@ -224,6 +225,39 @@ test("T22: an unknown value warns, a known or empty value clears the warning", (
   input.dispatch("input", {});
   assert.equal(input.getAttribute("aria-invalid"), null);
   assert.equal(status.getAttribute("data-state"), null);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+test("T220: a known stem outside the dropdown suggestions does not warn, an unknown one still does", () => {
+  const list = openListEditor('[""]', '["StRS-A"]', '["StRS-A","related-target"]');
+  const input = list.inputs()[0]!;
+  const status = listStatus(list);
+  const datalist = list.harness.createdElements.find((element) => element.tagName === "DATALIST");
+  assert.deepEqual(datalist?.childElements.map((option) => option.getAttribute("value")), ["StRS-A"]);
+  input.value = "related-target";
+  input.dispatch("input", {});
+  assert.equal(input.getAttribute("aria-invalid"), null);
+  assert.equal(status.getAttribute("data-state"), null);
+  assert.equal(status.textContent, "");
+  input.value = "zzz";
+  input.dispatch("input", {});
+  assert.equal(input.getAttribute("aria-invalid"), "true");
+  assert.equal(status.getAttribute("data-state"), "warning");
+  assert.equal(status.textContent, 'No Markdown file named "zzz.md" was found. It will be saved as typed.');
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+test("T220: invalid JSON in the known-stems attribute falls back to the suggestions", () => {
+  const list = openListEditor('[""]', '["StRS-A"]', "{not json");
+  const input = list.inputs()[0]!;
+  const status = listStatus(list);
+  input.value = "StRS-A";
+  input.dispatch("input", {});
+  assert.equal(input.getAttribute("aria-invalid"), null);
+  input.value = "zzz";
+  input.dispatch("input", {});
+  assert.equal(input.getAttribute("aria-invalid"), "true");
+  assert.equal(status.getAttribute("data-state"), "warning");
 });
 
 test("T22: saving a list with an unknown value still posts the save", () => {

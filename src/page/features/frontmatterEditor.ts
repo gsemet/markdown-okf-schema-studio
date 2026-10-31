@@ -283,6 +283,8 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     control.addEventListener("blur", (event) => {
       const relatedTarget = event.relatedTarget as Element | null;
       if (relatedTarget?.closest?.("[data-okf-frontmatter-menu]")) return;
+      // The refused key, unchanged, is not posted again (CR 218).
+      if (holdsRefusedText()) return;
       saveKey();
     });
     editor.appendChild(control);
@@ -338,8 +340,49 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     edit.control.disabled = false;
     if (edit.setNullButton) edit.setNullButton.disabled = false;
     edit.setDisabled?.(false);
+    edit.refusedText = controlText(edit);
+    // The control was disabled during the save, so the browser moved the focus to the body.
+    const active = document.activeElement;
+    const focusLost = !active || active === document.body || active === edit.control
+      || edit.valueCell.contains?.(active);
     // A navigation waiting for this refused save now saves the typed text again, as a flush.
     afterResult?.();
+    // Focus comes back to the control unless the writer already moved it to another control.
+    if (focusLost && state.activeFrontmatterEdit === edit && !edit.saving) {
+      editorTrace.record("frontmatter control refocused", "refused save field=" + edit.fieldName);
+      if (edit.focusControl) {
+        edit.focusControl();
+      } else {
+        rt.textControls.focusTextControlAtLastContent(edit.control);
+      }
+    }
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
+  // What the control holds, to tell whether the writer changed it since the refusal.
+  function controlText(edit: FrontmatterEdit): string {
+    const control = edit.control as HTMLElement & { value?: unknown; checked?: boolean; type?: string };
+    if (control.type === "checkbox") return String(control.checked);
+    if (String(control.tagName || "").toUpperCase() !== "DIV") return String(control.value ?? "");
+    // The list editor: the values of its item inputs.
+    const inputs = Array.from(control.querySelectorAll?.<HTMLInputElement>("input, textarea, select") ?? []);
+    return JSON.stringify(inputs.map((input) => input.value));
+  }
+
+  function holdsRefusedText(): boolean {
+    const edit = state.activeFrontmatterEdit;
+    return Boolean(edit && edit.refusedText !== undefined && !edit.saving && !edit.control.disabled
+      && controlText(edit) === edit.refusedText);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
+  function closeRefusedEditorFor(cell: Element): boolean {
+    const edit = state.activeFrontmatterEdit;
+    if (!edit || edit.valueCell === cell || !holdsRefusedText()) return false;
+    edit.cancel();
+    closeFrontmatterEditor("refused editor, another field clicked");
+    return true;
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-001
@@ -379,6 +422,8 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     consumePendingFrontmatterEdit,
     resumePendingFrontmatterEdit,
     flushFrontmatterEditor,
+    holdsRefusedText,
+    closeRefusedEditorFor,
     bindKeys() {
       // Escape cancels the open frontmatter edit from anywhere inside the properties section, for
       // example the field picker or a header cell, as it does inside the field control itself.

@@ -9,6 +9,7 @@ __pycache__/
 /out/reports/
 /test/visual/screenshots/
 /test/visual/fixtures/gen-*.md
+/test/visual/fixtures/gen-*/
 *.vsix
 .agents/changes/
 .npmrc

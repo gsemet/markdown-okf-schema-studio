@@ -546,6 +546,26 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   display: none;
 }
 
+/* Comments hidden (the Comments button off, or preview.showComments off): every review mark goes.
+   A highlight keeps its quoted text as plain text; badges and the Orphaned comments box are not
+   shown. The page script lets clicks and keys on them through and takes highlights out of the Tab
+   order. */
+html[data-sphinx-preview-comments="off"] #sphinx-myst-preview-content mark[data-okf-comment-thread],
+html[data-okf-show-comments="false"] #sphinx-myst-preview-content mark[data-okf-comment-thread] {
+  background: transparent;
+  color: inherit;
+  border-radius: 0;
+  text-decoration: none;
+  cursor: inherit;
+}
+
+html[data-sphinx-preview-comments="off"] #sphinx-myst-preview-content button[data-okf-comment-badge],
+html[data-okf-show-comments="false"] #sphinx-myst-preview-content button[data-okf-comment-badge],
+html[data-sphinx-preview-comments="off"] [data-okf-orphans],
+html[data-okf-show-comments="false"] [data-okf-orphans] {
+  display: none;
+}
+
 #sphinx-myst-preview-content img {
   max-width: 100%;
   height: auto;

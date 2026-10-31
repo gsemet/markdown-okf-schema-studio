@@ -43,6 +43,8 @@ export function registerHostHandlers(rt: PageRuntime): void {
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-156
   hostMessages.on("previewShowComments", (message) => {
     parts.chipToggle.setShowComments(message.showComments !== false);
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
+    parts.commentThreads.visibilityChanged();
   });
   hostMessages.on("previewCommentResult", (message) => {
     // The answer to a create or a reply: the compose box and the reply box keep the text until ok.

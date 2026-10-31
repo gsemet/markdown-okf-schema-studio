@@ -141,6 +141,29 @@ test("find and replace is refused in a read-only preview, during an open edit an
   assert.deepEqual(none.applied, []);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+test("a find and replace dry run answers the counts of the plan and never edits the document", async () => {
+  const writable = setup();
+  await writable.handlers.get("previewFindReplace")!(request({
+    dryRun: true,
+    items: [findItem(), findItem({ find: "Nope" }), findItem({ find: "Title", occurrences: 2, occurrence: 1 })],
+  }), writable.preview);
+  assert.deepEqual(writable.applied, [], "nothing is applied");
+  assert.deepEqual(writable.results.map((result) => [result.type, result.editId, result.ok, result.replaced, result.skipped]),
+    [["previewFindReplaceResult", "e1", true, 1, 2]]);
+
+  const none = setup();
+  await none.handlers.get("previewFindReplace")!(request({ dryRun: true, items: [findItem({ find: "Nope" }), findItem({ find: "Gone" })] }), none.preview);
+  assert.deepEqual(none.applied, []);
+  assert.deepEqual(none.results.map((result) => [result.ok, result.replaced, result.skipped]), [[true, 0, 2]],
+    "when nothing maps, every match is announced as skipped");
+
+  const refused = setup({ readOnly: true });
+  await refused.handlers.get("previewFindReplace")!(request({ dryRun: true, items: [findItem()] }), refused.preview);
+  assert.deepEqual(refused.results.map((result) => [result.ok, result.reason]), [[false, TRUSTED_REFUSAL]]);
+  assert.deepEqual(refused.applied, []);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065
 test("a thread request that names another revision gets the out-of-date answer", async () => {
   const old = setup();

@@ -265,10 +265,13 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   previewThreadDelete: (message) => isHostRequest(message) && isSourceLine(message.line)
     && isSourceLine(message.endLine) && (message.endLine as number) >= (message.line as number),
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-131
   // Find and replace: matches of the find bar as (source lines, matched text, occurrence, replacement).
+  // `dryRun: true` asks for the counts of the plan only: the host edits nothing.
   previewFindReplace: (message) => isHostRequest(message) && Array.isArray(message.items)
     && message.items.length >= 1 && message.items.length <= MAX_FIND_REPLACE_ITEMS
-    && message.items.every(isFindReplaceItem),
+    && message.items.every(isFindReplaceItem)
+    && (message.dryRun === undefined || typeof message.dryRun === "boolean"),
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-240
   // Move of a body block past its neighbour from the "+" bar: both line ranges, the direction and
   // the moved block's viewport top (the host knows the new line). The host re-checks the ranges.

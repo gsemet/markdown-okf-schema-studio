@@ -20,6 +20,7 @@ import {
   planRadioSelect,
   planThreadDelete,
   planThreadReply,
+  READ_ONLY_FILE,
   readThreadLines,
   STALE_REQUEST,
 } from "../../core/edits/sourceEdits";
@@ -114,10 +115,17 @@ export class SourceEditController {
       this.postCheckboxResult(preview, message, { saved: true });
       return undefined;
     }
+    const before = document.getText();
     return this.apply(document, "edits" in toggle ? toggle.edits : [toggle.edit]).then((applied) => {
-      this.postCheckboxResult(preview, message, applied
+      // VS Code accepts an edit of a read-only file (`files.readonlyInclude`) and changes nothing.
+      // An external change during the apply can make this answer saved once; benign, as its
+      // content patch re-renders the page from the source right after.
+      // @implements_req SwRS-MDOKFSTUDIO-GFM-021
+      // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+      const written = applied && document.getText() !== before;
+      this.postCheckboxResult(preview, message, written
         ? { saved: true }
-        : { error: "VS Code could not apply the checkbox edit." });
+        : { error: applied ? READ_ONLY_FILE : "VS Code could not apply the checkbox edit." });
     }, (error: unknown) => {
       this.postCheckboxResult(preview, message, { error: error instanceof Error ? error.message : String(error) });
     });
@@ -278,10 +286,12 @@ export class SourceEditController {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-131
   /**
    * Replaces the matches of the find bar. The page names the source lines, the matched text and the
    * occurrence; the planner edits those spans only (all of them in one undo step) and skips what
-   * does not map one-to-one to the source.
+   * does not map one-to-one to the source. A dry run answers the counts of the plan and edits
+   * nothing; when no match maps, it answers them all as skipped instead of refusing.
    */
   private handleFindReplace(preview: PreviewSession, message: PageMessageOf<"previewFindReplace">): PromiseLike<void> | undefined {
     const fail = (reason: string): undefined => {
@@ -293,6 +303,12 @@ export class SourceEditController {
     const document = currentPreviewDocument(preview, message);
     if (!document) return fail(STALE_REQUEST);
     const plan = planFindReplace(document.getText(), message.items);
+    if (message.dryRun === true) {
+      this.postFindReplaceResult(preview, message, "refused" in plan
+        ? { ok: true, replaced: 0, skipped: message.items.length }
+        : { ok: true, replaced: plan.replaced, skipped: plan.skipped });
+      return undefined;
+    }
     if ("refused" in plan) return fail(plan.refused);
     const { replaced, skipped } = plan;
     return this.apply(document, plan.edits).then((applied) => {

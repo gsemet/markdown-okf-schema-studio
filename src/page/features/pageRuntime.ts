@@ -124,6 +124,12 @@ export interface BlockEdit {
   tableRowIndex?: number;
   tableColumnIndex?: number;
   initialCaretPosition: CaretPosition;
+  /**
+   * The editor edits one line that must stay one line (a card's `:header:` or `:footer:` option, or
+   * its title line; the renderer marks them `data-single-line`): plain Enter saves like Done,
+   * Shift+Enter and Alt+Enter do nothing, and Tab and Shift+Tab do nothing.
+   */
+  singleLine?: boolean;
   /** The element that held the focus when the editor opened (its source was not there yet). */
   focusAtOpen?: Element | null;
   /** The host refused to open this editor: the frame holds the reason and a way out. */
@@ -207,6 +213,13 @@ export interface FrontmatterEdit {
   plainSavePending?: boolean;
   /** Runs once the result of the pending save arrives. */
   afterResult?: () => void;
+  /**
+   * The text the control held when the host refused its last save (CR 218). While the control
+   * still holds it, a blur posts nothing again and a click on another field closes the editor.
+   */
+  refusedText?: string;
+  /** Focuses the control of an editor that is not a single text control (the list editor). */
+  focusControl?: () => void;
   frontmatterMenu?: HTMLElement;
   frontmatterMenuPositionListener?: undefined;
 }
@@ -510,6 +523,13 @@ export interface FrontmatterEditor {
   resumePendingFrontmatterEdit(): void;
   /** Saves the open frontmatter editor as a flush; true when a save was posted. */
   flushFrontmatterEditor(): boolean;
+  /** True while the open editor is idle and still holds the text of its refused save (CR 218). */
+  holdsRefusedText(): boolean;
+  /**
+   * Closes, without a save, an editor that still holds its refused text when another field's
+   * cell is clicked (CR 218); true when it closed.
+   */
+  closeRefusedEditorFor(cell: Element): boolean;
   /** Binds Escape inside the properties section. */
   bindKeys(): void;
 }

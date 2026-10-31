@@ -5,6 +5,7 @@
  * The order in which these listeners are bound matters (see `../runtime.ts`).
  */
 
+import { linkActivationEdits } from "./linkEditing";
 import { MAPPINGS_SELECTOR, type PageInput, type PageRuntime } from "./pageRuntime";
 
 /**
@@ -23,6 +24,7 @@ export function bindEditModeCaptureClicks(rt: PageRuntime): void {
       || row.getAttribute("data-okf-editable") !== "true") return;
     event.preventDefault?.();
     event.stopImmediatePropagation?.();
+    rt.frontmatter.closeRefusedEditorFor(cell);
     rt.frontmatter.openFrontmatterEditor(row);
   }, true);
   document.addEventListener("click", (event) => {
@@ -150,7 +152,9 @@ export function installPageInput(rt: PageRuntime): PageInput {
           ...snapshot,
         });
       });
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
       // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-001
+      // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
       document.addEventListener("click", (event) => {
         if (event.target instanceof Element
           && event.target.closest('a[data-sphinx-preview-navigation^="okf-link:"]')) return;
@@ -165,6 +169,8 @@ export function installPageInput(rt: PageRuntime): PageInput {
         if (!cell || !row || !state.editMode) return;
         event.preventDefault?.();
         event.stopPropagation?.();
+        // An editor left with its refused text closes without a save and this field opens (CR 218).
+        rt.frontmatter.closeRefusedEditorFor(cell);
         if (cell.getAttribute("data-okf-edit-cell") === "name") {
           rt.frontmatter.openFrontmatterKeyEditor(row, cell);
         } else if (row.getAttribute("data-okf-type") === "checkbox") {
@@ -193,8 +199,11 @@ export function installPageInput(rt: PageRuntime): PageInput {
         const target = event.target instanceof Element
           ? event.target.closest<HTMLElement>(MAPPINGS_SELECTOR)
           : undefined;
-        // In edit mode a click on a link inside a block only follows the link.
-        if (!target || target.closest("a") || (state.editMode && event.target instanceof Element && event.target.closest("a"))) {
+        // In edit mode a plain click on a link inside a block edits the block (CR 217); a Cmd/Ctrl
+        // click only follows the link, and so does any click in reading mode.
+        const linkEdits = linkActivationEdits(state.editMode, event);
+        if (!target || (!linkEdits && (target.closest("a")
+          || (state.editMode && event.target instanceof Element && event.target.closest("a"))))) {
           if (state.editMode && state.activeBlockEdit?.selectedCell && !state.activeBlockEdit.finishing) {
             rt.blockEditor.postBlockEditSave(true);
           }
@@ -233,6 +242,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
         const row = cell?.closest("tr[data-okf-field]");
         if (!frontmatterEditor && cell && row && state.editMode) {
           event.preventDefault?.();
+          rt.frontmatter.closeRefusedEditorFor(cell);
           if (cell.getAttribute("data-okf-edit-cell") === "name") {
             rt.frontmatter.openFrontmatterKeyEditor(row, cell);
           } else {
@@ -241,9 +251,10 @@ export function installPageInput(rt: PageRuntime): PageInput {
           return;
         }
         const target = element ? element.closest<HTMLElement>(MAPPINGS_SELECTOR) : undefined;
-        if (!target || target.closest("a")) return;
-        // In edit mode Enter or Space on a link inside a block only follows the link.
-        if (state.editMode && element!.closest("a")) return;
+        if (!target) return;
+        // In edit mode Enter or Space on a link inside a block edits the block (CR 217); with Cmd or
+        // Ctrl, or in reading mode, it only follows the link.
+        if (element!.closest("a") && !linkActivationEdits(state.editMode, event)) return;
         event.preventDefault?.();
         if (state.editMode) {
           rt.editMode.openMappedEditor(target, element!);

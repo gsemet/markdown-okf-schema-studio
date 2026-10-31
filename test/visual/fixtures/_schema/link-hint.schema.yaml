@@ -1,0 +1,19 @@
+type: object
+required:
+  - type
+  - title
+properties:
+  type:
+    const: link-hint
+    description: Document type for the link list hint visual fixture.
+  title:
+    type: string
+    description: Fixture title.
+  related:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: filename-stem
+        syntax: plain
+    description: Sibling notes, linked by file name.

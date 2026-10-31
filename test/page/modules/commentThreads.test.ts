@@ -108,6 +108,7 @@ class FakeDocument extends FakeElement {
     this.body.appendChild(this.content);
     this.ownerDocument = this;
   }
+  get documentElement(): FakeElement { return this; }
   createElement(tag: string) { const element = new FakeElement(tag); element.ownerDocument = this; return element; }
   createTextNode(text: string) { return new FakeText(text); }
   add(tag: string, attrs: Record<string, string>, parent: FakeElement = this.content, text?: string) {
@@ -814,4 +815,81 @@ test("T45: orphaned false with a block at the line places the thread as before",
   comments.setThreads([{ ...thread(), orphaned: false }]);
   assert.equal(marks(document).length, 1);
   assert.equal(orphanItems(document).length, 0);
+});
+
+// Comments hidden by the toolbar Comments button or by the preview.showComments setting.
+const HIDDEN_BY = [["data-sphinx-preview-comments", "off", "on"], ["data-okf-show-comments", "false", "true"]] as const;
+
+/** A highlight, a badge (quote across an element boundary) and an orphan entry. */
+function setupAllMarks() {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  const split = document.add("p", { "data-line": "2" }, document.content, "a nee");
+  document.add("em", {}, split, "dle b");
+  comments.setThreads([
+    thread({ id: "mark" }),
+    thread({ id: "badge", anchor: { line: 2, endLine: 2, quote: "needle", prefix: "", suffix: "" } }),
+    thread({ id: "orphan", anchor: { line: 40, endLine: 40, quote: "gone", prefix: "", suffix: "" } }),
+  ]);
+  const holders = [marks(document)[0], badges(document)[0], orphanItems(document)[0]];
+  assert.equal(holders.filter(Boolean).length, 3, "a highlight, a badge and an orphan entry");
+  return { document, comments, holders };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021
+test("comments hidden: a click, Enter or Space on a highlight, badge or orphan entry opens nothing and is not swallowed", () => {
+  for (const [name, off] of HIDDEN_BY) {
+    const { document, comments, holders } = setupAllMarks();
+    document.setAttribute(name, off);
+    comments.visibilityChanged();
+    for (const holder of holders) {
+      const label = `${name}=${off}, ${holder.tagName} ${holder.attrs.keys().next().value}`;
+      for (const [type, event] of [["click", {}], ["dblclick", {}], ["keydown", { key: "Enter" }], ["keydown", { key: " " }]] as const) {
+        const calls = holder.fire(type, event);
+        assert.deepEqual(calls, { prevented: 0, stopped: 0 }, `${label}: ${type} ${JSON.stringify(event)} reaches the other handlers`);
+        assert.equal(document.querySelector("[data-okf-comment-popover]"), null, `${label}: ${type} opens no popover`);
+      }
+    }
+    assert.equal(comments.openThread("mark"), false, `${name}=${off}: the page opens no thread either`);
+    assert.equal(document.querySelector("[data-okf-comment-popover]"), null);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+test("comments hidden: highlights leave the Tab order and come back when comments are shown", () => {
+  const focusable = (mark: FakeElement) => ["tabindex", "role", "aria-haspopup"].map((name) => mark.getAttribute(name));
+  for (const [name, off, on] of HIDDEN_BY) {
+    const { document, comments } = setupAllMarks();
+    assert.deepEqual(focusable(marks(document)[0]), ["0", "button", "dialog"]);
+    document.setAttribute(name, off);
+    comments.visibilityChanged();
+    assert.deepEqual(focusable(marks(document)[0]), [null, null, null], `${name}=${off}: the highlight is plain text`);
+    // Threads posted again while hidden (a new thread, a render) stay out of the Tab order.
+    comments.apply();
+    assert.deepEqual(focusable(marks(document)[0]), [null, null, null], `${name}=${off}: still plain text after a re-apply`);
+    document.setAttribute(name, on);
+    comments.visibilityChanged();
+    assert.deepEqual(focusable(marks(document)[0]), ["0", "button", "dialog"], `${name}=${on}: back in the Tab order`);
+    const calls = marks(document)[0].fire("click");
+    assert.deepEqual(calls, { prevented: 1, stopped: 1 });
+    assert.ok(document.querySelector("[data-okf-comment-popover]"), "a shown highlight opens its popover again");
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+test("comments hidden: an open popover closes and does not come back with the threads or with Show", () => {
+  for (const [name, off, on] of HIDDEN_BY) {
+    const { document, comments } = setupAllMarks();
+    marks(document)[0].fire("click");
+    assert.ok(document.querySelector("[data-okf-comment-popover]"));
+    document.setAttribute(name, off);
+    comments.visibilityChanged();
+    assert.equal(document.querySelector("[data-okf-comment-popover]"), null, `${name}=${off}: the popover closed`);
+    comments.apply();
+    assert.equal(document.querySelector("[data-okf-comment-popover]"), null, `${name}=${off}: not reopened by a re-apply`);
+    document.setAttribute(name, on);
+    comments.visibilityChanged();
+    assert.equal(document.querySelector("[data-okf-comment-popover]"), null, `${name}=${on}: Show opens nothing by itself`);
+  }
 });

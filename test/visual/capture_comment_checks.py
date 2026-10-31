@@ -328,6 +328,84 @@ def check_comment_button_thread(page: Page, scenario: dict, failures: list[Failu
     failures.append(Failure(page_name, "the Comments button did not bring the gray and thread chips back"))
 
 
+REVIEW_MARKS_STATE = """() => {
+  const visible = (element) => element.getClientRects().length > 0;
+  const marks = [...document.querySelectorAll('#sphinx-myst-preview-content mark[data-okf-comment-thread]')];
+  const mark = (id) => {
+    const element = marks.find((candidate) => candidate.getAttribute('data-okf-comment-thread') === id);
+    if (!element) return null;
+    const style = getComputedStyle(element);
+    return { background: style.backgroundColor, decoration: style.textDecorationLine, cursor: style.cursor,
+      tabindex: element.getAttribute('tabindex'), role: element.getAttribute('role'), text: visible(element) };
+  };
+  return { open: mark('thread-open'), resolved: mark('thread-resolved'),
+    orphans: [...document.querySelectorAll('[data-okf-orphans]')].filter(visible).length,
+    popovers: document.querySelectorAll('[data-okf-comment-popover]').length };
+}"""
+
+
+def check_comment_marks_hidden(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The toolbar Comments button hides every review mark and a hidden highlight is plain text."""
+  if not scenario.get("commentMarksHiddenChecks"):
+    return
+  page_name = scenario["page"]
+  button = page.locator("[data-sphinx-preview-comments-toggle]")
+  if button.count() != 1 or not button.is_visible():
+    failures.append(Failure(page_name, "the Comments button is not visible"))
+    return
+  transparent = "rgba(0, 0, 0, 0)"
+
+  def expect(shown: bool, when: str) -> None:
+    state = page.evaluate(REVIEW_MARKS_STATE)
+    open_mark, resolved = state["open"], state["resolved"]
+    if open_mark is None or resolved is None:
+      failures.append(Failure(page_name, f"{when}: both threads must be placed as highlights: {state}"))
+      return
+    if not (open_mark["text"] and resolved["text"]):
+      failures.append(Failure(page_name, f"{when}: the quoted text must stay visible: {state}"))
+    if shown:
+      ok = (open_mark["background"] != transparent and resolved["decoration"] == "underline"
+            and open_mark["cursor"] == "pointer" and open_mark["tabindex"] == "0" and open_mark["role"] == "button"
+            and state["orphans"] == 1)
+    else:
+      ok = (open_mark["background"] == transparent and resolved["decoration"] == "none"
+            and open_mark["cursor"] != "pointer" and resolved["cursor"] != "pointer"
+            and open_mark["tabindex"] is None and open_mark["role"] is None and state["orphans"] == 0)
+    if not ok:
+      failures.append(Failure(page_name, f"{when}: the review marks must be {'shown' if shown else 'hidden'}: {state}"))
+
+  def click_former_highlight(when: str) -> None:
+    page.evaluate("window.visualMessages.length = 0")
+    page.click('mark[data-okf-comment-thread="thread-open"]')
+    # Either outcome ends the wait: the reveal of plain text (right) or a popover (wrong).
+    page.wait_for_function(
+      "window.visualMessages.some(m => m.type === 'previewReveal')"
+      " || document.querySelector('[data-okf-comment-popover]') !== null")
+    popovers = page.evaluate("document.querySelectorAll('[data-okf-comment-popover]').length")
+    reveals = page.evaluate("window.visualMessages.filter(m => m.type === 'previewReveal').length")
+    if popovers != 0 or reveals != 1:
+      failures.append(Failure(page_name, f"{when}: a click on a former highlight must open no popover and reveal "
+                                         f"its source line like plain text ({popovers} popover(s), {reveals} reveal(s))"))
+
+  def press_and_wait() -> None:
+    hidden_before = page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-comments') === 'off'")
+    button.click()
+    page.wait_for_function(
+      "hiddenBefore => (document.documentElement.getAttribute('data-sphinx-preview-comments') === 'off') !== hiddenBefore",
+      arg=hidden_before)
+
+  expect(True, "at start")
+  press_and_wait()
+  expect(False, "after the first press")
+  click_former_highlight("after the first press")
+  press_and_wait()
+  expect(True, "after the second press")
+  # The screenshot shows the hidden state after a click on the former highlight.
+  press_and_wait()
+  expect(False, "after the third press")
+  click_former_highlight("after the third press")
+
+
 def check_checkbox_refusal(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """A refused checkbox toggle: the box returns to its state and the reason shows next to it, readable."""
   if not scenario.get("checkboxRefusalChecks"):
