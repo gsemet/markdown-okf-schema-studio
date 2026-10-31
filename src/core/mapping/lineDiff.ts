@@ -17,10 +17,10 @@ function splitLines(text: string): string[] {
 }
 
 /**
- * Indexes (0-based, in `current`) of the lines that are not in the common subsequence with `base`,
- * or undefined when more than `MAX_DIFF_EDITS` edits are needed. Myers' O(ND) algorithm.
+ * Indexes (0-based) of the lines of `current` that are not in the common subsequence with `base`
+ * (inserted), and of the lines of `base` that are not (deleted), or undefined when more than `MAX_DIFF_EDITS` edits are needed. Myers' O(ND) algorithm.
  */
-function insertedIndexes(base: string[], current: string[]): number[] | undefined {
+function editIndexes(base: string[], current: string[]): { inserted: number[]; deleted: number[] } | undefined {
   const n = base.length;
   const m = current.length;
   const max = Math.min(n + m, MAX_DIFF_EDITS);
@@ -48,6 +48,7 @@ function insertedIndexes(base: string[], current: string[]): number[] | undefine
   }
   if (found < 0) return undefined;
   const inserted: number[] = [];
+  const deleted: number[] = [];
   let x = n;
   let y = m;
   for (let d = found; d > 0; d -= 1) {
@@ -62,10 +63,11 @@ function insertedIndexes(base: string[], current: string[]): number[] | undefine
       y -= 1;
     }
     if (down) inserted.push(previousY);
+    else deleted.push(previousX);
     x = previousX;
     y = previousY;
   }
-  return inserted.reverse();
+  return { inserted: inserted.reverse(), deleted: deleted.reverse() };
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-200
@@ -89,8 +91,9 @@ export function changedLineRanges(base: string, current: string): LineRange[] {
   if (middleCurrent.length === 0) return [];
   const whole = [{ start: prefix + 1, end: prefix + middleCurrent.length }];
   if (Math.max(middleBase.length, middleCurrent.length) > MAX_DIFF_LINES) return whole;
-  const inserted = insertedIndexes(middleBase, middleCurrent);
-  if (!inserted) return whole;
+  const edits = editIndexes(middleBase, middleCurrent);
+  if (!edits) return whole;
+  const { inserted } = edits;
   const ranges: LineRange[] = [];
   for (const index of inserted) {
     const line = prefix + index + 1;
@@ -99,4 +102,113 @@ export function changedLineRanges(base: string, current: string): LineRange[] {
     else ranges.push({ start: line, end: line });
   }
   return ranges;
+}
+
+/**
+ * One difference between a base text and the current text: the base lines `baseStart..baseEnd` became
+ * the current lines `start..end` (1-based, inclusive). A side that has no line is empty:
+ * `end === start - 1`, and its `start` is the line it would sit before.
+ */
+export interface LineHunk {
+  baseStart: number;
+  baseEnd: number;
+  start: number;
+  end: number;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-010
+/**
+ * The differences between `base` and `current` as hunks: runs of lines added, removed or changed,
+ * with the lines of both texts. Unlike {@link changedLineRanges}, a run of removed lines is a hunk
+ * (with an empty current side). Line endings are ignored. Large or very different texts report the
+ * whole differing middle as one hunk.
+ */
+export function lineHunks(base: string, current: string): LineHunk[] {
+  const a = splitLines(base);
+  const b = splitLines(current);
+  let prefix = 0;
+  while (prefix < a.length && prefix < b.length && a[prefix] === b[prefix]) prefix += 1;
+  let suffix = 0;
+  while (
+    suffix < a.length - prefix && suffix < b.length - prefix
+    && a[a.length - 1 - suffix] === b[b.length - 1 - suffix]
+  ) suffix += 1;
+  const middleBase = a.slice(prefix, a.length - suffix);
+  const middleCurrent = b.slice(prefix, b.length - suffix);
+  if (middleBase.length === 0 && middleCurrent.length === 0) return [];
+  const whole = [{
+    baseStart: prefix + 1,
+    baseEnd: prefix + middleBase.length,
+    start: prefix + 1,
+    end: prefix + middleCurrent.length,
+  }];
+  if (Math.max(middleBase.length, middleCurrent.length) > MAX_DIFF_LINES) return whole;
+  const edits = editIndexes(middleBase, middleCurrent);
+  if (!edits) return whole;
+  const inserted = new Set(edits.inserted);
+  const deleted = new Set(edits.deleted);
+  const hunks: LineHunk[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < middleBase.length || j < middleCurrent.length) {
+    if (!(i < middleBase.length && deleted.has(i)) && !(j < middleCurrent.length && inserted.has(j))) {
+      i += 1;
+      j += 1;
+      continue;
+    }
+    const baseFrom = i;
+    const currentFrom = j;
+    // Removed and added lines may interleave before the next common line: one hunk.
+    while ((i < middleBase.length && deleted.has(i)) || (j < middleCurrent.length && inserted.has(j))) {
+      while (i < middleBase.length && deleted.has(i)) i += 1;
+      while (j < middleCurrent.length && inserted.has(j)) j += 1;
+    }
+    hunks.push({
+      baseStart: prefix + baseFrom + 1,
+      baseEnd: prefix + i,
+      start: prefix + currentFrom + 1,
+      end: prefix + j,
+    });
+  }
+  return hunks;
+}
+
+/** A range of lines, 1-based and inclusive; `end === start - 1` is an empty range. */
+export interface LineSpan {
+  start: number;
+  end: number;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-010
+/**
+ * True when a block that covers `span` (lines of the current text) changed: it meets a hunk that has
+ * current lines, or it holds the place where a hunk removed lines (the removal lies after its first
+ * line and not after its last).
+ */
+export function spanChanged(span: LineSpan, hunks: readonly LineHunk[]): boolean {
+  return hunks.some((hunk) => hunk.end >= hunk.start
+    ? hunk.start <= span.end && hunk.end >= span.start
+    : span.start < hunk.start && hunk.start <= span.end);
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-010
+/**
+ * The lines of the base text that a block covering `span` (lines of the current text) comes from.
+ * A line inside a hunk maps to the whole base side of the hunk; the lines between hunks shift by the
+ * lengths the hunks before them added or removed. The result is empty (`end === start - 1`) for a
+ * block made only of added lines.
+ */
+export function baseSpanOf(span: LineSpan, hunks: readonly LineHunk[]): LineSpan {
+  const shiftBefore = (line: number): number => hunks.reduce(
+    (shift, hunk) => hunk.end < line ? shift + (hunk.end - hunk.start) - (hunk.baseEnd - hunk.baseStart) : shift,
+    0,
+  );
+  const inside = (line: number): LineHunk | undefined =>
+    hunks.find((hunk) => hunk.end >= hunk.start && hunk.start <= line && line <= hunk.end);
+  const first = inside(span.start);
+  const last = inside(span.end);
+  return {
+    start: first ? first.baseStart : span.start - shiftBefore(span.start),
+    end: last ? last.baseEnd : span.end - shiftBefore(span.end),
+  };
 }

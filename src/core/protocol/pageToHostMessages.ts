@@ -239,6 +239,11 @@ export interface PreviewViewPreferenceChangedMessage extends PageMessageBase<"pr
   value: unknown;
 }
 
+/** The side-by-side diff of changed blocks was switched on or off (a view of the page, not a preference kept). */
+export interface PreviewSideBySideChangedMessage extends PageMessageBase<"previewSideBySideChanged"> {
+  on: boolean;
+}
+
 /** The palette mode select of the edition palette (workspace state). */
 export interface PreviewPaletteModeChangedMessage extends PageMessageBase<"previewPaletteModeChanged"> {
   mode: "strict" | "gfm" | "myst" | "full";
@@ -405,6 +410,7 @@ export type PageToHostMessage =
   | PreviewCopyTextMessage
   | PreviewHistoryGoMessage
   | PreviewViewPreferenceChangedMessage
+  | PreviewSideBySideChangedMessage
   | PreviewPaletteModeChangedMessage
   | PreviewLabelRenameMessage
   | PreviewThreadReplyMessage

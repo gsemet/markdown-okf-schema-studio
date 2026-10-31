@@ -37,6 +37,7 @@ import type { HeadingFold } from "../modules/headingFold";
 import type { installHistoryControls } from "../modules/historyControls";
 import type { HostRequests } from "../modules/hostRequests";
 import type { installIncomingChanges } from "../modules/incomingChanges";
+import type { installSideBySide } from "../modules/sideBySide";
 import type { installInlineThreads } from "../modules/inlineThread";
 import type { installLabelRename } from "../modules/labelRename";
 import type { installLinkNavigation } from "../modules/linkNavigation";
@@ -343,6 +344,7 @@ export interface PageParts {
   chipToggle: ReturnType<typeof installChipToggle>;
   tabs: ReturnType<typeof installTabs>;
   incomingChanges: ReturnType<typeof installIncomingChanges>;
+  sideBySide: ReturnType<typeof installSideBySide>;
   motion: ReturnType<typeof installMotion>;
   historyControls: ReturnType<typeof installHistoryControls>;
   viewControls: ReturnType<typeof installViewControls>;

@@ -565,6 +565,49 @@ test("T17: the Diff button flips the marks, posts the preference and keeps the s
   assert.equal(harness.messages.at(-1)?.value, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
+test("CR147: the Side-by-side button toggles the diff, posts the state and is disabled in edit mode", () => {
+  const harness = createRuntimeHarness();
+  const root = harness.documentElement;
+  const button = harness.sideBySideButton;
+  assert.equal(root.getAttribute("data-sphinx-preview-sbs"), "off");
+  assert.equal(button.getAttribute("aria-pressed"), "false");
+  assert.equal(button.getAttribute("data-tooltip"), "Show side-by-side changes since last commit");
+  const posted = (): Array<Record<string, unknown>> =>
+    harness.messages.filter((message) => message.type === "previewSideBySideChanged");
+  button.dispatch("click");
+  assert.equal(root.getAttribute("data-sphinx-preview-sbs"), "on");
+  assert.equal(button.getAttribute("aria-pressed"), "true");
+  assert.equal(button.getAttribute("title"), "Hide side-by-side changes since last commit");
+  assert.equal(posted().length, 1);
+  assert.equal(posted()[0].on, true);
+  assert.equal(posted()[0].documentId, "file:///active.md");
+  // Edit mode: the button is disabled and does nothing, the diff state is kept for when it ends.
+  harness.editModeButton.dispatch("click");
+  assert.equal(button.getAttribute("disabled"), "");
+  assert.match(button.getAttribute("data-tooltip") ?? "", /edit mode/u);
+  button.dispatch("click");
+  assert.equal(posted().length, 1, "a click in edit mode posts nothing");
+  assert.equal(root.getAttribute("data-sphinx-preview-sbs"), "on");
+  harness.editModeButton.dispatch("click");
+  assert.equal(button.getAttribute("disabled"), null);
+  button.dispatch("click");
+  assert.equal(root.getAttribute("data-sphinx-preview-sbs"), "off");
+  assert.equal(posted().at(-1)?.on, false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+test("CR147: a baseline sent while the diff is off is answered by telling the host it is off", () => {
+  const harness = createRuntimeHarness();
+  const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
+  harness.dispatchMessage({ type: "previewBaselineDiff", ...ids, html: "<p data-line=\"1\">x</p>", hunks: [] });
+  const posted = harness.messages.filter((message) => message.type === "previewSideBySideChanged");
+  assert.equal(posted.length, 1);
+  assert.equal(posted[0].on, false);
+  harness.dispatchMessage({ type: "previewBaselineDiff", ...ids, requestId: 3, html: "", hunks: [] });
+  assert.equal(harness.messages.filter((message) => message.type === "previewSideBySideChanged").length, 1, "a stale one is dropped");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-214
 test("T17: the initial preference and the saved webview state decide the pressed state", () => {
   const off = createRuntimeHarness({

@@ -11,7 +11,7 @@
 import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Page } from "playwright-core";
+import type { Frame, Locator, Page } from "playwright-core";
 import * as vscode from "vscode";
 import { describeFolder } from "./folderListing";
 import { explained, selectAllInControl } from "./realInput/flushBeforeNavigate";
@@ -96,6 +96,88 @@ async function waitForGitRepository(uri: vscode.Uri): Promise<void> {
     api.getRepository(uri)?.state.HEAD?.commit !== undefined, 30_000);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+/**
+ * CR 147: the Side-by-side button turns each changed block into a card with the block at HEAD on the
+ * left and the current block on the right. Runs on the buffer of {@link scenarioIncomingChanges}
+ * (one paragraph edited, one added, never saved) and removes one more block from it.
+ */
+async function sideBySideSteps(
+  page: Page,
+  evidence: Evidence,
+  document: vscode.TextDocument,
+  committed: string,
+): Promise<void> {
+  const cards = (frame: Frame): Locator => frame.locator("[data-okf-sbs-card]");
+  await withCurrentFrame(page, async (frame) => {
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-sbs"), "off", "the diff is off by default");
+    assert.equal(await cards(frame).count(), 0, "the default shows the green bars only");
+    await frame.locator("[data-sphinx-preview-sbs-toggle]").click();
+  });
+  await waitFor("the side-by-side cards of the two changed blocks", () => withCurrentFrame(page, async (frame) =>
+    await cards(frame).count() === 2));
+  await withCurrentFrame(page, async (frame) => {
+    assert.equal(await frame.locator("[data-sphinx-preview-sbs-toggle]").getAttribute("aria-pressed"), "true");
+    const changed = cards(frame).filter({ hasText: "will change in the buffer" });
+    assert.equal(await changed.count(), 1, "the edited paragraph is one card");
+    assert.match(await changed.locator("[data-okf-sbs-side=base]").innerText(), /will change in the buffer\./u);
+    assert.match(await changed.locator("[data-okf-sbs-side=current]").innerText(), /changed in the buffer and is not saved/u);
+    assert.ok(await changed.locator("[data-okf-sbs-side=base] [data-okf-sbs-word=removed]").count() > 0, "removed words on the left");
+    assert.ok(await changed.locator("[data-okf-sbs-side=current] [data-okf-sbs-word=added]").count() > 0, "added words on the right");
+    const added = cards(frame).filter({ hasText: "added after the commit" });
+    assert.equal(await added.count(), 1, "the added paragraph is one card");
+    assert.equal((await added.locator("[data-okf-sbs-side=base]").innerText()).replace(/last commit/iu, "").trim(), "", "empty left side");
+    assert.equal(await frame.locator("[data-okf-sbs-card]", { hasText: "stays as committed" }).count(), 0, "an unchanged block has no card");
+    assert.equal(await frame.getByText("stays as committed").first().isVisible(), true, "and stays as it is");
+    assert.equal(await frame.locator("[data-okf-sbs-replaced]").count(), 2, "the two original blocks are replaced");
+    for (const original of await frame.locator("[data-okf-sbs-replaced]").all()) {
+      assert.equal(await original.isVisible(), false, "an original block is hidden while its card shows");
+    }
+  });
+  await captureNow(evidence, page, "review-annotations/r07-side-by-side-diff",
+    "Reading mode; the same unsaved buffer as r03 with the Side-by-side button pressed. The edited paragraph "
+    + "is a card (HEAD left, buffer right, removed and added words marked), the added paragraph a card with an "
+    + "empty left side; the unchanged blocks are as they were.");
+
+  // A whole block removed in the buffer comes back on the left with an empty right side.
+  const removedLine = document.getText().split("\n").findIndex((line) => line.startsWith("This paragraph stays as committed"));
+  assert.ok(removedLine > 0, "the fixture holds the paragraph to remove");
+  const edit = new vscode.WorkspaceEdit();
+  edit.delete(vscode.Uri.file(INCOMING_FIXTURE), new vscode.Range(removedLine, 0, removedLine + 2, 0));
+  assert.equal(await vscode.workspace.applyEdit(edit), true);
+  await waitFor("the card of the removed block", () => withCurrentFrame(page, async (frame) =>
+    await cards(frame).filter({ hasText: "stays as committed" }).count() === 1));
+  await withCurrentFrame(page, async (frame) => {
+    const removed = cards(frame).filter({ hasText: "stays as committed" });
+    assert.match(await removed.locator("[data-okf-sbs-side=base]").innerText(), /stays as committed/u);
+    assert.equal((await removed.locator("[data-okf-sbs-side=current]").innerText()).replace(/now/iu, "").trim(), "", "empty right side");
+  });
+
+  // Edit mode: the button is disabled, no card shows and the green bars remain.
+  await setEditMode(page, true);
+  await withCurrentFrame(page, async (frame) => {
+    assert.equal(await frame.locator("[data-sphinx-preview-sbs-toggle]").isDisabled(), true);
+    assert.equal(await frame.locator("[data-okf-sbs-card]:visible").count(), 0, "no card in edit mode");
+    assert.ok(await frame.locator("[data-sphinx-preview-changed]").count() >= 2, "the green bars remain");
+  });
+  await leaveEditMode(page);
+  await waitFor("the cards back after edit mode", () => withCurrentFrame(page, async (frame) =>
+    await frame.locator("[data-okf-sbs-card]:visible").count() === 3));
+
+  // Off: the originals are back and nothing is left of the cards.
+  await withCurrentFrame(page, async (frame) => {
+    await frame.locator("[data-sphinx-preview-sbs-toggle]").click();
+  });
+  await withCurrentFrame(page, async (frame) => {
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-sbs"), "off");
+    assert.equal(await frame.locator("[data-okf-sbs-card]").count(), 0);
+    assert.equal(await frame.locator("[data-okf-sbs-replaced]").count(), 0);
+  });
+  assert.equal(fs.readFileSync(INCOMING_FIXTURE, "utf8"), committed, "the source file is never rewritten");
+}
+
 // @tests_req StRS-MDOKFSTUDIO-REVIEW-017
 /**
  * review-annotations/r03: a tracked file whose buffer differs from Git HEAD. The buffer is edited,
@@ -132,6 +214,7 @@ export async function scenarioIncomingChanges(page: Page, evidence: Evidence): P
     await captureNow(evidence, page, "review-annotations/r03-incoming-change-bars",
       "Reading mode; the buffer of a tracked fixture differs from Git HEAD (one paragraph edited, one "
       + "added, not saved). Both blocks carry the green change bar; the unchanged blocks do not.");
+    await sideBySideSteps(page, evidence, document, committed);
   } finally {
     disposeActivePreviewForTests();
     await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
