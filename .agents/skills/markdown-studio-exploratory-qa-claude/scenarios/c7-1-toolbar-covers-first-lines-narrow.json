@@ -1,0 +1,10 @@
+{"name":"c7-1-toolbar-covers-first-lines-narrow","file":"book/chapters/08-research-plan-implement.md","steps":[
+{"open":"${file}"},
+{"palette":"Markdown OKF-Schema Studio: Open Preview to Side","wait":3000},
+{"waitFor":"D.querySelector('#sphinx-myst-preview-content h1')","timeout":20000},
+{"waitFor":"W.innerWidth<=460","label":"narrow preview pane (default side layout is about 393-438 px)"},
+{"clicksel":"button[aria-label='Show view controls']","wait":600,"optional":true},
+{"wheel":[900,400,-3000],"steps":3,"wait":600},
+{"check":"feval","expr":"(()=>{const t=D.querySelector('[data-sphinx-preview-toolbar]').getBoundingClientRect();const rg=D.createRange();rg.selectNodeContents(D.querySelector('#sphinx-myst-preview-content p'));return ![...rg.getClientRects()].some(r=>r.left<t.right&&r.right>t.left&&r.top<t.bottom&&r.bottom>t.top)})()","equals":true,"label":"c7-1 first paragraph not under the expanded toolbar"},
+{"shot":"c7-1","clip":"preview","onFail":true}
+]}

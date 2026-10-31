@@ -1,0 +1,15 @@
+{
+  "name": "c2-1-comments-toggle-keeps-threads",
+  "file": "synth/review-threads.md",
+  "steps": [
+    {"open": "${file}"},
+    {"palette": "Markdown OKF-Schema Studio: Open Preview to Side", "wait": 4000},
+    {"waitFor": "D.querySelector('mark[data-okf-comment-thread]')", "timeout": 15000},
+    {"clicksel": "[data-sphinx-preview-toolbar-collapse][aria-expanded=\"false\"]", "optional": true, "wait": 600},
+    {"clicksel": "[data-sphinx-preview-comments-toggle]", "wait": 800},
+    {"check": "feval", "expr": "D.querySelector('[data-sphinx-preview-comments-toggle]').getAttribute('aria-pressed')", "equals": "false", "label": "c2-1 button off"},
+    {"check": "feval", "expr": "getComputedStyle(D.querySelector('mark[data-okf-comment-thread]')).backgroundColor === 'rgba(0, 0, 0, 0)' || getComputedStyle(D.querySelector('mark[data-okf-comment-thread]')).backgroundColor === 'transparent'", "label": "c2-1 thread highlight hidden when comments are hidden"},
+    {"check": "errors"},
+    {"shot": "c2-1", "clip": "preview", "onFail": true}
+  ]
+}

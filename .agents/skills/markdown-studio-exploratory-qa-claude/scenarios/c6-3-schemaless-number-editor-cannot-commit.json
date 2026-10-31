@@ -1,0 +1,18 @@
+{
+  "name": "c6-3-schemaless-number-editor-cannot-commit",
+  "file": "synth/vault-props.md",
+  "vars": {},
+  "steps": [
+    {"open": "${file}"},
+    {"palette": "Markdown OKF-Schema Studio: Open Preview to Side", "wait": 4000},
+    {"waitFor": "D.querySelector('tr[data-okf-field=rating]')", "timeout": 15000},
+    {"editMode": true},
+    {"mark": true},
+    {"clicksel": "tr[data-okf-field=rating] td[data-okf-value-cell]"}, {"wait": 600},
+    {"key": "Meta+a"}, {"type": "3.5"}, {"key": "Enter"}, {"wait": 900},
+    {"check": "diff", "against": "mark", "contains": "rating: 3.5", "show": true, "label": "c6-3 Enter commits the number"},
+    {"check": "feval", "expr": "!D.querySelector('[aria-label=\"Frontmatter rating\"]')", "label": "c6-3 editor closed after Enter"},
+    {"check": "errors"},
+    {"shot": "c6-3", "clip": "preview", "onFail": true}
+  ]
+}

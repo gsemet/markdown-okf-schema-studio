@@ -1,0 +1,63 @@
+{
+ "name": "ux-03-open-with-undo-keeps-inline-editor",
+ "file": "fixtures-visual/01-handbook-overview.md",
+ "vars": {},
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "View: Reopen Editor With...",
+   "wait": 1200
+  },
+  {
+   "pick": "OKF-Schema Studio",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector(\"p\")",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "p",
+   "text": "The dispatch path is the only component"
+  },
+  {
+   "key": "End"
+  },
+  {
+   "type": " Second sentence.",
+   "delay": 20
+  },
+  {
+   "wait": 600
+  },
+  {
+   "key": "Meta+z"
+  },
+  {
+   "wait": 1000
+  },
+  {
+   "check": "feval",
+   "expr": "!!D.querySelector('textarea')",
+   "label": "UX-03 textarea still open after Cmd+Z"
+  },
+  {
+   "check": "focus",
+   "selector": "textarea",
+   "label": "UX-03 focus stays in textarea"
+  },
+  {
+   "shot": "ux-03",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

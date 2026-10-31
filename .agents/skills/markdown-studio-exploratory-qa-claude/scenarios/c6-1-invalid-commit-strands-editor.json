@@ -1,0 +1,21 @@
+{
+  "name": "c6-1-invalid-commit-strands-editor",
+  "file": "synth/frontmatter-edge.md",
+  "vars": {},
+  "steps": [
+    {"open": "${file}"},
+    {"palette": "Markdown OKF-Schema Studio: Open Preview to Side", "wait": 4000},
+    {"waitFor": "D.querySelector('tr[data-okf-field=priority]')", "timeout": 15000},
+    {"editMode": true},
+    {"mark": true},
+    {"clicksel": "tr[data-okf-field=priority] td[data-okf-value-cell]"},
+    {"key": "Meta+a"}, {"type": "7"}, {"key": "Enter"}, {"wait": 800},
+    {"check": "feval", "expr": "D.activeElement.tagName === 'INPUT'", "label": "c6-1 focus stays in the field after a rejected commit"},
+    {"key": "Escape"}, {"wait": 500},
+    {"check": "feval", "expr": "!D.querySelector('input[aria-label=\"Frontmatter priority\"]')", "label": "c6-1 Escape closes the editor"},
+    {"clicksel": "tr[data-okf-field=title] td[data-okf-value-cell]"}, {"wait": 500},
+    {"check": "feval", "expr": "D.activeElement.tagName === 'TEXTAREA'", "label": "c6-1 another field can be edited"},
+    {"check": "diff", "against": "mark", "equal": true, "label": "c6-1 buffer untouched"},
+    {"shot": "c6-1", "clip": "preview", "onFail": true}
+  ]
+}

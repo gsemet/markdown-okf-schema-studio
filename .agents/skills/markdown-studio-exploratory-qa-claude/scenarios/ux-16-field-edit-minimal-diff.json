@@ -1,0 +1,56 @@
+{
+ "name": "ux-16-field-edit-minimal-diff",
+ "file": "synth/frontmatter-edge.md",
+ "vars": {},
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "File: Revert File",
+   "wait": 800
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector('tr[data-okf-field=title]')",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "tr[data-okf-field=title] td[data-okf-value-cell]"
+  },
+  {
+   "key": "Meta+a"
+  },
+  {
+   "type": "Brake release X",
+   "delay": 20
+  },
+  {
+   "clicksel": "h1"
+  },
+  {
+   "wait": 1200
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "maxLines": 1,
+   "show": true,
+   "label": "UX-16 only the title line changes"
+  },
+  {
+   "shot": "ux-16",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

@@ -1,0 +1,69 @@
+{
+ "name": "ux-01-escape-keeps-typed-text",
+ "file": "book/chapters/02-foundations.md",
+ "vars": {},
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "File: Revert File",
+   "wait": 800
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector(\"h1, h2, p\")",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "p",
+   "text": "Training and deploying an LLM"
+  },
+  {
+   "key": "End"
+  },
+  {
+   "type": " KEEP ME PLEASE.",
+   "delay": 20
+  },
+  {
+   "wait": 800
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "contains": "KEEP ME PLEASE",
+   "label": "UX-01 precondition: autosave put the text in the buffer"
+  },
+  {
+   "key": "Escape"
+  },
+  {
+   "wait": 1000
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "contains": "KEEP ME PLEASE",
+   "label": "UX-01 Escape keeps the typed text"
+  },
+  {
+   "check": "errors",
+   "max": 0
+  },
+  {
+   "shot": "ux-01",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

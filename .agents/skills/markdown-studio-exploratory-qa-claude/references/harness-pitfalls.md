@@ -76,6 +76,32 @@ stale bundle): run it after every launch.
 - Private vault content: when a screenshot shows the vault in the Explorer, crop it to the preview
   region (`sips -c <h> <w> --cropOffset <y> <x>`) or leave it out of `evidence/`.
 
+## Lessons of campaign 210
+
+- **The no-op sweep followed links.** Clicking a link-only paragraph (a block whose only content
+  is a link) follows the link, so the preview left the document and the sweeps of two chapters did
+  not reach their tables and fields. The closing `*Next: [Chapter N](…)*` line of every chapter is
+  such a block, and its text is not equal to its link text, so a text comparison misses it.
+  `noop-sweep.mjs` now checks the click point itself (`elementFromPoint(...).closest('a[href]')`),
+  picks another point of the block when the first one is on a link, and skips the block when none
+  is free (reported as "link-only skipped"; `--follow-links` includes them). It records the shown
+  document id (`data-sphinx-preview-document-id`) and compares it after each click, because the
+  target document is also a mapped Markdown document. On a change it clicks the preview's Back
+  button (`[data-sphinx-preview-back]`, which sits in the toolbar's collapsed rows: it expands them
+  first and waits for the button to be enabled), waits for the original id, re-enables edit mode,
+  and stops the whole sweep with an error if the id never returns. Test link-only blocks with a
+  dedicated scenario (`synth/linkonly.md`), not the sweep.
+  `--limit N` bounds every kind with or without `--from`; split a long chapter with
+  `--from`/`--limit`.
+- **`--var nth=3` arrived as the string `"3"`.** Variables are strings, and a step field written
+  as `"nth": "${nth}"` stayed a string. `clicksel` already applied `Number()`, but other numeric
+  step fields did not. `engine.mjs` `substitute()` now turns a field that is exactly one
+  placeholder into a number when the field is a known numeric one (`nth`, `which`, `count`,
+  `delay`, `gap`, `wait`, `timeout`, `dx`, `dy`, `steps`, `px`, `max`, `maxLines`) and the value is
+  an integer. Text fields (`text`, `type`, `insert`) keep strings, so `--var cell=3` still types
+  "3". Other fields: write the number in the scenario, or build the selector with
+  `td:nth-child(${n})`.
+
 ## Shell
 
 - `rm` may be aliased to `rm -i` and zsh may have `noclobber`: use `command rm -f`, and write files
@@ -92,5 +118,5 @@ What made the first campaign expensive, and the cheaper habit:
 | Full-window PNG screenshots read after each action | Checks first; `--clip preview` JPEG only on a failure or for a visual judgement |
 | `q spy --text` of a 100 KB chapter | `q spy --diff FILE --against mark`, or `--text FILE --lines 120-160` |
 | Unbounded `feval` / `box` output | Outputs are capped at 2000 chars; `--full` only when needed |
-| Exploring, writing sheets, and synthesis in one thread | Coordinator plus one sub-agent per charter (references/charters.md) |
+| Exploring, writing sheets, and synthesis in one thread | Foreman, QA Drivers, and one sub-agent per charter (references/charters.md) |
 | Re-exploring old findings | Run their replay scenarios |

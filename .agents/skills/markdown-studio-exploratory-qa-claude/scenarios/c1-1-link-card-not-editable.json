@@ -1,0 +1,15 @@
+{
+  "name": "c1-1-link-card-not-editable",
+  "file": "fixtures-visual/46-grid-cards.md",
+  "steps": [
+    {"open": "${file}"},
+    {"waitFor": "D.querySelector('.myst-grid-card-link')", "timeout": 8000},
+    {"editMode": true, "optional": true},
+    {"check": "feval", "expr": "D.documentElement.getAttribute('data-sphinx-preview-edit-mode')", "equals": "on", "label": "c1-1 edit mode on"},
+    {"mark": true},
+    {"clicksel": ".myst-grid-card-header p", "text": "Header of the card", "dbl": true, "wait": 800},
+    {"check": "feval", "expr": "!!D.querySelector('textarea')", "label": "c1-1 a block editor opens on a link-card header (double click)"},
+    {"check": "editor", "visible": "${file}", "label": "c1-1 still on the edited file, not the link target"},
+    {"shot": "c1-1-fail", "clip": "preview", "onFail": true}
+  ]
+}

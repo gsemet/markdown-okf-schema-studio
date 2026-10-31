@@ -1,0 +1,17 @@
+{
+  "name": "c0-1-link-only-paragraph-navigates",
+  "file": "synth/linkonly.md",
+  "steps": [
+    {"open": "${file}"},
+    {"palette": "Markdown OKF-Schema Studio: Open Preview to Side", "wait": 4000},
+    {"waitFor": "D.querySelector('#sphinx-myst-preview-content h1')", "timeout": 15000, "label": "rendered"},
+    {"editMode": true},
+    {"mark": true},
+    {"clicksel": "p", "text": "Next:", "label": "click centre of link-only paragraph"},
+    {"wait": 1500},
+    {"check": "feval", "expr": "!!D.querySelector('[data-sphinx-preview-block-editor]')", "equals": true, "label": "c0-1 block editor opened (author wants to edit the paragraph)"},
+    {"check": "feval", "expr": "D.querySelector('h1')?.textContent", "equals": "Link only", "label": "c0-1 preview still shows the same document"},
+    {"check": "diff", "file": "${file}", "against": "mark", "equal": true},
+    {"shot": "c0-1", "clip": "preview", "onFail": true}
+  ]
+}
