@@ -40,6 +40,9 @@ AREAS = [
     (r"src/core/(state|configuration)/", "A4 F3"),
     (r"src/core/security/", "A5 B1"),
     (r"src/core/mapping/", "B2 D1"),
+    (r"src/core/edits/", "D1 D2 D3 E2"),
+    (r"src/core/protocol/", "D1 D6 F2"),
+    (r"src/session/features/", "D1 D2 D6 E2"),
     (r"src/extension\.ts", "A1 A2 A3 A4 D5 D6 F1"),
     (r"package\.json", "A1 A2 F3"),
 ]

@@ -13,6 +13,10 @@ revision still counts). PRs already in the recorded revision are dropped: merge 
 or a log subject exactly "<title> (#N)", or (only when the revision is an ancestor of the default
 branch) merged at/before the revision's commit time (rebase/squash merges).
 
+Rows of the previous campaign's new-feature table that were never covered (Charter `TODO`, or a
+Result that says "not run") are carried forward under the table: a PR merged before the baseline
+stays visible until a campaign covers it.
+
 Usage:
   python3 new-features.py [--since YYYY-MM-DD] [--campaign DIR] [--repo OWNER/NAME]
                           [--json-file FILE] [--dry-run]
@@ -91,6 +95,33 @@ def cell(text):
     return text.replace("|", "\\|").strip()
 
 
+def split_row(line):
+    """Cells of a markdown table row; an escaped pipe stays inside its cell."""
+    cells = re.split(r"(?<!\\)\|", line.strip().strip("|"))
+    return [c.strip() for c in cells]
+
+
+def carried_rows(campaign):
+    """Rows of the previous index's new-feature table left at TODO or "not run": [(cells, index)]."""
+    rows = []
+    for index in cm.campaign_indexes(campaign):
+        lines = Path(index).read_text(encoding="utf-8").splitlines()
+        for i, line in enumerate(lines):
+            head = [c.lower() for c in split_row(line)] if line.lstrip().startswith("|") else []
+            if head[:4] != ["pr", "feature", "charter", "result"]:
+                continue
+            for row in lines[i + 2:]:
+                if not row.lstrip().startswith("|"):
+                    break
+                cells = split_row(row)
+                if len(cells) < 4:
+                    continue
+                charter, result = cells[2], cells[3]
+                if charter.upper() == "TODO" or re.search(r"\bnot run\b", result, re.I):
+                    rows.append((cells[:4], index))
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--since", help="previous campaign date, YYYY-MM-DD")
@@ -101,6 +132,8 @@ def main():
     args = ap.parse_args()
 
     date, rev, note = baseline(args)
+    previous, _how = cm.resolve_campaign(args.campaign)
+    carried = carried_rows(previous) if previous else []
     if not date:
         sys.exit(f"No previous campaign date: {note}. Pass --since DATE or --campaign DIR.")
     cmd = ["gh", "pr", "list", "--state", "merged", "--search", f"merged:>={date}",
@@ -173,6 +206,13 @@ def main():
         print(f"| {link} | {cell(pr['title'])} | TODO | |")
     if not user:
         print("| (none) | | | |")
+    shown = {f"#{p['number']}" for p in user}
+    carried = [(c, i) for c, i in carried if not any(n in shown for n in re.findall(r"#\d+", c[0]))]
+    if carried:
+        print(f"\nCarried forward from {previous} ({len(carried)}; not covered there, add them to the table):\n")
+        print("| PR | Feature | Charter | Result |\n| --- | --- | --- | --- |")
+        for cells, _index in carried:
+            print(f"| {cells[0]} | {cells[1]} | TODO | previous: {cells[2]}, {cells[3]} |")
     print("\nCharter: charter ID, or `automated: <test>`. Result: PASS / finding IDs / not run.")
     print("A user-facing PR left at TODO is a gap: list it under Limits; status cannot be `completed`.")
     if other:

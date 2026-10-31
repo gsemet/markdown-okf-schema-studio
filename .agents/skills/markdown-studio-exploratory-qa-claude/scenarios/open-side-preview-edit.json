@@ -1,0 +1,17 @@
+{
+  "name": "open-side-preview-edit",
+  "file": "synth/tables.md",
+  "steps": [
+    {"comment": "Setup for latency-probe.mjs and source-typing journeys: side preview in edit mode, keyboard focus back in the source at a new last paragraph. Run with --file <doc>."},
+    {"open": "${file}", "wait": 2500},
+    {"palette": "Markdown OKF-Schema Studio: Open Preview to Side", "wait": 4000},
+    {"waitFor": "D.querySelector('#sphinx-myst-preview-content [data-sphinx-source-line]')", "timeout": 20000, "label": "rendered preview"},
+    {"editMode": true},
+    {"check": "feval", "expr": "D.documentElement.getAttribute('data-sphinx-preview-edit-mode')", "equals": "on", "label": "edit mode on"},
+    {"comment": "Focus stays in the preview after the toolbar click: Meta+1 returns it to the source editor."},
+    {"key": "Meta+1", "wait": 400},
+    {"key": ["Meta+End", "Enter", "Enter"], "gap": 120, "wait": 600},
+    {"check": "editor", "active": "${file}", "label": "keyboard focus in the source editor"},
+    {"check": "errors"}
+  ]
+}

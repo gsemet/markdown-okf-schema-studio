@@ -4,6 +4,7 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 import { setTimeout as delay } from "node:timers/promises";
 
 export function cap(value, max = 2000) {
@@ -148,16 +149,80 @@ export async function setEditMode(ctx, on, which = 0) {
   throw new Error(`edit mode did not switch to ${wanted}`);
 }
 
-const ACTIONS = ["open", "palette", "pick", "key", "type", "insert", "click", "clicksel", "wheel", "drag", "waitFor", "waitForPage", "editMode", "mark", "shot", "eval", "wait"];
+// Order matters: the first name present in a step is its action, so `comment` comes last and a
+// `comment` key next to an action only annotates it.
+const ACTIONS = ["open", "palette", "pick", "key", "type", "insert", "click", "clicksel", "wheel", "drag", "waitFor", "waitForPage", "editMode", "mark", "shot", "eval", "peval", "wait", "comment"];
+
+const AsyncFunction = (async () => {}).constructor;
+const parses = (body) => { try { new AsyncFunction(body); return true; } catch (error) { return !(error instanceof SyntaxError); } };
+
+// JS for `eval`, `peval`, `waitFor` and the eval checks is one expression. Statements (`;`, `const`,
+// `if`) are accepted too: when the text does not parse as an expression but parses as a function
+// body, it is wrapped in an async IIFE, so its value is what it `return`s. One trailing `;` is
+// ignored (and dropped from the result, so the caller can wrap it in `return (...)`). The check is a parse in
+// Node (nothing runs twice); text that parses neither way is sent as is and fails in the page.
+export function asExpression(js) {
+  const text = String(js);
+  const bare = text.replace(/;\s*$/, "");
+  if (parses(`return (${bare}\n);`)) return bare;
+  return parses(text) ? `(async () => {\n${text}\n})()` : text;
+}
+
+// Same for the workbench page (`peval`): text that already compiles as a script is sent unchanged,
+// so `a; b` keeps returning the last value; anything else is wrapped like `asExpression`.
+export function asPageExpression(js) {
+  const text = String(js);
+  try { new vm.Script(text); return text; } catch { /* needs await or return: fall through */ }
+  const out = asExpression(text);
+  // A bare top-level `await x` is an expression only inside an async function: wrap it so the page
+  // awaits it and returns its value.
+  if (!out.startsWith("(async") && parses(`return (${out}\n);`)) return `(async () => (${out}\n))()`;
+  return out;
+}
+
+// The `editor` check: `want` names the file as a workspace path (`book/chapters/08-x.md`), a shorter
+// suffix (`chapters/08-x.md`), or an absolute path. It matches the editor's file when the file path
+// ends with it on a path boundary, or, when the window's folder is a sub-folder of the QA workspace
+// (`--workspace ws/book`), when `want` is the path relative to that folder or that path behind
+// the folder's own name (`book/x.md` for `x.md` in a window opened on `ws/book`); nothing else.
+export function editorMatches(uri, want, root) {
+  if (!uri || !want) return false;
+  const file = decodeURIComponent(String(uri).replace(/^file:\/\//, ""));
+  const wanted = String(want).replace(/^\.\//, "");
+  if (file === wanted || file.endsWith(`/${wanted}`)) return true;
+  if (!root || !file.startsWith(`${root.replace(/\/$/, "")}/`)) return false;
+  const base = root.replace(/\/$/, "");
+  const rel = file.slice(base.length + 1);
+  return rel === wanted || wanted === `${path.basename(base)}/${rel}`;
+}
+
+// VS Code windows of the isolated profiles: one main process per `--user-data-dir` under `msq-`.
+// Helper processes (renderers, GPU, extension host) carry `--type=` and are not windows. `ps` is the
+// output of `ps -axo pid=,command=`. Returns [{ pid, userData }].
+export function parseWindows(ps) {
+  const windows = [];
+  for (const line of String(ps).split("\n")) {
+    const match = /^\s*(\d+)\s+(.*)$/.exec(line);
+    if (!match || / --type=/.test(match[2])) continue;
+    const dir = /--user-data-dir=(\S*msq-[^\s]*)/.exec(match[2]);
+    if (dir) windows.push({ pid: Number(match[1]), userData: dir[1] });
+  }
+  return windows;
+}
+
+export function listWindows() {
+  return parseWindows(spawnSync("ps", ["-axo", "pid=,command="], { encoding: "utf8" }).stdout ?? "");
+}
 
 async function runAction(ctx, step, state) {
   const kind = ACTIONS.find((name) => name in step);
   if (!kind) throw new Error(`unknown step ${JSON.stringify(step)}`);
   const { page } = ctx;
-  const which = step.which ?? 0;
+  const which = step.which ?? step.frame ?? 0;
   let note;
   switch (kind) {
     case "wait": await delay(Number(step.wait)); return undefined;
+    case "comment": return undefined;
     case "open":
       // Cmd+P with focus in the preview opens the file in the preview's group: focus group 1 first.
       await page.keyboard.press("Meta+1"); await delay(200);
@@ -202,6 +267,8 @@ async function runAction(ctx, step, state) {
       if (!b) throw new Error(`element not found: ${step.clicksel}${step.text !== undefined ? ` with text ${step.text}` : ""}`);
       await delay(250);
       const r = await ctx.wv(`box(${elementsJs(step.clicksel, step.text, step.exact)}[${nth}])`, which);
+      // A collapsed toolbar leaves its buttons 0×0: a click there would land on something else.
+      if (!r || !r.w || !r.h) throw new Error(`${step.clicksel} has an empty box (collapsed toolbar? click button[aria-label='Show view controls'] first)`);
       const x = r.x + (step.dx !== undefined ? Number(step.dx) : Math.min(r.w / 2, 40));
       const y = r.y + (step.dy !== undefined ? Number(step.dy) : Math.min(r.h / 2, 12));
       if (step.dbl) await page.mouse.dblclick(x, y);
@@ -221,10 +288,10 @@ async function runAction(ctx, step, state) {
       break;
     }
     case "waitFor":
-      await waitUntil(() => ctx.wv(step.waitFor, which), Number(step.timeout ?? 5000), step.label ?? step.waitFor);
+      await waitUntil(() => ctx.wv(asExpression(step.waitFor), which), Number(step.timeout ?? 5000), step.label ?? step.waitFor);
       return undefined;
     case "waitForPage":
-      await waitUntil(() => page.evaluate(step.waitForPage), Number(step.timeout ?? 5000), step.label ?? step.waitForPage);
+      await waitUntil(() => page.evaluate(asPageExpression(step.waitForPage)), Number(step.timeout ?? 5000), step.label ?? step.waitForPage);
       return undefined;
     case "editMode": note = await setEditMode(ctx, step.editMode, which); break;
     case "mark": {
@@ -236,7 +303,8 @@ async function runAction(ctx, step, state) {
       if (step.onFail && state.failed === 0) return undefined;
       return `shot ${await ctx.shot(step.shot, step)}`;
     }
-    case "eval": return `eval ${cap(await ctx.wv(step.eval, which), Number(step.max ?? 600))}`;
+    case "eval": return `eval ${cap(await ctx.wv(asExpression(step.eval), which), Number(step.max ?? 600))}`;
+    case "peval": return `peval ${cap(await page.evaluate(asPageExpression(step.peval)), Number(step.max ?? 600))}`;
     default: break;
   }
   await delay(Number(step.wait ?? DEFAULT_PAUSE[kind] ?? 300));
@@ -244,7 +312,7 @@ async function runAction(ctx, step, state) {
 }
 
 async function runCheck(ctx, step, state) {
-  const which = step.which ?? 0;
+  const which = step.which ?? step.frame ?? 0;
   const label = step.label ? ` (${step.label})` : "";
   switch (step.check) {
     case "diff": {
@@ -286,7 +354,7 @@ async function runCheck(ctx, step, state) {
     }
     case "feval":
     case "peval": {
-      const value = step.check === "feval" ? await ctx.wv(step.expr, which) : await ctx.page.evaluate(step.expr);
+      const value = step.check === "feval" ? await ctx.wv(asExpression(step.expr), which) : await ctx.page.evaluate(asPageExpression(step.expr));
       const ok = "equals" in step ? JSON.stringify(value) === JSON.stringify(step.equals) : Boolean(value);
       return { ok, check: step.check, detail: `${step.label ?? cap(step.expr, 80)} → ${cap(value, 200)}${"equals" in step ? ` (want ${JSON.stringify(step.equals)})` : ""}` };
     }
@@ -318,14 +386,20 @@ async function runCheck(ctx, step, state) {
     case "editor": {
       // `active` is undefined while a webview has focus; `visible` checks the editor groups instead.
       const spy = await freshSpy(ctx.readSpy, ctx.session);
-      const short = (uri) => (uri ? uri.split("/").slice(-2).join("/") : "none");
+      // Shown relative to the window's folder (the QA workspace or its clone).
+      const root = ctx.session?.target;
+      const short = (uri) => {
+        if (!uri) return "none";
+        const file = decodeURIComponent(uri.replace(/^file:\/\//, ""));
+        return root && file.startsWith(`${root}/`) ? file.slice(root.length + 1) : file.split("/").slice(-2).join("/");
+      };
       if ("visible" in step) {
         const uris = (spy?.visibleEditors ?? []).map((e) => e.uri);
-        const ok = uris.some((uri) => uri.endsWith(step.visible));
+        const ok = uris.some((uri) => editorMatches(uri, step.visible, root));
         return { ok, check: "editor", detail: `visible text editors ${uris.map(short).join(", ") || "none"} (want ${step.visible})${label}` };
       }
       const active = spy?.activeEditor?.uri ?? null;
-      const ok = step.active === null ? active === null : Boolean(active?.endsWith(step.active));
+      const ok = step.active === null ? active === null : editorMatches(active, step.active, root);
       return { ok, check: "editor", detail: `active text editor ${short(active)} (want ${step.active ?? "none"})${label}` };
     }
     default: throw new Error(`unknown check ${step.check}`);
@@ -334,7 +408,7 @@ async function runCheck(ctx, step, state) {
 
 // Step fields that must be numbers: `--var nth=3` arrives as the string "3", so a field that is
 // exactly one placeholder (`"nth": "${nth}"`) is coerced to a Number when the value is an integer.
-const NUMERIC_FIELDS = new Set(["nth", "which", "count", "delay", "gap", "wait", "timeout", "dx", "dy", "steps", "px", "max", "maxLines"]);
+const NUMERIC_FIELDS = new Set(["nth", "which", "frame", "count", "delay", "gap", "wait", "timeout", "dx", "dy", "steps", "px", "max", "maxLines"]);
 
 function substitute(value, vars, key) {
   if (typeof value === "string") {
@@ -418,8 +492,12 @@ export async function doctor({ session, repo, extensionRoot, here, readSpy }) {
   add(age !== null && age < 5 ? "OK" : "FAIL", "spy", age === null ? "no state.json: spy extension not loaded" : `last snapshot ${age}s ago`);
   const consoleFile = path.join(session.dir, "console.log");
   const pidFile = path.join(session.dir, "observer.pid");
-  const observer = fs.existsSync(pidFile) && (() => { try { process.kill(Number(fs.readFileSync(pidFile, "utf8")), 0); return true; } catch { return false; } })();
-  add(observer && fs.existsSync(consoleFile) ? "OK" : "WARN", "observer", observer ? "running" : "not running: start q run observe.mjs in the background (errors/navs checks need it)");
+  const observerUp = () => fs.existsSync(pidFile) && fs.existsSync(consoleFile)
+    && (() => { try { process.kill(Number(fs.readFileSync(pidFile, "utf8")), 0); return true; } catch { return false; } })();
+  // Right after `q run observe.mjs &` the observer is still attaching: poll up to 3 s before warning.
+  let observer = observerUp();
+  for (let i = 0; i < 15 && !observer; i += 1) { await delay(200); observer = observerUp(); }
+  add(observer ? "OK" : "WARN", "observer", observer ? "running" : "not running after 3 s: start q run observe.mjs in the background (errors/navs checks need it)");
   try {
     const sheet = execFileSync("osascript", [path.join(here, "sheet.applescript"), "read"], { encoding: "utf8", timeout: 4000 }).trim();
     const pending = sheet && !/^no sheet/i.test(sheet);
@@ -435,8 +513,9 @@ export async function doctor({ session, repo, extensionRoot, here, readSpy }) {
     const stale = newest(path.join(extensionRoot, "src")) > fs.statSync(bundle).mtimeMs;
     add(stale ? "WARN" : "OK", "extension build", stale ? "sources newer than the bundle: rebuild, then relaunch" : "bundle up to date");
   }
-  const others = spawnSync("pgrep", ["-f", "msq-"], { encoding: "utf8" }).stdout.trim().split("\n").filter(Boolean).length;
-  add("INFO", "msq- processes (all sessions)", String(others));
+  // Windows, not processes: `pgrep -f msq-` also counts the helpers (about 7 per window).
+  const windows = listWindows();
+  add(windows.length > 3 ? "WARN" : "INFO", "VS Code windows (all sessions)", `${windows.length}${windows.length > 3 ? " (budget 2-3: stop some)" : ""}; q sessions lists them`);
   const head = spawnSync("git", ["-C", repo, "rev-parse", "--short", "HEAD"], { encoding: "utf8" }).stdout.trim();
   const dirty = spawnSync("git", ["-C", repo, "status", "--short"], { encoding: "utf8" }).stdout.trim();
   add("INFO", "revision", `${head}${dirty ? " (extension tree dirty)" : " (clean)"}`);

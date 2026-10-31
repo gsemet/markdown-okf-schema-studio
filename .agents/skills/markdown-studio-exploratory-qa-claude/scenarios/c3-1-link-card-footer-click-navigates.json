@@ -1,0 +1,51 @@
+{
+ "name": "c3-1-link-card-footer-click-navigates",
+ "file": "fixtures-visual/46-grid-cards.md",
+ "steps": [
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 3500
+  },
+  {
+   "waitFor": "D.querySelector('.myst-grid-card-link')",
+   "timeout": 8000
+  },
+  {
+   "editMode": true,
+   "optional": true
+  },
+  {
+   "check": "feval",
+   "expr": "D.documentElement.getAttribute('data-sphinx-preview-edit-mode')",
+   "equals": "on",
+   "label": "QA215-01 edit mode on"
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": ".myst-grid-card-footer p",
+   "text": "Footer of the card",
+   "wait": 900
+  },
+  {
+   "check": "feval",
+   "expr": "!!D.querySelector('textarea')",
+   "label": "QA215-01 a block editor opens on the link-card footer (header already does, c1-1)"
+  },
+  {
+   "check": "feval",
+   "expr": "D.querySelector('h1') && D.querySelector('h1').textContent.trim()",
+   "equals": "Grid of cards",
+   "label": "QA215-01 still on the grid document"
+  },
+  {
+   "shot": "c3-1-currently",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

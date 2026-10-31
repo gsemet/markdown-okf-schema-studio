@@ -1,0 +1,63 @@
+{
+ "name": "c7-1-radio-click-with-open-editor-writes",
+ "file": "fixtures-visual/74-radio-plan.md",
+ "steps": [
+  {
+   "comment": "Setup added on promotion: open the fixture in the side preview with edit mode on (the campaign ran these steps by hand)."
+  },
+  {
+   "open": "${file}"
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelector('[role=radiogroup]')",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "key": "Escape",
+   "wait": 500
+  },
+  {
+   "clicksel": "h2",
+   "text": "Tasks",
+   "wait": 800
+  },
+  {
+   "eval": "'editor before:'+!!D.querySelector('textarea,.cm-editor')+' scrollY:'+scrollY"
+  },
+  {
+   "wheel": [
+    600,
+    300,
+    -200
+   ],
+   "steps": 3
+  },
+  {
+   "eval": "'editor after wheel:'+!!D.querySelector('textarea,.cm-editor')+' scrollY:'+scrollY+' radio1:'+Math.round(D.querySelectorAll('[role=radio]')[1].getBoundingClientRect().top)"
+  },
+  {
+   "mark": true
+  },
+  {
+   "clicksel": "ul[role=radiogroup] [role=radio]",
+   "nth": 1,
+   "wait": 300
+  },
+  {
+   "eval": "'editor after scroll-click:'+!!D.querySelector('textarea,.cm-editor')+' sel:'+[...D.querySelectorAll('[role=radio]')].map(e=>e.getAttribute('aria-checked')[0]).join('')"
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "equal": true,
+   "label": "QA215-04 radio click with editor open and radio scrolled into view"
+  }
+ ]
+}
