@@ -20,6 +20,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import sys
 import subprocess
 import time
@@ -123,6 +124,14 @@ from capture_final_checks import (
   pin_frontmatter_capture,
   show_schema_key_suggestions,
 )
+
+# A Playwright timeout as it reads in a failure detail caught by a check.
+TIMEOUT_DETAIL = re.compile(r"Timeout \d+ms exceeded")
+
+
+def first_line(error: Exception) -> str:
+  """The call and reason of a Playwright error, e.g. "Page.goto: Timeout 30000ms exceeded."."""
+  return str(error).splitlines()[0] if str(error) else type(error).__name__
 
 
 def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: dict) -> str:
@@ -275,13 +284,15 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                           "group": scenario["group"], "screenshotOf": scenario.get("screenshotOf"),
                           "expectedContent": scenario["description"],
                           "actions": [], "finalState": {}}
-                # Opt-in stopgap (retryOnTimeout): only a Playwright timeout is retried, so a real
-                # visual diff or any other failure is never hidden by a second attempt.
-                attempts_allowed = 1 + (int(scenario.get("retryOnTimeout") or 0) if scenario.get("timeoutMs") else 0)
+                # Opt-in safety net (retryOnTimeout): only a Playwright timeout is retried, at most once.
+                # A retry keeps the failures recorded before the hang, so a real check failure still
+                # fails the scenario; the timeout and what the hung page records after it are dropped.
+                attempts_allowed = 1 + (min(1, int(scenario.get("retryOnTimeout") or 0)) if scenario.get("timeoutMs") else 0)
                 attempt_log = []
                 for attempt in range(1, attempts_allowed + 1):
                     timed_out = False
-                    del failures[start_failures:]
+                    hung_call = None
+                    hung_at = None
                     result.update({"actions": [], "finalState": {}})
                     context = browser.new_context(
                         viewport={"width": scenario["width"], "height": scenario["height"]},
@@ -303,18 +314,24 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                     page.step_recorder = steps
                     position = "setup failed before scrolling"
                     try:
+                        # goto waits for "load"; Mermaid, PlantUML and charts have their own render-state
+                        # waits. No "networkidle" wait: Playwright can miss a late script request on a
+                        # large page and then never report the network as idle.
                         page.goto((page_directory / scenario["page"]).as_uri())
-                        page.wait_for_load_state("networkidle")
                         position = run_scenario(page, scenario, failures, result)
                     except Exception as error:
                         timed_out = isinstance(error, PlaywrightTimeoutError)
+                        if timed_out:
+                            hung_call, hung_at = first_line(error), len(failures)
                         failures.append(Failure(scenario["page"], f"scenario exception: {error}"))
                     try:
                       if scenario.get('frontmatterLinkState'):
                         trace.run("check_deferred_frontmatter_links_final", lambda: check_deferred_frontmatter_links(page, scenario, failures))
                       result["finalState"] = trace.run("check_final_frame", lambda: check_final_frame(page, scenario, failures))
                     except Exception as error:
-                        timed_out = timed_out or isinstance(error, PlaywrightTimeoutError)
+                        if isinstance(error, PlaywrightTimeoutError) and not timed_out:
+                            timed_out = True
+                            hung_call, hung_at = first_line(error), len(failures)
                         failures.append(Failure(scenario["page"], f"final frame unavailable: {error}"))
                     if scenario.get("timeoutMs"):
                         duration_ms = round((time.monotonic() - scenario_started) * 1000)
@@ -322,11 +339,20 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                         print(f"{short_id} attempt {attempt} duration {duration_ms} ms ({scenario['id']}, budget {scenario['timeoutMs']} ms)" if attempts_allowed > 1 else f"{short_id} duration {duration_ms} ms ({scenario['id']}, budget {scenario['timeoutMs']} ms)", flush=True)
                         attempt_log.append(duration_ms)
                     if timed_out and attempt < attempts_allowed:
-                        print(f"{short_id} attempt {attempt} HUNG after {duration_ms} ms (budget {scenario['timeoutMs']} ms) — retrying once (known hang, see backlog)", flush=True)
+                        print(f"{short_id} attempt {attempt} HUNG after {duration_ms} ms (budget {scenario['timeoutMs']} ms) in {hung_call} — retrying once", flush=True)
+                        failures[start_failures:] = [
+                            failure for failure in failures[start_failures:hung_at] if not TIMEOUT_DETAIL.search(failure.detail)
+                        ]
                         context.close()
                         continue
                     if timed_out and attempt_log and len(attempt_log) > 1:
                         failures.append(Failure(scenario["page"], f"timed out on every attempt (attempt durations {attempt_log} ms, budget {scenario['timeoutMs']} ms)"))
+                    if attempt > 1:
+                        # A check failure kept from the hung attempt may be recorded again by the retry.
+                        unique = {}
+                        for failure in failures[start_failures:]:
+                            unique.setdefault(failure.detail, failure)
+                        failures[start_failures:] = list(unique.values())
                     break
                 result["checkTrace"] = dict(sorted(trace.counts.items()))
                 result["failures"] = [failure.detail for failure in failures[start_failures:]]
