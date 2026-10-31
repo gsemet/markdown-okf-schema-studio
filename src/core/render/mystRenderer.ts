@@ -19,6 +19,7 @@ import {
 } from "./chartData";
 import { type CheckboxMarker, prepareCheckboxMarkers } from "./checkboxMarkers";
 import { convertCommentMarkers } from "./commentMarkers";
+import { convertRadioGroups } from "./radioGroups";
 import {
   expandVersionAdmonitions,
   labelLinkRoles,
@@ -473,6 +474,15 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   { name: "dollar amounts", run: (state) => restoreDollarAmounts(state.ast) },
   { name: "toc markers", run: (state) => expandTocMarkers(state.ast) },
   { name: "wiki links", run: (state) => expandWikiLinks(state.ast) },
+  {
+    // Before the checkboxes: a radio marker left out of every group is restored there as text.
+    name: "radio groups",
+    run: (state) => {
+      if (state.checkboxMarkers.some((marker) => marker.kind === "radio")) {
+        convertRadioGroups(state.ast, state.checkboxMarkers, state.source.split(/\r\n|\r|\n/u));
+      }
+    },
+  },
   {
     name: "checkboxes",
     run: (state) => {

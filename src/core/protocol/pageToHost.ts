@@ -86,6 +86,29 @@ const isFindReplaceItem = (item: unknown): boolean => {
     && Number.isSafeInteger(value.occurrences) && (value.occurrences as number) > (value.occurrence as number);
 };
 
+/** Most options one radio group request names. */
+const MAX_RADIO_GROUP_OPTIONS = 256;
+
+// @implements_req SwRS-MDOKFSTUDIO-GFM-039
+/**
+ * The options of a radio choice: 2 to 256 distinct source positions, the clicked one among them,
+ * and a request that selects (never clears) the clicked option.
+ */
+const isRadioGroup: MessageValidator = (message) => {
+  const group = message.radioGroup;
+  if (message.checked !== true || !Array.isArray(group) || group.length < 2 || group.length > MAX_RADIO_GROUP_OPTIONS) {
+    return false;
+  }
+  const keys = new Set<string>();
+  for (const option of group as unknown[]) {
+    if (typeof option !== "object" || option === null) return false;
+    const { line, column } = option as Record<string, unknown>;
+    if (!isSourceLine(line) || !Number.isSafeInteger(column) || (column as number) < 0) return false;
+    keys.add(`${String(line)}:${String(column)}`);
+  }
+  return keys.size === group.length && keys.has(`${String(message.line)}:${String(message.column)}`);
+};
+
 const isPinViewportTop = (value: unknown): boolean => value === undefined
   || (typeof value === "number" && Number.isFinite(value) && Math.abs(value) <= 100000);
 
@@ -143,7 +166,8 @@ function hasValidStateFields(message: Readonly<Record<string, unknown>>, type: P
     && (message.flush === undefined
       || ((frontmatter || type === "previewEditSave") && message.flush === true))
     && (message.newFieldName === undefined || (frontmatter && typeof message.newFieldName === "string"))
-    && (type === "previewCheckboxToggle" || (message.column === undefined && message.checked === undefined))
+    && (type === "previewCheckboxToggle"
+      || (message.column === undefined && message.checked === undefined && message.radioGroup === undefined))
     && (message.afterField === undefined
       || (frontmatter
         && message.frontmatterAction === "add"
@@ -209,7 +233,8 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   previewCheckboxToggle: stateMessage("previewCheckboxToggle", (message) => Number.isSafeInteger(message.column)
     && (message.column as number) >= 0
     && typeof message.checked === "boolean"
-    && message.line === message.endLine),
+    && message.line === message.endLine
+    && (message.radioGroup === undefined || isRadioGroup(message))),
   // @implements_req SwRS-MDOKFSTUDIO-CODE-026
   // Raw code of a code block, copied to the clipboard by the host.
   // The size limit is the host's to answer (`previewCopyTextResult`); the shape check only keeps

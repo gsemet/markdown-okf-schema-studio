@@ -17,10 +17,13 @@ import { STALE_REQUEST } from "../protocol/staleRequest";
 import { countRefUses, renameLabelLine } from "../mapping/labelRename";
 import { minimalReplacement } from "../mapping/textDiff";
 import { checkboxToggleEdit } from "../render/checkboxMarkers";
+import { type RadioPosition, radioSelectEdits } from "../render/radioMarkers";
 import { sourceLines, type EditRefusal, type SourceLines, type TextEdit } from "./textEdit";
 
 /** Refusal of a checkbox whose marker is gone. */
 export const CHECKBOX_GONE = "The checkbox is no longer in the source. Refresh the preview.";
+/** Refusal of a radio choice whose group is no longer in the source as the preview showed it. */
+export const RADIO_GONE = "The choice is no longer in the source. Refresh the preview.";
 /** Refusal of a label rename whose `(name)=` line is gone. */
 export const LABEL_GONE = "The label is no longer on that line. Refresh the preview.";
 
@@ -69,6 +72,30 @@ export function planCheckboxToggle(text: string, line: number, column: number, c
   if (!toggle.changed) return { unchanged: true };
   const start = lines.start(line - 1) + toggle.column;
   return { edit: { start, end: start + 1, text: toggle.replacement } };
+}
+
+/** The one-character edits that move the `x` of a radio group, or no edit when nothing changes. */
+export type RadioSelectPlan = EditRefusal | { unchanged: true } | { edits: TextEdit[] };
+
+// @implements_req SwRS-MDOKFSTUDIO-GFM-039
+/**
+ * Selects the radio option at 1-based `line`, zero-based `column` (its opening parenthesis) among
+ * the options of `group`: the option becomes `(x)` and every other selected option `( )`. Each line
+ * of the group is re-read; a group whose markers moved is refused.
+ */
+export function planRadioSelect(text: string, line: number, column: number, group: readonly RadioPosition[]): RadioSelectPlan {
+  const lines = sourceLines(text);
+  const lineText = (number: number): string | undefined =>
+    Number.isSafeInteger(number) && number >= 1 && number <= lines.count ? lines.text(number - 1) : undefined;
+  const changes = radioSelectEdits(lineText, { line, column }, group);
+  if (!changes) return { refused: RADIO_GONE };
+  if (changes.length === 0) return { unchanged: true };
+  return {
+    edits: changes.map((change) => {
+      const start = lines.start(change.line - 1) + change.column;
+      return { start, end: start + 1, text: change.replacement };
+    }),
+  };
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-045

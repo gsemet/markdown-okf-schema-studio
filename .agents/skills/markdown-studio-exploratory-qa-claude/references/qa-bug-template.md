@@ -91,9 +91,10 @@ Uncheck to disagree: [x]
 
 The sections **Suggested direction**, **Test to add**, **Requirement to write or change** and
 **Promote replay to E2E** are the author's proposals. Each ends with its own line
-`Uncheck to disagree: [x]`, ticked by default. The owner unticks what they disagree with; the fix CR
-carries out only the sections still ticked. Triage copies the sheet as is: the "Test to add" and
-"Done when" text is a proposal, not an order.
+`Uncheck to disagree: [x]`, ticked by default, unless it offers several approaches (a radio group,
+see below). The owner unticks what they disagree with; the fix CR carries out only the sections
+still ticked. Triage copies the sheet as is: the "Test to add" and "Done when" text is a proposal,
+not an order.
 
 - When no test is proposed, the section says `No test: <reason>` followed by the same ticked line;
   unticking it means "add one anyway":
@@ -106,6 +107,22 @@ carries out only the sections still ticked. Triage copies the sheet as is: the "
   Uncheck to disagree: [x]
   ```
 
+- **Several approaches: a radio group.** When a proposal section offers two or three approaches,
+  it lists them as a radio group, the recommended one preselected `(x)`, and keeps no
+  `Uncheck to disagree` line: the owner picks another approach with one click in the Studio. A
+  section with a single proposal keeps `Uncheck to disagree: [x]`.
+
+  ```markdown
+  ## Suggested direction
+
+  - (x) A click in the margin around the block opens its editor
+  - ( ) Alt+click on the link opens the editor
+  - ( ) Leave as is: edit link-only blocks in the source
+  ```
+
+- **Reading a ticket.** An agent that carries out a sheet checks that each radio group has exactly
+  one `(x)` and follows that option. With no `(x)`, or more than one, it does not guess: it asks
+  the owner which approach to take.
 - **Balance.** Propose a test only when the defect could come back silently and no existing test is
   close (data loss, buffer diff, regression of a fixed bug, invariant). Requirements follow the same
   rule. A cosmetic or one-off finding gets "No test: <reason>" and no new requirement.

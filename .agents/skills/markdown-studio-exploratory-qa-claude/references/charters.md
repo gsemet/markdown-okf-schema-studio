@@ -135,7 +135,8 @@ Method:
   annotated: shorten or drop the note if it hides something that matters.
 - Propose a test or a requirement only when the defect could come back silently and no existing
   test is close; otherwise write "No test: <reason>". Each proposal ends with
-  `Uncheck to disagree: [x]`.
+  `Uncheck to disagree: [x]`; a section that offers several approaches lists them as a radio
+  group (`- (x)` on the recommended one, `- ( )` on the others) instead.
 - Stay within the budget. When it runs out, stop and report what is known.
 - Write each confirmed finding as a sheet in <campaign>/<group>/ following
   references/qa-bug-template.md (full sheet for High/Medium, short sheet for Low), starting with

@@ -173,7 +173,9 @@ bug: it is an owner question.
 Proposals follow a balance rule: propose a test only when the defect could come back silently and no
 existing test is close (data loss, buffer diff, regression of a fixed bug, invariant); requirements
 follow the same rule. Each proposal section ends with `Uncheck to disagree: [x]` and the fix CR
-carries out only the sections still ticked.
+carries out only the sections still ticked. A section that offers several approaches is a radio
+group with the recommended one preselected `(x)` instead; a fix CR asks the owner when a group has
+no `(x)` or more than one.
 
 **Triage (coordinator).** Read "Why this is wrong" first. A weak reason sends the sheet back to the
 charter agent, or downgrades it to Low as an intent question. A Bug with a cited requirement carries

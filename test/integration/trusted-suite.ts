@@ -9,6 +9,7 @@ import {
   getActivePreviewForTests,
 } from "./extensionApi";
 import { run as runCheckboxToggle } from "./checkboxToggle.test";
+import { run as runRadioChoice } from "./radioChoice.test";
 import { run as runDirtySnapshots } from "./dirtySnapshots.test";
 import { run as runGenericMarkdown } from "./genericMarkdown.test";
 import { run as runTableEmptyColumn } from "./tableEmptyColumn.test";
@@ -178,6 +179,7 @@ async function runTrustedSuite(): Promise<void> {
     console.error("Checkbox toggle integration failed:", error);
     throw error;
   }
+  if (!onlyRealInput) await step("radio-choice", runRadioChoice);
   if (!onlyRealInput) {
     await step("table-empty-column", runTableEmptyColumn);
     await step("edit-toolbar-cover", runEditToolbarCover);

@@ -2,6 +2,31 @@
 
 Each block is a complete document; all of them are rendered by Studio's test.
 
+A plan that asks the reader to decide: each choice is a radio group, the recommended option
+preselected, and the reader's click moves the `x` in the file:
+
+````markdown
+# Plan: faster preview start
+
+The preview takes two seconds to open on large files.
+
+Approach:
+
+- (x) Render the visible blocks first, the rest in the background
+- ( ) Cache the rendered page between sessions
+- ( ) Leave as is
+
+Rollout:
+
+- ( ) Behind a setting first
+- (x) On by default in the next release
+
+## Tasks
+
+- [ ] Measure the start time on the three largest files
+- [ ] Implement the chosen approach
+````
+
 Alerts, admonitions, a folding admonition and a version note:
 
 ````markdown

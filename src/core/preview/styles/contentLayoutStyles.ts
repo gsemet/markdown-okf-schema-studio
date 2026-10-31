@@ -460,6 +460,42 @@ ${FIRST_ELEMENT_CLEARANCE_CSS}
   outline-offset: 2px;
 }
 
+/* Radio choice markers (( ) / (x)) render as round controls drawn like the checkboxes: the ring
+   is the text colour at half strength (readable on every theme, where the input border token is
+   too faint on Cream), the selected ring and dot the focus accent the checkboxes use. */
+#sphinx-myst-preview-content .myst-radio {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 1em;
+  height: 1em;
+  margin: 0 0.35em 0 0;
+  vertical-align: -0.125em;
+  border: 1px solid color-mix(in srgb, currentColor 55%, transparent);
+  border-radius: 50%;
+  background: var(--studio-input-background, var(--studio-editor-background, Canvas));
+  cursor: pointer;
+}
+
+#sphinx-myst-preview-content .myst-radio[aria-checked="true"] {
+  border-color: var(--studio-focusBorder, #007fd4);
+  background: radial-gradient(circle, var(--studio-focusBorder, #007fd4) 0 38%, transparent 42%),
+    var(--studio-input-background, var(--studio-editor-background, Canvas));
+}
+
+#sphinx-myst-preview-content .myst-radio[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.6;
+}
+
+#sphinx-myst-preview-content .myst-radio[aria-busy="true"] {
+  cursor: progress;
+}
+
+#sphinx-myst-preview-content .myst-radio:focus-visible {
+  outline: 1px solid var(--studio-focusBorder, #007fd4);
+  outline-offset: 2px;
+}
+
 /* The reason of a refused toggle, shown next to its box for a few seconds. */
 #sphinx-myst-preview-content .myst-checkbox-refusal {
   margin-inline-end: 0.5em;
@@ -490,6 +526,18 @@ ${FIRST_ELEMENT_CLEARANCE_CSS}
 }
 
 #sphinx-myst-preview-content li.task-list-item > p:first-child > input.myst-checkbox:first-child {
+  margin-inline-start: -1.4em;
+}
+
+/* Bulleted radio choice items show the radio in the bullet gutter too (after the empty group
+   element of a group that is only a part of its list). Ordered items keep their numbers, which a
+   plan may cite ("option 2"), and show the radio after the number. */
+#sphinx-myst-preview-content ul > li.myst-radio-item {
+  list-style: none;
+}
+
+#sphinx-myst-preview-content ul > li.myst-radio-item > p:first-child > .myst-radio:first-child,
+#sphinx-myst-preview-content ul > li.myst-radio-item > p:first-child > .myst-radio-group:first-child + .myst-radio {
   margin-inline-start: -1.4em;
 }
 `;

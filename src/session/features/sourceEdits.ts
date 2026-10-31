@@ -1,6 +1,6 @@
 /**
  * The source edit controller: the small edits the page asks for outside the block editor. A
- * checkbox toggle, a MyST label rename, a reply to or the removal of an inline thread, a block move
+ * checkbox toggle or radio choice, a MyST label rename, a reply to or the removal of an inline thread, a block move
  * and the copy, cut and paste of blocks. The page only names lines; the pure planners of
  * `src/core/edits/` check them against the text and return the text edits the document store
  * applies, each as one undo step.
@@ -17,6 +17,7 @@ import {
   planCheckboxToggle,
   planFindReplace,
   planLabelRename,
+  planRadioSelect,
   planThreadDelete,
   planThreadReply,
   readThreadLines,
@@ -75,7 +76,11 @@ export class SourceEditController {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-GFM-021
-  /** Toggles one `[ ]`/`[x]` marker with a single-character edit (one undo step). */
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  /**
+   * Toggles one `[ ]`/`[x]` marker with a single-character edit, or selects a radio option with at
+   * most one edit per option of its group; either way one undo step.
+   */
   private handleCheckboxToggle(preview: PreviewSession, message: PageMessageOf<"previewCheckboxToggle">): PromiseLike<void> | undefined {
     const document = currentPreviewDocument(preview, message);
     if (!document || message.line === undefined || message.column === undefined || message.checked === undefined) {
@@ -83,10 +88,15 @@ export class SourceEditController {
       return undefined;
     }
     if (preview.edits.active) {
-      this.postCheckboxResult(preview, message, { error: "Save or cancel the open Markdown edit before toggling a checkbox." });
+      this.postCheckboxResult(preview, message, {
+        error: `Save or cancel the open Markdown edit before ${message.radioGroup ? "choosing an option" : "toggling a checkbox"}.`,
+      });
       return undefined;
     }
-    const toggle = planCheckboxToggle(document.getText(), message.line, message.column, message.checked);
+    // A radio option moves the `x` of its group: the same guards and answer, up to two edits.
+    const toggle = message.radioGroup
+      ? planRadioSelect(document.getText(), message.line, message.column, message.radioGroup)
+      : planCheckboxToggle(document.getText(), message.line, message.column, message.checked);
     if ("refused" in toggle) {
       this.postCheckboxResult(preview, message, { error: toggle.refused });
       return undefined;
@@ -95,7 +105,7 @@ export class SourceEditController {
       this.postCheckboxResult(preview, message, { saved: true });
       return undefined;
     }
-    return this.apply(document, [toggle.edit]).then((applied) => {
+    return this.apply(document, "edits" in toggle ? toggle.edits : [toggle.edit]).then((applied) => {
       this.postCheckboxResult(preview, message, applied
         ? { saved: true }
         : { error: "VS Code could not apply the checkbox edit." });

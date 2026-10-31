@@ -85,6 +85,7 @@ const FAMILIES: Array<{ name: string; source: RegExp; html: RegExp }> = [
   { name: "list table", source: /^`{3,}\{list-table\}/mu, html: /<table/u },
   { name: "label and reference", source: /\{ref\}`/u, html: /<a href="#cost">/u },
   { name: "task list", source: /^- \[x\]/mu, html: /class="myst-checkbox/u },
+  { name: "radio choice in a plan", source: /^- \(x\) /mu, html: /role="radiogroup"[^>]*aria-labelledby=[\s\S]*role="radio"[^>]*aria-checked="true"/u },
   { name: "figure", source: /^`{3,}\{figure\}/mu, html: /<figure[^>]*><img src="diagrams\/layers\.svg"/u },
   { name: "Mermaid", source: /^```mermaid$/mu, html: /class="myst-mermaid-figure/u },
   { name: "PlantUML", source: /^```plantuml$/mu, html: /class="myst-plantuml-figure/u },

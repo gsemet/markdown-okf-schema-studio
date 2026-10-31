@@ -41,5 +41,6 @@
 - [SwRS-MDOKFSTUDIO-GFM-036 — Removed span styles record a diagnostic](SwRS-MDOKFSTUDIO-GFM-036.md) — When a colour span style contains a removed declaration, the extension SHALL record the sanitizer diagnostic 'Removed unsafe style attribute.'.
 - [SwRS-MDOKFSTUDIO-GFM-037 — Alerts end at the first unquoted line](SwRS-MDOKFSTUDIO-GFM-037.md) — When the lines after an alert marker stop being quoted, the extension SHALL end the admonition at the first unquoted line.
 - [SwRS-MDOKFSTUDIO-GFM-038 — Raw HTML tables remove active content](SwRS-MDOKFSTUDIO-GFM-038.md) — When a raw HTML table contains script, style, iframe, svg, form, embed or object elements, the extension SHALL remove them with their content and drop comments.
+- [SwRS-MDOKFSTUDIO-GFM-039 — Radio choice lists render as a radio group and a click moves the selection in the source](SwRS-MDOKFSTUDIO-GFM-039.md) — When a list holds at least two consecutive items that start with '( )', '(x)' or '(X)', the extension SHALL render them as one radio group, and when a writer clicks or presses Space or Enter on an unselected option, it SHALL write '(x)' on that option and '( )' on the previously selected one as one undo step.
 
 <!-- okfreq:index:end -->
