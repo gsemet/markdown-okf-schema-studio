@@ -69,7 +69,13 @@ export function findButton(harness: RuntimeHarness, label: string): RuntimeEleme
  */
 export function openTableCellEditorForTab(
   harness: ReturnType<typeof createRuntimeHarness>,
-  options: { mapped?: boolean } = {},
+  options: {
+    mapped?: boolean;
+    /** The cell clicked to open the editor, [rendered row, column]; the first body cell by default. */
+    start?: [number, number];
+    /** Runs after the click and before the source reply, which opens the editor. */
+    beforeSource?: (table: RuntimeElement, cells: RuntimeElement[][]) => void;
+  } = {},
   originalText = "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
 ) {
   const table = new RuntimeElement({
@@ -99,7 +105,9 @@ export function openTableCellEditorForTab(
     target: cell,
     preventDefault: () => undefined,
   });
-  click(cells[1][0]);
+  const [startRow, startColumn] = options.start ?? [1, 0];
+  click(cells[startRow][startColumn]);
+  options.beforeSource?.(table, cells);
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
