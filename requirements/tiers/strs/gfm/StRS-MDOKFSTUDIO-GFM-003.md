@@ -31,6 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-GFM-026
 - SwRS-MDOKFSTUDIO-GFM-027
 - SwRS-MDOKFSTUDIO-GFM-028
+- SwRS-MDOKFSTUDIO-GFM-039
 - SwRS-MDOKFSTUDIO-TRUST-005
 default_owner_email: gaetan@xeberon.net
 ---
@@ -70,5 +71,6 @@ Writers and reviewers expect to tick a task checkbox without opening an editor, 
   - [SwRS-MDOKFSTUDIO-GFM-026](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-026.md): Read-only previews disable checkboxes
   - [SwRS-MDOKFSTUDIO-GFM-027](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-027.md): The host validates checkbox toggle messages
   - [SwRS-MDOKFSTUDIO-GFM-028](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-028.md): Content patches clear pending toggles
+  - [SwRS-MDOKFSTUDIO-GFM-039](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-039.md): Radio choice lists render as a radio group and a click moves the selection in the source
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
 <!-- okf:links:end -->

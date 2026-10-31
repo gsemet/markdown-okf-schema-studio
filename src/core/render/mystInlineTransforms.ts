@@ -273,8 +273,11 @@ export function convertCheckboxPlaceholders(
   const childrenInert = inert || INERT_CHECKBOX_PARENTS.has(node.type);
   node.children = node.children.flatMap((child): MystNode[] => {
     if (child.type === "text" && !childrenInert && child.value && hasCheckboxPlaceholder(child.value)) {
+      // A radio marker still here is not part of a radio group: it stays literal text.
       return splitCheckboxPlaceholders(child.value, markers).map((segment) => "marker" in segment
-        ? checkboxNode(markers[segment.marker])
+        ? markers[segment.marker].kind === "radio"
+          ? { ...child, value: markers[segment.marker].text }
+          : checkboxNode(markers[segment.marker])
         : { ...child, value: segment.text });
     }
     convertCheckboxPlaceholders(child, markers, childrenInert);

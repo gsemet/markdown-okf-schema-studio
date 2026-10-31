@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Radio choice lists: two or more list items in a row that start with `( )` or `(x)` render as a
+  radio group, labelled by the paragraph above the list. One click on another option, or Space or
+  Enter on it, moves the `x` in the Markdown: at most two lines change, in one undo step. A plan can
+  offer two or three approaches with the recommended one preselected and let the reader decide in
+  the preview.
 - Editing the body or the title of a card in a `{grid}` in edit mode no longer hides the text box
   under the edition palette: the card widens and pushes the other cards of its row aside, the
   palette sits above the text box (it may be wider than the card and scrolls vertically past a

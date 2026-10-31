@@ -166,7 +166,7 @@ export interface PreviewFrontmatterSaveMessage extends PageStateMessage<"preview
   pinViewportTop?: number;
 }
 
-/** A task-list checkbox was clicked. */
+/** A task-list checkbox or a radio option was clicked. */
 export interface PreviewCheckboxToggleMessage extends PageStateMessage<"previewCheckboxToggle"> {
   editId: string;
   line: number;
@@ -175,6 +175,11 @@ export interface PreviewCheckboxToggleMessage extends PageStateMessage<"previewC
   column: number;
   /** The requested state. */
   checked: boolean;
+  /**
+   * For a radio option (`( )` at the start of a list item): every option of its group, the clicked
+   * one included, by the line and column of its opening parenthesis. `checked` is then true.
+   */
+  radioGroup?: Array<{ line: number; column: number }>;
 }
 
 /** Every page-state message. */

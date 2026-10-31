@@ -45,6 +45,7 @@ with `code --install-extension GaetanSemet.markdown-okf-schema-studio`, or by se
 | Images | `![alt](path)` and `{figure}` for local PNG, JPEG, SVG files (raw SVG: see below) |
 | Navigation | `[TOC]` or `[[_TOC_]]` alone on a line, or `{contents}` (`:depth: 2`, `:local:`) |
 | README HTML | `<div align>`, `<p align>`, `<img width>`, `<picture>`, `<details>`, `<kbd>`, `<sub>`, `<sup>` |
+| Choices | two or more list items in a row that start with `( )` or `(x)`: a radio group; the reader's click moves the `x` in the file |
 | Metadata | YAML front matter shows as a properties table (OKF, validated by OKF-Schema) |
 | Review | `<!-- TODO: text -->` and `<!-- THREAD ... -->` comments show as chips |
 
@@ -61,8 +62,9 @@ palette. Every syntax above renders in every mode: write MyST freely, never down
   component diagrams: **PlantUML**.
 - Numbers (estimates, benchmarks, counts): **Vega-Lite**. A **table** when the reader compares
   exact values over three columns or more.
-- Alternatives to decide between: **tabs** or a comparison table. Parallel items (phases,
-  options, risks): **cards** in a grid. One highlighted fact: a single **card**.
+- Alternatives to decide between: **tabs** or a comparison table; when the reader must pick one,
+  a **radio group** with your recommendation preselected `(x)`. Parallel items (phases, options,
+  risks): **cards** in a grid. One highlighted fact: a single **card**.
 - **Admonitions** and alerts sparingly: one per section at most, for what the reader must not
   miss (warning, decision, assumption). Never wrap ordinary paragraphs.
 - `[TOC]` after the title only when the document has more than about six headings.
@@ -133,8 +135,8 @@ encoding:
 ```
 ````
 
-More copy-ready examples (alerts, admonitions, version notes, TOC, math, list table, PlantUML,
-front matter, review comments, README HTML): [references/examples.md](references/examples.md).
+More copy-ready examples (a plan with choices, alerts, admonitions, version notes, TOC, math,
+list table, PlantUML, front matter, review comments, README HTML): [references/examples.md](references/examples.md).
 
 ## Limits
 

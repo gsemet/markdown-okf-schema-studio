@@ -124,6 +124,25 @@ falls back to your Git `user.name`, then to your operating system user name, and
 it per user, workspace or folder. Comment threads are the groundwork for future interactive
 multi-user capabilities, a direction we are exploring with no date attached.
 
+### Decide in the page: choices in your plans
+
+An agent writes a plan with two or three approaches as a list of `( )` and `(x)` items, the
+recommended one preselected. Two or more such items in a row render as a radio group, and one click
+on another option switches the choice in the Markdown: at most two lines change, in one undo step.
+On GitHub and in a plain editor the `( )` and `(x)` text stays readable.
+
+```markdown
+Fix direction:
+
+- (x) A click in the margin around the block opens its editor
+- ( ) Alt+click on the link opens the editor
+- ( ) Leave as is: edit link-only blocks in the source
+```
+
+| Cream | Dark |
+| --- | --- |
+| ![A plan with two radio groups, the recommended option of each selected, and a task list on the cream page](images/readme/radio-plan-cream.png) | ![The same plan on the dark page](images/readme/radio-plan-dark.png) |
+
 ### Mermaid and PlantUML, no Java
 
 Mermaid and PlantUML diagrams are drawn by built-in engines. PlantUML needs no Java, no server and

@@ -42,7 +42,8 @@ The unit test `test/core/render/writingSkill.test.ts` (run by `just unit` and `j
   fails on a render error, a diagnostic or an unresolved directive;
 - fails when a syntax family the skill lists (cards, tabs, version notes, alerts, admonitions,
   table of contents, math, list table, figure, Mermaid, PlantUML, Vega-Lite, README HTML, comments,
-  front matter) has no example, or its example no longer renders as its own element;
+  front matter, radio choices in a plan) has no example,
+  or its example no longer renders as its own element;
 - checks the shape: front matter, length, no link out of the folder, no repository path.
 
 A new syntax family goes into the `FAMILIES` list of that test together with its example. The

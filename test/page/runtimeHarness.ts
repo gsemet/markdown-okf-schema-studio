@@ -218,6 +218,7 @@ export class RuntimeElement {
         || (selector === "[data-okf-properties]" && current.getAttribute("data-okf-properties") !== null)
         || (selector === "input.myst-checkbox" && current.tagName === "INPUT"
           && current.getAttribute("class") === "myst-checkbox")
+        || (selector === ".myst-radio" && (current.getAttribute("class") ?? "").split(" ").includes("myst-radio"))
         || (selector.includes("data-sphinx-source-line") && current.getAttribute("data-sphinx-source-line") !== null)
         || (selector === "[data-edit-option],[data-edit-action]"
           && (current.getAttribute("data-edit-option") !== null || current.getAttribute("data-edit-action") !== null))
@@ -385,6 +386,8 @@ export interface RuntimeHarness {
   readonly anchorButton: RuntimeElement;
   readonly editModeButton: RuntimeElement;
   readonly checkbox: RuntimeElement;
+  /** The options of the radio group the `radioGroup` option asked for, in source order (else empty). */
+  readonly radios: RuntimeElement[];
   readonly descriptionButton: RuntimeElement;
   readonly frontmatterNameCell: RuntimeElement;
   readonly frontmatterNameDisplay: RuntimeElement;
@@ -492,6 +495,16 @@ export function createRuntimeHarness(configuration: Partial<{
    * file). The page carries the context as the JSON element the runtime reads.
    */
   runtimeScript: string;
+  /**
+   * A radio group in the second mapped block, one option per entry (`x` selected, ` ` not), on
+   * source lines 60, 61, ... at column 2, rendered as the renderer does (roving tabindex).
+   */
+  radioGroup: ReadonlyArray<"x" | " ">;
+  /**
+   * True runs the document listeners registered for the capture phase before the bubble ones, as a
+   * browser does for an event on an element of the page (absent: registration order only).
+   */
+  captureOrder: boolean;
 }> = {}, savedThemeMode?: string, sharedThemeMode?: "current" | "dark" | "white", savedAnchorMode?: boolean): RuntimeHarness {
   const {
     firstMappedSourceLine = 1,
@@ -514,6 +527,8 @@ export function createRuntimeHarness(configuration: Partial<{
     virtualClock = false,
     runtimeScript,
     blurOnFocusChange = false,
+    radioGroup = [],
+    captureOrder = false,
     ...runtimeConfiguration
   } = configuration;
   const windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number; focused?: RuntimeElement; blurOnFocusChange?: boolean } = { scrollY: 0, blurOnFocusChange };
@@ -598,6 +613,17 @@ export function createRuntimeHarness(configuration: Partial<{
     "data-myst-checkbox-column": "2",
   }, windowState, 510, 14, "input");
   if (mappings.length >= 2) mappings[mappings.length - 2].appendChild(checkbox);
+  const focusedRadio = Math.max(0, radioGroup.indexOf("x"));
+  const radios = radioGroup.map((state, index) => new RuntimeElement({
+    class: "myst-radio",
+    role: "radio",
+    "aria-checked": state === "x" ? "true" : "false",
+    tabindex: index === focusedRadio ? "0" : "-1",
+    "data-myst-radio-group": "myst-radio-group-60",
+    "data-myst-radio-line": String(60 + index),
+    "data-myst-radio-column": "2",
+  }, windowState, 520 + index * 20, 14, "span"));
+  if (mappings.length >= 2) radios.forEach((radio) => mappings[mappings.length - 2].appendChild(radio));
   const stickyHeadings = new RuntimeElement({}, windowState, 0, 0);
   stickyHeadings.rectProvider = () => ({ top: 116, height: stickyHeadings.height, bottom: 116 + stickyHeadings.height });
   const descriptionButton = new RuntimeElement({ "data-okf-description-toggle": "" }, windowState, 0, 24, "button");
@@ -698,6 +724,7 @@ export function createRuntimeHarness(configuration: Partial<{
   };
   const windowListeners = new Map<string, RuntimeListener[]>();
   const documentListeners = new Map<string, RuntimeListener[]>();
+  const captureListeners = new Set<RuntimeListener>();
   const viewportListeners: RuntimeListener[] = [];
   const frameQueue: Array<() => void> = [];
   const timerQueue = new Map<number, () => void>();
@@ -842,8 +869,18 @@ export function createRuntimeHarness(configuration: Partial<{
       }
       return null;
     },
-    addEventListener: (type: string, listener: RuntimeListener): void => {
-      addListener(documentListeners, type, listener);
+    addEventListener: (type: string, listener: RuntimeListener, options?: boolean | { capture?: boolean }): void => {
+      const capture = options === true || (typeof options === "object" && options.capture === true);
+      if (!captureOrder || !capture) {
+        addListener(documentListeners, type, listener);
+        return;
+      }
+      // After the capture listeners already there, before every bubble listener.
+      const listeners = documentListeners.get(type) ?? [];
+      const firstBubble = listeners.findIndex((entry) => !captureListeners.has(entry));
+      listeners.splice(firstBubble < 0 ? listeners.length : firstBubble, 0, listener);
+      captureListeners.add(listener);
+      documentListeners.set(type, listeners);
     },
     createElement: (tagName: string): RuntimeElement => {
       const element = new RuntimeElement({}, windowState, 0, 0, tagName);
@@ -857,6 +894,7 @@ export function createRuntimeHarness(configuration: Partial<{
     querySelectorAll: (selector: string): RuntimeElement[] => (
       selector === "img" ? [image]
         : selector === "input.myst-checkbox" ? [checkbox]
+        : selector === ".myst-radio" ? radios
         : selector === "[data-okf-description-toggle]" ? [descriptionButton]
         : selector === ".okf-info-row th[colspan]" ? []
         : selector === "#sphinx-myst-preview-content table" ? [frontmatterTable, ...contentTables]
@@ -953,6 +991,7 @@ export function createRuntimeHarness(configuration: Partial<{
     anchorButton,
     editModeButton,
     checkbox,
+    radios,
     frontmatterNameCell,
     frontmatterNameDisplay,
     frontmatterValueCell,

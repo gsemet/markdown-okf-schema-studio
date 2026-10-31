@@ -26,6 +26,7 @@ import {
 } from "./scenarioAssertions";
 import { ALERT_EDITING_SCENARIOS } from "./alertEditingScenarios";
 import { CARDS_TABS_SCENARIOS } from "./cardsTabsScenarios";
+import { RADIO_PLAN_SCENARIOS } from "./radioPlanScenarios";
 import { GRID_CARD_EDITING_SCENARIOS } from "./gridCardEditingScenarios";
 import { FRONTMATTER_CHANGE_BAR_SCENARIOS } from "./frontmatterChangeBarScenarios";
 import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
@@ -448,6 +449,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...CARDS_TABS_SCENARIOS,
   ...GRID_CARD_EDITING_SCENARIOS,
   ...ALERT_EDITING_SCENARIOS,
+  ...RADIO_PLAN_SCENARIOS,
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
   {
     id: "code-dark-top",

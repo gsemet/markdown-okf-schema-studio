@@ -185,6 +185,29 @@ environments),
 Checkboxes in task lists, paragraphs, and table cells are editable in place. In an untrusted
 workspace they remain read-only until the workspace is trusted.
 
+Radio choice lists let a reader pick one option in the preview. Start two or more consecutive list
+items with `( )`, or `(x)` for the selected one, followed by a space:
+
+```markdown
+Fix direction:
+
+- (x) A click in the margin around the block opens its editor
+- ( ) Alt+click on the link opens the editor
+- ( ) Leave as is: edit link-only blocks in the source
+```
+
+The items render as one radio group, labelled by the paragraph just above the list. Clicking an
+option, or pressing Space or Enter on it, moves the `x` in the source: the old option becomes
+`( )` and the new one `(x)`, so at most two lines change and one undo reverts the choice. Clicking
+the selected option changes nothing, and the arrow keys only move the focus between the options.
+A blank line, a heading, another list or an item without a marker ends a group; a single `( )`
+item stays plain text, and a list can mix task items and radio items. A group with no `(x)`
+renders with nothing selected, and a group with two keeps both until the first click. Nested
+lists form their own groups. In a numbered list (`1. ( )`) each option keeps its number, so a plan
+can refer to "option 2". Radio groups render in every palette mode and follow the same rules
+as checkboxes: read-only in an untrusted workspace, and refused while a block editor is open. On
+GitHub and in plain editors the `( )` and `(x)` text stays readable.
+
 An inline block editor that is open in the preview keeps its text and caret while you save the
 file, switch the colour theme or a diagram finishes drawing; the preview shows the newer render
 when you close the editor. A change made in the text editor outside the block you edit leaves the

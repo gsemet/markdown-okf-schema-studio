@@ -2,6 +2,26 @@
 
 ## 2026-10-31
 
+### Radio choice lists
+
+- Added SwRS-MDOKFSTUDIO-GFM-039 (gfm, `proposed`, derives from StRS-MDOKFSTUDIO-GFM-003): a run
+  of at least two list items that start with `( )`, `(x)` or `(X)` renders as a radio group
+  (role="radiogroup", role="radio", aria-checked, roving tabindex, labelled by the paragraph above
+  the list), and a click or Space / Enter on an unselected option writes `(x)` on it and `( )` on
+  the old selection in one undo step, through the checkbox toggle path and its guards.
+- SwRS-MDOKFSTUDIO-GFM-027 (proposed): the toggle message may carry the options of a radio group;
+  new refusal rows for a malformed group and for a group on another message type.
+- Verification: unit tests in test/core/render/radioGroups.test.ts,
+  test/core/edits/radioSelect.test.ts, test/page/runtimeRadioGroups.test.ts and
+  test/session/radioChoice.test.ts; the real-window test test/integration/radioChoice.test.ts runs
+  in the heavy integration job (not run locally).
+- SwRS-MDOKFSTUDIO-GFM-039: the host refuses a choice whose positions are not one run of
+  consecutive radio items of one list; a numbered radio list keeps its numbers; the screenshot
+  scenarios gfm/v10-radio-plan-cream-900 and gfm/v11-radio-plan-dark-900 verify the rendering.
+- SwRS-MDOKFSTUDIO-GFM-027: the criteria line names radioGroup.
+- SwRS-MDOKFSTUDIO-CORE-073 (proposed): the writing skill's families include radio choices in a
+  plan.
+
 ### A block editor in a grid card
 
 - Added SwRS-MDOKFSTUDIO-BLOCK-257 (block-editing, `proposed`, derives from StRS-MDOKFSTUDIO-BLOCK-001):

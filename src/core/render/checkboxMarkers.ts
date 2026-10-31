@@ -1,10 +1,14 @@
 /**
  * Checkbox markers (`[ ]`, `[x]`, `[X]`) anywhere in prose: list items, paragraphs, table cells.
+ * Radio markers (`( )`, `(x)`, `(X)`) at the start of a list item go through the same placeholders,
+ * with the kind `radio`; `radioGroups.ts` decides which of them render as a radio group.
  *
  * The parser only reports line positions, so markers are swapped for private-use placeholders
  * before parsing. Each placeholder carries the marker's index, which maps back to the exact
  * source line and column; the host toggles that single character in the buffer.
  */
+
+import { radioMarkerColumn } from "./radioMarkers";
 
 export interface CheckboxMarker {
   /** One-based line in the full document, frontmatter included. */
@@ -14,6 +18,8 @@ export interface CheckboxMarker {
   checked: boolean;
   /** The literal marker text, restored wherever the marker is not rendered as a checkbox. */
   text: string;
+  /** `radio` for a `( )` marker that starts a list item; absent for a checkbox. */
+  kind?: "radio";
 }
 
 export interface PreparedCheckboxSource {
@@ -29,7 +35,7 @@ const PLACEHOLDER_END = "";
 // that Markdown could interpret (no digits, punctuation, or whitespace).
 const DIGIT_BASE = 0xe010;
 const PLACEHOLDER_PATTERN = /([-]+)/gu;
-const MARKER_PATTERN = /\[([ xX])\]/gu;
+const MARKER_PATTERN = /\[([ xX])\]|\(([ xX])\)/gu;
 const ATX_HEADING = /^ {0,3}#{1,6}(?:[ \t]|$)/u;
 const LINE_SPLIT = /(\r\n|\n|\r)/u;
 
@@ -72,6 +78,7 @@ function isCheckboxMarker(line: string, index: number, value: string, labels: Re
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-GFM-016
+// @implements_req SwRS-MDOKFSTUDIO-GFM-039
 /**
  * Replaces checkbox markers with placeholders, keeping every line break so parser line numbers
  * stay valid. `firstLine` is the one-based document line of the first line of `markdown`.
@@ -82,15 +89,29 @@ export function prepareCheckboxMarkers(markdown: string, firstLine = 1): Prepare
   const parts = markdown.split(LINE_SPLIT);
   for (let part = 0; part < parts.length; part += 2) {
     const line = parts[part];
-    if (!line.includes("[") || ATX_HEADING.test(line)) continue;
+    const radioColumn = radioMarkerColumn(line);
+    if ((!line.includes("[") && radioColumn < 0) || ATX_HEADING.test(line)) continue;
     const lineNumber = firstLine + part / 2;
-    parts[part] = line.replace(MARKER_PATTERN, (text: string, value: string, index: number) => {
-      if (!isCheckboxMarker(line, index, value, labels)) return text;
-      markers.push({ line: lineNumber, column: index, checked: value !== " ", text });
+    parts[part] = line.replace(MARKER_PATTERN, (text: string, box: string | undefined, choice: string | undefined, index: number) => {
+      if (choice !== undefined) {
+        if (index !== radioColumn) return text;
+        markers.push({ line: lineNumber, column: index, checked: choice !== " ", text, kind: "radio" });
+        return placeholder(markers.length - 1);
+      }
+      if (box === undefined || !isCheckboxMarker(line, index, box, labels)) return text;
+      markers.push({ line: lineNumber, column: index, checked: box !== " ", text });
       return placeholder(markers.length - 1);
     });
   }
   return { text: parts.join(""), markers };
+}
+
+const LEADING_PLACEHOLDER = new RegExp(`^${PLACEHOLDER_PATTERN.source}`, "u");
+
+/** The marker whose placeholder starts `value`, and the text after it. */
+export function splitLeadingPlaceholder(value: string): { marker: number; rest: string } | undefined {
+  const match = LEADING_PLACEHOLDER.exec(value);
+  return match ? { marker: decodeIndex(match[1]), rest: value.slice(match[0].length) } : undefined;
 }
 
 export function hasCheckboxPlaceholder(value: string): boolean {

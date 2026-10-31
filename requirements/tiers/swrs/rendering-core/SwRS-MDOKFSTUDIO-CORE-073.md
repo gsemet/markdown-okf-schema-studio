@@ -34,7 +34,7 @@ When the repository is checked, the writing skill for Studio SHALL contain only 
 
 - GIVEN the skill folder `skills/writing-for-markdown-okf-schema-studio/` with its `SKILL.md` and `references/*.md`
 - WHEN each `markdown` example block of those files is rendered by the preview pipeline, in a workspace where the files it names exist
-- THEN no render fails, no diagnostic of warning or error severity is produced, no directive is left unresolved, and every syntax family the skill lists (cards, tabs, version notes, alerts, admonitions, table of contents, math, list table, figure, Mermaid, PlantUML, Vega-Lite, README HTML, comment threads, front matter) appears in at least one example and is rendered as its own element
+- THEN no render fails, no diagnostic of warning or error severity is produced, no directive is left unresolved, and every syntax family the skill lists (cards, tabs, version notes, alerts, admonitions, table of contents, math, list table, figure, Mermaid, PlantUML, Vega-Lite, README HTML, comment threads, front matter, radio choices in a plan) appears in at least one example and is rendered as its own element
 
 ### Scenario (boundary): Shape of the skill
 

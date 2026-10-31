@@ -31,6 +31,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
 - test/session/checkboxRefusal.test.ts
+- test/session/radioChoice.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -54,10 +55,11 @@ When the host receives a previewCheckboxToggle message, the extension SHALL acce
 | a fractional column | rejected, no edit is made |
 | a checked state that is not a boolean | rejected, no edit is made |
 | line different from endLine | rejected, no edit is made |
+| a radioGroup (the options of a radio choice) that is not an array of 2 to 256 distinct line and column positions including the message's own, or that comes with checked false | rejected, no edit is made |
 
-### Scenario (refusal): Column and checked on another type
+### Scenario (refusal): Column, checked and radioGroup on another type
 
-- GIVEN a previewEditCancel message with column 4
+- GIVEN a previewEditCancel message with column 4, or a previewScroll message with a radioGroup
 - WHEN it is checked
 - THEN it is refused
 
@@ -71,12 +73,13 @@ When the host receives a previewCheckboxToggle message, the extension SHALL acce
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-GFM-021: the click that sends this message and the reasons of its refusals
+- SwRS-MDOKFSTUDIO-GFM-039: the radio choice that sends this message with a radioGroup
 
 ### Verification notes
 
-- Method: test/session/checkboxRefusal.test.ts (a malformed toggle is answered; one without a box or for another document is not).
+- Method: test/session/checkboxRefusal.test.ts (a malformed toggle is answered; one without a box or for another document is not). test/session/radioChoice.test.ts (malformed radio groups are answered; a radioGroup on another type is refused).
 - Method: test/core/protocol/pageStateMessages.test.ts (valid message, invalid shapes, column and checked on another type: unit tests on the validators, which accept exactly what the frozen validator accepted).
-- Criteria: Only well-formed messages are accepted; the toggle needs a non-negative integer column, a boolean state and one line, and column and checked are accepted only on previewCheckboxToggle.
+- Criteria: Only well-formed messages are accepted; the toggle needs a non-negative integer column, a boolean state and one line, and column, checked and radioGroup are accepted only on previewCheckboxToggle; a radioGroup also needs 2 to 256 distinct positions that include the toggled one, and checked set to true.
 
 <!-- okf:links:start -->
 ### Links
