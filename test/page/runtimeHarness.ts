@@ -69,6 +69,14 @@ export class RuntimeElement {
 
   public scrollHeight = 2_000;
   public scrollWidth = 0;
+  private scrollLeftValue = 0;
+  // An accessor, not a field, so a test element can override it with the browser's clamp.
+  public get scrollLeft(): number {
+    return this.scrollLeftValue;
+  }
+  public set scrollLeft(value: number) {
+    this.scrollLeftValue = value;
+  }
   public clientWidth = 0;
   public className = "";
   public textContent = "";
