@@ -281,16 +281,25 @@ ci-hang-dump:
 # Filter with STUDIO_STRESS_SCENARIOS=name,name (test/shared/stressPlan.ts). CI only: it opens VS
 # Code windows, and preflight already runs each of these scenarios once.
 # CI job "stress": repeat the flake-prone real-window scenarios REPEAT times, in the trusted window
-# then in the Restricted Mode window (one window each).
-ci-stress REPEAT="20":
+# then in the Restricted Mode window (one window each). The rounds come from the argument, else from
+# STUDIO_STRESS_REPEAT (the workflow_dispatch input); STUDIO_STRESS_SCENARIOS (comma-separated names)
+# narrows the scenarios. REPEAT must be an integer from 1 to 100. Above about 20 rounds, narrow
+# STUDIO_STRESS_SCENARIOS (for example alert-dropdown): all scenarios take about 3.6 s per round and
+# scenario, so 100 rounds of all of them would pass the 26-minute launch deadline and the job limit.
+ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "20"):
     #!/usr/bin/env bash
     set -uo pipefail
-    export STUDIO_REAL_INPUT_SCENARIO=stress STUDIO_STRESS_REPEAT="{{ REPEAT }}"
+    repeat={{ quote(REPEAT) }}
+    if ! [[ "$repeat" =~ ^[0-9]+$ ]] || (( 10#$repeat < 1 || 10#$repeat > 100 )); then
+        echo "ci-stress: REPEAT must be an integer from 1 to 100, got $repeat" >&2
+        exit 2
+    fi
+    export STUDIO_REAL_INPUT_SCENARIO=stress STUDIO_STRESS_REPEAT="$repeat"
     # 20 rounds take about 18 minutes in the trusted window: the 15-minute launch deadline of the
     # hang watchdog (test/shared/hangWatchdog.ts) would cut a healthy run; 26 still fails before the job.
     export STUDIO_LAUNCH_TIMEOUT_MS="${STUDIO_LAUNCH_TIMEOUT_MS:-1560000}"
     if {{ npm }} run test:integration -- --trusted-only && node out/test/integration/run-tests.js --untrusted-only; then
-        echo "ci-stress: passed ({{ REPEAT }} rounds)"
+        echo "ci-stress: passed ($repeat rounds)"
     else
         echo "ci-stress: FAILED" >&2
         exit 1

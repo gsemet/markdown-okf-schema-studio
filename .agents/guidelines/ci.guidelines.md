@@ -75,7 +75,9 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     with the real VS Code stage reported as skipped (`just ci-report visual`). The real VS Code
     window jobs, `integration` and `stress`, run on demand:
     `gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery
-    and site). Run them before merging a change to the extension host, the webview or the
+    and site). To loop one flaky scenario many times, use
+    `-f heavy=true -f stress_repeat=60 -f stress_scenarios=alert-dropdown` (narrow the scenarios
+    above about 20 rounds; the timeouts stay as they are). Run them before merging a change to the extension host, the webview or the
     real-window tests, and run `npm run test:integration` locally (one VS Code window at a time).
 14. **A release is tagged only after a green heavy run of its commit.** A push to `main` that
     changes the package version runs the heavy jobs without a dispatch: the `release-check` job
