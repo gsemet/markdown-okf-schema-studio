@@ -71,3 +71,28 @@ test("CR147: the base lines of a block follow the hunks", () => {
   const span = baseSpanOf({ start: 2, end: 2 }, added);
   assert.ok(span.end < span.start, "an added block has no base lines");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-010
+test("CR234: a removal next to a changed line across a blank line is one hunk", () => {
+  // Myers matches the blank line: "gone" alone is removed, then "old" became "new".
+  assert.deepEqual(lineHunks("a\ngone\n\nold\nz\n", "a\n\nnew\nz\n"), [{ baseStart: 2, baseEnd: 4, start: 2, end: 3 }]);
+  // An addition next to a changed line across a blank line is one hunk too.
+  assert.deepEqual(lineHunks("a\nold\n\nz\n", "a\nnew\n\nadded\nz\n"), [{ baseStart: 2, baseEnd: 3, start: 2, end: 4 }]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-010
+test("CR234: a removal is never merged across a heading or a text line", () => {
+  assert.deepEqual(lineHunks("a\ngone\n\n# H\n\nold\nz\n", "a\n\n# H\n\nnew\nz\n"), [
+    { baseStart: 2, baseEnd: 2, start: 2, end: 1 },
+    { baseStart: 6, baseEnd: 6, start: 5, end: 5 },
+  ]);
+  assert.deepEqual(lineHunks("a\ngone\n\ntext\n\nold\nz\n", "a\n\ntext\n\nnew\nz\n"), [
+    { baseStart: 2, baseEnd: 2, start: 2, end: 1 },
+    { baseStart: 6, baseEnd: 6, start: 5, end: 5 },
+  ]);
+  // Two changed lines (no pure side) across a blank line stay two hunks.
+  assert.deepEqual(lineHunks("a\nold\n\nx\nz\n", "a\nnew\n\ny\nz\n"), [
+    { baseStart: 2, baseEnd: 2, start: 2, end: 2 },
+    { baseStart: 4, baseEnd: 4, start: 4, end: 4 },
+  ]);
+});

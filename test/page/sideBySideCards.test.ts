@@ -1,4 +1,6 @@
 import * as assert from "node:assert/strict";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { test } from "node:test";
 
 import { lineHunks } from "../../src/core/mapping/lineDiff";
@@ -40,8 +42,8 @@ interface Opened {
   cards(): DomElement[];
 }
 
-function open(): Opened {
-  const document = new DomDocument(PAGE_HTML);
+function open(pageHtml = PAGE_HTML): Opened {
+  const document = new DomDocument(pageHtml);
   document.documentElement.setAttribute("data-sphinx-preview-sbs", "off");
   const posted: unknown[] = [];
   const layouts = { count: 0 };
@@ -179,4 +181,88 @@ test("CR147: toggling the diff off removes the cards and restores the default", 
   assert.equal(opened.document.documentElement.getAttribute("data-sphinx-preview-sbs"), "off");
   assert.equal(opened.element("changed").getAttribute("data-sphinx-preview-changed"), "true");
   assert.equal(opened.posted.length, 2, "the host is told about both switches");
+});
+
+/**
+ * CR 234: the buffer of the real-window scenario incoming-changes (test/integration/realWindowGaps.ts)
+ * after its last edit: one paragraph edited, one added, and the paragraph before the edited one removed.
+ */
+const INCOMING_FIXTURE = path.resolve(__dirname, "../../../test/integration/fixtures/incoming-changes.md");
+
+function incomingTexts(): { committed: string; current: string } {
+  const committed = fs.readFileSync(INCOMING_FIXTURE, "utf8");
+  const lines = committed.split("\n");
+  const edited = lines.findIndex((line) => line.startsWith("This paragraph will change"));
+  lines[edited] = "This paragraph changed in the buffer and is not saved.";
+  lines.splice(lines.length - 1, 0, "", "A paragraph added after the commit.");
+  const removed = lines.findIndex((line) => line.startsWith("This paragraph stays as committed"));
+  lines.splice(removed, 2);
+  return { committed, current: lines.join("\n") };
+}
+
+const INCOMING_BASELINE_HTML = [
+  '<h1 data-line="1">Incoming changes</h1>',
+  '<p data-line="3">This paragraph stays as committed.</p>',
+  '<p data-line="5">This paragraph will change in the buffer.</p>',
+  '<ul data-line="7" data-end-line="8"><li data-line="7">a committed item</li><li data-line="8">another committed item</li></ul>',
+  '<p data-line="10">The last committed paragraph.</p>',
+].join("");
+
+const INCOMING_PAGE_HTML = `
+<button data-sphinx-preview-sbs-toggle></button>
+<main id="sphinx-myst-preview-content">
+<h1 data-line="1" id="title">Incoming changes</h1>
+<p data-line="3" data-sphinx-preview-changed="true" id="edited">This paragraph changed in the buffer and is not saved.</p>
+<ul data-line="5" data-end-line="6" id="list"><li data-line="5">a committed item</li><li data-line="6">another committed item</li></ul>
+<p data-line="8" id="last">The last committed paragraph.</p>
+<p data-line="10" data-sphinx-preview-changed="true" id="added">A paragraph added after the commit.</p>
+</main>`;
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+test("CR234: a paragraph removed next to an edited one is a removed card, the edited one is paired with its own last-commit text", () => {
+  const { committed, current } = incomingTexts();
+  assert.equal(current.split("\n")[2], "This paragraph changed in the buffer and is not saved.", "the page lines follow the buffer");
+  const opened = open(INCOMING_PAGE_HTML);
+  toggle(opened);
+  opened.module.setBaseline({ html: INCOMING_BASELINE_HTML, hunks: lineHunks(committed, current), revision: 7 });
+  const all = cardViews(opened);
+  assert.deepEqual(all.map((card) => [card.kind, card.left, card.right]), [
+    ["removed", "This paragraph stays as committed.", ""],
+    ["changed", "This paragraph will change in the buffer.", "This paragraph changed in the buffer and is not saved."],
+    ["added", "", "A paragraph added after the commit."],
+  ]);
+  const edited = all[1];
+  assert.deepEqual(edited.leftWords, ["will change", "buffer."]);
+  assert.deepEqual(edited.rightWords, ["changed", "buffer and is not saved."]);
+  // The removed card stands where the removed paragraph was: right before the card of the edited one.
+  const cards = opened.cards();
+  assert.equal(cards[0].nextElementSibling, cards[1]);
+  assert.equal(cards[1].nextElementSibling?.getAttribute("id"), "edited");
+  assert.equal(opened.element("list").hasAttribute("data-okf-sbs-replaced"), false, "the unchanged list has no card");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+test("CR234: two blocks inside one hunk do not share a last-commit block: the closer keeps it, the other is added", () => {
+  const base = ["Alpha stays", "", "The quick red fox", "", "Omega tail", ""].join("\n");
+  const current = ["Alpha stays", "", "The quick brown fox", "", "A new paragraph", "", "Omega tail", ""].join("\n");
+  const hunks = lineHunks(base, current);
+  assert.deepEqual(hunks, [{ baseStart: 3, baseEnd: 3, start: 3, end: 5 }], "one hunk holds both blocks");
+  const opened = open(`
+<button data-sphinx-preview-sbs-toggle></button>
+<main id="sphinx-myst-preview-content">
+<p data-line="1">Alpha stays</p>
+<p data-line="3">The quick brown fox</p>
+<p data-line="5">A new paragraph</p>
+<p data-line="7">Omega tail</p>
+</main>`);
+  toggle(opened);
+  opened.module.setBaseline({
+    html: '<p data-line="1">Alpha stays</p><p data-line="3">The quick red fox</p><p data-line="5">Omega tail</p>',
+    hunks,
+    revision: 7,
+  });
+  assert.deepEqual(cardViews(opened).map((card) => [card.kind, card.left, card.right]), [
+    ["changed", "The quick red fox", "The quick brown fox"],
+    ["added", "", "A new paragraph"],
+  ]);
 });
