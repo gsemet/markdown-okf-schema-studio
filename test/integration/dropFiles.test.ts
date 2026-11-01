@@ -96,7 +96,9 @@ export async function run(): Promise<void> {
     const lowerHalf = async (text: string): Promise<{ x: number; y: number }> => withCurrentFrame(page, async (frame) => {
       const box = await frame.locator("p", { hasText: text }).first().boundingBox({ timeout: 5_000 });
       assert.ok(box, `the paragraph "${text}" has a box`);
-      return { x: box.x + 40, y: box.y + box.height * 0.8 };
+      // Just above the bottom edge: the bar after the last block sits one paragraph margin lower than
+      // the paragraph, so at 80% of a one-line paragraph the bar before it was equally near.
+      return { x: box.x + 40, y: box.y + box.height - 1 };
     });
     // 1. A Markdown file over the lower half of the first paragraph: the marker, then the link.
     const first = await lowerHalf("First paragraph");
