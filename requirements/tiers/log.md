@@ -1,5 +1,19 @@
 # Update Log
 
+## 2026-11-01
+
+### Side-by-side diff: a paragraph removed next to an edited one
+
+- SwRS-MDOKFSTUDIO-REVIEW-010 (proposed): a hunk of lines only added or only removed is merged
+  with the hunk next to it when only blank lines separate them on both sides (never across a
+  heading or another non-blank line), so Myers no longer pairs a removed paragraph with the edited
+  one through the blank line between them.
+- SwRS-MDOKFSTUDIO-REVIEW-009 (proposed): a block inside one hunk keeps on its left only the block
+  at the last commit that shares the most words with it (each kept by one block at most); the other
+  blocks at the last commit of that hunk come back as removed cards in their source order.
+- Verification: test/core/mapping/lineHunks.test.ts, test/page/sideBySideCards.test.ts,
+  test/core/mapping/wordDiff.test.ts.
+
 ## 2026-10-31
 
 ### Side-by-side diff of changed blocks

@@ -120,7 +120,8 @@ export interface LineHunk {
 /**
  * The differences between `base` and `current` as hunks: runs of lines added, removed or changed,
  * with the lines of both texts. Unlike {@link changedLineRanges}, a run of removed lines is a hunk
- * (with an empty current side). Line endings are ignored. Large or very different texts report the
+ * (with an empty current side). A removal or an addition next to another hunk across blank lines
+ * only is part of that hunk. Line endings are ignored. Large or very different texts report the
  * whole differing middle as one hunk.
  */
 export function lineHunks(base: string, current: string): LineHunk[] {
@@ -170,7 +171,39 @@ export function lineHunks(base: string, current: string): LineHunk[] {
       end: prefix + j,
     });
   }
-  return hunks;
+  return mergeAcrossBlankLines(hunks, a, b);
+}
+
+/** True when the lines `from..to` (1-based, inclusive) of `lines` are all blank (an empty range is). */
+function blankLines(lines: readonly string[], from: number, to: number): boolean {
+  for (let line = from; line <= to; line += 1) if (lines[line - 1].trim() !== "") return false;
+  return true;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-010
+/**
+ * Merges a pure removal or a pure addition with the hunk next to it when only blank lines separate
+ * them on both sides. Myers matches a blank line between two paragraphs as a common line, so a
+ * paragraph removed right before an edited one would otherwise pair the wrong lines; the merged hunk
+ * holds both, with the blank lines between them. A heading or any other non-blank line between two
+ * hunks keeps them apart, and two hunks that both have lines on both sides stay apart.
+ */
+function mergeAcrossBlankLines(hunks: readonly LineHunk[], base: readonly string[], current: readonly string[]): LineHunk[] {
+  const pure = (hunk: LineHunk): boolean => hunk.end < hunk.start || hunk.baseEnd < hunk.baseStart;
+  const merged: LineHunk[] = [];
+  for (const hunk of hunks) {
+    const previous = merged[merged.length - 1];
+    if (
+      previous && (pure(previous) || pure(hunk))
+      && blankLines(base, previous.baseEnd + 1, hunk.baseStart - 1)
+      && blankLines(current, previous.end + 1, hunk.start - 1)
+    ) {
+      merged[merged.length - 1] = { baseStart: previous.baseStart, baseEnd: hunk.baseEnd, start: previous.start, end: hunk.end };
+    } else {
+      merged.push(hunk);
+    }
+  }
+  return merged;
 }
 
 /** A range of lines, 1-based and inclusive; `end === start - 1` is an empty range. */

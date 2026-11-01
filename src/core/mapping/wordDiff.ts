@@ -132,3 +132,18 @@ export function diffSegments(before: readonly string[], after: readonly string[]
   const diff = diffWords(before.join("\n"), after.join("\n"));
   return { removed: splitRanges(before, diff.removed), added: splitRanges(after, diff.added) };
 }
+
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
+/**
+ * How much two texts share, from 0 (no common word) to 1 (the same words): the words {@link diffWords}
+ * keeps on both sides over all the words of both. Two texts without words share nothing (0).
+ */
+export function sharedWordRatio(before: string, after: string): number {
+  const count = (text: string): number => tokens(text).filter((token) => !token.space).length;
+  const total = count(before) + count(after);
+  if (total === 0) return 0;
+  const diff = diffWords(before, after);
+  const changed = diff.removed.reduce((sum, range) => sum + count(before.slice(range.start, range.end)), 0)
+    + diff.added.reduce((sum, range) => sum + count(after.slice(range.start, range.end)), 0);
+  return (total - changed) / total;
+}

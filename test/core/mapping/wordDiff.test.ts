@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { diffSegments, diffWords, MAX_WORD_DIFF_CELLS } from "../../../src/core/mapping/wordDiff";
+import { diffSegments, diffWords, MAX_WORD_DIFF_CELLS, sharedWordRatio } from "../../../src/core/mapping/wordDiff";
 
 const slices = (text: string, ranges: readonly { start: number; end: number }[]): string[] =>
   ranges.map((range) => text.slice(range.start, range.end));
@@ -68,4 +68,18 @@ test("CR147: pieces of text are compared as one text and the ranges come back in
   const glued = diffSegments(["a", "b"], ["a", "c"]);
   assert.deepEqual(glued.removed, [[], [{ start: 0, end: 1 }]]);
   assert.deepEqual(glued.added, [[], [{ start: 0, end: 1 }]]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+test("CR234: the shared-word ratio of two texts", () => {
+  assert.equal(sharedWordRatio("one two", "one two"), 1);
+  assert.equal(sharedWordRatio("one two", "three four"), 0);
+  assert.equal(sharedWordRatio("", ""), 0);
+  assert.equal(sharedWordRatio("a b c d", "a b x y"), 0.5);
+  const edited = "This paragraph changed in the buffer and is not saved.";
+  assert.ok(
+    sharedWordRatio("This paragraph will change in the buffer.", edited)
+      > sharedWordRatio("This paragraph stays as committed.", edited),
+    "the edited paragraph is closer to its own last-commit text",
+  );
 });

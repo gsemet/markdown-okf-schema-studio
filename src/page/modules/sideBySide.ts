@@ -1,5 +1,5 @@
 import { baseSpanOf, spanChanged, type LineHunk, type LineSpan } from "../../core/mapping/lineDiff";
-import { diffSegments } from "../../core/mapping/wordDiff";
+import { diffSegments, sharedWordRatio } from "../../core/mapping/wordDiff";
 
 const CONTENT_ID = "sphinx-myst-preview-content";
 const CARD = "data-okf-sbs-card";
@@ -102,6 +102,57 @@ function textNodesOf(document: Document, roots: readonly Element[]): Text[] {
   return nodes;
 }
 
+/** The text a reader reads in a block, for comparing two blocks. */
+function readableText(document: Document, block: Element): string {
+  return textNodesOf(document, [block]).map((node) => node.data).join("\n");
+}
+
+/**
+ * A changed block of the page and the last-commit blocks its lines come from. `inHunk`: the block lies
+ * inside the current lines of one hunk, so it keeps only one of them (the others were removed).
+ */
+interface Change {
+  block: Element;
+  candidates: Element[];
+  inHunk: boolean;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
+/**
+ * The last-commit block each changed block keeps on its left: the candidate most similar to it by
+ * shared words, each last-commit block kept by one changed block at most. The most similar pairs are
+ * taken first; ties go to the earlier block. A changed block whose candidates are all kept by others
+ * keeps none (it is shown as added).
+ */
+function pairBlocks(document: Document, changes: readonly Change[]): Map<Change, Element> {
+  const pairs: { change: Change; candidate: Element; ratio: number; order: number }[] = [];
+  const texts = new Map<Element, string>();
+  const textOf = (element: Element): string => {
+    let text = texts.get(element);
+    if (text === undefined) {
+      text = readableText(document, element);
+      texts.set(element, text);
+    }
+    return text;
+  };
+  changes.forEach((change) => {
+    if (!change.inHunk) return;
+    const current = textOf(change.block);
+    for (const candidate of change.candidates) {
+      pairs.push({ change, candidate, ratio: sharedWordRatio(textOf(candidate), current), order: pairs.length });
+    }
+  });
+  pairs.sort((first, second) => second.ratio - first.ratio || first.order - second.order);
+  const kept = new Map<Change, Element>();
+  const taken = new Set<Element>();
+  for (const pair of pairs) {
+    if (kept.has(pair.change) || taken.has(pair.candidate)) continue;
+    kept.set(pair.change, pair.candidate);
+    taken.add(pair.candidate);
+  }
+  return kept;
+}
+
 /** Wraps the character ranges of a text node in `<span data-okf-sbs-word>`. */
 function markWords(document: Document, node: Text, ranges: readonly { start: number; end: number }[], kind: string): void {
   if (ranges.length === 0 || !node.parentNode) return;
@@ -194,22 +245,44 @@ export function installSideBySide(
       || baseline.hunks.length === 0) return;
     const { hunks, content } = baseline;
     const cardOf = new Map<Element, HTMLElement>();
-    const changed = blocksOf(main, (span) => spanChanged(span, hunks));
+    const changes: Change[] = [];
     const spans: LineSpan[] = [];
-    for (const block of changed) {
+    for (const block of blocksOf(main, (span) => spanChanged(span, hunks))) {
       const span = spanOf(block);
       if (!span) continue;
       spans.push(span);
       const base = baseSpanOf(span, hunks);
-      const before = base.end >= base.start
+      const candidates = base.end >= base.start
         ? blocksOf(content, (other) => other.start <= base.end && other.end >= base.start)
         : [];
-      const element = card(before.length === 0 ? "added" : "changed", before, [block]);
+      const inHunk = hunks.some((hunk) => hunk.end >= hunk.start && hunk.start <= span.start && span.end <= hunk.end);
+      changes.push({ block, candidates, inHunk });
+    }
+    // A hunk can hold several last-commit blocks: a block inside it keeps the most similar one on its
+    // left, the others come back as removed blocks, before or after its card in their source order.
+    const kept = pairBlocks(document, changes);
+    const shown = new Set<Element>(kept.values());
+    const lineOf = (element: Element): number => spanOf(element)?.start ?? 0;
+    for (const change of changes) {
+      const { block } = change;
+      const before = change.inHunk ? kept.get(change) : undefined;
+      const left = change.inHunk ? (before ? [before] : []) : change.candidates;
+      const element = card(left.length === 0 ? "added" : "changed", left, [block]);
       block.parentNode?.insertBefore(element, block);
       block.setAttribute(REPLACED, "");
       replaced.push(block);
       cards.push(element);
       cardOf.set(block, element);
+      if (!before) continue;
+      // The cards after it go before what follows the (hidden) original block.
+      const following = block.nextElementSibling;
+      for (const other of change.candidates) {
+        if (shown.has(other)) continue;
+        shown.add(other);
+        const removed = card("removed", [other], []);
+        block.parentNode?.insertBefore(removed, lineOf(other) < lineOf(before) ? element : following);
+        cards.push(removed);
+      }
     }
     // Removed blocks come back where they were, unless a changed block holds the removal.
     for (const hunk of hunks) {
