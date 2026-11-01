@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+## 1.2.0 - 2026-11-01
+
+- A new Side-by-side button in the floating toolbar (reading mode) turns each block changed since the
+  last Git commit into a small diff: the block at the last commit on the left, as it is now on the
+  right, both rendered, with removed and added words marked. Added blocks have an empty left side and
+  deleted blocks come back with an empty right side. The green bar stays the default; the button is
+  disabled in edit mode and the file is never changed. A paragraph deleted right before an edited one
+  is paired with the right lines.
+- Dropping files from the VS Code Explorer onto the preview in edit mode (hold Shift while dropping, so
+  VS Code hands the drop to the page) writes a Markdown link per file at the drop point: a bar shows
+  where it lands, a Markdown file becomes `[first heading](relative%20path.md)`, an image becomes
+  `![name](relative/path.png)` and any other file a link with its name. Only files inside a workspace
+  folder count, and only the inserted block changes in the source.
+- In edit mode, a click, Enter or Space on a link opens the editor of the block that holds it instead
+  of following the link (a `:link:` card used to jump to its target on any click). Cmd/Ctrl+click,
+  Cmd/Ctrl+Enter and middle click follow the link; reading mode is unchanged.
+- A wide table keeps its sideways scroll when a cell editor closes, the pane is resized or an image
+  loads, and Tab, Shift+Tab and the arrow keys scroll it so the cell editor stays in view.
+- In a narrow preview pane, the first lines of text wrap around the expanded floating toolbar instead
+  of sitting under it.
+- The properties table of a note: a refused field value (for example a number above the schema
+  maximum) no longer leaves the field editor stuck; a schema-less number now saves with Cmd/Ctrl+Enter
+  from the YAML box; and the link list editor no longer warns about a valid sibling file in a
+  workspace with more than 500 Markdown files.
+- Find and replace: Replace all no longer skips a block because a link or image target in it repeats
+  the query.
+- An unquoted line that continues a GitHub alert's paragraph stays inside the alert, as on GitHub,
+  and the palette no longer rewrites the alert above when you change the type there.
+- Radio choice lists keep a single Tab stop and the keyboard focus after a choice, refuse a choice
+  while a block editor is open, and refuse one in a read-only file.
 - The Comments button of the toolbar, and the setting `preview.showComments`, now hide every review
   mark and not only the chips: the highlighted quotes and their underline, the badges and the
   Orphaned comments box go, the quoted text stays as plain text, and a click on it no longer opens a
@@ -115,20 +145,10 @@
 - The floating toolbar now has five rows of at most three buttons: Refresh, Edit and the chevron;
   Anchor, Back and Next; Theme, Zoom out and Zoom in; Width and Table of contents; then Fold, Diff and
   Comments. It is narrower (three buttons instead of six), so it covers less of the page.
-- Dropping files from the VS Code Explorer onto the preview in edit mode (hold Shift while dropping, so
-  VS Code hands the drop to the page) writes a Markdown link per file at the drop point: a bar shows
-  where it lands, a Markdown file becomes `[first heading](relative%20path.md)`, an image becomes
-  `![name](relative/path.png)` and any other file a link with its name. Only files inside a workspace
-  folder count, and only the inserted block changes in the source.
 - Pasting a web address (`http:`, `https:` or `mailto:`) into a block editor makes a Markdown link: `[text](url)`
   over selected text, `<url>` alone and `![](url)` for an image address (`.png`, `.jpg`, `.gif`, `.svg`,
   `.webp`). Cmd/Ctrl+Shift+V still pastes the raw text, and code, link targets and other schemes are
   left alone.
-- A new Side-by-side button in the floating toolbar (reading mode) turns each block changed since the
-  last Git commit into a small diff: the block at the last commit on the left, as it is now on the
-  right, both rendered, with removed and added words marked. Added blocks have an empty left side and
-  deleted blocks come back with an empty right side. The green bar stays the default; the button is
-  disabled in edit mode and the file is never changed.
 - Link-target search by name (wiki-style links) skips `node_modules`, `.git`, `_build`, `.venv` and
   `venv`, no longer applies VS Code's `files.exclude` (files hidden by it can now be found) and stops
   at 50 matches per root, so a name matching more files may resolve from the first 50 only.

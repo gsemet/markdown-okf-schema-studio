@@ -2,7 +2,7 @@
   "name": "markdown-okf-schema-studio",
   "displayName": "Markdown OKF-Schema Studio",
   "description": "Schema-aware Markdown editor and live preview for OKF bundles.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "GaetanSemet",
   "icon": "images/logo.png",
   "license": "MIT",
