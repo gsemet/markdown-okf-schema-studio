@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A new Option button in the edit bar (GFM and MyST palettes, next to Checkbox) turns the selected
+  lines into an option list `- ( ) ` and back. In the block editor, Enter at the end of an option
+  item starts the next line with `- ( ) `, and Enter on an empty option ends the list, as for task
+  lists.
+
 ## 1.2.0 - 2026-11-01
 
 - A new Side-by-side button in the floating toolbar (reading mode) turns each block changed since the

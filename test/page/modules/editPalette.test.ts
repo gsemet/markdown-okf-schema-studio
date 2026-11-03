@@ -115,7 +115,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   assert.equal(strict.length >= 9, true);
   assert.equal(strict.includes("gfmOnly") || strict.includes("mystOnly"), false);
   assert.deepEqual(gfm, [
-    ...strict, "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+    ...strict, "alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     "gfmOnly",
   ]);
   // T28: the registry's own MyST group (admonition ... label) sits before the test's extra action.
@@ -142,7 +142,7 @@ test("P6: the real registry shows the MyST-specific buttons in MyST mode only, p
   const strict = ids("strict");
   const gfm = ids("gfm");
   const myst = ids("myst");
-  const gfmOnly = ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"];
+  const gfmOnly = ["alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"];
   const mystOnly = [
     "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
     "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",
@@ -525,7 +525,7 @@ const options = (menu: FakeElement): FakeElement[] =>
 
 test("T25: strict mode has no GitHub buttons; GFM and MyST show Alert, Checkbox and HTML table", () => {
   const ids = (mode: EditActionMode): string[] => actionIds(open(mode).root);
-  for (const id of ["alert", "checkbox", "htmlTable"]) {
+  for (const id of ["alert", "checkbox", "option", "htmlTable"]) {
     assert.equal(ids("strict").includes(id), false, "strict");
     assert.equal(ids("gfm").includes(id), true, "gfm");
     assert.equal(ids("myst").includes(id), true, "myst");

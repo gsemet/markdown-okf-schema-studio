@@ -24,6 +24,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/modules/textEditing.test.ts
 - test/page/runtimeBlockEditor.test.ts
+- test/visual/optionListScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -59,6 +60,7 @@ Up to one indentation unit, or one tab, is removed from the start of every touch
 | `9) a` | The next line starts with `10) ` |
 | An indented item | The next line keeps the indentation |
 | `- [x] done` | The next item starts with `- [ ] ` (box reset) |
+| `- ( ) a` or `- (x) a` (an option item) | The next item starts with `- ( ) ` (marker reset); a numbered `1. ( ) a` gives `2. ( ) ` |
 | `- ab` with the caret between a and b | The line splits into `- a` and `- b` |
 
 ### Scenario (nominal): Enter continues a quote prefix or the indentation
@@ -75,6 +77,7 @@ The list marker, the quote prefix and the indentation are the only constructs th
 | --- | --- |
 | The lines `a`, `  - ` and `b` with the caret on the empty item | The item line becomes empty and the caret sits on it |
 | The line `>  ` with the caret at its end | The line becomes empty |
+| The line `- ( ) ` (an option item with no text) with the caret at its end | The line becomes empty, which ends the option list |
 
 ### Scenario (boundary): Enter inside a fenced code block
 | Input | Outcome |
@@ -90,10 +93,10 @@ Only the indentation of the current line is continued while an odd number of fen
 | Tab with Ctrl, Cmd or Alt held, or during an IME composition | The page does not handle the key; Ctrl+Tab still reaches VS Code |
 | Shift+Enter at the end of a list item | The text box inserts a plain line break without a marker |
 | Enter with Alt, Ctrl or Cmd, with a non-collapsed selection or during an IME composition | The page leaves the key to the text box |
-| Enter with the caret before or inside the marker, as in `\|- a` or `-\| a` | The page does not continue the list |
+| Enter with the caret before or inside the marker, as in `\|- a`, `-\| a` or `- (\| ) a` | The page does not continue the list |
 
 ### Verification notes
-- Method: test/page/modules/textEditing.test.ts (`indentSelection indent ...` cases, including `some| prose` and `- a|`: Tab; `indentSelection outdent ...`: Shift+Tab; `continueOnEnter ...` cases, including `- |`, `a\n  - |\nb`, `>  |`, `> quote|`, `> - item|`, `    code|`, `plain|`, the fence cases, `|- a` and `-| a`, and `continueOnEnter leaves non-collapsed selections to the native behaviour`: Enter).
+- Method: test/page/modules/textEditing.test.ts (`indentSelection indent ...` cases, including `some| prose` and `- a|`: Tab; `indentSelection outdent ...`: Shift+Tab; `continueOnEnter ...` cases, including `- |`, `a\n  - |\nb`, `>  |`, `> quote|`, `> - item|`, `- ( ) titi|`, `- (x) chosen|`, `1. ( ) a|`, `- ( ) |`, `    code|`, `plain|`, the fence cases, `|- a` and `-| a`, and `continueOnEnter leaves non-collapsed selections to the native behaviour`: Enter).
 - Method: test/page/runtimeBlockEditor.test.ts (`Tab and Shift+Tab indent the block editor without closing it`: Tab and Shift+Tab; `Enter in a list item continues the list, and Shift+Enter stays native`: list marker and Shift+Enter; `Enter on an empty list item empties the line and Enter in plain text stays native`: empty item and plain text).
 - Method: test/integration/realInput/markers.ts (scenarioTabIndents, screenshot block-editing/r10; scenarioEnterContinuesList, screenshot block-editing/r09); visual scenarios block-editing/v01 and v02 (Enter continues the list).
 - Criteria: The edit equals the expected text of every case of the table in the unit test; only a non-list line receives spaces at the caret; an outdent without a removable character returns no edit; continueOnEnter returns no edit in the native cases; an odd number of fence lines above the caret switches to indentation-only continuation.

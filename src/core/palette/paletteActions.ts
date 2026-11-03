@@ -390,6 +390,15 @@ export const PALETTE_ACTIONS = {
     modes: ["gfm"],
     scopes: ["block"],
   },
+  option: {
+    slash: { aliases: ["choice", "radio", "options"] },
+    label: "Option",
+    title: "Toggle option",
+    icon: "option",
+    group: "github",
+    modes: ["gfm"],
+    scopes: ["block"],
+  },
   htmlTable: {
     slash: { aliases: ["table", "html"] },
     label: "HTML table",

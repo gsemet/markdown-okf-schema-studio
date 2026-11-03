@@ -31,6 +31,7 @@ import {
   insertToc,
   setHeading,
   toggleCheckbox,
+  toggleOption,
   toggleList,
   toggleQuote,
 } from "./blockEditActions";
@@ -232,6 +233,7 @@ export function createEditActions(
     thread: { apply: (ctx) => insertThread(ctx, threadAuthor) },
     alert: { apply: insertAlert },
     checkbox: { apply: toggleCheckbox },
+    option: { apply: toggleOption },
     htmlTable: { apply: htmlTable },
     details: { apply: insertDetails },
     footnote: { apply: insertFootnote },

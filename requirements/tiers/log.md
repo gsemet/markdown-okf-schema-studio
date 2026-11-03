@@ -11,6 +11,19 @@
 - Verification: test/page/runtimeTableRowMove.test.ts, scenario
   table-editing/v26-handles-breakout-table-auto-light-900.
 
+### Option toggle button and option list continuation
+
+- SwRS-MDOKFSTUDIO-PALETTE-267 (new, proposed, CR 241): the Option button of the GFM and MyST
+  palettes (next to Checkbox) adds `( )` after the list marker of the touched lines, or `- ( ) `
+  to lines without one, removes it from every line when all have one, replaces a task box, and is
+  one undo step.
+- SwRS-MDOKFSTUDIO-BLOCK-061 (proposed, updated): Enter at the end of an option item starts the
+  next line with `- ( ) ` (a numbered item counts up), and Enter on an empty option item ends the
+  list; the caret inside the marker leaves Enter native.
+- Verification: test/page/modules/optionAction.test.ts, test/page/modules/textEditing.test.ts,
+  test/page/runtimeBlockEditor.test.ts, test/page/runtimeEditPalette.test.ts, visual scenarios
+  palette-slash/v30 to v33.
+
 ### Find and replace fields keep their native editing shortcuts
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-132 (new, proposed, CR 236): the native editing keys typed in the find or

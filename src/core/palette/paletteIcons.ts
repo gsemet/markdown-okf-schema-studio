@@ -32,6 +32,7 @@ export const PALETTE_ICONS = {
   thread: svg("M4 4h16v12H10l-5 4v-4H4z"),
   alert: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5v5.5M12 16v.5") + caret,
   checkbox: svg("M5 5h14v14H5zM8.5 12l2.5 2.5 4.5-5"),
+  option: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"),
   listTable: svg("M4 5h16v14H4zM4 10h16M9 5v14M6 7.5h.01M6 14.5h.01M12 14.5h6"),
   pipeTable: svg("M4 5h16v14H4zM4 10h16M10 5v14M15 5v14"),
   htmlTable: svg("M4 5h16v14H4zM4 10h16M9 12.5l-1.7 1.7L9 16M15 12.5l1.7 1.7L15 16"),

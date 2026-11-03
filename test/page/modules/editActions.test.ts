@@ -200,7 +200,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     [
       "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote",
       "rule", "toc", "table",
-      "emoji", "todo", "comment", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+      "emoji", "todo", "comment", "thread", "alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
       "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd", "vegaLite", "vega",
     ],
@@ -210,7 +210,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     assert.ok(action.label.length > 0 && action.icon.length > 0 && action.group.length > 0);
     // T25: the GitHub group is listed for gfm only; every other action is in every mode.
     const github = [
-      "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+      "alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     ].includes(action.id);
     const myst = ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
       "tableCaption", "listTable", "pipeTable", "figure", "roleKbd"].includes(action.id);
@@ -654,7 +654,7 @@ function applyTo(
 }
 
 test("T25: the GitHub actions are block actions of the gfm mode with no shortcut", () => {
-  for (const id of ["alert", "checkbox", "htmlTable"]) {
+  for (const id of ["alert", "checkbox", "option", "htmlTable"]) {
     const action = registry.byId.get(id)!;
     assert.deepEqual(action.modes, ["gfm"]);
     assert.deepEqual(action.scopes, ["block"]);
