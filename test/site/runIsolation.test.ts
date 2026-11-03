@@ -30,7 +30,10 @@ test("two runs get different user-data and extensions directories, both removed 
     for (const directory of all) {
       assert.ok(fs.statSync(directory).isDirectory());
       assert.ok(directory.startsWith(shortTemporaryRoot()));
-      assert.ok(directory.length < 60, `${directory} stays far below the ~100 character socket path limit`);
+      // Unix sockets only: VS Code uses named pipes on Windows, where the temporary folder is longer.
+      if (process.platform !== "win32") {
+        assert.ok(directory.length < 60, `${directory} stays far below the ~100 character socket path limit`);
+      }
     }
     assert.ok(first.userDataDirectory.includes(instanceTag(first.instanceId)));
   } finally {
