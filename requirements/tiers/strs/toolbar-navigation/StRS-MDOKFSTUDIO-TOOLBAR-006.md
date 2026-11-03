@@ -28,6 +28,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-037
 - SwRS-MDOKFSTUDIO-TOOLBAR-040
 - SwRS-MDOKFSTUDIO-TOOLBAR-045
+- SwRS-MDOKFSTUDIO-TOOLBAR-133
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -64,4 +65,5 @@ As a reader, I open a table of contents next to a long document when I want an o
   - [SwRS-MDOKFSTUDIO-TOOLBAR-037](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-037.md): The column sits below the toolbar on the right and never covers the text
   - [SwRS-MDOKFSTUDIO-TOOLBAR-040](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-040.md): The column lists the h1 to h4 headings with folding
   - [SwRS-MDOKFSTUDIO-TOOLBAR-045](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-045.md): The column marks the section being read and jumps on click
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-133](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-133.md): The narrow-pane rail keeps the text and the other Escape handlers clear
 <!-- okf:links:end -->

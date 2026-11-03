@@ -140,9 +140,9 @@ function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?:
   const nav = () => body.children.find((child) => child.attrs.has("data-sphinx-preview-toc"))!;
   const entries = () => nav().all("button").filter((entry) => !entry.attrs.has("data-sphinx-preview-toc-twisty"));
   const twisties = () => nav().all("button").filter((entry) => entry.attrs.has("data-sphinx-preview-toc-twisty"));
-  const key = (name: string) => {
+  const key = (name: string, extra: Record<string, unknown> = {}) => {
     const calls = { prevented: 0 };
-    for (const handler of windowListeners.get("keydown") ?? []) handler({ key: name, preventDefault: () => calls.prevented++ });
+    for (const handler of windowListeners.get("keydown") ?? []) handler({ key: name, preventDefault: () => calls.prevented++, ...extra });
     return calls;
   };
   return { key, advance, rail, ticks, toc, window, twisties, content, body, root, button, posted, scrolled, flush, nav, entries, getState: () => state, changes: () => changes, frames };
@@ -502,6 +502,7 @@ test("hover or focus on the rail opens the overlay, which closes 300 ms after th
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-133
 test("Escape closes the overlay at once and puts the focus back on the rail", () => {
   const { content, toc, flush, rail, nav, key } = setup({ toc: true });
   content.appendChild(heading("h1", "Title"));
@@ -522,6 +523,32 @@ test("Escape closes the overlay at once and puts the focus back on the rail", ()
   key("Escape");
   assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
   assert.equal(rail().focused, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+test("Escape typed elsewhere than on the overlay is left to the handler that owns it", () => {
+  const { content, toc, flush, rail, nav, key, body } = setup({ toc: true });
+  const field = new FakeElement("textarea");
+  content.appendChild(field);
+  content.appendChild(heading("h1", "Title"));
+  toc.refresh();
+  flush();
+  rail().fire("mouseenter");
+  // The focus is in the text: the key belongs to whoever handles it there, not to the overlay.
+  let calls = key("Escape", { target: field });
+  assert.equal(calls.prevented, 0);
+  assert.equal(nav().getAttribute("data-sphinx-preview-toc-overlay"), "open");
+  // Already consumed by another handler.
+  calls = key("Escape", { target: body, defaultPrevented: true });
+  assert.equal(calls.prevented, 0);
+  assert.equal(nav().getAttribute("data-sphinx-preview-toc-overlay"), "open");
+  // From the overlay itself, and with no focus anywhere (the body), it closes.
+  calls = key("Escape", { target: nav().all("button")[0] });
+  assert.equal(calls.prevented, 1);
+  assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
+  rail().fire("mouseenter");
+  key("Escape", { target: body });
+  assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037

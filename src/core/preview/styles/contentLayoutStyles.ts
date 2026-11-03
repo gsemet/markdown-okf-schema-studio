@@ -80,6 +80,7 @@ const TOOLBAR_FLOAT_CSS = `/*
 // @implements_req SwRS-MDOKFSTUDIO-CORE-028
 // @implements_req SwRS-MDOKFSTUDIO-CORE-034
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-133
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-001
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
@@ -141,6 +142,15 @@ nav[data-sphinx-preview-toc] {
    closes it 300 ms after the pointer and the focus left, or on Escape). The overlay appears at once,
    with no animation, so prefers-reduced-motion needs no special case. */
 @media (max-width: 759px) {
+  /* The content leaves the 16px of the rail free (the overlay floats above the text and reserves nothing more). */
+  html[data-sphinx-preview-toc="open"] {
+    --sphinx-preview-toc-reserve: 16px;
+  }
+
+  html[data-sphinx-preview-toc="open"] body {
+    padding-inline-end: var(--sphinx-preview-toc-reserve);
+  }
+
   html[data-sphinx-preview-toc="open"] [data-sphinx-preview-toc-rail] {
     position: fixed;
     inset-block-start: var(--sphinx-preview-toc-top, 96px);
@@ -191,7 +201,8 @@ nav[data-sphinx-preview-toc] {
 
   html[data-sphinx-preview-toc="open"] nav[data-sphinx-preview-toc][data-sphinx-preview-toc-overlay="open"] {
     position: fixed;
-    inset-block-start: var(--sphinx-preview-toc-top, 96px);
+    /* 40px lower than the column top: clear of the open tooltip of the TOC button. */
+    inset-block-start: calc(var(--sphinx-preview-toc-top, 96px) + 40px);
     inset-block-end: 16px;
     inset-inline-end: 16px;
     z-index: 1001;

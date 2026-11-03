@@ -26,7 +26,7 @@ implemented_in_files:
 - src/page/modules/tocColumn.ts
 tested_in_files:
 - test/page/modules/tocColumn.test.ts
-- test/visual/capture_layout_checks.py
+- test/visual/capture_toc_checks.py
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -64,7 +64,7 @@ When the reader presses the Table of contents button, the extension SHALL toggle
 
 ### Verification notes
 - Method: test/page/modules/tocColumn.test.ts (all scenarios: the TOC is off by default and the page is marked closed; the toggle opens the TOC, posts the preference, remembers it and builds the entries; the toolbar markup test checks the initial attributes; the change callback count).
-- Method: test/visual/capture_layout_checks.py (Root attribute follows each press through check_toc_column: state closed, then open).
+- Method: test/visual/capture_toc_checks.py (Root attribute follows each press through check_toc_column: state closed, then open).
 - Criteria: aria-pressed and the three texts follow the open flag; the root attribute is open or closed; one callback call per press.
 
 <!-- okf:links:start -->

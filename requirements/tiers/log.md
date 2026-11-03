@@ -25,6 +25,18 @@
   SwRS-MDOKFSTUDIO-LIFE-170 (edit mode row and scenarios) and SwRS-MDOKFSTUDIO-TRUST-001 (edit mode at start). Markers in
   `src/page/runtime.ts`, `src/page/features/editMode.ts` and `test/page/runtimeOpenInPreview.test.ts`.
 
+### The TOC rail keeps the text, the tooltips and other Escape handlers clear
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-133 (new, proposed, CR 250): under 760 px with the TOC on, the content
+  keeps 16 px free for the rail, the overlay is placed 40 px lower than the column top so it stays
+  clear of the toolbar tooltips, and Escape closes the overlay only when it comes from the overlay,
+  the rail or no focused element and no other handler consumed it.
+- SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): the narrow-pane scenario now narrows the content by the
+  rail only; the Escape rule points to TOOLBAR-133.
+- Verification: test/page/modules/tocColumn.test.ts, test/core/preview/previewStyles.test.ts,
+  test/visual/capture_toc_rail.py and capture_toc_checks.py (scenarios toolbar-navigation/v28 and
+  v29, renamed from "hidden-narrow" to "rail").
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no
@@ -32,7 +44,7 @@
   hover or focus on the rail opens the column as an overlay, closed 300 ms after the pointer and
   the focus left or on Escape; a click on a tick goes to the heading.
 - Verification: test/page/modules/tocColumn.test.ts, test/core/preview/previewStyles.test.ts,
-  test/visual/capture_layout_checks.py (scenarios toolbar-navigation/v28 and v29).
+  test/visual/capture_toc_checks.py (scenarios toolbar-navigation/v28 and v29).
 
 ### Table handles follow the real edges of a table that breaks out of the margin
 

@@ -6,6 +6,9 @@
   whole document: it shows as text, and only a `+++` line at the root of the document stays a block break.
 - A document always opens in preview mode (a new one or another one in the same panel), and
   pressing E in the preview (outside any text field) switches to edit mode.
+- On a narrow pane the table of contents rail no longer covers the text (the content keeps 16 px free for it),
+  the opened overlay stays clear of the toolbar tooltips, and Escape typed in the text or in a field is left
+  to its own handler instead of closing the overlay.
 - A new Option button in the edit bar (GFM and MyST palettes, next to Checkbox) turns the selected
   lines into an option list `- ( ) ` and back. In the block editor, Enter at the end of an option
   item starts the next line with `- ( ) `, and Enter on an empty option ends the list, as for task
