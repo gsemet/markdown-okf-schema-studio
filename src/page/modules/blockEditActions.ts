@@ -630,3 +630,27 @@ export function insertMermaid(ctx: EditActionContext): TextEdit | undefined {
   return insertBlockAfterSelection(
     ctx, "```mermaid\nflowchart TD\n  A[Start] --> B[End]\n```", "Start");
 }
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-273
+/** A MyST tab set of two tabs set apart after the selection, the first tab title selected. */
+export function insertTabs(ctx: EditActionContext): TextEdit | undefined {
+  if (!validSelection(ctx)) return undefined;
+  return insertBlockAfterSelection(ctx, [
+    "::::{tab-set}",
+    ":::{tab-item} Tab 1",
+    "Content",
+    ":::",
+    ":::{tab-item} Tab 2",
+    "Content",
+    ":::",
+    "::::",
+  ].join("\n"), "Tab 1");
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-274
+/** A fenced PlantUML sequence diagram set apart after the selection, its first message selected. */
+export function insertPlantUml(ctx: EditActionContext): TextEdit | undefined {
+  if (!validSelection(ctx)) return undefined;
+  return insertBlockAfterSelection(
+    ctx, "```plantuml\n@startuml\nAlice -> Bob: Hello\n@enduml\n```", "Hello");
+}
