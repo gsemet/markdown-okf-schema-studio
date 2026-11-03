@@ -45,8 +45,6 @@ export interface PreviewRuntimeContext extends ScrollContext, Partial<PreviewBoo
   themeKind?: number;
   /** False when no visible text editor shows the previewed document. */
   pairedTextEditor?: boolean;
-  /** The workspace-wide edit mode choice, used when the webview has no saved state. */
-  initialEditMode?: boolean;
   /** The workspace's palette mode (stored choice, else the setting); saved state wins on load. */
   initialPaletteMode?: "strict" | "gfm" | "myst" | "full";
   /** Fractional source line to show at the preview reading line on load (see anchorPolicy). */

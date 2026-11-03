@@ -194,12 +194,12 @@ test("T38: a paired preview keeps the anchor button enabled, and a foreign previ
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-170
-test("T38: edit mode starts from the workspace choice unless the webview has saved state", () => {
-  const remembered = createRuntimeHarness({ initialEditMode: true });
+test("T38: edit mode starts off unless the webview holds the saved state of this document", () => {
+  const remembered = createRuntimeHarness({ savedState: { editMode: true } });
   assert.equal(remembered.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "on");
   assert.equal(remembered.editModeButton.getAttribute("aria-pressed"), "true");
 
-  const saved = createRuntimeHarness({ initialEditMode: true, savedState: { editMode: false } });
+  const saved = createRuntimeHarness({ savedState: { editMode: false } });
   assert.equal(saved.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
 
   const plain = createRuntimeHarness();
@@ -208,13 +208,13 @@ test("T38: edit mode starts from the workspace choice unless the webview has sav
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 test("T38: a read-only preview never starts in edit mode", () => {
-  const harness = createRuntimeHarness({ initialEditMode: true, editingEnabled: false });
+  const harness = createRuntimeHarness({ savedState: { editMode: true }, editingEnabled: false });
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 test("a greyed Edit button does nothing and says why (untrusted or no workspace folder)", () => {
-  const untrusted = createRuntimeHarness({ initialEditMode: true, editingEnabled: false });
+  const untrusted = createRuntimeHarness({ savedState: { editMode: true }, editingEnabled: false });
   untrusted.editModeButton.dispatch("click");
   assert.equal(untrusted.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
   assert.equal(untrusted.editModeButton.getAttribute("aria-pressed"), null);

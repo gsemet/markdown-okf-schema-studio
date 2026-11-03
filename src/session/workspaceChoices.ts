@@ -162,12 +162,12 @@ export class WorkspaceChoices {
     ), "writeViewPreferences");
   }
 
-  /** The stored edit mode, as stored (`true` starts the next preview in edit mode). */
+  /** The stored edit mode, as stored (no page reads it at start: every document opens in preview mode). */
   public get editMode(): unknown {
     return this.storage?.get(EDIT_MODE_STORAGE_KEY);
   }
 
-  /** Stores the edit mode the next preview starts in. */
+  /** Stores the last edit mode a page reported. */
   public setEditMode(editMode: boolean): void {
     fireAndForget(this.host.logger, this.storage?.update(EDIT_MODE_STORAGE_KEY, editMode), "Storing the edit mode");
   }

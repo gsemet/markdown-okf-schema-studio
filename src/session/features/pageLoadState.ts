@@ -81,7 +81,6 @@ export const CONTENT_PATCH_ACK_TIMEOUT_MS = 2_000;
 /** The toolbar state a page starts with. */
 export interface ToolbarState {
   pairedTextEditor: boolean;
-  initialEditMode: boolean;
   initialPaletteMode: PaletteMode;
   /** False in read-only previews: the page offers no Comment button and no reply box. */
   commentsEnabled: boolean;
