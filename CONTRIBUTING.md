@@ -23,6 +23,17 @@ diagram cases. In GitHub Actions only the visual job installs them, with Playwri
 libraries, through `just dev-ci visual`, from cached Ubuntu package archives; on macOS use
 `brew install plantuml graphviz`.
 
+### Windows
+
+`just check` and `just ci-static` run on Windows; the visual and real VS Code stages run on Linux
+and macOS only. The recipes need a POSIX shell: install Git for Windows and put `sh`, `bash` and
+`cygpath` on `PATH` (its `usr\bin` folder, or one shim per tool with Scoop), plus `node` (for
+example `fnm default 24` and `fnm env` in your PowerShell profile). The justfile calls `npm.cmd`
+through `fnm` on Windows. Python 3.12 comes from `.python-version`: the next interpreter may lack
+prebuilt wheels and need a C compiler. Tests that create symbolic links are skipped unless
+Windows allows them (Developer Mode or administrator rights), and the hang-watchdog tests, which
+read the process list with `ps`, are skipped; the Linux job runs them all.
+
 ## Dependency Updates
 
 Run `just update` to upgrade JavaScript dependencies, regenerate the npm lockfile against the
@@ -251,8 +262,9 @@ review index and `out/reports/e2e/e2e-manifest.json`; it fails when a stage mani
 failed) and `just ci-gallery` (gallery and site from the existing outputs, no E2E re-run).
 On a pull request and an ordinary push (no version change), CI runs only the simulated tests, which
 make up the required `checks` job:
-`ci-static`, `ci-visual` (Playwright/Chromium against a mock host) and `just ci-report visual`, which
-reports the real VS Code stage as skipped. The real VS Code window jobs (`ci-integration` and the
+`ci-static` (on Linux, and again on Windows in the `static-windows` job), `ci-visual`
+(Playwright/Chromium against a mock host) and `just ci-report visual`, which reports the real VS Code
+stage as skipped. The real VS Code window jobs (`ci-integration` and the
 `stress` repetitions) are heavy and manual: start them with
 `gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery and site
 artifact), or with "Run workflow" in the Actions tab. Run them, or `npm run test:integration`
