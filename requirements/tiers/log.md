@@ -53,7 +53,8 @@
   of its preview callout; a version admonition writes `:::{versionadded} 1.0` with the version
   selected. The type popover is unchanged.
 - SwRS-MDOKFSTUDIO-PALETTE-238 (changed): the admonition variants row names the version admonitions.
-- Verification: test/page/modules/slashMenu.test.ts.
+- Verification: test/page/modules/slashMenu.test.ts; visual scenarios palette-slash/v34-slash-myst-admonitions-light-900 and
+  palette-slash/v35-slash-myst-admonitions-dark-900 (test/visual/slashAdmonitionScenarios.ts).
 
 ### The TOC shows as a rail on a narrow pane
 

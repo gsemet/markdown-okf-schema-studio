@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/modules/blockEditActions.ts
 tested_in_files:
 - test/page/modules/slashMenu.test.ts
+- test/visual/slashAdmonitionScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -63,7 +64,7 @@ When the writer opens the slash menu in MyST mode, the extension SHALL list one 
 
 ### Verification notes
 
-- Method: test/page/modules/slashMenu.test.ts, unit tests "P11: the MyST slash menu lists every admonition directive, each with its own icon" and "P11: /versionadded inserts a valid version admonition with the version selected".
+- Method: the visual scenarios palette-slash/v34-slash-myst-admonitions-light-900 and palette-slash/v35-slash-myst-admonitions-dark-900 (simulated, light and dark: /admonition in the MyST block editor, the menu scrolled to its last entries, which show the version admonitions with their icons), and test/page/modules/slashMenu.test.ts, unit tests "P11: the MyST slash menu lists every admonition directive, each with its own icon" and "P11: /versionadded inserts a valid version admonition with the version selected".
 - Criteria: The entries come from the Admonition variants of the palette registry; the icon of a variant is a palette icon named after the callout shape. The version admonitions are not options of the popover (see SwRS-MDOKFSTUDIO-PALETTE-127). The block renders as an admonition titled with the version (see SwRS-MDOKFSTUDIO-MYST-001).
 
 ### Related requirements

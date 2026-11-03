@@ -189,9 +189,10 @@ export interface Scenario {
   /**
    * P11: the slash command menu in a paragraph editor of this palette mode. Steps: `open` (all
    * commands), `filtered`, `nomatch` (No command row), `flip` (editor near the viewport bottom: the
-   * menu opens above the caret). The final frame keeps the menu open with `finalQuery` typed.
+   * menu opens above the caret). The final frame keeps the menu open with `finalQuery` typed; with
+   * `scrollToEnd` the menu list is scrolled to its last entries first.
    */
-  slashMenuShot?: { mode: "strict" | "gfm" | "myst"; finalQuery: string };
+  slashMenuShot?: { mode: "strict" | "gfm" | "myst"; finalQuery: string; scrollToEnd?: true };
   /** Click the + after the final figure; the insertion message must carry the closing fence line. */
   insertAfterFigureChecks?: boolean;
   /** Last block of the fixture, the line the insertion must follow, and its selector. */
