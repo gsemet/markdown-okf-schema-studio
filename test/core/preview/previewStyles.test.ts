@@ -952,6 +952,16 @@ test("the TOC column is hidden by default, reserves 256px when open and hides on
   assert.match(css, /\[data-sphinx-preview-sticky-headings\] \{[^}]*max-width: calc\(100% - var\(--sphinx-preview-toc-reserve, 0px\)\)/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+test("a narrow pane with the TOC on shows a rail and opens the column as an overlay", () => {
+  const css = PREVIEW_THEME_CSS;
+  const media = css.match(/@media \(max-width: 759px\) \{[\s\S]*?\n\}\n/u)?.[0] ?? "";
+  assert.match(css, /\[data-sphinx-preview-toc-rail\] \{\s*display: none;/u);
+  assert.match(media, /html\[data-sphinx-preview-toc="open"\] \[data-sphinx-preview-toc-rail\] \{[^}]*position: fixed;[^}]*display: flex;/u);
+  assert.match(media, /nav\[data-sphinx-preview-toc\]\[data-sphinx-preview-toc-overlay="open"\] \{[^}]*position: fixed;[^}]*display: block;/u);
+  assert.doesNotMatch(media, /animation|transition/u);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-143
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
 test("T15: an open comment is an admonition-like box and showComments off hides the gray chips only", () => {

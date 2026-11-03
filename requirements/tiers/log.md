@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-11-03 (CR 239)
+
+### The TOC shows as a rail on a narrow pane
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no
+  longer hidden. A rail on the right shows one tick per heading (current section highlighted);
+  hover or focus on the rail opens the column as an overlay, closed 300 ms after the pointer and
+  the focus left or on Escape; a click on a tick goes to the heading.
+- Verification: test/page/modules/tocColumn.test.ts, test/core/preview/previewStyles.test.ts,
+  test/visual/capture_layout_checks.py (scenarios toolbar-navigation/v28 and v29).
+
 ## 2026-11-03
 
 ### Table handles follow the real edges of a table that breaks out of the margin

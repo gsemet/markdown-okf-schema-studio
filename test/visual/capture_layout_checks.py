@@ -12,6 +12,7 @@ from playwright.sync_api import Page
 from capture_find_checks import check_find_bar
 from capture_sbs_checks import check_side_by_side
 from capture_start_hint import check_start_hint
+from capture_toc_rail import check_toc_overlay, check_toc_rail
 from capture_support import Failure, HERE, VISUAL_REPORT_DIR, report_path, save_step
 
 
@@ -1016,7 +1017,7 @@ def check_width_mode_break(page: Page, scenario: dict, failures: list[Failure]) 
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> None:
-  """The TOC button opens a right column below the toolbar; wide panes only."""
+  """The TOC button opens a right column below the toolbar (wide panes) or a rail (narrow)."""
   if not scenario.get("tocChecks"):
     return
   page_name = scenario["page"]
@@ -1068,6 +1069,7 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
         failures.append(Failure(page_name, "a hidden TOC column must not narrow the content"))
       if toggle.get_attribute("aria-pressed") != "true":
         failures.append(Failure(page_name, "the TOC button must still reflect the preference"))
+      failures.extend(Failure(page_name, text) for text in check_toc_rail(page))
       return
     if not opened["shown"] or not opened["nav"]:
       failures.append(Failure(page_name, "the TOC column is not shown on a wide pane"))
@@ -1228,9 +1230,7 @@ def check_toc_shot(page: Page, scenario: dict, failures: list[Failure]) -> None:
     failures.append(Failure(page_name, f"the TOC button did not leave the column open ({state['toc']}, pressed {state['pressed']})"))
     return
   if scenario["width"] < 760:
-    # Intended narrow behaviour: the column is hidden, the preference stays on.
-    if state["shown"]:
-      failures.append(Failure(page_name, "the TOC column must stay hidden on a pane under 760px"))
+    failures.extend(Failure(page_name, text) for text in check_toc_overlay(page, state["shown"]))
     return
   nav = state["nav"]
   if not state["shown"] or not nav or nav["width"] < 100 or nav["height"] < 100:

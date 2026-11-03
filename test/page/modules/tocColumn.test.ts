@@ -58,9 +58,11 @@ class FakeElement {
   }
   querySelectorAll(selector: string) { return this.all(selector); }
   querySelector(selector: string) { return this.all(selector)[0] ?? null; }
-  fire(type: string) {
+  focused = 0;
+  focus() { this.focused += 1; }
+  fire(type: string, extra: Record<string, unknown> = {}) {
     const calls = { prevented: 0 };
-    for (const handler of this.listeners.get(type) ?? []) handler({ preventDefault: () => calls.prevented++ });
+    for (const handler of this.listeners.get(type) ?? []) handler({ preventDefault: () => calls.prevented++, ...extra });
     return calls;
   }
 }
@@ -99,8 +101,13 @@ function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?:
     ),
   };
   const windowListeners = new Map<string, Handler[]>();
+  const timers = new Map<number, { at: number; run: () => void }>();
+  let clock = 0;
+  let timerId = 0;
   const window = {
     scrollY: 0,
+    setTimeout: (run: () => void, delay: number) => { timerId += 1; timers.set(timerId, { at: clock + delay, run }); return timerId; },
+    clearTimeout: (id: number) => { timers.delete(id); },
     addEventListener: (type: string, handler: Handler) => {
       windowListeners.set(type, [...(windowListeners.get(type) ?? []), handler]);
     },
@@ -121,11 +128,24 @@ function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?:
     () => { changes += 1; },
     () => 40,
   );
+  const advance = (ms: number) => {
+    clock += ms;
+    for (const [id, timer] of [...timers]) {
+      if (timer.at <= clock) { timers.delete(id); timer.run(); }
+    }
+  };
+  const rail = () => body.children.find((child) => child.attrs.has("data-sphinx-preview-toc-rail"))!;
+  const ticks = () => rail().all("button");
   const flush = () => { while (frames.length) frames.shift()!(); };
   const nav = () => body.children.find((child) => child.attrs.has("data-sphinx-preview-toc"))!;
   const entries = () => nav().all("button").filter((entry) => !entry.attrs.has("data-sphinx-preview-toc-twisty"));
   const twisties = () => nav().all("button").filter((entry) => entry.attrs.has("data-sphinx-preview-toc-twisty"));
-  return { toc, window, twisties, content, body, root, button, posted, scrolled, flush, nav, entries, getState: () => state, changes: () => changes, frames };
+  const key = (name: string) => {
+    const calls = { prevented: 0 };
+    for (const handler of windowListeners.get("keydown") ?? []) handler({ key: name, preventDefault: () => calls.prevented++ });
+    return calls;
+  };
+  return { key, advance, rail, ticks, toc, window, twisties, content, body, root, button, posted, scrolled, flush, nav, entries, getState: () => state, changes: () => changes, frames };
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
@@ -437,4 +457,97 @@ test("a comment chip and its hidden body stay out of the entry label, a TODO wor
   toc.refresh?.();
   flush();
   assert.deepEqual(entries().map((entry) => entry.textContent), ["Plan", "Ship TODO"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+test("with the TOC on, the rail has one tick per heading and marks the section at the reading line", () => {
+  const { content, toc, flush, rail, ticks, root } = setup({ toc: true });
+  for (const [tag, text] of [["h1", "Title"], ["h2", "Part"], ["h4", "Deep"], ["h5", "Too deep"]]) {
+    content.appendChild(heading(tag, text));
+  }
+  content.children.forEach((child, index) => { child.rect = { ...child.rect, top: index * 100 }; });
+  toc.refresh();
+  flush();
+  assert.equal(root.getAttribute("data-sphinx-preview-toc"), "open");
+  assert.equal(rail().getAttribute("tabindex"), "0");
+  assert.deepEqual(ticks().map((tick) => tick.getAttribute("aria-label")), ["Title", "Part", "Deep"]);
+  assert.equal(ticks().filter((tick) => tick.hasAttribute("data-sphinx-preview-toc-tick-current")).length, 1);
+  assert.ok(ticks()[0].hasAttribute("data-sphinx-preview-toc-tick-current"));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+test("hover or focus on the rail opens the overlay, which closes 300 ms after the pointer left", () => {
+  const { content, toc, flush, rail, nav, advance } = setup({ toc: true });
+  content.appendChild(heading("h1", "Title"));
+  toc.refresh();
+  flush();
+  assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
+  rail().fire("mouseenter");
+  assert.equal(nav().getAttribute("data-sphinx-preview-toc-overlay"), "open");
+  rail().fire("mouseleave");
+  advance(299);
+  assert.equal(nav().getAttribute("data-sphinx-preview-toc-overlay"), "open");
+  // Moving onto the overlay itself keeps it open.
+  nav().fire("mouseenter");
+  advance(500);
+  assert.equal(nav().getAttribute("data-sphinx-preview-toc-overlay"), "open");
+  nav().fire("mouseleave");
+  advance(300);
+  assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
+  rail().fire("focusin");
+  assert.equal(nav().getAttribute("data-sphinx-preview-toc-overlay"), "open");
+  rail().fire("focusout");
+  advance(300);
+  assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+test("Escape closes the overlay at once and puts the focus back on the rail", () => {
+  const { content, toc, flush, rail, nav, key } = setup({ toc: true });
+  content.appendChild(heading("h1", "Title"));
+  toc.refresh();
+  flush();
+  rail().fire("focusin");
+  const calls = key("Escape");
+  assert.equal(calls.prevented, 1);
+  assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
+  assert.equal(rail().focused, 1);
+  // Another key leaves it alone.
+  rail().fire("focusin");
+  key("a");
+  assert.equal(nav().getAttribute("data-sphinx-preview-toc-overlay"), "open");
+  // Opened by the pointer alone, Escape still closes it and the focus stays where it was.
+  rail().fire("focusout");
+  rail().fire("mouseenter");
+  key("Escape");
+  assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
+  assert.equal(rail().focused, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+test("a click on a tick goes to that heading", () => {
+  const { content, toc, flush, ticks, scrolled } = setup({ toc: true });
+  const first = heading("h1", "Title");
+  const second = heading("h2", "Part");
+  content.appendChild(first);
+  content.appendChild(second);
+  toc.refresh();
+  flush();
+  const calls = ticks()[1].fire("click");
+  assert.equal(calls.prevented, 1);
+  assert.deepEqual(scrolled, [second]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+test("closing the TOC closes the overlay and an entry click in the overlay closes it", () => {
+  const { content, toc, flush, rail, nav, entries, button } = setup({ toc: true });
+  content.appendChild(heading("h1", "Title"));
+  toc.refresh();
+  flush();
+  rail().fire("mouseenter");
+  entries()[0].fire("click");
+  assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
+  rail().fire("mouseenter");
+  button.fire("click");
+  assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
 });
