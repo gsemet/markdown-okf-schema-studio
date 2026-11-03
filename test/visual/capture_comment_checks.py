@@ -1206,6 +1206,14 @@ def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> Non
   page.wait_for_timeout(200)
   if state() is None:
     failures.append(Failure(page_name, "the menu did not reopen for the scenario capture"))
+  elif shot.get("scrollToEnd"):
+    # A long list shows its last entries (CR 243: the version admonitions close the admonition list).
+    page.evaluate("""() => {
+      const menu = document.querySelector('[data-slash-menu]');
+      const list = [menu, ...menu.querySelectorAll('*')].find((element) => element.scrollHeight > element.clientHeight + 1);
+      if (list) list.scrollTop = list.scrollHeight;
+    }""")
+    page.wait_for_timeout(150)
 
 
 def check_edit_palette_tall(page: Page, scenario: dict, failures: list[Failure]) -> None:

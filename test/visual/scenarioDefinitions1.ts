@@ -27,6 +27,7 @@ import {
 import { ALERT_EDITING_SCENARIOS } from "./alertEditingScenarios";
 import { CARDS_TABS_SCENARIOS } from "./cardsTabsScenarios";
 import { OPTION_LIST_SCENARIOS } from "./optionListScenarios";
+import { SLASH_ADMONITION_SCENARIOS } from "./slashAdmonitionScenarios";
 import { RADIO_PLAN_SCENARIOS } from "./radioPlanScenarios";
 import { REVIEW_MARKS_HIDDEN_SCENARIOS } from "./reviewMarksHiddenScenarios";
 import { GRID_CARD_EDITING_SCENARIOS } from "./gridCardEditingScenarios";
@@ -460,6 +461,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...ALERT_EDITING_SCENARIOS,
   ...RADIO_PLAN_SCENARIOS,
   ...OPTION_LIST_SCENARIOS,
+  ...SLASH_ADMONITION_SCENARIOS,
   ...REVIEW_MARKS_HIDDEN_SCENARIOS,
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
   ...FRONTMATTER_COLLAPSE_SCENARIOS,
