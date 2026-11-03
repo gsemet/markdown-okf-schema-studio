@@ -1,6 +1,7 @@
 set dotenv-load
 
-npm := env("STUDIO_NPM", "fnm exec -- npm --registry=https://registry.npmjs.org/")
+# On Windows npm is npm.cmd, which `fnm exec` does not find from the bare name.
+npm := env("STUDIO_NPM", "fnm exec -- " + (if os_family() == "windows" { "npm.cmd" } else { "npm" }) + " --registry=https://registry.npmjs.org/")
 okfreq := env("STUDIO_OKFREQ", "uv run --no-sync --group requirements okfreq")
 
 _default:
