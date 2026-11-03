@@ -1,5 +1,26 @@
 # Update Log
 
+## 2026-11-03
+
+### Find and replace fields keep their native editing shortcuts
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-132 (new, proposed, CR 236): the native editing keys typed in the find or
+  replace field (select all, copy, cut, paste, undo, redo, caret and word moves, Home, End, Shift
+  with the arrows, delete a word) stop at the bar and keep their default action, so no page
+  listener and no VS Code key forwarding acts on them. The bar's own keys are unchanged.
+- Verification: test/page/modules/findBar.test.ts.
+
+### Frontmatter properties table: collapse and expand
+
+- SwRS-MDOKFSTUDIO-FMSCHEMA-090 (proposed): a toggle next to the Frontmatter properties title hides
+  the table under its header and shows it again; the state holds across content patches and edits
+  of the open document and is never stored, so a page load or a newly opened document shows the
+  table.
+- Verification: test/core/frontmatter/propertiesTable.test.ts, test/page/runtimeFrontmatterFields.test.ts,
+  test/visual/frontmatterCollapseScenarios.ts.
+- Owner decision after review: the toggle uses a down-pointing triangle when expanded and a
+  right-pointing one when collapsed, not the Description column's left-pointing icon (SwRS-MDOKFSTUDIO-FMSCHEMA-090 verification notes).
+
 ## 2026-11-01
 
 ### Side-by-side diff: a paragraph removed next to an edited one

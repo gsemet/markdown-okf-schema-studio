@@ -92,5 +92,6 @@
 - [SwRS-MDOKFSTUDIO-FMSCHEMA-087 — A link problem counts in the badge](SwRS-MDOKFSTUDIO-FMSCHEMA-087.md) — When a frontmatter link does not resolve, the extension SHALL count the problem on the field row and in the title badge, without blocking the saving of other fields.
 - [SwRS-MDOKFSTUDIO-FMSCHEMA-088 — The generic table is shown when no schema lookup is made](SwRS-MDOKFSTUDIO-FMSCHEMA-088.md) — When no schema lookup is made for the document, the extension SHALL show the generic frontmatter table.
 - [SwRS-MDOKFSTUDIO-FMSCHEMA-089 — Every violation of the schema is reported](SwRS-MDOKFSTUDIO-FMSCHEMA-089.md) — When the frontmatter violates the schema in several places, the extension SHALL report every violation, not only the first.
+- [SwRS-MDOKFSTUDIO-FMSCHEMA-090 — The frontmatter properties table collapses under its header and is shown again on every page load](SwRS-MDOKFSTUDIO-FMSCHEMA-090.md) — When a writer presses the toggle next to the Frontmatter properties title, the extension SHALL hide the table below the header, show it again on the next press, keep the state across content patches and edits of the open document, and show the table expanded whenever the page loads or a document is opened.
 
 <!-- okfreq:index:end -->

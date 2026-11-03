@@ -126,6 +126,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     editMode: false,
     paletteMode: DEFAULT_EDITING_CONFIGURATION.defaultPaletteMode,
     descriptionsCollapsed: false,
+    frontmatterCollapsed: false,
     activeBlockEdit: undefined,
     activeFrontmatterEdit: undefined,
     editSequence: 0,

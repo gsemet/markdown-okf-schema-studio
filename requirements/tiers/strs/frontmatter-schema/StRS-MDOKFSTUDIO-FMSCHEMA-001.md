@@ -40,6 +40,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-044
 - SwRS-MDOKFSTUDIO-FMSCHEMA-045
 - SwRS-MDOKFSTUDIO-FMSCHEMA-075
+- SwRS-MDOKFSTUDIO-FMSCHEMA-090
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-FMSCHEMA-003
@@ -101,6 +102,7 @@ As a writer, I read my document metadata as a table above the text, safely, with
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-044](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-044.md): A new table waits while a field editor is open
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-045](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-045.md): A frontmatter setting change re-analyses the open previews
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-075](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-075.md): The body still renders when the table is off
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-090](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-090.md): The frontmatter properties table collapses under its header and is shown again on every page load
 - Supersedes:
   - [StRS-MDOKFSTUDIO-FMSCHEMA-003](StRS-MDOKFSTUDIO-FMSCHEMA-003.md): Property values read like YAML
   - [StRS-MDOKFSTUDIO-FMSCHEMA-004](StRS-MDOKFSTUDIO-FMSCHEMA-004.md): The Description column can be collapsed

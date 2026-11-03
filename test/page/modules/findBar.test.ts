@@ -549,3 +549,37 @@ test("the matches are searched again when the content changes, keeping the curre
   harness.bar.refresh();
   assert.equal(harness.query("[data-sphinx-preview-find]").hidden, true, "a closed bar stays closed");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-132
+test("the native editing keys of the find and replace fields stop at the bar and keep their default action", () => {
+  const harness = setup();
+  render(harness.page);
+  harness.bar.open();
+  const outside = harness.page.node("p", ["text"]);
+  const fields = [harness.query("[data-find-input]"), harness.query("[data-find-replace-input]")];
+  const native: Array<Record<string, unknown>> = [
+    ...["a", "c", "x", "v", "z", "y", "A"].map((key) => ({ key, ctrlKey: true })),
+    { key: "z", ctrlKey: true, shiftKey: true },
+    { key: "ArrowLeft", ctrlKey: true },
+    { key: "ArrowRight", ctrlKey: true, shiftKey: true },
+    { key: "ArrowLeft", shiftKey: true },
+    { key: "Home" },
+    { key: "End", shiftKey: true },
+    { key: "Backspace", ctrlKey: true },
+    { key: "Delete", ctrlKey: true },
+  ];
+  for (const field of fields) {
+    for (const init of native) {
+      assert.deepEqual(harness.key(init, field), { prevented: 0, stopped: 1 }, JSON.stringify(init));
+    }
+  }
+  const field = fields[0];
+  assert.deepEqual(harness.key({ key: "a", ctrlKey: true }, outside), { prevented: 0, stopped: 0 }, "outside the bar the key is not taken");
+  assert.deepEqual(harness.key({ key: "a", ctrlKey: true, isComposing: true }, field), { prevented: 0, stopped: 0 }, "an input method composition");
+  assert.deepEqual(harness.key({ key: "s", ctrlKey: true }, field), { prevented: 0, stopped: 0 }, "Ctrl+S is left to VS Code");
+  assert.deepEqual(harness.key({ key: "a", ctrlKey: true, altKey: true }, field), { prevented: 0, stopped: 0 }, "Ctrl+Alt+A is no native key");
+  assert.equal(harness.key({ key: "Enter" }, field).prevented, 1, "Enter keeps its action");
+  assert.equal(harness.key({ code: "KeyF", ctrlKey: true, key: "f" }, field).prevented, 1, "Ctrl+F keeps its action");
+  assert.equal(harness.key({ code: "KeyC", key: "c", altKey: true }, field).prevented, 1, "Alt+C keeps its action");
+  assert.equal(harness.key({ key: "Escape" }, field).prevented, 1, "Escape keeps its action");
+});

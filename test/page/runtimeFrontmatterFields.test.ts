@@ -596,3 +596,24 @@ test("T30: a replacement closes the link tooltip, re-measures and keeps the desc
   assert.equal(harness.documentElement.getAttribute("data-okf-descriptions-collapsed"), "true");
   assert.equal(harness.descriptionButton.getAttribute("aria-expanded"), "false");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+test("the frontmatter toggle collapses the table, survives a content patch and starts expanded on a fresh page", () => {
+  const harness = createRuntimeHarness({ viewportWidth: 900 });
+  assert.notEqual(harness.documentElement.getAttribute("data-okf-frontmatter-collapsed"), "true");
+  assert.equal(harness.frontmatterToggleButton.getAttribute("aria-expanded"), "true");
+  harness.dispatchDocument("click", { target: harness.frontmatterToggleButton });
+  assert.equal(harness.documentElement.getAttribute("data-okf-frontmatter-collapsed"), "true");
+  assert.equal(harness.frontmatterToggleButton.getAttribute("aria-expanded"), "false");
+  assert.equal(harness.frontmatterToggleButton.getAttribute("aria-label"), "Expand frontmatter properties");
+  harness.dispatchMessage(propertiesMessage(cellMarkup("fresh")));
+  assert.equal(harness.documentElement.getAttribute("data-okf-frontmatter-collapsed"), "true");
+  assert.equal(harness.frontmatterToggleButton.getAttribute("aria-expanded"), "false");
+  harness.dispatchDocument("click", { target: harness.frontmatterToggleButton });
+  assert.equal(harness.documentElement.getAttribute("data-okf-frontmatter-collapsed"), "false");
+  assert.equal(harness.frontmatterToggleButton.getAttribute("aria-expanded"), "true");
+  harness.dispatchDocument("click", { target: harness.frontmatterToggleButton });
+  const fresh = createRuntimeHarness({ viewportWidth: 900 });
+  assert.notEqual(fresh.documentElement.getAttribute("data-okf-frontmatter-collapsed"), "true");
+  assert.equal(fresh.frontmatterToggleButton.getAttribute("aria-expanded"), "true");
+});
