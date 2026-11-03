@@ -51,6 +51,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LAYOUT-039
 - SwRS-MDOKFSTUDIO-LAYOUT-040
 - SwRS-MDOKFSTUDIO-LAYOUT-041
+- SwRS-MDOKFSTUDIO-LAYOUT-044
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
 default_owner_email: gaetan@xeberon.net
@@ -121,6 +122,7 @@ As a writer or team, I choose how wide the text column is, from a narrow measure
   - [SwRS-MDOKFSTUDIO-LAYOUT-039](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-039.md): Full width centres the content with gutters of at least 15 px
   - [SwRS-MDOKFSTUDIO-LAYOUT-040](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-040.md): A width mode change keeps the reading line
   - [SwRS-MDOKFSTUDIO-LAYOUT-041](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-041.md): A width mode change measures the first-element clearance again
+  - [SwRS-MDOKFSTUDIO-LAYOUT-044](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-044.md): Auto keeps a table in the column when its minimum widths fit
   - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
 - Supersedes:

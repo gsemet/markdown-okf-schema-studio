@@ -79,6 +79,7 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 | An image whose data-okf-width is 50% | Not marked wide |
 | An image whose data-okf-width is 20em | Not marked wide |
 | An image whose data-okf-width is 3rem | Not marked wide |
+| A table whose column minimums fit the column (SwRS-MDOKFSTUDIO-LAYOUT-044) | Not marked wide, even when its natural width is larger |
 
 ### Scenario (boundary): Author pixel width and a gain of 1 px
 | Input | Outcome |

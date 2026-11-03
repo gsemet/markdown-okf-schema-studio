@@ -47,6 +47,11 @@ export function installWidthMode(
   let mode = pick(saved?.viewWidthMode) ?? pick(context.initialViewPreferences?.widthMode) ?? "margin";
   const marked = new Set<Element>();
   const figures = new Set<Element>();
+  // The cells of a token column (see tableMinimum), which keep their text on one line in Auto.
+  const tokenAttribute = "data-sphinx-preview-token";
+  const tokenCells = new Set<Element>();
+  // A prose column needs about this many characters of the body font (the review said 20, see tableMinimum).
+  const proseMinimumCharacters = 24;
 
   const clear = (): void => {
     for (const element of marked) {
@@ -106,6 +111,77 @@ export function installWidthMode(
     }
   };
 
+  const tableOf = (wrapper: Element): Element | null => (
+    wrapper.tagName === "TABLE" ? wrapper : wrapper.tagName === "FIGURE" ? wrapper.querySelector?.("table") ?? null : null
+  );
+
+  interface TablePlan {
+    grid: Element[][];
+    /** Per column: holds a code block, or is a token column. */
+    block: boolean[];
+    token: boolean[];
+    /** Per column: the longest unbroken word of a body cell, in characters. */
+    longest: number[];
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-044
+  /**
+   * Sorts the columns of a table from its text alone: a token column (every body cell at most three
+   * words: inline code, a number, a date, an identifier) never wraps; a column holding a code block
+   * cannot shrink; any other column is prose. Undefined for a table without a plain grid (merged
+   * cells, nested tables, no rows): it then keeps the rule of its natural width.
+   */
+  const planTable = (table: Element): TablePlan | undefined => {
+    const rows = Array.from(table.querySelectorAll?.("tr") ?? []);
+    if (rows.length === 0 || table.querySelector?.("table")) return undefined;
+    const grid = rows.map((tableRow) => Array.from(tableRow.children));
+    const count = grid[0].length;
+    if (count === 0 || grid.some((cells) => cells.length !== count || cells.some((cell) => {
+      const span = cell as HTMLTableCellElement;
+      return span.colSpan > 1 || span.rowSpan > 1;
+    }))) return undefined;
+    const bodyRows = grid.filter((_, index) => rows[index].parentElement?.tagName !== "THEAD");
+    const body = bodyRows.length > 0 ? bodyRows : grid;
+    const plan: TablePlan = { grid, block: [], token: [], longest: [] };
+    for (let column = 0; column < count; column += 1) {
+      const words = body.map((cells) => (cells[column].textContent ?? "").trim().split(/\s+/u).filter(Boolean));
+      const block = grid.some((cells) => cells[column].querySelector?.("pre"));
+      plan.block.push(block);
+      plan.token.push(!block && words.every((cellWords) => cellWords.length <= 3));
+      plan.longest.push(Math.max(0, ...words.flat().map((word) => word.length)));
+    }
+    return plan;
+  };
+
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-044
+  /**
+   * The width a planned table needs at the least, read while it is uncapped: a token column or a
+   * column holding a code block needs its widest cell; a prose column needs about 24 characters of
+   * the body font (calibrated so that the reviewed cases keep their verdicts), or its longest
+   * unbroken word when that is longer.
+   */
+  const tableMinimum = (plan: TablePlan): number => {
+    const probe = document.createElement("span");
+    probe.textContent = "0".repeat(proseMinimumCharacters);
+    probe.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap";
+    plan.grid[0][0].appendChild(probe);
+    const characterWidth = probe.getBoundingClientRect().width / proseMinimumCharacters;
+    probe.remove();
+    let minimum = 0;
+    plan.grid[0].forEach((_, column) => {
+      const cells = plan.grid.map((cellRow) => cellRow[column]);
+      const natural = Math.max(...cells.map((cell) => cell.getBoundingClientRect().width));
+      if (plan.block[column] || plan.token[column]) {
+        minimum += natural;
+        return;
+      }
+      const style = window.getComputedStyle?.(cells[0]);
+      const padding = (parseFloat(style?.paddingLeft ?? "") || 0) + (parseFloat(style?.paddingRight ?? "") || 0) + 1;
+      minimum += Math.min(natural, Math.max(proseMinimumCharacters, plan.longest[column]) * characterWidth + padding);
+    });
+    return minimum;
+  };
+
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
   const measureWide = (): void => {
@@ -114,6 +190,10 @@ export function installWidthMode(
     // The measure below uncaps each wrapper, which makes the browser reset its sideways scroll.
     const scrolled = wrappers ? scrolledBoxes(wrappers) : [];
     clear();
+    if (mode !== "auto") {
+      for (const cell of tokenCells) cell.removeAttribute(tokenAttribute);
+      tokenCells.clear();
+    }
     if (!content) return;
     // A paragraph holding only an image is a figure: CSS centres it in every width mode. Only the
     // top-level blocks are looked at, and only the difference is written, so a re-measure of a long
@@ -156,7 +236,37 @@ export function installWidthMode(
     const shift = Math.round((pane - reserved) / 2 - columnCentre);
     // A table is capped at the column, which wraps its cells: measure it uncapped, then restore.
     const measuring = "data-sphinx-preview-measuring";
-    for (const wrapper of wrappers) wrapper.setAttribute(measuring, "");
+    // The token cells are marked first, so the measure reads their final sizes.
+    const plans = new Map<Element, TablePlan>();
+    const wantedTokens = new Set<Element>();
+    for (const wrapper of wrappers) {
+      const table = tableOf(wrapper);
+      const plan = table ? planTable(table) : undefined;
+      if (!plan) continue;
+      plans.set(wrapper, plan);
+      plan.grid.forEach((cells) => cells.forEach((cell, column) => { if (plan.token[column]) wantedTokens.add(cell); }));
+    }
+    for (const cell of tokenCells) {
+      if (!wantedTokens.has(cell)) {
+        cell.removeAttribute(tokenAttribute);
+        tokenCells.delete(cell);
+      }
+    }
+    for (const cell of wantedTokens) {
+      if (!tokenCells.has(cell)) {
+        cell.setAttribute(tokenAttribute, "");
+        tokenCells.add(cell);
+      }
+    }
+    for (const wrapper of wrappers) {
+      wrapper.setAttribute(measuring, "");
+      tableOf(wrapper)?.setAttribute(measuring, "");
+    }
+    // A table whose minimums fit the column stays in it (LAYOUT-044), whatever its natural width.
+    const stays = new Set<Element>();
+    for (const [wrapper, plan] of plans) {
+      if (tableMinimum(plan) <= column + 1) stays.add(wrapper);
+    }
     const widths = wrappers.map((wrapper) => {
       const image = wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img");
       // An image is capped by the column, so its own size is the natural width: the pixel width
@@ -169,8 +279,12 @@ export function installWidthMode(
       const box = wrapper.getBoundingClientRect?.()?.width ?? 0;
       return Math.ceil(Math.max(wrapper.scrollWidth, declared, intrinsic, box));
     });
-    for (const wrapper of wrappers) wrapper.removeAttribute(measuring);
+    for (const wrapper of wrappers) {
+      wrapper.removeAttribute(measuring);
+      tableOf(wrapper)?.removeAttribute(measuring);
+    }
     wrappers.forEach((wrapper, index) => {
+      if (stays.has(wrapper)) return;
       const room = hasRowHandles(wrapper) ? pane - reserved - handleGutter * 2 : available;
       const extra = widths[index] <= room ? Math.ceil(widths[index] - column) : Math.floor(room - column);
       if (extra <= 1) return;

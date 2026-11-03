@@ -346,8 +346,15 @@ html[data-sphinx-preview-width="auto"] #sphinx-myst-preview-content > [data-sphi
 
 /* The runtime lifts the column cap for a moment to read the natural width of a wide table; it also
    lifts the row-handle cap (edit mode), else the measure would depend on its own result. */
-html[data-sphinx-preview-width="auto"] #sphinx-myst-preview-content > :where(table, .table-wrapper)[data-sphinx-preview-measuring] {
+html[data-sphinx-preview-width="auto"] #sphinx-myst-preview-content :where(table, .table-wrapper)[data-sphinx-preview-measuring] {
   max-width: none !important;
+}
+
+/* Auto: a cell of a token column (inline code, a number, a date, at most three words) never wraps
+   and is as wide as its widest cell, without the 5em floor of the other columns. */
+html[data-sphinx-preview-width="auto"] #sphinx-myst-preview-content :where(th, td)[data-sphinx-preview-token] {
+  min-width: 0;
+  white-space: nowrap;
 }
 
 /* Tables and figures narrower than the column are centred in every width mode, at their own
