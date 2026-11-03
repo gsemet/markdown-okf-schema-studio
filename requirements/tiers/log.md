@@ -2,6 +2,19 @@
 
 ## 2026-11-03
 
+### GitHub Copilot marketplace catalog (CR 255)
+
+- SwRS-MDOKFSTUDIO-CORE-074 (proposed, updated): the packaging also provides the GitHub Copilot
+  catalog `.github/plugin/marketplace.json`, named `markdown-okf-schema-studio` like the Claude Code
+  marketplace, whose single entry points at the repository root (`./`, where the Agent Plugins
+  `plugin.json` lives). New refusal row: the catalog must have the required fields and limits of the
+  Copilot CLI `marketplace.json` reference and no `$schema` key.
+- SwRS-MDOKFSTUDIO-CORE-075 (proposed, updated): `scripts/version.py` also writes the version to the
+  plugin entry of the Copilot catalog, and the version commit contains five files instead of four;
+  the drift check covers the catalog entry.
+- Verification: test/build/test_plugin_manifests.py and test/build/test_release.py fail on the
+  previous code (no catalog file; the version commit does not contain the catalog).
+
 ### An open cell editor stays in view when its table leaves the breakout
 
 - SwRS-MDOKFSTUDIO-TABLE-035: the reveal of the open cell and its editor runs again after every

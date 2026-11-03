@@ -17,7 +17,14 @@ from commitizen.providers.npm_provider import NpmProvider
 # @implements_req SwRS-MDOKFSTUDIO-CORE-075
 # Plugin manifests whose "version" always equals package.json (Claude Code and Agent Plugins).
 PLUGIN_MANIFESTS = ("plugin.json", ".claude-plugin/plugin.json")
-VERSIONED_PATHS = ("package.json", "package-lock.json", *PLUGIN_MANIFESTS)
+# Marketplace catalogs whose plugin entries carry a "version" equal to package.json (GitHub Copilot).
+PLUGIN_CATALOGS = (".github/plugin/marketplace.json",)
+VERSIONED_PATHS = (
+    "package.json",
+    "package-lock.json",
+    *PLUGIN_MANIFESTS,
+    *PLUGIN_CATALOGS,
+)
 
 VERSION = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
 
@@ -36,6 +43,14 @@ def set_manifest_version(path: Path, version: str) -> None:
     manifest = json.loads(path.read_text())
     manifest["version"] = version
     path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+
+
+def set_catalog_version(path: Path, version: str) -> None:
+    """Rewrite the "version" of every plugin entry of a marketplace catalog, keeping key order."""
+    catalog = json.loads(path.read_text())
+    for entry in catalog["plugins"]:
+        entry["version"] = version
+    path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n")
 
 
 def git(*arguments: str) -> str:
@@ -168,6 +183,8 @@ def main() -> int:
         NpmProvider(read_cfg()).set_version(next_version)
         for name in PLUGIN_MANIFESTS:
             set_manifest_version(Path(name), next_version)
+        for name in PLUGIN_CATALOGS:
+            set_catalog_version(Path(name), next_version)
         print(f"Updated npm and plugin versions: {current} -> {next_version}")
         git(
             "commit",

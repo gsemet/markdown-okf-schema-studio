@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- GitHub Copilot CLI now finds the writing skill plugin through its own marketplace catalog, which
+  lists the plugin with its version.
 - A cell editor opened in a table that breaks out of the column stays in view when the table goes
   back into the column for the edit.
 
