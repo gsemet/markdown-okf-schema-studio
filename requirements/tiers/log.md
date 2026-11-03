@@ -2,6 +2,14 @@
 
 ## 2026-11-03
 
+### Restricted Mode images: test gaps (CR 251)
+
+- SwRS-MDOKFSTUDIO-TRUST-002 (proposed, updated): Verification notes reworded (each clause says what it
+  covers) and test/session/baselineDiff.test.ts added to `tested_in_files` (image of the workspace
+  folder in the HEAD text of the side-by-side diff). No behaviour change.
+- Verification: the new test fails when `pagePolicyRoot(preview)` is reverted to
+  `preview.workspaceRoot` in src/session/features/baselineDiff.ts.
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no
