@@ -74,7 +74,11 @@ async function clickPageMargin(page: Page): Promise<void> {
   await waitFor("the content root to hold the focus", async () => (await focusState(page)).active === "main#sphinx-myst-preview-content");
 }
 
-/** Leaves the preview for another editor tab of the same VS Code window and comes back to it. */
+/**
+ * Leaves the preview for another editor tab of the same VS Code window and comes back to it. The
+ * other tab is a plain text file, so the preview keeps its document and its edit mode (another
+ * Markdown document would open in preview mode).
+ */
 async function leaveTabAndReturn(
   page: Page, other: vscode.TextDocument, document: vscode.TextDocument,
 ): Promise<void> {
@@ -95,11 +99,11 @@ async function leaveTabAndReturn(
  */
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
-  const fixture = createFixture("window-switch-keys", { "doc.md": DOCUMENT, "other.md": "# Other\n\nText.\n" });
+  const fixture = createFixture("window-switch-keys", { "doc.md": DOCUMENT, "other.txt": "Other text.\n" });
   try {
     await page.setViewportSize({ width: 1400, height: 900 });
     const document = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("doc.md")));
-    const other = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("other.md")));
+    const other = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("other.txt")));
     await openSidePreview(document);
     await waitForRender(document);
     await setEditMode(page, true);
