@@ -37,7 +37,10 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 
 ## Setup
 
-- Use Node.js 24 from `.nvmrc`; run `uv run` for Python commands.
+- Use Node.js 24 from `.nvmrc`; run `uv run` for Python commands (Python 3.12 from
+  `.python-version`).
+- Windows: `just check` and `just ci-static` work with Git for Windows' `sh`, `bash` and
+  `cygpath` on `PATH`; see "Windows" in CONTRIBUTING.md.
 - `just dev` installs Node.js, JavaScript and Python dependencies, and Playwright Chromium
   (`just install` also works); JavaScript dependencies alone: `fnm exec -- npm ci`.
 - `just update` upgrades dependencies; `just dev-ci` (`just dev-ci visual`) sets up a CI machine
@@ -54,8 +57,8 @@ When two instructions conflict, the higher source wins, and the conflict is repo
   navigation), `just requirements-report` (traceability report in `out/reports/requirements/`)
 - End-to-end tests: `just e2e`; full validation and site generation: `just preflight`
 - CI jobs (in parallel in `.github/workflows/ci.yml`, in sequence in `just preflight`):
-  `just ci-static`, `just ci-visual`, `just ci-integration`, then `just ci-report` and
-  `just ci-gallery`. Push and pull request run only the simulated jobs; the real VS Code jobs
+  `just ci-static` (on Linux and Windows), `just ci-visual`, `just ci-integration`, then
+  `just ci-report` and `just ci-gallery`. Push and pull request run only the simulated jobs; the real VS Code jobs
   (integration, stress with `just ci-stress [REPEAT]`) are manual:
   `gh workflow run ci.yml --ref <branch> -f heavy=true`
 
