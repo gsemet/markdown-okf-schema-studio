@@ -71,6 +71,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-098
 - SwRS-MDOKFSTUDIO-MYST-099
 - SwRS-MDOKFSTUDIO-MYST-100
+- SwRS-MDOKFSTUDIO-MYST-101
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-MYST-002
@@ -154,6 +155,7 @@ Writers want every admonition kind, custom title, dropdown and nesting to look l
   - [SwRS-MDOKFSTUDIO-MYST-098](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-098.md): Tab sets render a tab bar with one panel shown at a time
   - [SwRS-MDOKFSTUDIO-MYST-099](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-099.md): Tabs follow the keyboard and the click
   - [SwRS-MDOKFSTUDIO-MYST-100](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-100.md): Standalone cards show header, title, body and footer
+  - [SwRS-MDOKFSTUDIO-MYST-101](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-101.md): A +++ line inside a container renders as text
 - Supersedes:
   - [StRS-MDOKFSTUDIO-MYST-002](StRS-MDOKFSTUDIO-MYST-002.md): Context tags render as readable panels
   - [StRS-MDOKFSTUDIO-MYST-003](StRS-MDOKFSTUDIO-MYST-003.md): Definition lists and inline text roles are typeset

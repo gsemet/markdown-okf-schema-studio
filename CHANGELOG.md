@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A `+++` line inside a directive, a quote, a list item or an alert no longer breaks the render of the
+  whole document: it shows as text, and only a `+++` line at the root of the document stays a block break.
 - A new Option button in the edit bar (GFM and MyST palettes, next to Checkbox) turns the selected
   lines into an option list `- ( ) ` and back. In the block editor, Enter at the end of an option
   item starts the next line with `- ( ) `, and Enter on an empty option ends the list, as for task
