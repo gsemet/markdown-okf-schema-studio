@@ -22,6 +22,7 @@ import { EDIT_REQUEST_TYPES } from "../../src/session/pageMessages";
 import { PreviewManager } from "../../src/session/previewManager";
 import { createPreviewNavigator } from "../../src/session/previewNavigator";
 import { PreviewSession } from "../../src/session/previewSession";
+import { needsSymlinks } from "../shared/symlinks";
 
 const files = createNodeFileSystem();
 
@@ -586,7 +587,7 @@ test("in a read-only preview only the document's folder is allowed", async () =>
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-094
-test("a symbolic link out of the workspace is blocked", async () => {
+test("a symbolic link out of the workspace is blocked", needsSymlinks, async () => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "toolbar-req-sym-")));
   const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "toolbar-req-out-")));
   try {

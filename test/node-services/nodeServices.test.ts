@@ -7,8 +7,9 @@ import { test } from "node:test";
 import { isFileNotFound, readTextFile } from "../../src/host-api/fileSystem";
 import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 import { createNodeProcessRunner } from "../../src/node-services/processRunner";
+import { needsSymlinks } from "../shared/symlinks";
 
-test("the Node file system reads, writes, lists, renames and resolves links", async (t) => {
+test("the Node file system reads, writes, lists, renames and resolves links", needsSymlinks, async (t) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "okf-node-fs-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const files = createNodeFileSystem();
@@ -67,7 +68,7 @@ test("the Node process runner stops a program on abort", async () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
-test("the Node file system reports a link itself, a dangling one included, and not a missing path", async (t) => {
+test("the Node file system reports a link itself, a dangling one included, and not a missing path", needsSymlinks, async (t) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "okf-node-link-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const files = createNodeFileSystem();

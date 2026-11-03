@@ -24,6 +24,7 @@ import {
 } from "../../../src/core/frontmatter/okfFrontmatter";
 import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
 import { inspectFrontmatterLinks } from "../../../src/core/frontmatter/fileLinks";
+import { needsSymlinks } from "../../shared/symlinks";
 
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-004
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
@@ -826,7 +827,7 @@ test("file-link union applicability preserves boolean local references", () => {
   }
 });
 
-test("filename-stem links recheck symlink containment after an internal target drifts", () => {
+test("filename-stem links recheck symlink containment after an internal target drifts", needsSymlinks, () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-symlink-drift-"));
   const inside = path.join(root, "inside.md");
   const outside = path.join(os.tmpdir(), `okf-link-outside-${process.pid}.md`);
@@ -873,7 +874,7 @@ test("filename-stem links recheck symlink containment after an internal target d
   }
 });
 
-test("filename-stem links report W15 when matching candidates are unavailable", () => {
+test("filename-stem links report W15 when matching candidates are unavailable", needsSymlinks, () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-unavailable-stem-"));
   const source = path.join(root, "source.md");
   const unavailable = path.join(root, "Unavailable.md");

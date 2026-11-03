@@ -11,6 +11,7 @@ import {
   resetPlantUmlProcessSpawnerForTests,
   setPlantUmlProcessSpawnerForTests,
 } from "../../../src/core/render/plantUmlRenderer";
+import { needsSymlinks } from "../../shared/symlinks";
 
 interface Fixture {
   parent: string;
@@ -89,7 +90,7 @@ test("an absolute path into a sibling folder sharing the workspace name prefix i
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-084
-test("a symlink inside the workspace that points out of it is refused", () => {
+test("a symlink inside the workspace that points out of it is refused", needsSymlinks, () => {
   const { parent, root, sibling } = createFixture();
   try {
     fs.symlinkSync(sibling, path.join(root, "link"));

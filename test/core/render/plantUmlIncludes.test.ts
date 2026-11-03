@@ -9,6 +9,7 @@ import {
   resolvePlantUmlInclude,
   type PlantUmlIncludeScope,
 } from "../../../src/core/render/plantUmlIncludes";
+import { needsSymlinks } from "../../shared/symlinks";
 
 /** workspace/{docs/{page.md, styles/common.puml, styles/parts.puml}, shared/theme.puml}, outside/secret.puml */
 function workspace(): { root: string; workspaceRoot: string; documentPath: string; scope: PlantUmlIncludeScope } {
@@ -86,7 +87,7 @@ test("Restricted Mode serves only the document's folder and below", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-053
-test("a missing file is refused and watched, a too large file and a symlink escape are refused", () => {
+test("a missing file is refused and watched, a too large file and a symlink escape are refused", needsSymlinks, () => {
   const { root, documentPath, scope } = workspace();
   const docs = path.dirname(documentPath);
   const missing = resolvePlantUmlInclude({ path: "styles/later.puml", from: null }, scope);

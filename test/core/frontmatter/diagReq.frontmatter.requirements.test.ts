@@ -18,6 +18,7 @@ import {
 import { linkStatusLabel, renderPropertiesTable } from "../../../src/core/frontmatter/propertiesTable";
 import { getResolvedSchema, resetSchemaRegistryForTests } from "../../../src/core/frontmatter/schemaRegistry";
 import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
+import { needsSymlinks } from "../../shared/symlinks";
 
 const roots: string[] = [];
 
@@ -129,7 +130,7 @@ test("an absolute link target is refused with an E10 error in POSIX, drive-lette
   }
 });
 
-test("a bundle-relative target cannot leave its root, by path or through a symbolic link", () => {
+test("a bundle-relative target cannot leave its root, by path or through a symbolic link", needsSymlinks, () => {
   const root = temporaryRoot();
   const bundle = path.join(root, "bundle");
   fs.mkdirSync(path.join(bundle, "docs"), { recursive: true });
