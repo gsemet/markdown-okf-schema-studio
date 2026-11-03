@@ -35,7 +35,7 @@ with `code --install-extension GaetanSemet.markdown-okf-schema-studio`, or by se
 | Family | Syntax rendered |
 | --- | --- |
 | GFM | headings, tables with `:--` `--:` alignment, task lists `- [ ]`, footnotes `[^1]`, alerts `> [!NOTE]` (also TIP, IMPORTANT, WARNING, CAUTION), autolinks, `~~strike~~` |
-| Code | fenced code with a language (highlighted), `{code-block}` with `:caption:`, `:linenos:` |
+| Code | fenced code with a language (highlighted), `{code-block}` with `:caption:`, `:linenos:`, `:emphasize-lines:`, `:name:` |
 | Math | `$x^2$`, `$$ ... $$`, `{math}` |
 | Admonitions | `:::{note}` `tip` `warning` `important` `danger` ... with an optional title; fold with `:class: dropdown`; `{versionadded}` `{versionchanged}` `{deprecated}` |
 | Layout | `{card}` (`:header:` `:footer:`), `{grid}` + `{grid-item-card}`, `{tab-set}` + `{tab-item}`, `{figure}`, `{list-table}` |

@@ -664,6 +664,17 @@ export const PALETTE_ACTIONS = {
     modes: ["myst"],
     scopes: ["block", "cell"],
   },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-272
+  codeBlock: {
+    slash: { aliases: ["code-block", "codeblock", "linenos", "emphasize"] },
+    label: "Code-block (MyST)",
+    title: "Code-block directive (language, line numbers, emphasized lines, caption, name; with the caret in one, edit it)",
+    icon: "codeBlock",
+    group: "myst",
+    modes: ["myst"],
+    scopes: ["block"],
+    panel: "codeBlock",
+  },
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-265
   vegaLite: {
     slash: { aliases: ["chart", "vega-lite", "vegalite", "plot", "graph"] },

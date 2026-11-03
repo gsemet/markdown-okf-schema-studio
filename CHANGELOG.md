@@ -14,6 +14,10 @@
   small form: the card title, header, footer and link, or the grid columns, gutter, number of
   cards and the header, footer and link of each card. Insert writes the `{card}` or `{grid}` with
   `{grid-item-card}` directives.
+- A new Code-block (MyST) button in the edit bar (MyST palette, after Key) opens a form for the
+  language, line numbers, emphasized lines, caption and name of a `{code-block}` directive. With the
+  caret in a directive it edits that block's options and leaves the other options and the code
+  untouched; elsewhere it inserts a new directive.
 - A new Option button in the edit bar (GFM and MyST palettes, next to Checkbox) turns the selected
   lines into an option list `- ( ) ` and back. In the block editor, Enter at the end of an option
   item starts the next line with `- ( ) `, and Enter on an empty option ends the list, as for task

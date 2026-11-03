@@ -202,7 +202,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
       "rule", "toc", "table",
       "emoji", "todo", "comment", "thread", "alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
-      "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd", "vegaLite", "vega",
+      "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd", "codeBlock", "vegaLite", "vega",
     ],
   );
   for (const action of registry.actions) {
@@ -213,7 +213,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
       "alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     ].includes(action.id);
     const myst = ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
-      "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd"].includes(action.id);
+      "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd", "codeBlock"].includes(action.id);
     const full = ["vegaLite", "vega"].includes(action.id);
     assert.deepEqual(action.modes, full ? ["full"] : myst ? ["myst"] : github ? ["gfm"] : ["strict"], action.id);
     if (action.slash?.menuOnly) assert.equal(action.shortcut, undefined, "no shortcut: " + action.id);
