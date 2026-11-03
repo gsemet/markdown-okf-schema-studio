@@ -675,10 +675,13 @@ export const EDIT_PALETTE_CSS = `
   cursor: pointer;
 }
 
-.sphinx-preview-link-panel-actions > button[data-link-action="insert"] {
+.sphinx-preview-link-panel-actions > button[data-link-action="insert"],
+.sphinx-preview-link-panel-actions > button[data-directive-action="insert"] {
   background: var(--studio-button-background, Highlight);
   color: var(--studio-button-foreground, HighlightText);
 }
+
+.sphinx-preview-link-panel > [data-directive-status]:not(:empty) { flex: 1 1 100%; color: var(--studio-errorForeground, #c62828); }
 
 .sphinx-preview-link-panel-actions > button:focus-visible {
   outline: 1px solid var(--studio-focusBorder, Highlight);

@@ -22,7 +22,7 @@ test("the registry lists every palette action once, in display order", () => {
     "bulletList", "numberedList", "quote", "rule", "toc", "table", "emoji", "todo", "comment", "thread",
     "alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
-    "tableCaption", "listTable", "pipeTable", "figure", "roleKbd", "vegaLite", "vega",
+    "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd", "vegaLite", "vega",
   ]);
 });
 

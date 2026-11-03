@@ -58,6 +58,8 @@ export const PALETTE_ICONS = {
   kbd: svg("M3 7h18v10H3zM7 11h.5M11 11h.5M15 11h.5M8 14h8"),
   ref: svg("M9 8H7a4 4 0 0 0 0 8h2M15 8h2a4 4 0 0 1 0 8h-2M8 12h8") + caret,
   image: svg("M4 5h16v14H4zM4 16l5-5 4 4 2-2 5 5M15 9.5v.5"),
+  card: svg("M5 5h14v14H5zM5 10h14M8 14h8"),
+  grid: svg("M4 5h7v6H4zM13 5h7v6h-7zM4 13h7v6H4zM13 13h7v6h-7z"),
   figure: svg("M4 4h16v11H4zM4 15l4.5-4.5 3.5 3.5 2-2 6 3M7 19h10"),
   doc: svg("M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"),
   cite: glyph("cite", "\u201c") + caret,

@@ -229,7 +229,9 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
           blockEditor.autosaveBlockEdit();
         };
         if ((panelName ?? action.panel) === "link") editorChrome.openLinkPanel(textarea, onFallbackInput);
-        else if (panelName === "figure") editorChrome.openFigurePanel(textarea, onFallbackInput, false, focus);
+        else if (action.panel === "card" || action.panel === "grid") {
+          editorChrome.openDirectivePanel(textarea, onFallbackInput, action.panel);
+        } else if (panelName === "figure") editorChrome.openFigurePanel(textarea, onFallbackInput, false, focus);
       },
       caretInside: (kind) => kind === "figure"
         && figureTools.locateFigure(String(textarea.value ?? ""), Number(textarea.selectionStart)) !== undefined,

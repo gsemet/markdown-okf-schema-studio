@@ -866,3 +866,103 @@ test("CR 145: Ctrl+Shift+V, other schemes, other text and rich text keep their o
   textarea.dispatch("paste", rich.event);
   assert.equal(harness.messages.at(-1)!.type, "previewPasteHtml", "rich text still goes to the host");
 });
+
+// Card and grid forms: the toolbar buttons and the slash menu open a form that writes the directive.
+function directivePanelOf(harness: RuntimeHarness, kind: string): RuntimeElement | undefined {
+  return harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-directive-panel") === kind && !element.removed);
+}
+
+function directiveField(harness: RuntimeHarness, name: string): RuntimeElement {
+  const field = harness.createdElements.find((element) =>
+    element.getAttribute("data-directive-field") === name && !element.removed);
+  assert.ok(field, "directive field " + name);
+  return field;
+}
+
+function directiveAction(harness: RuntimeHarness, name: string): RuntimeElement {
+  const button = harness.createdElements.find((element) =>
+    element.getAttribute("data-directive-action") === name && !element.removed);
+  assert.ok(button, "directive action " + name);
+  return button;
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270
+test("CR245: the Card button opens the card form and Insert writes the directive", () => {
+  const { harness, textarea } = figureHarness("Intro.", 6);
+  assert.equal(directivePanelOf(harness, "card"), undefined);
+  paletteButton(harness, "card").dispatch("click", paletteClick);
+  const panel = directivePanelOf(harness, "card");
+  assert.ok(panel, "the form opens");
+  assert.equal(panel.parentElement, textarea.parentElement);
+  directiveField(harness, "title").value = "Decision";
+  directiveField(harness, "header").value = "Accepted";
+  directiveField(harness, "link").value = "https://example.org";
+  directiveAction(harness, "insert").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(directivePanelOf(harness, "card"), undefined, "the form closes");
+  assert.match(
+    textarea.value,
+    /^Intro\.\n\n:::\{card\} Decision\n:header: Accepted\n:link: https:\/\/example\.org\n\nContent\n:::/u,
+  );
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270
+test("CR245: Escape closes the card form and leaves the text unchanged", () => {
+  const { harness, textarea } = figureHarness("Intro.", 6);
+  paletteButton(harness, "card").dispatch("click", paletteClick);
+  directiveField(harness, "title").dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(directivePanelOf(harness, "card"), undefined);
+  assert.equal(textarea.value, "Intro.");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+test("CR245: the Grid button opens the grid form; a bad value keeps it open, a good one writes the grid", () => {
+  const { harness, textarea } = figureHarness("Intro.", 6);
+  paletteButton(harness, "grid").dispatch("click", paletteClick);
+  assert.ok(directivePanelOf(harness, "grid"), "the form opens");
+  directiveField(harness, "columns").value = "1 2 3 3";
+  directiveField(harness, "cards").value = "40";
+  directiveAction(harness, "insert").dispatch("click", { preventDefault: () => undefined });
+  assert.ok(directivePanelOf(harness, "grid"), "the form stays open");
+  assert.equal(textarea.value, "Intro.");
+  directiveField(harness, "cards").value = "3";
+  directiveAction(harness, "insert").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(directivePanelOf(harness, "grid"), undefined);
+  assert.match(textarea.value, /^Intro\.\n\n::::\{grid\} 1 2 3 3\n:gutter: 2\n\n:::\{grid-item-card\} Card 1\n/u);
+  assert.equal(textarea.value.match(/\{grid-item-card\}/gu)?.length, 3);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+test("CR245: the slash menu opens the card and the grid forms and removes the typed query", () => {
+  for (const [query, kind] of [["/card", "card"], ["/grid", "grid"]] as const) {
+    const { harness, textarea } = figureHarness("Intro.\n", 7);
+    textarea.value = "Intro.\n/";
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+    textarea.dispatch("input", { data: "/", inputType: "insertText" });
+    textarea.value = "Intro.\n" + query;
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+    textarea.dispatch("input", { data: query.slice(-1), inputType: "insertText" });
+    textarea.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+    assert.ok(directivePanelOf(harness, kind), "the " + kind + " form opens");
+    assert.equal(textarea.value, "Intro.\n", "the query is removed");
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+test("CR245: the grid form has per-card header, footer and link fields; too many entries keep it open", () => {
+  const { harness, textarea } = figureHarness("Intro.", 6);
+  paletteButton(harness, "grid").dispatch("click", paletteClick);
+  directiveField(harness, "cards").value = "2";
+  directiveField(harness, "headers").value = "Alpha|Beta|Gamma";
+  directiveAction(harness, "insert").dispatch("click", { preventDefault: () => undefined });
+  assert.ok(directivePanelOf(harness, "grid"), "the form stays open");
+  assert.equal(textarea.value, "Intro.");
+  directiveField(harness, "headers").value = "Alpha|Beta";
+  directiveField(harness, "footers").value = "|End";
+  directiveField(harness, "links").value = "https://example.org";
+  directiveAction(harness, "insert").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(directivePanelOf(harness, "grid"), undefined);
+  assert.match(textarea.value, /:::\{grid-item-card\} Card 1\n:header: Alpha\n:link: https:\/\/example\.org\n\nContent/u);
+  assert.match(textarea.value, /:::\{grid-item-card\} Card 2\n:header: Beta\n:footer: End\n\nContent/u);
+});

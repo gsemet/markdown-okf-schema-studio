@@ -633,6 +633,28 @@ export const PALETTE_ACTIONS = {
     hostDialog: "image",
     panelWhenInside: "figure",
   },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-270
+  card: {
+    slash: { aliases: ["panel", "box", "tile"] },
+    label: "Card",
+    title: "Card (title, header, footer and link)",
+    icon: "card",
+    group: "myst",
+    modes: ["myst"],
+    scopes: ["block"],
+    panel: "card",
+  },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-271
+  grid: {
+    slash: { aliases: ["columns", "column", "cards", "layout"] },
+    label: "Grid",
+    title: "Grid of cards (columns, gutter, number of cards and each card header, footer and link)",
+    icon: "grid",
+    group: "myst",
+    modes: ["myst"],
+    scopes: ["block"],
+    panel: "grid",
+  },
   roleKbd: {
     slash: { aliases: ["key", "kbd", "keyboard"] },
     label: "Key (MyST)",
