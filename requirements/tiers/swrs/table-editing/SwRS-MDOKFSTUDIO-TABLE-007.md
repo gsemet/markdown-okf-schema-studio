@@ -26,6 +26,7 @@ tested_in_files:
 - test/integration/tableMoves.ts
 - test/page/modules/tableColumnMove.test.ts
 - test/page/runtimeTableRowMove.test.ts
+- test/visual/breakoutHandleScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -61,6 +62,7 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | Edit mode on, a pipe table or a `{list-table}` of at least two columns | Each column shows the handle of the frontmatter list editor, turned (named "Move table column"), just above the table, outside its cells and horizontally centred on the column, header or not; a table of one body row has these handles too |
 | The bar of an open cell editor above the table | The bar leaves the room of the handles between it and the table |
 | The page is resized, the zoom changes or a table scrolls sideways | The handles follow the header cells |
+| A table that breaks out of the margin (Auto width), or that returns to the column, after the handles were placed or after a column move rendered the page again | The handles are placed again on the top of each column of the table as laid out now |
 | Edit mode switched off | The handles are gone |
 | A click on a handle | No cell editor opens |
 

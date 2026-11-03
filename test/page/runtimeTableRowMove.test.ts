@@ -622,3 +622,85 @@ test("a row handle drags over the handle strip: the marker is on the nearest gap
   assert.ok(save);
   assert.equal(save.editedText, "| H1 | H2 |\n| --- | --- |\n| b | 2 |\n| c | 3 |\n| a | 1 |\n");
 });
+
+/**
+ * A table that breaks out of the column in Auto: before the breakout it is narrow and its cells
+ * wrap (taller rows, 700 px wide at 150); once broken out it is 900 px wide at 40 and its rows are
+ * 30 px high. The boxes are read from the breakout attribute, like the browser lays them out.
+ */
+function breakoutTable(harness: ReturnType<typeof createRuntimeHarness>, bodyRows = 3): FakeTable {
+  harness.previewContent.clientWidth = 700;
+  harness.documentElement.clientWidth = 1000;
+  const fake = pipeTable(harness, bodyRows);
+  fake.table.scrollWidth = 900;
+  harness.previewContent.appendChild(fake.table);
+  const wide = (): boolean => fake.table.getAttribute("data-sphinx-preview-wide") !== null;
+  const rowTop = (index: number): number => 100 + (wide() ? 30 : 46) * index;
+  const rowHeight = (): number => (wide() ? 30 : 46);
+  fake.table.rectProvider = () => ({
+    top: 100, height: rowHeight() * (bodyRows + 1), left: wide() ? 40 : 150, width: wide() ? 900 : 700,
+  });
+  fake.rows.forEach((row, index) => {
+    row.rectProvider = () => ({ top: rowTop(index), height: rowHeight(), left: wide() ? 40 : 150, width: 700 });
+    row.cells!.forEach((cell: RuntimeElement, column: number) => {
+      cell.rectProvider = () => ({
+        top: rowTop(index), height: rowHeight(), left: (wide() ? 40 : 150) + 300 * column, width: 300,
+      });
+    });
+  });
+  return fake;
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+test("the handles of a table that breaks out of the column follow its real edges", () => {
+  const harness = createRuntimeHarness();
+  const { table, cells, rows } = breakoutTable(harness);
+  harness.editModeButton.dispatch("click");
+  const margin = handleOf(cells[1]!)!;
+  assert.equal(margin.style.getPropertyValue("left"), "146px", "in the column: at the table's left edge");
+  // The width mode breaks the table out after the handles were placed (as after a row move render).
+  harness.widthButton.dispatch("click");
+  assert.equal(table.getAttribute("data-sphinx-preview-wide"), "", "the table breaks out in Auto");
+  harness.flushFrames();
+  for (const cell of cells.slice(1)) {
+    const handle = handleOf(cell)!;
+    const rectangle = cell.parentElement!.getBoundingClientRect();
+    assert.equal(handle.style.getPropertyValue("left"), "36px", "the real left edge of the broken-out table");
+    assert.equal(handle.style.getPropertyValue("top"), (rectangle.top + rectangle.height / 2) + "px",
+      "centred on its row");
+  }
+  const columnHandles = harness.createdElements.filter((element) => element.getAttribute("data-okf-col-handle") !== null
+    && !element.parentElement?.removed);
+  assert.equal(columnHandles.length, 2);
+  columnHandles.forEach((handle) => {
+    const header = rows[0]!.cells![Number(handle.getAttribute("data-okf-col"))]!.getBoundingClientRect();
+    assert.equal(handle.style.getPropertyValue("left"), Math.round(header.left! + header.width! / 2) + "px",
+      "centred on its column");
+    assert.equal(handle.style.getPropertyValue("top"), (header.top - 2) + "px", "on the top of the column");
+  });
+  // Back in the column: the handles come back to its edge.
+  harness.widthButton.dispatch("click");
+  harness.widthButton.dispatch("click");
+  assert.equal(table.getAttribute("data-sphinx-preview-wide"), null);
+  assert.equal(handleOf(cells[1]!)!.style.getPropertyValue("left"), "146px");
+  assert.equal(handleOf(cells[2]!)!.style.getPropertyValue("top"), (100 + 46 * 2 + 23) + "px");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+test("the handles of a table that stays in the column sit on its edge in Auto", () => {
+  const harness = createRuntimeHarness();
+  const { table, cells } = pipeTable(harness);
+  table.scrollWidth = 200;
+  harness.previewContent.appendChild(table);
+  harness.previewContent.clientWidth = 700;
+  harness.documentElement.clientWidth = 1000;
+  harness.widthButton.dispatch("click");
+  harness.editModeButton.dispatch("click");
+  harness.widthButton.dispatch("click");
+  harness.widthButton.dispatch("click");
+  harness.widthButton.dispatch("click");
+  assert.equal(table.getAttribute("data-sphinx-preview-wide"), null);
+  assert.equal(handleOf(cells[1]!)!.style.getPropertyValue("left"), "-4px");
+  assert.equal(handleOf(cells[1]!)!.style.getPropertyValue("top"), "145px");
+});

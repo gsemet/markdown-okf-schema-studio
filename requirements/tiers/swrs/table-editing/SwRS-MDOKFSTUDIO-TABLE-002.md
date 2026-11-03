@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/modules/listTableRowMove.test.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/runtimeTableRowMove.test.ts
+- test/visual/breakoutHandleScenarios.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -76,6 +77,7 @@ The chord is not also read as the move of the whole table block.
 | A table with less than a handle's width of room on its left (it fills the column in a narrow pane) | The table is pushed right by a handle's width, so every handle stays in the pane and is never clipped |
 | A table wider than the pane, which scrolls sideways | The handles stay left of the table, outside its scrolling box, at the height of their row |
 | A row that wraps onto several lines | Its handle is centred on the whole row |
+| A table that breaks out of the margin (Auto width), or that returns to the column, after the handles were placed or after a row move rendered the page again | The handles are placed again on the table's real left edge, at the height of their row as laid out now, never at the place of the narrower table |
 | The page is resized or the zoom changes | The handles follow their rows |
 | Edit mode switched off | The handles are gone and a pushed table returns to its place |
 | A click on a handle | No cell editor opens |
