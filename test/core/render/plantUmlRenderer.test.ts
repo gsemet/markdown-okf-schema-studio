@@ -463,14 +463,19 @@ test("the JAR and the PATH command run under the allowlist security profile with
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-084
 test("java is taken from JAVA_HOME when it holds a binary, else from the PATH", () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), "markdown-okf-java-home-"));
+  // Below the working directory: a temporary folder on another Windows drive has no relative path.
+  const relativeHome = fs.mkdtempSync(path.join("out", "markdown-okf-java-home-"));
   try {
     assert.equal(resolveJavaCommand({ JAVA_HOME: home }, "linux"), "java");
-    fs.mkdirSync(path.join(home, "bin"));
-    fs.writeFileSync(path.join(home, "bin", "java"), "");
+    for (const directory of [home, relativeHome]) {
+      fs.mkdirSync(path.join(directory, "bin"));
+      fs.writeFileSync(path.join(directory, "bin", "java"), "");
+    }
     assert.equal(resolveJavaCommand({ JAVA_HOME: home }, "linux"), path.join(home, "bin", "java"));
     assert.equal(resolveJavaCommand({}, "linux"), "java");
-    assert.equal(resolveJavaCommand({ JAVA_HOME: path.relative(process.cwd(), home) }, "linux"), "java");
+    assert.equal(resolveJavaCommand({ JAVA_HOME: relativeHome }, "linux"), "java");
   } finally {
     fs.rmSync(home, { recursive: true, force: true });
+    fs.rmSync(relativeHome, { recursive: true, force: true });
   }
 });
