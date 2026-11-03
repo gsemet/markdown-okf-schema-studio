@@ -85,6 +85,18 @@ const isMac = (window: Window): boolean => /Mac|iPhone|iPad/u.test(window.naviga
 const isEditingField = (target: Element | undefined): boolean => target !== undefined
   && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || (target as HTMLElement).isContentEditable === true);
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-132
+/**
+ * True for a key that edits or moves inside a text field on its own: the primary-key chords select
+ * all, copy, cut, paste, undo and redo, and the caret keys (arrows, Home, End, Backspace, Delete)
+ * with or without Shift, Alt or the primary key (word and line moves, delete a word).
+ */
+const isNativeTextKey = (event: KeyboardEvent, command: boolean): boolean => {
+  if (event.isComposing) return false;
+  if (/^(Arrow(Left|Right|Up|Down)|Home|End|Backspace|Delete)$/u.test(event.key)) return true;
+  return command && !event.altKey && /^[acxvzy]$/iu.test(event.key);
+};
+
 /**
  * The text selected inside a text field (`document.getSelection()` does not see into one), or
  * undefined when `element` is not a text field or nothing is selected in it.
@@ -573,8 +585,13 @@ export function installFindBar(
         event.preventDefault();
         event.stopPropagation();
         toggleOption(name);
+        return;
       }
     }
+    // The native editing keys of a field act on the field alone. VS Code's webview forwards every
+    // key it sees to the workbench (select all would select the text editor, undo and redo run its
+    // own history), so the key stops here and its default action, which is not prevented, runs.
+    if (inField && isNativeTextKey(event, command)) event.stopPropagation();
   };
 
   const api: FindBar = {
