@@ -80,13 +80,12 @@ from capture_layout_checks import (
   check_paste_image,
   check_paste_rich_text,
   check_preview_toolbar,
-  check_toc_column,
-  check_toc_shot,
   check_top_spacing,
   check_update_glow,
   check_width_mode_break,
   check_width_modes,
 )
+from capture_toc_checks import check_toc_column, check_toc_shot
 from capture_comment_checks import (
   FIRST_GAP_REPORT_DIR,
   check_code_copy,

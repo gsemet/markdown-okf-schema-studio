@@ -26,7 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/modules/tocColumn.test.ts
-- test/visual/capture_layout_checks.py
+- test/visual/capture_toc_checks.py
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -77,7 +77,7 @@ When the reading line passes a heading, the extension SHALL mark the entry of th
 ### Verification notes
 - Method: test/page/modules/tocColumn.test.ts (Reading and Fractional top: the current entry follows the reading line and is marked aria-current, and a heading revealed at the reading line becomes current despite a fractional top; Folded parent: a collapsed parent carries the highlight of a hidden current section; The column scrolls itself: the TOC scrolls itself, not the page, to keep the current entry visible; Click: clicking an entry scrolls to its heading and does not navigate; Click right after a content update: a click right after a content patch scrolls to the live heading). The removed-heading fallback is untested.
 - Method: test/core/preview/previewStyles.test.ts (The current entry is readable: T16b, only the current TOC entry loses its rounded corners, asserting border-radius 0 and the 3 px bar).
-- Method: test/visual/capture_layout_checks.py (check_toc_column: exactly one current entry and its contrast on toolbar-navigation/v22 to v27; the current entry is inside the column; the page scrolls after the click).
+- Method: test/visual/capture_toc_checks.py (check_toc_column: exactly one current entry and its contrast on toolbar-navigation/v22 to v27; the current entry is inside the column; the page scrolls after the click).
 - Criteria: one entry carries aria-current location and data-sphinx-preview-toc-current; nav.scrollTop changes by the overflow of the entry and the window scroll is untouched; contrast >= 4.5 and border-radius 0; scrollToHeading is called with the heading and no previewLink is posted; the live heading by key, else the heading captured at build time.
 
 <!-- okf:links:start -->

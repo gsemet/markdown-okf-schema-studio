@@ -9,6 +9,7 @@ export interface TocColumnContext {
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-133
 /**
  * TOC column: a right-hand column below the toolbar that lists the h1-h4 headings of the content.
  * The column is runtime UI appended to the body (never part of the page shell) and is
@@ -137,10 +138,17 @@ export function installTocColumn(
     }
     return made;
   };
-  // Escape closes the overlay wherever the focus is (the pointer alone can have opened it); the
-  // focus goes back to the rail only when it was inside.
+  // Escape closes the overlay when it comes from the overlay, from the rail or from no focused
+  // element (the pointer alone can have opened it). A key typed in the text or in a field, or
+  // already consumed by another handler, is not ours: it stays with its owner. The focus goes back
+  // to the rail only when it was inside.
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-133
   window.addEventListener?.("keydown", (event) => {
-    if ((event as KeyboardEvent).key !== "Escape" || !overlayOpen) return;
+    const key = event as KeyboardEvent;
+    if (key.key !== "Escape" || !overlayOpen || key.defaultPrevented) return;
+    const target = key.target as Element | null | undefined;
+    const unfocused = !target || target === document.body || target === document.documentElement;
+    if (!unfocused && !target.closest?.("[data-sphinx-preview-toc], [data-sphinx-preview-toc-rail]")) return;
     event.preventDefault?.();
     const hadFocus = focusInside;
     closeNow();

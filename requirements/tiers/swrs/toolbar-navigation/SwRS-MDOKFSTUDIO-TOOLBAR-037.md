@@ -28,7 +28,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/modules/tocColumn.test.ts
-- test/visual/capture_layout_checks.py
+- test/visual/capture_toc_checks.py
 - test/visual/capture_toc_rail.py
 default_owner_email: gaetan@xeberon.net
 ---
@@ -37,7 +37,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the column is open, the extension SHALL place it eight pixels below the toolbar and, on a pane of at least 760 pixels, show it as a fixed 240 pixel column 16 pixels from the right edge with 256 pixels reserved from the content so that the text and the tables stay clear of it, and on a narrower pane show a rail on the right with one tick per heading instead, the tick of the section at the reading line being highlighted. While the pointer or the keyboard focus is on the rail or on the overlay, the extension SHALL show the column as an overlay above the text without reserving width; it SHALL close the overlay 300 ms after both have left, or at once on Escape (the focus returns to the rail), or when an entry of the overlay is clicked or the TOC is turned off. The rail is focusable, the overlay stays the navigation landmark Table of contents, a click on a tick goes to its heading, and the overlay appears without animation.
+When the column is open, the extension SHALL place it eight pixels below the toolbar and, on a pane of at least 760 pixels, show it as a fixed 240 pixel column 16 pixels from the right edge with 256 pixels reserved from the content so that the text and the tables stay clear of it, and on a narrower pane show a rail on the right with one tick per heading instead, the tick of the section at the reading line being highlighted. While the pointer or the keyboard focus is on the rail or on the overlay, the extension SHALL show the column as an overlay above the text without reserving width; it SHALL close the overlay 300 ms after both have left, or at once on Escape (the focus returns to the rail; the key is taken only when it comes from the overlay, the rail or no focused element, see SwRS-MDOKFSTUDIO-TOOLBAR-133), or when an entry of the overlay is clicked or the TOC is turned off. The rail is focusable, the overlay stays the navigation landmark Table of contents, a click on a tick goes to its heading, and the overlay appears without animation.
 
 ### Scenario (nominal): Top edge follows the toolbar
 | Input | Outcome |
@@ -56,7 +56,7 @@ When the column is open, the extension SHALL place it eight pixels below the too
 | --- | --- |
 | Exactly 760 px with the column open | The column is shown |
 | 900 px with the column open | The column is shown (240 px wide, 16 px from the right edge, 256 px reserved) |
-| 460 px with the button pressed | The root attribute is open, the button is pressed, the rail is displayed, the column is not displayed until the rail is hovered or focused and the content right edge did not move |
+| 460 px with the button pressed | The root attribute is open, the button is pressed, the rail is displayed, the column is not displayed until the rail is hovered or focused and the content right edge moved in by the 16 px of the rail only |
 | The 460 px pane resized to 900 px | The column shows without a new press and the rail goes |
 
 ### Scenario (nominal): Narrow pane rail and overlay
@@ -80,6 +80,7 @@ When the column is open, the extension SHALL place it eight pixels below the too
 - THEN the content still ends before the column and does not scroll sideways
 
 ### Related requirements
+- SwRS-MDOKFSTUDIO-TOOLBAR-133: the 16 px padding for the rail, the overlay offset under the tooltips and the Escape scope.
 - SwRS-MDOKFSTUDIO-LAYOUT-023: Auto width is specified there, not here.
 
 ### Verification notes
@@ -87,7 +88,7 @@ When the column is open, the extension SHALL place it eight pixels below the too
 - Method: test/page/modules/tocColumn.test.ts (the rail ticks and the current tick; hover and focus open the overlay and the 300 ms close; Escape; a click on a tick; an entry click and the toggle close the overlay).
 - Method: test/core/preview/previewStyles.test.ts (a narrow pane shows a rail and opens the column as an overlay: the max-width 759 px block, the fixed rail, the overlay attribute, no animation).
 - Method: test/core/preview/previewStyles.test.ts (Wide pane and Pane width: the TOC column is hidden by default, reserves 256px when open and hides on narrow panes; the 760 px media block, 256 px, position fixed, inset-block-end 16px, width 240px, display none under 760 px). The exact 760 px boundary and the widening of the pane are untested.
-- Method: test/visual/capture_layout_checks.py (check_toc_column: the column starts at least 7 px under the toolbar bottom; check_toc_column and check_toc_shot on scenarios toolbar-navigation/v22 to v27 for the wide pane, Margin, Full width and zoom 200, light 900 px and dark 1600 px; v28 and v29 for the narrow pane: the column hidden at rest, the rail displayed, the same content width, the button still pressed, and the overlay opened by a hover on the rail).
+- Method: test/visual/capture_toc_checks.py (check_toc_column: the column starts at least 7 px under the toolbar bottom; check_toc_column and check_toc_shot on scenarios toolbar-navigation/v22 to v27 for the wide pane, Margin, Full width and zoom 200, light 900 px and dark 1600 px; v28 and v29 for the narrow pane: the column hidden at rest, the rail displayed, the content narrowed by the 16 px of the rail only, the button still pressed, and the overlay opened by a hover on the rail).
 - Criteria: --sphinx-preview-toc-top = toolbar bottom + 8, or 8; --sphinx-preview-toc-reserve is 256px at 760 px or more; nav width 240 px, inset-inline-end 16 px; display none under 760 px at rest, a rail of 16 px under 760 px, and padding on the body only from 760 px; columnRight <= nav.left + 1 and overflowX <= 1 for margin, full and zoom 200.
 
 <!-- okf:links:start -->

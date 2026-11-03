@@ -962,6 +962,15 @@ test("a narrow pane with the TOC on shows a rail and opens the column as an over
   assert.doesNotMatch(media, /animation|transition/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-133
+test("a narrow pane with the TOC on pads the content for the 16px rail and keeps the overlay under the toolbar tooltip", () => {
+  const css = PREVIEW_THEME_CSS;
+  const media = css.match(/@media \(max-width: 759px\) \{[\s\S]*?\n\}\n/u)?.[0] ?? "";
+  assert.match(media, /html\[data-sphinx-preview-toc="open"\] \{\s*--sphinx-preview-toc-reserve: 16px;/u);
+  assert.match(media, /html\[data-sphinx-preview-toc="open"\] body \{\s*padding-inline-end: var\(--sphinx-preview-toc-reserve\)/u);
+  assert.match(media, /nav\[data-sphinx-preview-toc\]\[data-sphinx-preview-toc-overlay="open"\] \{[^}]*inset-block-start: calc\(var\(--sphinx-preview-toc-top, 96px\) \+ 40px\);/u);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-143
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
 test("T15: an open comment is an admonition-like box and showComments off hides the gray chips only", () => {
