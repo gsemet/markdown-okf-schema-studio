@@ -2,13 +2,14 @@
 
 ## Unreleased
 
+## 1.3.1 - 2026-11-03
+
+Version 1.3.0 was not published: its release checks failed. Its changes ship in 1.3.1.
+
 - GitHub Copilot CLI now finds the writing skill plugin through its own marketplace catalog, which
   lists the plugin with its version.
 - A cell editor opened in a table that breaks out of the column stays in view when the table goes
   back into the column for the edit.
-
-## 1.3.0 - 2026-11-03
-
 - On a narrow pane the table of contents, when its toolbar toggle is on, shows as a thin rail on the
   right with one tick per heading and the current section highlighted; hovering or focusing the rail
   opens the table of contents above the text, and a click on a tick goes to that heading. Wide panes
