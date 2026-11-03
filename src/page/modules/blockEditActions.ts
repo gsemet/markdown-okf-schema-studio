@@ -4,7 +4,7 @@
  * dropdowns and Mermaid diagrams.
  */
 
-import { ADMONITION_TYPES, ALERT_TYPES } from "../../core/palette/paletteActions";
+import { ADMONITION_TYPES, ALERT_TYPES, VERSION_ADMONITION_TYPES } from "../../core/palette/paletteActions";
 import { blockQuoteAround } from "../../core/syntax/blockQuoteRange";
 import {
   editLinePrefixes,
@@ -359,16 +359,20 @@ export function insertFootnote(ctx: EditActionContext): TextEdit | undefined {
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-127
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-130
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-268
 /**
  * Wraps the touched lines in a MyST colon-fence admonition (`:::{type}`), or inserts an empty one;
- * "custom" writes `{admonition} Title` with a `:class:`. The outer fence is one colon longer than
+ * "custom" writes `{admonition} Title` with a `:class:`, and a version admonition writes
+ * `{versionadded} 1.0` with the version selected. The outer fence is one colon longer than
  * the longest colon fence inside.
  */
 export function insertAdmonition(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
   const type = ctx.arg;
-  if (type === undefined || (type !== "custom" && !ADMONITION_TYPES.includes(type))) return undefined;
+  const versioned = type !== undefined && VERSION_ADMONITION_TYPES.includes(type);
+  if (type === undefined || (type !== "custom" && !versioned && !ADMONITION_TYPES.includes(type))) return undefined;
   const custom = type === "custom";
+  const select = custom || versioned;
   const selected = ctx.selectionStart !== ctx.selectionEnd;
   const { firstStart, lastEnd, lines } = touchedLines(ctx);
   let longest = 2;
@@ -379,20 +383,23 @@ export function insertAdmonition(ctx: EditActionContext): TextEdit | undefined {
     }
   }
   const colons = ":".repeat(longest + 1);
-  const head = colons + (custom ? "{admonition} Title\n:class: note\n\n" : "{" + type + "}\n");
+  const head = colons + (versioned
+    ? "{" + type + "} 1.0\n"
+    : custom ? "{admonition} Title\n:class: note\n\n" : "{" + type + "}\n");
   const body = selected ? lines.join("\n") : "";
   const text = head + (selected ? body + "\n" : custom ? "" : "\n") + colons;
-  const titleAt = head.indexOf("Title");
+  const titleAt = versioned ? head.indexOf("1.0") : head.indexOf("Title");
+  const titleLength = versioned ? 3 : 5;
   if (selected) {
     return {
       start: firstStart,
       end: lastEnd,
       text,
-      selectionStart: firstStart + (custom ? titleAt : head.length),
-      selectionEnd: firstStart + (custom ? titleAt + 5 : head.length + body.length),
+      selectionStart: firstStart + (select ? titleAt : head.length),
+      selectionEnd: firstStart + (select ? titleAt + titleLength : head.length + body.length),
     };
   }
-  return insertBlockAt(ctx, text, custom ? titleAt : head.length, custom ? 5 : 0);
+  return insertBlockAt(ctx, text, select ? titleAt : head.length, select ? titleLength : 0);
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-132

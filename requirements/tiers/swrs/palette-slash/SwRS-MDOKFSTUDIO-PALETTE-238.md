@@ -72,7 +72,7 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 | --- | --- |
 | Heading 1 to Heading 5 and Paragraph | run Heading with the argument that choosing the same option in the Heading popover gives |
 | one Alert per type | run Alert with the argument of the same option in the Alert popover |
-| one admonition per type | run Admonition with the argument of the same option in the Admonition popover |
+| one admonition per type | run Admonition with the argument of the same option in the Admonition popover, plus the version admonitions (see SwRS-MDOKFSTUDIO-PALETTE-268) |
 | the pickers Alert, Admonition and Code block | stay listed |
 
 ### Scenario (boundary): The Key commands in MyST mode

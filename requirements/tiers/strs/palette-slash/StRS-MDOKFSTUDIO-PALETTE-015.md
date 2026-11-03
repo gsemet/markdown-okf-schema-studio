@@ -36,6 +36,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-252
 - SwRS-MDOKFSTUDIO-PALETTE-256
 - SwRS-MDOKFSTUDIO-PALETTE-263
+- SwRS-MDOKFSTUDIO-PALETTE-268
 - SwRS-MDOKFSTUDIO-TABLE-085
 default_owner_email: gaetan@xeberon.net
 ---
@@ -77,5 +78,6 @@ As a writer, I get a command menu from the slash without it getting in the way o
   - [SwRS-MDOKFSTUDIO-PALETTE-252](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-252.md): The slash menu is an announced listbox of text-only rows
   - [SwRS-MDOKFSTUDIO-PALETTE-256](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-256.md): The slash menu stays next to the caret inside the viewport
   - [SwRS-MDOKFSTUDIO-PALETTE-263](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-263.md): Slash commands have short alternative names
+  - [SwRS-MDOKFSTUDIO-PALETTE-268](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-268.md): The MyST slash menu lists every admonition directive with its icon
   - [SwRS-MDOKFSTUDIO-TABLE-085](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-085.md): The table bar's cell group formats the cell text
 <!-- okf:links:end -->

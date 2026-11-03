@@ -52,7 +52,7 @@ export interface EditActionSlash {
   /** Short names the completion also matches. */
   aliases?: string[];
   /** Entries that run the action with a ready-made argument. */
-  variants?: Array<{ label: string; arg: string; aliases?: string[] }>;
+  variants?: Array<{ label: string; arg: string; aliases?: string[]; icon?: PaletteIcon }>;
   /** List only the variants, not the action itself. */
   variantsOnly?: boolean;
   /** Listed by the `/` menu only: no palette button (and no shortcut). */
@@ -130,6 +130,29 @@ export const ADMONITION_TYPES = [
   "note", "tip", "important", "warning", "caution", "danger", "attention", "error", "hint", "seealso",
 ];
 
+/**
+ * The Sphinx version admonitions (`:::{versionadded} 1.2`): listed by the `/` menu and written
+ * with a version argument, but not offered by the Admonition type popover.
+ */
+export const VERSION_ADMONITION_TYPES = ["versionadded", "versionchanged", "deprecated"];
+
+/** The icon of each admonition kind in the `/` menu, as the badge of its callout in the preview. */
+const ADMONITION_ICONS: Record<string, PaletteIcon> = {
+  note: "calloutInfo",
+  tip: "calloutBulb",
+  hint: "calloutBulb",
+  versionadded: "calloutBulb",
+  important: "calloutStar",
+  warning: "calloutTriangle",
+  attention: "calloutTriangle",
+  versionchanged: "calloutTriangle",
+  caution: "calloutOctagon",
+  danger: "calloutCross",
+  error: "calloutCross",
+  deprecated: "calloutCross",
+  seealso: "calloutArrow",
+};
+
 /** The table column alignments of the Column alignment action. */
 export const COLUMN_ALIGNMENTS = ["left", "center", "right"];
 
@@ -171,10 +194,16 @@ const ALERT_SLASH = ALERT_OPTIONS.map((option) => ({
   arg: option.value,
   aliases: [option.label.toLowerCase(), "callout", "github"],
 }));
-const ADMONITION_SLASH = ADMONITION_OPTIONS.map((option) => ({
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-268
+const ADMONITION_SLASH = [
+  ...ADMONITION_OPTIONS.slice(0, -1),
+  ...VERSION_ADMONITION_TYPES.map((type) => ({ value: type, label: type })),
+  ADMONITION_OPTIONS[ADMONITION_OPTIONS.length - 1],
+].map((option) => ({
   label: option.value === "custom" ? "Custom admonition" : option.label + " admonition",
   arg: option.value,
   aliases: [option.value === "seealso" ? "see also" : option.value, "callout", "admonition"],
+  icon: ADMONITION_ICONS[option.value],
 }));
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-263
