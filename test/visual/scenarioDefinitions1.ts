@@ -26,6 +26,7 @@ import {
 } from "./scenarioAssertions";
 import { ALERT_EDITING_SCENARIOS } from "./alertEditingScenarios";
 import { CARDS_TABS_SCENARIOS } from "./cardsTabsScenarios";
+import { ADMONITION_TYPE_PICKER_SCENARIOS } from "./admonitionTypePickerScenarios";
 import { OPTION_LIST_SCENARIOS } from "./optionListScenarios";
 import { SLASH_ADMONITION_SCENARIOS } from "./slashAdmonitionScenarios";
 import { RADIO_PLAN_SCENARIOS } from "./radioPlanScenarios";
@@ -462,6 +463,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...RADIO_PLAN_SCENARIOS,
   ...OPTION_LIST_SCENARIOS,
   ...SLASH_ADMONITION_SCENARIOS,
+  ...ADMONITION_TYPE_PICKER_SCENARIOS,
   ...REVIEW_MARKS_HIDDEN_SCENARIOS,
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
   ...FRONTMATTER_COLLAPSE_SCENARIOS,
