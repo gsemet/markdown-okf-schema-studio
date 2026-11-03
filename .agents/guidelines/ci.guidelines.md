@@ -93,7 +93,10 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     fails `report`, then `checks`; the summary is written all the same). If `release-check` itself
     fails or the run is cancelled, nothing is tagged and no summary is written; the run is red or
     cancelled. The Pages deploy of the tag reuses the reports of that run instead of running the
-    suite again. A red heavy job on that push is recovered in the same run (next section).
+    suite again. A red heavy job on that push is recovered in the same run (next section). The version
+    commit itself is made only after a green heavy run of `main` HEAD (see
+    [release-process.guidelines.md](release-process.guidelines.md)); the heavy run of the version
+    push stays the final gate.
 
 ## Recovering from a red heavy job on a release push
 
