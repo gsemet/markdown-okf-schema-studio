@@ -211,7 +211,7 @@ export async function scenarioTitleBarButton(page: Page, evidence: Evidence): Pr
   });
 }
 
-/** RI-T38: the anchor button needs a paired text editor; edit mode is remembered per workspace. */
+/** RI-T38: the anchor button needs a paired text editor; a reopened preview starts in preview mode. */
 export async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<void> {
   const demo = [
     "# Fleet dispatch review",
@@ -283,11 +283,13 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
     await closeAllEditors();
     await openSidePreview(document);
     await waitForRender(document);
-    await waitFor("edit mode to be on in the reopened preview", async () => {
+    // A reopened preview starts in preview mode, whatever edit mode was stored (SwRS LIFE-170).
+    await waitFor("edit mode to be off in the reopened preview", async () => {
       const current = await findCurrentFrame(page);
       return current !== undefined
-        && await current.locator("html").getAttribute("data-sphinx-preview-edit-mode") === "on";
+        && await current.locator("html").getAttribute("data-sphinx-preview-edit-mode") === "off";
     });
+    await setEditMode(page, true);
     const workbench = vscode.workspace.getConfiguration("workbench");
     const originalTheme = workbench.inspect<string>("colorTheme")?.workspaceValue;
     const palettes = {
