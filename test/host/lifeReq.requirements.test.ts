@@ -25,6 +25,7 @@ import {
   type FakeWebviewPanel,
   type Studio,
 } from "./lifeReqHarness";
+import { needsSymlinks } from "../shared/symlinks";
 
 const DEFAULT_PANEL_TYPE = "markdown-okf-schema-studio.preview";
 const EDITOR_TYPE = "markdown-okf-schema-studio.editor";
@@ -165,7 +166,7 @@ test("the default reason of a missing source is The active Markdown source is un
   assert.match(lastHtml(panel), /The active Markdown source is unavailable\./u);
 });
 
-test("a source whose symbolic link leaves the root counts as missing", async (t) => {
+test("a source whose symbolic link leaves the root counts as missing", needsSymlinks, async (t) => {
   const studio = start(t);
   const target = writeFile("# Outside\n", outsideRoot);
   const link = path.join(workspaceRoot, `link-${process.pid}.md`);

@@ -5,6 +5,7 @@ import * as path from "node:path";
 import test from "node:test";
 
 import { RUN_FOLDER_PREFIX, SUITES } from "../shared/captureRegistry";
+import { needsSymlinks } from "../shared/symlinks";
 import { applyPrune, planPrune, pointerProtectedFolders, RUN_FOLDER_PATTERN } from "./reportPruner";
 
 function fixture(): { reports: string; screenshots: string; cleanup: () => void } {
@@ -87,7 +88,7 @@ test("refuses a scan directory or a reports root outside out/reports", () => {
   }
 });
 
-test("a symlinked run folder pointing outside is neither planned nor followed", () => {
+test("a symlinked run folder pointing outside is neither planned nor followed", needsSymlinks, () => {
   const { reports, screenshots, cleanup } = fixture();
   const outside = fs.mkdtempSync(path.join(os.tmpdir(), "outside-"));
   try {

@@ -32,7 +32,7 @@ function scratchInstall(): string {
     const from = path.join(sharedModules, entry);
     const to = path.join(root, "node_modules", entry);
     if (patched.includes(entry)) fs.cpSync(from, to, { recursive: true });
-    else fs.symlinkSync(from, to, "dir");
+    else fs.symlinkSync(from, to, "junction");
   }
   const modules = path.join(root, "node_modules");
   for (const file of ["markdown-it-dollarmath/dist/index.js", "myst-to-html/dist/utils.js"]) {

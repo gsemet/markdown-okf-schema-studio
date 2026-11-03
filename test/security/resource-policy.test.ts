@@ -8,6 +8,7 @@ import {
   ResourcePolicy,
   rewriteSrcset,
 } from "../../src/core/security/resource-policy";
+import { needsSymlinks } from "../shared/symlinks";
 
 const temporaryDirectories: string[] = [];
 
@@ -26,14 +27,14 @@ function makeRoots(): { output: string; outside: string } {
   fs.mkdirSync(outside);
   fs.writeFileSync(path.join(output, "image.png"), "image");
   fs.writeFileSync(path.join(outside, "secret.txt"), "secret");
-  fs.symlinkSync(path.join(outside, "secret.txt"), path.join(output, "escape.txt"));
   return { output, outside };
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-013
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025
-test("canonicalizes local resources and rejects hostile paths", () => {
-  const { output } = makeRoots();
+test("canonicalizes local resources and rejects hostile paths", needsSymlinks, () => {
+  const { output, outside } = makeRoots();
+  fs.symlinkSync(path.join(outside, "secret.txt"), path.join(output, "escape.txt"));
   const policy = new ResourcePolicy([{ label: "output", directory: output }]);
 
   assert.equal(policy.resolveResource("image.png", output), fs.realpathSync(path.join(output, "image.png")));

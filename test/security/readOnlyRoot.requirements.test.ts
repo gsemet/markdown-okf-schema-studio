@@ -10,6 +10,7 @@ import {
   isBroadReadOnlyRoot,
   readBoundedText,
 } from "../../src/core/security/resource-policy";
+import { needsSymlinks } from "../shared/symlinks";
 
 const SECRET = "PRIVATE-KEY-MATERIAL";
 const savedHome = { HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE };
@@ -71,7 +72,7 @@ test("a read-only policy refuses dot-segments but a trusted policy keeps them", 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only dot-directory is refused through a symbolic link as well", () => {
+test("a read-only dot-directory is refused through a symbolic link as well", needsSymlinks, () => {
   const project = path.join(home, "project");
   fs.symlinkSync(path.join(project, ".agents"), path.join(project, "visible"));
   const policy = createPreviewResourcePolicy(project, project, true);

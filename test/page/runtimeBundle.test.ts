@@ -42,7 +42,7 @@ const HOST_GLOBALS = ["acquireVsCodeApi"];
 function bundledRuntime(): string {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "studio-runtime-bundle-"));
   try {
-    fs.symlinkSync(path.join(repositoryRoot, "src"), path.join(directory, "src"), "dir");
+    fs.symlinkSync(path.join(repositoryRoot, "src"), path.join(directory, "src"), "junction");
     execFileSync(process.execPath, [path.join(repositoryRoot, "esbuild.mjs")], { cwd: directory, stdio: "pipe" });
     return fs.readFileSync(path.join(directory, "out", "bundle", "preview.js"), "utf8");
   } finally {
