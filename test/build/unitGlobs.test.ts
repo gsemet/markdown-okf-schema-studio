@@ -18,8 +18,9 @@ test("every compiled unit test file is matched by a test:unit glob", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")) as {
     scripts: Record<string, string>;
   };
-  const globs = [...manifest.scripts["test:unit"].matchAll(/'(out\/test\/[^']+)'/g)].map((match) => match[1]);
-  assert.ok(globs.length > 0, "test:unit lists its globs in single quotes");
+  // Double quotes: npm runs the script with cmd.exe on Windows, which keeps single quotes.
+  const globs = [...manifest.scripts["test:unit"].matchAll(/"(out\/test\/[^"]+)"/g)].map((match) => match[1]);
+  assert.ok(globs.length > 0, "test:unit lists its globs in double quotes");
   const unmatched = listTests(path.join(ROOT, "out", "test"))
     .filter((file) => !OTHER_RUNNERS.some((prefix) => file.startsWith(prefix)))
     .filter((file) => !globs.some((glob) => path.matchesGlob(`out/test/${file}`, glob)));
