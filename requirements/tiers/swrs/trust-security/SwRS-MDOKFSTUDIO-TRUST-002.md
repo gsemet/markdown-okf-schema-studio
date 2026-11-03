@@ -30,6 +30,7 @@ implemented_in_files:
 - src/session/webview.ts
 tested_in_files:
 - test/security/readOnlyRoot.requirements.test.ts
+- test/session/baselineDiff.test.ts
 - test/session/readOnlyImages.test.ts
 - test/session/readOnlyImagesSession.test.ts
 - test/session/readOnlyLocalRoots.test.ts
@@ -92,7 +93,7 @@ When a preview is read-only (no workspace folder, or Restricted Mode), the exten
 
 ### Verification notes
 
-- Method: Unit tests test/session/readOnlyImages.test.ts and test/session/readOnlyImagesSession.test.ts (the session wiring: an image of the workspace folder outside the document folder, and its folder as webview root) cover the images (images with spaces, in a subfolder, in the home folder, in the workspace folder; includes and non-image files still refused, a .png link to another kind of file refused; the policy is asked directly for the non-image gate) and the visual scenario trust-security/v04-read-only-images-light-900 cover the images. Unit test test/security/readOnlyRoot.requirements.test.ts covers the broad roots, the policy refusals with their codes, the symbolic link into a dot-directory, the render of includes with diagnostics and the unchanged trusted behaviour.
+- Method: Unit tests test/session/readOnlyImages.test.ts and test/session/readOnlyImagesSession.test.ts (the session wiring: an image of the workspace folder outside the document folder, and its folder as webview root) cover the policy for images (images with spaces, in a subfolder, in the home folder, in the workspace folder; includes and non-image files still refused, a .png link to another kind of file refused; the policy is asked directly for the non-image gate); the visual scenario trust-security/v04-read-only-images-light-900 shows the images in the rendered page. Unit test test/session/baselineDiff.test.ts covers the same image of the workspace folder in the HEAD text of the side-by-side diff. Unit test test/security/readOnlyRoot.requirements.test.ts covers the broad roots, the policy refusals with their codes, the symbolic link into a dot-directory, the render of includes with diagnostics and the unchanged trusted behaviour.
 - Criteria: The home folder is read from USERPROFILE (HOME first outside Windows), then HOMEDRIVE+HOMEPATH, after realpath, compared case-insensitively on Windows and macOS (the core layer cannot import node:os); a folder is broad when it equals or contains it, or is a file-system root. The dot-segment test runs on the path relative to the root, before and after resolving symbolic links. The image rule is the `image` option of resolveResource in src/core/security/resource-policy.ts, set for every page resource by buildPreviewWebviewHtml, matched on the decoded extension (the limit is by file extension, not by element) and again on the real path after symbolic links. The webview resource roots (previewLocalResourceRoots in src/session/features/rendering.ts) are covered by test/session/readOnlyLocalRoots.test.ts.
 
 <!-- okf:links:start -->
