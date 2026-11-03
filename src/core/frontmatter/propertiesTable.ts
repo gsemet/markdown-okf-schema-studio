@@ -227,6 +227,8 @@ export function renderPropertiesTable(
     ? ` <button type="button" data-okf-badge data-okf-errors="${result.summary.errors}" data-okf-warnings="${result.summary.warnings}" data-okf-infos="${result.summary.infos}" aria-label="Go to the first frontmatter issue">${result.summary.errors > 0 ? `✖ ${result.summary.errors}` : ""}${result.summary.warnings > 0 ? `${result.summary.errors > 0 ? " " : ""}⚠ ${result.summary.warnings}` : ""}${result.summary.infos > 0 && result.summary.errors + result.summary.warnings === 0 ? `ℹ ${result.summary.infos}` : ""}</button>`
     : "";
   const descriptionToggle = '<button type="button" data-okf-description-toggle aria-expanded="true" aria-label="Collapse Description column" title="Collapse Description column"><span aria-hidden="true" class="okf-description-collapse">&#9664;</span><span aria-hidden="true" class="okf-description-expand">&#9654;</span></button>';
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+  const frontmatterToggle = '<button type="button" data-okf-frontmatter-toggle aria-expanded="true" aria-label="Collapse frontmatter properties" title="Collapse frontmatter properties"><span aria-hidden="true" class="okf-frontmatter-collapse">&#9664;</span><span aria-hidden="true" class="okf-frontmatter-expand">&#9654;</span></button>';
   const header = withDocs
     ? `<thead><tr><th scope="col">Name</th><th scope="col"><span class="okf-column-heading">Value<span class="okf-description-restore">${descriptionToggle}</span></span></th><th scope="col"><span class="okf-column-heading">Description${descriptionToggle}</span></th></tr></thead>`
     : `<thead><tr><th scope="col">Names</th><th scope="col">Values</th></tr></thead>`;
@@ -295,7 +297,7 @@ export function renderPropertiesTable(
   const sourceLineAttribute = sourceMapping
     ? ` data-line="1" ${SOURCE_FILE_ATTRIBUTE}="${escapeHtml(sourceMapping.activeSourceFile)}" ${SOURCE_LINE_ATTRIBUTE}="1" ${PREVIEW_DOCUMENT_ATTRIBUTE}="${escapeHtml(sourceMapping.documentId)}" ${PREVIEW_BLOCK_ATTRIBUTE}="source-block-1"`
     : "";
-  return `<section${sourceLineAttribute} data-okf-properties data-okf-available-keys="${availableKeys}" data-okf-available-fields="${availableFields}" data-okf-order="${result.orderMode}" data-okf-schema-found="${result.schemaFound}"${result.additionalPropertiesAllowed === false ? ' data-okf-additional-properties="false"' : ""}><div class="okf-properties-title">Frontmatter properties${badge}</div><table class="okf-properties${withDocs ? " okf-properties-docs" : ""}">${header}<tbody>${rows}${infoRows}</tbody></table>${missingRequired}</section>`;
+  return `<section${sourceLineAttribute} data-okf-properties data-okf-available-keys="${availableKeys}" data-okf-available-fields="${availableFields}" data-okf-order="${result.orderMode}" data-okf-schema-found="${result.schemaFound}"${result.additionalPropertiesAllowed === false ? ' data-okf-additional-properties="false"' : ""}><div class="okf-properties-title">Frontmatter properties${frontmatterToggle}${badge}</div><table class="okf-properties${withDocs ? " okf-properties-docs" : ""}">${header}<tbody>${rows}${infoRows}</tbody></table>${missingRequired}</section>`;
 }
 
 /**

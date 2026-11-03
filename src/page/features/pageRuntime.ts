@@ -285,6 +285,8 @@ export interface PageRuntimeState {
   paletteMode: PaletteMode;
   /** The Description column of the properties table is collapsed. */
   descriptionsCollapsed: boolean;
+  /** The properties table is collapsed below its header; kept in memory only, never persisted. */
+  frontmatterCollapsed: boolean;
   activeBlockEdit: BlockEdit | undefined;
   activeFrontmatterEdit: FrontmatterEdit | undefined;
   /** Numbers the edit ids of this page. */
@@ -628,6 +630,7 @@ export interface ContentPatch {
 export interface PageInput {
   refreshPreview(): void;
   applyDescriptionVisibility(): void;
+  applyFrontmatterVisibility(): void;
   bindClicks(): void;
 }
 

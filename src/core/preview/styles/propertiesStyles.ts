@@ -235,6 +235,44 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
   display: inline;
 }
 
+/* The frontmatter toggle looks like the Description one, beside the title. */
+[data-okf-frontmatter-toggle] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  margin-inline-start: 0.5em;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font-size: 1em;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+[data-okf-frontmatter-toggle]:hover {
+  background: var(--studio-list-hoverBackground, rgba(128, 128, 128, 0.12));
+}
+
+[data-okf-frontmatter-toggle] .okf-frontmatter-expand,
+html[data-okf-frontmatter-collapsed="true"] .okf-frontmatter-collapse {
+  display: none;
+}
+
+html[data-okf-frontmatter-collapsed="true"] [data-okf-frontmatter-toggle] .okf-frontmatter-expand {
+  display: inline;
+}
+
+/* The header stays; the table and the missing-required note fold away. */
+html[data-okf-frontmatter-collapsed="true"] #sphinx-myst-preview-content [data-okf-properties] .okf-properties,
+html[data-okf-frontmatter-collapsed="true"] #sphinx-myst-preview-content [data-okf-properties] .okf-missing-required {
+  display: none;
+}
+
 /* Type icon at the left of the name cell; a fixed-width slot keeps every
    field name vertically aligned even for unknown or missing types. */
 #sphinx-myst-preview-content [data-okf-properties] .okf-name-cell {

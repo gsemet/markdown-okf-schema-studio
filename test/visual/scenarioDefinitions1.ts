@@ -31,6 +31,7 @@ import { REVIEW_MARKS_HIDDEN_SCENARIOS } from "./reviewMarksHiddenScenarios";
 import { GRID_CARD_EDITING_SCENARIOS } from "./gridCardEditingScenarios";
 import { LINK_EDIT_MODE_SCENARIOS } from "./linkEditModeScenarios";
 import { FRONTMATTER_CHANGE_BAR_SCENARIOS } from "./frontmatterChangeBarScenarios";
+import { FRONTMATTER_COLLAPSE_SCENARIOS } from "./frontmatterCollapseScenarios";
 import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
 import { TOOLBAR_FLOAT_SCENARIOS } from "./toolbarFloatScenarios";
 import { WIDTH_SCROLL_SCENARIOS } from "./widthScrollScenarios";
@@ -457,6 +458,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...RADIO_PLAN_SCENARIOS,
   ...REVIEW_MARKS_HIDDEN_SCENARIOS,
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
+  ...FRONTMATTER_COLLAPSE_SCENARIOS,
   ...TOOLBAR_FLOAT_SCENARIOS,
   ...WIDTH_SCROLL_SCENARIOS,
   {

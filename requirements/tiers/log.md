@@ -10,6 +10,15 @@
   listener and no VS Code key forwarding acts on them. The bar's own keys are unchanged.
 - Verification: test/page/modules/findBar.test.ts.
 
+### Frontmatter properties table: collapse and expand
+
+- SwRS-MDOKFSTUDIO-FMSCHEMA-090 (proposed): a toggle next to the Frontmatter properties title hides
+  the table under its header and shows it again; the state holds across content patches and edits
+  of the open document and is never stored, so a page load or a newly opened document shows the
+  table.
+- Verification: test/core/frontmatter/propertiesTable.test.ts, test/page/runtimeFrontmatterFields.test.ts,
+  test/visual/frontmatterCollapseScenarios.ts.
+
 ## 2026-11-01
 
 ### Side-by-side diff: a paragraph removed next to an edited one

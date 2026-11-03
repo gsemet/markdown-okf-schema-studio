@@ -210,6 +210,7 @@ export class RuntimeElement {
           && (current.getAttribute("data-sphinx-preview-navigation") ?? "").startsWith("okf-link:"))
         || (selector === "[data-okf-edit-cell]" && current.getAttribute("data-okf-edit-cell") !== null)
         || (selector === "[data-okf-description-toggle]" && current.getAttribute("data-okf-description-toggle") !== null)
+        || (selector === "[data-okf-frontmatter-toggle]" && current.getAttribute("data-okf-frontmatter-toggle") !== null)
         || (selector === "[data-okf-frontmatter-editor]" && current.getAttribute("data-okf-frontmatter-editor") !== null)
         || (selector === "[data-okf-frontmatter-menu]" && current.getAttribute("data-okf-frontmatter-menu") !== null)
         || (selector === "tr[data-okf-field]" && current.tagName === "TR" && current.getAttribute("data-okf-field") !== null)
@@ -404,6 +405,7 @@ export interface RuntimeHarness {
   /** The options of the radio group the `radioGroup` option asked for, in source order (else empty). */
   readonly radios: RuntimeElement[];
   readonly descriptionButton: RuntimeElement;
+  readonly frontmatterToggleButton: RuntimeElement;
   readonly frontmatterNameCell: RuntimeElement;
   readonly frontmatterNameDisplay: RuntimeElement;
   readonly frontmatterValueCell: RuntimeElement;
@@ -643,6 +645,7 @@ export function createRuntimeHarness(configuration: Partial<{
   const stickyHeadings = new RuntimeElement({}, windowState, 0, 0);
   stickyHeadings.rectProvider = () => ({ top: 116, height: stickyHeadings.height, bottom: 116 + stickyHeadings.height });
   const descriptionButton = new RuntimeElement({ "data-okf-description-toggle": "" }, windowState, 0, 24, "button");
+  const frontmatterToggleButton = new RuntimeElement({ "data-okf-frontmatter-toggle": "", "aria-expanded": "true" }, windowState, 0, 24, "button");
   const frontmatterRow = new RuntimeElement({
     "data-okf-editable": "true",
     "data-okf-enums": '["draft","active"]',
@@ -913,6 +916,7 @@ export function createRuntimeHarness(configuration: Partial<{
         : selector === "input.myst-checkbox" ? [checkbox]
         : selector === ".myst-radio" ? radios
         : selector === "[data-okf-description-toggle]" ? [descriptionButton]
+        : selector === "[data-okf-frontmatter-toggle]" ? [frontmatterToggleButton]
         : selector === ".okf-info-row th[colspan]" ? []
         : selector === "#sphinx-myst-preview-content table" ? [frontmatterTable, ...contentTables]
         : selector === "[data-okf-edit-cell]" ? (currentProperties === frontmatterProperties
@@ -991,6 +995,7 @@ export function createRuntimeHarness(configuration: Partial<{
     headings,
     stickyHeadings,
     descriptionButton,
+    frontmatterToggleButton,
     previewContent,
     body,
     observedResizeTarget,

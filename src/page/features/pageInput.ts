@@ -103,12 +103,27 @@ export function installPageInput(rt: PageRuntime): PageInput {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+  function applyFrontmatterVisibility(): void {
+    const collapsed = state.frontmatterCollapsed;
+    // A freshly rendered table is expanded already: nothing to write until a press collapsed it.
+    if (!collapsed && document.documentElement?.getAttribute("data-okf-frontmatter-collapsed") === null) return;
+    document.documentElement?.setAttribute("data-okf-frontmatter-collapsed", String(collapsed));
+    document.querySelectorAll("[data-okf-frontmatter-toggle]").forEach((button) => {
+      const label = collapsed ? "Expand frontmatter properties" : "Collapse frontmatter properties";
+      button.setAttribute("aria-expanded", String(!collapsed));
+      button.setAttribute("aria-label", label);
+      button.setAttribute("title", label);
+    });
+  }
+
   /** The element an event happened on, when it is an element. */
   const elementOf = (event: Event): Element | undefined => event.target instanceof Element ? event.target : undefined;
 
   return {
     refreshPreview,
     applyDescriptionVisibility,
+    applyFrontmatterVisibility,
     // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
     bindClicks() {
       // Registered first so a checkbox click never opens a block editor or reveals the source.
@@ -120,6 +135,11 @@ export function installPageInput(rt: PageRuntime): PageInput {
         if (!badge) return;
         event.preventDefault?.();
         event.stopImmediatePropagation?.();
+        if (state.frontmatterCollapsed) {
+          state.frontmatterCollapsed = false;
+          applyFrontmatterVisibility();
+          rt.scroll.measure();
+        }
         const row = document.querySelector?.(
           "tr[data-okf-field].okf-error, tr[data-okf-field].okf-warning, tr[data-okf-field].okf-info");
         if (!row) return;
@@ -151,6 +171,17 @@ export function installPageInput(rt: PageRuntime): PageInput {
           requestId: context.requestId,
           ...snapshot,
         });
+      });
+      // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+      document.addEventListener("click", (event) => {
+        const button = event.target instanceof Element
+          ? event.target.closest("[data-okf-frontmatter-toggle]") : undefined;
+        if (!button) return;
+        event.preventDefault?.();
+        event.stopImmediatePropagation?.();
+        state.frontmatterCollapsed = !state.frontmatterCollapsed;
+        applyFrontmatterVisibility();
+        rt.scroll.measure();
       });
       // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
       // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-001
@@ -235,6 +266,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
           && (["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(element.tagName)
             || (element as HTMLElement).isContentEditable)) return;
         if (element && element.closest("[data-okf-description-toggle]")) return;
+        if (element && element.closest("[data-okf-frontmatter-toggle]")) return;
         if (element && element.closest(".okf-chip")) return;
         if (element && element.closest('a[data-sphinx-preview-navigation^="okf-link:"]')) return;
         const frontmatterEditor = element ? element.closest("[data-okf-frontmatter-editor]") : undefined;

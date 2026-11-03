@@ -64,11 +64,11 @@ test("renders a two-column Obsidian-like table with escaped values", () => {
     ],
   }), true);
   assert.match(markup, /<section data-okf-properties[^>]*>/u);
-  assert.match(markup, /<div class="okf-properties-title">Frontmatter properties<\/div>/u);
+  assert.match(markup, /<div class="okf-properties-title">Frontmatter properties<button type="button" data-okf-frontmatter-toggle aria-expanded="true"[^>]*>[^]*?<\/button><\/div>/u);
   assert.doesNotMatch(markup, /<h[1-6][^>]*>Frontmatter properties/u);
   assert.match(markup, /<th scope="row" data-okf-edit-cell="name"><span class="okf-name-cell">[^]*?<span class="okf-name-text">title<\/span><\/span><\/th><td class="" data-okf-value-cell data-okf-edit-cell="value"><span data-okf-value-display>A &lt;b&gt;dangerous&lt;\/b&gt; &amp; summary<\/span><\/td>/u);
   assert.match(markup, /<th scope="row" data-okf-edit-cell="name"><span class="okf-name-cell">[^]*?<span class="okf-name-text">tags<\/span><\/span><\/th><td class="" data-okf-value-cell data-okf-edit-cell="value"><span class="okf-list-display" data-okf-value-display><ul class="okf-list-preview"><li>one<\/li><li>two<\/li><\/ul><\/span><\/td>/u);
-  assert.doesNotMatch(markup, /data-okf-edit-field|<button\b/u);
+  assert.doesNotMatch(markup, /data-okf-edit-field|<button\b(?![^>]*data-okf-frontmatter-toggle)/u);
   assert.doesNotMatch(markup, /okf-type-icon/u);
   // Obsidian-like: exactly two columns per row, no status column.
   assert.doesNotMatch(markup, /status/u);
@@ -77,7 +77,7 @@ test("renders a two-column Obsidian-like table with escaped values", () => {
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
 test("description controls live in column headers with an adjacent collapsed restore slot", () => {
   const markup = renderPropertiesTable(resultWith({ schemaFound: true }), true);
-  assert.match(markup, /<div class="okf-properties-title">Frontmatter properties<\/div>/u);
+  assert.match(markup, /<div class="okf-properties-title">Frontmatter properties<button[^>]*data-okf-frontmatter-toggle/u);
   assert.match(markup, /<th scope="col"><span class="okf-column-heading">Description<button[^>]*data-okf-description-toggle/u);
   assert.match(markup, /<th scope="col"><span class="okf-column-heading">Value<span class="okf-description-restore"><button[^>]*data-okf-description-toggle/u);
   assert.equal((markup.match(/data-okf-description-toggle/gu) ?? []).length, 2);
@@ -911,4 +911,12 @@ test("CR 155: with source mapping every field row carries the source lines of it
   assert.match(row("tags"), /data-okf-line="3" data-okf-end-line="5"/u);
   assert.match(row("owner"), /data-okf-line="6" data-okf-end-line="6"/u);
   assert.doesNotMatch(renderPropertiesTable(result, true), /data-okf-line/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+test("the properties header carries one keyboard-reachable toggle that collapses the table, expanded by default", () => {
+  const markup = renderPropertiesTable(resultWith({ schemaFound: true }), true);
+  assert.equal((markup.match(/data-okf-frontmatter-toggle/gu) ?? []).length, 1);
+  assert.match(markup, /<button type="button" data-okf-frontmatter-toggle aria-expanded="true" aria-label="Collapse frontmatter properties" title="Collapse frontmatter properties">/u);
+  assert.ok(markup.indexOf("data-okf-frontmatter-toggle") < markup.indexOf("<table"), "the toggle sits in the header, above the table");
 });
