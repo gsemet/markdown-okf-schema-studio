@@ -511,9 +511,24 @@ The extension version lives in `package.json`; `package-lock.json` must match it
 The Python project's version is tooling metadata and is not the extension release version.
 The release notes, the announcement thread and the hero image are prepared in a release change
 request before the version pull request merges: see
-[release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md).
+[release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md), which also
+gives the order of a release run by the release driver. Make the version commit (step 3) only
+after a green heavy run of `main` HEAD (step 1).
 
-1. Fetch release tags and commit the changes to include in the release:
+1. Merge everything the release needs into `main`, then run the heavy jobs (`integration` and
+	`stress`) on `main` HEAD and wait for both to be green on that exact commit:
+
+	```bash
+	gh workflow run ci.yml --ref main -f heavy=true
+	gh run list --workflow ci.yml --branch main --limit 3
+	gh run watch <run-id>
+	```
+
+	A red job: fix, merge, run again. A flake: `gh run rerun <run-id> --failed` once, then treat it
+	as red. Do not make the version commit before this run is green. The heavy run of the version
+	push (step 5) stays the final gate.
+
+2. Fetch release tags and commit the changes to include in the release:
 
 	```bash
 	git fetch origin --tags
@@ -527,7 +542,7 @@ request before the version pull request merges: see
 	git log --format='%h %s' "$(git describe --tags --abbrev=0)"..origin/main | grep -E '^\S+ (feat|fix)'
 	```
 
-2. Calculate the next version with Python Commitizen:
+3. Calculate the next version with Python Commitizen:
 
 	```bash
 	just bump-version
@@ -562,7 +577,7 @@ request before the version pull request merges: see
 	git commit --amend --no-edit -s CHANGELOG.md
 	```
 
-3. Validate the version commit, then push it and merge it into `main`:
+4. Validate the version commit, then push it and merge it into `main`:
 
 	```bash
 	just preflight
@@ -572,7 +587,7 @@ request before the version pull request merges: see
 	Keep release images and their Git LFS
 	objects committed and pushed, since Marketplace image URLs use the release tag.
 
-4. The push of the version commit to `main` runs the heavy jobs (`integration` and
+5. The push of the version commit to `main` runs the heavy jobs (`integration` and
 	`stress`) in its own CI run: `release-check` sees that the pushed version changed
 	(`scripts/version.py --bump-since`). After successful main-branch CI, the tagging job
 	checks whether the pushed version changed and whether `vX.Y.Z` exists remotely. It
@@ -585,7 +600,7 @@ request before the version pull request merges: see
 	change) skip the heavy jobs and leave the tags unchanged. It never commits files back to
 	`main`.
 
-5. CI calls **Release VSIX** explicitly with that tag. A tag pushed by `GITHUB_TOKEN`
+6. CI calls **Release VSIX** explicitly with that tag. A tag pushed by `GITHUB_TOKEN`
 	does not trigger another push workflow, so this call is required. The release job
 	verifies the tag, manifest, and default-branch ancestry, generates user-facing notes
 	from the previous reachable release's Git diff through `gh copilot`, packages the
