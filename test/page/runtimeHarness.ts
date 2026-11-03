@@ -486,7 +486,6 @@ export function createRuntimeHarness(configuration: Partial<{
   savedState: Record<string, unknown>;
   frontmatterRowAttributes: Record<string, string>;
   pairedTextEditor: boolean;
-  initialEditMode: boolean;
   initialPaletteMode: "strict" | "gfm" | "myst" | "full";
   initialViewPreferences: ViewPreferences;
   commentsEnabled: boolean;

@@ -102,7 +102,6 @@ async function buildPage(text: string, version: number, requestId: number): Prom
       activeSourceFile: result.stage.activeDocumentPath,
       stickyHeadingDepth: 3,
       pairedTextEditor: true,
-      initialEditMode: false,
       commentsEnabled: true,
     },
     EXTENSION_ROOT,

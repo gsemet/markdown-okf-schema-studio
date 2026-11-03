@@ -76,7 +76,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 
 | View choice | Panel state (first) | Stored value (second) | Default (last) | Accepted values and normalisation |
 | --- | --- | --- | --- | --- |
-| Edit mode | saved editMode, a boolean | the host passes initialEditMode true only when the preview is writable and the stored edit mode is true | off (reading mode); also off when the Edit button is greyed | a saved non-boolean is ignored; a stored value that is false, absent or not a boolean gives off; a read-only preview gives off |
+| Edit mode | saved editMode true, of the same document | none: the stored edit mode is not applied at start (see SwRS-MDOKFSTUDIO-LIFE-172) | off (preview mode); also off when the Edit button is greyed | a saved value that is not true, or saved by another document, gives off; a read-only preview gives off |
 | Palette mode | saved paletteMode | the host gives the valid mode stored for the workspace, else the value of the setting markdownOkfSchemaStudio.editing.defaultPaletteMode | gfm | only strict, gfm, myst and full |
 | Width mode | saved viewWidthMode | stored widthMode | margin | only margin, auto and full |
 | Zoom | saved viewZoom | stored zoom | 100 | rounded to a multiple of 10 and clamped to 70 to 200; a value that is not a finite number is ignored |
@@ -90,8 +90,8 @@ The panel state is the state the webview saved with the panel (restored panel or
 
 | Input | Outcome |
 | --- | --- |
-| Context initialEditMode true and saved edit mode false | edit mode is off |
-| Context initialEditMode true and no saved state | edit mode is on |
+| Saved edit mode true of the same document | edit mode is on |
+| Saved edit mode false, or no saved state | edit mode is off |
 | Saved paletteMode myst and host initial mode strict | the palette mode is myst |
 | Saved width mode full and stored width mode auto | the width mode is full |
 | Saved viewZoom 120 and initial preference 150 | the zoom is 120 |
@@ -104,7 +104,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 
 | Input | Outcome |
 | --- | --- |
-| Writable preview in a trusted workspace whose stored edit mode is true | the runtime context carries initialEditMode true and the page starts in edit mode |
+| Writable preview in a trusted workspace whose stored edit mode is true | the page still starts in preview mode |
 | Stored palette mode myst and setting strict | the initial mode in the page context is myst |
 | Initial zoom preference 150, no saved state | the zoom is 150 |
 | Stored zoom 130 accepted from a preview (validation: SwRS-MDOKFSTUDIO-TOOLBAR-013; storage: SwRS-MDOKFSTUDIO-LIFE-169), next page of the workspace built | its initial view preferences carry the zoom 130 and, without saved state, it starts at 130 |
@@ -133,8 +133,8 @@ The Cream start is the same on a light and on a dark host theme:
 
 | Input | Outcome |
 | --- | --- |
-| Stored edit mode false, absent or not a boolean | initialEditMode is false and the page starts in reading mode |
-| Read-only preview whose stored edit mode is true | initialEditMode is false and the page starts in reading mode |
+| Stored edit mode false, absent or not a boolean | the page starts in preview mode |
+| Read-only preview whose stored edit mode is true | the page starts in preview mode |
 | Invalid stored width mode and no saved state | the invalid value is ignored and the width mode is margin |
 | Stored palette mode that is not a mode and setting strict | the initial mode is strict |
 | No saved state and no host initial palette mode | the palette mode is gfm |
@@ -181,7 +181,7 @@ The Cream start is the same on a light and on a dark host theme:
 - Method: test/integration/lifecycle.test.ts (a posted theme mode dark is the stored mode in the html of the next page)
 - Method: test/integration/reload-suite.ts (130 % survives a window reload and a reopen)
 - Method: visual scenarios theme-zoom/v12 and theme-zoom/v13 (Cream start on a light and on a dark host), test/visual/capture_layout_checks.py check_fresh_workspace (zero posted messages, collapsed toolbar)
-- Method: the host expression initialEditMode (src/session/features/rendering.ts) has no test of its own (untested); the Cream result for an unknown stored theme value on the page is not asserted by a session test (untested)
+- Method: the Cream result for an unknown stored theme value on the page is not asserted by a session test (untested)
 - Criteria: each view choice equals the first valid source in the order of the table, the theme mode taking the stored value first; the zoom equals the listed rounded values; nothing is posted at start except one previewAnchorModeChanged when the saved anchor mode differs from the setting.
 
 <!-- okf:links:start -->

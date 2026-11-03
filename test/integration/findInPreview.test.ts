@@ -183,8 +183,8 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
   };
   const settle = (description: string, predicate: () => boolean | Promise<boolean>, timeoutMs?: number): Promise<void> =>
     waitFor(description, predicate, timeoutMs, pageState);
-  // CR 169: the suite runs this test in edit mode (an earlier test turned it on and the workspace
-  // remembers it), where a click on the title opens its block editor. That editor gets its source
+  // CR 169: this test may run in edit mode (a document opens in preview mode, but an earlier step can
+  // have turned it on), where a click on the title opens its block editor. That editor gets its source
   // after a round trip to the host and takes the focus when it does: a Cmd/Ctrl+F pressed before then
   // opened the find bar, the late editor took the focus back (the search text went into the
   // Markdown source) and stayed open (replace refused "Save or cancel the open edit"). The click

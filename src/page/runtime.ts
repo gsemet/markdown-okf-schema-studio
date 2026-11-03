@@ -364,8 +364,12 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // Whether the page and the text editor scroll together (features/anchorMode.ts).
   const anchorMode = installAnchorMode(document, hostMessages, { host: vscode, context, settings, savedState });
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
-  state.editMode = rt.editModeButton
-    ? (typeof saved?.editMode === "boolean" ? saved.editMode : context.initialEditMode === true)
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-172
+  // A document opens in preview mode. Only the page of the same document that reloads keeps the
+  // edit mode its saved state holds; neither another document's state nor the workspace choice does.
+  const savedOfOtherDocument = saved?.documentId !== undefined && saved.documentId !== context.documentId;
+  state.editMode = rt.editModeButton && !savedOfOtherDocument
+    ? saved?.editMode === true
     : false;
   const paletteModes: readonly string[] = PALETTE_MODES;
   state.paletteMode = (paletteModes.includes(saved?.paletteMode as string)

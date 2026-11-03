@@ -34,6 +34,7 @@ import { expandRawHtmlElements } from "./mystRawHtml";
 import { expandTocMarkers } from "./mystToc";
 import { loadEngine, MYST_PARSE_OPTIONS, type MystEngine } from "./mystEngine";
 import { neutralizeDirectiveErrors } from "./mystDirectiveErrors";
+import { textifyNestedBlockBreaks } from "./mystNestedBlockBreaks";
 import { splitUnclosedFences } from "./mystUnclosedFences";
 import {
   alertLineMapper,
@@ -415,6 +416,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
       { lines: state.parsedText.split(/\r\n|\r|\n/u), firstLine: state.lineOffset + 1 },
     ),
   },
+  { name: "nested block breaks", run: (state) => textifyNestedBlockBreaks(state.ast) },
   { name: "context tags", run: (state) => repairGroupedContextTagHtml(state.ast, state.mystParse) },
   // The passes above read the parsed text line for line; from here on, every line is the document's.
   { name: "alert source lines", run: (state) => mapAlertSourceLines(state.ast, state.alerts, state.lineOffset + 1) },

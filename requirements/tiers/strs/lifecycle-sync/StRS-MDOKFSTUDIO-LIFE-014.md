@@ -33,6 +33,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-143
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+- SwRS-MDOKFSTUDIO-LIFE-172
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -70,4 +71,5 @@ As a reader, I reload the window and my previews come back on the same documents
   - [SwRS-MDOKFSTUDIO-LIFE-143](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-143.md): Closing a preview or folder leaves nothing behind
   - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-LIFE-172](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-172.md): A document opens in preview mode and E switches to edit mode
 <!-- okf:links:end -->
