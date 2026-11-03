@@ -65,6 +65,7 @@ export const PALETTE_ICONS = {
   doc: svg("M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"),
   cite: glyph("cite", "\u201c") + caret,
   dropdown: svg("M4 5h16v14H4zM8 10l4 4 4-4"),
+  tabs: svg("M4 9h16v10H4zM4 9V6h5v3M9 6h5v3"),
   tableCaption: svg("M4 4h16M4 8h16v12H4zM4 13h16M10 8v12"),
   table: svg("M4 5h16v14H4zM4 10h16M4 14.5h16M10 5v14M15 5v14"),
   color: svg("M7 15l5-10 5 10M9 11h6M5 20h14") + caret,

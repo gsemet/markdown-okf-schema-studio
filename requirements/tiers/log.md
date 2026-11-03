@@ -2,6 +2,15 @@
 
 ## 2026-11-03
 
+### Every rendered syntax has a slash entry (CR 248)
+
+- SwRS-MDOKFSTUDIO-PALETTE-273 (new, proposed): the Content tabs action (MyST and Full) inserts a `{tab-set}` of
+  two tabs. SwRS-MDOKFSTUDIO-PALETTE-274 (new, proposed): the PlantUML diagram action (Full) inserts a
+  `plantuml` fence. SwRS-MDOKFSTUDIO-PALETTE-275 (new, proposed): every syntax of the writing skill
+  table has a slash entry or a documented exception.
+- Verification: test/page/modules/slashSyntaxCoverage.test.ts fails on the previous code (no
+  `tabs` entry).
+
 ### Restricted Mode images: test gaps (CR 251)
 
 - SwRS-MDOKFSTUDIO-TRUST-002 (proposed, updated): Verification notes reworded (each clause says what it

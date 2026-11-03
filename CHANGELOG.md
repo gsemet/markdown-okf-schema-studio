@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- New Content tabs button in the MyST edit bar (`/tab-set` in the slash menu) inserts a tab set of two tabs, and a PlantUML diagram button in the Full edit bar (`/plantuml`) inserts a sequence diagram.
 - A `+++` line inside a directive, a quote, a list item or an alert no longer breaks the render of the
   whole document: it shows as text, and only a `+++` line at the root of the document stays a block break.
 - A document always opens in preview mode (a new one or another one in the same panel), and

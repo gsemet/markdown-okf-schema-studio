@@ -122,7 +122,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   const gfmReal = gfm.filter((id) => id !== "gfmOnly");
   assert.deepEqual(myst, [
     ...gfmReal, "admonition", "deflist", "math", "sub", "sup", "label",
-    "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd", "codeBlock", "gfmOnly", "mystOnly",
+    "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "tabs", "roleKbd", "codeBlock", "gfmOnly", "mystOnly",
   ]);
 });
 
@@ -145,7 +145,7 @@ test("P6: the real registry shows the MyST-specific buttons in MyST mode only, p
   const gfmOnly = ["alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"];
   const mystOnly = [
     "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
-    "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd", "codeBlock",
+    "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "tabs", "roleKbd", "codeBlock",
   ];
   assert.deepEqual(gfm, [...strict, ...gfmOnly]);
   assert.deepEqual(myst, [...gfm, ...mystOnly]);
@@ -153,8 +153,8 @@ test("P6: the real registry shows the MyST-specific buttons in MyST mode only, p
   for (const id of mystOnly) assert.equal(gfm.includes(id), false, id);
   // CR 149: Full is MyST plus the chart commands, which no other mode lists.
   const full = ids("full");
-  assert.deepEqual(full, [...myst, "vegaLite", "vega"]);
-  for (const id of ["vegaLite", "vega"]) assert.equal(myst.includes(id), false, id);
+  assert.deepEqual(full, [...myst, "vegaLite", "vega", "plantuml"]);
+  for (const id of ["vegaLite", "vega", "plantuml"]) assert.equal(myst.includes(id), false, id);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169

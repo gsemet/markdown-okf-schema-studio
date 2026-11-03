@@ -655,6 +655,16 @@ export const PALETTE_ACTIONS = {
     scopes: ["block"],
     panel: "grid",
   },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-273
+  tabs: {
+    slash: { aliases: ["tab-set", "tab-item", "tabset", "tabbed", "switch"] },
+    label: "Content tabs",
+    title: "Tabs ({tab-set} with two {tab-item} tabs)",
+    icon: "tabs",
+    group: "myst",
+    modes: ["myst"],
+    scopes: ["block"],
+  },
   roleKbd: {
     slash: { aliases: ["key", "kbd", "keyboard"] },
     label: "Key (MyST)",
@@ -691,6 +701,16 @@ export const PALETTE_ACTIONS = {
     label: "Vega chart",
     title: "Vega chart",
     icon: "chart",
+    group: "full",
+    modes: ["full"],
+    scopes: ["block"],
+  },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-274
+  plantuml: {
+    slash: { aliases: ["uml", "sequence", "diagram", "puml"] },
+    label: "PlantUML diagram",
+    title: "PlantUML diagram",
+    icon: "mermaid",
     group: "full",
     modes: ["full"],
     scopes: ["block"],

@@ -49,7 +49,7 @@ test("T21: the palette sits in a host above the block editor frame, not inside i
       "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "toc", "table",
       "emoji", "todo", "thread", "alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
-      "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd", "codeBlock",
+      "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "tabs", "roleKbd", "codeBlock",
     ],
   );
 });
@@ -111,7 +111,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 43);
+  assert.equal(controls.length, 44);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
