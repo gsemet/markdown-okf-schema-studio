@@ -60,9 +60,11 @@ const CASES: Array<{ title: string; stays: boolean; markdown: string[] }> = [
   { title: "four columns: prose in every column", stays: false, markdown: table(["Problem", "Cause", "Fix", "Risk"], [
     [lorem(10), lorem(14), lorem(12), lorem(9)], [lorem(13), lorem(8), lorem(16), lorem(11)],
   ]) },
+  // Cases 6 and 12: the longest token is wide enough to break out with any monospace font, since
+  // Consolas (Windows) is narrower than the DejaVu Sans Mono fallback of Linux.
   { title: "two columns: long code paths", stays: false, markdown: table(["File", "Role"], [
     [code("src/page/features/blockEditing/editorPlacement.ts"), "Places the block editor and its palette."],
-    [code("test/integration/realInput/scenarios/gridCardEditorBlur.ts"), "Real-window scenario for the blur bug."],
+    [code("test/integration/realInput/scenarios/blockEditing/gridCardEditorBlur.ts"), "Real-window scenario for the blur bug."],
     [code("src/core/preview/styles/contentLayoutStyles.ts"), "Column width, breakout and gutters."],
   ]) },
   { title: "three columns with a long URL", stays: false, markdown: table(["Source", "Link", "Use"], [
@@ -88,7 +90,7 @@ const CASES: Array<{ title: string; stays: boolean; markdown: string[] }> = [
     ["TOOLBAR-009", "SwRS", "proposed", "Studio", code("findShortcut.test.ts"), "Cmd/Ctrl+F opens the find bar from any editing field."],
   ]) },
   { title: "three columns: inline code identifiers", stays: false, markdown: table(["Setting", "Default", "Effect"], [
-    [code("markdownOkfSchemaStudio.preview.showIncomingChanges"), code("true"), "Marks blocks changed since the last commit with a green bar."],
+    [code("markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks"), code("false"), "Lets a frontmatter link point outside the workspace."],
     [code("markdownOkfSchemaStudio.comments.authorName"), code('""'), "Signs comments; falls back to Git user.name."],
   ]) },
 ];
