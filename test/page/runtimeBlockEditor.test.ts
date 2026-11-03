@@ -262,6 +262,33 @@ test("Enter on an empty list item empties the line and Enter in plain text stays
   assert.equal(textarea.value, "plain");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+test("Enter after an option item starts the next option, and Enter on an empty option ends the list", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "- ( ) titi\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.setSelectionRange(10, 10);
+  let prevented = 0;
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 1);
+  assert.equal(textarea.value, "- ( ) titi\n- ( ) ");
+  assert.equal(textarea.selectionStart, 17);
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 2);
+  assert.equal(textarea.value, "- ( ) titi\n");
+  assert.equal(textarea.selectionStart, 11);
+});
+
 test("block textareas resize on input and preview layout changes", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");

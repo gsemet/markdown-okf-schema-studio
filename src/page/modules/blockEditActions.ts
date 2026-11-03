@@ -237,30 +237,36 @@ const CHECKBOX_LINE = /^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)\[[ xX]\][ \t]?/u;
 
 const LIST_ITEM_LINE = /^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)/u;
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-123
+const OPTION_LINE = /^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)\([ xX]\)[ \t]?/u;
+
 /**
- * Toggles a task-list checkbox on the touched lines: when every non-blank line has one they
- * lose it (the list item stays), otherwise the lines without one gain `[ ]` after their list
- * marker, or `- [ ] ` when they have none.
+ * Toggles a list-item marker (`[ ]` of a task list or `( )` of a choice list) on the touched
+ * lines: when every non-blank line has `own` they lose it (the list item stays), otherwise the
+ * lines without it gain `box` after their list marker, or `- ` + `box` when they have none. A line
+ * that has the `other` marker swaps it for `box`.
  */
-export function toggleCheckbox(ctx: EditActionContext): TextEdit | undefined {
+function toggleMarker(
+  ctx: EditActionContext, own: RegExp, other: RegExp | undefined, box: string,
+): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
   const { firstStart, lastEnd, lines } = touchedLines(ctx);
   const filled = lines.filter((line) => line.trim() !== "");
-  const remove = filled.length > 0 && filled.every((line) => CHECKBOX_LINE.test(line));
+  const remove = filled.length > 0 && filled.every((line) => own.test(line));
   // For each line: where the change happens, how many characters go and what comes instead.
   const changes = lines.map((line) => {
     if (line.trim() === "" && lines.length > 1) return { at: 0, drop: 0, add: "" };
-    const boxed = CHECKBOX_LINE.exec(line);
+    const marked = own.exec(line);
     if (remove) {
-      const marker = boxed![1];
-      return { at: marker.length, drop: boxed![0].length - marker.length, add: "" };
+      const marker = marked![1];
+      return { at: marker.length, drop: marked![0].length - marker.length, add: "" };
     }
-    if (boxed) return { at: 0, drop: 0, add: "" };
+    if (marked) return { at: 0, drop: 0, add: "" };
+    const swapped = other?.exec(line);
+    if (swapped) return { at: swapped[1].length, drop: swapped[0].length - swapped[1].length, add: box };
     const item = LIST_ITEM_LINE.exec(line);
-    if (item) return { at: item[1].length, drop: 0, add: "[ ] " };
+    if (item) return { at: item[1].length, drop: 0, add: box };
     const indent = (/^[ \t]*/u.exec(line) ?? [""])[0].length;
-    return { at: indent, drop: 0, add: "- [ ] " };
+    return { at: indent, drop: 0, add: "- " + box };
   });
   const text = lines.map((line, index) => {
     const change = changes[index];
@@ -283,6 +289,26 @@ export function toggleCheckbox(ctx: EditActionContext): TextEdit | undefined {
     selectionStart: firstStart,
     selectionEnd: firstStart + text.length,
   };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-123
+/**
+ * Toggles a task-list checkbox on the touched lines: when every non-blank line has one they
+ * lose it (the list item stays), otherwise the lines without one gain `[ ]` after their list
+ * marker, or `- [ ] ` when they have none.
+ */
+export function toggleCheckbox(ctx: EditActionContext): TextEdit | undefined {
+  return toggleMarker(ctx, CHECKBOX_LINE, undefined, "[ ] ");
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-267
+/**
+ * Toggles an option marker `( )` on the touched lines, as Toggle checkbox does for `[ ]`: when
+ * every non-blank line has one they lose it, otherwise the lines without one gain `( )` after
+ * their list marker, or `- ( ) ` when they have none. A task box is replaced by the marker.
+ */
+export function toggleOption(ctx: EditActionContext): TextEdit | undefined {
+  return toggleMarker(ctx, OPTION_LINE, CHECKBOX_LINE, "( ) ");
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-124

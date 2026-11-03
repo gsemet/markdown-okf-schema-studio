@@ -10,6 +10,7 @@ export interface TextEdit {
  * Pure text-editing helpers for the raw-Markdown block editor.
  */
 export function createTextEditingTools() {
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-061
   /**
    * Returns the edit that Enter should apply at the caret to continue the construct of the current
    * line (list item, quote, indentation), or `undefined` to leave Enter to the native textarea.
@@ -48,7 +49,7 @@ export function createTextEditingTools() {
     }
 
     const quote = /^(?:[ \t]*>[ \t]?)*/u.exec(line)![0];
-    const list = /^([ \t]*)([-*+]|\d{1,9}[.)])([ \t]+)(\[[ xX]\][ \t]+)?/u.exec(
+    const list = /^([ \t]*)([-*+]|\d{1,9}[.)])([ \t]+)(\[[ xX]\][ \t]+|\([ xX]\)[ \t]+)?/u.exec(
       line.slice(quote.length),
     );
     const prefixEnd = quote.length + (list ? list[0].length : 0);
@@ -70,7 +71,8 @@ export function createTextEditingTools() {
       const marker = list[2];
       const numbered = /^(\d+)([.)])$/u.exec(marker);
       const nextMarker = numbered ? String(Number(numbered[1]) + 1) + numbered[2] : marker;
-      const task = list[4] ? "[ ] " : "";
+      // A task box or an option marker restarts unticked, as `[ ]` or `( )`.
+      const task = list[4] ? (list[4].startsWith("(") ? "( ) " : "[ ] ") : "";
       return insertion(quote + list[1] + nextMarker + list[3] + task);
     }
     if (quote.length > 0) return insertion(quote);

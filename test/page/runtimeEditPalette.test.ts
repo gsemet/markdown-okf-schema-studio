@@ -47,7 +47,7 @@ test("T21: the palette sits in a host above the block editor frame, not inside i
     palette.childElements.slice(1).map((child) => child.getAttribute("data-edit-action")),
     [
       "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "toc", "table",
-      "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+      "emoji", "todo", "thread", "alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
       "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",
     ],
@@ -111,7 +111,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 39);
+  assert.equal(controls.length, 40);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
@@ -1168,7 +1168,7 @@ test("T25: strict mode shows no GitHub buttons; GFM shows Alert, Checkbox and HT
   assert.equal(strict.createdElements.some((e) => e.getAttribute("data-edit-action") === "alert"), false);
   const gfm = createRuntimeHarness({ initialPaletteMode: "gfm" });
   openBlockEditorWithSource(gfm);
-  for (const id of ["alert", "checkbox", "htmlTable"]) assert.ok(paletteButton(gfm, id), id);
+  for (const id of ["alert", "checkbox", "option", "htmlTable"]) assert.ok(paletteButton(gfm, id), id);
 });
 
 test("T25: Alert writes the head, opens the type list near the caret and picking changes the type", () => {
@@ -1300,4 +1300,19 @@ test("T25: Checkbox and HTML table edit the text box as one undo step each", () 
   assert.equal(calls.length, 1);
   assert.equal(calls[0].command, "insertText");
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-267
+test("Option turns the line into an option item and back as one undo step each", () => {
+  const harness = createRuntimeHarness({ initialPaletteMode: "gfm" });
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "pick one";
+  textarea.setSelectionRange(3, 3);
+  paletteButton(harness, "option").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "- ( ) pick one");
+  assert.equal(calls.length, 1);
+  paletteButton(harness, "option").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "- pick one");
+  assert.equal(calls.length, 2);
 });
