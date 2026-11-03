@@ -616,9 +616,9 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "The TOC button opens a column of h1-h4 headings right of the content and below the "
       + "toolbar. It never overlaps the content, the table or the floating toolbar, Auto and Full "
       + "width respect it, zoom 200 % keeps it usable, a click scrolls to the heading, and a pane "
-      + "under 760 px hides it (the button then only records the preference). The final frame is "
+      + "under 760 px shows a rail instead, whose hover opens the column as an overlay. The final frame is "
       + `taken with the column open in ${mode === "margin" ? "Margin" : mode === "auto" ? "Auto" : "Full width"} mode`
-      + " (narrow panes: column hidden by design).",
+      + " (narrow panes: the rail and the overlay opened by a hover).",
   }))),
   ...([
     ["light", undefined],

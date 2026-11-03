@@ -8,12 +8,17 @@ export interface TocColumnContext {
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-033
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-037
 /**
  * TOC column: a right-hand column below the toolbar that lists the h1-h4 headings of the content.
  * The column is runtime UI appended to the body (never part of the page shell) and is
  * built only while it is open. `scrollToHeading` reveals a heading at the reading line; `onChange`
  * runs after the column opened or closed, because that changes the available width. CSS reserves
- * the width and hides the column on narrow panes. Parent entries fold with a twisty (the folded
+ * the width on wide panes. On a narrow pane the same open state shows a rail instead: a thin
+ * strip on the right with one tick per heading (the section at the reading line highlighted). Hover
+ * or focus on the rail opens the column as an overlay above the text; it closes 300 ms after the
+ * pointer and the focus have left, or on Escape. A tick goes to its heading. CSS decides which of
+ * the two shows; the script builds both whenever the TOC is open. Parent entries fold with a twisty (the folded
  * keys, level + occurrence + text, live in the webview state and survive rebuilds). `track` marks
  * the entry of the section at the reading line from heading tops cached per rebuild; `remeasure`
  * refreshes those tops after a layout change (zoom, width mode, resize, content patch).
@@ -53,6 +58,14 @@ export function installTocColumn(
   nav.setAttribute("data-sphinx-preview-toc", "");
   nav.setAttribute("aria-label", "Table of contents");
   document.body.appendChild(nav);
+  // The rail is built the first time the TOC is open, so a page that never opens it has none.
+  let rail: HTMLElement | undefined;
+  let ticks: HTMLElement[] = [];
+  let overlayOpen = false;
+  let pointerInside = false;
+  let focusInside = false;
+  let closeTimer: unknown;
+  const CLOSE_DELAY_MS = 300;
   let list: HTMLElement | undefined;
   let dirty = true;
   let scheduled = false;
@@ -63,7 +76,76 @@ export function installTocColumn(
     const bounds = toolbar?.getBoundingClientRect?.();
     const bottom = bounds && Number.isFinite(bounds.bottom) ? Math.max(0, bounds.bottom) : 0;
     nav.style.setProperty("--sphinx-preview-toc-top", bottom + 8 + "px");
+    rail?.style.setProperty("--sphinx-preview-toc-top", bottom + 8 + "px");
   };
+
+  const setOverlay = (value: boolean): void => {
+    overlayOpen = value;
+    if (value) nav.setAttribute("data-sphinx-preview-toc-overlay", "open");
+    else nav.removeAttribute("data-sphinx-preview-toc-overlay");
+  };
+  const cancelClose = (): void => {
+    if (closeTimer !== undefined) window.clearTimeout?.(closeTimer as number);
+    closeTimer = undefined;
+  };
+  const scheduleClose = (): void => {
+    cancelClose();
+    if (pointerInside || focusInside) return;
+    closeTimer = window.setTimeout(() => {
+      closeTimer = undefined;
+      if (!pointerInside && !focusInside) setOverlay(false);
+    }, CLOSE_DELAY_MS);
+  };
+  const enter = (): void => {
+    pointerInside = true;
+    cancelClose();
+    if (open) setOverlay(true);
+  };
+  const leave = (): void => {
+    pointerInside = false;
+    scheduleClose();
+  };
+  const focusEnter = (): void => {
+    focusInside = true;
+    cancelClose();
+    if (open) setOverlay(true);
+  };
+  const focusLeave = (): void => {
+    focusInside = false;
+    scheduleClose();
+  };
+  const closeNow = (): void => {
+    cancelClose();
+    pointerInside = false;
+    focusInside = false;
+    setOverlay(false);
+  };
+  const ensureRail = (): HTMLElement => {
+    if (rail) return rail;
+    const made = document.createElement("div");
+    rail = made;
+    made.setAttribute("data-sphinx-preview-toc-rail", "");
+    made.setAttribute("role", "group");
+    made.setAttribute("tabindex", "0");
+    made.setAttribute("aria-label", "Table of contents rail");
+    document.body.appendChild(made);
+    for (const surface of [made, nav]) {
+      surface.addEventListener("mouseenter", enter);
+      surface.addEventListener("mouseleave", leave);
+      surface.addEventListener("focusin", focusEnter);
+      surface.addEventListener("focusout", focusLeave);
+    }
+    return made;
+  };
+  // Escape closes the overlay wherever the focus is (the pointer alone can have opened it); the
+  // focus goes back to the rail only when it was inside.
+  window.addEventListener?.("keydown", (event) => {
+    if ((event as KeyboardEvent).key !== "Escape" || !overlayOpen) return;
+    event.preventDefault?.();
+    const hadFocus = focusInside;
+    closeNow();
+    if (hadFocus) rail?.focus?.();
+  });
 
   const headingText = (heading: Element): string => {
     // A comment chip and its hidden body are not part of the heading's wording.
@@ -93,6 +175,7 @@ export function installTocColumn(
   let entries: Entry[] = [];
   let represent: number[] = [];
   let shown = -1;
+  let tickShown = -1;
   const collapsedKeys = new Set<string>(
     Array.isArray(saved?.tocCollapsed)
       ? (saved.tocCollapsed as unknown[]).filter((key): key is string => typeof key === "string")
@@ -147,7 +230,16 @@ export function installTocColumn(
       else break;
     }
     const next = current < 0 ? -1 : represent[current];
-    if (next === shown && !force) return;
+    if (next === shown && current === tickShown && !force) return;
+    if (tickShown >= 0 && ticks[tickShown]) {
+      ticks[tickShown].removeAttribute("aria-current");
+      ticks[tickShown].removeAttribute("data-sphinx-preview-toc-tick-current");
+    }
+    tickShown = current;
+    if (current >= 0 && ticks[current]) {
+      ticks[current].setAttribute("aria-current", "location");
+      ticks[current].setAttribute("data-sphinx-preview-toc-tick-current", "");
+    }
     if (shown >= 0 && entries[shown]) {
       entries[shown].target.removeAttribute("aria-current");
       entries[shown].item.removeAttribute("data-sphinx-preview-toc-current");
@@ -181,6 +273,9 @@ export function installTocColumn(
     dirty = false;
     const found = collect();
     list?.remove();
+    for (const tick of ticks) tick.remove();
+    ticks = [];
+    tickShown = -1;
     const next = document.createElement("ol");
     if (found.length === 0) {
       const empty = document.createElement("p");
@@ -224,12 +319,27 @@ export function installTocColumn(
       target.setAttribute("type", "button");
       target.textContent = entry.text;
       target.addEventListener("click", (event) => {
+        goTo(event);
+        // On a narrow pane the overlay has done its job; on a wide pane it is not an overlay.
+        if (overlayOpen) closeNow();
+      });
+      item.appendChild(target);
+      const goTo = (event: Event): void => {
         event.preventDefault?.();
         // Resolved at click time: a content patch may have replaced the heading since the build.
         const live = collect().find((candidate) => candidate.key === entry.key);
         scrollToHeading(live ? live.heading : entry.heading);
-      });
-      item.appendChild(target);
+      };
+      const tick = document.createElement("button");
+      tick.setAttribute("type", "button");
+      tick.setAttribute("data-sphinx-preview-toc-tick", "");
+      tick.setAttribute("data-level", String(entry.level));
+      tick.setAttribute("aria-label", entry.text);
+      tick.setAttribute("title", entry.text);
+      tick.style.setProperty("--sphinx-preview-toc-depth", String(entry.level - shallowest));
+      tick.addEventListener("click", goTo);
+      ensureRail().appendChild(tick);
+      ticks.push(tick);
       entries.push({ ...entry, item, target, twisty, parent, top: 0 });
       next.appendChild(item);
     }
@@ -269,8 +379,11 @@ export function installTocColumn(
       button.setAttribute("data-tooltip", label);
     }
     if (open) {
+      ensureRail();
       layout();
       if (dirty) refresh();
+    } else {
+      closeNow();
     }
   };
 

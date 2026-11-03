@@ -127,9 +127,88 @@ export const CONTENT_LAYOUT_CSS = `
 
 /* TOC column (runtime-created nav, filled by the page script). Off by default; when open and the
    pane is at least 760px wide it takes 240px plus a 16px gap from the right of the pane, so the
-   content and the sticky band narrow by 256px. Narrower panes hide it whatever the preference. */
+   content and the sticky band narrow by 256px. Narrower panes show a rail instead (below). */
 nav[data-sphinx-preview-toc] {
   display: none;
+}
+
+[data-sphinx-preview-toc-rail] {
+  display: none;
+}
+
+/* Narrow pane, TOC on: a thin rail on the right with one tick per heading. Hover or focus on the
+   rail opens the column as an overlay above the text (the page script sets the overlay attribute,
+   closes it 300 ms after the pointer and the focus left, or on Escape). The overlay appears at once,
+   with no animation, so prefers-reduced-motion needs no special case. */
+@media (max-width: 759px) {
+  html[data-sphinx-preview-toc="open"] [data-sphinx-preview-toc-rail] {
+    position: fixed;
+    inset-block-start: var(--sphinx-preview-toc-top, 96px);
+    inset-block-end: 16px;
+    inset-inline-end: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 2px;
+    width: 16px;
+    overflow: hidden;
+    padding: 4px 3px;
+    border-radius: 8px 0 0 8px;
+    background: color-mix(in srgb, var(--studio-editor-background, Canvas) 85%, transparent);
+    cursor: pointer;
+  }
+
+  html[data-sphinx-preview-toc="open"] [data-sphinx-preview-toc-rail]:focus-visible {
+    outline: 1px solid var(--studio-focusBorder, Highlight);
+  }
+
+  [data-sphinx-preview-toc-rail] button[data-sphinx-preview-toc-tick] {
+    flex: none;
+    box-sizing: border-box;
+    width: calc(10px - var(--sphinx-preview-toc-depth, 0) * 2px);
+    min-width: 4px;
+    height: 3px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--studio-editor-foreground, CanvasText) 45%, transparent);
+    cursor: pointer;
+  }
+
+  [data-sphinx-preview-toc-rail] button[data-sphinx-preview-toc-tick]:hover,
+  [data-sphinx-preview-toc-rail] button[data-sphinx-preview-toc-tick]:focus-visible {
+    background: var(--studio-editor-foreground, CanvasText);
+  }
+
+  [data-sphinx-preview-toc-rail] button[data-sphinx-preview-toc-tick][data-sphinx-preview-toc-tick-current] {
+    background: var(--studio-focusBorder, Highlight);
+    height: 4px;
+  }
+
+  html[data-sphinx-preview-toc="open"] nav[data-sphinx-preview-toc][data-sphinx-preview-toc-overlay="open"] {
+    position: fixed;
+    inset-block-start: var(--sphinx-preview-toc-top, 96px);
+    inset-block-end: 16px;
+    inset-inline-end: 16px;
+    z-index: 1001;
+    box-sizing: border-box;
+    display: block;
+    width: min(240px, calc(100% - 32px));
+    overflow-y: auto;
+    padding: 8px 6px;
+    border: 1px solid var(--sphinx-preview-border);
+    border-radius: 8px;
+    background: var(--studio-editor-background, Canvas);
+    color: var(--studio-editor-foreground, CanvasText);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    font-family: var(--sphinx-preview-font);
+    font-size: 13px;
+    line-height: 1.35;
+  }
 }
 
 @media (min-width: 760px) {
