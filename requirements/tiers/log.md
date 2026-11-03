@@ -56,6 +56,14 @@
 - Verification: test/page/modules/slashMenu.test.ts; visual scenarios palette-slash/v34-slash-myst-admonitions-light-900 and
   palette-slash/v35-slash-myst-admonitions-dark-900 (test/visual/slashAdmonitionScenarios.ts).
 
+### Type picker on an alert or admonition type
+
+- SwRS-MDOKFSTUDIO-PALETTE-269 (new, proposed, CR 244): with the caret on the type of a GitHub
+  alert head or of a MyST admonition directive, a list of the types of that syntax with their
+  icons opens above it (arrows move, Enter chooses, Escape closes); a choice replaces the type
+  text only.
+- Verification: test/page/modules/editPalette.test.ts.
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no

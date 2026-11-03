@@ -1,5 +1,6 @@
 import { PALETTE_MODES } from "../../core/configuration/settingsRegistry";
 import { PALETTE_ICONS } from "../../core/palette/paletteIcons";
+import { calloutIconFor } from "../../core/preview/calloutIcons";
 import type { EditAction, EditActionMode } from "./editActions";
 import {
   buildChoices,
@@ -35,6 +36,7 @@ export type {
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-150
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-238
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-242
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-269
 
 /**
  * The edition palette: a pill-shaped bar of edit actions shown above an open block editor. It is
@@ -83,6 +85,12 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   let caretOptions: HTMLElement[] = [];
   let caretAction: EditAction | undefined;
   let caretIndex = -1;
+  // Type picker (the caret on an alert or admonition type): the start of the type the open list is
+  // for, and of the one the user dismissed or chose from (the list stays closed until the caret leaves it).
+  let pickerFor = -1;
+  let pickerDismissed = -1;
+  // True while an action edits the text: the edit's own input events are not the caret moving.
+  let running = false;
   let mode: EditActionMode = deps.mode;
   let buttons: HTMLElement[] = [];
   // The action behind each button, for the ones whose visibility follows the caret.
@@ -173,6 +181,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
    */
   function closePopover(refocus = true): boolean {
     if (!openMenu) return false;
+    if (pickerFor >= 0) pickerDismissed = pickerFor;
+    pickerFor = -1;
     const hadFocus = menuFocused;
     closing = true;
     try {
@@ -195,6 +205,15 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   }
 
   function run(action: EditAction, arg?: string): void {
+    running = true;
+    try {
+      runAction(action, arg);
+    } finally {
+      running = false;
+    }
+  }
+
+  function runAction(action: EditAction, arg?: string): void {
     const control = deps.getControl();
     const edit = action.apply({
       value: String(control.value ?? ""),
@@ -262,7 +281,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   };
 
   /** Shows the caret-dependent buttons only where their action says so; shows the code swatch. */
-  function updateAvailability(): void {
+  function updateButtons(): void {
     if (caretButtons.length === 0) return;
     const ctx = contextOf();
     for (const entry of caretButtons) {
@@ -314,6 +333,10 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
         item.setAttribute("role", "menuitem");
         item.setAttribute("data-edit-option", option.value);
         item.textContent = option.label;
+        if (action.optionIcons) {
+          item.style.setProperty("--sphinx-edit-type-icon", calloutIconFor(option.value));
+          item.setAttribute("data-edit-type-icon", "true");
+        }
         item.setAttribute("tabindex", "-1");
         item.addEventListener("mousedown", keepFocus);
         item.addEventListener("click", (event) => {
@@ -355,7 +378,13 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       menu.style.setProperty("inset-inline-start", Math.max(0, at) + "px");
     }
     if (caretRect && barRect && Number.isFinite(caretRect.bottom - barRect.top)) {
-      menu.style.setProperty("inset-block-start", Math.round(caretRect.bottom - barRect.top + 2) + "px");
+      // The type picker sits above the caret line when the list fits between the bar and the line.
+      const above = caretRect.top - barRect.top - menu.offsetHeight - 2;
+      if (action.optionIcons && menu.offsetHeight > 0 && Number.isFinite(above) && above > barRect.bottom - barRect.top) {
+        menu.style.setProperty("inset-block-start", Math.round(above) + "px");
+      } else {
+        menu.style.setProperty("inset-block-start", Math.round(caretRect.bottom - barRect.top + 2) + "px");
+      }
       menu.setAttribute("data-edit-popover-at", "caret");
     }
     button.setAttribute("aria-expanded", "true");
@@ -382,6 +411,48 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       && action.scopes.includes(scope)
       // Modes are additive: an action listed for a lower mode shows in every higher one.
       && action.modes.some((candidate) => (MODE_RANK[candidate] ?? 0) <= rank));
+  }
+
+  /**
+   * The type picker: with the caret on the type of an alert or admonition head, lists the types of
+   * that syntax above it; a choice replaces the type text only. Called as the caret moves.
+   */
+  function syncTypePicker(): void {
+    if (running) return;
+    const ctx = contextOf();
+    const collapsed = ctx.selectionStart === ctx.selectionEnd;
+    let found: { action: EditAction; start: number } | undefined;
+    if (collapsed) {
+      for (const action of visibleActions()) {
+        const at = action.typeAt?.(ctx);
+        if (at) {
+          found = { action, start: at.start };
+          break;
+        }
+      }
+    }
+    if (!found) {
+      if (pickerFor >= 0) closePopover();
+      if (collapsed) pickerDismissed = -1;
+      return;
+    }
+    if (pickerFor === found.start || pickerDismissed === found.start || (openMenu && pickerFor < 0)) return;
+    const { action, start } = found;
+    const anchor = buttons.find((button) => button.getAttribute("data-edit-action") === action.id);
+    if (!anchor) return;
+    openPopover({
+      ...action,
+      apply: (inner) => action.retype?.(inner),
+      options: (action.options ?? []).filter((option) => option.value !== "custom"),
+      popoverAtCaret: true,
+      optionIcons: true,
+    }, anchor);
+    pickerFor = start;
+  }
+
+  function updateAvailability(): void {
+    updateButtons();
+    syncTypePicker();
   }
 
   /** What a click on the action's button does; the `/` menu runs the same path. */
@@ -570,7 +641,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       root.appendChild(button);
       buttons.push(button);
     }
-    updateAvailability();
+    updateButtons();
   }
 
   build();

@@ -192,6 +192,29 @@ function joinsQuoteAbove(value: string, lineStart: number): boolean {
   return blockQuoteAround(lines, index - 1) !== undefined;
 }
 
+/** The edit that writes `type` over the type word `existing`, the caret following its text. */
+function retypeEdit(ctx: EditActionContext, existing: { start: number; end: number }, type: string): TextEdit {
+  const delta = type.length - (existing.end - existing.start);
+  const move = (position: number): number =>
+    position >= existing.end ? position + delta : position > existing.start ? existing.start + type.length : position;
+  return {
+    start: existing.start,
+    end: existing.end,
+    text: type,
+    selectionStart: move(ctx.selectionStart),
+    selectionEnd: move(ctx.selectionEnd),
+  };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-269
+/** The type word of the alert head when the caret is on it (the type picker opens there). */
+export function alertTypeAt(ctx: EditActionContext): { start: number; end: number } | undefined {
+  const found = alertAtCaret(ctx);
+  const on = found && lineAt(ctx.value, found.start).index === lineAt(ctx.value, ctx.selectionStart).index
+    && ctx.selectionStart >= found.start && ctx.selectionStart <= found.end;
+  return on ? found : undefined;
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-115
 /**
  * Inserts a GitHub alert (`> [!NOTE]` and the touched lines quoted) or, with the caret inside
@@ -201,19 +224,7 @@ export function insertAlert(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
   if (ctx.arg !== undefined && !ALERT_TYPES.includes(ctx.arg)) return undefined;
   const existing = alertAtCaret(ctx);
-  if (existing) {
-    if (ctx.arg === undefined || ctx.arg === existing.type) return undefined;
-    const delta = ctx.arg.length - existing.type.length;
-    const move = (position: number): number =>
-      position >= existing.end ? position + delta : position > existing.start ? existing.start + ctx.arg!.length : position;
-    return {
-      start: existing.start,
-      end: existing.end,
-      text: ctx.arg,
-      selectionStart: move(ctx.selectionStart),
-      selectionEnd: move(ctx.selectionEnd),
-    };
-  }
+  if (existing) return ctx.arg === undefined || ctx.arg === existing.type ? undefined : retypeEdit(ctx, existing, ctx.arg);
   const { firstStart, lastEnd, lines } = touchedLines(ctx);
   // A blank line keeps the new alert out of a block quote right above it.
   const head = (joinsQuoteAbove(ctx.value, firstStart) ? "\n" : "") + "> [!" + (ctx.arg ?? "NOTE") + "]\n";
@@ -355,6 +366,27 @@ export function insertFootnote(ctx: EditActionContext): TextEdit | undefined {
   const text = mark + content + separator + mark + ": ";
   const caret = at + text.length;
   return { start: at, end: ctx.value.length, text: text + trailing, selectionStart: caret, selectionEnd: caret };
+}
+
+const ADMONITION_HEAD = /^(\s*(?:`{3,}|:{3,})\{)([a-z]+)\}/u;
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-269
+/** The type word of a MyST admonition head when the caret is on it (the type picker opens there). */
+export function admonitionTypeAt(ctx: EditActionContext): { start: number; end: number; type: string } | undefined {
+  const { lines, index } = lineAt(ctx.value, ctx.selectionStart);
+  const head = ADMONITION_HEAD.exec(lines[index]);
+  if (!head || !ADMONITION_TYPES.includes(head[2])) return undefined;
+  const start = ctx.value.slice(0, ctx.selectionStart).lastIndexOf("\n") + 1 + head[1].length;
+  const end = start + head[2].length;
+  return ctx.selectionStart >= start && ctx.selectionStart <= end ? { start, end, type: head[2] } : undefined;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-269
+/** Changes the type of the admonition head under the caret to `ctx.arg`; nothing else is touched. */
+export function retypeAdmonition(ctx: EditActionContext): TextEdit | undefined {
+  if (!validSelection(ctx) || ctx.arg === undefined || !ADMONITION_TYPES.includes(ctx.arg)) return undefined;
+  const existing = admonitionTypeAt(ctx);
+  return existing && existing.type !== ctx.arg ? retypeEdit(ctx, existing, ctx.arg) : undefined;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-127

@@ -33,3 +33,18 @@ export const CALLOUT_ICONS = {
     "M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 1.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11ZM7.4 4.9 6.34 5.96 8.38 8l-2.04 2.04L7.4 11.1 10.5 8 7.4 4.9Z",
   ),
 };
+
+const ICON_OF_TYPE: Record<string, keyof typeof CALLOUT_ICONS> = {
+  seealso: "arrow",
+  tip: "bulb", hint: "bulb", versionadded: "bulb",
+  important: "star",
+  warning: "triangle", attention: "triangle", versionchanged: "triangle",
+  caution: "octagon",
+  danger: "cross", error: "cross", deprecated: "cross",
+};
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-269
+/** The badge of an admonition or alert type (any case); the information badge when unknown. */
+export function calloutIconFor(type: string): string {
+  return CALLOUT_ICONS[ICON_OF_TYPE[type.toLowerCase()] ?? "info"];
+}

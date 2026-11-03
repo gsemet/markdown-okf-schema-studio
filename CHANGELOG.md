@@ -14,6 +14,9 @@
   lines into an option list `- ( ) ` and back. In the block editor, Enter at the end of an option
   item starts the next line with `- ( ) `, and Enter on an empty option ends the list, as for task
   lists.
+- In the block editor, putting the caret on the type of a GitHub alert (`> [!NOTE]`) or of a MyST
+  admonition (`:::{note}`) lists the types with their icons above it; a pick changes the type only
+  (arrows move, Enter picks, Escape closes).
 
 ## 1.2.0 - 2026-11-01
 

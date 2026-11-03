@@ -67,6 +67,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-265
 - SwRS-MDOKFSTUDIO-PALETTE-266
 - SwRS-MDOKFSTUDIO-PALETTE-267
+- SwRS-MDOKFSTUDIO-PALETTE-269
 - SwRS-MDOKFSTUDIO-TABLE-111
 default_owner_email: gaetan@xeberon.net
 ---
@@ -148,5 +149,6 @@ As a writer, I format and insert Markdown from buttons or keyboard shortcuts wit
   - [SwRS-MDOKFSTUDIO-PALETTE-265](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-265.md): The Full palette mode adds Vega-Lite and Vega chart commands
   - [SwRS-MDOKFSTUDIO-PALETTE-266](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-266.md): Cmd or Ctrl with the slash key toggles a plain HTML comment on the touched lines
   - [SwRS-MDOKFSTUDIO-PALETTE-267](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-267.md): Option toggles a choice list marker on the touched lines
+  - [SwRS-MDOKFSTUDIO-PALETTE-269](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-269.md): Caret on an alert or admonition type lists the types
   - [SwRS-MDOKFSTUDIO-TABLE-111](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-111.md): Column alignment sets the colons of the caret's column
 <!-- okf:links:end -->

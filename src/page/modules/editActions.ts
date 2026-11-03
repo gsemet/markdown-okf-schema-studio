@@ -14,6 +14,8 @@ import {
   type PaletteActionId,
 } from "../../core/palette/paletteActions";
 import {
+  admonitionTypeAt,
+  alertTypeAt,
   insertAdmonition,
   insertAlert,
   insertCodeFence,
@@ -29,6 +31,7 @@ import {
   insertVegaLite,
   insertRule,
   insertToc,
+  retypeAdmonition,
   setHeading,
   toggleCheckbox,
   toggleOption,
@@ -101,6 +104,15 @@ export interface PaletteActionHandler {
    */
   current?(ctx: EditActionContext): string | undefined;
   apply(ctx: EditActionContext): TextEdit | undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-269
+  /**
+   * The type picker: where the type text sits when the caret is on it (the palette then lists the
+   * `options` above it), and `retype`, the edit that writes the chosen `ctx.arg` over it.
+   */
+  typeAt?(ctx: EditActionContext): { start: number } | undefined;
+  retype?(ctx: EditActionContext): TextEdit | undefined;
+  /** Set by the type picker on the action it lists: each option shows the badge of its type. */
+  optionIcons?: boolean;
 }
 
 /** One handler per registered palette action. */
@@ -231,7 +243,8 @@ export function createEditActions(
     // @implements_req SwRS-MDOKFSTUDIO-PALETTE-266
     comment: { apply: toggleComment },
     thread: { apply: (ctx) => insertThread(ctx, threadAuthor) },
-    alert: { apply: insertAlert },
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-269
+    alert: { apply: insertAlert, typeAt: alertTypeAt, retype: insertAlert },
     checkbox: { apply: toggleCheckbox },
     option: { apply: toggleOption },
     htmlTable: { apply: htmlTable },
@@ -242,7 +255,7 @@ export function createEditActions(
     vega: { apply: insertVega },
     columnAlign: { apply: alignColumn },
     kbd: { apply: toggleKbd },
-    admonition: { apply: insertAdmonition },
+    admonition: { apply: insertAdmonition, typeAt: admonitionTypeAt, retype: retypeAdmonition },
     deflist: { apply: insertDefinitionList },
     math: { apply: insertMath },
     sub: { apply: (ctx) => wrapRole(ctx, "sub") },
