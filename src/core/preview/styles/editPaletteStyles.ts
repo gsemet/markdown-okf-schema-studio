@@ -222,6 +222,19 @@ export const EDIT_PALETTE_CSS = `
   cursor: pointer;
 }
 
+/* Type picker (the caret on an alert or admonition type): a badge before each type. */
+.sphinx-preview-edit-palette-menu > button[data-edit-type-icon]::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-inline-end: 0.55em;
+  vertical-align: -0.15em;
+  background: currentColor;
+  -webkit-mask: var(--sphinx-edit-type-icon) center / contain no-repeat;
+  mask: var(--sphinx-edit-type-icon) center / contain no-repeat;
+}
+
 /* Size grid of the Table button: 9 x 9 cells, the hovered rectangle from the top left is lit. */
 .sphinx-preview-edit-palette-menu[data-edit-popover="grid"] {
   min-width: 0;

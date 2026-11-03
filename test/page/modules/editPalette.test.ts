@@ -494,7 +494,12 @@ test("T24: arrow keys move through the visible emoji and back to the filter", ()
 });
 
 // T25: the Alert dropdown at the caret.
-function openGfm(value = "", caret = 0, rect?: { left: number; top: number; bottom: number }): Harness {
+function openGfm(
+  value = "",
+  caret = 0,
+  rect?: { left: number; top: number; bottom: number },
+  mode: EditActionMode = "gfm",
+): Harness {
   const textbox = {
     value, selectionStart: caret, selectionEnd: caret, focused: 0,
     focus() { textbox.focused += 1; },
@@ -512,7 +517,7 @@ function openGfm(value = "", caret = 0, rect?: { left: number; top: number; bott
       textbox.selectionEnd = edit.selectionEnd;
       harness.palette.closePopover();
     },
-    mode: "gfm",
+    mode,
     onLeave: () => { harness.leaves += 1; },
     isInsideFrame: (node) => harness.frame.has(node),
   });
@@ -1060,4 +1065,85 @@ test("CR038: a refused conversion from the slash menu removes the query and tell
   assert.equal(h.textbox.value, source.slice(0, start) + source.slice(start + 5));
   assert.equal(h.notices.length, 1);
   assert.match(h.notices[0], /title/u);
+});
+
+// CR 244: the type picker, a list of types with their icons that opens when the caret is on the
+// type of an alert or an admonition.
+const pickerOptions = (h: Harness): string[] =>
+  options(popover(h.root)!).map((e) => String(e.getAttribute("data-edit-option")));
+const pick = (h: Harness, value: string): void =>
+  options(popover(h.root)!).find((e) => e.getAttribute("data-edit-option") === value)!.dispatch("click", click);
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-269
+test("CR 244: the caret on the type of a GFM alert lists the five types with icons; a pick changes the type only", () => {
+  const h = openGfm("> [!NOTE]\n> Mind the gap", 6);
+  h.palette.updateAvailability();
+  assert.deepEqual(pickerOptions(h), ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"]);
+  for (const item of options(popover(h.root)!)) {
+    assert.ok(item.styles.get("--sphinx-edit-type-icon")?.startsWith("url("), "an icon per type");
+  }
+  assert.equal(h.edits.length, 0, "opening the list edits nothing");
+  pick(h, "WARNING");
+  assert.equal(h.textbox.value, "> [!WARNING]\n> Mind the gap");
+  assert.equal(popover(h.root), undefined);
+  h.palette.updateAvailability();
+  assert.equal(popover(h.root), undefined, "the pick does not reopen the list under the caret");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-269
+test("CR 244: a caret off the type, or in a plain quote, shows no type list", () => {
+  const h = openGfm("> [!NOTE]\n> Mind the gap", 14);
+  h.palette.updateAvailability();
+  assert.equal(popover(h.root), undefined);
+  const quote = openGfm("> Mind the gap", 6);
+  quote.palette.updateAvailability();
+  assert.equal(popover(quote.root), undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-269
+test("CR 244: arrows move, Enter picks and Escape closes the list, which stays closed on the same type", () => {
+  const h = openGfm("> [!NOTE]\n> x", 6);
+  h.palette.updateAvailability();
+  assert.equal(h.palette.handleKey({ key: "ArrowDown" }), true);
+  assert.equal(h.palette.handleKey({ key: "ArrowDown" }), true);
+  assert.equal(h.palette.handleKey({ key: "Enter" }), true);
+  assert.equal(h.textbox.value, "> [!TIP]\n> x");
+  const e = openGfm("> [!NOTE]\n> x", 6);
+  e.palette.updateAvailability();
+  assert.equal(e.palette.handleKey({ key: "Escape" }), true);
+  assert.equal(popover(e.root), undefined);
+  assert.equal(e.textbox.value, "> [!NOTE]\n> x");
+  e.palette.updateAvailability();
+  assert.equal(popover(e.root), undefined, "the key release after Escape does not reopen it");
+  e.textbox.selectionStart = e.textbox.selectionEnd = 12;
+  e.palette.updateAvailability();
+  e.textbox.selectionStart = e.textbox.selectionEnd = 5;
+  e.palette.updateAvailability();
+  assert.ok(popover(e.root), "back on the type, the list opens again");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-269
+test("CR 244: the caret on the type of a MyST admonition lists the admonition types; a pick changes the type only", () => {
+  const h = openGfm(":::{note} Title\nBody\n:::", 6, undefined, "myst");
+  h.palette.updateAvailability();
+  assert.deepEqual(pickerOptions(h), [
+    "note", "tip", "important", "warning", "caution", "danger", "attention", "error", "hint", "seealso",
+  ]);
+  assert.ok(options(popover(h.root)!)[0].styles.get("--sphinx-edit-type-icon")?.startsWith("url("));
+  pick(h, "danger");
+  assert.equal(h.textbox.value, ":::{danger} Title\nBody\n:::");
+  assert.equal(h.edits.length, 1);
+  const off = openGfm(":::{note}\nBody\n:::", 14, undefined, "myst");
+  off.palette.updateAvailability();
+  assert.equal(popover(off.root), undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-269
+test("CR 244: the MyST list does not open in GFM mode, nor the GFM list in strict mode", () => {
+  const gfm = openGfm(":::{note}\nBody\n:::", 6);
+  gfm.palette.updateAvailability();
+  assert.equal(popover(gfm.root), undefined);
+  const strict = openGfm("> [!NOTE]\n> x", 6, undefined, "strict");
+  strict.palette.updateAvailability();
+  assert.equal(popover(strict.root), undefined);
 });
