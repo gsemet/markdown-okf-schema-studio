@@ -70,7 +70,7 @@ The refusal message replaces the diagram, no diagram figure is produced and one 
 | Input | Outcome |
 | --- | --- |
 | Path outside the allowed folders (outside the workspace; Restricted Mode keeps to the document's folder) | a message says the file is outside the folders the preview reads |
-| Absolute path or URL | the message says the path must be a relative path to a local file |
+| Absolute path (a Windows drive path such as C:\diagrams\a.puml included) or URL | the message says the path must be a relative path to a local file |
 | File larger than 5 MiB | the message says the file is larger than the 5 MiB preview limit |
 
 ### Scenario (refusal): Missing file

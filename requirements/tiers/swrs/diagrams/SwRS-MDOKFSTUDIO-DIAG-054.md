@@ -70,7 +70,7 @@ The folders an include may read follow the trust of the workspace.
 | Library name in angle brackets (C4/C4_Context) | reason saying the built-in engine reads no URL and no standard library |
 | URL | same reason: the name is not a local file, the built-in engine reads no URL and no standard library |
 | Name that is empty after trimming (only spaces) | The include names no file. |
-| Absolute path (leading slash) | PlantUML file followed by the name and must be a relative path to a local file |
+| Absolute path (leading slash, or on Windows a drive or UNC path such as C:\diagrams\a.puml) | PlantUML file followed by the name and must be a relative path to a local file |
 
 ### Scenario (refusal): A forged relative from is refused
 - GIVEN an include request with from equal to a relative path
@@ -84,10 +84,6 @@ The folders an include may read follow the trust of the workspace.
 | Path outside the allowed folders | refused with the outside-folders reason and no path is reported for watching |
 | Include file larger than 5 MiB | refused with the reason that the file is larger than the 5 MiB preview limit |
 | Symbolic link in the document's folder that points outside the workspace | refused with the outside-folders reason (links are judged by their real path) |
-
-### Known issues
-
-- Known issue: The check treats any name starting with a letter sequence and a colon as a URL, so a Windows drive path such as C:\diagrams\a.puml is refused as not local.
 
 ### Related requirements
 
