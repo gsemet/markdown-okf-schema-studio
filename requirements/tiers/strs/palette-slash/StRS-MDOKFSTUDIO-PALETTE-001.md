@@ -159,7 +159,7 @@ As a writer, I format and insert Markdown from buttons or keyboard shortcuts wit
   - [SwRS-MDOKFSTUDIO-PALETTE-270](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-270.md): Card form inserts a MyST card
   - [SwRS-MDOKFSTUDIO-PALETTE-271](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-271.md): Grid form inserts a MyST grid of cards
   - [SwRS-MDOKFSTUDIO-PALETTE-272](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-272.md): The Code-block button edits a MyST code-block directive in a form
-  - [SwRS-MDOKFSTUDIO-PALETTE-273](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-273.md): The MyST palette mode adds a Tabs command
+  - [SwRS-MDOKFSTUDIO-PALETTE-273](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-273.md): The MyST palette mode adds a Content tabs command
   - [SwRS-MDOKFSTUDIO-PALETTE-274](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-274.md): The Full palette mode adds a PlantUML diagram command
   - [SwRS-MDOKFSTUDIO-PALETTE-275](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-275.md): Every rendered syntax has a slash menu entry or a documented exception
   - [SwRS-MDOKFSTUDIO-TABLE-111](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-111.md): Column alignment sets the colons of the caret's column

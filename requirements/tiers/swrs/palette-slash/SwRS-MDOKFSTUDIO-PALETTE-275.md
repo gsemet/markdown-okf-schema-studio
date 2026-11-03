@@ -17,7 +17,8 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files: []
+implemented_in_files:
+- src/core/palette/paletteActions.ts
 tested_in_files:
 - test/page/modules/slashSyntaxCoverage.test.ts
 default_owner_email: gaetan@xeberon.net
