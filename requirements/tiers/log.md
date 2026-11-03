@@ -92,6 +92,16 @@
 - Verification: test/session/readOnlyImages.test.ts, test/session/readOnlyImagesSession.test.ts, test/session/readOnlyLocalRoots.test.ts,
   visual scenario trust-security/v04-read-only-images-light-900.
 
+### Schema folder listing: a file added in the same clock step is found
+
+- SwRS-MDOKFSTUDIO-FMSCHEMA-019 (proposed): the listing of a schema folder is no longer kept when
+  the folder's modification time is less than 2 seconds old at the listing. File times advance in
+  clock steps (about 15 ms on Windows, 2 s on FAT), so a schema file added in the same step left
+  the folder's times unchanged and stayed invisible until the next change. Found by the Windows CI
+  job (the test wrote two files in one step).
+- Verification: test/node-services/schemaFiles.test.ts (new test: fails on the previous code,
+  passes now; the caching test ages its folder so it no longer depends on the clock).
+
 ### PlantUML: a Windows drive path is refused as absolute
 
 - SwRS-MDOKFSTUDIO-DIAG-054 (proposed): an include named by a Windows drive or UNC path (such as
