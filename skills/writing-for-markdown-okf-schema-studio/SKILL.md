@@ -38,7 +38,7 @@ with `code --install-extension GaetanSemet.markdown-okf-schema-studio`, or by se
 | Code | fenced code with a language (highlighted), `{code-block}` with `:caption:`, `:linenos:`, `:emphasize-lines:`, `:name:` |
 | Math | `$x^2$`, `$$ ... $$`, `{math}` |
 | Admonitions | `:::{note}` `tip` `warning` `important` `danger` ... with an optional title; fold with `:class: dropdown`; `{versionadded}` `{versionchanged}` `{deprecated}` |
-| Layout | `{card}` (`:header:` `:footer:`), `{grid}` + `{grid-item-card}`, `{tab-set}` + `{tab-item}`, `{figure}`, `{list-table}` |
+| Layout | `{card}` (`:header:` `:footer:`), `{grid}` + `{grid-item-card}` (header `^^^` body `+++` footer), `{tab-set}` + `{tab-item}`, `{figure}`, `{list-table}` |
 | Inline | `{kbd}`, `{ref}` to a `(name)=` label above a heading, definition lists (`Term` then `: text`) |
 | Diagrams | `mermaid` fence, `plantuml` fence (built in, no Java), `{uml} file.puml` |
 | Charts | `vega-lite` and `vega` fences, JSON or YAML, inline `values` or a relative CSV, TSV, JSON file |
@@ -94,11 +94,15 @@ The extension is three layers; each imports only the one below.
 ````markdown
 ::::{grid} 1 1 3 3
 :::{grid-item-card} Phase 1
-:header: Week 1
+Week 1
+^^^
 Parser and schema.
++++
+Owner: core team
 :::
 :::{grid-item-card} Phase 2
-:header: Week 2
+Week 2
+^^^
 Renderer and tests.
 :::
 ::::

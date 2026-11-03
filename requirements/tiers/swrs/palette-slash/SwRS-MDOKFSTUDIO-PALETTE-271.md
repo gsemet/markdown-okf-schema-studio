@@ -41,7 +41,7 @@ When the writer chooses Grid from the MyST palette or the slash menu, the extens
 
 - GIVEN a block editor in the MyST palette mode
 - WHEN the writer presses the Grid button, or chooses Grid in the slash menu (the typed /query is removed first)
-- THEN a form opens under the palette with the fields Columns, Gutter, Cards, Headers, Footers and Links; Insert writes a {grid} directive after the selection, with the columns as its argument, a :gutter: option when the gutter is filled, and one {grid-item-card} per requested card, and selects the title of the first card. Headers, Footers and Links hold one entry per card, separated by |: entry N becomes the :header:, :footer: or :link: option of card N, as in the Card form (SwRS-MDOKFSTUDIO-PALETTE-270), and an empty or missing entry leaves the option out
+- THEN a form opens under the palette with the fields Columns, Gutter, Cards, Headers, Footers and Links; Insert writes a {grid} directive after the selection, with the columns as its argument, a :gutter: option when the gutter is filled, and one {grid-item-card} per requested card, and selects the title of the first card. Headers, Footers and Links hold one entry per card, separated by |: entry N of Links becomes the :link: option of card N, entry N of Headers its header line above a ^^^ separator and entry N of Footers its footer line under a +++ separator after the body (a grid card takes no :header: or :footer: option, unlike the Card form of SwRS-MDOKFSTUDIO-PALETTE-270), and an empty or missing entry leaves the option, line or separator out
 
 ### Scenario (boundary): Refusals and cancel
 
@@ -59,7 +59,7 @@ The vertical bar character inside a value is read as the separator between cards
 
 - Method: test/page/modules/cardGridDirectives.test.ts (generated MyST of the grid, including the per-card header, footer and link, and the validation of each field)
 - Method: test/page/runtimePaletteActions.test.ts (the form opens from the toolbar button and from the slash menu, Insert writes the grid with the per-card options, an invalid value keeps the form open)
-- Criteria: The text written is the {grid} directive the renderer draws as a grid of cards; the Grid button shows in the MyST and Full palette modes only.
+- Criteria: The text written is the {grid} directive the renderer draws as a grid of cards, each with the header and footer typed in the form; the Grid button shows in the MyST and Full palette modes only.
 
 <!-- okf:links:start -->
 ### Links

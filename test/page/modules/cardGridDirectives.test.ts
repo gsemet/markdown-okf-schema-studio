@@ -5,6 +5,8 @@ import { cardEdit, cardText, gridEdit, gridText, validateGrid } from "../../../s
 import { createEditActions } from "../../../src/page/modules/editActions";
 import { createMarkdownTableTools } from "../../../src/page/modules/markdownTable";
 import { isSafeOkfColor } from "../../../src/core/security/spanColors";
+import { renderMyst } from "../../../src/core/render/mystRenderer";
+import { findElements, hasClass, parseHtml, textContent } from "../../core/render/dom";
 
 const ctx = (value: string, at = value.length) =>
   ({ value, selectionStart: at, selectionEnd: at, scope: "block" as const });
@@ -85,7 +87,7 @@ test("the registry lists Card and Grid, with their panel, in the MyST palette on
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
-test("the grid form writes each card's header, footer and link as the card form does", () => {
+test("the grid form writes each card's header and footer with the ^^^ and +++ separators, and its link as an option", () => {
   const { text, titleAt } = gridText({
     columns: "2", gutter: "", cards: "3",
     headers: "Alpha | Beta", footers: "|Footer 2", links: "https://example.org",
@@ -94,13 +96,23 @@ test("the grid form writes each card's header, footer and link as the card form 
     text,
     [
       "::::{grid} 2", "",
-      ":::{grid-item-card} Card 1", ":header: Alpha", ":link: https://example.org", "", "Content", ":::", "",
-      ":::{grid-item-card} Card 2", ":header: Beta", ":footer: Footer 2", "", "Content", ":::", "",
+      ":::{grid-item-card} Card 1", ":link: https://example.org", "", "Alpha", "^^^", "Content", ":::", "",
+      ":::{grid-item-card} Card 2", "", "Beta", "^^^", "Content", "+++", "Footer 2", ":::", "",
       ":::{grid-item-card} Card 3", "", "Content", ":::",
       "::::",
     ].join("\n"),
   );
   assert.equal(text.slice(titleAt, titleAt + 6), "Card 1");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+test("the headers and footers written by the grid form render in their cards", async () => {
+  const { text } = gridText({ columns: "2", gutter: "", cards: "2", headers: "Week 1|Week 2", footers: "Behind a flag|" });
+  const { html } = await renderMyst(text, { sourcePath: "/virtual/main.md", resolveInclude: () => undefined });
+  const parts = (name: string) => findElements(parseHtml(html), (element) => hasClass(element, name)).map((element) => textContent(element).trim());
+  assert.deepEqual(parts("myst-grid-card-header"), ["Week 1", "Week 2"]);
+  assert.deepEqual(parts("myst-grid-card-body"), ["Content", "Content"]);
+  assert.deepEqual(parts("myst-grid-card-footer"), ["Behind a flag"]);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
