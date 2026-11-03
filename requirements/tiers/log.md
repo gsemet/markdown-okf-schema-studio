@@ -10,6 +10,13 @@
 - Verification: the new test fails when `pagePolicyRoot(preview)` is reverted to
   `preview.workspaceRoot` in src/session/features/baselineDiff.ts.
 
+### A +++ line inside a container renders as text
+
+- SwRS-MDOKFSTUDIO-MYST-101 (proposed): a `+++` line inside a MyST directive, a quote, a list item or an
+  alert renders as text instead of throwing and failing the whole render; only a root-level `+++`
+  stays a block break. The card footer separator (SwRS-MDOKFSTUDIO-MYST-100) is unchanged.
+- Verification: test/core/render/blockBreakInContainer.test.ts.
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no
