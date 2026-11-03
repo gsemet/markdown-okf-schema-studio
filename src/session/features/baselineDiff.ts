@@ -9,6 +9,7 @@ import { renderPreviewDocument, type RenderStage } from "../../core/render/rende
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { buildPreviewWebviewHtml } from "../webview";
+import { pagePolicyRoot } from "./rendering";
 
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-006
 /**
@@ -51,7 +52,7 @@ export async function renderBaselineContent(
       result.stage.outputDirectory,
       preview.panel.assets,
       manager.rendering.runtimeContext(result.stage),
-      preview.workspaceRoot,
+      pagePolicyRoot(preview),
       undefined,
       preview.configuration.maxContentWidth,
       false,

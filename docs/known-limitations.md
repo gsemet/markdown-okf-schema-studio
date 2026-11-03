@@ -40,6 +40,11 @@ file, the preview is read-only and the resource root is the folder of the docume
 inside that folder (subfolders included) is read and shown, and an include outside it is
 refused with a warning.
 
+In Restricted Mode (or for a standalone file) the preview still shows images (png, jpg, jpeg, gif,
+webp, svg) from the folder of the document and from the workspace folder, but not from a workspace
+folder that is your home folder or above, and never from a dot-directory. The rule goes by the file
+extension, not by the element that loads it.
+
 `{code-cell}` input renders with its line-numbering and line-emphasis options, but the active-file
 preview does not execute it. Its output is replaced by a warning placeholder and requires a full
 notebook/project build.

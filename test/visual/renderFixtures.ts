@@ -126,9 +126,10 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     listDocuments: (pattern, from) => listGlobDocuments(pattern, path.dirname(from), () => true, from),
   });
 
-  const policy = createPreviewResourcePolicy(documentDirectory, visualRoot);
+  // A read-only preview (Restricted Mode) resolves under the read-only policy, as the host does.
+  const policy = createPreviewResourcePolicy(documentDirectory, visualRoot, options.readOnly === true);
   const resolveResource = (request: string, baseDirectory: string): ResolvedResource | undefined => {
-    const resourcePath = policy.resolveResource(request, baseDirectory);
+    const resourcePath = policy.resolveResource(request, baseDirectory, { image: true });
     if (!resourcePath) {
       return undefined;
     }

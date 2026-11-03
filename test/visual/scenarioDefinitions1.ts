@@ -34,6 +34,7 @@ import { FRONTMATTER_CHANGE_BAR_SCENARIOS } from "./frontmatterChangeBarScenario
 import { FRONTMATTER_COLLAPSE_SCENARIOS } from "./frontmatterCollapseScenarios";
 import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
 import { TOOLBAR_FLOAT_SCENARIOS } from "./toolbarFloatScenarios";
+import { READ_ONLY_IMAGES_SCENARIOS } from "./readOnlyImagesScenarios";
 import { WIDTH_SCROLL_SCENARIOS } from "./widthScrollScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
@@ -460,6 +461,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
   ...FRONTMATTER_COLLAPSE_SCENARIOS,
   ...TOOLBAR_FLOAT_SCENARIOS,
+  ...READ_ONLY_IMAGES_SCENARIOS,
   ...WIDTH_SCROLL_SCENARIOS,
   {
     id: "code-dark-top",

@@ -71,13 +71,36 @@ export function editingBootState(
     : { commentsEnabled: true };
 }
 
-/** Renders, page documents, content patches, status and the pending overlay. */
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
-/** The webview's local resource roots (before the extension bundle): none for a broad read-only root. */
-export function previewLocalResourceRoots(workspaceRoot: string, readOnly: boolean): string[] {
-  return readOnly && isBroadReadOnlyRoot(workspaceRoot) ? [] : [workspaceRoot];
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-007
+/**
+ * The webview's local resource roots (before the extension bundle). A read-only preview loads the
+ * images of the document folder (`resourceRoot`, even a broad one) and of the workspace folder
+ * (`workspaceFolder`, unless it is broad); a trusted one loads from its resource root.
+ */
+export function previewLocalResourceRoots(
+  resourceRoot: string,
+  readOnly: boolean,
+  workspaceFolder?: string,
+): string[] {
+  if (!readOnly) return [resourceRoot];
+  const extra = workspaceFolder !== undefined && workspaceFolder !== resourceRoot
+    && !isBroadReadOnlyRoot(workspaceFolder) ? [workspaceFolder] : [];
+  return [resourceRoot, ...extra];
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-002
+/**
+ * The second root of the resource policy of a page: a read-only preview also loads the images of
+ * its workspace folder (Restricted Mode), a trusted one its workspace root.
+ */
+export function pagePolicyRoot(
+  preview: Pick<PreviewSession, "readOnly" | "workspaceFolder" | "workspaceRoot">,
+): string {
+  return preview.readOnly ? preview.workspaceFolder?.path ?? preview.workspaceRoot : preview.workspaceRoot;
+}
+
+/** Renders, page documents, content patches, status and the pending overlay. */
 export class RenderingController extends PageDocumentController {
   /** Registers the handler of the page's ready report. */
   public register(router: PageMessageRouter): void {
@@ -165,8 +188,13 @@ export class RenderingController extends PageDocumentController {
       },
     );
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
-    // A read-only preview in the home folder or a file-system root loads nothing from it.
-    const localResourceRoots = previewLocalResourceRoots(preview.workspaceRoot, preview.readOnly);
+    // A read-only preview loads images from its document folder and its workspace folder, never from
+    // a broad workspace folder (the home folder, a file-system root).
+    const localResourceRoots = previewLocalResourceRoots(
+      preview.workspaceRoot,
+      preview.readOnly,
+      preview.workspaceFolder?.path,
+    );
     const plantUmlRenderer = result.plantUmlEngine === "builtin" ? "builtin" : "host";
     // Every rendered page loads its runtime and stylesheet from the bundle (PERF-11), and the
     // diagram engines when it has diagrams: the bundle folder is always a resource root.
@@ -202,7 +230,7 @@ export class RenderingController extends PageDocumentController {
       result.stage.outputDirectory,
       preview.panel.assets,
       context,
-      preview.workspaceRoot,
+      pagePolicyRoot(preview),
       preview.frontmatter.result
         ? {
           result: preview.frontmatter.result,

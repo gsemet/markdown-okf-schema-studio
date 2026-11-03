@@ -4,6 +4,16 @@ import * as path from "node:path";
 export interface ResourceRoot {
   label: string;
   directory: string;
+  /** The folder of the previewed document: a read-only preview serves its images even when it is broad. */
+  documentFolder?: boolean;
+}
+
+/** The image formats a read-only preview shows from the workspace root (`<img>` sources). */
+const IMAGE_EXTENSIONS = /\.(?:png|jpe?g|gif|webp|svg)$/iu;
+
+export interface ResourceRequestOptions {
+  /** The request names an image file (by extension): a read-only preview then reaches the workspace root too. */
+  image?: boolean;
 }
 
 export interface SecurityDiagnostic {
@@ -42,6 +52,7 @@ interface CanonicalRoot {
   label: string;
   directory: string;
   realDirectory: string;
+  documentFolder: boolean;
 }
 
 const SCHEME_PATTERN = /^[a-z][a-z\d+.-]*:/i;
@@ -150,9 +161,11 @@ export function isBroadReadOnlyRoot(directory: string): boolean {
 // @implements_req SwRS-MDOKFSTUDIO-MYST-031
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
 /**
- * The policy of one preview. `readOnly` (no workspace folder, or Restricted Mode) narrows it: a
- * broad document folder (see {@link isBroadReadOnlyRoot}) serves no resource at all, and a path
- * with a dot-segment below the root (`.ssh`, `.aws`, `.config`) is refused.
+ * The policy of one preview. `readOnly` (no workspace folder, or Restricted Mode) narrows it: an
+ * include or other resource comes from the document folder only and never from a broad one (see
+ * {@link isBroadReadOnlyRoot}); an image (png, jpg, jpeg, gif, webp, svg) also comes from the
+ * workspace root unless that is broad, and from a broad document folder; a path with a
+ * dot-segment below the root (`.ssh`, `.aws`, `.config`) is always refused.
  */
 export function createPreviewResourcePolicy(
   documentDirectory: string,
@@ -160,7 +173,7 @@ export function createPreviewResourcePolicy(
   readOnly = false,
 ): ResourcePolicy {
   const roots: ResourceRoot[] = [
-    { label: "preview document directory", directory: documentDirectory },
+    { label: "preview document directory", directory: documentDirectory, documentFolder: true },
     ...(workspaceRoot ? [{ label: "workspace root", directory: workspaceRoot }] : []),
   ];
   return new ResourcePolicy(roots, readOnly ? { readOnly: true } : {});
@@ -169,7 +182,7 @@ export function createPreviewResourcePolicy(
 const MAX_FILE_FACTS = 2000;
 
 export interface ResourcePolicyOptions {
-  /** Read-only preview: broad roots serve nothing and dot-segments are refused. */
+  /** Read-only preview: broad roots serve no include, images come from the document and workspace folders, dot-segments are refused. */
   readOnly?: boolean;
 }
 
@@ -191,7 +204,7 @@ export class ResourcePolicy {
       try {
         const directory = path.resolve(root.directory);
         const realDirectory = fs.realpathSync(directory);
-        return [{ label: root.label, directory, realDirectory }];
+        return [{ label: root.label, directory, realDirectory, documentFolder: root.documentFolder === true }];
       } catch {
         diagnostic(
           this.diagnostics,
@@ -222,8 +235,12 @@ export class ResourcePolicy {
     return real;
   }
 
-  public resolveResource(request: string, baseDirectory: string): string | undefined {
-    const resolution = this.resolveResourceDetailed(request, baseDirectory);
+  public resolveResource(
+    request: string,
+    baseDirectory: string,
+    options?: ResourceRequestOptions,
+  ): string | undefined {
+    const resolution = this.resolveResourceDetailed(request, baseDirectory, options);
     return "path" in resolution ? resolution.path : undefined;
   }
 
@@ -233,7 +250,11 @@ export class ResourcePolicy {
    * `resolveResource` with the reason of a refusal (the diagnostic code it records), and for a
    * missing file inside the roots the absolute path it would have, so a caller can watch for it.
    */
-  public resolveResourceDetailed(request: string, baseDirectory: string): ResourceResolution {
+  public resolveResourceDetailed(
+    request: string,
+    baseDirectory: string,
+    options: ResourceRequestOptions = {},
+  ): ResourceResolution {
     const decoded = decodePath(resourcePathPart(request));
     if (!decoded || decoded.includes("\0") || decoded.includes("\\")) {
       diagnostic(
@@ -260,7 +281,11 @@ export class ResourcePolicy {
     }
 
     const candidate = path.resolve(baseDirectory, decoded);
-    const root = this.roots.find((entry) => isWithin(entry.directory, candidate));
+    // A read-only preview reaches the workspace root for images only; everything else stays in
+    // the folder of the document.
+    const image = options.image === true && IMAGE_EXTENSIONS.test(decoded);
+    const reachable = this.readOnly && !image ? this.roots.filter((entry) => entry.documentFolder) : this.roots;
+    const root = reachable.find((entry) => isWithin(entry.directory, candidate));
     if (!root) {
       diagnostic(
         this.diagnostics,
@@ -272,12 +297,13 @@ export class ResourcePolicy {
     }
 
     if (this.readOnly) {
-      if (isBroadReadOnlyRoot(root.directory)) {
+      if (isBroadReadOnlyRoot(root.directory) && !(image && root.documentFolder)) {
         diagnostic(
           this.diagnostics,
           "restricted-root",
           "This read-only preview is in your home folder or a file-system root, so it reads no "
-          + "include or resource; open a folder in the workspace to include files.",
+          + "include or resource except the images next to the document; open a folder in the "
+          + "workspace to include files.",
           request,
         );
         return { refusal: "restricted-root" };
@@ -319,6 +345,23 @@ export class ResourcePolicy {
         request,
       );
       return { refusal: "hidden-path" };
+    }
+
+    // The image exception covers image files: a `.png` that is a link to another kind of file is
+    // not served from the workspace root, nor from a broad document folder.
+    if (
+      this.readOnly
+      && image
+      && (!root.documentFolder || isBroadReadOnlyRoot(root.directory))
+      && !IMAGE_EXTENSIONS.test(realCandidate)
+    ) {
+      diagnostic(
+        this.diagnostics,
+        "resource-outside-root",
+        "A read-only preview reads an image file only, and this link leads to another kind of file.",
+        request,
+      );
+      return { refusal: "resource-outside-root" };
     }
 
     if (!isWithin(root.realDirectory, realCandidate)) {
