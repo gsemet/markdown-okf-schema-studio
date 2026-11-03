@@ -162,7 +162,7 @@ test("the Node load hook patches the MyST packages for Node-run code without wri
   try {
     fs.writeFileSync(path.join(root, "run.mjs"), `${PROBE}\nconsole.log(JSON.stringify({ ...probe(${JSON.stringify(SOURCE)}), html: html() }));\n`);
     const onDisk = fs.readFileSync(path.join(root, "node_modules/markdown-it-myst/dist/directives.js"), "utf8");
-    const register = path.join(projectRoot, "scripts/register-myst-patches.mjs");
+    const register = pathToFileURL(path.join(projectRoot, "scripts/register-myst-patches.mjs")).href;
 
     const hooked = spawnSync(process.execPath, ["--import", register, "run.mjs"], { cwd: root, encoding: "utf8" });
     assert.equal(hooked.status, 0, hooked.stderr);

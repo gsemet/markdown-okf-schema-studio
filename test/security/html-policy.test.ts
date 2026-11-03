@@ -357,7 +357,8 @@ test("resolves parent-relative figure images through the workspace root", () => 
   ]);
   const resolveResource = (request: string, baseDirectory: string) => {
     const resourcePath = policy.resolveResource(request, baseDirectory);
-    return resourcePath ? { path: resourcePath, uri: `webview://${resourcePath}` } : undefined;
+    // A URI path, like asWebviewUri: forward slashes on every platform.
+    return resourcePath ? { path: resourcePath, uri: `webview://${resourcePath.split(path.sep).join("/")}` } : undefined;
   };
   const html = `<figure><img src="../external-img/figure.svg" alt="figure"></figure>`;
   const rewritten = rewriteSphinxHtml(html, {

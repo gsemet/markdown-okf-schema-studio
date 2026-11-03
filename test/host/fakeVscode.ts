@@ -63,6 +63,17 @@ export class Emitter<T> {
   }
 }
 
+/** The URI path of a native path, as `vscode.Uri` writes it: forward slashes, a leading slash before a drive letter. */
+function uriPath(fsPath: string): string {
+  const slashed = fsPath.split(path.sep).join("/");
+  return slashed.startsWith("/") ? slashed : `/${slashed}`;
+}
+
+/** The native path of a URI path, as `vscode.Uri.fsPath` reads it. */
+function nativePath(value: string): string {
+  return path.sep === "/" ? value : value.replace(/^\/(?=[a-z]:)/iu, "").split("/").join(path.sep);
+}
+
 /** `vscode.Uri` for `file:` paths (the only scheme the preview path uses here). */
 export class Uri {
   public static file(fsPath: string): Uri {
@@ -72,7 +83,8 @@ export class Uri {
   public static parse(value: string): Uri {
     const match = /^([a-z][\w+.-]*):(?:\/\/[^/]*)?(.*)$/iu.exec(value);
     if (!match) return new Uri("file", value);
-    return new Uri(match[1]!, decodeURIComponent(match[2] ?? ""));
+    const decoded = decodeURIComponent(match[2] ?? "");
+    return new Uri(match[1]!, match[1] === "file" ? nativePath(decoded) : decoded);
   }
 
   public static joinPath(base: Uri, ...parts: string[]): Uri {
@@ -94,7 +106,7 @@ export class Uri {
   }
 
   public toString(): string {
-    return `${this.scheme}://${encodeURI(this.fsPath)}`;
+    return `${this.scheme}://${encodeURI(this.scheme === "file" ? uriPath(this.fsPath) : this.fsPath)}`;
   }
 
   public toJSON(): unknown {

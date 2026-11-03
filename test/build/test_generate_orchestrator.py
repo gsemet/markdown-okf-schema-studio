@@ -78,7 +78,7 @@ def test_unparsable_header_exits_1_names_path_and_still_writes(changes: Path, ca
     assert run(changes) == 1
     err = capsys.readouterr().err
     assert f"error: {bad / 'STATE.md'}: unparsable STATE.md header (line 2)" in err
-    assert "022-missing/STATE.md: missing STATE.md" in err
+    assert f"{Path('022-missing', 'STATE.md')}: missing STATE.md" in err
     text = output(changes)
     assert "[⚠️ unparsable header](021-bad/STATE.md)" in text
     assert "| [020](020-good/00-request.md) | Good | [🟢 ready" in text

@@ -27,6 +27,12 @@ import {
 } from "../shared/hangWatchdog";
 import { watchLaunch } from "../shared/launchWatchdog";
 
+/**
+ * The dump and the kill read the process list with `ps` and send POSIX signals; Windows has
+ * neither, and the real VS Code jobs that use the watchdog run on Linux.
+ */
+const needsPs = { skip: process.platform === "win32" ? "the hang watchdog reads the process list with ps, which Windows lacks" : false };
+
 function temporaryDirectory(): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), "studio-hang-test-"));
 }
@@ -166,7 +172,7 @@ test("CR 173: processTree selects the roots, the user-data matches and their des
   assert.deepEqual(processTree(processes, [30], [], [31]).map((entry) => entry.pid), [30]);
 });
 
-test("CR 173: the hang dump writes the processes, the log tails, the host state and the heartbeat", async () => {
+test("CR 173: the hang dump writes the processes, the log tails, the host state and the heartbeat", needsPs, async () => {
   const directory = temporaryDirectory();
   try {
     const userData = path.join(directory, "user-data");
@@ -208,7 +214,7 @@ test("CR 173: the hang dump writes the processes, the log tails, the host state 
   }
 });
 
-test("CR 173: a launch whose heartbeat goes stale is dumped, killed with its descendants and failed", async () => {
+test("CR 173: a launch whose heartbeat goes stale is dumped, killed with its descendants and failed", needsPs, async () => {
   const directory = temporaryDirectory();
   const stuck = spawnStuckProcess();
   const grandchild = await stuck.grandchild;
@@ -240,7 +246,7 @@ test("CR 173: a launch whose heartbeat goes stale is dumped, killed with its des
   }
 });
 
-test("CR 173: a launch past its deadline is killed even without any heartbeat; a healthy one passes", async () => {
+test("CR 173: a launch past its deadline is killed even without any heartbeat; a healthy one passes", needsPs, async () => {
   const directory = temporaryDirectory();
   const stuck = spawnStuckProcess();
   const grandchild = await stuck.grandchild;
@@ -261,7 +267,7 @@ test("CR 173: a launch past its deadline is killed even without any heartbeat; a
   }
 });
 
-test("CR 173: without a root pid the watchdog kills the launch found by its user-data directory, not a parallel one", async () => {
+test("CR 173: without a root pid the watchdog kills the launch found by its user-data directory, not a parallel one", needsPs, async () => {
   const directory = temporaryDirectory();
   const dirA = fs.mkdtempSync(path.join(directory, "studio-a-d-"));
   const dirB = fs.mkdtempSync(path.join(directory, "studio-b-d-"));
