@@ -22,6 +22,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-012
 - SwRS-MDOKFSTUDIO-TOOLBAR-014
 - SwRS-MDOKFSTUDIO-TOOLBAR-131
+- SwRS-MDOKFSTUDIO-TOOLBAR-132
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -55,4 +56,5 @@ Readers and editors of a long document want to locate a word or phrase in what t
   - [SwRS-MDOKFSTUDIO-TOOLBAR-012](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-012.md): Replace edits only the matched source spans
   - [SwRS-MDOKFSTUDIO-TOOLBAR-014](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-014.md): Replace is unavailable in a read-only preview
   - [SwRS-MDOKFSTUDIO-TOOLBAR-131](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-131.md): Replace all announces the matches it will skip
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-132](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-132.md): The find and replace fields keep their native editing shortcuts
 <!-- okf:links:end -->

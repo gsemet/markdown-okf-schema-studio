@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-11-03
+
+### Find and replace fields keep their native editing shortcuts
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-132 (new, proposed, CR 236): the native editing keys typed in the find or
+  replace field (select all, copy, cut, paste, undo, redo, caret and word moves, Home, End, Shift
+  with the arrows, delete a word) stop at the bar and keep their default action, so no page
+  listener and no VS Code key forwarding acts on them. The bar's own keys are unchanged.
+- Verification: test/page/modules/findBar.test.ts.
+
 ## 2026-11-01
 
 ### Side-by-side diff: a paragraph removed next to an edited one
