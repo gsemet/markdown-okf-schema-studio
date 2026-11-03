@@ -509,11 +509,22 @@ manually.
 Releases start with a committed version change, not a manually created tag.
 The extension version lives in `package.json`; `package-lock.json` must match it.
 The Python project's version is tooling metadata and is not the extension release version.
+The release notes, the announcement thread and the hero image are prepared in a release change
+request before the version pull request merges: see
+[release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md).
 
 1. Fetch release tags and commit the changes to include in the release:
 
 	```bash
 	git fetch origin --tags
+	```
+
+	Then check that `## Unreleased` in `CHANGELOG.md` has one user-facing line for every
+	`feat` and `fix` commit since the last release tag, and add the missing ones in the release
+	branch (test, CI, build and documentation commits get none):
+
+	```bash
+	git log --format='%h %s' "$(git describe --tags --abbrev=0)"..origin/main | grep -E '^\S+ (feat|fix)'
 	```
 
 2. Calculate the next version with Python Commitizen:
@@ -535,11 +546,20 @@ The Python project's version is tooling metadata and is not the extension releas
 	just version 1.2.3
 	```
 
-	Both commands update the npm manifest and lockfile and create a signed-off commit
-	with subject `chore: version X.Y.Z`, using `git commit -s`. Neither creates a local tag.
-	Only these two files are committed; unrelated staged work stays staged.
-	Commit or stash existing edits to either npm version file before running the command.
+	Both commands update the npm manifest and lockfile and the two plugin manifests
+	(`plugin.json`, `.claude-plugin/plugin.json`), and create a signed-off commit with subject
+	`chore: version X.Y.Z`, using `git commit -s`. Neither creates a local tag.
+	Only these files are committed; unrelated staged work stays staged.
+	Commit or stash existing edits to these version files before running the command.
 	Explicit versions must be stable `X.Y.Z`, newer than the baseline, and not already tagged.
+
+	The commands leave `CHANGELOG.md` alone. Add a `## X.Y.Z - YYYY-MM-DD` heading (the version
+	just computed, today's date) right under `## Unreleased`, so the lines move under it and
+	`## Unreleased` stays empty, then amend the version commit:
+
+	```bash
+	git commit --amend --no-edit -s CHANGELOG.md
+	```
 
 3. Validate the version commit, then push it and merge it into `main`:
 

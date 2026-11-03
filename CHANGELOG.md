@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 1.3.0 - 2026-11-03
+
+- On a narrow pane the table of contents, when its toolbar toggle is on, shows as a thin rail on the
+  right with one tick per heading and the current section highlighted; hovering or focusing the rail
+  opens the table of contents above the text, and a click on a tick goes to that heading. Wide panes
+  keep the column.
+- A button next to the "Frontmatter properties" title collapses and expands the properties table. It
+  stays collapsed while the document is open and shows again after a reload or when a document opens.
+- In Restricted Mode, images next to the document or in the workspace folder now display, including
+  file names with spaces. Includes, files that are not images and hidden folders such as `.ssh` stay
+  refused.
+- Table row and column handles in edit mode follow the table's real edges, also after the table breaks
+  out of the column or after a row or column move.
+- Select all, copy, cut, paste, undo, redo and word moves typed in the find and replace fields act on
+  those fields only, instead of the page or the editor behind the bar.
+- A schema file added to the schema folder right after another change is found on the next render.
+- On Windows, a PlantUML include or `{uml}` file named by a drive path such as `C:\diagrams\a.puml` now
+  says it must be a relative path to a local file.
 - New Content tabs button in the MyST edit bar (`/tab-set` in the slash menu) inserts a tab set of two tabs, and a PlantUML diagram button in the Full edit bar (`/plantuml`) inserts a sequence diagram.
 - A `+++` line inside a directive, a quote, a list item or an alert no longer breaks the render of the
   whole document: it shows as text, and only a `+++` line at the root of the document stays a block break.
