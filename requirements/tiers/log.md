@@ -86,6 +86,14 @@
 - Verification: test/page/modules/codeBlockDirective.test.ts, test/page/runtimeCodeBlockPanel.test.ts,
   test/page/modules/editActions.test.ts, test/page/modules/editPalette.test.ts.
 
+### Auto keeps a table in the column when its minimum widths fit
+
+- SwRS-MDOKFSTUDIO-LAYOUT-044 (new, proposed): in Auto a table stays in the column when the sum of its
+  column minimums fits (token column: widest cell, never wraps; prose column: about 24 characters;
+  code block in a cell: natural width) and breaks out to its natural width otherwise.
+- SwRS-MDOKFSTUDIO-LAYOUT-023 (changed): a table whose minimums fit is not widened.
+- Verification: test/page/tableBreakout.test.ts.
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no

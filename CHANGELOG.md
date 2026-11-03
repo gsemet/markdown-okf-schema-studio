@@ -18,6 +18,9 @@
   language, line numbers, emphasized lines, caption and name of a `{code-block}` directive. With the
   caret in a directive it edits that block's options and leaves the other options and the code
   untouched; elsewhere it inserts a new directive.
+- In Auto width, a table stays in the reading column when its columns fit (short columns keep their
+  text on one line, prose wraps) and only breaks out when it needs more room, such as a cell with a
+  code block.
 - A new Option button in the edit bar (GFM and MyST palettes, next to Checkbox) turns the selected
   lines into an option list `- ( ) ` and back. In the block editor, Enter at the end of an option
   item starts the next line with `- ( ) `, and Enter on an empty option ends the list, as for task
