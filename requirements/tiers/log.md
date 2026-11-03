@@ -92,6 +92,16 @@
 - Verification: test/session/readOnlyImages.test.ts, test/session/readOnlyImagesSession.test.ts, test/session/readOnlyLocalRoots.test.ts,
   visual scenario trust-security/v04-read-only-images-light-900.
 
+### PlantUML: a Windows drive path is refused as absolute
+
+- SwRS-MDOKFSTUDIO-DIAG-054 (proposed): an include named by a Windows drive or UNC path (such as
+  C:\diagrams\a.puml) is refused with the absolute-path reason (must be a relative path to a local
+  file) instead of the URL reason; the known issue that described the old refusal is removed.
+- SwRS-MDOKFSTUDIO-DIAG-068 (proposed): the absolute-path row of the {uml} file refusals names the
+  Windows drive path, which now gets that message instead of could not be read.
+- Verification: test/core/render/plantUmlIncludes.test.ts and test/core/render/plantUmlFile.test.ts
+  pass on Windows (they build the absolute path natively) and on Linux; `just check` passes on both.
+
 ## 2026-11-01
 
 ### Side-by-side diff: a paragraph removed next to an edited one

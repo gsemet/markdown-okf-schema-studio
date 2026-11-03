@@ -26,6 +26,11 @@ const MAX_FILE_MIB = Math.round(MAX_INCLUDED_FILE_BYTES / (1024 * 1024));
 
 /** Why a local PlantUML file is not read, for the preview message. */
 export function describePlantUmlFileRefusal(request: string, refusal: Refusal): string {
+  // An absolute path is refused for being absolute, whatever the policy saw first: a Windows
+  // drive path looks like a scheme (C:) and its backslashes like an undecodable path.
+  if (path.isAbsolute(request)) {
+    return `PlantUML file ${request} must be a relative path to a local file.`;
+  }
   switch (refusal) {
     case "missing-resource":
       return `PlantUML file not found: ${request}.`;
@@ -83,7 +88,8 @@ export function resolvePlantUmlInclude(
   if (!name) {
     return { ok: false, reason: "The include names no file." };
   }
-  if (NOT_LOCAL.test(name)) {
+  // A Windows drive path (C:\...) is absolute, not a URL: the policy refuses it below.
+  if (!path.isAbsolute(name) && NOT_LOCAL.test(name)) {
     return {
       ok: false,
       reason: `${name} is not a local file: the built-in PlantUML engine reads no URL and no standard library.`,
