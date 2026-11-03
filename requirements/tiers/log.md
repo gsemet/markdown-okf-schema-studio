@@ -18,6 +18,8 @@
   table.
 - Verification: test/core/frontmatter/propertiesTable.test.ts, test/page/runtimeFrontmatterFields.test.ts,
   test/visual/frontmatterCollapseScenarios.ts.
+- Owner decision after review: the toggle uses a down-pointing triangle when expanded and a
+  right-pointing one when collapsed, not the Description column's left-pointing icon (SwRS-MDOKFSTUDIO-FMSCHEMA-090 verification notes).
 
 ## 2026-11-01
 

@@ -228,7 +228,7 @@ export function renderPropertiesTable(
     : "";
   const descriptionToggle = '<button type="button" data-okf-description-toggle aria-expanded="true" aria-label="Collapse Description column" title="Collapse Description column"><span aria-hidden="true" class="okf-description-collapse">&#9664;</span><span aria-hidden="true" class="okf-description-expand">&#9654;</span></button>';
   // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
-  const frontmatterToggle = '<button type="button" data-okf-frontmatter-toggle aria-expanded="true" aria-label="Collapse frontmatter properties" title="Collapse frontmatter properties"><span aria-hidden="true" class="okf-frontmatter-collapse">&#9664;</span><span aria-hidden="true" class="okf-frontmatter-expand">&#9654;</span></button>';
+  const frontmatterToggle = '<button type="button" data-okf-frontmatter-toggle aria-expanded="true" aria-label="Collapse frontmatter properties" title="Collapse frontmatter properties"><span aria-hidden="true" class="okf-frontmatter-collapse">&#9660;</span><span aria-hidden="true" class="okf-frontmatter-expand">&#9654;</span></button>';
   const header = withDocs
     ? `<thead><tr><th scope="col">Name</th><th scope="col"><span class="okf-column-heading">Value<span class="okf-description-restore">${descriptionToggle}</span></span></th><th scope="col"><span class="okf-column-heading">Description${descriptionToggle}</span></th></tr></thead>`
     : `<thead><tr><th scope="col">Names</th><th scope="col">Values</th></tr></thead>`;

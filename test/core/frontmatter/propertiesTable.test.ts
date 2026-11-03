@@ -919,4 +919,5 @@ test("the properties header carries one keyboard-reachable toggle that collapses
   assert.equal((markup.match(/data-okf-frontmatter-toggle/gu) ?? []).length, 1);
   assert.match(markup, /<button type="button" data-okf-frontmatter-toggle aria-expanded="true" aria-label="Collapse frontmatter properties" title="Collapse frontmatter properties">/u);
   assert.ok(markup.indexOf("data-okf-frontmatter-toggle") < markup.indexOf("<table"), "the toggle sits in the header, above the table");
+  assert.match(markup, /class="okf-frontmatter-collapse">&#9660;<\/span><span aria-hidden="true" class="okf-frontmatter-expand">&#9654;<\/span>/u, "the frontmatter toggle points down when expanded and right when collapsed");
 });
