@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A cell editor opened in a table that breaks out of the column stays in view when the table goes
+  back into the column for the edit.
+
 ## 1.3.0 - 2026-11-03
 
 - On a narrow pane the table of contents, when its toolbar toggle is on, shows as a thin rail on the

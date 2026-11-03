@@ -517,6 +517,8 @@ export interface EditorChrome {
 export interface TableCellEditor {
   switchTableCell(edit: BlockEdit, selectedCell: HTMLTableCellElement, caretPosition: CaretPosition): void;
   renderTableCellEditor(edit: BlockEdit): void;
+  /** Brings the open cell editor back inside its table's scroll box after a layout pass. */
+  revealOpenCell(): void;
   /** Binds the pointer tracking and the Escape key of the cell editor. */
   bindKeys(): void;
 }

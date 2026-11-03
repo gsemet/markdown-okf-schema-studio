@@ -164,6 +164,7 @@ export async function run(): Promise<void> {
       probe: () => scenarioPerformanceProbe(page),
       "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
       "table-moves": () => scenarioTableMoves(page),
+      "wide-table-tab": () => scenarioWideTableTab(page, evidence),
       "find-after-click": () => scenarioFindRightAfterClick(page),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
       "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),

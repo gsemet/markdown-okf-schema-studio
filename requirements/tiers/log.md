@@ -2,6 +2,14 @@
 
 ## 2026-11-03
 
+### An open cell editor stays in view when its table leaves the breakout
+
+- SwRS-MDOKFSTUDIO-TABLE-035: the reveal of the open cell and its editor runs again after every
+  Auto width layout pass. Opening a cell editor takes the table out of its Auto breakout, so the box
+  narrows to the column after the first reveal and the editor could end past its right edge.
+- Verification: test/page/runtimeTableCellEditor.test.ts "a layout pass that narrows the table box
+  brings the open cell editor back inside it" fails without the call from the layout pass.
+
 ### Grid form card headers and footers
 
 - SwRS-MDOKFSTUDIO-PALETTE-271: the Grid form writes each card's header and footer with the `^^^` and
