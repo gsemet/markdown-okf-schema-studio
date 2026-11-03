@@ -602,6 +602,8 @@ export interface TableRowMove {
    * none otherwise.
    */
   refresh(): void;
+  /** Places the handles again on the boxes the tables have now (a breakout or a render moved them). */
+  reposition(): void;
   /** Takes the table source a move asked for; false when the message is not for a move. */
   receiveSource(message: PreviewEditSourceMessage): boolean;
 }

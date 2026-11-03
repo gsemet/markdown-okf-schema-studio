@@ -24,6 +24,8 @@ export function installWidthMode(
   },
   context: WidthModeContext,
   onChange: () => void,
+  // Called at the end of every layout pass: a breakout or its removal moves the elements around.
+  onLayout: () => void = () => undefined,
 ): { mode(): string; update(): void } {
   const modes = ["margin", "auto", "full"];
   const labels: Record<string, string> = { margin: "Margin", auto: "Auto", full: "Full width" };
@@ -106,7 +108,7 @@ export function installWidthMode(
 
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
-  const update = (): void => {
+  const measureWide = (): void => {
     const content = document.getElementById(contentId);
     const wrappers = content && mode === "auto" ? eligibleWrappers(content) : undefined;
     // The measure below uncaps each wrapper, which makes the browser reset its sideways scroll.
@@ -178,6 +180,11 @@ export function installWidthMode(
       marked.add(wrapper);
     });
     restoreScroll(scrolled);
+  };
+
+  const update = (): void => {
+    measureWide();
+    onLayout();
   };
 
   const apply = (): void => {

@@ -36,6 +36,7 @@ import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
 import { TOOLBAR_FLOAT_SCENARIOS } from "./toolbarFloatScenarios";
 import { READ_ONLY_IMAGES_SCENARIOS } from "./readOnlyImagesScenarios";
 import { WIDTH_SCROLL_SCENARIOS } from "./widthScrollScenarios";
+import { BREAKOUT_HANDLE_SCENARIOS } from "./breakoutHandleScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   {
@@ -463,6 +464,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...TOOLBAR_FLOAT_SCENARIOS,
   ...READ_ONLY_IMAGES_SCENARIOS,
   ...WIDTH_SCROLL_SCENARIOS,
+  ...BREAKOUT_HANDLE_SCENARIOS,
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",

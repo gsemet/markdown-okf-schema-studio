@@ -851,6 +851,19 @@ export const WIDE_ROW_HANDLE_ASSERTIONS: ContentAssertion[] = [
   { message: "every table is inside the pane", selector: `${MAIN} table`, insidePane: true },
 ];
 
+const BREAKOUT_TABLE = "document.querySelector('#sphinx-myst-preview-content table[data-okf-row-handles]')";
+
+/** CR 240: a table that broke out of the margin keeps its handles on its real left edge and top. */
+export const BREAKOUT_HANDLE_ASSERTIONS: ContentAssertion[] = [
+  { message: "with the handles placed in edit mode, the Width button breaks the table out of the column in Auto", selector: `${MAIN} table[data-okf-row-handles="true"]`, count: 1,
+    expr: `(() => { if (!document.querySelector('[data-okf-row-handle-layer] .okf-table-row-handle')) return false; const table = ${BREAKOUT_TABLE}; const before = table.getBoundingClientRect().width; const button = document.querySelector('[data-sphinx-preview-width-toggle]'); for (let click = 0; click < 3 && document.documentElement.getAttribute('data-sphinx-preview-width') !== 'auto'; click += 1) button.click(); return table.hasAttribute('data-sphinx-preview-wide') && table.getBoundingClientRect().width > before + 20; })()` },
+  { message: "each of the three body rows shows a handle", selector: ROW_HANDLES, count: 3, visible: true },
+  { message: "every row handle sits on the table's real left edge, centred on its row", selector: ROW_HANDLES, min: 1,
+    expr: `${HANDLE_GEOMETRY} && [...document.querySelectorAll('[data-okf-row-handle-layer] .okf-table-row-handle')].every((handle) => Math.abs(handle.getBoundingClientRect().right - ${BREAKOUT_TABLE}.getBoundingClientRect().left) <= 12)` },
+  { message: "each of the five columns shows a handle centred on its header cell and above the table", selector: "[data-okf-row-handle-layer] .okf-table-col-handle", count: 5, visible: true,
+    expr: `(() => { const table = ${BREAKOUT_TABLE}; const top = table.getBoundingClientRect().top; return [...document.querySelectorAll('[data-okf-row-handle-layer] .okf-table-col-handle')].every((handle) => { const cell = table.rows[0].cells[Number(handle.dataset.okfCol)].getBoundingClientRect(); const box = handle.getBoundingClientRect(); return Math.abs((box.left + box.width / 2) - (cell.left + cell.width / 2)) <= 2 && box.bottom <= top + 1; }); })()` },
+];
+
 /** CR 112: the edit bar's buttons carry the slide-in tooltip, and a horizontal rule is easy to hit. */
 export const EDIT_BAR_TOOLTIP_ASSERTIONS: ContentAssertion[] = [
   { message: "every button of the open edit bar carries a data-tooltip (the floating toolbar's slide-in tooltip)", selector: ".sphinx-preview-edit-palette > button", min: 5,

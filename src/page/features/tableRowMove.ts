@@ -579,5 +579,13 @@ export function installTableRowMove(rt: PageRuntime): TableRowMove {
     }
   }
 
-  return { refresh, receiveSource };
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-002
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-007
+  // The width mode lets a table break out of the column, or takes it back, after the handles were
+  // placed: they follow the table's real box again, at once.
+  function reposition(): void {
+    if (entries.length > 0) position();
+  }
+
+  return { refresh, reposition, receiveSource };
 }

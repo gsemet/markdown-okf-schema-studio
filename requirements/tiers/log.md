@@ -2,6 +2,15 @@
 
 ## 2026-11-03
 
+### Table handles follow the real edges of a table that breaks out of the margin
+
+- SwRS-MDOKFSTUDIO-TABLE-002 and SwRS-MDOKFSTUDIO-TABLE-007 (proposed): the row and column handles are
+  placed again each time the width mode measures the page, so a table that breaks out of the
+  margin (or returns to the column) after the handles were placed, as after a row or column move
+  rendered the page again, keeps them on its real left edge and top.
+- Verification: test/page/runtimeTableRowMove.test.ts, scenario
+  table-editing/v26-handles-breakout-table-auto-light-900.
+
 ### Find and replace fields keep their native editing shortcuts
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-132 (new, proposed, CR 236): the native editing keys typed in the find or
