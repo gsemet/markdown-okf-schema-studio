@@ -2,12 +2,25 @@
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def _bash() -> str:
+    """The bash that runs the workflow scripts. On Windows a bare ``bash`` finds the WSL launcher
+    of System32 before PATH, so take the first bash.exe on PATH outside it (Git's)."""
+    if os.name != "nt":
+        return "bash"
+    for directory in os.environ.get("PATH", "").split(os.pathsep):
+        candidate = Path(directory) / "bash.exe"
+        if directory and "system32" not in directory.lower() and candidate.is_file():
+            return str(candidate)
+    return "bash"
 WORKFLOWS = sorted((ROOT / ".github/workflows").glob("*.yml"))
 USES = re.compile(r"^\s*(?:-\s+)?uses:\s*(\S+)(.*)$")
 PINNED = re.compile(r"^[\w.-]+/[\w./-]+@[0-9a-f]{40}$")
@@ -192,7 +205,7 @@ def test_release_dispatch_can_publish_placeholder_notes(tmp_path: Path) -> None:
     assert set(notes_input["options"]) == {"generated", "placeholder"}
     step = _step("Write placeholder release notes")
     assert str(step["if"]) == f"{DISPATCH} && inputs.notes == 'placeholder'"
-    subprocess.run(["bash", "-euo", "pipefail", "-c", step["run"]], cwd=tmp_path, check=True)
+    subprocess.run([_bash(), "-euo", "pipefail", "-c", step["run"]], cwd=tmp_path, check=True)
     spec = importlib.util.spec_from_file_location("release_notes", ROOT / "scripts/release_notes.py")
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
@@ -219,7 +232,7 @@ def _verify_tag(repository: Path, tag: str) -> int:
     )
     assert "${{" not in script
     return subprocess.run(
-        ["bash", "-c", script],
+        [_bash(), "-c", script],
         cwd=repository,
         env={**os.environ, "RELEASE_TAG": tag},
         capture_output=True,
@@ -578,7 +591,7 @@ def test_refused_tag_names_each_heavy_result_in_the_job_summary(tmp_path: Path) 
     }
     summary = tmp_path / "summary.md"
     result = subprocess.run(
-        ["bash", "-e", "-c", refuse["run"]],
+        [_bash(), "-e", "-c", refuse["run"]],
         env={**os.environ, "GITHUB_STEP_SUMMARY": str(summary), "CHECKS": "failure", "INTEGRATION": "failure",
              "STRESS": "skipped", "RUN_ID": "4242"},
         capture_output=True,
@@ -731,7 +744,7 @@ def _find_reports(tmp_path: Path, **env: str) -> tuple[int, dict[str, str], str]
     calls.write_text("")
     step = _pages_step("Find the end-to-end reports")
     result = subprocess.run(
-        ["bash", "-c", step["run"]],
+        [_bash(), "-c", step["run"]],
         env={**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}", "GITHUB_OUTPUT": str(output),
              "GITHUB_RUN_ID": "42", "GITHUB_REPOSITORY": "o/r", "UV_CALLS": str(calls), "SELECTION": "",
              "REQUESTED_RUN_ID": "", "FROM_CALLER": "false", "CALLER_ARTIFACT": "", **env},
