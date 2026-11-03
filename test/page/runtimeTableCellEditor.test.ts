@@ -843,6 +843,20 @@ test("a cell already inside the table box does not scroll it; a target wider tha
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+test("a layout pass that narrows the table box brings the open cell editor back inside it", () => {
+  const opened = openWideTableForReveal();
+  // Cell 150..350, editor 150..370: 20 px past the 50..350 box, so the open scrolled it 36 px.
+  assert.equal(opened.table.scrollLeft, 370 - (350 - 16));
+  // The table leaves its breakout while a cell is edited: the box narrows to 50..310.
+  opened.table.clientWidth = 260;
+  opened.table.rectProvider = () => ({ top: 100, height: 100, left: 50, width: 260 });
+  opened.harness.dispatchWindow("resize");
+  opened.harness.flushFrames();
+  // Editor 114..334 is 24 px past the new right edge.
+  assert.equal(opened.table.scrollLeft, 36 + 334 - (310 - 16));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
 test("a click on a partly hidden cell and an editor opening in a hidden cell scroll the table box to it", () => {
   const clicked = openWideTableForReveal();
   clicked.table.scrollLeft = 400;

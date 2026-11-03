@@ -290,7 +290,10 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const widthMode = installWidthMode(document, window, vscode, context, () => {
     firstClearance.update();
     keepReadingLine();
-  }, () => rt.tableRowMove?.reposition());
+  }, () => {
+    rt.tableRowMove?.reposition();
+    rt.tableCellEditor?.revealOpenCell();
+  });
   // The TOC column changes the available width: re-measure Auto and keep the reading line.
   const tocColumn = installTocColumn(document, window, vscode, context, (heading) => rt.scroll.revealElement(heading), () => {
     firstClearance.update();

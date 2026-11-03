@@ -20,7 +20,6 @@ import { interruptionSince, type PageWitness, type StepVerdict, type TraceEntry,
 import {
   disposeActivePreviewForTests,
   getActivePreviewForTests,
-  storedEditModeForTests,
 } from "./extensionApi";
 import {
   bufferText,
@@ -49,10 +48,12 @@ async function captureNow(evidence: Evidence, page: Page, id: string, note: stri
   await withCurrentFrame(page, (frame) => evidence.capture(page, frame, id, note));
 }
 
-/** Edit mode off in the page, and the workspace remembers it off for the next preview. */
+/**
+ * Edit mode off in the page. Every preview opens in preview mode, so the stored edit mode does not
+ * matter here; a page already in preview reports nothing, so the stored value is not awaited.
+ */
 async function leaveEditMode(page: Page): Promise<void> {
   if (await findCurrentFrame(page) !== undefined) await setEditMode(page, false);
-  await waitFor("the workspace to remember edit mode off", () => storedEditModeForTests() !== true);
 }
 
 /** The ready preview of `document`, with the page loaded for its current render. */

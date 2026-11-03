@@ -541,6 +541,14 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
   return {
     switchTableCell,
     renderTableCellEditor,
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+    // A layout pass can resize the box under an open editor (the edited table leaves its Auto
+    // breakout): the cell and its editor are brought back inside it.
+    revealOpenCell() {
+      const edit = state.activeBlockEdit;
+      if (!edit || edit.finishing || !edit.selectedCell) return;
+      revealCellInTable(edit.selectedCell, edit.element);
+    },
     bindKeys() {
       document.addEventListener("pointerdown", () => {
         lastPointerDownAt = Date.now();
