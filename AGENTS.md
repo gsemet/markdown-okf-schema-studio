@@ -72,7 +72,8 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 - When picking up backlog work, change requests or PRs (`.agents/changes/`), including Parallel
   Change Requests Orchestration:
   [change-requests-lifecycle.guidelines.md](.agents/guidelines/change-requests-lifecycle.guidelines.md)
-- When preparing a release (release notes, announcement thread, hero image):
+- When preparing or running a release (release driver, release notes, announcement thread, hero
+  image):
   [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md)
 - When adding, removing or changing a rendered syntax (directive, role, fence language, marker,
   HTML element, palette mode, limit): update the writing skill `skills/writing-for-markdown-okf-schema-studio/`

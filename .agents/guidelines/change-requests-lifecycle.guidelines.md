@@ -55,6 +55,7 @@ Unless specified by user through your context otherwise, here are the default ro
 | User | 1 | — | —  | — |
 | Main session | 1 | Opus 5.5 | Opus 5.5 (copilot) | starts drivers, lands CRs, edits a CR worktree |
 | Orchestrator (foreman) | 1, in a nested session | Sonnet 5.5 | Sonnet 5.5 (copilot) | runs long commands, codes, reviews, commits, merges PRs |
+| Release driver | 1 per release | Sonnet | Sonnet 5.5 (copilot) | codes, reviews, asks the owner between the notes review and the publication (except a real blocker) |
 | CR driver | 1 per CR | Sonnet | Sonnet 5.5 (copilot)  | codes, reviews, touches another CR |
 | Coder | 1 per round | Sonnet | GPT 5.6 Luna (copilot) | commits, pushes, lives past its round |
 | Reviewer | 1 per round | Sonnet | GPT 6.1 Sol (copilot) | edits files, lives past its round |
@@ -66,6 +67,44 @@ Unless specified by user through your context otherwise, here are the default ro
 - **Never move a task up a level**: each role does only its own row, even for a single CR and even
   when a child fails. A failing child is restarted (see "Supervision"), never replaced by its
   parent. If sub-agents cannot be started at all, the agent returns "blocked" to its parent.
+
+## Release driver
+
+A special driver, started by the main session when the owner says "release X". It runs the release
+end to end, so the owner only agrees on the version, reviews the notes and the thread, and reads
+the result. The steps (notes, thread, merges, heavy run on `main`, version commit, publishing,
+archive) are in [release-process.guidelines.md](release-process.guidelines.md); this section
+covers the role.
+
+- **Owns** the release CR folder `.agents/changes/03-requests/NNN-release-x-y-z/` and its
+  `STATE.md` header. It is the one writer of that header from the notes draft to the archive, and
+  `driver:` is its lock, like for a CR driver.
+- **May merge** the PRs the release needs and the version PR, on the owner's standing permission
+  for release work. It keeps the order of stacks (bottom up) and merges nothing else. It never
+  enables auto-merge and never touches a PR outside the release.
+- **Fixes** go through the normal CR flow: a red heavy job gets a fix CR or PR, with a coder and a
+  separate reviewer per round, started by the release driver like a CR driver does (the lifecycle
+  above, the round limit, escalation to Opus). The release driver never codes or reviews.
+- **Asks the owner nothing** between the notes review and the publication, except a real blocker:
+  the round limit is reached or a product decision is needed. It then returns `status: blocked`
+  with the question and its recommended answer.
+- **Watches** in slices of at most 5 minutes (see "Responsiveness") and rewrites the header at
+  every transition and every slice.
+
+### Release driver prompt (the main session fills the placeholders)
+
+> You are the release driver for release `<X.Y.Z>`. You alone own the release CR folder
+> `<absolute path>` and its `STATE.md` header. Read
+> `.agents/guidelines/change-requests-lifecycle.guidelines.md` ("Release driver", `STATE.md`
+> header, responsiveness), `.agents/guidelines/release-process.guidelines.md`,
+> `.agents/guidelines/ci.guidelines.md` and the release folder (`00-request.md`, `STATE.md`).
+> Resume from the `STATE.md` header and write `driver: <your id>` in it. Follow the steps of
+> "The release driver's steps": notes and thread, monitor and merge the release PRs, a green heavy
+> run on `main` HEAD, then the version commit, then tag, Marketplace and Pages, the published
+> notes and the archive. Start a coder, then a separate reviewer, per round for any fix PR; never
+> code or review yourself. Ask the owner nothing after the notes review except a real blocker.
+> Return with `status: ready` when the release is archived, or `status: blocked` and a question
+> with your recommended answer.
 
 ## Lifecycle
 

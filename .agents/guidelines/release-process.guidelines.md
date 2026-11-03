@@ -1,15 +1,21 @@
 # Release process guidelines
 
 The mechanics of a release (version commit, changelog heading, CI tag, Marketplace publication)
-are in "How to Release" in [CONTRIBUTING.md](../../CONTRIBUTING.md). This guideline covers what
-the owner reviews before the version pull request merges: the release notes, the announcement
-thread and the hero image. The model is release 1.2.0.
+are in "How to Release" in [CONTRIBUTING.md](../../CONTRIBUTING.md). This guideline covers the
+release driver's steps and what the owner reviews before the version pull request merges: the
+release notes, the announcement thread and the hero image. The model is release 1.2.0.
+
+A release is run by the release driver, a special driver started by the main session (role, merge
+rights and prompt: "Release driver" in
+[change-requests-lifecycle.guidelines.md](change-requests-lifecycle.guidelines.md)). The goal: the
+owner says "release X", and the release is almost guaranteed before the version commit exists.
+1.3.0 and 1.3.1 were never tagged because the version push was the first real VS Code run of their
+code.
 
 ## The release change request
 
 Every release has a change request folder, `.agents/changes/03-requests/<NNN>-release-<x>-<y>-<z>/`,
-with the next free CR number. The main session writes it with the owner; there is no Foreman and
-no Driver.
+with the next free CR number. The release driver owns it; there is no Foreman and no CR driver.
 
 | File | Content |
 | --- | --- |
@@ -18,15 +24,40 @@ no Driver.
 | `tweet.md` | The announcement thread, three posts |
 | `images/` | Copies of the images the notes and the thread use |
 
-The order:
+## The release driver's steps
 
-1. Open the folder as soon as the last CRs of the release are in their final round.
-2. Draft the notes and the thread from `CHANGELOG.md` `## Unreleased` and the CR reports.
-3. The version pull request carries the hero image (see below) and the version commit, squashed
-   into one `chore: version X.Y.Z` commit, and its body follows `.github/PULL_REQUEST_TEMPLATE.md`.
-4. The owner reviews `release-notes.md` and `tweet.md` in Studio, then merges the version PR.
-5. After CI has tagged and published the release, replace the generated notes (see "Publishing").
-6. Archive the folder with a `report.md`: tag, release URL, CI run.
+1. The owner says "release X". The main session and the owner agree on the version number, then
+   the main session starts the release driver.
+2. The release driver opens the folder as soon as the version is agreed, and drafts the notes and
+   the thread from `CHANGELOG.md` `## Unreleased` and the CR reports. The owner reviews
+   `release-notes.md` and `tweet.md` in Studio. This is the owner's only step after the version.
+3. The release driver monitors the open PRs that belong to the release and `main`, and merges what
+   the release needs, keeping the order of stacks. The changelog lines go in with the PRs of the
+   release, so they are in `main` before the heavy run. The hero image waits for the version PR
+   (step 5), in the release CR folder or on the `-assets` branch.
+4. When everything is in `main`, it dispatches the heavy run on `main` HEAD and waits for
+   `integration` and `stress` to be green on that exact commit:
+
+   ```bash
+   gh workflow run ci.yml --ref main -f heavy=true
+   gh run list --workflow ci.yml --branch main --limit 3
+   gh run watch <run-id>
+   ```
+
+   Check that the run's `headSha` is the current `main` HEAD; a merge since then starts the step
+   again. A red job: fix PR, merge, run again on the new HEAD. A flake: re-run once
+   (`gh run rerun <run-id> --failed`); if it fails again, treat it as red.
+5. **Only then** the version commit: `just bump-version`, the changelog heading, the version pull
+   request (hero image and version commit squashed into one `chore: version X.Y.Z` commit, body
+   following `.github/PULL_REQUEST_TEMPLATE.md`), squash and merge (see "How to Release" in
+   CONTRIBUTING.md). The heavy run of the version push (CI rule 14) stays the final gate.
+6. It monitors the version push through the tag, the Marketplace publication and Pages, recovering
+   a red heavy job as in [ci.guidelines.md](ci.guidelines.md).
+7. It replaces the generated notes (see "Publishing") and archives the folder with a `report.md`:
+   tag, release URL, CI runs (heavy run on `main`, version push).
+
+Between the notes review (step 2) and the publication (step 7), the driver asks the owner nothing,
+except a real blocker: the round limit is reached or a product decision is needed.
 
 ## Release notes
 
@@ -37,8 +68,10 @@ no internal terms (Foreman, driver, round). Structure, in this order:
    - `<h1 align="center">Markdown OKF-Schema Studio X.Y</h1>`;
    - one bold line naming the two or three headline changes, as verbs
      ("Decide in the page, review as a side-by-side diff, drop files as links.");
-   - one `<sub>` line: `N changes since X.Y'.Z' · VS Code 1.95 or later · MIT`, where N is
-     `git rev-list --count --no-merges vPREVIOUS..vX.Y.Z^` (the version commit does not count).
+   - one `<sub>` line: `N changes since X.Y'.Z' · VS Code 1.95 or later · MIT`, where N counts
+     the commits of `vPREVIOUS..vX.Y.Z^` without merges and without the `chore: version` commits
+     of unpublished versions (for 1.3.2: without the unpublished 1.3.0 and 1.3.1 version commits):
+     `git rev-list --no-merges --grep='^chore: version' --invert-grep --count vPREVIOUS..vX.Y.Z^`.
 2. **Links**, centred, one line: Install from the Marketplace · Read the guide · Full changelog
    (`blob/vX.Y.Z/CHANGELOG.md`) · 1.0 showcase. Then a `---` rule.
 3. **Two to four highlight sections**, `## <emoji> <what the reader can now do>`. Each one says
@@ -58,13 +91,14 @@ Keyboard keys use `<kbd>`. Every changelog line of the release appears once, in 
 Images are committed under `images/readme/` (Git LFS) in the version pull request, so they exist
 at the tag. The published notes link them as
 `https://media.githubusercontent.com/media/gsemet/markdown-okf-schema-studio/vX.Y.Z/images/readme/<file>`,
-which resolves only once the tag exists. In the CR folder, `release-notes.md` links the copies in
-`images/` instead, so the owner can review the page locally.
+which resolves only once the tag exists. Before the version pull request merges, images may
+come from a CR `-assets` branch at a raw URL. In the CR folder, `release-notes.md` links the
+copies in `images/` instead, so the owner can review the page locally.
 
 ### Publishing
 
-CI publishes the release with notes generated by `gh copilot`. Once the release exists, the owner
-(or the main session on the owner's request) replaces them with the reviewed notes:
+CI publishes the release with notes generated by `gh copilot`. Once the release exists, the release
+driver replaces them with the reviewed notes:
 
 ```bash
 sed 's#](images/#](https://media.githubusercontent.com/media/gsemet/markdown-okf-schema-studio/vX.Y.Z/images/readme/#g; s#src="images/#src="https://media.githubusercontent.com/media/gsemet/markdown-okf-schema-studio/vX.Y.Z/images/readme/#g' release-notes.md > release-notes.github.md
