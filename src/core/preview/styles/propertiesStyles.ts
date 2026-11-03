@@ -235,7 +235,7 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
   display: inline;
 }
 
-/* The frontmatter toggle looks like the Description one, beside the title. */
+/* The frontmatter toggle sits beside the title; it points down (▼) when expanded and right (▶) when collapsed. */
 [data-okf-frontmatter-toggle] {
   display: inline-flex;
   align-items: center;

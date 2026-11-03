@@ -68,6 +68,7 @@ When a writer presses the toggle next to the Frontmatter properties title, the e
 - Method: `test/core/frontmatter/propertiesTable.test.ts` (one toggle in the title, expanded by default, button markup with aria-expanded, aria-label and title).
 - Method: `test/page/runtimeFrontmatterFields.test.ts` (click collapses and expands, a content patch keeps the state, a fresh page starts expanded).
 - Method: visual scenarios `frontmatter-schema/v28` to `v31` in `test/visual/frontmatterCollapseScenarios.ts` (table hidden and shown, light and dark).
+- Method: the toggle icon is a down-pointing triangle while expanded and a right-pointing triangle while collapsed, unlike the Description column toggle (checked in `test/core/frontmatter/propertiesTable.test.ts`).
 - Criteria: html carries data-okf-frontmatter-collapsed true only after a press; the table computed display is none while collapsed; the toggle aria-expanded is the inverse of the collapsed state.
 
 <!-- okf:links:start -->
