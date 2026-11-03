@@ -87,7 +87,7 @@ When a preview is read-only (created for a document that lies in no workspace fo
 | Affordance | In a read-only preview |
 | --- | --- |
 | Edit button | Rendered greyed: the toolbar keeps the same five rows with 15 buttons, and the Edit button carries aria-disabled true, a dimmed icon and a not-allowed cursor. Its title and tooltip say "Editing is unavailable: this file is not in a trusted workspace" (untrusted workspace) or "Editing is unavailable: this file is not in a folder opened in the VS Code workspace" (file outside every workspace folder). A click does nothing: it is not an edit toggle |
-| Edit mode at start | Off (state.editMode is false whenever the toggle button is greyed), even when the context has initialEditMode true |
+| Edit mode at start | Off (state.editMode is false whenever the toggle button is greyed), even when the saved state holds edit mode true |
 | Edition palette | None built: no element with data-sphinx-edit-palette exists |
 | Palette mode message | previewPaletteModeChanged is never posted |
 | Comment button | Not installed: selecting text shows no Comment button, and Cmd+Alt+M or Ctrl+Alt+M does nothing (the runtime context carries commentsEnabled false and the compose module is not created); same for a preview of a standalone file |
@@ -108,7 +108,7 @@ When a preview is read-only (created for a document that lies in no workspace fo
 | Affordance | In a writable preview |
 | --- | --- |
 | Edit button | Present: the toolbar holds 13 buttons |
-| Edit mode at start | On when the context has initialEditMode true (a page that has the Edit button) |
+| Edit mode at start | Off, or on when the saved state of the same document holds edit mode true (a page that has the Edit button) |
 | Properties table | The name and value cells carry data-okf-edit-cell and the rows say data-okf-editable true |
 | Edit target under the pointer | With edit mode on, a paragraph under the pointer is outlined as the block a click would edit (see SwRS-MDOKFSTUDIO-BLOCK-017) |
 | Popover of a review thread | The reply box and the Resolve and Delete buttons exist |

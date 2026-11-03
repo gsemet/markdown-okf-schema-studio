@@ -182,7 +182,6 @@ export class RenderingController extends PageDocumentController {
       manager.scroll.takePendingPin(preview, result.stage.activeDocumentIdentity, result.stage.activeDocumentRevision),
       {
         pairedTextEditor: manager.scroll.visibleEditorFor(preview) !== undefined,
-        initialEditMode: !preview.readOnly && manager.choices.editMode === true,
         initialPaletteMode: manager.choices.initialPaletteMode(),
         ...editingBootState(preview),
       },

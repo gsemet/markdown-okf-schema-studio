@@ -7,8 +7,7 @@ import { patchMessage } from "./runtimeTestSupport";
 /**
  * Headless attempt to force the `toc` integration flake ("Edit mode did not switch"). It covers
  * rapid clicks on the edit toggle, content patches between and right after them, a page that boots
- * from a stored mode, and a boot where the stored mode and the host's `initialEditMode` disagree
- * (the stored mode wins, `src/page/runtime.ts`). None of them reproduced the flake. This does not
+ * from a saved mode (`src/page/runtime.ts`). None of them reproduced the flake. This does not
  * cover a full re-render of the webview (a theme change) nor a click that never reaches the page,
  * so those stay open: they are only observable in the real window (the `toc-loop` CI job).
  */
@@ -47,17 +46,15 @@ test("a content patch between clicks keeps the mode the last click set", () => {
   assert.equal(harness.editModeButton.getAttribute("data-edit-mode"), "off");
 });
 
-test("a boot where the saved state and the host's initial mode disagree follows the saved state, then clicks switch from it", () => {
-  // A reloaded webview whose saved state is stale: the host asks for "on", the state says "off".
-  const staleOff = createRuntimeHarness({ initialEditMode: true, savedState: { editMode: false } });
-  assert.equal(mode(staleOff), "off");
-  staleOff.editModeButton.dispatch("click");
-  assert.equal(mode(staleOff), "on");
-  assert.deepEqual(editModeMessages(staleOff), [true]);
-  // The other way round: the host asks for "off", the state says "on".
-  const staleOn = createRuntimeHarness({ initialEditMode: false, savedState: { editMode: true } });
-  assert.equal(mode(staleOn), "on");
-  staleOn.editModeButton.dispatch("click");
-  assert.equal(mode(staleOn), "off");
-  assert.deepEqual(editModeMessages(staleOn), [false]);
+test("a boot from a saved state follows it, then clicks switch from it", () => {
+  const savedOff = createRuntimeHarness({ savedState: { editMode: false } });
+  assert.equal(mode(savedOff), "off");
+  savedOff.editModeButton.dispatch("click");
+  assert.equal(mode(savedOff), "on");
+  assert.deepEqual(editModeMessages(savedOff), [true]);
+  const savedOn = createRuntimeHarness({ savedState: { editMode: true } });
+  assert.equal(mode(savedOn), "on");
+  savedOn.editModeButton.dispatch("click");
+  assert.equal(mode(savedOn), "off");
+  assert.deepEqual(editModeMessages(savedOn), [false]);
 });

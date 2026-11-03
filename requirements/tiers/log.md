@@ -17,6 +17,14 @@
   stays a block break. The card footer separator (SwRS-MDOKFSTUDIO-MYST-100) is unchanged.
 - Verification: test/core/render/blockBreakInContainer.test.ts.
 
+### A document opens in preview mode, E switches to edit mode
+
+- SwRS-MDOKFSTUDIO-LIFE-172 (proposed): a document always opens in preview mode (only the saved
+  state of the same document, on a reload, keeps edit mode; the stored workspace edit mode is no
+  longer applied at start), and E alone in the preview switches to edit mode. Changed
+  SwRS-MDOKFSTUDIO-LIFE-170 (edit mode row and scenarios) and SwRS-MDOKFSTUDIO-TRUST-001 (edit mode at start). Markers in
+  `src/page/runtime.ts`, `src/page/features/editMode.ts` and `test/page/runtimeOpenInPreview.test.ts`.
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no

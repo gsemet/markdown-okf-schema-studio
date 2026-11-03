@@ -203,8 +203,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
     resumePendingBlockNavigation,
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
     bindButton() {
-      rt.editModeButton?.addEventListener?.("click", () => {
-        const nextEditMode = !state.editMode;
+      const setMode = (nextEditMode: boolean): void => {
         // Posted before the toggle applies: leaving edit mode may post a block save, which stays last.
         host.postMessage({
           type: "previewEditModeChanged",
@@ -219,6 +218,18 @@ export function installEditMode(rt: PageRuntime): EditMode {
           ...(saved && typeof saved === "object" ? saved : {}),
           editMode: state.editMode,
         });
+      };
+      rt.editModeButton?.addEventListener?.("click", () => setMode(!state.editMode));
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-172
+      // E alone, in the preview and outside any text field, switches to edit mode.
+      document.addEventListener("keydown", (event) => {
+        if (event.key?.toLowerCase() !== "e" || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+        if (!rt.editModeButton || state.editMode || event.defaultPrevented) return;
+        const element = event.target instanceof Element ? event.target : undefined;
+        if (element && (["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName)
+          || (element as HTMLElement).isContentEditable)) return;
+        event.preventDefault?.();
+        setMode(true);
       });
     },
     bindHover() {
