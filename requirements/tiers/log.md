@@ -2,6 +2,12 @@
 
 ## 2026-11-03
 
+### Grid form card headers and footers
+
+- SwRS-MDOKFSTUDIO-PALETTE-271: the Grid form writes each card's header and footer with the `^^^` and
+  `+++` separators of a grid card, the syntax the renderer draws (it wrote `:header:` and `:footer:`
+  options, which only a standalone card reads, so they were dropped).
+
 ### Every rendered syntax has a slash entry (CR 248)
 
 - SwRS-MDOKFSTUDIO-PALETTE-273 (new, proposed): the Content tabs action (MyST and Full) inserts a `{tab-set}` of

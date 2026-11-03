@@ -65,15 +65,31 @@ const perCard = (value: string | undefined): string[] => (value ?? "").trim() ==
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-270
 /** The `{card}` text and where the body placeholder starts in it. */
-export function cardText(values: CardValues, colons = ":::", itemName = "card"): { text: string; bodyAt: number } {
+export function cardText(values: CardValues): { text: string; bodyAt: number } {
   const title = oneLine(values.title);
-  let head = colons + "{" + itemName + "}" + (title === "" ? "" : " " + title) + "\n";
+  let head = ":::{card}" + (title === "" ? "" : " " + title) + "\n";
   for (const [name, value] of [["header", values.header], ["footer", values.footer], ["link", values.link]]) {
     const clean = oneLine(value);
     if (clean !== "") head += ":" + name + ": " + clean + "\n";
   }
   head += "\n";
-  return { text: head + "Content\n" + colons, bodyAt: head.length };
+  return { text: head + "Content\n:::", bodyAt: head.length };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-271
+/**
+ * One `{grid-item-card}`: a grid card takes its header and footer from the `^^^` and `+++`
+ * separators of its body, as in sphinx-design (only a standalone `{card}` reads `:header:` and
+ * `:footer:` options); its link stays an option.
+ */
+function gridCardText(title: string, header: string, footer: string, link: string): string {
+  const [cleanHeader, cleanFooter, cleanLink] = [header, footer, link].map(oneLine);
+  return ":::{grid-item-card} " + title + "\n"
+    + (cleanLink === "" ? "" : ":link: " + cleanLink + "\n") + "\n"
+    + (cleanHeader === "" ? "" : cleanHeader + "\n^^^\n")
+    + "Content\n"
+    + (cleanFooter === "" ? "" : "+++\n" + cleanFooter + "\n")
+    + ":::";
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-271
@@ -84,8 +100,7 @@ export function gridText(values: GridValues): { text: string; titleAt: number } 
   const count = Number(values.cards);
   for (let index = 1; index <= count; index += 1) {
     const pick = (value: string | undefined): string => perCard(value)[index - 1] ?? "";
-    const card = { title: "Card " + index, header: pick(values.headers), footer: pick(values.footers), link: pick(values.links) };
-    text += "\n" + cardText(card, ":::", "grid-item-card").text + "\n";
+    text += "\n" + gridCardText("Card " + index, pick(values.headers), pick(values.footers), pick(values.links)) + "\n";
   }
   const titleAt = text.indexOf("Card 1");
   return { text: text + "::::", titleAt };

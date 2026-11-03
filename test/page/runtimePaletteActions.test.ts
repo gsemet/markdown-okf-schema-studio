@@ -963,6 +963,6 @@ test("CR245: the grid form has per-card header, footer and link fields; too many
   directiveField(harness, "links").value = "https://example.org";
   directiveAction(harness, "insert").dispatch("click", { preventDefault: () => undefined });
   assert.equal(directivePanelOf(harness, "grid"), undefined);
-  assert.match(textarea.value, /:::\{grid-item-card\} Card 1\n:header: Alpha\n:link: https:\/\/example\.org\n\nContent/u);
-  assert.match(textarea.value, /:::\{grid-item-card\} Card 2\n:header: Beta\n:footer: End\n\nContent/u);
+  assert.match(textarea.value, /:::\{grid-item-card\} Card 1\n:link: https:\/\/example\.org\n\nAlpha\n\^\^\^\nContent\n:::/u);
+  assert.match(textarea.value, /:::\{grid-item-card\} Card 2\n\nBeta\n\^\^\^\nContent\n\+\+\+\nEnd\n:::/u);
 });
