@@ -260,6 +260,8 @@ export async function scenarioFlushBeforeBack(page: Page, evidence: Evidence): P
       frame.locator("a", { hasText: "the second note" }).click({ modifiers: [MOD] }));
     await waitForPreviewOf(second);
     await waitForRender(second);
+    // Another document opens in preview mode: edit mode is switched on again for it.
+    await setEditMode(page, true);
     await typeIntoBlock(page, "p", "Second body.");
     await clickWithoutBlur(page, "[data-sphinx-preview-back]");
     await waitFor("the typed text to reach the second document", () =>
@@ -313,6 +315,8 @@ export async function scenarioFlushCellAndFrontmatter(page: Page, evidence: Evid
     await waitForPreviewOf(first);
     await waitForRender(first);
     await waitForPageSettled(page, "frontmatter title", first);
+    // Coming back from another document, the preview opens in preview mode.
+    await setEditMode(page, true);
     await withCurrentFrame(page, (frame) =>
       frame.locator('tr[data-okf-field="title"] [data-okf-edit-cell="value"]').click());
     await waitForEditor(page, "[data-okf-frontmatter-editor] textarea, [data-okf-frontmatter-editor] input");
