@@ -1,6 +1,6 @@
 # Update Log
 
-## 2026-11-03 (CR 239)
+## 2026-11-03
 
 ### The TOC shows as a rail on a narrow pane
 
@@ -10,8 +10,6 @@
   the focus left or on Escape; a click on a tick goes to the heading.
 - Verification: test/page/modules/tocColumn.test.ts, test/core/preview/previewStyles.test.ts,
   test/visual/capture_layout_checks.py (scenarios toolbar-navigation/v28 and v29).
-
-## 2026-11-03
 
 ### Table handles follow the real edges of a table that breaks out of the margin
 
