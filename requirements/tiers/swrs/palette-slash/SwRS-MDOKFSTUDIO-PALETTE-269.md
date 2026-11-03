@@ -24,6 +24,7 @@ implemented_in_files:
 - src/page/modules/editPalette.ts
 tested_in_files:
 - test/page/modules/editPalette.test.ts
+- test/visual/admonitionTypePickerScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -53,8 +54,12 @@ When the caret is on the type of a GitHub alert head or of a MyST admonition dir
 
 ### Verification notes
 
-- Method: page test of the palette (`test/page/modules/editPalette.test.ts`).
-- Criteria: the options, their icons, the replaced text and the keys are as above.
+- Method: page test of the palette (`test/page/modules/editPalette.test.ts`) and simulated visual
+  scenarios `palette-slash/v36` to `v39` (`test/visual/admonitionTypePickerScenarios.ts`): the GFM
+  list and the MyST list in the light and dark themes, with the caret on the type of the opened head.
+- Criteria: the options, their icons, the replaced text and the keys are as above. In the visual
+  scenarios the caret is on the first line of the block editor, directly under the edit bar: there
+  is no room above it, so the list sits under the caret line.
 
 <!-- okf:links:start -->
 ### Links

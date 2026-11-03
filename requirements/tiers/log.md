@@ -62,7 +62,8 @@
   alert head or of a MyST admonition directive, a list of the types of that syntax with their
   icons opens above it (arrows move, Enter chooses, Escape closes); a choice replaces the type
   text only.
-- Verification: test/page/modules/editPalette.test.ts.
+- Verification: test/page/modules/editPalette.test.ts and the simulated visual scenarios
+  palette-slash/v36 to v39 (test/visual/admonitionTypePickerScenarios.ts).
 
 ### The TOC shows as a rail on a narrow pane
 
