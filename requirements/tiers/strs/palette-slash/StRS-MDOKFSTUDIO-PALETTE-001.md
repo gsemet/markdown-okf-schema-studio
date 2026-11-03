@@ -70,6 +70,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-269
 - SwRS-MDOKFSTUDIO-PALETTE-270
 - SwRS-MDOKFSTUDIO-PALETTE-271
+- SwRS-MDOKFSTUDIO-PALETTE-272
 - SwRS-MDOKFSTUDIO-TABLE-111
 default_owner_email: gaetan@xeberon.net
 ---
@@ -154,5 +155,6 @@ As a writer, I format and insert Markdown from buttons or keyboard shortcuts wit
   - [SwRS-MDOKFSTUDIO-PALETTE-269](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-269.md): Caret on an alert or admonition type lists the types
   - [SwRS-MDOKFSTUDIO-PALETTE-270](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-270.md): Card form inserts a MyST card
   - [SwRS-MDOKFSTUDIO-PALETTE-271](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-271.md): Grid form inserts a MyST grid of cards
+  - [SwRS-MDOKFSTUDIO-PALETTE-272](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-272.md): The Code-block button edits a MyST code-block directive in a form
   - [SwRS-MDOKFSTUDIO-TABLE-111](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-111.md): Column alignment sets the colons of the caret's column
 <!-- okf:links:end -->

@@ -29,6 +29,8 @@ import type { installCommentThreads } from "../modules/commentThreads";
 import type { ContentMorph } from "../modules/contentMorph";
 import type { EditActionRegistry } from "../modules/editActions";
 import type { EditPalette } from "../modules/editPalette";
+import type { CodeBlockPanel } from "../modules/codeBlockPanel";
+import type { CodeBlockTools } from "../modules/codeBlockDirective";
 import type { FigureTools } from "../modules/figureDirective";
 import type { FigureEditButton, FigurePanel } from "../modules/figurePanel";
 import type { installFirstClearance } from "../modules/firstClearance";
@@ -162,6 +164,9 @@ export interface BlockEdit {
   figurePanel?: FigurePanel;
   closeFigurePanel?: (restore?: boolean) => void;
   figurePanelShift?: number;
+  codeBlockPanel?: CodeBlockPanel;
+  closeCodeBlockPanel?: (restore?: boolean) => void;
+  codeBlockPanelShift?: number;
   /** How far opening the palette and panels scrolled the page down (a close scrolls it back). */
   paletteShift?: number;
   /** The distance the frame reserves under the sticky palette riding down over it (px; 0 when none). */
@@ -323,6 +328,7 @@ export interface PageTools {
   readonly blockSelection: ReturnType<typeof createBlockSelection>;
   readonly editActions: EditActionRegistry;
   readonly figureTools: FigureTools;
+  readonly codeBlockTools: CodeBlockTools;
 }
 
 /** The page modules the runtime installed (toolbar, comments, motion, layout helpers). */
@@ -501,6 +507,7 @@ export interface EditorChrome {
   /** The Card or Grid form, in the link panel's place. */
   openDirectivePanel(control: HTMLTextAreaElement, onFallbackInput: () => void, kind: "card" | "grid"): void;
   openFigurePanel(control: HTMLTextAreaElement, onFallbackInput: () => void, first?: boolean, focus?: "caption"): void;
+  openCodeBlockPanel(control: HTMLTextAreaElement, onFallbackInput: () => void): void;
   openFigureEditor(figure: HTMLElement): void;
   /** Keeps the palette sticky state right on resize and scroll. */
   bindPaletteSticky(): void;

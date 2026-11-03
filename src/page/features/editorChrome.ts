@@ -8,6 +8,7 @@
 import { caretRectOf, caretRevealDelta } from "../modules/caretRect";
 import { type CardValues, cardEdit, DEFAULT_CARD, DEFAULT_GRID, type GridValues, gridEdit, validateGrid } from "../modules/cardGridDirectives";
 import { createDirectivePanel } from "../modules/directivePanel";
+import { createCodeBlockPanel } from "../modules/codeBlockPanel";
 import { createFigurePanel } from "../modules/figurePanel";
 import { createLinkPanel } from "../modules/linkPanel";
 import type { BlockEdit, EditorChrome, PageRuntime } from "./pageRuntime";
@@ -18,7 +19,7 @@ type BarRect = Parameters<EditorChrome["toolbarUsableTop"]>[0];
 /** The editor chrome of a page. */
 export function installEditorChrome(rt: PageRuntime): EditorChrome {
   const { document, window, state } = rt;
-  const { editActions, figureTools } = rt.tools;
+  const { editActions, figureTools, codeBlockTools } = rt.tools;
 
   // The top of the strip of the viewport where the table toolbar is fully usable: below the sticky
   // heading band (its measured bottom when that exceeds the reserved reading offset) and, when the
@@ -482,6 +483,7 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     }
     edit.palette.closePopover();
     edit.closeLinkPanel?.(false);
+    edit.closeCodeBlockPanel?.(false);
     const text = String(control.value ?? "");
     const location = figureTools.locateFigure(text, first ? undefined : Number(control.selectionStart));
     if (!location) {
@@ -569,6 +571,92 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     else panel.focusFirst();
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-272
+  // The code-block form: the {code-block} directive around the caret, or a new one inserted at the
+  // selection. Apply rewrites that range as one native edit; the editor stays open.
+  const openCodeBlockPanel: EditorChrome["openCodeBlockPanel"] = (control, onFallbackInput) => {
+    const edit = state.activeBlockEdit;
+    if (!edit || edit.finishing || edit.textarea !== control || !edit.palette) return;
+    if (edit.codeBlockPanel) {
+      edit.codeBlockPanel.focusFirst();
+      return;
+    }
+    edit.palette.closePopover();
+    edit.closeLinkPanel?.(false);
+    edit.closeFigurePanel?.(false);
+    const text = String(control.value ?? "");
+    const selection = {
+      selectionStart: Number(control.selectionStart),
+      selectionEnd: Number(control.selectionEnd),
+    };
+    const location = codeBlockTools.locate(text, selection.selectionStart);
+    const slice = location ? text.slice(location.start, location.end) : "";
+    const model = location ? codeBlockTools.parse(slice) : codeBlockTools.newModel("", []);
+    if (!model) {
+      edit.status.textContent = "This code-block uses a YAML option block: edit it in the text box.";
+      return;
+    }
+    const closePanel = (restore = true): void => {
+      const panel = edit.codeBlockPanel;
+      if (!panel) return;
+      edit.codeBlockPanel = undefined;
+      edit.closeCodeBlockPanel = undefined;
+      panel.destroy();
+      if (restore) {
+        control.focus({ preventScroll: true });
+        control.setSelectionRange(selection.selectionStart, selection.selectionEnd);
+      }
+      const shift = edit.codeBlockPanelShift ?? 0;
+      edit.codeBlockPanelShift = 0;
+      if (shift > 0 && state.activeBlockEdit === edit && state.editAnchor) {
+        edit.paletteShift = (edit.paletteShift ?? 0) - shift;
+        state.editAnchor.viewportTop += shift;
+        rt.scroll.applyAnchor();
+      }
+    };
+    const panel = createCodeBlockPanel(document, {
+      values: codeBlockTools.valuesOf(model),
+      mode: location ? "edit" : "new",
+      validate: (values) => codeBlockTools.validate(values),
+      onSubmit: (values) => {
+        if (state.activeBlockEdit !== edit || edit.finishing) return;
+        // The range was taken when the form opened; a text changed without an input event is stale.
+        if (String(control.value ?? "") !== text) {
+          closePanel(false);
+          return;
+        }
+        const next = codeBlockTools.applyValues(model, values);
+        const written = codeBlockTools.serialize(next);
+        closePanel(false);
+        if (location && written === slice) {
+          control.focus({ preventScroll: true });
+          control.setSelectionRange(selection.selectionStart, selection.selectionEnd);
+          return;
+        }
+        rt.textControls.applyTextEdit(control, location
+          ? {
+            start: location.start, end: location.end, text: written,
+            selectionStart: location.start, selectionEnd: location.start,
+          }
+          : codeBlockTools.insertion(text, selection.selectionStart, selection.selectionEnd, next), onFallbackInput);
+      },
+      onCancel: () => closePanel(),
+      onLeave: () => {
+        if (state.activeBlockEdit === edit) rt.blockEditor.saveBlockEdit();
+      },
+      isInsideFrame: (node) => frameContains(edit, node as Node | null | undefined),
+    });
+    edit.codeBlockPanel = panel;
+    edit.closeCodeBlockPanel = closePanel;
+    const textTopBefore = control.getBoundingClientRect?.().top;
+    edit.element.insertBefore(panel.element, control);
+    const shift = keepTextInPlace(edit, textTopBefore);
+    edit.codeBlockPanelShift = shift;
+    if (shift > 0) edit.paletteShift = (edit.paletteShift ?? 0) + shift;
+    rt.scroll.applyAnchor();
+    panel.focusFirst();
+  };
+
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-153
   // The Edit figure button: open the figure's block editor, then its form once the source arrives.
@@ -609,6 +697,7 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     openLinkPanel,
     openDirectivePanel,
     openFigurePanel,
+    openCodeBlockPanel,
     openFigureEditor,
     bindPaletteSticky() {
       window.addEventListener("resize", () => {

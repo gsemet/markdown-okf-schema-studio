@@ -231,7 +231,8 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
         if ((panelName ?? action.panel) === "link") editorChrome.openLinkPanel(textarea, onFallbackInput);
         else if (action.panel === "card" || action.panel === "grid") {
           editorChrome.openDirectivePanel(textarea, onFallbackInput, action.panel);
-        } else if (panelName === "figure") editorChrome.openFigurePanel(textarea, onFallbackInput, false, focus);
+        } else if ((panelName ?? action.panel) === "codeBlock") editorChrome.openCodeBlockPanel(textarea, onFallbackInput);
+        else if (panelName === "figure") editorChrome.openFigurePanel(textarea, onFallbackInput, false, focus);
       },
       caretInside: (kind) => kind === "figure"
         && figureTools.locateFigure(String(textarea.value ?? ""), Number(textarea.selectionStart)) !== undefined,
@@ -300,6 +301,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       palette.closePopover();
       edit.closeLinkPanel?.(false);
       edit.closeFigurePanel?.(false);
+      edit.closeCodeBlockPanel?.(false);
     });
     // @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
     let wasTall = false;
@@ -315,6 +317,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       palette.closePopover();
       edit.closeLinkPanel?.(false);
       edit.closeFigurePanel?.(false);
+      edit.closeCodeBlockPanel?.(false);
       palette.updateAvailability();
       editorChrome.revealCaretBelowPalette(edit, textarea);
       edit.slashMenu?.handleInput(event as InputEvent);

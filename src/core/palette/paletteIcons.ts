@@ -60,6 +60,7 @@ export const PALETTE_ICONS = {
   image: svg("M4 5h16v14H4zM4 16l5-5 4 4 2-2 5 5M15 9.5v.5"),
   card: svg("M5 5h14v14H5zM5 10h14M8 14h8"),
   grid: svg("M4 5h7v6H4zM13 5h7v6h-7zM4 13h7v6H4zM13 13h7v6h-7z"),
+  codeBlock: svg("M3 4h18v16H3zM9 9l-2.5 3L9 15M15 9l2.5 3-2.5 3"),
   figure: svg("M4 4h16v11H4zM4 15l4.5-4.5 3.5 3.5 2-2 6 3M7 19h10"),
   doc: svg("M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"),
   cite: glyph("cite", "\u201c") + caret,

@@ -76,6 +76,16 @@
   form open.
 - Verification: test/page/modules/cardGridDirectives.test.ts, test/page/runtimePaletteActions.test.ts.
 
+### Code-block form for MyST code-block options
+
+- SwRS-MDOKFSTUDIO-PALETTE-272 (new, proposed, CR 246): the Code-block (MyST) button of the MyST
+  palette opens a form for the language, line numbers, emphasized lines, caption and name of the
+  `{code-block}` directive at the caret, or of a new one; Apply writes it as one undo step and
+  leaves the other options and the code unchanged; invalid values and YAML option blocks are
+  refused.
+- Verification: test/page/modules/codeBlockDirective.test.ts, test/page/runtimeCodeBlockPanel.test.ts,
+  test/page/modules/editActions.test.ts, test/page/modules/editPalette.test.ts.
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no

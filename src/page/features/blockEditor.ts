@@ -77,6 +77,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     edit.linkPanel = undefined;
     edit.figurePanel?.destroy();
     edit.figurePanel = undefined;
+    edit.codeBlockPanel?.destroy();
+    edit.codeBlockPanel = undefined;
     edit.slashMenu?.destroy();
     edit.cellSlash?.destroy();
     edit.palette?.destroy();

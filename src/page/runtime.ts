@@ -59,6 +59,7 @@ import { installCommentThreads } from "./modules/commentThreads";
 import { installCommentsToggle } from "./modules/commentsToggle";
 import { installContentMorph, morphKey, planKeyedMorph } from "./modules/contentMorph";
 import { createEditActions } from "./modules/editActions";
+import { createCodeBlockTools } from "./modules/codeBlockDirective";
 import { createFigureTools } from "./modules/figureDirective";
 import { installFigureEditButton } from "./modules/figurePanel";
 import { installFirstClearance } from "./modules/firstClearance";
@@ -105,6 +106,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const blockSelection = createBlockSelection();
   const editActions = createEditActions(HIGHLIGHT_LANGUAGES, tableTools, isSafeOkfColor, context.threadAuthor);
   const figureTools = createFigureTools();
+  const codeBlockTools = createCodeBlockTools();
   const anchorPolicy = createAnchorPolicy();
   // Diagnostics only (they change nothing in the page): the editor trace, read by the tests through
   // window.__studioDiagnostics, and the key containment of controls and editors (pageDiagnostics.ts).
@@ -155,7 +157,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     diagnostics: pageDiagnostics,
     bus,
     hostMessages,
-    tools: { tableTools, textEditing, blockSelection, editActions, figureTools },
+    tools: { tableTools, textEditing, blockSelection, editActions, figureTools, codeBlockTools },
     state,
     refreshButton: undefined,
     editModeButton: undefined,

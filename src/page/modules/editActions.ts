@@ -295,6 +295,8 @@ export function createEditActions(
     card: { apply: (ctx) => cardEdit(ctx, DEFAULT_CARD) },
     grid: { apply: (ctx) => gridEdit(ctx, DEFAULT_GRID) },
     roleKbd: { apply: insertKbdRole },
+    // The Code-block form writes the directive itself (see `openCodeBlockPanel`).
+    codeBlock: { apply: () => undefined },
   };
   const actions: EditAction[] = PALETTE_ACTION_IDS.map((id): EditAction => ({
     id,
