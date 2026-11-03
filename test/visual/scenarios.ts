@@ -134,6 +134,8 @@ export interface Scenario {
   inlineCodeNarrowChecks?: boolean;
   /** T44: the Orphaned comments box adds no scroll height inside the bottom padding; a taller one extends it. */
   orphanBoxChecks?: boolean;
+  /** CR 252: a body row dragged below the last one is saved moved; once rendered anew, the table and its handles sit on their real edges. */
+  tableMoveChecks?: boolean;
   frontmatterLinkState?: "loading" | "loaded";
   hideDescriptionColumn?: boolean;
   contextTagChecks?: boolean;
