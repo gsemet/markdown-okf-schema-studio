@@ -64,6 +64,7 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     }
     setFrontmatterEditCells(state.editMode);
     rt.input.applyDescriptionVisibility();
+    rt.input.applyFrontmatterVisibility();
     // The insertion points sit next to the properties section; rebuild them when it appeared or
     // went away, unless one of them hosts the open block editor.
     if (Boolean(existing) !== (markup !== "") && !state.activeBlockEdit) rt.insertPoints.refreshInsertPoints();

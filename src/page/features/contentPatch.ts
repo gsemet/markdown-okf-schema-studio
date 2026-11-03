@@ -105,6 +105,7 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     parts.checkboxes.initialize();
     parts.stickyBand.updateStickyHeadings();
     rt.input.applyDescriptionVisibility();
+    rt.input.applyFrontmatterVisibility();
     applyFigureSizes(document);
     applySpanColors(document, isSafeOkfColor);
     document.querySelectorAll("img").forEach((image) => {
