@@ -24,6 +24,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/frontmatter/okfFrontmatter.ts
+- src/node-services/schemaFiles.ts
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/node-services/schemaFiles.test.ts
@@ -92,6 +93,10 @@ When a document's frontmatter has a string `type`, the extension SHALL look for 
 - WHEN the document is rendered again, first with the folder unchanged and then after a schema file was added or the folder removed
 - THEN the unchanged folder is not listed again, an added file is found, and a removed folder lists nothing
 
+- GIVEN a schema folder whose modification time is less than 2 seconds old when it is listed
+- WHEN a schema file is added within the same clock step (the folder's times do not move) and the document is rendered again
+- THEN the folder is listed again and the added file is found
+
 ### Known issues
 
 - Known issue: a file outside every workspace folder in a trusted workspace is also told that schema validation requires a trusted workspace, which is misleading.
@@ -105,7 +110,7 @@ When a document's frontmatter has a string `type`, the extension SHALL look for 
 
 - Method: `test/core/frontmatter/okfFrontmatter.test.ts`, markers of the tests in `okfFrontmatter.test.ts` (schema folder search, schema file matcher, missing schema info row, analysis with schema resolution off; all scenarios).
 - Method: integration test of the untrusted workspace (generic table only; the info row in Restricted Mode is untested there).
-- Method: test/node-services/schemaFiles.test.ts (the folder is read once while unchanged, again after a file is added, and lists nothing once removed)
+- Method: test/node-services/schemaFiles.test.ts (the folder is read once while unchanged, again after a file is added, and lists nothing once removed; a listing read right after the folder changed is not reused, with the folder's times frozen as in one clock step)
 - Criteria: The folder name in the message is the base name of the schema folder; the summary counts one info, also for a typed document in Restricted Mode.
 - Criteria: Schema resolution is off when the preview is read-only (no workspace folder, or an untrusted workspace).
 
