@@ -18,7 +18,8 @@ const extensionRoot = path.resolve(__dirname, "../../..");
 const sourcePath = path.join(extensionRoot, "tests", "fixtures", "sphinx-features", "inline.md");
 const assets = fakeAssetResolver({
   cspSource: "vscode-webview://csp",
-  url: (filePath) => "file://vscode-webview://resource" + filePath,
+  // A URI path, like asWebviewUri: forward slashes on every platform.
+  url: (filePath) => "file://vscode-webview://resource" + filePath.split(path.sep).join("/"),
   extensionRoot,
 });
 

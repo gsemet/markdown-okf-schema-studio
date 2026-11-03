@@ -7,6 +7,7 @@
  */
 
 import * as assert from "node:assert/strict";
+import * as path from "node:path";
 import { test } from "node:test";
 
 import type { FileSystem } from "../../src/host-api/fileSystem";
@@ -40,21 +41,25 @@ function harness(options: { failWrite?: boolean; beforeWrite?: (files: FileSyste
   const images = async (): Promise<string[]> => (await memory.readDirectory(FOLDER))
     .map(([name]) => name).filter((name) => name !== "chapter.md").sort();
   let beforeWrite = options.beforeWrite;
+  // The controller joins paths natively (backslashes on Windows); the memory file system is POSIX.
+  const posix = (value: unknown): unknown => (typeof value === "string" ? value.split(path.sep).join("/") : value);
+  const onMemory = Object.fromEntries(Object.entries(memory).map(([key, value]) => [key,
+    typeof value === "function" ? (...args: unknown[]) => value(...args.map(posix)) : value])) as unknown as FileSystem;
   const files: FileSystem = {
-    ...memory,
+    ...onMemory,
     async writeFile(target, data) {
       if (beforeWrite) {
         const step = beforeWrite;
         beforeWrite = undefined;
         await step(memory);
       }
-      await memory.writeFile(target, new Uint8Array());
+      await onMemory.writeFile(target, new Uint8Array());
       await Promise.resolve();
       for (const name of await images()) {
         if (!name.startsWith(".")) seenMidWrite.push(`${name} (${(await memory.stat(`${FOLDER}/${name}`)).size})`);
       }
       if (options.failWrite) throw Object.assign(new Error("ENOSPC: no space left on device"), { code: "ENOSPC" });
-      await memory.writeFile(target, data);
+      await onMemory.writeFile(target, data);
     },
   };
   const manager = {

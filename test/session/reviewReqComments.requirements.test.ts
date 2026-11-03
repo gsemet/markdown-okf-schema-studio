@@ -5,14 +5,17 @@
  */
 
 import * as assert from "node:assert/strict";
+import * as path from "node:path";
 import { test } from "node:test";
 
 import { serializeSidecar, type CommentThread } from "../../src/core/comments/commentModel";
 import { CommentsController, createCommentsState } from "../../src/session/features/comments";
 import { READ_ONLY_NO_FOLDER, READ_ONLY_UNTRUSTED } from "../../src/core/edits/sourceEdits";
 
-const DOCUMENT = "/w/a.md";
-const SIDECAR = "/w/a.comments.json";
+/** A path of the in-memory workspace, native like the document paths the host hands out. */
+const w = (name: string): string => path.resolve("/w", name);
+const DOCUMENT = w("a.md");
+const SIDECAR = w("a.comments.json");
 const MIB = 1024 * 1024;
 
 const thread = (id: string, line: number, quote = "needle"): CommentThread => ({
@@ -275,34 +278,34 @@ test("a closed document over 8 MiB is not searched: the stored lines are posted"
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-125
 test("a comments file that names another document stays where it is, without a warning", async () => {
   const other = setup();
-  other.files.set("/w/move-me.comments.json", sidecarOf("other.md", [thread("t1", 1)]));
-  other.files.set("/w/moved.md", "x\n");
-  await other.controller.moveSidecars([{ oldPath: "/w/move-me.md", newPath: "/w/moved.md", local: true }]);
+  other.files.set(w("move-me.comments.json"), sidecarOf("other.md", [thread("t1", 1)]));
+  other.files.set(w("moved.md"), "x\n");
+  await other.controller.moveSidecars([{ oldPath: w("move-me.md"), newPath: w("moved.md"), local: true }]);
   assert.deepEqual(other.renames, []);
   assert.deepEqual(other.warnings, []);
-  assert.ok(other.files.has("/w/move-me.comments.json"));
-  assert.equal(other.files.has("/w/moved.comments.json"), false);
+  assert.ok(other.files.has(w("move-me.comments.json")));
+  assert.equal(other.files.has(w("moved.comments.json")), false);
 
   // Its own document: the file moves and names the new document.
   const own = setup();
-  own.files.set("/w/move-me.comments.json", sidecarOf("move-me.md", [thread("t1", 1)]));
-  own.files.set("/w/moved.md", "x\n");
-  await own.controller.moveSidecars([{ oldPath: "/w/move-me.md", newPath: "/w/moved.md", local: true }]);
-  assert.deepEqual(own.renames, [["/w/move-me.comments.json", "/w/moved.comments.json"]]);
-  assert.match(own.files.get("/w/moved.comments.json")!, /"document": "moved\.md"/u);
+  own.files.set(w("move-me.comments.json"), sidecarOf("move-me.md", [thread("t1", 1)]));
+  own.files.set(w("moved.md"), "x\n");
+  await own.controller.moveSidecars([{ oldPath: w("move-me.md"), newPath: w("moved.md"), local: true }]);
+  assert.deepEqual(own.renames, [[w("move-me.comments.json"), w("moved.comments.json")]]);
+  assert.match(own.files.get(w("moved.comments.json"))!, /"document": "moved\.md"/u);
 });
 
 test("a folder, a comments file itself and a file that is not local move no comments file", async () => {
   const s = setup();
-  s.files.set("/w/dir.comments.json", sidecarOf("dir", [thread("t1", 1)]));
-  s.files.set("/w/x.comments.json", sidecarOf("x.comments.json", [thread("t1", 1)]));
-  s.files.set("/w/remote.comments.json", sidecarOf("remote.md", [thread("t1", 1)]));
-  s.directories.add("/w/dir-renamed");
+  s.files.set(w("dir.comments.json"), sidecarOf("dir", [thread("t1", 1)]));
+  s.files.set(w("x.comments.json"), sidecarOf("x.comments.json", [thread("t1", 1)]));
+  s.files.set(w("remote.comments.json"), sidecarOf("remote.md", [thread("t1", 1)]));
+  s.directories.add(w("dir-renamed"));
 
   await s.controller.moveSidecars([
-    { oldPath: "/w/dir", newPath: "/w/dir-renamed", local: true },
-    { oldPath: "/w/x.comments.json", newPath: "/w/y.comments.json", local: true },
-    { oldPath: "/w/remote.md", newPath: "/w/remote2.md", local: false },
+    { oldPath: w("dir"), newPath: w("dir-renamed"), local: true },
+    { oldPath: w("x.comments.json"), newPath: w("y.comments.json"), local: true },
+    { oldPath: w("remote.md"), newPath: w("remote2.md"), local: false },
   ]);
   assert.deepEqual(s.renames, []);
   assert.deepEqual(s.warnings, []);
@@ -346,7 +349,7 @@ test("a comment from a read-only preview is refused with the real cause", async 
 test("switching the sidecar and clearing a preview release the watcher and its three subscriptions", async () => {
   const s = setup();
   s.files.set(DOCUMENT, "a needle here\n");
-  s.files.set("/w/b.md", "b needle here\n");
+  s.files.set(w("b.md"), "b needle here\n");
   const preview = s.preview();
   const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
   await post(preview);
@@ -356,7 +359,7 @@ test("switching the sidecar and clearing a preview release the watcher and its t
   await post(preview);
   assert.deepEqual(s.watching, { watchers: 1, subscriptions: 3 });
   for (let round = 0; round < 5; round += 1) {
-    const document = round % 2 === 0 ? "/w/b.md" : DOCUMENT;
+    const document = round % 2 === 0 ? w("b.md") : DOCUMENT;
     preview.stage = { ...preview.stage, activeDocumentPath: document, activeDocumentIdentity: `file://${document}` };
     await post(preview);
     assert.deepEqual(s.watching, { watchers: 1, subscriptions: 3 }, `after switch ${round}`);
