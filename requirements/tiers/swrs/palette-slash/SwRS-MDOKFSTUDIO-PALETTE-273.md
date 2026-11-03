@@ -2,7 +2,7 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-PALETTE-273
 uuid: 99c1e05e-c56e-449b-bf26-0b2fc33152ac
-title: The MyST palette mode adds a Tabs command
+title: The MyST palette mode adds a Content tabs command
 description: When the palette mode is MyST or Full, the extension SHALL list a
   Content tabs action in the edition palette and the slash menu (/tab-set,
   /tabs) that inserts a MyST tab-set of two tab-item tabs after the selection,
@@ -26,7 +26,7 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## The MyST palette mode adds a Tabs command
+## The MyST palette mode adds a Content tabs command
 
 ### Normative behavior
 
@@ -42,7 +42,7 @@ When the palette mode is MyST or Full, the extension SHALL list a Content tabs a
 
 - GIVEN the palette in the Strict or GFM mode
 - WHEN the palette is shown or the slash menu is typed with /tab-set
-- THEN no Tabs command is offered; the tab sets of the document are rendered all the same
+- THEN no Content tabs command is offered; the tab sets of the document are rendered all the same
 
 ### Verification notes
 

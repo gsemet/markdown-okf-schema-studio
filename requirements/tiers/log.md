@@ -9,7 +9,7 @@
   `plantuml` fence. SwRS-MDOKFSTUDIO-PALETTE-275 (new, proposed): every syntax of the writing skill
   table has a slash entry or a documented exception.
 - Verification: test/page/modules/slashSyntaxCoverage.test.ts fails on the previous code (no
-  `tabs` entry).
+  `tabs` entry and no `plantuml` entry).
 
 ### Restricted Mode images: test gaps (CR 251)
 

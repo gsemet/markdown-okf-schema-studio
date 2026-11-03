@@ -208,6 +208,7 @@ const ADMONITION_SLASH = [
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-263
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-275
 /**
  * Every palette action, by id, in display order (palette buttons and `/` menu entries follow this
  * order). Add an action here and its handler in `src/page/modules/editActions.ts`.
