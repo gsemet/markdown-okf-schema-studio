@@ -498,6 +498,13 @@ export const READ_ONLY_ASSERTIONS: ContentAssertion[] = [
   { message: "every frontmatter row says it is not editable", selector: "[data-okf-field]", min: 5, expr: "[...document.querySelectorAll('[data-okf-field]')].every(row => row.getAttribute('data-okf-editable') === 'false')" },
   { message: "the document itself is still rendered", selector: `${MAIN} h1`, count: 1, text: "Brake pedal release detection" },
 ];
+/** CR 238: Restricted Mode shows the images of the document folder and the workspace root. */
+export const READ_ONLY_IMAGES_ASSERTIONS: ContentAssertion[] = [
+  { message: "the three allowed images are in the page", selector: `${MAIN} img[src^="file:"]`, count: 3 },
+  { message: "every allowed image loaded, with spaces in a file name and below a subfolder", selector: `${MAIN} img[src^="file:"]`, min: 1, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content img[src^=\"file:\"]')].every((image) => image.complete && image.naturalWidth > 0)" },
+  { message: "the image below a dot-directory is refused: its source is removed", selector: `${MAIN} img[alt="Hidden image"]`, count: 1, expr: "!document.querySelector('#sphinx-myst-preview-content img[alt=\"Hidden image\"]').hasAttribute('src')" },
+  { message: "the document itself is still rendered", selector: `${MAIN} h1`, count: 1, text: "Restricted Mode images" },
+];
 export const READ_ONLY_NO_HOVER_ASSERTIONS: ContentAssertion[] = [
   { message: "no block is marked as an edit target after the pointer rested on a paragraph", selector: "[data-sphinx-preview-edit-hover]", count: 0 },
   { message: "the paragraph under the pointer has no outline", selector: `${MAIN} p`, min: 1, expr: "(() => { const hovered = [...document.querySelectorAll('#sphinx-myst-preview-content p')].find(p => p.matches(':hover')); if (!hovered) return 'no paragraph under the pointer'; const style = getComputedStyle(hovered); return style.outlineStyle === 'none' || style.outlineWidth === '0px'; })()" },

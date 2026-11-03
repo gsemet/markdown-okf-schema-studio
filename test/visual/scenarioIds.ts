@@ -590,6 +590,7 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "theme-zoom/v13-fresh-workspace-dark-460": "In a fresh workspace on a dark host in a 460 px pane the preview opens, before any click and without posting a choice, in the cream theme mode with the cream page colours and with the floating toolbar collapsed to its first row.",
   "trust-security/v01-read-only-page-dark-900": "A read-only preview in the dark theme has no Edit button, no editable frontmatter cell and still renders the document.",
   "trust-security/v02-read-only-page-light-460": "A read-only preview in a 460 px light pane has no Edit button, no editable frontmatter cell and still renders the document.",
+  "trust-security/v04-read-only-images-light-900": "A read-only preview shows an image with spaces in its name in a subfolder, the same file in angle brackets and an image of the workspace root, and refuses an image below a dot-directory.",
   "trust-security/v03-read-only-no-hover-outline-light-900": "In a read-only preview a pointer resting on a paragraph, and a click on it, show no edit outline and open no editor.",
   "toolbar-navigation/v30-back-enabled-after-anchor-light-900": "After an in-page jump the host's history report enables Back, Next stays disabled and the target heading sits at the top of the pane.",
   "toolbar-navigation/v31-mark-editor-selection-light-900": "With the mark-editor-selection setting on, the block holding the text editor's selection line is outlined and no other block is.",

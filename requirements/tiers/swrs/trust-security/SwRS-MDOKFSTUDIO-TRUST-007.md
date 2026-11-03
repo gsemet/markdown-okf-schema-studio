@@ -5,10 +5,10 @@ uuid: 8d5311bd-1111-40d3-bc26-c0258df4dc66
 title: A page loads local files only from its resource roots
 description: When the extension shows a document, it SHALL allow the webview to
   load local files only from the resource root of the preview (the folder of the
-  document for a read-only preview, the workspace folder that holds the document
-  for a writable one) and from the bundle folder of the extension, and no local
-  file for the pending page that clears the content and for the missing-source
-  page.
+  document for a read-only preview, which also loads the images of the workspace
+  folder that holds it, unless that folder is broad; the workspace folder for a
+  writable one) and from the bundle folder of the extension, and no local file
+  for the pending page that clears the content and for the missing-source page.
 project: markdown-okf-schema-studio
 scope: trust-security
 req_lifecycle: proposed
@@ -29,12 +29,14 @@ implemented_in_files:
 - src/host-vscode/previewPanel.ts
 - src/session/features/links.ts
 - src/session/features/pageDocument.ts
+- src/session/features/rendering.ts
 - src/session/sessionFactory.ts
 - src/session/webview.ts
 tested_in_files:
 - test/integration/standalone-suite.ts
 - test/security/trustReq.requirements.test.ts
 - test/session/previewRuntimeFile.test.ts
+- test/session/readOnlyLocalRoots.test.ts
 - test/session/toolbarReq.requirements.test.ts
 - test/session/trustReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
@@ -44,7 +46,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the extension shows a document, it SHALL allow the webview to load local files only from the resource root of the preview (the folder of the document for a read-only preview, the workspace folder that holds the document for a writable one) and from the bundle folder of the extension, and no local file for the pending page that clears the content and for the missing-source page.
+When the extension shows a document, it SHALL allow the webview to load local files only from the resource root of the preview (the folder of the document for a read-only preview, which also loads the images of the workspace folder that holds it unless that folder is broad; the workspace folder for a writable one) and from the bundle folder of the extension, and no local file for the pending page that clears the content and for the missing-source page.
 
 ### Scenario (nominal): Read-only preview of a file outside the workspace
 - GIVEN a Markdown file outside every workspace folder, with an image beside it
@@ -54,7 +56,7 @@ When the extension shows a document, it SHALL allow the webview to load local fi
 ### Scenario (nominal): Read-only preview in an untrusted workspace
 - GIVEN a document in a subfolder of an untrusted workspace folder
 - WHEN the reader previews it
-- THEN the resource root is that subfolder, not the workspace folder
+- THEN the resource root is that subfolder; the workspace folder serves images only (SwRS-MDOKFSTUDIO-TRUST-002)
 
 ### Scenario (nominal): Writable preview
 | Input | Outcome |
@@ -65,7 +67,7 @@ When the extension shows a document, it SHALL allow the webview to load local fi
 ### Scenario (nominal): Roots the webview may load from
 - GIVEN a writable preview of a workspace document, or a read-only preview of a file outside the workspace
 - WHEN the page is shown
-- THEN the webview may load from the workspace folder (writable) or the folder of the file (read-only), and from the bundle folder, and from nowhere else; a read-only preview may not load from the workspace or the rest of the disk
+- THEN the webview may load from the workspace folder (writable) or the folder of the file (read-only), and from the bundle folder, and from nowhere else; a read-only preview of a workspace document may also load from the workspace folder (its images, SwRS-MDOKFSTUDIO-TRUST-002) but not from the rest of the disk
 
 ### Scenario (nominal): Runtime and stylesheet as bundle files
 | Input | Outcome |

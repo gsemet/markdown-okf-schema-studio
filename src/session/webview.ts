@@ -158,6 +158,7 @@ function injectPropertiesTable(html: string, markup: string): string {
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-023
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-022
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-002
 export function buildPreviewWebviewHtml(
   sphinxHtml: string,
   outputDirectory: string,
@@ -180,7 +181,7 @@ export function buildPreviewWebviewHtml(
   const resolvedStylesheets = new Set<string>();
   const stylesheetDiagnostics: SecurityDiagnostic[] = [];
   const resolveResource = (request: string, baseDirectory: string): ResolvedResource | undefined => {
-    const resourcePath = policy.resolveResource(request, baseDirectory);
+    const resourcePath = policy.resolveResource(request, baseDirectory, { image: true });
     if (!resourcePath) {
       return undefined;
     }

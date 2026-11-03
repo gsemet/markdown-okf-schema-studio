@@ -20,6 +20,23 @@
   test/visual/frontmatterCollapseScenarios.ts.
 - Owner decision after review: the toggle uses a down-pointing triangle when expanded and a
   right-pointing one when collapsed, not the Description column's left-pointing icon (SwRS-MDOKFSTUDIO-FMSCHEMA-090 verification notes).
+### Restricted Mode shows images
+
+- SwRS-MDOKFSTUDIO-TRUST-002 (proposed, changed): a read-only preview (Restricted Mode, or a file
+  outside the workspace) shows images (png, jpg, jpeg, gif, webp, svg) from the folder of the
+  document, even when that folder is the home folder or above, and from the workspace folder unless
+  it is broad; the webview gets those folders as local resource roots. Includes and other
+  resources stay in the folder of the document, dot-segment paths stay refused, a broad workspace
+  folder serves nothing. Before, an image outside the folder of the document, or next to a
+  document in the home folder, was refused.
+- SwRS-MDOKFSTUDIO-TRUST-007 (proposed, changed): the webview roots of a read-only preview of a
+  workspace document include the workspace folder for images. StRS-MDOKFSTUDIO-TRUST-004: rationale
+  line updated to match.
+- Round 2: the image rule is worded by file extension (any element), is checked again on the real
+  path after symbolic links, and also applies in the side-by-side diff; TRUST-007 description says
+  "unless that folder is broad".
+- Verification: test/session/readOnlyImages.test.ts, test/session/readOnlyImagesSession.test.ts, test/session/readOnlyLocalRoots.test.ts,
+  visual scenario trust-security/v04-read-only-images-light-900.
 
 ## 2026-11-01
 
