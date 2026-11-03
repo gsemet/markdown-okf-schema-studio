@@ -584,6 +584,18 @@ def check_page_actions(page: Page, scenario: dict, failures: list[Failure]) -> N
             page.keyboard.press(action["press"])
             page.wait_for_timeout(action.get("waitMs", 200))
             continue
+        if "select" in action or "fill" in action:
+            selector = action.get("select") or action.get("fill")
+            target = page.locator(selector).first
+            if target.count() == 0:
+                failures.append(Failure(scenario["page"], f"page action: {selector} matches nothing"))
+                return
+            if "select" in action:
+                target.select_option(action["value"])
+            else:
+                target.fill(action["value"])
+            page.wait_for_timeout(action.get("waitMs", 200))
+            continue
         selector = action.get("click") or action.get("hover")
         target = page.locator(selector).first
         if target.count() == 0:

@@ -38,6 +38,7 @@ import {
   toggleList,
   toggleQuote,
 } from "./blockEditActions";
+import { cardEdit, DEFAULT_CARD, DEFAULT_GRID, gridEdit } from "./cardGridDirectives";
 import { createColourEditActions } from "./colourEditActions";
 import { validSelection } from "./editActionHelpers";
 import {
@@ -291,6 +292,8 @@ export function createEditActions(
       apply: (ctx) => convertTableAtCaret(ctx, "pipe").edit,
     },
     figure: { apply: insertFigure },
+    card: { apply: (ctx) => cardEdit(ctx, DEFAULT_CARD) },
+    grid: { apply: (ctx) => gridEdit(ctx, DEFAULT_GRID) },
     roleKbd: { apply: insertKbdRole },
   };
   const actions: EditAction[] = PALETTE_ACTION_IDS.map((id): EditAction => ({

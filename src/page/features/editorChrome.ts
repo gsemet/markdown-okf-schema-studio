@@ -6,6 +6,8 @@
  */
 
 import { caretRectOf, caretRevealDelta } from "../modules/caretRect";
+import { type CardValues, cardEdit, DEFAULT_CARD, DEFAULT_GRID, type GridValues, gridEdit, validateGrid } from "../modules/cardGridDirectives";
+import { createDirectivePanel } from "../modules/directivePanel";
 import { createFigurePanel } from "../modules/figurePanel";
 import { createLinkPanel } from "../modules/linkPanel";
 import type { BlockEdit, EditorChrome, PageRuntime } from "./pageRuntime";
@@ -377,6 +379,95 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     panel.focusFirst();
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-270
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-271
+  // The Card and Grid forms (palette buttons and the `/` menu): they take the link panel's slot, so
+  // typing, a click in the text box and the end of the editor close them the same way. Insert
+  // writes the directive after the selection remembered when the form opened.
+  const openDirectivePanel: EditorChrome["openDirectivePanel"] = (control, onFallbackInput, kind) => {
+    const edit = state.activeBlockEdit;
+    if (!edit || edit.finishing || edit.textarea !== control || !edit.palette) return;
+    if (edit.linkPanel) {
+      edit.linkPanel.focusFirst();
+      return;
+    }
+    edit.palette.closePopover();
+    const selection = {
+      value: String(control.value ?? ""),
+      selectionStart: Number(control.selectionStart),
+      selectionEnd: Number(control.selectionEnd),
+      scope: "block" as const,
+    };
+    const closePanel = (restore = true): void => {
+      const panel = edit.linkPanel;
+      if (!panel) return;
+      edit.linkPanel = undefined;
+      edit.closeLinkPanel = undefined;
+      panel.destroy();
+      if (restore) {
+        control.focus({ preventScroll: true });
+        control.setSelectionRange(selection.selectionStart, selection.selectionEnd);
+      }
+      const shift = edit.linkPanelShift ?? 0;
+      edit.linkPanelShift = 0;
+      if (shift > 0 && state.activeBlockEdit === edit && state.editAnchor) {
+        edit.paletteShift = (edit.paletteShift ?? 0) - shift;
+        state.editAnchor.viewportTop += shift;
+        rt.scroll.applyAnchor();
+      }
+    };
+    const card = kind === "card";
+    const panel = createDirectivePanel(document, {
+      title: card ? "Insert card" : "Insert grid",
+      kind,
+      fields: card
+        ? [
+          { name: "title", label: "Title", value: DEFAULT_CARD.title },
+          { name: "header", label: "Header", value: "" },
+          { name: "footer", label: "Footer", value: "" },
+          { name: "link", label: "Link", value: "" },
+        ]
+        : [
+          { name: "columns", label: "Columns", value: DEFAULT_GRID.columns },
+          { name: "gutter", label: "Gutter", value: DEFAULT_GRID.gutter },
+          { name: "cards", label: "Cards", value: DEFAULT_GRID.cards },
+          { name: "headers", label: "Headers (one per card, separated by |)", value: "" },
+          { name: "footers", label: "Footers (one per card, separated by |)", value: "" },
+          { name: "links", label: "Links (one per card, separated by |)", value: "" },
+        ],
+      validate: (values) => (card ? undefined : validateGrid(values as unknown as GridValues)),
+      onSubmit: (values) => {
+        if (state.activeBlockEdit !== edit || edit.finishing) return;
+        // The offsets were taken when the form opened; a changed text makes them meaningless.
+        if (String(control.value ?? "") !== selection.value) {
+          closePanel(false);
+          return;
+        }
+        closePanel();
+        rt.textControls.applyTextEdit(
+          control,
+          card ? cardEdit(selection, values as unknown as CardValues)
+            : gridEdit(selection, values as unknown as GridValues),
+          onFallbackInput,
+        );
+      },
+      onCancel: () => closePanel(),
+      onLeave: () => {
+        if (state.activeBlockEdit === edit) rt.blockEditor.saveBlockEdit();
+      },
+      isInsideFrame: (node) => frameContains(edit, node as Node | null | undefined),
+    });
+    edit.linkPanel = panel;
+    edit.closeLinkPanel = closePanel;
+    const textTopBefore = control.getBoundingClientRect?.().top;
+    edit.element.insertBefore(panel.element, control);
+    const shift = keepTextInPlace(edit, textTopBefore);
+    edit.linkPanelShift = shift;
+    if (shift > 0) edit.paletteShift = (edit.paletteShift ?? 0) + shift;
+    rt.scroll.applyAnchor();
+    panel.focusFirst();
+  };
+
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-160
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-150
   // The figure form: the {figure} directive around the caret (the first one when the editor was
@@ -516,6 +607,7 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     frameContains,
     keepTextInPlaceBelowPalette,
     openLinkPanel,
+    openDirectivePanel,
     openFigurePanel,
     openFigureEditor,
     bindPaletteSticky() {

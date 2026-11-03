@@ -10,6 +10,10 @@
   the opened overlay stays clear of the toolbar tooltips, and Escape typed in the text or in a field is left
   to its own handler instead of closing the overlay.
 - The MyST slash menu now lists the version admonitions (versionadded, versionchanged, deprecated) and gives every admonition kind the icon of its preview callout; a version admonition inserts `:::{versionadded} 1.0` with the version selected.
+- New Card and Grid buttons in the MyST edit bar, and `/card` and `/grid` in the slash menu, open a
+  small form: the card title, header, footer and link, or the grid columns, gutter, number of
+  cards and the header, footer and link of each card. Insert writes the `{card}` or `{grid}` with
+  `{grid-item-card}` directives.
 - A new Option button in the edit bar (GFM and MyST palettes, next to Checkbox) turns the selected
   lines into an option list `- ( ) ` and back. In the block editor, Enter at the end of an option
   item starts the next line with `- ( ) `, and Enter on an empty option ends the list, as for task

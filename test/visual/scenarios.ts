@@ -62,6 +62,10 @@ export type PageAction =
   | { hover: string; waitMs?: number }
   /** Presses a keyboard key (Playwright name, such as "ArrowDown") on the page, with no element focused by the script. */
   | { press: string; waitMs?: number }
+  /** Picks the option `value` in the `<select>` matching `select`. */
+  | { select: string; value: string; waitMs?: number }
+  /** Replaces the text of the input matching `fill` with `value`. */
+  | { fill: string; value: string; waitMs?: number }
   /** Presses the mouse on `drag` and moves it over `over`; with `hold` the button stays down (a drag in progress). */
   | { drag: string; over: string; hold?: true; waitMs?: number };
 

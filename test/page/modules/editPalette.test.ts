@@ -122,7 +122,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   const gfmReal = gfm.filter((id) => id !== "gfmOnly");
   assert.deepEqual(myst, [
     ...gfmReal, "admonition", "deflist", "math", "sub", "sup", "label",
-    "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd", "gfmOnly", "mystOnly",
+    "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd", "gfmOnly", "mystOnly",
   ]);
 });
 
@@ -145,7 +145,7 @@ test("P6: the real registry shows the MyST-specific buttons in MyST mode only, p
   const gfmOnly = ["alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"];
   const mystOnly = [
     "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
-    "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",
+    "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd",
   ];
   assert.deepEqual(gfm, [...strict, ...gfmOnly]);
   assert.deepEqual(myst, [...gfm, ...mystOnly]);

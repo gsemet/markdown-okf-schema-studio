@@ -65,6 +65,17 @@
 - Verification: test/page/modules/editPalette.test.ts and the simulated visual scenarios
   palette-slash/v36 to v39 (test/visual/admonitionTypePickerScenarios.ts).
 
+### Card and grid forms in the MyST palette and the slash menu
+
+- SwRS-MDOKFSTUDIO-PALETTE-270 and SwRS-MDOKFSTUDIO-PALETTE-271 (new, proposed): the Card and Grid
+  buttons of the MyST palette, and the matching `/` menu entries, open a form (card title, header,
+  footer, link; grid columns, gutter, number of cards) whose Insert writes a `{card}` or a `{grid}`
+  of `{grid-item-card}` directives.
+- The Grid form also edits each card's header, footer and link (Headers, Footers and Links fields,
+  one entry per card separated by `|`), as the Card form does; more entries than cards keeps the
+  form open.
+- Verification: test/page/modules/cardGridDirectives.test.ts, test/page/runtimePaletteActions.test.ts.
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no

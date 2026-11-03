@@ -1024,7 +1024,7 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
   page_name = scenario["page"]
   strict = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "toc", "table", "emoji", "todo", "thread"]
   gfm = strict + ["alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
-  myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd"]
+  myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "card", "grid", "roleKbd"]
   expected = {"strict": strict, "gfm": gfm, "myst": myst}[mode]
   page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
 
@@ -1074,7 +1074,7 @@ def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> Non
   page_name = scenario["page"]
   strict = ["heading", "bold", "italic", "strikethrough", "color", "link", "image", "codeFence", "quote", "rule", "toc", "table", "emoji", "todo", "thread"]
   gfm = strict + ["alert", "checkbox", "option", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
-  myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
+  myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "card", "grid", "roleKbd"]
   # The palette's buttons (minus the caret-dependent colour code and table conversions) plus the two menu-only list entries.
   expected = {"strict": strict, "gfm": gfm, "myst": myst}[mode] + ["bulletList", "numberedList"]
   page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
