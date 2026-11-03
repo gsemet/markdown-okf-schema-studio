@@ -26,11 +26,17 @@ test("the registry lists every palette action once, in display order", () => {
   ]);
 });
 
-test("every descriptor names a known icon, mode and scope, and every icon is used", () => {
+test("every descriptor names a known icon, mode and scope, and every icon is used by an action or a slash variant", () => {
   const used = new Set<string>();
   for (const [id, descriptor] of descriptors) {
     assert.ok(Object.hasOwn(PALETTE_ICONS, descriptor.icon), id);
     used.add(descriptor.icon);
+    for (const variant of descriptor.slash?.variants ?? []) {
+      if (variant.icon) {
+        assert.ok(Object.hasOwn(PALETTE_ICONS, variant.icon), id + ":" + variant.arg);
+        used.add(variant.icon);
+      }
+    }
     assert.ok(descriptor.modes.length > 0 && descriptor.modes.every((mode) => PALETTE_MODES.includes(mode)), id);
     assert.ok(descriptor.scopes.length > 0 && descriptor.scopes.every((scope) => scope === "block" || scope === "cell"), id);
     assert.ok(descriptor.label.trim() !== "", id);

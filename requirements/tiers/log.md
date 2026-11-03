@@ -46,6 +46,15 @@
 - Verification: test/visual/capture_table_move.py, scenario
   table-editing/v27-row-move-breakout-table-auto-light-900.
 
+### The MyST slash menu lists the version admonitions and icons
+
+- SwRS-MDOKFSTUDIO-PALETTE-268 (new, proposed, CR 243): the MyST slash menu lists the version
+  admonitions (versionadded, versionchanged, deprecated) and gives every admonition kind the icon
+  of its preview callout; a version admonition writes `:::{versionadded} 1.0` with the version
+  selected. The type popover is unchanged.
+- SwRS-MDOKFSTUDIO-PALETTE-238 (changed): the admonition variants row names the version admonitions.
+- Verification: test/page/modules/slashMenu.test.ts.
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no

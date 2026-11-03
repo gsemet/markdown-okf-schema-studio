@@ -457,6 +457,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       for (const variant of slash?.variants ?? []) {
         entries.push({
           ...base,
+          icon: variant.icon ? icons[variant.icon] : base.icon,
           key: action.id + ":" + variant.arg,
           label: variant.label,
           aliases: variant.aliases ?? [],

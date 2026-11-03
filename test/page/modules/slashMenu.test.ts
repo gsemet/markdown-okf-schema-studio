@@ -272,6 +272,43 @@ test("P11: heading is offered as Heading 1 to 5 and Paragraph, alerts and admoni
   assert.ok(heading.icon.includes("<svg"));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-268
+test("P11: the MyST slash menu lists every admonition directive, each with its own icon", () => {
+  const entries = setup("myst").palette.menuEntries();
+  const types = ["note", "tip", "hint", "important", "warning", "caution", "attention", "danger", "error",
+    "seealso", "versionadded", "versionchanged", "deprecated"];
+  const icons = new Map<string, string>();
+  for (const type of types) {
+    const entry = entries.find((candidate) => candidate.key === "admonition:" + type);
+    assert.ok(entry, type + " is listed");
+    assert.ok(entry!.icon.includes("<svg"), type + " has an icon");
+    icons.set(type, entry!.icon);
+  }
+  assert.ok(entries.some((entry) => entry.key === "admonition:custom"), "the custom {admonition} entry stays");
+  // The icon follows the callout of the preview: the shape tells the family apart.
+  assert.equal(icons.get("tip"), icons.get("versionadded"));
+  assert.equal(icons.get("warning"), icons.get("versionchanged"));
+  assert.equal(icons.get("danger"), icons.get("deprecated"));
+  assert.notEqual(icons.get("note"), icons.get("tip"));
+  assert.notEqual(icons.get("caution"), icons.get("danger"));
+  assert.notEqual(icons.get("important"), icons.get("seealso"));
+  const gfm = setup("gfm").palette.menuEntries();
+  assert.equal(gfm.some((entry) => entry.key.startsWith("admonition:")), false, "GFM mode has no MyST admonition");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-268
+test("P11: /versionadded inserts a valid version admonition with the version selected", () => {
+  for (const type of ["versionadded", "versionchanged", "deprecated"]) {
+    const h = setup("myst", "");
+    h.type("/" + type);
+    assert.equal(h.ids()[0], "admonition:" + type, "/" + type + " finds its admonition first");
+    h.key("Enter");
+    assert.equal(h.box.value, ":::{" + type + "} 1.0\n\n:::");
+    assert.equal(h.box.value.slice(h.box.selectionStart, h.box.selectionEnd), "1.0", "the version is selected");
+    assert.equal(h.box.edits.length, 1);
+  }
+});
+
 test("P11: the colour-code button is listed only with the caret inside a colour code", () => {
   const plain = setup("strict", "text ");
   assert.equal(plain.palette.menuEntries().some((entry) => entry.id === "colorCode"), false);
