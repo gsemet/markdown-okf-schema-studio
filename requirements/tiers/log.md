@@ -37,6 +37,15 @@
   test/visual/capture_toc_rail.py and capture_toc_checks.py (scenarios toolbar-navigation/v28 and
   v29, renamed from "hidden-narrow" to "rail").
 
+### A table row drag is checked end to end
+
+- SwRS-MDOKFSTUDIO-TABLE-002 and SwRS-MDOKFSTUDIO-TABLE-007 (no change of behaviour): a simulated
+  scenario drags the first body row of a table that breaks out of the margin below the last one,
+  checks the saved table, renders the page again as the host does and checks the rows, the
+  breakout and every handle on the real edges of the table.
+- Verification: test/visual/capture_table_move.py, scenario
+  table-editing/v27-row-move-breakout-table-auto-light-900.
+
 ### The TOC shows as a rail on a narrow pane
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-037 (changed): on a pane under 760 px with the TOC on, the column is no

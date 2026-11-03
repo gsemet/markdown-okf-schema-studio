@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/modules/tableColumnMove.test.ts
 - test/page/runtimeTableRowMove.test.ts
 - test/visual/breakoutHandleScenarios.ts
+- test/visual/capture_table_move.py
 default_owner_email: gaetan@xeberon.net
 ---
 
