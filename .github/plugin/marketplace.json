@@ -1,0 +1,33 @@
+{
+  "name": "markdown-okf-schema-studio",
+  "owner": {
+    "name": "Gaetan Semet",
+    "email": "gaetan@xeberon.net"
+  },
+  "metadata": {
+    "description": "Agent plugins for Markdown OKF-Schema Studio."
+  },
+  "plugins": [
+    {
+      "name": "markdown-okf-schema-studio",
+      "source": "./",
+      "description": "Agent skill that teaches how to write Markdown that renders well in Markdown OKF-Schema Studio, the VS Code Markdown preview.",
+      "version": "1.3.0",
+      "author": {
+        "name": "Gaetan Semet",
+        "url": "https://github.com/gsemet"
+      },
+      "homepage": "https://github.com/gsemet/markdown-okf-schema-studio",
+      "repository": "https://github.com/gsemet/markdown-okf-schema-studio",
+      "license": "MIT",
+      "keywords": [
+        "markdown",
+        "okf",
+        "vscode",
+        "skill",
+        "documentation"
+      ],
+      "category": "documentation"
+    }
+  ]
+}

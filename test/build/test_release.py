@@ -16,6 +16,12 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 PLUGIN_MANIFESTS = ("plugin.json", ".claude-plugin/plugin.json")
+PLUGIN_CATALOGS = (".github/plugin/marketplace.json",)
+
+
+def catalog_versions(path: Path) -> list[str]:
+    """The version of every plugin entry of a marketplace catalog."""
+    return [entry["version"] for entry in json.loads(path.read_text())["plugins"]]
 
 spec = importlib.util.spec_from_file_location(
     "release_notes", ROOT / "scripts/release_notes.py"
@@ -81,6 +87,17 @@ def repository(tmp_path: Path) -> Path:
     (tmp_path / ".claude-plugin").mkdir()
     for name in PLUGIN_MANIFESTS:
         (tmp_path / name).write_text(json.dumps({"name": "demo", "version": "0.2.0"}))
+    for name in PLUGIN_CATALOGS:
+        (tmp_path / name).parent.mkdir(parents=True)
+        (tmp_path / name).write_text(
+            json.dumps(
+                {
+                    "name": "demo",
+                    "owner": {"name": "Release Test"},
+                    "plugins": [{"name": "demo", "source": "./", "version": "0.2.0"}],
+                }
+            )
+        )
     for arguments in (
         ["init", "--quiet"],
         ["config", "user.email", "test@example.com"],
@@ -144,10 +161,12 @@ def assert_version(repository: Path, arguments: list[str], expected: str) -> Non
         text=True,
     ).splitlines()
     assert changed == sorted(
-        ["package-lock.json", "package.json", *PLUGIN_MANIFESTS]
+        ["package-lock.json", "package.json", *PLUGIN_MANIFESTS, *PLUGIN_CATALOGS]
     )
     for name in PLUGIN_MANIFESTS:
         assert json.loads((repository / name).read_text())["version"] == expected, name
+    for name in PLUGIN_CATALOGS:
+        assert catalog_versions(repository / name) == [expected], name
     assert subprocess.check_output(["git", "tag"], cwd=repository).strip() == b"v0.2.0"
 
 
@@ -200,7 +219,7 @@ def test_version_rejects_existing_manifest_edits(
     )
 
 
-@pytest.mark.parametrize("name", PLUGIN_MANIFESTS)
+@pytest.mark.parametrize("name", [*PLUGIN_MANIFESTS, *PLUGIN_CATALOGS])
 def test_version_rejects_existing_plugin_manifest_edits(
     repository: Path, name: str
 ) -> None:

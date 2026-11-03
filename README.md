@@ -214,7 +214,9 @@ with your host; copying the skill folder is only a last resort.
      copilot plugin install markdown-okf-schema-studio@markdown-okf-schema-studio
      ```
 
-     A direct install also works: `copilot plugin install gsemet/markdown-okf-schema-studio`. The
+     The marketplace reads the Copilot catalog `.github/plugin/marketplace.json`, which lists the
+     plugin with its version and description. A direct install also works:
+     `copilot plugin install gsemet/markdown-okf-schema-studio`. The
      accepted sources are `plugin@marketplace`, `owner/repo`, `owner/repo:path` and a git URL (see
      `copilot plugin install --help` and
      [Finding and installing plugins](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/plugins-finding-installing)).

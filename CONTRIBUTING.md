@@ -546,8 +546,9 @@ request before the version pull request merges: see
 	just version 1.2.3
 	```
 
-	Both commands update the npm manifest and lockfile and the two plugin manifests
-	(`plugin.json`, `.claude-plugin/plugin.json`), and create a signed-off commit with subject
+	Both commands update the npm manifest and lockfile, the two plugin manifests
+	(`plugin.json`, `.claude-plugin/plugin.json`) and the plugin entry of the GitHub Copilot
+	catalog (`.github/plugin/marketplace.json`), and create a signed-off commit with subject
 	`chore: version X.Y.Z`, using `git commit -s`. Neither creates a local tag.
 	Only these files are committed; unrelated staged work stays staged.
 	Commit or stash existing edits to these version files before running the command.
