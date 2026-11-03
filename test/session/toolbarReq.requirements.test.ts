@@ -545,14 +545,20 @@ test("one search per wikilink name runs at a time", async () => {
   try {
     let release!: () => void;
     const gate = new Promise<string[]>((done) => { release = () => done([]); });
+    let searched!: () => void;
+    const firstSearch = new Promise<void>((done) => { searched = done; });
     f.manager.host.workspace.findFiles = (search) => {
       f.searches.push(search.pattern);
+      searched();
       return gate;
     };
     const both = Promise.all([
       f.manager.links.resolve(f.preview, "wiki:Note"),
       f.manager.links.resolve(f.preview, "wiki:Note"),
     ]);
+    // Waits for the first search rather than a fixed delay, which a loaded machine can outrun;
+    // the settle after it leaves a second search the time to start.
+    await firstSearch;
     await settle();
     assert.equal(f.searches.length, 1, "two requests share one search");
     release();
