@@ -2,9 +2,10 @@
 
 ## Unreleased
 
-## 1.3.1 - 2026-11-03
+## 1.3.2 - 2026-11-03
 
-Version 1.3.0 was not published: its release checks failed. Its changes ship in 1.3.1.
+Versions 1.3.0 and 1.3.1 were not published: their release checks failed. Their changes ship in
+1.3.2.
 
 - GitHub Copilot CLI now finds the writing skill plugin through its own marketplace catalog, which
   lists the plugin with its version.
