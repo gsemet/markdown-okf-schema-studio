@@ -1,6 +1,7 @@
 import { directiveStyle } from "../../directives/registry";
 import { MERMAID_FONT_FAMILY, MERMAID_FONT_SIZE, MERMAID_MEASURE_CLASS } from "../../render/mermaidFont";
 import { gridColumnCss } from "../../render/mystGridToctree";
+import { TABLE_CSS } from "./tableStyles";
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-002
 // @implements_req SwRS-MDOKFSTUDIO-MYST-100
@@ -15,7 +16,6 @@ import { gridColumnCss } from "../../render/mystGridToctree";
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-001
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-023
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-032
-// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-032
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-043
 /**
  * Rendered blocks: inline images, label anchors, figures, admonitions, code and highlighting,
@@ -482,67 +482,7 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   }
 }
 
-/* A wide table scrolls inside its own box instead of widening the whole preview. */
-#sphinx-myst-preview-content :where(table, .table-wrapper) {
-  display: block;
-  width: max-content;
-  max-width: 100%;
-  margin: 1.2em 0;
-  border-collapse: collapse;
-  overflow-x: auto;
-}
-
-/* A table that scrolls sideways keeps short identifiers whole and shades the overflow edges. */
-#sphinx-myst-preview-content table[data-sphinx-table-overflow="true"] :where(th, td)[data-sphinx-short-cell="true"] {
-  white-space: nowrap;
-}
-
-#sphinx-myst-preview-content table[data-sphinx-table-overflow="true"] {
-  background:
-    linear-gradient(to right, var(--studio-editor-background, Canvas) 30%, transparent) left center / 2rem 100% no-repeat local,
-    linear-gradient(to left, var(--studio-editor-background, Canvas) 30%, transparent) right center / 2rem 100% no-repeat local,
-    radial-gradient(farthest-side at 0 50%, color-mix(in srgb, var(--studio-editor-foreground, var(--studio-foreground, CanvasText)) 35%, transparent), transparent) left center / 1rem 100% no-repeat scroll,
-    radial-gradient(farthest-side at 100% 50%, color-mix(in srgb, var(--studio-editor-foreground, var(--studio-foreground, CanvasText)) 35%, transparent), transparent) right center / 1rem 100% no-repeat scroll;
-}
-
-#sphinx-myst-preview-content :where(th, td) {
-  padding: 0.4em 0.8em;
-  border: 1px solid var(--sphinx-preview-border);
-  text-align: start;
-  vertical-align: top;
-}
-
-/* A column never narrows below 5em of text, so a table with many columns keeps whole words in its
-   cells ("document", "parse") instead of breaking them letter by letter. A table that then no
-   longer fits the column uses the wide-table behaviour (breakout in Auto, scroll otherwise). The
-   frontmatter properties table sizes its own columns. In edit mode the larger cell minimum below
-   (8em) wins. */
-#sphinx-myst-preview-content table:not(.okf-properties) :where(th, td) {
-  min-width: 5em;
-}
-
-/* A short identifier (one word, up to 24 characters) never splits inside a cell, wide table or not:
-   the global overflow-wrap: anywhere would otherwise break "Coverage" or "OPS-1042" letter by letter
-   when the columns are squeezed. The cell keeps the word whole, so the table grows and then breaks
-   out in Auto or scrolls. */
-#sphinx-myst-preview-content table :where(th, td)[data-sphinx-short-cell="true"] {
-  white-space: nowrap;
-}
-
-#sphinx-myst-preview-content th {
-  background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.12));
-  font-weight: 600;
-}
-
-#sphinx-myst-preview-content :where(th, td)[align="left"] { text-align: left; }
-#sphinx-myst-preview-content :where(th, td)[align="center"] { text-align: center; }
-#sphinx-myst-preview-content :where(th, td)[align="right"] { text-align: right; }
-#sphinx-myst-preview-content table[align="center"] { margin-inline: auto; }
-#sphinx-myst-preview-content table[align="right"] {
-  margin-inline-start: auto;
-  margin-inline-end: 0;
-}
-
+${TABLE_CSS}
 ${directiveStyle("tables")}
 /* The line is 1px, but the box is 25px tall (12px of padding on each side, painted transparent), so a
    click near the line lands on the rule and opens its editor. The margin gives the padding back. */

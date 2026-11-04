@@ -41,6 +41,7 @@ import { TOOLBAR_FLOAT_SCENARIOS } from "./toolbarFloatScenarios";
 import { READ_ONLY_IMAGES_SCENARIOS } from "./readOnlyImagesScenarios";
 import { WIDTH_SCROLL_SCENARIOS } from "./widthScrollScenarios";
 import { BREAKOUT_HANDLE_SCENARIOS } from "./breakoutHandleScenarios";
+import { TABLE_ROW_COLOUR_SCENARIOS } from "./tableRowColourScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   {
@@ -473,6 +474,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...READ_ONLY_IMAGES_SCENARIOS,
   ...WIDTH_SCROLL_SCENARIOS,
   ...BREAKOUT_HANDLE_SCENARIOS,
+  ...TABLE_ROW_COLOUR_SCENARIOS,
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",

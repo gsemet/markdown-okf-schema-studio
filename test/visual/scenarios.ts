@@ -140,6 +140,8 @@ export interface Scenario {
   orphanBoxChecks?: boolean;
   /** CR 252: a body row dragged below the last one is saved moved; once rendered anew, the table and its handles sit on their real edges. */
   tableMoveChecks?: boolean;
+  /** The tints of a table's heading, even rows and hovered row, with a real pointer. */
+  tableRowColourChecks?: "page" | "overflow" | "edit";
   frontmatterLinkState?: "loading" | "loaded";
   hideDescriptionColumn?: boolean;
   contextTagChecks?: boolean;
