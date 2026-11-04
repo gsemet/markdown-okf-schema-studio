@@ -69,9 +69,6 @@ When two instructions conflict, the higher source wins, and the conflict is repo
   allowed scopes in [git-commit-allowed-scopes.md](.agents/guidelines/git-commit-allowed-scopes.md)
 - When changing the CI workflows or `ci-*` justfile targets:
   [ci.guidelines.md](.agents/guidelines/ci.guidelines.md)
-- When picking up backlog work, change requests or PRs (`.agents/changes/`), including Parallel
-  Change Requests Orchestration:
-  [change-requests-lifecycle.guidelines.md](.agents/guidelines/change-requests-lifecycle.guidelines.md)
 - When preparing or running a release (release driver, release notes, announcement thread, hero
   image):
   [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md)

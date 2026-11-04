@@ -32,8 +32,7 @@ The CI only runs what a developer can run locally. All logic lives in the task r
 10. **Every PR uses the template** `.github/PULL_REQUEST_TEMPLATE.md` (Summary, Deliverables,
     Changes, Impacts, Blast radius graded 1 to 3, Test plan), written in English. Fill every
     section; write "None" rather than delete one. It is written for a reader outside the team: no
-    internal ids in the text (see "PR body for an external reader" in
-    change-requests-lifecycle.guidelines.md).
+    internal ids in the text (see "PR body for an external reader" below).
 11. **Every job has a `timeout-minutes`** (about twice its healthy duration: 30 for the VS Code
     integration and stress jobs, 15 for the others, 10 for the report job). A hung job must fail fast and name
     where it stopped, never run to the platform default of six hours. Never raise a timeout to
@@ -131,3 +130,50 @@ same run; no new commit and no manual tag are needed.
 
 Fix and release a new version instead when the failure is a real bug, or when the same job fails
 again after a re-run: open a fix, merge it, then bump the version (`just version`) and push.
+
+## PR body for an external reader
+
+The PR is read by people outside the agent session: reviewers, stakeholders, future maintainers.
+They do not know the backlog, the CR numbers or the plan files, and `.agents/changes/` is not
+even in git.
+
+- Explain the change from the reader's side: what was wrong or missing, what the PR changes, what
+  they will notice. Name features by what they do ("incoming-changes bars", "Restricted Mode
+  window"), not by internal ids.
+- No internal references in the body text: no CR numbers (`CR 043`), backlog or plan ids (`P9`,
+  `T2`, `B5`, `F`), task or round numbers, scenario ids, agent roles, or paths under
+  `.agents/changes/`. Define any project term the reader needs on first use.
+- If a reference helps the maintainers, put it in one last section, "Internal references", just
+  before the Claude Code line.
+- The title follows the same rule: a Conventional Commit subject that says what changes.
+- Update the body whenever the scope changes (re-scope, dropped item, follow-up); it describes
+  the PR as it is now, not its history.
+- Add a "Deliverables" section right after Summary: what the reader gets, shown with one or
+  more small visuals, each placed next to the one or two sentences it supports. Use one, sometimes several, rarely every kind.
+  Keep only the calls, files, props and boundaries the reviewer needs, with real names checked
+  against the code:
+  - a Mermaid `flowchart` of the modules or layers that change, arrows for the calls or allowed
+    imports (about 10 nodes at most);
+  - a Mermaid `sequenceDiagram` of one real flow (an edit, a message, a write), before and after
+    when the order is the fix;
+  - a before/after tree or table (files moved or split, sizes, settings);
+  - screenshots before/after for UI changes
+  - a short code sketch (5 to 15 lines) of the new interface, message or registration that a
+    contributor will reuse, with `...` for the rest.
+  A one-line fix may skip the section; a structural change never does.
+
+## Screenshots in the PR
+
+Take them from the e2e/visual run of the final code, light and dark when themes matter. Push them
+as raw blobs to a side branch (bypasses Git LFS) and link the raw URLs:
+
+```bash
+tree=$(for f in shots/*.png; do
+  printf '100644 blob %s\t%s\n' "$(git hash-object -w --no-filters "$f")" "$(basename "$f")"
+done | git mktree)
+commit=$(git commit-tree "$tree" -m "<slug> screenshots")
+git push origin "${commit}:refs/heads/pr-assets/<slug>"  # braces: zsh reads $commit:r as a modifier
+# URL: https://raw.githubusercontent.com/<owner>/<repo>/${commit}/<name>.png
+```
+
+Keep `pr-assets/<slug>` after merge, and every older assets branch: the PR bodies point at them.

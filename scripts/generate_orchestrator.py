@@ -260,8 +260,7 @@ def render(changes: Path, repo: str, today: str) -> Result:
     if drift_lines:
         out += ["Drift (backlog items already worked by a CR, move or remove them from `02-backlog/`):", "", *drift_lines, ""]
     out += [
-        f"Repository: [{repo}](https://github.com/{repo}). Process:",
-        "[change-requests-lifecycle.guidelines.md](../../guidelines/change-requests-lifecycle.guidelines.md).",
+        f"Repository: [{repo}](https://github.com/{repo}).",
         f"Worktree of CR NNN: `../{name}-wt-NNN`.",
         "",
         "## Active",
