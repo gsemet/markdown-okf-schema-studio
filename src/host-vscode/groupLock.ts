@@ -52,19 +52,16 @@ export function createVscodePanelGroups(
    * next preview; the product does not read this.
    */
   const groupFocusWork = createFocusWorkTracker(20, () => Date.now());
-  /**
-   * The groups this extension locked. This relies on the extension host keeping one TabGroup object
-   * per group and updating it in place (its viewColumn follows the shift when a group on its left
-   * closes); if that ever changed, no group would be unlocked and the leak below would come back.
-   */
-  const lockedGroups = new Set<vscode.TabGroup>();
 
   /**
    * Releases the lock this extension put on a preview group that outlived its preview. Only empty
    * groups are ever unlocked: that is the shape of the leak (VS Code keeps an empty locked group),
-   * and a non-empty group may carry a lock the user set.
+   * and a non-empty group may carry a lock the user set. `known` holds the groups open when the
+   * preview closed. This relies on the extension host keeping one TabGroup object per group and
+   * updating it in place (its viewColumn follows the shift when a group on its left closes); if that
+   * ever changed, no group would be unlocked and the leak would come back.
    */
-  async function unlockPreviewGroup(column: vscode.ViewColumn): Promise<void> {
+  async function unlockPreviewGroup(column: vscode.ViewColumn, known: readonly vscode.TabGroup[]): Promise<void> {
     try {
       const groupAt = (target: number) => vscode.window.tabGroups.all.find((group) => group.viewColumn === target);
       const holdsPreviewTab = (group: vscode.TabGroup | undefined): boolean => group?.tabs.some((tab) =>
@@ -79,13 +76,9 @@ export function createVscodePanelGroups(
       // The groups themselves are remembered, not their columns: a column goes stale when a group on
       // its left closes, a focus command for a position past the last group creates a new group, and
       // a preview opened meanwhile has a new group at the same column.
-      const open = vscode.window.tabGroups.all;
       const remembered = vscode.window.tabGroups.activeTabGroup;
-      const unlocked = groupsToUnlock(lockedGroups, open, (group) => group.tabs.length === 0
-        && !hasLivePanelIn(group.viewColumn));
-      for (const group of lockedGroups) {
-        if (!open.includes(group) || unlocked.includes(group)) lockedGroups.delete(group);
-      }
+      const unlocked = groupsToUnlock(known, column, vscode.window.tabGroups.all, (group) =>
+        group.tabs.length === 0 && !hasLivePanelIn(group.viewColumn));
       for (const group of unlocked) {
         const command = focusGroupCommand(group.viewColumn, vscode.window.tabGroups.all.length);
         if (command === undefined) continue;
@@ -123,10 +116,8 @@ export function createVscodePanelGroups(
         for (let attempt = 0; attempt < 10 && groupOf() === undefined; attempt += 1) {
           await new Promise<void>((resolve) => setTimeout(resolve, 25));
         }
-        const group = groupOf();
-        if (panel.active && group?.tabs.length === 1) {
+        if (panel.active && groupOf()?.tabs.length === 1) {
           await vscode.commands.executeCommand("workbench.action.lockEditorGroup");
-          lockedGroups.add(group);
           return true;
         }
       } catch {
@@ -136,8 +127,9 @@ export function createVscodePanelGroups(
     },
     /** Called when a preview's panel goes away: unlock its group one tick later. */
     release(column: number): void {
+      const known = [...vscode.window.tabGroups.all];
       const unlock = new Promise<void>((resolve) => {
-        setTimeout(() => void unlockPreviewGroup(column).finally(resolve), 0);
+        setTimeout(() => void unlockPreviewGroup(column, known).finally(resolve), 0);
       });
       groupFocusWork.track(unlock);
     },
