@@ -175,8 +175,8 @@ jobs:
           if-no-files-found: warn
 
   # Does this push to main change the package version? The same test as tag-release (scripts/
-  # version.py), so a version change always gets the heavy jobs below, and tag-release requires
-  # them to be green before it tags.
+  # version.py): stress then blocks, and tag-release requires the heavy jobs to be green before it
+  # tags.
   release-check:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -197,13 +197,13 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
         run: uv run --group release python scripts/version.py --bump-since "$BEFORE_SHA"
 
-  # Heavy: the real VS Code window tests. They do not run on a pull request, nor on a push to main
-  # unless the push changes the version (a release: release-check). Start them by hand with
+  # Heavy: the real VS Code window tests. They run on every push to main and never on a pull
+  # request. Start them by hand on a branch with
   # `gh workflow run ci.yml --ref <branch> -f heavy=true` (or "Run workflow" in Actions).
   # Not part of `checks`. `!cancelled()`: release-check is skipped outside a push to main.
   integration:
     needs: release-check
-    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.outputs.bump == 'true') }}
+    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.result == 'success') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -251,7 +251,7 @@ jobs:
   # needs.stress.result reports the failure to tag-release.
   stress:
     needs: release-check
-    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.outputs.bump == 'true') }}
+    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.result == 'success') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -397,7 +397,7 @@ jobs:
           path: out/reports/
           merge-multiple: true
       # Without the heavy jobs the real VS Code stage is reported as skipped (visual only).
-      - run: just ci-report ${{ ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.outputs.bump == 'true') && 'all' || 'visual' }}
+      - run: just ci-report ${{ ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.result == 'success') && 'all' || 'visual' }}
       - name: Publish merged reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -447,9 +447,9 @@ jobs:
           if-no-files-found: warn
 
   # Stable aggregate name for branch protection: it depends on every required check job, the
-  # simulated ones. The real VS Code jobs are not among them: they are manual, except on a push
-  # that changes the version, where `report` merges the integration stage and tag-release requires
-  # both heavy jobs (CI rule 14).
+  # simulated ones. The real VS Code jobs are not among them, but on a push to main `report` merges
+  # the integration stage, and on a version change tag-release requires both heavy jobs (CI rules
+  # 13 and 14).
   checks:
     needs: [static, static-windows, visual, report]
     if: ${{ !cancelled() }}
@@ -471,8 +471,7 @@ jobs:
     needs: [checks, release-check, integration, stress]
     # `checks` runs even though the heavy jobs above it are skipped; a plain `if` carries an
     # implicit success() that is false when any ancestor was skipped, so ask for the result.
-    # The heavy jobs are skipped on a push without a version change: red checks skip this job, as
-    # before. On a version change the job also runs when checks failed (an integration failure
+    # Without a version change, red checks skip this job. On a version change the job also runs when checks failed (an integration failure
     # fails report, then checks), so that every untagged version change says why in its summary;
     # the tag step requires checks and both heavy jobs to be green.
     if: ${{ !cancelled() && needs.release-check.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.checks.result == 'success' || needs.release-check.outputs.bump == 'true') }}

@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-11-04
+
+### Real VS Code jobs on every push to main (CR 258)
+
+- SwRS-MDOKFSTUDIO-CORE-076 (proposed, updated): the heavy jobs run on every push to main, not only
+  on a version change, and never on a pull request. Without a version change `stress` stays advisory
+  and `tag-release` creates no tag.
+
 ## 2026-11-03
 
 ### GitHub Copilot marketplace catalog (CR 255)

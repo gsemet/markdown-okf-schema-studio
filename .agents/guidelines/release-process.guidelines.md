@@ -38,18 +38,19 @@ the fixes it needs.
    `## Unreleased` and the CR reports. The owner reviews `release-notes.md` and `tweet.md` in
    Studio. This is the owner's only step after the version. The hero image waits for the version PR
    (step 5), in the release CR folder or on the `-assets` branch.
-4. The release driver dispatches the heavy run on `main` HEAD and waits for `integration` and
-   `stress` to be green on that exact commit:
+4. The last merge of the stack started the heavy run on `main` HEAD. The release driver waits for
+   `integration` and `stress` to be green on that exact commit, and reads the result of each job:
+   a red `stress` does not turn this run red.
 
    ```bash
-   gh workflow run ci.yml --ref main -f heavy=true
    gh run list --workflow ci.yml --branch main --limit 3
    gh run watch <run-id>
+   gh run view <run-id> --json jobs --jq '.jobs[] | select(.name == "integration" or .name == "stress") | "\(.name) \(.conclusion)"'
    ```
 
    Check that the run's `headSha` is the current `main` HEAD; a merge since then starts the step
    again. A red job: the release driver tells the Foreman, which runs a fix CR; the release driver
-   merges the fix PR and runs again on the new HEAD. A flake: re-run once
+   merges the fix PR and waits for the run of the new HEAD. A flake: re-run once
    (`gh run rerun <run-id> --failed`); if it fails again, treat it as red.
 5. **Only then** the version commit: `just bump-version`, the changelog heading, the version pull
    request (hero image and version commit squashed into one `chore: version X.Y.Z` commit, body
