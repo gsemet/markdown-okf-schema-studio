@@ -35,20 +35,6 @@ export const BLOCK_EDITOR_BLUR = "block editor blur";
 const COMMIT_ON_WINDOW_BLUR = /^related=none commit active=\S+ pageFocus=false$/u;
 
 /**
- * The detail of a block editor blur that committed with the focus going nowhere in a page that
- * still has the focus. The VS Code window taking the focus back does this: the workbench restores
- * its own focus and the text box blurs to the body, so the press that follows finds no editor.
- */
-const COMMIT_ON_WINDOW_FOCUS = /^related=none commit active=body pageFocus=true$/u;
-
-/**
- * Most milliseconds between that commit and the host's record of the VS Code window taking the
- * focus (`onDidChangeWindowState` with `focused: true`), either way. Both are wall-clock
- * `Date.now()` on one machine; the bound absorbs the IPC to the extension host under load.
- */
-export const WINDOW_FOCUS_TO_COMMIT_MS = 250;
-
-/**
  * Most milliseconds from that commit to the `page blur` that follows it. Both are recorded in the
  * same task with the commit's save in between: a few ms, never the seconds of a later blur.
  */
@@ -80,10 +66,6 @@ export const WINDOW_BLUR_TO_PAGE_BLUR_MS = 1_000;
  * - the window blur proof of `interruptionSince` on that page blur and that window loss: the VS
  *   Code window lost the focus during the step.
  *
- * A commit in a page that kept the focus is proved the other way: no press since the start, and a
- * host record of the VS Code window taking the focus within `WINDOW_FOCUS_TO_COMMIT_MS` of that
- * commit, with no window focus loss during the step.
- *
  * The page trace keeps its last 40 entries: a press pushed out of it is not seen here.
  */
 export function editorBlurBeforePress(
@@ -109,19 +91,6 @@ export function editorBlurBeforePress(
   const rejected: string[] = [];
   for (const commit of commits) {
     const described = `commit at ${commit.at} ms (${commit.detail ?? "no detail"})`;
-    if (COMMIT_ON_WINDOW_FOCUS.test(commit.detail ?? "")) {
-      const commitAt = before.startedAt + commit.at;
-      const states = host.windowStates.filter((state) => state.at >= host.stepStartedAt);
-      const gain = states.find((state) => state.focused && Math.abs(state.at - commitAt) <= WINDOW_FOCUS_TO_COMMIT_MS);
-      // A loss in the step is the other proof's: that commit came from a blur, not from this gain.
-      if (gain !== undefined && states.every((state) => state.focused)) {
-        return {
-          redo: true,
-          reason: `the VS Code window took the focus ${gain.at - commitAt} ms from the block editor commit at `
-            + `${commit.at} ms (${commit.detail}) and no press reached the page`,
-        };
-      }
-    }
     if (!COMMIT_ON_WINDOW_BLUR.test(commit.detail ?? "")) {
       rejected.push(`${described}: not a blur to nowhere in a page that had lost the focus`);
       continue;

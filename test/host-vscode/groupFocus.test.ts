@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { createFocusWorkTracker, focusGroupCommand } from "../../src/host-vscode/groupFocus";
+import { createFocusWorkTracker, focusGroupCommand, groupsToUnlock } from "../../src/host-vscode/groupFocus";
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-151
 test("a group position that exists maps to its focus command", () => {
@@ -21,6 +21,20 @@ test("positions outside the supported range or not known get no command", () => 
   assert.equal(focusGroupCommand(0, 3), undefined);
   assert.equal(focusGroupCommand(9, 9), undefined);
   assert.equal(focusGroupCommand(1.5, 3), undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151
+test("only a free group this extension locked is unlocked, never a new group at the same column", () => {
+  const closedPreview = { viewColumn: 2, free: true };
+  const newPreview = { viewColumn: 2, free: true };
+  const isFree = (group: { free: boolean }): boolean => group.free;
+  assert.deepEqual(groupsToUnlock([closedPreview], [closedPreview], isFree), [closedPreview], "the empty locked group");
+  assert.deepEqual(groupsToUnlock([closedPreview], [newPreview], isFree), [], "its group closed; a new one took the column");
+  assert.deepEqual(groupsToUnlock([closedPreview], [closedPreview, newPreview], isFree), [closedPreview],
+    "only the locked one of two empty groups");
+  assert.deepEqual(groupsToUnlock([{ viewColumn: 2, free: false }], [], isFree), [], "a group that is gone");
+  const occupied = { viewColumn: 2, free: false };
+  assert.deepEqual(groupsToUnlock([occupied], [occupied], isFree), [], "a live preview occupies it");
 });
 
 test("CR 041: settled() waits for every tracked focus job, also one that starts while waiting", async () => {

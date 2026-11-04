@@ -300,8 +300,8 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
       // The pick is redone once, from a reset document, only when the page and the host prove that the
       // VS Code window lost the focus during it and the editor committed and closed on that very blur
       // (SwRS-MDOKFSTUDIO-BLOCK-047: a commit to nowhere in an unfocused page, followed within a few
-      // ms by the page blur, or a commit as the window took the focus back) before the press reached
-      // the page. Any other failure, and a failure of the redo, carries the full dump.
+      // ms by the page blur) before the press reached the page. Any other failure, and a failure of
+      // the redo, carries the full dump.
       const first = await witnessPress(page, windowStates);
       try {
         await pickWarning();

@@ -9,7 +9,7 @@
 import * as vscode from "vscode";
 
 import type { PanelGroups, PreviewPanel } from "../host-api/previewPanel";
-import { createFocusWorkTracker, focusGroupCommand, type GroupFocusMove } from "./groupFocus";
+import { createFocusWorkTracker, focusGroupCommand, groupsToUnlock, type GroupFocusMove } from "./groupFocus";
 import type { VscodePreviewPanel } from "./previewPanel";
 
 /** The group lock of the VS Code host, with what the tests wait for. */
@@ -52,6 +52,12 @@ export function createVscodePanelGroups(
    * next preview; the product does not read this.
    */
   const groupFocusWork = createFocusWorkTracker(20, () => Date.now());
+  /**
+   * The groups this extension locked. This relies on the extension host keeping one TabGroup object
+   * per group and updating it in place (its viewColumn follows the shift when a group on its left
+   * closes); if that ever changed, no group would be unlocked and the leak below would come back.
+   */
+  const lockedGroups = new Set<vscode.TabGroup>();
 
   /**
    * Releases the lock this extension put on a preview group that outlived its preview. Only empty
@@ -70,21 +76,16 @@ export function createVscodePanelGroups(
       // An unlocked empty group closes by itself; one that is still there after a moment is locked.
       // Waiting also keeps the focus command below from landing on a group that shifted into place.
       await new Promise<void>((resolve) => setTimeout(resolve, 150));
-      // The recorded column can be stale when a group on its left closed in the meantime. Then the
-      // locked group is an empty group that no live preview occupies.
-      const direct = groupAt(column);
-      const targets = direct !== undefined && direct.tabs.length === 0
-        ? [column]
-        : vscode.window.tabGroups.all
-          .filter((group) => group.tabs.length === 0 && group.viewColumn !== undefined && !hasLivePanelIn(group.viewColumn))
-          .map((group) => group.viewColumn);
       // The groups themselves are remembered, not their columns: a column goes stale when a group on
-      // its left closes, and a focus command for a position past the last group creates a new group.
-      // This relies on the extension host keeping one TabGroup object per group and updating it in
-      // place (its viewColumn follows the shift); if that ever changed, the restore below would be
-      // skipped and the wait would time out after its bound.
+      // its left closes, a focus command for a position past the last group creates a new group, and
+      // a preview opened meanwhile has a new group at the same column.
+      const open = vscode.window.tabGroups.all;
       const remembered = vscode.window.tabGroups.activeTabGroup;
-      const unlocked = targets.map(groupAt).filter((group): group is vscode.TabGroup => group !== undefined);
+      const unlocked = groupsToUnlock(lockedGroups, open, (group) => group.tabs.length === 0
+        && !hasLivePanelIn(group.viewColumn));
+      for (const group of lockedGroups) {
+        if (!open.includes(group) || unlocked.includes(group)) lockedGroups.delete(group);
+      }
       for (const group of unlocked) {
         const command = focusGroupCommand(group.viewColumn, vscode.window.tabGroups.all.length);
         if (command === undefined) continue;
@@ -122,8 +123,10 @@ export function createVscodePanelGroups(
         for (let attempt = 0; attempt < 10 && groupOf() === undefined; attempt += 1) {
           await new Promise<void>((resolve) => setTimeout(resolve, 25));
         }
-        if (panel.active && groupOf()?.tabs.length === 1) {
+        const group = groupOf();
+        if (panel.active && group?.tabs.length === 1) {
           await vscode.commands.executeCommand("workbench.action.lockEditorGroup");
+          lockedGroups.add(group);
           return true;
         }
       } catch {

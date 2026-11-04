@@ -8,7 +8,6 @@ import {
   PAGE_FOCUS,
   PAGE_MOUSEDOWN,
   WINDOW_BLUR_TO_PAGE_BLUR_MS,
-  WINDOW_FOCUS_TO_COMMIT_MS,
 } from "../shared/editorBlurInterruption";
 import { type HostWitness, PAGE_BLUR, type PageWitness, type TraceEntry } from "../shared/stepInterruption";
 
@@ -49,23 +48,6 @@ test("a window blur that committed the editor before the press reached the page:
   assert.equal(redo([commit, saved, { ...pageBlur, at: 605 }]), true,
     "the commit's own records between the commit and its page blur");
   assert.equal(redo([commit, { ...pageBlur, at: 600 + COMMIT_TO_PAGE_BLUR_MS }]), true, "a page blur at the bound");
-});
-
-test("the window took the focus back as the editor committed in a focused page: redo once", () => {
-  const inFocusedPage = { ...commit, detail: "related=none commit active=body pageFocus=true" };
-  const commitAt = (before.startedAt ?? 0) + inFocusedPage.at;
-  const gained = (delta: number): HostWitness => ({ ...quiet, windowStates: [{ at: commitAt + delta, focused: true }] });
-  const verdict = editorBlurBeforePress(before, samePage, [inFocusedPage], gained(-3));
-  assert.equal(verdict.redo, true);
-  assert.match(verdict.reason, /^the VS Code window took the focus -3 ms from the block editor commit at 600 ms /u);
-  assert.equal(redo([inFocusedPage], gained(WINDOW_FOCUS_TO_COMMIT_MS)), true, "a gain at the bound");
-  assert.equal(redo([inFocusedPage], gained(WINDOW_FOCUS_TO_COMMIT_MS + 1)), false, "a gain further away");
-  assert.equal(redo([inFocusedPage], quiet), false, "no window focus change");
-  assert.equal(redo([{ ...warningPress, at: 650 }, inFocusedPage], gained(0)), false, "a press reached the page");
-  assert.equal(redo([{ ...inFocusedPage, detail: "related=none commit active=textarea pageFocus=true" }], gained(0)),
-    false, "the focus did not leave for the body");
-  const beforeTheStep = { ...quiet, stepStartedAt: commitAt + 1, windowStates: [{ at: commitAt, focused: true }] };
-  assert.equal(redo([inFocusedPage], beforeTheStep), false, "a gain before the step");
 });
 
 test("a commit in a page that kept the focus, then a later window blur: fail", () => {
