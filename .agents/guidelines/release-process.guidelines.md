@@ -5,17 +5,19 @@ are in "How to Release" in [CONTRIBUTING.md](../../CONTRIBUTING.md). This guidel
 release driver's steps and what the owner reviews before the version pull request merges: the
 release notes, the announcement thread and the hero image. The model is release 1.2.0.
 
-A release is run by the release driver, a special driver started by the main session (role, merge
-rights and prompt: "Release driver" in
+A release is planned by the Foreman and run by the release driver, a special driver the Foreman
+starts once the stack of the release is merged (role, merge rights and prompt: "Release driver" in
 [change-requests-lifecycle.guidelines.md](change-requests-lifecycle.guidelines.md)). The goal: the
 owner says "release X", and the release is almost guaranteed before the version commit exists.
 1.3.0 and 1.3.1 were never tagged because the version push was the first real VS Code run of their
-code.
+code. The real VS Code jobs stay on `main`, so the version commit is never stacked on top of
+development: the development lands first, then the release runs on its own.
 
 ## The release change request
 
 Every release has a change request folder, `.agents/changes/03-requests/<NNN>-release-<x>-<y>-<z>/`,
-with the next free CR number. The release driver owns it; there is no Foreman and no CR driver.
+with the next free CR number. The release driver owns it; the Foreman plans the release and runs
+the fixes it needs.
 
 | File | Content |
 | --- | --- |
@@ -27,16 +29,17 @@ with the next free CR number. The release driver owns it; there is no Foreman an
 ## The release driver's steps
 
 1. The owner says "release X". The main session and the owner agree on the version number, then
-   the main session starts the release driver.
-2. The release driver opens the folder as soon as the version is agreed, and drafts the notes and
-   the thread from `CHANGELOG.md` `## Unreleased` and the CR reports. The owner reviews
-   `release-notes.md` and `tweet.md` in Studio. This is the owner's only step after the version.
-3. The release driver monitors the open PRs that belong to the release and `main`, and merges what
-   the release needs, keeping the order of stacks. The changelog lines go in with the PRs of the
-   release, so they are in `main` before the heavy run. The hero image waits for the version PR
+   the main session gives the release to the Foreman, starting one if none is running.
+2. The Foreman plans the release: it brings the stack of the release to `main` first, with the
+   changelog lines in its PRs, so they are in `main` before the heavy run. Once the stack is merged,
+   it asks the main session to hold every other merge until the release is published, and starts
+   the release driver.
+3. The release driver opens the folder and drafts the notes and the thread from `CHANGELOG.md`
+   `## Unreleased` and the CR reports. The owner reviews `release-notes.md` and `tweet.md` in
+   Studio. This is the owner's only step after the version. The hero image waits for the version PR
    (step 5), in the release CR folder or on the `-assets` branch.
-4. When everything is in `main`, it dispatches the heavy run on `main` HEAD and waits for
-   `integration` and `stress` to be green on that exact commit:
+4. The release driver dispatches the heavy run on `main` HEAD and waits for `integration` and
+   `stress` to be green on that exact commit:
 
    ```bash
    gh workflow run ci.yml --ref main -f heavy=true
@@ -45,7 +48,8 @@ with the next free CR number. The release driver owns it; there is no Foreman an
    ```
 
    Check that the run's `headSha` is the current `main` HEAD; a merge since then starts the step
-   again. A red job: fix PR, merge, run again on the new HEAD. A flake: re-run once
+   again. A red job: the release driver tells the Foreman, which runs a fix CR; the release driver
+   merges the fix PR and runs again on the new HEAD. A flake: re-run once
    (`gh run rerun <run-id> --failed`); if it fails again, treat it as red.
 5. **Only then** the version commit: `just bump-version`, the changelog heading, the version pull
    request (hero image and version commit squashed into one `chore: version X.Y.Z` commit, body
@@ -56,7 +60,7 @@ with the next free CR number. The release driver owns it; there is no Foreman an
 7. It replaces the generated notes (see "Publishing") and archives the folder with a `report.md`:
    tag, release URL, CI runs (heavy run on `main`, version push).
 
-Between the notes review (step 2) and the publication (step 7), the driver asks the owner nothing,
+Between the notes review (step 3) and the publication (step 7), the driver asks the owner nothing,
 except a real blocker: the round limit is reached or a product decision is needed.
 
 ## Release notes

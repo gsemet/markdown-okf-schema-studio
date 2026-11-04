@@ -70,28 +70,28 @@ Unless specified by user through your context otherwise, here are the default ro
 
 ## Release driver
 
-A special driver, started by the main session when the owner says "release X". It runs the release
-end to end, so the owner only agrees on the version, reviews the notes and the thread, and reads
-the result. The steps (notes, thread, merges, heavy run on `main`, version commit, publishing,
-archive) are in [release-process.guidelines.md](release-process.guidelines.md); this section
+A special driver, started by the Foreman once the stack of the release is merged. It runs the
+release from there to the end, so the owner only agrees on the version, reviews the notes and the
+thread, and reads the result. The steps (planning, notes, thread, heavy run on `main`, version
+commit, publishing, archive) are in [release-process.guidelines.md](release-process.guidelines.md); this section
 covers the role.
 
 - **Owns** the release CR folder `.agents/changes/03-requests/NNN-release-x-y-z/` and its
   `STATE.md` header. It is the one writer of that header from the notes draft to the archive, and
   `driver:` is its lock, like for a CR driver.
-- **May merge** the PRs the release needs and the version PR, on the owner's standing permission
-  for release work. It keeps the order of stacks (bottom up) and merges nothing else. It never
-  enables auto-merge and never touches a PR outside the release.
-- **Fixes** go through the normal CR flow: a red heavy job gets a fix CR or PR, with a coder and a
-  separate reviewer per round, started by the release driver like a CR driver does (the lifecycle
-  above, the round limit, escalation to Opus). The release driver never codes or reviews.
+- **May merge** the fix PRs of the release and the version PR, on the owner's standing permission
+  for release work. It merges nothing else. It never enables auto-merge and never touches a PR
+  outside the release.
+- **Fixes** go through the Foreman: the release driver reports a red heavy job or another small
+  problem, and the Foreman runs a fix CR with a CR driver (the lifecycle below, the round limit,
+  escalation to Opus). The release driver never codes or reviews.
 - **Asks the owner nothing** between the notes review and the publication, except a real blocker:
   the round limit is reached or a product decision is needed. It then returns `status: blocked`
   with the question and its recommended answer.
 - **Watches** in slices of at most 5 minutes (see "Responsiveness") and rewrites the header at
   every transition and every slice.
 
-### Release driver prompt (the main session fills the placeholders)
+### Release driver prompt (the Foreman fills the placeholders)
 
 > You are the release driver for release `<X.Y.Z>`. You alone own the release CR folder
 > `<absolute path>` and its `STATE.md` header. Read
@@ -99,10 +99,11 @@ covers the role.
 > header, responsiveness), `.agents/guidelines/release-process.guidelines.md`,
 > `.agents/guidelines/ci.guidelines.md` and the release folder (`00-request.md`, `STATE.md`).
 > Resume from the `STATE.md` header and write `driver: <your id>` in it. Follow the steps of
-> "The release driver's steps": notes and thread, monitor and merge the release PRs, a green heavy
-> run on `main` HEAD, then the version commit, then tag, Marketplace and Pages, the published
-> notes and the archive. Start a coder, then a separate reviewer, per round for any fix PR; never
-> code or review yourself. Ask the owner nothing after the notes review except a real blocker.
+> "The release driver's steps" from step 3: notes and thread, a green heavy run on `main` HEAD,
+> then the version commit, then tag, Marketplace and Pages, the published notes and the archive.
+> Report a red job or another small problem to the Foreman, which runs the fix CR, and merge its
+> PR; never code or review yourself. Ask the owner nothing after the notes review except a real
+> blocker.
 > Return with `status: ready` when the release is archived, or `status: blocked` and a question
 > with your recommended answer.
 
@@ -351,6 +352,15 @@ Drivers stay background sub-agents of the foreman.
 - **Without nested sessions** (another harness, or `start_session` unavailable): the main session
   starts the orchestrator as a background sub-agent, and its tick is a 270-second `sleep` run in
   the background, restarted at the end of every tick.
+
+### Planning a release
+
+When the main session gives it a release, the Foreman keeps the version commit away from
+development. It brings the stack of the release to `main` the usual way, then asks the main session
+to hold every other merge, and starts the release driver as a background driver of the run. It
+does not start a driver for a new CR until the release is published. A problem the release driver
+reports becomes a fix CR, with a CR driver; the release driver merges its PR. The steps are in
+[release-process.guidelines.md](release-process.guidelines.md).
 
 ### Orchestrator tick
 
