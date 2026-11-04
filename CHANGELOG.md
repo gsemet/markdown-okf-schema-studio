@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Tables are easier to read: the heading and the even rows have a soft tint, and the row under the
+  pointer is highlighted. The colours follow the theme.
 - A preview opened right after another one closed keeps the focus: an editor just opened in it no
   longer closes by itself about a second later.
 

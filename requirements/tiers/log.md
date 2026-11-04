@@ -2,6 +2,12 @@
 
 ## 2026-11-04
 
+### Table row colours (CR 260)
+
+- SwRS-MDOKFSTUDIO-CORE-077 (proposed, new): a table tints its heading, its even rows and the hovered
+  row with translucent theme colours; the frontmatter properties table keeps no background.
+- Verification: test/visual/capture_table_row_colours.py, with a real pointer in each page theme.
+
 ### A new preview keeps its focus (CR 259)
 
 - SwRS-MDOKFSTUDIO-LIFE-151 (proposed, updated): new boundary scenario. The unlock of a closed preview

@@ -67,6 +67,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-074
 - SwRS-MDOKFSTUDIO-CORE-075
 - SwRS-MDOKFSTUDIO-CORE-076
+- SwRS-MDOKFSTUDIO-CORE-077
 - SwRS-MDOKFSTUDIO-GFM-029
 - SwRS-MDOKFSTUDIO-LIFE-094
 - SwRS-MDOKFSTUDIO-TRUST-052
@@ -142,6 +143,7 @@ Writers need to read their Markdown as formatted text, at any length, while they
   - [SwRS-MDOKFSTUDIO-CORE-074](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-074.md): The writing skill is packaged as an installable agent plugin
   - [SwRS-MDOKFSTUDIO-CORE-075](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-075.md): Plugin manifest versions equal the package version
   - [SwRS-MDOKFSTUDIO-CORE-076](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-076.md): CI tags a version change only after a green heavy run of the commit
+  - [SwRS-MDOKFSTUDIO-CORE-077](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-077.md): A table tints its heading, its even rows and the hovered row
   - [SwRS-MDOKFSTUDIO-GFM-029](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
   - [SwRS-MDOKFSTUDIO-LIFE-094](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-094.md): Blocks changed by another tool glow briefly
   - [SwRS-MDOKFSTUDIO-TRUST-052](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
