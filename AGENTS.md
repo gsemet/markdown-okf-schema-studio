@@ -75,6 +75,8 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 - When preparing or running a release (release driver, release notes, announcement thread, hero
   image):
   [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md)
+- When making, editing or reviewing a short demo video:
+  [short-demo-process.guidelines.md](docs/demo-video/guidelines/short-demo-process.guidelines.md)
 - When adding, removing or changing a rendered syntax (directive, role, fence language, marker,
   HTML element, palette mode, limit): update the writing skill `skills/writing-for-markdown-okf-schema-studio/`
   in the same pull request, per
