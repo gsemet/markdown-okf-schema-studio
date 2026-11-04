@@ -68,45 +68,6 @@ Unless specified by user through your context otherwise, here are the default ro
   when a child fails. A failing child is restarted (see "Supervision"), never replaced by its
   parent. If sub-agents cannot be started at all, the agent returns "blocked" to its parent.
 
-## Release driver
-
-A special driver, started by the Foreman once the stack of the release is merged. It runs the
-release from there to the end, so the owner only agrees on the version, reviews the notes and the
-thread, and reads the result. The steps (planning, notes, thread, heavy run on `main`, version
-commit, publishing, archive) are in [release-process.guidelines.md](release-process.guidelines.md); this section
-covers the role.
-
-- **Owns** the release CR folder `.agents/changes/03-requests/NNN-release-x-y-z/` and its
-  `STATE.md` header. It is the one writer of that header from the notes draft to the archive, and
-  `driver:` is its lock, like for a CR driver.
-- **May merge** the fix PRs of the release and the version PR, on the owner's standing permission
-  for release work. It merges nothing else. It never enables auto-merge and never touches a PR
-  outside the release.
-- **Fixes** go through the Foreman: the release driver reports a red heavy job or another small
-  problem, and the Foreman runs a fix CR with a CR driver (the lifecycle below, the round limit,
-  escalation to Opus). The release driver never codes or reviews.
-- **Asks the owner nothing** between the notes review and the publication, except a real blocker:
-  the round limit is reached or a product decision is needed. It then returns `status: blocked`
-  with the question and its recommended answer.
-- **Watches** in slices of at most 5 minutes (see "Responsiveness") and rewrites the header at
-  every transition and every slice.
-
-### Release driver prompt (the Foreman fills the placeholders)
-
-> You are the release driver for release `<X.Y.Z>`. You alone own the release CR folder
-> `<absolute path>` and its `STATE.md` header. Read
-> `.agents/guidelines/change-requests-lifecycle.guidelines.md` ("Release driver", `STATE.md`
-> header, responsiveness), `.agents/guidelines/release-process.guidelines.md`,
-> `.agents/guidelines/ci.guidelines.md` and the release folder (`00-request.md`, `STATE.md`).
-> Resume from the `STATE.md` header and write `driver: <your id>` in it. Follow the steps of
-> "The release driver's steps" from step 3: notes and thread, a green heavy run on `main` HEAD,
-> then the version commit, then tag, Marketplace and Pages, the published notes and the archive.
-> Report a red job or another small problem to the Foreman, which runs the fix CR, and merge its
-> PR; never code or review yourself. Ask the owner nothing after the notes review except a real
-> blocker.
-> Return with `status: ready` when the release is archived, or `status: blocked` and a question
-> with your recommended answer.
-
 ## Lifecycle
 
 | Step | Owner | Action |
@@ -152,25 +113,7 @@ and `approved_on`. New requirements delivered with their code are created `propo
 
 ### `STATE.md` header
 
-The first four lines of `STATE.md`, rewritten at every transition and at every CI watch slice.
-Everything else reads it; nobody keeps a CR's state in memory only.
-
-**One writer**: exactly one agent writes a CR's header at a time. That is the main session for
-steps 1–4, the CR driver for steps 5–10 (in stack mode: until its branch joins the stack), the
-stack driver once the branch is in the stack, and the orchestrator for step 11. Every other agent
-reports the line it wants changed to the writer, through its parent. The writer re-reads the file
-right before rewriting it, always sets `updated:`, and reads it back after writing. No other
-checklist is kept in `STATE.md`; `ORCHESTRATOR.md` shows the step.
-
-```text
-driver: <agent id | none> · updated: <HH:MM>
-status: <working | wait-ci | ready | blocked | landed> · step: <1–11 name> · round: <n>/<limit>
-head: <sha> · PR: <#n | —> · run: <id> <pass | fail | pending>
-next: <next action> · question: <question for the user, or —>
-```
-
-`driver:` is a lock: a CR has at most one live driver. A new orchestrator reads it before starting
-a driver and messages the existing one instead of starting a second.
+The four-line header: [state-file.guidelines.md](state-file.guidelines.md).
 
 ## Writing tickets
 

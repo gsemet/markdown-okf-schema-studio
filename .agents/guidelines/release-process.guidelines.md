@@ -6,12 +6,48 @@ release driver's steps and what the owner reviews before the version pull reques
 release notes, the announcement thread and the hero image. The model is release 1.2.0.
 
 A release is planned by the Foreman and run by the release driver, a special driver the Foreman
-starts once the stack of the release is merged (role, merge rights and prompt: "Release driver" in
-[change-requests-lifecycle.guidelines.md](change-requests-lifecycle.guidelines.md)). The goal: the
-owner says "release X", and the release is almost guaranteed before the version commit exists.
+starts once the stack of the release is merged (role, merge rights and prompt: "Release driver"
+below). The goal: the owner says "release X", and the release is almost guaranteed before the version commit exists.
 1.3.0 and 1.3.1 were never tagged because the version push was the first real VS Code run of their
 code. The real VS Code jobs stay on `main`, so the version commit is never stacked on top of
 development: the development lands first, then the release runs on its own.
+
+## Release driver
+
+A special driver, started by the Foreman once the stack of the release is merged. It runs the
+release from there to the end, so the owner only agrees on the version, reviews the notes and the
+thread, and reads the result. The steps (planning, notes, thread, heavy run on `main`, version
+commit, publishing, archive) are in "The release driver's steps"; this section covers the role.
+
+- **Owns** the release CR folder `.agents/changes/03-requests/NNN-release-x-y-z/` and its
+  `STATE.md` header. It is the one writer of that header from the notes draft to the archive, and
+  `driver:` is its lock, like for a CR driver.
+- **May merge** the fix PRs of the release and the version PR, on the owner's standing permission
+  for release work. It merges nothing else. It never enables auto-merge and never touches a PR
+  outside the release.
+- **Fixes** go through the Foreman: the release driver reports a red heavy job or another small
+  problem, and the Foreman runs a fix CR with a CR driver (the round limit, escalation to Opus). The release driver never codes or reviews.
+- **Asks the owner nothing** between the notes review and the publication, except a real blocker:
+  the round limit is reached or a product decision is needed. It then returns `status: blocked`
+  with the question and its recommended answer.
+- **Watches** in slices of at most 5 minutes and rewrites the header at
+  every transition and every slice.
+
+### Release driver prompt (the Foreman fills the placeholders)
+
+> You are the release driver for release `<X.Y.Z>`. You alone own the release CR folder
+> `<absolute path>` and its `STATE.md` header. Read
+> `.agents/guidelines/release-process.guidelines.md`,
+> `.agents/guidelines/state-file.guidelines.md`, `.agents/guidelines/ci.guidelines.md` and the
+> release folder (`00-request.md`, `STATE.md`).
+> Resume from the `STATE.md` header and write `driver: <your id>` in it. Follow the steps of
+> "The release driver's steps" from step 3: notes and thread, a green heavy run on `main` HEAD,
+> then the version commit, then tag, Marketplace and Pages, the published notes and the archive.
+> Report a red job or another small problem to the Foreman, which runs the fix CR, and merge its
+> PR; never code or review yourself. Ask the owner nothing after the notes review except a real
+> blocker.
+> Return with `status: ready` when the release is archived, or `status: blocked` and a question
+> with your recommended answer.
 
 ## The release change request
 
@@ -33,7 +69,7 @@ the fixes it needs.
 2. The Foreman plans the release: it brings the stack of the release to `main` first, with the
    changelog lines in its PRs, so they are in `main` before the heavy run. Once the stack is merged,
    it asks the main session to hold every other merge until the release is published, and starts
-   the release driver.
+   the release driver. It starts no driver for a new CR until the release is published.
 3. The release driver opens the folder and drafts the notes and the thread from `CHANGELOG.md`
    `## Unreleased` and the CR reports. The owner reviews `release-notes.md` and `tweet.md` in
    Studio. This is the owner's only step after the version. The hero image waits for the version PR
