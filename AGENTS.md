@@ -72,6 +72,11 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 - When picking up backlog work, change requests or PRs (`.agents/changes/`), including Parallel
   Change Requests Orchestration:
   [change-requests-lifecycle.guidelines.md](.agents/guidelines/change-requests-lifecycle.guidelines.md)
+- Change requests run by chantier (under `.agents/changes/backlog/` and
+  `.agents/changes/batches/`, on `chantier/*` branches) follow the chantier plugin's lifecycle, not
+  change-requests-lifecycle.guidelines.md: they never read or write `01-inbox/` to `05-trash/`,
+  `STATE.md` or `ORCHESTRATOR.md`. Every other rule of this file still applies, `just preflight`
+  included.
 - When preparing or running a release (release driver, release notes, announcement thread, hero
   image):
   [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md)
