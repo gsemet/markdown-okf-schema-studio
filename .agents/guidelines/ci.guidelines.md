@@ -69,11 +69,15 @@ The CI only runs what a developer can run locally. All logic lives in the task r
       repetitions, not steps (rule 7). It is advisory: it is not part of the required `checks` job,
       so a red stress run does not block a merge, but it is a flake to fix with the steps above,
       never to ignore.
-13. **Real VS Code jobs are manual, except on a version-change push (rule 14).**
-    The required path (`checks`) runs the simulated tests only:
-    static checks and the Playwright/Chromium visual tests against a mock host, then `ci-report`
-    with the real VS Code stage reported as skipped (`just ci-report visual`). The real VS Code
-    window jobs, `integration` and `stress`, run on demand:
+13. **Real VS Code jobs run on every push to `main`, never on a pull request.**
+    A pull request runs the simulated tests only: static checks and the Playwright/Chromium visual
+    tests against a mock host, then `ci-report` with the real VS Code stage reported as skipped
+    (`just ci-report visual`). The real VS Code window jobs, `integration` and `stress`, are too
+    heavy for that path. They run on every push to `main`, so a red real-window scenario shows up
+    on the merge that causes it: a red `integration` fails `report`, then `checks`, and `stress`
+    stays advisory except on a version change (rule 14). The run's own conclusion stays green with
+    a red advisory `stress`: read the result of each job.
+    On a branch, they run on demand:
     `gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery
     and site). To loop one flaky scenario many times, use
     `-f heavy=true -f stress_repeat=60 -f stress_scenarios=alert-dropdown` (narrow the scenarios
@@ -83,11 +87,10 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     `gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]` (1 to 40 rounds,
     delay 0 to 2000 ms, launch deadline 30 minutes inside a 35-minute step). It does not gate merges
     and is not part of `checks`; failed rounds are counted and the job is red if any failed.
-14. **A release is tagged only after a green heavy run of its commit.** A push to `main` that
-    changes the package version runs the heavy jobs without a dispatch: the `release-check` job
-    detects the change (`scripts/version.py --bump-since`, the same test `tag-release` uses) and
-    `integration` and `stress` run in that push run, where `stress` blocks instead of being
-    advisory. `tag-release` needs `checks` and both heavy jobs, and tags only when all three
+14. **A release is tagged only after a green heavy run of its commit.** On a push to `main` that
+    changes the package version, the `release-check` job detects the change
+    (`scripts/version.py --bump-since`, the same test `tag-release` uses) and `stress` blocks
+    instead of being advisory. `tag-release` needs `checks` and both heavy jobs, and tags only when all three
     results are `success`. Otherwise it creates no tag, writes "Release not tagged" with the result
     of `checks`, `integration` and `stress` to the job summary and fails (an integration failure
     fails `report`, then `checks`; the summary is written all the same). If `release-check` itself

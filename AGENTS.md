@@ -58,9 +58,9 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 - End-to-end tests: `just e2e`; full validation and site generation: `just preflight`
 - CI jobs (in parallel in `.github/workflows/ci.yml`, in sequence in `just preflight`):
   `just ci-static` (on Linux and Windows), `just ci-visual`, `just ci-integration`, then
-  `just ci-report` and `just ci-gallery`. Push and pull request run only the simulated jobs; the real VS Code jobs
-  (integration, stress with `just ci-stress [REPEAT]`) are manual:
-  `gh workflow run ci.yml --ref <branch> -f heavy=true`
+  `just ci-report` and `just ci-gallery`. A pull request runs only the simulated jobs; the real VS Code jobs
+  (integration, stress with `just ci-stress [REPEAT]`) run on every push to `main`, and on a branch
+  with `gh workflow run ci.yml --ref <branch> -f heavy=true`
 
 ## Guidelines
 

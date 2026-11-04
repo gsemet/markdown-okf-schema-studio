@@ -260,18 +260,17 @@ CI runs the same stages as parallel jobs, each calling one target after `just de
 `just ci-integration`, then `just ci-report` (merges the visual and integration outputs into the
 review index and `out/reports/e2e/e2e-manifest.json`; it fails when a stage manifest is missing or
 failed) and `just ci-gallery` (gallery and site from the existing outputs, no E2E re-run).
-On a pull request and an ordinary push (no version change), CI runs only the simulated tests, which
-make up the required `checks` job:
+On a pull request, CI runs only the simulated tests, which make up the required `checks` job:
 `ci-static` (on Linux, and again on Windows in the `static-windows` job), `ci-visual`
 (Playwright/Chromium against a mock host) and `just ci-report visual`, which reports the real VS Code
 stage as skipped. The real VS Code window jobs (`ci-integration` and the
-`stress` repetitions) are heavy and manual: start them with
+`stress` repetitions) are heavy, so they run on every push to `main` and never on a pull request.
+On a branch, start them with
 `gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery and site
 artifact), or with "Run workflow" in the Actions tab. Run them, or `npm run test:integration`
 locally, before merging a change to the extension host, the webview or the real-window tests.
-One push runs them on its own: a push to `main` that changes the package version (a release). Its
-`release-check` job detects the change, the heavy jobs run in that push run, and the release is
-tagged only when both succeed (see "Releases" below).
+On a push to `main` that changes the package version (a release), the `release-check` job detects
+the change, and the release is tagged only when both heavy jobs succeed (see "Releases" below).
 A flake that only shows in the real window can be hunted with the `toc-loop` job, a repro tool that
 never gates a merge and never runs on its own:
 `gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]` repeats the `toc`
@@ -515,13 +514,14 @@ request before the version pull request merges: see
 gives the order of a release, planned by the Foreman and run by the release driver. Make the version commit (step 3) only
 after a green heavy run of `main` HEAD (step 1).
 
-1. Merge everything the release needs into `main`, then run the heavy jobs (`integration` and
-	`stress`) on `main` HEAD and wait for both to be green on that exact commit:
+1. Merge everything the release needs into `main`. The push runs the heavy jobs (`integration` and
+	`stress`) on `main` HEAD: wait for both to be green on that exact commit, reading the result of
+	each job, because a red `stress` does not turn this run red:
 
 	```bash
-	gh workflow run ci.yml --ref main -f heavy=true
 	gh run list --workflow ci.yml --branch main --limit 3
 	gh run watch <run-id>
+	gh run view <run-id> --json jobs --jq '.jobs[] | select(.name == "integration" or .name == "stress") | "\(.name) \(.conclusion)"'
 	```
 
 	A red job: fix, merge, run again. A flake: `gh run rerun <run-id> --failed` once, then treat it
@@ -597,7 +597,7 @@ after a green heavy run of `main` HEAD (step 1).
 	`integration` and `stress` to the job summary, and fails (an integration failure also
 	fails `report` and `checks`; the summary is written all the same). Only that push can
 	tag the version: see "Recovering from a red heavy job" below. Ordinary pushes (no version
-	change) skip the heavy jobs and leave the tags unchanged. It never commits files back to
+	change) leave the tags unchanged. It never commits files back to
 	`main`.
 
 6. CI calls **Release VSIX** explicitly with that tag. A tag pushed by `GITHUB_TOKEN`

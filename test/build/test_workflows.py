@@ -73,7 +73,8 @@ def test_static_ci_target_runs_an_online_audit_of_production_dependencies() -> N
 
 
 # A job downstream of a skipped job carries an implicit success() that is false, so it is skipped
-# too. The heavy jobs are skipped on push; every job below them must opt out of that default.
+# too. The heavy jobs are skipped on a pull request; every job below them must opt out of that
+# default.
 CI = ROOT / ".github/workflows/ci.yml"
 
 
@@ -443,13 +444,13 @@ def test_release_check_detects_a_version_change_on_a_push_to_main() -> None:
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076
 @pytest.mark.parametrize("name", ["integration", "stress"])
-def test_heavy_jobs_run_on_a_version_change_push_and_on_a_heavy_dispatch(name: str) -> None:
+def test_heavy_jobs_run_on_every_push_to_main_and_on_a_heavy_dispatch(name: str) -> None:
     job = _ci_jobs()[name]
     assert "release-check" in _needs(job)
     condition = job["if"]
     assert _run_if(condition, _context("push", bump="true"))
+    assert _run_if(condition, _context("push", bump="false"))
     assert _run_if(condition, _context("workflow_dispatch", heavy=True))
-    assert not _run_if(condition, _context("push", bump="false"))
     assert not _run_if(condition, _context("pull_request"))
     assert not _run_if(condition, _context("workflow_dispatch", heavy=False))
 
@@ -486,13 +487,13 @@ def test_stress_blocks_only_a_version_change() -> None:
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076
-def test_report_merges_the_real_window_stage_of_a_version_change() -> None:
+def test_report_merges_the_real_window_stage_of_every_push_to_main() -> None:
     job = _ci_jobs()["report"]
     step = next(s for s in job["steps"] if "just ci-report" in str(s.get("run", "")))
     mode = re.search(r"\$\{\{(.*)\}\}", step["run"]).group(1)
     assert _run_if(mode, _context("push", bump="true")) == "all"
     assert _run_if(mode, _context("workflow_dispatch", heavy=True)) == "all"
-    assert _run_if(mode, _context("push", bump="false")) == "visual"
+    assert _run_if(mode, _context("push", bump="false")) == "all"
     assert _run_if(mode, _context("pull_request")) == "visual"
 
 

@@ -3,10 +3,10 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-CORE-076
 uuid: 30314c60-b057-41f4-b74f-60d266d261bd
 title: CI tags a version change only after a green heavy run of the commit
-description: When a push to main changes the package version, the CI workflow
-  SHALL run the heavy jobs in that push run and SHALL tag the commit only when
-  they both succeed; a push without a version change SHALL still run the tag
-  step with the heavy jobs skipped.
+description: Every push to main SHALL run the heavy jobs; when the push changes
+  the package version, the CI workflow SHALL tag the commit only when they both
+  succeed, and a push without a version change SHALL still run the tag step and
+  create no tag.
 project: MDOKFSTUDIO
 scope: rendering-core
 req_lifecycle: proposed
@@ -34,7 +34,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a push to main changes the package version, the CI workflow SHALL run the heavy jobs (`integration` and `stress`) in that push run and SHALL tag the commit only when they both succeed; a push without a version change SHALL still run the tag step with the heavy jobs skipped. When `checks` or a heavy job of a version change does not succeed, the workflow SHALL say why in the job summary. The Pages site of a tag SHALL reuse the end-to-end reports of that green heavy run. After "Re-run failed jobs" on that run, every job and the Pages site SHALL use the artifacts of the newest attempt of each producing job, never an older attempt's artifact of the same name.
+Every push to main SHALL run the heavy jobs (`integration` and `stress`); when the push changes the package version, the CI workflow SHALL tag the commit only when they both succeed; a push without a version change SHALL still run the tag step and create no tag. When `checks` or a heavy job of a version change does not succeed, the workflow SHALL say why in the job summary. The Pages site of a tag SHALL reuse the end-to-end reports of that green heavy run. After "Re-run failed jobs" on that run, every job and the Pages site SHALL use the artifacts of the newest attempt of each producing job, never an older attempt's artifact of the same name.
 
 ### Scenario (nominal): Version change on main with a green heavy run
 
@@ -63,7 +63,7 @@ When a push to main changes the package version, the CI workflow SHALL run the h
 
 - GIVEN a push to main whose `static`, `visual` and `report` jobs succeed and whose version is unchanged (`bump=false`)
 - WHEN the workflow reaches `tag-release`
-- THEN `integration` and `stress` are skipped, `tag-release` runs and outputs no tag, and `release` and `pages` are skipped
+- THEN `integration` and `stress` run, with `stress` advisory, `tag-release` runs and outputs no tag, and `release` and `pages` are skipped
 
 ### Scenario (boundary): Failure, cancellation and other events
 
