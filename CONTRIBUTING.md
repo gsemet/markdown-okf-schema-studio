@@ -512,7 +512,7 @@ The Python project's version is tooling metadata and is not the extension releas
 The release notes, the announcement thread and the hero image are prepared in a release change
 request before the version pull request merges: see
 [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md), which also
-gives the order of a release run by the release driver. Make the version commit (step 3) only
+gives the order of a release, planned by the Foreman and run by the release driver. Make the version commit (step 3) only
 after a green heavy run of `main` HEAD (step 1).
 
 1. Merge everything the release needs into `main`, then run the heavy jobs (`integration` and
