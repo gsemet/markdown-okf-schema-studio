@@ -7,7 +7,7 @@ repository (the parent of ``scripts/``).
 Sources, all read from the changes root:
 
 * Active: every ``03-requests/*/`` folder, from the four-line ``STATE.md`` header defined in
-  ``.agents/guidelines/change-requests-lifecycle.guidelines.md``.
+  ``.agents/guidelines/state-file.guidelines.md``.
 * Backlog: every ``02-backlog/P*/*/`` folder (priority, first file, its first H1, file count).
 * Landed: every ``04-archives/NNN-*/`` folder, with the PR and date found in its ``report.md``.
 * Notes: ``03-requests/ORCHESTRATOR-NOTES.md``, the only hand-written part, appended as is.
