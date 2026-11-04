@@ -1,0 +1,5 @@
+# The working files of a take and a render, and the licensed music, stay out of the repository.
+kit/remotion/node_modules
+kit/remotion/public/
+kit/remotion/src/story.json
+kit/remotion/src/take.json

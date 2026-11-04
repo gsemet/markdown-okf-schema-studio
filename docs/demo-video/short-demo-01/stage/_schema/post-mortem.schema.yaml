@@ -1,0 +1,36 @@
+type: object
+title: Post-mortem
+additionalProperties: true
+required:
+  - type
+  - title
+  - status
+  - severity
+  - owner
+properties:
+  type:
+    const: post-mortem
+    description: Document type of the OKF entry.
+  title:
+    type: string
+    minLength: 1
+    description: Short name of the incident.
+  status:
+    enum:
+      - draft
+      - in-review
+      - published
+    description: Where the post-mortem stands.
+  severity:
+    enum:
+      - SEV-1
+      - SEV-2
+      - SEV-3
+    description: Customer impact, SEV-1 being the worst.
+  owner:
+    type: string
+    description: Team accountable for the follow-ups.
+  date:
+    type: string
+    format: date
+    description: Date of the review.
