@@ -24,17 +24,25 @@ test("positions outside the supported range or not known get no command", () => 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-151
-test("only a free group this extension locked is unlocked, never a new group at the same column", () => {
+test("only a free group open when the preview closed is unlocked, never a new group at the same column", () => {
   const closedPreview = { viewColumn: 2, free: true };
   const newPreview = { viewColumn: 2, free: true };
   const isFree = (group: { free: boolean }): boolean => group.free;
-  assert.deepEqual(groupsToUnlock([closedPreview], [closedPreview], isFree), [closedPreview], "the empty locked group");
-  assert.deepEqual(groupsToUnlock([closedPreview], [newPreview], isFree), [], "its group closed; a new one took the column");
-  assert.deepEqual(groupsToUnlock([closedPreview], [closedPreview, newPreview], isFree), [closedPreview],
-    "only the locked one of two empty groups");
-  assert.deepEqual(groupsToUnlock([{ viewColumn: 2, free: false }], [], isFree), [], "a group that is gone");
+  assert.deepEqual(groupsToUnlock([closedPreview], 2, [closedPreview], isFree), [closedPreview], "the empty locked group");
+  assert.deepEqual(groupsToUnlock([closedPreview], 2, [newPreview], isFree), [], "its group closed; a new one took the column");
+  assert.deepEqual(groupsToUnlock([closedPreview], 2, [closedPreview, newPreview], isFree), [closedPreview],
+    "only the known one of two empty groups");
   const occupied = { viewColumn: 2, free: false };
-  assert.deepEqual(groupsToUnlock([occupied], [occupied], isFree), [], "a live preview occupies it");
+  assert.deepEqual(groupsToUnlock([occupied], 2, [occupied], isFree), [], "a live preview occupies it");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151
+test("a stale column falls back to every free group, and a free group at the column wins", () => {
+  const shifted = { viewColumn: 1, free: true };
+  const other = { viewColumn: 2, free: true };
+  const isFree = (group: { free: boolean }): boolean => group.free;
+  assert.deepEqual(groupsToUnlock([shifted], 2, [shifted], isFree), [shifted], "the group shifted left of its recorded column");
+  assert.deepEqual(groupsToUnlock([shifted, other], 2, [shifted, other], isFree), [other], "the group at the column");
 });
 
 test("CR 041: settled() waits for every tracked focus job, also one that starts while waiting", async () => {

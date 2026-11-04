@@ -5,7 +5,7 @@
 ### A new preview keeps its focus (CR 259)
 
 - SwRS-MDOKFSTUDIO-LIFE-151 (proposed, updated): new boundary scenario. The unlock of a closed preview
-  matches the groups this extension locked, not a column, so it never touches a new preview's group.
+  only considers the groups open when it closed, so it never touches a new preview's group.
 - Verification: test/host-vscode/groupFocus.test.ts, and the `stress` job in a real window.
 
 ### Real VS Code jobs on every push to main (CR 258)

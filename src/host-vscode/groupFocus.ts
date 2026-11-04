@@ -22,17 +22,21 @@ export function focusGroupCommand(column: number | undefined, groupCount: number
 }
 
 /**
- * The groups to unlock after a preview closed: only groups this extension locked, still open, and
- * free (empty, no live preview). A group is never matched by its column: a preview opened right
- * after the close gets a new group at that column, empty for a moment, and unlocking it would move
- * the focus away from the new preview.
+ * The groups to unlock after a preview closed, among `known`: the groups open when it closed, still
+ * open and free (empty, no live preview). A group that appeared later belongs to a preview opened
+ * right after the close: it is empty for a moment, and unlocking it would move the focus away from
+ * that preview. `column` was recorded when the lock was taken and can be stale when a group on its
+ * left closed: without a free group there, every free group is unlocked.
  */
-export function groupsToUnlock<Group>(
-  locked: Iterable<Group>,
+export function groupsToUnlock<Group extends { viewColumn: number }>(
+  known: readonly Group[],
+  column: number,
   open: readonly Group[],
   isFree: (group: Group) => boolean,
 ): Group[] {
-  return [...locked].filter((group) => open.includes(group) && isFree(group));
+  const free = known.filter((group) => open.includes(group) && isFree(group));
+  const direct = free.find((group) => group.viewColumn === column);
+  return direct === undefined ? free : [direct];
 }
 
 /** One workbench focus command run by this extension on its own, with its wall-clock time. */
