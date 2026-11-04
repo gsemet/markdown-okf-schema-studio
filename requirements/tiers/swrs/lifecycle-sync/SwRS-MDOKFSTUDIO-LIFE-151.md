@@ -48,6 +48,12 @@ When a new side preview opens in an editor group that holds only that panel, the
 - WHEN the reader closes the preview
 - THEN the empty group is unlocked and closes, and Quick Open from the reader's group opens a file there
 
+### Scenario (boundary): Preview reopened at once
+
+- GIVEN a locked preview that closed, and whose group closed
+- WHEN a new side preview opens at the same column before the unlock of the closed one runs
+- THEN the new group is not unlocked, and the focus stays in the new preview
+
 ### Scenario (boundary): Shared group
 
 - GIVEN a preview that opened in a group that holds another tab

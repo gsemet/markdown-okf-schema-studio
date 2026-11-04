@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A preview opened right after another one closed keeps the focus: an editor just opened in it no
+  longer closes by itself about a second later.
+
 ## 1.3.2 - 2026-11-03
 
 Versions 1.3.0 and 1.3.1 were not published: their release checks failed. Their changes ship in
