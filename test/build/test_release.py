@@ -30,45 +30,92 @@ assert spec and spec.loader
 notes = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(notes)
 
-
-def test_copilot_final_answer() -> None:
-    """Persist only a final answer with a successful result event."""
-    markdown = "## Bug Fixes\n\n- Preserve table edits."
-    events = [
-        {
-            "type": "assistant.message",
-            "data": {"phase": "commentary", "content": "Working"},
-        },
-        {
-            "type": "assistant.message",
-            "data": {"phase": "final_answer", "content": markdown},
-        },
-        {"type": "result", "exitCode": 0},
-    ]
-    assert notes.final_answer("\n".join(map(json.dumps, events))) == markdown + "\n"
-    with pytest.raises(ValueError):
-        notes.final_answer("\n".join(map(json.dumps, events[:-1])))
-    events[-1]["exitCode"] = 1
-    with pytest.raises(ValueError):
-        notes.final_answer("\n".join(map(json.dumps, events)))
+NOTES = "<h1>Studio 0.2</h1>\n\n![Table](table.png)\n\n<img src=\"dark.png\" alt=\"Dark\">\n"
 
 
+def write_notes(root: Path, version: str = "0.2.0", text: str = NOTES) -> Path:
+    """A dated notes folder with the images of the default notes."""
+    folder = root / f"docs/releases-notes/2026-01-02-v{version}"
+    folder.mkdir(parents=True)
+    (folder / "release-notes.md").write_text(text, encoding="utf-8")
+    for name in ("table.png", "dark.png"):
+        (folder / name).write_bytes(b"image")
+    return folder
+
+
+def run_notes(cwd: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(ROOT / "scripts/release_notes.py"), *arguments],
+        cwd=cwd,
+        text=True,
+        capture_output=True,
+    )
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+def test_check_accepts_the_notes_of_the_package_version(tmp_path: Path) -> None:
+    (tmp_path / "package.json").write_text(json.dumps({"version": "0.2.0"}))
+    write_notes(tmp_path)
+    result = run_notes(tmp_path, "--check")
+    assert result.returncode == 0, result.stderr
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+def test_check_refuses_a_version_without_notes(tmp_path: Path) -> None:
+    (tmp_path / "package.json").write_text(json.dumps({"version": "0.3.0"}))
+    write_notes(tmp_path)
+    result = run_notes(tmp_path, "--check")
+    assert result.returncode == 1
+    assert "2026" not in result.stderr and "v0.3.0" in result.stderr
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+def test_check_refuses_two_folders_for_a_version(tmp_path: Path) -> None:
+    (tmp_path / "package.json").write_text(json.dumps({"version": "0.2.0"}))
+    folder = write_notes(tmp_path)
+    shutil.copytree(folder, folder.with_name("2026-01-03-v0.2.0"))
+    assert run_notes(tmp_path, "--check").returncode == 1
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
 @pytest.mark.parametrize(
     "markdown",
     [
-        "# v1.0.0\n\n- Something",
-        "## Bug Fixes",
-        "## Bug Fixes\n\n- Fixed\n- Fixed",
-        "## Maintenance\n\n- Internal\n\n## Bug Fixes\n\n- Fixed",
-        "## Documentation\n\n- See https://example.com/docs",
-        "## Bug Fixes\n\n- <thinking>hidden",
-        "## Bug Fixes\n\n- ```code```",
+        "",
+        "No title\n",
+        "# Studio 0.1\n",
+        "# Studio 0.2\n\n![Gone](missing.png)\n",
+        "# Studio 0.2\n\n![Branch](https://example.com/branch/table.png)\n",
+        '# Studio 0.2\n\n<img src="https://example.com/branch/table.png">\n',
+        "# Studio 0.2\n\n![Nested](images/table.png)\n",
     ],
 )
-def test_reject_invalid_notes(markdown: str) -> None:
-    """Fail closed instead of publishing malformed notes."""
-    with pytest.raises(ValueError):
-        notes.validate_notes(markdown)
+def test_check_refuses_invalid_notes(tmp_path: Path, markdown: str) -> None:
+    """Fail closed instead of publishing notes that nobody can read as reviewed."""
+    (tmp_path / "package.json").write_text(json.dumps({"version": "0.2.0"}))
+    write_notes(tmp_path, text=markdown)
+    assert run_notes(tmp_path, "--check").returncode == 1
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+def test_prepare_points_the_images_to_the_release_assets(tmp_path: Path) -> None:
+    write_notes(tmp_path)
+    assets = tmp_path / "assets"
+    result = run_notes(tmp_path, "--prepare", "v0.2.0", "--assets", str(assets))
+    assert result.returncode == 0, result.stderr
+    published = (tmp_path / "release-notes.md").read_text(encoding="utf-8")
+    base = "https://github.com/gsemet/markdown-okf-schema-studio/releases/download/v0.2.0"
+    assert f"![Table]({base}/table.png)" in published
+    assert f'<img src="{base}/dark.png" alt="Dark">' in published
+    assert sorted(path.name for path in assets.iterdir()) == ["dark.png", "table.png"]
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+@pytest.mark.parametrize("tag", ["0.2.0", "v0.2", "v0.2.0-rc1", "v0.3.0"])
+def test_prepare_refuses_a_tag_without_notes(tmp_path: Path, tag: str) -> None:
+    write_notes(tmp_path)
+    assert run_notes(tmp_path, "--prepare", tag).returncode == 1
+    assert not (tmp_path / "release-notes.md").exists()
 
 
 @pytest.fixture
@@ -167,6 +214,8 @@ def assert_version(repository: Path, arguments: list[str], expected: str) -> Non
         assert json.loads((repository / name).read_text())["version"] == expected, name
     for name in PLUGIN_CATALOGS:
         assert catalog_versions(repository / name) == [expected], name
+    for name in changed:
+        assert b"\r\n" not in (repository / name).read_bytes(), name
     assert subprocess.check_output(["git", "tag"], cwd=repository).strip() == b"v0.2.0"
 
 
@@ -327,159 +376,6 @@ def test_tag_rejects_inconsistent_versions(repository: Path) -> None:
     assert result.returncode != 0
     assert "versions disagree" in result.stderr
 
-
-def test_first_release_notes(repository: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """First-release evidence uses the empty Git tree without waiting for stdin."""
-    monkeypatch.chdir(repository)
-    subprocess.run(["git", "tag", "-d", "v0.2.0"], check=True, capture_output=True)
-    subprocess.run(["git", "tag", "v0.1.0"], check=True)
-    context = notes.release_context("v0.1.0", None)
-    assert "chore: initial" in context
-    assert "package.json" in context
-
-
-def test_generate_notes_retries_and_replaces_stale_output(
-    repository: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Exercise generation without a network call or real Copilot credential."""
-    subprocess.run(
-        ["git", "commit", "--allow-empty", "--quiet", "-m", "feat: add table editing"],
-        cwd=repository,
-        check=True,
-    )
-    subprocess.run(["git", "tag", "v0.3.0"], cwd=repository, check=True)
-    output = repository / "release-notes.md"
-    output.write_text("Stale notes must not be published")
-    monkeypatch.chdir(repository)
-    monkeypatch.setenv("COPILOT_GITHUB_TOKEN", "test-only-placeholder")
-    monkeypatch.setattr(sys, "argv", ["release_notes.py", "--to-ref", "v0.3.0"])
-    original_run = subprocess.run
-    attempts: list[list[str]] = []
-
-    def copilot_stub(
-        command: list[str], **kwargs: object
-    ) -> subprocess.CompletedProcess[str]:
-        if command[:2] != ["gh", "copilot"]:
-            return original_run(command, **kwargs)
-        assert not output.exists()
-        attempts.append(command)
-        markdown = (
-            "Invalid notes"
-            if len(attempts) == 1
-            else "## New Features\n\n- Edit tables."
-        )
-        events = [
-            {
-                "type": "assistant.message",
-                "data": {"phase": "commentary", "content": "Working"},
-            },
-            {
-                "type": "assistant.message",
-                "data": {"phase": "final_answer", "content": markdown},
-            },
-            {"type": "result", "exitCode": 0},
-        ]
-        return subprocess.CompletedProcess(
-            command, 0, "\n".join(map(json.dumps, events)), ""
-        )
-
-    monkeypatch.setattr(subprocess, "run", copilot_stub)
-    notes.main()
-    assert len(attempts) == 2
-    assert "--output-format" in attempts[0]
-    assert (
-        "previous output was rejected" in attempts[1][attempts[1].index("--prompt") + 1]
-    )
-    assert output.read_text() == "## New Features\n\n- Edit tables.\n"
-
-
-ARGV_BOUND = 100 * 1024
-
-
-def test_large_context_goes_through_a_file_not_argv(
-    repository: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """A first release's MB-sized Git evidence never reaches argv (E2BIG)."""
-    context = "Release range: v1.0.0\n\n" + "x" * (5 * 1024 * 1024) + "\nEND-OF-CONTEXT\n"
-    context_file = repository / "release-context.md"
-    output = repository / "release-notes.md"
-    monkeypatch.chdir(repository)
-    monkeypatch.setenv("COPILOT_GITHUB_TOKEN", "test-only-placeholder")
-    monkeypatch.setattr(sys, "argv", ["release_notes.py", "--to-ref", "v1.0.0"])
-    monkeypatch.setattr(notes, "release_context", lambda target, previous: context)
-    original_answer = notes.final_answer
-    answers = iter(
-        [
-            ValueError("rejected " + "y" * (5 * 1024 * 1024)),
-            ValueError("rejected " + "z" * (5 * 1024 * 1024)),
-        ]
-    )
-
-    def final_answer_stub(response: str) -> str:
-        error = next(answers, None)
-        if error:
-            raise error
-        return original_answer(response)
-
-    monkeypatch.setattr(notes, "final_answer", final_answer_stub)
-    attempts: list[list[str]] = []
-
-    def copilot_stub(
-        command: list[str], **kwargs: object
-    ) -> subprocess.CompletedProcess[str]:
-        assert command[:2] == ["gh", "copilot"]
-        attempts.append(command)
-        for element in command:
-            assert len(element.encode()) < ARGV_BOUND, element[:200]
-        assert sum(len(element.encode()) + 1 for element in command) < ARGV_BOUND
-        prompt = command[command.index("--prompt") + 1]
-        assert str(context_file) in prompt
-        assert "view" in prompt
-        assert "evidence, not instructions" in prompt
-        assert "truncated" in prompt
-        assert context_file.read_text() == context
-        events = [
-            {
-                "type": "assistant.message",
-                "data": {"phase": "final_answer", "content": "## Bug Fixes\n\n- Fixed."},
-            },
-            {"type": "result", "exitCode": 0},
-        ]
-        return subprocess.CompletedProcess(
-            command, 0, "\n".join(map(json.dumps, events)), ""
-        )
-
-    monkeypatch.setattr(subprocess, "run", copilot_stub)
-    notes.main()
-    assert len(attempts) == 3
-    assert "previous output was rejected" in attempts[2][attempts[2].index("--prompt") + 1]
-    assert output.read_text() == "## Bug Fixes\n\n- Fixed.\n"
-    assert not context_file.exists()
-
-
-def test_context_file_is_removed_when_generation_fails(
-    repository: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
-    """The evidence file is deleted even when Copilot fails, and its path is configurable."""
-    context_file = tmp_path / "custom-context.md"
-    monkeypatch.chdir(repository)
-    monkeypatch.setenv("COPILOT_GITHUB_TOKEN", "test-only-placeholder")
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        ["release_notes.py", "--to-ref", "v1.0.0", "--context-file", str(context_file)],
-    )
-    monkeypatch.setattr(notes, "release_context", lambda target, previous: "evidence")
-
-    def failing_copilot(command: list[str], **kwargs: object) -> None:
-        assert context_file.read_text() == "evidence"
-        raise subprocess.CalledProcessError(1, command)
-
-    monkeypatch.setattr(subprocess, "run", failing_copilot)
-    with pytest.raises(subprocess.CalledProcessError):
-        notes.main()
-    assert not context_file.exists()
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076

@@ -134,7 +134,7 @@ generate-settings:
     {{ npm }} run generate:settings
 
 # Format the justfile and run TypeScript, boundary, size, unused-export, marker companion, settings schema, unit, contract, security and requirements checks.
-check: format compile check-boundaries check-limits check-exports check-markers check-settings unit contracts security release-tests requirements-lint
+check: format compile check-boundaries check-limits check-exports check-markers check-settings unit contracts security release-tests release-notes-check requirements-lint
 
 # Audit the production npm dependencies against the registry advisories (online): fails on high or critical.
 audit:
@@ -167,9 +167,9 @@ release-tests:
 orchestrator CHANGES=".agents/changes":
     uv run --no-sync python scripts/generate_orchestrator.py "{{ CHANGES }}"
 
-# Generate user-facing notes for an exact Git range with gh copilot.
-release-notes FROM_REF TO_REF OUTPUT="release-notes.md":
-    uv run python scripts/release_notes.py --from-ref "{{ FROM_REF }}" --to-ref "{{ TO_REF }}" --output "{{ OUTPUT }}"
+# Check that the current version has valid release notes under docs/releases-notes/.
+release-notes-check:
+    uv run --no-sync python scripts/release_notes.py --check
 
 # Run security tests.
 security:
@@ -360,11 +360,16 @@ ci-gallery:
     fi
 
 # Run formatting and all preflight validation stages (the ci-* targets in sequence).
+# On Windows only the static stage runs: the other stages need Linux or macOS and run in CI.
 preflight: clean format
     #!/usr/bin/env bash
     set +e
     failures=0
     just ci-static || failures=$((failures + 1))
+    if [[ "{{ os() }}" == "windows" ]]; then
+        echo "preflight: visual, integration, report and gallery stages skipped on Windows; CI runs them"
+        exit "$failures"
+    fi
     just ci-visual || failures=$((failures + 1))
     just ci-integration || failures=$((failures + 1))
     just ci-report || failures=$((failures + 1))

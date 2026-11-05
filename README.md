@@ -14,7 +14,7 @@ page and click any block to edit its source. It renders [CommonMark](https://com
 [OKF-Schema](https://github.com/gsemet/okf-schema).
 
 > [!TIP]
-> **Version 1.0.0 is out.** See what's new in the [release notes](https://github.com/gsemet/markdown-okf-schema-studio/releases/tag/v1.0.0).
+> See what's new in the [latest release notes](https://github.com/gsemet/markdown-okf-schema-studio/releases/latest).
 
 > [!NOTE]
 > You can follow [my X account](https://x.com/gsemetfr) where I mainly talk about Agentic Development.

@@ -55,7 +55,9 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 - Python Sphinx source-mapping contract: `just sphinx-check`
 - Requirements: `just requirements-lint` (validate), `just requirements-update` (coverage and
   navigation), `just requirements-report` (traceability report in `out/reports/requirements/`)
-- End-to-end tests: `just e2e`; full validation and site generation: `just preflight`
+- End-to-end tests: `just e2e`; full validation and site generation: `just preflight` (on Windows,
+  the static stage only: CI runs the others)
+- Release notes of the current version, in `docs/releases-notes/`: `just release-notes-check`
 - CI jobs (in parallel in `.github/workflows/ci.yml`, in sequence in `just preflight`):
   `just ci-static` (on Linux and Windows), `just ci-visual`, `just ci-integration`, then
   `just ci-report` and `just ci-gallery`. A pull request runs only the simulated jobs; the real VS Code jobs

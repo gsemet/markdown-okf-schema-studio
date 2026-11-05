@@ -168,50 +168,71 @@ def _step(name: str) -> dict:
     return steps[0]
 
 
-def _notes_steps() -> list[dict]:
-    """Steps that generate notes with Copilot (they call the script with --to-ref)."""
-    return [s for s in _release_steps() if "release_notes.py" in str(s.get("run", "")) and "--to-ref" in str(s.get("run", ""))]
-
-
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
 def test_release_dispatch_runs_the_notes_script_of_the_workflow_ref() -> None:
     load = _step("Load the release notes script of the workflow ref")
     assert DISPATCH in str(load["if"])
     assert 'git show "$GITHUB_SHA:scripts/release_notes.py"' in load["run"]
     assert '"$RUNNER_TEMP/tools/release_notes.py"' in load["run"]
-    step = _step("Generate user-facing release notes (workflow ref script)")
+    step = _step("Prepare the reviewed release notes (workflow ref script)")
     condition = str(step["if"])
     assert DISPATCH in condition and "inputs.notes != 'placeholder'" in condition
-    assert step["run"].strip() == 'uv run python "$RUNNER_TEMP/tools/release_notes.py" --to-ref "$RELEASE_TAG"'
+    assert step["run"].strip() == 'uv run python "$RUNNER_TEMP/tools/release_notes.py" --prepare "$RELEASE_TAG" --assets "$RUNNER_TEMP/release-assets"'
     steps = _release_steps()
     assert steps.index(load) < steps.index(step)
 
 
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
 def test_release_tag_and_call_run_the_notes_script_of_the_tag() -> None:
-    step = _step("Generate user-facing release notes")
+    step = _step("Prepare the reviewed release notes")
     assert str(step["if"]) == "github.event_name != 'workflow_dispatch'"
-    assert step["run"].strip() == 'uv run python scripts/release_notes.py --to-ref "$RELEASE_TAG"'
+    assert step["run"].strip() == 'uv run python scripts/release_notes.py --prepare "$RELEASE_TAG" --assets "$RUNNER_TEMP/release-assets"'
     checkout = [s for s in _release_steps() if str(s.get("uses", "")).startswith("actions/checkout@")]
     assert len(checkout) == 1
     assert checkout[0]["with"]["ref"] == "${{ inputs.tag || github.ref_name }}"
+    assert checkout[0]["with"]["lfs"] is True, "the images to attach are in Git LFS"
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+def test_release_prepares_the_notes_before_publishing_and_attaches_the_images() -> None:
+    steps = _release_steps()
+    publish = _step("Publish to VS Code Marketplace")
+    attach = _step("Attach VSIX and images to GitHub release")
+    assert steps.index(_step("Prepare the reviewed release notes")) < steps.index(publish)
+    assert attach["with"]["body_path"] == "release-notes.md"
+    assert attach["with"]["files"].splitlines() == [
+        "out/reports/package/markdown-okf-schema-studio.vsix",
+        "${{ runner.temp }}/release-assets/*",
+    ]
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+def test_the_repository_check_includes_the_release_notes() -> None:
+    justfile = (ROOT / "justfile").read_text()
+    check = next(line for line in justfile.splitlines() if line.startswith("check:"))
+    assert "release-notes-check" in check.split()
+
+
+def test_preflight_skips_only_the_stages_that_need_linux_or_macos_on_windows() -> None:
+    justfile = (ROOT / "justfile").read_text()
+    recipe = justfile.split("\npreflight: ")[1].split("\n\n")[0]
+    static = recipe.index("just ci-static")
+    skip = recipe.index('"{{ os() }}" == "windows"')
+    assert static < skip < recipe.index("just ci-visual")
+    assert 'exit "$failures"' in recipe[skip:recipe.index("just ci-visual")]
 
 
 def test_release_dispatch_can_publish_placeholder_notes(tmp_path: Path) -> None:
     import subprocess
 
-    import importlib.util
-
     notes_input = _release()[True]["workflow_dispatch"]["inputs"]["notes"]
     assert notes_input["type"] == "choice"
-    assert notes_input["default"] == "generated"
-    assert set(notes_input["options"]) == {"generated", "placeholder"}
+    assert notes_input["default"] == "reviewed"
+    assert set(notes_input["options"]) == {"reviewed", "placeholder"}
     step = _step("Write placeholder release notes")
     assert str(step["if"]) == f"{DISPATCH} && inputs.notes == 'placeholder'"
     subprocess.run([_bash(), "-euo", "pipefail", "-c", step["run"]], cwd=tmp_path, check=True)
-    spec = importlib.util.spec_from_file_location("release_notes", ROOT / "scripts/release_notes.py")
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    module.validate_notes((tmp_path / "release-notes.md").read_text())
+    assert (tmp_path / "release-notes.md").read_text().startswith("## Maintenance")
     steps = _release_steps()
     upload = _step("Upload validated notes")
     assert upload["with"]["path"] == "release-notes.md"
@@ -286,16 +307,10 @@ def test_release_tag_verification_rejects_a_tag_off_main(released_main: Path) ->
     assert _verify_tag(released_main, "v1.0.0") != 0
 
 
-def test_release_copilot_token_stays_in_the_notes_steps_env() -> None:
-    text = RELEASE.read_text()
-    notes_steps = _notes_steps()
-    assert len(notes_steps) == 2
-    for step in notes_steps:
-        assert step["env"] == {"COPILOT_GITHUB_TOKEN": "${{ secrets.COPILOT_GITHUB_TOKEN }}"}
-    assert text.count("COPILOT_GITHUB_TOKEN") == 2 * len(notes_steps)
-    for step in _release_steps():
-        if step not in notes_steps:
-            assert "COPILOT_GITHUB_TOKEN" not in str(step), step.get("name")
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+def test_release_generates_no_notes() -> None:
+    assert "COPILOT" not in RELEASE.read_text()
+    assert not (ROOT / ".github/workflows/release-notes.yml").exists()
 
 
 def test_release_checkout_does_not_persist_credentials() -> None:

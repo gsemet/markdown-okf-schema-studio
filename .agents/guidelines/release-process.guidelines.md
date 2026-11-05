@@ -2,8 +2,9 @@
 
 The mechanics of a release (version commit, changelog heading, CI tag, Marketplace publication)
 are in "How to Release" in [CONTRIBUTING.md](../../CONTRIBUTING.md). This guideline covers the
-release driver's steps and what the owner reviews before the version pull request merges: the
-release notes, the announcement thread and the hero image. The model is release 1.2.0.
+release driver's steps and what the owner reviews in the version pull request: the release notes,
+the announcement thread and the hero image, in `docs/releases-notes/<date>-vX.Y.Z/`. The merge of
+that pull request publishes everything; after it the driver only monitors. The model is release 1.2.0.
 
 A release is planned by the Foreman and run by the release driver, a special driver the Foreman
 starts once the stack of the release is merged (role, merge rights and prompt: "Release driver"
@@ -22,11 +23,13 @@ commit, publishing, archive) are in "The release driver's steps"; this section c
 - **Owns** the release CR folder `.agents/changes/03-requests/NNN-release-x-y-z/` and its
   `STATE.md` header. It is the one writer of that header from the notes draft to the archive, and
   `driver:` is its lock, like for a CR driver.
-- **May merge** the fix PRs of the release and the version PR, on the owner's standing permission
-  for release work. It merges nothing else. It never enables auto-merge and never touches a PR
-  outside the release.
-- **Fixes** go through the Foreman: the release driver reports a red heavy job or another small
-  problem, and the Foreman runs a fix CR with a CR driver (the round limit, escalation to Opus). The release driver never codes or reviews.
+- **May merge** the fix PRs of the release, on the owner's standing permission for release work.
+  The owner merges the version PR. It merges nothing else. It never enables auto-merge and never
+  touches a PR outside the release.
+- **Fixes** go through the Foreman: before the version PR merges, the release driver reports a red
+  heavy job or another small problem, and the Foreman runs a fix CR with a CR driver (the round limit, escalation to Opus). The release driver never codes or reviews.
+- **After the merge** it monitors the run. On a red job it re-runs the failed jobs once; if a job
+  fails again, it stops and calls the owner with its diagnosis.
 - **Asks the owner nothing** between the notes review and the publication, except a real blocker:
   the round limit is reached or a product decision is needed. It then returns `status: blocked`
   with the question and its recommended answer.
@@ -42,7 +45,7 @@ commit, publishing, archive) are in "The release driver's steps"; this section c
 > release folder (`00-request.md`, `STATE.md`).
 > Resume from the `STATE.md` header and write `driver: <your id>` in it. Follow the steps of
 > "The release driver's steps" from step 3: notes and thread, a green heavy run on `main` HEAD,
-> then the version commit, then tag, Marketplace and Pages, the published notes and the archive.
+> then the version commit, then monitor the tag, Marketplace and Pages, and the archive.
 > Report a red job or another small problem to the Foreman, which runs the fix CR, and merge its
 > PR; never code or review yourself. Ask the owner nothing after the notes review except a real
 > blocker.
@@ -58,9 +61,15 @@ the fixes it needs.
 | File | Content |
 | --- | --- |
 | `00-request.md` | The owner's request, the scope (the CRs and PRs in the release), the decisions |
-| `release-notes.md` | The GitHub release notes, with relative image links for the local review |
+
+What the owner reviews is committed with the version, in `docs/releases-notes/YYYY-MM-DD-vX.Y.Z/`,
+named by the date of the pull request (the date may differ from the tag's; nothing checks it):
+
+| File | Content |
+| --- | --- |
+| `release-notes.md` | The GitHub release notes, with relative image links |
 | `tweet.md` | The announcement thread, three posts |
-| `images/` | Copies of the images the notes and the thread use |
+| Images | The images of the notes and the thread, directly in the folder |
 
 ## The release driver's steps
 
@@ -71,9 +80,7 @@ the fixes it needs.
    it asks the main session to hold every other merge until the release is published, and starts
    the release driver. It starts no driver for a new CR until the release is published.
 3. The release driver opens the folder and drafts the notes and the thread from `CHANGELOG.md`
-   `## Unreleased` and the CR reports. The owner reviews `release-notes.md` and `tweet.md` in
-   Studio. This is the owner's only step after the version. The hero image waits for the version PR
-   (step 5), in the release CR folder or on the `-assets` branch.
+   `## Unreleased` and the CR reports, in `docs/releases-notes/`. They go in the version PR.
 4. The last merge of the stack started the heavy run on `main` HEAD. The release driver waits for
    `integration` and `stress` to be green on that exact commit, and reads the result of each job:
    a red `stress` does not turn this run red.
@@ -89,16 +96,18 @@ the fixes it needs.
    merges the fix PR and waits for the run of the new HEAD. A flake: re-run once
    (`gh run rerun <run-id> --failed`); if it fails again, treat it as red.
 5. **Only then** the version commit: `just bump-version`, the changelog heading, the version pull
-   request (hero image and version commit squashed into one `chore: version X.Y.Z` commit, body
-   following `.github/PULL_REQUEST_TEMPLATE.md`), squash and merge (see "How to Release" in
-   CONTRIBUTING.md). The heavy run of the version push (CI rule 14) stays the final gate.
-6. It monitors the version push through the tag, the Marketplace publication and Pages, recovering
-   a red heavy job as in [ci.guidelines.md](ci.guidelines.md).
-7. It replaces the generated notes (see "Publishing") and archives the folder with a `report.md`:
-   tag, release URL, CI runs (heavy run on `main`, version push).
+   request (notes folder and version commit in one `chore: version X.Y.Z` commit, body following
+   `.github/PULL_REQUEST_TEMPLATE.md`; see "How to Release" in CONTRIBUTING.md). `just check` fails
+   without valid notes, so the PR cannot merge without them. The owner reviews the folder in the
+   PR and merges it by rebase, the only merge method of the repository. The heavy run of the
+   version push (CI rule 14) stays the final gate.
+6. It monitors the version push through the tag, the GitHub release with its notes and images, the
+   Marketplace publication and Pages, recovering a red heavy job as in "After the merge" above.
+7. It archives the folder with a `report.md`: tag, release URL, CI runs (heavy run on `main`,
+   version push).
 
-Between the notes review (step 3) and the publication (step 7), the driver asks the owner nothing,
-except a real blocker: the round limit is reached or a product decision is needed.
+Between the notes review (step 5) and the publication, the driver asks the owner nothing, except a
+real blocker: the round limit is reached or a product decision is needed.
 
 ## Release notes
 
@@ -129,27 +138,21 @@ Keyboard keys use `<kbd>`. Every changelog line of the release appears once, in 
 
 ### Images
 
-Images are committed under `images/readme/` (Git LFS) in the version pull request, so they exist
-at the tag. The published notes link them as
-`https://media.githubusercontent.com/media/gsemet/markdown-okf-schema-studio/vX.Y.Z/images/readme/<file>`,
-which resolves only once the tag exists. Before the version pull request merges, images may
-come from a CR `-assets` branch at a raw URL. In the CR folder, `release-notes.md` links the
-copies in `images/` instead, so the owner can review the page locally.
+Images sit directly in the notes folder, next to `release-notes.md`, and the notes link them by file
+name. An image at an absolute URL or in a subfolder fails the check: a release must depend on no
+branch. The release attaches them as assets and points the links to
+`https://github.com/gsemet/markdown-okf-schema-studio/releases/download/vX.Y.Z/<file>`.
 
 ### Publishing
 
-CI publishes the release with notes generated by `gh copilot`. Once the release exists, the release
-driver replaces them with the reviewed notes:
-
-```bash
-sed 's#](images/#](https://media.githubusercontent.com/media/gsemet/markdown-okf-schema-studio/vX.Y.Z/images/readme/#g; s#src="images/#src="https://media.githubusercontent.com/media/gsemet/markdown-okf-schema-studio/vX.Y.Z/images/readme/#g' release-notes.md > release-notes.github.md
-gh release edit vX.Y.Z --notes-file release-notes.github.md
-```
+CI publishes the reviewed file as it is, with `scripts/release_notes.py --prepare`, before the
+Marketplace publication. A typo found afterwards is fixed by editing the release on GitHub: the
+published text may then differ from the file, and that is accepted.
 
 ## Announcement thread
 
-Three posts on X, in `tweet.md`, each under a `## 1/`, `## 2/`, `## 3/` heading, followed by an
-`Image:` line with the absolute path of its picture when it has one.
+Three posts on X, in `tweet.md` of the notes folder, each under a `## 1/`, `## 2/`, `## 3/` heading,
+followed by an `Image:` line with the file name of its picture when it has one. Only the owner posts.
 
 1. **The story** (may be long; X shows "Show more" past 280 characters). Written in the first
    person, as one would tell a colleague: start from a concrete moment of work with a coding agent
@@ -166,8 +169,9 @@ Read each post aloud: it should sound like a person, not a press release.
 
 ## Hero image
 
-Each minor or major release has one hero image, used by post 1 and by the first highlight of the
-notes. It is a simulated visual scenario, so it is reproducible and checked:
+A hero image is recommended for a minor or major release, not required: an existing capture is
+enough for a small one. It serves post 1 and the first highlight of the notes. A dedicated one is a
+simulated visual scenario, so it is reproducible and checked:
 
 - fixture `test/visual/fixtures/<NN>-release-<x>-<y>-showcase.md`, scenario
   `rendering-core/v<NN>-release-<x>-<y>-showcase-cream-1200` in

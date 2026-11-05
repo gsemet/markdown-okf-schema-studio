@@ -53,6 +53,11 @@ def set_catalog_version(path: Path, version: str) -> None:
     path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n")
 
 
+def use_lf(path: Path) -> None:
+    """Keep LF line endings: Python and Commitizen write CRLF on Windows."""
+    path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
+
+
 def git(*arguments: str) -> str:
     """Run Git in the current checkout."""
     return subprocess.check_output(["git", *arguments], text=True).strip()
@@ -185,6 +190,8 @@ def main() -> int:
             set_manifest_version(Path(name), next_version)
         for name in PLUGIN_CATALOGS:
             set_catalog_version(Path(name), next_version)
+        for name in VERSIONED_PATHS:
+            use_lf(Path(name))
         print(f"Updated npm and plugin versions: {current} -> {next_version}")
         git(
             "commit",
