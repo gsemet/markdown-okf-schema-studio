@@ -511,8 +511,7 @@ The Python project's version is tooling metadata and is not the extension releas
 The release notes, the announcement thread and their images are committed in the version pull
 request, under `docs/releases-notes/YYYY-MM-DD-vX.Y.Z/`, and `just check` fails without valid notes:
 see [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md), which also
-gives the order of a release, planned by the Foreman and run by the release driver. Make the version commit (step 3) only
-after a green heavy run of `main` HEAD (step 1).
+gives the order of a release. Make the version commit (step 3) only after a green heavy run of `main` HEAD (step 1).
 
 1. Merge everything the release needs into `main`. The push runs the heavy jobs (`integration` and
 	`stress`) on `main` HEAD: wait for both to be green on that exact commit, reading the result of

@@ -14,16 +14,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 PROCESS = ".agents/guidelines/change-requests-lifecycle.guidelines.md"
 PROCESS_NAME = "change-requests-lifecycle.guidelines.md"
-ROLES = re.compile(r"\b(Chief of Staff|Foreman|drivers?|Inspector)\b", re.IGNORECASE)
+# "reviewer" is left out on purpose: the pull request guideline means the human reader of a PR.
+ROLES = re.compile(
+    r"\b(Chief\s+of\s+Staff|Foreman|drivers?|Inspector|coders?|orchestrators?(?!\.md))\b",
+    re.IGNORECASE,
+)
 LINK = re.compile(r"\]\(([^)\s]+)\)")
 
 
 def project_rules() -> list[Path]:
-    """The constitution, the project guidelines and the requirements guidelines."""
-    guidelines = sorted((ROOT / ".agents/guidelines").glob("*.md"))
-    requirements = sorted((ROOT / "requirements/guidelines").glob("*.md"))
-    demo = sorted((ROOT / "docs/demo-video/guidelines").glob("*.md"))
-    rules = [ROOT / ".agents/constitution.md", *guidelines, *requirements, *demo]
+    """The constitution, CONTRIBUTING.md, the project and the requirements guidelines."""
+    guidelines = sorted((ROOT / ".agents/guidelines").rglob("*.md"))
+    requirements = sorted((ROOT / "requirements/guidelines").rglob("*.md"))
+    demo = sorted((ROOT / "docs/demo-video/guidelines").rglob("*.md"))
+    rules = [
+        ROOT / ".agents/constitution.md",
+        ROOT / "CONTRIBUTING.md",
+        *guidelines,
+        *requirements,
+        *demo,
+    ]
     return [path for path in rules if path != ROOT / PROCESS]
 
 
@@ -73,6 +83,32 @@ def test_no_project_rule_names_a_process_role() -> None:
 
 def test_agents_md_links_to_the_process_guideline_exactly_once() -> None:
     assert len(links_to_process(ROOT / "AGENTS.md")) == 1
+
+
+def agents_md_process_section() -> str:
+    text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    match = re.search(r"^## Process\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
+    assert match, "AGENTS.md has no '## Process' section"
+    return match.group(1)
+
+
+def test_agents_md_link_sits_inside_the_process_section() -> None:
+    assert len(LINK.findall(agents_md_process_section())) >= 1
+    section_links = [
+        target
+        for target in LINK.findall(agents_md_process_section())
+        if PROCESS_NAME in target
+    ]
+    assert len(section_links) == 1
+
+
+def test_agents_md_names_the_process_guideline_only_in_the_process_section() -> None:
+    link = re.compile(r"\[[^\]]*\]\([^)\s]*" + re.escape(PROCESS_NAME) + r"[^)\s]*\)")
+    text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    bare = link.sub("", text)
+    assert PROCESS_NAME not in bare
+    assert len(link.findall(text)) == 1
+    assert len(link.findall(agents_md_process_section())) == 1
 
 
 def test_process_guideline_ranks_below_the_project_guidelines() -> None:

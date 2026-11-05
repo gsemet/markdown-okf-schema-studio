@@ -46,14 +46,15 @@ of a release, which may be merged on the owner's standing permission (see
 ## Screenshots in the PR
 
 Take them from the e2e/visual run of the final code, light and dark when themes matter. Push them
-as raw blobs to a side branch (bypasses Git LFS) and link the raw URLs:
+as raw blobs to a side branch (bypasses Git LFS) and link the raw URLs (`<id>` is the change number and `<slug>`
+its short name):
 
 ```bash
 tree=$(for f in shots/*.png; do
   printf '100644 blob %s\t%s\n' "$(git hash-object -w --no-filters "$f")" "$(basename "$f")"
 done | git mktree)
-commit=$(git commit-tree "$tree" -m "CR NNN screenshots")
-git push origin "${commit}:refs/heads/change-requests/NNN-<slug>-assets"  # braces: zsh reads $commit:r as a modifier
+commit=$(git commit-tree "$tree" -m "change <id> screenshots")
+git push origin "${commit}:refs/heads/change-requests/<id>-<slug>-assets"  # braces: zsh reads $commit:r as a modifier
 # URL: https://raw.githubusercontent.com/<owner>/<repo>/${commit}/<name>.png
 ```
 
