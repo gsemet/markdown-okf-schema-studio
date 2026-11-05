@@ -2,65 +2,28 @@
 
 The mechanics of a release (version commit, changelog heading, CI tag, Marketplace publication)
 are in "How to Release" in [CONTRIBUTING.md](../../CONTRIBUTING.md). This guideline covers the
-release driver's steps and what the owner reviews in the version pull request: the release notes,
-the announcement thread and the hero image, in `docs/releases-notes/<date>-vX.Y.Z/`. The merge of
-that pull request publishes everything; after it the driver only monitors. The model is release 1.2.0.
+steps of a release and what the owner reviews in the version pull request: the release notes, the
+announcement thread and the hero image, in `docs/releases-notes/<date>-vX.Y.Z/`. The merge of
+that pull request publishes everything; after it the release is only monitored. The model is
+release 1.2.0.
 
-A release is planned by the Foreman and run by the release driver, a special driver the Foreman
-starts once the stack of the release is merged (role, merge rights and prompt: "Release driver"
-below). The goal: the owner says "release X", and the release is almost guaranteed before the version commit exists.
-1.3.0 and 1.3.1 were never tagged because the version push was the first real VS Code run of their
-code. The real VS Code jobs stay on `main`, so the version commit is never stacked on top of
-development: the development lands first, then the release runs on its own.
+The goal: the owner says "release X", and the release is almost guaranteed before the version
+commit exists. 1.3.0 and 1.3.1 were never tagged because the version push was the first real VS Code
+run of their code. The real VS Code jobs stay on `main`, so the version commit is never stacked on
+top of development: the development lands first, then the release runs on its own.
 
-## Release driver
+## Rules of a release
 
-A special driver, started by the Foreman once the stack of the release is merged. It runs the
-release from there to the end, so the owner only agrees on the version, reviews the notes and the
-thread, and reads the result. The steps (planning, notes, thread, heavy run on `main`, version
-commit, publishing, archive) are in "The release driver's steps"; this section covers the role.
+- **Merge rights**: the fix PRs of the release may be merged on the owner's standing permission for
+  release work. The owner merges the version PR. Nothing else is merged, auto-merge is never
+  enabled, and no PR outside the release is touched.
+- **Nothing is asked of the owner** between the notes review and the publication, except a real
+  blocker: a product decision is needed, or a fix cannot be completed. The release then stops with
+  the question and its recommended answer.
+- **After the merge** the run is monitored. On a red job the failed jobs are re-run once; if a job
+  fails again, the release stops and calls the owner with its diagnosis.
 
-- **Owns** the release CR folder `.agents/changes/03-requests/NNN-release-x-y-z/` and its
-  `STATE.md` header. It is the one writer of that header from the notes draft to the archive, and
-  `driver:` is its lock, like for a CR driver.
-- **May merge** the fix PRs of the release, on the owner's standing permission for release work.
-  The owner merges the version PR. It merges nothing else. It never enables auto-merge and never
-  touches a PR outside the release.
-- **Fixes** go through the Foreman: before the version PR merges, the release driver reports a red
-  heavy job or another small problem, and the Foreman runs a fix CR with a CR driver (the round limit, escalation to Opus). The release driver never codes or reviews.
-- **After the merge** it monitors the run. On a red job it re-runs the failed jobs once; if a job
-  fails again, it stops and calls the owner with its diagnosis.
-- **Asks the owner nothing** between the notes review and the publication, except a real blocker:
-  the round limit is reached or a product decision is needed. It then returns `status: blocked`
-  with the question and its recommended answer.
-- **Watches** in slices of at most 5 minutes and rewrites the header at
-  every transition and every slice.
-
-### Release driver prompt (the Foreman fills the placeholders)
-
-> You are the release driver for release `<X.Y.Z>`. You alone own the release CR folder
-> `<absolute path>` and its `STATE.md` header. Read
-> `.agents/guidelines/release-process.guidelines.md`,
-> `.agents/guidelines/state-file.guidelines.md`, `.agents/guidelines/ci.guidelines.md` and the
-> release folder (`00-request.md`, `STATE.md`).
-> Resume from the `STATE.md` header and write `driver: <your id>` in it. Follow the steps of
-> "The release driver's steps" from step 3: notes and thread, a green heavy run on `main` HEAD,
-> then the version commit, then monitor the tag, Marketplace and Pages, and the archive.
-> Report a red job or another small problem to the Foreman, which runs the fix CR, and merge its
-> PR; never code or review yourself. Ask the owner nothing after the notes review except a real
-> blocker.
-> Return with `status: ready` when the release is archived, or `status: blocked` and a question
-> with your recommended answer.
-
-## The release change request
-
-Every release has a change request folder, `.agents/changes/03-requests/<NNN>-release-<x>-<y>-<z>/`,
-with the next free CR number. The release driver owns it; the Foreman plans the release and runs
-the fixes it needs.
-
-| File | Content |
-| --- | --- |
-| `00-request.md` | The owner's request, the scope (the CRs and PRs in the release), the decisions |
+## The release folder
 
 What the owner reviews is committed with the version, in `docs/releases-notes/YYYY-MM-DD-vX.Y.Z/`,
 named by the date of the pull request (the date may differ from the tag's; nothing checks it):
@@ -71,18 +34,16 @@ named by the date of the pull request (the date may differ from the tag's; nothi
 | `tweet.md` | The announcement thread, three posts |
 | Images | The images of the notes and the thread, directly in the folder |
 
-## The release driver's steps
+## The steps of a release
 
-1. The owner says "release X". The main session and the owner agree on the version number, then
-   the main session gives the release to the Foreman, starting one if none is running.
-2. The Foreman plans the release: it brings the stack of the release to `main` first, with the
-   changelog lines in its PRs, so they are in `main` before the heavy run. Once the stack is merged,
-   it asks the main session to hold every other merge until the release is published, and starts
-   the release driver. It starts no driver for a new CR until the release is published.
-3. The release driver opens the folder and drafts the notes and the thread from `CHANGELOG.md`
-   `## Unreleased` and the CR reports, in `docs/releases-notes/`. They go in the version PR.
-4. The last merge of the stack started the heavy run on `main` HEAD. The release driver waits for
-   `integration` and `stress` to be green on that exact commit, and reads the result of each job:
+1. The owner says "release X". The version number is agreed with the owner.
+2. The stack of the release lands on `main` first, with the changelog lines in its PRs, so they are
+   in `main` before the heavy run. Once the stack is merged, every other merge is held until the
+   release is published, and no work on a new change starts until then.
+3. The notes and the thread are drafted from `CHANGELOG.md` `## Unreleased` and the reports of the
+   changes, in `docs/releases-notes/`. They go in the version PR.
+4. The last merge of the stack started the heavy run on `main` HEAD. Wait for
+   `integration` and `stress` to be green on that exact commit, and read the result of each job:
    a red `stress` does not turn this run red.
 
    ```bash
@@ -92,27 +53,27 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    ```
 
    Check that the run's `headSha` is the current `main` HEAD; a merge since then starts the step
-   again. A red job: the release driver tells the Foreman, which runs a fix CR; the release driver
-   merges the fix PR and waits for the run of the new HEAD. A flake: re-run once
-   (`gh run rerun <run-id> --failed`); if it fails again, treat it as red.
+   again. A red job is fixed with a fix PR, which is merged, and the run of the new HEAD is
+   awaited. A flake: re-run once (`gh run rerun <run-id> --failed`); if it fails again, treat it as
+   red.
 5. **Only then** the version commit: `just bump-version`, the changelog heading, the version pull
    request (notes folder and version commit in one `chore: version X.Y.Z` commit, body following
    `.github/PULL_REQUEST_TEMPLATE.md`; see "How to Release" in CONTRIBUTING.md). `just check` fails
    without valid notes, so the PR cannot merge without them. The owner reviews the folder in the
    PR and merges it by rebase, the only merge method of the repository. The heavy run of the
    version push (CI rule 14) stays the final gate.
-6. It monitors the version push through the tag, the GitHub release with its notes and images, the
+6. The version push is monitored through the tag, the GitHub release with its notes and images, the
    Marketplace publication and Pages, recovering a red heavy job as in "After the merge" above.
-7. It archives the folder with a `report.md`: tag, release URL, CI runs (heavy run on `main`,
+7. The release is archived with a `report.md`: tag, release URL, CI runs (heavy run on `main`,
    version push).
 
-Between the notes review (step 5) and the publication, the driver asks the owner nothing, except a
-real blocker: the round limit is reached or a product decision is needed.
+Between the notes review (step 5) and the publication, the owner is asked nothing, except a real
+blocker: a product decision is needed, or a fix cannot be completed.
 
 ## Release notes
 
 Write for a user of the extension, from the changelog lines: no CR numbers, no requirement IDs,
-no internal terms (Foreman, driver, round). Structure, in this order:
+no internal terms (agent roles, change request numbers, rounds). Structure, in this order:
 
 1. **Header**, centred:
    - `<h1 align="center">Markdown OKF-Schema Studio X.Y</h1>`;

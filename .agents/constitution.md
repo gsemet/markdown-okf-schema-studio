@@ -1,8 +1,9 @@
 # Constitution
 
 The rules every change to this project follows, whoever makes it (a person, an agent or a
-sub-agent). They rank above `AGENTS.md`, the guidelines and the skills. Each rule links to the
-guideline that gives the details. A rule changes only by a pull request the maintainer approves.
+sub-agent). The order of authority is: this constitution, `AGENTS.md`, the project guidelines, the
+process guideline, the skills. Each rule links to the guideline that gives the details. A rule
+changes only by a pull request the maintainer approves.
 
 `AGENTS.md` covers how to set up, build and run the project; this file covers what a change must
 respect.
@@ -50,7 +51,7 @@ Details: "Architecture" in [CONTRIBUTING.md](../CONTRIBUTING.md).
   Only the maintainer decides a merge.
 - A change is complete only when `just preflight` passes.
 
-Details: [change-requests-lifecycle.guidelines.md](guidelines/change-requests-lifecycle.guidelines.md),
+Details: [pull-request.guidelines.md](guidelines/pull-request.guidelines.md),
 [ci.guidelines.md](guidelines/ci.guidelines.md).
 
 ## 5. Dependencies
@@ -71,3 +72,11 @@ Details: [writing-skill-maintenance.guideline.md](guidelines/writing-skill-maint
 - Repository content (code, comments, docs, commits, PRs) is in English.
 - No reference from maintained source or tests back to the white-paper repository.
 - Never commit `node_modules/`, `out/` or Python virtual-environment files.
+
+## 8. The process never overrides a project rule
+
+- The process that runs the work (who does what, in which order) is a layer of its own and ranks
+  below every rule of this constitution, of `AGENTS.md` and of the project guidelines. When the
+  process and a project rule conflict, the project rule wins and the conflict is reported.
+- Project rules stay valid whatever process runs the work: they name no process role and link to no
+  process document.

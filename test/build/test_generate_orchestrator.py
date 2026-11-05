@@ -33,10 +33,10 @@ def write(path: Path, text: str) -> None:
 
 
 def cr(changes: Path, name: str, title: str, state: str | None) -> Path:
-    folder = changes / "03-requests" / name
-    write(folder / "00-request.md", f"# {title}\n\nBody.\n")
+    folder = changes / "3-requests" / name
+    write(folder / "03-change-spec.md", f"# {title}\n\nBody.\n")
     if state is not None:
-        write(folder / "STATE.md", state)
+        write(folder / "STATUS.md", state)
     return folder
 
 
@@ -45,12 +45,12 @@ def run(changes: Path, *extra: str) -> int:
 
 
 def output(changes: Path) -> str:
-    return (changes / "03-requests" / "ORCHESTRATOR.md").read_text(encoding="utf-8")
+    return (changes / "3-requests" / "ORCHESTRATOR.md").read_text(encoding="utf-8")
 
 
 @pytest.fixture
 def changes(tmp_path: Path) -> Path:
-    (tmp_path / "03-requests").mkdir(parents=True)
+    (tmp_path / "3-requests").mkdir(parents=True)
     return tmp_path
 
 
@@ -62,11 +62,11 @@ def test_active_rows_icons_and_pr_link(changes: Path, capsys: pytest.CaptureFixt
     text = output(changes)
     assert "> Updated 2026-11-01: 3 active CRs." in text
     assert (
-        "| [010](010-ready-one/00-request.md) | Ready one | [🟢 ready 5 Code 1/3](010-ready-one/STATE.md) "
+        "| [010](010-ready-one/03-change-spec.md) | Ready one | [🟢 ready 5 Code 1/3](010-ready-one/STATUS.md) "
         "| `change-requests/010-ready-one` | [#12](https://github.com/acme/widgets/pull/12) |"
     ) in text
-    assert "[🟡 working 5 Code 1/3](011-working-one/STATE.md) | `change-requests/011-working-one` | — |" in text
-    assert "[🔴 blocked 5 Code 1/3](012-blocked-one/STATE.md)" in text
+    assert "[🟡 working 5 Code 1/3](011-working-one/STATUS.md) | `change-requests/011-working-one` | — |" in text
+    assert "[🔴 blocked 5 Code 1/3](012-blocked-one/STATUS.md)" in text
     assert text.index("[012]") < text.index("[011]") < text.index("[010]")
     assert capsys.readouterr().err == ""
 
@@ -77,75 +77,76 @@ def test_unparsable_header_exits_1_names_path_and_still_writes(changes: Path, ca
     cr(changes, "022-missing", "Missing", None)
     assert run(changes) == 1
     err = capsys.readouterr().err
-    assert f"error: {bad / 'STATE.md'}: unparsable STATE.md header (line 2)" in err
-    assert f"{Path('022-missing', 'STATE.md')}: missing STATE.md" in err
+    assert f"error: {bad / 'STATUS.md'}: unparsable STATUS.md header (line 2)" in err
+    assert f"{Path('022-missing', 'STATUS.md')}: missing STATUS.md" in err
     text = output(changes)
-    assert "[⚠️ unparsable header](021-bad/STATE.md)" in text
-    assert "| [020](020-good/00-request.md) | Good | [🟢 ready" in text
-    assert "| [022](022-missing/00-request.md) | Missing | ⚠️ unparsable header | `change-requests/022-missing` | — |" in text
+    assert "[⚠️ unparsable header](021-bad/STATUS.md)" in text
+    assert "| [020](020-good/03-change-spec.md) | Good | [🟢 ready" in text
+    assert "| [022](022-missing/03-change-spec.md) | Missing | ⚠️ unparsable header | `change-requests/022-missing` | — |" in text
 
 
 def test_landed_report_pr_and_date_newest_first(changes: Path) -> None:
-    archives = changes / "04-archives"
+    archives = changes / "4-archives"
     write(archives / "100-old" / "00-request.md", "# 100 - Old change\n")
     write(archives / "100-old" / "report.md", "# Report\n\nPR [#43](https://github.com/acme/widgets/pull/43) landed 2026-10-01.\n")
-    write(archives / "101-new" / "00-request.md", "# 101 — New change\n")
+    write(archives / "101-new" / "03-change-spec.md", "# 101 — New change\n")
     write(archives / "101-new" / "report.md", "Landed 2026-10-20, see PR #44.\n")
-    write(archives / "099-undated" / "00-request.md", "# Undated\n")
+    write(archives / "099-undated" / "03-change-spec.md", "# Undated\n")
     write(archives / "102-nodoc" / "00-index.md", "# Campaign\n")
     write(archives / "RUN-BRIEF-run3.md", "ignored\n")
     assert run(changes) == 0
     landed = output(changes).split("## Landed")[1]
-    assert "| [100](../04-archives/100-old/00-request.md) | Old change | [report](../04-archives/100-old/report.md) | [#43](https://github.com/acme/widgets/pull/43) | 2026-10-01 |" in landed
+    assert "| [100](../4-archives/100-old/00-request.md) | Old change | [report](../4-archives/100-old/report.md) | [#43](https://github.com/acme/widgets/pull/43) | 2026-10-01 |" in landed
     assert "[#44](https://github.com/acme/widgets/pull/44) | 2026-10-20 |" in landed
-    assert "| [102](../04-archives/102-nodoc/00-index.md) | Campaign | — | — | — |" in landed
+    assert "| [101](../4-archives/101-new/03-change-spec.md) | New change |" in landed
+    assert "| [102](../4-archives/102-nodoc/00-index.md) | Campaign | — | — | — |" in landed
     assert "RUN-BRIEF" not in landed
     order = [landed.index(f"[{n}]") for n in ("101", "100", "102", "099")]
     assert order == sorted(order)
 
 
 def test_backlog_rows(changes: Path) -> None:
-    write(changes / "02-backlog/P2/zeta/01-intent.md", "---\ntitle: x\n# not a heading\n---\n\n# Zeta item\n")
-    write(changes / "02-backlog/P2/zeta/notes/extra.md", "more\n")
-    write(changes / "02-backlog/P1/alpha/01-intent.md", "# Alpha | pipe\n")
+    write(changes / "2-backlog/P2/zeta/01-intent.md", "---\ntitle: x\n# not a heading\n---\n\n# Zeta item\n")
+    write(changes / "2-backlog/P2/zeta/notes/extra.md", "more\n")
+    write(changes / "2-backlog/P1/alpha/01-intent.md", "# Alpha | pipe\n")
     assert run(changes) == 0
     text = output(changes)
-    assert "| P1 | [alpha](../02-backlog/P1/alpha/01-intent.md) | Alpha \\| pipe | 1 |" in text
-    assert "| P2 | [zeta](../02-backlog/P2/zeta/01-intent.md) | Zeta item | 2 |" in text
+    assert "| P1 | [alpha](../2-backlog/P1/alpha/01-intent.md) | Alpha \\| pipe | 1 |" in text
+    assert "| P2 | [zeta](../2-backlog/P2/zeta/01-intent.md) | Zeta item | 2 |" in text
     assert text.index("| P1 |") < text.index("| P2 |")
 
 
 def test_drift_by_name_is_listed_under_its_cr_only(changes: Path, capsys: pytest.CaptureFixture[str]) -> None:
     folder = cr(changes, "030-fix-thing", "Fix thing", header())
     write(folder / "backlog-item" / "01-intent.md", "# Fix thing intent\n")
-    write(changes / "02-backlog/P2/fix-thing/01-intent.md", "# Fix thing intent (old copy)\n")
-    write(changes / "02-backlog/P2/other/01-intent.md", "# Other\n")
+    write(changes / "2-backlog/P2/fix-thing/01-intent.md", "# Fix thing intent (old copy)\n")
+    write(changes / "2-backlog/P2/other/01-intent.md", "# Other\n")
     assert run(changes) == 0
     err = capsys.readouterr().err
-    assert "warning: drift: 02-backlog/P2/fix-thing is also 03-requests/030-fix-thing/backlog-item" in err
+    assert "warning: drift: 2-backlog/P2/fix-thing is also 3-requests/030-fix-thing/backlog-item" in err
     text = output(changes)
     backlog = text.split("## Backlog")[1].split("## Landed")[0]
     assert "fix-thing" not in backlog and "[other]" in backlog
-    assert text.count("[030](030-fix-thing/00-request.md)") == 1
-    drift = "- `02-backlog/P2/fix-thing` is also `03-requests/030-fix-thing/backlog-item`: listed under its CR only."
+    assert text.count("[030](030-fix-thing/03-change-spec.md)") == 1
+    drift = "- `2-backlog/P2/fix-thing` is also `3-requests/030-fix-thing/backlog-item`: listed under its CR only."
     assert text.count(drift) == 1
     assert text.index(drift) < text.index("## Active")
 
 
 def test_drift_by_title_with_archived_cr(changes: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    write(changes / "04-archives/040-renamed/00-request.md", "# Renamed\n")
-    write(changes / "04-archives/040-renamed/backlog-item/01-intent.md", "# Same title\n")
-    write(changes / "02-backlog/P3/different-slug/01-intent.md", "# Same title\n")
+    write(changes / "4-archives/040-renamed/03-change-spec.md", "# Renamed\n")
+    write(changes / "4-archives/040-renamed/backlog-item/01-intent.md", "# Same title\n")
+    write(changes / "2-backlog/P3/different-slug/01-intent.md", "# Same title\n")
     assert run(changes) == 0
-    assert "warning: drift: 02-backlog/P3/different-slug is also 04-archives/040-renamed/backlog-item" in capsys.readouterr().err
+    assert "warning: drift: 2-backlog/P3/different-slug is also 4-archives/040-renamed/backlog-item" in capsys.readouterr().err
     assert "different-slug](" not in output(changes)
 
 
 def test_second_run_is_a_noop_even_on_another_day(changes: Path) -> None:
     cr(changes, "050-one", "One", header())
-    write(changes / "02-backlog/P4/idea/01-intent.md", "# Idea\n")
+    write(changes / "2-backlog/P4/idea/01-intent.md", "# Idea\n")
     assert run(changes) == 0
-    path = changes / "03-requests" / "ORCHESTRATOR.md"
+    path = changes / "3-requests" / "ORCHESTRATOR.md"
     before, mtime = path.read_bytes(), path.stat().st_mtime_ns
     os.utime(path, ns=(mtime - 10**9, mtime - 10**9))
     mtime -= 10**9
@@ -161,7 +162,7 @@ def test_notes_are_appended_as_is(changes: Path) -> None:
     assert run(changes) == 0
     assert "Hand-written" not in output(changes)
     notes = "## Notes\n\nHand-written | line.\n"
-    write(changes / "03-requests" / "ORCHESTRATOR-NOTES.md", notes)
+    write(changes / "3-requests" / "ORCHESTRATOR-NOTES.md", notes)
     assert run(changes) == 0
     assert output(changes).endswith("\n" + notes)
 
@@ -179,7 +180,7 @@ def test_alert_is_singular_and_plural(changes: Path) -> None:
 
 
 def test_archived_folder_without_md_still_gets_a_landed_row(changes: Path) -> None:
-    (changes / "04-archives" / "050-empty").mkdir(parents=True)
+    (changes / "4-archives" / "050-empty").mkdir(parents=True)
     assert run(changes) == 0
     assert "| 050 | — | — | — | — |" in output(changes).split("## Landed")[1]
 
@@ -189,13 +190,13 @@ def test_wait_ci_and_landed_icons(changes: Path) -> None:
     cr(changes, "071-done", "Done", header("landed"))
     assert run(changes) == 0
     text = output(changes)
-    assert "[🟡 wait-ci 5 Code 1/3](070-waiting/STATE.md)" in text
-    assert "[✅ landed 5 Code 1/3](071-done/STATE.md)" in text
+    assert "[🟡 wait-ci 5 Code 1/3](070-waiting/STATUS.md)" in text
+    assert "[✅ landed 5 Code 1/3](071-done/STATUS.md)" in text
 
 
 def test_notes_alert_like_line_is_not_ignored(changes: Path) -> None:
     cr(changes, "080-one", "One", header())
-    notes = changes / "03-requests" / "ORCHESTRATOR-NOTES.md"
+    notes = changes / "3-requests" / "ORCHESTRATOR-NOTES.md"
     write(notes, "> Updated 2026-01-01: first.\n")
     assert run(changes) == 0
     write(notes, "> Updated 2026-01-02: second.\n")
@@ -205,7 +206,17 @@ def test_notes_alert_like_line_is_not_ignored(changes: Path) -> None:
 
 def test_non_utf8_state_is_reported_like_unparsable(changes: Path, capsys: pytest.CaptureFixture[str]) -> None:
     folder = cr(changes, "090-binary", "Binary", None)
-    (folder / "STATE.md").write_bytes(b"\xff\xfe\x00bad")
+    (folder / "STATUS.md").write_bytes(b"\xff\xfe\x00bad")
     assert run(changes) == 1
-    assert f"error: {folder / 'STATE.md'}: unparsable STATE.md header (line 1)" in capsys.readouterr().err
-    assert "[⚠️ unparsable header](090-binary/STATE.md)" in output(changes)
+    assert f"error: {folder / 'STATUS.md'}: unparsable STATUS.md header (line 1)" in capsys.readouterr().err
+    assert "[⚠️ unparsable header](090-binary/STATUS.md)" in output(changes)
+
+
+def test_spec_file_prefers_the_new_name_and_falls_back_to_the_old_one(tmp_path: Path) -> None:
+    both = tmp_path / "both"
+    write(both / "00-request.md", "# Old\n")
+    write(both / "03-change-spec.md", "# New\n")
+    legacy = tmp_path / "legacy"
+    write(legacy / "00-request.md", "# Old\n")
+    assert gen.spec_file(both).name == "03-change-spec.md"
+    assert gen.spec_file(legacy).name == "00-request.md"
