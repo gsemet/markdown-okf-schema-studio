@@ -16,6 +16,10 @@ page and click any block to edit its source. It renders [CommonMark](https://com
 > [!TIP]
 > **Version 1.0.0 is out.** See what's new in the [release notes](https://github.com/gsemet/markdown-okf-schema-studio/releases/tag/v1.0.0).
 
+**One-minute demo**
+
+https://github.com/user-attachments/assets/770e80d6-4530-4704-b588-e940ba189330
+
 **Example of complex Markdown rendering**
 
 [![A long Cream page in Auto width: figure, tables, a wide table breaking out of the column, a chart and a diagram](images/readme/release-showcase.png)](images/readme/release-showcase.png)
