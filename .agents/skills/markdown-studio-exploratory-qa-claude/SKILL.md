@@ -1,11 +1,11 @@
 ---
 name: markdown-studio-exploratory-qa-claude
-description: This skill should be used when asked to run, resume, or re-validate an exploratory QA campaign on the Markdown OKF-Schema Studio VS Code extension in a real VS Code window (real mouse and keyboard through CDP), and to write one bug sheet per finding under .agents/changes/03-requests/. A Foreman picks charters from a coverage map and the PRs merged since the last campaign, hands groups of charters to QA Driver sub-agents, and each Driver runs charter agents that drive their own window with scenario files and automatic checks. It ships the driver, scenario engine, no-op sweep, a read-only spy extension, synthetic fixtures, a use-case catalogue, and the harness pitfalls learned in previous campaigns.
+description: This skill should be used when asked to run, resume, or re-validate an exploratory QA campaign on the Markdown OKF-Schema Studio VS Code extension in a real VS Code window (real mouse and keyboard through CDP), and to write one bug sheet per finding under .agents/changes/3-requests/. A Foreman picks charters from a coverage map and the PRs merged since the last campaign, hands groups of charters to QA Driver sub-agents, and each Driver runs charter agents that drive their own window with scenario files and automatic checks. It ships the driver, scenario engine, no-op sweep, a read-only spy extension, synthetic fixtures, a use-case catalogue, and the harness pitfalls learned in previous campaigns.
 compatibility: macOS with Visual Studio Code installed at /Applications, fnm with Node 24, the extension's node_modules (playwright-core), rsync, git, sips.
 metadata:
   owner: "Gaetan Semet <gaetan.semet@ampere.cars>"
   keywords: [markdown, okf, studio, vscode, exploratory, qa, ux, cdp]
-  previous-campaigns: [".agents/changes/04-archives/001-deep-UX-analysis/", ".agents/changes/04-archives/210-qa-campaign-2026-10-31/", ".agents/changes/04-archives/215-qa-campaign-2026-10-31/"]
+  previous-campaigns: [".agents/changes/4-archives/001-deep-UX-analysis/", ".agents/changes/4-archives/210-qa-campaign-2026-10-31/", ".agents/changes/4-archives/215-qa-campaign-2026-10-31/"]
 ---
 
 # Markdown Studio Exploratory QA (Claude)
@@ -211,7 +211,7 @@ and never drives a window except the smoke check.
 Write the index and the sheets as described in
 [qa-bug-template.md](references/qa-bug-template.md) (the owner reads them in the Studio).
 
-Under `.agents/changes/03-requests/<campaign-folder>/` (for a follow-up, a new folder or a `part-N/`
+Under `.agents/changes/3-requests/<campaign-folder>/` (for a follow-up, a new folder or a `part-N/`
 subfolder linked from the previous index):
 
 - `00-index.md`: date, revision, status (`partial`/`completed`), summary, findings table sorted by

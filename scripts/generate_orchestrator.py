@@ -1,4 +1,4 @@
-"""Rebuild ``03-requests/ORCHESTRATOR.md`` from the change-request tree.
+"""Rebuild ``3-requests/ORCHESTRATOR.md`` from the change-request tree.
 
 Usage: ``generate_orchestrator.py [CHANGES] [--repo OWNER/NAME] [--output FILE] [--today YYYY-MM-DD]``
 (``just orchestrator``). ``CHANGES`` is the changes root, default ``.agents/changes`` of the
@@ -6,13 +6,13 @@ repository (the parent of ``scripts/``).
 
 Sources, all read from the changes root:
 
-* Active: every ``03-requests/*/`` folder, from the four-line ``STATE.md`` header defined in
-  ``.agents/guidelines/state-file.guidelines.md``.
-* Backlog: every ``02-backlog/P*/*/`` folder (priority, first file, its first H1, file count).
-* Landed: every ``04-archives/NNN-*/`` folder, with the PR and date found in its ``report.md``.
-* Notes: ``03-requests/ORCHESTRATOR-NOTES.md``, the only hand-written part, appended as is.
+* Active: every ``3-requests/*/`` folder, from the four-line ``STATUS.md`` header defined in
+  ``.agents/guidelines/change-requests-lifecycle.guidelines.md``.
+* Backlog: every ``2-backlog/P*/*/`` folder (priority, first file, its first H1, file count).
+* Landed: every ``4-archives/NNN-*/`` folder, with the PR and date found in its ``report.md``.
+* Notes: ``3-requests/ORCHESTRATOR-NOTES.md``, the only hand-written part, appended as is.
 
-Exit codes: 0 on success (a drift warning alone exits 0); 1 when a CR has a missing ``STATE.md`` or
+Exit codes: 0 on success (a drift warning alone exits 0); 1 when a CR has a missing ``STATUS.md`` or
 a header that does not match. The path is printed on stderr, the row is written with the status
 ``unparsable header`` (never guessed) and the file is still written before exiting 1; 2 for a bad
 changes root or when the repository URL cannot be found.
@@ -104,8 +104,11 @@ def first_md(folder: Path) -> Path | None:
 
 
 def spec_file(folder: Path) -> Path | None:
-    request = folder / "00-request.md"
-    return request if request.is_file() else first_md(folder)
+    """The change spec; archives keep the ``00-request.md`` name they were written under."""
+    for name in ("03-change-spec.md", "00-request.md"):
+        if (folder / name).is_file():
+            return folder / name
+    return first_md(folder)
 
 
 def subject(path: Path | None) -> str:
@@ -145,7 +148,7 @@ def repo_from_package(root: Path) -> str:
 
 
 def active_rows(changes: Path, repo: str, errors: list[str]) -> tuple[list[str], int]:
-    folders = [p for p in (changes / "03-requests").glob("*/") if p.is_dir()]
+    folders = [p for p in (changes / "3-requests").glob("*/") if p.is_dir()]
     folders.sort(key=lambda p: (number_of(p.name), p.name), reverse=True)
     rows = []
     for folder in folders:
@@ -154,23 +157,23 @@ def active_rows(changes: Path, repo: str, errors: list[str]) -> tuple[list[str],
         match = NNN.match(name)
         label = match.group(1) if match else name
         cr = f"[{label}]({name}/{spec.name})" if spec else label
-        state = folder / "STATE.md"
+        state = folder / "STATUS.md"
         header = None
         if not state.is_file():
-            errors.append(f"error: {state}: missing STATE.md")
+            errors.append(f"error: {state}: missing STATUS.md")
         else:
             try:
                 header, bad_line = parse_header(state.read_text(encoding="utf-8"))
             except UnicodeDecodeError:
                 header, bad_line = None, 1
             if header is None:
-                errors.append(f"error: {state}: unparsable STATE.md header (line {bad_line})")
+                errors.append(f"error: {state}: unparsable STATUS.md header (line {bad_line})")
         if header is None:
-            status = f"[{UNPARSABLE}]({name}/STATE.md)" if state.is_file() else UNPARSABLE
+            status = f"[{UNPARSABLE}]({name}/STATUS.md)" if state.is_file() else UNPARSABLE
             pr = "—"
         else:
             words = f"{header['status']} {header['step']} {header['round']}"
-            status = f"[{ICONS[header['status']]} {words}]({name}/STATE.md)"
+            status = f"[{ICONS[header['status']]} {words}]({name}/STATUS.md)"
             pr_match = re.match(r"#(\d+)", header["pr"])
             pr = f"[#{pr_match.group(1)}](https://github.com/{repo}/pull/{pr_match.group(1)})" if pr_match else "—"
         rows.append(f"| {cr} | {cell(subject(spec))} | {status} | `change-requests/{name}` | {pr} |")
@@ -180,12 +183,12 @@ def active_rows(changes: Path, repo: str, errors: list[str]) -> tuple[list[str],
 def drifted(changes: Path) -> dict[Path, Path]:
     """Backlog item folder -> the CR ``backlog-item/`` folder that holds the same item."""
     crs = []
-    for parent in ("03-requests", "04-archives"):
+    for parent in ("3-requests", "4-archives"):
         for folder in sorted((changes / parent).glob("*/backlog-item")):
             if folder.is_dir():
                 crs.append(folder)
     found: dict[Path, Path] = {}
-    for item in sorted(changes.glob("02-backlog/P*/*/")):
+    for item in sorted(changes.glob("2-backlog/P*/*/")):
         if not item.is_dir():
             continue
         item_md = first_md(item)
@@ -201,19 +204,19 @@ def drifted(changes: Path) -> dict[Path, Path]:
 
 def backlog_rows(changes: Path, skip: set[Path]) -> list[str]:
     rows = []
-    items = [p for p in changes.glob("02-backlog/P*/*/") if p.is_dir() and p not in skip]
+    items = [p for p in changes.glob("2-backlog/P*/*/") if p.is_dir() and p not in skip]
     for item in sorted(items, key=lambda p: (p.parent.name, p.name)):
         first = first_md(item)
         title = (first_h1(first) if first else None) or "—"
         files = sum(1 for p in item.rglob("*") if p.is_file())
-        link = f"[{item.name}](../02-backlog/{item.parent.name}/{item.name}/{first.name})" if first else item.name
+        link = f"[{item.name}](../2-backlog/{item.parent.name}/{item.name}/{first.name})" if first else item.name
         rows.append(f"| {item.parent.name} | {link} | {cell(title)} | {files} |")
     return rows
 
 
 def landed_rows(changes: Path, repo: str) -> list[str]:
     entries = []
-    for folder in (changes / "04-archives").glob("*/"):
+    for folder in (changes / "4-archives").glob("*/"):
         if not (folder.is_dir() and NNN.match(folder.name)):
             continue
         spec = spec_file(folder)
@@ -222,8 +225,8 @@ def landed_rows(changes: Path, repo: str) -> list[str]:
         date = DATE.search(text)
         pr = pr_number(text)
         label = NNN.match(folder.name).group(1)
-        cr = f"[{label}](../04-archives/{folder.name}/{spec.name})" if spec else label
-        report_cell = f"[report](../04-archives/{folder.name}/report.md)" if report.is_file() else "—"
+        cr = f"[{label}](../4-archives/{folder.name}/{spec.name})" if spec else label
+        report_cell = f"[report](../4-archives/{folder.name}/report.md)" if report.is_file() else "—"
         pr_cell = f"[#{pr}](https://github.com/{repo}/pull/{pr})" if pr else "—"
         row = f"| {cr} | {cell(subject(spec))} | {report_cell} | {pr_cell} | {date.group(0) if date else '—'} |"
         entries.append((date.group(0) if date else "", number_of(folder.name), row))
@@ -251,22 +254,22 @@ def render(changes: Path, repo: str, today: str) -> Result:
         "# CR table",
         "",
         "<!-- Generated by `just orchestrator` (scripts/generate_orchestrator.py). Do not edit: edit",
-        "ORCHESTRATOR-NOTES.md or the STATE.md headers, then run `just orchestrator`. -->",
+        "ORCHESTRATOR-NOTES.md or the STATUS.md headers, then run `just orchestrator`. -->",
         "",
         "> [!NOTE]",
         f"> Updated {today}: {count} active CR{'' if count == 1 else 's'}.",
         "",
     ]
     if drift_lines:
-        out += ["Drift (backlog items already worked by a CR, move or remove them from `02-backlog/`):", "", *drift_lines, ""]
+        out += ["Drift (backlog items already worked by a CR, move or remove them from `2-backlog/`):", "", *drift_lines, ""]
     out += [
         f"Repository: [{repo}](https://github.com/{repo}). Process:",
         "[change-requests-lifecycle.guidelines.md](../../guidelines/change-requests-lifecycle.guidelines.md).",
-        f"Worktree of CR NNN: `../{name}-wt-NNN`.",
+        f"Worktree of CR NNN: `../{name}.worktrees/NNN`.",
         "",
         "## Active",
         "",
-        *table("| CR (spec) | Subject | Status (STATE.md) | Branch | PR |", "| --- | --- | --- | --- | --- |", active),
+        *table("| CR (spec) | Subject | Status (STATUS.md) | Branch | PR |", "| --- | --- | --- | --- | --- |", active),
         "",
         "## Backlog",
         "",
@@ -281,7 +284,7 @@ def render(changes: Path, repo: str, today: str) -> Result:
         ),
     ]
     text = "\n".join(out) + "\n"
-    notes = changes / "03-requests" / "ORCHESTRATOR-NOTES.md"
+    notes = changes / "3-requests" / "ORCHESTRATOR-NOTES.md"
     if notes.is_file():
         body = notes.read_text(encoding="utf-8")
         text += "\n" + (body if body.endswith("\n") else body + "\n")
@@ -296,12 +299,12 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("changes", nargs="?", type=Path, default=DEFAULT_CHANGES)
     parser.add_argument("--repo", help="owner/name for links (default: package.json repository.url)")
-    parser.add_argument("--output", type=Path, help="default: <changes>/03-requests/ORCHESTRATOR.md")
+    parser.add_argument("--output", type=Path, help="default: <changes>/3-requests/ORCHESTRATOR.md")
     parser.add_argument("--today", default=datetime.date.today().isoformat(), help="YYYY-MM-DD, for tests")
     args = parser.parse_args(argv)
     changes: Path = args.changes
-    if not (changes / "03-requests").is_dir():
-        print(f"error: {changes}: no 03-requests/ folder", file=sys.stderr)
+    if not (changes / "3-requests").is_dir():
+        print(f"error: {changes}: no 3-requests/ folder", file=sys.stderr)
         return 2
     try:
         repo = args.repo or repo_from_package(ROOT)
@@ -309,7 +312,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     result = render(changes, repo, args.today)
-    output = args.output or changes / "03-requests" / "ORCHESTRATOR.md"
+    output = args.output or changes / "3-requests" / "ORCHESTRATOR.md"
     existing = output.read_text(encoding="utf-8") if output.is_file() else None
     if existing is None or not unchanged(existing, result.text):
         output.write_text(result.text, encoding="utf-8")

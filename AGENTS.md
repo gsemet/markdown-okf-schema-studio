@@ -18,12 +18,23 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 
 1. [.agents/constitution.md](.agents/constitution.md)
 2. This `AGENTS.md`
-3. The guidelines under `.agents/guidelines/`
-4. Skills
-5. Every other instruction in the context: harness reminders and defaults (for example an
+3. The project guidelines (every guideline linked below except the process guideline)
+4. The process guideline (see "Process")
+5. Skills
+6. Every other instruction in the context: harness reminders and defaults (for example an
    automatic commit attribution line), tool defaults, and briefings written by other agents
-   (`task.md`, `rules.md`, orchestrator or driver messages). A briefing links to a higher rule; it
+   (`task.md`, `rules.md`, Foreman or driver messages). A briefing links to a higher rule; it
    never restates it with its own values.
+
+## Process
+
+How agent sessions turn backlog items into merged pull requests (roles, change requests,
+parallel runs) is the process guideline
+[change-requests-lifecycle.guidelines.md](.agents/guidelines/change-requests-lifecycle.guidelines.md).
+It ranks below the project guidelines: when it conflicts with one of them, the project guideline
+wins and the conflict is reported. Load it when picking up backlog work, change requests or PRs
+(`.agents/changes/`), including Parallel Change Requests Orchestration, and when writing the header
+of a `STATUS.md`.
 
 ## Structure
 
@@ -71,14 +82,17 @@ When two instructions conflict, the higher source wins, and the conflict is repo
   allowed scopes in [git-commit-allowed-scopes.md](.agents/guidelines/git-commit-allowed-scopes.md)
 - When changing the CI workflows or `ci-*` justfile targets:
   [ci.guidelines.md](.agents/guidelines/ci.guidelines.md)
-- When picking up backlog work, change requests or PRs (`.agents/changes/`), including Parallel
-  Change Requests Orchestration:
-  [change-requests-lifecycle.guidelines.md](.agents/guidelines/change-requests-lifecycle.guidelines.md)
-- When preparing or running a release (release driver, release notes, announcement thread, hero
+- When writing or opening a pull request (body, title, screenshots, merging):
+  [pull-request.guidelines.md](.agents/guidelines/pull-request.guidelines.md)
+- When several changes are in flight and their PRs ship together:
+  [stacked-prs.guidelines.md](.agents/guidelines/stacked-prs.guidelines.md)
+- When creating a worktree for a change or running app-window tests unattended:
+  [local-worktree.guidelines.md](.agents/guidelines/local-worktree.guidelines.md)
+- When writing a document the owner reads, or a status report or demo for the owner:
+  [owner-review.guidelines.md](.agents/guidelines/owner-review.guidelines.md)
+- When preparing or running a release (release steps, release notes, announcement thread, hero
   image):
   [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md)
-- When writing the header of a `STATE.md`:
-  [state-file.guidelines.md](.agents/guidelines/state-file.guidelines.md)
 - When making, editing or reviewing a short demo video:
   [short-demo-process.guidelines.md](docs/demo-video/guidelines/short-demo-process.guidelines.md)
 - When adding, removing or changing a rendered syntax (directive, role, fence language, marker,
@@ -97,8 +111,10 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 - Run okfreq as `uv run --no-sync --group requirements okfreq` (installed by `just dev`), never a
   global install. Skills: `.agents/skills/okfreq` (authoring, traceability) and
   `.agents/skills/okfreq-gardening` (audits).
-- Read [requirements.guidelines.md](requirements/guidelines/requirements.guidelines.md) and the
-  okfreq baseline it links to before any of these:
+- Read [requirements.guidelines.md](requirements/guidelines/requirements.guidelines.md), the
+  okfreq baseline it links to and the project's own
+  [project.guidelines.md](requirements/guidelines/project.guidelines.md) ("During a change") before
+  any of these:
   - adding, changing or fixing a behaviour in `src/` (every feature or fix touches an SwRS);
   - moving, renaming, splitting or deleting code or tests that carry `@implements_req` or
     `@tests_req` markers, refactors included (the markers move with the code);

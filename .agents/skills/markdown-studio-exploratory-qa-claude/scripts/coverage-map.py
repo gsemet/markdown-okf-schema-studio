@@ -5,7 +5,7 @@ Prints (1) what the automated suites already exercise, so charters skip it, and 
 files changed since the last campaign, mapped to use-case areas (references/use-cases.md).
 
 Baseline revision, in order: --since REV; the revision recorded in the index of --campaign DIR; the
-newest archived QA campaign under <changes-root>/04-archives/*qa-campaign*/. The index records it as
+newest archived QA campaign under <changes-root>/4-archives/*qa-campaign*/. The index records it as
 a line `Revision: `<sha>`` or as the prose "at commit `<sha>`" (campaign 210 form). A sha that is not
 an ancestor of HEAD is reported and skipped.
 
@@ -95,8 +95,8 @@ def campaign_indexes(campaign):
 
 
 def newest_archived_campaign(root):
-    """Newest <root>/04-archives/*qa-campaign*/ by the date in its name, else by name."""
-    found = [p.parent for p in Path(root).glob("04-archives/*qa-campaign*/00-index.md")]
+    """Newest <root>/4-archives/*qa-campaign*/ by the date in its name, else by name."""
+    found = [p.parent for p in Path(root).glob("4-archives/*qa-campaign*/00-index.md")]
     return max(found, key=lambda p: (re.findall(r"\d{4}-\d{2}-\d{2}", p.name) or [""])[-1] + p.name, default=None)
 
 
@@ -107,8 +107,8 @@ def resolve_campaign(campaign=None):
     root = changes_root()
     newest = newest_archived_campaign(root)
     if newest:
-        return newest, f"newest archived QA campaign under {root}/04-archives"
-    legacy = root / "04-archives/001-deep-UX-analysis"
+        return newest, f"newest archived QA campaign under {root}/4-archives"
+    legacy = root / "4-archives/001-deep-UX-analysis"
     if legacy.exists():
         return legacy, f"legacy default under {root}"
     return None, f"no campaign found (changes root {root}; set QA_CHANGES_ROOT or pass --campaign)"

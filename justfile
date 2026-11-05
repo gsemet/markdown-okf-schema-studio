@@ -161,9 +161,9 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_generate_orchestrator.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py
+    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_generate_orchestrator.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py
 
-# Rebuild .agents/changes/03-requests/ORCHESTRATOR.md from the STATE.md headers, the backlog and the archives.
+# Rebuild .agents/changes/3-requests/ORCHESTRATOR.md from the STATUS.md headers, the backlog and the archives.
 orchestrator CHANGES=".agents/changes":
     uv run --no-sync python scripts/generate_orchestrator.py "{{ CHANGES }}"
 
