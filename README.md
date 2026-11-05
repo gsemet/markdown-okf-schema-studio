@@ -16,6 +16,9 @@ page and click any block to edit its source. It renders [CommonMark](https://com
 > [!TIP]
 > **Version 1.0.0 is out.** See what's new in the [release notes](https://github.com/gsemet/markdown-okf-schema-studio/releases/tag/v1.0.0).
 
+> [!NOTE]
+> You can follow [my X account](https://x.com/gsemetfr) where I mainly talk about Agentic Development.
+
 **One-minute demo**
 
 https://github.com/user-attachments/assets/770e80d6-4530-4704-b588-e940ba189330
