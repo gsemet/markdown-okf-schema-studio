@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.4.0 - 2026-11-05
+
 - Tables are easier to read: the heading and the even rows have a soft tint, and the row under the
   pointer is highlighted. The colours follow the theme.
 - A preview opened right after another one closed keeps the focus: an editor just opened in it no
