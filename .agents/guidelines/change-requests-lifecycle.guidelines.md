@@ -21,6 +21,11 @@ guideline holds. Project specifics (gates, commit format, install restrictions) 
   `.agents/changes/2-backlog/<P1|P2|P3|P4>/<slug>/` holding the intent (`01-intent.md`, plus any
   analysis and `02-answers.md` with user decisions). P1 = do first, P4 = someday. The Backlog
   table of the generated `3-requests/ORCHESTRATOR.md` lists them.
+- **Chief of Staff**: the session the user talks to (not the Chantier tool). It keeps the backlog,
+  grills, records decisions, opens the CRs and supervises the Foreman.
+- **Foreman**: the nested session the Chief of Staff starts to run the drivers and land the CRs.
+- **Heartbeat**: the Foreman's periodic wake-up (a `/loop` every 270 seconds while a driver is
+  live) to check the drivers and the merged PRs; see "Foreman session and its loop".
 - **Change request (CR)**: one unit of delivered work. One CR = one branch = one PR with green CI,
   shipping code, tests (unit + e2e), documentation and screenshots for any visible change.
 - **PRD folder**: the working folder of a CR in progress, `.agents/changes/3-requests/NNN-<slug>/`.
@@ -68,8 +73,8 @@ Unless specified by user through your context otherwise, here are the default ro
 | Foreman | 1, in a nested session | Sonnet 5.5 | Sonnet 5.5 (copilot) | runs long commands, codes, reviews, commits, merges PRs |
 | Release driver | 1 per release | Sonnet | Sonnet 5.5 (copilot) | codes, reviews, asks the owner between the notes review and the publication (except a real blocker) |
 | CR driver | 1 per CR | Sonnet | Sonnet 5.5 (copilot)  | codes, reviews, touches another CR |
-| Stack driver | 1 per stack | Sonnet | Sonnet 5.5 (copilot) | codes, reviews, merges, enables auto-merge |
-| Conflict resolver | 1 per rebase | Sonnet | Sonnet 5.5 (copilot) | pushes, lives past its rebase |
+| Stack driver | 1 per stack | as the CR driver | as the CR driver | merges, enables auto-merge |
+| Conflict resolver | as needed | — | — | pushes |
 | Coder | 1 per round | Sonnet | GPT 5.6 Luna (copilot) | commits, pushes, lives past its round |
 | Inspector | 1 per round | Sonnet | GPT 6.1 Sol (copilot) | edits files, lives past its round |
 
@@ -103,7 +108,8 @@ it. At most 3 rounds per CR, all causes together. After round 3 without green CI
 (written in `03-change-spec.md`, for example "rounds: 5").
 
 **Rebase rule**: when any PR merges, rebase every open CR branch on `origin/main` and push with
-`--force-with-lease`. This is the only allowed history rewrite. No merge commits.
+`--force-with-lease`. This is the only allowed history rewrite. No merge commits. In stack mode the
+Foreman messages the stack driver, which restacks and pushes (see "Stack mode").
 
 ### `STATUS.md` header
 
@@ -148,7 +154,8 @@ is `3-requests/ORCHESTRATOR-NOTES.md`, appended as is.
 
 ## Parallel Change Requests Orchestration
 
-Use it when the user asks for several CRs at once. Open PRs never exceed the user's cap
+A single CR runs the same tree: the Foreman and one CR driver. Use the rest of this section when the
+user asks for several CRs at once. Open PRs never exceed the user's cap
 (default 4), every PR of a stack counted; further CRs wait locally until a PR merges. Several CRs
 at once always ship as a stack (see [stacked-prs.guidelines.md](stacked-prs.guidelines.md)).
 
@@ -158,7 +165,7 @@ them. A Chief of Staff that runs in a worktree anyway writes those files, and on
 short shell scripts, and so does the Foreman sharing its folder.
 
 ```text
-Chief of Staff ── user interface: grill, decisions, merges; supervises the Foreman session
+Chief of Staff ── user interface: grill, decisions (the user merges); supervises the Foreman
  └─ Foreman (nested session) ── one driver per CR, in parallel; /loop heartbeat every
     270 s while a driver is live; landing
      ├─ CR driver A ── coder r1 → Inspector r1 → coder r2 … (max 3) → commit → PR → CI watch
@@ -277,8 +284,8 @@ Drivers stay background sub-agents of the Foreman.
 
 ### Planning a release
 
-When the Chief of Staff gives a release to the Foreman (starting one if none is running), it keeps the version commit away from
-development. It brings the stack of the release to `main` the usual way, then asks the Chief of
+When the Chief of Staff gives a release to the Foreman (starting one if none is running), the
+Foreman keeps the version commit away from development. It brings the stack of the release to `main` the usual way, then asks the Chief of
 Staff to hold every other merge, and starts the release driver as a background driver of the run.
 It does not start a driver for a new CR until the release is published. The steps are in
 [release-process.guidelines.md](release-process.guidelines.md).
@@ -291,11 +298,11 @@ thread, and reads the result. The steps (notes, thread, heavy run on `main`, ver
 publishing, archive) are in [release-process.guidelines.md](release-process.guidelines.md); this
 section covers the role.
 
-- **Owns** the release CR folder `.agents/changes/3-requests/NNN-release-x-y-z/` and its
-  `STATUS.md` header. It is the one writer of that header from the notes draft to the archive, and
-  `driver:` is its lock, like for a CR driver. The folder is named with the next free CR number and
-  holds a `03-change-spec.md`: the owner's request, the scope (the CRs and PRs in the release), the
-  decisions.
+- **Opens and owns** the release CR folder `.agents/changes/3-requests/NNN-release-x-y-z/`: it
+  creates the folder, its `03-change-spec.md` (the owner's request, the scope (the CRs and PRs in
+  the release), the decisions) and the `STATUS.md` header. The folder is named with the next free CR
+  number. It is the one writer of that header from the notes draft to the archive, and `driver:` is
+  its lock, like for a CR driver.
 - **Merges** only what the release guideline allows: the fix PRs of the release, on the owner's
   standing permission for release work. It never enables auto-merge and never touches a PR outside
   the release.
@@ -329,7 +336,8 @@ section covers the role.
 1. First heartbeat, within 5 minutes of starting: for each CR in the table, read the header; start a
    driver (background) where `driver: none` and the status is not ready, blocked or landed.
 2. Every heartbeat: check merged PRs. On a merge: step 11 for that CR, then message each live driver to
-   rebase; for a ready CR without a live driver, start one for "rebase, push, watch CI".
+   rebase (in stack mode, the stack driver); for a ready CR without a live driver, start one for
+   "rebase, push, watch CI".
 3. Check every driver against the supervision rules and the round limit.
 4. Run `just orchestrator` to rebuild the CR tables from the headers.
 5. Schedule the next heartbeat while a driver is live. When every CR is ready, blocked or landed, stop
@@ -411,7 +419,7 @@ The rules of the stack itself (order, restacking, no auto-merge) are in
 - No installs, no network unless `AGENTS.md` allows it.
 - Run only the gates `task.md` lists, in the foreground; leave nothing running.
 - Documents read by the owner follow the writing skill (see
-  [owner-review.guidelines.md](owner-review.guidelines.md)); working files stay plain GFM.
+  `.agents/guidelines/owner-review.guidelines.md`); working files stay plain GFM.
 - Touch only the files the task needs. Never change an existing assertion's intent. New tests must
   fail on the unchanged code.
 - A behaviour change follows `requirements/guidelines/project.guidelines.md` ("During a change"):

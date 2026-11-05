@@ -5,12 +5,13 @@ habits that keep an unattended session working.
 
 ## One worktree per change
 
-One worktree per change, dependencies symlinked, never staged:
+One worktree per change, dependencies symlinked, never staged (`<id>` is the change number and `<slug>`
+its short name):
 
 ```bash
-git worktree add -b change-requests/NNN-<slug> ../<repo>.worktrees/NNN origin/main --no-track
-ln -s "$PWD/node_modules" ../<repo>.worktrees/NNN/node_modules
-(cd ../<repo>.worktrees/NNN && uv sync --group requirements)
+git worktree add -b change-requests/<id>-<slug> ../<repo>.worktrees/<id> origin/main --no-track
+ln -s "$PWD/node_modules" ../<repo>.worktrees/<id>/node_modules
+(cd ../<repo>.worktrees/<id> && uv sync --group requirements)
 ```
 
 The `uv sync` gives the worktree its own Python environment from the lock file, so

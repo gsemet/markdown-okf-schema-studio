@@ -78,5 +78,6 @@ Details: [writing-skill-maintenance.guideline.md](guidelines/writing-skill-maint
 - The process that runs the work (who does what, in which order) is a layer of its own and ranks
   below every rule of this constitution, of `AGENTS.md` and of the project guidelines. When the
   process and a project rule conflict, the project rule wins and the conflict is reported.
-- Project rules stay valid whatever process runs the work: they name no process role and link to no
-  process document.
+- Project rules stay valid whatever process runs the work: the project guidelines name no process
+  role and link to no process document. Only `AGENTS.md` links the process guideline, in its
+  "Process" section.
