@@ -44,6 +44,7 @@ images/logo-proposals/**
 pyproject.toml
 docs/*.md
 docs/demo-video/**
+docs/releases-notes/**
 plugin.json
 .claude-plugin/**
 .agents/plugins/**

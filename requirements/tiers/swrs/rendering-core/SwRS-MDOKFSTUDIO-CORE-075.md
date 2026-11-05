@@ -38,7 +38,7 @@ When a release version is set, the version script SHALL write the same version t
 
 - GIVEN a repository whose `package.json`, `package-lock.json`, `plugin.json`, `.claude-plugin/plugin.json` and the plugin entry of `.github/plugin/marketplace.json` hold the same version and have no uncommitted edit
 - WHEN `scripts/version.py` sets or computes the next version
-- THEN the five files hold the new version and one signed-off commit `chore: version X.Y.Z` contains exactly those five files, without a tag
+- THEN the five files hold the new version with LF line endings, on Windows too, and one signed-off commit `chore: version X.Y.Z` contains exactly those five files, without a tag
 
 ### Scenario (boundary): Drift and dirty manifests
 

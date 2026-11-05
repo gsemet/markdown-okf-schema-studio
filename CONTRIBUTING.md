@@ -26,7 +26,7 @@ libraries, through `just dev-ci visual`, from cached Ubuntu package archives; on
 ### Windows
 
 `just check` and `just ci-static` run on Windows; the visual and real VS Code stages run on Linux
-and macOS only. The recipes need a POSIX shell: install Git for Windows and put `sh`, `bash` and
+and macOS only, so `just preflight` runs the static stage there and leaves the others to CI. The recipes need a POSIX shell: install Git for Windows and put `sh`, `bash` and
 `cygpath` on `PATH` (its `usr\bin` folder, or one shim per tool with Scoop), plus `node` (for
 example `fnm default 24` and `fnm env` in your PowerShell profile). The justfile calls `npm.cmd`
 through `fnm` on Windows. Python 3.12 comes from `.python-version`: the next interpreter may lack
@@ -508,9 +508,9 @@ manually.
 Releases start with a committed version change, not a manually created tag.
 The extension version lives in `package.json`; `package-lock.json` must match it.
 The Python project's version is tooling metadata and is not the extension release version.
-The release notes, the announcement thread and the hero image are prepared in a release change
-request before the version pull request merges: see
-[release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md), which also
+The release notes, the announcement thread and their images are committed in the version pull
+request, under `docs/releases-notes/YYYY-MM-DD-vX.Y.Z/`, and `just check` fails without valid notes:
+see [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md), which also
 gives the order of a release, planned by the Foreman and run by the release driver. Make the version commit (step 3) only
 after a green heavy run of `main` HEAD (step 1).
 
@@ -602,10 +602,9 @@ after a green heavy run of `main` HEAD (step 1).
 
 6. CI calls **Release VSIX** explicitly with that tag. A tag pushed by `GITHUB_TOKEN`
 	does not trigger another push workflow, so this call is required. The release job
-	verifies the tag, manifest, and default-branch ancestry, generates user-facing notes
-	from the previous reachable release's Git diff through `gh copilot`, packages the
-	extension, publishes to Marketplace, and attaches the VSIX and notes to a GitHub release.
-	A first release uses all history. Note generation must succeed before publication.
+	verifies the tag, manifest, and default-branch ancestry, prepares the reviewed notes of the
+	tag, packages the extension, publishes to Marketplace, and attaches the VSIX, the notes and
+	their images to a GitHub release. The notes must be valid before publication.
 	CI also calls **Deploy GitHub Pages** with the tag: it builds the site from the
 	end-to-end reports of that same run (its heavy jobs are green) instead of running the
 	suite again. A later manual Pages dispatch of the tag finds that run as well
@@ -651,11 +650,8 @@ Create a GitHub environment named `release`, allowing releases from the default 
 and `v*` tags. Configure these secrets in that environment or at repository level:
 
 - `VSCE_PAT`: a Marketplace publisher token authorized for `GaetanSemet`.
-- `COPILOT_GITHUB_TOKEN`: a GitHub token with Copilot access for `gh copilot`.
-  The workflow's normal `GITHUB_TOKEN` is used for tags and GitHub releases, not Copilot.
 
-The runner must provide `gh` with Copilot CLI support for `gh copilot --`.
-GitHub-hosted Ubuntu runners supply `gh`; authentication uses the Copilot secret above.
+The workflow's normal `GITHUB_TOKEN` is used for tags and GitHub releases.
 Repository rules must permit the CI token to create version tags. Environment approval
 rules, when configured, pause publication after tagging. All committed dependency settings
 and GitHub jobs use public PyPI and npm registries; corporate proxy and CA settings belong
@@ -668,18 +664,11 @@ If tagging succeeded but publication failed, rerun the failed release job or dis
 to retry. Marketplace publication skips an already published version, allowing a retry
 to finish the GitHub release. Manual pushes of valid `vX.Y.Z` tags also run this workflow.
 
-To generate notes without publishing the extension, dispatch **Generate release notes
-(manual)** from the default branch with an existing tag reachable from that branch.
-It uploads the validated Markdown and creates a draft GitHub release, refusing to overwrite
-an existing release. A later **Release VSIX** run publishes that draft with the VSIX.
+A tag older than 1.4.0 has no notes folder: dispatch **Release VSIX** with `notes: placeholder`,
+then replace the notes by hand.
 
-Local generation uses the same diff-grounded generator:
+To check the notes of the current version locally:
 
 ```bash
-just release-notes v0.1.0 v0.1.1
-uv run python scripts/release_notes.py --validate release-notes.md
+just release-notes-check
 ```
-
-Set `COPILOT_GITHUB_TOKEN` locally before generation. `release-notes.md` contains only
-validated final-answer Markdown, not Copilot progress or tool output. The generator retries
-invalid output up to three times and fails closed rather than substituting invented notes.
