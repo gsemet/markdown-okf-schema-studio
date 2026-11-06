@@ -363,6 +363,18 @@ export function installCommentThreads(
     return found;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-216
+  // Where a quote sits in a text node. The quote has its whitespace collapsed, the node keeps the line
+  // breaks of a wrapped source paragraph: a whitespace run of the quote matches any run of the node.
+  const locate = (value: string, variant: string, from: number): { index: number; length: number } | undefined => {
+    const words = variant.split(/\s+/u).filter((word) => word !== "");
+    const source = words.map((word) => word.replace(/[\\^$.*+?()[\]{}|]/gu, "\\$&")).join("\\s+");
+    const pattern = new RegExp(source, "gu");
+    pattern.lastIndex = from;
+    const match = words.length > 0 ? pattern.exec(value) : null;
+    return match ? { index: match.index, length: match[0].length } : undefined;
+  };
+
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-017
   const attach = (thread: PageCommentThread): boolean => {
     const quote = thread.anchor.quote;
@@ -398,11 +410,11 @@ export function installCommentThreads(
       for (const node of nodes) {
         const value = node.nodeValue ?? "";
         for (const variant of variants) {
-          let from = value.indexOf(variant);
-          if (from < 0) continue;
-          while (from >= 0) {
+          let found = locate(value, variant, 0);
+          if (!found) continue;
+          while (found) {
             total += 1;
-            from = value.indexOf(variant, from + variant.length);
+            found = locate(value, variant, found.index + found.length);
           }
           break;
         }
@@ -412,15 +424,16 @@ export function installCommentThreads(
     for (const node of nodes) {
       const value = node.nodeValue ?? "";
       for (const variant of variants) {
-        const index = value.indexOf(variant);
-        if (index < 0) continue;
+        const found = locate(value, variant, 0);
+        if (!found) continue;
+        const { index, length } = found;
         const parent = node.parentNode;
         if (!parent) continue;
         const mark = document.createElement("mark");
         mark.setAttribute(MARK, thread.id);
         if (thread.resolved) mark.setAttribute("data-okf-comment-resolved", "true");
         paintFocus(mark);
-        mark.textContent = value.slice(index, index + variant.length);
+        mark.textContent = value.slice(index, index + length);
         if (index === 0) {
           // No empty text node before the mark: clear() then restores the original structure.
           parent.replaceChild(mark, node);
@@ -429,7 +442,7 @@ export function installCommentThreads(
           parent.insertBefore(mark, node.nextSibling);
         }
         addedMarks.push(mark);
-        const rest = value.slice(index + variant.length);
+        const rest = value.slice(index + length);
         if (rest !== "") parent.insertBefore(document.createTextNode(rest), mark.nextSibling);
         return true;
       }

@@ -54,6 +54,14 @@
 - Flush: promotion and demotion of a preview with an open page editor flush it first (TRUST-001, LIFE-143; tests "granting trust flushes the open page editor before the preview is replaced" and "removing the folder of a preview flushes its open page editor before the preview is replaced" in test/host/lifeReq.requirements.test.ts).
 - Verification: ran locally: `just requirements-update` and `just requirements-lint` (exit 0), `tsc --noEmit`, and the unit tests pasteImageWrite, blockReq.requirements and inlineThread. Not run locally: `just check`, the render-based unit tests (host/lifeReq.requirements, including the two flush tests, and the other write-path suites: they time out on the first render in this worktree), integration, e2e and visual tests.
 
+### Comments on a long document (CR 266)
+
+- SwRS-MDOKFSTUDIO-REVIEW-216 (proposed, new): a quote over a line break of the source is highlighted.
+  The page matches any run of whitespace of a text node with a space of the quote, so a paragraph, list
+  item or cell wrapped over several lines of the source (as in the repository README) is highlighted
+  instead of getting a badge. The length of the document was not the cause.
+- Verification: test/page/modules/commentThreadsLongDocument.test.ts.
+
 ## 2026-11-05
 
 ### Reviewed release notes
