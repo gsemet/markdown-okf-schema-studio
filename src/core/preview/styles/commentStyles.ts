@@ -436,6 +436,8 @@ button[data-okf-comment-create]:hover {
   z-index: 51;
   box-sizing: border-box;
   width: min(320px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
   padding: 8px 10px;
   border: 1px solid var(--studio-editorWidget-border, var(--studio-focusBorder, #454545));
   border-radius: 0;
@@ -499,8 +501,19 @@ button[data-okf-comment-create]:hover {
   flex: 1 1 100%;
 }
 
+/* "Discard / Keep editing" under a changed draft: it replaces window.confirm, which a webview lacks. */
+[data-okf-comment-compose] [data-okf-comment-discard],
+[data-okf-comment-popover] [data-okf-comment-discard] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
 [data-okf-comment-compose] button,
-[data-okf-comment-popover] [data-okf-comment-reply] button {
+[data-okf-comment-popover] [data-okf-comment-reply] button,
+[data-okf-comment-popover] [data-okf-comment-discard] button {
   padding: 2px 10px;
   border: 1px solid var(--studio-button-border, transparent);
   border-radius: 3px;

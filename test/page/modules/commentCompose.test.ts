@@ -191,8 +191,9 @@ test("T43: Cmd/Ctrl+C and Shift+click are not intercepted", () => {
   assert.deepEqual([click.prevented, click.stopped], [0, 0]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218
 test("T43: Escape cancels the box, Cmd/Ctrl+Enter saves, an empty body posts nothing", () => {
-  const { document, select, button, click, box, posted } = setup();
+  const { document, select, button, click, box, posted, compose } = setup();
   const p = document.add("p", { "data-line": "2" }, document.content, "some selectable text");
   select([textOf(p), 5], [textOf(p), 15], "selectable");
   click(button()!);
@@ -214,6 +215,9 @@ test("T43: Escape cancels the box, Cmd/Ctrl+Enter saves, an empty body posts not
   document.fire("keydown", { target: second, key: "Enter", metaKey: true });
   assert.equal(posted.length, 1);
   assert.equal(posted[0].fields.body, "Ship it");
+  // CR 265: Escape acts on an open box wherever the focus is, so "left alone" holds once it is closed.
+  compose.result({ kind: "create", ok: true });
+  assert.equal(box(), null);
   assert.equal(document.fire("keydown", { target: p, key: "Escape" }).stopped, 0, "Escape elsewhere is left alone");
 });
 

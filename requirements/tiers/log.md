@@ -62,6 +62,21 @@
   instead of getting a badge. The length of the document was not the cause.
 - Verification: test/page/modules/commentThreadsLongDocument.test.ts.
 
+### Comment editor position, scroll and dismissal (CR 265)
+
+- SwRS-MDOKFSTUDIO-REVIEW-217 (proposed, new): the new comment box and the thread popover with its
+  reply box sit entirely inside the window (above their text near the bottom) and follow their text
+  on scroll, even out of view.
+- SwRS-MDOKFSTUDIO-REVIEW-218 (proposed, new): Escape, wherever the focus is, and a press outside
+  close the editor, or ask Discard or Keep editing inside it when its text is not blank; no
+  `window.confirm`.
+- SwRS-MDOKFSTUDIO-REVIEW-044 and SwRS-MDOKFSTUDIO-REVIEW-021 (proposed, updated): the Escape and
+  click rows point to the two new requirements; the vertical position of the popover is no longer
+  unspecified.
+- Decisions: Escape while the question shows means Keep editing; Cancel in the box closes without a
+  question; a press on a highlight with a changed reply draft asks instead of switching.
+- Verification: test/page/modules/commentEditorBehaviour.test.ts. No window test ran.
+
 ## 2026-11-05
 
 ### Reviewed release notes

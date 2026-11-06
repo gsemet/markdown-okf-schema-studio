@@ -62,7 +62,8 @@ When the comment box opens, the page shows a dialog named New comment holding th
 
 | Input | Outcome |
 | --- | --- |
-| An open box with typed text and the reader presses Escape | The box closes and nothing is sent |
+| An open box with no text and the reader presses Escape, wherever the focus is | The box closes and nothing is sent |
+| An open box with typed text and the reader presses Escape | The box asks Discard or Keep editing and nothing is sent (SwRS-MDOKFSTUDIO-REVIEW-218) |
 | An open box and the reader presses Cancel | The box closes, nothing is sent, and the selection state is looked at again |
 
 ### Scenario (boundary): Keys typed in the box stay in the box
@@ -113,10 +114,12 @@ When a create or reply message passes the protocol with a body that is blank or 
 - SwRS-MDOKFSTUDIO-REVIEW-049: the anchor that the create message carries.
 - SwRS-MDOKFSTUDIO-REVIEW-054: the host writes the comment and refuses it with the reasons shown here.
 - SwRS-MDOKFSTUDIO-REVIEW-069: the accepted shape of the create message.
+- SwRS-MDOKFSTUDIO-REVIEW-217: where the box sits and how it follows its text.
+- SwRS-MDOKFSTUDIO-REVIEW-218: Escape and a press outside, and the Discard question.
 
 ### Verification notes
 
-- Method: test/page/modules/commentCompose.test.ts, unit tests `T43: typing in the box is not seen by other key handlers, and the box text is data` (Box content, Keys typed in the box stay in the box), `T43: Escape cancels the box, Cmd/Ctrl+Enter saves, an empty body posts nothing` (Save or Cmd/Ctrl+Enter sends the comment, Empty or blank text is not sent, Escape or Cancel closes the box), `T43 r2: results of other kinds, or without a pending save, are ignored` (A saved comment closes the box), `T43 r2: a refused save keeps the box and the text, shows the reason as text and allows a retry` (A refused comment; the default text is not asserted), `T43 r2: no answer in time keeps the text, says so, and a late ok still closes the box` (No answer from the host).
+- Method: test/page/modules/commentCompose.test.ts, unit tests `T43: typing in the box is not seen by other key handlers, and the box text is data` (Box content, Keys typed in the box stay in the box), `T43: Escape cancels the box, Cmd/Ctrl+Enter saves, an empty body posts nothing` (Save or Cmd/Ctrl+Enter sends the comment, Empty or blank text is not sent, Escape on a blank box closes it), `T43 r2: results of other kinds, or without a pending save, are ignored` (A saved comment closes the box), `T43 r2: a refused save keeps the box and the text, shows the reason as text and allows a retry` (A refused comment; the default text is not asserted), `T43 r2: no answer in time keeps the text, says so, and a late ok still closes the box` (No answer from the host).
 - Method: real window review-annotations/r04-thread-created (Box content, Save sends the comment, A saved comment closes the box).
 - Method: test/core/comments/commentEditing.test.ts, unit test `T43: normalizeBody trims and enforces 1 to 10000 characters` (the trimming and length rule of The host answers a blank or invalid comment as empty); the handler answers themselves are untested.
 - Criteria: The dialog holds a textarea with maxlength 10000 and two buttons; the quote is set with textContent. Exactly one create message is posted per save and the post hook is not called for a trimmed empty body. stopImmediatePropagation is called for keydown inside the box only. The result handler returns true and closes only for a create answer while a save is pending. The error line has role alert and holds the reason cut at 500 characters. The no-answer message appears after ANSWER_TIMEOUT_MS = 15000 and a late answer closes the box. The placeholder and the length limit are not asserted. normalizeBody returns undefined for a blank body and the host answers with the reason, without a warning.

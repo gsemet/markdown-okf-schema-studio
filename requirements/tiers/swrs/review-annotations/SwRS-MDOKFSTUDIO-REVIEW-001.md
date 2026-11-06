@@ -22,7 +22,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/comments/commentModel.ts
-- src/page/modules/commentThreads.ts
+- src/page/modules/commentThreadData.ts
 tested_in_files:
 - test/core/comments/commentModel.test.ts
 - test/integration/reviewComments.test.ts
