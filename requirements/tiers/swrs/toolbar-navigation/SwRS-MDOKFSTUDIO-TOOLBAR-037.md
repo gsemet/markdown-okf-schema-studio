@@ -28,6 +28,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/modules/tocColumn.test.ts
+- test/page/modules/toolbarCollapse.test.ts
 - test/visual/capture_toc_checks.py
 - test/visual/capture_toc_rail.py
 default_owner_email: gaetan@xeberon.net
@@ -44,6 +45,7 @@ When the column is open, the extension SHALL place it eight pixels below the too
 | --- | --- |
 | An open column and a toolbar whose bottom edge is at 92 px | Its top variable (--sphinx-preview-toc-top) is 100 px, which is the toolbar bottom plus 8 px |
 | The window is resized | The column is placed again below the toolbar |
+| The toolbar is expanded or collapsed, even with quick clicks | The column is placed again below the toolbar when the animation of the rows ends |
 | A toolbar bounds value that is not finite | The top is 8 px |
 
 ### Scenario (nominal): Wide pane
@@ -85,6 +87,8 @@ When the column is open, the extension SHALL place it eight pixels below the too
 
 ### Verification notes
 - Method: test/page/modules/tocColumn.test.ts (Top edge follows the toolbar: the column starts 8 px below the toolbar).
+- Method: test/page/modules/toolbarCollapse.test.ts (the layout is measured after the animation in both directions, once for quick clicks).
+- Method: test/visual/capture_toc_checks.py (check_toc_follows_toolbar: four clicks on the chevron, in a real browser, with the column on a wide pane and the rail on a narrow one).
 - Method: test/page/modules/tocColumn.test.ts (the rail ticks and the current tick; hover and focus open the overlay and the 300 ms close; Escape; a click on a tick; an entry click and the toggle close the overlay).
 - Method: test/core/preview/previewStyles.test.ts (a narrow pane shows a rail and opens the column as an overlay: the max-width 759 px block, the fixed rail, the overlay attribute, no animation).
 - Method: test/core/preview/previewStyles.test.ts (Wide pane and Pane width: the TOC column is hidden by default, reserves 256px when open and hides on narrow panes; the 760 px media block, 256 px, position fixed, inset-block-end 16px, width 240px, display none under 760 px). The exact 760 px boundary and the widening of the pane are untested.

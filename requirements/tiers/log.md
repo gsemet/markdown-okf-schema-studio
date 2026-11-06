@@ -77,6 +77,14 @@
   question; a press on a highlight with a changed reply draft asks instead of switching.
 - Verification: test/page/modules/commentEditorBehaviour.test.ts. No window test ran.
 
+### The TOC follows the toolbar
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-037 (proposed, updated): the column is placed again when the animation of
+  the toolbar rows ends. It kept the position of the previous state, above or far under the toolbar.
+- SwRS-MDOKFSTUDIO-TOOLBAR-130 (proposed, updated): the layout is measured again when the animating
+  mark goes, also after the load hint, instead of on a transition end event that never came.
+- Verification: test/page/modules/toolbarCollapse.test.ts and test/visual/capture_toc_checks.py.
+
 ## 2026-11-05
 
 ### Reviewed release notes

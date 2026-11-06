@@ -42,7 +42,7 @@ When the reader expands or collapses the toolbar, the extension SHALL unroll or 
 - GIVEN a preview with the toolbar
 - WHEN the reader presses the chevron
 - THEN rows 2 to 5 get the animating mark before the hidden attribute changes, unroll (from zero height, fading in) or roll up (height and opacity to zero) together over 160 ms, and lose the mark at the end
-- AND the layout is measured again when the animation ends
+- AND the layout is measured again when the mark goes, 200 ms after the last change, also after the load hint
 
 ### Scenario (nominal): Load hint
 | Input | Outcome |

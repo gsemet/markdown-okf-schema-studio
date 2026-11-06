@@ -20,7 +20,8 @@ const HINT_STATE_KEY = "viewToolbarHintShown";
  * posted to the host (kept per workspace) and mirrored on `<html>` as
  * `data-sphinx-preview-toolbar-state` ("expanded" / "collapsed"). Without a stored choice the toolbar
  * starts collapsed, like `DEFAULT_VIEW_PREFERENCES`. `onChange` runs after a click, when
- * the toolbar changed size, and again when the unroll or roll-up animation of the rows ends.
+ * the toolbar changed size, and again when the animating mark goes: the first run still measures
+ * the size before the animation, and neither a transition nor a keyframe end event is reliable here.
  *
  * The rows unroll and roll up as one block (the stylesheet animates `height` and `opacity` of the
  * rows; `hidden` still decides the Tab order). Load hint: when the toolbar is collapsed, a panel
@@ -60,9 +61,6 @@ export function installToolbarCollapse(
   };
 
   apply();
-  rows?.addEventListener("transitionend", (event) => {
-    if (event.target === rows && (event as TransitionEvent).propertyName === "height") onChange();
-  });
 
   const reduced = (): boolean => {
     try {
@@ -84,6 +82,7 @@ export function installToolbarCollapse(
     animatingTimer = window.setTimeout(() => {
       animatingTimer = undefined;
       rows.removeAttribute(ANIMATING);
+      onChange();
     }, ANIMATION_MS);
   };
 
