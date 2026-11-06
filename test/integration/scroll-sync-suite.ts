@@ -464,7 +464,7 @@ async function runScrollSyncSuite(): Promise<void> {
       "vscode.openWith", document.uri, "markdown-okf-schema-studio.editor", vscode.ViewColumn.One,
     );
     await waitFor("the custom editor render", () => getActivePreviewForTests()?.phase === "ready");
-    assert.equal(getActivePreviewForTests()?.readOnly, false, "the fixture must support inline edits");
+    assert.equal(getActivePreviewForTests()?.restrictedReads, false, "the fixture must support inline edits");
     let frame = await previewFrame(page);
     let anchorButton = frame.locator("[data-sphinx-preview-anchor]");
     let editButton = frame.locator("[data-sphinx-preview-edit-toggle]");

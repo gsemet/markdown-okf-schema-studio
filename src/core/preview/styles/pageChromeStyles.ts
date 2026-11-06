@@ -454,19 +454,6 @@ html[data-sphinx-preview-toolbar-state="collapsed"]:not([data-sphinx-preview-too
   cursor: not-allowed;
 }
 
-/* A button that stays focusable but unavailable (the Edit button of a read-only preview). */
-[data-sphinx-preview-toolbar] button[aria-disabled="true"] {
-  cursor: not-allowed;
-}
-
-[data-sphinx-preview-toolbar] button[aria-disabled="true"]:hover {
-  background: transparent;
-}
-
-[data-sphinx-preview-toolbar] button[aria-disabled="true"] > svg {
-  opacity: 0.5;
-}
-
 [data-sphinx-preview-toolbar] button:disabled > svg {
   opacity: 0.5;
 }

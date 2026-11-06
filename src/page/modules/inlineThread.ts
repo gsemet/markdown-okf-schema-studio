@@ -1,5 +1,5 @@
 export interface InlineThreadDeps {
-  /** True when the document may be edited (a trusted workspace); otherwise threads are read-only. */
+  /** True when the thread controls are offered; otherwise threads are shown without controls. */
   enabled: boolean;
   /** True while a block or frontmatter editor is open: a reply would race its save. */
   blockedReason(): string | undefined;

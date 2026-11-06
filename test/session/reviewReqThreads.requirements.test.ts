@@ -6,11 +6,10 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { applyTextEdits } from "../../src/core/edits/textEdit";
 import { SourceEditController } from "../../src/session/features/sourceEdits";
-import { READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
 
 const TEXT = ["# Title", "", "<!-- THREAD", "Ada (2026-10-16 10:47):", "  hello", "-->", "", "After.", ""].join("\n");
-const TRUSTED_REFUSAL = READ_ONLY_NO_FOLDER;
 
 interface Setup {
   readonly handlers: Map<string, (message: any, preview: any) => PromiseLike<void> | undefined>;
@@ -23,10 +22,11 @@ interface Setup {
   holdAuthor(): () => void;
 }
 
-function setup(options: { readOnly?: boolean; editOpen?: boolean } = {}): Setup {
+function setup(options: { restrictedReads?: boolean; editOpen?: boolean; readOnly?: boolean } = {}): Setup {
   const applied: unknown[][] = [];
   const results: Array<Record<string, unknown>> = [];
   let reads = 0;
+  let text = TEXT;
   let release: (() => void) | undefined;
   let authorGate: Promise<void> | undefined;
   const document: any = {
@@ -36,19 +36,24 @@ function setup(options: { readOnly?: boolean; editOpen?: boolean } = {}): Setup 
     eol: "\n",
     getText: () => {
       reads += 1;
-      return TEXT;
+      return text;
     },
   };
   const host = {
     settings: { section: () => ({ get: (_key: string, fallback: unknown) => fallback }) },
     vcs: { userName: async () => { await authorGate; return "Ada"; } },
-    documents: { applyEdits: async (_document: unknown, edits: unknown[]) => { applied.push(edits); return true; } },
+    documents: { applyEdits: async (_document: unknown, edits: any[]) => {
+      applied.push(edits);
+      // A read-only file: VS Code accepts the edit and changes nothing.
+      if (!options.readOnly) text = applyTextEdits(text, edits);
+      return true;
+    } },
   };
   const manager: any = { host, edits: { trackPendingSave: (_preview: unknown, value: unknown) => value } };
   const handlers = new Map<string, (message: any, preview: any) => PromiseLike<void> | undefined>();
   new SourceEditController(manager).register({ on: (type: string, handler: any) => { handlers.set(type, handler); } } as never);
   const preview: any = {
-    readOnly: options.readOnly === true,
+    restrictedReads: options.restrictedReads === true,
     edits: { active: options.editOpen === true },
     document,
     documentUri: document.id,
@@ -73,16 +78,16 @@ const request = (extra: Record<string, unknown> = {}) => ({
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("a reply or a delete from a read-only preview is refused and changes nothing", async () => {
-  const refused = setup({ readOnly: true });
-  await refused.handlers.get("previewThreadReply")!(request({ text: "hi" }), refused.preview);
-  await refused.handlers.get("previewThreadDelete")!(request(), refused.preview);
-  assert.deepEqual(refused.results.map((result) => [result.type, result.ok, result.reason]), [
-    ["previewThreadReplyResult", false, TRUSTED_REFUSAL],
-    ["previewThreadDeleteResult", false, TRUSTED_REFUSAL],
+test("a reply or a delete from a restricted-reads preview is applied like any other", async () => {
+  const restricted = setup({ restrictedReads: true });
+  const afterReply = setup({ restrictedReads: true });
+  await restricted.handlers.get("previewThreadReply")!(request({ text: "hi" }), restricted.preview);
+  await afterReply.handlers.get("previewThreadDelete")!(request(), afterReply.preview);
+  assert.deepEqual([...restricted.results, ...afterReply.results].map((result) => [result.type, result.ok]), [
+    ["previewThreadReplyResult", true],
+    ["previewThreadDeleteResult", true],
   ]);
-  assert.deepEqual(refused.applied, [], "the document is unchanged");
-  assert.equal(refused.readText(), 0, "answered before the document is read");
+  assert.equal(restricted.applied.length + afterReply.applied.length, 2, "Restricted Mode or a standalone file never makes the document read-only");
 
   const writable = setup();
   await writable.handlers.get("previewThreadReply")!(request({ text: "hi" }), writable.preview);
@@ -122,12 +127,11 @@ test("find and replace edits the matched spans in one undo step and answers with
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-014
-test("find and replace is refused in a read-only preview, during an open edit and when nothing maps", async () => {
-  const refused = setup({ readOnly: true });
-  await refused.handlers.get("previewFindReplace")!(request({ items: [findItem()] }), refused.preview);
-  assert.deepEqual(refused.results.map((result) => [result.ok, result.reason]), [[false, TRUSTED_REFUSAL]]);
-  assert.deepEqual(refused.applied, []);
-  assert.equal(refused.readText(), 0, "answered before the document is read");
+test("find and replace applies in a restricted-reads preview, is refused during an open edit and when nothing maps", async () => {
+  const restricted = setup({ restrictedReads: true });
+  await restricted.handlers.get("previewFindReplace")!(request({ items: [findItem()] }), restricted.preview);
+  assert.deepEqual(restricted.results.map((result) => [result.ok, result.replaced]), [[true, 1]]);
+  assert.equal(restricted.applied.length, 1);
 
   const open = setup({ editOpen: true });
   await open.handlers.get("previewFindReplace")!(request({ items: [findItem()] }), open.preview);
@@ -158,10 +162,10 @@ test("a find and replace dry run answers the counts of the plan and never edits 
   assert.deepEqual(none.results.map((result) => [result.ok, result.replaced, result.skipped]), [[true, 0, 2]],
     "when nothing maps, every match is announced as skipped");
 
-  const refused = setup({ readOnly: true });
-  await refused.handlers.get("previewFindReplace")!(request({ dryRun: true, items: [findItem()] }), refused.preview);
-  assert.deepEqual(refused.results.map((result) => [result.ok, result.reason]), [[false, TRUSTED_REFUSAL]]);
-  assert.deepEqual(refused.applied, []);
+  const restricted = setup({ restrictedReads: true });
+  await restricted.handlers.get("previewFindReplace")!(request({ dryRun: true, items: [findItem()] }), restricted.preview);
+  assert.deepEqual(restricted.results.map((result) => [result.ok, result.replaced]), [[true, 1]]);
+  assert.deepEqual(restricted.applied, []);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065
@@ -199,4 +203,19 @@ test("a document that changes while the author is resolved gets the changed-mean
   await quick.handlers.get("previewThreadReply")!(request({ text: "hi" }), quick.preview);
   assert.equal(quick.applied.length, 1, "without an edit in between the reply is applied");
   assert.equal(quick.results[0]!.ok, true);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+test("a reply, a delete and a find replace on a file VS Code holds read-only answer the read-only reason", async () => {
+  for (const restrictedReads of [false, true]) {
+    const readOnly = setup({ readOnly: true, restrictedReads });
+    await readOnly.handlers.get("previewThreadReply")!(request({ text: "hi" }), readOnly.preview);
+    await readOnly.handlers.get("previewThreadDelete")!(request(), readOnly.preview);
+    await readOnly.handlers.get("previewFindReplace")!(request({ items: [findItem()] }), readOnly.preview);
+    assert.deepEqual(readOnly.results.map((result) => [result.type, result.ok, result.reason]), [
+      ["previewThreadReplyResult", false, "This file is read-only in VS Code."],
+      ["previewThreadDeleteResult", false, "This file is read-only in VS Code."],
+      ["previewFindReplaceResult", false, "This file is read-only in VS Code."],
+    ]);
+  }
 });

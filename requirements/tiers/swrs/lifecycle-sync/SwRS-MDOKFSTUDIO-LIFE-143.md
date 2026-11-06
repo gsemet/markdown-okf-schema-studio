@@ -9,7 +9,7 @@ description: When a preview panel is closed, a document is closed, a workspace
   subscriptions and Problems entries of the preview concerned, so that no late
   result reaches the panel, keeping every shared resource that another live
   preview still uses. A preview whose workspace folder is removed keeps its
-  panel and shows its file read-only.
+  panel and shows its file with restricted reads.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -41,7 +41,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a preview panel is closed, a document is closed, a workspace folder is removed or the extension is deactivated, the extension SHALL cancel the render queue and dispose the pending render stages, file watchers, subscriptions and Problems entries of the preview concerned, so that no late result reaches the panel, keeping every shared resource that another live preview still uses. A preview whose workspace folder is removed keeps its panel and shows its file read-only.
+When a preview panel is closed, a document is closed, a workspace folder is removed or the extension is deactivated, the extension SHALL cancel the render queue and dispose the pending render stages, file watchers, subscriptions and Problems entries of the preview concerned, so that no late result reaches the panel, keeping every shared resource that another live preview still uses. A preview whose workspace folder is removed keeps its panel and shows its file with restricted reads.
 
 ### Scenario (nominal): Closed while rendering
 
@@ -69,10 +69,10 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 
 ### Scenario (nominal): Folder removed
 
-- GIVEN a writable preview of a file in a workspace folder (in the Agents window, the folder of the active agent session, which a session switch removes)
+- GIVEN a preview with full reads of a file in a workspace folder (in the Agents window, the folder of the active agent session, which a session switch removes)
 - WHEN the folder is removed from the workspace
-- THEN the preview's session, with its render queue, watchers and Problems entries, is disposed; the same panel stays open and shows the file in a new read-only session (resource root = the directory of the file, no session roots) that keeps the reading state; the folder's files still exist
-- AND when a folder that holds the file is added later, the preview becomes writable again on the same panel (see SwRS-MDOKFSTUDIO-TRUST-001)
+- THEN the preview's session, with its render queue, watchers and Problems entries, is disposed; the same panel stays open and shows the file in a new session with restricted reads (resource root = the directory of the file, no session roots) that keeps the reading state; the folder's files still exist
+- AND when a folder that holds the file is added later, the preview gets full reads again on the same panel (see SwRS-MDOKFSTUDIO-TRUST-001)
 
 ### Scenario (nominal): Deactivation
 
@@ -89,6 +89,7 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 | A preview of a file that is in no workspace folder, and a folder is removed | The preview stays open, unchanged |
 | A preview of a file in a removed folder that another workspace folder still holds | The preview moves to a session of that folder, on the same panel |
 | A preview of a removed folder that has no document to show | The preview and its panel are disposed |
+| A preview of a removed folder with an open block, cell or field editor | The page is asked to save and close its editor first (previewFlushEdit), then the session is replaced: the typed text is kept |
 | A session that was already disposed, and it is disposed again without its panel | Nothing happens: the disposal is idempotent |
 
 ### Verification notes
@@ -96,8 +97,8 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 - Method: test/host/previewTiming.test.ts "a preview disposed while its render is debouncing, building or awaiting a patch acknowledgement stays silent" (closed while rendering).
 - Method: test/integration/lifecycle.test.ts (closed idle: the active preview is undefined after disposal).
 - Method: test/host/lifeReq.requirements.test.ts "previews of one root share one file watcher, which closing the last preview removes with its subscriptions" (watchers removed, second preview keeps the shared watcher), test/session/eventFanOut.test.ts (one dependency watcher for several previews of a root, released with the last; linked-target watches shared and released with the last preview), "closing a preview clears the Problems entries that no preview shows" (Problems entries cleared and kept), "deactivating the extension disposes the sessions and leaves the panels to VS Code" (deactivation, disposed twice).
-- Method: test/host/lifeReq.requirements.test.ts "removing the folder of a preview keeps its panel read-only until the folder is added back" (folder removed: same panel, old session and its folder watcher disposed, read-only session rooted at the file's directory with the reading state, writable again when the folder is added back), and test/integration/workspaceDisposal.test.ts in a real VS Code (multi-root only, it asserts at least two folders: the tab stays, the active preview becomes read-only on the same panel). The standalone file row, the row of a file another folder still holds and the row of a preview with no document are deduced from the code (demoteSessionsOf in src/session/previewManager.ts), not tested.
-- Criteria: no post follows disposal and the live set no longer holds the session; the shared dependency watcher is disposed once, when the last preview of its root releases it; sink.delete is called only when no live session has the document; after a folder removal the panel is not disposed, the active preview is read-only on that panel and the source directory exists; disposeAll(false) leaves the panels undisposed.
+- Method: test/host/lifeReq.requirements.test.ts "removing the folder of a preview keeps its panel, with restricted reads, until the folder is added back" (folder removed: same panel, old session and its folder watcher disposed, session with restricted reads rooted at the file's directory with the reading state, full reads again when the folder is added back), and test/integration/workspaceDisposal.test.ts in a real VS Code (multi-root only, it asserts at least two folders: the tab stays, the active preview gets restricted reads on the same panel). "removing the folder of a preview flushes its open page editor before the preview is replaced" asserts the previewFlushEdit request is posted once, while the old session is alive. The standalone file row, the row of a file another folder still holds and the row of a preview with no document are deduced from the code (demoteSessionsOf in src/session/previewManager.ts), not tested.
+- Criteria: no post follows disposal and the live set no longer holds the session; the shared dependency watcher is disposed once, when the last preview of its root releases it; sink.delete is called only when no live session has the document; after a folder removal the panel is not disposed, the active preview has restricted reads on that panel and the source directory exists; disposeAll(false) leaves the panels undisposed.
 
 <!-- okf:links:start -->
 ### Links

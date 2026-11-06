@@ -53,7 +53,7 @@ As a reader, I click a link and land on the right document, line, heading or web
 
 - Targets: a heading, a block id, a line, a label or a slug of a Markdown file; an external address is handed to the system.
 - A wikilink is found by its file name in every workspace folder; an ambiguous name is refused.
-- In a standalone (read-only) preview, the folder of the document replaces the workspace.
+- In a standalone preview (restricted reads), the folder of the document replaces the workspace.
 - Only links that scroll into view are checked, so a long document is not resolved all at once.
 - The hint never changes where the link goes.
 - Hints already known survive an in-place update of the content.
@@ -75,7 +75,7 @@ As a reader, I click a link and land on the right document, line, heading or web
   - [SwRS-MDOKFSTUDIO-TOOLBAR-102](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-102.md): A link fragment selects a source line, block id, label, heading or field
   - [SwRS-MDOKFSTUDIO-TOOLBAR-113](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-113.md): A link message needs a request, else it is ignored or refused
   - [SwRS-MDOKFSTUDIO-TOOLBAR-117](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-117.md): An in-page anchor scrolls the page to its target at the reading line
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
   - [SwRS-MDOKFSTUDIO-TRUST-007](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-007.md): A page loads local files only from its resource roots
   - [SwRS-MDOKFSTUDIO-TRUST-063](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-063.md): A link targets message needs an array of the current render
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type

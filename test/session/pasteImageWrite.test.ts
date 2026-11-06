@@ -27,6 +27,8 @@ interface Harness {
   seenMidWrite: string[];
   paste(): Promise<Record<string, unknown> | undefined>;
   images(): Promise<string[]>;
+  /** The pasted images the session records for a block save that fails (see `edits.pastedImages`). */
+  pastedImages(): readonly string[] | undefined;
 }
 
 /**
@@ -71,7 +73,8 @@ function harness(options: { failWrite?: boolean; beforeWrite?: (files: FileSyste
   new HostRequestController(manager).register(router);
   const posted: Array<Record<string, unknown>> = [];
   const preview = {
-    readOnly: false,
+    restrictedReads: false,
+    edits: {},
     documentUri: "file:///ws/docs/chapter.md",
     document: { id: "file:///ws/docs/chapter.md", path: `${FOLDER}/chapter.md` },
     postToPage: (message: Record<string, unknown>) => {
@@ -84,6 +87,7 @@ function harness(options: { failWrite?: boolean; beforeWrite?: (files: FileSyste
     files: memory,
     seenMidWrite,
     images,
+    pastedImages: () => preview.edits.pastedImages,
     async paste() {
       count += 1;
       const editId = `paste-${count}`;
@@ -118,12 +122,13 @@ test("a failed write leaves no file, empty or partial, and the page gets the rea
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
 test("a file created under the chosen name during the write is kept and the paste takes the next name", async () => {
   const other = new TextEncoder().encode("written by someone else");
-  const { files, paste, images } = harness({
+  const { files, paste, images, pastedImages } = harness({
     beforeWrite: (memory) => memory.writeFile(`${FOLDER}/image.png`, other),
   });
   const result = await paste();
   assert.equal(result?.ok, true, `host answer: ${JSON.stringify(result)}`);
   assert.equal(result?.fileName, "image-1.png");
+  assert.deepEqual(pastedImages(), [path.join(FOLDER, "image-1.png")], "the saved image is recorded for a failed block save");
   assert.deepEqual(await files.readFile(`${FOLDER}/image.png`), other, "the other writer's file is unchanged");
   assert.deepEqual(Buffer.from(await files.readFile(`${FOLDER}/image-1.png`)), PNG);
   assert.deepEqual(await images(), ["image-1.png", "image.png"], "the hidden file of the paste is removed");

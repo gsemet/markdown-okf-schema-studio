@@ -188,8 +188,14 @@ environments),
   highlighted in the preview and open in a popover; select text to start a thread and reply to
   existing ones (see [Review Comments](review-comments.md)).
 
-Checkboxes in task lists, paragraphs, and table cells are editable in place. In an untrusted
-workspace they remain read-only until the workspace is trusted.
+Checkboxes in task lists, paragraphs, and table cells are editable in place. Trust never makes a
+document read-only: in Restricted Mode, and for a file outside every workspace folder, you edit,
+paste images next to the document and comment as usual. Only a file that VS Code itself holds
+read-only (`files.readonlyInclude`) stays read-only. What Restricted Mode narrows is what the
+preview reads: includes and other resources stay in the document's folder, images also come from
+the workspace folder, schema files are not looked up,
+and features that need trust, such as the PlantUML Java engine and the citation list, are
+disabled with their reason.
 
 Radio choice lists let a reader pick one option in the preview. Start two or more consecutive list
 items with `( )`, or `(x)` for the selected one, followed by a space:
@@ -211,7 +217,7 @@ item stays plain text, and a list can mix task items and radio items. A group wi
 renders with nothing selected, and a group with two keeps both until the first click. Nested
 lists form their own groups. In a numbered list (`1. ( )`) each option keeps its number, so a plan
 can refer to "option 2". Radio groups render in every palette mode and follow the same rules
-as checkboxes: read-only in an untrusted workspace, and refused while a block editor is open. On
+as checkboxes: refused while a block editor is open. On
 GitHub and in plain editors the `( )` and `(x)` text stays readable.
 
 An inline block editor that is open in the preview keeps its text and caret while you save the

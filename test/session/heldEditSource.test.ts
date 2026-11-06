@@ -38,7 +38,7 @@ test("CR 188: a held block source reaches the page only when the queue runs, unc
     sessionRoots: [],
     navigationRoots: [],
     workspaceFolder: undefined,
-    readOnly: false,
+    restrictedReads: false,
     webview: {},
     states: {},
     state: undefined,

@@ -95,13 +95,12 @@ When a list holds at least two consecutive items that start with '( )', '(x)' or
 | a click while a choice of the group waits for the host | prevented, no second message |
 | an option without a valid line or column, or a group of fewer than two options | prevented, no message |
 
-### Scenario (refusal): Read-only previews, an open editor and refused choices
+### Scenario (refusal): An open editor and refused choices
 
 The choice takes the path of the checkbox toggle (SwRS-MDOKFSTUDIO-GFM-021): the same message type with the group's options, the same gates (SwRS-MDOKFSTUDIO-TRUST-005, SwRS-MDOKFSTUDIO-TRUST-065, SwRS-MDOKFSTUDIO-BLOCK-041), the same answer and the same refusal note.
 
 | Input | Outcome |
 | --- | --- |
-| a read-only preview | the controls have aria-disabled="true" and the read-only reason as tooltip; a click or key writes nothing |
 | a click while a block or frontmatter editor is open | the guard runs on the press (mousedown, capture phase), before the editor's blur: the press is prevented, so the focus and the caret stay in the editor, nothing is committed and the editor stays open; the click that follows sends no message; the editor status reads 'Save or cancel this edit before choosing an option.' |
 | a choice that reaches the host while a Markdown edit is open | refused with 'Save or cancel the open Markdown edit before choosing an option.' |
 | a group whose lines no longer start with a radio marker at their columns | refused with 'The choice is no longer in the source. Refresh the preview.' |
@@ -113,7 +112,7 @@ The choice takes the path of the checkbox toggle (SwRS-MDOKFSTUDIO-GFM-021): the
 ### Verification notes
 
 - Method: test/core/render/radioGroups.test.ts (rendering, grouping rules, labels, roving tab stop, sanitizer, the list, items and option paragraphs out of the Tab order, also in a mixed list and a nested group); test/security/html-policy.test.ts (a mapped block keeps its tabindex); test/core/edits/radioSelect.test.ts (marker detection and the host edit: two lines, normalisation, no-op, refusals, forged groups).
-- Method: test/page/runtimeRadioGroups.test.ts (page clicks, keys, guards, the press guard with an open editor, the focus kept after the content patch and not taken without a focused option, refusal note, palette modes); test/session/radioChoice.test.ts (one apply per choice, host refusals, a forged two-group choice, message validation, read-only gate, an apply that changes nothing on a read-only file).
+- Method: test/page/runtimeRadioGroups.test.ts (page clicks, keys, guards, the press guard with an open editor, the focus kept after the content patch and not taken without a focused option, refusal note, palette modes); test/session/radioChoice.test.ts (one apply per choice, host refusals, a forged two-group choice, message validation, a choice of a preview with restricted reads reaches the handler, an apply that changes nothing on a read-only file).
 - Method: test/integration/radioChoice.test.ts (real VS Code window, real mouse and keys through CDP, run by the heavy integration job: click writes two lines, one undo reverts, the selected option writes nothing, one Tab from the label lands on the selected option, the arrows only move the focus, Space and Enter select, the chosen option keeps the focus after the re-render; with a block editor open, a real click on an option reached by a wheel scroll writes nothing and keeps the editor open; on a file in files.readonlyInclude a click is refused, the source's selection comes back and the reason shows). Untested: when no editor shows the document, the host applies the choice through workspace.applyEdit; on a read-only file that call may resolve false, and the page then shows 'VS Code could not apply the checkbox edit.' instead of the read-only reason.
 - Method: the screenshot scenarios gfm/v10-radio-plan-cream-900 and gfm/v11-radio-plan-dark-900 (test/visual/radioPlanScenarios.ts: a plan with a bulleted and an ordered group and a task list; the named groups, the selected options with their drawn dot, one tab stop per group, round controls in place of the bullets while the ordered group keeps its numbers, in both themes); gfm/v12-radio-tab-entry-cream-900 and gfm/v13-radio-tab-entry-dark-900 (a click on the label, then one Tab: the focus, with its ring, is on the selected option).
 - Criteria: at most one character per option changes, in one undo step; no write for the selected option or the arrows; every refusal restores the shown selection and names its reason.
@@ -128,7 +127,7 @@ The choice takes the path of the checkbox toggle (SwRS-MDOKFSTUDIO-GFM-021): the
 - Depends on:
   - [SwRS-MDOKFSTUDIO-GFM-021](SwRS-MDOKFSTUDIO-GFM-021.md): Clicking a checkbox toggles one source character
   - [SwRS-MDOKFSTUDIO-GFM-027](SwRS-MDOKFSTUDIO-GFM-027.md): The host validates checkbox toggle messages
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply

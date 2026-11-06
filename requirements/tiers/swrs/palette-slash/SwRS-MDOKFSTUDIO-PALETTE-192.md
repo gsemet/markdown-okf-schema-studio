@@ -3,12 +3,13 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-PALETTE-192
 uuid: ae85ecc0-bc35-4ec4-8095-8eaaf6accc14
 title: The host image picker answers a path relative to the document
-description: When previewPickImage reaches the host for a trusted, saved
-  document, the extension SHALL open a native dialog in the folder of the
-  document filtered to png, jpg, jpeg, gif, webp and svg with the label Insert
-  image, answer the picked file as a path relative to the document with forward
-  slashes and blanks kept, or cancelled, or refuse a file that is outside every
-  workspace folder, is not a local image or cannot be written in a reference
+description: When previewPickImage reaches the host for a saved document,
+  whatever the trust, the extension SHALL open a native dialog in the folder of
+  the document filtered to png, jpg, jpeg, gif, webp and svg with the label
+  Insert image, answer the picked file as a path relative to the document with
+  forward slashes and blanks kept, or cancelled, or refuse a file that is
+  outside the allowed folders (the workspace folders, or the folder of a
+  standalone document), is not a local image or cannot be written in a reference
   with a reason the page shows, and read or write nothing.
 project: markdown-okf-schema-studio
 scope: palette-slash
@@ -32,6 +33,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/mapping/imageReference.test.ts
 - test/integration/imagePicker.test.ts
+- test/session/paletteReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -39,7 +41,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When previewPickImage reaches the host for a trusted, saved document, the extension SHALL open a native dialog in the folder of the document filtered to png, jpg, jpeg, gif, webp and svg with the label Insert image, answer the picked file as a path relative to the document with forward slashes and blanks kept, or cancelled, or refuse a file that is outside every workspace folder, is not a local image or cannot be written in a reference with a reason the page shows, and read or write nothing.
+When previewPickImage reaches the host for a saved document, whatever the trust, the extension SHALL open a native dialog in the folder of the document filtered to png, jpg, jpeg, gif, webp and svg with the label Insert image, answer the picked file as a path relative to the document with forward slashes and blanks kept, or cancelled, or refuse a file that is outside the allowed folders (the workspace folders, or the folder of a standalone document), is not a local image or cannot be written in a reference with a reason the page shows, and read or write nothing.
 
 ### Scenario (nominal): Picked image
 
@@ -58,9 +60,9 @@ When previewPickImage reaches the host for a trusted, saved document, the extens
 | Input | Outcome |
 | --- | --- |
 | a file outside every workspace folder | the reason reads The image must be inside a workspace folder. |
+| a file outside the folder of the document, for a standalone document that lies in no workspace folder | the reason reads The image must be inside the folder of the document. |
 | a text file, or a file that is not local | the reason reads Pick a png, jpeg, gif, webp or svg image. |
 | a file on another drive, with no relative path, or with a name that holds an angle bracket or a line break | the reason reads That image cannot be referenced from this document (another drive, or an unusual name). |
-| a read-only preview | ok false with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 | a document that is out of date or is not a file | ok false with the reason The preview is out of date, or the document is not a file. |
 | a failed dialog | ok false with the message of the error (a value that is not an Error as its string) |
 
@@ -81,7 +83,7 @@ When previewPickImage reaches the host for a trusted, saved document, the extens
 
 - Method: test/core/mapping/imageReference.test.ts (relativeImageReference gives a POSIX path relative to the document folder; accepts Windows separators and refuses another drive; refuses a path that cannot be written in a reference; isImageFileName accepts png, jpeg, gif, webp and svg only; checks the picked image, refused picks and shape scenarios)
 - Method: test/integration/imagePicker.test.ts (the relative path, the dialog folder and filter, the cancel, that picking edits nothing, and that a file outside the workspace and a non-image are refused; checks the picked image, cancelled and refused picks scenarios)
-- Criteria: The read-only, out-of-date and failed-dialog answers are deduced from the code (handlePickImage), not tested.
+- Criteria: The out-of-date and failed-dialog answers are deduced from the code (handlePickImage), not tested; the standalone-document rows are tested in test/session/paletteReq.requirements.test.ts.
 
 <!-- okf:links:start -->
 ### Links
@@ -93,7 +95,7 @@ When previewPickImage reaches the host for a trusted, saved document, the extens
   - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 <!-- okf:links:end -->

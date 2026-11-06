@@ -431,24 +431,24 @@ export class PreviewManager {
     return replacement;
   }
 
-  /** The user granted trust: see {@link promoteReadOnlySessions}. */
+  /** The user granted trust: see {@link promoteRestrictedSessions}. */
   public refreshTrust(): void {
-    this.promoteReadOnlySessions();
+    this.promoteRestrictedSessions();
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   /**
-   * A read-only preview whose document now lies in a folder of a trusted workspace (trust was
-   * granted, or a folder that holds it was added) moves to a writable session on the same panel
-   * (editing, palette, workspace resource and navigation roots) and renders once, keeping its
-   * reading state. Previews that stay read-only are left alone, and the active preview stays the
+   * A preview with restricted reads whose document now lies in a folder of a trusted workspace (trust was
+   * granted, or a folder that holds it was added) moves to a session with full reads on the same panel
+   * (workspace resource and navigation roots, schema resolution) and renders once, keeping its
+   * reading state. Previews that keep restricted reads are left alone, and the active preview stays the
    * active one.
    */
-  public promoteReadOnlySessions(): void {
+  public promoteRestrictedSessions(): void {
     const { host } = this;
     if (!host.workspace.trusted) return;
     this.replaceEach((session, document) => {
-      if (!session.readOnly) return undefined;
+      if (!session.restrictedReads) return undefined;
       return host.workspace.folderOf(this.pathOf(document));
     });
   }
@@ -456,7 +456,7 @@ export class PreviewManager {
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-143
   /**
    * The workspace folders `removedFolderIds` were removed: each preview of a file in one of them
-   * moves to a new session on the same panel, keeping its reading state: read-only (resource root
+   * moves to a new session on the same panel, keeping its reading state: restricted reads (resource root
    * = the directory of the document, no session roots) unless another folder still holds the file.
    * The old session's render queue, watchers and Problems entries go with it. A preview with no
    * document to show is closed.
@@ -475,25 +475,45 @@ export class PreviewManager {
       : undefined));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-143
   /**
    * Replaces each live session for which `target` returns a workspace folder (or `null` for no
-   * folder) by a new session on the same panel; `undefined` leaves the session alone. The reader's
-   * active preview stays the active one (replacing a preview would make it active).
+   * folder) by a new session on the same panel; `undefined` leaves the session alone. A page with an
+   * open editor first saves and closes it (as before a document switch), so the replacement
+   * loses no typed text. The reader's active preview stays the active one (replacing a preview
+   * would make it active).
    */
   private replaceEach(
     target: (session: PreviewSession, document: HostDocument) => WorkspaceFolderInfo | null | undefined,
   ): void {
-    const active = this.activeSession;
-    let activeAfter = active;
+    // The target is computed again once the flush is done: the flush can change the document or the folders.
+    const replace = (session: PreviewSession): void => {
+      const document = session.document;
+      if (session.disposed || !this.live.has(session) || !document || !isDocumentEligible(document)) return;
+      const workspaceFolder = target(session, document);
+      if (workspaceFolder === undefined) return;
+      const active = this.activeSession;
+      const replacement = this.replaceSession(session, document, workspaceFolder ?? undefined, session.state);
+      if (session === active) this.activeSession = replacement;
+      else if (active && this.live.has(active)) this.activeSession = active;
+    };
     for (const session of [...this.live]) {
       const document = session.document;
       if (session.disposed || !document || !isDocumentEligible(document)) continue;
-      const workspaceFolder = target(session, document);
-      if (workspaceFolder === undefined) continue;
-      const replacement = this.replaceSession(session, document, workspaceFolder ?? undefined, session.state);
-      if (session === active) activeAfter = replacement;
+      if (target(session, document) === undefined) continue;
+      if (!session.edits.lock.pageEditorOpen) {
+        replace(session);
+        continue;
+      }
+      // An open page editor holds typed text the replacement would drop: save and close it first.
+      const panel = session.panel;
+      const chain = (this.switchChains.get(panel) ?? Promise.resolve())
+        .then(() => this.edits.flushPageEdits(session))
+        .catch((error: unknown) => this.host.logger.error("Failed to flush the open editor before the replacement.", error))
+        .then(() => replace(session));
+      this.switchChains.set(panel, chain);
     }
-    if (activeAfter && this.live.has(activeAfter)) this.activeSession = activeAfter;
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-125
@@ -504,11 +524,11 @@ export class PreviewManager {
     }
     const documentPath = this.pathOf(document);
     const workspaceFolder = host.workspace.folderOf(documentPath);
-    const readOnly = workspaceFolder === undefined || !host.workspace.trusted;
-    const resourceRoot = readOnly
+    const restrictedReads = workspaceFolder === undefined || !host.workspace.trusted;
+    const resourceRoot = restrictedReads
       ? path.dirname(path.resolve(documentPath))
       : workspaceFolder.path;
-    if (resourceRoot !== session.workspaceRoot || readOnly !== session.readOnly) {
+    if (resourceRoot !== session.workspaceRoot || restrictedReads !== session.restrictedReads) {
       this.replaceSession(session, document, workspaceFolder);
       return;
     }

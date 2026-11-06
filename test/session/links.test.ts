@@ -72,7 +72,7 @@ test("a frontmatter link finds its marker with the identity of the text it was a
     workspaceRoot: root,
     sessionRoots: [root],
     navigationRoots: [root],
-    readOnly: false,
+    restrictedReads: false,
     frontmatter: {},
     frontmatterConfiguration: { allowOutsideWorkspaceLinks: false },
   } as unknown as PreviewSession;

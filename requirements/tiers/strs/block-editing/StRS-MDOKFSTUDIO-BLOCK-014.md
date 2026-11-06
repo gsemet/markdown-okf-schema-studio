@@ -75,6 +75,6 @@ As a writer, I swap a block or a selected run of blocks with its neighbour with 
   - [SwRS-MDOKFSTUDIO-BLOCK-139](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-139.md): The chord is Cmd+Alt on macOS and Ctrl+Alt elsewhere
   - [SwRS-MDOKFSTUDIO-BLOCK-156](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-156.md): A block selection moves as a whole
   - [SwRS-MDOKFSTUDIO-BLOCK-240](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-240.md): previewBlockMove needs both ranges and a direction
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 <!-- okf:links:end -->

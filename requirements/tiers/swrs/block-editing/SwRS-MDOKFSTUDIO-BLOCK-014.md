@@ -140,7 +140,7 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview offers no editing affordance
+- SwRS-MDOKFSTUDIO-TRUST-001: every preview offers its editing affordances
 - SwRS-MDOKFSTUDIO-BLOCK-041: one edit at a time
 - SwRS-MDOKFSTUDIO-TRUST-059: the page accepts only host messages addressed to its render
 - SwRS-MDOKFSTUDIO-BLOCK-237: the accepted shape of previewEditOpen
@@ -173,7 +173,7 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
   - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
 <!-- okf:links:end -->

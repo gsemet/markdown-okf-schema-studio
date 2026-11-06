@@ -85,7 +85,7 @@ async function runStandaloneSuite(): Promise<void> {
 
     const standaloneSidePreview = getActivePreviewForTests();
     assert.ok(standaloneSidePreview);
-    assert.equal(standaloneSidePreview.readOnly, true);
+    assert.equal(standaloneSidePreview.restrictedReads, true);
     assert.equal(standaloneSidePreview.outputDirectory, directory);
 
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri;
@@ -97,7 +97,7 @@ async function runStandaloneSuite(): Promise<void> {
     await waitForDocument(workspaceDocument.uri.toString());
     const trustedSidePreview = getActivePreviewForTests();
     assert.ok(trustedSidePreview);
-    assert.equal(trustedSidePreview.readOnly, false);
+    assert.equal(trustedSidePreview.restrictedReads, false);
     assert.ok(
       trustedSidePreview.localResourceRoots.some((root) => root.fsPath === workspaceRoot.fsPath),
       "the workspace document should restore the workspace resource root",
@@ -107,7 +107,7 @@ async function runStandaloneSuite(): Promise<void> {
     await waitForDocument(document.uri.toString());
     const restoredStandalonePreview = getActivePreviewForTests();
     assert.ok(restoredStandalonePreview);
-    assert.equal(restoredStandalonePreview.readOnly, true);
+    assert.equal(restoredStandalonePreview.restrictedReads, true);
     assert.equal(restoredStandalonePreview.outputDirectory, directory);
 
     disposeActivePreviewForTests();
@@ -116,28 +116,34 @@ async function runStandaloneSuite(): Promise<void> {
 
     const preview = getActivePreviewForTests();
     assert.ok(preview);
-    assert.equal(preview.readOnly, true);
+    assert.equal(preview.restrictedReads, true);
     assert.equal(preview.outputDirectory, directory);
     assert.match(preview.html, /Standalone document/u);
     assert.match(preview.html, /data-okf-schema-found="false"/u);
     assert.doesNotMatch(preview.html, /data-okf-enums=/u);
-    assert.match(preview.html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"/u);
+    assert.match(preview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+    assert.doesNotMatch(preview.html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled/u,
+      "a standalone file stays editable");
     assert.ok(
       preview.localResourceRoots.some((root) => root.fsPath === directory),
       "the standalone document directory should be the local resource root",
     );
 
+    // The frontmatter of a standalone file is saved like any other (the document is the file the user opened).
     sendPreviewMessageForTests({
       type: "previewFrontmatterSave",
       documentId: preview.documentUri,
       revision: preview.documentVersion,
       requestId: preview.requestId,
-      editId: "standalone-edit-attempt",
+      editId: "standalone-edit",
       fieldName: "status",
       fieldValue: "active",
     });
-    await new Promise<void>((resolve) => setTimeout(resolve, 100));
-    assert.equal(document.getText(), source);
+    const deadline = Date.now() + 10_000;
+    while (document.getText() === source && Date.now() < deadline) {
+      await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    }
+    assert.match(document.getText(), /status: active/u);
   } finally {
     disposeActivePreviewForTests();
     fs.rmSync(directory, { recursive: true, force: true });

@@ -108,7 +108,6 @@ async function buildPage(text: string, version: number, requestId: number): Prom
     frontmatter.present ? { result: frontmatter, tableEnabled: true } : undefined,
     undefined,
     true,
-    true,
     [],
     "builtin",
   );

@@ -30,7 +30,7 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { RenamedFile } from "../hostEvents";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { previewReadOnlyReason, revisionOfStage } from "../sessionDocuments";
+import { revisionOfStage } from "../sessionDocuments";
 import { fireAndForget } from "../../host-api/logger";
 
 /** Comment threads of one page (owned by the comments controller). */
@@ -260,7 +260,7 @@ export class CommentsController {
     if (document.path === undefined) return;
     const documentIdentity = document.id;
     const previews = [...this.manager.sessions()].filter((preview) =>
-      !preview.disposed && !preview.readOnly && preview.documentUri === documentIdentity);
+      !preview.disposed && preview.documentUri === documentIdentity);
     if (previews.length === 0) return;
     const documentPath = document.path;
     const sidecar = sidecarOf(documentPath);
@@ -413,8 +413,8 @@ export class CommentsController {
   }
 
   /**
-   * Writes a review comment (T43): a new thread on a selection or a reply. Refused in a read-only
-   * preview (untrusted workspace or no folder), for a document that is not a saved file, and while
+   * Writes a review comment (T43): a new thread on a selection or a reply, in the sidecar next to
+   * the document (Restricted Mode and a standalone file included). Refused for a document that is not a saved file, and while
    * the comments file has unsaved changes in an editor. The author, the ids and the time are chosen
    * here; the page sends only the anchor, the thread id of a reply and the text. The sidecar is
    * changed through the per-file queue (read latest, apply, serialize, write), then posted to the
@@ -430,7 +430,6 @@ export class CommentsController {
       fireAndForget(host.logger, host.ui.showWarning(`The comment was not saved: ${reason}`), "showWarning");
       return { ok: false, reason };
     };
-    if (preview.readOnly) return refuse(previewReadOnlyReason(preview));
     const stage = preview.stage;
     if (preview.disposed || !stage || !preview.documentUri.startsWith("file:")) {
       return refuse("save the document first.");

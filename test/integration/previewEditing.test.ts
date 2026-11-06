@@ -491,7 +491,7 @@ export async function run(): Promise<void> {
     });
     const schemaPreview = getActivePreviewForTests();
     assert.ok(schemaPreview);
-    assert.equal(schemaPreview.readOnly, false);
+    assert.equal(schemaPreview.restrictedReads, false);
     assert.match(schemaPreview.html, /data-okf-field="status"/u);
     assert.match(schemaPreview.html, /data-okf-field="metadata"/u);
     assert.match(schemaPreview.html, /data-okf-field="related"[^]*?okf-frontmatter-link/u);

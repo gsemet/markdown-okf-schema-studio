@@ -3,10 +3,10 @@ type: StRS
 id: StRS-MDOKFSTUDIO-BLOCK-001
 uuid: 7224caa2-5c79-4b5c-ac7d-077856f7b9d9
 title: A writer switches edit mode and finds it as left
-description: When a writer clicks the Edit button of a writable preview, or
-  opens a preview in a workspace where edit mode was last on, the Studio SHALL
-  switch edit mode on or off, saving or closing what is open, and start that
-  preview in edit mode unless it cannot edit the file.
+description: When a writer clicks the Edit button of a preview, or opens a
+  preview in a workspace where edit mode was last on, the Studio SHALL switch
+  edit mode on or off, saving or closing what is open, and start that preview in
+  edit mode when it was last in edit mode.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -34,22 +34,22 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer clicks the Edit button of a writable preview, or opens a preview in a workspace where edit mode was last on, the Studio SHALL switch edit mode on or off, saving or closing what is open, and start that preview in edit mode unless it cannot edit the file.
+When a writer clicks the Edit button of a preview, or opens a preview in a workspace where edit mode was last on, the Studio SHALL switch edit mode on or off, saving or closing what is open, and start that preview in edit mode when it was last in edit mode.
 
 ### Preserved stakeholder intent
 
 Writers expect to change a document where they read it and to go back to plain reading with one click.
 
-Writers expect the preview to remember whether they were editing, and not to promise editing where the file cannot be changed.
+Writers expect the preview to remember whether they were editing, and not to lose a write silently on a file that VS Code holds read-only.
 
-As a writer, I turn edit mode on to change my document in the preview and off to read it again, without losing anything I typed, and I reopen a document to find the preview in the edit mode I last chose, never offered editing in a preview that cannot change the file.
+As a writer, I turn edit mode on to change my document in the preview and off to read it again, without losing anything I typed, and I reopen a document to find the preview in the edit mode I last chose, told when a file that VS Code holds read-only cannot be changed.
 
 ### Rationale and constraints
 
 - Turning edit mode off saves the text of an open block editor and clears the block selection, the hover outline and the insert points.
 - Turning edit mode on does not reflow the reading layout: paragraphs keep their wrapping and the text does not move.
 - The choice is remembered per workspace; a preview that was already open and reloaded keeps its own state first.
-- A preview of an untrusted workspace, or of a file outside every workspace folder, has no Edit button and never starts in edit mode.
+- Every preview has the Edit button, in Restricted Mode and for a file outside every workspace folder too; trust never takes it away. A file that VS Code holds read-only keeps its button, and a write to it is refused with the reason "This file is read-only in VS Code.".
 
 <!-- okf:links:start -->
 ### Links
@@ -64,5 +64,5 @@ As a writer, I turn edit mode on to change my document in the preview and off to
   - [SwRS-MDOKFSTUDIO-BLOCK-258](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-258.md): A click on a card title or option opens the editor on its own line, the title is inline text and Enter saves a one-line editor
   - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
 <!-- okf:links:end -->

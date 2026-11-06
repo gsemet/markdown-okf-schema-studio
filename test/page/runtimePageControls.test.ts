@@ -119,18 +119,6 @@ test("a checkbox click is refused while a block editor is open", () => {
   assert.match(status?.textContent ?? "", /before toggling a checkbox/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("checkboxes are disabled when the preview cannot edit the document", () => {
-  const harness = createRuntimeHarness({ editingEnabled: false, readOnlyReason: "Reason from the host." });
-  assert.equal(harness.checkbox.disabled, true);
-  assert.equal(harness.checkbox.getAttribute("title"), "Reason from the host.");
-  const messageCount = harness.messages.length;
-  const event = clickEvent(harness.checkbox);
-  harness.dispatchDocument("click", event);
-  assert.equal(event.defaultPrevented, true);
-  assert.equal(harness.messages.length, messageCount);
-});
-
 const NO_EDITOR_TOOLTIP = "No text editor shows this file";
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
@@ -204,32 +192,6 @@ test("T38: edit mode starts off unless the webview holds the saved state of this
 
   const plain = createRuntimeHarness();
   assert.equal(plain.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-test("T38: a read-only preview never starts in edit mode", () => {
-  const harness = createRuntimeHarness({ savedState: { editMode: true }, editingEnabled: false });
-  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-test("a greyed Edit button does nothing and says why (untrusted or no workspace folder)", () => {
-  const untrusted = createRuntimeHarness({ savedState: { editMode: true }, editingEnabled: false });
-  untrusted.editModeButton.dispatch("click");
-  assert.equal(untrusted.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
-  assert.equal(untrusted.editModeButton.getAttribute("aria-pressed"), null);
-  assert.equal(
-    untrusted.editModeButton.getAttribute("data-tooltip"),
-    "Editing is unavailable: this file is not in a trusted workspace",
-  );
-  const noFolder = createRuntimeHarness({
-    editingEnabled: false,
-    readOnlyReason: "Editing needs the file's folder opened as a workspace folder in VS Code.",
-  });
-  assert.equal(
-    noFolder.editModeButton.getAttribute("title"),
-    "Editing is unavailable: this file is not in a folder opened in the VS Code workspace",
-  );
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-001

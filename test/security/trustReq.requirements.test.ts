@@ -353,7 +353,8 @@ test("the manifest declares limited support for untrusted workspaces", () => {
   assert.ok(manifest.main, "the rule below applies to an extension with a main entry point");
   const untrusted = manifest.capabilities?.untrustedWorkspaces;
   assert.equal(untrusted?.supported, "limited");
-  assert.match(untrusted?.description ?? "", /read-only/u);
+  assert.doesNotMatch(untrusted?.description ?? "", /read-only/u, "Restricted Mode no longer makes the document read-only");
+  assert.match(untrusted?.description ?? "", /still edit/u);
   const settings = new Set(manifest.contributes.configuration.flatMap((category) => Object.keys(category.properties)));
   assert.ok((untrusted?.restrictedConfigurations ?? []).length > 0);
   for (const name of untrusted?.restrictedConfigurations ?? []) {

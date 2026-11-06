@@ -514,13 +514,12 @@ test("preview toolbar has five rows: actions with the collapse button, navigatio
     "refresh", "edit-toggle", "toolbar-collapse", "anchor", "back", "next", "theme-toggle", "zoom-out", "zoom-in",
     "width-toggle", "toc-toggle", "sbs-toggle", "fold-toggle", "diff-toggle", "comments-toggle",
   ]);
-  // Read-only previews: the Edit button stays, greyed (aria-disabled) with the reason as tooltip.
-  const readOnly = renderPreviewToolbar(false);
-  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 15);
-  assert.match(readOnly, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"[^>]*title="Editing is unavailable: this file is not in a trusted workspace"[^>]*data-tooltip="Editing is unavailable: this file is not in a trusted workspace"/u);
+  // The Edit button is always enabled: trust never makes a document read-only. A button that needs
+  // trust stays focusable and greyed (aria-disabled) with its reason as tooltip.
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 15);
   assert.doesNotMatch(toolbar, /aria-disabled/u);
   assert.match(PREVIEW_THEME_CSS, /button\[aria-disabled="true"\]\s*\{[^}]*cursor: not-allowed;/u);
-  assert.match(readOnly, /data-sphinx-preview-toolbar-row="main"[\s\S]*data-sphinx-preview-toolbar-collapse/u);
+  assert.match(toolbar, /data-sphinx-preview-toolbar-row="main"[\s\S]*data-sphinx-preview-toolbar-collapse/u);
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar-more\]\[hidden\]\s*\{[^}]*display: none;/u);
   assert.doesNotMatch(toolbar, /style=/u);
   assert.doesNotMatch(toolbar, /data-sphinx-preview-mode-controls|role="group"/u);
@@ -1010,7 +1009,7 @@ test("the Comments toolbar button hides the gray and thread chips at once and go
   assert.match(css, /html\[data-sphinx-preview-comments="off"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="comment"\],\s*html\[data-sphinx-preview-comments="off"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="thread"\] \{\s*display: none;/u);
   assert.doesNotMatch(css, /data-sphinx-preview-comments="off"\][^{]*kind="todo"/u);
   assert.match(css, /html\[data-okf-show-comments="false"\] \[data-sphinx-preview-comments-toggle\] \{\s*display: none;/u);
-  const toolbar = renderPreviewToolbar(false);
+  const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /data-sphinx-preview-comments-toggle aria-pressed="true" aria-label="Hide comments" title="Hide comments" data-tooltip="Hide comments"/u);
 });
 

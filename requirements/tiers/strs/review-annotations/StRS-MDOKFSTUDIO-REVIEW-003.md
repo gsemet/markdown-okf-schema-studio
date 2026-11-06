@@ -14,10 +14,10 @@ scope: review-annotations
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-06T01:44:30+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-06T01:44:30+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -66,7 +66,7 @@ As a reviewer, I attach a comment to the exact words I am talking about, answer 
 - Selections in code, diagrams, math, the properties table and open editors offer no comment.
 - Deleting asks for confirmation inside the thread.
 - Deleting the last thread keeps the comments file with an empty list.
-- Reasons a change cannot be saved include a damaged comments file, a comments file with unsaved changes in an editor, a read-only preview and a document that is not saved yet.
+- Reasons a change cannot be saved include a damaged comments file, a comments file with unsaved changes in an editor and a document that is not saved yet.
 - When the editor gives no answer in time, the text is kept and the reviewer can try again.
 - Every change of the comments file reads the latest file first, so a change made by another tool in between is kept too.
 - The author is the name the reviewer configured in a setting or, without one, the name known to Git or to the operating system; when no name can be found at all, the comment is stored as Anonymous.
@@ -92,7 +92,7 @@ As a reviewer, I attach a comment to the exact words I am talking about, answer 
   - [SwRS-MDOKFSTUDIO-REVIEW-071](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-071.md): Resolve and delete messages name a thread; resolve carries a flag
   - [SwRS-MDOKFSTUDIO-REVIEW-073](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-073.md): Comment messages are accepted for any revision of the document
   - [SwRS-MDOKFSTUDIO-REVIEW-074](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-074.md): Reply, resolve, reopen and delete change the named thread only
-  - [SwRS-MDOKFSTUDIO-REVIEW-081](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-081.md): The thread popover of a writable preview sends a reply and keeps it until accepted
+  - [SwRS-MDOKFSTUDIO-REVIEW-081](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-081.md): The thread popover of a preview sends a reply and keeps it until accepted
   - [SwRS-MDOKFSTUDIO-REVIEW-086](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-086.md): Resolve, Reopen and a confirmed Delete wait for the host, one action at a time
   - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only
   - [SwRS-MDOKFSTUDIO-REVIEW-143](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-143.md): A click or Enter on a chip toggles its comment box

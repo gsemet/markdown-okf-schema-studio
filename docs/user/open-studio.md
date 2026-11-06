@@ -28,9 +28,11 @@ Markdown file there, then use **Open With...** and select **Markdown OKF-Schema 
 
 - Files of the active agent session are editable: the Agents window adds the session's working
   folder to the workspace.
-- Other files open read-only, with the Edit button greyed and its reason in the tooltip.
-- Switching to another agent session keeps the Studio tab open. It turns read-only until a session
-  that holds the file is active again, then becomes editable on the same tab.
+- Other files are editable too. Their reads are limited to the file's own folder: includes and
+  images come from there, and schema files are not looked up.
+- Switching to another agent session keeps the Studio tab open. It keeps editing, with reads
+  limited to the file's folder, until a session that holds the file is active again, then reads
+  the whole working folder on the same tab.
 
 A VS Code build that ignores the extension's declaration of Agents window support leaves Studio
 disabled there. Enable it with this user setting, or under **Agent Customizations** >

@@ -79,7 +79,7 @@ When a live preview shows a document with extension warnings in a trusted worksp
 Message type previewShowProblems (page to host): the envelope fields only (documentId, revision, requestId), no further field. See SwRS-MDOKFSTUDIO-TRUST-052 for the envelope and SwRS-MDOKFSTUDIO-TRUST-065 for the document gate.
 - GIVEN a preview showing a document with warnings
 - WHEN the page posts previewShowProblems for the shown document
-- THEN the host opens the Problems view; opening it edits nothing, so a read-only or untrusted preview is allowed
+- THEN the host opens the Problems view; opening it edits nothing, so an untrusted preview is allowed
 
 ### Scenario (refusal): A malformed or mismatched previewShowProblems is ignored
 | Input | Outcome |

@@ -63,8 +63,8 @@ export interface PlantUmlIncludeScope {
   /** The workspace folder of the preview; ignored in Restricted Mode. */
   workspaceRoot?: string;
   trusted: boolean;
-  /** A read-only preview: the include policy is narrowed (TRUST-002). */
-  readOnly?: boolean;
+  /** Restricted reads: the include policy is narrowed (TRUST-002). */
+  restrictedReads?: boolean;
 }
 
 export type PlantUmlIncludeAnswer =
@@ -103,7 +103,7 @@ export function resolvePlantUmlInclude(
   const policy = createPreviewResourcePolicy(
     documentDirectory,
     scope.trusted ? scope.workspaceRoot : undefined,
-    scope.readOnly === true || !scope.trusted,
+    scope.restrictedReads === true || !scope.trusted,
   );
   const baseDirectory = request.from === null ? documentDirectory : path.dirname(request.from);
   const read = readBoundedText(policy, name, baseDirectory);

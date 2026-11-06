@@ -67,7 +67,7 @@ When the host receives a label rename, the extension SHALL change only the `(old
 - SwRS-MDOKFSTUDIO-MYST-051: the message that carries the rename and its answer.
 - SwRS-MDOKFSTUDIO-BLOCK-058: the edit is one undo step, renders once and a failed apply is reported.
 - SwRS-MDOKFSTUDIO-BLOCK-041: an open editor blocks a rename.
-- SwRS-MDOKFSTUDIO-TRUST-005: a read-only preview refuses a rename with a reason.
+- SwRS-MDOKFSTUDIO-TRUST-005: the host handles a rename whatever the trust.
 - SwRS-MDOKFSTUDIO-TRUST-065: a rename from a stale render is refused.
 
 ### Verification notes
@@ -86,7 +86,7 @@ When the host receives a label rename, the extension SHALL change only the `(old
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-MYST-046](SwRS-MDOKFSTUDIO-MYST-046.md): A valid rename edits only the label text as one undo step

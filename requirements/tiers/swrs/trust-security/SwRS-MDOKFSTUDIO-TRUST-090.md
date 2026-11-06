@@ -108,19 +108,19 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 | Request | Result message | Success payload | Refusals and failures, as the reason text of ok false |
 | --- | --- | --- | --- |
 | previewCopyText | previewCopyTextResult | ok true | Too large to copy. (text over 1 000 000 characters); Could not copy. (the clipboard write failed) |
-| previewListTargets | previewListTargetsResult | ok true, items, truncated | The preview is out of date. Try again once it has refreshed. (no refusal in a read-only preview) |
-| previewListCitations | previewListCitationsResult | ok true, items, truncated | the read-only reason (read-only); The preview is out of date. Try again once it has refreshed.; the message of the scan error |
-| previewPickDocument | previewPickDocumentResult | ok true and path relative to the document, or ok true and cancelled true when the dialog is closed | the read-only reason (read-only); The preview is out of date, or the document is not a file.; That file name cannot be written in a {doc} link.; the message of the dialog error |
-| previewPickImage | previewPickImageResult | ok true and path relative to the document, or ok true and cancelled true | the read-only reason (read-only); The preview is out of date, or the document is not a file.; Pick a png, jpeg, gif, webp or svg image.; The image must be inside a workspace folder.; That image cannot be referenced from this document (another drive, or an unusual name).; the message of the dialog error |
-| previewPasteImage | previewPasteImageResult | ok true and fileName | the read-only reason (read-only); Save the document before pasting an image.; Pasting an image needs a Markdown file.; The image must be saved inside a workspace folder.; That clipboard image type is not supported.; The image is larger than 10 MB.; The clipboard data is not a png, jpeg, gif or webp image.; Too many pasted images next to this document.; the message of the write error |
+| previewListTargets | previewListTargetsResult | ok true, items, truncated | The preview is out of date. Try again once it has refreshed. (no refusal for restricted reads: the label list reads only the document) |
+| previewListCitations | previewListCitationsResult | ok true, items, truncated | the citation reason of SwRS-MDOKFSTUDIO-TRUST-005 (restricted reads); The preview is out of date. Try again once it has refreshed.; the message of the scan error |
+| previewPickDocument | previewPickDocumentResult | ok true and path relative to the document, or ok true and cancelled true when the dialog is closed | The preview is out of date, or the document is not a file.; That file name cannot be written in a {doc} link.; the message of the dialog error |
+| previewPickImage | previewPickImageResult | ok true and path relative to the document, or ok true and cancelled true | The preview is out of date, or the document is not a file.; Pick a png, jpeg, gif, webp or svg image.; The image must be inside a workspace folder.; The image must be inside the folder of the document. (a standalone file); That image cannot be referenced from this document (another drive, or an unusual name).; the message of the dialog error |
+| previewPasteImage | previewPasteImageResult | ok true and fileName | Save the document before pasting an image.; Pasting an image needs a Markdown file.; The image must be saved inside a workspace folder.; That clipboard image type is not supported.; The image is larger than 10 MB.; The clipboard data is not a png, jpeg, gif or webp image.; Too many pasted images next to this document.; the message of the write error |
 | previewPasteHtml | previewPasteHtmlResult | ok true and markdown | the message of the conversion error |
 | previewPlantUmlInclude | previewPlantUmlIncludeResult | ok true, the real path of the file as id, and text | ok false and a reason, for a file outside the allowed folders; a malformed or incomplete answer reaches the bundle as the reason that the file could not be read |
-| previewThreadReply | previewThreadReplyResult | ok true | the read-only reason (read-only); Save or cancel the open Markdown edit before changing a thread.; The preview is out of date. Try again once it has refreshed.; The document changed meanwhile. Try again.; VS Code could not apply the change.; the refusal of the thread lines |
+| previewThreadReply | previewThreadReplyResult | ok true | Save or cancel the open Markdown edit before changing a thread.; The preview is out of date. Try again once it has refreshed.; The document changed meanwhile. Try again.; VS Code could not apply the change.; the refusal of the thread lines |
 | previewThreadDelete | previewThreadDeleteResult | ok true | the same reasons as previewThreadReply, except The document changed meanwhile. Try again. |
 
 - The page shows the reason of a refusal where the request came from: the popover for a list, the status line of the block editor for a picker, the status line of the thread (or The change was not saved. when there is no reason).
 - The page matches these results by the edit id only, because the edit itself can move the document revision. The host-to-page rule of these result types is the own-id addressing, see SwRS-MDOKFSTUDIO-TRUST-059.
-- The writes among them are refused in a read-only preview, see SwRS-MDOKFSTUDIO-TRUST-005.
+- The writes among them are handled in every preview, trust included; only the citation list is refused for restricted reads, see SwRS-MDOKFSTUDIO-TRUST-005.
 
 ### Scenario (boundary): The comment actions are answered by a result without an edit id
 
@@ -160,7 +160,7 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 - SwRS-MDOKFSTUDIO-TRUST-052: the envelope and the accepted fields of the request messages
 - SwRS-MDOKFSTUDIO-TRUST-059: the acceptance of the result messages by the page
 - SwRS-MDOKFSTUDIO-TRUST-065: the gates, and the out-of-date answer to a request of an older render
-- SwRS-MDOKFSTUDIO-TRUST-005: the refusal of the write requests of a read-only preview
+- SwRS-MDOKFSTUDIO-TRUST-005: the handling of the write requests of every preview
 
 ### Verification notes
 
@@ -173,7 +173,7 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 - Method: test/session/diagReq.plantuml.requirements.test.ts (an include request is answered once with the edit id, a file or a refusal)
 - Method: test/integration/mystPickers.test.ts, test/integration/imagePicker.test.ts, test/integration/imagePaste.test.ts (host answers with the request identity, labels, keys and refusal reasons of the pickers and the paste)
 - Method: test/integration/inlineThread.test.ts (thread reply and delete results with the edit id, only for the success and the lines refusals)
-- Method: test/integration/commentWrite.test.ts (previewCommentResult of reply to an unknown thread, delete of an unknown thread, create with an old version, read-only resolve and delete); the 15 second page timeout of the comment actions is untested
+- Method: test/integration/commentWrite.test.ts (previewCommentResult of reply to an unknown thread, delete of an unknown thread, create with an old version); the 15 second page timeout of the comment actions is untested
 - Method: test/core/protocol/hostToPage.test.ts (sample previewThreadReplyResult)
 - Criteria: the protocol validator rejects an edit id that is empty, longer than 100 characters or not a string (isHostRequest in src/core/protocol/pageToHost.ts); each request gets one answer that repeats its edit id with the request type followed by Result, or a failure result after its timeout; the 30 second and 10 second values are passed by the block editor and are not asserted by a test.
 
@@ -187,7 +187,7 @@ When the page sends a request to the host, the extension SHALL answer it once wi
   - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
   - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-052](SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
   - [SwRS-MDOKFSTUDIO-TRUST-065](SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type

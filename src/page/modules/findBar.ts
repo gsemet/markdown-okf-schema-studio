@@ -23,7 +23,7 @@ export interface FindHooks {
   prepare(): void;
   /** The source block of a rendered element, or undefined when its text cannot be replaced from the preview. */
   sourceBlockOf(element: Element): FindSourceBlock | undefined;
-  /** Why replacing is not possible now (read-only preview, an open editor), or undefined. */
+  /** Why replacing is not possible now (an open editor), or undefined. */
   replaceBlockedReason(): string | undefined;
   /** Unfolds the folded sections that hold `target`; true when the layout changed. */
   reveal(target: Element): boolean;

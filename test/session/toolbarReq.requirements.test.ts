@@ -18,7 +18,6 @@ import { nodeHostPorts } from "./nodeHostPorts";
 import type { PanelGroups, PreviewPanel } from "../../src/host-api/previewPanel";
 import type { PairedEditor } from "../../src/host-api/textEditors";
 import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
-import { EDIT_REQUEST_TYPES } from "../../src/session/pageMessages";
 import { PreviewManager } from "../../src/session/previewManager";
 import { createPreviewNavigator } from "../../src/session/previewNavigator";
 import { PreviewSession } from "../../src/session/previewSession";
@@ -55,8 +54,8 @@ function fileDocument(filePath: string, text = ""): HostDocument {
   };
 }
 
-/** A manager over a temporary folder with `active.md`; the preview is read-only when asked. */
-function fixture(options: { readOnly?: boolean; followsActiveEditor?: boolean; activeText?: string } = {}): Fixture {
+/** A manager over a temporary folder with `active.md`; the preview has restricted reads when asked. */
+function fixture(options: { restrictedReads?: boolean; followsActiveEditor?: boolean; activeText?: string } = {}): Fixture {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "toolbar-req-")));
   const activePath = path.join(root, "active.md");
   fs.writeFileSync(activePath, options.activeText ?? "# Active\n\n## Part\n");
@@ -100,17 +99,17 @@ function fixture(options: { readOnly?: boolean; followsActiveEditor?: boolean; a
   const manager = new PreviewManager(host, groups);
   const panel = { postMessage: (message: Record<string, any>) => { posted.push(message); return Promise.resolve(true); } };
   const document = fileDocument(activePath, options.activeText ?? "# Active\n\n## Part\n");
-  const readOnly = options.readOnly ?? false;
+  const restrictedReads = options.restrictedReads ?? false;
   const preview = new PreviewSession({
     panel: panel as unknown as PreviewPanel,
     followsActiveEditor: options.followsActiveEditor ?? true,
     document,
     documentUri: document.id,
     workspaceRoot: root,
-    sessionRoots: readOnly ? [] : [root],
+    sessionRoots: restrictedReads ? [] : [root],
     navigationRoots: [root],
     workspaceFolder: undefined,
-    readOnly,
+    restrictedReads,
     webview: { html: "", diagnostics: [], nonce: "" },
     states: new Map() as never,
     state: undefined,
@@ -177,10 +176,9 @@ function showOther(preview: PreviewSession, id: string): void {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-006
-test("a read-only preview stores a view preference like a writable one", async () => {
-  const f = fixture({ readOnly: true });
+test("a preview with restricted reads stores a view preference like any other", async () => {
+  const f = fixture({ restrictedReads: true });
   try {
-    assert.equal(EDIT_REQUEST_TYPES.has("previewViewPreferenceChanged"), false);
     assert.equal(f.manager.choices.viewPreferences.toc, false);
     await f.send("previewViewPreferenceChanged", { preference: "toc", value: true });
     assert.equal(f.manager.choices.viewPreferences.toc, true);
@@ -229,11 +227,10 @@ test("a link message without a request records the page state and follows nothin
   }
 });
 
-test("a read-only preview follows a link to a sibling Markdown file", async () => {
-  const f = fixture({ readOnly: true });
+test("a preview with restricted reads follows a link to a sibling Markdown file", async () => {
+  const f = fixture({ restrictedReads: true });
   try {
     fs.writeFileSync(path.join(f.root, "sibling.md"), "# Sibling\n");
-    assert.equal(EDIT_REQUEST_TYPES.has("previewLink"), false);
     await f.send("previewLink", { request: "sibling.md" });
     assert.deepEqual(f.shown.map((entry) => path.basename(new URL(entry.id).pathname)), ["sibling.md"]);
     assert.deepEqual(f.warnings, []);
@@ -438,10 +435,9 @@ test("a Back or Next that cannot open its document shows a warning", async () =>
   }
 });
 
-test("Back and Next work in a read-only preview", async () => {
-  const f = fixture({ readOnly: true });
+test("Back and Next work in a preview with restricted reads", async () => {
+  const f = fixture({ restrictedReads: true });
   try {
-    assert.equal(EDIT_REQUEST_TYPES.has("previewHistoryGo"), false);
     const other = path.join(f.root, "other.md");
     fs.writeFileSync(other, "# Other\n");
     const history = f.manager.history.historyOf(f.preview);
@@ -454,10 +450,9 @@ test("Back and Next work in a read-only preview", async () => {
   }
 });
 
-test("a read-only preview answers the link discovery", async () => {
-  const f = fixture({ readOnly: true });
+test("a preview with restricted reads answers the link discovery", async () => {
+  const f = fixture({ restrictedReads: true });
   try {
-    assert.equal(EDIT_REQUEST_TYPES.has("previewLinkDiscover"), false);
     fs.writeFileSync(path.join(f.root, "sibling.md"), "# Sibling\n");
     await f.send("previewLinkDiscover", { requests: ["sibling.md"] });
     await until(() => f.posted.some((message) => message.type === "previewLinkTargets"), "an answer");
@@ -575,8 +570,8 @@ test("one search per wikilink name runs at a time", async () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-007
-test("in a read-only preview only the document's folder is allowed", async () => {
-  const f = fixture({ readOnly: true });
+test("in a preview with restricted reads only the document's folder is allowed", async () => {
+  const f = fixture({ restrictedReads: true });
   try {
     fs.mkdirSync(path.join(f.root, "below"));
     fs.writeFileSync(path.join(f.root, "below", "inner.md"), "# Inner\n");

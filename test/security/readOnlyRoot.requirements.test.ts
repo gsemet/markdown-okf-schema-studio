@@ -7,7 +7,7 @@ import { afterEach, beforeEach, test } from "node:test";
 import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import {
   createPreviewResourcePolicy,
-  isBroadReadOnlyRoot,
+  isBroadRestrictedRoot,
   readBoundedText,
 } from "../../src/core/security/resource-policy";
 import { needsSymlinks } from "../shared/symlinks";
@@ -44,14 +44,14 @@ afterEach(() => {
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
 test("the home folder, its ancestors and file-system roots are broad roots", () => {
-  assert.equal(isBroadReadOnlyRoot(home), true);
-  assert.equal(isBroadReadOnlyRoot(sandbox), true);
-  assert.equal(isBroadReadOnlyRoot(path.parse(sandbox).root), true);
-  assert.equal(isBroadReadOnlyRoot(path.join(home, "project")), false);
+  assert.equal(isBroadRestrictedRoot(home), true);
+  assert.equal(isBroadRestrictedRoot(sandbox), true);
+  assert.equal(isBroadRestrictedRoot(path.parse(sandbox).root), true);
+  assert.equal(isBroadRestrictedRoot(path.join(home, "project")), false);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only policy in the home folder reads nothing", () => {
+test("a restricted-reads policy in the home folder reads nothing", () => {
   const policy = createPreviewResourcePolicy(home, home, true);
   const read = readBoundedText(policy, "part.md", home);
   assert.deepEqual(read, { ok: false, refusal: "restricted-root" });
@@ -60,19 +60,19 @@ test("a read-only policy in the home folder reads nothing", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only policy refuses dot-segments but a trusted policy keeps them", () => {
+test("a restricted-reads policy refuses dot-segments but a trusted policy keeps them", () => {
   const project = path.join(home, "project");
-  const readOnly = createPreviewResourcePolicy(project, project, true);
-  assert.equal(readBoundedText(readOnly, "part.md", project).ok, true);
-  assert.deepEqual(readBoundedText(readOnly, ".agents/rule.md", project), { ok: false, refusal: "hidden-path" });
-  assert.ok(readOnly.diagnostics.some((entry) => entry.code === "hidden-path"));
+  const restrictedReads = createPreviewResourcePolicy(project, project, true);
+  assert.equal(readBoundedText(restrictedReads, "part.md", project).ok, true);
+  assert.deepEqual(readBoundedText(restrictedReads, ".agents/rule.md", project), { ok: false, refusal: "hidden-path" });
+  assert.ok(restrictedReads.diagnostics.some((entry) => entry.code === "hidden-path"));
 
   const trusted = createPreviewResourcePolicy(project, project, false);
   assert.equal(readBoundedText(trusted, ".agents/rule.md", project).ok, true);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only dot-directory is refused through a symbolic link as well", needsSymlinks, () => {
+test("a restricted-reads dot-directory is refused through a symbolic link as well", needsSymlinks, () => {
   const project = path.join(home, "project");
   fs.symlinkSync(path.join(project, ".agents"), path.join(project, "visible"));
   const policy = createPreviewResourcePolicy(project, project, true);
@@ -80,7 +80,7 @@ test("a read-only dot-directory is refused through a symbolic link as well", nee
   assert.equal(read.ok, false);
 });
 
-async function render(text: string, documentDirectory: string, readOnly: boolean) {
+async function render(text: string, documentDirectory: string, restrictedReads: boolean) {
   return renderPreviewDocument({
     document: {
       uri: { scheme: "file", fsPath: path.join(documentDirectory, "doc.md") },
@@ -89,7 +89,7 @@ async function render(text: string, documentDirectory: string, readOnly: boolean
       getText: () => text,
     },
     workspaceRoot: documentDirectory,
-    readOnly,
+    restrictedReads,
     requestId: 1,
     isWorkspaceTrusted: () => true,
     allowUntrusted: true,
@@ -106,7 +106,7 @@ test("an include of a document in the home folder is refused with a diagnostic",
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only preview includes a plain file but not a dot-directory file", async () => {
+test("a restricted-reads preview includes a plain file but not a dot-directory file", async () => {
   const project = path.join(home, "project");
   const result = await render("```{include} part.md\n```\n\n```{include} .agents/rule.md\n```\n", project, true);
   assert.ok(result.html.includes("Included part"));
@@ -122,9 +122,27 @@ test("a trusted workspace still includes from a dot-directory", async () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+test("a standalone file (no workspace root) includes a plain sibling, refuses dot-directories and non-image files outside its folder", () => {
+  const project = path.join(home, "project");
+  const sub = path.join(project, "sub");
+  fs.mkdirSync(path.join(sub, ".hidden"), { recursive: true });
+  fs.writeFileSync(path.join(sub, "doc.md"), "doc\n");
+  fs.writeFileSync(path.join(sub, ".hidden", "rule.md"), `${SECRET}\n`);
+  // The production root: a file outside every workspace folder has its own folder as resource root.
+  const standalone = createPreviewResourcePolicy(sub, sub, true);
+  assert.equal(readBoundedText(standalone, "doc.md", sub).ok, true);
+  assert.deepEqual(readBoundedText(standalone, ".hidden/rule.md", sub), { ok: false, refusal: "hidden-path" });
+  assert.deepEqual(readBoundedText(standalone, "../part.md", sub), { ok: false, refusal: "resource-outside-root" });
+  // A non-image file is refused outside the folder even when an image request would not be.
+  assert.deepEqual(standalone.resolveResourceDetailed("../part.md", sub, { image: true }), { refusal: "resource-outside-root" });
+  assert.deepEqual(standalone.resolveResourceDetailed("../image.png", sub, { image: true }), { refusal: "resource-outside-root" });
+  assert.equal(standalone.resolveResource("../image.png", sub, { image: true }), undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
 test("the home folder is found with another letter case on case-insensitive systems", () => {
   const insensitive = process.platform === "win32" || process.platform === "darwin";
-  assert.equal(isBroadReadOnlyRoot(home.toUpperCase()), insensitive);
+  assert.equal(isBroadRestrictedRoot(home.toUpperCase()), insensitive);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
@@ -134,6 +152,6 @@ test("on Windows USERPROFILE wins over HOME, elsewhere HOME wins", () => {
   process.env.HOME = other;
   process.env.USERPROFILE = home;
   const windows = process.platform === "win32";
-  assert.equal(isBroadReadOnlyRoot(home), windows);
-  assert.equal(isBroadReadOnlyRoot(other), !windows);
+  assert.equal(isBroadRestrictedRoot(home), windows);
+  assert.equal(isBroadRestrictedRoot(other), !windows);
 });

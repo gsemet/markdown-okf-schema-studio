@@ -363,8 +363,8 @@ export class HostEvents {
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   /**
    * Workspace folders were added or removed (the Agents window mounts the folder of the active
-   * agent session this way): stem watchers follow, previews of a removed folder turn read-only on
-   * the same panel, and read-only previews of a file in an added folder become writable.
+   * agent session this way): stem watchers follow, previews of a removed folder get restricted reads on
+   * the same panel, and previews of a file in an added folder get full reads.
    */
   public onFoldersChanged(added: readonly WorkspaceFolderInfo[], removed: readonly WorkspaceFolderInfo[]): void {
     for (const folder of added) {
@@ -377,7 +377,7 @@ export class HostEvents {
       this.manager.demoteSessionsOf(new Set(removed.map((folder) => folder.id)));
     }
     if (added.length > 0) {
-      this.manager.promoteReadOnlySessions();
+      this.manager.promoteRestrictedSessions();
     }
   }
 

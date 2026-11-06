@@ -87,7 +87,7 @@ When the extension resolves a resource reference of a page, it SHALL give the pa
 - GIVEN a policy with a root that is not on disk and a second, existing root
 - WHEN the policy is created
 - THEN it drops the missing root, records the diagnostic missing-root with the root path (message The {label} resource root is unavailable) and resolves nothing through it, while a file of the second root is found
-- GIVEN a page of a read-only preview
+- GIVEN a page of a preview with restricted reads
 - WHEN a parent-relative figure image is resolved
 - THEN it is refused, because both roots are the folder of the document
 

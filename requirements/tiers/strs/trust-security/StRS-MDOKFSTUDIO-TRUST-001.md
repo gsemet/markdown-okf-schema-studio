@@ -2,13 +2,12 @@
 type: StRS
 id: StRS-MDOKFSTUDIO-TRUST-001
 uuid: ac15f392-751d-459b-bc19-b98f630f2348
-title: A document outside a trusted folder opens read-only and keeps the viewing
-  actions
+title: A document opens editable whatever the trust, with narrow reads outside a
+  trusted folder
 description: When a reader previews a document in an untrusted workspace or a
-  file outside every workspace folder, the Studio SHALL show the rendered
-  document read-only, without any control that edits it, refuse with a reason
-  any change that is asked for and write nothing, while zooming, changing the
-  theme, following links and copying code work as in a writable preview.
+  file outside every workspace folder, the Studio SHALL keep the document
+  editable exactly as in a trusted workspace, and narrow only what the preview
+  reads, while features that need trust stay off with their reason.
 project: markdown-okf-schema-studio
 scope: trust-security
 req_lifecycle: proposed
@@ -16,10 +15,10 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
-user_need: As a reader, I open a document in Restricted Mode, or a file from
-  outside my workspace, and see it rendered without any control that could edit
-  it; I am told why a change is refused and no file of mine is touched; and I
-  still zoom, switch theme, follow links and copy code.
+user_need: As a writer, I open a document in Restricted Mode, or a file from
+  outside my workspace, and edit it as I do anywhere else; the preview reads no
+  more than the folder of the document, and I am told why a feature that needs
+  trust is off.
 derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-026
 - SwRS-MDOKFSTUDIO-TRUST-001
@@ -28,25 +27,24 @@ derived_by:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## A document outside a trusted folder opens read-only and keeps the viewing actions
+## A document opens editable whatever the trust, with narrow reads outside a trusted folder
 
 ### Normative behavior
 
-When a reader previews a document in an untrusted workspace or a file outside every workspace folder, the Studio SHALL show the rendered document read-only, without any control that edits it, refuse with a reason any change that is asked for and write nothing, while zooming, changing the theme, following links and copying code work as in a writable preview.
+When a reader previews a document in an untrusted workspace or a file outside every workspace folder, the Studio SHALL keep the document editable exactly as in a trusted workspace (edit mode, block, table and frontmatter edits, checkboxes, comments, image paste), and SHALL narrow only what the preview reads, while features that need trust stay off and give their reason where they are used.
 
 ### Preserved stakeholder intent
 
-As a reader, I open a document in Restricted Mode, or a file from outside my workspace, and see it rendered without any control that could edit it; I am told why a change is refused and no file of mine is touched; and I still zoom, switch theme, follow links and copy code.
+As a writer, I open a document in Restricted Mode, or a file from outside my workspace, and edit it as I do anywhere else; the preview reads no more than the folder of the document, and I am told why a feature that needs trust is off.
 
 ### Rationale and constraints
 
-- Restricted Mode and a file outside every workspace folder share one read-only preview.
-- The toolbar, the properties table and the blocks offer no editing in it; no edition palette is shown and the palette mode is kept as it is.
-- The review threads are shown without any control to change them, and nothing is written.
+- Other VS Code editors edit in an untrusted workspace, so trust never makes a document read-only; only a file that VS Code itself holds read-only stays read-only, with its own reason.
+- Restricted Mode and a file outside every workspace folder share one preview with restricted reads: includes and resources come from the folder of the document, no path below a dot-directory is read and no schema is looked up.
 - A preview that is open when the user trusts the workspace is covered by SwRS-MDOKFSTUDIO-TRUST-001.
-- This record holds the rule that applies to every kind of change. The wording of each refusal is specified with the feature that owns the action (block editing, table editing, frontmatter editing, labels, checkboxes, images, comments).
-- An action that changes no file is never refused because the preview is read-only; the theme mode and the zoom only change how the preview looks, never the document, so no trust is needed.
-- The viewing actions themselves are specified in the theme and zoom, toolbar and navigation, and code block scopes.
+- This record holds the rule that applies to every kind of change. The wording of each refusal that remains is specified with the feature that owns the action (block editing, table editing, frontmatter editing, labels, checkboxes, images, comments).
+- A feature that needs trust, such as PlantUML with Java or the citation list, is disabled with its reason; there is no banner.
+- The viewing actions (zoom, theme, links, code copy) are specified in the theme and zoom, toolbar and navigation, and code block scopes.
 
 <!-- okf:links:start -->
 ### Links
@@ -55,7 +53,7 @@ As a reader, I open a document in Restricted Mode, or a file from outside my wor
 
 - Derived by:
   - [SwRS-MDOKFSTUDIO-LIFE-026](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-026.md): The side preview follows the active Markdown editor
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 <!-- okf:links:end -->

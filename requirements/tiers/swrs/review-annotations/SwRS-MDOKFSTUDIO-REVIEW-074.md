@@ -76,7 +76,7 @@ When the host handles a reply, resolve or delete message for a thread of the rev
 | A delete for the thread t_ffffffff | The page is told ok false with kind delete and "the thread no longer exists.", and the file is unchanged |
 | A resolve for an unknown thread | The same refusal is answered with kind resolve |
 
-The refusals of the host that apply to every comment change (a read-only preview, a document that is not a saved file, a comments file with unsaved changes in an editor, the size and thread limits of the file) and the warning shown with them are in SwRS-MDOKFSTUDIO-REVIEW-054.
+The refusals of the host that apply to every comment change (a document that is not a saved file, a comments file with unsaved changes in an editor, the size and thread limits of the file) and the warning shown with them are in SwRS-MDOKFSTUDIO-REVIEW-054.
 
 ### Related requirements
 
@@ -102,6 +102,6 @@ The refusals of the host that apply to every comment change (a read-only preview
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 <!-- okf:links:end -->

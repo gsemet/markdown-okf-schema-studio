@@ -591,10 +591,10 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "theme-zoom/v11-zoom-150-light-460": "At 150 % zoom in a 460 px pane the body text is 150 % of the base size and the column stays inside the pane, with no horizontal page scroll.",
   "theme-zoom/v12-fresh-workspace-light-900": "In a fresh workspace on a light host the preview opens, before any click and without posting a choice, in the cream theme mode with the cream page colours and with the floating toolbar collapsed to its first row.",
   "theme-zoom/v13-fresh-workspace-dark-460": "In a fresh workspace on a dark host in a 460 px pane the preview opens, before any click and without posting a choice, in the cream theme mode with the cream page colours and with the floating toolbar collapsed to its first row.",
-  "trust-security/v01-read-only-page-dark-900": "A read-only preview in the dark theme has no Edit button, no editable frontmatter cell and still renders the document.",
-  "trust-security/v02-read-only-page-light-460": "A read-only preview in a 460 px light pane has no Edit button, no editable frontmatter cell and still renders the document.",
-  "trust-security/v04-read-only-images-light-900": "A read-only preview shows an image with spaces in its name in a subfolder, the same file in angle brackets and an image of the workspace root, and refuses an image below a dot-directory.",
-  "trust-security/v03-read-only-no-hover-outline-light-900": "In a read-only preview a pointer resting on a paragraph, and a click on it, show no edit outline and open no editor.",
+  "trust-security/v01-restricted-page-dark-900": "A preview with restricted reads in the dark theme has an enabled Edit button that switches the edit mode on, offers editable frontmatter cells and renders the document.",
+  "trust-security/v02-restricted-page-light-460": "A preview with restricted reads in a 460 px light pane has an enabled Edit button, offers editable frontmatter cells and renders the document.",
+  "trust-security/v04-read-only-images-light-900": "A preview with restricted reads shows an image with spaces in its name in a subfolder, the same file in angle brackets and an image of the workspace root, and refuses an image below a dot-directory.",
+  "trust-security/v03-restricted-opens-block-editor-light-900": "In a preview with restricted reads, edit mode on and a click on a paragraph open the block editor.",
   "toolbar-navigation/v30-back-enabled-after-anchor-light-900": "After an in-page jump the host's history report enables Back, Next stays disabled and the target heading sits at the top of the pane.",
   "toolbar-navigation/v31-mark-editor-selection-light-900": "With the mark-editor-selection setting on, the block holding the text editor's selection line is outlined and no other block is.",
   "toolbar-navigation/v32-sticky-shadow-light-900": "In the light preview scrolled under three pinned headings, the sticky band casts a soft shadow onto the text scrolling under it, stays fixed at the top without moving the content, and the toolbar stays above it.",
@@ -727,7 +727,7 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
  * final-frame checks; only the screenshot, its sidecar and the step PNGs go.
  */
 export const ASSERTION_ONLY_IDS: ReadonlySet<string> = new Set([
-  "trust-security/v03-read-only-no-hover-outline-light-900",
+  "trust-security/v03-restricted-opens-block-editor-light-900",
   "review-annotations/v16-incoming-diff-off-light-900",
   "review-annotations/v20-comment-chips-hidden-light-900",
   "review-annotations/v22-comments-button-hides-thread-light-900",

@@ -2,7 +2,7 @@
  * The view state controller: how the reader looks at the page, never the document. It records the
  * page's scroll and disclosure state, keeps the reader's choices (theme mode, view preferences,
  * edit and palette mode, closed warning banners), follows the host's color theme and handles the
- * Refresh button. None of these messages edit the document, so read-only previews accept them.
+ * Refresh button. None of these messages edit the document.
  */
 
 import { isPaletteMode } from "../../core/configuration/editingConfiguration";
@@ -25,8 +25,8 @@ export class ViewStateController {
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-214
-    // A view preference only changes how the preview looks (workspace state, no document edit), so a
-    // read-only or untrusted preview accepts it; the value is validated by the protocol.
+    // A view preference only changes how the preview looks (workspace state, no document edit); the
+    // value is validated by the protocol.
     router.on("previewViewPreferenceChanged", (message, preview) => {
       manager.choices.setViewPreference(message.preference, message.value);
       if (message.preference === "incomingChanges") {
@@ -34,22 +34,21 @@ export class ViewStateController {
       }
     });
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-006
-    // The side-by-side diff is a view of the page like the preferences above: no document edit, so a
-    // read-only preview accepts it; the baseline is posted for a trusted, tracked file only.
+    // The side-by-side diff is a view of the page like the preferences above: no document edit; the
+    // baseline is posted for a trusted, tracked file only.
     router.on("previewSideBySideChanged", (message, preview) => {
       manager.incoming.setSideBySide(preview, message.on);
     });
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
     // The palette mode is a workspace choice like the edit mode: it changes buttons only, never the
-    // rendering, so it is saved from the page and only a document edit needs a writable preview.
-    router.on("previewPaletteModeChanged", (message, preview) => {
-      if (!preview.readOnly && isPaletteMode(message.mode)) {
+    // rendering, so it is saved from the page whatever the trust.
+    router.on("previewPaletteModeChanged", (message) => {
+      if (isPaletteMode(message.mode)) {
         fireAndForget(manager.host.logger, manager.choices.setPaletteMode(message.mode), "setPaletteMode");
       }
     });
     // @implements_req SwRS-MDOKFSTUDIO-MYST-081
-    // CR 050: the warning banner. Opening the Problems view and closing the banner edit nothing, so a
-    // read-only or untrusted preview allows them.
+    // CR 050: the warning banner. Opening the Problems view and closing the banner edit nothing.
     router.on("previewShowProblems", () =>
       manager.host.ui.showProblems());
     router.on("previewWarningBannerClosed", (message, preview) => {
@@ -61,8 +60,8 @@ export class ViewStateController {
         manager.choices.setPreviewThemeMode(message.previewThemeMode);
       }
     });
-    router.on("previewEditModeChanged", (message, preview) => {
-      if (!preview.readOnly && typeof message.editMode === "boolean") {
+    router.on("previewEditModeChanged", (message) => {
+      if (typeof message.editMode === "boolean") {
         manager.choices.setEditMode(message.editMode);
       }
     });

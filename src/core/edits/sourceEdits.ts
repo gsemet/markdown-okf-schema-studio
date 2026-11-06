@@ -3,7 +3,7 @@
  * inline thread reply and delete, block move, copy, cut and paste of blocks, and the text of an
  * open block editor. Each operation reads the current document text, refuses with the reason the
  * page shows, or returns the {@link TextEdit} to apply. Nothing here applies an edit, reads a file
- * or talks to a host: the host checks its own preconditions (trust, an open block edit, a stale
+ * or talks to a host: the host checks its own preconditions (an open block edit, a stale
  * revision), calls the operation, and applies the edit through its document store.
  *
  * The page's line numbers are never trusted: every operation re-reads the lines it changes.
@@ -12,7 +12,6 @@
 import { isThreadSource, threadDeleteRange, threadReplyEdit } from "../comments/inlineThread";
 import { opensIncludeDirective, planBlockMove, type BlockLines } from "../mapping/blockMove";
 import { planCut, planPaste, spanText } from "../mapping/blockRange";
-import { READ_ONLY_NO_FOLDER, READ_ONLY_UNTRUSTED } from "./readOnlyReasons";
 import { STALE_REQUEST } from "../protocol/staleRequest";
 import { countRefUses, renameLabelLine } from "../mapping/labelRename";
 import { minimalReplacement } from "../mapping/textDiff";
@@ -29,20 +28,9 @@ export const LABEL_GONE = "The label is no longer on that line. Refresh the prev
 
 export { FIND_REPLACE_NOTHING, planFindReplace } from "./findReplace";
 
-export {
-  EDIT_UNAVAILABLE_NO_FOLDER,
-  EDIT_UNAVAILABLE_UNTRUSTED,
-  READ_ONLY_FILE,
-  READ_ONLY_NO_FOLDER,
-  READ_ONLY_UNTRUSTED,
-} from "./readOnlyReasons";
+export { READ_ONLY_FILE } from "./readOnlyReasons";
 /** Refusal of a checkbox toggle whose message is malformed. */
 export const MALFORMED_TOGGLE = "The checkbox request was not understood. Refresh the preview.";
-
-/** The reason a read-only preview refuses an edit: the missing folder, else the missing trust. */
-export function readOnlyReason(hasWorkspaceFolder: boolean): string {
-  return hasWorkspaceFolder ? READ_ONLY_UNTRUSTED : READ_ONLY_NO_FOLDER;
-}
 
 export { STALE_REQUEST };
 /** Refusal of a thread change whose `<!-- THREAD` comment is gone. */

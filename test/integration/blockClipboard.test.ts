@@ -159,26 +159,53 @@ export async function runUndo(): Promise<void> {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-/** An untrusted (read-only) preview neither edits the document nor touches the clipboard. */
+/** A preview in Restricted Mode copies, pastes and cuts blocks like a trusted one; each edit is undone here. */
 export async function runUntrusted(
   preview: { documentUri: string; documentVersion?: number; requestId?: number },
   document: vscode.TextDocument,
 ): Promise<void> {
   const before = document.getText();
   const savedClipboard = await vscode.env.clipboard.readText();
-  const sentinel = "untrusted sentinel";
+  const sentinel = "restricted sentinel";
   await vscode.env.clipboard.writeText(sentinel);
   try {
     const base = {
       documentId: preview.documentUri,
-      revision: preview.documentVersion,
-      requestId: preview.requestId,
+      revision: document.version,
+      requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
     };
-    await sendPreviewMessageForTests({ ...base, type: "previewBlocksCopy", line: 1, endLine: 1 });
-    await sendPreviewMessageForTests({ ...base, type: "previewBlocksCut", line: 1, endLine: 1, pinViewportTop: 10 });
-    await sendPreviewMessageForTests({ ...base, type: "previewBlocksPaste", insertAfterLine: 1 });
-    assert.equal(document.getText(), before, "a read-only preview must not cut or paste");
-    assert.equal(await vscode.env.clipboard.readText(), sentinel, "a read-only preview must not copy");
+    // A copy sent while the preview still renders the previous text is dropped as stale: retry.
+    for (let attempt = 0; attempt < 20 && await vscode.env.clipboard.readText() === sentinel; attempt += 1) {
+      await sendPreviewMessageForTests({
+        ...base,
+        revision: document.version,
+        requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
+        type: "previewBlocksCopy", line: 1, endLine: 1,
+      });
+      if (await vscode.env.clipboard.readText() === sentinel) await new Promise<void>((resolve) => setTimeout(resolve, 250));
+    }
+    assert.notEqual(await vscode.env.clipboard.readText(), sentinel, "Restricted Mode copies the block");
+    await untilApplied(document, () => sendPreviewMessageForTests({
+      documentId: preview.documentUri,
+      revision: document.version,
+      requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
+      type: "previewBlocksPaste", insertAfterLine: 1, pinViewportTop: 10,
+    }));
+    assert.notEqual(document.getText(), before, "Restricted Mode pastes the block: trust never makes a document read-only");
+    await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+    await vscode.commands.executeCommand("undo");
+    assert.equal(document.getText(), before, "one undo removes the pasted block");
+    // A cut is applied too, then undone; a cut sent for the previous text is dropped as stale: retry.
+    await untilApplied(document, () => sendPreviewMessageForTests({
+      documentId: preview.documentUri,
+      revision: document.version,
+      requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
+      type: "previewBlocksCut", line: 9, endLine: 10, pinViewportTop: 10,
+    }));
+    assert.notEqual(document.getText(), before, "Restricted Mode cuts the blocks");
+    await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+    await vscode.commands.executeCommand("undo");
+    assert.equal(document.getText(), before, "one undo restores the cut blocks");
   } finally {
     await vscode.env.clipboard.writeText(savedClipboard);
   }

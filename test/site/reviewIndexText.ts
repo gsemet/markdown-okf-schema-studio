@@ -50,7 +50,7 @@ ${input.integrationSkipped ? "Real VS Code stage: **not run** in this campaign (
 4. [Actual window reload and close/reopen](RELOAD-LATEST.md): before reload, after reload, after reopen. No injected state.
 5. [Real checkbox toggles](CHECKBOX-LATEST.md): \`[ ]\`/\`[x]\` markers clicked in reading mode and edit mode, unchecked and checked states.
 6. [Real-input editing](screenshots/REAL-INPUT-LATEST.md): real mouse and keyboard edits in the side preview and the Open With editor, with the buffer checked after each action.
-7. [Restricted Mode window](screenshots/UNTRUSTED-LATEST.md): the read-only side preview of an untrusted workspace.
+7. [Restricted Mode window](screenshots/UNTRUSTED-LATEST.md): the editable side preview of an untrusted workspace.
 
 ## Reading Each Capture
 

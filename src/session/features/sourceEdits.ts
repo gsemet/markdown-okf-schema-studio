@@ -20,7 +20,6 @@ import {
   planRadioSelect,
   planThreadDelete,
   planThreadReply,
-  READ_ONLY_FILE,
   readThreadLines,
   STALE_REQUEST,
 } from "../../core/edits/sourceEdits";
@@ -38,7 +37,7 @@ import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { currentPreviewDocument, previewReadOnlyReason } from "../sessionDocuments";
+import { applyWrittenEdits, currentPreviewDocument } from "../sessionDocuments";
 import { fireAndForget } from "../../host-api/logger";
 
 type BlocksOp = "copy" | "cut" | "paste";
@@ -66,10 +65,10 @@ export class SourceEditController {
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-058
   /** Applies edits a preview asked for, as one undo step in the editor that shows the document. */
   private apply(document: HostDocument, edits: readonly TextEdit[]): PromiseLike<boolean> {
-    return this.manager.host.documents.applyEdits(document, edits, { ownUndoStep: true });
+    return applyWrittenEdits(this.manager.host.documents, document, edits, { ownUndoStep: true });
   }
 
-  /** Answers a checkbox toggle; also the refusal of a read-only preview (see the page gates). */
+  /** Answers a checkbox toggle (see the page gates). */
   public postCheckboxResult(
     preview: PreviewSession,
     message: PageMessageOf<"previewCheckboxToggle">,
@@ -115,17 +114,13 @@ export class SourceEditController {
       this.postCheckboxResult(preview, message, { saved: true });
       return undefined;
     }
-    const before = document.getText();
     return this.apply(document, "edits" in toggle ? toggle.edits : [toggle.edit]).then((applied) => {
-      // VS Code accepts an edit of a read-only file (`files.readonlyInclude`) and changes nothing.
-      // An external change during the apply can make this answer saved once; benign, as its
-      // content patch re-renders the page from the source right after.
+      // A read-only file rejects with its reason (see `applyWrittenEdits`).
       // @implements_req SwRS-MDOKFSTUDIO-GFM-021
       // @implements_req SwRS-MDOKFSTUDIO-GFM-039
-      const written = applied && document.getText() !== before;
-      this.postCheckboxResult(preview, message, written
+      this.postCheckboxResult(preview, message, applied
         ? { saved: true }
-        : { error: applied ? READ_ONLY_FILE : "VS Code could not apply the checkbox edit." });
+        : { error: "VS Code could not apply the checkbox edit." });
     }, (error: unknown) => {
       this.postCheckboxResult(preview, message, { error: error instanceof Error ? error.message : String(error) });
     });
@@ -156,10 +151,6 @@ export class SourceEditController {
    * A line that is not exactly `(oldName)=` is refused, never searched for elsewhere.
    */
   private handleLabelRename(preview: PreviewSession, message: PageMessageOf<"previewLabelRename">): PromiseLike<void> | undefined {
-    if (preview.readOnly) {
-      this.postLabelRenameResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
-      return undefined;
-    }
     if (preview.edits.active) {
       this.postLabelRenameResult(preview, message, {
         ok: false,
@@ -227,7 +218,6 @@ export class SourceEditController {
       this.postThreadResult(preview, type, message, { ok: false, reason });
       return undefined;
     };
-    if (preview.readOnly) return fail(previewReadOnlyReason(preview));
     if (preview.edits.active) return fail("Save or cancel the open Markdown edit before changing a thread.");
     const document = currentPreviewDocument(preview, message);
     if (!document) return fail(STALE_REQUEST);
@@ -298,7 +288,6 @@ export class SourceEditController {
       this.postFindReplaceResult(preview, message, { ok: false, reason });
       return undefined;
     };
-    if (preview.readOnly) return fail(previewReadOnlyReason(preview));
     if (preview.edits.active) return fail("Save or cancel the open Markdown edit before replacing.");
     const document = currentPreviewDocument(preview, message);
     if (!document) return fail(STALE_REQUEST);
@@ -341,10 +330,6 @@ export class SourceEditController {
    * The moving range may span several selected blocks (their inner separators travel with it).
    */
   private handleBlockMove(preview: PreviewSession, message: PageMessageOf<"previewBlockMove">): PromiseLike<void> | undefined {
-    if (preview.readOnly) {
-      this.postBlockMoveResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
-      return undefined;
-    }
     if (preview.edits.active) {
       this.postBlockMoveResult(preview, message, {
         ok: false,
@@ -402,7 +387,7 @@ export class SourceEditController {
     }), "postToPage");
   }
 
-  /** Read-only, open-editor and stale-version refusals shared by copy, cut and paste of blocks. */
+  /** Open-editor and stale-version refusals shared by copy, cut and paste of blocks. */
   private blocksDocument(
     preview: PreviewSession,
     message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksPaste" | "previewDropFiles">,
@@ -412,9 +397,6 @@ export class SourceEditController {
       this.postBlocksResult(preview, message, op, { ok: false, reason });
       return undefined;
     };
-    if (preview.readOnly) {
-      return refuse(previewReadOnlyReason(preview));
-    }
     if (preview.edits.active) {
       return refuse("Save or cancel the open Markdown edit first.");
     }
@@ -525,9 +507,9 @@ export class SourceEditController {
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-004
   /**
    * Files dropped from the Explorer: one relative Markdown reference per file, written as a new
-   * block after the line of the drop. Only `file:` addresses inside a workspace folder count; the
-   * first heading of a Markdown file is read (at most 64 KiB) for the link text. Refused like a
-   * paste of blocks (read-only, open editor, stale version, next to an included block).
+   * block after the line of the drop. Only `file:` addresses count, inside a workspace folder unless
+   * the document is a standalone file; the first heading of a Markdown file is read (at most 64 KiB) for the link text. Refused like a
+   * paste of blocks (open editor, stale version, next to an included block).
    */
   private handleDropFiles(
     preview: PreviewSession,
@@ -549,15 +531,19 @@ export class SourceEditController {
       refuse(nextToInclude.refused);
       return undefined;
     }
+    // A document in a workspace folder takes files of a workspace folder; a standalone file (no
+    // workspace folder holds it) takes any `file:` address, linked relative to the document.
+    const standalone = host.workspace.folderOf(documentPath) === undefined;
     const paths = message.uris
       .map(droppedFilePath)
-      .filter((file): file is string => file !== undefined && host.workspace.folderOf(file) !== undefined);
+      .filter((file): file is string => file !== undefined && (standalone || host.workspace.folderOf(file) !== undefined));
     if (paths.length === 0) {
       refuse("Only files inside a workspace folder can be dropped.");
       return undefined;
     }
     const describe = async (file: string): Promise<DroppedFile> => {
-      if (!isMarkdownFileName(file)) return { path: file };
+      // Restricted reads: no file is read for a title, the link is written without one.
+      if (preview.restrictedReads || !isMarkdownFileName(file)) return { path: file };
       try {
         const bytes = await host.files.readFile(file);
         const title = firstHeadingTitle(new TextDecoder().decode(bytes.subarray(0, MAX_HEADING_SCAN_BYTES)));

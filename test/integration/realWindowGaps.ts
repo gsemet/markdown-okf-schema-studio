@@ -667,23 +667,29 @@ export async function scenarioFigureInsert(page: Page, evidence: Evidence): Prom
 
 // @tests_req StRS-MDOKFSTUDIO-BLOCK-001
 // @tests_req StRS-MDOKFSTUDIO-TRUST-001
-/** trust-security/r01: the side preview of an untrusted workspace (runs in the Restricted Mode window). */
-export async function scenarioUntrustedReadOnly(page: Page, evidence: Evidence): Promise<void> {
+/** trust-security/r01: the side preview of an untrusted workspace, editable (runs in the Restricted Mode window). */
+export async function scenarioRestrictedEdit(page: Page, evidence: Evidence): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, false, "this scenario runs in the Restricted Mode window");
-  const text = "# Restricted Mode\n\nThis workspace is not trusted.\n\n- the preview renders\n- nothing can be edited\n";
+  const text = "# Restricted Mode\n\nThis workspace is not trusted.\n\n- the preview renders\n- the document can still be edited\n";
   await withFixtureDocument("untrusted-capture", { "restricted.md": text }, "restricted.md", async (document) => {
     await openSidePreview(document);
     await waitForPreviewReady(document);
-    assert.equal(getActivePreviewForTests()?.readOnly, true);
+    assert.equal(getActivePreviewForTests()?.restrictedReads, true);
     const frame = await currentPreviewFrame(page);
     const editButton = frame.locator("[data-sphinx-preview-edit-toggle]");
     assert.equal(await editButton.count(), 1, "the Edit button stays visible");
-    assert.equal(await editButton.getAttribute("aria-disabled"), "true", "the Edit button is greyed");
-    assert.match((await editButton.getAttribute("data-tooltip")) ?? "", /^Editing is unavailable: .*trusted workspace/u);
+    assert.equal(await editButton.getAttribute("aria-disabled"), null, "the Edit button is enabled in Restricted Mode");
+    assert.equal(await editButton.getAttribute("data-tooltip"), "Edit mode");
     assert.notEqual(await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode"), "on");
-    // The refusal toasts of the suite's earlier checks would cover the preview.
-    await vscode.commands.executeCommand("notifications.clearAll");
-    await captureNow(evidence, page, "trust-security/r01-untrusted-read-only",
-      "Restricted Mode window: the side preview renders the document read-only and the toolbar shows the Edit button greyed, with its reason as tooltip.");
+    await setEditMode(page, true);
+    try {
+      assert.equal(await (await currentPreviewFrame(page)).locator("html").getAttribute("data-sphinx-preview-edit-mode"), "on");
+      // The toasts of the suite's earlier checks would cover the preview.
+      await vscode.commands.executeCommand("notifications.clearAll");
+      await captureNow(evidence, page, "trust-security/r01-untrusted-read-only",
+        "Restricted Mode window: the side preview renders the document, the Edit button is enabled and edit mode is on.");
+    } finally {
+      await leaveEditMode(page);
+    }
   });
 }

@@ -1,4 +1,4 @@
-/** The webview of a read-only preview loads the images of the document folder and of a non-broad workspace folder. */
+/** The webview of a preview with restricted reads loads the images of the document folder and of a non-broad workspace folder. */
 import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -9,7 +9,7 @@ import { previewLocalResourceRoots } from "../../src/session/features/rendering"
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-007
-test("a read-only preview has its document folder and a non-broad workspace folder as local resource roots", () => {
+test("a restricted-reads preview has its document folder and a non-broad workspace folder as local resource roots", () => {
   const sandbox = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "readonly-roots-")));
   const saved = { HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE };
   const project = path.join(sandbox, "project");

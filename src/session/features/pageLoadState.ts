@@ -82,8 +82,6 @@ export const CONTENT_PATCH_ACK_TIMEOUT_MS = 2_000;
 export interface ToolbarState {
   pairedTextEditor: boolean;
   initialPaletteMode: PaletteMode;
-  /** False in read-only previews: the page offers no Comment button and no reply box. */
+  /** True when the page offers the Comment button and the reply box (Restricted Mode and standalone files too). */
   commentsEnabled: boolean;
-  /** Set in read-only previews: why the page offers no editing (the tooltip of a disabled checkbox). */
-  readOnlyReason?: string;
 }

@@ -23,7 +23,7 @@ const CHART = '<figure class="myst-vega-figure"><div class="myst-vega-diagram" d
 const MERMAID = '<figure class="myst-mermaid-figure"><div class="myst-mermaid-diagram">graph TD</div></figure>';
 
 const build = (content: string) =>
-  buildPreviewWebviewHtml(page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, true, [], "builtin").html;
+  buildPreviewWebviewHtml(page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, [], "builtin").html;
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-124
 test("the chart runtime script is added once with the page nonce, only when the content holds a chart", () => {

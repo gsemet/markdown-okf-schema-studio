@@ -127,14 +127,14 @@ function injectAccessibilityStyles(html: string, css: string, nonce: string): st
   return html;
 }
 
-function injectPreviewThemeControl(html: string, editingEnabled: boolean): string {
+function injectPreviewThemeControl(html: string): string {
   const bodyOpening = /<body(?:\s[^>]*)?>/iu;
   if (!bodyOpening.test(html)) {
     return html;
   }
   return html.replace(
     bodyOpening,
-    (opening) => `${opening}${renderPreviewToolbar(editingEnabled)}${renderPreviewStickyHeadings()}`,
+    (opening) => `${opening}${renderPreviewToolbar()}${renderPreviewStickyHeadings()}`,
   );
 }
 
@@ -168,15 +168,15 @@ export function buildPreviewWebviewHtml(
   workspaceRoot?: string,
   frontmatter?: { result: FrontmatterResult; tableEnabled: boolean },
   maxContentWidth?: number,
-  editingEnabled = true,
+  /** False for a preview with restricted reads: the page loads no external script. */
   allowExternalScripts = true,
   plantUmlDiagrams: readonly PlantUmlDiagramRender[] = [],
   /** `builtin`: the page loads the bundled PlantUML engine; `host`: the diagrams come injected. */
   plantUmlRenderer: "builtin" | "host" = "host",
-  /** A read-only preview: the resource policy is narrowed (TRUST-002). */
-  readOnly = false,
+  /** Restricted reads: the resource policy is narrowed (TRUST-002). */
+  restrictedReads = false,
 ): PreviewWebviewResult {
-  const policy = createPreviewResourcePolicy(outputDirectory, workspaceRoot, readOnly);
+  const policy = createPreviewResourcePolicy(outputDirectory, workspaceRoot, restrictedReads);
   const nonce = createNonce();
   const resolvedStylesheets = new Set<string>();
   const stylesheetDiagnostics: SecurityDiagnostic[] = [];
@@ -241,7 +241,7 @@ export function buildPreviewWebviewHtml(
   // element, which keeps only the rule that depends on the settings.
   const stylesheetUri = bundleUri("preview.css");
   const accessibleHtml = injectAccessibilityStyles(
-    scrollContext ? injectPreviewThemeControl(withPlantUml, editingEnabled) : withPlantUml,
+    scrollContext ? injectPreviewThemeControl(withPlantUml) : withPlantUml,
     stylesheetUri
       ? `@import url("${stylesheetUri.replace(/["\\\n]/gu, encodeURIComponent)}");${previewContentWidthCss(maxContentWidth)}`
       : `${PREVIEW_ACCESSIBILITY_CSS}${PREVIEW_THEME_CSS}${previewContentWidthCss(maxContentWidth)}`,
@@ -278,7 +278,7 @@ export function buildPreviewWebviewHtml(
   const withFrontmatter = injectPropertiesTable(
     html,
     frontmatter
-      ? renderPropertiesTable(frontmatter.result, frontmatter.tableEnabled, scrollContext, editingEnabled)
+      ? renderPropertiesTable(frontmatter.result, frontmatter.tableEnabled, scrollContext)
       : "",
   );
   return {

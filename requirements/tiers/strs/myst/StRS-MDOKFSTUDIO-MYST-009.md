@@ -88,7 +88,7 @@ Writers want to see where each cross-reference points so that they can spot brok
   - [SwRS-MDOKFSTUDIO-MYST-051](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-051.md): The label rename message is validated and answered
   - [SwRS-MDOKFSTUDIO-MYST-090](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-090.md): The rename field closes itself after 5 seconds
   - [SwRS-MDOKFSTUDIO-MYST-094](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-094.md): A label starting with underscore, dot or hyphen cannot be renamed
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:
   - [StRS-MDOKFSTUDIO-MYST-004](StRS-MDOKFSTUDIO-MYST-004.md): Reference roles show where a link goes

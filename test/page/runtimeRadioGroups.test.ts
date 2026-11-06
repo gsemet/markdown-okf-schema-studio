@@ -7,7 +7,7 @@ import { openBlockEditorWithSource, patchMessage } from "./runtimeTestSupport";
 /**
  * Radio choice options in the page (features/checkboxes.ts): a click or Space / Enter selects an
  * option and asks the host to move the `x`, the arrows move the focus only, and the checkbox guards
- * (read-only preview, open editor, pending toggle) apply.
+ * (open editor, pending toggle) apply.
  */
 
 interface FakeEvent {
@@ -177,24 +177,6 @@ test("the arrow keys move the focus between the options and write nothing", () =
 
   assert.equal(harness.messages.length, before, "moving the focus writes nothing");
   assert.equal(states(radios), "x  ", "moving the focus selects nothing");
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
-test("radio options in a read-only preview are disabled and a click sends nothing", () => {
-  const harness = createRuntimeHarness({
-    radioGroup: ["x", " "], editingEnabled: false, readOnlyReason: "Reason from the host.", captureOrder: true,
-  });
-  for (const radio of harness.radios) {
-    assert.equal(radio.getAttribute("aria-disabled"), "true");
-    assert.equal(radio.getAttribute("title"), "Reason from the host.");
-  }
-  const before = harness.messages.length;
-  const click = fakeEvent(harness.radios[1]);
-  harness.dispatchDocument("click", click);
-  harness.dispatchDocument("keydown", fakeEvent(harness.radios[1], " "));
-  assert.equal(click.defaultPrevented, true);
-  assert.equal(harness.messages.length, before);
-  assert.equal(states(harness.radios), "x ");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-039

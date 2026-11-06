@@ -66,5 +66,5 @@ As a writer, I paste a screenshot and it becomes a picture of the document witho
   - [SwRS-MDOKFSTUDIO-PALETTE-217](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-217.md): Pasted HTML becomes the matching Markdown
   - [SwRS-MDOKFSTUDIO-PALETTE-229](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-229.md): Pasted HTML never brings active content
   - [SwRS-MDOKFSTUDIO-PALETTE-264](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-264.md): A pasted URL becomes a link, an autolink or an image in the block text box
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
 <!-- okf:links:end -->

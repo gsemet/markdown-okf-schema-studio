@@ -1,12 +1,12 @@
 /**
  * Requirement tests of the answers the host gives to a checkbox toggle it refuses: a malformed
- * message and a read-only preview. The dispatcher runs against a fake manager that records the
+ * message. The dispatcher runs against a fake manager that records the
  * result of each toggle.
  */
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { MALFORMED_TOGGLE, READ_ONLY_NO_FOLDER, READ_ONLY_UNTRUSTED } from "../../src/core/edits/sourceEdits";
+import { MALFORMED_TOGGLE } from "../../src/core/edits/sourceEdits";
 import { PageMessageDispatcher } from "../../src/session/pageMessages";
 import { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
@@ -18,12 +18,12 @@ interface Answer {
   readonly result: { saved?: true; error?: string };
 }
 
-function harness(options: { readOnly?: boolean; workspaceFolder?: object } = {}) {
+function harness(options: { restrictedReads?: boolean; workspaceFolder?: object } = {}) {
   const answers: Answer[] = [];
   const handled: string[] = [];
   const session = {
     disposed: false,
-    readOnly: options.readOnly === true,
+    restrictedReads: options.restrictedReads === true,
     workspaceFolder: options.workspaceFolder,
     documentUri: DOCUMENT,
     stage: { activeDocumentIdentity: DOCUMENT, activeDocumentRevision: 4, requestId: 9 },
@@ -72,14 +72,14 @@ test("a malformed checkbox toggle is answered, so the box never stays busy", () 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("a read-only checkbox toggle names the missing folder or the missing trust", () => {
-  const standalone = harness({ readOnly: true });
+test("a checkbox toggle of a standalone file or in Restricted Mode reaches the handler", () => {
+  const standalone = harness({ restrictedReads: true });
   standalone.dispatcher.handle(standalone.session, toggle());
-  assert.deepEqual(standalone.answers, [{ editId: "c1", result: { error: READ_ONLY_NO_FOLDER } }]);
-  assert.doesNotMatch(READ_ONLY_NO_FOLDER, /trust/iu);
+  assert.deepEqual(standalone.answers, []);
+  assert.deepEqual(standalone.handled, ["previewCheckboxToggle"]);
 
-  const untrusted = harness({ readOnly: true, workspaceFolder: { path: "/notes" } });
+  const untrusted = harness({ restrictedReads: true, workspaceFolder: { path: "/notes" } });
   untrusted.dispatcher.handle(untrusted.session, toggle());
-  assert.deepEqual(untrusted.answers, [{ editId: "c1", result: { error: READ_ONLY_UNTRUSTED } }]);
-  assert.deepEqual([...standalone.handled, ...untrusted.handled], []);
+  assert.deepEqual(untrusted.answers, []);
+  assert.deepEqual(untrusted.handled, ["previewCheckboxToggle"]);
 });

@@ -17,7 +17,7 @@ import type { MessageRouter } from "../core/protocol/router";
 import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
 import { LABEL_GONE, MALFORMED_TOGGLE, STALE_REQUEST } from "../core/edits/sourceEdits";
-import { previewReadOnlyReason, revisionOfStage } from "./sessionDocuments";
+import { revisionOfStage } from "./sessionDocuments";
 import { fireAndForget } from "../host-api/logger";
 
 /** What a page message handler returns: the work it started, when a caller may wait for it. */
@@ -89,11 +89,6 @@ export const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGa
   previewEditClosed: "own-id",
   previewEditFlushed: "own-id",
 };
-
-/** The edit requests of the page-state family: they need a writable preview. */
-export const EDIT_REQUEST_TYPES: ReadonlySet<PageToHostType> = new Set([
-  "previewEditOpen", "previewEditSave", "previewEditCancel", "previewFrontmatterSave", "previewCheckboxToggle",
-]);
 
 /** Matches each page message to its preview by its gate, then runs the registered handler. */
 export class PageMessageDispatcher {
@@ -212,7 +207,7 @@ export class PageMessageDispatcher {
    */
   private reportStaleEdit(preview: PreviewSession, value: PageStateMessageUnion): void {
     const { manager } = this;
-    if (preview.disposed || preview.readOnly || !manager.has(preview) || value.documentId !== preview.documentUri) {
+    if (preview.disposed || !manager.has(preview) || value.documentId !== preview.documentUri) {
       return;
     }
     if (value.type === "previewEditSave" || value.type === "previewEditCancel") {
@@ -235,9 +230,9 @@ export class PageMessageDispatcher {
   /**
    * The gate of the page-state family. Before the render check, a ready report can show that the
    * webview reloaded an older document, or that it works through a chain of content patches. A stale
-   * edit is answered with an error. A message that passes reports the page's anchor, and an edit
-   * request of a read-only preview is refused with an error the page shows. Unlike the other gates,
-   * the result is the handler's own (undefined when it started nothing).
+   * edit is answered with an error. A message that passes reports the page's anchor and goes to its
+   * handler: Restricted Mode and a standalone file edit like a trusted workspace. Unlike the other
+   * gates, the result is the handler's own (undefined when it started nothing).
    */
   private handlePageState(preview: PreviewSession, value: PageStateMessageUnion): PromiseLike<void> | undefined {
     const { manager } = this;
@@ -274,18 +269,6 @@ export class PageMessageDispatcher {
     if (value.type !== "previewLinkDiscover" && value.anchorLine !== undefined && value.documentId === preview.documentUri) {
       // The preview reports its anchor with every scroll, refresh and inline edit save.
       preview.scroll.anchor = { line: value.anchorLine, owner: "preview", documentId: value.documentId };
-    }
-    if (preview.readOnly && EDIT_REQUEST_TYPES.has(value.type)) {
-      if (value.type === "previewFrontmatterSave") {
-        manager.frontmatter.postEditError(preview, value, previewReadOnlyReason(preview));
-      } else if (value.type === "previewCheckboxToggle") {
-        manager.sourceEdits.postCheckboxResult(preview, value, {
-          error: previewReadOnlyReason(preview),
-        });
-      } else if (value.type === "previewEditOpen" || value.type === "previewEditSave" || value.type === "previewEditCancel") {
-        manager.edits.postEditSourceError(preview, value, previewReadOnlyReason(preview));
-      }
-      return undefined;
     }
     const outcome = this.router.dispatch(value, preview);
     return outcome.handled && outcome.result ? outcome.result : undefined;

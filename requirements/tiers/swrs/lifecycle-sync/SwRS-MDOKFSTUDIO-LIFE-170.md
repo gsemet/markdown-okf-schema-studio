@@ -76,7 +76,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 
 | View choice | Panel state (first) | Stored value (second) | Default (last) | Accepted values and normalisation |
 | --- | --- | --- | --- | --- |
-| Edit mode | saved editMode true, of the same document | none: the stored edit mode is not applied at start (see SwRS-MDOKFSTUDIO-LIFE-172) | off (preview mode); also off when the Edit button is greyed | a saved value that is not true, or saved by another document, gives off; a read-only preview gives off |
+| Edit mode | saved editMode true, of the same document | none: the stored edit mode is not applied at start (see SwRS-MDOKFSTUDIO-LIFE-172) | off (preview mode) | a saved value that is not true, or saved by another document, gives off |
 | Palette mode | saved paletteMode | the host gives the valid mode stored for the workspace, else the value of the setting markdownOkfSchemaStudio.editing.defaultPaletteMode | gfm | only strict, gfm, myst and full |
 | Width mode | saved viewWidthMode | stored widthMode | margin | only margin, auto and full |
 | Zoom | saved viewZoom | stored zoom | 100 | rounded to a multiple of 10 and clamped to 70 to 200; a value that is not a finite number is ignored |
@@ -104,7 +104,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 
 | Input | Outcome |
 | --- | --- |
-| Writable preview in a trusted workspace whose stored edit mode is true | the page still starts in preview mode |
+| Preview in a trusted workspace whose stored edit mode is true | the page still starts in preview mode |
 | Stored palette mode myst and setting strict | the initial mode in the page context is myst |
 | Initial zoom preference 150, no saved state | the zoom is 150 |
 | Stored zoom 130 accepted from a preview (validation: SwRS-MDOKFSTUDIO-TOOLBAR-013; storage: SwRS-MDOKFSTUDIO-LIFE-169), next page of the workspace built | its initial view preferences carry the zoom 130 and, without saved state, it starts at 130 |
@@ -134,7 +134,7 @@ The Cream start is the same on a light and on a dark host theme:
 | Input | Outcome |
 | --- | --- |
 | Stored edit mode false, absent or not a boolean | the page starts in preview mode |
-| Read-only preview whose stored edit mode is true | the page starts in preview mode |
+| Preview with restricted reads whose stored edit mode is true | the page starts in preview mode |
 | Invalid stored width mode and no saved state | the invalid value is ignored and the width mode is margin |
 | Stored palette mode that is not a mode and setting strict | the initial mode is strict |
 | No saved state and no host initial palette mode | the palette mode is gfm |

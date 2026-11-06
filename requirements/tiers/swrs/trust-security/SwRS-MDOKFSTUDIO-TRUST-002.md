@@ -2,17 +2,18 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-TRUST-002
 uuid: 16e75dfb-3bcc-404e-9ced-54b954339956
-title: A read-only preview reads no include, shows images only, and reads no
-  home folder or dot-directory
-description: "When a preview is read-only (no workspace folder, or Restricted Mode),
-  the extension SHALL refuse every include and resource whose path lies below a dot-segment;
-  SHALL read includes and resources other than images from the folder of the document
-  only, and none of them when that folder is the home folder of the user, a folder
-  that contains it or a file-system root, showing the reason as a diagnostic; and
-  SHALL show images (files named .png, .jpg, .jpeg, .gif, .webp or .svg, whatever
-  element loads them, and leading to a file of those kinds) from the folder of the
-  document, even when it is broad, and from the workspace folder unless that is broad,
-  granting the webview those folders as local resource roots."
+title: A preview with restricted reads reads no include, shows images only, and
+  reads no home folder or dot-directory
+description: "When a preview has restricted reads (no workspace folder, or Restricted
+  Mode; editing is not affected), the extension SHALL refuse every include and resource
+  whose path lies below a dot-segment; SHALL read includes and resources other than
+  images from the folder of the document only, and none of them when that folder is
+  the home folder of the user, a folder that contains it or a file-system root, showing
+  the reason as a diagnostic; and SHALL show images (files named .png, .jpg, .jpeg,
+  .gif, .webp or .svg, whatever element loads them, and leading to a file of those
+  kinds) from the folder of the document, even when it is broad, and from the workspace
+  folder unless that is broad, granting the webview those folders as local resource
+  roots."
 project: markdown-okf-schema-studio
 scope: trust-security
 req_lifecycle: proposed
@@ -38,45 +39,45 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## A read-only preview reads no include, shows images only, and reads no home folder or dot-directory
+## A preview with restricted reads reads no include, shows images only, and reads no home folder or dot-directory
 
 ### Normative behavior
 
-When a preview is read-only (no workspace folder, or Restricted Mode), the extension SHALL refuse every include and resource whose path lies below a dot-segment; SHALL read includes and resources other than images from the folder of the document only, and none of them when that folder is the home folder of the user, a folder that contains it or a file-system root, showing the reason as a diagnostic; and SHALL show images (files named .png, .jpg, .jpeg, .gif, .webp or .svg, whatever element loads them, and leading to a file of those kinds) from the folder of the document, even when it is broad, and from the workspace folder unless that is broad, granting the webview those folders as local resource roots.
+When a preview has restricted reads (no workspace folder, or Restricted Mode; editing is not affected), the extension SHALL refuse every include and resource whose path lies below a dot-segment; SHALL read includes and resources other than images from the folder of the document only, and none of them when that folder is the home folder of the user, a folder that contains it or a file-system root, showing the reason as a diagnostic; and SHALL show images (files named .png, .jpg, .jpeg, .gif, .webp or .svg, whatever element loads them, and leading to a file of those kinds) from the folder of the document, even when it is broad, and from the workspace folder unless that is broad, granting the webview those folders as local resource roots.
 
-### Scenario (nominal): Read-only preview in an ordinary folder
+### Scenario (nominal): Preview with restricted reads in an ordinary folder
 
-- GIVEN a read-only preview of a document in a folder that is not the home folder
+- GIVEN a preview with restricted reads of a document in a folder that is not the home folder
 - WHEN the document includes a file next to it, or loads an image next to it
 - THEN the include and the image are served as before
 
 ### Scenario (nominal): Images of the document folder and of the workspace folder
 
-- GIVEN a read-only preview of a document in a subfolder of a workspace folder that is not broad, whose images have spaces in their names (written with %20 or between angle brackets), lie in a subfolder of the document folder, or lie in the workspace folder outside the document folder
+- GIVEN a preview with restricted reads of a document in a subfolder of a workspace folder that is not broad, whose images have spaces in their names (written with %20 or between angle brackets), lie in a subfolder of the document folder, or lie in the workspace folder outside the document folder
 - WHEN the document shows them as images (png, jpg, jpeg, gif, webp or svg)
 - THEN every image loads, and the webview has the folder of the document and the workspace folder as local resource roots
 
 ### Scenario (refusal): Non-image resource and include outside the document folder
 
-- GIVEN the same read-only preview
+- GIVEN the same preview with restricted reads
 - WHEN a file that is not an image, or an include, lies in the workspace folder outside the folder of the document
 - THEN it is refused with the code resource-outside-root, as before
 
 ### Scenario (refusal): Dot-directory
 
-- GIVEN a read-only preview in any folder
+- GIVEN a preview with restricted reads in any folder
 - WHEN an include or a resource names a path with a segment that starts with a dot below the folder of the document (.ssh/id_rsa, .agents/rule.md), or a symbolic link that leads to such a path
-- THEN it is refused with the code hidden-path and the diagnostic "A read-only preview does not read paths inside dot-directories such as .ssh or .config."
+- THEN it is refused with the code hidden-path and the diagnostic "A preview with restricted reads does not read paths inside dot-directories such as .ssh or .config."
 
 ### Scenario (refusal): Broad folder
 
-- GIVEN a read-only preview whose document is in the home folder, in a folder that contains it (such as /Users) or in a file-system or drive root
+- GIVEN a preview with restricted reads whose document is in the home folder, in a folder that contains it (such as /Users) or in a file-system or drive root
 - WHEN an include or a resource that is not an image is requested, even a plain file next to the document
 - THEN it is refused with the code restricted-root and the diagnostic that names the home folder
 
 ### Scenario (boundary): Images in a broad folder
 
-- GIVEN a read-only preview whose document is in the home folder (or in a folder that contains it, or in a file-system root), and a workspace folder that may be the home folder too
+- GIVEN a preview with restricted reads whose document is in the home folder (or in a folder that contains it, or in a file-system root), and a workspace folder that may be the home folder too
 - WHEN the document shows an image next to it or below its folder, and an image of the workspace folder outside the document folder
 - THEN the image of the document folder (never one below a dot-segment) loads and the folder of the document is a local resource root; the image of the broad workspace folder is refused with the code restricted-root, and that folder is no local resource root
 
@@ -84,7 +85,7 @@ When a preview is read-only (no workspace folder, or Restricted Mode), the exten
 
 - GIVEN a preview of a trusted workspace folder
 - WHEN a document includes a file inside a dot-directory such as .agents
-- THEN the file is included (the dot-segment rule applies to read-only previews only)
+- THEN the file is included (the dot-segment rule applies to previews with restricted reads only)
 
 ### Related requirements
 

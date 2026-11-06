@@ -13,10 +13,10 @@ scope: review-annotations
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-06T01:44:30+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-06T01:44:30+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -48,7 +48,7 @@ As a writer, I keep a discussion in the file itself and answer it where I read i
 ### Rationale and constraints
 
 - Only the lines of the thread change, in one undo step, and the line breaks of the document are kept.
-- Read-only previews show the messages without controls.
+- Every preview offers the thread controls, Restricted Mode and a file outside the workspace included; a file that VS Code holds read-only is not changed and the writer is told.
 - The refusal under an open edit is made by the page first; the host refuses again when an edit of the Markdown is open on its side.
 
 <!-- okf:links:start -->

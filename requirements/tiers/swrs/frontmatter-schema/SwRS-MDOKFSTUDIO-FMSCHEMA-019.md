@@ -112,7 +112,7 @@ When a document's frontmatter has a string `type`, the extension SHALL look for 
 - Method: integration test of the untrusted workspace (generic table only; the info row in Restricted Mode is untested there).
 - Method: test/node-services/schemaFiles.test.ts (the folder is read once while unchanged, again after a file is added, and lists nothing once removed; a listing read right after the folder changed is not reused, with the folder's times frozen as in one clock step)
 - Criteria: The folder name in the message is the base name of the schema folder; the summary counts one info, also for a typed document in Restricted Mode.
-- Criteria: Schema resolution is off when the preview is read-only (no workspace folder, or an untrusted workspace).
+- Criteria: Schema resolution is off when the preview has restricted reads (no workspace folder, or an untrusted workspace).
 
 <!-- okf:links:start -->
 ### Links

@@ -75,7 +75,7 @@ When a writer clicks a checkbox in reading or edit mode, the extension SHALL edi
 
 ### Scenario (refusal): The host refuses the toggle
 
-For the open editor, the stale render and the read-only preview, see SwRS-MDOKFSTUDIO-BLOCK-041, SwRS-MDOKFSTUDIO-TRUST-065 and SwRS-MDOKFSTUDIO-TRUST-005. The reasons of the toggle are:
+For the open editor and the stale render, see SwRS-MDOKFSTUDIO-BLOCK-041, SwRS-MDOKFSTUDIO-TRUST-065 and SwRS-MDOKFSTUDIO-TRUST-005. The reasons of the toggle are:
 
 | Input | Outcome |
 | --- | --- |
@@ -85,7 +85,6 @@ For the open editor, the stale render and the read-only preview, see SwRS-MDOKFS
 | VS Code fails to apply the edit | refused with 'VS Code could not apply the checkbox edit.' or the edit error |
 | a file VS Code keeps read-only (files.readonlyInclude, or read-only in the session): the apply resolves and changes nothing | refused with 'This file is read-only in VS Code.' |
 | a toggle message the validator rejects (see SwRS-MDOKFSTUDIO-GFM-027) | refused with 'The checkbox request was not understood. Refresh the preview.' |
-| a toggle in a preview of a file outside every workspace folder | refused with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 
 The reason appears in a status note right after the box and disappears after about six seconds; a second refusal of the same box replaces the note.
 
@@ -103,7 +102,7 @@ The reason appears in a status note right after the box and disappears after abo
 ### Verification notes
 
 - Method: test/core/edits/sourceEdits.test.ts (toggle in reading mode, table cell, uppercase marker: unit tests of the one-character edit).
-- Method: test/page/runtimePageControls.test.ts (toggle with no block editor, busy checkbox, missing position attributes, unit test "a rejected checkbox toggle reverts the box and explains why", which also checks the status note and its removal). test/session/checkboxRefusal.test.ts (read-only reasons). test/session/radioChoice.test.ts (a plain toggle on a read-only file: the apply changes nothing and the answer is the read-only reason). Untested: the host refusal paths (marker gone, open Markdown edit, apply failure). Untested: when no editor shows the document, the host applies the toggle through workspace.applyEdit; on a read-only file that call may resolve false, and the page then shows 'VS Code could not apply the checkbox edit.' instead of the read-only reason. The visual scenario of the refusal note is in the visual suite.
+- Method: test/page/runtimePageControls.test.ts (toggle with no block editor, busy checkbox, missing position attributes, unit test "a rejected checkbox toggle reverts the box and explains why", which also checks the status note and its removal). test/session/checkboxRefusal.test.ts (a toggle of a standalone file or in Restricted Mode reaches the handler). test/session/radioChoice.test.ts (a plain toggle on a read-only file: the apply changes nothing and the answer is the read-only reason). Untested: the host refusal paths (marker gone, open Markdown edit, apply failure). Untested: when no editor shows the document, the host applies the toggle through workspace.applyEdit; on a read-only file that call may resolve false, and the page then shows 'VS Code could not apply the checkbox edit.' instead of the read-only reason. The visual scenario of the refusal note is in the visual suite.
 - Method: test/page/runtimeContentPatch.test.ts (content patch scenario: page unit tests).
 - Criteria: The edit replaces exactly one character; exactly one message per pending toggle; the box is reverted and the matching reason shown, beside the box and as a tooltip, for every refusal; new content is unaffected by stale results.
 
@@ -115,7 +114,7 @@ The reason appears in a status note right after the box and disappears after abo
 - Derives from:
   - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes

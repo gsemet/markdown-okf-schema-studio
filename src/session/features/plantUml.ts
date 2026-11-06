@@ -139,7 +139,7 @@ export class PlantUmlController {
     }
     const answer = resolvePlantUmlInclude(
       { path: message.path, from: message.from },
-      { documentPath: manager.activePathOf(preview), workspaceRoot: preview.workspaceRoot, trusted: manager.host.workspace.trusted, readOnly: preview.readOnly },
+      { documentPath: manager.activePathOf(preview), workspaceRoot: preview.workspaceRoot, trusted: manager.host.workspace.trusted, restrictedReads: preview.restrictedReads },
     );
     if (answer.watch) {
       preview.plantUml.includeWatch.remember(manager.canonicalPath(answer.watch));

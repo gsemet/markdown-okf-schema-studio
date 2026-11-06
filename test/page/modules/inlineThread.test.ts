@@ -82,7 +82,7 @@ test("an open thread gets a reply box and a Delete button once, and apply is ide
   assert.equal(part(body, "data-okf-thread-delete").textContent, "Delete thread");
 });
 
-test("a read-only page (untrusted workspace) shows the messages without controls", () => {
+test("a page with the thread controls off shows the messages without controls", () => {
   const { root, threads } = setup({ enabled: false });
   const { body } = thread(root);
   threads.apply();

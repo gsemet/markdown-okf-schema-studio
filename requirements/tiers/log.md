@@ -1,5 +1,59 @@
 # Update Log
 
+## 2026-11-06
+
+### A document is editable whatever the trust (CR 264)
+
+- StRS-MDOKFSTUDIO-TRUST-001 and SwRS-MDOKFSTUDIO-TRUST-001, -005 and -006 (proposed, updated): trust never
+  makes a document read-only. In Restricted Mode and for a standalone file the Edit button, the palette,
+  the checkboxes, the comments, the image paste and every write request work as in a trusted workspace;
+  only the reads stay narrow (includes, resources, schema files, the citation list, PlantUML with Java).
+  The read-only reasons "Editing requires a trusted workspace." and "Editing needs the file's folder ..."
+  and the greyed Edit button are gone; "This file is read-only in VS Code." stays.
+- Further SwRS (proposed, updated, except the ones named below): wording follows the two meanings, "restricted reads" for the narrowed
+  reads and no refusal for trust; the standalone image pick and paste use the folder of the document as
+  root. BLOCK-014, -017, -058, -124, -127, -156, -169, -174, -238, -240, -242, -243; CODE-017, -019, -025,
+  -026; FMEDIT-051, -054; FMSCHEMA-019; GFM-021, -026, -027, -039; MYST-042, -045, -051, -078, -081;
+  REVIEW-038, -044, -054, -069, -070, -071, -074, -081, -086, -171, -178, -186, -192; THEME-001, -038;
+  TOOLBAR-058, -077, -079, -083, -113, -126; TRUST-002, -007, -011, -025, -065, -090.
+  Also BLOCK-001, -205, FMEDIT-001, LIFE-026, -039, -127, -143, -169, -170, PALETTE-004, -010, -148, -183,
+  -192, -196, TOOLBAR-013, -014, -094, -131.
+  CODE-025, FMEDIT-051, GFM-026 and MYST-042 are superseded (their wording only follows the rename) and
+  SwRS TOOLBAR-014 is a draft.
+- Other StRS (proposed, updated): BLOCK-001, -006, -014, -016; CODE-004; FMEDIT-001, -008; GFM-003;
+  MYST-009; PALETTE-002, -007, -013, -018; THEME-011; TOOLBAR-001, -009, -011; TRUST-004. StRS
+  TOOLBAR-003 is a draft.
+- Approved StRS-MDOKFSTUDIO-BLOCK-025, REVIEW-003, REVIEW-015 and TABLE-001 (changed with the owner's
+  agreement of 2026-11-06): "read-only preview" becomes a file that VS Code itself holds read-only in
+  BLOCK-025, REVIEW-015 and TABLE-001. REVIEW-003 deletes the reason "a read-only preview" from its list of
+  reasons a change cannot be saved; it is not replaced. REVIEW-015 also adds "Every preview offers the thread
+  controls, Restricted Mode and a file outside the workspace included". Their approval date is
+  2026-11-06T01:44:30+01:00 and approved_by stays the owner. Approved StRS-MDOKFSTUDIO-REVIEW-001 changed
+  only its generated link line to SwRS TRUST-001 (title), with no lifecycle or text change.
+- Verification: test/session/blockReq.requirements.test.ts, checkboxRefusal.test.ts,
+  reviewReqComments.requirements.test.ts, paletteReq.requirements.test.ts and test/host/fmtableReq.requirements.test.ts
+  pass in `just check` (round 1); the visual scenarios trust-security/v01 to v03 and the real-window suites
+  untrusted-suite.ts and standalone-suite.ts are compiled, run only by the real-window jobs.
+
+### Round 2: the writer is told when VS Code keeps a file read-only (CR 264)
+
+- SwRS-MDOKFSTUDIO-TRUST-001 (proposed, updated): every write path (label rename, thread reply and delete,
+  find and replace, block save, move, cut, paste, drop, checkboxes, metadata save) checks that VS Code wrote
+  the edit and answers "This file is read-only in VS Code." otherwise (helper applyWrittenEdits); a pasted
+  image whose block save fails that way is deleted. The test titles of lifeReq.requirements.test.ts it
+  quotes follow the rename; the PlantUML reference is DIAG-024 (DIAG-025 is superseded).
+- SwRS-MDOKFSTUDIO-TRUST-005 (proposed, updated): same rule in its refusal table; a dropped Markdown file is
+  not read for a title in a preview with restricted reads; a standalone document accepts any dropped file.
+- SwRS-MDOKFSTUDIO-PALETTE-004 (proposed, updated): the drop rules above and the read-only refusal.
+  PALETTE-192 (the picker no longer says "trusted") and PALETTE-213 (no "read-only" preview) follow the
+  rename, as do REVIEW-038, -054, -081, TOOLBAR-001, TOOLBAR-012 (draft) and LIFE-143 (test title).
+- StRS-MDOKFSTUDIO-BLOCK-001 and FMEDIT-008 (proposed, updated): the Edit button is not withheld for trust; a metadata edit is not refused for trust, only for a file that VS Code holds read-only.
+- No approved requirement is changed in round 2: StRS BLOCK-025, REVIEW-003, REVIEW-015 and TABLE-001 already
+  say that the writer is told.
+- Kept names: the capture id `trust-security/r01-untrusted-read-only` and the stress scenario `untrusted-read-only` keep their names (stable ids that the registry, the site tests and the baselines use).
+- Flush: promotion and demotion of a preview with an open page editor flush it first (TRUST-001, LIFE-143; tests "granting trust flushes the open page editor before the preview is replaced" and "removing the folder of a preview flushes its open page editor before the preview is replaced" in test/host/lifeReq.requirements.test.ts).
+- Verification: ran locally: `just requirements-update` and `just requirements-lint` (exit 0), `tsc --noEmit`, and the unit tests pasteImageWrite, blockReq.requirements and inlineThread. Not run locally: `just check`, the render-based unit tests (host/lifeReq.requirements, including the two flush tests, and the other write-path suites: they time out on the first render in this worktree), integration, e2e and visual tests.
+
 ## 2026-11-05
 
 ### Reviewed release notes

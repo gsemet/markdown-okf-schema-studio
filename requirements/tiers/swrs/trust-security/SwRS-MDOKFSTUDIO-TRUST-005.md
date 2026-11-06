@@ -2,11 +2,12 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-TRUST-005
 uuid: 5e4cdfef-45cc-4199-be05-a4feed623017
-title: The host refuses every write request of a read-only preview with a reason
-description: When the host receives a write request from a read-only preview for
-  the render it holds, the extension SHALL refuse it with the read-only reason
-  that names the real cause, before it reads the document, opens a dialog or
-  writes a file, and change nothing.
+title: The host handles the write requests of every preview, whatever the trust
+description: When the host receives a write request from a preview for the
+  render it holds, the extension SHALL handle it as for a trusted workspace, in
+  Restricted Mode and for a standalone file too, and refuse it only for a reason
+  that does not depend on trust or because it needs a read that Restricted Mode
+  narrows.
 project: markdown-okf-schema-studio
 scope: trust-security
 req_lifecycle: proposed
@@ -31,7 +32,6 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/page/features/checkboxes.ts
 - src/session/features/blockEdits.ts
 - src/session/features/comments.ts
 - src/session/features/hostRequests.ts
@@ -45,11 +45,10 @@ tested_in_files:
 - test/integration/imagePaste.test.ts
 - test/integration/standalone-suite.ts
 - test/integration/untrusted-suite.ts
-- test/page/runtimePageControls.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/checkboxRefusal.test.ts
+- test/session/dropFiles.requirements.test.ts
 - test/session/paletteReq.requirements.test.ts
-- test/session/readOnlyFirstLoad.test.ts
 - test/session/renderReq.labelRename.requirements.test.ts
 - test/session/reviewReqComments.requirements.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
@@ -60,96 +59,72 @@ supersedes:
 - SwRS-MDOKFSTUDIO-MYST-042
 ---
 
-## The host refuses every write request of a read-only preview with a reason
+## The host handles the write requests of every preview, whatever the trust
 
 ### Normative behavior
 
-When the host receives a write request from a read-only preview for the render it holds, the extension SHALL refuse it with the read-only reason that names the real cause (an untrusted workspace, or a file outside every workspace folder), before it reads the document, opens a dialog or writes a file, and change nothing.
+When the host receives a write request from a preview for the render it holds, the extension SHALL handle it as for a trusted workspace, whether the preview belongs to a trusted workspace, to Restricted Mode or to a standalone file, and SHALL refuse it only for a reason that does not depend on trust (an older render, an open edit, a document that is not a saved file, a file VS Code holds read-only, a malformed request) or because it needs a read that Restricted Mode narrows (the citation list). A refusal names its real cause and changes nothing.
 
-### Scenario (refusal): The read-only reason
+### Scenario (nominal): Every write request type is handled
 
-| Cause of the read-only preview | Read-only reason |
-| --- | --- |
-| The workspace is not trusted | Editing requires a trusted workspace. |
-| The file is outside every workspace folder (a standalone file) | Editing needs the file's folder opened as a workspace folder in VS Code. |
-
-- GIVEN a read-only preview
-- WHEN any refusal below is shown, or the tooltip of a disabled checkbox
-- THEN the text is the read-only reason of the table above for the cause of that preview, never the trust text for a standalone file, and the page receives the same reason in its boot context for the tooltip
-
-### Scenario (refusal): Every write request type
-
-- GIVEN a read-only preview (an untrusted workspace, or a file outside every workspace folder) and a valid, current write request of any type in the table
+- GIVEN a preview with restricted reads (an untrusted workspace, or a file outside every workspace folder) and a valid, current write request of any type in the table
 - WHEN the host receives the request
-- THEN the page is answered with the read-only reason (column "Reason text") before the document is read, a dialog opens or a file is written (the five edit types previewEditOpen, previewEditSave, previewEditCancel, previewFrontmatterSave and previewCheckboxToggle are refused before their handler runs; every other type is refused by its own handler first), and the document, the clipboard, the comments file and the disk are unchanged
+- THEN the request is handled by the handler of its type, as in a trusted workspace
 
-| Request type | Reason text | Answered as |
-| --- | --- | --- |
-| previewEditOpen, previewEditSave, previewEditCancel | the read-only reason | block edit error |
-| previewFrontmatterSave | the read-only reason | frontmatter edit error |
-| previewCheckboxToggle | the read-only reason | checkbox result with an error |
-| previewBlockMove | the read-only reason | move result, ok false |
-| previewBlocksCopy, previewBlocksCut, previewBlocksPaste | the read-only reason | blocks result, ok false |
-| previewLabelRename | the read-only reason | rename result, ok false |
-| previewThreadReply, previewThreadDelete | the read-only reason | thread result, ok false |
-| previewCommentCreate, previewCommentReply, previewCommentResolve, previewCommentDelete | the read-only reason | comment result, ok false, and a warning is shown |
-| previewListCitations | the read-only reason | host result, ok false; no file is read |
-| previewPickDocument | the read-only reason | host result, ok false; no dialog opens |
-| previewPickImage | the read-only reason | host result, ok false; no dialog opens |
-| previewPasteImage | the read-only reason | host result, ok false; nothing is written |
+| Request type | Outcome in a preview with restricted reads |
+| --- | --- |
+| previewEditOpen, previewEditSave, previewEditCancel | the block editor opens, saves and closes; the document is edited |
+| previewFrontmatterSave | the frontmatter is saved in one document edit |
+| previewCheckboxToggle | the checkbox or radio option is written to the source |
+| previewBlockMove | the two blocks swap in one edit |
+| previewBlocksCopy, previewBlocksCut, previewBlocksPaste, previewDropFiles | the blocks are copied, cut and pasted; dropped files are written as links, a Markdown file without a title read in a preview with restricted reads, and for a standalone document any file, linked relative to the document |
+| previewLabelRename | the label line is renamed |
+| previewThreadReply, previewThreadDelete | the thread comment is changed in the document |
+| previewFindReplace | the matched spans are replaced in one undo step |
+| previewCommentCreate, previewCommentReply, previewCommentResolve, previewCommentDelete | the comments file next to the document is read and written |
+| previewPickDocument | the document dialog opens |
+| previewPickImage | the image dialog opens; the picked image must lie in a workspace folder, or in the folder of the document for a standalone file ("The image must be inside the folder of the document.") |
+| previewPasteImage | the image is saved next to the document; for a standalone file the folder of the document is the root, for a document in a workspace folder that folder is |
+| previewPaletteModeChanged, previewEditModeChanged | the choice is stored for the workspace |
 
-### Scenario (nominal): Writable preview
+### Scenario (refusal): The citation list needs a trusted workspace folder
 
-- GIVEN a writable preview
-- WHEN the same request of any type in the table arrives
-- THEN it is handled by the handler of its type (the open is handled, the move, cut and thread reply are planned and applied, the citation keys are answered, the document and image dialogs open, the pasted image is saved)
-- AND GIVEN a trusted workspace and a file inside it, the same previewFrontmatterSave is processed normally
+- GIVEN a preview with restricted reads
+- WHEN the page sends previewListCitations for the current render
+- THEN the host answers ok false with "Listing citations searches the workspace for .bib files, which needs a trusted workspace folder that holds this file." and reads no file; the label list (previewListTargets) is answered from the document text
 
-### Scenario (refusal): Message of an older render
-
-- GIVEN a read-only preview and a previewEditSave that names an older render
-- WHEN the message arrives
-- THEN it is dropped by the render check, with no answer, before the read-only check (see SwRS-MDOKFSTUDIO-TRUST-065)
-
-### Scenario (refusal): Frontmatter save and rename in a read-only preview
-
-- GIVEN a read-only preview of a document with frontmatter, or of a document with a MyST label
-- WHEN the page sends previewFrontmatterSave for the current render, or a previewLabelRename
-- THEN the host answers with the error of the table and the document text is unchanged; for previewFrontmatterSave the handler does not run
-
-### Scenario (boundary): Disabled checkbox in a read-only preview
-
-- GIVEN a read-only preview of a document with task checkboxes
-- WHEN it is rendered
-- THEN the checkboxes are disabled with the read-only reason as the tooltip, and a previewCheckboxToggle sent anyway is refused with the reason of the table (the tooltip of the disabled box carries the same reason)
-
-### Scenario (boundary): Host-side writes that a read-only preview never starts
+### Scenario (refusal): Reasons that do not depend on trust
 
 | Input | Outcome |
 | --- | --- |
-| A read-only preview switches document | No previewFlushEdit is posted (a writable preview posts it) |
-| A document is saved and the only previews of it are read-only | Nothing is written to the review comments file (a writable preview of the document gets its moved lines written) |
+| A write request that names an older render | Answered with the out-of-date reason, or dropped for a message of another document (see SwRS-MDOKFSTUDIO-TRUST-065) |
+| A write while a Markdown edit is open on the host side | Refused with "Save or cancel the open Markdown edit ..." |
+| A document that is not a saved file | Refused (for example "Save the document before pasting an image.") |
+| A file that VS Code holds read-only (files.readonlyInclude, or made read-only in the session) | VS Code accepts the edit and writes nothing: every write above (the label rename, thread reply and delete, find and replace, block save, move, cut, paste and drop, checkbox toggle, metadata save) checks that the text changed and answers "This file is read-only in VS Code." instead of success (see SwRS-MDOKFSTUDIO-TRUST-001); a pasted image whose block save fails that way is deleted again |
+| A malformed checkbox toggle or radio group | Answered with "The checkbox request was not understood. Refresh the preview." |
+
+### Scenario (nominal): Host-side writes follow the trust-free rule
+
+| Input | Outcome |
+| --- | --- |
+| A preview with restricted reads switches document | A previewFlushEdit is posted, like for any preview |
+| A document is saved and the only preview of it has restricted reads | The moved lines are written to the review comments file |
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-TRUST-001: the page offers no control for these requests in a read-only preview
-- SwRS-MDOKFSTUDIO-TRUST-065: the render check that runs before the read-only check
+- SwRS-MDOKFSTUDIO-TRUST-001: the page offers every editing control in every preview
+- SwRS-MDOKFSTUDIO-TRUST-065: the render check that runs before the handler of a write request
 
 ### Verification notes
 
-- Method: test/integration/standalone-suite.ts sends previewFrontmatterSave to a read-only preview and checks that the document text is unchanged (frontmatter row, document unchanged). The older render scenario, the order of the checks and the missing handler call for the other types are untested through the dispatcher: no unit test covers PageMessageDispatcher in src/session/pageMessages.ts.
-- Method: test/session/blockReq.requirements.test.ts, unit tests `a read-only preview answers the open, save and cancel of a block with the read-only reason` (block edit row) and `a read-only preview posts no flush request before a switch, a writable preview does` (flush row, writable scenario). The page does not offer the Edit button in such a preview, so the refusal is a second line of defence. The read-only reason of the file-outside-the-workspace cause is the one asserted there.
-- Method: test/host/fmtableReq.requirements.test.ts, unit test a frontmatter save in an untrusted workspace is refused with the trust message and changes nothing (frontmatter row). The frontmatter row uses the same read-only reason function as the other rows.
-- Method: test/page/runtimePageControls.test.ts, unit test "checkboxes are disabled when the preview cannot edit the document" (disabled checkbox scenario). The host refusal of previewCheckboxToggle (both reasons) is tested in test/session/checkboxRefusal.test.ts.
-- Method: test/integration/blockMove.test.ts (a read-only preview must not move a block; move row and writable scenario).
-- Method: test/integration/blockClipboard.test.ts and test/integration/untrusted-suite.ts (an untrusted preview leaves document and clipboard unchanged; copy, cut and paste row; the untrusted suite also shows that a read-only preview opens no image dialog and writes no file; the answered image picker text is untested).
-- Method: test/session/renderReq.labelRename.requirements.test.ts, unit test "a rename in an untrusted or read-only preview changes nothing and answers with the read-only reason" (rename row).
-- Method: test/session/reviewReqThreads.requirements.test.ts, unit test a reply or a delete from a read-only preview is refused and changes nothing (thread row).
-- Method: test/integration/commentWrite.test.ts (runUntrusted: no comments file written, the refusal reported, resolve and delete answered; comment row).
-- Method: test/session/reviewReqComments.requirements.test.ts, unit test "a comment from a read-only preview is refused with the real cause" (comment row, both causes), and the unit test saving writes nothing to the comments file when the only previews are read-only (host-side writes table, second row).
-- Method: test/session/paletteReq.requirements.test.ts, unit tests the citation list is refused in a read-only preview and no file is read, and the document picker is refused in a read-only preview and opens no dialog; a writable preview opens it (citation and document picker rows, writable scenario).
-- Method: test/integration/imagePaste.test.ts (refusals write nothing and the document is unchanged; image paste row); the answered text of the paste is untested. Unlike the pickers, the paste handler does not check the render revision.
-- Criteria: EDIT_REQUEST_TYPES holds exactly previewEditOpen, previewEditSave, previewEditCancel, previewFrontmatterSave and previewCheckboxToggle, and handlePageState refuses them after the render check; every other handler in the table checks readOnly first and answers before reading the document, opening a dialog or writing a file; the disabled state and the refusal text of the checkbox match.
+- Method: test/session/blockReq.requirements.test.ts, unit tests `a restricted-reads preview opens, saves and cancels a block like a writable one`, `a restricted-reads preview and a writable one both post a flush request before a switch`, `an open, save or cancel from an older page of a preview is answered with an error` and the edit mode test (block edit, flush and edit mode rows). Before the change these were refusals with the read-only reason.
+- Method: test/session/checkboxRefusal.test.ts and test/session/radioChoice.test.ts (a checkbox toggle and a radio choice of a standalone file or in Restricted Mode reach the handler through PageMessageDispatcher; the malformed rows).
+- Method: test/host/fmtableReq.requirements.test.ts, unit test a frontmatter save in an untrusted workspace is applied like in a trusted one (frontmatter row).
+- Method: test/session/renderReq.labelRename.requirements.test.ts (a rename in a standalone file or in Restricted Mode is applied; rename row), test/session/reviewReqThreads.requirements.test.ts (reply, delete and find and replace of a preview with restricted reads are applied; thread and find rows), test/session/dropFiles.requirements.test.ts (a drop is written; no Markdown file is read under restricted reads; a standalone document links any file; a read-only file is refused).
+- Method: test/session/reviewReqComments.requirements.test.ts (a comment of a standalone file or in Restricted Mode is written next to the document, and the moved lines are written when the document is saved; comment and host-side rows).
+- Method: test/session/paletteReq.requirements.test.ts (the document picker opens; the image picker of a standalone file accepts an image of the document folder and refuses one elsewhere; an image paste is saved next to a standalone file and in Restricted Mode; the citation list is refused with its reason and no file is read).
+- Method: test/integration/untrusted-suite.ts, blockMove.test.ts, blockClipboard.test.ts and commentWrite.test.ts (runUntrusted) and test/integration/standalone-suite.ts run the same requests in a real Restricted Mode window and for a standalone file; they run in the real-window jobs only and were compiled but not run on the author's machine.
+- Criteria: no handler checks the trust or the missing workspace folder before it edits; PageMessageDispatcher stops no edit request for restricted reads; the citation handler is the only one that answers a trust reason; the paste root is the workspace folder, or the folder of the document when no workspace folder holds it.
 
 <!-- okf:links:start -->
 ### Links
@@ -157,7 +132,7 @@ When the host receives a write request from a read-only preview for the render i
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document outside a trusted folder opens read-only and keeps the viewing actions
+  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document opens editable whatever the trust, with narrow reads outside a trusted folder
   - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
   - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
   - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown

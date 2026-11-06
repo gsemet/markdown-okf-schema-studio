@@ -15,10 +15,6 @@
  */
 
 import { DEFAULT_EDITING_CONFIGURATION, PALETTE_MODES } from "../core/configuration/editingConfiguration";
-import {
-  EDIT_UNAVAILABLE_NO_FOLDER,
-  READ_ONLY_NO_FOLDER,
-} from "../core/edits/readOnlyReasons";
 import type { PreviewRuntimeContext } from "../core/protocol/bootContext";
 import { createAnchorPolicy } from "../core/scroll/anchorPolicy";
 import { HIGHLIGHT_LANGUAGES } from "./buildConstants";
@@ -324,7 +320,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
       return undefined;
     },
     replaceBlockedReason: () => {
-      if (!rt.editModeButton) return context.readOnlyReason ?? "Editing is not available in this preview.";
+      if (!rt.editModeButton) return "Editing is not available in this preview.";
       return state.activeBlockEdit || state.activeFrontmatterEdit ? "Save or cancel the open edit before replacing." : undefined;
     },
     reveal: (target) => headingFold.reveal(target),
@@ -342,17 +338,8 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     },
   });
   rt.refreshButton = document.querySelector?.<HTMLButtonElement>("[data-sphinx-preview-refresh]");
-  const editButton = document.querySelector?.<HTMLElement>("[data-sphinx-preview-edit-toggle]");
-  // A read-only preview greys the Edit button with the reason; it is no edit toggle then.
-  if (editButton?.getAttribute?.("aria-disabled") === "true") {
-    if (context.readOnlyReason === READ_ONLY_NO_FOLDER) {
-      editButton.setAttribute?.("title", EDIT_UNAVAILABLE_NO_FOLDER);
-      editButton.setAttribute?.("data-tooltip", EDIT_UNAVAILABLE_NO_FOLDER);
-    }
-    rt.editModeButton = undefined;
-  } else {
-    rt.editModeButton = editButton;
-  }
+  // The Edit button is always enabled: trust never makes a document read-only.
+  rt.editModeButton = document.querySelector?.<HTMLElement>("[data-sphinx-preview-edit-toggle]");
   const savedState = vscode.getState?.();
   const saved = savedState as RuntimeSavedState | undefined;
   // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
@@ -388,20 +375,17 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // After an add, the re-rendered preview opens the editor of the new field.
   state.pendingFrontmatterEdit = saved?.pendingFrontmatterEdit;
   state.pendingEditOpenedIn = saved?.pendingFrontmatterEditOpenedIn;
-  // The edit toggle is only rendered when the document may be edited (trusted workspace).
-  const checkboxEditingEnabled = Boolean(rt.editModeButton);
   // Task list checkboxes (features/checkboxes.ts).
   const checkboxes = installCheckboxes(document, hostMessages, {
     host: vscode,
     context,
-    editingEnabled: checkboxEditingEnabled,
     openEdit: () => state.activeBlockEdit || state.activeFrontmatterEdit,
     nextEditSequence: () => ++state.editSequence,
     anchorField: () => rt.scroll.anchorField(),
   });
   // Inline threads (<!-- THREAD): the reply box and Delete of an open thread; the host edits the file.
   const inlineThreads = installInlineThreads(document, {
-    enabled: checkboxEditingEnabled,
+    enabled: true,
     blockedReason: () => state.activeBlockEdit || state.activeFrontmatterEdit
       ? "Save or cancel the open edit before changing a thread." : undefined,
     ask: (type, payload, done) => hostRequests.ask(type, payload, {}, done),

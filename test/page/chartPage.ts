@@ -139,7 +139,7 @@ export async function openPreviewPage(
   // Only the diagram runtime is bundled here: the page keeps its inline stylesheet and has no KaTeX.
   const assets = { ...bundle, bundleUri: (...segments: string[]) => segments[0] === runtimeFile ? bundle.bundleUri(...segments) : undefined };
   const built = buildPreviewWebviewHtml(
-    rendered.html, workspace, assets, undefined, workspace, undefined, undefined, true, true, [], "builtin",
+    rendered.html, workspace, assets, undefined, workspace, undefined, undefined, true, [], "builtin",
   );
   const pagePath = path.join(root, "page.html");
   fs.writeFileSync(pagePath, built.html);

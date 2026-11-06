@@ -1,8 +1,8 @@
 /**
  * Task list checkboxes (`input.myst-checkbox`) and radio choice options (`.myst-radio`). In a
- * writable preview a click toggles the box, or selects the option, at once and asks the host to edit
- * the source; the host's result confirms it, or reverts the control and shows why. Read-only
- * previews disable both. A radio group is one tab stop (roving tabindex): the arrow keys move the
+ * preview a click toggles the box, or selects the option, at once and asks the host to edit
+ * the source; the host's result confirms it, or reverts the control and shows why (Restricted Mode
+ * and a standalone file included). A radio group is one tab stop (roving tabindex): the arrow keys move the
  * focus between its options, Space and Enter select the focused option.
  */
 
@@ -25,8 +25,6 @@ export interface BlockingEdit {
 export interface CheckboxDeps {
   readonly host: PageHostApi;
   readonly context: PreviewRuntimeContext;
-  /** False in read-only previews (no trusted workspace). */
-  readonly editingEnabled: boolean;
   /** The open block or frontmatter editor, if any. */
   openEdit(): BlockingEdit | undefined;
   /** A new number for an edit id. */
@@ -37,8 +35,6 @@ export interface CheckboxDeps {
 
 /** The checkbox feature of a page. */
 export interface Checkboxes {
-  /** Disables the boxes and radio options of the content in a read-only preview. */
-  initialize(): void;
   /** Forgets the toggles still waiting for the host (the content was replaced). */
   clearPending(): void;
   /**
@@ -70,7 +66,6 @@ function sourcePosition(control: Element, kind: "checkbox" | "radio"): { line: n
 /** The checkbox feature; handles `previewCheckboxResult` (the answer to toggles and radio choices). */
 export function installCheckboxes(document: Document, router: HostMessageRouter, deps: CheckboxDeps): Checkboxes {
   const { host, context } = deps;
-  const checkboxEditingEnabled = deps.editingEnabled;
   const pendingToggles = new Map<string, PendingToggle>();
   const refusals = new WeakMap<Element, { note: Element; timer: number }>();
 
@@ -91,29 +86,14 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
     refusals.set(control, { note, timer: window.setTimeout(() => note.remove(), REFUSAL_VISIBLE_MS) });
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
-  function initializeCheckboxes(): void {
-    if (checkboxEditingEnabled) return;
-    const reason = context.readOnlyReason ?? "Editing is not available in this preview.";
-    document.querySelectorAll?.<HTMLInputElement>(CHECKBOX_SELECTOR).forEach((checkbox) => {
-      checkbox.disabled = true;
-      checkbox.setAttribute("title", reason);
-    });
-    document.querySelectorAll?.(RADIO_SELECTOR).forEach((radio) => {
-      radio.setAttribute("aria-disabled", "true");
-      radio.setAttribute("title", reason);
-    });
-  }
-
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   // @implements_req SwRS-MDOKFSTUDIO-GFM-039
   /**
-   * The page guards of every toggle: editing enabled, a valid source position, no toggle of the
+   * The page guards of every toggle: a valid source position, no toggle of the
    * control still waiting, no open editor. A refused click is prevented (the browser undoes it).
    */
   function mayToggle(event: Event, valid: boolean, busy: boolean, action: string): boolean {
-    if (!checkboxEditingEnabled || !valid || busy) {
+    if (!valid || busy) {
       event.preventDefault?.();
       return false;
     }
@@ -139,7 +119,6 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
    * refused by the click guard. Task checkboxes keep only the click guard.
    */
   function guardPress(event: MouseEvent): void {
-    if (!checkboxEditingEnabled) return;
     const target = event.target instanceof Element ? event.target : undefined;
     if (target?.closest(CHECKBOX_SELECTOR)) return;
     if (target?.closest(RADIO_SELECTOR)) refuseForOpenEdit(event, "choosing an option");
@@ -290,7 +269,6 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
     if (!saved && typeof message.error === "string") showRefusal(pending.control, message.error);
   });
   return {
-    initialize: initializeCheckboxes,
     clearPending: () => pendingToggles.clear(),
     keepRadioFocus,
     bindClicks() {

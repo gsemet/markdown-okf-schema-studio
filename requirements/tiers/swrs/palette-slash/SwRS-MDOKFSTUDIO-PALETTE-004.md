@@ -9,8 +9,8 @@ description: When the writer drops one or more local files from the VS Code
   over the page and, on the drop, write there a new block with one relative
   Markdown reference per file, ![name](path) for a png, jpg, jpeg, gif, svg or
   webp image and [title](path) for any other file, with the first heading of a
-  Markdown file as its title, in one undo step, leaving the rest of the source
-  unchanged.
+  Markdown file as its title (not read in a preview with restricted reads), in
+  one undo step, leaving the rest of the source unchanged.
 project: MDOKFSTUDIO
 scope: palette-slash
 req_lifecycle: proposed
@@ -42,7 +42,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer drops one or more local files from the VS Code Explorer onto the preview in edit mode with no block editor open, the extension SHALL mark the insertion point nearest to the pointer while they are over the page and, on the drop, write there a new block with one relative Markdown reference per file, ![name](path) for a png, jpg, jpeg, gif, svg or webp image and [title](path) for any other file, with the first heading of a Markdown file as its title, in one undo step, leaving the rest of the source unchanged.
+When the writer drops one or more local files from the VS Code Explorer onto the preview in edit mode with no block editor open, the extension SHALL mark the insertion point nearest to the pointer while they are over the page and, on the drop, write there a new block with one relative Markdown reference per file, ![name](path) for a png, jpg, jpeg, gif, svg or webp image and [title](path) for any other file, with the first heading of a Markdown file as its title (not read in a preview with restricted reads), in one undo step, leaving the rest of the source unchanged.
 
 ### Scenario (nominal): A Markdown file becomes a link titled by its first heading
 - GIVEN the preview in edit mode with no editor open and a Markdown file whose first heading is "Getting started" in the folder of the document
@@ -58,8 +58,10 @@ When the writer drops one or more local files from the VS Code Explorer onto the
 | Case | Outcome |
 | --- | --- |
 | a drag that carries no file addresses, a block editor or property editor open, or edit mode off | no marker, no message; the page does nothing |
-| a file outside every workspace folder, or an address that is not `file:` | not written; when none is left the host answers with a notice and the source is unchanged |
-| a document that is not a saved file, a read-only preview, a stale version | refused with a notice, nothing written |
+| a file outside every workspace folder (a standalone document takes any file), or an address that is not `file:` | not written; when none is left the host answers with a notice and the source is unchanged |
+| a preview with restricted reads and a Markdown file | the file is not read: its link text is its name without extension |
+| a file that VS Code holds read-only | refused with "This file is read-only in VS Code.", nothing written |
+| a document that is not a saved file, a stale version | refused with a notice, nothing written |
 | the insertion point is next to a block that comes from an included file | refused with the notice of the paste of blocks |
 | more than 50 files in one drop | the page sends the first 50 |
 | a file on another drive than the document, or a name with angle brackets or a line break | no reference for that file |
@@ -67,7 +69,7 @@ When the writer drops one or more local files from the VS Code Explorer onto the
 ### Scenario (boundary): The written reference
 | Part | Outcome |
 | --- | --- |
-| destination | relative to the folder of the document, `/` separators, spaces and parentheses percent-encoded |
+| destination | relative to the folder of the document (also for a file outside it, when the document is standalone), `/` separators, spaces and parentheses percent-encoded |
 | link text | first heading of a Markdown file (md, markdown, mdx; first 64 KiB, outside front matter and code, emphasis marks removed); else the name without extension; `[`, `]` and `\` escaped |
 | several files | their references on one line separated by a space, in drag order |
 
@@ -77,7 +79,7 @@ When the writer drops one or more local files from the VS Code Explorer onto the
 ### Verification notes
 - Method: test/core/mapping/dropReferences.test.ts (heading, escaping, relative encoding, images)
 - Method: test/page/modules/dropFiles.test.ts and test/page/runtimeFileDrop.test.ts (drag data, nearest bar, marker, message)
-- Method: test/session/dropFiles.requirements.test.ts (host: workspace check, heading read, edit, refusals)
+- Method: test/session/dropFiles.requirements.test.ts (host: workspace check, heading read, no read under restricted reads, standalone document, read-only file, edit, refusals)
 - Method: test/integration/dropFiles.test.ts (real VS Code window: drag events from the Explorer over the preview, marker and written source)
 - Criteria: the text outside the inserted block is identical before and after the drop.
 

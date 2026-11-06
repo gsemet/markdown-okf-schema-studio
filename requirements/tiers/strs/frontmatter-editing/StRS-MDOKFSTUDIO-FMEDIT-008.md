@@ -7,8 +7,8 @@ title: Metadata edits keep the source intact, follow the schema and never lose
 description: When a writer edits a metadata field, the Studio SHALL change only
   the lines of that field, refuse with a reason any edit whose result would not
   parse, would alter other keys, does not match the schema, targets a stale
-  preview or runs in an untrusted workspace, and save typed text instead of
-  dropping it when the writer navigates away.
+  preview or targets a file that VS Code holds read-only, and save typed text
+  instead of dropping it when the writer navigates away.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
 req_lifecycle: proposed
@@ -77,7 +77,7 @@ supersedes:
 
 ### Normative behavior
 
-When a writer edits a metadata field, the Studio SHALL change only the lines of that field, refuse with a reason any edit whose result would not parse, would alter other keys, does not match the schema, targets a stale preview or runs in an untrusted workspace, and save typed text instead of dropping it when the writer navigates away.
+When a writer edits a metadata field, the Studio SHALL change only the lines of that field, refuse with a reason any edit whose result would not parse, would alter other keys, does not match the schema, targets a stale preview or targets a file that VS Code holds read-only, and save typed text instead of dropping it when the writer navigates away.
 
 ### Preserved stakeholder intent
 
@@ -88,6 +88,7 @@ As a writer or reviewer, I expect a metadata edit to leave comments, quoting, li
 - Quoting style, folded or literal headers, comments, fences, the body and line endings are preserved; anchored or aliased values fall back to a whole-block rewrite.
 - Every edit is re-parsed and refused when it would lose, duplicate or corrupt a key.
 - A refusal explains itself and never leaves the document half-edited.
+- Trust does not refuse a metadata edit: it works in Restricted Mode and for a file outside every workspace folder as in a trusted workspace. A file that VS Code holds read-only is refused with the reason "This file is read-only in VS Code.", as is every other write.
 - The schema check covers type, enum, null and conditional rules; link problems do not block a save.
 - Malformed page messages are ignored without a reply.
 - Known issue: the stale-field message is shared by stale renders and schema mismatches.
@@ -146,7 +147,7 @@ As a writer or reviewer, I expect a metadata edit to leave comments, quoting, li
   - [SwRS-MDOKFSTUDIO-FMEDIT-080](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-080.md): The figure editor and insert points ignore input while a field editor is open
   - [SwRS-MDOKFSTUDIO-FMEDIT-083](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-083.md): A save for a missing field or revision is refused as stale
   - [SwRS-MDOKFSTUDIO-FMEDIT-085](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-085.md): Hiding or closing the page saves the open field editor as a flush
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:
   - [StRS-MDOKFSTUDIO-FMEDIT-009](StRS-MDOKFSTUDIO-FMEDIT-009.md): Refuse metadata edits that break the schema or the document state

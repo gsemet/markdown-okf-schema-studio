@@ -60,7 +60,7 @@ async function page(text: string, documentDirectory: string, root = documentDire
       getText: () => text,
     },
     workspaceRoot: documentDirectory,
-    readOnly: true,
+    restrictedReads: true,
     requestId: 1,
     isWorkspaceTrusted: () => false,
     allowUntrusted: true,
@@ -69,14 +69,14 @@ async function page(text: string, documentDirectory: string, root = documentDire
   const assets = fakeAssetResolver({ cspSource: "vscode-webview://csp", url: (file) => `webview://${file}` });
   const built = buildPreviewWebviewHtml(
     result.html, result.stage.outputDirectory, assets, undefined, root,
-    undefined, undefined, false, false, [], "builtin", true,
+    undefined, undefined, false, [], "builtin", true,
   );
   result.stage.dispose();
   return built.html;
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only preview shows an image with spaces in its name, next to the document or in a subfolder", async () => {
+test("a restricted-reads preview shows an image with spaces in its name, next to the document or in a subfolder", async () => {
   const docs = path.join(home, "docs");
   const html = await page(
     `![a](${NAME.replaceAll(" ", "%20")})\n\n![b](<images dir/${NAME}>)\n\n![c](images%20dir/${NAME.replaceAll(" ", "%20")})\n\n![d](pic.svg)\n`,
@@ -89,7 +89,7 @@ test("a read-only preview shows an image with spaces in its name, next to the do
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only preview of a document in the home folder shows the images of its own folder only", async () => {
+test("a restricted-reads preview of a document in the home folder shows the images of its own folder only", async () => {
   const html = await page("![a](home.png)\n\n![b](other/b.png)\n\n![c](.ssh/c.png)\n", home);
   assert.ok(html.includes(path.join(home, "home.png")));
   assert.ok(html.includes(path.join(home, "other", "b.png")), "a subfolder of the document folder");
@@ -97,7 +97,7 @@ test("a read-only preview of a document in the home folder shows the images of i
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only preview refuses an image outside the document folder when the workspace root is the home folder", async () => {
+test("a restricted-reads preview refuses an image outside the document folder when the workspace root is the home folder", async () => {
   const docs = path.join(home, "docs");
   const html = await page("![a](../other/b.png)\n\n![b](../home.png)\n\n![c](.hidden/a.png)\n", docs, home);
   assert.equal(html.includes("b.png"), false);
@@ -106,7 +106,7 @@ test("a read-only preview refuses an image outside the document folder when the 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only preview reaches the images of the workspace root, not its includes or other files", async () => {
+test("a restricted-reads preview reaches the images of the workspace root, not its includes or other files", async () => {
   const guide = path.join(sandbox, "ws", "docs", "guide");
   fs.mkdirSync(guide, { recursive: true });
   fs.mkdirSync(path.join(sandbox, "ws", "images"), { recursive: true });
@@ -127,7 +127,7 @@ test("a read-only preview reaches the images of the workspace root, not its incl
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("the policy of a read-only preview serves an image of the workspace root and nothing else there", () => {
+test("the policy of a restricted-reads preview serves an image of the workspace root and nothing else there", () => {
   const ws = path.join(sandbox, "ws");
   const guide = path.join(ws, "docs", "guide");
   fs.mkdirSync(guide, { recursive: true });
@@ -166,7 +166,7 @@ test("a link named .png that leads to another kind of file is not served from th
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-test("a read-only preview still refuses an include in the home folder", async () => {
+test("a restricted-reads preview still refuses an include in the home folder", async () => {
   fs.writeFileSync(path.join(home, "part.md"), `${SECRET}\n`);
   const inHome = await page("```{include} part.md\n```\n", home);
   assert.equal(inHome.includes(SECRET), false);

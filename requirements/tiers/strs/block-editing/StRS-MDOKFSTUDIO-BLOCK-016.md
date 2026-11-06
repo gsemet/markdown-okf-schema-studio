@@ -81,6 +81,6 @@ As a writer, I select a run of blocks with Shift+click or Shift+Arrow to treat t
   - [SwRS-MDOKFSTUDIO-BLOCK-242](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-242.md): previewBlocksCut needs a line range and an optional pin
   - [SwRS-MDOKFSTUDIO-BLOCK-243](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-243.md): previewBlocksPaste needs a line to paste after
   - [SwRS-MDOKFSTUDIO-BLOCK-254](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-254.md): Right and Left move the block selection down and up the structure
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 <!-- okf:links:end -->

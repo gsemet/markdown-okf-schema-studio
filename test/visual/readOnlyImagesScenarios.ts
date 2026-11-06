@@ -13,8 +13,8 @@ export const READ_ONLY_IMAGES_SCENARIOS: ScenarioDefinition[] = [{
   theme: "light",
   ...WIDE,
   scroll: { kind: "top" as const },
-  render: { readOnly: true as const },
+  render: { restrictedReads: true as const },
   contentAssertions: READ_ONLY_IMAGES_ASSERTIONS,
-  description: "A read-only preview (Restricted Mode) shows an image with spaces in its name in a subfolder, the same file in angle brackets "
+  description: "A preview with restricted reads (Restricted Mode) shows an image with spaces in its name in a subfolder, the same file in angle brackets "
     + "and an image of the workspace root, and refuses an image below a dot-directory.",
 }];

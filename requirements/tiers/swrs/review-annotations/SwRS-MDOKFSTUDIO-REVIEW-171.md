@@ -3,11 +3,11 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-171
 uuid: d495f720-7053-41af-870d-fe7acd7bbd50
 title: An open inline thread offers Reply and Delete thread
-description: When a writable preview shows an inline thread, the page SHALL add
-  once to the body of the thread a reply text area labelled "Reply to this
-  thread" with the placeholder Reply, a Reply button and a Delete thread button
-  titled "Delete the whole thread from the document", and send a reply or a
-  delete of the thread to the host with its source lines.
+description: When a preview shows an inline thread, the page SHALL add once to
+  the body of the thread a reply text area labelled "Reply to this thread" with
+  the placeholder Reply, a Reply button and a Delete thread button titled
+  "Delete the whole thread from the document", and send a reply or a delete of
+  the thread to the host with its source lines.
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -35,15 +35,15 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writable preview shows an inline thread, the page SHALL add once to the body of the thread a reply text area labelled "Reply to this thread" with the placeholder Reply, a Reply button and a Delete thread button titled "Delete the whole thread from the document", and send a reply or a delete of the thread to the host with its source lines.
+When a preview shows an inline thread, the page SHALL add once to the body of the thread a reply text area labelled "Reply to this thread" with the placeholder Reply, a Reply button and a Delete thread button titled "Delete the whole thread from the document", and send a reply or a delete of the thread to the host with its source lines.
 
 ### Scenario (nominal): Controls added once
 - GIVEN a thread and the content applied twice
 - WHEN the page runs the controls
 - THEN the thread holds one set of controls (one element with data-okf-thread-actions in its body)
 
-### Scenario (refusal): Read-only page
-- GIVEN a preview that cannot edit (an untrusted workspace)
+### Scenario (refusal): Page without controls
+- GIVEN a page whose host gave the controls disabled (the module is installed with controls off, as in a test host)
 - WHEN the thread is shown
 - THEN the messages show and no control is added; see SwRS-MDOKFSTUDIO-TRUST-001
 
@@ -80,10 +80,10 @@ The answer is matched to the request, see SwRS-MDOKFSTUDIO-TRUST-090.
 - SwRS-MDOKFSTUDIO-REVIEW-086: a review thread's Delete asks first, unlike Delete thread of an inline thread.
 
 ### Verification notes
-- Method: test/page/modules/inlineThread.test.ts (`an open thread gets a reply box and a Delete button once, and apply is idempotent`, `a read-only page (untrusted workspace) shows the messages without controls`, `Reply sends the trimmed text with the source lines and clears the box on success`, `Cmd or Ctrl+Enter in the box replies, and keys in the box never reach the page`, `Delete thread asks the host with the source lines only`, `an empty reply is not sent, and a refusal keeps the text and says why`, `an open edit blocks the change with its reason, and a thread without lines is not sent`). The default text "The change was not saved." is untested.
+- Method: test/page/modules/inlineThread.test.ts (`an open thread gets a reply box and a Delete button once, and apply is idempotent`, `a page with the thread controls off shows the messages without controls` (the module with its controls off), `Reply sends the trimmed text with the source lines and clears the box on success`, `Cmd or Ctrl+Enter in the box replies, and keys in the box never reach the page`, `Delete thread asks the host with the source lines only`, `an empty reply is not sent, and a refusal keeps the text and says why`, `an open edit blocks the change with its reason, and a thread without lines is not sent`). The default text "The change was not saved." is untested.
 - Method: test/integration/inlineThread.test.ts (Delete thread, assert "one undo should restore the thread").
 - Method: visual scenario review-annotations/v11-inline-thread-light-900 (controls and reply).
-- Criteria: The body holds exactly one element with data-okf-thread-actions in a writable page and none in a read-only page; one request carries the lines and the trimmed text and the controls are re-enabled by the answer; one delete request with the lines and no text is posted; no request is posted and the status line holds the message in the refusal cases; the status line holds the reason and the text area keeps its value.
+- Criteria: The body holds exactly one element with data-okf-thread-actions in a page with controls and none in a page without; one request carries the lines and the trimmed text and the controls are re-enabled by the answer; one delete request with the lines and no text is posted; no request is posted and the status line holds the message in the refusal cases; the status line holds the reason and the text area keeps its value.
 
 <!-- okf:links:start -->
 ### Links
@@ -93,7 +93,7 @@ The answer is matched to the request, see SwRS-MDOKFSTUDIO-TRUST-090.
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-015](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-015.md): A writer keeps a discussion in the Markdown source and answers it from the preview
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 <!-- okf:links:end -->

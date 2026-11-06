@@ -75,5 +75,5 @@ As a reviewer, I see where each discussion sits in the document and read it wher
   - [SwRS-MDOKFSTUDIO-REVIEW-101](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-101.md): A thread whose quote is gone or ambiguous is orphaned and keeps its lines
   - [SwRS-MDOKFSTUDIO-REVIEW-107](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-107.md): A slightly changed quote is followed by a bounded fuzzy search
   - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
 <!-- okf:links:end -->

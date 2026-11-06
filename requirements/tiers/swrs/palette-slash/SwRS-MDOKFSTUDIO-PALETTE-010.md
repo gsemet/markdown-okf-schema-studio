@@ -55,15 +55,15 @@ When the page posts previewPaletteModeChanged with a mode other than strict, gfm
 | a number or true (not a string) | rejected |
 | missing | rejected |
 
-### Scenario (refusal): Read-only preview
+### Scenario (nominal): Preview with restricted reads
 
-- GIVEN a read-only preview
+- GIVEN a preview with restricted reads (Restricted Mode, a standalone file)
 - WHEN the page posts previewPaletteModeChanged with the mode strict
-- THEN the host stores nothing
+- THEN the host stores the mode like for any other preview
 
 ### Verification notes
 
-- Method: test/integration/paletteMode.test.ts (accepted shape, an invalid mode is not stored); test/core/protocol/pageToHost.test.ts (previewPaletteModeChanged accepts only strict, gfm, myst or full: html, the empty text, true and a missing mode are rejected); test/page/runtimeEditPalette.test.ts (choosing a mode posts previewPaletteModeChanged once); test/integration/untrusted-suite.ts (read-only preview)
+- Method: test/integration/paletteMode.test.ts (accepted shape, an invalid mode is not stored); test/core/protocol/pageToHost.test.ts (previewPaletteModeChanged accepts only strict, gfm, myst or full: html, the empty text, true and a missing mode are rejected); test/page/runtimeEditPalette.test.ts (choosing a mode posts previewPaletteModeChanged once); test/integration/untrusted-suite.ts (Restricted Mode preview)
 - Method: the number case is deduced from the validator (isOneOf the three modes), not tested
 - Criteria: The validator accepts exactly the three mode names, and the stored mode is the same before and after the invalid message.
 

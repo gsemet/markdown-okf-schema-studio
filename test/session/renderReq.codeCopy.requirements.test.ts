@@ -17,7 +17,7 @@ import type { PreviewSession } from "../../src/session/previewSession";
 const DOCUMENT = "file:///ws/doc.md";
 const MAX_COPY = 1_000_000;
 
-function setup(options: { readOnly: boolean }) {
+function setup(options: { restrictedReads: boolean }) {
   const clipboard: string[] = [];
   const edits: string[] = [];
   const posted: Array<Record<string, unknown>> = [];
@@ -37,7 +37,7 @@ function setup(options: { readOnly: boolean }) {
   const router: PageMessageRouter = createMessageRouter();
   new HostRequestController(manager).register(router);
   router.on("previewEditOpen", () => { edits.push("edit"); });
-  const preview = { disposed: false, readOnly: options.readOnly, documentUri: DOCUMENT,
+  const preview = { disposed: false, restrictedReads: options.restrictedReads, documentUri: DOCUMENT,
     postToPage: (message: Record<string, unknown>) => { posted.push(message); return Promise.resolve(true); } } as unknown as PreviewSession;
   const dispatcher = new PageMessageDispatcher(manager, router);
   const copy = (identity: Partial<typeof current> = {}): PageToHostMessage => ({
@@ -48,7 +48,7 @@ function setup(options: { readOnly: boolean }) {
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065
 test("a copy request only needs the document; a stale version or render request still copies and is answered", async () => {
-  const t = setup({ readOnly: false });
+  const t = setup({ restrictedReads: false });
   await t.dispatcher.handle(t.preview, t.copy({ revision: 3 }));
   await t.dispatcher.handle(t.preview, t.copy({ requestId: 8 }));
   assert.deepEqual(t.clipboard, ["print('x')\n", "print('x')\n"]);
@@ -62,7 +62,7 @@ test("a copy request only needs the document; a stale version or render request 
 
 // @tests_req SwRS-MDOKFSTUDIO-CODE-026
 test("an oversized text is refused with a reason and a failing clipboard is answered as not copied", async () => {
-  const t = setup({ readOnly: false });
+  const t = setup({ restrictedReads: false });
   await t.dispatcher.handle(t.preview, { ...t.copy(), text: "x".repeat(MAX_COPY + 1) });
   assert.deepEqual(t.clipboard, []);
   assert.deepEqual([t.posted[0]?.ok, t.posted[0]?.reason], [false, "Too large to copy."]);
@@ -77,7 +77,7 @@ test("an oversized text is refused with a reason and a failing clipboard is answ
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-006
 test("a read-only preview still writes the requested code to the clipboard and edits nothing", async () => {
-  const t = setup({ readOnly: true });
+  const t = setup({ restrictedReads: true });
   await t.dispatcher.handle(t.preview, t.copy());
   assert.deepEqual(t.clipboard, ["print('x')\n"]);
   assert.deepEqual(t.edits, [], "no edit request was processed");
@@ -85,7 +85,7 @@ test("a read-only preview still writes the requested code to the clipboard and e
 
 // @tests_req SwRS-MDOKFSTUDIO-CODE-026
 test("a copy request without a user gesture is refused and writes nothing", async () => {
-  const t = setup({ readOnly: false });
+  const t = setup({ restrictedReads: false });
   await t.dispatcher.handle(t.preview, { ...t.copy(), userGesture: false } as PageToHostMessage);
   assert.deepEqual(t.clipboard, []);
   assert.deepEqual([t.posted[0]?.ok, t.posted[0]?.reason], [false, "Copy needs a click on the copy button."]);

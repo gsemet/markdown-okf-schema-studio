@@ -51,8 +51,9 @@ import {
   PLANTUML_THEME_SPRITE_ASSERTIONS,
   plantUmlIncludeAssertions,
   PROPERTIES_HIDDEN_ASSERTIONS,
-  READ_ONLY_ASSERTIONS,
-  READ_ONLY_NO_HOVER_ASSERTIONS,
+  RESTRICTED_EDITS_ASSERTIONS,
+  RESTRICTED_PAGE_ASSERTIONS,
+  RESTRICTED_PAGE_EDIT_ON_ASSERTIONS,
   REVIEW_THREAD_OPEN_ASSERTIONS,
   REVIEW_THREAD_RESOLVED_ASSERTIONS,
   type ScenarioDefinition,
@@ -1001,26 +1002,25 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   })),
   ...([["dark", WIDE, "900", 1], ["light", NARROW, "460", 2]] as const).map(([theme, viewport, width, number]) => ({
     // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-    id: `trust-security/v0${number}-read-only-page-${theme}-${width}`,
+    id: `trust-security/v0${number}-restricted-page-${theme}-${width}`,
     fixture: "08-okf-schema",
     theme,
     ...viewport,
     scroll: { kind: "top" as const },
-    render: { readOnly: true as const },
-    contentAssertions: READ_ONLY_ASSERTIONS,
-    description: `A read-only preview (restricted workspace or file outside the workspace), ${theme} theme, ${width} px pane: `
-      + "the toolbar has no Edit (pencil) button and the frontmatter table offers no editable cell.",
+    render: { restrictedReads: true as const }, ...(number === 1 ? { pageActions: [{ click: "[data-sphinx-preview-edit-toggle]" }] } : {}),
+    contentAssertions: number === 1 ? RESTRICTED_PAGE_EDIT_ON_ASSERTIONS : RESTRICTED_PAGE_ASSERTIONS,
+    description: `A preview with restricted reads (restricted workspace or file outside the workspace), ${theme} theme, ${width} px pane: `
+      + `the Edit (pencil) button is enabled${number === 1 ? ", a click on it switches the edit mode on," : ""} and the frontmatter table offers editable cells.`,
   })),
   {
-    id: "trust-security/v03-read-only-no-hover-outline-light-900",
+    id: "trust-security/v03-restricted-opens-block-editor-light-900",
     fixture: "08-okf-schema",
     theme: "light",
     ...WIDE,
     scroll: { kind: "top" as const },
-    render: { readOnly: true as const },
-    pageActions: [{ hover: "main > p" }, { click: "main > p" }],
-    contentAssertions: READ_ONLY_NO_HOVER_ASSERTIONS,
-    description: "A read-only preview with the pointer resting on a paragraph and a click on it: no dashed edit outline, no editor, no Edit button.",
+    render: { restrictedReads: true as const }, pageActions: [{ click: "[data-sphinx-preview-edit-toggle]" }, { click: "main > p" }],
+    contentAssertions: RESTRICTED_EDITS_ASSERTIONS,
+    description: "A preview with restricted reads, edit mode switched on and a click on a paragraph: the block editor opens, as in a trusted workspace.",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054

@@ -363,6 +363,7 @@ test("previews of one root share one file watcher, which closing the last previe
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-026
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 test("a document outside the workspace folder gets a new session on the same panel", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# A\n");
@@ -384,7 +385,11 @@ test("a document outside the workspace folder gets a new session on the same pan
   assert.equal(replacement.documentUri, Uri.file(fileB).toString());
   assert.equal(replacement.followsActiveEditor, true);
   assert.equal(replacement.lockedColumn, 2, "the group lock is kept");
-  assert.equal(replacement.readOnly, true, "outside every folder the session is read-only");
+  assert.equal(replacement.restrictedReads, true, "outside every folder the session has restricted reads");
+  await studio.renderDone(panel);
+  assert.match(lastRendered(panel), /data-sphinx-preview-edit-toggle/u);
+  assert.doesNotMatch(lastRendered(panel), /data-sphinx-preview-edit-toggle[^>]*aria-disabled/u,
+    "a standalone file stays editable");
   assert.equal(replacement.workspaceRoot, outsideRoot, "the resource folder is the directory of the document");
   assert.equal(fake.controls.panels.filter((candidate) => candidate === panel).length, 1);
 });
@@ -408,16 +413,19 @@ test("the recorded column of a locked preview follows its group", async (t) => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-test("granting trust turns an open Restricted Mode preview into a writable one", async (t) => {
+test("granting trust turns an open Restricted Mode preview into one with full reads", async (t) => {
   const untrusted = start(t, { trusted: false });
   const file = writeFile("# Restricted\n\n- [ ] task\n");
   const { panel } = await untrusted.openSide(file);
   const restricted = untrusted.manager.active!;
-  assert.equal(restricted.readOnly, true);
+  assert.equal(restricted.restrictedReads, true);
   assert.deepEqual(restricted.sessionRoots, []);
   assert.deepEqual(restricted.navigationRoots, [path.dirname(file)]);
   assert.equal(restricted.workspaceRoot, path.dirname(file));
-  const readOnlyHtml = lastRendered(panel);
+  const restrictedHtml = lastRendered(panel);
+  assert.match(restrictedHtml, /data-sphinx-preview-edit-toggle/u);
+  assert.doesNotMatch(restrictedHtml, /data-sphinx-preview-edit-toggle[^>]*aria-disabled/u,
+    "Restricted Mode keeps the Edit button enabled: trust never makes a document read-only");
   const assignmentsBefore = panel.htmlAssignments.length;
   (fake.vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
   fake.controls.events.grantTrust.fire();
@@ -426,15 +434,66 @@ test("granting trust turns an open Restricted Mode preview into a writable one",
   const trusted = untrusted.manager.active!;
   assert.equal(untrusted.manager.sessions().size, 1, "the preview is not duplicated");
   assert.equal(trusted.panel, restricted.panel, "the same panel is kept: nothing is reopened");
-  assert.equal(trusted.readOnly, false, "the preview is writable after the grant");
+  assert.equal(trusted.restrictedReads, false, "the preview has full reads after the grant");
   assert.equal(trusted.workspaceRoot, workspaceRoot);
   assert.ok(trusted.navigationRoots.includes(workspaceRoot));
   assert.ok(trusted.sessionRoots.includes(workspaceRoot));
-  assert.notEqual(lastRendered(panel), readOnlyHtml, "the page is rebuilt with the editing controls");
+  assert.notEqual(lastRendered(panel), restrictedHtml, "the page is rebuilt with the editing controls");
   const rendersAfter = panel.htmlAssignments.filter((html) => identityOfDocument(html) !== undefined).length;
   assert.ok(panel.htmlAssignments.length > assignmentsBefore);
   assert.equal(trusted.probe.renderedStages, 1, "the trusted session renders once");
   assert.ok(rendersAfter >= 2);
+});
+
+/**
+ * Makes the page of `session` answer a flush request at once and records, for each one, whether the
+ * session was still alive when it was posted.
+ */
+function watchFlush(session: PreviewSession): boolean[] {
+  const aliveWhenPosted: boolean[] = [];
+  const original = session.postToPage.bind(session);
+  session.postToPage = ((value: { type: string; flushId?: string }) => {
+    if (value.type === "previewFlushEdit") {
+      aliveWhenPosted.push(!session.disposed);
+      queueMicrotask(() => session.edits.flushWaiters.get(value.flushId!)?.());
+    }
+    return original(value as never);
+  }) as never;
+  return aliveWhenPosted;
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+test("granting trust flushes the open page editor before the preview is replaced", async (t) => {
+  const studio = start(t, { trusted: false });
+  const { panel } = await studio.openSide(writeFile("# Restricted\n\nTyping here.\n"));
+  await studio.ready(panel);
+  const restricted = studio.manager.active!;
+  restricted.edits.lock.openPageEditor("e1");
+  const flushes = watchFlush(restricted);
+  (fake.vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
+  fake.controls.events.grantTrust.fire();
+  await studio.advance(300);
+  await studio.until(() => restricted.disposed, "the replacement of the restricted preview");
+  assert.deepEqual(flushes, [true], "the page editor is flushed once, while the old session is alive");
+  assert.equal(studio.manager.active!.restrictedReads, false);
+  assert.equal(studio.manager.active!.panel, restricted.panel);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143
+test("removing the folder of a preview flushes its open page editor before the preview is replaced", async (t) => {
+  const studio = start(t);
+  const setFolders = folderControl(t);
+  const { panel } = await studio.openSide(writeFile("# Session\n\nTyping here.\n"));
+  await studio.ready(panel);
+  const writable = studio.manager.active!;
+  writable.edits.lock.openPageEditor("e1");
+  const flushes = watchFlush(writable);
+  setFolders([]);
+  await studio.advance(300);
+  await studio.until(() => writable.disposed, "the replacement of the preview");
+  assert.deepEqual(flushes, [true], "the page editor is flushed once, while the old session is alive");
+  assert.equal(studio.manager.active!.restrictedReads, true);
+  assert.equal(studio.manager.active!.panel, writable.panel);
 });
 
 test("granting trust keeps the active preview active when several previews are open", async (t) => {
@@ -449,18 +508,18 @@ test("granting trust keeps the active preview active when several previews are o
   fake.controls.events.grantTrust.fire();
   await studio.advance(300);
   assert.equal(studio.manager.sessions().size, 2);
-  assert.ok(sessionsOf(studio).every((session) => !session.readOnly));
+  assert.ok(sessionsOf(studio).every((session) => !session.restrictedReads));
   assert.equal(studio.manager.active!.documentUri, activeId, "the active preview is still the same one");
 });
 
-test("a preview created in a trusted workspace stays writable when trust is granted again", async (t) => {
+test("a preview created in a trusted workspace keeps its full reads when trust is granted again", async (t) => {
   const studio = start(t);
   await studio.openSide(writeFile("# Trusted\n"));
   const session = studio.manager.active!;
-  assert.equal(session.readOnly, false);
+  assert.equal(session.restrictedReads, false);
   fake.controls.events.grantTrust.fire();
   await studio.advance(100);
-  assert.equal(session.readOnly, false);
+  assert.equal(session.restrictedReads, false);
 });
 
 type FakeFolder = { uri: Uri; name: string; index: number };
@@ -496,70 +555,70 @@ function folderControl(t: TestContext): (roots: readonly string[]) => void {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-test("adding a workspace folder makes the read-only previews of its files writable on the same panel", async (t) => {
+test("adding a workspace folder gives the previews of its files full reads on the same panel", async (t) => {
   const studio = start(t);
   const setFolders = folderControl(t);
   const mounted = path.join(outsideRoot, `mounted-${process.pid}`);
   const inside = writeFile("# Mounted\n", mounted);
   const outside = writeFile("# Elsewhere\n", path.join(outsideRoot, `elsewhere-${process.pid}`));
   const { panel } = await studio.openSide(inside);
-  const readOnly = studio.manager.active!;
-  assert.equal(readOnly.readOnly, true, "no folder holds the file yet");
+  const restrictedReads = studio.manager.active!;
+  assert.equal(restrictedReads.restrictedReads, true, "no folder holds the file yet");
   const readingState = { documentId: Uri.file(inside).toString(), sourceFile: inside, sourceLine: 1, scrollTop: 40 };
-  readOnly.state = readingState;
+  restrictedReads.state = readingState;
   await openWith(studio, outside);
   const other = studio.manager.active!;
-  assert.equal(other.readOnly, true);
+  assert.equal(other.restrictedReads, true);
   setFolders([workspaceRoot, mounted]);
   await studio.advance(300);
   const promoted = sessionsOf(studio).find((session) => session.documentUri === Uri.file(inside).toString())!;
   assert.equal(studio.manager.sessions().size, 2, "the preview is not duplicated");
-  assert.equal(readOnly.disposed, true);
-  assert.equal(promoted.panel, readOnly.panel, "the same panel is kept: nothing is reopened");
+  assert.equal(restrictedReads.disposed, true);
+  assert.equal(promoted.panel, restrictedReads.panel, "the same panel is kept: nothing is reopened");
   assert.equal(panel.disposed, false);
-  assert.equal(promoted.readOnly, false, "the preview is writable once its folder is added");
+  assert.equal(promoted.restrictedReads, false, "the preview has full reads once its folder is added");
   assert.equal(promoted.workspaceRoot, mounted);
   assert.ok(promoted.sessionRoots.includes(mounted));
   assert.deepEqual(promoted.state, readingState, "the reading state is kept");
   assert.equal(other.disposed, false, "a preview of a file outside the added folder is left alone");
-  assert.equal(other.readOnly, true);
+  assert.equal(other.restrictedReads, true);
   assert.equal(studio.manager.active, other, "the active preview stays the active one");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-143
-test("removing the folder of a preview keeps its panel read-only until the folder is added back", async (t) => {
+test("removing the folder of a preview keeps its panel, with restricted reads, until the folder is added back", async (t) => {
   const studio = start(t);
   const setFolders = folderControl(t);
   const directory = path.join(workspaceRoot, `agent-session-${process.pid}`);
   const file = writeFile("# Session\n", directory);
   const { panel } = await studio.openSide(file);
   const writable = studio.manager.active!;
-  assert.equal(writable.readOnly, false);
+  assert.equal(writable.restrictedReads, false);
   const readingState = { documentId: Uri.file(file).toString(), sourceFile: file, sourceLine: 1, scrollTop: 40 };
   writable.state = readingState;
   const folderWatcher = studio.dependencyWatcherOf(workspaceRoot);
-  const writableHtml = lastRendered(panel);
+  const fullReadsHtml = lastRendered(panel);
 
   setFolders([]);
   await studio.advance(300);
-  await studio.until(() => lastRendered(panel) !== writableHtml, "the read-only page");
+  await studio.until(() => lastRendered(panel) !== fullReadsHtml, "the page with restricted reads");
   assert.equal(panel.disposed, false, "the tab stays open");
   assert.equal(writable.disposed, true, "the session of the removed folder is disposed");
   assert.equal(folderWatcher.disposed, true, "with its watcher of the folder");
-  const readOnly = studio.manager.active!;
+  const restrictedReads = studio.manager.active!;
   assert.equal(studio.manager.sessions().size, 1);
-  assert.equal(readOnly.panel, writable.panel, "the same panel shows the file");
-  assert.equal(readOnly.readOnly, true);
-  assert.equal(readOnly.workspaceRoot, directory, "the resource folder is the directory of the document");
-  assert.deepEqual(readOnly.sessionRoots, []);
-  assert.deepEqual(readOnly.state, readingState, "the reading state is kept");
+  assert.equal(restrictedReads.panel, writable.panel, "the same panel shows the file");
+  assert.equal(restrictedReads.restrictedReads, true);
+  assert.equal(restrictedReads.workspaceRoot, directory, "the resource folder is the directory of the document");
+  assert.deepEqual(restrictedReads.sessionRoots, []);
+  assert.deepEqual(restrictedReads.state, readingState, "the reading state is kept");
 
   setFolders([workspaceRoot]);
   await studio.advance(300);
   const again = studio.manager.active!;
-  assert.equal(readOnly.disposed, true);
+  assert.equal(restrictedReads.disposed, true);
   assert.equal(again.panel, writable.panel);
-  assert.equal(again.readOnly, false, "the preview is writable again once the folder is back");
+  assert.equal(again.restrictedReads, false, "the preview has full reads again once the folder is back");
   assert.equal(again.workspaceRoot, workspaceRoot);
   assert.equal(panel.disposed, false);
 });

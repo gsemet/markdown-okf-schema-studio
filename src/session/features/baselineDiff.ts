@@ -34,7 +34,7 @@ export async function renderBaselineContent(
       },
       revision: shown.activeDocumentRevision,
       workspaceRoot: preview.workspaceRoot,
-      readOnly: preview.readOnly,
+      restrictedReads: preview.restrictedReads,
       requestId: shown.requestId,
       documentIdentity: shown.activeDocumentIdentity,
       isWorkspaceTrusted: () => host.workspace.trusted,
@@ -56,10 +56,9 @@ export async function renderBaselineContent(
       undefined,
       preview.configuration.maxContentWidth,
       false,
-      false,
       [],
       "host",
-      preview.readOnly,
+      preview.restrictedReads,
     );
     const inner = extractMainContent(page.html)?.inner;
     if (inner === undefined || inner.length > MAX_PATCH_CONTENT_LENGTH) return undefined;

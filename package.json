@@ -35,7 +35,7 @@
     },
     "untrustedWorkspaces": {
       "supported": "limited",
-      "description": "In Restricted Mode the preview is read-only: editing, comments and every write to the document are off, and the PlantUML Java engine is disabled (the built-in engine still draws diagrams). Trust the workspace to edit.",
+      "description": "In Restricted Mode you can still edit the open document, paste images next to it and add comments. Reads stay narrow: includes and other resources come from the document's folder only, images also from the workspace folder, with no schema lookup, and the PlantUML Java engine is disabled (the built-in engine still draws diagrams). Trust the workspace to lift these limits.",
       "restrictedConfigurations": [
         "markdownOkfSchemaStudio.plantuml.useJar",
         "markdownOkfSchemaStudio.plantuml.jarPath",

@@ -215,15 +215,21 @@ export async function runUndo(): Promise<void> {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-/** An untrusted (read-only) preview never moves a block. */
+/** A preview in Restricted Mode moves a block like a trusted one: one swap, undone here. */
 export async function runUntrusted(preview: { documentUri: string; documentVersion?: number; requestId?: number }, document: vscode.TextDocument): Promise<void> {
   const before = document.getText();
-  await sendPreviewMessageForTests({
-    type: "previewBlockMove",
-    documentId: preview.documentUri,
-    revision: preview.documentVersion,
-    requestId: preview.requestId,
-    line: 1, endLine: 1, neighbourLine: 3, neighbourEndLine: 3, direction: "down", pinViewportTop: 10,
-  });
-  assert.equal(document.getText(), before, "a read-only preview must not move a block");
+  for (let attempt = 0; attempt < 20 && document.getText() === before; attempt += 1) {
+    await sendPreviewMessageForTests({
+      type: "previewBlockMove",
+      documentId: preview.documentUri,
+      revision: document.version,
+      requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
+      line: 1, endLine: 1, neighbourLine: 3, neighbourEndLine: 5, direction: "down", pinViewportTop: 10,
+    });
+    if (document.getText() === before) await new Promise<void>((resolve) => setTimeout(resolve, 250));
+  }
+  assert.notEqual(document.getText(), before, "Restricted Mode moves a block: trust never makes a document read-only");
+  await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+  await vscode.commands.executeCommand("undo");
+  assert.equal(document.getText(), before, "one undo restores the block order");
 }

@@ -488,15 +488,25 @@ export const zoomAssertions = (zoom: number): ContentAssertion[] => [
   { message: "the text column stays inside the pane", selector: `${MAIN} p`, insidePane: true },
 ];
 
-export const READ_ONLY_ASSERTIONS: ContentAssertion[] = [
+const RESTRICTED_PAGE_COMMON: ContentAssertion[] = [
   { message: "the toolbar is shown", selector: "[data-sphinx-preview-toolbar]", count: 1, visible: true },
-  { message: "the read-only toolbar keeps the Edit (pencil) button, greyed", selector: "[data-sphinx-preview-edit-toggle]", count: 1, visible: true, attr: { name: "aria-disabled", value: "true" } },
-  { message: "the greyed Edit button says why", selector: "[data-sphinx-preview-edit-toggle]", attr: { name: "title", value: "Editing is unavailable: this file is not in a trusted workspace" } },
+  { message: "the Edit (pencil) button is enabled in Restricted Mode", selector: "[data-sphinx-preview-edit-toggle]", count: 1, visible: true, expr: "!document.querySelector('[data-sphinx-preview-edit-toggle]').hasAttribute('aria-disabled')" },
   { message: "the Refresh button is still there", selector: "[data-sphinx-preview-refresh]", count: 1 },
-  { message: "edit mode is never switched on", selector: "html", expr: "document.documentElement.getAttribute('data-sphinx-preview-edit-mode') !== 'on'" },
-  { message: "no frontmatter cell is editable", selector: "[data-okf-edit-cell]", count: 0 },
-  { message: "every frontmatter row says it is not editable", selector: "[data-okf-field]", min: 5, expr: "[...document.querySelectorAll('[data-okf-field]')].every(row => row.getAttribute('data-okf-editable') === 'false')" },
+  { message: "the frontmatter cells are editable", selector: "[data-okf-edit-cell]", min: 5 },
+  { message: "the editable frontmatter rows say so", selector: "[data-okf-field]", min: 5, expr: "[...document.querySelectorAll('[data-okf-field]')].some(row => row.getAttribute('data-okf-editable') === 'true')" },
   { message: "the document itself is still rendered", selector: `${MAIN} h1`, count: 1, text: "Brake pedal release detection" },
+];
+/** Restricted Mode, before any click: the Edit button offers the edit mode and the mode is off. */
+export const RESTRICTED_PAGE_ASSERTIONS: ContentAssertion[] = [
+  ...RESTRICTED_PAGE_COMMON,
+  { message: "the Edit button offers the edit mode, not a reason", selector: "[data-sphinx-preview-edit-toggle]", attr: { name: "title", value: "Edit mode" } },
+  { message: "edit mode starts off", selector: "html", expr: "document.documentElement.getAttribute('data-sphinx-preview-edit-mode') !== 'on'" },
+];
+/** Restricted Mode after a click on the Edit button: the edit mode is on and the button is pressed. */
+export const RESTRICTED_PAGE_EDIT_ON_ASSERTIONS: ContentAssertion[] = [
+  ...RESTRICTED_PAGE_COMMON,
+  { message: "the Edit button is pressed after the click", selector: "[data-sphinx-preview-edit-toggle]", attr: { name: "aria-pressed", value: "true" } },
+  { message: "the click on the Edit button switched the edit mode on", selector: "html", attr: { name: "data-sphinx-preview-edit-mode", value: "on" } },
 ];
 /** CR 238: Restricted Mode shows the images of the document folder and the workspace root. */
 export const READ_ONLY_IMAGES_ASSERTIONS: ContentAssertion[] = [
@@ -505,12 +515,10 @@ export const READ_ONLY_IMAGES_ASSERTIONS: ContentAssertion[] = [
   { message: "the image below a dot-directory is refused: its source is removed", selector: `${MAIN} img[alt="Hidden image"]`, count: 1, expr: "!document.querySelector('#sphinx-myst-preview-content img[alt=\"Hidden image\"]').hasAttribute('src')" },
   { message: "the document itself is still rendered", selector: `${MAIN} h1`, count: 1, text: "Restricted Mode images" },
 ];
-export const READ_ONLY_NO_HOVER_ASSERTIONS: ContentAssertion[] = [
-  { message: "no block is marked as an edit target after the pointer rested on a paragraph", selector: "[data-sphinx-preview-edit-hover]", count: 0 },
-  { message: "the paragraph under the pointer has no outline", selector: `${MAIN} p`, min: 1, expr: "(() => { const hovered = [...document.querySelectorAll('#sphinx-myst-preview-content p')].find(p => p.matches(':hover')); if (!hovered) return 'no paragraph under the pointer'; const style = getComputedStyle(hovered); return style.outlineStyle === 'none' || style.outlineWidth === '0px'; })()" },
-  { message: "clicking the paragraph opened no editor", selector: "[data-sphinx-preview-block-editor], .sphinx-preview-block-editor", count: 0 },
-  { message: "the pointer is a normal text cursor, not an edit affordance", selector: `${MAIN} p`, min: 1, expr: "(() => { const hovered = [...document.querySelectorAll('#sphinx-myst-preview-content p')].find(p => p.matches(':hover')); return hovered !== undefined && getComputedStyle(hovered).cursor !== 'pointer'; })()" },
-  { message: "the Edit button is greyed and not pressed", selector: "[data-sphinx-preview-edit-toggle]", count: 1, attr: { name: "aria-disabled", value: "true" } },
+export const RESTRICTED_EDITS_ASSERTIONS: ContentAssertion[] = [
+  { message: "edit mode is on", selector: "html", attr: { name: "data-sphinx-preview-edit-mode", value: "on" } },
+  { message: "the Edit button is pressed and enabled", selector: "[data-sphinx-preview-edit-toggle]", count: 1, attr: { name: "aria-pressed", value: "true" }, expr: "!document.querySelector('[data-sphinx-preview-edit-toggle]').hasAttribute('aria-disabled')" },
+  { message: "clicking the paragraph opened its block editor", selector: ".sphinx-preview-block-editor textarea[aria-label=\"Raw Markdown block\"]", count: 1 },
 ];
 
 export const MARK_EDITOR_SELECTION_ASSERTIONS: ContentAssertion[] = [

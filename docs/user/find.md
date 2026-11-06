@@ -35,5 +35,5 @@ The arrow at the left of the bar opens the replace field.
   source, such as text inside a formula, a link label that repeats its target, generated text like
   an admonition title, the front matter or an included file, is skipped. The bar tells you how many:
   `3 matches cannot be replaced from the preview`. Edit those in the text editor.
-- **Read-only previews:** in Restricted Mode, or while a block editor is open, the replace field is
-  disabled and the reason is shown. Finding still works.
+- **Open editors:** while a block editor is open, the replace field is disabled and the reason is
+  shown. Finding still works. Restricted Mode and standalone files replace like any other.

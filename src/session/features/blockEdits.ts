@@ -4,7 +4,7 @@
  * STAB-06), and the flush of the page's open editors before the host switches document (CR 025).
  */
 
-import { planBlockTextEdit, withLineEndingOf } from "../../core/edits/sourceEdits";
+import { READ_ONLY_FILE, planBlockTextEdit, withLineEndingOf } from "../../core/edits/sourceEdits";
 import type { HostDocument } from "../../host-api/documentStore";
 import { checkBlockLines, type BlockRangeRefusal } from "../../core/mapping/blockRange";
 import { sourceRangeForLines } from "../../core/mapping/sourceMapping";
@@ -17,7 +17,7 @@ import { EditLock } from "../../core/state/editLock";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { currentPreviewDocument, isDocumentEligible, revisionOfStage } from "../sessionDocuments";
+import { applyWrittenEdits, currentPreviewDocument, isDocumentEligible, revisionOfStage } from "../sessionDocuments";
 import { OWN_EDIT_ECHO_MS } from "./scrollSync";
 import { fireAndForget } from "../../host-api/logger";
 
@@ -49,6 +49,11 @@ export interface EditState {
   lock: EditLock;
   /** The block edit the host holds, until its final save completed. */
   active?: ActiveBlockEdit;
+  /**
+   * Images pasted into the open editor and saved next to the document, until a block save wrote the
+   * text that refers to them (removed when the file turns out read-only, so none is left orphan).
+   */
+  pastedImages?: string[];
   /** Frontmatter and checkbox saves whose edit is still being applied (CR 025). */
   pendingSaves: Set<Promise<unknown>>;
   /** Flush requests posted to the page and not answered yet, by flush id (CR 025). */
@@ -321,7 +326,7 @@ export class BlockEditController {
     // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
     // CR 134: the text editor scrolls to the edit; the page must not follow that echo.
     preview.scroll.ownEditUntil = Infinity;
-    fireAndForget(this.manager.host.logger, this.manager.host.documents.applyEdits(source.document, [textEdit]).then((applied) => {
+    fireAndForget(this.manager.host.logger, applyWrittenEdits(this.manager.host.documents, source.document, [textEdit]).then((applied) => {
       preview.scroll.ownEditUntil = Date.now() + OWN_EDIT_ECHO_MS;
       if (preview.edits.active !== edit) {
         return;
@@ -334,6 +339,7 @@ export class BlockEditController {
       }
       edit.lastSavedText = editedText;
       edit.hasAppliedEdit = true;
+      preview.edits.pastedImages = undefined;
       this.drainActiveBlockEdit(preview, edit);
     }, (error: unknown) => {
       preview.scroll.ownEditUntil = Date.now() + OWN_EDIT_ECHO_MS;
@@ -342,12 +348,22 @@ export class BlockEditController {
       }
       edit.applying = false;
       edit.finalRequested = false;
+      if (error instanceof Error && error.message === READ_ONLY_FILE) this.removePastedImages(preview);
       this.postEditSourceError(
         preview,
         edit.lastMessage,
         error instanceof Error ? error.message : String(error),
       );
     }), "applyEdits");
+  }
+
+  /** A read-only file cannot take the pasted images' references: the images would stay orphans. */
+  private removePastedImages(preview: PreviewSession): void {
+    const images = preview.edits.pastedImages ?? [];
+    preview.edits.pastedImages = undefined;
+    for (const image of images) {
+      fireAndForget(this.manager.host.logger, this.manager.host.files.delete(image).then(undefined, () => undefined), "deletePastedImage");
+    }
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-191
@@ -536,11 +552,11 @@ export class BlockEditController {
    * document (CR 025). Used before the host switches document on its own (tab follow, Back / Next):
    * the page posts the final saves first and the answer after them, and messages arrive in order, so
    * the host knows every save when the answer comes. A dead page or a refused save ends after
-   * `FLUSH_WAIT_MS`; the navigation is never blocked and nothing is flushed in a read-only preview.
+   * `FLUSH_WAIT_MS`; the navigation is never blocked.
    */
   public async flushPageEdits(preview: PreviewSession): Promise<void> {
     const stage = preview.stage;
-    if (!preview.disposed && !preview.readOnly && stage && preview.page.readyRequestId !== undefined) {
+    if (!preview.disposed && stage && preview.page.readyRequestId !== undefined) {
       const flushId = `flush-${++preview.edits.flushSequence}`;
       const answered = new Promise<void>((resolve) => preview.edits.flushWaiters.set(flushId, resolve));
       const posted = await preview.postToPage({

@@ -423,7 +423,7 @@ export async function setEditMode(page: Page, on: boolean): Promise<Frame> {
       return currentPreviewFrame(page);
     }
     if (before.state.toggle === undefined) throw failure("the page has no edit toggle");
-    if (before.state.toggle.ariaDisabled === "true") throw failure("the edit toggle is disabled (read-only preview)");
+    if (before.state.toggle.ariaDisabled === "true") throw failure("the edit toggle is disabled (the preview offers no editing)");
     // The outcome, read on the clicked frame: the page handles the click in the same task as the
     // probe's counter, so a counted click comes with the page's answer to it.
     // Assigned in the poll below (`as` keeps TypeScript from narrowing them to their start values).

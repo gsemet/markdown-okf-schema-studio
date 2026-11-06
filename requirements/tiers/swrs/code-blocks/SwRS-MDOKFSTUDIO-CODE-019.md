@@ -99,7 +99,7 @@ When the reader clicks the copy button, the extension SHALL put the block's code
 - Derives from:
   - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
   - [SwRS-MDOKFSTUDIO-CODE-026](SwRS-MDOKFSTUDIO-CODE-026.md): An invalid or oversized copy request is refused
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CODE-020](SwRS-MDOKFSTUDIO-CODE-020.md): Confirm a copy with a Copied state for 1.5 seconds

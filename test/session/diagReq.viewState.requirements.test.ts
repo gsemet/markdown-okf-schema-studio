@@ -16,7 +16,6 @@ import { PageMessageDispatcher, type PageMessageRouter } from "../../src/session
 import { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
 import { WorkspaceChoices } from "../../src/session/workspaceChoices";
-import { READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
 
 const DOCUMENT = "file:///notes/doc.md";
 
@@ -39,7 +38,7 @@ function readOnlyHarness() {
   const errors: string[] = [];
   const session = {
     disposed: false,
-    readOnly: true,
+    restrictedReads: true,
     documentUri: DOCUMENT,
     stage: { activeDocumentIdentity: DOCUMENT, activeDocumentRevision: 4, requestId: 9 },
     edits: { active: undefined },
@@ -64,7 +63,7 @@ function readOnlyHarness() {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-006
-test("a read-only preview stores a zoom change, and a message of an older render is dropped", () => {
+test("a preview with restricted reads stores a zoom change, and a message of an older render is dropped", () => {
   const { choices, send } = readOnlyHarness();
 
   send({ type: "previewViewPreferenceChanged", preference: "zoom", value: 130 });
@@ -74,7 +73,7 @@ test("a read-only preview stores a zoom change, and a message of an older render
   assert.equal(choices.viewPreferences.zoom, 130, "the render gate drops a message with the old revision");
 });
 
-test("a read-only preview stores a theme choice; its edit requests are refused", () => {
+test("a restricted-reads preview stores a theme choice; its edit requests reach the handlers", () => {
   const { choices, errors, send } = readOnlyHarness();
 
   send({ type: "previewThemeModeChanged", previewThemeMode: "white" });
@@ -82,7 +81,7 @@ test("a read-only preview stores a theme choice; its edit requests are refused",
   assert.deepEqual(errors, []);
 
   send({ type: "previewEditOpen", line: 3, endLine: 4, editId: "e1" });
-  assert.deepEqual(errors, [READ_ONLY_NO_FOLDER]);
+  assert.deepEqual(errors, [], "no refusal is posted");
   assert.equal(choices.previewThemeMode, "white");
 });
 

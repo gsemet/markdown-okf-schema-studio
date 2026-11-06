@@ -33,7 +33,7 @@ test("a malformed frontmatter link request is refused with its own reason", asyn
     workspaceRoot: "/notes",
     sessionRoots: ["/notes"],
     navigationRoots: ["/notes"],
-    readOnly: false,
+    restrictedReads: false,
     frontmatter: {},
     frontmatterConfiguration: {},
   } as unknown as PreviewSession;

@@ -42,7 +42,7 @@ export async function run(): Promise<void> {
 
   const outputDirectory = getActivePreviewForTests()?.outputDirectory;
   assert.ok(outputDirectory);
-  assert.equal(getActivePreviewForTests()?.readOnly, false);
+  assert.equal(getActivePreviewForTests()?.restrictedReads, false);
   const panel = getActivePreviewPanelForTests();
   assert.ok(panel);
   let panelDisposed = false;
@@ -62,12 +62,12 @@ export async function run(): Promise<void> {
     "the extension-host workspace folder could not be removed",
   );
   // @tests_req SwRS-MDOKFSTUDIO-LIFE-143
-  await waitFor("the read-only preview after workspace removal", () => {
+  await waitFor("the preview with restricted reads after workspace removal", () => {
     const preview = getActivePreviewForTests();
-    return preview?.readOnly === true && preview.phase === "ready" && preview.status === "success";
+    return preview?.restrictedReads === true && preview.phase === "ready" && preview.status === "success";
   });
   assert.equal(panelDisposed, false, "removing the folder keeps the preview tab open");
-  assert.equal(getActivePreviewPanelForTests(), panel, "the same panel shows the file, read-only");
+  assert.equal(getActivePreviewPanelForTests(), panel, "the same panel shows the file, with restricted reads");
   assert.equal(getActivePreviewForTests()?.outputDirectory, path.dirname(fixturePath));
   assert.equal(outputDirectory, path.dirname(fixturePath));
   assert.equal(fs.existsSync(outputDirectory), true, "workspace removal deleted the source directory");

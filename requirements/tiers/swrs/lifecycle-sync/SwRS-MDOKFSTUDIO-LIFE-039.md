@@ -90,7 +90,7 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 | --- | --- |
 | a preview whose panel is hidden and a change, a refresh or a document switch | no render starts; the preview is marked dirty |
 | the dirty panel is shown | one render starts, and the mark is cleared |
-| two previews of the same document at the same revision, workspace root, trust state, read-only state and PlantUML engine | one render serves both; each receives its own stage with its own request id |
+| two previews of the same document at the same revision, workspace root, trust state, restricted-reads state and PlantUML engine | one render serves both; each receives its own stage with its own request id |
 | a file the render may have read changes, a setting changes, files are renamed or a refresh is requested | the next request renders again instead of joining a finished render |
 
 ### Scenario (nominal): Rendering writes nothing

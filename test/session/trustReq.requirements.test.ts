@@ -35,7 +35,7 @@ function harness(options: { stage?: boolean; activeEdit?: { editId: string; revi
   };
   const session = {
     disposed: false,
-    readOnly: false,
+    restrictedReads: false,
     documentUri: DOCUMENT,
     stage,
     edits: {

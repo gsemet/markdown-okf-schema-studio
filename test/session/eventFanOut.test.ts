@@ -264,7 +264,7 @@ test("the link target search skips dependency and VCS folders and stops after a 
     stage: { activeDocumentPath: path.join(root, "a.md"), activeDocumentIdentity: "file:///a.md", requestId: 1 },
     workspaceRoot: root,
     navigationRoots: [root],
-    readOnly: false,
+    restrictedReads: false,
     frontmatter: {},
     links: {},
     frontmatterConfiguration: {},
