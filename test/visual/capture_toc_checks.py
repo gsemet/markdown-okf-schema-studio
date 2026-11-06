@@ -9,6 +9,27 @@ from capture_support import Failure
 from capture_toc_rail import check_toc_overlay, check_toc_rail
 
 
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+def check_toc_follows_toolbar(page: Page) -> list[str]:
+  """The open column or rail stays 8px below the toolbar each time the toolbar opens or closes."""
+  chevron = page.locator("[data-sphinx-preview-toolbar-collapse]")
+  measure = """() => {
+    const shown = [...document.querySelectorAll('nav[data-sphinx-preview-toc], [data-sphinx-preview-toc-rail]')]
+      .find(element => getComputedStyle(element).display !== 'none');
+    const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+    return shown ? shown.getBoundingClientRect().top - toolbar.getBoundingClientRect().bottom : null;
+  }"""
+  problems = []
+  # An even number of clicks gives the toolbar back as it was; the bug showed from the second click.
+  for click in range(1, 5):
+    chevron.click()
+    page.wait_for_timeout(350)
+    gap = page.evaluate(measure)
+    if gap is None or abs(gap - 8) > 1:
+      problems.append(f"toolbar click {click}: the TOC is {gap}px below the toolbar, expected 8px")
+  return problems
+
+
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
@@ -59,6 +80,7 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
     if opened["state"] != "open":
       failures.append(Failure(page_name, "the TOC button did not open the column"))
       return
+    failures.extend(Failure(page_name, text) for text in check_toc_follows_toolbar(page))
     if not wide_pane:
       if opened["shown"]:
         failures.append(Failure(page_name, "the TOC column must be hidden on a pane under 760px"))

@@ -83,10 +83,40 @@ test("CR 162: the rows carry the animating mark before hidden changes, and lose 
   t.button.dispatch("click");
   assert.equal(t.rows.hidden, false);
   assert.equal(t.rows.getAttribute(ANIMATING), "true");
-  // The layout is measured again when the height transition ends.
+  // The layout is measured again when the animation ends.
   const before = t.log.length;
-  for (const listener of t.rows.listeners.get("transitionend") ?? []) listener({ type: "transitionend", target: t.rows, propertyName: "height" });
-  assert.equal(t.log.length, before + 1);
+  t.advance(200);
+  assert.deepEqual(t.log.slice(before), ["change hidden=false animating=null"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+test("the layout is measured after the animation in both directions, once for quick clicks", () => {
+  const t = setup({ collapsed: false });
+  for (const hidden of [true, false]) {
+    t.button.dispatch("click");
+    const before = t.log.length;
+    t.advance(200);
+    assert.deepEqual(t.log.slice(before), [`change hidden=${hidden} animating=null`]);
+  }
+  t.button.dispatch("click");
+  t.advance(100);
+  t.button.dispatch("click");
+  const before = t.log.length;
+  t.advance(199);
+  assert.equal(t.log.length, before, "the second click restarts the animation");
+  t.advance(1);
+  assert.deepEqual(t.log.slice(before), ["change hidden=false animating=null"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+test("the layout is measured after the load hint rolls up", () => {
+  const t = setup();
+  t.paint();
+  t.advance(700);
+  const before = t.log.length;
+  t.advance(200);
+  assert.deepEqual(t.log.slice(before), ["change hidden=true animating=null"]);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
