@@ -21,7 +21,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/page/modules/commentThreads.ts
+- src/page/modules/commentThreadData.ts
 tested_in_files:
 - test/page/modules/commentThreadsLongDocument.test.ts
 default_owner_email: gaetan@xeberon.net

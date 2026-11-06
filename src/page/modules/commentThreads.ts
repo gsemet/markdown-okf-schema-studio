@@ -1,23 +1,5 @@
-export interface PageCommentEntry {
-  id: string;
-  author: string;
-  createdAt: string;
-  body: string;
-}
-
-export interface PageCommentThread {
-  id: string;
-  anchor: { line: number; endLine: number; quote: string; prefix: string; suffix: string };
-  resolved: boolean;
-  createdAt: string;
-  comments: PageCommentEntry[];
-  /**
-   * T45: the host's verdict after re-anchoring. `true`: list in the Orphaned box without looking at
-   * the page; `false`: the host placed the thread, so its lines are trusted and the page does not
-   * search the quote elsewhere; absent: the page decides alone (T44 rules).
-   */
-  orphaned?: boolean;
-}
+import { MAX_TEXT, locate, sanitize, type PageCommentThread } from "./commentThreadData";
+import { DISCARD, DISCARD_KEEP, DISCARD_YES, discardQuestion, floatingTop } from "./commentEditorBehaviour";
 
 /**
  * Review comments in the page (T42).
@@ -53,8 +35,12 @@ export interface PageCommentThread {
  * (the page never searches the quote elsewhere for such a thread). Threads without the field
  * (older hosts, tests) keep the T44 placement rules.
  *
- * `trace` (diagnostics only, it changes nothing) hears why an open popover went away: a press
- * outside, Escape, a toggle, a close by the page, or a re-apply that found no thread or holder.
+ * Placement and dismissal of the popover follow `commentEditorBehaviour.ts`: it sits inside the window,
+ * follows its text on scroll, and Escape or a press outside closes it, or, when the reply box holds
+ * text, asks "Discard / Keep editing" inside the popover first (no `window.confirm`).
+ *
+ * `trace` (diagnostics only) hears why an open popover went away: a press outside, Escape, a toggle,
+ * a close by the page, or a re-apply that found no thread or holder.
  *
  * While comments are hidden (`<html>` carries `data-sphinx-preview-comments="off"` from the toolbar
  * Comments button or `data-okf-show-comments="false"` from the setting; the stylesheet hides the
@@ -100,9 +86,6 @@ export function installCommentThreads(
   const NEXT_TO = new Set(["TABLE", "THEAD", "TBODY", "TR", "UL", "OL", "DL", "PRE", "DETAILS", "IMG", "HR", "SVG"]);
   // A quote must have this many characters (whitespace collapsed) to be searched for elsewhere.
   const MIN_MOVED_QUOTE = 12;
-  const MAX_THREADS = 1000;
-  const MAX_COMMENTS = 200;
-  const MAX_TEXT = 10000;
   let threads: PageCommentThread[] = [];
   let popover: Element | undefined;
   let openId: string | undefined;
@@ -113,6 +96,9 @@ export function installCommentThreads(
   // The resolve or delete waiting for the host's answer, and the thread whose Delete is being asked.
   let act: { threadId: string; kind: "resolve" | "delete"; timer?: number; waiting: boolean; error: string } | undefined;
   let confirming: string | undefined;
+  // The thread whose reply draft is being asked about, and the element the popover is anchored to.
+  let discarding: string | undefined;
+  let openTarget: Element | undefined;
   let orphanBox: Element | undefined;
   let addedOrphans: Element[] = [];
 
@@ -135,53 +121,19 @@ export function installCommentThreads(
     mark.setAttribute("aria-haspopup", "dialog");
   };
 
-  const text = (value: unknown): string => (typeof value === "string" ? value.slice(0, MAX_TEXT) : "");
-
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-001
-  // Keeps only well-formed threads, as fresh objects (the host validated them already).
-  const sanitize = (value: unknown): PageCommentThread[] => {
-    if (!Array.isArray(value)) return [];
-    const result: PageCommentThread[] = [];
-    for (const raw of value.slice(0, MAX_THREADS)) {
-      if (!raw || typeof raw !== "object" || typeof raw.id !== "string" || raw.id === "") continue;
-      const anchor = raw.anchor;
-      if (!anchor || !Number.isSafeInteger(anchor.line) || anchor.line < 1) continue;
-      if (!Array.isArray(raw.comments)) continue;
-      const comments: PageCommentEntry[] = [];
-      for (const comment of raw.comments.slice(0, MAX_COMMENTS)) {
-        if (!comment || typeof comment !== "object") continue;
-        comments.push({
-          id: text(comment.id),
-          author: text(comment.author),
-          createdAt: text(comment.createdAt),
-          body: text(comment.body),
-        });
-      }
-      result.push({
-        id: text(raw.id),
-        anchor: {
-          line: anchor.line,
-          endLine: Number.isSafeInteger(anchor.endLine) && anchor.endLine >= anchor.line ? anchor.endLine : anchor.line,
-          quote: text(anchor.quote),
-          prefix: text(anchor.prefix),
-          suffix: text(anchor.suffix),
-        },
-        resolved: raw.resolved === true,
-        createdAt: text(raw.createdAt),
-        comments,
-        ...(typeof raw.orphaned === "boolean" ? { orphaned: raw.orphaned } : {}),
-      });
-    }
-    return result;
-  };
-
   const replyInput = (): { value: string } | undefined =>
     (popover?.querySelector(`[${REPLY_INPUT}]`) ?? undefined) as unknown as { value: string } | undefined;
 
   // Shows the state of `sent` in the open popover: error line and Reply button.
   const paintReply = (): void => {
+    paintReplyContent();
+    if (popover && openTarget) position(openTarget); // the rows changed the height
+  };
+
+  const paintReplyContent = (): void => {
     if (!popover) return;
     paintActions();
+    paintDiscard(false);
     const reply = popover.querySelector("[data-okf-comment-reply]");
     const send = popover.querySelector(`[${REPLY_SEND}]`);
     if (!reply || !send) return;
@@ -246,6 +198,7 @@ export function installCommentThreads(
       line.textContent = message;
       row.appendChild(line);
     }
+    if (openTarget) position(openTarget);
   };
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-086
@@ -277,6 +230,45 @@ export function installCommentThreads(
     popover = undefined;
     openId = undefined;
     confirming = undefined;
+    discarding = undefined;
+    openTarget = undefined;
+  };
+
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-218
+  // The question under the reply box; only the user's trigger, not a repaint, focuses Keep editing.
+  const paintDiscard = (focusKeep: boolean): void => {
+    if (!popover) return;
+    const shown = popover.querySelector(`[${DISCARD}]`);
+    const wanted = discarding !== undefined && discarding === openId;
+    if (shown && wanted) return;
+    shown?.remove();
+    if (!wanted) return;
+    const row = discardQuestion(document, "Discard this reply?");
+    popover.appendChild(row);
+    if (focusKeep) (row.querySelector(`[${DISCARD_KEEP}]`) as HTMLElement | null)?.focus?.();
+  };
+  const keepEditing = (): void => {
+    discarding = undefined;
+    paintDiscard(false);
+    if (openTarget) position(openTarget);
+    (replyInput() as unknown as HTMLElement | undefined)?.focus?.();
+  };
+
+  const draftChanged = (): boolean => {
+    const field = replyInput();
+    return popover !== undefined && typeof field?.value === "string" && field.value.trim() !== "";
+  };
+
+  // Closes at once, or asks first when the reply box holds text. Returns false when it asked.
+  const closeOrAsk = (why: string): boolean => {
+    if (!draftChanged()) {
+      close(why);
+      return true;
+    }
+    discarding = openId;
+    paintDiscard(true);
+    if (openTarget) position(openTarget);
+    return false;
   };
 
   // Puts back the text a mark wrapped and merges it with its neighbouring text nodes.
@@ -361,18 +353,6 @@ export function installCommentThreads(
     };
     if (!block.matches(SKIP)) walk(block);
     return found;
-  };
-
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-216
-  // Where a quote sits in a text node. The quote has its whitespace collapsed, the node keeps the line
-  // breaks of a wrapped source paragraph: a whitespace run of the quote matches any run of the node.
-  const locate = (value: string, variant: string, from: number): { index: number; length: number } | undefined => {
-    const words = variant.split(/\s+/u).filter((word) => word !== "");
-    const source = words.map((word) => word.replace(/[\\^$.*+?()[\]{}|]/gu, "\\$&")).join("\\s+");
-    const pattern = new RegExp(source, "gu");
-    pattern.lastIndex = from;
-    const match = words.length > 0 ? pattern.exec(value) : null;
-    return match ? { index: match.index, length: match[0].length } : undefined;
   };
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-017
@@ -519,6 +499,7 @@ export function installCommentThreads(
     const reopen = hidden() ? undefined : openId;
     const draft = replyInput()?.value;
     const asking = confirming;
+    const discardAsked = discarding;
     close();
     clear();
     if (threads.length === 0) {
@@ -538,6 +519,7 @@ export function installCommentThreads(
         const input = replyInput();
         if (input && typeof draft === "string") input.value = draft;
         confirming = asking === reopen ? asking : undefined;
+        discarding = discardAsked === reopen ? discardAsked : undefined;
         paintReply();
         paintActions();
       } else {
@@ -557,12 +539,14 @@ export function installCommentThreads(
     }
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-217
   const position = (target: Element): void => {
     if (!popover) return;
+    openTarget = target;
     const rectangle = target.getBoundingClientRect();
     const width = Math.min(360, Math.max(200, (window.innerWidth || 800) - 16));
     const left = Math.max(8, Math.min(rectangle.left, (window.innerWidth || 800) - width - 8));
-    const top = Math.min(rectangle.bottom + 6, Math.max(8, (window.innerHeight || 600) - 120));
+    const top = floatingTop(popover, rectangle, window.innerHeight || 600);
     (popover as HTMLElement).style.setProperty("width", `${width}px`);
     (popover as HTMLElement).style.setProperty("left", `${left}px`);
     (popover as HTMLElement).style.setProperty("top", `${top}px`);
@@ -628,7 +612,6 @@ export function installCommentThreads(
     openId = thread.id;
     position(target);
     paintReply();
-    paintActions();
   };
 
   const holderOf = (target: Element): Element | null => target.closest(`[${MARK}], [${BADGE}], [${ORPHAN}]`);
@@ -640,7 +623,8 @@ export function installCommentThreads(
     const id = idOf(holder);
     const thread = threads.find((candidate) => candidate.id === id);
     if (!thread) return false;
-    if (openId === thread.id) close("toggled");
+    if (openId === thread.id) closeOrAsk("toggled");
+    else if (draftChanged()) closeOrAsk("switched");
     else open(thread, holder);
     return true;
   };
@@ -710,6 +694,12 @@ export function installCommentThreads(
     } else if (hit("data-okf-comment-delete-yes") && removeHook) {
       event.preventDefault();
       if (confirming === openId) startAction("delete", (threadId) => removeHook(threadId));
+    } else if (popover && target instanceof Element && hit(DISCARD_YES) && target.closest(`[${POPOVER}]`)) {
+      event.preventDefault();
+      close("discarded");
+    } else if (popover && target instanceof Element && hit(DISCARD_KEEP) && target.closest(`[${POPOVER}]`)) {
+      event.preventDefault();
+      keepEditing();
     }
   }, true);
   document.addEventListener("click", intercept, true);
@@ -718,7 +708,12 @@ export function installCommentThreads(
     const target = event.target;
     if (event.key === "Escape") {
       if (!popover) return;
-      close("Escape");
+      // While the question shows, Escape means Keep editing.
+      if (discarding !== undefined) {
+        keepEditing();
+      } else {
+        closeOrAsk("Escape");
+      }
       event.stopImmediatePropagation();
       return;
     }
@@ -738,11 +733,16 @@ export function installCommentThreads(
     event.stopImmediatePropagation();
     toggle(holder);
   }, true);
-  document.addEventListener("pointerdown", (event) => {
+  const pressOutside = (event: Event): void => {
     const target = event.target;
-    if (!popover || (target instanceof Element && (target.closest(`[${POPOVER}]`) || holderOf(target)))) return;
-    close(`pointerdown outside on ${target instanceof Element ? target.tagName.toLowerCase() : "no element"}`);
-  }, true);
+    if (!popover || discarding !== undefined) return;
+    if (target instanceof Element && (target.closest(`[${POPOVER}]`) || holderOf(target))) return;
+    closeOrAsk(`pointerdown outside on ${target instanceof Element ? target.tagName.toLowerCase() : "no element"}`);
+  };
+  document.addEventListener("pointerdown", pressOutside, true);
+  document.addEventListener("mousedown", pressOutside, true);
+  // The popover follows its text: scroll events of the page and of any scrolling container.
+  document.addEventListener("scroll", () => { if (openTarget) position(openTarget); }, { capture: true, passive: true });
 
   return {
     result(message) {

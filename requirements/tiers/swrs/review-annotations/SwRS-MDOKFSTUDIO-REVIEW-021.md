@@ -43,7 +43,7 @@ Exception: while comments are hidden (the Comments button off or the setting pre
 | Given | When | Then |
 | --- | --- | --- |
 | a highlighted quote | the reader clicks it | the popover opens, and the click edits no block and follows no link |
-| the popover is open | the reader clicks the same highlight again | the popover closes |
+| the popover is open | the reader clicks the same highlight again | the popover closes, or asks Discard or Keep editing when the reply box holds text |
 | a popover open for one thread | the reader clicks the highlight of another thread | the popover of the second thread replaces the first |
 | comments hidden (button off or setting false) | the reader clicks a former highlight | no popover opens and the click acts as on plain text (SwRS-MDOKFSTUDIO-REVIEW-152) |
 
@@ -87,6 +87,7 @@ Exception: while comments are hidden (the Comments button off or the setting pre
 | Escape with no popover open | the key reaches the other handlers |
 | Escape on a popover that asks "Delete thread?", then the thread is opened again | the popover shows Resolve and Delete, not the question |
 | click outside a popover that asks "Delete thread?" | the popover closes |
+| Escape, or a press outside, on a popover whose reply box holds text | the popover stays and asks Discard or Keep editing (SwRS-MDOKFSTUDIO-REVIEW-218) |
 
 ### Scenario (boundary): The threads are posted again while a popover is open
 
@@ -103,7 +104,7 @@ Exception: while comments are hidden (the Comments button off or the setting pre
 - Method: test/page/modules/commentThreads.test.ts (`comments hidden: a click, Enter or Space on a highlight, badge or orphan entry opens nothing and is not swallowed`) and test/page/runtimeCommentsHidden.test.ts (`comments shown: the same click opens the thread popover and reveals nothing`, and the hidden case) check the exception.
 - Method: test/page/modules/reviewReq.requirements.test.ts (Enter and Space on a focused highlight or badge toggle its popover and another key does nothing; the popover is at most 360 px wide and stays 8 px inside the pane edges).
 - Untested: the toggle and replacement as such, the absence of the Resolved note for an open thread, the Thread-no-longer-posted column (popover, reply draft), the question shown for another thread, and the click outside a question.
-- Criteria: At most one popover element exists and it names the clicked thread. Each entry holds an author, a date and a body set with textContent. The note and the resolved attribute exist exactly for resolved threads. The keydown handler toggles the thread for Enter and Space only, and stops the event. Left is clamped between 8 px and the window width minus the popover width minus 8 px; width is min(360, max(200, window width - 16)); the vertical position is not specified. stopImmediatePropagation is called only when a popover was open. After apply the popover element names the same thread id, the new reply box value equals the old one, and confirming equals the open thread id; confirming is undefined after close().
+- Criteria: At most one popover element exists and it names the clicked thread. Each entry holds an author, a date and a body set with textContent. The note and the resolved attribute exist exactly for resolved threads. The keydown handler toggles the thread for Enter and Space only, and stops the event. Left is clamped between 8 px and the window width minus the popover width minus 8 px; width is min(360, max(200, window width - 16)); the vertical position is given by SwRS-MDOKFSTUDIO-REVIEW-217. stopImmediatePropagation is called only when a popover was open. After apply the popover element names the same thread id, the new reply box value equals the old one, and confirming equals the open thread id; confirming is undefined after close().
 
 <!-- okf:links:start -->
 ### Links

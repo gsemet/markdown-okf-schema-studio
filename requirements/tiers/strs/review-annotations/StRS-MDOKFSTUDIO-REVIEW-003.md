@@ -47,6 +47,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-119
 - SwRS-MDOKFSTUDIO-REVIEW-143
 - SwRS-MDOKFSTUDIO-REVIEW-186
+- SwRS-MDOKFSTUDIO-REVIEW-217
+- SwRS-MDOKFSTUDIO-REVIEW-218
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -97,4 +99,6 @@ As a reviewer, I attach a comment to the exact words I am talking about, answer 
   - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only
   - [SwRS-MDOKFSTUDIO-REVIEW-143](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-143.md): A click or Enter on a chip toggles its comment box
   - [SwRS-MDOKFSTUDIO-REVIEW-186](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-186.md): The host appends a reply inside the thread comment under the author
+  - [SwRS-MDOKFSTUDIO-REVIEW-217](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-217.md): The comment editors stay inside the window and follow their text
+  - [SwRS-MDOKFSTUDIO-REVIEW-218](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-218.md): Escape or a press outside closes a comment editor and asks before dropping a draft
 <!-- okf:links:end -->

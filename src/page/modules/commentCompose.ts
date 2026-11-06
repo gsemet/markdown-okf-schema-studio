@@ -1,10 +1,15 @@
+import { DISCARD_KEEP, DISCARD_YES, discardQuestion, floatingTop, isGone } from "./commentEditorBehaviour";
+
 /**
  * Writing a review comment in the page (T43).
  *
  * Selecting text inside mapped body blocks shows a small "Comment" button near the selection
  * rectangle; the button, or Cmd/Ctrl+Alt+M, opens a box with a text area. Save (or Cmd/Ctrl+Enter)
- * posts `previewCommentCreate { anchor, body }` through `hooks.post`; Escape or Cancel closes the
- * box. The anchor is `{ line, endLine, quote, prefix, suffix }`: the first block's line .. the last
+ * posts `previewCommentCreate { anchor, body }` through `hooks.post`; Cancel closes the box.
+ * Escape (wherever the focus is) and a press outside the box close it when its text is blank, and
+ * otherwise ask "Discard / Keep editing" inside the box (no `window.confirm`: a webview has none).
+ * The box is placed entirely inside the window (above the text near the bottom) and follows the
+ * selected text on scroll, even out of view. The anchor is `{ line, endLine, quote, prefix, suffix }`: the first block's line .. the last
  * block's end line, the whitespace-collapsed selected text (at most 500 characters) and up to 32
  * characters of text before and after it in the first and last block.
  *
@@ -51,7 +56,13 @@ export function installCommentCompose(
   let button: Element | undefined;
   let box: Element | undefined;
   let pointerDown = false;
-  let current: { anchor: Record<string, unknown>; rect: { left: number; top: number; right: number; bottom: number } } | undefined;
+  type Rect = { left: number; top: number; right: number; bottom: number };
+  let current: { anchor: Record<string, unknown>; rect: Rect; live: () => Rect } | undefined;
+  // The open box follows this rectangle, read again at every scroll; the question replaces its buttons.
+  let anchorRect: (() => Rect) | undefined;
+  let lastRect: Rect | undefined;
+  let question: Element | undefined;
+  let actionsRow: Element | undefined;
 
   const elementOf = (node: Node | null | undefined): Element | null =>
     !node ? null : (node.nodeType === 1 ? node as Element : node.parentNode as Element | null);
@@ -142,6 +153,12 @@ export function installCommentCompose(
     const prefix = contextAround(startBlock, range.startContainer, range.startOffset).before;
     const suffix = contextAround(endBlock, range.endContainer, range.endOffset).after;
     const rectangle = range.getBoundingClientRect();
+    // A copy of the range keeps following the text after the selection itself moved on.
+    const kept = typeof range.cloneRange === "function" ? range.cloneRange() : range;
+    const live = (): Rect => {
+      const now = kept.getBoundingClientRect();
+      return { left: now.left, top: now.top, right: now.right, bottom: now.bottom };
+    };
     return {
       anchor: {
         line,
@@ -151,6 +168,7 @@ export function installCommentCompose(
         suffix: suffix.slice(0, MAX_CONTEXT),
       },
       rect: { left: rectangle.left, top: rectangle.top, right: rectangle.right, bottom: rectangle.bottom },
+      live,
     };
   };
 
@@ -161,6 +179,20 @@ export function installCommentCompose(
     const top = Math.max(8, Math.min(rect.bottom + 6, viewportHeight - 48));
     (element as HTMLElement).style.setProperty("left", `${left}px`);
     (element as HTMLElement).style.setProperty("top", `${top}px`);
+  };
+
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-217
+  // The box sits next to the selected text, entirely inside the window while the text is in view.
+  const placeBox = (): void => {
+    if (!box || !anchorRect) return;
+    let rect = anchorRect();
+    if (isGone(rect) && lastRect) rect = lastRect;
+    lastRect = rect;
+    const viewportWidth = window.innerWidth || 800;
+    const width = Math.min(320, viewportWidth - 16);
+    const left = Math.max(8, Math.min(rect.right - width / 2, viewportWidth - width - 8));
+    (box as HTMLElement).style.setProperty("left", `${left}px`);
+    (box as HTMLElement).style.setProperty("top", `${floatingTop(box, rect, window.innerHeight || 600)}px`);
   };
 
   const hideButton = (): void => {
@@ -189,6 +221,42 @@ export function installCommentCompose(
     awaiting = false;
     box?.remove();
     box = undefined;
+    question = undefined;
+    anchorRect = undefined;
+    lastRect = undefined;
+  };
+
+  const draftChanged = (): boolean => {
+    const input = box?.querySelector(`[${INPUT}]`) as unknown as { value: string } | null | undefined;
+    return typeof input?.value === "string" && input.value.trim() !== "";
+  };
+
+  const keepEditing = (): void => {
+    if (!box || !question) return;
+    const actions = actionsRow;
+    question.remove();
+    question = undefined;
+    // The buttons come back under the text; the text and its place in the box are untouched.
+    if (actions) box.appendChild(actions);
+    placeBox();
+    (box.querySelector(`[${INPUT}]`) as HTMLElement | null)?.focus?.();
+  };
+
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-218
+  // Escape and a press outside: a blank box closes; a changed draft asks before it is dropped.
+  const dismiss = (): void => {
+    if (!box || question) return;
+    if (!draftChanged()) {
+      close();
+      refresh();
+      return;
+    }
+    actionsRow = box.querySelector("[data-okf-comment-actions]") ?? undefined;
+    question = discardQuestion(document, "Discard this comment?");
+    if (actionsRow) box.removeChild(actionsRow);
+    box.appendChild(question);
+    placeBox();
+    (question.querySelector(`[${DISCARD_KEEP}]`) as HTMLElement | null)?.focus?.();
   };
 
   const refresh = (): void => {
@@ -222,6 +290,7 @@ export function installCommentCompose(
       box.insertBefore(line, actions);
     }
     line.textContent = text;
+    placeBox();
   };
 
   const setSending = (value: boolean): void => {
@@ -306,7 +375,8 @@ export function installCommentCompose(
     hideButton();
     document.body.appendChild(root);
     box = root;
-    place(root, current.rect, 320);
+    anchorRect = current.live;
+    placeBox();
     (input as HTMLElement).focus?.();
     return true;
   };
@@ -320,6 +390,13 @@ export function installCommentCompose(
     }
     if (target instanceof Element && target.closest(`[${BOX}]`)) return;
     pointerDown = true;
+    dismiss();
+  }, true);
+  // A press outside the box as a pointer event (a mouse also sends mousedown right after).
+  document.addEventListener("pointerdown", (event) => {
+    const target = event.target;
+    if (!box || !(target instanceof Element) || target.closest(`[${BOX}], [${BUTTON}]`)) return;
+    dismiss();
   }, true);
   const released = (): void => {
     if (!pointerDown) return;
@@ -331,6 +408,8 @@ export function installCommentCompose(
   window.addEventListener("blur", released);
   document.addEventListener("selectionchange", () => refresh());
   window.addEventListener("scroll", () => { if (button || current) refresh(); }, { passive: true } as AddEventListenerOptions);
+  // The open box follows its text: scroll events of the page and of any scrolling container.
+  document.addEventListener("scroll", () => placeBox(), { capture: true, passive: true } as AddEventListenerOptions);
   window.addEventListener("resize", () => refresh());
 
   // Block selection (Shift+click, Shift+Arrows) and editors change `busy()` without moving the text
@@ -352,16 +431,27 @@ export function installCommentCompose(
       event.preventDefault();
       close();
       refresh();
+    } else if (box && target.closest(`[${DISCARD_YES}]`) && target.closest(`[${BOX}]`)) {
+      event.preventDefault();
+      close();
+      refresh();
+    } else if (box && target.closest(`[${DISCARD_KEEP}]`) && target.closest(`[${BOX}]`)) {
+      event.preventDefault();
+      keepEditing();
     }
   }, true);
 
   document.addEventListener("keydown", (event) => {
     const target = event.target;
+    // Escape acts on the open box wherever the focus is; while the question shows it means Keep editing.
+    if (event.key === "Escape" && box) {
+      if (question) keepEditing();
+      else dismiss();
+      event.stopImmediatePropagation();
+      return;
+    }
     if (target instanceof Element && target.closest(`[${BOX}]`)) {
-      if (event.key === "Escape") {
-        close();
-        refresh();
-      } else if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !event.isComposing) {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !event.isComposing) {
         event.preventDefault();
         submit();
       }
