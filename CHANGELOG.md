@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 1.5.0 - 2026-11-06
+
+- A document can be edited whatever the workspace trust, in Restricted Mode and in a file outside
+  every workspace folder: blocks, frontmatter, checkboxes, comments, pasted images and dropped files.
+  Reading limits stay: includes and resources remain in the document's folder, and the features that
+  need trust stay off with their reason.
+- A file that VS Code itself keeps read-only now says so on every edit, instead of reporting success.
+- A comment on a sentence that runs over several source lines is highlighted in the text, instead of
+  showing only a badge on its block.
+- The comment editor stays inside the window near the bottom of the page and follows its text when
+  the page scrolls.
+- Escape closes the comment editor wherever the focus is, and so does a click outside it. When a
+  draft would be lost, the editor asks whether to keep it.
+
 ## 1.4.0 - 2026-11-05
 
 - Tables are easier to read: the heading and the even rows have a soft tint, and the row under the
