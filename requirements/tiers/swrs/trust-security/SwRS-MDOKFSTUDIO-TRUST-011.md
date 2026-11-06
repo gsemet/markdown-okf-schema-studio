@@ -30,11 +30,11 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the extension builds the page of a document, it SHALL have the sanitizer remove every script element of the document, inline or with a source, in every preview mode, writable or read-only, and never keep a nonce attribute written by the document. The scripts of the preview itself are added by the host after sanitizing.
+When the extension builds the page of a document, it SHALL have the sanitizer remove every script element of the document, inline or with a source, in every preview, with full or restricted reads, and never keep a nonce attribute written by the document. The scripts of the preview itself are added by the host after sanitizing.
 
 ### Scenario (nominal): Script with a source in any preview
 
-- GIVEN a script element whose source is a file inside the roots, in a read-only or a writable preview, and an image inside the roots
+- GIVEN a script element whose source is a file inside the roots, in a preview with restricted reads or full reads, and an image inside the roots
 - WHEN the page is built
 - THEN the script element is gone with the diagnostic blocked-script and the image stays
 
@@ -52,7 +52,7 @@ When the extension builds the page of a document, it SHALL have the sanitizer re
 - SwRS-MDOKFSTUDIO-TRUST-036: the sanitizer removes active content and keeps the rest
 
 ### Verification notes
-- Method: test/security/html-policy.test.ts (reduced previews remove external scripts while retaining contained media; trusted previews also remove scripts and the nonce attribute of the document) checks the scenarios. The host wiring in src/session/features/rendering.ts still passes the negated read-only flag, which the sanitizer now ignores. The renderer already drops raw HTML scripts (SwRS-MDOKFSTUDIO-GFM-029), so this removal is a second wall.
+- Method: test/security/html-policy.test.ts (reduced previews remove external scripts while retaining contained media; trusted previews also remove scripts and the nonce attribute of the document) checks the scenarios. The host wiring in src/session/features/rendering.ts still passes the negated restricted-reads flag, which the sanitizer now ignores. The renderer already drops raw HTML scripts (SwRS-MDOKFSTUDIO-GFM-029), so this removal is a second wall.
 - Criteria: The page holds no script element written by the document, in any mode; the diagnostic blocked-script or blocked-inline-script is recorded; no nonce attribute written by the document remains.
 
 <!-- okf:links:start -->

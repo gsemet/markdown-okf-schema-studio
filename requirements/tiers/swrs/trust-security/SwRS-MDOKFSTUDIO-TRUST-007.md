@@ -5,10 +5,11 @@ uuid: 8d5311bd-1111-40d3-bc26-c0258df4dc66
 title: A page loads local files only from its resource roots
 description: When the extension shows a document, it SHALL allow the webview to
   load local files only from the resource root of the preview (the folder of the
-  document for a read-only preview, which also loads the images of the workspace
-  folder that holds it, unless that folder is broad; the workspace folder for a
-  writable one) and from the bundle folder of the extension, and no local file
-  for the pending page that clears the content and for the missing-source page.
+  document for a preview with restricted reads, which also loads the images of
+  the workspace folder that holds it, unless that folder is broad; the workspace
+  folder for a preview with full reads) and from the bundle folder of the
+  extension, and no local file for the pending page that clears the content and
+  for the missing-source page.
 project: markdown-okf-schema-studio
 scope: trust-security
 req_lifecycle: proposed
@@ -46,14 +47,14 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the extension shows a document, it SHALL allow the webview to load local files only from the resource root of the preview (the folder of the document for a read-only preview, which also loads the images of the workspace folder that holds it unless that folder is broad; the workspace folder for a writable one) and from the bundle folder of the extension, and no local file for the pending page that clears the content and for the missing-source page.
+When the extension shows a document, it SHALL allow the webview to load local files only from the resource root of the preview (the folder of the document for a preview with restricted reads, which also loads the images of the workspace folder that holds it unless that folder is broad; the workspace folder for a preview with full reads) and from the bundle folder of the extension, and no local file for the pending page that clears the content and for the missing-source page.
 
-### Scenario (nominal): Read-only preview of a file outside the workspace
+### Scenario (nominal): Preview with restricted reads of a file outside the workspace
 - GIVEN a Markdown file outside every workspace folder, with an image beside it
 - WHEN the reader previews it
 - THEN the resource root is the folder of the file and the image beside it loads
 
-### Scenario (nominal): Read-only preview in an untrusted workspace
+### Scenario (nominal): Preview with restricted reads in an untrusted workspace
 - GIVEN a document in a subfolder of an untrusted workspace folder
 - WHEN the reader previews it
 - THEN the resource root is that subfolder; the workspace folder serves images only (SwRS-MDOKFSTUDIO-TRUST-002)
@@ -65,9 +66,9 @@ When the extension shows a document, it SHALL allow the webview to load local fi
 | A trusted window with two workspace folders and a document in the second | The resource root is the second folder |
 
 ### Scenario (nominal): Roots the webview may load from
-- GIVEN a writable preview of a workspace document, or a read-only preview of a file outside the workspace
+- GIVEN a preview with full reads of a workspace document, or a preview with restricted reads of a file outside the workspace
 - WHEN the page is shown
-- THEN the webview may load from the workspace folder (writable) or the folder of the file (read-only), and from the bundle folder, and from nowhere else; a read-only preview of a workspace document may also load from the workspace folder (its images, SwRS-MDOKFSTUDIO-TRUST-002) but not from the rest of the disk
+- THEN the webview may load from the workspace folder (full reads) or the folder of the file (restricted reads), and from the bundle folder, and from nowhere else; a preview with restricted reads of a workspace document may also load from the workspace folder (its images, SwRS-MDOKFSTUDIO-TRUST-002) but not from the rest of the disk
 
 ### Scenario (nominal): Runtime and stylesheet as bundle files
 | Input | Outcome |
@@ -82,29 +83,29 @@ When the extension shows a document, it SHALL allow the webview to load local fi
 | A preview whose source file was deleted, the page replaced by the missing-source page | The webview has no local resource root until a document is rendered again |
 | The page replaced by the pending page that clears the content | The webview has no local resource root |
 
-### Scenario (boundary): Links and includes of a read-only preview stay in the folder of the document
+### Scenario (boundary): Links and includes of a preview with restricted reads stay in the folder of the document
 | Input | Outcome |
 | --- | --- |
 | A standalone preview and a link to a file below the document's folder | It opens |
 | The same preview and a link to ../other.md | It is blocked with outside the standalone document directory |
-| A read-only preview and an include of sub/part.md next to the document | The file is included |
+| A preview with restricted reads and an include of sub/part.md next to the document | The file is included |
 | The same preview and an include of ../other.md | The file is refused as outside the roots |
 
 ### Known issues
 - Known issue: the text of SwRS-MDOKFSTUDIO-CORE-012 says an include is expanded for a trusted document, and docs/known-limitations.md says that file includes are supported only when the workspace is trusted; the code reads includes in Restricted Mode and for a file outside the workspace too, from the folder of the document.
 
 ### Related requirements
-- SwRS-MDOKFSTUDIO-FMSCHEMA-019: the schema is not searched in a read-only preview
+- SwRS-MDOKFSTUDIO-FMSCHEMA-019: the schema is not searched in a preview with restricted reads
 - SwRS-MDOKFSTUDIO-CORE-012: an include is expanded in place
 - SwRS-MDOKFSTUDIO-CORE-013: includes outside the allowed roots are refused
 
 ### Verification notes
-- Method: test/integration/standalone-suite.ts checks the Read-only preview of a file outside the workspace (the render output directory equals the folder of the file) and the roots of the Roots the webview may load from scenario (the local resource roots contain the workspace folder when writable, the folder of the file when read-only; the bundle folder entry is not asserted). The Restricted Mode, subfolder and multi-root cases of the writable and untrusted scenarios are untested; the Restricted Mode case is read from createSession in src/session/previewManager.ts.
+- Method: test/integration/standalone-suite.ts checks the Preview with restricted reads of a file outside the workspace (the render output directory equals the folder of the file) and the roots of the Roots the webview may load from scenario (the local resource roots contain the workspace folder when it has full reads, the folder of the file when it has restricted reads; the bundle folder entry is not asserted). The Restricted Mode, subfolder and multi-root cases of the full-reads and untrusted scenarios are untested; the Restricted Mode case is read from createSession in src/session/previewManager.ts.
 - Method: test/session/previewRuntimeFile.test.ts (PERF-11: a rendered page loads the runtime as a bundle file and carries its context as inert JSON; PERF-11: the static stylesheet is a bundle file; the page keeps only the per-render rule inline; PERF-11: two renders share the page shell although their context elements differ) checks the Runtime and stylesheet as bundle files scenario. That the bundle folder is always a resource root has no test (by reading updatePreview).
 - Method: test/session/trustReq.requirements.test.ts (the pending page that clears the content and the missing-source page allow no local file) checks the Pending and Missing-source rows with a fake session through showPending and setMissingSource; the panel options of a new panel (localResourceRoots empty in src/host-vscode/activation.ts) are read from the code, not run.
-- Method: test/session/toolbarReq.requirements.test.ts (in a read-only preview only the document's folder is allowed) checks the link rows; the same roots apply to a preview in an untrusted workspace.
-- Method: test/security/trustReq.requirements.test.ts (a read-only preview reads includes from the folder of its document) checks the include rows by rendering with renderPreviewDocument in src/core/render/renderPipeline.ts with the folder of the document as resource root, an include below the folder and one of ../other.md.
-- Criteria: The resource root of a read-only session equals dirname of the document path; that of a writable session equals the folder returned for the document by the workspace. The roots set on the panel are exactly the resource root plus the bundle folder when a bundle exists, and empty for the pending page that clears the content and for the missing-source page. navigationRoots is [document folder] when read-only. The html of a page holds the bundle URLs and no inline copy of the runtime. The roots of the include policy are the folder of the document and the resource root.
+- Method: test/session/toolbarReq.requirements.test.ts (in a preview with restricted reads only the document's folder is allowed) checks the link rows; the same roots apply to a preview in an untrusted workspace.
+- Method: test/security/trustReq.requirements.test.ts (a preview with restricted reads reads includes from the folder of its document) checks the include rows by rendering with renderPreviewDocument in src/core/render/renderPipeline.ts with the folder of the document as resource root, an include below the folder and one of ../other.md.
+- Criteria: The resource root of a session with restricted reads equals dirname of the document path; that of a session with full reads equals the folder returned for the document by the workspace. The roots set on the panel are exactly the resource root plus the bundle folder when a bundle exists, and empty for the pending page that clears the content and for the missing-source page. navigationRoots is [document folder] when the reads are restricted. The html of a page holds the bundle URLs and no inline copy of the runtime. The roots of the include policy are the folder of the document and the resource root.
 
 <!-- okf:links:start -->
 ### Links

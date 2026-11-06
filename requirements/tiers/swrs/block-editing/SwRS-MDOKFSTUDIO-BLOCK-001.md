@@ -3,11 +3,11 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-BLOCK-001
 uuid: 0445da8e-ead8-4bcd-9f89-9f7980efa080
 title: "The Edit button turns edit mode on and off and tidies up on exit"
-description: "When a writer clicks the Edit button of a writable preview, the page
-  SHALL switch edit mode on or off and show the new state on the button as its pressed
-  state and its tooltip, post the new state to the host before it applies it, keep
-  the reading layout unchanged, and on exit save the open block editor, clear the
-  block selection and the hover outline and close the label rename field."
+description: "When a writer clicks the Edit button of a preview, the page SHALL switch
+  edit mode on or off and show the new state on the button as its pressed state and
+  its tooltip, post the new state to the host before it applies it, keep the reading
+  layout unchanged, and on exit save the open block editor, clear the block selection
+  and the hover outline and close the label rename field."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -39,17 +39,17 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer clicks the Edit button of a writable preview, the page SHALL switch edit mode on or off and show the new state on the button as its pressed state and its tooltip, post the new state to the host before it applies it, keep the reading layout unchanged, and on exit save the open block editor, clear the block selection and the hover outline and close the label rename field.
+When a writer clicks the Edit button of a preview, the page SHALL switch edit mode on or off and show the new state on the button as its pressed state and its tooltip, post the new state to the host before it applies it, keep the reading layout unchanged, and on exit save the open block editor, clear the block selection and the hover outline and close the label rename field.
 
 ### Scenario (nominal): Edit mode turned on
 
-- GIVEN a writable preview in reading mode
+- GIVEN a preview in reading mode
 - WHEN the writer clicks the Edit button
 - THEN the page posts previewEditModeChanged with editMode true for the shown document and then turns edit mode on: the page element carries data-sphinx-preview-edit-mode on, the button carries data-edit-mode on and aria-pressed true, and its tooltip reads "Exit edit mode"
 
 ### Scenario (nominal): Edit mode turned off again
 
-- GIVEN a writable preview in edit mode
+- GIVEN a preview in edit mode
 - WHEN the writer clicks the Edit button again
 - THEN data-sphinx-preview-edit-mode and data-edit-mode are off, aria-pressed is false and the tooltip reads "Edit mode"
 
@@ -95,7 +95,7 @@ When a writer clicks the Edit button of a writable preview, the page SHALL switc
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview shows the Edit button greyed, with the reason
+- SwRS-MDOKFSTUDIO-TRUST-001: the Edit button is enabled whatever the trust
 - SwRS-MDOKFSTUDIO-LIFE-169: the edit mode choice is stored for the workspace
 - SwRS-MDOKFSTUDIO-BLOCK-236: the accepted shape of previewEditModeChanged
 - SwRS-MDOKFSTUDIO-FMEDIT-019: closing of a frontmatter field editor
@@ -121,6 +121,6 @@ When a writer clicks the Edit button of a writable preview, the page SHALL switc
   - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
   - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
   - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
 <!-- okf:links:end -->

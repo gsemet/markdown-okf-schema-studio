@@ -78,8 +78,8 @@ As a writer, I link to a label, a document or a bibliography entry by choosing i
   - [SwRS-MDOKFSTUDIO-PALETTE-192](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-192.md): The host image picker answers a path relative to the document
   - [SwRS-MDOKFSTUDIO-PALETTE-196](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-196.md): The host saves a pasted image next to the document under a name it chooses
   - [SwRS-MDOKFSTUDIO-PALETTE-203](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-203.md): A pasted image is sent to the host and its name inserted on its own paragraph
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 <!-- okf:links:end -->

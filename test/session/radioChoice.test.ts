@@ -6,7 +6,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { MALFORMED_TOGGLE, RADIO_GONE, READ_ONLY_FILE, READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
+import { MALFORMED_TOGGLE, RADIO_GONE, READ_ONLY_FILE } from "../../src/core/edits/sourceEdits";
 import { applyTextEdits, type TextEdit } from "../../src/core/edits/textEdit";
 import { isPageToHostMessage, type PageToHostMessage } from "../../src/core/protocol/pageToHost";
 import { createMessageRouter } from "../../src/core/protocol/router";
@@ -112,12 +112,12 @@ test("a forged choice that names the options of two groups is refused and change
   assert.equal(host.posted[0].error, RADIO_GONE);
 });
 
-function dispatcher(options: { readOnly?: boolean } = {}) {
+function dispatcher(options: { restrictedReads?: boolean } = {}) {
   const answers: Array<{ editId: string; result: unknown }> = [];
   const handled: string[] = [];
   const session = {
     disposed: false,
-    readOnly: options.readOnly === true,
+    restrictedReads: options.restrictedReads === true,
     documentUri: DOCUMENT,
     stage: { activeDocumentIdentity: DOCUMENT, activeDocumentRevision: 4, requestId: 9 },
     edits: { active: undefined },
@@ -145,7 +145,7 @@ function dispatcher(options: { readOnly?: boolean } = {}) {
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-039
 // @tests_req SwRS-MDOKFSTUDIO-GFM-027
-test("a malformed radio group is answered as not understood, and a read-only preview refuses the choice", () => {
+test("a malformed radio group is answered as not understood, and a restricted-reads preview takes the choice", () => {
   const gate = dispatcher();
   const malformed = [
     { radioGroup: [GROUP[2]] },
@@ -166,10 +166,10 @@ test("a malformed radio group is answered as not understood, and a read-only pre
     type: "previewScroll", documentId: DOCUMENT, revision: 4, requestId: 9, line: 3, radioGroup: GROUP,
   }), false, "only a checkbox toggle carries a radio group");
 
-  const readOnly = dispatcher({ readOnly: true });
-  readOnly.dispatcher.handle(readOnly.session, choice());
-  assert.deepEqual(readOnly.answers, [{ editId: "checkbox-9-1", result: { error: READ_ONLY_NO_FOLDER } }]);
-  assert.deepEqual(readOnly.handled, []);
+  const restricted = dispatcher({ restrictedReads: true });
+  restricted.dispatcher.handle(restricted.session, choice());
+  assert.deepEqual(restricted.answers, []);
+  assert.deepEqual(restricted.handled, ["previewCheckboxToggle"]);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-039

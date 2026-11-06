@@ -32,13 +32,13 @@ import {
 } from "../webview";
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import { PreviewDiagnostic, RenderError, RenderResult, RenderStage } from "../../core/render/renderPipeline";
-import { isBroadReadOnlyRoot } from "../../core/security/resource-policy";
+import { isBroadRestrictedRoot } from "../../core/security/resource-policy";
 import { needsRefresh } from "../../core/state/editLock";
 import type { PreviewPanelState } from "../../core/state/previewState";
 import type { PreviewRuntimeContext } from "../../core/protocol/bootContext";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewSession } from "../previewSession";
-import { isDocumentEligible, previewReadOnlyReason, revisionOfStage } from "../sessionDocuments";
+import { isDocumentEligible, revisionOfStage } from "../sessionDocuments";
 import { PENDING_OVERLAY_DELAY_MS, type ToolbarState } from "./pageLoadState";
 import { PageDocumentController } from "./pageDocument";
 import { fireAndForget } from "../../host-api/logger";
@@ -62,42 +62,33 @@ function sameResourceRoots(previous: readonly string[], next: readonly string[])
   return previous.length === next.length && previous.every((root, index) => root === next[index]);
 }
 
-/** What the boot context says about editing: comments on, or the reason a read-only page gives. */
-export function editingBootState(
-  preview: Pick<PreviewSession, "readOnly" | "workspaceFolder">,
-): { commentsEnabled: boolean; readOnlyReason?: string } {
-  return preview.readOnly
-    ? { commentsEnabled: false, readOnlyReason: previewReadOnlyReason(preview) }
-    : { commentsEnabled: true };
-}
-
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-007
 /**
- * The webview's local resource roots (before the extension bundle). A read-only preview loads the
+ * The webview's local resource roots (before the extension bundle). A preview with restricted reads loads the
  * images of the document folder (`resourceRoot`, even a broad one) and of the workspace folder
  * (`workspaceFolder`, unless it is broad); a trusted one loads from its resource root.
  */
 export function previewLocalResourceRoots(
   resourceRoot: string,
-  readOnly: boolean,
+  restrictedReads: boolean,
   workspaceFolder?: string,
 ): string[] {
-  if (!readOnly) return [resourceRoot];
+  if (!restrictedReads) return [resourceRoot];
   const extra = workspaceFolder !== undefined && workspaceFolder !== resourceRoot
-    && !isBroadReadOnlyRoot(workspaceFolder) ? [workspaceFolder] : [];
+    && !isBroadRestrictedRoot(workspaceFolder) ? [workspaceFolder] : [];
   return [resourceRoot, ...extra];
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
 /**
- * The second root of the resource policy of a page: a read-only preview also loads the images of
+ * The second root of the resource policy of a page: a preview with restricted reads also loads the images of
  * its workspace folder (Restricted Mode), a trusted one its workspace root.
  */
 export function pagePolicyRoot(
-  preview: Pick<PreviewSession, "readOnly" | "workspaceFolder" | "workspaceRoot">,
+  preview: Pick<PreviewSession, "restrictedReads" | "workspaceFolder" | "workspaceRoot">,
 ): string {
-  return preview.readOnly ? preview.workspaceFolder?.path ?? preview.workspaceRoot : preview.workspaceRoot;
+  return preview.restrictedReads ? preview.workspaceFolder?.path ?? preview.workspaceRoot : preview.workspaceRoot;
 }
 
 /** Renders, page documents, content patches, status and the pending overlay. */
@@ -183,15 +174,15 @@ export class RenderingController extends PageDocumentController {
       {
         pairedTextEditor: manager.scroll.visibleEditorFor(preview) !== undefined,
         initialPaletteMode: manager.choices.initialPaletteMode(),
-        ...editingBootState(preview),
+        commentsEnabled: true,
       },
     );
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
-    // A read-only preview loads images from its document folder and its workspace folder, never from
+    // A preview with restricted reads loads images from its document folder and its workspace folder, never from
     // a broad workspace folder (the home folder, a file-system root).
     const localResourceRoots = previewLocalResourceRoots(
       preview.workspaceRoot,
-      preview.readOnly,
+      preview.restrictedReads,
       preview.workspaceFolder?.path,
     );
     const plantUmlRenderer = result.plantUmlEngine === "builtin" ? "builtin" : "host";
@@ -206,7 +197,7 @@ export class RenderingController extends PageDocumentController {
       filePath: result.stage.activeDocumentPath,
       sourceText: result.stage.sourceText,
       stopDir: preview.workspaceRoot,
-      allowSchemaResolution: !preview.readOnly,
+      allowSchemaResolution: !preview.restrictedReads,
       inspectLinks: false,
       strictAdditionalProperties: preview.frontmatterConfiguration.strictAdditionalProperties,
       bundleRoot: preview.frontmatterConfiguration.bundleRoot,
@@ -237,11 +228,10 @@ export class RenderingController extends PageDocumentController {
         }
         : undefined,
       preview.configuration.maxContentWidth,
-      !preview.readOnly,
-      !preview.readOnly,
+      !preview.restrictedReads,
       [],
       plantUmlRenderer,
-      preview.readOnly,
+      preview.restrictedReads,
     );
     const status: PreviewStatus = preview.hadFailure ? "recovery" : "success";
     const html = setPreviewStatus(webview.html, status, undefined, result.diagnostics);

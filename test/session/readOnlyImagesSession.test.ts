@@ -36,7 +36,7 @@ function ignored(): any {
   });
 }
 
-async function show(): Promise<{ html: string; roots: readonly string[] }> {
+async function show(): Promise<{ html: string; roots: readonly string[]; toolbar: unknown }> {
   const ws = path.join(sandbox, "ws");
   const guide = path.join(ws, "docs", "guide");
   const text = "![x](../../images/x.png)\n";
@@ -48,7 +48,7 @@ async function show(): Promise<{ html: string; roots: readonly string[] }> {
       getText: () => text,
     },
     workspaceRoot: guide,
-    readOnly: true,
+    restrictedReads: true,
     requestId: 1,
     isWorkspaceTrusted: () => false,
     allowUntrusted: true,
@@ -56,6 +56,7 @@ async function show(): Promise<{ html: string; roots: readonly string[] }> {
   });
   const identity = result.stage.activeDocumentIdentity;
   let roots: readonly string[] = [];
+  let toolbar: unknown;
   const manager: any = ignored();
   manager.has = () => true;
   manager.host = { schemaFiles: nodeSchemaFiles, documents: { idOf: () => undefined } };
@@ -65,7 +66,7 @@ async function show(): Promise<{ html: string; roots: readonly string[] }> {
   const preview: any = {
     disposed: false,
     documentUri: identity,
-    readOnly: true,
+    restrictedReads: true,
     workspaceRoot: guide,
     workspaceFolder: { path: ws },
     state: undefined,
@@ -84,13 +85,13 @@ async function show(): Promise<{ html: string; roots: readonly string[] }> {
     },
   };
   const controller: any = new RenderingController(manager);
-  controller.runtimeContext = () => ({ documentId: identity, revision: 1, requestId: 1, activeSourceFile: result.stage.activeDocumentPath });
+  controller.runtimeContext = (...args: unknown[]) => (toolbar = args[5], { documentId: identity, revision: 1, requestId: 1, activeSourceFile: result.stage.activeDocumentPath });
   controller.assignWebviewHtml = () => undefined;
   controller.clearPendingOverlay = () => undefined;
   controller.updatePreview(preview, result);
   const html: string = preview.webview.html;
   preview.stage?.dispose();
-  return { html, roots };
+  return { html, roots, toolbar };
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
@@ -98,4 +99,10 @@ test("Restricted Mode: an image of the workspace folder outside the document fol
   const { html, roots } = await show();
   assert.ok(html.includes(`src="webview://${path.join(sandbox, "ws", "images", "x.png")}"`), html);
   assert.deepEqual(roots, [path.join(sandbox, "ws", "docs", "guide"), path.join(sandbox, "ws")]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+test("Restricted Mode: the page boots with the Comment button and the reply box on", async () => {
+  const { toolbar } = await show();
+  assert.equal((toolbar as { commentsEnabled?: boolean }).commentsEnabled, true);
 });

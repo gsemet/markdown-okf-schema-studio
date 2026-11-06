@@ -65,7 +65,7 @@ When a relative Markdown link is followed, the extension SHALL open its target o
 - SwRS-MDOKFSTUDIO-TOOLBAR-077: the reason of a blocked link is shown as a warning
 - SwRS-MDOKFSTUDIO-FMSCHEMA-060: a frontmatter link may leave the roots only with the opt-in setting
 - SwRS-MDOKFSTUDIO-FMSCHEMA-050: the roots a frontmatter link resolves from, and the symlink case of the frontmatter path
-- SwRS-MDOKFSTUDIO-TRUST-007: the roots a read-only preview allows
+- SwRS-MDOKFSTUDIO-TRUST-007: the roots a preview with restricted reads allows
 
 ### Verification notes
 

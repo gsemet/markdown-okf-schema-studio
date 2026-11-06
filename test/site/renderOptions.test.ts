@@ -18,15 +18,15 @@ test("a page without options keeps its file name and an empty options key", () =
 });
 
 test("the options are part of the page cache key and of the file name", () => {
-  const readOnly = { ...base, render: { readOnly: true as const } };
+  const restrictedReads = { ...base, render: { restrictedReads: true as const } };
   const strict = { ...base, render: { strictAdditionalProperties: true as const } };
-  const keys = new Set([pageKey(base), pageKey(readOnly), pageKey(strict), pageKey({ ...base, render: { zoom: 150 } })]);
+  const keys = new Set([pageKey(base), pageKey(restrictedReads), pageKey(strict), pageKey({ ...base, render: { zoom: 150 } })]);
   assert.equal(keys.size, 4);
-  const names = new Set([pageFileName(base), pageFileName(readOnly), pageFileName(strict), pageFileName({ ...base, render: { zoom: 150 } })]);
+  const names = new Set([pageFileName(base), pageFileName(restrictedReads), pageFileName(strict), pageFileName({ ...base, render: { zoom: 150 } })]);
   assert.equal(names.size, 4);
-  assert.match(pageFileName(readOnly), /^01-basic--dark--sticky-3--default--o[0-9a-f]{8}\.html$/u);
+  assert.match(pageFileName(restrictedReads), /^01-basic--dark--sticky-3--default--o[0-9a-f]{8}\.html$/u);
   // The same options give the same page whatever the property order.
-  assert.equal(pageKey({ ...base, render: { zoom: 150, readOnly: true } }), pageKey({ ...base, render: { readOnly: true, zoom: 150 } }));
+  assert.equal(pageKey({ ...base, render: { zoom: 150, restrictedReads: true } }), pageKey({ ...base, render: { restrictedReads: true, zoom: 150 } }));
 });
 
 test("the huge document is generated, deterministic, long and ends with its sentinel", () => {

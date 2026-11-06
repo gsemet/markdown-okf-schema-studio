@@ -48,7 +48,7 @@ When VS Code restores a Studio preview panel, the extension SHALL open in it the
 
 - GIVEN a saved file that lies in no workspace folder
 - WHEN VS Code restores the panel
-- THEN the panel renders it read-only (see SwRS-MDOKFSTUDIO-TRUST-001 and SwRS-MDOKFSTUDIO-TRUST-007)
+- THEN the panel renders it with restricted reads (see SwRS-MDOKFSTUDIO-TRUST-001 and SwRS-MDOKFSTUDIO-TRUST-007)
 
 ### Scenario (refusal): A saved state that cannot be restored
 
@@ -102,7 +102,7 @@ The identity is kept in every row.
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-LIFE-062: a missing source that returns is rendered again by itself
-- SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview offers no editing affordance
+- SwRS-MDOKFSTUDIO-TRUST-001: every preview offers its editing affordances, with narrow reads outside a trusted folder
 - SwRS-MDOKFSTUDIO-TRUST-007: a page loads local files only from its resource roots
 
 ### Verification notes
@@ -124,5 +124,5 @@ The identity is kept in every row.
   - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
   - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
 <!-- okf:links:end -->

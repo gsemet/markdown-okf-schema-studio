@@ -75,10 +75,10 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 - WHEN the writer changes one of the view choices of the table
 - THEN the page writes the saved-state field of the row next to the other saved fields, posts the message of the row with the document, revision and request identity of the page, and the host stores the value under the storage key of the row
 
-| View choice | Page control | Saved-state field | Message and field | Accepted values | Host validation | Storage key | Read-only preview |
+| View choice | Page control | Saved-state field | Message and field | Accepted values | Host validation | Storage key | Preview with restricted reads |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Edit mode | Edit button | editMode | previewEditModeChanged, editMode | boolean | Dropped unless the preview is writable and the value is a boolean | markdownOkfSchemaStudio.editMode | Not stored |
-| Palette mode | Mode select of the block editor | paletteMode | previewPaletteModeChanged, mode | strict, gfm, myst, full | Dropped unless the preview is writable and the mode is one of the four | markdownOkfSchemaStudio.paletteMode | Not stored |
+| Edit mode | Edit button | editMode | previewEditModeChanged, editMode | boolean | Dropped unless the value is a boolean | markdownOkfSchemaStudio.editMode | Stored like any other |
+| Palette mode | Mode select of the block editor | paletteMode | previewPaletteModeChanged, mode | strict, gfm, myst, full | Dropped unless the mode is one of the four | markdownOkfSchemaStudio.paletteMode | Stored like any other |
 | Theme mode | Theme button | previewThemeMode | previewThemeModeChanged, previewThemeMode | current, dark, white, cream | Dropped unless the value is one of the four | previewThemeMode | Stored |
 | Zoom | Zoom in and Zoom out | viewZoom | previewViewPreferenceChanged, preference zoom | integer from 70 to 200 | Refused outside the range or when not an integer | markdownOkfSchemaStudio.viewPreferences, field zoom | Stored |
 | Width mode | Width button | viewWidthMode | previewViewPreferenceChanged, preference widthMode | margin, auto, full | Refused for any other value | markdownOkfSchemaStudio.viewPreferences, field widthMode | Stored |
@@ -102,7 +102,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 
 ### Scenario (nominal): The host remembers a valid theme, edit mode or palette mode
 
-- GIVEN an open writable preview whose workspace holds no stored value
+- GIVEN an open preview whose workspace holds no stored value
 - WHEN the page reports previewThemeModeChanged dark, previewEditModeChanged with editMode true, or previewPaletteModeChanged gfm
 - THEN the value is held for the session where the row says so, written to the workspace storage, and carried by the boot context of the next page of the workspace (the theme mode dark; the palette mode gfm wins over the setting)
 
@@ -118,11 +118,11 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 - WHEN a message arrives with the width mode wide, a zoom outside 70 to 200, a preference name that is not in the table, a theme mode that is not one of the four, a palette mode that is not strict, gfm, myst or full, or an editMode or anchorToEditor that is not a boolean
 - THEN the message is refused or ignored by the validator of its type and the stored value is unchanged
 
-### Scenario (refusal): A stale message or a read-only preview stores nothing where the row says so
+### Scenario (refusal): A stale message stores nothing where the row says so
 
-- GIVEN a message that names an older render than the page now holds, or an edit mode or palette mode report from a read-only or untrusted preview
+- GIVEN a message that names an older render than the page now holds, or an edit mode or palette mode report whose value is invalid
 - WHEN the host receives it
-- THEN the stale message is dropped before its handler (by the page-state gate for previewThemeModeChanged, previewEditModeChanged and previewAnchorModeChanged, by the render gate for previewViewPreferenceChanged and previewPaletteModeChanged), a read-only preview stores no edit mode and no palette mode, and no preference changes
+- THEN the stale message is dropped before its handler (by the page-state gate for previewThemeModeChanged, previewEditModeChanged and previewAnchorModeChanged, by the render gate for previewViewPreferenceChanged and previewPaletteModeChanged), an invalid edit mode or palette mode is not stored, and no preference changes
 
 ### Scenario (boundary): The storage is missing or rejects the write
 
@@ -138,24 +138,20 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 | A list, or missing | Every field has its default: zoom 100, widthMode margin, toc off, incomingChanges on, comments on, toolbarCollapsed on |
 | Any applied preference | The whole object is normalized again (applyViewPreference), so the stored object is always valid |
 
-### Known issues
-
-- Known issue: the preference message is accepted by read-only and untrusted previews because it edits no document.
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-LIFE-170: the start of a new page from the saved, stored or default value of each choice, with its rounding.
-- SwRS-MDOKFSTUDIO-TRUST-006: a read-only preview keeps the viewing choices (theme, zoom, width, table of contents, comments, incoming changes).
+- SwRS-MDOKFSTUDIO-TRUST-006: a preview with restricted reads keeps the viewing choices (theme, zoom, width, table of contents, comments, incoming changes).
 
 ### Verification notes
 
 - Method: test/page/blockReq.requirements.test.ts (the saved state holds editMode next to its other fields, on and off).
-- Method: test/session/blockReq.requirements.test.ts (the host stores a boolean edit mode of a writable preview and ignores the read-only and the non-boolean reports).
+- Method: test/session/blockReq.requirements.test.ts (the host stores a boolean edit mode, also from a preview with restricted reads, and ignores the non-boolean reports).
 - Method: test/page/runtimeScroll.test.ts (the theme click posts previewThemeModeChanged with the page identity and writes previewThemeMode; the anchor switch posts previewAnchorModeChanged; the identity after a patch and the snapshot field are untested).
 - Method: test/page/runtimePageControls.test.ts (zoom buttons post zoom and write viewZoom, the zoom limits post nothing more, the width button cycles margin, auto, full, the collapse button, the table of contents button).
 - Method: test/page/modules/editPalette.test.ts and test/page/runtimeEditPalette.test.ts (one previewPaletteModeChanged per chosen mode, none after setMode).
 - Method: test/page/modules/tocColumn.test.ts (the toggle posts toc and remembers it).
-- Method: test/integration/paletteMode.test.ts (a reported palette mode is stored and wins over the setting in the next panel; the read-only case is deduced from the code, untested).
+- Method: test/integration/paletteMode.test.ts (a reported palette mode is stored and wins over the setting in the next panel; the Restricted Mode case is deduced from the code, untested).
 - Method: test/integration/lifecycle.test.ts and test/core/state/previewTheme.test.ts (previewThemeModeChanged dark is stored and carried by the next page; the stale-message drop is untested).
 - Method: test/core/state/previewViewPreferences.test.ts (one key, normalized object, no write without storage) and test/core/protocol/pageToHost.test.ts (validators, width mode wide refused).
 - Method: test/session/diagReq.viewState.requirements.test.ts (a theme mode or a view preference that cannot be saved still holds for the session, is logged by the logger of the host, and warns the reader once).
@@ -179,7 +175,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
   - [StRS-MDOKFSTUDIO-TOOLBAR-013](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-013.md): The reader decides how the panes scroll together and sees the cursor block
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-170](SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-LAYOUT-021](../layout-width/SwRS-MDOKFSTUDIO-LAYOUT-021.md): A width mode choice is saved for the workspace
 <!-- okf:links:end -->

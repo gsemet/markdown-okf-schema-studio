@@ -77,10 +77,10 @@ export class SessionFactory {
         descriptionsCollapsed: savedDescriptions };
     }
     const documentDirectory = path.dirname(path.resolve(sourcePath));
-    const readOnly = workspaceFolder === undefined || !host.workspace.trusted;
-    const resourceRoot = readOnly ? documentDirectory : workspaceFolder.path;
-    const sessionRoots = readOnly ? [] : host.workspace.folders().map((folder) => folder.path);
-    const navigationRoots = readOnly
+    const restrictedReads = workspaceFolder === undefined || !host.workspace.trusted;
+    const resourceRoot = restrictedReads ? documentDirectory : workspaceFolder.path;
+    const sessionRoots = restrictedReads ? [] : host.workspace.folders().map((folder) => folder.path);
+    const navigationRoots = restrictedReads
       ? [documentDirectory]
       : [...new Set([resourceRoot, ...sessionRoots])];
     const initialStatus: PreviewStatus = document
@@ -100,7 +100,7 @@ export class SessionFactory {
       sessionRoots,
       navigationRoots,
       workspaceFolder,
-      readOnly,
+      restrictedReads,
       webview: {
         html: buildStatusWebviewHtml(initialStatus, panel.cspSource, initialMessage),
         diagnostics: [],
@@ -128,7 +128,7 @@ export class SessionFactory {
           documentId: request.document.id,
           revision: request.document.revision,
           workspaceRoot: resourceRoot,
-          readOnly,
+          restrictedReads,
           trusted: host.workspace.trusted,
           plantUmlJarPath: session.plantUmlConfiguration.jarPath,
           plantUmlEngine: manager.plantUml.engineFor(session),
@@ -139,7 +139,7 @@ export class SessionFactory {
           document: previewDocumentOf(request.document, manager.pathOf(request.document)),
           revision: request.document.revision,
           workspaceRoot: resourceRoot,
-          readOnly,
+          restrictedReads,
           requestId: request.requestId,
           documentIdentity: request.document.id,
           signal: sharedSignal,

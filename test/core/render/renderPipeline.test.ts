@@ -146,7 +146,7 @@ test("the host's source renderer gets plain data and the signal, and its cancell
   const seen: unknown[] = [];
   const controller = new AbortController();
   const result = await renderPreviewDocument(options({
-    readOnly: true,
+    restrictedReads: true,
     signal: controller.signal,
     renderSource: async (input, signal) => {
       seen.push(input, signal);
@@ -158,7 +158,7 @@ test("the host's source renderer gets plain data and the signal, and its cancell
     },
   }));
   assert.deepEqual(seen[0], {
-    text: "# Unsaved buffer\n", documentPath: result.stage.activeDocumentPath, workspaceRoot: "/workspace", readOnly: true,
+    text: "# Unsaved buffer\n", documentPath: result.stage.activeDocumentPath, workspaceRoot: "/workspace", restrictedReads: true,
   });
   assert.equal(seen[1], controller.signal);
   assert.equal(result.html, "<p>From the worker</p>");

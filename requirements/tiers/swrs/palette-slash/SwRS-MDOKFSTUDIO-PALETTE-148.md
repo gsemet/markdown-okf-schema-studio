@@ -34,6 +34,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
+- test/session/paletteReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -66,7 +67,6 @@ When the writer presses Document link, the extension SHALL ask the host through 
 | Input | Outcome |
 | --- | --- |
 | a path on another Windows drive, or a name with a backtick, an angle bracket or a line break | ok false with the reason That file name cannot be written in a {doc} link. |
-| a read-only preview | ok false with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 | a document that is out of date or is not a file | ok false with the reason The preview is out of date, or the document is not a file. |
 | a failed dialog | ok false with the message of the error (a value that is not an Error as its string) |
 | a previewPickDocument message without a non-empty editId of at most 100 characters | ignored by the envelope check |
@@ -97,7 +97,7 @@ See SwRS-MDOKFSTUDIO-TRUST-052, SwRS-MDOKFSTUDIO-TRUST-005, SwRS-MDOKFSTUDIO-TRU
   - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
   - [SwRS-MDOKFSTUDIO-PALETTE-039](SwRS-MDOKFSTUDIO-PALETTE-039.md): A palette action edits in one undo step or leaves the text unchanged and says why

@@ -102,7 +102,6 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     const parts = rt.parts;
     rt.editMode.applyEditMode(state.editMode);
     parts.warningBanner.update();
-    parts.checkboxes.initialize();
     parts.stickyBand.updateStickyHeadings();
     rt.input.applyDescriptionVisibility();
     rt.input.applyFrontmatterVisibility();

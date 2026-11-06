@@ -6,8 +6,9 @@
 
 import * as path from "node:path";
 
-import type { HostDocument } from "../host-api/documentStore";
-import { readOnlyReason } from "../core/edits/sourceEdits";
+import { READ_ONLY_FILE } from "../core/edits/readOnlyReasons";
+import type { TextEdit } from "../core/edits/textEdit";
+import type { ApplyEditOptions, DocumentStore, HostDocument } from "../host-api/documentStore";
 import type { PageIdentity } from "../core/protocol/envelope";
 import type { Revision } from "../core/protocol/revision";
 import type { RenderStage } from "../core/render/renderPipeline";
@@ -90,7 +91,23 @@ export function currentPaletteDocument(
   return currentPreviewDocument(preview, message);
 }
 
-/** Why a read-only preview refuses to edit: the missing workspace folder, else the missing trust. */
-export function previewReadOnlyReason(preview: Pick<PreviewSession, "workspaceFolder">): string {
-  return readOnlyReason(preview.workspaceFolder !== undefined);
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-001
+/**
+ * Applies edits and checks that they were written. VS Code accepts an edit of a read-only file
+ * (`files.readonlyInclude`, or made read-only in the session) and changes nothing: the answer is
+ * then a rejection with the read-only reason, so every writer is told. An edit that changes no text
+ * is never read as a refusal.
+ */
+export function applyWrittenEdits(
+  documents: DocumentStore,
+  document: HostDocument,
+  edits: readonly TextEdit[],
+  options?: ApplyEditOptions,
+): PromiseLike<boolean> {
+  const before = document.getText();
+  const changes = edits.some((edit) => before.slice(edit.start, edit.end) !== edit.text);
+  return documents.applyEdits(document, edits, options).then((applied) => {
+    if (applied && changes && document.getText() === before) throw new Error(READ_ONLY_FILE);
+    return applied;
+  });
 }

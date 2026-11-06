@@ -47,7 +47,7 @@ As a reader, I follow a link to another document or a heading, and come back to 
 
 - Each preview panel has its own history, limited to the last 50 places.
 - External links, blocked links and links to files that are not Markdown documents are not recorded.
-- Back and Next work in read-only previews too.
+- Back and Next work in Restricted Mode and for standalone files too.
 - A link to a place of the same page keeps the editor open.
 - An editor with nothing typed is closed without a save.
 - The page half (the final save before the move) is specified in the block-editing and table-editing scopes (SwRS-MDOKFSTUDIO-BLOCK-205).
@@ -67,5 +67,5 @@ As a reader, I follow a link to another document or a heading, and come back to 
   - [SwRS-MDOKFSTUDIO-TOOLBAR-070](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-070.md): Back and Next save an open editor first
   - [SwRS-MDOKFSTUDIO-TOOLBAR-071](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-071.md): A link to another file saves an open editor first
   - [SwRS-MDOKFSTUDIO-TOOLBAR-072](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-072.md): An anchor of the same page keeps the editor open
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 <!-- okf:links:end -->

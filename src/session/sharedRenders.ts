@@ -26,7 +26,7 @@ export interface SharedRenderKey {
   documentId: string;
   revision: number;
   workspaceRoot: string;
-  readOnly: boolean;
+  restrictedReads: boolean;
   trusted: boolean;
   plantUmlJarPath: string | undefined;
   plantUmlEngine: string;
@@ -34,7 +34,7 @@ export interface SharedRenderKey {
 
 function keyString(key: SharedRenderKey): string {
   return JSON.stringify([
-    key.documentId, key.revision, key.workspaceRoot, key.readOnly, key.trusted,
+    key.documentId, key.revision, key.workspaceRoot, key.restrictedReads, key.trusted,
     key.plantUmlJarPath ?? null, key.plantUmlEngine,
   ]);
 }

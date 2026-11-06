@@ -74,7 +74,7 @@ export interface PreviewSessionInit {
   sessionRoots: string[];
   navigationRoots: string[];
   workspaceFolder: WorkspaceFolderInfo | undefined;
-  readOnly: boolean;
+  restrictedReads: boolean;
   webview: PreviewWebviewResult;
   states: BoundedMap<PreviewPanelState>;
   state: PreviewPanelState | undefined;
@@ -108,8 +108,8 @@ export class PreviewSession {
   public readonly sessionRoots: string[];
   public readonly navigationRoots: string[];
   public readonly workspaceFolder?: WorkspaceFolderInfo;
-  /** Untrusted workspace or no folder: the page offers no edit, the host refuses them. */
-  public readonly readOnly: boolean;
+  /** Untrusted workspace or no folder: reads are narrowed (resource policy, includes, schema resolution). Editing is unaffected. */
+  public readonly restrictedReads: boolean;
   /** The render the page shows (or will once loaded). */
   public stage?: RenderStage;
   /** The host's record of the page: its html, diagnostics and nonce. */
@@ -171,7 +171,7 @@ export class PreviewSession {
     this.sessionRoots = init.sessionRoots;
     this.navigationRoots = init.navigationRoots;
     this.workspaceFolder = init.workspaceFolder;
-    this.readOnly = init.readOnly;
+    this.restrictedReads = init.restrictedReads;
     this.webview = init.webview;
     this.states = init.states;
     this.state = init.state;

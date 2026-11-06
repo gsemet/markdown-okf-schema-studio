@@ -75,7 +75,7 @@ export function getActivePreviewForTests():
     scrollEditorWithPreview: boolean;
     findWidgetEnabled: boolean;
     localResourceRoots: readonly vscode.Uri[];
-    readOnly: boolean;
+    restrictedReads: boolean;
     restorePreviewStateCalls: number;
     htmlAssignments: number;
     renderedStages: number;
@@ -154,7 +154,7 @@ export function getActivePreviewForTests():
     scrollEditorWithPreview: preview.configuration.scrollEditorWithPreview,
     findWidgetEnabled: panel.options.enableFindWidget === true,
     localResourceRoots: panel.webview.options.localResourceRoots ?? [],
-    readOnly: preview.readOnly,
+    restrictedReads: preview.restrictedReads,
     restorePreviewStateCalls: probe.restoreCalls,
     htmlAssignments: probe.htmlAssignments,
     renderedStages: probe.renderedStages,

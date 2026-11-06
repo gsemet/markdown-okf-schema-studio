@@ -478,7 +478,6 @@ export function createRuntimeHarness(configuration: Partial<{
   initialPin: { line: number; viewportTop: number };
   initialAnchor: number;
   savedDescriptionsCollapsed: boolean;
-  editingEnabled: boolean;
   emptyBody: boolean;
   propertiesMapped: boolean;
   previewStatus: string;
@@ -489,8 +488,6 @@ export function createRuntimeHarness(configuration: Partial<{
   initialPaletteMode: "strict" | "gfm" | "myst" | "full";
   initialViewPreferences: ViewPreferences;
   commentsEnabled: boolean;
-  /** The reason a read-only page gives for its disabled checkboxes. */
-  readOnlyReason: string;
   intersectionObserver: boolean;
   /** `navigator.platform` of the page (absent: no navigator, like a non-Apple platform). */
   platform: string;
@@ -532,7 +529,6 @@ export function createRuntimeHarness(configuration: Partial<{
     controlsHeight = 0,
     tocReserve = 0,
     savedDescriptionsCollapsed,
-    editingEnabled = true,
     emptyBody = false,
     propertiesMapped = false,
     previewStatus,
@@ -616,8 +612,7 @@ export function createRuntimeHarness(configuration: Partial<{
   const backButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const nextButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const anchorButton = new RuntimeElement({}, windowState, 0, 30);
-  // A read-only page keeps the Edit button, greyed with aria-disabled (core/preview/previewToolbar.ts).
-  const editModeButton = new RuntimeElement(editingEnabled ? {} : { "aria-disabled": "true", title: "Editing is unavailable: this file is not in a trusted workspace", "data-tooltip": "Editing is unavailable: this file is not in a trusted workspace" }, windowState, 0, 30);
+  const editModeButton = new RuntimeElement({}, windowState, 0, 30);
   const toolbar = new RuntimeElement({}, windowState, 12, Math.max(0, toolbarBottom - 12));
   toolbar.rectProvider = () => ({
     top: 12,

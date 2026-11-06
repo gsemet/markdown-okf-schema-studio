@@ -105,7 +105,6 @@ function plantUmlFixtureFiles(): Record<string, string> {
 async function renderPage(identity: PageIdentity): Promise<string[]> {
   const { fixture, theme: themeId, stickyHeadingDepth, plantumlExpectation } = identity;
   const options: ScenarioRenderOptions = identity.render ?? {};
-  const editingEnabled = options.readOnly !== true;
   const theme = THEMES.find((candidate) => candidate.id === themeId);
   if (!theme) {
     throw new Error(`Unknown theme: ${themeId}`);
@@ -126,8 +125,8 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     listDocuments: (pattern, from) => listGlobDocuments(pattern, path.dirname(from), () => true, from),
   });
 
-  // A read-only preview (Restricted Mode) resolves under the read-only policy, as the host does.
-  const policy = createPreviewResourcePolicy(documentDirectory, visualRoot, options.readOnly === true);
+  // A preview with restricted reads (Restricted Mode) resolves under the restricted policy, as the host does.
+  const policy = createPreviewResourcePolicy(documentDirectory, visualRoot, options.restrictedReads === true);
   const resolveResource = (request: string, baseDirectory: string): ResolvedResource | undefined => {
     const resourcePath = policy.resolveResource(request, baseDirectory, { image: true });
     if (!resourcePath) {
@@ -179,7 +178,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     activeSourceFile: sourcePath,
   };
   const tableEnabled = options.propertiesTable !== false;
-  const markup = renderPropertiesTable(frontmatter, tableEnabled, sourceMapping, editingEnabled);
+  const markup = renderPropertiesTable(frontmatter, tableEnabled, sourceMapping);
   const deferredMarkup = deferredFrontmatterLinks
     ? renderPropertiesTable(analyzeFrontmatter({
       schemaFiles: nodeSchemaFiles,
@@ -188,7 +187,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
       strictAdditionalProperties: options.strictAdditionalProperties === true,
       inspectLinks: true,
       ...workspaceRoots,
-    }), tableEnabled, sourceMapping, editingEnabled)
+    }), tableEnabled, sourceMapping)
     : "";
   const withPlantUmlAndTable = markup
     ? withPlantUml.replace(
@@ -212,7 +211,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
       : withPlantUmlAndTable;
   const withToolbar = withStatus.replace(
     /(<body(?:\s[^>]*)?>)/iu,
-    (opening) => `${opening}${renderPreviewToolbar(editingEnabled)}${renderPreviewStickyHeadings()}`,
+    (opening) => `${opening}${renderPreviewToolbar()}${renderPreviewStickyHeadings()}`,
   );
   // Like the real host: a stored theme mode is sent only when there is one, the view preferences
   // and the palette mode always are (the built-in defaults when nothing is stored).

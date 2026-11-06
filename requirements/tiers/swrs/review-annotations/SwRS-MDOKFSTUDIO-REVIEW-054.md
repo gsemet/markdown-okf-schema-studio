@@ -3,8 +3,8 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-054
 uuid: 55130de2-cc11-47c6-8ac0-30305b4c0217
 title: The host writes comment changes one after another within the file limits
-description: When the host receives a create message from a writable preview of
-  a saved document, the extension SHALL append a thread with the anchor as sent,
+description: When the host receives a create message from a preview of a saved
+  document, the extension SHALL append a thread with the anchor as sent,
   resolved false and one comment, with thread and comment ids and the time
   chosen by the host, in the review comments file next to the document, running
   the changes of one file one after another on its latest content and refusing
@@ -45,11 +45,11 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the host receives a create message from a writable preview of a saved document, the extension SHALL append a thread with the anchor as sent, resolved false and one comment, with thread and comment ids and the time chosen by the host, in the review comments file next to the document, running the changes of one file one after another on its latest content and refusing with a reason and a warning, and writing nothing, a change that the file state or its limits do not allow, and writing through a temporary file renamed onto the comments file and never into a comments file that is a symbolic link.
+When the host receives a create message from a preview of a saved document, the extension SHALL append a thread with the anchor as sent, resolved false and one comment, with thread and comment ids and the time chosen by the host, in the review comments file next to the document, running the changes of one file one after another on its latest content and refusing with a reason and a warning, and writing nothing, a change that the file state or its limits do not allow, and writing through a temporary file renamed onto the comments file and never into a comments file that is a symbolic link.
 
 ### Scenario (nominal): First comment on a text
 
-- GIVEN a writable preview of notes.md and a create message with an anchor and the body "First remark"
+- GIVEN a preview of notes.md and a create message with an anchor and the body "First remark"
 - WHEN the host handles it
 - THEN the comments file holds one thread with the anchor as sent, resolved false, an id of the form t_ and 8 hex characters, a comment with an id of the form c_ and 8 hex characters, and an ISO creation time
 - AND the earlier threads of the file are unchanged
@@ -82,7 +82,6 @@ When the host refuses a comment change, it answers the page ok false with the re
 
 | Condition | Reason answered to the page |
 | --- | --- |
-| The preview is read-only | see SwRS-MDOKFSTUDIO-TRUST-005 |
 | The document is not a saved file (an untitled document, a uri that does not start with file:) | "save the document first." |
 | The comments file is open in an editor with unsaved changes | "{name} has unsaved changes in an editor; save or close it first." |
 | The change makes the serialized file larger than 2 MiB (the UTF-8 length above MAX_SIDECAR_BYTES) | "the comments file would become too large." |
@@ -139,7 +138,7 @@ When the host refuses a comment change, it answers the page ok false with the re
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 <!-- okf:links:end -->

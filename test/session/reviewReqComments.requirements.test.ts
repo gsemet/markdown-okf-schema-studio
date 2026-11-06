@@ -10,7 +10,6 @@ import { test } from "node:test";
 
 import { serializeSidecar, type CommentThread } from "../../src/core/comments/commentModel";
 import { CommentsController, createCommentsState } from "../../src/session/features/comments";
-import { READ_ONLY_NO_FOLDER, READ_ONLY_UNTRUSTED } from "../../src/core/edits/sourceEdits";
 
 /** A path of the in-memory workspace, native like the document paths the host hands out. */
 const w = (name: string): string => path.resolve("/w", name);
@@ -124,7 +123,7 @@ function setup(): Setup {
   const preview = (extra: Record<string, unknown> = {}): any => {
     const value = {
       disposed: false,
-      readOnly: false,
+      restrictedReads: false,
       documentUri: `file://${DOCUMENT}`,
       stage: {
         activeDocumentPath: DOCUMENT,
@@ -206,17 +205,12 @@ test("a comment for a document that is not a file is refused with 'save the docu
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("saving writes nothing to the comments file when the only previews are read-only", async () => {
+test("saving writes the moved lines to the comments file when the only preview has restricted reads", async () => {
   const s = setup();
   s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 1)]));
   const document: any = { id: `file://${DOCUMENT}`, path: DOCUMENT, isDirty: false, getText: () => "x\n\nsee the needle\n" };
 
-  s.preview({ readOnly: true });
-  await s.controller.persistAnchors(document);
-  assert.deepEqual(s.writes, []);
-
-  // A writable preview of the same document: the moved line is written.
-  s.preview();
+  s.preview({ restrictedReads: true });
   await s.controller.persistAnchors(document);
   assert.deepEqual(s.writes, [SIDECAR]);
   assert.match(s.files.get(SIDECAR)!, /"line": 3/u);
@@ -329,20 +323,40 @@ test("a save that cannot write the moved lines warns once for each reason", asyn
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("a comment from a read-only preview is refused with the real cause", async () => {
+test("a comment from a standalone file or in Restricted Mode is written next to the document", async () => {
   const s = setup();
   const router = new Map<string, (message: any, preview: any) => Promise<void>>();
   s.controller.register({ on: (type: string, handler: any) => { router.set(type, handler); } } as never);
   const message = { anchor: { line: 1, endLine: 1, quote: "x", prefix: "", suffix: "" }, body: "Hello" };
 
-  await router.get("previewCommentCreate")!(message, s.preview({ readOnly: true }));
-  await router.get("previewCommentCreate")!(message, s.preview({ readOnly: true, workspaceFolder: { path: "/ws" } }));
-  assert.deepEqual(s.posted.map((value) => value.reason), [READ_ONLY_NO_FOLDER, READ_ONLY_UNTRUSTED]);
-  assert.deepEqual(s.warnings, [
-    `The comment was not saved: ${READ_ONLY_NO_FOLDER}`,
-    `The comment was not saved: ${READ_ONLY_UNTRUSTED}`,
-  ]);
-  assert.deepEqual(s.writes, []);
+  s.files.set(DOCUMENT, "x\n");
+  await router.get("previewCommentCreate")!(message, s.preview({ restrictedReads: true }));
+  await router.get("previewCommentCreate")!(message, s.preview({ restrictedReads: true, workspaceFolder: { path: "/ws" } }));
+  assert.deepEqual(s.posted.filter((value) => value.type === "previewCommentResult").map((value) => value.ok), [true, true]);
+  assert.deepEqual(s.warnings, []);
+  assert.equal(s.writes.length, 2);
+  assert.ok(s.writes.every((written) => written === SIDECAR));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+test("a reply, a resolve and a delete are written next to the document in Restricted Mode", async () => {
+  const s = setup();
+  const router = new Map<string, (message: any, preview: any) => Promise<void>>();
+  s.controller.register({ on: (type: string, handler: any) => { router.set(type, handler); } } as never);
+  s.files.set(DOCUMENT, "x\n");
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 1)]));
+  const preview = s.preview({ restrictedReads: true });
+  const stored = (): Array<Record<string, any>> => JSON.parse(s.files.get(SIDECAR)!).threads;
+
+  await router.get("previewCommentReply")!({ threadId: "t1", body: "Reply" }, preview);
+  assert.equal(stored()[0]!.comments.length, 2, "the reply is written");
+  await router.get("previewCommentResolve")!({ threadId: "t1", resolved: true }, preview);
+  assert.equal(stored()[0]!.resolved, true, "the resolve is written");
+  await router.get("previewCommentDelete")!({ threadId: "t1" }, preview);
+  assert.equal(stored().length, 0, "the delete is written");
+  const results = s.posted.filter((value) => value.type === "previewCommentResult");
+  assert.deepEqual(results.map((value) => value.ok), [true, true, true]);
+  assert.deepEqual(s.warnings, []);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-012

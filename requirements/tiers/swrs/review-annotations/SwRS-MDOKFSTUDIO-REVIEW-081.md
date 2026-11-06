@@ -2,11 +2,10 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-081
 uuid: 3758e9e7-4dc7-48fc-ac5b-56dce82793d8
-title: The thread popover of a writable preview sends a reply and keeps it until
-  accepted
-description: When the popover of a review thread opens in a writable preview,
-  the extension SHALL show a reply text area labelled "Reply to this thread" and
-  a Reply button.
+title: The thread popover of a preview sends a reply and keeps it until accepted
+description: When the popover of a review thread opens in a preview, the
+  extension SHALL show a reply text area labelled "Reply to this thread" and a
+  Reply button.
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -30,21 +29,21 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## The thread popover of a writable preview sends a reply and keeps it until accepted
+## The thread popover of a preview sends a reply and keeps it until accepted
 
 ### Normative behavior
 
-When the popover of a review thread opens in a writable preview, the extension SHALL show a reply text area labelled "Reply to this thread" and a Reply button.
+When the popover of a review thread opens in a preview, the extension SHALL show a reply text area labelled "Reply to this thread" and a Reply button.
 
-### Scenario (nominal): The popover of a writable preview ends with the reply box
+### Scenario (nominal): The popover of a preview ends with the reply box
 
-- GIVEN a writable preview and a thread
+- GIVEN a preview and a thread
 - WHEN its popover opens
 - THEN the popover ends with the text area (aria-label "Reply to this thread", placeholder Reply, maxlength 10000) and the Reply button
 
-### Scenario (refusal): No reply box in a read-only preview
+### Scenario (refusal): No reply box without a reply hook
 
-- GIVEN a preview that cannot edit (no reply hook)
+- GIVEN a page whose host gave no reply hook (the runtime context carries commentsEnabled false, as in a test host)
 - WHEN the popover opens
 - THEN no reply box is shown
 
@@ -90,14 +89,14 @@ When the popover of a review thread opens in a writable preview, the extension S
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview shows no reply box
-- SwRS-MDOKFSTUDIO-TRUST-005: the host refuses a thread write of a read-only preview with a reason
+- SwRS-MDOKFSTUDIO-TRUST-001: every preview offers the reply box
+- SwRS-MDOKFSTUDIO-TRUST-005: the host handles a thread write whatever the trust
 - SwRS-MDOKFSTUDIO-TRUST-090: the answer of the host is matched by its id and result type, or ends with a readable error
 - SwRS-MDOKFSTUDIO-BLOCK-041: an open editor blocks the reply
 
 ### Verification notes
 
-- Method: test/page/modules/commentThreads.test.ts, `T43: the popover has a reply box that posts the thread id and the trimmed body` (writable popover, Reply sends the trimmed text), `T43: no reply box without a reply hook (read-only previews)` (read-only), `T43: Cmd/Ctrl+Enter sends a reply and keys typed in the reply box stay there` (keyboard, keys stay in the box), `T43: a reply over 10000 characters is cut by the box and refused by the page` (length), `T43 r2: a refused reply keeps the text and shows the reason as text` (refusal with a reason; the default text "The reply was not saved." is not asserted), `T43 r2: no answer keeps the text, says so, and a late ok still empties the box` (timeout and late ok true).
+- Method: test/page/modules/commentThreads.test.ts, `T43: the popover has a reply box that posts the thread id and the trimmed body` (popover with a reply hook, Reply sends the trimmed text), `T43: no reply box without a reply hook (read-only previews)` (no hook), `T43: Cmd/Ctrl+Enter sends a reply and keys typed in the reply box stay there` (keyboard, keys stay in the box), `T43: a reply over 10000 characters is cut by the box and refused by the page` (length), `T43 r2: a refused reply keeps the text and shows the reason as text` (refusal with a reason; the default text "The reply was not saved." is not asserted), `T43 r2: no answer keeps the text, says so, and a late ok still empties the box` (timeout and late ok true).
 - Method: real window review-annotations/r05-thread-reply (reply sent, immediate ok true empties the box).
 - The text typed since the reply was sent is untested.
 - Criteria: The reply box exists only when the reply hook is installed; one reply message is posted with the trimmed body; the textarea value is unchanged after a refusal and empty after ok true; the message appears after 15000 ms.
@@ -110,8 +109,8 @@ When the popover of a review thread opens in a writable preview, the extension S
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 <!-- okf:links:end -->

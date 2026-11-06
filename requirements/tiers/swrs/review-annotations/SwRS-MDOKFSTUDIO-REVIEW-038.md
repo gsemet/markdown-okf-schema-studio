@@ -3,9 +3,9 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-038
 uuid: 4a80fb13-0b4b-4162-a6e0-82cab820bc35
 title: Selected body text offers a Comment button and a keyboard shortcut
-description: When a reader selects text inside mapped body blocks of a writable
-  preview, the page SHALL show a Comment button near the selection, and open the
-  comment box for that selection on Cmd+Alt+M (macOS) or Ctrl+Alt+M (elsewhere).
+description: When a reader selects text inside mapped body blocks of a preview,
+  the page SHALL show a Comment button near the selection, and open the comment
+  box for that selection on Cmd+Alt+M (macOS) or Ctrl+Alt+M (elsewhere).
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -36,13 +36,13 @@ supersedes:
 
 ### Normative behavior
 
-When a reader selects text inside mapped body blocks of a writable preview, the page SHALL show a Comment button near the selection, and open the comment box for that selection on Cmd+Alt+M (macOS) or Ctrl+Alt+M (elsewhere).
+When a reader selects text inside mapped body blocks of a preview, the page SHALL show a Comment button near the selection, and open the comment box for that selection on Cmd+Alt+M (macOS) or Ctrl+Alt+M (elsewhere).
 
 ### Scenario (nominal): A selection in body blocks shows the button
 
 | Given | When | Then |
 | --- | --- | --- |
-| a writable preview and a selection inside one paragraph | the selection is made | a button labelled "Add a comment on the selected text" and reading "Comment" appears near the selection range |
+| a preview and a selection inside one paragraph | the selection is made | a button labelled "Add a comment on the selected text" and reading "Comment" appears near the selection range |
 | a selection that starts in one paragraph and ends in another | the selection is made | the button appears |
 
 ### Scenario (refusal): No button for a collapsed selection or for text outside body blocks
@@ -107,7 +107,7 @@ When a reader selects text inside mapped body blocks of a writable preview, the 
   - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
   - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-DIAG-020](../diagrams/SwRS-MDOKFSTUDIO-DIAG-020.md): Selecting text inside a diagram offers no comment

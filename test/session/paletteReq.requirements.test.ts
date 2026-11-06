@@ -14,7 +14,7 @@ import { MAX_BIB_BYTES, scanBibKeys, SCAN_TIMEOUT_MS } from "../../src/session/b
 import type { PageMessageRouter } from "../../src/session/pageMessages";
 import type { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
-import { READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
+import { CITATIONS_NEED_TRUST } from "../../src/session/features/hostRequests";
 
 const DOC = "/ws/docs/chapter.md";
 const STALE = "The preview is out of date. Try again once it has refreshed.";
@@ -121,7 +121,7 @@ test("a scan still running after 5 seconds stops reading and marks the list trun
 
 interface Setup {
   answers: Array<Record<string, unknown>>;
-  preview: { readOnly: boolean; document: unknown; stage: unknown; documentUri: string; edits: { active?: unknown } };
+  preview: { restrictedReads: boolean; document: unknown; stage: unknown; documentUri: string; edits: { active?: unknown } };
   dialogs: number;
   writes: number;
   scans: string[];
@@ -129,7 +129,7 @@ interface Setup {
 }
 
 interface SetupOptions {
-  readOnly?: boolean;
+  restrictedReads?: boolean;
   documentPath?: string | undefined;
   revision?: number;
   stageRevision?: number;
@@ -188,7 +188,8 @@ function setup(options: SetupOptions = {}): Setup {
     getText: () => options.text ?? "(intro)=\n# Intro\n\n(next)=\n## Next\n",
   };
   const preview = {
-    readOnly: options.readOnly ?? false,
+    restrictedReads: options.restrictedReads ?? false,
+    workspaceFolder: folder === undefined ? undefined : { id: "ws", path: folder, name: "ws" },
     document,
     stage: { activeDocumentRevision: options.stageRevision ?? revision },
     edits: {
@@ -228,22 +229,22 @@ test("a label request for a stale preview is answered with the out-of-date error
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-006
-test("the label list is answered in a read-only preview, the citation list is refused", async () => {
-  const readOnly = setup({ readOnly: true });
-  const labels = await readOnly.ask("previewListTargets");
+test("the label list is answered in a preview with restricted reads, the citation list is refused", async () => {
+  const restrictedReads = setup({ restrictedReads: true });
+  const labels = await restrictedReads.ask("previewListTargets");
   assert.equal(labels.ok, true);
   assert.equal((labels.items as unknown[]).length, 2);
-  const citations = await readOnly.ask("previewListCitations");
+  const citations = await restrictedReads.ask("previewListCitations");
   assert.equal(citations.ok, false);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("the citation list is refused in a read-only preview and no file is read", async () => {
-  const readOnly = setup({ readOnly: true });
-  const answer = await readOnly.ask("previewListCitations");
+test("the citation list needs a trusted workspace folder: refused with its reason in a restricted-reads preview, no file read", async () => {
+  const restrictedReads = setup({ restrictedReads: true });
+  const answer = await restrictedReads.ask("previewListCitations");
   assert.equal(answer.ok, false);
-  assert.equal(answer.reason, READ_ONLY_NO_FOLDER);
-  assert.deepEqual(readOnly.scans, []);
+  assert.equal(answer.reason, CITATIONS_NEED_TRUST);
+  assert.deepEqual(restrictedReads.scans, []);
   const writable = await setup().ask("previewListCitations");
   assert.equal(writable.ok, true);
   assert.deepEqual(writable.items, []);
@@ -264,17 +265,27 @@ test("a citation scan that throws is answered with ok false and the message of t
   assert.equal(answer.reason, "search backend down");
 });
 
-test("the document picker is refused in a read-only preview and opens no dialog; a writable preview opens it", async () => {
-  const readOnly = setup({ readOnly: true });
-  const answer = await readOnly.ask("previewPickDocument");
-  assert.equal(answer.ok, false);
-  assert.equal(answer.reason, READ_ONLY_NO_FOLDER);
-  assert.equal(readOnly.dialogs, 0);
-  const writable = setup();
-  assert.deepEqual(
-    { ok: (await writable.ask("previewPickDocument")).ok, dialogs: writable.dialogs },
-    { ok: true, dialogs: 1 },
-  );
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148
+test("the document picker opens in a restricted-reads preview and in a writable one", async () => {
+  for (const options of [{ restrictedReads: true }, {}]) {
+    const preview = setup(options);
+    assert.deepEqual(
+      { ok: (await preview.ask("previewPickDocument")).ok, dialogs: preview.dialogs },
+      { ok: true, dialogs: 1 },
+    );
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-192
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+test("the image picker of a standalone file accepts an image of the document folder and refuses one elsewhere", async () => {
+  const picked = (path: string): { picked: PickedFile } => ({ picked: { path, local: true } as PickedFile });
+  const inside = setup({ restrictedReads: true, workspaceFolder: undefined, ...picked("/ws/docs/pic.png") });
+  assert.equal((await inside.ask("previewPickImage")).ok, true);
+  const outside = setup({ restrictedReads: true, workspaceFolder: undefined, ...picked("/elsewhere/pic.png") });
+  const refusal = await outside.ask("previewPickImage");
+  assert.equal(refusal.ok, false);
+  assert.equal(refusal.reason, "The image must be inside the folder of the document.");
 });
 
 test("the document picker does not open for a stale preview or a document that is not a file", async () => {
@@ -340,6 +351,17 @@ test("an image paste is refused for a folder outside the workspace, links resolv
   const inside = setup();
   assert.equal((await inside.ask("previewPasteImage", paste)).ok, true);
   assert.ok(inside.writes > 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+test("an image paste is saved next to a standalone file and in Restricted Mode", async () => {
+  const standalone = setup({ restrictedReads: true, workspaceFolder: undefined });
+  assert.equal((await standalone.ask("previewPasteImage", paste)).ok, true);
+  assert.ok(standalone.writes > 0, "the image file is written in the folder of the document");
+  const restricted = setup({ restrictedReads: true });
+  assert.equal((await restricted.ask("previewPasteImage", paste)).ok, true);
+  assert.ok(restricted.writes > 0);
 });
 
 test("an image paste is refused for a saved file that is not a Markdown file and accepted for a .md file", async () => {

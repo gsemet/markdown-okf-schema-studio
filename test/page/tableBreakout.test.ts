@@ -149,7 +149,7 @@ async function openPage(markdown: string, themeId: string): Promise<Opened | und
     initialViewPreferences: { zoom: 100, widthMode: "auto" as const, toc: false, incomingChanges: true, comments: true, toolbarCollapsed: true },
   };
   const built = buildPreviewWebviewHtml(
-    rendered.html, workspace, bundle, context, workspace, undefined, COLUMN + GUTTER * 2, true, true, [], "builtin",
+    rendered.html, workspace, bundle, context, workspace, undefined, COLUMN + GUTTER * 2, true, [], "builtin",
   );
   assert.ok(serializeRuntimeContext(context).length > 0);
   const pagePath = path.join(root, "page.html");

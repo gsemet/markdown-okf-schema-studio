@@ -30,7 +30,7 @@ function stubs() {
   };
   const preview: any = {
     workspaceRoot: "/ws",
-    readOnly: false,
+    restrictedReads: false,
     plantUmlConfiguration: {},
     configuration: {},
     panel: { assets: fakeAssetResolver({ cspSource: "vscode-resource:", url: (filePath) => `vscode-resource:${filePath}` }) },
@@ -67,7 +67,7 @@ test("CR251: in Restricted Mode the HEAD text shows an image of the workspace fo
     fs.writeFileSync(path.join(sandbox, "ws", "images", "x.png"), "png");
     const { manager, preview } = stubs();
     manager.host.workspace.trusted = false;
-    preview.readOnly = true;
+    preview.restrictedReads = true;
     preview.workspaceRoot = guide;
     preview.workspaceFolder = { path: path.join(sandbox, "ws") };
     const readOnlyStage = { ...stage, activeDocumentPath: path.join(guide, "doc.md") };

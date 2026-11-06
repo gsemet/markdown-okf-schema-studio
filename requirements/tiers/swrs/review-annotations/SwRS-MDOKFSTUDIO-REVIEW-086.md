@@ -71,8 +71,8 @@ When a reader presses Resolve or Reopen in a thread popover, the extension SHALL
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview shows no Resolve or Delete button
-- SwRS-MDOKFSTUDIO-TRUST-005: the host refuses a thread write of a read-only preview with a reason
+- SwRS-MDOKFSTUDIO-TRUST-001: every preview shows the Resolve and Delete buttons
+- SwRS-MDOKFSTUDIO-TRUST-005: the host handles a thread write whatever the trust
 - SwRS-MDOKFSTUDIO-TRUST-090: the answer of the host is matched by its id and result type, or ends with a readable error
 - SwRS-MDOKFSTUDIO-BLOCK-041: an open editor blocks the change
 
@@ -90,8 +90,8 @@ When a reader presses Resolve or Reopen in a thread popover, the extension SHALL
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 <!-- okf:links:end -->

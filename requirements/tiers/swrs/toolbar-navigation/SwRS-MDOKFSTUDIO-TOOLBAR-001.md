@@ -5,12 +5,12 @@ uuid: 1a0f84b9-cd60-44df-a02a-786ee604464d
 title: "The toolbar has five rows of titled buttons that float over the page"
 description: "When a preview page is built, the extension SHALL render the toolbar,
   named Preview controls with the role toolbar, as five rows of at most three buttons
-  in a fixed order (for a writable preview: Refresh, Edit and the collapse button;
-  Anchor, Back and Next; Theme, Zoom out and Zoom in; Width, Table of contents and
-  Side-by-side; Fold, Diff and Comments), give every button a data-tooltip equal to
-  its title, show that tooltip with a readable contrast on hover and on keyboard focus,
-  and fix the toolbar at the top right of the pane above the page content, inside
-  the pane and without overlap between its rows."
+  in a fixed order (Refresh, Edit and the collapse button; Anchor, Back and Next;
+  Theme, Zoom out and Zoom in; Width, Table of contents and Side-by-side; Fold, Diff
+  and Comments), give every button a data-tooltip equal to its title, show that tooltip
+  with a readable contrast on hover and on keyboard focus, and fix the toolbar at
+  the top right of the pane above the page content, inside the pane and without overlap
+  between its rows."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
 req_lifecycle: proposed
@@ -38,10 +38,10 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a preview page is built, the extension SHALL render the toolbar, named Preview controls with the role toolbar, as five rows of at most three buttons in a fixed order (for a writable preview: Refresh, Edit and the collapse button; Anchor, Back and Next; Theme, Zoom out and Zoom in; Width, Table of contents and Side-by-side; Fold, Diff and Comments), give every button a data-tooltip equal to its title, show that tooltip with a readable contrast on hover and on keyboard focus, and fix the toolbar at the top right of the pane above the page content, inside the pane and without overlap between its rows.
+When a preview page is built, the extension SHALL render the toolbar, named Preview controls with the role toolbar, as five rows of at most three buttons in a fixed order (Refresh, Edit and the collapse button; Anchor, Back and Next; Theme, Zoom out and Zoom in; Width, Table of contents and Side-by-side; Fold, Diff and Comments), give every button a data-tooltip equal to its title, show that tooltip with a readable contrast on hover and on keyboard focus, and fix the toolbar at the top right of the pane above the page content, inside the pane and without overlap between its rows.
 
 ### Scenario (nominal): Writable preview
-- GIVEN a writable preview
+- GIVEN a preview
 - WHEN the toolbar markup is rendered
 - THEN it holds 15 buttons in the rows main (3), navigation (3), appearance (3), layout (3) and content (3), in that order, no row holds more than three buttons, and rows navigation, appearance, layout and content sit together in one group that follows the main row
 

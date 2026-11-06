@@ -15,7 +15,6 @@ import type { PanelGroups } from "../../src/host-api/previewPanel";
 import { createMemoryDocumentStore } from "../../src/host-memory/memoryDocumentStore";
 import { PreviewManager } from "../../src/session/previewManager";
 import { PreviewSession } from "../../src/session/previewSession";
-import { READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
 
 const MARKDOWN = "# Title\n\nFirst paragraph.\n\nSecond paragraph.\n";
 
@@ -40,7 +39,7 @@ function deferred<T>(): Deferred<T> {
 }
 
 interface FixtureOptions {
-  readOnly?: boolean;
+  restrictedReads?: boolean;
   text?: string;
 }
 
@@ -52,6 +51,8 @@ function fixture(options: FixtureOptions = {}) {
   const hooks = {
     gate: undefined as Promise<void> | undefined,
     rejectWith: undefined as Error | undefined,
+    /** A file VS Code holds read-only: it accepts an edit and changes nothing. */
+    readOnly: false,
     readClipboard: (): Promise<string> => Promise.resolve("Pasted block.\n"),
     writeClipboard: (_text: string): Promise<void> => Promise.resolve(),
   };
@@ -59,14 +60,16 @@ function fixture(options: FixtureOptions = {}) {
     applyEdits: (target: typeof document, edits: readonly TextEdit[], applyOptions?: never) => {
       applyCalls.push(edits);
       if (hooks.rejectWith) return Promise.reject(hooks.rejectWith);
+      if (hooks.readOnly) return Promise.resolve(true);
       const outcome = Promise.resolve(store.applyEdits(target, edits, applyOptions));
       return hooks.gate ? hooks.gate.then(() => outcome) : outcome;
     },
   });
   const warnings: string[] = [];
+  const deleted: string[] = [];
   const host = {
     ...nodeHostPorts,
-    files: {},
+    files: { delete: (file: string) => { deleted.push(file); return Promise.resolve(); } },
     documents,
     ui: {
       readClipboard: () => hooks.readClipboard(),
@@ -89,7 +92,7 @@ function fixture(options: FixtureOptions = {}) {
     sessionRoots: [],
     navigationRoots: [],
     workspaceFolder: undefined,
-    readOnly: options.readOnly === true,
+    restrictedReads: options.restrictedReads === true,
     webview: {},
     states: {},
     state: undefined,
@@ -114,26 +117,22 @@ function fixture(options: FixtureOptions = {}) {
     await settle();
   };
   const of = (type: string): Array<Record<string, unknown>> => posted.filter((entry) => entry.type === type);
-  return { store, document, applyCalls, hooks, manager, preview, posted, warnings, send, of, message };
+  return { store, document, applyCalls, hooks, manager, preview, posted, warnings, deleted, send, of, message };
 }
 
 /** The save of the second paragraph (source line 5) with the edited text. */
 const SECOND = { editId: "e1", line: 5, endLine: 5, originalText: "Second paragraph.\n" };
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("a read-only preview answers the open, save and cancel of a block with the read-only reason", async () => {
-  const readOnly = fixture({ readOnly: true });
-  await readOnly.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
-  await readOnly.send("previewEditSave", { ...SECOND, editedText: "Changed.\n" });
-  await readOnly.send("previewEditCancel", { editId: "e1", line: 5, endLine: 5 });
-  const answers = readOnly.of("previewEditSource");
-  assert.equal(answers.length, 3);
-  for (const answer of answers) {
-    assert.equal(answer.error, READ_ONLY_NO_FOLDER);
-    assert.equal(answer.originalText, undefined);
-  }
-  assert.equal(readOnly.document.getText(), MARKDOWN);
-  assert.equal(readOnly.applyCalls.length, 0);
+test("a restricted-reads preview opens, saves and cancels a block like a writable one", async () => {
+  const restricted = fixture({ restrictedReads: true });
+  await restricted.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
+  assert.equal(restricted.of("previewEditSource")[0]!.originalText, "Second paragraph.\n");
+  assert.equal(restricted.of("previewEditSource")[0]!.error, undefined);
+  await restricted.send("previewEditSave", { ...SECOND, editedText: "Changed.\n" });
+  assert.ok(restricted.document.getText().includes("Changed."), "Restricted Mode and a standalone file edit the document");
+  assert.equal(restricted.applyCalls.length, 1);
+  assert.deepEqual(restricted.of("previewEditSource").map((answer) => answer.error), [undefined]);
 
   const writable = fixture();
   await writable.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
@@ -141,12 +140,9 @@ test("a read-only preview answers the open, save and cancel of a block with the 
   assert.equal(writable.of("previewEditSource")[0]!.error, undefined);
 });
 
-test("a read-only preview posts no flush request before a switch, a writable preview does", async () => {
-  const readOnly = fixture({ readOnly: true });
-  await readOnly.manager.edits.flushPageEdits(readOnly.preview);
-  assert.deepEqual(readOnly.of("previewFlushEdit"), []);
-
-  const writable = fixture();
+test("a restricted-reads preview and a writable one both post a flush request before a switch", async () => {
+  for (const options of [{ restrictedReads: true }, {}]) {
+  const writable = fixture(options);
   const original = writable.preview.postToPage.bind(writable.preview);
   writable.preview.postToPage = ((value: { type: string; flushId?: string }) => {
     if (value.type === "previewFlushEdit") {
@@ -157,6 +153,7 @@ test("a read-only preview posts no flush request before a switch, a writable pre
   }) as never;
   await writable.manager.edits.flushPageEdits(writable.preview);
   assert.equal(writable.of("previewFlushEdit").length, 1);
+  }
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
@@ -216,7 +213,7 @@ test("a second open while the host holds an edit is refused", async () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065
-test("an open, save or cancel from an older page of a writable preview is answered with an error", async () => {
+test("an open, save or cancel from an older page of a preview is answered with an error", async () => {
   const stale = "The preview changed while this block was being edited. Copy your text, then reopen the block.";
   const writable = fixture();
   const old = (type: string, extra: Record<string, unknown>) => writable.manager.handlePageMessage(
@@ -231,13 +228,13 @@ test("an open, save or cancel from an older page of a writable preview is answer
   assert.deepEqual(errors, [stale, stale, "The preview is out of date. Try again once it has refreshed."]);
   assert.equal(writable.document.getText(), MARKDOWN);
 
-  const readOnly = fixture({ readOnly: true });
-  await readOnly.manager.handlePageMessage(
-    readOnly.preview,
-    { ...readOnly.message("previewEditSave", { ...SECOND, editedText: "Changed.\n" }), requestId: 0 },
+  const restricted = fixture({ restrictedReads: true });
+  await restricted.manager.handlePageMessage(
+    restricted.preview,
+    { ...restricted.message("previewEditSave", { ...SECOND, editedText: "Changed.\n" }), requestId: 0 },
   );
   await settle();
-  assert.deepEqual(readOnly.of("previewEditSource"), []);
+  assert.deepEqual(restricted.of("previewEditSource").map((entry) => entry.error), [stale]);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
@@ -486,10 +483,10 @@ test("the host stores the edit mode a writable preview reports and ignores the o
   await writable.send("previewEditModeChanged", { editMode: "yes" });
   assert.equal(updates.length, 1, "a message whose editMode is not a boolean changes nothing");
 
-  const readOnly = fixture({ readOnly: true });
-  readOnly.manager.choices.load(store as never);
-  await readOnly.send("previewEditModeChanged", { editMode: false });
-  assert.equal(updates.length, 1, "a read-only preview stores nothing");
+  const restricted = fixture({ restrictedReads: true });
+  restricted.manager.choices.load(store as never);
+  await restricted.send("previewEditModeChanged", { editMode: false });
+  assert.equal(updates.length, 2, "a restricted-reads preview stores the edit mode like any other");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
@@ -532,4 +529,41 @@ test("the last block of a CRLF document without a final line break takes CR LF",
     editId: "e1", line: 3, endLine: 3, originalText: "Last", editedText: "Last\nmore", final: true,
   });
   assert.equal(run.document.getText(), "# Title\r\n\r\nLast\r\nmore");
+});
+
+const READ_ONLY = "This file is read-only in VS Code.";
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+test("a move, a cut and a paste on a file VS Code holds read-only answer the read-only reason, trusted or not", async () => {
+  for (const restrictedReads of [false, true]) {
+    const readOnly = fixture({ restrictedReads });
+    readOnly.hooks.readOnly = true;
+    await readOnly.send("previewBlockMove", { line: 3, endLine: 3, neighbourLine: 5, neighbourEndLine: 5, direction: "down" });
+    await readOnly.send("previewBlocksCut", { line: 3, endLine: 3 });
+    await readOnly.send("previewBlocksPaste", { insertAfterLine: 3 });
+    assert.deepEqual(readOnly.of("previewBlockMoveResult").map(({ ok, reason }) => ({ ok, reason })), [{ ok: false, reason: READ_ONLY }]);
+    assert.deepEqual(readOnly.of("previewBlocksResult").map(({ op, ok, reason }) => ({ op, ok, reason })), [
+      { op: "cut", ok: false, reason: READ_ONLY },
+      { op: "paste", ok: false, reason: READ_ONLY },
+    ]);
+    assert.equal(readOnly.document.getText(), MARKDOWN);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+test("a block save on a file VS Code holds read-only is told, and the images pasted meanwhile are removed", async () => {
+  for (const restrictedReads of [false, true]) {
+    const readOnly = fixture({ restrictedReads });
+    readOnly.hooks.readOnly = true;
+    await readOnly.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
+    // The image the page pasted into this editor was saved next to the document.
+    readOnly.preview.edits.pastedImages = ["/w/image.png"];
+    await readOnly.send("previewEditSave", { ...SECOND, editedText: "Changed ![](image.png)\n", final: true });
+    const errors = readOnly.of("previewEditSource").map((entry) => entry.error).filter((error) => error !== undefined);
+    assert.deepEqual(errors, [READ_ONLY]);
+    assert.deepEqual(readOnly.deleted, ["/w/image.png"], "no orphan image is left");
+    assert.equal(readOnly.document.getText(), MARKDOWN);
+  }
 });

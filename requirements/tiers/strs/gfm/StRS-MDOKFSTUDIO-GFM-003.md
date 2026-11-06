@@ -5,7 +5,7 @@ uuid: f7c2af3c-c6f3-4fd8-bd4f-f42a097d548d
 title: A writer toggles task checkboxes from the preview
 description: When a writer clicks a checkbox in the preview, the Studio SHALL
   change only that checkbox in the source as one undoable step, or refuse with a
-  reason when the preview is stale or read-only.
+  reason when the preview is stale or the file is read-only in VS Code.
 project: markdown-okf-schema-studio
 scope: gfm
 req_lifecycle: proposed
@@ -40,7 +40,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer clicks a checkbox in the preview, the Studio SHALL change only that checkbox in the source as one undoable step, or refuse with a reason when the preview is stale or read-only.
+When a writer clicks a checkbox in the preview, the Studio SHALL change only that checkbox in the source as one undoable step, or refuse with a reason when the preview is stale or the file is read-only in VS Code.
 
 ### Preserved stakeholder intent
 
@@ -48,7 +48,7 @@ Writers and reviewers expect to tick a task checkbox without opening an editor, 
 
 ### Rationale and constraints
 
-- A toggle is refused while an edit is open, when the preview is out of date, and in read-only previews; the box then returns to its previous state.
+- A toggle is refused while an edit is open, when the preview is out of date, and for a file that VS Code holds read-only; the box then returns to its previous state.
 
 <!-- okf:links:start -->
 ### Links
@@ -72,5 +72,5 @@ Writers and reviewers expect to tick a task checkbox without opening an editor, 
   - [SwRS-MDOKFSTUDIO-GFM-027](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-027.md): The host validates checkbox toggle messages
   - [SwRS-MDOKFSTUDIO-GFM-028](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-028.md): Content patches clear pending toggles
   - [SwRS-MDOKFSTUDIO-GFM-039](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-039.md): Radio choice lists render as a radio group and a click moves the selection in the source
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
 <!-- okf:links:end -->

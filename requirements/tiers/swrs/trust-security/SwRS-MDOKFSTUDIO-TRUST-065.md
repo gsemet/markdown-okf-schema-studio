@@ -95,7 +95,7 @@ The page-state exceptions are the ready reports (see SwRS-MDOKFSTUDIO-LIFE-071),
 | previewBlockMove naming revision 3 while the host holds revision 4 | answered with previewBlockMoveResult ok false and "The preview is out of date. Try again once it has refreshed."; nothing changes |
 | previewBlockMove, previewBlocksCopy, previewBlocksCut or previewBlocksPaste naming an earlier request id | answered with ok false and the out-of-date reason (previewBlocksResult carries the operation); nothing changes |
 | previewThreadReply, previewThreadDelete, previewListTargets, previewListCitations, previewPickDocument, previewPickImage, previewPasteImage or previewPasteHtml naming an older render | answered with its Result message, ok false and the out-of-date reason; no file is read and no dialog is opened, and the page clears its pending request |
-| previewEditOpen or previewCheckboxToggle naming an older render of a writable preview | answered with the out-of-date reason (the block editor error, the checkbox error); for the open, the frame of the block editor shows the reason and can be left (see SwRS-MDOKFSTUDIO-BLOCK-216) |
+| previewEditOpen or previewCheckboxToggle naming an older render of a preview | answered with the out-of-date reason (the block editor error, the checkbox error); for the open, the frame of the block editor shows the reason and can be left (see SwRS-MDOKFSTUDIO-BLOCK-216) |
 | a request of the render gate naming another document, or of a disposed preview | dropped without an answer |
 | previewCopyText of a page whose document version or render request is no longer current | handled: the text is written to the clipboard and the page is answered, because a copy edits nothing |
 | previewCopyText naming another document | dropped, the clipboard is not written |
@@ -122,7 +122,7 @@ The page-state exceptions are the ready reports (see SwRS-MDOKFSTUDIO-LIFE-071),
 
 ### Scenario (refusal): Stale write answered out of date or with a reopen hint
 
-A message that passes its gate but writes for a document newer than the render is answered with a reason and changes nothing. The page-state gate answers a stale save or cancel of a writable preview instead of dropping it:
+A message that passes its gate but writes for a document newer than the render is answered with a reason and changes nothing. The page-state gate answers a stale save or cancel of a live preview instead of dropping it:
 
 | Request | Stale case | Answer |
 | --- | --- | --- |
@@ -134,35 +134,34 @@ A message that passes its gate but writes for a document newer than the render i
 | previewPickImage | the preview is out of date (no block editor open on that render), or the document is an untitled document that is not a saved Markdown file | "The preview is out of date, or the document is not a file." and the dialog is not opened |
 | previewPickDocument | the preview is out of date (no block editor open on that render), or the document is not a saved Markdown file | "The preview is out of date, or the document is not a file." and the dialog is not opened |
 | previewThreadReply, previewThreadDelete | the request names another revision of the document than the host holds | "The preview is out of date. Try again once it has refreshed." and nothing changes; a request naming the current revision is handled |
-| previewEditSave, previewEditCancel (block editor) | the editor was opened on an older page than the host holds, in a writable preview | "The preview changed while this block was being edited. Copy your text, then reopen the block." |
+| previewEditSave, previewEditCancel (block editor) | the editor was opened on an older page than the host holds | "The preview changed while this block was being edited. Copy your text, then reopen the block." |
 | previewFrontmatterSave | the editor was opened on an older render (render 1 while the host shows render 2 of the same document) | "The preview changed while this field was being edited. Reopen the field." and the document is unchanged |
 
 ### Scenario (refusal): No stale answer where none is owed
 
 | Input | Outcome |
 | --- | --- |
-| stale previewEditSave of a read-only preview | no answer is sent |
 | stale previewFrontmatterSave naming another document | no answer is sent |
-| stale save of a read-only or disposed preview | no stale answer is sent |
+| stale save of a disposed preview | no stale answer is sent |
 | stale previewScroll or any other page-state message that is not a save, cancel or frontmatter save | dropped without an answer |
 
 ### Known issues
 
-- Known issue: the include request (previewPlantUmlInclude) is not an edit: it is allowed in read-only previews and in Restricted Mode.
+- Known issue: the include request (previewPlantUmlInclude) is not an edit: it is allowed in Restricted Mode and for a standalone file.
 
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TRUST-052: a message needs a registered type and a valid envelope before any gate
-- SwRS-MDOKFSTUDIO-TRUST-005: an edit request of a read-only preview is refused after the gate, with the read-only reason
+- SwRS-MDOKFSTUDIO-TRUST-005: an edit request that passes the gate is handled whatever the trust
 - SwRS-MDOKFSTUDIO-LIFE-071: the ready reports that the page-state gate lets through
 - SwRS-MDOKFSTUDIO-BLOCK-058: the outcome of a host source edit that passes the gate
 
 ### Verification notes
 
-- Method: test/session/trustReq.requirements.test.ts (render gate current, older and foreign identity, disposed and stage-less preview; comment gate; document gate; own-id gate; page-state gate with previewScroll and the open editor save; stale save answered with an error; read-only gets no answer). It runs PageMessageDispatcher.handle in src/session/pageMessages.ts with the real matchesCurrent of the preview manager. The other render-gated types share the same gate.
+- Method: test/session/trustReq.requirements.test.ts (render gate current, older and foreign identity, disposed and stage-less preview; comment gate; document gate; own-id gate; page-state gate with previewScroll and the open editor save; stale save answered with an error). It runs PageMessageDispatcher.handle in src/session/pageMessages.ts with the real matchesCurrent of the preview manager. The other render-gated types share the same gate.
 - Method: test/integration/commentWrite.test.ts (comment gate: a previewCommentCreate with an old documentVersion is written and answered ok; the same message with a wrong document id is dropped and writes nothing).
 - Method: test/integration/blockMove.test.ts and test/integration/blockClipboard.test.ts (stale version: document and clipboard unchanged, current render plans the move or copy). The message text has no assertion.
-- Method: test/session/blockReq.requirements.test.ts (a save or cancel from an older page of a writable preview is answered with an error; read-only gets none).
+- Method: test/session/blockReq.requirements.test.ts (a save or cancel from an older page of a preview, one with restricted reads included, is answered with an error).
 - Method: test/session/renderReq.codeCopy.requirements.test.ts (stale copy request copied and answered, another document dropped).
 - Method: test/session/diagReq.plantuml.requirements.test.ts (include request handled for the current document even one render behind, dropped otherwise).
 - Method: test/host/fmtableReq.requirements.test.ts (frontmatter save from an older render answered with the reopen hint; another document gets no answer).

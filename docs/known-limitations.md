@@ -16,7 +16,7 @@ close those release-specific manual checks.
 
 ## Product Boundary
 
-The extension is an opt-in, read-only preview of a Markdown document in this workspace. The side
+The extension is an opt-in preview of a Markdown document in this workspace, with in-place editing. The side
 panel follows the active editor; the optional **Open With...** editor stays on its selected file.
 It does not claim:
 
@@ -36,9 +36,10 @@ preview displays a warning placeholder for these references; it does not execute
 notebooks or hydrate their outputs. File includes are read only through the preview's
 resource policy, which depends on trust. In a trusted workspace, an include may point to any
 file inside the workspace folder. In Restricted Mode (untrusted workspace) or for a standalone
-file, the preview is read-only and the resource root is the folder of the document: an include
-inside that folder (subfolders included) is read and shown, and an include outside it is
-refused with a warning.
+file, the preview stays editable but its reads are narrowed: the resource root is the folder of
+the document, so an include inside that folder (subfolders included) is read and shown, and an
+include outside it is refused with a warning. Schema files are not looked up, the PlantUML Java
+engine is off and the citation list of the palette is disabled with its reason.
 
 In Restricted Mode (or for a standalone file) the preview still shows images (png, jpg, jpeg, gif,
 webp, svg) from the folder of the document and from the workspace folder, but not from a workspace

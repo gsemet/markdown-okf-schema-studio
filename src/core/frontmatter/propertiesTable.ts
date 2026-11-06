@@ -206,7 +206,6 @@ export function renderPropertiesTable(
   result: FrontmatterResult,
   enabled: boolean,
   sourceMapping?: SourceMappingOptions,
-  editingEnabled = true,
 ): string {
   if (!result.present || !enabled) {
     return "";
@@ -269,10 +268,10 @@ export function renderPropertiesTable(
       : Array.isArray(field.value)
         ? `<span class="okf-list-display" data-okf-value-display>${formatListValue(field.value, fieldLinks, field.name)}</span>`
       : `<span data-okf-value-display>${formatLinkedValue(field.value, scalarLink)}</span>`;
-    const editable = editingEnabled && (structuredValue
+    const editable = structuredValue
       || field.valueKind !== "scalar"
       || field.fieldType !== "unknown"
-      || typeof field.value === "string");
+      || typeof field.value === "string";
     const nameCellAttributes = editable ? ' data-okf-edit-cell="name"' : "";
     const valueCellAttributes = editable
       ? ' data-okf-value-cell data-okf-edit-cell="value"'
@@ -311,11 +310,10 @@ export function replacePropertiesTableMarkup(
   result: FrontmatterResult,
   enabled: boolean,
   sourceMapping?: SourceMappingOptions,
-  editingEnabled = true,
 ): string {
   return replacePropertiesTableHtml(
     html,
-    renderPropertiesTable(result, enabled, sourceMapping, editingEnabled),
+    renderPropertiesTable(result, enabled, sourceMapping),
   );
 }
 

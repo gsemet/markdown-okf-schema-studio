@@ -13,7 +13,7 @@ const KEY: SharedRenderKey = {
   documentId: "file:///w/a.md",
   revision: 3,
   workspaceRoot: "/w",
-  readOnly: false,
+  restrictedReads: false,
   trusted: true,
   plantUmlJarPath: undefined,
   plantUmlEngine: "builtin",

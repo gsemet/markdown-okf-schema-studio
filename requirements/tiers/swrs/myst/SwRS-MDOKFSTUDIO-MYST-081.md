@@ -68,7 +68,7 @@ When a render succeeds with conf.py warnings, the extension SHALL show a one-lin
 | Input (the reader activates Open Problems) | Outcome |
 | --- | --- |
 | A trusted preview | The host's Problems view opens |
-| A read-only or untrusted preview (a message already sent) | The host accepts `previewShowProblems` since it edits nothing; in Restricted Mode the banner itself has no Open Problems button |
+| An untrusted preview (a message already sent) | The host accepts `previewShowProblems` since it edits nothing; in Restricted Mode the banner itself has no Open Problems button |
 
 The message carries only the envelope and passes the document gate.
 

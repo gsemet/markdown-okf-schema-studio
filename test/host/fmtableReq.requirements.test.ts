@@ -1,7 +1,7 @@
 /**
  * Host answers to a frontmatter save from the properties table, through the public seams of the
  * extension host only (activation, the Open Preview command, webview messages): the refusals of an
- * untrusted workspace, of an older render and of VS Code, and the single document edit of a save.
+ * older render and of VS Code, and the single document edit of a save.
  */
 import * as assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
@@ -25,6 +25,11 @@ async function readyPreview(t: TestContext): Promise<HostSession> {
   return host;
 }
 
+/** What VS Code does with an edit it applies: the text changes (the version stays, as the fake has no edit engine). */
+function writeInto(host: HostSession): void {
+  Reflect.set(host.document, "text", `${host.document.getText()}\n`);
+}
+
 /** A save message of the page that holds the render the host holds. */
 function save(host: HostSession, extra: Record<string, unknown>): Record<string, unknown> {
   return { type: "previewFrontmatterSave", ...host.loadedIdentity(), editId: "e-1", ...extra };
@@ -36,25 +41,52 @@ function results(host: HostSession, from: number): Array<Record<string, unknown>
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("a frontmatter save in an untrusted workspace is refused with the trust message and changes nothing", async (t) => {
+test("a frontmatter save in an untrusted workspace is applied like in a trusted one", async (t) => {
   fakeVscode.workspace.isTrusted = false;
   const applied: number[] = [];
   const originalApply = fakeVscode.workspace.applyEdit;
-  fakeVscode.workspace.applyEdit = (edit) => { applied.push(edit.size); return Promise.resolve(true); };
+  let writes: () => void = () => undefined;
+  fakeVscode.workspace.applyEdit = (edit) => { applied.push(edit.size); writes(); return Promise.resolve(true); };
   t.after(() => {
     fakeVscode.workspace.isTrusted = true;
     fakeVscode.workspace.applyEdit = originalApply;
   });
   const host = await readyPreview(t);
+  writes = () => writeInto(host);
   const from = host.posted.length;
   await host.fromPage(save(host, { fieldName: "title", fieldValue: "New" }));
   await host.settle();
   const answers = results(host, from);
   assert.equal(answers.length, 1);
-  assert.equal(answers[0]!.error, "Editing requires a trusted workspace.");
+  assert.equal(answers[0]!.error, undefined);
+  assert.equal(answers[0]!.saved, true, JSON.stringify(answers[0]));
   assert.equal(answers[0]!.editId, "e-1");
-  assert.deepEqual(applied, []);
-  assert.equal(host.document.getText(), MARKDOWN);
+  assert.deepEqual(applied, [1], "Restricted Mode edits the frontmatter in one document edit");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+test("a frontmatter save on a file VS Code holds read-only answers the read-only reason, trusted or not", async (t) => {
+  const originalApply = fakeVscode.workspace.applyEdit;
+  t.after(() => {
+    fakeVscode.workspace.isTrusted = true;
+    fakeVscode.workspace.applyEdit = originalApply;
+  });
+  // VS Code accepts the edit of a read-only file and changes nothing.
+  fakeVscode.workspace.applyEdit = () => Promise.resolve(true);
+  for (const trusted of [true, false]) {
+    fakeVscode.workspace.isTrusted = trusted;
+    const host = await readyPreview(t);
+    const from = host.posted.length;
+    await host.fromPage(save(host, { fieldName: "title", fieldValue: "New" }));
+    await host.settle();
+    const answers = results(host, from);
+    assert.equal(answers.length, 1);
+    assert.equal(answers[0]!.error, "This file is read-only in VS Code.");
+    assert.equal(answers[0]!.saved, undefined);
+    assert.equal(host.document.getText(), MARKDOWN);
+    closeHost(t.mock.timers);
+  }
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065
@@ -105,9 +137,11 @@ test("a frontmatter save that VS Code does not apply is answered with a message;
 test("a value save, an add, a rename and a remove are each one text edit of the document", async (t) => {
   const originalApply = fakeVscode.workspace.applyEdit;
   const sizes: number[] = [];
-  fakeVscode.workspace.applyEdit = (edit) => { sizes.push(edit.size); return Promise.resolve(true); };
+  let writes: () => void = () => undefined;
+  fakeVscode.workspace.applyEdit = (edit) => { sizes.push(edit.size); writes(); return Promise.resolve(true); };
   t.after(() => { fakeVscode.workspace.applyEdit = originalApply; });
   const host = await readyPreview(t);
+  writes = () => writeInto(host);
   const messages: Array<Record<string, unknown>> = [
     { fieldName: "title", newFieldName: "name", fieldValue: "Old" },
     { fieldName: "title", fieldValue: "New" },

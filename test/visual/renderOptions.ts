@@ -18,8 +18,8 @@ export interface HostMessage {
 export interface ScenarioRenderOptions {
   /** `false`: untrusted workspace (PlantUML disabled, external scripts refused). Default trusted. */
   readonly trusted?: false;
-  /** `true`: editing disabled like a read-only preview (no Edit button, properties table not editable). Default editing on. */
-  readonly readOnly?: true;
+  /** `true`: the narrowed reads of Restricted Mode (images of the document folder, no dot-directory). Editing stays on. */
+  readonly restrictedReads?: true;
   /** `true`: undeclared frontmatter fields are warnings (`strictAdditionalProperties`). Default off. */
   readonly strictAdditionalProperties?: true;
   /** `false`: no properties table (`propertiesTable` setting off). Default on. */
@@ -65,7 +65,7 @@ export interface ScenarioRenderOptions {
 }
 
 const OPTION_ORDER: readonly (keyof ScenarioRenderOptions)[] = [
-  "trusted", "readOnly", "strictAdditionalProperties", "propertiesTable",
+  "trusted", "restrictedReads", "strictAdditionalProperties", "propertiesTable",
   "maxContentWidth", "paletteMode", "zoom", "incomingChanges", "markEditorSelection", "commentsEnabled", "hostMessages",
   "codeBlocksDarkBackground", "codeBlocksLineNumbers",
   "freshWorkspace", "mystExtensions", "fixturesWorkspace",

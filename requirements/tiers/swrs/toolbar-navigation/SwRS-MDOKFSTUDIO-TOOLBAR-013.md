@@ -67,7 +67,7 @@ When a previewViewPreferenceChanged message reaches the host, the extension SHAL
 ### Verification notes
 
 - Method: test/core/protocol/pageToHost.test.ts (nominal, zoom, refusal: previewViewPreferenceChanged validates the value per preference; the own-key rows are by code only)
-- Criteria: Booleans pass for the four switches; only the integers 70 to 200 pass for the zoom; isOneOf(value, margin, auto, full) for the width mode; every other value or name fails. The envelope and the render gate are those of the page messages (see SwRS-MDOKFSTUDIO-TRUST-052 and SwRS-MDOKFSTUDIO-TRUST-065); a read-only preview keeps the preference like a writable one (see SwRS-MDOKFSTUDIO-TRUST-006).
+- Criteria: Booleans pass for the four switches; only the integers 70 to 200 pass for the zoom; isOneOf(value, margin, auto, full) for the width mode; every other value or name fails. The envelope and the render gate are those of the page messages (see SwRS-MDOKFSTUDIO-TRUST-052 and SwRS-MDOKFSTUDIO-TRUST-065); a preview with restricted reads keeps the preference like any other (see SwRS-MDOKFSTUDIO-TRUST-006).
 
 <!-- okf:links:start -->
 ### Links
@@ -80,6 +80,6 @@ When a previewViewPreferenceChanged message reaches the host, the extension SHAL
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
   - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
 <!-- okf:links:end -->

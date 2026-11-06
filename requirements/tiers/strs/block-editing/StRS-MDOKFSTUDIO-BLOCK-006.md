@@ -99,7 +99,7 @@ As a writer, I type in the preview and my Markdown file follows, so a closed win
   - [SwRS-MDOKFSTUDIO-BLOCK-244](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-244.md): previewEditClosed carries the id of the closed editor
   - [SwRS-MDOKFSTUDIO-BLOCK-245](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-245.md): previewEditFlushed carries the flush id and a flag
   - [SwRS-MDOKFSTUDIO-BLOCK-256](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-256.md): The host refuses a block edit whose first line is blank
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-064](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-064.md): Flush and editor watch messages are addressed by their own id
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 <!-- okf:links:end -->

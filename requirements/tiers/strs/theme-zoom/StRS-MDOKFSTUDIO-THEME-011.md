@@ -62,5 +62,5 @@ As a reader, I enlarge or shrink the text with two buttons, the column grows or 
   - [SwRS-MDOKFSTUDIO-THEME-043](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-043.md): Zoom scales the text and the column without a redraw
   - [SwRS-MDOKFSTUDIO-THEME-055](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-055.md): A zoom that cannot be saved still holds for the session
   - [SwRS-MDOKFSTUDIO-TOOLBAR-013](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-013.md): The host accepts only a known view preference with a valid value
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 <!-- okf:links:end -->

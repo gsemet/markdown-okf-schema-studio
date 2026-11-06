@@ -83,6 +83,6 @@ As a writer, I create or fix a link by filling two fields, add pictures from the
   - [SwRS-MDOKFSTUDIO-PALETTE-160](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-160.md): Apply rewrites the figure directive in one minimal edit
   - [SwRS-MDOKFSTUDIO-PALETTE-192](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-192.md): The host image picker answers a path relative to the document
   - [SwRS-MDOKFSTUDIO-PALETTE-263](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-263.md): Slash commands have short alternative names
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 <!-- okf:links:end -->

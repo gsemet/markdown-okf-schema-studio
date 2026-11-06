@@ -94,7 +94,7 @@ When the reader presses the Theme button, the extension SHALL switch the preview
 
 - SwRS-MDOKFSTUDIO-LIFE-169: the host stores the mode a press of the button chooses (previewThemeModeChanged, see SwRS-MDOKFSTUDIO-THEME-013).
 - SwRS-MDOKFSTUDIO-LIFE-170: a new page starts from the stored mode, then the saved state, then the default.
-- SwRS-MDOKFSTUDIO-TRUST-006: a read-only preview keeps the Theme button.
+- SwRS-MDOKFSTUDIO-TRUST-006: a preview with restricted reads keeps the Theme button.
 - SwRS-MDOKFSTUDIO-THEME-016: the colours of Current mode.
 - SwRS-MDOKFSTUDIO-THEME-025: the colours of the forced modes.
 
@@ -118,5 +118,5 @@ When the reader presses the Theme button, the extension SHALL switch the preview
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 <!-- okf:links:end -->

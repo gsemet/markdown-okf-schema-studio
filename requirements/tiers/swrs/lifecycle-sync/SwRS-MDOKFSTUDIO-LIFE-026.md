@@ -79,7 +79,7 @@ When another saved Markdown file becomes the active editor, the extension SHALL 
 
 | Input | Outcome |
 | --- | --- |
-| a read-only side preview of a file in no workspace folder, another file of another directory also in no folder becomes active | a new session is created too, because the resource folder is the document's own directory |
+| a side preview with restricted reads of a file in no workspace folder, another file of another directory also in no folder becomes active | a new session is created too, because the resource folder is the document's own directory |
 | the same document folder and trust state | the session is kept |
 
 ### Scenario (boundary): A hidden preview that becomes visible
@@ -105,7 +105,7 @@ When another saved Markdown file becomes the active editor, the extension SHALL 
 - Method: test/integration/sourceMapping.test.ts (Second file: the old stage must not reveal during a switch). The message text Following the active Markdown editor. is untested.
 - Method: test/host/lifeReq.requirements.test.ts, unit tests "only the newest following preview switches with the active editor" (Only the newest following preview switches: reads onActiveEditorChanged, manager.latest(followsActiveEditor)), "a document outside the workspace folder gets a new session on the same panel" (Another workspace folder or trust state and Same folder and trust state, or no folder: reads switchDocument in src/session/previewManager.ts) and "a hidden preview that becomes visible catches up with the editor" (A hidden preview that becomes visible: reads createSession becameVisible and ScrollSyncController.restorePreviewState).
 - Method: test/core/preview/flushWait.test.ts, "CR 025: LatestRequest applies only the latest request, so A to B to A ends on A" (Quick switching between documents, first row); the came-back branch (watchPageEditor) is untested.
-- Criteria: documentUri equals the new document and the old document's HTML is gone; documentUri, status and requestId are equal before and after an unrelated change; exactly one session changes documentUri; settle() returns the latest value only for the last queued run; a new session replaces the old one only when resourceRoot or readOnly differs; restorePreviewState runs only on the hidden-to-visible transition and only with scrollPreviewWithEditor on.
+- Criteria: documentUri equals the new document and the old document's HTML is gone; documentUri, status and requestId are equal before and after an unrelated change; exactly one session changes documentUri; settle() returns the latest value only for the last queued run; a new session replaces the old one only when resourceRoot or restrictedReads differs; restorePreviewState runs only on the hidden-to-visible transition and only with scrollPreviewWithEditor on.
 
 <!-- okf:links:start -->
 ### Links
@@ -116,5 +116,5 @@ When another saved Markdown file becomes the active editor, the extension SHALL 
   - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
   - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
   - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
-  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document outside a trusted folder opens read-only and keeps the viewing actions
+  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document opens editable whatever the trust, with narrow reads outside a trusted folder
 <!-- okf:links:end -->

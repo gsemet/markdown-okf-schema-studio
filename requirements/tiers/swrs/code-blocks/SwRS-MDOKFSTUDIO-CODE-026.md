@@ -74,11 +74,11 @@ A request is answered by `editId` (see SwRS-MDOKFSTUDIO-TRUST-090). The shape ch
 - WHEN the clipboard write succeeds or fails
 - THEN the host sends `previewCopyTextResult` with the request's `editId` and `ok: true`, or `ok: false` with "Could not copy."
 
-### Scenario (boundary): A stale or read-only page
+### Scenario (boundary): A stale page or a preview with restricted reads
 
 - GIVEN a `previewCopyText` message that passes the shape check
-- WHEN its document version or render request is stale, or the preview is read-only
-- THEN a stale message is still copied and answered, because the copy is gated by the document only (see SwRS-MDOKFSTUDIO-TRUST-065), and a read-only preview still writes the text and edits nothing (see SwRS-MDOKFSTUDIO-TRUST-006)
+- WHEN its document version or render request is stale, or the preview has restricted reads
+- THEN a stale message is still copied and answered, because the copy is gated by the document only (see SwRS-MDOKFSTUDIO-TRUST-065), and a preview with restricted reads still writes the text and edits nothing (see SwRS-MDOKFSTUDIO-TRUST-006)
 
 ### Related requirements
 
@@ -87,8 +87,8 @@ A request is answered by `editId` (see SwRS-MDOKFSTUDIO-TRUST-090). The shape ch
 ### Verification notes
 
 - Method: test/core/protocol/pageToHost.test.ts (nominal, refusal and the shape table)
-- Method: test/session/renderReq.codeCopy.requirements.test.ts (gestureless request refused, stale and read-only page, size refusal, failing clipboard, answers)
-- Criteria: 1 000 000 copied, 1 000 001 accepted by the shape check and answered "Too large to copy.", 20 000 001 and non-strings rejected; a stale message leaves the clipboard unchanged; a read-only preview writes the requested code and processes no edit request
+- Method: test/session/renderReq.codeCopy.requirements.test.ts (gestureless request refused, stale page and restricted reads, size refusal, failing clipboard, answers)
+- Criteria: 1 000 000 copied, 1 000 001 accepted by the shape check and answered "Too large to copy.", 20 000 001 and non-strings rejected; a stale message leaves the clipboard unchanged; a preview with restricted reads writes the requested code and processes no edit request
 
 <!-- okf:links:start -->
 ### Links
@@ -100,5 +100,5 @@ A request is answered by `editId` (see SwRS-MDOKFSTUDIO-TRUST-090). The shape ch
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 <!-- okf:links:end -->

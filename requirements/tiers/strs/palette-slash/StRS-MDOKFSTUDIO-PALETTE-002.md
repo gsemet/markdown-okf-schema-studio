@@ -63,5 +63,5 @@ As a writer, I pick the set of buttons that matches the Markdown flavour of my p
   - [SwRS-MDOKFSTUDIO-PALETTE-010](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-010.md): An unknown palette mode is refused and stores nothing
   - [SwRS-MDOKFSTUDIO-PALETTE-017](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-017.md): Cmd/Ctrl+Shift+M reaches the mode select and Escape or Enter returns to the text
   - [SwRS-MDOKFSTUDIO-PALETTE-036](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
 <!-- okf:links:end -->

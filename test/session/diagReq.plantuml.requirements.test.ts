@@ -26,7 +26,7 @@ test("an include request is handled for the current document even one render beh
   const handled: string[] = [];
   const session = {
     disposed: false,
-    readOnly: false,
+    restrictedReads: false,
     documentUri: DOCUMENT,
     stage: { activeDocumentIdentity: DOCUMENT, activeDocumentRevision: 4, requestId: 9 },
     edits: { active: undefined },
@@ -120,7 +120,7 @@ test("the include watch is emptied when the preview follows another document", (
   includeWatch.remember("/notes/included.puml");
   const session = {
     documentUri: "file:///notes/one.md",
-    readOnly: false,
+    restrictedReads: false,
     workspaceRoot: "/notes",
     plantUml: { includeWatch, issuedIds: new PlantUmlIncludeWatch() },
     edits: { lock: { forgetPage: () => undefined }, watchedPageEditorId: "x" },

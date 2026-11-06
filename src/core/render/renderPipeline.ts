@@ -76,10 +76,10 @@ export interface RenderOptions {
   revision?: number;
   workspaceRoot: string;
   /**
-   * A read-only preview (no workspace folder, or Restricted Mode): includes and resources are
-   * narrowed (no home folder or file-system root, no dot-directory). Omitted: not read-only.
+   * Restricted reads (no workspace folder, or Restricted Mode; editing is not affected): includes and resources are
+   * narrowed (no home folder or file-system root, no dot-directory). Omitted: full reads.
    */
-  readOnly?: boolean;
+  restrictedReads?: boolean;
   requestId: number;
   documentIdentity?: string;
   signal?: AbortSignal;
@@ -108,7 +108,7 @@ export interface SourceRenderInput {
   /** The absolute path of the document. */
   documentPath: string;
   workspaceRoot: string;
-  readOnly: boolean;
+  restrictedReads: boolean;
   /**
    * The MyST extensions the governing `conf.py` enables (see `enabledMystExtensionsFor`), looked
    * up by the caller so a worker never holds a stale `conf.py` cache. Undefined: unknown.
@@ -206,7 +206,7 @@ function createStage(options: RenderOptions, diagnostics: PreviewDiagnostic[]): 
  */
 export async function renderPreviewSource(input: SourceRenderInput): Promise<SourceRenderOutput> {
   const documentDirectory = path.dirname(input.documentPath);
-  const resourcePolicy = createPreviewResourcePolicy(documentDirectory, input.workspaceRoot, input.readOnly);
+  const resourcePolicy = createPreviewResourcePolicy(documentDirectory, input.workspaceRoot, input.restrictedReads);
   // The first render loads the engine; that time is not the render's.
   await loadEngine();
   const started = performance.now();
@@ -291,7 +291,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
         text: options.document.getText(),
         documentPath: stage.activeDocumentPath,
         workspaceRoot: options.workspaceRoot,
-        readOnly: options.readOnly === true,
+        restrictedReads: options.restrictedReads === true,
         ...(enabled ? { enabledMystExtensions: [...enabled] } : {}),
       }, options.signal);
       html = rendered.html;

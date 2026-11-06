@@ -81,14 +81,14 @@ The skipped folders are node_modules, .git, _build, .venv, venv, out and dist; t
 | the same key in two files | the key appears once and the first file that defines it wins |
 | more than 1000 keys | the list is cut at 1000 with truncated true |
 
-### Scenario (refusal): Failed scan, read-only preview and stale preview
+### Scenario (refusal): Failed scan, restricted reads and stale preview
 
 | Input | Outcome |
 | --- | --- |
 | a scan that throws an Error | previewListCitationsResult holds ok false and the reason is the message of the error |
 | a scan that throws a value that is not an Error | ok false and the reason is that value as a string |
 | one unreadable file among readable ones | the scan does not fail and the other keys are answered |
-| a read-only preview | ok false with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
+| a preview with restricted reads (an untrusted workspace, or a file outside every workspace folder) | ok false with the reason "Listing citations searches the workspace for .bib files, which needs a trusted workspace folder that holds this file."; no file is read (SwRS-MDOKFSTUDIO-TRUST-005) |
 | a document that is no longer the one of the render | ok false with the reason The preview is out of date. Try again once it has refreshed. |
 | a previewListCitations message without a non-empty editId of at most 100 characters | ignored by the envelope check |
 
@@ -103,7 +103,7 @@ Each answer repeats the editId and holds ok true with the items (value and label
 - Method: test/integration/mystPickers.test.ts (the keys smith2024 and zed are listed, hiddenkey in node_modules is excluded, the title Smith title is listed with smith2024; checks nearest first, excluded folder, entries of the list)
 - Method: test/session/paletteReq.requirements.test.ts (the scan skips files that do not fit in 2 MiB, marks the list truncated and skips an unreadable file; a scan still running after 5 seconds stops reading and marks the list truncated; a fast scan clears the timer; a citation scan that throws is answered with ok false and the message of the error; exactly 20 bibliography files are a complete list, a 21st marks it truncated; checks the bounds and failed scan scenarios)
 - Method: test/core/mapping/mystTargets.test.ts (bibKeys reads entry keys and titles, and skips comment, string and preamble entries; collectBibKeys merges files, removes duplicates, sorts and caps; checks the entries and duplicates scenarios)
-- Criteria: MAX_BIB_BYTES is 2 MiB and the text of each file is decoded as UTF-8; SCAN_TIMEOUT_MS is 5000; the read-only and out-of-date answers are deduced from the code (handleListCitations), not tested.
+- Criteria: MAX_BIB_BYTES is 2 MiB and the text of each file is decoded as UTF-8; SCAN_TIMEOUT_MS is 5000; the out-of-date answer is deduced from the code (handleListCitations), not tested; the restricted-reads answer is tested in test/session/paletteReq.requirements.test.ts.
 
 <!-- okf:links:start -->
 ### Links
@@ -114,7 +114,7 @@ Each answer repeats the editId and holds ok true with the items (value and label
   - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 <!-- okf:links:end -->

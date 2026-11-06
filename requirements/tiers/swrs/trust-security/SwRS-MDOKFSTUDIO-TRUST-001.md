@@ -2,12 +2,11 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-TRUST-001
 uuid: f1c9745f-e89f-41fd-9837-0b7304d53752
-title: A read-only preview offers no editing affordance
-description: When a preview is read-only (created for a document that lies in no
-  workspace folder, or while the workspace is untrusted), the extension SHALL
-  show it with every affordance that edits, comments or changes the document
-  absent (the Edit button stays visible, greyed, with the reason), and otherwise
-  writable.
+title: A document is editable whatever the trust; only its reads are restricted
+description: When a preview is created for a document that lies in no workspace
+  folder, or while the workspace is untrusted, the extension SHALL keep every
+  editing affordance on, as in a trusted workspace, and narrow only what the
+  preview reads.
 project: markdown-okf-schema-studio
 scope: trust-security
 req_lifecycle: proposed
@@ -34,7 +33,6 @@ implemented_in_files:
 - src/core/configuration/settingsRegistry.ts
 - src/core/edits/readOnlyReasons.ts
 - src/core/frontmatter/propertiesTable.ts
-- src/core/preview/previewToolbar.ts
 - src/page/features/blockSourceEditor.ts
 - src/page/features/editMode.ts
 - src/page/features/pageInput.ts
@@ -43,131 +41,125 @@ implemented_in_files:
 - src/session/features/viewState.ts
 - src/session/hostEvents.ts
 - src/session/previewManager.ts
+- src/session/sessionDocuments.ts
 - src/session/sessionFactory.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
+- test/host/fmtableReq.requirements.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/integration/commentWrite.test.ts
 - test/integration/standalone-suite.ts
 - test/integration/untrusted-suite.ts
 - test/page/modules/commentThreads.test.ts
-- test/page/runtimeEditPalette.test.ts
-- test/page/runtimePageControls.test.ts
 - test/security/trustReq.requirements.test.ts
+- test/session/blockReq.requirements.test.ts
+- test/session/dropFiles.requirements.test.ts
 - test/session/readOnlyFirstLoad.test.ts
+- test/session/readOnlyImagesSession.test.ts
+- test/session/renderReq.labelRename.requirements.test.ts
+- test/session/reviewReqThreads.requirements.test.ts
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
-## A read-only preview offers no editing affordance
+## A document is editable whatever the trust; only its reads are restricted
 
 ### Normative behavior
 
-When a preview is read-only (created for a document that lies in no workspace folder, or while the workspace is untrusted), the extension SHALL show it with every affordance that edits, comments or changes the document absent, and otherwise writable. The one toolbar button that needs editing, the Edit button, is never hidden: it stays visible, greyed out (aria-disabled), and its tooltip gives the reason.
+When a preview is created for a document that lies in no workspace folder, or while the workspace is untrusted, the extension SHALL keep every affordance that edits, comments or changes the document, exactly as in a trusted workspace (the Edit button, the edition palette, the Comment button and thread controls, the editable properties table and the block, cell and field editors), and SHALL narrow only what the preview reads (includes, resources, schema files; see SwRS-MDOKFSTUDIO-TRUST-002 and SwRS-MDOKFSTUDIO-TRUST-007). Trust never makes a document read-only. A feature that needs trust stays disabled and gives its reason where it is used.
 
-### Scenario (nominal): Writable or read-only at creation
+### Scenario (nominal): Restricted reads at creation
 
 - GIVEN a Markdown document and a window
 - WHEN the reader opens the preview with the Open Preview to Side command or with Open With
-- THEN the preview is writable when the document lies inside a folder of a trusted workspace, and read-only (showing the rendered document) otherwise
+- THEN the preview has full reads when the document lies inside a folder of a trusted workspace, and restricted reads otherwise; in both cases it is editable
 
 | Input | Outcome |
 | --- | --- |
-| Trusted workspace, document inside one of its folders | Writable |
-| Window in Restricted Mode (untrusted workspace) | Read-only; the command preview and the Open With editor report readOnly true |
-| Markdown file that lies in no workspace folder of a trusted window (standalone file) | Read-only |
+| Trusted workspace, document inside one of its folders | Full reads, editable |
+| Window in Restricted Mode (untrusted workspace) | Restricted reads, editable; the command preview and the Open With editor report restrictedReads true |
+| Markdown file that lies in no workspace folder of a trusted window (standalone file) | Restricted reads, editable |
+| A file that VS Code holds read-only (files.readonlyInclude, or made read-only in the session) | The preview offers the same controls; every write path (label rename, thread reply and delete, find and replace, block save, move, cut, paste, drop, checkbox and radio toggle, metadata save) checks that VS Code wrote the edit, and answers "This file is read-only in VS Code." when it accepted the edit and left the text unchanged; a pasted image whose block save fails that way is deleted again |
 
-### Scenario (nominal): One row per affordance
+### Scenario (nominal): Every editing affordance is present
 
-- GIVEN a read-only preview of a document with at least five frontmatter fields, a table and a paragraph
+- GIVEN a preview with restricted reads of a document with at least five frontmatter fields, a table and a paragraph
 - WHEN the reader looks at the page and acts on it
-- THEN each editing affordance of the table is absent, and none of the actions below happens
+- THEN each affordance below is present and works as in a trusted workspace
 
-| Affordance | In a read-only preview |
+| Affordance | In a preview with restricted reads |
 | --- | --- |
-| Edit button | Rendered greyed: the toolbar keeps the same five rows with 15 buttons, and the Edit button carries aria-disabled true, a dimmed icon and a not-allowed cursor. Its title and tooltip say "Editing is unavailable: this file is not in a trusted workspace" (untrusted workspace) or "Editing is unavailable: this file is not in a folder opened in the VS Code workspace" (file outside every workspace folder). A click does nothing: it is not an edit toggle |
-| Edit mode at start | Off (state.editMode is false whenever the toggle button is greyed), even when the saved state holds edit mode true |
-| Edition palette | None built: no element with data-sphinx-edit-palette exists |
-| Palette mode message | previewPaletteModeChanged is never posted |
-| Comment button | Not installed: selecting text shows no Comment button, and Cmd+Alt+M or Ctrl+Alt+M does nothing (the runtime context carries commentsEnabled false and the compose module is not created); same for a preview of a standalone file |
-| Comment box | Not installed (same condition as the Comment button) |
-| Thread popover | Lists the comments and the Resolved note, with no reply box, no Resolve button and no Delete button (the controls exist only when the reply, resolve and remove hooks are given) |
-| Properties table | Every field row says data-okf-editable false and no cell carries data-okf-edit-cell |
-| Edit target under the pointer | The block under the pointer has no edit-target mark (no data-sphinx-preview-edit-hover), no outline and a normal text cursor |
-| Click on a paragraph | No block editor opens |
-| Click on a table cell | No cell editor, no cell bar and no table action opens |
-| Click on a frontmatter value | No frontmatter editor opens |
-
-### Scenario (nominal): The same page in a writable preview
-
-- GIVEN a preview created in a trusted workspace, with the same document
-- WHEN the page is rendered and the reader acts on it
-- THEN the affordances of the previous scenario are present
-
-| Affordance | In a writable preview |
-| --- | --- |
-| Edit button | Present: the toolbar holds 13 buttons |
-| Edit mode at start | Off, or on when the saved state of the same document holds edit mode true (a page that has the Edit button) |
+| Edit button | Enabled: the toolbar holds the same five rows with 15 buttons, the Edit button has no aria-disabled attribute and its title and tooltip say "Edit mode"; a click toggles the edit mode |
+| Edit mode at start | Off, or on when the saved state of the same document holds edit mode true |
+| Edition palette | Built, and the palette mode message previewPaletteModeChanged is posted and stored for the workspace |
+| Comment button | Installed (the runtime context carries commentsEnabled true); Cmd+Alt+M or Ctrl+Alt+M opens the comment box |
+| Thread popover | The reply box and the Resolve and Delete buttons exist |
 | Properties table | The name and value cells carry data-okf-edit-cell and the rows say data-okf-editable true |
 | Edit target under the pointer | With edit mode on, a paragraph under the pointer is outlined as the block a click would edit (see SwRS-MDOKFSTUDIO-BLOCK-017) |
-| Popover of a review thread | The reply box and the Resolve and Delete buttons exist |
-| Click in a table | The cell editor opens (see SwRS-MDOKFSTUDIO-TABLE-001) |
-| Click on a frontmatter value | The field editor opens in edit mode (see SwRS-MDOKFSTUDIO-FMEDIT-001) |
+| Click on a paragraph, a table cell, a frontmatter value | The block, cell or field editor opens (see SwRS-MDOKFSTUDIO-TABLE-001 and SwRS-MDOKFSTUDIO-FMEDIT-001) |
+| Checkboxes and radio options | Enabled; a click is written to the source |
 
-### Scenario (refusal): A palette mode message from a read-only preview
+### Scenario (boundary): What stays off because it needs trust
 
-- GIVEN a previewPaletteModeChanged message that reaches the host from a read-only preview
-- WHEN the host handles it
-- THEN the stored mode is not changed
+- GIVEN a preview with restricted reads
+- WHEN the reader uses a feature of the table
+- THEN the feature is off, and the reason is shown where it is used or in the existing diagnostics; there is no banner
 
-The refusal of write requests is that of SwRS-MDOKFSTUDIO-TRUST-005.
+| Feature that needs trust | In a preview with restricted reads |
+| --- | --- |
+| PlantUML with Java (the jar pipeline) | No process starts; the diagram shows "PlantUML preview is disabled in an untrusted workspace." (see SwRS-MDOKFSTUDIO-DIAG-024) |
+| Includes, images and resources | Read from the folder of the document only, never below a dot-directory, images only outside it (see SwRS-MDOKFSTUDIO-TRUST-002) |
+| Schema lookup of the properties table | Not resolved; the generic table shows an info row (see SwRS-MDOKFSTUDIO-FMSCHEMA-019) |
+| Citation list of the palette | Refused with "Listing citations searches the workspace for .bib files, which needs a trusted workspace folder that holds this file." (see SwRS-MDOKFSTUDIO-TRUST-005) |
+| Linked scripts of the document | Not allowed (the sanitizer removes them in every mode) |
+| MyST extension warnings in the Problems view, and the incoming-change marks | Published only for a trusted workspace (see SwRS-MDOKFSTUDIO-MYST-078); the incoming-change marks are posted for a trusted, tracked file only |
+| Workspace values of the restricted settings | Ignored (see the manifest scenario) |
 
 ### Scenario (boundary): Trust granted or a folder added while a preview is open
 
 | Input | Outcome |
 | --- | --- |
-| A preview created read-only in an untrusted workspace, then the reader trusts the workspace | The preview moves to a trusted session without being reopened: it renders once, keeps its reading state, and offers editing, the palette and checkboxes; its resource roots and navigation roots become the workspace folders |
-| A preview created in a trusted workspace, then trust is granted again | It stays writable |
-| A read-only preview of a file in no workspace folder of a trusted window, then a folder that holds the file is added (in the Agents window, the folder of the agent session becomes active) | The preview moves to a writable session of that folder on the same panel, renders once and keeps its reading state; the active preview stays the active one |
-| The same, for a preview of a file that the added folder does not hold | It stays read-only, on its own session |
+| A preview created in an untrusted workspace, then the reader trusts the workspace | The preview moves to a session with full reads without being reopened: it renders once and keeps its reading state; its resource roots and navigation roots become the workspace folders |
+| A preview created in a trusted workspace, then trust is granted again | It keeps its session |
+| A preview of a file in no workspace folder of a trusted window, then a folder that holds the file is added (in the Agents window, the folder of the agent session becomes active) | The preview moves to a session of that folder with full reads on the same panel, renders once and keeps its reading state; the active preview stays the active one |
+| The same, for a preview of a file that the added folder does not hold | It keeps restricted reads, on its own session |
+| Any of the above while the preview has an open block, cell or field editor | The page is asked to save and close its editor first (the previewFlushEdit request, as before a document switch), then the session is replaced: the typed text is kept |
 
-A preview whose folder is removed turns read-only on the same panel: see SwRS-MDOKFSTUDIO-LIFE-143.
+A preview whose folder is removed gets restricted reads on the same panel: see SwRS-MDOKFSTUDIO-LIFE-143.
 
 ### Scenario (boundary): The manifest declares limited support for untrusted workspaces
 
 - GIVEN the package.json of the extension, which has a main entry point
 - WHEN VS Code decides whether the extension runs in a window in Restricted Mode
-- THEN the extension runs, because the manifest declares the limited support, and its read-only preview is the one described above
+- THEN the extension runs, because the manifest declares the limited support, and its description says that editing stays on and reads are narrowed
 
 | Input | Outcome |
 | --- | --- |
-| capabilities.untrustedWorkspaces.supported in package.json | "limited", with a description that says the preview is read-only |
+| capabilities.untrustedWorkspaces.supported in package.json | "limited", with a description that says the reader can still edit, and does not call the preview read-only |
 | capabilities.untrustedWorkspaces.restrictedConfigurations | The PlantUML engine settings plantuml.useJar and plantuml.jarPath, and the frontmatter path settings frontmatter.bundleRoot, frontmatter.projectRoot and frontmatter.allowOutsideWorkspaceLinks: a value from the workspace is ignored in Restricted Mode. The list is generated from the settings registry by just generate-settings |
 | A manifest without the declaration, or with another value | The check fails (VS Code then disables a packaged extension in Restricted Mode) |
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-TRUST-005: the host refuses every write request of a read-only preview with a reason
+- SwRS-MDOKFSTUDIO-TRUST-005: the host handles the write requests of every preview
 - SwRS-MDOKFSTUDIO-LIFE-170: a new page starts each view choice from the saved, stored or default value
 - SwRS-MDOKFSTUDIO-LIFE-026: the side preview follows the active Markdown editor
-- SwRS-MDOKFSTUDIO-BLOCK-017: the hover outline of a writable preview
+- SwRS-MDOKFSTUDIO-BLOCK-017: the hover outline shows what a click would edit
 - SwRS-MDOKFSTUDIO-FMEDIT-001: the field editor opens in edit mode only
-- SwRS-MDOKFSTUDIO-TABLE-001: the cell editor of a writable preview
+- SwRS-MDOKFSTUDIO-TABLE-001: the cell editor of a preview
 
 ### Verification notes
 
-- Method: Integration suites test/integration/untrusted-suite.ts (the command preview and the Open With editor of an untrusted workspace report readOnly true; the real-window scenario trust-security/r01-untrusted-read-only shows the side preview rendered with a greyed Edit button) and test/integration/standalone-suite.ts (a file outside the workspace reports readOnly true, a document of the workspace false), which check the first scenario. The decision is taken in createSession of src/session/previewManager.ts.
-- Method: Unit test `T38: a read-only preview never starts in edit mode` in test/page/runtimePageControls.test.ts (Edit mode at start, both the read-only and the writable case).
-- Method: Unit test of the toolbar markup in test/core/preview/previewStyles.test.ts (13 buttons in both cases; the read-only Edit button is aria-disabled with the reason as title and tooltip), the unit test `a greyed Edit button does nothing and says why` in test/page/runtimePageControls.test.ts (click ignored, tooltip per reason), the integration suites untrusted-suite.ts and standalone-suite.ts (the page HTML carries the greyed button) and the visual toolbar check test/visual/capture_layout_checks.py, which fails when a read-only toolbar has no greyed Edit button.
-- Method: Unit test `T23: a read-only preview has no palette and never posts the message` in test/page/runtimeEditPalette.test.ts (palette and palette mode message rows); the host side refusal of the previewPaletteModeChanged scenario is deduced from the code (the handler checks preview.readOnly), not tested.
-- Method: The integration test test/integration/commentWrite.test.ts (a read-only preview page carries commentsEnabled false); the unit tests of the compose module install it only when comments are enabled. The absence of the button in a real page is deduced from the code (commentCompose is created only when commentsEnabled), not run.
-- Method: Unit tests `T43: no reply box without a reply hook (read-only previews)` and `T44: without resolve and delete hooks (read-only) the popover has neither button` in test/page/modules/commentThreads.test.ts (thread popover rows).
-- Method: Visual scenarios trust-security/v01-read-only-page-dark-900 and trust-security/v02-read-only-page-light-460 in test/visual/scenarioDefinitions2.ts (READ_ONLY_ASSERTIONS: no edit cell, every row not editable), and trust-security/v03-read-only-no-hover-outline-light-900 (READ_ONLY_NO_HOVER_ASSERTIONS: no edit-target mark, no outline, cursor not a pointer; no block editor after the paragraph click). These scenarios build the page in test/visual/renderFixtures.ts with the read-only flag; the host page build (first load) is covered by the unit test "the first load of a read-only page has no edit cells in the properties table" in test/session/readOnlyFirstLoad.test.ts. The table cell click and the frontmatter click rows are untested; they are deduced from the code: the click handlers of src/page/features/pageInput.ts open editors only when edit mode is on, which a page without an Edit button never is.
-- Method: Unit test "granting trust turns an open Restricted Mode preview into a writable one" in test/host/lifeReq.requirements.test.ts (trust granted scenario: same panel, readOnly false, workspace roots, one render).
-- Method: Unit test "adding a workspace folder makes the read-only previews of its files writable on the same panel" in test/host/lifeReq.requirements.test.ts (folder added rows: same panel, readOnly false, the added folder as root, the reading state kept, the active preview kept, a preview outside the folder left read-only).
-- Method: Unit test "the manifest declares limited support for untrusted workspaces" in test/security/trustReq.requirements.test.ts, which asserts the declaration, its description and the five restricted settings in package.json (and that the list is the registry's), the inputs VS Code reads to decide (extensionManifestPropertiesService, VS Code 1.143.1 bundle: an extension with a main entry point and no declaration is disabled in Restricted Mode). The Restricted Mode integration suite test/integration/untrusted-suite.ts loads the extension from the development path, which is not disabled either way, so it asserts the declaration through the installed extension manifest instead; a packaged VSIX is not run in a Restricted Mode window.
-- Criteria: The readOnly flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; a read-only page has a greyed Edit button with its reason, no palette, no Comment button, no reply, Resolve or Delete control, no edit cell, no edit-target mark and no editor element after the clicks; after onTrustGranted an open preview of a workspace file is a new trusted session on the same panel (readOnly false, the workspace folders as roots) and the active preview stays the active one; after a folder that holds its file is added, a read-only preview is a new writable session on the same panel with the folder as root, and a preview of another file is unchanged; package.json declares capabilities.untrustedWorkspaces.supported as limited.
+- Method: Unit tests in test/host/lifeReq.requirements.test.ts ("a document outside the workspace folder gets a new session on the same panel": restrictedReads true and an enabled Edit button for a standalone file; "granting trust turns an open Restricted Mode preview into one with full reads": restrictedReads true then false, same panel, workspace roots, one render, and an enabled Edit button in Restricted Mode; "adding a workspace folder gives the previews of its files full reads on the same panel": the folder-added rows; "granting trust flushes the open page editor before the preview is replaced": the previewFlushEdit request is posted once, while the old session is alive, when a page editor is open).
+- Method: Unit test "the first load of a page with restricted reads has edit cells in the properties table and an enabled Edit button" in test/session/readOnlyFirstLoad.test.ts (properties table and Edit button rows of the page built by the host).
+- Method: Unit test of the toolbar markup in test/core/preview/previewStyles.test.ts (15 buttons, no aria-disabled) and `T38: toggling edit mode posts previewEditModeChanged` in test/page/runtimePageControls.test.ts (a click toggles the edit mode).
+- Method: Unit tests of the host handlers in test/session/blockReq.requirements.test.ts, test/session/checkboxRefusal.test.ts, test/session/reviewReqComments.requirements.test.ts and test/host/fmtableReq.requirements.test.ts show that a preview with restricted reads, an untrusted workspace and a standalone file included, is not refused for trust (see SwRS-MDOKFSTUDIO-TRUST-005).
+- Method: Integration suites test/integration/untrusted-suite.ts (the command preview and the Open With editor of an untrusted workspace report restrictedReads true, carry an enabled Edit button, store the palette mode, move a block, copy and paste blocks, write a comment and a pasted image; the real-window scenario trust-security/r01-untrusted-read-only shows the side preview with the enabled Edit button and the edit mode on) and test/integration/standalone-suite.ts (a file outside the workspace reports restrictedReads true, a document of the workspace false, and a frontmatter save is applied). They run in the real-window jobs only: they were compiled but not run on the author's machine.
+- Method: Visual scenarios trust-security/v01-restricted-page-dark-900 and trust-security/v02-restricted-page-light-460 in test/visual/scenarioDefinitions2.ts (RESTRICTED_PAGE_ASSERTIONS: the Edit button is enabled, the frontmatter cells are editable) and trust-security/v03-restricted-opens-block-editor-light-900 (RESTRICTED_EDITS_ASSERTIONS: edit mode on and the block editor opens after a click on a paragraph). They build the page in test/visual/renderFixtures.ts with the restrictedReads option.
+- Method: Unit test "the manifest declares limited support for untrusted workspaces" in test/security/trustReq.requirements.test.ts, which asserts the declaration, its description (editing stays on, no "read-only") and the five restricted settings in package.json (and that the list is the registry's). A packaged VSIX is not run in a Restricted Mode window.
+- Method: Unit tests of the write paths with a document that VS Code holds read-only: test/session/blockReq.requirements.test.ts (block save, move, cut, paste and the pasted image removed), test/session/dropFiles.requirements.test.ts, test/session/reviewReqThreads.requirements.test.ts, test/session/renderReq.labelRename.requirements.test.ts and test/host/fmtableReq.requirements.test.ts (metadata save); each answers the READ_ONLY_FILE reason, with restricted reads too.
+- Criteria: The restrictedReads flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; it narrows reads only (resource policy, includes, schema resolution, link roots, external scripts) and gates no write; the page of such a preview has an enabled Edit button, a palette, a Comment button, thread controls and editable cells; after onTrustGranted an open preview of a workspace file is a new session on the same panel (restrictedReads false, the workspace folders as roots) and the active preview stays the active one; package.json declares capabilities.untrustedWorkspaces.supported as limited.
 
 <!-- okf:links:start -->
 ### Links
@@ -175,13 +167,13 @@ A preview whose folder is removed turns read-only on the same panel: see SwRS-MD
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document outside a trusted folder opens read-only and keeps the viewing actions
+  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document opens editable whatever the trust, with narrow reads outside a trusted folder
   - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
   - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
   - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
   - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-LIFE-026](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-026.md): The side preview follows the active Markdown editor
   - [SwRS-MDOKFSTUDIO-BLOCK-017](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-017.md): The hover outline shows what a click would edit

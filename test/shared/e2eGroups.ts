@@ -33,7 +33,7 @@ export const GROUPS = [
   { id: "table-editing", title: "Table editing", scope: "Cell editors, cell bar, Tab/Enter navigation, minimal diffs", srcAnchors: "src/page/modules, src/core/mapping" },
   { id: "review-annotations", title: "Review annotations", scope: "Comment and TODO chips, review threads, sidecar, orphans, incoming changes", srcAnchors: "src/core/comments, src/page/modules/incomingChanges" },
   { id: "lifecycle-sync", title: "Lifecycle and sync", scope: "Open, refresh, reload and restore, Open With, scroll sync, incremental patches, status pages, coexistence", srcAnchors: "src/extension.ts, src/core/preview, src/page/runtime" },
-  { id: "trust-security", title: "Trust and security", scope: "Restricted Mode, read-only and standalone previews, refused messages, CSP, resource policy", srcAnchors: "src/core/security, src/core/protocol" },
+  { id: "trust-security", title: "Trust and security", scope: "Restricted Mode and standalone previews (editable, restricted reads), refused messages, CSP, resource policy", srcAnchors: "src/core/security, src/core/protocol" },
 ] as const satisfies readonly E2eGroup[];
 
 export type GroupId = (typeof GROUPS)[number]["id"];
@@ -58,8 +58,8 @@ export interface IntegrationTestRow {
 
 export const INTEGRATION_TESTS: readonly IntegrationTestRow[] = [
   { file: "test/integration/trusted-suite.ts", group: "trust-security", locks: "Trusted command preview: CSP with nonce, no unsafe-inline, KaTeX stylesheet, dirty buffer rendered, `_build` untouched" },
-  { file: "test/integration/untrusted-suite.ts", group: "trust-security", locks: "Restricted Mode: read-only side preview and Open With, greyed Edit button with its reason, palette-mode/image-pick/paste/move/clipboard/comment messages refused" },
-  { file: "test/integration/standalone-suite.ts", group: "trust-security", locks: "File outside the workspace: read-only, its folder is the resource root, schema not found, frontmatter save refused" },
+  { file: "test/integration/untrusted-suite.ts", group: "trust-security", locks: "Restricted Mode: editable side preview and Open With, enabled Edit button, palette-mode/image-pick/paste/move/clipboard/comment messages applied" },
+  { file: "test/integration/standalone-suite.ts", group: "trust-security", locks: "File outside the workspace: editable, its folder is the resource root, schema not found, frontmatter save applied" },
   { file: "test/integration/projectFeatures.test.ts", group: "rendering-core", locks: "Webview HTML keeps links, local images/SVG, headings, admonitions, inline/display math (offline KaTeX), code directives" },
   { file: "test/integration/stockCoexistence.test.ts", group: "lifecycle-sync", locks: "Coexists with the built-in Markdown preview; status-page layout scoped by a body marker" },
   { file: "test/integration/previewEditing.test.ts", group: "frontmatter-editing", locks: "Frontmatter saves (values, lists, nullable, afterField), block edit protocol, insertion, edit lock after reload, copy-code message (+ frontmatter-e2e captures)" },
@@ -77,7 +77,7 @@ export const INTEGRATION_TESTS: readonly IntegrationTestRow[] = [
   { file: "test/integration/incomingChanges.test.ts", group: "review-annotations", locks: "Untracked file gets no incoming-change message (only the negative case is tested)" },
   { file: "test/integration/reviewComments.test.ts", group: "review-annotations", locks: "Comment sidecar: invalid file posts nothing, valid threads posted as data, file changes followed, deletion clears" },
   { file: "test/integration/inlineThread.test.ts", group: "review-annotations", locks: "Inline comment thread: reply appends one message above the closing marker with the configured author and keeps CRLF, delete removes the thread and one blank line, stale lines refused, one undo each" },
-  { file: "test/integration/commentWrite.test.ts", group: "review-annotations", locks: "Create/reply/resolve/delete threads, queued creates, author name, refusals and untrusted refusal" },
+  { file: "test/integration/commentWrite.test.ts", group: "review-annotations", locks: "Create/reply/resolve/delete threads, queued creates, author name, refusals and Restricted Mode writes" },
   { file: "test/integration/commentAnchors.test.ts", group: "review-annotations", locks: "Anchors follow edits (multi-cursor), orphaning, no write while typing, dirty sidecar never overwritten" },
   { file: "test/integration/genericMarkdown.test.ts", group: "frontmatter-schema", locks: "Generic (non-OKF) YAML frontmatter rendered and saved in the custom editor" },
   { file: "test/integration/dirtySnapshots.test.ts", group: "lifecycle-sync", locks: "Unsaved buffer snapshots render (no disk read), versions ordered" },

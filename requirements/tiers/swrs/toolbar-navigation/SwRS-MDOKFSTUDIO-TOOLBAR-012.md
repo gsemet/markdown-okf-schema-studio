@@ -42,7 +42,7 @@ default_owner_email: gaetan@xeberon.net
 When the reader replaces matches from the find bar, the extension SHALL replace the source span of each match that maps one-to-one to the source, and no other text, in one undo step.
 
 ### Scenario (nominal): Replace one and replace all
-- GIVEN the bar holds a query with matches in a heading and two paragraphs, a replacement text and a writable preview
+- GIVEN the bar holds a query with matches in a heading and two paragraphs, a replacement text and a preview
 - WHEN the reader presses Replace (or Enter in the replace field), or Replace all (Cmd/Ctrl+Alt+Enter)
 - THEN the page sends, for each match, the source lines of its block, the matched text, which occurrence of it that is, and the final replacement text (with the "$1" groups of a regular expression expanded); the host replaces exactly those source spans, all in one undo step, and answers with the number replaced and skipped
 

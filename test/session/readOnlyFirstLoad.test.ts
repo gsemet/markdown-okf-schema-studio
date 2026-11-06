@@ -1,6 +1,6 @@
 /**
- * The first load of a read-only page: its properties table carries no edit cells, because the
- * host builds the page with the read-only flag instead of replacing the table afterwards.
+ * The first load of a page with restricted reads (Restricted Mode, a standalone file): its
+ * properties table carries edit cells like any other, and the Edit button is enabled.
  */
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
@@ -8,14 +8,12 @@ import { test } from "node:test";
 import { analyzeFrontmatter } from "../../src/core/frontmatter/okfFrontmatter";
 import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
-import { editingBootState } from "../../src/session/features/rendering";
-import { READ_ONLY_NO_FOLDER, READ_ONLY_UNTRUSTED } from "../../src/core/edits/sourceEdits";
 import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 
 const SOURCE = "---\ntitle: Hello\n---\n\n# Heading\n";
 
-async function firstLoad(editingEnabled: boolean): Promise<string> {
+async function firstLoad(): Promise<string> {
   const result = await renderPreviewDocument({
     document: { uri: { scheme: "file", fsPath: "/ws/doc.md" }, languageId: "markdown", version: 1, getText: () => SOURCE },
     workspaceRoot: "/ws",
@@ -38,24 +36,16 @@ async function firstLoad(editingEnabled: boolean): Promise<string> {
   };
   const built = buildPreviewWebviewHtml(
     result.html, result.stage.outputDirectory, assets, context, "/ws",
-    { result: frontmatter, tableEnabled: true }, undefined, editingEnabled,
+    { result: frontmatter, tableEnabled: true }, undefined, false, [], "host", true,
   );
   result.stage.dispose();
   return built.html;
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-test("the first load of a read-only page has no edit cells in the properties table", async () => {
-  assert.doesNotMatch(await firstLoad(false), /data-okf-editable="true"/u);
-  assert.match(await firstLoad(true), /data-okf-editable="true"/u);
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("the boot context of a read-only preview carries the read-only reason, a writable one none", () => {
-  assert.deepEqual(editingBootState({ readOnly: true, workspaceFolder: undefined }),
-    { commentsEnabled: false, readOnlyReason: READ_ONLY_NO_FOLDER });
-  assert.deepEqual(editingBootState({ readOnly: true, workspaceFolder: { path: "/ws" } as never }),
-    { commentsEnabled: false, readOnlyReason: READ_ONLY_UNTRUSTED });
-  assert.deepEqual(editingBootState({ readOnly: false, workspaceFolder: { path: "/ws" } as never }),
-    { commentsEnabled: true });
+test("the first load of a page with restricted reads has edit cells in the properties table and an enabled Edit button", async () => {
+  const html = await firstLoad();
+  assert.match(html, /data-okf-editable="true"/u);
+  assert.match(html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+  assert.doesNotMatch(html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled/u);
 });

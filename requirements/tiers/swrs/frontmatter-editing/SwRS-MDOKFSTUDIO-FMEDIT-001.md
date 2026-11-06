@@ -51,11 +51,11 @@ When a writer clicks, or presses Enter or Space on, a name or value cell of the 
 - WHEN the writer clicks the value cell, or focuses it and presses Enter or Space
 - THEN an editor labelled "Frontmatter title" opens inside that cell
 
-### Scenario (refusal): Reading mode and read-only previews open no editor
+### Scenario (refusal): Reading mode opens no editor
 
 - GIVEN edit mode off (reading mode)
 - WHEN the writer clicks a name or value cell of the table
-- THEN no editor opens and the table is unchanged; in a read-only preview the cells carry no edit attribute at all (see SwRS-MDOKFSTUDIO-TRUST-001); in edit mode the cells have tabindex 0, outside it they have none
+- THEN no editor opens and the table is unchanged; a field whose value is a plain number, boolean or null with no schema type carries no edit attribute; in edit mode the cells have tabindex 0, outside it they have none
 
 ### Scenario (nominal): A plain click on a link value edits the field
 
@@ -110,7 +110,7 @@ When a writer clicks, or presses Enter or Space on, a name or value cell of the 
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-FMEDIT-013](SwRS-MDOKFSTUDIO-FMEDIT-013.md): A plain click on a link value edits the field

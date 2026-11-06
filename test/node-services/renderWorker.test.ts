@@ -15,7 +15,7 @@ function workspace(context: { after: (fn: () => void) => void }): string {
 }
 
 function input(root: string, text: string): SourceRenderInput {
-  return { text, documentPath: path.join(root, "doc.md"), workspaceRoot: root, readOnly: false };
+  return { text, documentPath: path.join(root, "doc.md"), workspaceRoot: root, restrictedReads: false };
 }
 
 /** A MyST document that takes a few hundred milliseconds to render. */

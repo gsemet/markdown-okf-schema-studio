@@ -15,7 +15,7 @@ import { runUntrusted as runBlockClipboardUntrusted } from "./blockClipboard.tes
 import { runUntrusted as runCommentWriteUntrusted } from "./commentWrite.test";
 import { runUntrusted as runMystDiagnostics } from "./mystDiagnostics.test";
 import { closeAllEditors, connectWorkbench, createEvidence } from "./realInput/harness";
-import { scenarioUntrustedReadOnly } from "./realWindowGaps";
+import { scenarioRestrictedEdit } from "./realWindowGaps";
 import { hostStressPlan } from "../shared/stressPlan";
 import { ensureTestWindowFocused } from "./windowFocus";
 import { withSuiteWatchdog } from "./stepWatchdog";
@@ -33,7 +33,7 @@ async function waitForPreview(): Promise<void> {
 }
 
 /**
- * The real-window capture of this window (CR 043): the read-only side preview of Restricted Mode,
+ * The real-window capture of this window (CR 043): the editable side preview of Restricted Mode,
  * through the window's own loopback CDP port. In stress mode (`just ci-stress`) it runs the rounds
  * of the untrusted stress plan instead, each round with its own evidence folder.
  */
@@ -57,7 +57,7 @@ async function runCaptures(): Promise<void> {
         try {
           const started = Date.now();
           try {
-            await scenarioUntrustedReadOnly(page, evidence);
+            await scenarioRestrictedEdit(page, evidence);
           } catch (error) {
             throw new Error(`stress round ${round}/${plan.repeat}, scenario untrusted-read-only: `
               + `${error instanceof Error ? error.message : String(error)}`, { cause: error });
@@ -74,7 +74,7 @@ async function runCaptures(): Promise<void> {
     const evidence = createEvidence("untrusted");
     let passed = false;
     try {
-      await scenarioUntrustedReadOnly(page, evidence);
+      await scenarioRestrictedEdit(page, evidence);
       passed = true;
     } finally {
       evidence.finish(passed, passed);
@@ -115,9 +115,11 @@ async function runUntrustedSuite(): Promise<void> {
     await waitForPreview();
     const commandPreview = getActivePreviewForTests();
     assert.ok(commandPreview);
-    assert.equal(commandPreview.readOnly, true);
-    assert.match(commandPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"[^>]*title="Editing is unavailable: this file is not in a trusted workspace"/u);
-    // A read-only preview does not store a palette mode (the page cannot post it; the host refuses).
+    assert.equal(commandPreview.restrictedReads, true);
+    assert.match(commandPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+    assert.doesNotMatch(commandPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled/u,
+      "Restricted Mode keeps the Edit button enabled: trust never makes a document read-only");
+    // Restricted Mode stores the palette mode like a trusted workspace.
     await sendPreviewMessageForTests({
       type: "previewPaletteModeChanged",
       documentId: commandPreview.documentUri,
@@ -125,7 +127,7 @@ async function runUntrustedSuite(): Promise<void> {
       requestId: commandPreview.requestId,
       mode: "strict",
     });
-    // A read-only preview never opens the image dialog.
+    // Restricted Mode opens the image dialog (the user picks the file; nothing is read before).
     const windowApi = vscode.window as unknown as { showOpenDialog: typeof vscode.window.showOpenDialog };
     const originalDialog = windowApi.showOpenDialog;
     let dialogCalls = 0;
@@ -141,8 +143,8 @@ async function runUntrustedSuite(): Promise<void> {
     } finally {
       windowApi.showOpenDialog = originalDialog;
     }
-    assert.equal(dialogCalls, 0, "the untrusted preview must not open the image dialog");
-    // A read-only preview never writes a pasted image.
+    assert.equal(dialogCalls, 1, "the Restricted Mode preview opens the image dialog");
+    // Restricted Mode writes a pasted image in the folder of the document, as a trusted workspace does.
     const folder = path.dirname(document.uri.fsPath);
     const before = fs.readdirSync(folder);
     await sendPreviewMessageForTests({
@@ -154,7 +156,9 @@ async function runUntrustedSuite(): Promise<void> {
       mime: "image/png",
       dataBase64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
     });
-    assert.deepEqual(fs.readdirSync(folder), before, "the untrusted preview must not write a pasted image");
+    const added = fs.readdirSync(folder).filter((name) => !before.includes(name));
+    assert.deepEqual(added, ["image.png"], "the Restricted Mode preview writes the pasted image next to the document");
+    for (const name of added) fs.rmSync(path.join(folder, name), { force: true });
     await runBlockMoveUntrusted(commandPreview, document);
     await runBlockClipboardUntrusted(commandPreview, document);
     await runCommentWriteUntrusted(commandPreview, document);
@@ -162,9 +166,9 @@ async function runUntrustedSuite(): Promise<void> {
     await waitForPreview();
     const editorPreview = getActivePreviewForTests();
     assert.ok(editorPreview);
-    assert.equal(editorPreview.readOnly, true);
-    assert.match(editorPreview.html, /"initialPaletteMode":"gfm"/u, "the refused message stored nothing: the default GFM mode");
-    assert.match(editorPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"/u);
+    assert.equal(editorPreview.restrictedReads, true);
+    assert.match(editorPreview.html, /"initialPaletteMode":"strict"/u, "Restricted Mode stored the palette mode the page chose");
+    assert.doesNotMatch(editorPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled/u);
     disposeActivePreviewForTests();
     await runMystDiagnostics();
   } finally {

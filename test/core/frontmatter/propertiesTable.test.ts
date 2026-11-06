@@ -83,18 +83,6 @@ test("description controls live in column headers with an adjacent collapsed res
   assert.equal((markup.match(/data-okf-description-toggle/gu) ?? []).length, 2);
 });
 
-test("read-only tables expose values without edit targets", () => {
-  const markup = renderPropertiesTable(resultWith({
-    fields: [fieldWith({
-      name: "status",
-      value: "draft",
-    })],
-  }), true, undefined, false);
-
-  assert.match(markup, /data-okf-editable="false"/u);
-  assert.doesNotMatch(markup, /data-okf-edit-cell|data-okf-value-cell/u);
-});
-
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
 test("annotated scalar and list values render independent navigation and status markup", () => {
   const valid: FrontmatterLinkResult = {
@@ -780,7 +768,7 @@ test("T24: required fields render data-okf-required and optional ones do not", (
       fieldWith({ name: "scope", value: "core", required: true }),
       fieldWith({ name: "note", value: "x" }),
     ],
-  }), true, undefined, true);
+  }), true);
 
   assert.match(markup, /data-okf-field="scope"[^>]*data-okf-required="true"/u);
   assert.equal((markup.match(/data-okf-required/gu) ?? []).length, 1);
@@ -789,11 +777,11 @@ test("T24: required fields render data-okf-required and optional ones do not", (
 test("T25: the section flags a schema that forbids additional properties", () => {
   const field = [fieldWith({ name: "scope", value: "core" })];
   const forbidden = renderPropertiesTable(
-    resultWith({ fields: field, additionalPropertiesAllowed: false }), true, undefined, true);
+    resultWith({ fields: field, additionalPropertiesAllowed: false }), true);
   assert.match(forbidden, /<section[^>]*data-okf-additional-properties="false"/u);
   for (const additionalPropertiesAllowed of [true, undefined]) {
     const markup = renderPropertiesTable(
-      resultWith({ fields: field, additionalPropertiesAllowed }), true, undefined, true);
+      resultWith({ fields: field, additionalPropertiesAllowed }), true);
     assert.doesNotMatch(markup, /data-okf-additional-properties/u);
   }
 });

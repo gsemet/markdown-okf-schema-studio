@@ -75,7 +75,7 @@ When the page hides, closes or leaves the document (a followed link, Back, anoth
 | previewFlushEdit arrives and no editor is open | previewEditFlushed with flushed false is posted |
 | A block editor or no editor is open and a flush runs | The table branch (copy of the cell text) is skipped |
 | A save by Done | The previewEditSave has no flush field |
-| A page that has not reported ready (or a read-only or disposed preview) and a switch starts | No flush is posted and the switch goes on |
+| A page that has not reported ready (or a disposed preview) and a switch starts | No flush is posted and the switch goes on |
 
 ### Scenario (nominal): Link and Back right after typing save first
 | Input | Outcome |
@@ -121,7 +121,7 @@ When the page hides, closes or leaves the document (a followed link, Back, anoth
 - Method: test/integration/previewHistory.test.ts (the host applies pending saves before Back: the text typed in the block editor is in the document after Back); the step settleHostEdits has no unit test.
 - Method: test/session/toolbarReq.requirements.test.ts (following a link applies the pending saves before the link is resolved).
 - Method: test/page/fmtableReqTable.requirements.test.ts (turning edit mode off saves a changed open cell and closes an unchanged or loading one without a save).
-- Criteria: flushPageEdits posts the message only for a live, writable, ready page; the answer follows the saves on the same channel; state.flushingEditors is set only around the flush save; flushPendingAutosave runs for both hide events; the saved table contains the typed text of the cell; the cell test checks that one previewEditSave whose editedText contains the typed text is posted but does not assert the non-final flag, which is read from flushPendingAutosave; flushRefusalMessage builds the warning; settleHostEdits runs before the link is resolved and before the history move; FLUSH_WAIT_MS is 1500; a final save for a changed cell and no message for an unchanged or still loading one.
+- Criteria: flushPageEdits posts the message only for a live, ready page; the answer follows the saves on the same channel; state.flushingEditors is set only around the flush save; flushPendingAutosave runs for both hide events; the saved table contains the typed text of the cell; the cell test checks that one previewEditSave whose editedText contains the typed text is posted but does not assert the non-final flag, which is read from flushPendingAutosave; flushRefusalMessage builds the warning; settleHostEdits runs before the link is resolved and before the history move; FLUSH_WAIT_MS is 1500; a final save for a changed cell and no message for an unchanged or still loading one.
 
 <!-- okf:links:start -->
 ### Links

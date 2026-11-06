@@ -6,7 +6,7 @@ title: A writer edits metadata values in place with fitting controls
 description: When a writer clicks, or presses Enter or Space on, a field name or
   value of the properties table in edit mode, the Studio SHALL open an editor
   inside that cell, one at a time, with a control that fits the field type, and
-  leave the table inert in reading mode and in a read-only preview.
+  leave the table inert in reading mode.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
 req_lifecycle: proposed
@@ -72,7 +72,7 @@ supersedes:
 
 ### Normative behavior
 
-When a writer clicks, or presses Enter or Space on, a field name or value of the properties table in edit mode, the Studio SHALL open an editor inside that cell, one at a time, with a control that fits the field type, and leave the table inert in reading mode and in a read-only preview.
+When a writer clicks, or presses Enter or Space on, a field name or value of the properties table in edit mode, the Studio SHALL open an editor inside that cell, one at a time, with a control that fits the field type, and leave the table inert in reading mode.
 
 ### Preserved stakeholder intent
 

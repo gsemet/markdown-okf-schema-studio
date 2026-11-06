@@ -23,12 +23,12 @@ function workspace(): { workspaceRoot: string; docs: string } {
   return { workspaceRoot, docs };
 }
 
-async function render(text: string, options: { readOnly?: boolean; resourceRoot?: "document" } = {}) {
+async function render(text: string, options: { restrictedReads?: boolean; resourceRoot?: "document" } = {}) {
   const { workspaceRoot, docs } = workspace();
   const result = await renderPreviewDocument({
     document: { uri: { scheme: "file", fsPath: path.join(docs, "page.md") }, languageId: "markdown", version: 1, getText: () => text },
     workspaceRoot: options.resourceRoot === "document" ? docs : workspaceRoot,
-    ...(options.readOnly ? { readOnly: true } : {}),
+    ...(options.restrictedReads ? { restrictedReads: true } : {}),
     requestId: 1,
     isWorkspaceTrusted: () => true,
     allowUntrusted: true,
@@ -101,9 +101,9 @@ test("a data file outside the folders the preview reads, a missing file and an a
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-122
 test("in Restricted Mode only the document folder and below is read", async () => {
-  const inside = await render('```vega-lite\n{ "data": { "url": "data/rows.csv" }, "mark": "bar" }\n```\n', { readOnly: true, resourceRoot: "document" });
+  const inside = await render('```vega-lite\n{ "data": { "url": "data/rows.csv" }, "mark": "bar" }\n```\n', { restrictedReads: true, resourceRoot: "document" });
   assert.ok(attribute(chartOf(inside.dom)!, "data-myst-chart-files"));
-  const outside = await render('```vega-lite\n{ "data": { "url": "../shared/all.json" }, "mark": "bar" }\n```\n', { readOnly: true, resourceRoot: "document" });
+  const outside = await render('```vega-lite\n{ "data": { "url": "../shared/all.json" }, "mark": "bar" }\n```\n', { restrictedReads: true, resourceRoot: "document" });
   assert.equal(attribute(chartOf(outside.dom)!, "data-myst-chart-files"), undefined);
   assert.match(attribute(chartOf(outside.dom)!, "data-myst-chart-errors")!, /outside the folders/u);
 });

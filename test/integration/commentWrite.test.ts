@@ -222,21 +222,33 @@ export async function run(): Promise<void> {
 // @tests_req StRS-MDOKFSTUDIO-TRUST-001
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-/** T43: a read-only preview offers no comments and writes no sidecar. */
+/** T43: a preview in Restricted Mode offers comments and writes the sidecar next to the document. */
 export async function runUntrusted(preview: PreviewForTests, document: vscode.TextDocument): Promise<void> {
-  assert.match(preview.html, /"commentsEnabled":false/u, "a read-only preview has no Comment button");
+  assert.match(preview.html, /"commentsEnabled":true/u, "Restricted Mode offers the Comment button");
+  // The earlier Restricted Mode steps moved blocks and undid them: a comment names the render the page
+  // shows, so it is sent once the preview has rendered the current version of the document.
+  await waitFor("the preview to show the current document", () => {
+    const current = getActivePreviewForTests();
+    return current?.documentUri === document.uri.toString() && current.phase === "ready"
+      && current.documentVersion === document.version;
+  });
   const sidecar = path.join(path.dirname(document.uri.fsPath), `${path.basename(document.uri.fsPath, ".md")}.comments.json`);
   assert.equal(fs.existsSync(sidecar), false);
   try {
-    await send(preview, "previewCommentCreate", { anchor: anchorOf(1, "x"), body: "Refused" });
-    await send(preview, "previewCommentReply", { threadId: "t_00000000", body: "Refused" });
-    await send(preview, "previewCommentResolve", { threadId: "t_00000000", resolved: true });
-    await send(preview, "previewCommentDelete", { threadId: "t_00000000" });
-    assert.equal(fs.existsSync(sidecar), false, "a read-only preview must not write a comments file");
-    const result = getActivePreviewForTests()?.comments.result;
-    assert.equal(result?.ok, false, "the refusal is reported to the page");
-    assert.equal(result?.kind, "delete", "resolve and delete are answered too");
-    assert.match(result?.reason ?? "", /trusted workspace/u);
+    await send(preview, "previewCommentCreate", { anchor: anchorOf(1, "x"), body: "Written in Restricted Mode" });
+    await waitFor("the comments file", () => fs.existsSync(sidecar));
+    assert.equal(readThreads(sidecar)[0].comments[0].body, "Written in Restricted Mode");
+    assert.equal(getActivePreviewForTests()?.comments.result?.ok, true);
+    // Reply, resolve and delete are written in Restricted Mode too.
+    const threadId = readThreads(sidecar)[0].id;
+    await send(preview, "previewCommentReply", { threadId, body: "Reply in Restricted Mode" });
+    assert.deepEqual(readThreads(sidecar)[0].comments.map((comment: any) => comment.body), ["Written in Restricted Mode", "Reply in Restricted Mode"]);
+    await send(preview, "previewCommentResolve", { threadId, resolved: true });
+    assert.equal(readThreads(sidecar)[0].resolved, true);
+    assert.equal(getActivePreviewForTests()?.comments.result?.ok, true);
+    await send(preview, "previewCommentDelete", { threadId });
+    assert.equal(readThreads(sidecar).length, 0);
+    assert.equal(getActivePreviewForTests()?.comments.result?.ok, true);
   } finally {
     fs.rmSync(sidecar, { force: true });
   }

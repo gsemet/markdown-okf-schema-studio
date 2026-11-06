@@ -870,14 +870,6 @@ test("T23: a mode change does not save the block, and the next editor opens in t
   assert.equal(palettes.at(-1)?.getAttribute("data-palette-mode"), "strict");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-test("T23: a read-only preview has no palette and never posts the message", () => {
-  const harness = createRuntimeHarness({ editingEnabled: false, initialPaletteMode: "strict" });
-  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
-  assert.equal(paletteOf(harness), undefined);
-  assert.equal(harness.messages.some((message) => message.type === "previewPaletteModeChanged"), false);
-});
-
 // T23 round 2: the select must never strand the focus.
 function finalSaves(harness: RuntimeHarness): number {
   return harness.messages.filter((message) =>

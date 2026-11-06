@@ -17,7 +17,7 @@ import type { RenderResult } from "../../core/render/renderPipeline";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { currentPreviewDocument, revisionOfStage } from "../sessionDocuments";
+import { applyWrittenEdits, currentPreviewDocument, revisionOfStage } from "../sessionDocuments";
 import { fireAndForget } from "../../host-api/logger";
 
 /** The watchers of one linked target: the host's one and the direct operating-system one. */
@@ -76,7 +76,7 @@ export class FrontmatterController {
       filePath,
       sourceText,
       stopDir: preview.workspaceRoot,
-      allowSchemaResolution: !preview.readOnly,
+      allowSchemaResolution: !preview.restrictedReads,
       inspectLinks,
       strictAdditionalProperties: preview.frontmatterConfiguration.strictAdditionalProperties,
       bundleRoot: preview.frontmatterConfiguration.bundleRoot,
@@ -268,7 +268,6 @@ export class FrontmatterController {
       result,
       preview.frontmatterConfiguration.propertiesTable,
       sourceMapping,
-      !preview.readOnly,
     );
     const html = replacePropertiesTableHtml(preview.webview.html, markup);
     if (html === preview.webview.html) {
@@ -354,7 +353,7 @@ export class FrontmatterController {
         return;
       }
     }
-    return manager.host.documents.applyEdits(document, [plan.edit]).then((applied) => {
+    return applyWrittenEdits(manager.host.documents, document, [plan.edit]).then((applied) => {
       if (applied) {
         manager.scroll.storePendingPin(preview, message, document.revision);
         this.postEditSaved(preview, message);

@@ -48,7 +48,7 @@ default_owner_email: gaetan@xeberon.net
 When previewPasteImage is accepted, the extension SHALL check the request and the image bytes, save the image in the folder of the document as image.png, image.jpg, image.gif or image.webp, or with the suffix -1, -2 and so on up to -1000 when the name is taken, comparing names without case, never showing the name before all its bytes are written, remove first the hidden partial files of its own naming that are older than 10 minutes, and answer the file name, or write nothing and answer a refusal with its reason when a check or the write fails.
 
 ### Scenario (nominal): The host chooses the name
-The name never comes from the page. The handler answers ok true and the file name (previewPasteImageResult). The envelope, the render gate, the read-only refusal and the answer correlation are those of SwRS-MDOKFSTUDIO-TRUST-052, SwRS-MDOKFSTUDIO-TRUST-065, SwRS-MDOKFSTUDIO-TRUST-005 and SwRS-MDOKFSTUDIO-TRUST-090.
+The name never comes from the page. The handler answers ok true and the file name (previewPasteImageResult). The envelope, the render gate and the answer correlation are those of SwRS-MDOKFSTUDIO-TRUST-052, SwRS-MDOKFSTUDIO-TRUST-065, SwRS-MDOKFSTUDIO-TRUST-005 and SwRS-MDOKFSTUDIO-TRUST-090.
 
 | GIVEN the folder of the document | WHEN the bytes are | THEN the file and the answer are |
 | --- | --- | --- |
@@ -84,10 +84,9 @@ Each refusal answers ok false with the reason below and writes nothing; the fold
 
 | Case | Reason |
 | --- | --- |
-| read-only preview | the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 | document with no file path, or whose id differs from the previewed document | Save the document before pasting an image. |
 | saved document whose file is not a .md file (any case of the extension) | Pasting an image needs a Markdown file. |
-| document folder outside every workspace folder, both paths compared with symbolic links resolved | The image must be saved inside a workspace folder. |
+| document folder outside every workspace folder, both paths compared with symbolic links resolved; for a document that lies in no workspace folder at all, its own folder is the root, so the image is saved there | The image must be saved inside a workspace folder. |
 | announced type outside png, jpeg, gif and webp, or data that is not plain base64 | That clipboard image type is not supported. |
 | more than 10 MiB (10 times 1024 times 1024 bytes) of bytes | The image is larger than 10 MB. |
 | first bytes that are not those of the announced type (text announced as image/png) | The clipboard data is not a png, jpeg, gif or webp image. |
@@ -132,6 +131,6 @@ A saved .md document in a folder inside the workspace, reached through a symboli
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 <!-- okf:links:end -->

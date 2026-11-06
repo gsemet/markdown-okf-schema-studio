@@ -309,13 +309,13 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
     && isPinViewportTop(message.pinViewportTop),
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-069
   // Review comments (T43): a new thread on a selection and a reply. The host picks the author, the
-  // ids and the time; it refuses read-only previews and writes the sidecar file.
+  // ids and the time; it writes the sidecar file next to the document.
   previewCommentCreate: (message) => isValidAnchor(message.anchor) && isCommentBody(message.body),
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-070
   previewCommentReply: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "" && isCommentBody(message.body),
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-071
-  // Resolve, reopen and delete a thread (T44). The host refuses read-only previews and answers.
+  // Resolve, reopen and delete a thread (T44). The host answers.
   previewCommentResolve: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "" && typeof message.resolved === "boolean",
   previewCommentDelete: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)

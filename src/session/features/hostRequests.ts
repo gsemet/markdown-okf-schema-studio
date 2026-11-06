@@ -26,7 +26,7 @@ import { MAX_COPY_TEXT_LENGTH, type PageMessageOf } from "../../core/protocol/pa
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { currentPaletteDocument, isDocumentEligible, isPathWithin, previewReadOnlyReason } from "../sessionDocuments";
+import { currentPaletteDocument, isDocumentEligible, isPathWithin } from "../sessionDocuments";
 import { fireAndForget } from "../../host-api/logger";
 
 /** The answer of a palette list request. */
@@ -69,6 +69,13 @@ export function targetChoices(text: string): HostListAnswer & { ok: true } {
   }
 }
 
+/**
+ * Why the citation list is off when the preview has restricted reads: it searches the whole
+ * workspace folder for `.bib` files, a read beyond the folder of the document.
+ */
+export const CITATIONS_NEED_TRUST =
+  "Listing citations searches the workspace for .bib files, which needs a trusted workspace folder that holds this file.";
+
 /** A hidden file this extension writes while saving a pasted image: `.image-2.png.k3j9x0ab.partial`. */
 const STALE_PARTIAL_NAME = /^\.image(?:-\d+)?\.(?:png|jpg|gif|webp)\.[0-9a-z]{1,8}\.partial$/u;
 
@@ -109,7 +116,7 @@ export class HostRequestController {
   public register(router: PageMessageRouter): void {
     const { host } = this.manager;
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
-    // Copies the raw code of a code block. It does not edit anything, so a read-only preview allows it.
+    // Copies the raw code of a code block. It does not edit anything.
     router.on("previewCopyText", (message, preview) => this.handleCopyText(preview, message));
     router.on("previewListTargets", (message, preview) => this.handleListTargets(preview, message));
     router.on("previewListCitations", (message, preview) => this.handleListCitations(preview, message));
@@ -179,8 +186,8 @@ export class HostRequestController {
     preview: PreviewSession,
     message: PageMessageOf<"previewListCitations">,
   ): PromiseLike<void> | undefined {
-    if (preview.readOnly) {
-      this.postHostResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
+    if (preview.restrictedReads) {
+      this.postHostResult(preview, message, { ok: false, reason: CITATIONS_NEED_TRUST });
       return undefined;
     }
     const document = currentPaletteDocument(preview, message);
@@ -205,10 +212,6 @@ export class HostRequestController {
     preview: PreviewSession,
     message: PageMessageOf<"previewPickDocument">,
   ): PromiseLike<void> | undefined {
-    if (preview.readOnly) {
-      this.postHostResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
-      return undefined;
-    }
     const document = currentPaletteDocument(preview, message);
     const documentPath = document?.path;
     if (!document || documentPath === undefined) {
@@ -241,10 +244,6 @@ export class HostRequestController {
    */
   private handlePickImage(preview: PreviewSession, message: PageMessageOf<"previewPickImage">): PromiseLike<void> | undefined {
     const { host } = this.manager;
-    if (preview.readOnly) {
-      this.postHostResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
-      return undefined;
-    }
     const document = currentPaletteDocument(preview, message);
     const documentPath = document?.path;
     if (!document || documentPath === undefined) {
@@ -264,7 +263,13 @@ export class HostRequestController {
         this.postHostResult(preview, message, { ok: false, reason: "Pick a png, jpeg, gif, webp or svg image." });
         return;
       }
-      if (!host.workspace.folderOf(file.path)) {
+      // A document outside every workspace folder has its own folder as its only root.
+      if (preview.workspaceFolder === undefined) {
+        if (!isPathWithin(path.dirname(documentPath), file.path)) {
+          this.postHostResult(preview, message, { ok: false, reason: "The image must be inside the folder of the document." });
+          return;
+        }
+      } else if (!host.workspace.folderOf(file.path)) {
         this.postHostResult(preview, message, { ok: false, reason: "The image must be inside a workspace folder." });
         return;
       }
@@ -280,8 +285,9 @@ export class HostRequestController {
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-196
   /**
    * An image pasted into the open block editor: saved next to the document under a name chosen
-   * here (`image.png`, `image-1.png`, …; chosen again when another program takes it meanwhile), never a name from the page. Refused in a read-only
-   * preview, for a document that is not a saved file, for a folder that
+   * here (`image.png`, `image-1.png`, …; chosen again when another program takes it meanwhile), never a name from the page. Restricted Mode and a
+   * standalone file paste like a trusted workspace (a standalone file's own folder is its root).
+   * Refused for a document that is not a saved file, for a folder that
    * is not inside a workspace folder (symlinks resolved), for bytes that are not the announced
    * png, jpeg, gif or webp, and above 10 MB. Only a block editor's text box posts this message (no
    * editor open: the page ignores the paste); the host has no state for an editor that is open but
@@ -293,7 +299,6 @@ export class HostRequestController {
       this.postHostResult(preview, message, { ok: false, reason });
       return undefined;
     };
-    if (preview.readOnly) return refuse(previewReadOnlyReason(preview));
     const document = preview.document;
     const documentPath = document?.path;
     if (!document || documentPath === undefined || document.id !== preview.documentUri) {
@@ -303,8 +308,9 @@ export class HostRequestController {
     const workspaceFolder = host.workspace.folderOf(documentPath);
     const folderPath = path.dirname(documentPath);
     const { canonicalPath } = this.manager;
-    if (!workspaceFolder
-      || !isPathWithin(canonicalPath(workspaceFolder.path), canonicalPath(folderPath))) {
+    // A document outside every workspace folder has its own folder as its only root.
+    const root = workspaceFolder?.path ?? (preview.workspaceFolder === undefined ? folderPath : undefined);
+    if (root === undefined || !isPathWithin(canonicalPath(root), canonicalPath(folderPath))) {
       return refuse("The image must be saved inside a workspace folder.");
     }
     const announced = imageTypeOfMime(String(message.mime));
@@ -318,7 +324,11 @@ export class HostRequestController {
     }
     return this.saveNewImage(host.files, folderPath, PASTED_IMAGE_EXTENSION[sniffed], bytes).then((result) => {
       if (result === undefined) refuse("Too many pasted images next to this document.");
-      else this.postHostResult(preview, message, { ok: true, fileName: result });
+      else {
+        // The image is kept until a block save wrote its reference (see `removePastedImages`).
+        preview.edits.pastedImages = [...(preview.edits.pastedImages ?? []), path.join(folderPath, result)];
+        this.postHostResult(preview, message, { ok: true, fileName: result });
+      }
     }, (error: unknown) => {
       refuse(error instanceof Error ? error.message : String(error));
     });

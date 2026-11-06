@@ -56,7 +56,7 @@ When the writer pastes into the block text box a clipboard that holds text/html 
 
 ### Scenario (nominal): The host converts without touching a file
 - GIVEN an HTML fragment with a heading
-- WHEN previewPasteHtml is accepted, in any preview, including a read-only one since it edits nothing
+- WHEN previewPasteHtml is accepted, in any preview, whatever the trust, since it edits nothing
 - THEN the answer previewPasteHtmlResult is ok true and holds the Markdown of the heading, and no file is touched
 - GIVEN a conversion that throws
 - WHEN the host answers

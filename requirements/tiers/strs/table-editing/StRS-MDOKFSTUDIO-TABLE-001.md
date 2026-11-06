@@ -14,10 +14,10 @@ scope: table-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-06T01:44:30+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-06T01:44:30+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -75,7 +75,7 @@ As a writer, I click a table cell in edit mode and edit its Markdown right where
 - The text is saved before the navigation; the host side belongs to the block-editing scope (see SwRS-MDOKFSTUDIO-BLOCK-205).
 - Turning edit mode off while a cell is open saves the cell like Done.
 - When the page is hidden or closed, typing that is still waiting to be saved is sent at once; the editor is not closed because the page is going away.
-- The causes of a refusal (stale revision, changed text, read-only preview) are host-side and belong to the block-editing and trust-security scopes; in a read-only preview edit mode is unavailable, so no cell editor opens.
+- The causes of a refusal (stale revision, changed text, a file that VS Code holds read-only) are host-side and belong to the block-editing and trust-security scopes; edit mode is available whatever the trust, so the cell editor opens in Restricted Mode and for a standalone file.
 - The refusal message is shown in the status line of the editor: in the table bar once the cell text box exists, and in the cell editor while the source is loading; the navigation that waited for the save does not carry on.
 
 <!-- okf:links:start -->

@@ -20,8 +20,9 @@ selection (or press Cmd+Alt+M on macOS, Ctrl+Alt+M elsewhere). Write the comment
 press **Save** (Cmd/Ctrl+Enter); Escape cancels. The thread is saved in the comments file, which is
 created when it does not exist. A selection that spans several blocks is anchored from the first
 block to the end of the last one. To answer, open a thread and use its reply box. The button is not
-shown while a block editor is open, over code or the properties table, or in a read-only preview
-(untrusted workspace), where adding comments is refused. The name stored with a comment is the
+shown while a block editor is open, or over code or the properties table. Comments work in
+Restricted Mode and for a file outside the workspace: the comments file sits next to the
+document. The name stored with a comment is the
 `markdownOkfSchemaStudio.comments.authorName` setting, else your Git `user.name`, else your
 operating system user name. The setting can be set per user, per workspace or per folder
 (`.vscode/settings.json`), for example to sign the comments of one project with an alias.
@@ -30,7 +31,7 @@ A thread popover also has **Resolve** (then **Reopen**) and **Delete**; Delete a
 thread?" with Yes and No in the popover, and deleting the last thread keeps the file with an empty
 list. A thread whose block and quote can no longer be found is never dropped: it is listed under
 **Orphaned comments** at the end of the preview, with its quote, and you can open it from there
-to resolve or delete it. Read-only previews show neither button.
+to resolve or delete it.
 
 Threads follow the text. Edits move them in memory, and the moved lines are written to the comments
 file when you save the document (never while typing, never creating a file). When the document is

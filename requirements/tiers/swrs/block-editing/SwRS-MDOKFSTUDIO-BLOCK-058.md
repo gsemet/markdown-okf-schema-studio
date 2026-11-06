@@ -112,7 +112,7 @@ When the host writes an edit of the source document for the preview, it SHALL ma
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-BLOCK-041: the edit lock that is released when a block changed under the host
-- SwRS-MDOKFSTUDIO-TRUST-005: a read-only preview is refused before any edit is written
+- SwRS-MDOKFSTUDIO-TRUST-005: the host handles the write requests of every preview
 - SwRS-MDOKFSTUDIO-TRUST-065: a stale write request is answered before any edit is written
 
 ### Verification notes

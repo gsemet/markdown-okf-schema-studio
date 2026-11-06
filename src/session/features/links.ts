@@ -1,7 +1,7 @@
 /**
  * The links controller: the links the reader follows from the page (Markdown links, wiki links,
  * MyST references, frontmatter links). It resolves them under the navigation rules (inside the
- * workspace, or the document's folder in a read-only preview), answers the page's link discovery,
+ * workspace, or the document's folder in a preview with restricted reads), answers the page's link discovery,
  * and opens the target: an anchor of the page, another document, or an external URL.
  */
 
@@ -85,7 +85,7 @@ export class LinkController {
     const { host, navigator } = manager;
     const stage = preview.stage!;
     const navigationRoots = preview.navigationRoots;
-    const analysisRoots = preview.readOnly ? navigationRoots : preview.sessionRoots;
+    const analysisRoots = preview.restrictedReads ? navigationRoots : preview.sessionRoots;
     if (request.startsWith("okf-link:")) {
       try {
         const identity = JSON.parse(decodeURIComponent(request.slice("okf-link:".length))) as {
@@ -148,7 +148,7 @@ export class LinkController {
             resolvedRoots.projectRoot,
             ...resolvedRoots.filenameRoots,
           ].filter((root): root is string => root !== undefined),
-          preview.readOnly ? "the standalone document directory" : "the workspace",
+          preview.restrictedReads ? "the standalone document directory" : "the workspace",
           preview.frontmatterConfiguration.allowOutsideWorkspaceLinks
             && link.resolution === "document-relative",
         );
@@ -189,7 +189,7 @@ export class LinkController {
       } finally {
         preview.links.discoveries.delete(name);
       }
-    }, preview.readOnly ? "the standalone document directory" : "the workspace", navigationRoots);
+    }, preview.restrictedReads ? "the standalone document directory" : "the workspace", navigationRoots);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-079

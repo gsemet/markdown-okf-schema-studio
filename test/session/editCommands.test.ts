@@ -48,7 +48,7 @@ function fixture() {
     sessionRoots: [],
     navigationRoots: [],
     workspaceFolder: undefined,
-    readOnly: false,
+    restrictedReads: false,
     webview: {},
     states: {},
     state: undefined,

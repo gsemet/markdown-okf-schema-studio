@@ -23,7 +23,7 @@ const FIGURE = '<figure class="myst-plantuml-figure"><div class="myst-plantuml-d
 
 const build = (content: string, engine: "builtin" | "host"): string =>
   buildPreviewWebviewHtml(
-    page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, true, [], engine,
+    page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, [], engine,
   ).html;
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-023

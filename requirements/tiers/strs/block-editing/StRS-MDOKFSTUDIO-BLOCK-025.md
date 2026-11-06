@@ -13,10 +13,10 @@ scope: block-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-06T01:44:30+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-06T01:44:30+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -79,7 +79,7 @@ When a writer's edit, move, cut or paste reaches the file, the Studio SHALL chan
 
 Writers expect the preview not to corrupt the file when the page and the file disagree.
 
-Writers expect a refusal to be explained and harmless: a stale preview, a read-only preview, an included block, the frontmatter or another open edit.
+Writers expect a refusal to be explained and harmless: a stale preview, a file that VS Code holds read-only, an included block, the frontmatter or another open edit.
 
 Writers expect preview edits to join the undo history of the file in a few clear steps.
 
@@ -137,7 +137,7 @@ As a writer, I trust that every change I make from the preview lands on the line
   - [SwRS-MDOKFSTUDIO-BLOCK-244](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-244.md): previewEditClosed carries the id of the closed editor
   - [SwRS-MDOKFSTUDIO-BLOCK-245](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-245.md): previewEditFlushed carries the flush id and a flag
   - [SwRS-MDOKFSTUDIO-BLOCK-252](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-252.md): Overlapping or out-of-range planned edits leave the document unchanged
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-059](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
   - [SwRS-MDOKFSTUDIO-TRUST-064](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-064.md): Flush and editor watch messages are addressed by their own id
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type

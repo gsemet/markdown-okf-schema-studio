@@ -122,7 +122,7 @@ When the pointer is over a code block of the preview content, or the block holds
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-CODE-019: copies the raw code of the block and confirms it
-- SwRS-MDOKFSTUDIO-TRUST-006: a read-only preview keeps copying (see SwRS-MDOKFSTUDIO-TRUST-006)
+- SwRS-MDOKFSTUDIO-TRUST-006: a preview with restricted reads keeps copying (see SwRS-MDOKFSTUDIO-TRUST-006)
 
 ### Verification notes
 
@@ -141,7 +141,7 @@ When the pointer is over a code block of the preview content, or the block holds
 - Derives from:
   - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CODE-018](SwRS-MDOKFSTUDIO-CODE-018.md): Hide the copy button below 30 px of visible block
   - [SwRS-MDOKFSTUDIO-CODE-022](SwRS-MDOKFSTUDIO-CODE-022.md): Offer no copy button for edited blocks, editors, diagram sources and blocks outside the content

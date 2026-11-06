@@ -26,19 +26,23 @@ async function settle(): Promise<void> {
   for (let index = 0; index < 20; index += 1) await new Promise<void>((resolve) => setImmediate(resolve));
 }
 
-function fixture(options: { readOnly?: boolean; reject?: boolean } = {}) {
+function fixture(options: { restrictedReads?: boolean; reject?: boolean; readOnly?: boolean; standalone?: boolean } = {}) {
   const store = createMemoryDocumentStore();
-  const document = store.add("file:///w/doc/a.md", MARKDOWN, "/w/doc/a.md");
+  const documentFile = options.standalone ? "/lone/doc/a.md" : "/w/doc/a.md";
+  const document = store.add(`file://${documentFile}`, MARKDOWN, documentFile);
   const applyCalls: Array<readonly TextEdit[]> = [];
+  const reads: string[] = [];
   const documents = Object.assign(Object.create(store) as object, {
     applyEdits: (target: typeof document, edits: readonly TextEdit[], applyOptions?: never) => {
       applyCalls.push(edits);
+      // A read-only file: VS Code accepts the edit and changes nothing.
+      if (options.readOnly) return Promise.resolve(true);
       return Promise.resolve(store.applyEdits(target, edits, applyOptions));
     },
   });
   const host = {
     files: {
-      readFile: (file: string) => file in FILES
+      readFile: (file: string) => (reads.push(file), file) && file in FILES
         ? Promise.resolve(new TextEncoder().encode(FILES[file]))
         : Promise.reject(new Error("missing")),
     },
@@ -58,7 +62,7 @@ function fixture(options: { readOnly?: boolean; reject?: boolean } = {}) {
     sessionRoots: [],
     navigationRoots: [],
     workspaceFolder: undefined,
-    readOnly: options.readOnly === true,
+    restrictedReads: options.restrictedReads === true,
     webview: {},
     states: {},
     state: undefined,
@@ -80,7 +84,7 @@ function fixture(options: { readOnly?: boolean; reject?: boolean } = {}) {
     await settle();
   };
   const results = (): Array<Record<string, unknown>> => posted.filter((entry) => entry.type === "previewBlocksResult");
-  return { document, applyCalls, send, results };
+  return { document, applyCalls, reads, send, results };
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
@@ -112,13 +116,48 @@ test("files outside the workspace, other addresses and unreadable files are hand
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
-test("a read-only preview and a line that is not a block end refuse a drop", async () => {
-  const readOnly = fixture({ readOnly: true });
-  await readOnly.send(["file:///w/img/logo.png"]);
-  assert.equal(readOnly.results()[0]!.ok, false);
-  assert.equal(readOnly.document.getText(), MARKDOWN);
+test("a restricted-reads preview takes a drop, and a line that is not a block end refuses it", async () => {
+  const restricted = fixture({ restrictedReads: true });
+  await restricted.send(["file:///w/img/logo.png"]);
+  assert.equal(restricted.results()[0]!.ok, true);
+  assert.notEqual(restricted.document.getText(), MARKDOWN);
   const blank = fixture();
   await blank.send(["file:///w/img/logo.png"], 4);
   assert.equal(blank.results()[0]!.ok, false);
   assert.equal(blank.document.getText(), MARKDOWN);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+test("a dropped Markdown file is not read under restricted reads: its link has no title", async () => {
+  const restricted = fixture({ restrictedReads: true });
+  await restricted.send(["file:///w/notes/The%20Guide.md"]);
+  assert.deepEqual(restricted.reads, [], "no file is read");
+  assert.equal(restricted.results()[0]!.ok, true);
+  assert.equal(restricted.document.getText().includes("[The Guide](../notes/The%20Guide.md)"), true);
+  assert.equal(restricted.document.getText().includes("Getting"), false, "the heading is not read");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+test("a drop on a file VS Code holds read-only answers the read-only reason", async () => {
+  for (const restrictedReads of [false, true]) {
+    const drop = fixture({ readOnly: true, restrictedReads });
+    await drop.send(["file:///w/img/logo.png"]);
+    assert.deepEqual(drop.results().map(({ ok, reason }) => ({ ok, reason })), [
+      { ok: false, reason: "This file is read-only in VS Code." },
+    ]);
+    assert.equal(drop.document.getText(), MARKDOWN);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+test("a drop on a standalone file links any file relative to the document, reading none", async () => {
+  const drop = fixture({ standalone: true, restrictedReads: true });
+  await drop.send(["file:///lone/img/logo.png", "file:///w/notes/The%20Guide.md"]);
+  assert.equal(drop.results()[0]!.ok, true);
+  assert.deepEqual(drop.reads, [], "no file is read");
+  assert.equal(
+    drop.document.getText().includes("![logo](../img/logo.png) [The Guide](../../w/notes/The%20Guide.md)"),
+    true,
+  );
 });
