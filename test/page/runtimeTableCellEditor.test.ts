@@ -1477,14 +1477,23 @@ test("Tab and Shift+Tab leave a cell with changed text showing the change, not t
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-035
-test("an arrow key leaves a cell showing its new text", () => {
-  const harness = createRuntimeHarness();
-  const { cells, input } = openTableCellEditorForTab(harness);
-  input().value = "x2";
-  input().selectionStart = 2;
-  input().selectionEnd = 2;
-  input().dispatch("input");
-  input().dispatch("keydown", { key: "ArrowRight", preventDefault: () => undefined });
-  assert.equal(input().value, "y");
-  assert.equal(shownText(cells[1][0]), "x2");
-});
+for (const { key, tabs, from, atStart } of [
+  { key: "ArrowRight", tabs: 0, from: [1, 0], atStart: false },
+  { key: "ArrowDown", tabs: 0, from: [1, 0], atStart: false },
+  { key: "ArrowLeft", tabs: 1, from: [1, 1], atStart: true },
+  { key: "ArrowUp", tabs: 2, from: [2, 0], atStart: true },
+]) {
+  test(`${key} leaves a cell showing its new text`, () => {
+    const harness = createRuntimeHarness();
+    const { cells, input } = openTableCellEditorForTab(harness);
+    for (let tab = 0; tab < tabs; tab += 1) input().dispatch("keydown", { key: "Tab", preventDefault: () => undefined });
+    assert.equal(cellEditorOf(harness).parentElement, cells[from[0]][from[1]]);
+    input().value = "n2";
+    input().setSelectionRange(atStart ? 0 : 2, atStart ? 0 : 2);
+    input().dispatch("input");
+    input().dispatch("keydown", { key, preventDefault: () => undefined });
+    assert.notEqual(cellEditorOf(harness).parentElement, cells[from[0]][from[1]]);
+    assert.equal(shownText(cells[from[0]][from[1]]), "n2");
+    assert.equal(harness.messages.some((message) => message.final === true), false);
+  });
+}

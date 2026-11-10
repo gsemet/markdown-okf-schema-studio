@@ -30,6 +30,7 @@ implemented_in_files:
 - src/page/features/textControls.ts
 tested_in_files:
 - test/integration/realInput/markers.ts
+- test/page/cellInlineMarkdown.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/visual/capture_edit_checks.py
@@ -136,7 +137,8 @@ Home moves the caret to the start of the text, and Shift extends the selection.
 
 ### Verification notes
 
-- Method: test/page/runtimeTableCellEditor.test.ts (Tab and Shift+Tab, Tab in the last cell, Shift+Tab in the first header cell, arrow keys in every direction, native arrows with a selection, modifiers, IME or a caret inside a multi-line cell, arrow without a matching model cell, block navigation fallback for ArrowUp, Home and End, the table box scrolled to a cell right of it, left of it across the wrap and with Shift+Tab, a visible cell, a target wider than the box, a click on a partly hidden cell, a layout pass that resizes the box under an open editor; scenarios Tab along a row, Tab in the last cell, the cell left shows its new text (a new row, a changed cell, an arrow key), Shift+Tab, ArrowLeft and ArrowRight, ArrowUp and ArrowDown, keys that stay native, no cell in the arrow direction, Home and End, Tab in a table wider than the pane).
+- Method: test/page/runtimeTableCellEditor.test.ts (Tab and Shift+Tab, Tab in the last cell, Shift+Tab in the first header cell, arrow keys in every direction, native arrows with a selection, modifiers, IME or a caret inside a multi-line cell, arrow without a matching model cell, block navigation fallback for ArrowUp, Home and End, the table box scrolled to a cell right of it, left of it across the wrap and with Shift+Tab, a visible cell, a target wider than the box, a click on a partly hidden cell, a layout pass that resizes the box under an open editor; scenarios Tab along a row, Tab in the last cell, the cell left shows its new text (a new row, a changed cell, each of the four arrow keys), Shift+Tab, ArrowLeft and ArrowRight, ArrowUp and ArrowDown, keys that stay native, no cell in the arrow direction, Home and End, Tab in a table wider than the pane).
+- Method: test/page/cellInlineMarkdown.test.ts (the inline Markdown the cell left shows: marks, link allowlist with `javascript:`, `data:` and protocol-relative `//host` targets left without href, backslash escapes, `<br>`, no emphasis inside a word such as `snake_case_name` or around spaces such as `2 * 3 * 4`, HTML never parsed).
 - Method: test/integration/realInput/markers.ts and real-window scenario scenarioTableTab (id table-editing/r05-tab-adds-row) in test/integration/realInput/editorWidgets.ts (Tab along a row, Tab in the last cell, the first cell of the new row shows the text typed after Tab).
 - Method: test/integration/realInput/markers.ts and real-window scenario scenarioWideTableTab in test/integration/realInput/wideTableTab.ts, assertion only (Tab in a table wider than the pane: real Tab and Shift+Tab presses through the row and across the wrap, and from the last cell of a table scrolled to its end, in Margin and Auto width).
 - Method: test/page/runtimeBlockEditor.test.ts (a table cell arrow inside a wrapped cell does not move to another cell; keys that stay native, wrapped cell row).

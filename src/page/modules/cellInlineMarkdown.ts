@@ -5,7 +5,7 @@
  * HTML: every text goes through `textContent`.
  */
 
-const SAFE_HREF = /^(?:https?:|mailto:|#|\/|\.\.?\/)/iu;
+const SAFE_HREF = /^(?:https?:|mailto:|#|\/(?!\/)|\.\.?\/)/iu;
 
 type Inline = { open: string; tag: string };
 const MARKS: readonly Inline[] = [
@@ -15,6 +15,29 @@ const MARKS: readonly Inline[] = [
   { open: "*", tag: "em" },
   { open: "_", tag: "em" },
 ];
+
+const WORD = /[\p{L}\p{N}]/u;
+const SPACE = /\s/u;
+
+/**
+ * The index of the delimiter closing the one opened at `index`, or -1. Follows the CommonMark
+ * flanking rules as far as is simple: the text after the opener and before the closer is not a
+ * space, and `_` never opens or closes inside a word (`snake_case_name` stays text).
+ */
+function closingIndex(text: string, index: number, open: string): number {
+  const after = text[index + open.length];
+  if (after === undefined || SPACE.test(after)) return -1;
+  const underscore = open.startsWith("_");
+  if (underscore && index > 0 && WORD.test(text[index - 1]!)) return -1;
+  let close = text.indexOf(open, index + open.length);
+  while (close > index + open.length) {
+    const before = text[close - 1]!;
+    const next = text[close + open.length];
+    if (!SPACE.test(before) && !(underscore && next !== undefined && WORD.test(next))) return close;
+    close = text.indexOf(open, close + 1);
+  }
+  return -1;
+}
 
 function textSpan(document: Document, text: string): HTMLElement {
   const span = document.createElement("span");
@@ -76,12 +99,15 @@ function appendCellInline(document: Document, parent: HTMLElement, text: string)
     }
     const mark = MARKS.find((candidate) => rest.startsWith(candidate.open));
     if (mark) {
-      const close = text.indexOf(mark.open, index + mark.open.length);
-      if (close > index + mark.open.length) {
+      const close = closingIndex(text, index, mark.open);
+      if (close > 0) {
         wrap(mark.tag, text.slice(index + mark.open.length, close));
         index = close + mark.open.length;
         continue;
       }
+      plain += mark.open;
+      index += mark.open.length;
+      continue;
     }
     plain += char;
     index += 1;
