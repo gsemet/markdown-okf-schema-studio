@@ -65,7 +65,13 @@ named by the date of the pull request (the date may differ from the tag's; nothi
 6. The version push is monitored through the tag, the GitHub release with its notes and images, the
    Marketplace publication and Pages, recovering a red heavy job as in "After the merge" above.
 7. The release is archived with a `report.md`: tag, release URL, CI runs (heavy run on `main`,
-   version push).
+   version push), and the issues the release closed (from the PRs' closing references,
+   `gh pr view <n> --json closingIssuesReferences`, and the `issue:` lines of the changes).
+8. The agent that talks to the owner drafts "Released in
+   https://github.com/gsemet/markdown-okf-schema-studio/releases/tag/vX.Y.Z" for each listed issue,
+   gets one owner approval for the whole list, posts each with `gh issue comment`, and reads the
+   comments back. This comes after the publication, so it does not break the rule that nothing is
+   asked of the owner between the notes review and the publication.
 
 Between the notes review (step 5) and the publication, the owner is asked nothing, except a real
 blocker: a product decision is needed, or a fix cannot be completed.
