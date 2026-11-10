@@ -204,6 +204,11 @@ export function createMarkdownTableTools() {
     return `${indentation}| ${newCells.map((cell) => escapeCellPipes(cell)).join(" | ")} |`;
   }
 
+  // GFM and the preview's markdown-it accept one dash or more with optional colons in a delimiter
+  // cell. A cell of fewer than three dashes is accepted only on a line with a pipe (checked in
+  // parse), so a setext heading ("Title" over "-" or "--") never parses as a one-column table.
+  const DELIMITER_CELL = /^:?-+:?$/u;
+
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
   function parse(source: string): MarkdownTableModel | undefined {
     const lineEnding = /\r\n|\r|\n/u.exec(source)?.[0] ?? "\n";
@@ -216,7 +221,8 @@ export function createMarkdownTableTools() {
     if (
       columnCount < 1
       || rows.some((row) => row.length !== columnCount)
-      || !rows[1].every((cell) => /^:?-{3,}:?$/u.test(cell.replace(/\s/gu, "")))
+      || !rows[1].every((cell) => DELIMITER_CELL.test(cell.replace(/\s/gu, "")))
+      || (!lines[1].includes("|") && !rows[1].every((cell) => /-{3,}/u.test(cell)))
     ) {
       return undefined;
     }

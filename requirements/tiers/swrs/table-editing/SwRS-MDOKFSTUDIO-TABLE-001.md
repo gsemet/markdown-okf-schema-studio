@@ -31,6 +31,7 @@ implemented_in_files:
 - src/page/modules/markdownTable.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
+- test/integration/realInput/tableShortDelimiter.ts
 - test/integration/tableMoves.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/modules/markdownTable.test.ts
@@ -93,7 +94,7 @@ When edit mode is on and the writer clicks a cell of a rendered pipe table, the 
 - THEN the region still holds no status and the bar status shows the new position
 
 ### Scenario (boundary): Only a well-formed pipe table opens a cell editor
-A table is editable when it has a header row, a delimiter row whose cells are at least three dashes with optional colons (the delimiter rule is /^:?-{3,}:?$/ on each delimiter cell with spaces removed), and the same number of cells in every row.
+A table is editable when it has a header row, a delimiter row whose cells are at least one dash with optional colons (the delimiter rule is /^:?-+:?$/ on each delimiter cell with spaces removed; when a delimiter cell has fewer than three dashes, the delimiter line holds a pipe), and the same number of cells in every row.
 
 | Input | Outcome |
 | --- | --- |
@@ -101,7 +102,9 @@ A table is editable when it has a header row, a delimiter row whose cells are at
 | the same with colons (":---", "---:", ":---:") | parses into rows of two cells and opens a cell editor |
 | a table with no outer pipes | parses into rows of two cells and opens a cell editor |
 | a single line | parse returns no table, no cell editor is built |
-| a delimiter cell of two dashes ("--") | parse returns no table, no cell editor is built |
+| "\| a \| b \|\n\| :-- \| --: \|\n\| c \| d \|" | parses into rows of two cells and opens a cell editor, the delimiter row is left as written by a cell edit |
+| "\| a \| b \|\n\|-\|-\|\n\| c \| d \|" | parses into rows of two cells and opens a cell editor |
+| a line over a "--" line with no pipe (a setext heading) | parse returns no table, no cell editor is built |
 | a body row with three cells under a two-cell header | parse returns no table, no cell editor is built |
 
 ### Scenario (refusal): A block that is no editable pipe table opens in the raw Markdown editor
@@ -117,7 +120,9 @@ A table is editable when it has a header row, a delimiter row whose cells are at
 - Method: test/page/runtimeTableCellEditor.test.ts (click and one previewEditOpen, selected mark and hidden-content wrapper, raw Markdown of the header and body cells via "table editing switches cells without losing changes and finalizes before leaving the table" and "table cell editing exposes row and column operations and saves the edited table", opening caret via "arrow keys move the table cell editor cell to cell in every direction", no status hint via "the table cell editor has Done and Cancel but no status hint").
 - Method: test/page/fmtableReqTable.requirements.test.ts (loading status and its replacement; fallback to the raw Markdown editor for a source that is no pipe table or has no cell at the clicked position).
 - Method: test/core/preview/previewStyles.test.ts (hidden content that keeps its width, and the 2 px focus-border outline of the selected cell in edit mode).
-- Method: test/page/modules/markdownTable.test.ts (well-formed and malformed tables, "non-table blocks and malformed separator rows cannot be edited as pipe tables"; parse and splitRow for the trimmed text).
+- Method: test/page/modules/markdownTable.test.ts (well-formed and malformed tables, "non-table blocks and malformed separator rows cannot be edited as pipe tables"; parse and splitRow for the trimmed text; short delimiter cells: "a delimiter row of one or two dashes, with or without colons, is an editable pipe table", "a cell edit in a short-delimiter table leaves the delimiter row as written, LF and CRLF", "a new column in a short-delimiter table gets a three-dash cell and keeps the others verbatim", "a heading over a dash line with no pipe is no table, a piped block still needs a valid delimiter").
+- Method: test/page/fmtableReqTable.requirements.test.ts also "a table with a two-dash delimiter opens the cell editor, not the raw Markdown editor".
+- Method: test/integration/realInput/tableShortDelimiter.ts (scenario table-short-delimiter: click on a cell of a ":--" and "--:" table opens the cell editor and the table bar, a typed edit keeps the delimiter row).
 - Method: visual scenarios table-editing/v02 to v05 (click, selected cell, caret at the end in step open; v05 only repeats the assertions of v02 to v04) and table-editing/v01 to v05 (no status hint).
 - Criteria: The region exists in the cell with the label "Markdown table cell editor" and exactly one previewEditOpen is posted for the click. The wrapper element carries data-sphinx-table-cell-content and aria-hidden, and the style makes it display block, height 0 and visibility hidden. The text box value equals the model cell, with rendered row 0 mapped to model row 0 and rendered row n to model row n+1. document.activeElement is the text box and selectionStart equals selectionEnd equals the text length. No element with the status attribute is a descendant of the cell editor region once the text box is rendered. parse returns a model for the well-formed inputs and undefined for the malformed ones. After the fallback answer the cell has no selected mark and the region holds a text box with the label "Raw Markdown block". The edit-mode-off refusal is read from the click handler in src/page/features/pageInput.ts and has no dedicated test; the empty-cell caret boundary has no dedicated test.
 

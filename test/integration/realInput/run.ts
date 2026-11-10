@@ -38,6 +38,7 @@ import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfte
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
 import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
+import { scenarioTableShortDelimiter } from "./tableShortDelimiter";
 import { scenarioWideTableTab } from "./wideTableTab";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
 import { scenarioLinkClickEditsInEditMode } from "./linkEditMode";
@@ -167,6 +168,7 @@ export async function run(): Promise<void> {
       "table-moves": () => scenarioTableMoves(page),
       "wide-table-tab": () => scenarioWideTableTab(page, evidence),
       "table-escape": () => scenarioTableEscapeKeepsCellsLeft(page),
+      "table-short-delimiter": () => scenarioTableShortDelimiter(page),
       "find-after-click": () => scenarioFindRightAfterClick(page),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
       "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),
@@ -219,6 +221,8 @@ export async function run(): Promise<void> {
     await scenarioWideTableTab(page, evidence);
     // QA replay 271-c2-1: Escape cancels only the open cell; the cells left keep their text.
     await scenarioTableEscapeKeepsCellsLeft(page);
+    // QA replay 271-c3-1: a table with a two-dash delimiter row opens the cell editor.
+    await scenarioTableShortDelimiter(page);
     await scenarioTableStructure(page);
     await scenarioTableMoves(page);
     await scenarioBooleanOneClick(page, evidence);
