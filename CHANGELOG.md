@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- In Auto width, a wide table keeps its full width while you edit one of its cells, and moving from
+  cell to cell does not change it, instead of shrinking to the text column and cutting the last
+  column. A table that fits the text column stays in it. A table edited as Markdown source still
+  keeps the column width.
 - A table cell you leave with Tab or an arrow key shows the text you just typed, instead of staying
   empty or showing its old text until the page renders again.
 

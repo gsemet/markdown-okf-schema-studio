@@ -53,13 +53,33 @@ export function installWidthMode(
   // A prose column needs about this many characters of the body font (the review said 20, see tableMinimum).
   const proseMinimumCharacters = 24;
 
-  const clear = (): void => {
-    for (const element of marked) {
-      element.removeAttribute(wideAttribute);
-      (element as HTMLElement).style.setProperty(breakoutProperty, "");
-      (element as HTMLElement).style.setProperty(shiftProperty, "");
+  // The wrappers measured by the last pass, and the geometry (column, pane, TOC reserve, shift) it
+  // measured them in: a table whose cell editor is open keeps its verdict until that geometry changes.
+  let decided = new Set<Element>();
+  let lastGeometry = "";
+
+  const release = (element: Element): void => {
+    element.removeAttribute(wideAttribute);
+    (element as HTMLElement).style.setProperty(breakoutProperty, "");
+    (element as HTMLElement).style.setProperty(shiftProperty, "");
+    marked.delete(element);
+  };
+
+  const clear = (except: Set<Element> = new Set()): void => {
+    for (const element of Array.from(marked)) {
+      if (!except.has(element)) release(element);
     }
-    marked.clear();
+  };
+
+  const hasCellEditor = (wrapper: Element): boolean => Boolean(
+    wrapper.querySelector?.("[data-sphinx-preview-table-cell-editor]"),
+  );
+
+  // The text of a cell as rendered: while its editor is open the cell also holds the editor's
+  // labels, so only the hidden rendered content counts.
+  const renderedText = (cell: Element): string => {
+    const hidden = cell.querySelector?.('[data-sphinx-table-cell-content="true"]');
+    return (hidden ?? cell).textContent ?? "";
   };
 
   // The element that breaks out: a top-level block, or the paragraph holding only an image.
@@ -73,8 +93,10 @@ export function installWidthMode(
     return undefined;
   };
 
-  // The elements that may break out in Auto: an element under edit, or a figure sized relative to
-  // the column, keeps the column width.
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
+  // The elements that may break out in Auto: an element whose source editor is open, or a figure
+  // sized relative to the column, keeps the column width. A table whose cell is being edited stays
+  // rendered, so its cell editor (a textarea inside the cell) does not count: it keeps its breakout.
   const eligibleWrappers = (content: HTMLElement): Element[] => {
     const wrappers: Element[] = [];
     for (const element of Array.from(content.querySelectorAll("table, figure, img, pre, .myst-mermaid-diagram"))) {
@@ -84,7 +106,10 @@ export function installWidthMode(
       const sized = (wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img"))?.getAttribute("data-okf-width");
       if (sized && /(?:%|r?em)$/u.test(sized)) continue;
       if (wrapper.getAttribute("data-sphinx-preview-editing") === "true"
-        || wrapper.querySelector?.('[data-sphinx-preview-editing="true"], textarea')) continue;
+        || wrapper.querySelector?.('[data-sphinx-preview-editing="true"]')
+        || Array.from(wrapper.querySelectorAll?.("textarea") ?? []).some(
+          (field) => !field.closest?.("[data-sphinx-preview-table-cell-editor]"),
+        )) continue;
       wrappers.push(wrapper);
     }
     return wrappers;
@@ -144,7 +169,7 @@ export function installWidthMode(
     const body = bodyRows.length > 0 ? bodyRows : grid;
     const plan: TablePlan = { grid, block: [], token: [], longest: [] };
     for (let column = 0; column < count; column += 1) {
-      const words = body.map((cells) => (cells[column].textContent ?? "").trim().split(/\s+/u).filter(Boolean));
+      const words = body.map((cells) => renderedText(cells[column]).trim().split(/\s+/u).filter(Boolean));
       const block = grid.some((cells) => cells[column].querySelector?.("pre"));
       plan.block.push(block);
       plan.token.push(!block && words.every((cellWords) => cellWords.length <= 3));
@@ -189,8 +214,16 @@ export function installWidthMode(
     const wrappers = content && mode === "auto" ? eligibleWrappers(content) : undefined;
     // The measure below uncaps each wrapper, which makes the browser reset its sideways scroll.
     const scrolled = wrappers ? scrolledBoxes(wrappers) : [];
-    clear();
+    // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
+    // A table whose cell editor is open keeps the verdict of the pass before the editor opened: the
+    // selected cell's minimum width would otherwise move the breakout at every Tab, arrow or click.
+    const held = new Set<Element>(
+      (wrappers ?? []).filter((wrapper) => decided.has(wrapper) && hasCellEditor(wrapper)),
+    );
+    clear(held);
     if (mode !== "auto") {
+      decided = new Set();
+      lastGeometry = "";
       for (const cell of tokenCells) cell.removeAttribute(tokenAttribute);
       tokenCells.clear();
     }
@@ -234,11 +267,21 @@ export function installWidthMode(
     const box = content.getBoundingClientRect?.();
     const columnCentre = (box?.left ?? 0) + (parseFloat(style?.paddingLeft ?? "") || 0) + column / 2;
     const shift = Math.round((pane - reserved) / 2 - columnCentre);
+    // A real resize (pane, TOC column, toolbar, zoom) changes the geometry: the held tables are measured again.
+    const geometry = [column, pane, reserved, shift].join(" ");
+    if (geometry !== lastGeometry) {
+      for (const wrapper of held) release(wrapper);
+      held.clear();
+    }
+    lastGeometry = geometry;
+    decided = new Set(wrappers);
+    const measured = wrappers.filter((wrapper) => !held.has(wrapper));
     // A table is capped at the column, which wraps its cells: measure it uncapped, then restore.
     const measuring = "data-sphinx-preview-measuring";
     // The token cells are marked first, so the measure reads their final sizes.
     const plans = new Map<Element, TablePlan>();
     const wantedTokens = new Set<Element>();
+    // The token cells of a held table stay marked: its plan reads the rendered text, not the editor.
     for (const wrapper of wrappers) {
       const table = tableOf(wrapper);
       const plan = table ? planTable(table) : undefined;
@@ -258,16 +301,16 @@ export function installWidthMode(
         tokenCells.add(cell);
       }
     }
-    for (const wrapper of wrappers) {
+    for (const wrapper of measured) {
       wrapper.setAttribute(measuring, "");
       tableOf(wrapper)?.setAttribute(measuring, "");
     }
     // A table whose minimums fit the column stays in it (LAYOUT-044), whatever its natural width.
     const stays = new Set<Element>();
     for (const [wrapper, plan] of plans) {
-      if (tableMinimum(plan) <= column + 1) stays.add(wrapper);
+      if (!held.has(wrapper) && tableMinimum(plan) <= column + 1) stays.add(wrapper);
     }
-    const widths = wrappers.map((wrapper) => {
+    const widths = measured.map((wrapper) => {
       const image = wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img");
       // An image is capped by the column, so its own size is the natural width: the pixel width
       // attribute when it has one (an SVG has no intrinsic size), else the intrinsic width.
@@ -279,11 +322,11 @@ export function installWidthMode(
       const box = wrapper.getBoundingClientRect?.()?.width ?? 0;
       return Math.ceil(Math.max(wrapper.scrollWidth, declared, intrinsic, box));
     });
-    for (const wrapper of wrappers) {
+    for (const wrapper of measured) {
       wrapper.removeAttribute(measuring);
       tableOf(wrapper)?.removeAttribute(measuring);
     }
-    wrappers.forEach((wrapper, index) => {
+    measured.forEach((wrapper, index) => {
       if (stays.has(wrapper)) return;
       const room = hasRowHandles(wrapper) ? pane - reserved - handleGutter * 2 : available;
       const extra = widths[index] <= room ? Math.ceil(widths[index] - column) : Math.floor(room - column);

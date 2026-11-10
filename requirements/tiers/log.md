@@ -2,6 +2,19 @@
 
 ## 2026-11-10
 
+### A wide table keeps its Auto breakout while a cell is edited (CR 269)
+
+- StRS-MDOKFSTUDIO-LAYOUT-003 (approved, changed with the owner's agreement of 2026-11-10; approved_by and
+  approved_at reset): an element whose source editor is open keeps the column width; a table whose cell
+  is being edited keeps its Auto breakout.
+- SwRS-MDOKFSTUDIO-LAYOUT-023 (proposed, updated): the "under edit" row splits into the source editor
+  (column width) and the cell editor (keeps the breakout it had when the editor opened, the same in every
+  cell the editor moves to; a table that fits the column stays in it; measured again only on a real resize).
+  Before, the cell field, a textarea, made the table leave its breakout and shrink to the column while a
+  cell was edited. Source widthMode.ts; new real-browser tests in test/page/tableBreakout.test.ts.
+- SwRS-MDOKFSTUDIO-TABLE-035 (proposed, updated): the re-scroll after a layout pass that resizes the box
+  under an open editor stays; it no longer says the table leaves its breakout.
+
 ### The cell left with Tab or an arrow key shows its new text (CR 268, GitHub #335)
 
 - SwRS-MDOKFSTUDIO-TABLE-035 (proposed, updated): the cell the editor leaves with Tab, Shift+Tab or an
