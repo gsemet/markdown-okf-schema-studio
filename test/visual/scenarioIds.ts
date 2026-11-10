@@ -382,6 +382,7 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "table-editing/v26-handles-breakout-table-auto-light-900": "In edit mode in Auto width at 900 px in the light theme, a pipe table that breaks out of the margin shows the handle of each of its three body rows on its real left edge, centred on its row, and the handle of each of its five columns on the top of the column, centred on its header cell.",
   "table-editing/v27-row-move-breakout-table-auto-light-900": "In edit mode in Auto width at 900 px in the light theme, dragging the handle of the first body row of a pipe table that breaks out of the margin below the last row saves the table with its rows in the new order, and once the page is rendered again the table breaks out of the margin anew and the handles of its three rows and five columns sit on the real left edge and top of the table.",
   "table-editing/v28-table-row-hover-below-handles-light-900": "In edit mode at 900 px in the light theme, the tint of the hovered table row stays below the row handles, which still take the press.",
+  "table-editing/v29-cell-editor-clamped-light-280": "In the light theme at 280 px, a table with row handles whose cell editor is open keeps the edited cell, its field and Done and Cancel inside the table's box and the pane, the cell at least 8em wide and narrower than its 300 px minimum.",
   "table-editing/v24-table-bar-groups-light-360": "In the light theme at 360 px, the table bar of a cell editor draws a rule before Col left and before List table and none between Col left and Col right and Col \u2212, and the rule of the cell formatting group sits at the start of that group, on its own line when the group wraps.",
   "table-editing/v25-table-bar-groups-dark-360": "In the dark theme at 360 px, the table bar of a cell editor draws a rule before Col left and before List table and none between Col left and Col right and Col \u2212, and the rule of the cell formatting group sits at the start of that group, on its own line when the group wraps.",
   "table-editing/v09-row-dragging-light-900": "In edit mode in the light preview at 900 px, dragging the handle of a body row over another row of the table leaves exactly one row dimmed (opacity 0.45), shows a drop line below the row under the pointer, and opens no editor.",
@@ -891,6 +892,7 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "table-editing/v05-cell-editor-wraps-dark-460": [],
   "table-editing/v24-table-bar-groups-light-360": ["arrowdown", "cell-bar", "cell-emoji", "open"],
   "table-editing/v25-table-bar-groups-dark-360": ["arrowdown", "cell-bar", "cell-emoji", "open"],
+  "table-editing/v29-cell-editor-clamped-light-280": ["open"],
 };
 
 /**

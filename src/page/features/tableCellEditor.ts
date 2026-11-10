@@ -7,6 +7,7 @@
 
 import { setCellInline } from "../modules/cellInlineMarkdown";
 import { caretRectOf } from "../modules/caretRect";
+import { CELL_REVEAL_MARGIN, clearCellEditorRoom, fitCellToRoom } from "../modules/cellEditorRoom";
 import { createEditPalette } from "../modules/editPalette";
 import { createSlashMenu } from "../modules/slashMenu";
 import { stickyBarShift } from "../modules/stickyBar";
@@ -17,9 +18,6 @@ import type { BlockEdit, CaretPosition, PageRuntime, TableCellEditor } from "./p
 function modelRowOf(renderedRow: number): number {
   return renderedRow === 0 ? 0 : renderedRow + 1;
 }
-
-/** The gap kept between a revealed cell and the side edges of its table's scroll box. */
-const CELL_REVEAL_MARGIN = 16;
 
 // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
 // A table wider than the pane scrolls sideways in its own box. The selected cell and its editor
@@ -84,6 +82,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     }
     rt.blockEditor.restoreTableCellContent(edit);
     edit.selectedCell!.removeAttribute("data-sphinx-preview-table-cell-selected");
+    clearCellEditorRoom(edit.selectedCell!);
     edit.element.remove();
     edit.focusAtOpen = document.activeElement;
     edit.selectedCell = selectedCell;
@@ -566,6 +565,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
     // The editor is now in its cell, so both rects are current: every open, switch and reopen
     // brings the cell and its editor inside the table's sideways scroll box.
+    fitCellToRoom(window, selectedCell);
     revealCellInTable(selectedCell, edit.element);
   }
 
@@ -579,6 +579,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     revealOpenCell() {
       const edit = state.activeBlockEdit;
       if (!edit || edit.finishing || !edit.selectedCell) return;
+      fitCellToRoom(window, edit.selectedCell);
       revealCellInTable(edit.selectedCell, edit.element);
     },
     bindKeys() {

@@ -6,6 +6,7 @@
  * `./blockSourceEditor.ts`); the cell editor in `./tableCellEditor.ts`.
  */
 
+import { clearCellEditorRoom } from "../modules/cellEditorRoom";
 import { AUTOSAVE_DELAY_MS, isApplePlatform } from "../pageSettings";
 import type { BlockEdit, BlockEditor, PageRuntime } from "./pageRuntime";
 
@@ -86,6 +87,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     restoreTableCellContent(edit);
     if (edit.selectedCell) {
       edit.selectedCell.removeAttribute("data-sphinx-preview-table-cell-selected");
+      clearCellEditorRoom(edit.selectedCell);
     } else {
       (edit.renderedTarget || edit.target).removeAttribute("data-sphinx-preview-editing");
     }

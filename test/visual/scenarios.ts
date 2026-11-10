@@ -142,6 +142,8 @@ export interface Scenario {
   tableMoveChecks?: boolean;
   /** The tints of a table's heading, even rows and hovered row, with a real pointer. */
   tableRowColourChecks?: "page" | "overflow" | "edit";
+  /** QA271-14: in a pane narrower than the cell minimum the edited cell, its field and buttons stay in view. */
+  cellRoomChecks?: boolean;
   frontmatterLinkState?: "loading" | "loaded";
   hideDescriptionColumn?: boolean;
   contextTagChecks?: boolean;

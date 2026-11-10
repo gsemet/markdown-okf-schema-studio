@@ -43,6 +43,7 @@ import { SVG_PICTURE_SCENARIOS } from "./svgPictureScenarios";
 import { FRONTMATTER_VALUE_SCENARIOS } from "./frontmatterValueScenarios";
 import { WIDTH_SCROLL_SCENARIOS } from "./widthScrollScenarios";
 import { BREAKOUT_HANDLE_SCENARIOS } from "./breakoutHandleScenarios";
+import { TABLE_CELL_ROOM_SCENARIOS } from "./tableCellRoomScenarios";
 import { TABLE_ROW_COLOUR_SCENARIOS } from "./tableRowColourScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
@@ -479,6 +480,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...WIDTH_SCROLL_SCENARIOS,
   ...BREAKOUT_HANDLE_SCENARIOS,
   ...TABLE_ROW_COLOUR_SCENARIOS,
+  ...TABLE_CELL_ROOM_SCENARIOS,
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",
