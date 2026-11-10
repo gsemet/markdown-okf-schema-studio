@@ -2,6 +2,14 @@
 
 ## 2026-11-10
 
+### Harden the cell inline Markdown shown after Tab (CR 270)
+
+- SwRS-MDOKFSTUDIO-TABLE-035 (proposed, verification notes only): new direct unit test
+  test/page/cellInlineMarkdown.test.ts; the arrow-key scenario now loops over the four keys. Code
+  (src/page/modules/cellInlineMarkdown.ts): a protocol-relative `//host` link target is dropped; `_` no
+  longer opens or closes emphasis inside a word and a delimiter next to a space does not open or close
+  (`snake_case_name`, `2 * 3 * 4` stay text); an unclosed delimiter stays literal.
+
 ### A wide table keeps its Auto breakout while a cell is edited (CR 269)
 
 - StRS-MDOKFSTUDIO-LAYOUT-003 (approved, changed with the owner's agreement of 2026-11-10; approved_by and

@@ -7,7 +7,9 @@
   column. A table that fits the text column stays in it. A table edited as Markdown source still
   keeps the column width.
 - A table cell you leave with Tab or an arrow key shows the text you just typed, instead of staying
-  empty or showing its old text until the page renders again.
+  empty or showing its old text until the page renders again. Words such as `snake_case_name` and
+  sums such as `2 * 3 * 4` stay plain there instead of flashing as emphasis, and a `//host` link
+  target is no longer kept.
 
 ## 1.5.0 - 2026-11-06
 
