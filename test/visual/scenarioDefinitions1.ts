@@ -40,6 +40,7 @@ import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
 import { TOOLBAR_FLOAT_SCENARIOS } from "./toolbarFloatScenarios";
 import { READ_ONLY_IMAGES_SCENARIOS } from "./readOnlyImagesScenarios";
 import { SVG_PICTURE_SCENARIOS } from "./svgPictureScenarios";
+import { FRONTMATTER_VALUE_SCENARIOS } from "./frontmatterValueScenarios";
 import { WIDTH_SCROLL_SCENARIOS } from "./widthScrollScenarios";
 import { BREAKOUT_HANDLE_SCENARIOS } from "./breakoutHandleScenarios";
 import { TABLE_ROW_COLOUR_SCENARIOS } from "./tableRowColourScenarios";
@@ -474,6 +475,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...TOOLBAR_FLOAT_SCENARIOS,
   ...READ_ONLY_IMAGES_SCENARIOS,
   ...SVG_PICTURE_SCENARIOS,
+  ...FRONTMATTER_VALUE_SCENARIOS,
   ...WIDTH_SCROLL_SCENARIOS,
   ...BREAKOUT_HANDLE_SCENARIOS,
   ...TABLE_ROW_COLOUR_SCENARIOS,

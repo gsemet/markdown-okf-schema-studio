@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { test } from "node:test";
 
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
+import { findElements, hasClass, parseHtml, textContent } from "./dom";
 
 /** The writing skill is installed on machines without this repository: it is checked as a folder. */
 const skillDirectory = path.resolve(__dirname, "../../../../skills/writing-for-markdown-okf-schema-studio");
@@ -96,6 +97,7 @@ const FAMILIES: Array<{ name: string; source: RegExp; html: RegExp }> = [
   { name: "TODO comment", source: /^<!-- TODO:/mu, html: /data-okf-comment-kind="todo"/u },
   { name: "comment thread", source: /^<!-- THREAD$/mu, html: /data-okf-comment-kind="thread"/u },
   { name: "front matter", source: /^---\ntitle: /u, html: /<h1[^>]*>Export plan<\/h1>/u },
+  { name: "front matter value in the text", source: /`= this\.status`/u, html: /<span class="okf-frontmatter-value"[^>]*>draft<\/span>[\s\S]*export, csv[\s\S]*<span class="okf-frontmatter-value"[^>]*>Ada<\/span>/u },
 ];
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-073
@@ -158,4 +160,21 @@ test("an example with an unknown directive is caught by the same check", async (
   const { html, diagnostics } = await renderExample(":::{no-such-directive}\nbody\n:::");
   assert.match(html, /myst-unresolved/u);
   assert.ok(diagnostics.some((entry) => entry.severity === "warning"));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+test("the way the skill shows the front matter form itself renders plain code, with no value and no warning", async () => {
+  const marker = "The form itself, shown as code:";
+  const example = skillSources().flatMap((file) => examplesOf(file)).find((text) => text.includes(marker));
+  assert.ok(example, `no example of the skill shows the form itself ("${marker}")`);
+  const { html, diagnostics } = await renderExample(example);
+  assert.deepEqual(diagnostics, []);
+  const paragraph = findElements(parseHtml(html), (element) => element.tagName === "p")
+    .find((element) => textContent(element).startsWith(marker));
+  assert.ok(paragraph, "the line that shows the form is rendered");
+  const codes = findElements(paragraph, (element) => element.tagName === "code").map(textContent);
+  assert.deepEqual(codes, ["`= this.status`"], "the form stays code, shown as written");
+  const resolved = findElements(paragraph, (element) =>
+    hasClass(element, "okf-frontmatter-value") || hasClass(element, "okf-frontmatter-missing"));
+  assert.deepEqual(resolved, [], "the form shown as code is neither a value nor a warning");
 });

@@ -31,6 +31,7 @@ import {
   wrapBareBlockImages,
 } from "./mystBlockTransforms";
 import { normalizeContextTagContainers, repairGroupedContextTagHtml } from "./mystContextTags";
+import { showFrontmatterValues } from "./frontmatterValues";
 import { expandRawHtmlElements } from "./mystRawHtml";
 import { expandTocMarkers } from "./mystToc";
 import { loadEngine, MYST_PARSE_OPTIONS, type MystEngine } from "./mystEngine";
@@ -479,6 +480,8 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   { name: "version admonitions", run: (state) => expandVersionAdmonitions(state.ast, state.mystParse) },
   { name: "dollar placeholders", run: (state) => restoreDollarPlaceholders(state.ast) },
   { name: "dollar amounts", run: (state) => restoreDollarAmounts(state.ast) },
+  // Before the toc markers: a heading entry of the table of contents shows the value, not the code.
+  { name: "front matter values", run: (state) => showFrontmatterValues(state.ast, state.source, state.diagnostics) },
   { name: "toc markers", run: (state) => expandTocMarkers(state.ast) },
   { name: "wiki links", run: (state) => expandWikiLinks(state.ast) },
   {

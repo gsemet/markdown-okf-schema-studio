@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Inline code written as `` `= this.field` `` (or `` `=this.field` ``) now shows the value of that field
+  of the document's own front matter, as in Obsidian: text and numbers as they are, lists joined with commas,
+  objects as one line of YAML, `this.a.b` for a nested field. The value is shown as plain text. A field
+  the front matter does not have leaves the code as written with a warning underline and a warning in
+  the diagnostics. The value updates when the front matter changes, and the writing skill explains it.
 - A drawing written as an `svg` fence, or as a raw `<svg>` that fills its own block, is now drawn in
   the page and follows the theme: write colours as `var(--surface)`, `var(--text)`, `var(--accent)`
   and the like. Scripts, styles, links and other active content are removed, a picture keeps its

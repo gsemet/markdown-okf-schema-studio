@@ -113,3 +113,29 @@ Ada (2026-10-28 10:00):
 
 </div>
 ````
+
+A front matter value in the text. Inline code that is exactly `= this.<field>` (or `=this.<field>`,
+and `this.a.b` for a nested field) shows the value of that field of the same document's front
+matter; no other document is read. A string or a number shows as text, a boolean as `true` or
+`false`, a list as its items joined with `, `, an object as its YAML on one line. The value is
+plain text, never Markdown or HTML. A field that is missing or empty leaves the code as written,
+with a warning colour and a warning in the diagnostics: write only fields the front matter holds.
+Any other inline code, and code in a fenced block, is not changed. To show the form itself, keep a
+backtick inside the code, as the last line of the example does, or put it in a fenced block. More
+backticks around the code are not enough: the code text is the same.
+
+````markdown
+---
+title: Export plan
+status: draft
+tags: [export, csv]
+owner:
+  name: Ada
+---
+
+# `= this.title`
+
+Status: `= this.status`. Tags: `=this.tags`. Owner: `= this.owner.name`.
+
+The form itself, shown as code: `` `= this.status` ``.
+````

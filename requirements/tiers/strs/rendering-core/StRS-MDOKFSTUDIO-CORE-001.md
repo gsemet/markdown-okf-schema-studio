@@ -69,6 +69,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-076
 - SwRS-MDOKFSTUDIO-CORE-077
 - SwRS-MDOKFSTUDIO-CORE-078
+- SwRS-MDOKFSTUDIO-CORE-079
 - SwRS-MDOKFSTUDIO-GFM-029
 - SwRS-MDOKFSTUDIO-LIFE-094
 - SwRS-MDOKFSTUDIO-TRUST-052
@@ -146,6 +147,7 @@ Writers need to read their Markdown as formatted text, at any length, while they
   - [SwRS-MDOKFSTUDIO-CORE-076](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-076.md): CI tags a version change only after a green heavy run of the commit
   - [SwRS-MDOKFSTUDIO-CORE-077](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-077.md): A table tints its heading, its even rows and the hovered row
   - [SwRS-MDOKFSTUDIO-CORE-078](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-078.md): A version ships only with its reviewed release notes
+  - [SwRS-MDOKFSTUDIO-CORE-079](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-079.md): Inline code shows a front matter value of the document
   - [SwRS-MDOKFSTUDIO-GFM-029](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
   - [SwRS-MDOKFSTUDIO-LIFE-094](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-094.md): Blocks changed by another tool glow briefly
   - [SwRS-MDOKFSTUDIO-TRUST-052](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
