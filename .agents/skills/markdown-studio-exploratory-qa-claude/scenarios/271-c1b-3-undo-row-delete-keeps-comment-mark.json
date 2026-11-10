@@ -1,0 +1,92 @@
+{
+ "name": "c1b-3-undo-row-delete-keeps-comment-mark",
+ "file": "synth/anchors-tables.md",
+ "steps": [
+  {
+   "key": "Meta+1",
+   "wait": 300
+  },
+  {
+   "wait": 300
+  },
+  {
+   "palette": "File: Revert File",
+   "wait": 1500
+  },
+  {
+   "waitFor": "D.querySelector('mark[data-okf-comment-thread]')",
+   "timeout": 15000
+  },
+  {
+   "editMode": true,
+   "optional": true
+  },
+  {
+   "check": "feval",
+   "expr": "D.documentElement.getAttribute('data-sphinx-preview-edit-mode')",
+   "equals": "on"
+  },
+  {
+   "mark": true
+  },
+  {
+   "eval": "'marks before: '+[...D.querySelectorAll('mark[data-okf-comment-thread]')].map(m=>m.dataset.okfCommentThread+':'+m.textContent).join(',')"
+  },
+  {
+   "clicksel": "td",
+   "text": "2",
+   "exact": true,
+   "nth": 0,
+   "wait": 900
+  },
+  {
+   "clicksel": "[data-sphinx-table-menu] button",
+   "text": "Row \u2212",
+   "wait": 1500
+  },
+  {
+   "key": "Escape",
+   "wait": 600
+  },
+  {
+   "eval": "'marks after delete: '+[...D.querySelectorAll('mark[data-okf-comment-thread]')].map(m=>m.dataset.okfCommentThread+':'+m.textContent).join(',')"
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "show": true,
+   "label": "row deleted"
+  },
+  {
+   "key": [
+    "Meta+1",
+    "Meta+z"
+   ],
+   "gap": 300,
+   "wait": 2500
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "equal": true,
+   "label": "undo restores buffer"
+  },
+  {
+   "eval": "'marks after undo: '+[...D.querySelectorAll('mark[data-okf-comment-thread]')].map(m=>m.dataset.okfCommentThread+':'+m.textContent).join(',')"
+  },
+  {
+   "check": "feval",
+   "expr": "[...D.querySelectorAll('mark[data-okf-comment-thread]')].map(m=>m.dataset.okfCommentThread+':'+m.textContent).join(',').indexOf('t1')>=0",
+   "equals": true,
+   "label": "c1b-3 comment mark of the restored row is back without reload"
+  },
+  {
+   "check": "errors"
+  },
+  {
+   "shot": "c1b-3-fail",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

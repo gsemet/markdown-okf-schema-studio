@@ -515,3 +515,119 @@ test("a clean document that changes is checked again even when the comments file
   assert.notEqual(preview.comments.view, undefined, "the followed lines are rebuilt, later edits shift them again");
   s.controller.clear(preview);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+test("an undo or a redo shifts the followed lines and marks every thread to be checked again", () => {
+  const s = setup();
+  const view = () => ({ diskHash: "h", threads: [thread("t1", 4)], orphaned: new Set<string>(["t2"]) });
+  const preview = s.preview();
+  for (const reason of ["undo", "redo"] as const) {
+    preview.comments.view = view();
+    s.controller.shiftForEdits({
+      document: { id: `file://${DOCUMENT}`, isDirty: true },
+      changes: [{ start: 0, length: 0, startLine: 0, endLine: 0, text: "new line\n" }],
+      reason,
+    } as never);
+    assert.equal(preview.comments.view?.recheck, true, `a ${reason} marks the threads to be checked again`);
+    assert.equal(preview.comments.view?.threads[0]!.anchor.line, 5, `a ${reason} keeps the lines followed in memory`);
+  }
+  s.controller.clear(preview);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+test("an unrelated undo keeps a short-quote thread on its followed line, far beyond the search window", async () => {
+  const s = setup();
+  const body = Array.from({ length: 12 }, (_, index) => `filler ${index}`);
+  const before = `${body.join("\n")}\nbeta\n`;
+  const buffer = openBuffer(s, before);
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 13, "beta")]));
+  const preview = s.preview();
+  const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
+  await post(preview);
+  assert.equal(threadsOf(s.posted.at(-1)!)[0]!.anchor.line, 13);
+
+  // 60 lines pasted above in memory: the thread follows to line 73, then an unrelated undo.
+  const pasted = Array.from({ length: 60 }, (_, index) => `pasted ${index}`).join("\n");
+  buffer.set(`${pasted}\n${before}`);
+  const document = { id: `file://${DOCUMENT}`, isDirty: true };
+  s.controller.shiftForEdits({
+    document, changes: [{ start: 0, length: 0, startLine: 0, endLine: 0, text: `${pasted}\n` }],
+  } as never);
+  buffer.set(`${pasted}\n${before}\n`);
+  s.controller.shiftForEdits({
+    document, changes: [{ start: 0, length: 0, startLine: 73, endLine: 73, text: "" }], reason: "undo",
+  } as never);
+  await post(preview);
+  const last = threadsOf(s.posted.at(-1)!)[0]!;
+  assert.equal(last.orphaned, false, "the thread stays anchored");
+  assert.equal(last.anchor.line, 73, "on the line followed in memory");
+  s.controller.clear(preview);
+});
+
+/** An open, dirty buffer whose text and revision the test changes. */
+function openBuffer(s: Setup, initial: string): { set(text: string): void } {
+  let text = initial;
+  let revision = 1;
+  const document = { path: DOCUMENT, isDirty: true, getText: () => text, get revision() { return revision; } };
+  s.open.set(`file://${DOCUMENT}`, document as never);
+  return { set: (next) => { text = next; revision += 1; } };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219
+test("an orphaned thread whose quote returns is posted again on its lines, nothing is written", async () => {
+  const s = setup();
+  const buffer = openBuffer(s, "first\n\nno such word here\n");
+  const stored = sidecarOf("a.md", [thread("t1", 3, "a long enough quote to find again")]);
+  s.files.set(SIDECAR, stored);
+  const preview = s.preview();
+  const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
+  await post(preview);
+  assert.equal(threadsOf(s.posted.at(-1)!)[0]!.orphaned, true, "the quote is absent: orphaned");
+
+  buffer.set("first\n\nsome text\nwith a long enough quote to find again\n");
+  await post(preview);
+  const last = threadsOf(s.posted.at(-1)!)[0]!;
+  assert.equal(last.orphaned, false, "the quote is back: the thread leaves the orphans");
+  assert.equal(last.anchor.line, 4, "on the line where the quote is found");
+  assert.equal(s.files.get(SIDECAR), stored, "the comments file is not written");
+  assert.deepEqual(s.writes, []);
+  s.controller.clear(preview);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219
+test("a short quote that reappears outside the window stays orphaned", async () => {
+  const s = setup();
+  const filler = Array.from({ length: 80 }, (_, index) => `filler ${index}`).join("\n");
+  const buffer = openBuffer(s, `${filler}\n`);
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 2, "beta")]));
+  const preview = s.preview();
+  const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
+  await post(preview);
+  assert.equal(threadsOf(s.posted.at(-1)!)[0]!.orphaned, true);
+
+  buffer.set(`${filler}\nbeta\n`);
+  await post(preview);
+  assert.equal(threadsOf(s.posted.at(-1)!)[0]!.orphaned, true, "the short quote is too far from the stored line");
+  s.controller.clear(preview);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219
+test("without an orphaned thread a text change costs no extra check of the document", async () => {
+  const s = setup();
+  const buffer = openBuffer(s, "first\n\nsee the needle\n");
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 3)]));
+  const preview = s.preview();
+  const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
+  await post(preview);
+  assert.equal(threadsOf(s.posted.at(-1)!)[0]!.orphaned, false);
+
+  let reads = 0;
+  const original = s.open.get(`file://${DOCUMENT}`)!;
+  s.open.set(`file://${DOCUMENT}`, { ...original, path: DOCUMENT, isDirty: true,
+    getText: () => { reads += 1; return original.getText(); },
+    get revision() { return (original as any).revision; } } as never);
+  buffer.set("first\n\nsee the needle, typed on\n");
+  await post(preview);
+  assert.equal(reads, 0, "the buffer is not read again: the anchored thread only follows the edits");
+  s.controller.clear(preview);
+});

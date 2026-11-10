@@ -40,6 +40,7 @@ import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
 import { scenarioTableShortDelimiter } from "./tableShortDelimiter";
 import { scenarioColumnMoveKeepsBlockIdAtRowEnd, scenarioTailedTableMovesAndOpensCellEditor } from "./tableRowTokens";
+import { scenarioUndoRestoresCommentMark } from "./tableCommentUndo";
 import { scenarioWideTableTab } from "./wideTableTab";
 import { scenarioRevertAfterExternalWriteRendersCell, scenarioUndoUnderCellEditorRendersTable } from "./tableStaleRender";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
@@ -179,6 +180,7 @@ export async function run(): Promise<void> {
         await scenarioColumnMoveKeepsBlockIdAtRowEnd(page);
         await scenarioTailedTableMovesAndOpensCellEditor(page);
       },
+      "table-comment-undo": () => scenarioUndoRestoresCommentMark(page),
       "find-after-click": () => scenarioFindRightAfterClick(page),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
       "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),
@@ -239,6 +241,8 @@ export async function run(): Promise<void> {
     // QA replays 271-c3-2 and 271-c6-1: the preview table shows the buffer after an undo or a revert.
     await scenarioUndoUnderCellEditorRendersTable(page);
     await scenarioRevertAfterExternalWriteRendersCell(page);
+    // QA replay 271-c1b-3: an undone row delete brings the comment mark back.
+    await scenarioUndoRestoresCommentMark(page);
     await scenarioTableStructure(page);
     await scenarioTableMoves(page);
     await scenarioBooleanOneClick(page, evidence);

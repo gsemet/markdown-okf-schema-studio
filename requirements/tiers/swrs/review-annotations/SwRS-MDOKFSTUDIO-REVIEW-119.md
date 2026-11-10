@@ -25,6 +25,7 @@ implemented_in_files:
 - src/session/features/comments.ts
 tested_in_files:
 - test/integration/commentAnchors.test.ts
+- test/integration/realInput/tableCommentUndo.ts
 - test/session/reviewReqComments.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -80,9 +81,10 @@ When the document is saved, the extension SHALL write the moved lines of the rev
 
 | Input | Outcome |
 | --- | --- |
-| A document without unsaved changes changes (a revert, an undo to the saved text, a reload from disk) | The lines followed in memory are dropped and the threads are checked again against the new text |
+| A document without unsaved changes changes (a revert, a reload from disk, an undo or a redo whose change event reports no unsaved changes) | The lines followed in memory are dropped and the threads are checked again against the new text |
 | The same change while the comments file text stays the same | The threads are still checked again against the new text: the unchanged file does not skip the check, and later edits shift the new lines |
-| A document with unsaved changes changes | The lines are shifted in memory instead |
+| An undo or a redo whose change event reports unsaved changes (the flag is the state before the change, so an undo back to the saved text still reports unsaved changes) | The lines are shifted in memory as for any edit, then every thread is checked again against the new text starting from the lines followed in memory |
+| A document with unsaved changes changes (not an undo or a redo) | The lines are shifted in memory instead |
 
 ### Scenario (boundary): Document over 8 MiB
 
@@ -100,8 +102,8 @@ When the document is saved, the extension SHALL write the moved lines of the rev
 ### Verification notes
 
 - Method: test/integration/commentAnchors.test.ts (save writes the new lines and a second save leaves the modification time; nothing moved; no write while typing and the page follows; plain.md never gets a comments file and {bad stays; a dirty comments file is not overwritten; orphaned flags posted and orphan after a removal). The write after the comments file is clean and the own-write starting point (hintHash) are untested.
-- Method: test/session/reviewReqComments.requirements.test.ts: `a save that cannot write the moved lines warns once for each reason` (the warning and the second save); `a document without unsaved changes that changes drops the followed lines, a dirty one shifts them` (change of a clean document); `a closed document over 8 MiB is not searched: the stored lines are posted` (document over 8 MiB, closed and open); `a clean document that changes is checked again even when the comments file did not change` (change of a clean document, same comments file text); `lines saved while the document gains lines are checked again against the text` (the document changes while the save writes the lines: the edit lands when the written file reaches its path).
-- Criteria: The file lines equal {t1: 4, t2: 7, t3: 7} after the save and the modification time stays the same on the second save; the comments file text is identical before and after the edits and for the invalid and unsaved cases; view is set to undefined when the changed document is not dirty; currentDocumentText returns undefined above 8 * 1024 * 1024 bytes for a file that is not open; showWarning is called once while the reason stays the same; after a save during which the document revision changed, the view is undefined; whenever the view is undefined the next post re-anchors against the current text, even when the comments file text has the hash of the last post (the hash skip applies only while a view exists).
+- Method: test/session/reviewReqComments.requirements.test.ts: `a save that cannot write the moved lines warns once for each reason` (the warning and the second save); `a document without unsaved changes that changes drops the followed lines, a dirty one shifts them` (change of a clean document); `an undo or a redo shifts the followed lines and marks every thread to be checked again` (undo and redo); `an unrelated undo keeps a short-quote thread on its followed line, far beyond the search window` (undo and redo: the check starts from the lines followed in memory); `a closed document over 8 MiB is not searched: the stored lines are posted` (document over 8 MiB, closed and open); `a clean document that changes is checked again even when the comments file did not change` (change of a clean document, same comments file text); `lines saved while the document gains lines are checked again against the text` (the document changes while the save writes the lines: the edit lands when the written file reaches its path).
+- Criteria: The file lines equal {t1: 4, t2: 7, t3: 7} after the save and the modification time stays the same on the second save; the comments file text is identical before and after the edits and for the invalid and unsaved cases; view is set to undefined when the changed document is not dirty; after an undo or a redo flagged dirty, the view has recheck true and its thread line is shifted (4 to 5), and the short-quote thread followed in memory to line 73 is posted on line 73 with orphaned false after an unrelated undo; currentDocumentText returns undefined above 8 * 1024 * 1024 bytes for a file that is not open; showWarning is called once while the reason stays the same; after a save during which the document revision changed, the view is undefined; whenever the view is undefined the next post re-anchors against the current text, even when the comments file text has the hash of the last post (the hash skip applies only while a view exists).
 
 <!-- okf:links:start -->
 ### Links

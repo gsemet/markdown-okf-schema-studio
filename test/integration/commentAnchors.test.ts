@@ -35,6 +35,7 @@ const liveLines = (): Record<string, number> =>
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-094
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-125
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219
 /**
  * T45: threads follow the text. Edits shift them in memory without any write; the save of the
  * document writes the moved lines; an orphan keeps its line; no sidecar is created; an invalid or
@@ -133,6 +134,31 @@ export async function run(): Promise<void> {
     await plainDocument.save();
     await pause(700);
     assert.equal(fs.readFileSync(path.join(directory, "plain.comments.json"), "utf8"), "{bad");
+    disposeActivePreviewForTests();
+    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+
+    // A row the thread quotes is deleted, then the delete is undone: the thread is orphaned while the
+    // quote is gone and placed again on its line after the undo (SwRS REVIEW-219); nothing is written.
+    const undoPath = path.join(directory, "undo.md");
+    const undoSidecar = path.join(directory, "undo.comments.json");
+    fs.writeFileSync(undoPath, ["# Table", "", "| Name | Value |", "| --- | --- |", "| alpha | 1 |", "| beta | 2 |", ""].join("\n"));
+    const undoText = sidecarText("undo.md", [thread("t1", 6, "beta")]);
+    fs.writeFileSync(undoSidecar, undoText);
+    const undoDocument = await vscode.workspace.openTextDocument(vscode.Uri.file(undoPath));
+    await vscode.window.showTextDocument(undoDocument, vscode.ViewColumn.One);
+    await vscode.commands.executeCommand(COMMAND_ID);
+    await waitFor("the thread", () => getActivePreviewForTests()?.comments.last?.length === 1);
+    assert.equal(getActivePreviewForTests()?.comments.last?.[0].orphaned, false);
+    const deleteRow = new vscode.WorkspaceEdit();
+    deleteRow.delete(vscode.Uri.file(undoPath), new vscode.Range(5, 0, 6, 0));
+    assert.equal(await vscode.workspace.applyEdit(deleteRow), true);
+    await waitFor("the orphan", () => getActivePreviewForTests()?.comments.last?.[0]?.orphaned === true);
+    await vscode.commands.executeCommand("undo");
+    await waitFor("the thread placed again", () => {
+      const last = getActivePreviewForTests()?.comments.last?.[0];
+      return last?.orphaned === false && last.anchor.line === 6;
+    });
+    assert.equal(fs.readFileSync(undoSidecar, "utf8"), undoText, "the comments file is not written");
     disposeActivePreviewForTests();
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
 
