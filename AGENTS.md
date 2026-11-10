@@ -85,6 +85,9 @@ request (a pull request opened directly): the project guidelines apply the same 
   [ci.guidelines.md](.agents/guidelines/ci.guidelines.md)
 - When writing or opening a pull request (body, title, screenshots, merging):
   [pull-request.guidelines.md](.agents/guidelines/pull-request.guidelines.md)
+- When a change comes from a GitHub issue, or when opening or marking ready a pull request:
+  [pull-request.guidelines.md](.agents/guidelines/pull-request.guidelines.md) ("GitHub issues",
+  "Draft until mergeable")
 - When several changes are in flight and their PRs ship together:
   [stacked-prs.guidelines.md](.agents/guidelines/stacked-prs.guidelines.md)
 - When creating a worktree for a change or running app-window tests unattended:

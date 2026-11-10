@@ -26,6 +26,9 @@ guideline holds. Project specifics (gates, commit format, install restrictions) 
 - **Foreman**: the nested session the Chief of Staff starts to run the drivers and land the CRs.
 - **Heartbeat**: the Foreman's periodic wake-up (a `/loop` every 270 seconds while a driver is
   live) to check the drivers and the merged PRs; see "Foreman session and its loop".
+- **Tracker issue**: the issue an item comes from, if any, recorded as an `issue:` line in the
+  `01-intent.md` front matter (`issue: none` when there is none). An item with no tracker issue
+  skips the issue steps below with one line in its notes.
 - **Change request (CR)**: one unit of delivered work. One CR = one branch = one PR with green CI,
   shipping code, tests (unit + e2e), documentation and screenshots for any visible change.
 - **PRD folder**: the working folder of a CR in progress, `.agents/changes/3-requests/NNN-<slug>/`.
@@ -91,16 +94,16 @@ Unless specified by user through your context otherwise, here are the default ro
 | Step | Owner | Action |
 | --- | --- | --- |
 | 1 Pick | Chief of Staff | In the highest priority with work, propose the easiest item: problem, file:line, fix, PR content (written as in [pull-request.guidelines.md](pull-request.guidelines.md)). |
-| 2 Grill | Chief of Staff | Ask only the questions that change the result, each with a recommended answer. "ok" accepts all. Record answers in `03-change-spec.md` (see [owner-review.guidelines.md](owner-review.guidelines.md)). List the approved requirements the item would change and record the owner's answer, as in "Approved requirements" of [requirements/guidelines/project.guidelines.md](../../requirements/guidelines/project.guidelines.md). |
-| 3 Open | Chief of Staff | Create the PRD folder, move the backlog content in (partial item: copy the part, note the split in the backlog item), create the worktree and branch from fresh `origin/main` (see [local-worktree.guidelines.md](local-worktree.guidelines.md)). `01-intent.md` and `03-change-spec.md` follow [owner-review.guidelines.md](owner-review.guidelines.md). |
+| 2 Grill | Chief of Staff | Ask only the questions that change the result, each with a recommended answer. "ok" accepts all. Record answers in `03-change-spec.md` (see [owner-review.guidelines.md](owner-review.guidelines.md)), and carry the `issue:` line into it. List the approved requirements the item would change and record the owner's answer, as in "Approved requirements" of [requirements/guidelines/project.guidelines.md](../../requirements/guidelines/project.guidelines.md). |
+| 3 Open | Chief of Staff | Create the PRD folder, move the backlog content in (partial item: copy the part, note the split in the backlog item), create the worktree and branch from fresh `origin/main` (see [local-worktree.guidelines.md](local-worktree.guidelines.md)). `01-intent.md` and `03-change-spec.md` follow [owner-review.guidelines.md](owner-review.guidelines.md). With a tracker issue, the Chief of Staff drafts the grill comment (what was understood, what will be done, with the plan and a demo attached when the tracker supports it), shows it to the owner, posts it after approval, and records the comment link in `02-answers.md`. |
 | 4 Brief | Chief of Staff | Write `task.md`, `rules.md` (plain GFM, see [owner-review.guidelines.md](owner-review.guidelines.md)), the `STATUS.md` header, then run `just orchestrator`. |
 | 5 Code | coder | Implement round n, run local gates, write `work/coder/T1-r<n>.md`. |
 | 6 Review | Inspector | Write `work/inspector/T1-r<n>.md` starting with `Verdict: APPROVE` or `Verdict: FIX-REQUIRED`. FIX-REQUIRED → step 5, round n+1. The Inspector checks the project guidelines, including the traceability rules of [requirements/guidelines/project.guidelines.md](../../requirements/guidelines/project.guidelines.md). |
 | 7 Commit | driver | Explicit paths only (never `git add -A` / `git add .`), project commit format. |
-| 8 PR | driver | Rebase on `origin/main`, push, open the PR with the template of [ci.guidelines.md](ci.guidelines.md), written as in [pull-request.guidelines.md](pull-request.guidelines.md). Before opening it, run the requirements check of [requirements/guidelines/project.guidelines.md](../../requirements/guidelines/project.guidelines.md). A gap is a new round (step 5). |
+| 8 PR | driver | Rebase on `origin/main`, push, open the PR as a draft with the template of [ci.guidelines.md](ci.guidelines.md), written as in [pull-request.guidelines.md](pull-request.guidelines.md); with a tracker issue, its body names the issue with the tracker's closing keyword. Before opening it, run the requirements check of [requirements/guidelines/project.guidelines.md](../../requirements/guidelines/project.guidelines.md). A gap is a new round (step 5). The Chief of Staff, on hearing the PR link, drafts the one-line comment with that link for the tracker issue and posts it after the owner approves it. |
 | 9 CI | driver | Watch the checks (see "Responsiveness"). Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. Never weaken a test. |
-| 10 Notify | driver | CI green: `status: ready` in the header, then return. |
-| 11 Land | Foreman | After the user merges: write `report.md`, move the PRD folder to `4-archives/`, remove the worktree and the CR branch (keep its screenshot branch, see [pull-request.guidelines.md](pull-request.guidelines.md)). `report.md` follows the format below. After moving the folder, run `just orchestrator`. |
+| 10 Notify | driver | CI green at the head and the review approved: mark the PR ready for review, then write `status: ready` in the header, then return. A CR sent back for a new round goes back to draft first. |
+| 11 Land | Foreman | After the user merges: write `report.md`, move the PRD folder to `4-archives/`, remove the worktree and the CR branch (keep its screenshot branch, see [pull-request.guidelines.md](pull-request.guidelines.md)). `report.md` follows the format below. The tracker issue closes by itself on merge, and nobody closes it by hand: the Foreman checks that it is closed and writes it in `report.md`; an issue left open is reported, not closed. After moving the folder, run `just orchestrator`. |
 
 **Round limit**: a round is one coder pass, whether an Inspector verdict or a CI failure triggered
 it. At most 3 rounds per CR, all causes together. After round 3 without green CI, the driver sets
@@ -303,6 +306,9 @@ section covers the role.
   the release), the decisions) and the `STATUS.md` header. The folder is named with the next free CR
   number. It is the one writer of that header from the notes draft to the archive, and `driver:` is
   its lock, like for a CR driver.
+- **Lists** in the release folder the tracker issues the release closed; it never comments. The
+  Chief of Staff drafts the "Released in" comments, after the publication, with one owner approval
+  for the whole list.
 - **Merges** only what the release guideline allows: the fix PRs of the release, on the owner's
   standing permission for release work. It never enables auto-merge and never touches a PR outside
   the release.
@@ -389,6 +395,8 @@ The rules of the stack itself (order, restacking, no auto-merge) are in
   the branch in the stack order, restacks, pushes with `--force-with-lease`, opens the PR against
   the branch below, links the PRs, watches CI and writes the headers of the branches in the stack.
   A CR driver stops pushing once its PR is in the stack.
+- The stack driver marks each PR of the stack ready on its own, as soon as its CI is green at its
+  head and its CR is `ready`, without waiting for the rest of the stack.
 - A stack driver that finds an auto-merge reports it; only the user disables it or merges.
 - The open-PR cap counts every PR of the stack; a branch over the cap waits, committed, until the
   user merges part of the stack.
@@ -401,7 +409,9 @@ The rules of the stack itself (order, restacking, no auto-merge) are in
 > responsiveness), `.agents/guidelines/stacked-prs.guidelines.md`,
 > `.agents/guidelines/ci.guidelines.md` and `<absolute path>/3-requests/brief.md`. Order the stack,
 > rebase with a conflict resolver that keeps both sides' intent, push, open or retarget the PRs,
-> link them, and watch CI in slices of at most 5 minutes. Never merge and never enable auto-merge.
+> link them, and watch CI in slices of at most 5 minutes. Open each PR as a draft and mark it ready
+> on its own, as soon as its CI is green at its head and its CR is `ready`, without waiting for the
+> rest of the stack. Never merge and never enable auto-merge.
 > Return when every PR in the stack is green, or with the failing branch, its log excerpt and your
 > recommended next step.
 
@@ -409,6 +419,9 @@ The rules of the stack itself (order, restacking, no auto-merge) are in
 
 - One driver per worktree; PRD folders stay in the main checkout (absolute paths).
 - No agent starts a new backlog item: the user decides. Merges follow
+  [pull-request.guidelines.md](pull-request.guidelines.md).
+- Only the Chief of Staff posts on a tracker issue, and only text the owner approved; drivers, the
+  Foreman and sub-agents never comment on issues. The commands are in
   [pull-request.guidelines.md](pull-request.guidelines.md).
 - Everything written to the repository or GitHub is in English, as the constitution requires.
 
@@ -434,6 +447,8 @@ The rules of the stack itself (order, restacking, no auto-merge) are in
 # Report — <slug>
 
 Status: **done** | **partial** (date, branch, PR #<n>, merge commit).
+
+Issue: <link> (closed on merge) | none
 
 ## Delivered
 

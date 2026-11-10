@@ -5,6 +5,7 @@ last section "Internal references". -->
 ## Summary
 
 <!-- Why: the user problem or limitation this solves, in two or three sentences. -->
+<!-- Fixes #N when the change closes a GitHub issue -->
 
 ## Deliverables
 

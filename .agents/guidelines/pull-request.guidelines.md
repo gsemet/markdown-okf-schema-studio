@@ -37,6 +37,32 @@ even in git.
 - Screenshots go in Impacts (see "Screenshots in the PR").
 - A decision an agent took without the user is listed in the PR body under "Autonomous decisions".
 
+## Draft until mergeable
+
+A pull request is a draft until it is mergeable.
+
+- Open it with `gh pr create --draft`.
+- Mark it ready with `gh pr ready <n>` only when CI is green at its head, the review is approved and
+  `ready` is reported.
+- When a CR goes back for a new round, put it back to draft with `gh pr ready <n> --undo`.
+- In a stack, each PR turns ready on its own, as soon as it is mergeable, without waiting for the
+  rest of the stack.
+- The release version PR and its fix PRs follow
+  [release-process.guidelines.md](release-process.guidelines.md).
+
+## GitHub issues
+
+When a change comes from a GitHub issue, the issue number is on the `issue:` line of the change's
+intent.
+
+- The Summary of the PR body ends with `Fixes #N`, one line per issue. This is a closing keyword,
+  not an internal reference. GitHub closes the issue when the PR merges; never run `gh issue close`.
+- Only the agent that talks to the owner posts on an issue, and only text the owner approved:
+  `gh issue comment <n> --body-file <file>`.
+- The plan and the demo attach with `gh issue artifact create <n> <file> --type plan` and
+  `--type embedded_html`. File names have no colon.
+- After posting, read back the comment URL and the artifact list.
+
 ## Merging
 
 Only the owner merges a pull request; no agent enables auto-merge. The one exception is the fix PRs
