@@ -120,6 +120,8 @@ export interface NoSaveFields {
 export interface PreviewEditOpenMessage extends PageStateMessage<"previewEditOpen">, BlockEditFields, NoSaveFields {
   line: number;
   endLine: number;
+  /** True when the editor is a table cell editor: its table is `line` to `endLine`. */
+  cellEditor?: true;
 }
 
 /** The text of an open block editor: an autosave (`final: false`) or the final save. */

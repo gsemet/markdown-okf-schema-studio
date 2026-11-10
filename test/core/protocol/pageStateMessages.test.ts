@@ -270,3 +270,15 @@ test("non-objects and inherited keys are not page messages", () => {
     assert.equal(isPageToHostMessage({ type, ...envelope }), false, type);
   }
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+test("the open of a table cell editor says so with cellEditor true, and no other message may", () => {
+  const open = { type: "previewEditOpen", ...envelope, editId: "e1", line: 3, endLine: 5 };
+  assert.equal(isPageToHostMessage({ ...open, cellEditor: true }), true);
+  assert.equal(isPageToHostMessage(open), true, "a block editor says nothing");
+  for (const bad of [false, "true", 1, null]) {
+    assert.equal(isPageToHostMessage({ ...open, cellEditor: bad }), false, `cellEditor ${String(bad)}`);
+  }
+  assert.equal(isPageToHostMessage({ type: "previewEditCancel", ...envelope, editId: "e1", line: 3, endLine: 5, cellEditor: true }), false);
+  assert.equal(isPageToHostMessage({ type: "previewReady", ...envelope, cellEditor: true }), false);
+});

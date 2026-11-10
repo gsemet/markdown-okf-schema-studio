@@ -140,7 +140,7 @@ test("editing a schema file refreshes nothing by itself; the next document chang
     },
     plantUml: {},
     sharedRenders: { invalidate: () => undefined },
-    edits: { deferWhileEditing: () => calls.push("deferred render") },
+    edits: { deferWhileEditing: () => calls.push("deferred render"), releaseCellEditorOnOutsideChange: () => false },
     rendering: { refreshPreviewDocument: () => { calls.push("render"); return Promise.resolve(); } },
   };
   const events = new HostEvents(manager as unknown as PreviewManager);

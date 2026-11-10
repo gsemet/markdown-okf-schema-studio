@@ -156,3 +156,32 @@ test("P-07: the insertion bars of kept blocks stay with them and bars of dropped
   assert.notEqual(container.childNodes[2], b);
   assert.equal(container.childNodes.includes(barB), false, "the bar after a replaced block goes");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+test("a block the page rewrote is rebuilt by the next patch, even when its host HTML is unchanged", () => {
+  const container = new FakeContainer();
+  container.set(block(1, 1, 1, "a") + block(3, 3, 2, "b"));
+  const morph = installContentMorph(fakeDocument(), planKeyedMorph, morphKey);
+  morph.record(container as unknown as Element);
+  const [a, b] = container.childNodes as [FakeNode, FakeNode];
+  // The page wrote into a node inside `a` (a table cell left with Tab): it forgets a's key.
+  const inner = Object.assign(new FakeNode("span", new Map(), "typed"), { parentNode: a });
+  morph.invalidate(inner as unknown as Node);
+  const result = morph.replace(container as unknown as Element, block(1, 1, 1, "a") + block(3, 3, 2, "b"));
+  assert.equal(result.kept, 1, "only the block the page left alone is kept");
+  assert.equal(result.inserted, 1);
+  assert.notEqual(container.childNodes[0], a, "the rewritten block is replaced by the host's HTML");
+  assert.equal(container.childNodes[1], b);
+  // The replacement is recorded again: the same HTML once more keeps both.
+  assert.equal(morph.replace(container as unknown as Element, block(1, 1, 1, "a") + block(3, 3, 2, "b")).kept, 2);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+test("invalidating a node outside the recorded blocks changes nothing", () => {
+  const container = new FakeContainer();
+  container.set(block(1, 1, 1, "a"));
+  const morph = installContentMorph(fakeDocument(), planKeyedMorph, morphKey);
+  morph.record(container as unknown as Element);
+  morph.invalidate(new FakeNode("span", new Map(), "loose") as unknown as Node);
+  assert.equal(morph.replace(container as unknown as Element, block(1, 1, 1, "a")).kept, 1);
+});

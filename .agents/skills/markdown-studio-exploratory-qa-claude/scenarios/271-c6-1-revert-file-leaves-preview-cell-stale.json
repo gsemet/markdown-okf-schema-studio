@@ -1,0 +1,10 @@
+{"name":"c6-1-revert-file-leaves-preview-cell-stale","file":"synth/c6-concurrency.md","steps":[
+{"comment":"PART 1 of 2. Fixture synth/c6-concurrency.md (assets/synth). Opens the side preview, opens the alpha cell editor and types ' X' (the buffer is written live). Then, OUTSIDE the scenario, rewrite the file on disk with an external tool: change 'A plain paragraph' to 'EXTERNAL paragraph' in <ws>/synth/c6-concurrency.md, wait 4 s, then run part 2: c6-1-revert-file-leaves-preview-cell-stale-part2.json"},
+{"open":"${file}","wait":2500},
+{"palette":"Markdown OKF-Schema Studio: Open Preview to Side","wait":4000},
+{"waitFor":"[...D.querySelectorAll('td')].some(t=>t.textContent.includes('alpha'))","timeout":20000},
+{"mark":"${file}"},{"editMode":true},
+{"clicksel":"td","text":"alpha","exact":true,"wait":700},
+{"waitFor":"D.querySelector('[data-sphinx-preview-table-cell-editor] textarea')","label":"editor"},
+{"key":"End"},{"type":" X","wait":800}
+]}

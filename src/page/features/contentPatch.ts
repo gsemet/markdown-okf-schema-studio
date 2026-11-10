@@ -51,6 +51,8 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     state.deferredPropertiesMarkup = undefined;
     rt.frontmatter.closeFrontmatterEditor("content patch");
     state.applyingContentPatch = true;
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-119
+    // A table cell editor an outside change reached closes here without a save: the buffer is the truth.
     rt.blockEditor.closeBlockEdit(false);
     state.applyingContentPatch = false;
     parts.linkTooltip.close();

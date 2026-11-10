@@ -13,6 +13,7 @@ import { test, type TestContext } from "node:test";
 
 import { identityOf, nextIdentityOf } from "../shared/previewIdentity";
 import { closeHost, identityOfDocument, openPreview, type HostSession } from "./hostHarness";
+import { noteKeystrokeForTests } from "../../src/host-vscode/keystrokes";
 
 const MARKDOWN = "# Title\n\nFirst paragraph.\n\nSecond paragraph.\n";
 const edited = (marker: string): string => `# Title\n\nFirst paragraph ${marker}.\n\nSecond paragraph.\n`;
@@ -249,4 +250,134 @@ test("a preview disposed while its render is debouncing, building or awaiting a 
     assert.deepEqual(host.panel.afterDispose, [], `${moment}: nothing is posted or assigned after the dispose`);
     closeHost(t.mock.timers);
   }
+});
+
+// A table (source lines 1 to 3) followed by two paragraphs, for the cell editor tests below.
+const TABLE = "| a | b |\n| --- | --- |\n| alpha | x |\n";
+const TABLE_DOCUMENT = `${TABLE}\nPara one.\n\nPara two.\n`;
+const ALPHA = TABLE_DOCUMENT.indexOf("alpha");
+
+/** An open preview over {@link TABLE_DOCUMENT} whose page has loaded and reported ready. */
+async function tablePreview(t: TestContext): Promise<HostSession> {
+  const host = await openPreview(t.mock.timers, TABLE_DOCUMENT);
+  t.after(() => closeHost(t.mock.timers));
+  await host.ready();
+  await host.settle();
+  return host;
+}
+
+/** The page opens a table cell editor on the table of {@link TABLE_DOCUMENT}. */
+async function openCellEditor(host: HostSession, editId: string): Promise<void> {
+  await host.fromPage({ type: "previewEditOpen", ...host.loadedIdentity(), editId, line: 1, endLine: 3, cellEditor: true });
+}
+
+/** Lets the debounce pass and settles the host; returns what was posted from `from` on. */
+async function renderFrom(host: HostSession, from: number): Promise<Array<Record<string, unknown>>> {
+  host.tick(40);
+  await host.settle();
+  host.tick(10_000);
+  await host.settle();
+  return host.postedSince(from, "previewContentPatch");
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+test("an undo inside the table of an open cell editor reaches the page at once", async (t) => {
+  const host = await tablePreview(t);
+  const from = host.posted.length;
+  await openCellEditor(host, "cell-1");
+  host.edit(ALPHA, 5, "alpha X", 1);
+  const patches = await renderFrom(host, from);
+  assert.equal(patches.length, 1, "the render of the undo is not held behind the cell editor");
+  assert.match(String(patches[0]!.contentHtml), /alpha X/u);
+  assert.equal(host.postedSince(from, "previewEditorWatch").length, 0, "nothing waits for the editor to close");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+test("a revert-like change that is neither an undo nor typed also reaches an open cell editor's table", async (t) => {
+  const host = await tablePreview(t);
+  const from = host.posted.length;
+  await openCellEditor(host, "cell-1");
+  // The last row only: the cursor (line 1) is not near it, so the change is certainly not typing.
+  host.edit(ALPHA, "alpha | x |".length, "restored | x |");
+  const patches = await renderFrom(host, from);
+  assert.equal(patches.length, 1);
+  assert.match(String(patches[0]!.contentHtml), /restored/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+test("an undo inside the table releases a held host edit without writing and renders", async (t) => {
+  const host = await tablePreview(t);
+  const loaded = host.loadedIdentity();
+  const from = host.posted.length;
+  host.enableHostEdits();
+  await openCellEditor(host, "cell-1");
+  await host.fromPage({
+    type: "previewEditSave", ...loaded, editId: "cell-1", line: 1, endLine: 3, final: false,
+    originalText: TABLE, editedText: TABLE.replace("alpha", "alpha Y"),
+  });
+  await host.settle();
+  assert.deepEqual(host.postedSince(from, "previewEditSource").map((message) => message.error), [undefined]);
+  await host.until(() => host.document.getText().includes("alpha Y"), "the autosave reaching the document");
+  await host.settle();
+  host.tick(10_000);
+  await host.settle();
+  assert.deepEqual(host.postedSince(from, "previewContentPatch"), [], "the autosave's own render waits for the editor");
+  const written = host.document.version;
+  host.edit(host.document.getText().indexOf("alpha Y"), 7, "alpha", 1);
+  const patches = await renderFrom(host, from);
+  assert.equal(host.document.version, written + 1, "the host wrote nothing besides the undo");
+  assert.equal(host.document.getText(), TABLE_DOCUMENT, "the buffer keeps the undone text");
+  assert.equal(host.postedSince(from, "previewEditSource").filter((message) => message.error !== undefined).length, 0,
+    "no conflict error is shown in the editor");
+  assert.equal(patches.length, 1);
+  assert.doesNotMatch(String(patches.at(-1)!.contentHtml), /alpha Y/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+test("a change outside the table of an open cell editor still waits for it, and follows the table", async (t) => {
+  const host = await tablePreview(t);
+  const from = host.posted.length;
+  await openCellEditor(host, "cell-1");
+  host.edit(TABLE_DOCUMENT.indexOf("Para two"), 4, "Part", 1);
+  assert.deepEqual(await renderFrom(host, from), [], "an undo in another block waits for the editor");
+  // A line added above the table moves it: the editor's range follows, a later undo in it renders.
+  host.edit(0, 0, "intro\n\n");
+  assert.deepEqual(await renderFrom(host, from), [], "a change above the table waits too");
+  host.edit(host.document.getText().indexOf("alpha"), 5, "alpha X", 1);
+  const patches = await renderFrom(host, from);
+  assert.equal(patches.length, 1, "the table moved with the change before it, and the undo inside it renders");
+  assert.match(String(patches[0]!.contentHtml), /alpha X/u);
+  assert.match(String(patches[0]!.contentHtml), /Part two/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+test("the first character typed in the source table, before any keystroke is seen, keeps the render waiting", async (t) => {
+  const host = await tablePreview(t);
+  const from = host.posted.length;
+  await openCellEditor(host, "cell-1");
+  // The cursor sits on the changed line and VS Code reports the keystroke after the change.
+  host.edit(2, 1, "A");
+  assert.deepEqual(await renderFrom(host, from), [], "an undecided change does not close the cell editor");
+  assert.equal(host.postedSince(from, "previewEditorWatch").length, 1, "the editor is still waited for");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+test("text typed in the source table keeps the render waiting", async (t) => {
+  const host = await tablePreview(t);
+  const from = host.posted.length;
+  await openCellEditor(host, "cell-1");
+  noteKeystrokeForTests();
+  host.edit(2, 1, "A");
+  assert.deepEqual(await renderFrom(host, from), [], "typing in the source does not close the cell editor");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+test("an undo over the block of a prose editor keeps the render waiting (not a cell editor)", async (t) => {
+  const host = await tablePreview(t);
+  const from = host.posted.length;
+  await host.fromPage({ type: "previewEditOpen", ...host.loadedIdentity(), editId: "block-1", line: 1, endLine: 3 });
+  host.edit(ALPHA, 5, "alpha X", 1);
+  assert.deepEqual(await renderFrom(host, from), []);
 });

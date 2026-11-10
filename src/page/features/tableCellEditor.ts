@@ -77,6 +77,10 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     // cell whose text did not change keeps its full rendering.
     if (edit.renderedCellContent && edit.tableInput!.value !== edit.cellTextAtOpen) {
       setCellInline(document, edit.renderedCellContent, edit.tableInput!.value);
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-069
+      // The table now shows text the host never rendered: the next patch has to rebuild it, even
+      // when the buffer is back to the text its host HTML came from (an undo, a revert).
+      rt.parts.contentMorph.invalidate(edit.renderedCellContent);
     }
     rt.blockEditor.restoreTableCellContent(edit);
     edit.selectedCell!.removeAttribute("data-sphinx-preview-table-cell-selected");
