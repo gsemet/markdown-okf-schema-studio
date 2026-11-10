@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-11-10
+
+### The cell left with Tab or an arrow key shows its new text (CR 268, GitHub #335)
+
+- SwRS-MDOKFSTUDIO-TABLE-035 (proposed, updated): the cell the editor leaves with Tab, Shift+Tab or an
+  arrow key shows the text just typed, rendered as inline Markdown, without a re-render; a new scenario
+  covers a new row, a changed cell and an arrow key. Before, the cell showed the content captured when
+  the editor opened in it (empty for a new row). New implementing file
+  src/page/modules/cellInlineMarkdown.ts; tests in test/page/runtimeTableCellEditor.test.ts and the
+  real-window scenario scenarioTableTab.
+
 ## 2026-11-06
 
 ### A document is editable whatever the trust (CR 264)

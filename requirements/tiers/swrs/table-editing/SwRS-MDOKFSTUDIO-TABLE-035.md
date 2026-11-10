@@ -9,7 +9,9 @@ description: When the writer presses Tab, Shift+Tab or an arrow key at the edge
   text (at the start for the cell to the right and the cell below), and leave
   the key to the browser or hand it to block-to-block navigation when no cell
   can take it, and bring that cell and its editor into the visible part of the
-  table's sideways scroll box without scrolling the page.
+  table's sideways scroll box without scrolling the page, and the cell left
+  SHALL show the text just typed in it, rendered as inline Markdown, without
+  waiting for a re-render.
 project: markdown-okf-schema-studio
 scope: table-editing
 req_lifecycle: proposed
@@ -38,7 +40,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text in a cell text box, the extension SHALL move the editor to the next, previous or neighbouring rendered cell, with the caret at the end of its text (at the start for the cell to the right and the cell below), and leave the key to the browser or hand it to block-to-block navigation when no cell can take it, and bring that cell and its editor into the visible part of the table's sideways scroll box without scrolling the page.
+When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text in a cell text box, the extension SHALL move the editor to the next, previous or neighbouring rendered cell, with the caret at the end of its text (at the start for the cell to the right and the cell below), and leave the key to the browser or hand it to block-to-block navigation when no cell can take it, and bring that cell and its editor into the visible part of the table's sideways scroll box without scrolling the page, and the cell left SHALL show the text just typed in it, rendered as inline Markdown, without waiting for a re-render.
 
 ### Scenario (nominal): Tab along a row and across rows
 
@@ -51,6 +53,12 @@ When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text i
 - GIVEN the editor in the last cell of a table with two body rows, with text typed in it
 - WHEN the writer presses Tab
 - THEN a final previewEditSave with an extra empty row at the end and the typed text is posted, and after the re-render the editor opens in the first cell of the new row
+
+### Scenario (nominal): The cell left shows its new text
+
+- GIVEN the editor in a cell whose text was typed or changed (the first cell of a row just added, or a cell with an older rendering), the cell holding no re-rendered content
+- WHEN the writer presses Tab, Shift+Tab or an arrow key that moves the editor to another cell
+- THEN the cell left shows the text just typed, with its inline Markdown (code, strong, emphasis, strikethrough, links, line breaks) rendered, and not the content it showed when the editor opened in it (empty for a new row); a cell whose text was not changed keeps its rendering; no render is requested and no final save is posted
 
 ### Scenario (refusal): Final save cannot be posted
 
@@ -128,8 +136,8 @@ Home moves the caret to the start of the text, and Shift extends the selection.
 
 ### Verification notes
 
-- Method: test/page/runtimeTableCellEditor.test.ts (Tab and Shift+Tab, Tab in the last cell, Shift+Tab in the first header cell, arrow keys in every direction, native arrows with a selection, modifiers, IME or a caret inside a multi-line cell, arrow without a matching model cell, block navigation fallback for ArrowUp, Home and End, the table box scrolled to a cell right of it, left of it across the wrap and with Shift+Tab, a visible cell, a target wider than the box, a click on a partly hidden cell, a layout pass that narrows the box under an open editor; scenarios Tab along a row, Tab in the last cell, Shift+Tab, ArrowLeft and ArrowRight, ArrowUp and ArrowDown, keys that stay native, no cell in the arrow direction, Home and End, Tab in a table wider than the pane).
-- Method: test/integration/realInput/markers.ts and real-window scenario scenarioTableTab (id table-editing/r05-tab-adds-row) in test/integration/realInput/editorWidgets.ts (Tab along a row, Tab in the last cell).
+- Method: test/page/runtimeTableCellEditor.test.ts (Tab and Shift+Tab, Tab in the last cell, Shift+Tab in the first header cell, arrow keys in every direction, native arrows with a selection, modifiers, IME or a caret inside a multi-line cell, arrow without a matching model cell, block navigation fallback for ArrowUp, Home and End, the table box scrolled to a cell right of it, left of it across the wrap and with Shift+Tab, a visible cell, a target wider than the box, a click on a partly hidden cell, a layout pass that narrows the box under an open editor; scenarios Tab along a row, Tab in the last cell, the cell left shows its new text (a new row, a changed cell, an arrow key), Shift+Tab, ArrowLeft and ArrowRight, ArrowUp and ArrowDown, keys that stay native, no cell in the arrow direction, Home and End, Tab in a table wider than the pane).
+- Method: test/integration/realInput/markers.ts and real-window scenario scenarioTableTab (id table-editing/r05-tab-adds-row) in test/integration/realInput/editorWidgets.ts (Tab along a row, Tab in the last cell, the first cell of the new row shows the text typed after Tab).
 - Method: test/integration/realInput/markers.ts and real-window scenario scenarioWideTableTab in test/integration/realInput/wideTableTab.ts, assertion only (Tab in a table wider than the pane: real Tab and Shift+Tab presses through the row and across the wrap, and from the last cell of a table scrolled to its end, in Margin and Auto width).
 - Method: test/page/runtimeBlockEditor.test.ts (a table cell arrow inside a wrapped cell does not move to another cell; keys that stay native, wrapped cell row).
 - Method: test/page/runtimeEditorFlush.test.ts (Ctrl+Tab pass-through; Shift+Tab and held modifiers, Ctrl+Tab row).

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A table cell you leave with Tab or an arrow key shows the text you just typed, instead of staying
+  empty or showing its old text until the page renders again.
+
 ## 1.5.0 - 2026-11-06
 
 - A document can be edited whatever the workspace trust, in Restricted Mode and in a file outside

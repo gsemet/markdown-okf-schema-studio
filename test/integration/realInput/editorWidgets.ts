@@ -813,6 +813,12 @@ export async function scenarioTableTab(page: Page, evidence: Evidence): Promise<
       const current = await findCurrentFrame(page);
       return current !== undefined && await current.locator("tbody tr:nth-child(3) td:nth-child(2) " + CELL).count() === 1;
     }));
+    // The cell left shows the text just typed (CR 268, GitHub #335), not an empty cell.
+    await waitFor("the first cell of the new row to show `gamma`", async () => {
+      const current = await findCurrentFrame(page);
+      return current !== undefined
+        && await current.locator("tbody tr:nth-child(3) td:nth-child(1)").filter({ hasText: /^gamma$/u }).count() === 1;
+    });
     await typeText(page, "three");
     await press(page, "Enter");
     await waitFor("the new row to reach the source buffer", () =>
