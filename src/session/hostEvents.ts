@@ -245,14 +245,14 @@ export class HostEvents {
     if (event.changes.length === 0) {
       return;
     }
-    this.noteOutsideChange(event);
+    const outside = this.noteOutsideChange(event);
     this.manager.scroll.shiftAnchorsForEdits(event);
     this.manager.comments.shiftForEdits(event);
     this.refreshPreview(event.document, event.changes.map((change) => ({
       rangeOffset: change.start,
       rangeLength: change.length,
       text: change.text,
-    })));
+    })), outside);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-094
@@ -260,9 +260,10 @@ export class HostEvents {
    * Records a change made outside the preview (or an undo / redo) on the previews of its document.
    * The writer typing does not glow; every other change does (see `isTypingChange`). VS Code
    * reports the keystroke after the change it caused, so a change that touches a cursor with no
-   * keystroke yet stays pending until the patch that shows it.
+   * keystroke yet stays pending until the patch that shows it. Returns true only for a change that is
+   * certainly outside: an undecided one may be the writer's first keystroke, so it does not count.
    */
-  private noteOutsideChange(event: DocumentChange): void {
+  private noteOutsideChange(event: DocumentChange): boolean {
     const key = event.document.id;
     const reason = event.reason === "undo" ? 1 : event.reason === "redo" ? 2 : undefined;
     const editors = this.manager.host.editors;
@@ -274,24 +275,29 @@ export class HostEvents {
     const undecided = reason === undefined && !typing && !this.manager.host.documents.isApplying(key)
       && touchesSelection(spans, selections);
     const outside = isOutsideChange(reason as 1 | 2, this.manager.host.documents.isApplying(key), typing);
-    if (!outside) return;
+    if (!outside) return false;
     for (const session of this.manager.sessions()) {
       if (session.documentUri !== key) continue;
       if (undecided) session.page.pendingOutsideChange = { version: event.document.revision, at: now };
       else session.page.outsideChangeVersion = event.document.revision;
     }
+    return !undecided;
   }
 
-  private refreshPreview(document: HostDocument, changes?: readonly BlockRangeChange[]): void {
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-119
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-193
+  private refreshPreview(document: HostDocument, changes?: readonly BlockRangeChange[], outside = false): void {
     // The path of a document no preview shows is resolved once for all the sessions, on demand.
     let foreign: { path: string; canonical: string } | undefined;
     for (const session of this.manager.sessions()) {
       if (document.id === session.documentUri) {
+        if (session.edits.active?.applying) {
+          continue;
+        }
+        // An outside change over the table of an open cell editor shows the buffer at once (TABLE-119).
+        if (changes) this.manager.edits.releaseCellEditorOnOutsideChange(session, changes, outside);
         const edit = session.edits.active;
         if (edit) {
-          if (edit.applying) {
-            continue;
-          }
           if (changes && this.manager.sourceAvailable(session) && this.manager.edits.trackOutsideChange(session, edit, changes)) {
             // The block moved with the change, or the conflict was reported: the editor stays open
             // and the render waits for it (STAB-03, STAB-06).

@@ -105,8 +105,16 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 | A change that lies inside or across the block | The editor shows "The source block changed outside the preview while it was being edited. Copy your text, then reopen the block." with the typed text kept, and the lock is free for a new edit |
 | An insertion editor (an empty block) and a change elsewhere | No conflict is reported; only a change at its own offset conflicts |
 
+### Scenario (boundary): A table cell editor
+
+| Input | Outcome |
+| --- | --- |
+| A held edit of a table cell editor and an outside change (undo, redo, revert) that overlaps its table | No error is shown: the edit is released without writing and the render of the buffer reaches the page, whose content patch closes the editor (SwRS-MDOKFSTUDIO-TABLE-119); the text was autosaved live, so the buffer already holds it |
+| The same change over a prose block editor | The conflict above applies |
+
 ### Related requirements
 
+- SwRS-MDOKFSTUDIO-TABLE-119: the cell editor that an outside change closes
 - SwRS-MDOKFSTUDIO-BLOCK-193: the page updates that wait for the lock
 - SwRS-MDOKFSTUDIO-BLOCK-216: a first save that does not match is refused
 - SwRS-MDOKFSTUDIO-BLOCK-244: the accepted shape of previewEditClosed
@@ -118,6 +126,7 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 - Method: test/host/previewTiming.test.ts (watch once, close of another editor id: `renders wait while the page has an inline editor open, and the newest one arrives on its close`, `a close of another editor id releases nothing`).
 - Method: test/page/runtimeBlockEditor.test.ts (`STAB-03: an editor the host watches reports its close; without a watch the close stays silent`, `STAB-03: a watch for an editor that is already closed is answered at once`, `STAB-03: a watch sent while the host already follows another document is still answered`).
 - Method: test/core/state/blockRange.test.ts (`STAB-06: a change before the open block shifts it by the inserted or removed length`, `STAB-06: a change at or after the end of the open block leaves it in place`, `STAB-06: several changes of one event add up; offsets refer to the text before the event`, `STAB-06: a change inside or across the open block is a conflict`, `STAB-06: an empty block (an insertion editor) conflicts only with a change at its offset`); the controller path trackOutsideChange through the host events has no test.
+- Method: test/host/previewTiming.test.ts (a table cell editor): `an undo inside the table releases a held host edit without writing and renders`; test/core/state/editLock.test.ts: `a table cell editor records its source range at open and clears it when it closes`, `a change before the cell editor's table moves its range, one inside it overlaps`.
 - Criteria: sourceStartOffset and lastSavedText describe the block in the document; releaseActiveBlockEdit runs the queued work once; watchedPageEditorId remembers the editor; the close message is addressed by the editor id only and closePageEditor compares the editor id; onPreviewReady releases only in the cases above; rebaseBlockRange returns the new start or the conflict and the host posts the error.
 
 <!-- okf:links:start -->

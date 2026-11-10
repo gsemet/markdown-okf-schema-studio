@@ -1,0 +1,86 @@
+{
+"name": "c3-2-undo-after-column-deletes-leaves-preview-table-stale",
+"file": "synth/structure-tables.md",
+"steps": [
+{
+"comment": "Fixture synth/structure-tables.md. Opens the doc, side preview, edit mode on; deletes columns of the alignment table with the toolbar (third Col - is disabled), undoes from the source, expects the preview to show the restored 3 columns."
+},
+{
+"key": "Meta+1",
+"wait": 300
+},
+{
+"open": "${file}",
+"wait": 2500
+},
+{
+"palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+"wait": 4000
+},
+{
+"waitFor": "D.querySelectorAll('table').length>=5",
+"timeout": 15000
+},
+{
+"editMode": true
+},
+{
+"mark": true
+},
+{
+"clicksel": "td",
+"text": "c1",
+"exact": true,
+"wait": 900
+},
+{
+"clicksel": "[data-sphinx-table-menu] button",
+"text": "Col \u2212",
+"wait": 900
+},
+{
+"clicksel": "[data-sphinx-table-menu] button",
+"text": "Col \u2212",
+"wait": 900
+},
+{
+"clicksel": "[data-sphinx-table-menu] button",
+"text": "Col \u2212",
+"wait": 900,
+"optional": true
+},
+{
+"key": [
+"Meta+1",
+"Meta+z",
+"Meta+z",
+"Meta+z"
+],
+"gap": 250,
+"wait": 2500
+},
+{
+"check": "diff",
+"against": "mark",
+"equal": true,
+"label": "source undo restores the buffer"
+},
+{
+"check": "feval",
+"expr": "[...D.querySelectorAll('table')].find(t=>t.rows[0].innerText.indexOf('Left')>=0).rows[0].cells.length",
+"equals": 3,
+"label": "c3-2 preview table shows the 3 restored columns"
+},
+{
+"eval": "'editorOpen='+!!D.querySelector('[data-sphinx-preview-table-cell-editor]')"
+},
+{
+"check": "errors"
+},
+{
+"shot": "c3-2-fail",
+"clip": "preview",
+"onFail": true
+}
+]
+}

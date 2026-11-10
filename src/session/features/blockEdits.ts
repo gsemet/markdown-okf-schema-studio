@@ -13,7 +13,7 @@ import { FLUSH_WAIT_MS, flushRefusalMessage, waitForAnswer, waitForSettled } fro
 import type { BlockEditMessage, PageMessageOf } from "../../core/protocol/pageToHost";
 import type { Revision } from "../../core/protocol/revision";
 import { rebaseBlockRange, type BlockRangeChange } from "../../core/state/blockRange";
-import { EditLock } from "../../core/state/editLock";
+import { EditLock, type SourceRange } from "../../core/state/editLock";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
@@ -182,7 +182,9 @@ export class BlockEditController {
       return;
     }
     const originalText = source.document.getText().slice(source.start, source.end);
-    this.openPageEditor(preview, message);
+    this.openPageEditor(preview, message, message.cellEditor === true
+      ? { start: source.start, length: source.end - source.start }
+      : undefined);
     this.postSource(preview, () => fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewEditSource",
       documentId: message.documentId,
@@ -202,9 +204,9 @@ export class BlockEditController {
   }
 
   /** The page shows an inline editor from now on: page updates wait for it to close (STAB-03). */
-  private openPageEditor(preview: PreviewSession, message: BlockEditMessage): void {
+  private openPageEditor(preview: PreviewSession, message: BlockEditMessage, cellRange?: SourceRange): void {
     if (typeof message.editId === "string" && message.editId !== "") {
-      preview.edits.lock.openPageEditor(message.editId);
+      preview.edits.lock.openPageEditor(message.editId, cellRange);
     }
   }
 
@@ -268,6 +270,8 @@ export class BlockEditController {
    * a new edit, but page updates keep waiting for the editor to close (STAB-03).
    */
   private releaseHostEditKeepingEditor(preview: PreviewSession): void {
+    const edit = preview.edits.active;
+    if (edit) preview.edits.lock.setPageCellEditorRange({ start: edit.sourceStartOffset, length: edit.lastSavedText.length });
     preview.edits.active = undefined;
     const queued = preview.edits.lock.releaseHostEdit();
     if (!preview.disposed) {
@@ -497,6 +501,36 @@ export class BlockEditController {
       return true;
     }
     edit.sourceStartOffset = rebased.start;
+    return true;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-119
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-191
+  /**
+   * Follows the table of the page's open cell editor through a change of the document. A change
+   * that overlaps the table and comes from outside the preview (an undo, a redo, a revert, another
+   * writer) lets the render of the new buffer reach the page at once: the host edit, if any, is
+   * released without a write and the render waits for nothing, so the page's content patch closes
+   * the editor without saving it (its text was autosaved live and the buffer is the truth). A change
+   * the writer typed or the preview applied keeps today's wait. Returns true when it released.
+   */
+  public releaseCellEditorOnOutsideChange(
+    preview: PreviewSession,
+    changes: readonly BlockRangeChange[],
+    outside: boolean,
+  ): boolean {
+    const { lock, active: edit } = preview.edits;
+    if (!lock.pageCellEditorRange) return false;
+    // The range length follows the host edit's text (its autosaves resize the table): re-sync it
+    // from the edit before every tracking step, or the overlap test would use a stale length.
+    if (edit) lock.setPageCellEditorRange({ start: edit.sourceStartOffset, length: edit.lastSavedText.length });
+    if (lock.trackPageCellEditor(changes) !== "overlap") return false;
+    if (!outside) {
+      // Typed in the source over the table: nothing follows it, the editor keeps its wait.
+      lock.clearPageCellEditorRange();
+      return false;
+    }
+    this.releaseActiveBlockEdit(preview, true);
     return true;
   }
 

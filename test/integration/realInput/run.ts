@@ -41,6 +41,7 @@ import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
 import { scenarioTableShortDelimiter } from "./tableShortDelimiter";
 import { scenarioColumnMoveKeepsBlockIdAtRowEnd, scenarioTailedTableMovesAndOpensCellEditor } from "./tableRowTokens";
 import { scenarioWideTableTab } from "./wideTableTab";
+import { scenarioRevertAfterExternalWriteRendersCell, scenarioUndoUnderCellEditorRendersTable } from "./tableStaleRender";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
 import { scenarioLinkClickEditsInEditMode } from "./linkEditMode";
 import { QA210_REPLAYS } from "./qa210Replays";
@@ -168,6 +169,10 @@ export async function run(): Promise<void> {
       "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
       "table-moves": () => scenarioTableMoves(page),
       "wide-table-tab": () => scenarioWideTableTab(page, evidence),
+      "table-stale-render": async () => {
+        await scenarioUndoUnderCellEditorRendersTable(page);
+        await scenarioRevertAfterExternalWriteRendersCell(page);
+      },
       "table-escape": () => scenarioTableEscapeKeepsCellsLeft(page),
       "table-short-delimiter": () => scenarioTableShortDelimiter(page),
       "table-row-tokens": async () => {
@@ -231,6 +236,9 @@ export async function run(): Promise<void> {
     // QA replays 271-c1b-1 and 271-c1b-2: block ids and tokens at the end of a table row.
     await scenarioColumnMoveKeepsBlockIdAtRowEnd(page);
     await scenarioTailedTableMovesAndOpensCellEditor(page);
+    // QA replays 271-c3-2 and 271-c6-1: the preview table shows the buffer after an undo or a revert.
+    await scenarioUndoUnderCellEditorRendersTable(page);
+    await scenarioRevertAfterExternalWriteRendersCell(page);
     await scenarioTableStructure(page);
     await scenarioTableMoves(page);
     await scenarioBooleanOneClick(page, evidence);

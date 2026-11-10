@@ -30,9 +30,11 @@ implemented_in_files:
 - src/page/features/textControls.ts
 tested_in_files:
 - test/integration/realInput/markers.ts
+- test/integration/realInput/tableStaleRender.ts
 - test/page/cellInlineMarkdown.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+- test/page/runtimeTableCellStale.test.ts
 - test/visual/capture_edit_checks.py
 default_owner_email: gaetan@xeberon.net
 ---

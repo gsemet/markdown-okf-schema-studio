@@ -72,6 +72,10 @@ export interface HostSession {
   ready(identity?: PageIdentity, extra?: Record<string, unknown>): Promise<void>;
   /** Types the whole new text into the editor (one change event, one new version). */
   type(text: string): void;
+  /** Replaces `length` characters at `offset`; `reason` 1 is an undo, 2 a redo (one change event). */
+  edit(offset: number, length: number, text: string, reason?: 1 | 2): void;
+  /** Makes the host's own edits (block saves) apply to the document, as VS Code does. */
+  enableHostEdits(): void;
   /** Moves the mock clock. */
   tick(ms: number): void;
   /** Lets promise chains and in-process I/O run until `condition` holds (bounded, no sleeping). */
@@ -160,6 +164,8 @@ export async function openPreview(timers: MockTimers, markdown: string): Promise
       await turn();
     },
     type: (text) => fake.controls.changeDocument(document, text),
+    edit: (offset, length, text, reason) => fake.controls.editDocument(document, offset, length, text, reason),
+    enableHostEdits: () => fake.controls.enableApplyEdit(),
     tick: (ms) => timers.tick(ms),
     until,
     settle: async () => {
@@ -193,6 +199,7 @@ export function closeHost(timers: MockTimers): void {
     for (const subscription of context.subscriptions.splice(0)) subscription.dispose();
   }
   for (const panel of fake.controls.panels) panel.dispose();
+  fake.controls.enableApplyEdit(false);
   timers.reset();
   releaseRenderClock();
 }

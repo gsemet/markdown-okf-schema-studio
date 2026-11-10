@@ -1,0 +1,12 @@
+{"name":"c6-1-part2","file":"synth/c6-concurrency.md","steps":[
+{"comment":"PART 2, after the external rewrite of the paragraph line."},
+{"wait":1000},
+{"key":"Tab","wait":1500},
+{"key":"Escape","wait":600},
+{"key":"Meta+1","wait":400},
+{"palette":"File: Revert File","wait":3000},
+{"check":"diff","file":"${file}","against":"disk","equal":true,"label":"buffer back to disk"},
+{"check":"feval","expr":"[...D.querySelectorAll('td')].some(t=>t.textContent.trim()==='alpha')&&![...D.querySelectorAll('td')].some(t=>t.textContent.includes('alpha X'))","label":"c6-1 preview table shows the reverted cell text"},
+{"check":"feval","expr":"D.querySelector('p').textContent.includes('EXTERNAL')","label":"c6-1 paragraph block did refresh"},
+{"shot":"c6-1-currently","clip":"preview","onFail":true}
+]}

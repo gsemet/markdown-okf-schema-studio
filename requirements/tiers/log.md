@@ -28,6 +28,26 @@
   test/page/fmtableReqTable.requirements.test.ts and
   test/integration/realInput/tableShortDelimiter.ts.
 
+### The preview table shows the buffer after an undo or a revert (CR 277, QA271-05 and QA271-06)
+
+- SwRS-MDOKFSTUDIO-TABLE-119 (proposed, new, derives from StRS-MDOKFSTUDIO-TABLE-001, which is
+  unchanged): an outside change (undo, redo, revert, another tool) over the source lines of the
+  table whose cell editor the page has open lets the render of the buffer reach the page at once,
+  releases the host edit without writing, and the content patch closes the cell editor without a
+  save. A change elsewhere, text typed in the source and the preview's own saves still wait.
+  SwRS-MDOKFSTUDIO-LIFE-069 (scenario added: a block the page rewrote is rebuilt by the next patch
+  even when its host HTML is unchanged), SwRS-MDOKFSTUDIO-BLOCK-193 (the exception, with a
+  depends_on link to TABLE-119) and SwRS-MDOKFSTUDIO-BLOCK-191 (a table cell editor releases the
+  edit instead of keeping an error) amended, all proposed; TABLE-035 gains markers only. No approved
+  requirement changed. Source: releaseCellEditorOnOutsideChange in src/session/features/blockEdits.ts
+  (called by refreshPreview in src/session/hostEvents.ts), the recorded range in
+  src/core/state/editLock.ts, the `cellEditor` flag of previewEditOpen (src/page/features/blockEditor.ts,
+  src/core/protocol/pageToHost.ts) and ContentMorph.invalidate (src/page/modules/contentMorph.ts, called
+  by switchTableCell in src/page/features/tableCellEditor.ts); tests: test/host/previewTiming.test.ts,
+  test/core/state/editLock.test.ts, test/page/modules/contentMorph.test.ts,
+  test/page/runtimeTableCellStale.test.ts, test/core/protocol/pageStateMessages.test.ts and
+  test/integration/realInput/tableStaleRender.ts (real window, CI only).
+
 ### Escape in a table cell cancels only that cell (CR 274, QA271-01)
 
 - SwRS-MDOKFSTUDIO-TABLE-025 (proposed, stable, not approved) amended: Escape in a cell editor outside a

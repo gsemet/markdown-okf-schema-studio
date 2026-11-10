@@ -226,6 +226,22 @@ export class FakeTextDocument {
       reason: undefined,
     };
   }
+
+  /** Replaces `length` characters at `offset` (a new version); `reason` 1 is an undo, 2 a redo. */
+  public editRange(offset: number, length: number, text: string, reason?: 1 | 2): {
+    document: FakeTextDocument; contentChanges: unknown[]; reason: 1 | 2 | undefined;
+  } {
+    const start = this.positionAt(offset);
+    const end = this.positionAt(offset + length);
+    this.text = this.text.slice(0, offset) + text + this.text.slice(offset + length);
+    this.version += 1;
+    this.isDirty = true;
+    return {
+      document: this,
+      contentChanges: [{ range: new Range(start, end), rangeOffset: offset, rangeLength: length, text }],
+      reason,
+    };
+  }
 }
 
 /** A webview panel that records the documents assigned to it and the messages posted to it. */
@@ -346,6 +362,8 @@ export function createFakeVscode(options: FakeVscodeOptions) {
   const folderUri = Uri.file(options.workspaceRoot);
   const workspaceFolder = { uri: folderUri, name: path.basename(options.workspaceRoot), index: 0 };
   const textDocuments: FakeTextDocument[] = [];
+  /** Opt-in: `workspace.applyEdit` applies the edit to the document (it refuses by default). */
+  const liveEdits = { on: false };
   const panels: FakeWebviewPanel[] = [];
   const watchers: FakeWatcher[] = [];
   const commands = new Map<string, (...args: unknown[]) => unknown>();
@@ -475,7 +493,19 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       return watcher;
     },
     findFiles: () => Promise.resolve([]),
-    applyEdit: () => Promise.resolve(false),
+    applyEdit: (edit: WorkspaceEdit) => {
+      if (!liveEdits.on) return Promise.resolve(false);
+      // The edits of the host apply to the document like VS Code's: one change event each.
+      for (const [uri, entries] of edit.entries()) {
+        const document = textDocuments.find((candidate) => candidate.uri.fsPath === uri.fsPath);
+        for (const entry of entries) {
+          const start = document?.offsetAt(entry.range.start) ?? 0;
+          const end = document?.offsetAt(entry.range.end) ?? 0;
+          if (document) events.changeTextDocument.fire(document.editRange(start, end - start, entry.newText));
+        }
+      }
+      return Promise.resolve(true);
+    },
     fs: strict({
       readFile: (uri: Uri) => fs.promises.readFile(uri.fsPath).then((data) => new Uint8Array(data)),
       writeFile: (uri: Uri, data: Uint8Array) => fs.promises.writeFile(uri.fsPath, data),
@@ -629,6 +659,12 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       /** Changes the document text as typing would, and tells the extension. */
       changeDocument: (document: FakeTextDocument, text: string): void => {
         events.changeTextDocument.fire(document.replaceText(text));
+      },
+      /** Makes `workspace.applyEdit` apply edits to the documents (it refuses by default). */
+      enableApplyEdit: (on = true): void => { liveEdits.on = on; },
+      /** Replaces a range of the document text, as an undo (`reason` 1) or a redo (2) does when given. */
+      editDocument: (document: FakeTextDocument, offset: number, length: number, text: string, reason?: 1 | 2): void => {
+        events.changeTextDocument.fire(document.editRange(offset, length, text, reason));
       },
       context: () => {
         const state = new Map<string, unknown>();

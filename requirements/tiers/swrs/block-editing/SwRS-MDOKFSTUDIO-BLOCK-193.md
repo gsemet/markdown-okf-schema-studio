@@ -16,7 +16,8 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-006
 - StRS-MDOKFSTUDIO-FMEDIT-008
-depends_on: []
+depends_on:
+- SwRS-MDOKFSTUDIO-TABLE-119
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -24,9 +25,11 @@ implemented_in_files:
 - src/core/state/editLock.ts
 - src/page/features/contentPatch.ts
 - src/page/features/hostHandlers.ts
+- src/session/hostEvents.ts
 tested_in_files:
 - test/core/state/editLock.test.ts
 - test/host/previewTiming.test.ts
+- test/integration/realInput/tableStaleRender.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
@@ -81,6 +84,13 @@ While the page has an inline editor open, the extension SHALL hold back the rend
 | A patch is applied and no block editor is open | Nothing else is closed |
 | A patch arrives and no field editor is open | The patch is applied normally |
 
+### Scenario (boundary): An outside change over an open table cell editor's table
+| Input | Outcome |
+| --- | --- |
+| A render of an outside change (undo, redo, revert, another writer) that overlaps the source lines of the table whose cell editor is open | The render is not held: it reaches the page at once and the content patch closes the cell editor (SwRS-MDOKFSTUDIO-TABLE-119) |
+| An outside change elsewhere, text typed in the source, or the preview's own save | The render waits as before |
+| An open editor that is not a table cell editor | The render waits as before |
+
 ### Scenario (nominal): A document switch drops the work of the old document
 - GIVEN an editor closed by the flush and a render queued for the old document
 - WHEN the preview switches to another document
@@ -100,7 +110,7 @@ While the page has an inline editor open, the extension SHALL hold back the rend
 
 ### Verification notes
 - Method: test/core/state/editLock.test.ts (render during editing, host lock only, two renders, work queued twice, document switch, host edit still running) with the unit tests `an editor the page opened defers page updates and finished renders until it closes (STAB-03)`, `the host lock alone defers page work but lets a finished render through`, `reloads are deferred while held and flushed once on release`, `release forgets the page editor (the page was replaced) and a replaced deferral is discarded` and `a document switch forgets the page editor and drops the old document's work (STAB-03)`.
-- Method: test/host/previewTiming.test.ts (render during editing, two renders) with `renders wait while the page has an inline editor open, and the newest one arrives on its close`.
+- Method: test/host/previewTiming.test.ts (render during editing, two renders) with `renders wait while the page has an inline editor open, and the newest one arrives on its close`; (the cell editor exception) `a change outside the table of an open cell editor still waits for it, and follows the table`, `text typed in the source table keeps the render waiting`, `an undo over the block of a prose editor keeps the render waiting (not a cell editor)`.
 - Method: test/integration/previewEditing.test.ts (render during editing, integration check).
 - Method: test/page/runtimeBlockSelection.test.ts (content patch over a block editor, indirectly, with `T39: a content patch and leaving edit mode clear the selection`; a patch reaches an open editor only after a forced render, a document switch or the editor's own final save).
 - Method: test/page/runtimeFrontmatterFields.test.ts (properties update waits for the field editor, T30 previewPropertiesTable is deferred while a frontmatter editor is open, then applied on close).
@@ -115,6 +125,8 @@ While the page has an inline editor open, the extension SHALL hold back the rend
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
   - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TABLE-119](../table-editing/SwRS-MDOKFSTUDIO-TABLE-119.md): An outside change of the table under an open cell editor closes the editor and shows the buffer
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-FMEDIT-060](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-060.md): A properties update waits until the field editor closes
   - [SwRS-MDOKFSTUDIO-FMEDIT-061](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-061.md): A content patch closes the field editor

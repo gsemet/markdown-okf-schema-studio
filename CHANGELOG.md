@@ -9,6 +9,9 @@
 - Pressing Escape, or the Cancel button, in a table cell now cancels only the text typed in that cell. The cells you left with
   Tab, an arrow key or a click keep their text in the file, as the preview already showed, instead of
   being silently dropped.
+- After an undo, a redo or a Revert File, the preview table shows what the file holds. A table whose
+  cell editor is open closes it and shows the restored text instead of staying out of date, and a
+  table whose cell you left with Tab is rebuilt instead of keeping the text you had typed.
 
 ## 1.6.0 - 2026-11-10
 

@@ -98,6 +98,11 @@ export function morphKey(source: string): string {
 export interface ContentMorph {
   /** Records the host HTML of the container's blocks as they are now (call before changing them). */
   record(container: Element): void;
+  /**
+   * Forgets the recorded key of the top-level block that contains `node`: the page wrote into it,
+   * so its HTML is no longer the host's and the next `replace` rebuilds it, whatever HTML it carries.
+   */
+  invalidate(node: Node): void;
   /** Replaces the container's content with `html`, keeping unchanged blocks. */
   replace(container: Element, html: string): { kept: number; inserted: number };
 }
@@ -143,6 +148,13 @@ export function installContentMorph(
   };
   return {
     record,
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-069
+    invalidate(node) {
+      // Only the top-level blocks are recorded: the first ancestor with a record is the block.
+      for (let current: Node | null = node; current; current = current.parentNode) {
+        if (sources.delete(current)) return;
+      }
+    },
     replace(container, html) {
       const template = typeof document.createElement === "function" ? document.createElement("template") : undefined;
       if (!template || !("content" in template) || typeof container.replaceChildren !== "function") {

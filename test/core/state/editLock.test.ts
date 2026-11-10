@@ -179,3 +179,36 @@ test("a document switch forgets the page editor and drops the old document's wor
   assert.equal(held.isHeld, true, "a final save the host still applies keeps its lock");
   assert.equal(held.shouldDeferResult(), false);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+test("a table cell editor records its source range at open and clears it when it closes", () => {
+  const lock = new EditLock();
+  assert.equal(lock.pageCellEditorRange, undefined);
+  lock.openPageEditor("block-1");
+  assert.equal(lock.pageCellEditorRange, undefined, "a block editor has no cell range");
+  lock.openPageEditor("cell-1", { start: 20, length: 30 });
+  assert.deepEqual(lock.pageCellEditorRange, { start: 20, length: 30 });
+  lock.closePageEditor("other");
+  assert.deepEqual(lock.pageCellEditorRange, { start: 20, length: 30 }, "another editor's close keeps it");
+  lock.closePageEditor("cell-1");
+  assert.equal(lock.pageCellEditorRange, undefined);
+  lock.openPageEditor("cell-2", { start: 1, length: 2 });
+  lock.forgetPage();
+  assert.equal(lock.pageCellEditorRange, undefined);
+  lock.openPageEditor("cell-3", { start: 1, length: 2 });
+  lock.release();
+  assert.equal(lock.pageCellEditorRange, undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+test("a change before the cell editor's table moves its range, one inside it overlaps", () => {
+  const lock = new EditLock();
+  assert.equal(lock.trackPageCellEditor([{ rangeOffset: 0, rangeLength: 0, text: "x" }]), "none", "no cell editor");
+  lock.openPageEditor("cell-1", { start: 20, length: 30 });
+  assert.equal(lock.trackPageCellEditor([{ rangeOffset: 0, rangeLength: 0, text: "intro\n" }]), "tracked");
+  assert.deepEqual(lock.pageCellEditorRange, { start: 26, length: 30 });
+  assert.equal(lock.trackPageCellEditor([{ rangeOffset: 60, rangeLength: 5, text: "" }]), "tracked", "after the table: nothing moves");
+  assert.deepEqual(lock.pageCellEditorRange, { start: 26, length: 30 });
+  assert.equal(lock.trackPageCellEditor([{ rangeOffset: 30, rangeLength: 2, text: "yy" }]), "overlap");
+  assert.deepEqual(lock.pageCellEditorRange, { start: 26, length: 30 }, "the range is kept for the caller to decide");
+});

@@ -7,11 +7,21 @@
  * edit is over.
  */
 
+import { rebaseBlockRange, type BlockRangeChange } from "./blockRange";
+
+/** The source range of a table, as an offset and a length in the document text. */
+export interface SourceRange {
+  start: number;
+  length: number;
+}
+
 export class EditLock {
   private held = false;
   private heldRequestId: number | undefined;
   /** The inline editor the page has open (its edit id), known from its first message. */
   private pageEditorId: string | undefined;
+  /** The source range of the table whose cell editor the page has open (TABLE-119), if it is one. */
+  private pageCellRange: SourceRange | undefined;
   private readonly deferred = new Map<string, { work: () => void; discard?: () => void }>();
 
   public get isHeld(): boolean {
@@ -28,6 +38,11 @@ export class EditLock {
     return this.pageEditorId;
   }
 
+  /** The source range of the table the page's open cell editor works on, if the open editor is one. */
+  public get pageCellEditorRange(): SourceRange | undefined {
+    return this.pageCellRange;
+  }
+
   /** The edit opened against the render `requestId`. */
   public acquire(requestId: number): void {
     this.held = true;
@@ -39,8 +54,34 @@ export class EditLock {
    * the page's content waits, including a render that finishes now: an open editor keeps its text
    * and caret through saves, theme changes and diagram updates.
    */
-  public openPageEditor(editId: string): void {
+  public openPageEditor(editId: string, cellRange?: SourceRange): void {
     this.pageEditorId = editId;
+    this.pageCellRange = cellRange;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-119
+  /** Replaces the recorded range of the open cell editor's table (the host edit moved or resized it). */
+  public setPageCellEditorRange(range: SourceRange): void {
+    if (this.pageCellRange) this.pageCellRange = range;
+  }
+
+  /** Stops following the open cell editor's table: the editor stays open and keeps its wait. */
+  public clearPageCellEditorRange(): void {
+    this.pageCellRange = undefined;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-119
+  /**
+   * Keeps the open cell editor's table range in step with `changes` (offsets before the event). A
+   * change before the table moves it ("tracked"), a change that overlaps it is reported ("overlap")
+   * and leaves the range as it was; "none" when no cell editor is open.
+   */
+  public trackPageCellEditor(changes: readonly BlockRangeChange[]): "none" | "tracked" | "overlap" {
+    if (!this.pageCellRange) return "none";
+    const rebased = rebaseBlockRange(this.pageCellRange, changes);
+    if (rebased === "conflict") return "overlap";
+    this.pageCellRange = { start: rebased.start, length: this.pageCellRange.length };
+    return "tracked";
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-191
@@ -53,6 +94,7 @@ export class EditLock {
       return [];
     }
     this.pageEditorId = undefined;
+    this.pageCellRange = undefined;
     return this.held ? [] : this.drain();
   }
 
@@ -64,6 +106,7 @@ export class EditLock {
    */
   public forgetPage(): void {
     this.pageEditorId = undefined;
+    this.pageCellRange = undefined;
     const queued = [...this.deferred.values()];
     this.deferred.clear();
     queued.forEach((entry) => entry.discard?.());
@@ -125,6 +168,7 @@ export class EditLock {
     this.held = false;
     this.heldRequestId = undefined;
     this.pageEditorId = undefined;
+    this.pageCellRange = undefined;
     return this.drain();
   }
 

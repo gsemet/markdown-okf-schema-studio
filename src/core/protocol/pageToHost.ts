@@ -155,6 +155,7 @@ function hasValidStateFields(message: Readonly<Record<string, unknown>>, type: P
     && (message.insertAfterLine === undefined
       || (BLOCK_EDIT_TYPES.includes(type)
         && Number.isSafeInteger(message.insertAfterLine) && (message.insertAfterLine as number) >= 0))
+    && (message.cellEditor === undefined || (type === "previewEditOpen" && message.cellEditor === true))
     && (message.blockEditOpen === undefined
       || (type === "previewReady" && typeof message.blockEditOpen === "boolean"))
     && (message.final === undefined || (type === "previewEditSave" && typeof message.final === "boolean"))

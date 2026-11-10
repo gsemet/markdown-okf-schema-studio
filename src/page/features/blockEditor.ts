@@ -318,6 +318,9 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       line,
       endLine,
       ...(insertAfterLine !== undefined ? { insertAfterLine } : {}),
+      // @implements_req SwRS-MDOKFSTUDIO-TABLE-119
+      // The host follows the table of an open cell editor, to show the buffer after an outside change.
+      ...(selectedCell ? { cellEditor: true as const } : {}),
     });
   };
 

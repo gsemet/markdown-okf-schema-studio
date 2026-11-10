@@ -40,6 +40,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-027
 - SwRS-MDOKFSTUDIO-TABLE-030
 - SwRS-MDOKFSTUDIO-TABLE-034
+- SwRS-MDOKFSTUDIO-TABLE-119
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -95,4 +96,5 @@ As a writer, I click a table cell in edit mode and edit its Markdown right where
   - [SwRS-MDOKFSTUDIO-TABLE-027](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-027.md): The Cancel button does what Escape does
   - [SwRS-MDOKFSTUDIO-TABLE-030](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-030.md): Following a link or pressing Back or Next saves an open cell first
   - [SwRS-MDOKFSTUDIO-TABLE-034](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-034.md): A host refusal is shown in the cell and keeps the typed text
+  - [SwRS-MDOKFSTUDIO-TABLE-119](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-119.md): An outside change of the table under an open cell editor closes the editor and shows the buffer
 <!-- okf:links:end -->
