@@ -69,6 +69,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     if (!edit.tableModel.rows[modelRowIndex] || columnIndex >= edit.tableModel.rows[modelRowIndex].length) return;
     const previousRowIndex = modelRowOf(edit.tableRowIndex!);
     edit.tableModel.rows[previousRowIndex]![edit.tableColumnIndex!] = edit.tableInput!.value;
+    if (edit.tableInput!.value !== edit.cellTextAtOpen) edit.keptCellChange = true;
     rt.blockEditor.postBlockEditSave(false);
     // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
     // The cell left shows the text just typed, not the content captured when the editor opened in
@@ -90,6 +91,22 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     selectedCell.appendChild(edit.element);
     rt.scroll.beginEditAnchor(selectedCell);
     renderTableCellEditor(edit);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-025
+  // Escape cancels only the cell it is pressed in. When a cell left earlier in the session holds
+  // typed text, the open cell goes back to its opening text and the table is saved and closed, so
+  // the buffer and the page keep the cells left; otherwise the whole edit is cancelled as before.
+  function cancelTableCellEdit(edit: BlockEdit): void {
+    if (edit.finishing) return;
+    if (edit.keptCellChange && edit.tableModel && edit.tableInput && edit.cellTextAtOpen !== undefined) {
+      edit.tableInput.value = edit.cellTextAtOpen;
+      edit.tableModel.rows[modelRowOf(edit.tableRowIndex!)]![edit.tableColumnIndex!] = edit.cellTextAtOpen;
+      edit.convertedText = undefined;
+      rt.blockEditor.saveBlockEdit();
+      return;
+    }
+    rt.blockEditor.cancelBlockEdit();
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
@@ -525,7 +542,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       if (textControls.homeEndInControl(event, input)) return;
       if (event.key === "Escape" && !event.isComposing) {
         event.preventDefault?.();
-        blockEditor.cancelBlockEdit();
+        cancelTableCellEdit(edit);
       } else if (event.key === "Enter") {
         event.preventDefault?.();
         blockEditor.saveBlockEdit();
@@ -550,6 +567,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
   return {
     switchTableCell,
     renderTableCellEditor,
+    cancelTableCellEdit,
     // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
     // A layout pass (for example a pane resize or a toolbar change) can resize the box under an
     // open editor: the table keeps its Auto breakout and the open cell is scrolled back into view.
@@ -578,7 +596,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
           && (edit.element === node || Boolean(edit.element.contains?.(node as Node)));
         if (inside(event.target) || inside(document.activeElement)) return;
         event.preventDefault?.();
-        rt.blockEditor.cancelBlockEdit();
+        cancelTableCellEdit(edit);
       });
     },
   };

@@ -126,6 +126,8 @@ export interface BlockEdit {
   renderedCellContent?: HTMLElement;
   /** The Markdown text the cell editor showed when it opened in the cell, to tell an edited cell. */
   cellTextAtOpen?: string;
+  /** A cell left earlier in this edit session (Tab, an arrow or a click) holds text that differs from its opening text. */
+  keptCellChange?: boolean;
   tableRowIndex?: number;
   tableColumnIndex?: number;
   initialCaretPosition: CaretPosition;
@@ -519,6 +521,8 @@ export interface EditorChrome {
 export interface TableCellEditor {
   switchTableCell(edit: BlockEdit, selectedCell: HTMLTableCellElement, caretPosition: CaretPosition): void;
   renderTableCellEditor(edit: BlockEdit): void;
+  /** Escape and the Cancel button: cancels only the open cell once a cell left holds typed text. */
+  cancelTableCellEdit(edit: BlockEdit): void;
   /** Brings the open cell editor back inside its table's scroll box after a layout pass. */
   revealOpenCell(): void;
   /** Binds the pointer tracking and the Escape key of the cell editor. */

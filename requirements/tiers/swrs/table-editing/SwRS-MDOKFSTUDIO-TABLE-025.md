@@ -2,11 +2,12 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-TABLE-025
 uuid: 588bd515-8e56-4c1a-a65e-3efc0dda9533
-title: Escape cancels the cell edit, except during a composition
+title: Escape cancels the open cell edit only, except during a composition
 description: When the writer presses Escape in a cell editor outside an IME
-  composition and no autosave has reached the document, the extension SHALL
-  close the editor, drop the typed text and send no final save, and, during an
-  input-method composition, leave the editor open and post nothing.
+  composition, the extension SHALL close the editor and drop the text typed in
+  that cell only, keep the text of the cells left earlier in the session with
+  Tab, an arrow key or a click, show in the preview what the buffer holds, and,
+  during an input-method composition, leave the editor open and post nothing.
 project: markdown-okf-schema-studio
 scope: table-editing
 req_lifecycle: proposed
@@ -21,23 +22,46 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/page/features/blockEditor.ts
 - src/page/features/tableCellEditor.ts
 tested_in_files:
 - test/integration/realInput/markers.ts
+- test/integration/realInput/tableEscape.ts
 - test/page/runtimeTableCellEditor.test.ts
+- test/page/runtimeTableCellEscape.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
-## Escape cancels the cell edit, except during a composition
+## Escape cancels the open cell edit only, except during a composition
 
 ### Normative behavior
 
-When the writer presses Escape in a cell editor outside an IME composition and no autosave has reached the document, the extension SHALL close the editor, drop the typed text and send no final save, and, during an input-method composition, leave the editor open and post nothing.
+When the writer presses Escape in a cell editor outside an IME composition, the extension SHALL close the editor and drop the text typed in that cell only: with no cell left earlier in the session holding typed text, the table is restored as before the session and no final save is sent; with such a cell, the open cell returns to its opening text, the table is saved with the text of the cells left (Tab, arrow key or click) and the preview shows what the buffer holds. During an input-method composition, the editor stays open and nothing is posted.
 
 ### Scenario (nominal): Escape after typing
 - GIVEN a cell edited and not yet autosaved
 - WHEN the writer presses Escape
 - THEN the editor closes, the rendered cell is as before and no final previewEditSave is ever posted
+
+### Scenario (nominal): Escape after a cell left with Tab, an arrow key or a click
+- GIVEN text typed in a cell, then Tab, an arrow key or a click to another cell, and text typed in that cell
+- WHEN the writer presses Escape in the second cell
+- THEN the editor closes, the buffer holds the text of the first cell and the original text of the second, and the preview shows both as the buffer holds them
+
+### Scenario (boundary): Escape in an unchanged cell after a cell left
+- GIVEN text typed in a cell and left with Tab, and nothing typed in the next cell
+- WHEN the writer presses Escape
+- THEN the text of the first cell stays in the buffer
+
+### Scenario (nominal): Cancel button after a cell left
+- GIVEN text typed in a cell, then Tab to another cell, and text typed in that cell
+- WHEN the writer clicks the Cancel button of the cell editor
+- THEN it behaves as Escape: the buffer holds the text of the first cell and the original text of the second, and no previewEditCancel is posted
+
+### Scenario (boundary): Escape after leaving an untouched cell
+- GIVEN Tab out of a cell where nothing was typed, then text typed in the next cell
+- WHEN the writer presses Escape
+- THEN the whole session is cancelled as before: no final save is posted
 
 ### Scenario (boundary): Blur after Escape
 - GIVEN the editor closed by Escape
@@ -65,13 +89,17 @@ When the writer presses Escape in a cell editor outside an IME composition and n
 - THEN the edit is cancelled
 
 ### Related requirements
+- SwRS-MDOKFSTUDIO-TABLE-013: one edit session across cells; the cells left keep their text.
+- SwRS-MDOKFSTUDIO-TABLE-035: the cell left shows the text just typed, which Escape in the next cell keeps.
 - SwRS-MDOKFSTUDIO-BLOCK-053: the block editor equivalent of the cancel; the cell has its own listener.
 
 ### Verification notes
 - Method: test/page/runtimeTableCellEditor.test.ts ("Escape in a changed table cell cancels and never saves a final table" for Escape after typing and the blur after it; "Escape cancels a table cell even when focus is outside the cell editor" for the focus outside and the key inside, with the document-level handler in bindKeys of src/page/features/tableCellEditor.ts; "Escape during IME composition neither cancels nor saves a table cell" for the composition scenarios).
+- Method: test/page/runtimeTableCellEscape.test.ts (Escape after Tab, ArrowRight and a click, the Cancel button after a cell left, Escape after leaving an untouched cell, after two cells left, with the focus outside the cell editor, and in an untouched cell, in each case a final save holding the cells left and not the open cell's text) with the cancel branch cancelTableCellEdit of src/page/features/tableCellEditor.ts.
+- Method: test/integration/realInput/tableEscape.ts (real-window scenario scenarioTableEscapeKeepsCellsLeft, QA replay 271-c2-1: type, Tab, Escape, then type, click, Escape; the buffer line and the shown cells agree).
 - Method: test/integration/realInput/textEditing.ts, markers in test/integration/realInput/markers.ts (real-window scenario scenarioEscapeCancels, id table-editing/r04-escape-cancels-cell: Escape after typing).
 - Method: visual scenarios table-editing/v02 to v05 (Escape cancelling).
-- Criteria: No message with final true after Escape and an unchanged source in the real-window scenario. Exactly one cancel per key press in the two focus scenarios. No message and an open editor in the composition scenario.
+- Criteria: No message with final true after Escape and an unchanged source in the real-window scenario. With a cell left earlier in the session, the last save is final and holds the text of that cell and not the open cell's typed text; no previewEditCancel is posted. Exactly one cancel per key press in the two focus scenarios. No message and an open editor in the composition scenario.
 
 <!-- okf:links:start -->
 ### Links

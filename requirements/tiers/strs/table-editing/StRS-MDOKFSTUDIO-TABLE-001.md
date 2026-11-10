@@ -90,7 +90,7 @@ As a writer, I click a table cell in edit mode and edit its Markdown right where
   - [SwRS-MDOKFSTUDIO-TABLE-006](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-006.md): The cell text box wraps and fits its text in the block editor font
   - [SwRS-MDOKFSTUDIO-TABLE-013](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-013.md): A cell edit saves the whole table and moves between cells without reopening
   - [SwRS-MDOKFSTUDIO-TABLE-018](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-018.md): Enter, Done, leaving the cell or a click elsewhere commits the cell
-  - [SwRS-MDOKFSTUDIO-TABLE-025](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-025.md): Escape cancels the cell edit, except during a composition
+  - [SwRS-MDOKFSTUDIO-TABLE-025](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-025.md): Escape cancels the open cell edit only, except during a composition
   - [SwRS-MDOKFSTUDIO-TABLE-026](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-026.md): Cancelling after an autosave asks the host to restore the original table
   - [SwRS-MDOKFSTUDIO-TABLE-027](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-027.md): The Cancel button does what Escape does
   - [SwRS-MDOKFSTUDIO-TABLE-030](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-030.md): Following a link or pressing Back or Next saves an open cell first

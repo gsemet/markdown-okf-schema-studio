@@ -37,6 +37,7 @@ import { scenarioAddFieldPositionAndEscape, scenarioBooleanOneClick, scenarioCom
 import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfterFinalFigure, scenarioInsertBlocksFromPreview, scenarioLargeDocumentPatched, scenarioPendingOverlayWithoutReload, scenarioPropertiesTableWithoutReload, scenarioStatusPageTwoLines, withIncrementalUpdates } from "./renderPatching";
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
 import { scenarioFindRightAfterClick } from "./findAfterClick";
+import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
 import { scenarioWideTableTab } from "./wideTableTab";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
 import { scenarioLinkClickEditsInEditMode } from "./linkEditMode";
@@ -165,6 +166,7 @@ export async function run(): Promise<void> {
       "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
       "table-moves": () => scenarioTableMoves(page),
       "wide-table-tab": () => scenarioWideTableTab(page, evidence),
+      "table-escape": () => scenarioTableEscapeKeepsCellsLeft(page),
       "find-after-click": () => scenarioFindRightAfterClick(page),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
       "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),
@@ -215,6 +217,8 @@ export async function run(): Promise<void> {
     await scenarioTableToolbar(page, evidence);
     // QA replay c5-1: Tab through a table wider than the preview keeps the cell editor in view.
     await scenarioWideTableTab(page, evidence);
+    // QA replay 271-c2-1: Escape cancels only the open cell; the cells left keep their text.
+    await scenarioTableEscapeKeepsCellsLeft(page);
     await scenarioTableStructure(page);
     await scenarioTableMoves(page);
     await scenarioBooleanOneClick(page, evidence);
