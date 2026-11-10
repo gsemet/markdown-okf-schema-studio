@@ -285,3 +285,150 @@ test("Auto breaks a table out when a cell holds content that cannot shrink", asy
     }
   }
 });
+
+const caseOf = (title: string) => documentOf([CASES.find((entry) => entry.title === title)!]);
+
+interface TableState {
+  readonly wide: boolean;
+  readonly width: number;
+}
+
+/** Runs a layout pass and reports whether the first top-level table is marked wide, with its width. */
+async function layoutPass(page: Page): Promise<TableState> {
+  return page.evaluate(async () => {
+    window.dispatchEvent(new Event("resize"));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const element = document.querySelector("#sphinx-myst-preview-content > table, #sphinx-myst-preview-content > figure > table")!;
+    const wrapper = element.parentElement!.tagName === "FIGURE" ? element.parentElement! : element;
+    return { wide: wrapper.hasAttribute("data-sphinx-preview-wide"), width: Math.round(element.getBoundingClientRect().width) };
+  });
+}
+
+/**
+ * Opens the cell editor of body cell `index` as the page builds it (blockEditor.ts): edit mode on,
+ * the selected cell, its rendered content hidden in a span, and the frame with the field and the
+ * Done and Cancel buttons. A frame open in another cell is closed first, as a move between cells does.
+ */
+async function openCellEditor(page: Page, index: number): Promise<void> {
+  await page.evaluate((cellIndex) => {
+    document.documentElement.setAttribute("data-sphinx-preview-edit-mode", "on");
+    const old = document.querySelector("[data-sphinx-preview-table-cell-editor]");
+    if (old) {
+      const oldCell = old.parentElement!;
+      const content = oldCell.querySelector('[data-sphinx-table-cell-content="true"]')!;
+      for (const node of Array.from(content.childNodes)) oldCell.insertBefore(node, content);
+      content.remove();
+      old.remove();
+      oldCell.removeAttribute("data-sphinx-preview-table-cell-selected");
+    }
+    const cell = document.querySelectorAll("tbody td")[cellIndex]!;
+    const content = document.createElement("span");
+    content.setAttribute("data-sphinx-table-cell-content", "true");
+    content.setAttribute("aria-hidden", "true");
+    for (const node of Array.from(cell.childNodes)) content.appendChild(node);
+    cell.appendChild(content);
+    cell.setAttribute("data-sphinx-preview-table-cell-selected", "true");
+    const frame = document.createElement("div");
+    frame.className = "sphinx-preview-table-cell-editor";
+    frame.setAttribute("data-sphinx-preview-block-editor", "true");
+    frame.setAttribute("data-sphinx-preview-table-cell-editor", "true");
+    const field = document.createElement("textarea");
+    field.value = cell.textContent ?? "";
+    frame.appendChild(field);
+    const actions = document.createElement("div");
+    actions.className = "sphinx-preview-block-editor-actions";
+    const buttons = document.createElement("div");
+    buttons.className = "sphinx-preview-block-editor-buttons";
+    for (const label of ["Done", "Cancel"]) {
+      const button = document.createElement("button");
+      button.textContent = label;
+      buttons.appendChild(button);
+    }
+    actions.appendChild(buttons);
+    frame.appendChild(actions);
+    cell.appendChild(frame);
+  }, index);
+}
+
+async function withPage(
+  t: { skip(message: string): void },
+  markdown: string,
+  body: (page: Page, themeId: string) => Promise<void>,
+): Promise<void> {
+  for (const themeId of RUN_THEMES) {
+    const opened = await openPage(markdown, themeId);
+    if (!opened) {
+      t.skip("no Chromium can start here (run `just dev` to install it)");
+      return;
+    }
+    try {
+      await body(opened.page, themeId);
+    } finally {
+      await opened.close();
+    }
+  }
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("Auto keeps the breakout of a table while a cell is edited, in every cell it moves to", async (t) => {
+  // The tick matrix grows by 70 to 270 px when the 300 px minimum of the selected cell is measured.
+  await withPage(t, caseOf("ten columns: tick matrix"), async (page, themeId) => {
+    const before = await layoutPass(page);
+    assert.equal(before.wide, true, `${themeId}: the table breaks out before any edit`);
+    for (const index of [0, 11, 14, 23, 3, 0]) {
+      await openCellEditor(page, index);
+      const during = await layoutPass(page);
+      assert.equal(during.wide, true, `${themeId}: cell ${index}: the table stays wide`);
+      assert.ok(Math.abs(during.width - before.width) <= 1,
+        `${themeId}: cell ${index}: the width stays ${before.width} px, not ${during.width} px`);
+    }
+  });
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("Auto keeps a table that fits the column in the column while a cell is edited", async (t) => {
+  await withPage(t, caseOf("eight columns: numbers"), async (page, themeId) => {
+    const before = await layoutPass(page);
+    assert.equal(before.wide, false, `${themeId}: the table fits the column before any edit`);
+    for (const index of [0, 9, 17]) {
+      await openCellEditor(page, index);
+      const during = await layoutPass(page);
+      assert.equal(during.wide, false, `${themeId}: cell ${index}: the table stays in the column (width ${during.width} px)`);
+    }
+  });
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("Auto measures a table again on a real resize while a cell is edited", async (t) => {
+  await withPage(t, caseOf("ten columns: tick matrix"), async (page, themeId) => {
+    await layoutPass(page);
+    await openCellEditor(page, 0);
+    const open = await layoutPass(page);
+    assert.equal(open.wide, true, `${themeId}: wide with the editor open`);
+    await page.setViewportSize({ width: 760, height: 1400 });
+    const narrower = await layoutPass(page);
+    assert.ok(narrower.width < open.width, `${themeId}: the breakout follows the pane (${open.width} then ${narrower.width} px)`);
+    assert.ok(narrower.width <= 760, `${themeId}: the table fits the narrower pane`);
+  });
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("Auto gives the column width to a table edited as source, or holding another editor field", async (t) => {
+  await withPage(t, caseOf("two columns: long code paths"), async (page, themeId) => {
+    assert.equal((await layoutPass(page)).wide, true, `${themeId}: the table breaks out before any edit`);
+    // A field that is not a cell editor: a textarea in the table, outside any cell editor frame.
+    await page.evaluate(() => {
+      const field = document.createElement("textarea");
+      field.id = "stray-field";
+      document.querySelector("td")!.appendChild(field);
+    });
+    assert.equal((await layoutPass(page)).wide, false, `${themeId}: another editor field keeps the column width`);
+    // The table edited as source (the cell editor fell back to the raw source).
+    await page.evaluate(() => {
+      document.getElementById("stray-field")!.remove();
+      document.querySelector("#sphinx-myst-preview-content > table, #sphinx-myst-preview-content > figure > table")!
+        .setAttribute("data-sphinx-preview-editing", "true");
+    });
+    assert.equal((await layoutPass(page)).wide, false, `${themeId}: a table edited as source keeps the column width`);
+  });
+});

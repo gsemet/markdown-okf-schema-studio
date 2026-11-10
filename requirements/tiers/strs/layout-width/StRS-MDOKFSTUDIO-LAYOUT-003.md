@@ -13,10 +13,10 @@ scope: layout-width
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-10T13:38:21+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-10T13:38:21+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -82,7 +82,7 @@ As a writer or team, I choose how wide the text column is, from a narrow measure
 - In Auto, a table, figure, image, code block or Mermaid diagram wider than the column uses the available width, centred and clear of the pane edges; elements not wider are left alone, and a gain of 1 px or less is ignored.
 - The element takes the width it needs up to the available area (the pane minus the open table-of-contents column minus a 16 px gutter on each side) and is centred on that area; with the table-of-contents column open its 256 px are excluded from the area, the centre and the cap.
 - A wide table is measured without the cap and rounded up to the next pixel so that no cell wraps.
-- An element under edit keeps the column width while its editor is open, and a figure sized in %, em or rem stays relative to the column; an image uses the author's pixel width before its intrinsic size.
+- An element whose source editor is open keeps the column width; a table whose cell is being edited keeps its Auto breakout. A figure sized in %, em or rem stays relative to the column; an image uses the author's pixel width before its intrinsic size.
 - The wide elements are measured again after a content patch, a window or content resize, image load, toolbar collapse, table-of-contents toggle and when an element enters or leaves edit.
 - Margin keeps tables, code blocks and figures inside the text column; they scroll or wrap instead of leaving it.
 - Full width removes the column limit and gives the page and wide blocks the same 16 px side margins as a table that breaks out in Auto; text, tables, code blocks and figures are centred with at least 15 px gutters.

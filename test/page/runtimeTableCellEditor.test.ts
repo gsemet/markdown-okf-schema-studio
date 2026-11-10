@@ -850,7 +850,7 @@ test("a layout pass that narrows the table box brings the open cell editor back 
   const opened = openWideTableForReveal();
   // Cell 150..350, editor 150..370: 20 px past the 50..350 box, so the open scrolled it 36 px.
   assert.equal(opened.table.scrollLeft, 370 - (350 - 16));
-  // The table leaves its breakout while a cell is edited: the box narrows to 50..310.
+  // A layout pass resizes the box, here to 50..310 (a pane resize, a toolbar change).
   opened.table.clientWidth = 260;
   opened.table.rectProvider = () => ({ top: 100, height: 100, left: 50, width: 260 });
   opened.harness.dispatchWindow("resize");
