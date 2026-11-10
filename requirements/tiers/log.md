@@ -11,8 +11,9 @@
   table as before. TABLE-013 and TABLE-035 are unchanged in intent (related-requirement lines added).
   The Cancel button of the cell editor follows the same path as Escape. No approved requirement
   changed. Source: cancelTableCellEdit in src/page/features/tableCellEditor.ts (the edit flag
-  keptCellChange); tests: test/page/runtimeTableCellEscape.test.ts and
-  test/integration/realInput/tableEscape.ts.
+  keptCellChange); tests: test/page/runtimeTableCellEscape.test.ts,
+  test/integration/realInput/tableEscape.ts and the visual check check_cell_escape_keeps_cells_left in
+  test/visual/capture_table_escape.py (ArrowDown then Escape now saves the cell left).
 
 ### Front matter values in the text: inline code that holds = this.field shows the value (CR 273, GitHub #334)
 
