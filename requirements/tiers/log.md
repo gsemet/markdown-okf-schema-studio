@@ -2,6 +2,17 @@
 
 ## 2026-11-10
 
+### A table with a one or two dash delimiter row opens the cell editor (CR 278, QA271-04)
+
+- SwRS-MDOKFSTUDIO-TABLE-001 (proposed, stable, not approved) amended: a delimiter cell is one dash or
+  more with optional colons (/^:?-+:?$/), the delimiter line holding a pipe when a cell has fewer than
+  three dashes, so a setext heading is still no table. The boundary table gains the ":--" / "--:" and
+  "-" rows and the heading refusal row. TABLE-111 gains one boundary row: a short cell ":--" aligned
+  right becomes "---:". No approved requirement changed. Source: parse in
+  src/page/modules/markdownTable.ts; tests: test/page/modules/markdownTable.test.ts (also the TABLE-111 row),
+  test/page/fmtableReqTable.requirements.test.ts and
+  test/integration/realInput/tableShortDelimiter.ts.
+
 ### Escape in a table cell cancels only that cell (CR 274, QA271-01)
 
 - SwRS-MDOKFSTUDIO-TABLE-025 (proposed, stable, not approved) amended: Escape in a cell editor outside a

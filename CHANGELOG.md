@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- A table whose delimiter row uses one or two dashes (`:--`, `--:`) can now be edited cell by cell, like one written with three.
 - Pressing Escape, or the Cancel button, in a table cell now cancels only the text typed in that cell. The cells you left with
   Tab, an arrow key or a click keep their text in the file, as the preview already showed, instead of
   being silently dropped.

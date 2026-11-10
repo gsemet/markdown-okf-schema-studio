@@ -1,0 +1,52 @@
+{
+"name": "c3-1-two-dash-delimiter-table-has-no-cell-editor",
+"file": "synth/structure-twodash-lf.md",
+"steps": [
+{
+"key": "Meta+1",
+"wait": 300
+},
+{
+"open": "${file}",
+"wait": 2500
+},
+{
+"palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+"wait": 4000
+},
+{
+"waitFor": "D.querySelector('h1')",
+"timeout": 15000
+},
+{
+"editMode": true
+},
+{
+"key": "Escape"
+},
+{
+"clicksel": "td",
+"text": "a1",
+"exact": true,
+"wait": 1000
+},
+{
+"check": "feval",
+"expr": "!!D.querySelector('[data-sphinx-preview-table-cell-editor]')",
+"label": "c3-1 cell editor opens (table with :-- and --: delimiters)"
+},
+{
+"check": "feval",
+"expr": "!!D.querySelector('[data-sphinx-table-menu]')",
+"label": "c3-1 table toolbar shown"
+},
+{
+"key": "Escape"
+},
+{
+"shot": "c3-1-fail",
+"clip": "preview",
+"onFail": true
+}
+]
+}

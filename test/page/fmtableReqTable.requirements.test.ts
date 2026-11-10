@@ -124,6 +124,19 @@ test("the cell editor shows a loading status until the host sends the table sour
   assert.match(tableBar(harness).childElements.at(-1)!.textContent, /^Row 1 of 2 · /u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+test("a table with a two-dash delimiter opens the cell editor, not the raw Markdown editor", () => {
+  const harness = createRuntimeHarness();
+  const { request } = openCellWithoutSource(harness);
+  sendSource(harness, request.editId, "| A | B |\n| :-- | --: |\n| a1 | b1 |\n| p | q |\n");
+  const region = cellEditorRegion(harness);
+  assert.equal(region.getAttribute("aria-label"), "Markdown table cell editor");
+  assert.notEqual(region.getAttribute("data-sphinx-preview-table-cell-editor"), null);
+  assert.equal(cellInput(harness).value, "a1");
+  assert.equal(harness.createdElements.some((element) => element.getAttribute("aria-label") === "Raw Markdown block"), false);
+  assert.ok(tableBar(harness));
+});
+
 test("a source that is no pipe table, or has no cell at the clicked position, opens the raw Markdown editor", () => {
   const list = createRuntimeHarness();
   const { cell, request } = openCellWithoutSource(list);

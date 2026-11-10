@@ -53,6 +53,69 @@ test("non-table blocks and malformed separator rows cannot be edited as pipe tab
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+test("a delimiter row of one or two dashes, with or without colons, is an editable pipe table", () => {
+  const tools = createMarkdownTableTools();
+  const cases: Array<[string, string[][]]> = [
+    ["| A | B |\n| :-- | --: |\n| a1 | b1 |", [["A", "B"], [":--", "--:"], ["a1", "b1"]]],
+    ["| A | B |\n| :- | -: |\n| a1 | b1 |", [["A", "B"], [":-", "-:"], ["a1", "b1"]]],
+    ["| A | B |\n| -- | -- |\n| a1 | b1 |", [["A", "B"], ["--", "--"], ["a1", "b1"]]],
+    ["|A|B|\n|-|-|\n|a|b|", [["A", "B"], ["-", "-"], ["a", "b"]]],
+    ["| A |\n| :-: |\n| a |", [["A"], [":-:"], ["a"]]],
+  ];
+  for (const [source, rows] of cases) {
+    const table = tools.parse(source);
+    assert.ok(table, source);
+    assert.deepEqual(table.rows, rows, source);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+test("a cell edit in a short-delimiter table leaves the delimiter row as written, LF and CRLF", () => {
+  const tools = createMarkdownTableTools();
+  for (const ending of ["\n", "\r\n"]) {
+    const source = ["| A | B |", "| :-- | --: |", "| a1 | b1 |", "| a2 | b2 |"].join(ending) + ending;
+    const table = tools.parse(source);
+    assert.ok(table);
+    table.rows[2][0] = "x";
+    const output = tools.serialize(table);
+    assert.equal(output, source.replace("| a1 | b1 |", "| x  | b1 |"));
+    assert.equal(output.split(ending)[1], "| :-- | --: |");
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+test("a new column in a short-delimiter table gets a three-dash cell and keeps the others verbatim", () => {
+  const tools = createMarkdownTableTools();
+  const source = "| A | B |\n| :-- | --: |\n| a1 | b1 |";
+  const table = tools.parse(source);
+  assert.ok(table);
+  tools.insertColumnAfter(table, 0);
+  const delimiter = tools.serialize(table).split("\n")[1];
+  assert.equal(delimiter, "| :-- | --- | --: |");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+test("a heading over a dash line with no pipe is no table, a piped block still needs a valid delimiter", () => {
+  const tools = createMarkdownTableTools();
+  for (const source of ["Title\n--\n", "Title\n-\n", "| A |\n| invalid |\n", "| A |\n| -x |\n"]) {
+    assert.equal(tools.parse(source), undefined, source);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-111
+test("Column alignment on a short delimiter cell grows it to three dashes and changes only that line", () => {
+  const align = (value: string, at: number, arg: string): string => {
+    const edit = createEditActions([], createMarkdownTableTools()).byId.get("columnAlign")!.apply({
+      value, selectionStart: at, selectionEnd: at, scope: "block", arg,
+    })!;
+    return value.slice(0, edit.start) + edit.text + value.slice(edit.end);
+  };
+  const short = "| A | B |\n| :-- | --: |\n| a1 | b1 |";
+  assert.equal(align(short, short.indexOf("B"), "left"), "| A | B |\n| :-- | :--- |\n| a1 | b1 |");
+  assert.equal(align(short, short.indexOf("A"), "right"), "| A | B |\n| ---: | --: |\n| a1 | b1 |");
+});
+
 test("cellSegments returns the text between the delimiting pipes, offsets in the untrimmed line", () => {
   const tools = createMarkdownTableTools();
   assert.deepEqual(tools.cellSegments("| a | b |"), [{ start: 1, end: 4 }, { start: 5, end: 8 }]);

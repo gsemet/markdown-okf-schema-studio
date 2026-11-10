@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
+- test/page/modules/markdownTable.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -51,6 +52,7 @@ When the writer runs Column alignment with left, center or right, the extension 
 | a longer cell "\|----------\|", left | "\|:---------\|" (a dash is given up, never below three dashes) |
 | a padded cell of exactly three dashes "\| ---      \|", left | "\| :---     \|" (a trailing space is given up, keeping at least one) |
 | a column aligned right, left | the marker becomes :--- with no leftover colon |
+| a short cell ":--", right | "---:" (the cell grows to three dashes) |
 
 ### Scenario (nominal): Caret in any row, with or without edge pipes
 - GIVEN the caret in a body cell, and in another run in the delimiter row
@@ -83,6 +85,7 @@ When the writer runs Column alignment with left, center or right, the extension 
 ### Verification notes
 - Method: test/page/modules/editActions.test.ts (T26: columnAlign rewrites only the delimiter cell of the caret's column; keeps the width of a padded column and replaces an existing alignment; works from a body row, outside pipes and in tables without edge pipes; its last assertions cover the unknown choice "justify" and the missing choice; the caret in a paragraph gives an undefined edit).
 - Method: test/page/modules/editPalette.test.ts (T26: Column alignment lists left, center and right; a choice rewrites the delimiter cell; strict mode has no button).
+- Method: test/page/modules/markdownTable.test.ts ("Column alignment on a short delimiter cell grows it to three dashes and changes only that line"; this file, not editActions.test.ts, which is at the 1 500-line limit).
 - Criteria: The edit range is the delimiter cell and the text is the new marker; a longer delimiter cell keeps its dashes, minus the room taken by the colons, with at least three left; the delimiter line length is unchanged when a dash or a trailing space can give way; the changed delimiter cell index; an undefined edit for every refusal.
 
 <!-- okf:links:start -->
