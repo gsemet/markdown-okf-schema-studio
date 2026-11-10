@@ -97,13 +97,21 @@ export function installWidthMode(
   // The elements that may break out in Auto: an element whose source editor is open, or a figure
   // sized relative to the column, keeps the column width. A table whose cell is being edited stays
   // rendered, so its cell editor (a textarea inside the cell) does not count: it keeps its breakout.
+  // The element that declares a wrapper's size: its image, or the <svg> of a picture written inline
+  // (an `svg` fence, see render/svgPictures.ts), which declares it with its width attribute.
+  const sizedElement = (wrapper: Element): Element | null | undefined => {
+    if (wrapper.tagName === "IMG") return wrapper;
+    return wrapper.querySelector?.(wrapper.matches?.(".myst-svg-figure") ? "svg" : "img");
+  };
+
   const eligibleWrappers = (content: HTMLElement): Element[] => {
     const wrappers: Element[] = [];
     for (const element of Array.from(content.querySelectorAll("table, figure, img, pre, .myst-mermaid-diagram"))) {
       const wrapper = wrapperOf(element, content);
       if (!wrapper || wrappers.includes(wrapper)) continue;
       // A figure sized in %, em or rem asks for a size relative to the column: it never breaks out.
-      const sized = (wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img"))?.getAttribute("data-okf-width");
+      const sizing = sizedElement(wrapper);
+      const sized = sizing?.getAttribute("data-okf-width") ?? (sizing?.tagName.toLowerCase() === "svg" ? sizing.getAttribute("width") : null);
       if (sized && /(?:%|r?em)$/u.test(sized)) continue;
       if (wrapper.getAttribute("data-sphinx-preview-editing") === "true"
         || wrapper.querySelector?.('[data-sphinx-preview-editing="true"]')
@@ -311,7 +319,7 @@ export function installWidthMode(
       if (!held.has(wrapper) && tableMinimum(plan) <= column + 1) stays.add(wrapper);
     }
     const widths = measured.map((wrapper) => {
-      const image = wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img");
+      const image = sizedElement(wrapper);
       // An image is capped by the column, so its own size is the natural width: the pixel width
       // attribute when it has one (an SVG has no intrinsic size), else the intrinsic width.
       const declared = parseFloat(image?.getAttribute("data-okf-width") ?? image?.getAttribute("width") ?? "") || 0;

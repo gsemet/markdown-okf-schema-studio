@@ -39,6 +39,7 @@ import { FRONTMATTER_COLLAPSE_SCENARIOS } from "./frontmatterCollapseScenarios";
 import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
 import { TOOLBAR_FLOAT_SCENARIOS } from "./toolbarFloatScenarios";
 import { READ_ONLY_IMAGES_SCENARIOS } from "./readOnlyImagesScenarios";
+import { SVG_PICTURE_SCENARIOS } from "./svgPictureScenarios";
 import { WIDTH_SCROLL_SCENARIOS } from "./widthScrollScenarios";
 import { BREAKOUT_HANDLE_SCENARIOS } from "./breakoutHandleScenarios";
 import { TABLE_ROW_COLOUR_SCENARIOS } from "./tableRowColourScenarios";
@@ -472,6 +473,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...FRONTMATTER_COLLAPSE_SCENARIOS,
   ...TOOLBAR_FLOAT_SCENARIOS,
   ...READ_ONLY_IMAGES_SCENARIOS,
+  ...SVG_PICTURE_SCENARIOS,
   ...WIDTH_SCROLL_SCENARIOS,
   ...BREAKOUT_HANDLE_SCENARIOS,
   ...TABLE_ROW_COLOUR_SCENARIOS,

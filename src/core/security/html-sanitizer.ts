@@ -1,6 +1,7 @@
 import { parse, serialize, type DefaultTreeAdapterTypes } from "parse5";
 import { directiveAttributeRule } from "../directives/registry";
 import { isSafeOkfColor, SAFE_COLOR_NAME_PATTERN } from "./spanColors";
+import { isSafeSvgPresentationValue, SVG_ATTRIBUTE_NAMES } from "./svgSanitizer";
 
 import {
   ResourcePolicy,
@@ -18,6 +19,7 @@ interface HtmlNode {
   tagName?: string;
   attrs?: HtmlAttribute[];
   childNodes?: HtmlNode[];
+  namespaceURI?: string;
   value?: string;
 }
 
@@ -63,7 +65,7 @@ const ALLOWED_ELEMENTS = new Set([
   "legend", "progress", "meter", "output", "ruby", "rt", "rp", "map", "area", "canvas",
   "svg", "g", "path", "circle", "ellipse", "line", "polygon", "polyline", "rect", "text", "tspan",
   "defs", "desc", "symbol", "use", "marker", "pattern", "clippath", "mask", "lineargradient",
-  "radialgradient", "stop", "image",
+  "radialgradient", "stop", "image", "textpath",
   "math", "mi", "mn", "mo", "ms", "mtext", "mrow", "mfrac", "msqrt", "mroot", "msub", "msup",
   "msubsup", "munder", "mover", "munderover", "mtable", "mtr", "mtd", "mspace", "mstyle",
   "semantics", "annotation",
@@ -89,11 +91,17 @@ const ALLOWED_ATTRIBUTES = new Set([
   "separators", "fence", "stretchy", "lspace", "rspace", "accent", "accentunder", "movablelimits",
 ]);
 const ALLOWED_ATTRIBUTE_PREFIXES = ["aria-", "data-sphinx-", "data-okf-", "data-myst-", "data-plantuml-", "data-footnote"];
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
 // `data-single-line`: a one-line card part whose editor takes Enter as done.
 const ALLOWED_DATA_ATTRIBUTES = new Set([
   "data-line", "data-end-line", "data-single-line", "data-line-number", "data-footnotes",
 ]);
+// The geometry and presentation attributes of a sanitized SVG picture (svgSanitizer.ts) that the
+// list above does not already allow. On an SVG element only, they pass only with a value that holds
+// no scheme, no function but the allowed ones and no url() but url(#id). The attributes the lists
+// above allow (aria-* included) keep their own rules.
+const SVG_VALUE_ATTRIBUTES = new Set(SVG_ATTRIBUTE_NAMES.map((name) => name.toLowerCase()).filter((name) => !isAllowedAttribute(name)));
 
 function isAllowedAttribute(name: string): boolean {
   return ALLOWED_ATTRIBUTES.has(name)
@@ -405,7 +413,14 @@ function rewriteNode(
       continue;
     }
 
-    if (!isAllowedAttribute(name)) {
+    const svgValue = node.namespaceURI === SVG_NAMESPACE && SVG_VALUE_ATTRIBUTES.has(name);
+    if (svgValue && !isSafeSvgPresentationValue(attribute.value)) {
+      removeAttr(node, attribute.name);
+      addDiagnostic(diagnostics, "blocked-attribute", `Removed unsafe ${attribute.name} value.`);
+      continue;
+    }
+
+    if (!isAllowedAttribute(name) && !svgValue) {
       removeAttr(node, attribute.name);
       addDiagnostic(diagnostics, "blocked-attribute", `Removed unsupported ${attribute.name} attribute.`);
       continue;

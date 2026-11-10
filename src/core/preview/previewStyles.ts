@@ -6,6 +6,7 @@ import { VSCODE_THEME_TOKEN_CSS } from "./themeTokens";
 import { COMMENT_CSS } from "./styles/commentStyles";
 import { CODE_BLOCK_CSS } from "./styles/codeBlockStyles";
 import { CONTENT_BLOCK_CSS } from "./styles/contentBlockStyles";
+import { SVG_PICTURE_CSS } from "./styles/svgPictureStyles";
 import { CONTENT_LAYOUT_CSS } from "./styles/contentLayoutStyles";
 import { EDIT_MODE_CSS } from "./styles/editModeStyles";
 import { EDIT_PALETTE_CSS } from "./styles/editPaletteStyles";
@@ -117,6 +118,7 @@ export const PREVIEW_THEME_CSS =
   + HTML_BLOCK_CSS
   + TOC_CSS
   + CONTENT_BLOCK_CSS
+  + SVG_PICTURE_CSS
   + GRID_CARD_EDIT_CSS
   + CODE_BLOCK_CSS
   + PROPERTIES_CSS

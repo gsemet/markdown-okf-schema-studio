@@ -19,6 +19,7 @@ import {
 } from "./chartData";
 import { type CheckboxMarker, prepareCheckboxMarkers } from "./checkboxMarkers";
 import { convertCommentMarkers } from "./commentMarkers";
+import { expandSvgPictures, prepareRawSvg, restoreRawSvgBlocks } from "./svgPictures";
 import { convertRadioGroups } from "./radioGroups";
 import {
   expandVersionAdmonitions,
@@ -383,6 +384,9 @@ interface RenderState {
   /** The GitHub alert rewrite: the parsed text's lines mapped to the document's. */
   readonly alerts: ExpandedGithubAlerts;
   readonly checkboxMarkers: readonly CheckboxMarker[];
+  /** The raw `<svg>` blocks the source pass set aside (see `svgPictures.ts`). */
+  readonly rawSvgBlocks: readonly string[];
+  readonly rawSvgToken: string;
   readonly ast: MystNode;
   anchorLabels: ReadonlySet<string>;
   readonly tableAlignments: Array<TableAlignmentSpec | undefined>;
@@ -397,6 +401,7 @@ interface RenderPass<Input> {
 /** The tree passes, in order, from the parsed tree to the tree the HTML writer reads. */
 const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   { name: "shift source lines", run: (state) => shiftSourcePositions(state.ast, state.lineOffset) },
+  { name: "raw svg blocks", run: (state) => restoreRawSvgBlocks(state.ast, state.rawSvgBlocks, state.rawSvgToken) },
   {
     name: "unclosed fences",
     run: (state) => splitUnclosedFences(state.ast, {
@@ -510,6 +515,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
     name: "directive errors",
     run: (state) => neutralizeDirectiveErrors(state.ast, state.source.split(/\r\n|\r|\n/u)),
   },
+  { name: "svg pictures", run: (state) => expandSvgPictures(state.ast, state.diagnostics) },
   { name: "normalize nodes", run: (state) => walk(state.ast, state.diagnostics) },
   {
     name: "table alignments",
@@ -549,7 +555,8 @@ export async function renderMyst(
   const markdown = stripFrontmatter(source);
   const removedPrefix = source.slice(0, source.length - markdown.length);
   const lineOffset = removedPrefix.match(/\r\n|\r|\n/gu)?.length ?? 0;
-  const checkboxes = prepareCheckboxMarkers(markdown, lineOffset + 1);
+  const rawSvg = prepareRawSvg(markdown);
+  const checkboxes = prepareCheckboxMarkers(rawSvg.text, lineOffset + 1);
   const alerts = expandGithubAlertsWithLines(checkboxes.text);
   const parsedText = prepareDollarAmounts(alerts.text);
   const state: RenderState = {
@@ -562,6 +569,8 @@ export async function renderMyst(
     parsedText,
     alerts,
     checkboxMarkers: checkboxes.markers,
+    rawSvgBlocks: rawSvg.sources,
+    rawSvgToken: rawSvg.token,
     ast: mystParse(parsedText, MYST_PARSE_OPTIONS),
     anchorLabels: new Set<string>(),
     tableAlignments: [],

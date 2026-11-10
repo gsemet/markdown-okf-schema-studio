@@ -42,7 +42,7 @@ with `code --install-extension GaetanSemet.markdown-okf-schema-studio`, or by se
 | Inline | `{kbd}`, `{ref}` to a `(name)=` label above a heading, definition lists (`Term` then `: text`) |
 | Diagrams | `mermaid` fence, `plantuml` fence (built in, no Java), `{uml} file.puml` |
 | Charts | `vega-lite` and `vega` fences, JSON or YAML, inline `values` or a relative CSV, TSV, JSON file |
-| Images | `![alt](path)` and `{figure}` for local PNG, JPEG, SVG files (raw SVG: see below) |
+| Images | `![alt](path)` and `{figure}` for local PNG, JPEG, SVG files (inline SVG: see below) |
 | Navigation | `[TOC]` or `[[_TOC_]]` alone on a line, or `{contents}` (`:depth: 2`, `:local:`) |
 | README HTML | `<div align>`, `<p align>`, `<img width>`, `<picture>`, `<details>`, `<kbd>`, `<sub>`, `<sup>` |
 | Choices | two or more list items in a row that start with `( )` or `(x)`: a radio group; the reader's click moves the `x` in the file |
@@ -57,7 +57,7 @@ palette. Every syntax above renders in every mode: write MyST freely, never down
 - One visual per idea, only where it beats a sentence. A plan of six sections wants two to four
   visuals, not twelve. Open with a short summary, then structure, then detail.
 - Concepts, architecture, layers, before and after: a **hand-drawn SVG**. It is the most
-  effective way to show an idea; write it as a file (below).
+  effective way to show an idea; write it in an `svg` fence (below).
 - Flows, states, dependencies, timelines: **Mermaid**. Interactions between actors, class or
   component diagrams: **PlantUML**.
 - Numbers (estimates, benchmarks, counts): **Vega-Lite**. A **table** when the reader compares
@@ -73,19 +73,20 @@ palette. Every syntax above renders in every mode: write MyST freely, never down
 - Front matter: when the project has an OKF schema, copy the fields of its sibling documents;
   otherwise `title`, `description`, `status`, `date`.
 
-## Raw SVG
+## SVG pictures
 
-Inline `<svg>` in Markdown is dropped. Write the picture to a file next to the document
-(`diagrams/layers.svg`) and show it with `{figure}` or `![alt](diagrams/layers.svg)`. Give the SVG
-a `viewBox`, its own background rectangle and mid-tone strokes so it reads on Cream, White and
-Dark; no scripts, no external fonts, no `foreignObject`. Keep text at 14 px or more.
+A drawing that is not a flow, a sequence or a chart: write the `<svg>` in an `svg` fence, or as a
+raw `<svg>` alone in its block (after a blank line, ending its last line). It is drawn inline in
+the theme: write colours as `var(--surface)`, `var(--text)`, `var(--accent)`, never hex. An `<svg>`
+inside a sentence is dropped. Variables, what is removed and when a file is better:
+[references/svg.md](references/svg.md).
 
 ````markdown
-```{figure} diagrams/layers.svg
-:width: 80%
-:alt: Three layers: page, session, core
-
-The extension is three layers; each imports only the one below.
+```svg
+<svg viewBox="0 0 160 60" width="320">
+  <rect x="4" y="4" width="152" height="52" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+  <text x="80" y="36" text-anchor="middle" fill="var(--text)" font-size="14">Core</text>
+</svg>
 ```
 ````
 
@@ -144,7 +145,7 @@ list table, PlantUML, front matter, review comments, README HTML): [references/e
 
 ## Limits
 
-- Dropped: inline `<svg>`, `<script>`, `<style>`, `<iframe>`, forms, event handlers.
+- Dropped: `<svg>` inside a sentence, `<script>`, `<style>`, `<iframe>`, forms, event handlers.
 - No remote resources: no `https://` images, chart data, fonts or PlantUML `!include` URLs.
   Download the file next to the document; `data:` URIs work.
 - Built-in PlantUML: no URL includes, no standard library (`!include <C4/...>`).

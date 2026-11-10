@@ -542,3 +542,49 @@ test("a blocked link has no href and names the reason in its title", () => {
   assert.doesNotMatch(result.html, /href="https/u);
   assert.match(result.html, /title="The navigation scheme is not allowed in the preview\."/u);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+test("the SVG presentation attributes pass the final sanitizer only with a local value", () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
+  temporaryDirectories.push(output);
+  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const result = rewriteSphinxHtml(
+    '<!doctype html><html><body><svg><defs><marker id="m"></marker></defs><path d="M0 0" marker-end="url(https://e.test/m.svg#m)" visibility="visible" paint-order="image-set(x 1x)"></path><path d="M1 1" marker-end="url(#m)" font-style="italic"></path></svg></body></html>',
+    {
+      outputRoot: output,
+      policy,
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" as const }),
+    },
+  );
+  assert.doesNotMatch(result.html, /e\.test|image-set/u);
+  assert.match(result.html, /marker-end="url\(#m\)"/u);
+  assert.match(result.html, /visibility="visible"/u);
+  assert.match(result.html, /font-style="italic"/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+test("the SVG value check never touches aria attributes nor an HTML element", () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
+  temporaryDirectories.push(output);
+  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const result = rewriteSphinxHtml(
+    '<!doctype html><html><body><button aria-label="Copy (Ctrl+C)">c</button><div aria-label="Metadata: data:info">m</div>'
+      + '<a aria-label="Open https://example.com">o</a><p rotate="9" textlength="4">p</p>'
+      + '<figure class="myst-svg-figure"><svg role="img" aria-label="Sales (2025)"><rect width="1" height="1" rotate="9"></rect></svg></figure></body></html>',
+    {
+      outputRoot: output,
+      policy,
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" as const }),
+    },
+  );
+  assert.match(result.html, /aria-label="Copy \(Ctrl\+C\)"/u);
+  assert.match(result.html, /aria-label="Metadata: data:info"/u);
+  assert.match(result.html, /aria-label="Open https:\/\/example\.com"/u);
+  assert.match(result.html, /aria-label="Sales \(2025\)"/u);
+  assert.match(result.html, /<rect[^>]* rotate="9"/u, "an SVG attribute stays on an SVG element");
+  assert.doesNotMatch(result.html, /<p[^>]*(rotate|textlength)=/u, "but not on an HTML element");
+});

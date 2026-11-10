@@ -89,6 +89,8 @@ const FAMILIES: Array<{ name: string; source: RegExp; html: RegExp }> = [
   { name: "figure", source: /^`{3,}\{figure\}/mu, html: /<figure[^>]*><img src="diagrams\/layers\.svg"/u },
   { name: "Mermaid", source: /^```mermaid$/mu, html: /class="myst-mermaid-figure/u },
   { name: "PlantUML", source: /^```plantuml$/mu, html: /class="myst-plantuml-figure/u },
+  { name: "SVG fence", source: /^```svg$/mu, html: /<figure class="myst-svg-figure"[^>]*><svg[^>]*viewBox="0 0 160 60"/u },
+  { name: "raw SVG block", source: /^<svg viewBox/mu, html: /<figure class="myst-svg-figure"[^>]*><svg[^>]*role="img"[^>]*>(?:(?!<\/figure>)[\s\S])*var\(--red\)/u },
   { name: "Vega-Lite", source: /^```vega-lite$/mu, html: /class="myst-vega-figure/u },
   { name: "README HTML", source: /^<div align="center">/mu, html: /<div align="center"/u },
   { name: "TODO comment", source: /^<!-- TODO:/mu, html: /data-okf-comment-kind="todo"/u },
