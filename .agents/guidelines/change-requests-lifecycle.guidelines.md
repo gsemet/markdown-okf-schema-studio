@@ -24,7 +24,7 @@ guideline holds. Project specifics (gates, commit format, install restrictions) 
 - **Chief of Staff**: the session the user talks to (not the Chantier tool). It keeps the backlog,
   grills, records decisions, opens the CRs and supervises the Foreman.
 - **Foreman**: the nested session the Chief of Staff starts to run the drivers and land the CRs.
-- **Heartbeat**: the Foreman's periodic wake-up (a `/loop` every 270 seconds while a driver is
+- **Heartbeat**: the Foreman's periodic wake-up (a `/loop` every 600 seconds while a driver is
   live) to check the drivers and the merged PRs; see "Foreman session and its loop".
 - **Tracker issue**: the issue an item comes from, if any, recorded as an `issue:` line in the
   `01-intent.md` front matter (`issue: none` when there is none). An item with no tracker issue
@@ -170,7 +170,7 @@ short shell scripts, and so does the Foreman sharing its folder.
 ```text
 Chief of Staff ── user interface: grill, decisions (the user merges); supervises the Foreman
  └─ Foreman (nested session) ── one driver per CR, in parallel; /loop heartbeat every
-    270 s while a driver is live; landing
+    600 s while a driver is live; landing
      ├─ CR driver A ── coder r1 → Inspector r1 → coder r2 … (max 3) → commit → PR → CI watch
      ├─ CR driver B ── same, own worktree
      └─ CR driver C ── same, own worktree
@@ -266,10 +266,11 @@ Drivers stay background sub-agents of the Foreman.
   the brief file plus a message, never a new loop prompt.
 - **Loop while a driver is live**: a driver is live when its background agent has not returned or
   a `STATUS.md` header holds its `driver:` lock with status working or wait-ci. While at least one
-  is live, every heartbeat ends with `ScheduleWakeup` at 270 seconds, passing the same loop prompt
-  back (`noop: true` when the heartbeat changed nothing). 270 seconds keeps the next heartbeat under the
-  5-minute prompt-cache lifetime, so it reads its context from the cache instead of paying
-  for it again; it is also the 4–5-minute heartbeat of "Responsiveness".
+  is live, every heartbeat ends with `ScheduleWakeup` at 600 seconds, passing the same loop prompt
+  back (`noop: true` when the heartbeat changed nothing). A nested session keeps a 1-hour prompt
+  cache, so a 600-second heartbeat still reads its context from the cache, and waking more often
+  only to keep the cache warm is waste. The Foreman wakes at once on a driver's return or a
+  message, so the longer heartbeat misses nothing.
 - **Stop when no driver is live**: every CR ready, blocked or landed, or waiting for a free PR
   slot. The Foreman calls `ScheduleWakeup` with `stop: true` and ends its turn with its report. An
   idle Foreman costs nothing; a message from the Chief of Staff (a merge, a decision) wakes it, and
@@ -283,7 +284,8 @@ Drivers stay background sub-agents of the Foreman.
   session id, never by starting a second Foreman.
 - **Without nested sessions** (another harness, or `start_session` unavailable): the Chief of Staff
   starts the Foreman as a background sub-agent, and its heartbeat is a 270-second `sleep` run in
-  the background, restarted at the end of every heartbeat.
+  the background, restarted at the end of every heartbeat. A sub-agent has a 5-minute prompt
+  cache, and 270 seconds keeps the next heartbeat under it.
 
 ### Planning a release
 
