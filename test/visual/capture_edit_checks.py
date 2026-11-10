@@ -5,6 +5,7 @@ from __future__ import annotations
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 
 from capture_support import Failure, TABLE_BAR_STYLE_JS, save_step, table_bar_flow_failure
+from capture_table_escape import check_cell_escape_keeps_cells_left
 
 
 # @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
@@ -1283,14 +1284,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       else:
         check_cell_editor_chrome(page, page_name, None, None, failures)
       save_step(page, scenario, "arrowdown", caret="initial")
-      cell_input = page.locator("[data-sphinx-preview-table-cell-editor] textarea")
-      cell_input.press("Escape")
-      if not page.evaluate("""() => {
-        const saves = window.visualMessages.filter(message => message.type === "previewEditSave");
-        return saves.length > 0 && saves.every(message => message.final !== true)
-          && window.visualMessages.some(message => message.type === "previewEditCancel");
-      }"""):
-        failures.append(Failure(page_name, "Escape in a table cell did not cancel the edit"))
+      check_cell_escape_keeps_cells_left(page, page_name, failures)
       return
 
     editor = page.locator("[data-okf-frontmatter-editor]")

@@ -29,6 +29,7 @@ tested_in_files:
 - test/integration/realInput/tableEscape.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/page/runtimeTableCellEscape.test.ts
+- test/visual/capture_table_escape.py
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -98,7 +99,7 @@ When the writer presses Escape in a cell editor outside an IME composition, the 
 - Method: test/page/runtimeTableCellEscape.test.ts (Escape after Tab, ArrowRight and a click, the Cancel button after a cell left, Escape after leaving an untouched cell, after two cells left, with the focus outside the cell editor, and in an untouched cell, in each case a final save holding the cells left and not the open cell's text) with the cancel branch cancelTableCellEdit of src/page/features/tableCellEditor.ts.
 - Method: test/integration/realInput/tableEscape.ts (real-window scenario scenarioTableEscapeKeepsCellsLeft, QA replay 271-c2-1: type, Tab, Escape, then type, click, Escape; the buffer line and the shown cells agree).
 - Method: test/integration/realInput/textEditing.ts, markers in test/integration/realInput/markers.ts (real-window scenario scenarioEscapeCancels, id table-editing/r04-escape-cancels-cell: Escape after typing).
-- Method: visual scenarios table-editing/v02 to v05 (Escape cancelling).
+- Method: visual scenarios table-editing/v02 to v05, v24 and v25 (check_cell_escape_keeps_cells_left in test/visual/capture_table_escape.py, run by check_preview_edit_mode: text typed in a cell, ArrowDown, Escape; the last save is final and holds the text of the cell left, no previewEditCancel is posted, and the editor closes once the host renders the page).
 - Criteria: No message with final true after Escape and an unchanged source in the real-window scenario. With a cell left earlier in the session, the last save is final and holds the text of that cell and not the open cell's typed text; no previewEditCancel is posted. Exactly one cancel per key press in the two focus scenarios. No message and an open editor in the composition scenario.
 
 <!-- okf:links:start -->
