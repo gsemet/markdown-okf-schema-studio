@@ -138,3 +138,68 @@ test("converting a pipe table to a list-table and moving a column in each gives 
     .map((line) => line.replace(/\s+/gu, " ").trim());
   assert.deepEqual(cells(back.text), cells(movedPipe(PIPE, 0, 2)!));
 });
+
+const T2 = "| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | first ^row-b |\n| beta | 2 | second |\n| gamma | 3 | third |\n";
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+test("a column move leaves a block id ending the last cell at the end of its row", () => {
+  assert.equal(movedPipe(T2, 2, 1),
+    "| Name | Note | Value |\n| --- | --- | --- |\n| alpha | first | 1 | ^row-b\n| beta | second | 2 |\n| gamma | third | 3 |\n");
+  // Moving the column back keeps the token in the tail.
+  const model = tools.parse(T2)!;
+  tools.moveColumn(model, 2, 1);
+  const moved = tools.parse(tools.serialize(model))!;
+  tools.moveColumn(moved, 1, 2);
+  assert.equal(tools.serialize(moved),
+    "| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | first | ^row-b\n| beta | 2 | second |\n| gamma | 3 | third |\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+test("a column move keeps a row tail at the end of its line and an anchor element with its cell", () => {
+  const tailed = "| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | first | ^row-a\n| beta | 2 | second |\n";
+  assert.equal(movedPipe(tailed, 0, 2),
+    "| Value | Note | Name |\n| --- | --- | --- |\n| 1 | first | alpha | ^row-a\n| 2 | second | beta |\n");
+  const anchor = "| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | first <a id=\"x\"></a> |\n";
+  assert.equal(movedPipe(anchor, 2, 1),
+    "| Name | Note | Value |\n| --- | --- | --- |\n| alpha | first <a id=\"x\"></a> | 1 |\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+test("a column inserted after the last also lifts the block id, and a cell holding only the id is emptied", () => {
+  const model = tools.parse(T2)!;
+  const at = tools.insertColumnAfter(model, 2);
+  model.rows[0]![at] = "New";
+  assert.equal(tools.serialize(model).split("\n")[2], "| alpha | 1 | first |  | ^row-b");
+  const only = tools.parse("| A | B |\n| --- | --- |\n| x | ^row-b |\n")!;
+  tools.moveColumn(only, 1, 0);
+  assert.equal(tools.serialize(only), "| B | A |\n| --- | --- |\n| | x | ^row-b\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+test("a block id is not lifted out of a row that has no closing pipe", () => {
+  for (const source of [
+    "Name | Value | Note\n--- | --- | ---\nalpha | 1 | first ^row-b\n",
+    "| Name | Value | Note\n| --- | --- | ---\n| alpha | 1 | first ^row-b\n",
+  ]) {
+    const out = movedPipe(source, 2, 1)!;
+    const reparsed = tools.parse(out);
+    assert.ok(reparsed, out);
+    assert.deepEqual(reparsed.rows[2], ["alpha", "first ^row-b", "1"], out);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+test("a list-table model takes no tail: a column move and an insert keep the id in the written list-table", () => {
+  const source = [
+    "```{list-table}", ":header-rows: 1", "", "* - H1", "  - H2", "* - a", "  - one ^row-b", "```", "",
+  ].join("\n");
+  const moved = tools.parseListTable(source)!;
+  tools.moveColumn(moved, 1, 0);
+  assert.equal(tools.serialize(moved), [
+    "```{list-table}", ":header-rows: 1", "", "* - H2", "  - H1", "* - one ^row-b", "  - a", "```", "",
+  ].join("\n"));
+  const inserted = tools.parseListTable(source)!;
+  tools.insertColumnAfter(inserted, 1);
+  assert.match(tools.serialize(inserted), /one \^row-b/u);
+  assert.notEqual(tools.serialize(inserted), source);
+});

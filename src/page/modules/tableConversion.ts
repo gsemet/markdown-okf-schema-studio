@@ -54,9 +54,13 @@ export function createTableConversionTools({ parse, escapeCellPipes }: TableConv
     return parse(source) ? "pipe" : undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-076
   function pipeGrid(source: string): GridResult {
     const model = parse(source);
     if (!model) return { ok: false, reason: "This is not a pipe table." };
+    if (model.sourceTails?.some((tail) => tail !== "")) {
+      return { ok: false, reason: "A row has text after its closing pipe that would be lost. Nothing was changed." };
+    }
     const aligns = model.rows[1].map((cell) => {
       const mark = cell.replace(/\s/gu, "");
       const left = mark.startsWith(":");

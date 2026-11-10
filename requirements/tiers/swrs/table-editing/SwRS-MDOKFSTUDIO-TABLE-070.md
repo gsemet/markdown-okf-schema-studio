@@ -25,6 +25,7 @@ tested_in_files:
 - test/integration/tableMoves.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+- test/page/runtimeTableRowTail.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -43,6 +44,11 @@ When the writer presses List table in the table bar, the extension SHALL post th
 - GIVEN a pipe table inside a {table} directive that renders as a figure
 - WHEN the bar is shown
 - THEN the List table button is disabled
+
+### Scenario (boundary): A row with text after its closing pipe
+- GIVEN a pipe table whose row has text after its closing pipe (see SwRS-MDOKFSTUDIO-TABLE-102)
+- WHEN the table bar is shown
+- THEN the List table button is disabled, as the conversion would lose that text (SwRS-MDOKFSTUDIO-TABLE-076)
 
 ### Scenario (boundary): A cell change drops a conversion that was not saved
 | Input | Outcome |

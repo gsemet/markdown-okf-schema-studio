@@ -398,7 +398,8 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
         edit.convertedText = converted.text;
         blockEditor.saveBlockEdit();
       }
-    }, tableFigure || Boolean(edit.tableModel!.listTable), "table");
+    }, tableFigure || Boolean(edit.tableModel!.listTable)
+      || Boolean(edit.tableModel!.sourceTails?.some((tail) => tail !== "")), "table");
     // A list-table opened in the cell editor goes back to a pipe table from the same bar.
     if (edit.tableModel!.listTable) {
       addAction("Convert to pipe table", tableActionIcons.listTable, "Pipe table", () => {

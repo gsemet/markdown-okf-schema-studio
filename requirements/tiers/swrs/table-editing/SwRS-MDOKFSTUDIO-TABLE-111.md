@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/markdownTable.test.ts
+- test/page/modules/tableRowTailActions.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -69,6 +70,11 @@ When the writer runs Column alignment with left, center or right, the extension 
 | the caret in a table and the choice "justify" | no edit is produced |
 | the caret in a table and no choice | no edit is produced |
 
+### Scenario (boundary): Caret in the text after a row's closing pipe
+- GIVEN the caret in the tail of a row, the text after the closing pipe of its last column (see SwRS-MDOKFSTUDIO-TABLE-102)
+- WHEN a column alignment is chosen
+- THEN no edit is produced: no column is under the caret
+
 ### Scenario (nominal): The menu of Left, Center and Right
 - GIVEN the caret in a pipe table
 - WHEN the writer presses Column alignment and chooses Center
@@ -83,6 +89,7 @@ When the writer runs Column alignment with left, center or right, the extension 
 - SwRS-MDOKFSTUDIO-TABLE-106: the palette modes in which Column alignment is offered.
 
 ### Verification notes
+- Method: test/page/modules/tableRowTailActions.test.ts (no edit with the caret in a tail, an edit in a cell of the same table).
 - Method: test/page/modules/editActions.test.ts (T26: columnAlign rewrites only the delimiter cell of the caret's column; keeps the width of a padded column and replaces an existing alignment; works from a body row, outside pipes and in tables without edge pipes; its last assertions cover the unknown choice "justify" and the missing choice; the caret in a paragraph gives an undefined edit).
 - Method: test/page/modules/editPalette.test.ts (T26: Column alignment lists left, center and right; a choice rewrites the delimiter cell; strict mode has no button).
 - Method: test/page/modules/markdownTable.test.ts ("Column alignment on a short delimiter cell grows it to three dashes and changes only that line"; this file, not editActions.test.ts, which is at the 1 500-line limit).

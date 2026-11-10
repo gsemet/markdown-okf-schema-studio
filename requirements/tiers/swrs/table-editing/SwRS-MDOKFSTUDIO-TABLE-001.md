@@ -31,11 +31,13 @@ implemented_in_files:
 - src/page/modules/markdownTable.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
+- test/integration/realInput/tableRowTokens.ts
 - test/integration/realInput/tableShortDelimiter.ts
 - test/integration/tableMoves.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+- test/page/runtimeTableRowTail.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -94,7 +96,7 @@ When edit mode is on and the writer clicks a cell of a rendered pipe table, the 
 - THEN the region still holds no status and the bar status shows the new position
 
 ### Scenario (boundary): Only a well-formed pipe table opens a cell editor
-A table is editable when it has a header row, a delimiter row whose cells are at least one dash with optional colons (the delimiter rule is /^:?-+:?$/ on each delimiter cell with spaces removed; when a delimiter cell has fewer than three dashes, the delimiter line holds a pipe), and the same number of cells in every row.
+A table is editable when it has a header row, a delimiter row whose cells are at least one dash with optional colons (the delimiter rule is /^:?-+:?$/ on each delimiter cell with spaces removed; when a delimiter cell has fewer than three dashes, the delimiter line holds a pipe), the same number of cells in the header and in the delimiter row, and in every body row at least as many cells as the header. The text of a body row after the closing pipe of the header's last column is the row tail (see SwRS-MDOKFSTUDIO-TABLE-102): the preview ignores it and the editor keeps it verbatim.
 
 | Input | Outcome |
 | --- | --- |
@@ -105,7 +107,9 @@ A table is editable when it has a header row, a delimiter row whose cells are at
 | "\| a \| b \|\n\| :-- \| --: \|\n\| c \| d \|" | parses into rows of two cells and opens a cell editor, the delimiter row is left as written by a cell edit |
 | "\| a \| b \|\n\|-\|-\|\n\| c \| d \|" | parses into rows of two cells and opens a cell editor |
 | a line over a "--" line with no pipe (a setext heading) | parse returns no table, no cell editor is built |
-| a body row with three cells under a two-cell header | parse returns no table, no cell editor is built |
+| a header or a delimiter row with an extra cell | parse returns no table, no cell editor is built |
+| a body row with fewer cells than the header | parse returns no table, no cell editor is built |
+| a body row with text after the closing pipe of its last column, such as "\| a \| 1 \| ^row-a" | parses into rows of the header's cells; the text after the closing pipe is kept as the row tail and a cell editor opens; saving keeps the tail verbatim at the end of its line |
 
 ### Scenario (refusal): A block that is no editable pipe table opens in the raw Markdown editor
 | Input | Outcome |
@@ -124,6 +128,7 @@ A table is editable when it has a header row, a delimiter row whose cells are at
 - Method: test/page/fmtableReqTable.requirements.test.ts also "a table with a two-dash delimiter opens the cell editor, not the raw Markdown editor".
 - Method: test/integration/realInput/tableShortDelimiter.ts (scenario table-short-delimiter: click on a cell of a ":--" and "--:" table opens the cell editor and the table bar, a typed edit keeps the delimiter row).
 - Method: visual scenarios table-editing/v02 to v05 (click, selected cell, caret at the end in step open; v05 only repeats the assertions of v02 to v04) and table-editing/v01 to v05 (no status hint).
+- Method: test/page/runtimeTableRowTail.test.ts (a click on a cell of a table whose row has a token after its closing pipe opens the cell editor, not the raw Markdown editor) and test/page/modules/markdownTable.test.ts (the row tail: parse, byte-identical serialization, CRLF, a cell edit that keeps it, a header with an extra cell refused).
 - Criteria: The region exists in the cell with the label "Markdown table cell editor" and exactly one previewEditOpen is posted for the click. The wrapper element carries data-sphinx-table-cell-content and aria-hidden, and the style makes it display block, height 0 and visibility hidden. The text box value equals the model cell, with rendered row 0 mapped to model row 0 and rendered row n to model row n+1. document.activeElement is the text box and selectionStart equals selectionEnd equals the text length. No element with the status attribute is a descendant of the cell editor region once the text box is rendered. parse returns a model for the well-formed inputs and undefined for the malformed ones. After the fallback answer the cell has no selected mark and the region holds a text box with the label "Raw Markdown block". The edit-mode-off refusal is read from the click handler in src/page/features/pageInput.ts and has no dedicated test; the empty-cell caret boundary has no dedicated test.
 
 <!-- okf:links:start -->

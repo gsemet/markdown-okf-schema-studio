@@ -23,6 +23,7 @@ implemented_in_files:
 - src/page/modules/listTableMove.ts
 - src/page/modules/markdownTable.ts
 tested_in_files:
+- test/integration/realInput/tableRowTokens.ts
 - test/integration/tableMoves.ts
 - test/page/modules/tableColumnMove.test.ts
 - test/page/runtimeTableRowMove.test.ts
@@ -55,6 +56,15 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | Focus on the handle of the second column, Alt+Right | The column swaps with the third as one edit, and after the render the focus is on the handle of the column at its new place |
 | Alt+Left on the handle of the first column, or Alt+Right on that of the last | Nothing happens |
 | Alt+Right repeated before the render of the previous move arrived | The repeat is ignored: the cells on the page are stale until the render arrives |
+
+### Scenario (nominal): A block id at the end of a row stays at the end of the row
+
+| Input | Outcome |
+| --- | --- |
+| A pipe table row `\| alpha \| 1 \| first ^row-b \|` and the last column moved left (drag, or Alt+Left on its handle), or a column inserted after the last | The row reads `\| alpha \| first \| 1 \| ^row-b`: the block id (whitespace, then `^` and letters, digits or dashes, at the end of the last cell) leaves the cell and follows the closing pipe, where a `#^row-b` link finds it; the preview no longer shows it. A cell that is only `^row-b` is left empty |
+| A row whose text after the closing pipe is already a tail (`\| alpha \| 1 \| first \| ^row-a`), any column moved | The tail stays at the end of the line and nothing is lifted |
+| `<a id="x"></a>` or other text in the last cell | It moves with its cell: only a block id names the row |
+| A table with a token after the closing pipe of one row (`^row-a`, `{#row-c}`, `<!-- keep -->`) | Its handles move it like any table and a click on a cell opens the cell editor |
 
 ### Scenario (nominal): The handle above its column
 
@@ -109,6 +119,7 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 - Method: test/page/modules/tableColumnMove.test.ts (a pipe column moves with its colons, padding and outer pipes as written; the model refuses an index outside the table or the same place; a list-table column moves with continuation lines, empty and nested cells, indentation, fence and line endings, and the `:widths:` numbers; ragged rows and non-list-tables refused; the same grid after a conversion).
 - Method: test/page/runtimeTableRowMove.test.ts (column handles above the columns of a pipe table and a list-table, outside the cells, none for a captioned table or a one-column table; a drag moves with one save and no cell editor; a drop in place requests nothing; Alt+Left and Alt+Right; refused or unreadable source; a click on a handle; a move while a cell editor is open).
 - Method: test/integration/tableMoves.ts (real VS Code window: real mouse drag and Alt+Left of a column of a pipe table and of a list-table, the handles above their header cells, and a column dragged while a cell editor is open).
+- Method: test/page/modules/tableColumnMove.test.ts (a block id ending the last cell is lifted to the end of its row by a move and by an insert after the last column; a tail stays at the end of the line; an anchor element moves with its cell; a cell that is only the id is emptied), test/page/runtimeTableRowMove.test.ts (Alt+Left on a column handle of a table whose row has a block id after its pipe saves the table with the tail kept) and test/integration/realInput/tableRowTokens.ts (real VS Code window: replays 271-c1b-1 and 271-c1b-2).
 - Criteria: the saved text equals the source with the cells of every line reordered; one `previewEditSave` per move; each handle rectangle lies above the header row and its centre is within 2 px of the column's centre.
 
 <!-- okf:links:start -->

@@ -39,6 +39,7 @@ import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, s
 import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
 import { scenarioTableShortDelimiter } from "./tableShortDelimiter";
+import { scenarioColumnMoveKeepsBlockIdAtRowEnd, scenarioTailedTableMovesAndOpensCellEditor } from "./tableRowTokens";
 import { scenarioWideTableTab } from "./wideTableTab";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
 import { scenarioLinkClickEditsInEditMode } from "./linkEditMode";
@@ -169,6 +170,10 @@ export async function run(): Promise<void> {
       "wide-table-tab": () => scenarioWideTableTab(page, evidence),
       "table-escape": () => scenarioTableEscapeKeepsCellsLeft(page),
       "table-short-delimiter": () => scenarioTableShortDelimiter(page),
+      "table-row-tokens": async () => {
+        await scenarioColumnMoveKeepsBlockIdAtRowEnd(page);
+        await scenarioTailedTableMovesAndOpensCellEditor(page);
+      },
       "find-after-click": () => scenarioFindRightAfterClick(page),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
       "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),
@@ -223,6 +228,9 @@ export async function run(): Promise<void> {
     await scenarioTableEscapeKeepsCellsLeft(page);
     // QA replay 271-c3-1: a table with a two-dash delimiter row opens the cell editor.
     await scenarioTableShortDelimiter(page);
+    // QA replays 271-c1b-1 and 271-c1b-2: block ids and tokens at the end of a table row.
+    await scenarioColumnMoveKeepsBlockIdAtRowEnd(page);
+    await scenarioTailedTableMovesAndOpensCellEditor(page);
     await scenarioTableStructure(page);
     await scenarioTableMoves(page);
     await scenarioBooleanOneClick(page, evidence);

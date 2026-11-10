@@ -92,6 +92,8 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
     if (!validSelection(ctx)) return undefined;
     const found = tableAtCaret(ctx);
     if (found && tableTools) {
+      // Text after a row's closing pipe has no place in an HTML table: nothing is converted.
+      if (found.model.sourceTails?.some((tail) => tail !== "")) return undefined;
       const text = tableTools.toHtmlTable(found.model);
       return {
         start: found.start,
@@ -198,6 +200,8 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
     const offset = ctx.selectionStart - found.caretLineStart;
     let column = caretSegments.findIndex((segment) => offset <= segment.end);
     if (column === -1) column = caretSegments.length - 1;
+    // The caret is in the text after the closing pipe of the last column: no column is under it.
+    if (column >= found.model.rows[0].length) return undefined;
     const delimiter = found.lines[1];
     const segments = tools.cellSegments(delimiter);
     const segment = segments[Math.min(column, segments.length - 1)];

@@ -25,6 +25,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/fmtableReqTable.requirements.test.ts
 - test/page/modules/listTable.test.ts
+- test/page/modules/markdownTable.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -59,6 +60,11 @@ When a conversion between a pipe table, a {list-table} and a simple HTML table w
 - WHEN Pipe table is run
 - THEN no edit is produced and the reason is "A pipe table has one header row; this table has 2. Nothing was changed."
 
+### Scenario (refusal): Pipe table whose row has text after its closing pipe
+- GIVEN a pipe table with a token after the closing pipe of a row, such as "| alpha | 1 | ^row-a"
+- WHEN it is converted to a list-table (the HTML table action of SwRS-MDOKFSTUDIO-TABLE-117 gives no edit and no reason)
+- THEN no edit is produced and the reason is "A row has text after its closing pipe that would be lost. Nothing was changed."
+
 ### Scenario (refusal): Table already in the target form
 - GIVEN a pipe table converted to a pipe table, and a list-table converted to a list-table (directly through the conversion function)
 - WHEN the conversion is requested
@@ -87,6 +93,7 @@ When a conversion between a pipe table, a {list-table} and a simple HTML table w
 - Method: test/page/modules/listTable.test.ts, unit tests a list-table that would lose content is refused with a reason and nothing is produced ("List-table that would lose content", "Tables that convert"), an HTML table with spans, markup or no body cells in a row is refused ("HTML table that would lose content", first group and the reason form), a table already in the target form is refused and text that is no table is not recognised ("Table already in the target form", the paragraph case of "Text that is no table"). The empty-text boundary is read from detectTable and has no test.
 - Method: test/page/modules/editActions.test.ts, unit test CR038: a conversion that would lose content changes nothing and says why ("List-table that would lose content"). The display of the reason belongs to the palette-slash scope.
 - Method: test/page/modules/fmtableReqTable.requirements.test.ts, unit test a list-table with several header rows is refused as a pipe table with the header-row count ("Several header rows").
+- Method: test/page/modules/markdownTable.test.ts (converting a pipe table whose row has a tail is refused with the reason).
 - Method: test/page/modules/editActions.test.ts holds the markers of the editActions.test.ts checks above.
 - Criteria: A refusal reason with the suffix "Nothing was changed." for each lossy form and a successful conversion for the plain form; the reason text with the header-row count; the refusal sentences of the already-in-form case (in the palette the actions are not offered for these cases, see SwRS-MDOKFSTUDIO-TABLE-073 and SwRS-MDOKFSTUDIO-TABLE-074); an undefined result for text that is no table.
 
