@@ -2,6 +2,23 @@
 
 ## 2026-11-10
 
+### Front matter values in the text: inline code that holds = this.field shows the value (CR 273, GitHub #334)
+
+- SwRS-MDOKFSTUDIO-CORE-079 (proposed, new, derives from StRS-MDOKFSTUDIO-CORE-001, which is
+  unchanged): inline code that holds exactly = this.field or =this.field shows the value of that
+  field of the document's own front matter as plain text (string and number as text, boolean as
+  true or false, list joined with a comma and a space, object as one line of YAML, a nested field
+  with this.a.b); a field without a value (absent, empty, null, through a scalar, no or invalid front
+  matter) keeps the inline code as written with a dashed warning style and one warning diagnostic
+  (at most 20 per render). Other inline code and fenced blocks are unchanged. No approved requirement
+  changed. Source: src/core/render/frontmatterValues.ts (a tree pass of mystRenderer.ts),
+  src/core/preview/styles/frontmatterValueStyles.ts; the value follows the front matter because each
+  edit renders the document again.
+  Round 2: the pass runs before the toc markers (an entry, the heading anchor and the entry link are
+  built from the value); an empty object counts as without a value; an included file reads the front
+  matter of the including document. Round 3: the form is shown as code by keeping a backtick inside
+  the code (more backticks around it do not change its text); the writing skill and the CHANGELOG say so.
+
 ### SVG pictures: an svg fence and a raw svg block are drawn inline, themed (CR 272, GitHub #336)
 
 - SwRS-MDOKFSTUDIO-DIAG-125, -126 and -127 (proposed, new, derive from StRS-MDOKFSTUDIO-DIAG-001, which

@@ -39,7 +39,7 @@ with `code --install-extension GaetanSemet.markdown-okf-schema-studio`, or by se
 | Math | `$x^2$`, `$$ ... $$`, `{math}` |
 | Admonitions | `:::{note}` `tip` `warning` `important` `danger` ... with an optional title; fold with `:class: dropdown`; `{versionadded}` `{versionchanged}` `{deprecated}` |
 | Layout | `{card}` (`:header:` `:footer:`), `{grid}` + `{grid-item-card}` (header `^^^` body `+++` footer), `{tab-set}` + `{tab-item}`, `{figure}`, `{list-table}` |
-| Inline | `{kbd}`, `{ref}` to a `(name)=` label above a heading, definition lists (`Term` then `: text`) |
+| Inline | `{kbd}`, `{ref}` to a `(name)=` label above a heading, definition lists (`Term` then `: text`), `` `= this.field` `` shows a field of the document's own front matter ([examples](references/examples.md)) |
 | Diagrams | `mermaid` fence, `plantuml` fence (built in, no Java), `{uml} file.puml` |
 | Charts | `vega-lite` and `vega` fences, JSON or YAML, inline `values` or a relative CSV, TSV, JSON file |
 | Images | `![alt](path)` and `{figure}` for local PNG, JPEG, SVG files (inline SVG: see below) |
