@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.6.0 - 2026-11-10
+
 - Inline code written as `` `= this.field` `` (or `` `=this.field` ``) now shows the value of that field
   of the document's own front matter, as in Obsidian: text and numbers as they are, lists joined with commas,
   objects as one line of YAML, `this.a.b` for a nested field. The value is shown as plain text. A field
@@ -20,6 +22,8 @@
   empty or showing its old text until the page renders again. Words such as `snake_case_name` and
   sums such as `2 * 3 * 4` stay plain there instead of flashing as emphasis, and a `//host` link
   target is no longer kept.
+- The table of contents stays just below the toolbar each time the toolbar opens or closes, instead of
+  sliding under the open toolbar or dropping far below the closed one.
 
 ## 1.5.0 - 2026-11-06
 
