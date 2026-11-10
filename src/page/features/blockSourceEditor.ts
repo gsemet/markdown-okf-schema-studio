@@ -6,6 +6,7 @@
  */
 
 import { createEditPalette } from "../modules/editPalette";
+import { clearCellEditorRoom } from "../modules/cellEditorRoom";
 import { caretRectOf } from "../modules/caretRect";
 import { imageParagraphEdit } from "../modules/pasteImage";
 import { createSlashMenu } from "../modules/slashMenu";
@@ -89,6 +90,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       }
       blockEditor.restoreTableCellContent(edit);
       edit.selectedCell.removeAttribute("data-sphinx-preview-table-cell-selected");
+      clearCellEditorRoom(edit.selectedCell);
       edit.selectedCell = undefined;
       edit.target.setAttribute("data-sphinx-preview-editing", "true");
       // The frame opened inside the clicked cell, and the table is hidden while it is edited as raw

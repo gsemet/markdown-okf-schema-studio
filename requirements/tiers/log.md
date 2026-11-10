@@ -62,6 +62,16 @@
   test/session/reviewReqComments.requirements.test.ts, test/integration/commentAnchors.test.ts and
   test/integration/realInput/tableCommentUndo.ts.
 
+### The cell editor is clamped to a narrow pane (CR 282, QA271-14)
+
+- SwRS-MDOKFSTUDIO-TABLE-006 (proposed, stable, not approved) amended: the edited cell is at least 300 px wide,
+  or as wide as the table's box allows in a narrower pane, never under 8em (a boundary scenario at 280 px with
+  row handles, and a window resize measures the room again). SwRS-MDOKFSTUDIO-LAYOUT-023: wording only, the
+  minimum width of the edited cell now points at TABLE-006. No approved requirement changed. Source:
+  fitCellToRoom in src/page/modules/cellEditorRoom.ts and the selected-cell rule of
+  src/core/preview/styles/editModeStyles.ts; tests: test/page/runtimeTableCellRoom.test.ts and the visual
+  scenario table-editing/v29 (test/visual/capture_table_cell_room.py).
+
 ### Escape in a table cell cancels only that cell (CR 274, QA271-01)
 
 - SwRS-MDOKFSTUDIO-TABLE-025 (proposed, stable, not approved) amended: Escape in a cell editor outside a

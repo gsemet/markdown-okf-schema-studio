@@ -79,7 +79,7 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 | A wide table marked data-sphinx-preview-editing in Auto mode (its source editor is open) | Not marked wide; keeps the column width while its source editor is open |
 | A wide table holding an editor field other than a cell editor | Not marked wide; keeps the column width |
 | A wide table with an open cell editor (a textarea inside a table cell frame, the table stays rendered) in Auto mode | Marked wide; keeps the breakout it had when the editor opened, and the editor moving to another cell (Tab, arrows, click) changes nothing |
-| A table that fits the column (SwRS-MDOKFSTUDIO-LAYOUT-044) with a cell editor opened | Not marked wide; the 300 px minimum width of the edited cell does not make it break out |
+| A table that fits the column (SwRS-MDOKFSTUDIO-LAYOUT-044) with a cell editor opened | Not marked wide; the minimum width of the edited cell (SwRS-MDOKFSTUDIO-TABLE-006) does not make it break out |
 | A table with an open cell editor and a real resize (pane, table-of-contents column, toolbar, zoom: the column, pane, reserve or shift changes) | Measured again, with the editor in place |
 | An image whose data-okf-width is 50% | Not marked wide |
 | An image whose data-okf-width is 20em | Not marked wide |
@@ -118,7 +118,7 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 - Known issue: The relative-size (%, em, rem) exclusion has no test.
 - Known issue: Neither the declared-pixel-width path nor the 1 px tolerance has a test in the earlier suite; the Mermaid wrapper path is not directly tested either.
 - Known issue: The re-measure after a content patch, an image load and a table-of-contents toggle has no unit test (the content patch test builds the runtime but asserts nothing about width).
-- Known issue: A table first measured while its cell editor is already open (the page renders again with the editor restored) has no earlier verdict to keep, so it is measured with the 300 px minimum width of the edited cell. After a real resize, or when the width mode comes back to Auto while a cell editor is open, the table is measured again with the editor in place the same way, so it can then break out wider, or leave the column, because of that minimum.
+- Known issue: A table first measured while its cell editor is already open (the page renders again with the editor restored) has no earlier verdict to keep, so it is measured with the minimum width of the edited cell (SwRS-MDOKFSTUDIO-TABLE-006). After a real resize, or when the width mode comes back to Auto while a cell editor is open, the table is measured again with the editor in place the same way, so it can then break out wider, or leave the column, because of that minimum.
 - Known issue: An element entering source edit loses its mark through a mutation observer; the unit test covers the start-up and resize path.
 
 ### Verification notes

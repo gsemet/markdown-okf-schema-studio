@@ -1402,7 +1402,7 @@ test("in edit mode table cells keep a minimum width and the edited cell is wider
   assert.match(PREVIEW_THEME_CSS, new RegExp(`${edit} :where\\(th, td\\) \\{[^}]*min-width: 8em;`, "u"));
   assert.match(
     PREVIEW_THEME_CSS,
-    new RegExp(`${edit} :where\\(th, td\\)\\[data-sphinx-preview-table-cell-selected="true"\\] \\{[^}]*min-width: 300px;`, "u"),
+    new RegExp(`${edit} :where\\(th, td\\)\\[data-sphinx-preview-table-cell-selected="true"\\] \\{[^}]*min-width: max\\(8em, min\\(300px, var\\(--sphinx-preview-cell-editor-room, 300px\\)\\)\\);`, "u"),
   );
   // The rendered (read) view has no such rule.
   assert.doesNotMatch(PREVIEW_THEME_CSS, /(?:^|\n)#sphinx-myst-preview-content table :where\(th, td\) \{[^}]*min-width/u);

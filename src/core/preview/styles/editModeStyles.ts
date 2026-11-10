@@ -308,13 +308,15 @@ html[data-sphinx-preview-edit-mode="on"] .sphinx-preview-insert-point--start but
 }
 
 /* In edit mode every table cell keeps a usable width (an empty new column stays clickable) and the
-   cell being edited is wide enough to type in. The rendered (read) view is unchanged. */
+   cell being edited is wide enough to type in: 300 px, or the room of the table's box when the pane
+   is narrower (the runtime writes it on the cell, see modules/cellEditorRoom.ts), never under 8em.
+   Without the property the edited cell keeps 300 px. The rendered (read) view is unchanged. */
 html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :where(th, td) {
   min-width: 8em;
 }
 
 html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :where(th, td)[data-sphinx-preview-table-cell-selected="true"] {
-  min-width: 300px;
+  min-width: max(8em, min(300px, var(--sphinx-preview-cell-editor-room, 300px)));
 }
 
 /* The rendered cell content keeps its width (so columns do not move) but no height: the editor

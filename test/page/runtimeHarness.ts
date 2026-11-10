@@ -54,7 +54,15 @@ export class RuntimeElement {
     setProperty: (name: string, value: string): void => {
       this.styleValues.set(name, value);
     },
+    removeProperty: (name: string): string => {
+      const old = this.styleValues.get(name) ?? "";
+      this.styleValues.delete(name);
+      return old;
+    },
   };
+
+  /** Computed style values a test gives this element (for example `paddingLeft: "10px"`). */
+  public computedStyle: Record<string, string> = {};
 
   public constructor(
     attributes: Record<string, string>,
@@ -782,7 +790,8 @@ export function createRuntimeHarness(configuration: Partial<{
         }
       }
     },
-    getComputedStyle: () => ({
+    getComputedStyle: (element?: RuntimeElement) => ({
+      ...(element?.computedStyle ?? {}),
       getPropertyValue: (name: string): string => name === "--sphinx-preview-controls-height"
         ? String(controlsHeight) + "px"
         : name === "--sphinx-preview-toc-reserve" ? String(tocReserve) + "px" : "",
