@@ -25,8 +25,10 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/security/html-sanitizer.ts
+- src/core/security/svgSanitizer.ts
 tested_in_files:
 - test/security/html-policy.test.ts
+- test/security/svgSanitizer.test.ts
 - test/security/trustReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

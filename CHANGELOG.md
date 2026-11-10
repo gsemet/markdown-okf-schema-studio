@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A drawing written as an `svg` fence, or as a raw `<svg>` that fills its own block, is now drawn in
+  the page and follows the theme: write colours as `var(--surface)`, `var(--text)`, `var(--accent)`
+  and the like. Scripts, styles, links and other active content are removed, a picture keeps its
+  size (capped at the column, and it can break out in Auto width), and a click in edit mode opens its
+  source. An `<svg>` inside a sentence is still dropped.
 - In Auto width, a wide table keeps its full width while you edit one of its cells, and moving from
   cell to cell does not change it, instead of shrinking to the text column and cutting the last
   column. A table that fits the text column stays in it. A table edited as Markdown source still

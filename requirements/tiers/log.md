@@ -2,6 +2,32 @@
 
 ## 2026-11-10
 
+### SVG pictures: an svg fence and a raw svg block are drawn inline, themed (CR 272, GitHub #336)
+
+- SwRS-MDOKFSTUDIO-DIAG-125, -126 and -127 (proposed, new, derive from StRS-MDOKFSTUDIO-DIAG-001, which
+  is unchanged): an `svg` fence and a raw `<svg>` that fills a whole block are drawn inline after an
+  allow-list sanitizer rebuilt them (no script, style, foreignObject, link, handler or external URL; ids
+  and their references renamed per picture); the theme vocabulary (`--surface`, `--border`, `--text`,
+  `--muted`, `--accent`, `--red`... from the `--studio-*` tokens) with an unknown variable in the text
+  colour; a click in edit mode opens the source editor of the block. An `<svg>` inside a sentence is still
+  dropped. Source: src/core/security/svgSanitizer.ts, src/core/render/svgPictures.ts,
+  src/core/preview/styles/svgPictureStyles.ts; the final sanitizer now keeps the presentation attributes
+  the picture sanitizer allows (html-sanitizer.ts); Auto width reads the declared width of the picture
+  (widthMode.ts).
+- Round 2 (inspector findings): DIAG-125 now also states that an svg inside a comment, a `$$` block, a code
+  block or a raw HTML table is not a picture (SwRS-MDOKFSTUDIO-GFM-031 unchanged: a cell drops it), that a
+  reference never leaves its picture, that a value is an allow-list (colours, `var()`, `url(#id)`,
+  transforms; no scheme, no `image-set()`/`src()`), and that the placeholder holds a per-render random
+  token. SwRS-MDOKFSTUDIO-TRUST-036 (existing, proposed) is now also implemented/tested by the value check
+  the final sanitizer applies to the SVG presentation attributes it keeps (`isSafeSvgPresentationValue`).
+- Round 3 (inspector findings): DIAG-125 gains two table rows: a comment or a `$$` block opens only at
+  the start of a line (a `<!--` or `$$` in a sentence or a code span no longer hides a later code block's
+  text or a later picture), and an author's aria-label is kept as text. The value check of TRUST-036 now
+  applies only to the SVG attributes the final sanitizer did not already allow, and only on SVG elements:
+  the aria-* attributes keep the rule of main everywhere (TRUST-036 text unchanged).
+- SwRS-MDOKFSTUDIO-PALETTE-229 (unchanged, checked): the paste conversion still drops an `svg` element, so
+  a pasted drawing never becomes a picture and nothing in the clipboard path changed.
+
 ### Harden the cell inline Markdown shown after Tab (CR 270)
 
 - SwRS-MDOKFSTUDIO-TABLE-035 (proposed, verification notes only): new direct unit test
