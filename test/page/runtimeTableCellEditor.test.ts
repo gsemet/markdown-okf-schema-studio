@@ -684,7 +684,10 @@ test("table editing switches cells without losing changes and finalizes before l
   click(cells[2][1]);
   assert.equal(input().value, "q");
   assert.equal(cells[1][0].getAttribute("data-sphinx-preview-table-cell-selected"), null);
-  assert.equal(cells[1][0].childElements[0].tagName, "STRONG");
+  // The cell left is out of its hidden wrapper and shows the text just typed, no longer the old
+  // rendering (CR 268; it used to assert the old STRONG element came back).
+  assert.equal(cells[1][0].childElements[0].getAttribute("data-sphinx-table-cell-content"), null);
+  assert.equal(cells[1][0].childElements[0].textContent, "edited x");
   input().value = "edited q";
   input().dispatch("input");
   click(cells[0][1]);
@@ -1428,4 +1431,60 @@ test("a table cell editor that opens with the focus still on the page takes the 
   const harness = createRuntimeHarness({ trackFocus: true });
   const input = openTableCellEditor(harness);
   assert.equal(harness.document.activeElement, input);
+});
+
+/** The text a cell shows, without its open editor and hidden content. */
+function shownText(cell: RuntimeElement): string {
+  const parts = (element: RuntimeElement): string => element.childElements
+    .filter((child) => child.getAttribute("data-sphinx-preview-table-cell-editor") !== "true"
+      && child.getAttribute("data-sphinx-table-cell-content") !== "true")
+    .map((child) => child.childElements.length ? parts(child) : child.textContent)
+    .join("");
+  return parts(cell);
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+test("Tab from a typed cell leaves that cell showing its new text, in a row that was empty", () => {
+  const harness = createRuntimeHarness();
+  const { cells, input } = openTableCellEditorForTab(harness);
+  input().value = "typed";
+  input().dispatch("input");
+  input().dispatch("keydown", { key: "Tab", preventDefault: () => undefined });
+  assert.equal(input().value, "y");
+  assert.equal(shownText(cells[1][0]), "typed");
+  assert.equal(cells[1][0].childElements.some((child) =>
+    child.getAttribute("data-sphinx-table-cell-content") === "true"), false);
+  assert.equal(harness.messages.some((message) => message.final === true), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+test("Tab and Shift+Tab leave a cell with changed text showing the change, not the old rendering", () => {
+  const harness = createRuntimeHarness();
+  const { cells, input } = openTableCellEditorForTab(harness);
+  const old = new RuntimeElement({}, harness.windowState, 10, 10, "span");
+  old.textContent = "stale";
+  cells[1][1].appendChild(old);
+  input().dispatch("keydown", { key: "Tab", preventDefault: () => undefined });
+  assert.equal(input().value, "y");
+  input().value = "fresh **bold** and `code`";
+  input().dispatch("input");
+  input().dispatch("keydown", { key: "Tab", shiftKey: true, preventDefault: () => undefined });
+  assert.equal(input().value, "x");
+  assert.equal(shownText(cells[1][1]), "fresh bold and code");
+  assert.ok(cells[1][1].childElements.some((child) => child.tagName === "STRONG"));
+  assert.ok(cells[1][1].childElements.some((child) => child.tagName === "CODE"));
+  assert.equal(shownText(cells[1][1]).includes("stale"), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+test("an arrow key leaves a cell showing its new text", () => {
+  const harness = createRuntimeHarness();
+  const { cells, input } = openTableCellEditorForTab(harness);
+  input().value = "x2";
+  input().selectionStart = 2;
+  input().selectionEnd = 2;
+  input().dispatch("input");
+  input().dispatch("keydown", { key: "ArrowRight", preventDefault: () => undefined });
+  assert.equal(input().value, "y");
+  assert.equal(shownText(cells[1][0]), "x2");
 });

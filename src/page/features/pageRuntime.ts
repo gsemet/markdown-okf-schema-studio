@@ -124,6 +124,8 @@ export interface BlockEdit {
   insertAfterLine?: number;
   selectedCell?: HTMLTableCellElement;
   renderedCellContent?: HTMLElement;
+  /** The Markdown text the cell editor showed when it opened in the cell, to tell an edited cell. */
+  cellTextAtOpen?: string;
   tableRowIndex?: number;
   tableColumnIndex?: number;
   initialCaretPosition: CaretPosition;

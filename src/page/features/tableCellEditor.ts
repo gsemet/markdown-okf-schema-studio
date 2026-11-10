@@ -5,6 +5,7 @@
  * on the parsed table model; every save writes the whole table back.
  */
 
+import { setCellInline } from "../modules/cellInlineMarkdown";
 import { caretRectOf } from "../modules/caretRect";
 import { createEditPalette } from "../modules/editPalette";
 import { createSlashMenu } from "../modules/slashMenu";
@@ -69,6 +70,13 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     const previousRowIndex = modelRowOf(edit.tableRowIndex!);
     edit.tableModel.rows[previousRowIndex]![edit.tableColumnIndex!] = edit.tableInput!.value;
     rt.blockEditor.postBlockEditSave(false);
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+    // The cell left shows the text just typed, not the content captured when the editor opened in
+    // it (empty for a new row), rendered as inline Markdown until the next render of the page. A
+    // cell whose text did not change keeps its full rendering.
+    if (edit.renderedCellContent && edit.tableInput!.value !== edit.cellTextAtOpen) {
+      setCellInline(document, edit.renderedCellContent, edit.tableInput!.value);
+    }
     rt.blockEditor.restoreTableCellContent(edit);
     edit.selectedCell!.removeAttribute("data-sphinx-preview-table-cell-selected");
     edit.element.remove();
@@ -235,6 +243,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     input.setAttribute("spellcheck", "false");
     input.setAttribute("aria-label", "Markdown table cell");
     input.value = row[edit.tableColumnIndex]!;
+    edit.cellTextAtOpen = input.value;
     // @implements_req SwRS-MDOKFSTUDIO-TABLE-006
     // The cell grows with its text: the field has no scrollbar and the buttons sit beneath it.
     const resizeInput = (): void => {
