@@ -496,7 +496,10 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     doneButton.addEventListener("click", () => saveBlockEdit());
     cancelButton.addEventListener("click", () => {
       if (state.activeBlockEdit !== edit) return;
-      cancelBlockEdit();
+      // @implements_req SwRS-MDOKFSTUDIO-TABLE-025
+      // The cell editor's Cancel is Escape: same path, so the cells left keep their text.
+      if (edit.tableModel) rt.tableCellEditor.cancelTableCellEdit(edit);
+      else cancelBlockEdit();
     });
     const buttons = document.createElement("div");
     buttons.className = "sphinx-preview-block-editor-buttons";

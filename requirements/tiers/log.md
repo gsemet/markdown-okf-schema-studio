@@ -2,6 +2,18 @@
 
 ## 2026-11-10
 
+### Escape in a table cell cancels only that cell (CR 274, QA271-01)
+
+- SwRS-MDOKFSTUDIO-TABLE-025 (proposed, stable, not approved) amended: Escape in a cell editor outside a
+  composition drops the text typed in the open cell only; the cells left earlier in the session with Tab,
+  an arrow key or a click keep their text, the table is saved with them (a final save, no
+  previewEditCancel) and the preview shows what the buffer holds. With no such cell, Escape restores the
+  table as before. TABLE-013 and TABLE-035 are unchanged in intent (related-requirement lines added).
+  The Cancel button of the cell editor follows the same path as Escape. No approved requirement
+  changed. Source: cancelTableCellEdit in src/page/features/tableCellEditor.ts (the edit flag
+  keptCellChange); tests: test/page/runtimeTableCellEscape.test.ts and
+  test/integration/realInput/tableEscape.ts.
+
 ### Front matter values in the text: inline code that holds = this.field shows the value (CR 273, GitHub #334)
 
 - SwRS-MDOKFSTUDIO-CORE-079 (proposed, new, derives from StRS-MDOKFSTUDIO-CORE-001, which is

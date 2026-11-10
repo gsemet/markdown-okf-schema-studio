@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Pressing Escape, or the Cancel button, in a table cell now cancels only the text typed in that cell. The cells you left with
+  Tab, an arrow key or a click keep their text in the file, as the preview already showed, instead of
+  being silently dropped.
+
 ## 1.6.0 - 2026-11-10
 
 - Inline code written as `` `= this.field` `` (or `` `=this.field` ``) now shows the value of that field
