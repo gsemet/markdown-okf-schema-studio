@@ -1,0 +1,55 @@
+{
+ "name": "c1b-1-column-move-carries-last-cell-block-id-into-row",
+ "file": "synth/anchors-trailing-tokens.md",
+ "steps": [
+  {
+   "key": "Meta+1",
+   "wait": 300
+  },
+  {
+   "open": "${file}",
+   "wait": 2500
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelectorAll('table').length>=6",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "comment": "Table T2: `| alpha | 1 | first ^row-b |`. Focus the column handle of Note and press Alt+Left."
+  },
+  {
+   "clicksel": "[data-okf-col-handle]",
+   "nth": 5,
+   "wait": 400
+  },
+  {
+   "key": "Alt+ArrowLeft",
+   "wait": 1800
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "show": true,
+   "notContains": "| first ^row-b | 1 |",
+   "label": "c1b-1 block id stays at the end of its row"
+  },
+  {
+   "check": "errors"
+  },
+  {
+   "shot": "c1b-1-fail",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

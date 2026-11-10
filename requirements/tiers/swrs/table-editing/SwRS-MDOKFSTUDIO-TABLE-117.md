@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/modules/tableInsertAfterTable.test.ts
+- test/page/modules/tableRowTailActions.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -66,6 +67,11 @@ When the writer runs HTML table, the extension SHALL replace the pipe table at t
 - WHEN HTML table is run
 - THEN the new table is inserted on its own lines after the last line of that table, which stays whole
 
+### Scenario (refusal): A row with text after its closing pipe
+- GIVEN the caret in a pipe table with a token after the closing pipe of a row, such as "| alpha | 1 | ^row-a"
+- WHEN HTML table is run
+- THEN no edit is produced: the table is not converted and no new table is inserted, because the text would be lost
+
 ### Scenario (boundary): No table tools
 - GIVEN the page without table tools
 - WHEN HTML table is run
@@ -77,6 +83,7 @@ When the writer runs HTML table, the extension SHALL replace the pipe table at t
 ### Verification notes
 - Method: test/page/modules/editActions.test.ts (T25: htmlTable converts the pipe table under the caret, text escaped, alignment kept; T25: htmlTable finds the table from its header, delimiter or last row, and from a table after text; T25: htmlTable outside a pipe table inserts a new 2 x 2 table set apart by blank lines; the list-table and HTML table rows are in test/page/modules/tableInsertAfterTable.test.ts; the no table tools row is read from htmlTable in src/page/modules/tableEditActions.ts and is untested).
 - Method: test/page/modules/markdownTable.test.ts (T25: toHtmlTable writes thead and tbody with escaped text and alignment attributes; T25: toHtmlTable omits tbody without rows and alignment attributes without colons; T25: toHtmlTable keeps a model's unicode and empty cells).
+- Method: test/page/modules/tableRowTailActions.test.ts (HTML table gives no edit on a pipe table whose row has a tail).
 - Criteria: The replaced range, the exact HTML text for each case, and the inserted text with the selection of Column 1. The button itself belongs to the palette-slash scope.
 
 <!-- okf:links:start -->

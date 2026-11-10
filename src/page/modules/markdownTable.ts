@@ -13,6 +13,12 @@ export interface MarkdownTableModel {
   /** For each current row, the index of its source row; undefined for new rows. */
   rowOrigins?: (number | undefined)[];
   /**
+   * For each source row, the text after the closing pipe of its last column ("" when there is
+   * none), such as ` ^row-a` or ` <!-- keep -->`. `sourceLines` holds the row up to that pipe. Set
+   * by `parse`; a tail follows its row and is never copied to a new row.
+   */
+  sourceTails?: string[];
+  /**
    * For each current column, the index of its source column; undefined for a new column. Column
    * operations edit this list so every line keeps its own padding, indentation and outer pipes.
    */
@@ -31,6 +37,9 @@ export type TableKind = "pipe" | "list-table" | "html";
 
 /** The outcome of a conversion: the new text, or why nothing may change. */
 export type TableConversion = { ok: true; text: string } | { ok: false; reason: string };
+
+/** A block id ending a cell: the text before it and the `^id`, which is at the start or after a space. */
+const BLOCK_ID_END = /^(?:(.*?)\s+)?(\^[A-Za-z0-9-]+)$/u;
 
 export function createMarkdownTableTools() {
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-102
@@ -216,24 +225,36 @@ export function createMarkdownTableTools() {
     const trailingLineEnding = lines.at(-1) === "";
     if (trailingLineEnding) lines.pop();
     if (lines.length < 2) return undefined;
-    const rows = lines.map(splitRow);
-    const columnCount = rows[0].length;
+    const parsed = lines.map(splitRow);
+    const columnCount = parsed[0].length;
     if (
       columnCount < 1
-      || rows.some((row) => row.length !== columnCount)
-      || !rows[1].every((cell) => DELIMITER_CELL.test(cell.replace(/\s/gu, "")))
-      || (!lines[1].includes("|") && !rows[1].every((cell) => /-{3,}/u.test(cell)))
+      || parsed.some((row, index) => (index < 2 ? row.length !== columnCount : row.length < columnCount))
+      || !parsed[1].every((cell) => DELIMITER_CELL.test(cell.replace(/\s/gu, "")))
+      || (!lines[1].includes("|") && !parsed[1].every((cell) => /-{3,}/u.test(cell)))
     ) {
       return undefined;
     }
+    // A body row with more cells than the header is a row of `columnCount` cells followed by a
+    // tail: the preview drops the extra cells (GFM), the source keeps them verbatim.
+    const bodies = [...lines];
+    const sourceTails = lines.map(() => "");
+    parsed.forEach((row, index) => {
+      if (row.length === columnCount) return;
+      const closing = cellSegments(lines[index])[columnCount - 1]!.end + 1;
+      bodies[index] = lines[index].slice(0, closing);
+      sourceTails[index] = lines[index].slice(closing);
+    });
+    const rows = parsed.map((row) => row.slice(0, columnCount));
     return {
       rows,
       lineEnding,
       trailingLineEnding,
-      sourceLines: [...lines],
+      sourceLines: bodies,
       sourceRows: rows.map((row) => [...row]),
       rowOrigins: rows.map((_, index) => index),
       columnOrigins: rows[0].map((_, index) => index),
+      sourceTails,
     };
   }
 
@@ -244,6 +265,9 @@ export function createMarkdownTableTools() {
     return model.listTable ? model.listTable.write(pipe) : pipe;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-002
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-007
   function serializePipe(model: MarkdownTableModel): string {
     if (
       !model.sourceLines
@@ -273,18 +297,48 @@ export function createMarkdownTableTools() {
       const text = line.slice(segment.start, segment.end);
       return text.length > text.trim().length + 2;
     }));
+    const tails = model.sourceTails ?? [];
+    // The source's last column, when it is no longer last: a block id ending its cell leaves the
+    // cell and ends the row, where `#^id` links find it.
+    const lastSource = sourceRows[0]!.length - 1;
+    // A list-table writes its own text from the grid, so it never takes a tail.
+    const liftAt = !sameColumns && !model.listTable && origins!.at(-1) !== lastSource
+      ? origins!.indexOf(lastSource) : -1;
     const lines = model.rows.map((row, rowIndex) => {
       const origin = rowOrigins[rowIndex];
+      const tail = origin === undefined ? "" : (tails[origin] ?? "");
       if (!sameColumns) {
         const template = origin ?? templateRowOrigin(rowIndex);
-        return columnsRow(sourceLines[template]!, sourceRows[template]!, row, origins!, rowIndex === 1, sourceLines[0]!, padded);
+        let line = sourceLines[template]!;
+        let oldCells = sourceRows[template]!;
+        let cells = row;
+        const token = liftAt >= 0 && origin !== undefined && origin >= 2 && tail === ""
+          ? BLOCK_ID_END.exec(row[liftAt] ?? "") : null;
+        if (token) {
+          const segment = cellSegments(line)[lastSource]!;
+          const text = line.slice(segment.start, segment.end);
+          if (row[liftAt] === oldCells[lastSource]) {
+            const stripped = text.replace(/\s*\^[A-Za-z0-9-]+\s*$/u, "");
+            const kept = stripped === "" ? " " : stripped + (/\s$/u.test(text) ? " " : "");
+            line = line.slice(0, segment.start) + kept + line.slice(segment.end);
+            oldCells = oldCells.map((cell, column) => (column === lastSource ? token[1] ?? "" : cell));
+          }
+          cells = row.map((cell, column) => (column === liftAt ? token[1] ?? "" : cell));
+          const lifted = columnsRow(line, oldCells, cells, origins!, rowIndex === 1, sourceLines[0]!, padded);
+          // Without a closing pipe the token would land in a cell: it then stays where it was.
+          if (/(?<!\\)(?:\\\\)*\|\s*$/u.test(lifted)) return lifted + " " + token[2];
+          line = sourceLines[template]!;
+          oldCells = sourceRows[template]!;
+          cells = row;
+        }
+        return columnsRow(line, oldCells, cells, origins!, rowIndex === 1, sourceLines[0]!, padded) + tail;
       }
       if (origin !== undefined) {
         const sourceRow = sourceRows[origin];
         if (row.length === sourceRow.length && row.every((cell, index) => cell === sourceRow[index])) {
-          return sourceLines[origin];
+          return sourceLines[origin] + tail;
         }
-        return spliceRow(sourceLines[origin], sourceRow, row);
+        return spliceRow(sourceLines[origin], sourceRow, row) + tail;
       }
       const templateOrigin = templateRowOrigin(rowIndex);
       return spliceRow(sourceLines[templateOrigin], sourceRows[templateOrigin], row);

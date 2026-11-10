@@ -55,11 +55,20 @@ When a table row is split into cells for editing, the extension SHALL accept row
 ### Scenario (boundary): Unescaped pipe in backticks
 - GIVEN the row "| `x|y` | z |" under a two-column table
 - WHEN it is parsed for editing
-- THEN the pipe splits the cell, as it does in the preview (GFM): the row has three cells, so the table is not a pipe table of the editor and no cell editor opens on it, instead of the editor and the preview holding different cells
+- THEN the pipe splits the cell, as it does in the preview (GFM): the row has three cells, of which the editor keeps the first two (the same cells as the preview) and the third, with the closing pipe, as the row tail, so the editor and the preview hold the same cells
+
+### Scenario (boundary): Text after the closing pipe of a body row
+- GIVEN a body row of a table of two columns with more cells than the header, such as "| alpha | 1 | ^row-a", "| alpha | 1 | {#row-c}", "| alpha | 1 | <!-- keep -->" or "| a | b | c |"
+- WHEN it is parsed for editing
+- THEN the row has the header's two cells and a tail: the text after the closing pipe of the last column, kept verbatim ("| alpha | 1 |" and " ^row-a"; "| a | b |" and " c |"); the preview ignores the extra cells, as GFM does, and the serialised table is unchanged
+- GIVEN the same extra cell in the header or in the delimiter row
+- WHEN the table is parsed
+- THEN it is no pipe table of the editor, as it is none in the preview
 
 ### Verification notes
 - Method: test/page/modules/markdownTable.test.ts (rows without outer pipes: rows without outer pipes stay parseable when an edge cell is emptied and rows with only one outer pipe stay parseable; escaped pipe and its round trip: pipe tables round-trip escaped cells and CRLF line endings; pipe in backticks: cellSegments returns the text between the delimiting pipes, offsets in the untrimmed line; an unescaped pipe inside a code span splits the cell as the preview does). The odd-backslash boundary is read from splitRow and has no dedicated test (untested). The preview rule was checked with markdown-it 14.3.3 and the project's myst-parser.
 - Method: test/page/modules/markdownTablePreservation.test.ts (escaped pipe round trip: corpus entry escaped-and-code).
+- Method: test/page/modules/markdownTable.test.ts (a body row with text after its closing pipe is a row of the header's columns with a tail, LF and CRLF, tail kinds ^id, {#id}, an HTML comment and an extra cell; a header or delimiter row with an extra cell and a short body row refused).
 - Criteria: The cells produced by parse for each row form, and string equality after serialising.
 
 <!-- okf:links:start -->

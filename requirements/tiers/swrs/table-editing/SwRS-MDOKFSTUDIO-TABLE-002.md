@@ -70,6 +70,13 @@ The chord is not also read as the move of the whole table block.
 | A list-table in a container (indented, or fenced with colons or backticks) | The move keeps the indentation, the fence style and the line endings of the source |
 | A list-table written with an option block that is not readable (a non-numeric `:header-rows:`), or text between the options and the first item | The move is refused and the document is not edited |
 
+### Scenario (nominal): A row with text after its closing pipe
+
+| Input | Outcome |
+| --- | --- |
+| A pipe table row with a token after its closing pipe (`\| alpha \| 1 \| ^row-a`), moved by its handle or by Alt+Up or Alt+Down | The row moves with its tail as one line; the handles of such a table work as those of any pipe table |
+| A new row inserted after that row, or a row deleted | The new row has no tail; a deleted row takes its tail with it |
+
 ### Scenario (nominal): The handle beside its row
 
 | Input | Outcome |
@@ -130,6 +137,7 @@ The chord is not also read as the move of the whole table block.
 - Method: test/page/runtimeTableRowMove.test.ts (list-table handles under two header rows and a drag that saves the moved item; handles on body rows only; no handle on list-tables, captioned tables and one-row tables; drag with one save and no cell editor; drop in place requests nothing; drop on the header refused; Alt+Up and Alt+Down; refused or non-pipe source; click on a handle; a drag refused while the source of a cell editor has not arrived; a drag and a key that move a row while a cell editor of the table is open, saving the typed text with it; a drag over the handle strip shows the marker on the nearest gap, none over the header or outside the table, and a drop in the strip moves the row).
 - Method: test/integration/tableMoves.ts (real VS Code window: a real mouse drag and Alt+Up of a body row of a pipe table and of a list-table, a drag while a cell editor is open, and a drag held over the handle strip and the middle of a row: marker on the nearest gap, none outside the table, a release outside leaves the document as it was, a release in the strip moves the row).
 - Method: visual scenarios table-editing/v06 to v08 (handles outside the tables, centred on their rows, and full-width table geometry in light, dark and cream), v15 to v20 (360 px pane: pushed tables) and v21 to v23 (a fourteen-column table scrolled sideways keeps its handles outside the scrolling box), v12 to v14 (list-table handles) and v09 to v11 (a real mouse drag held down: dimmed row, drop line, no editor).
+- Method: test/page/modules/markdownTable.test.ts (a row move takes the tail along, a new row has none, a deleted row takes its tail).
 - Criteria: the saved text equals the source with the lines reordered; the number of `previewEditSave` messages is one; the handle rectangle lies left of its table, inside the pane and centred on its row within 2 px; no cell breaks a word. The drop in the browser harness is not exercised (the visual harness has no host that answers a save); the real window suite drags with the mouse.
 
 <!-- okf:links:start -->

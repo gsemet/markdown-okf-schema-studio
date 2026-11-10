@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A table row with a block id or another token after its closing pipe (`| a | b | ^row-a`) can be edited
+  and moved again: the handles work and a click on a cell opens the cell editor. A column move keeps a
+  `^id` at the end of its row instead of carrying it into the middle.
 - A table whose delimiter row uses one or two dashes (`:--`, `--:`) can now be edited cell by cell, like one written with three.
 - Pressing Escape, or the Cancel button, in a table cell now cancels only the text typed in that cell. The cells you left with
   Tab, an arrow key or a click keep their text in the file, as the preview already showed, instead of

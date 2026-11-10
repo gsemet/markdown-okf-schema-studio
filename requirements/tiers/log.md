@@ -2,6 +2,21 @@
 
 ## 2026-11-10
 
+### Block ids and tokens at the end of a table row (CR 279, QA271-02 and QA271-10)
+
+- SwRS-MDOKFSTUDIO-TABLE-001, -002, -007, -076, -094, -102, -111, -117 and -070 (proposed, stable, not approved)
+  amended: a body row with text after the closing pipe of its last column (`| a | 1 | ^row-a`) is a row
+  of the header's columns plus a tail kept verbatim, so the table stays editable (cell editor, row and
+  column handles); a column move or insert that makes the source's last column no longer last lifts a
+  `^id` ending that cell to the end of its row; a pipe table whose row has a tail is not converted
+  to a list-table or an HTML table (refusal reason, no edit); aligning with the caret in a tail gives no
+  edit. TABLE-102 no longer says a row with an extra cell is refused: the editor reads the same cells
+  as the preview and keeps the rest as the tail. No approved requirement changed. Source:
+  src/page/modules/markdownTable.ts (parse, serializePipe), tableConversion.ts (pipeGrid) and
+  tableEditActions.ts (htmlTable, alignColumn); tests: test/page/modules/markdownTable.test.ts,
+  tableColumnMove.test.ts, tableRowTailActions.test.ts, test/page/runtimeTableRowMove.test.ts,
+  runtimeTableRowTail.test.ts and test/integration/realInput/tableRowTokens.ts.
+
 ### A table with a one or two dash delimiter row opens the cell editor (CR 278, QA271-04)
 
 - SwRS-MDOKFSTUDIO-TABLE-001 (proposed, stable, not approved) amended: a delimiter cell is one dash or

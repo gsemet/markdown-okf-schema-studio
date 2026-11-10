@@ -1,0 +1,66 @@
+{
+ "name": "c1b-2-token-after-last-pipe-table-handles-inert",
+ "file": "synth/anchors-trailing-tokens.md",
+ "steps": [
+  {
+   "key": "Meta+1",
+   "wait": 300
+  },
+  {
+   "open": "${file}",
+   "wait": 2500
+  },
+  {
+   "palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+   "wait": 4000
+  },
+  {
+   "waitFor": "D.querySelectorAll('table').length>=6",
+   "timeout": 15000
+  },
+  {
+   "editMode": true
+  },
+  {
+   "mark": true
+  },
+  {
+   "comment": "Tables T1/T3/T5 carry a token after the closing pipe of one row (^row-a, {#row-c}, an HTML comment)."
+  },
+  {
+   "clicksel": "[data-okf-col-handle]",
+   "nth": 2,
+   "wait": 400
+  },
+  {
+   "key": "Alt+ArrowLeft",
+   "wait": 1800
+  },
+  {
+   "check": "diff",
+   "against": "mark",
+   "contains": "| alpha | first | 1 | ^row-a",
+   "label": "c1b-2 the column moves and ^row-a stays at the end of its row"
+  },
+  {
+   "clicksel": "td",
+   "text": "beta",
+   "nth": 0,
+   "wait": 900
+  },
+  {
+   "check": "feval",
+   "expr": "!!D.querySelector('[data-sphinx-table-menu]')",
+   "equals": true,
+   "label": "c1b-2 the table cell editor (with its toolbar) opens in T1"
+  },
+  {
+   "check": "errors"
+  },
+  {
+   "shot": "c1b-2-fail",
+   "clip": "preview",
+   "onFail": true
+  }
+ ]
+}

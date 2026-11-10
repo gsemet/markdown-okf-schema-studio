@@ -704,3 +704,15 @@ test("the handles of a table that stays in the column sit on its edge in Auto", 
   assert.equal(handleOf(cells[1]!)!.style.getPropertyValue("left"), "-4px");
   assert.equal(handleOf(cells[1]!)!.style.getPropertyValue("top"), "145px");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+test("Alt+Left on a column handle moves the column of a table whose row has a block id after its pipe", () => {
+  const harness = createRuntimeHarness();
+  pipeTable(harness);
+  harness.editModeButton.dispatch("click");
+  columnHandle(1)!.dispatch("keydown", altKey("ArrowLeft"));
+  sourceReply(harness, "| H1 | H2 |\n| --- | --- |\n| a | 1 | ^row-a\n| b | 2 |\n| c | 3 |\n");
+  const saves = messagesOf(harness, "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0]?.editedText, "| H2 | H1 |\n| --- | --- |\n| 1 | a | ^row-a\n| 2 | b |\n| 3 | c |\n");
+});

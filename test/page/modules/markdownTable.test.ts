@@ -404,11 +404,70 @@ test("a column operation keeps the padding, indentation and outer pipes of every
 test("an unescaped pipe inside a code span splits the cell as the preview does", () => {
   const tools = createMarkdownTableTools();
   assert.deepEqual(tools.parse("| a | b |\n| --- | --- |\n| x | `y` |")?.rows[2], ["x", "`y`"]);
-  // The renderer reads three cells in the body row: the editor refuses it instead of disagreeing.
-  assert.equal(tools.parse("| a | b |\n| --- | --- |\n| `x|y` | z |"), undefined);
+  // The renderer reads three cells in the body row and drops the third: the editor reads the same
+  // two cells and keeps the rest of the line as the row's tail, instead of disagreeing.
+  const split = tools.parse("| a | b |\n| --- | --- |\n| `x|y` | z |");
+  assert.deepEqual(split?.rows[2], ["`x", "y`"]);
+  assert.deepEqual(split?.sourceTails, ["", "", " z |"]);
   const model = tools.parse("| a | b |\n| --- | --- |\n| `x\\|y` | z |");
   assert.deepEqual(model?.rows[2], ["`x\\|y`", "z"]);
   model!.rows[2]![1] = "`p|q`";
   assert.equal(tools.serialize(model!), "| a | b |\n| --- | --- |\n| `x\\|y` | `p\\|q` |");
   assert.equal(tools.cellSegments("| `a|b` |").length, 2);
+});
+
+const TAILED = (tail: string): string =>
+  `| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | first |${tail}\n| beta | 2 | second |\n`;
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+test("a body row with text after its closing pipe is a row of the header's columns with a tail", () => {
+  const tools = createMarkdownTableTools();
+  for (const tail of [" ^row-a", " {#row-c}", " <!-- keep -->", " d |"]) {
+    for (const ending of ["\n", "\r\n"]) {
+      const source = TAILED(tail).replace(/\n/gu, ending);
+      const table = tools.parse(source);
+      assert.ok(table, tail);
+      assert.deepEqual(table.rows[2], ["alpha", "1", "first"]);
+      assert.equal(tools.serialize(table), source, "no edit, no change");
+    }
+  }
+  // A header or delimiter row with an extra cell is no table.
+  assert.equal(tools.parse("| A | B | c |\n| --- | --- |\n| x | y |\n"), undefined);
+  assert.equal(tools.parse("| A | B |\n| --- | --- | ---|\n| x | y |\n"), undefined);
+  assert.equal(tools.parse("| A | B |\n| --- | --- |\n| x |\n"), undefined, "a short row is still refused");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
+test("a cell edit of a row with a tail changes only that cell and keeps the tail", () => {
+  const tools = createMarkdownTableTools();
+  const table = tools.parse(TAILED(" ^row-a"))!;
+  table.rows[2]![2] = "changed";
+  assert.equal(tools.serialize(table),
+    "| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | changed | ^row-a\n| beta | 2 | second |\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+test("a row move takes the tail along and a new row after a tailed row has no tail", () => {
+  const tools = createMarkdownTableTools();
+  const table = tools.parse(TAILED(" ^row-a"))!;
+  tools.moveRow(table, 1, 2);
+  assert.equal(tools.serialize(table),
+    "| Name | Value | Note |\n| --- | --- | --- |\n| beta | 2 | second |\n| alpha | 1 | first | ^row-a\n");
+  const inserted = tools.parse(TAILED(" ^row-a"))!;
+  const at = tools.insertRowAfter(inserted, 1);
+  inserted.rows[at + 1]![0] = "new";
+  assert.equal(tools.serialize(inserted).split("\n")[3], "| new   |   |       |");
+  tools.deleteRow(inserted, 1);
+  assert.doesNotMatch(tools.serialize(inserted), /\^row-a/u, "a deleted row takes its tail");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-076
+test("converting a pipe table whose row has a tail is refused, nothing changes", () => {
+  const tools = createMarkdownTableTools();
+  const result = tools.convertTable(TAILED(" ^row-a"), "list-table");
+  assert.deepEqual(result, {
+    ok: false,
+    reason: "A row has text after its closing pipe that would be lost. Nothing was changed.",
+  });
+  assert.equal(tools.convertTable(TAILED(""), "list-table")?.ok, true);
 });
