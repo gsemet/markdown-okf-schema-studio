@@ -48,6 +48,20 @@
   test/page/runtimeTableCellStale.test.ts, test/core/protocol/pageStateMessages.test.ts and
   test/integration/realInput/tableStaleRender.ts (real window, CI only).
 
+### An undone row delete brings the comment mark back (CR 280, QA271-03)
+
+- SwRS-MDOKFSTUDIO-REVIEW-119 (proposed, stable, not approved) amended: an undo or a redo whose
+  change event reports unsaved changes shifts the lines followed in memory, then every thread is
+  checked again starting from them (the dirty flag of a change event is the state before the change,
+  so an undo back to the saved text still reports unsaved changes); a change flagged clean still
+  drops them. SwRS-MDOKFSTUDIO-REVIEW-219 (proposed, new, derives from StRS-MDOKFSTUDIO-REVIEW-008
+  and StRS-MDOKFSTUDIO-REVIEW-001): while a thread is orphaned and the document text changes, the
+  orphan is checked again and, when its quote is found, is posted on the found lines with orphaned
+  false; nothing is written. No approved requirement changed.
+  Source: shiftForEdits and post in src/session/features/comments.ts; tests:
+  test/session/reviewReqComments.requirements.test.ts, test/integration/commentAnchors.test.ts and
+  test/integration/realInput/tableCommentUndo.ts.
+
 ### Escape in a table cell cancels only that cell (CR 274, QA271-01)
 
 - SwRS-MDOKFSTUDIO-TABLE-025 (proposed, stable, not approved) amended: Escape in a cell editor outside a

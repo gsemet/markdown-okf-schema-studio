@@ -24,6 +24,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-107
 - SwRS-MDOKFSTUDIO-REVIEW-119
 - SwRS-MDOKFSTUDIO-REVIEW-125
+- SwRS-MDOKFSTUDIO-REVIEW-219
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -56,4 +57,5 @@ As a reviewer, I find a discussion on its text after the author edited the docum
   - [SwRS-MDOKFSTUDIO-REVIEW-107](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-107.md): A slightly changed quote is followed by a bounded fuzzy search
   - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only
   - [SwRS-MDOKFSTUDIO-REVIEW-125](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-125.md): A renamed document takes its review comments file along
+  - [SwRS-MDOKFSTUDIO-REVIEW-219](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-219.md): An orphaned thread whose quote returns is placed again
 <!-- okf:links:end -->

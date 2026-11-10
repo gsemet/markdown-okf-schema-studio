@@ -24,6 +24,7 @@ import {
 import { createCommentStore, hashText, newId } from "../../core/comments/commentStore";
 import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../../core/configuration/commentsConfiguration";
 import type { DocumentChange, HostDocument } from "../../host-api/documentStore";
+import type { Revision } from "../../core/protocol/revision";
 import { isFileNotFound } from "../../host-api/fileSystem";
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
@@ -55,7 +56,9 @@ export interface CommentsState {
    * (`shiftThreadLines`). Never written per keystroke; saved with the document, see
    * `persistAnchors`. Dropped when the sidecar changes or the document reloads.
    */
-  view?: { diskHash: string; threads: CommentThread[]; orphaned: Set<string> };
+  view?: { diskHash: string; threads: CommentThread[]; orphaned: Set<string>; revision?: Revision;
+    /** An undo or a redo happened: the next post checks every thread again, from the lines followed. */
+    recheck?: boolean };
   /** Hash of the sidecar text our own last comment write produced: the view's lines are valid for it. */
   hintHash?: string;
 }
@@ -152,7 +155,12 @@ export class CommentsController {
     // when the followed lines were dropped (a clean document changed, an edit during a save): the
     // anchors must then be checked again against the current text even if the file did not change.
     const hash = text === undefined ? undefined : hashText(text);
-    if (hash !== undefined && hash === state.textHash && state.posted !== undefined && state.view !== undefined) return;
+    // Nor when an orphan may be placed again: the text changed since the view was built.
+    const orphanMayReturn = state.view !== undefined && state.view.orphaned.size > 0
+      && this.openRevision(documentPath) !== state.view.revision;
+    const recheckAll = state.view?.recheck === true;
+    if (hash !== undefined && hash === state.textHash && state.posted !== undefined && state.view !== undefined
+      && !orphanMayReturn && !recheckAll) return;
     let stored: CommentThread[] = [];
     if (text !== undefined) {
       const parsed = parseSidecar(text);
@@ -171,9 +179,32 @@ export class CommentsController {
     if (stored.length === 0 || hash === undefined) {
       state.view = undefined;
     } else if (state.view?.diskHash === hash) {
-      live = state.view.threads;
-      orphaned = state.view.orphaned;
+      const view = state.view;
+      live = view.threads;
+      orphaned = view.orphaned;
+      // @implements_req SwRS-MDOKFSTUDIO-REVIEW-219
+      // An orphan whose quote returned (an undo, a paste, a retyped word) is placed again. Only while
+      // one exists and only when the text changed since the view was built: anchored threads keep
+      // following the edits without any check. After an undo or a redo every thread is checked again,
+      // starting from the lines followed in memory.
+      const revision = this.openRevision(documentPath);
+      if (recheckAll || (orphaned.size > 0 && revision !== view.revision)) {
+        const documentText = await this.currentDocumentText(documentPath);
+        if (preview.disposed || preview.stage !== stage || sequence !== state.seq) return;
+        // The view changed while the text was read (an edit shifted it): that edit scheduled a new post.
+        if (state.view !== view) return;
+        if (documentText !== undefined) {
+          const outcome = reanchorThreads(documentText, recheckAll ? live : live.filter((thread) => orphaned.has(thread.id)));
+          const found = new Map(outcome.threads.map((thread) => [thread.id, thread]));
+          live = live.map((thread) => found.get(thread.id) ?? thread);
+          orphaned = recheckAll ? outcome.orphaned
+            : new Set(live.map((thread) => thread.id).filter((id) => outcome.orphaned.has(id)));
+          state.view = { diskHash: view.diskHash, threads: live, orphaned, revision };
+        }
+      }
     } else {
+      // Taken before the text is read: an edit during the read leaves the view older than the buffer.
+      const revision = this.openRevision(documentPath);
       const documentText = await this.currentDocumentText(documentPath);
       if (preview.disposed || preview.stage !== stage || sequence !== state.seq) return;
       if (documentText !== undefined) {
@@ -189,7 +220,7 @@ export class CommentsController {
         live = outcome.threads;
         orphaned = outcome.orphaned;
       }
-      state.view = { diskHash: hash, threads: live, orphaned };
+      state.view = { diskHash: hash, threads: live, orphaned, revision };
     }
     // Recorded only now, after the last staleness check: a post that a newer one overtook never
     // makes that newer post skip the same text (the hash says "the page was told about this text").
@@ -212,6 +243,13 @@ export class CommentsController {
     }), "postToPage");
   }
 
+  /** The revision of the open buffer of the document; undefined when the host holds none. */
+  private openRevision(documentPath: string): Revision | undefined {
+    const { documents } = this.manager.host;
+    const open = documents.get(documents.idOf(documentPath));
+    return open?.path !== undefined ? open.revision : undefined;
+  }
+
   /** The text of the document: the open buffer when there is one, else the file (bounded size). */
   private async currentDocumentText(documentPath: string): Promise<string | undefined> {
     const { documents, files } = this.manager.host;
@@ -231,15 +269,22 @@ export class CommentsController {
     for (const preview of this.manager.sessions()) {
       const view = preview.comments.view;
       if (!view || preview.documentUri !== documentIdentity) continue;
+      // @implements_req SwRS-MDOKFSTUDIO-REVIEW-119
+      // The dirty flag of a change event is the state before the change (VS Code reports the flip in a
+      // later event without contents), so an undo back to the saved text still says "dirty". An undo or
+      // a redo flagged dirty shifts the lines followed, then checks every thread again from them; one
+      // flagged clean drops them like any clean change, and the stored lines are the start.
       if (event.document.isDirty) {
         // Contents of one event are all in the coordinates of the text before it, in any order.
         const changes = toLineChanges(event.changes.map((change) => ({
           range: { start: { line: change.startLine }, end: { line: change.endLine } },
           text: change.text,
         })));
-        preview.comments.view = { ...view, threads: shiftThreadLines(view.threads, changes) };
+        const shifted = { ...view, threads: shiftThreadLines(view.threads, changes) };
+        // An undo or a redo: the lines followed are the start, every thread is checked again by the next post.
+        preview.comments.view = event.reason === undefined ? shifted : { ...shifted, recheck: true };
       } else {
-        // A clean document changed: reload from disk, a revert or an undo to the saved text. Check again.
+        // A clean document changed (a reload from disk, a revert, a clean-flagged undo): check again.
         preview.comments.view = undefined;
       }
       this.schedule(preview);

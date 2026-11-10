@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "document": "anchors-tables.md",
+  "threads": [
+    {"id":"t1","anchor":{"line":13,"endLine":13,"quote":"beta","prefix":"| ","suffix":" | 2"},"resolved":false,"createdAt":"2026-10-21T10:00:00Z","comments":[{"id":"c1","author":"Ada","createdAt":"2026-10-21T10:00:00Z","body":"Why beta?"}]},
+    {"id":"t2","anchor":{"line":27,"endLine":27,"quote":"retry budget","prefix":"| retry | the ","suffix":""},"resolved":false,"createdAt":"2026-10-21T10:00:00Z","comments":[{"id":"c2","author":"Ada","createdAt":"2026-10-21T10:00:00Z","body":"Cell comment"}]}
+  ]
+}
