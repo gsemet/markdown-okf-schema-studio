@@ -60,7 +60,8 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    request (notes folder and version commit in one `chore: version X.Y.Z` commit, body following
    `.github/PULL_REQUEST_TEMPLATE.md`; see "How to Release" in CONTRIBUTING.md). `just check` fails
    without valid notes, so the PR cannot merge without them. The owner reviews the folder in the
-   PR and merges it by rebase, the only merge method of the repository. The heavy run of the
+   PR and merges it by rebase, the only merge method of the repository. The PR body also shows the
+   notes and the thread themselves (see "The version PR body" below). The heavy run of the
    version push (CI rule 14) stays the final gate.
 6. The version push is monitored through the tag, the GitHub release with its notes and images, the
    Marketplace publication and Pages, recovering a red heavy job as in "After the merge" above.
@@ -75,6 +76,39 @@ named by the date of the pull request (the date may differ from the tag's; nothi
 
 Between the notes review (step 5) and the publication, the owner is asked nothing, except a real
 blocker: a product decision is needed, or a fix cannot be completed.
+
+## The version PR body
+
+The owner reads the notes and the thread in the version PR page, not only in its diff. After the
+sections of `.github/PULL_REQUEST_TEMPLATE.md`, the body carries, each part opened by a `---` rule
+and a heading:
+
+1. `---`, then `# 📰 Release notes (rendered)`, then the content of `release-notes.md`;
+2. `---`, then `# 🐦 Announcement thread (rendered)`, then the content of `tweet.md`.
+
+The committed files keep their relative image links (the release check requires them); only the
+copy in the body points to the images at the PR head. The images are in Git LFS, so the links use
+`media.githubusercontent.com` (a `raw.githubusercontent.com` link shows the LFS pointer, not the
+picture). `body-sections.md` holds the template sections without the closing attribution line,
+which ends the body after the thread:
+
+```bash
+dir=docs/releases-notes/<date>-vX.Y.Z
+base="https://media.githubusercontent.com/media/gsemet/markdown-okf-schema-studio/$(git rev-parse HEAD)/$dir"
+rewrite() { sed -E -e "s#(\]\(|src=\")([^/\":)]+\.(png|jpe?g|gif))#\1$base/\2#g" \
+                     -e "s#^Image: ([^ /]+\.(png|jpe?g|gif))\$#Image: ![\1]($base/\1)#" "$1"; }
+{ cat body-sections.md
+  printf '\n---\n\n# 📰 Release notes (rendered)\n\n'; rewrite "$dir/release-notes.md"
+  printf '\n---\n\n# 🐦 Announcement thread (rendered)\n\n'; rewrite "$dir/tweet.md"
+  printf '\n---\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n'
+} > pr-body.md
+gh pr edit <n> --body-file pr-body.md
+```
+
+The owner gives remarks on the delivered files, `release-notes.md` and `tweet.md`, as review
+comments in the PR diff (or edits them directly). The agent running the release applies them in
+the files, amends the version commit, and regenerates the body from the files at the new head, so
+the body never differs from what is committed.
 
 ## Release notes
 
