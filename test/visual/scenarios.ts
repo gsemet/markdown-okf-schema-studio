@@ -150,6 +150,8 @@ export interface Scenario {
   tabHintChecks?: boolean;
   /** CR 292: a spreadsheet paste into the last cell fills the cells from it, adds a row and a column, in one save. */
   tableGridPasteChecks?: boolean;
+  /** CR 291: a cell of a table inside a quote, an alert or a MyST admonition opens the cell editor and the table bar. */
+  tableInContainerChecks?: "quote" | "note";
   /** CR 281: with the unchanged title editor open, one click on the priority value below it opens priority. */
   frontmatterClickChecks?: boolean;
   /** CR 290: the Rename label field of a table label opens above the icon and covers no cell. */

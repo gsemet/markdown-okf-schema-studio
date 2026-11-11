@@ -11,6 +11,7 @@
 - Pasting cells copied from a spreadsheet into a table cell now fills the cells from that one,
   rightwards and downwards, and adds the rows and columns the table lacks. One undo takes the whole
   paste back. Pasting a single value works as before.
+- A table inside a quote, a GitHub alert (Note, Tip, ...) or a MyST admonition now opens the cell editor and the table bar, like any other table, instead of the raw Markdown editor. The `>` prefixes and the rest of the quote are kept as written.
 
 ## 1.6.1 - 2026-11-11
 

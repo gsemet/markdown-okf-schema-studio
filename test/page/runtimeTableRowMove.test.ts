@@ -146,6 +146,38 @@ test("dragging a handle onto a row moves it with one save and opens no cell edit
     element.getAttribute("data-sphinx-preview-table-cell-editor") === null));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+test("a row of a table inside a quote moves with the quote prefix kept on every line", () => {
+  const quoted = "> | H1 | H2 |\n> | --- | --- |\n> | a | 1 |\n> | b | 2 |\n> | c | 3 |\n";
+  const harness = createRuntimeHarness();
+  const { rows, cells } = pipeTable(harness);
+  harness.editModeButton.dispatch("click");
+  const handle = handleOf(cells[1]!)!;
+  const transfer: Record<string, unknown> = { effectAllowed: "", dropEffect: "", setData: () => undefined };
+  handle.dispatch("dragstart", { dataTransfer: transfer });
+  harness.windowState.scrollY = 0;
+  rows[3]!.dispatch("dragover", dragEvent(rows[3]!.top + 25, transfer));
+  rows[3]!.dispatch("drop", dragEvent(rows[3]!.top + 25, transfer));
+  handle.dispatch("dragend");
+  sourceReply(harness, quoted);
+  const [save] = messagesOf(harness, "previewEditSave");
+  assert.ok(save, "the move of a row of a quoted table is saved");
+  assert.equal(save.editedText, "> | H1 | H2 |\n> | --- | --- |\n> | b | 2 |\n> | c | 3 |\n> | a | 1 |\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+test("a column of a table inside a quote moves with the quote prefix kept on every line", () => {
+  const quoted = "> | H1 | H2 |\n> | --- | --- |\n> | a | 1 |\n> | b | 2 |\n> | c | 3 |\n";
+  const harness = createRuntimeHarness();
+  pipeTable(harness);
+  harness.editModeButton.dispatch("click");
+  columnHandle(0)!.dispatch("keydown", altKey("ArrowRight"));
+  sourceReply(harness, quoted);
+  const [save] = messagesOf(harness, "previewEditSave");
+  assert.ok(save, "the move of a column of a quoted table is saved");
+  assert.equal(save.editedText, "> | H2 | H1 |\n> | --- | --- |\n> | 1 | a |\n> | 2 | b |\n> | 3 | c |\n");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
 test("dropping a row on the half of its neighbour that leaves it in place requests nothing", () => {
   const harness = createRuntimeHarness();

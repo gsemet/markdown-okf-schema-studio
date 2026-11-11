@@ -249,6 +249,8 @@ export interface PendingBlockNavigation {
   tableColumnIndex?: number;
   /** The row of `tableRowIndex` was added by Tab: the reopened edit remembers it (`BlockEdit.tabAddedRow`). */
   addedRow?: boolean;
+  /** The rank of the table among the tables of the block, when the block holds several or is not the table. */
+  tableRank?: number;
 }
 
 /** Where a moved block selection is restored, by ordinal among the body blocks. */
@@ -487,7 +489,7 @@ export interface BlockEditor {
   flushOpenEditorsThen(navigate: (flushed: boolean) => void): void;
   clearPendingBlockNavigation(): void;
   rememberPendingBlockNavigation(target: Element, caretPosition: CaretPosition, selectedCell?: HTMLTableCellElement,
-    explicitIndices?: { tableRowIndex: number; tableColumnIndex: number },
+    explicitIndices?: { tableRowIndex: number; tableColumnIndex: number; tableRank?: number },
     thenMove?: { direction: "up" | "down"; caretOffset: number }, addedRow?: boolean): void;
   createEditorButtons(edit: BlockEdit): HTMLElement;
   blockEditHint(edit: BlockEdit): string;

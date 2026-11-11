@@ -5,6 +5,7 @@
  * from block to block, Tab past the last cell).
  */
 
+import { tablesIn } from "../modules/tableInContainer";
 import { inLinkThatKeepsItsBehaviour, syncLinkFollowHints } from "./linkEditing";
 import { MAPPINGS_SELECTOR, type CaretPoint, type CaretPosition, type EditMode, type PageRuntime } from "./pageRuntime";
 
@@ -175,10 +176,18 @@ export function installEditMode(rt: PageRuntime): EditMode {
     const pending = state.pendingBlockNavigation;
     if (!pending || !state.editMode) return;
     const sourceLine = Number(pending.sourceLine);
-    const target = rt.blocks.topLevelMappedBlocks().find((element) =>
-      (pending.blockId && element.getAttribute("data-sphinx-preview-block") === pending.blockId)
-      || (!pending.blockId && Number(element.getAttribute("data-sphinx-source-line")) === sourceLine),
-    );
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-121
+    // The top-level blocks first, then the blocks inside them: a table inside a quote or an
+    // admonition is a mapped block of its own.
+    const isPending = (element: HTMLElement): boolean =>
+      Boolean(pending.blockId && element.getAttribute("data-sphinx-preview-block") === pending.blockId)
+      || (!pending.blockId && Number(element.getAttribute("data-sphinx-source-line")) === sourceLine);
+    const queue = [...rt.blocks.topLevelMappedBlocks()];
+    let target: HTMLElement | undefined;
+    for (let block = queue.shift(); block && !target; block = queue.shift()) {
+      if (isPending(block)) target = block;
+      else queue.push(...rt.blocks.mappedChildren(block));
+    }
     rt.blockEditor.clearPendingBlockNavigation();
     if (!target) return;
     const then = pending.thenMove;
@@ -190,8 +199,9 @@ export function installEditMode(rt: PageRuntime): EditMode {
       return;
     }
     const caretPosition = pending.caretPosition === "start" ? "start" : "end";
-    const table = target.closest?.("table");
-    const cell = table?.rows?.[pending.tableRowIndex!]?.cells?.[pending.tableColumnIndex!];
+    const table = target.closest?.("table") ?? tablesIn(target)[pending.tableRank ?? 0];
+    const cell = (table as HTMLTableElement | undefined)?.rows?.[pending.tableRowIndex!]
+      ?.cells?.[pending.tableColumnIndex!];
     openMappedEditor(target, cell || target, caretPosition, true);
     // @implements_req SwRS-MDOKFSTUDIO-TABLE-025
     // The row Tab added is remembered by the editor that opens in it, for that session only.

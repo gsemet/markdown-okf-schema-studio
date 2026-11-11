@@ -7,6 +7,7 @@
  */
 
 import { clearCellEditorRoom } from "../modules/cellEditorRoom";
+import { tableRankIn } from "../modules/tableInContainer";
 import { AUTOSAVE_DELAY_MS, isApplePlatform } from "../pageSettings";
 import type { BlockEdit, BlockEditor, PageRuntime } from "./pageRuntime";
 
@@ -128,6 +129,9 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     host.setState?.(nextState);
   }
 
+  // A table that is not the first of its block (a quote with two tables) is found again by its rank.
+  const rankField = (rank: number | undefined): { tableRank?: number } => (rank ? { tableRank: rank } : {});
+
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-079
   const rememberPendingBlockNavigation: BlockEditor["rememberPendingBlockNavigation"] = (
     target, caretPosition, selectedCell, explicitIndices, thenMove, addedRow,
@@ -140,9 +144,11 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       ...(selectedCell ? {
         tableRowIndex: (selectedCell.parentElement as HTMLTableRowElement).rowIndex,
         tableColumnIndex: selectedCell.cellIndex,
+        ...rankField(tableRankIn(target, selectedCell.closest?.("table"))),
       } : explicitIndices ? {
         tableRowIndex: explicitIndices.tableRowIndex,
         tableColumnIndex: explicitIndices.tableColumnIndex,
+        ...rankField(explicitIndices.tableRank),
       } : {}),
       ...(addedRow ? { addedRow: true } : {}),
     };

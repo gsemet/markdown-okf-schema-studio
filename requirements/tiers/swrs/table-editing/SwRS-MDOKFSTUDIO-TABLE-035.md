@@ -145,6 +145,12 @@ Home moves the caret to the start of the text, and Shift extends the selection.
 | Editor reopened after a re-render (Tab in the last cell, a structural button of the table bar) | The table scrolls to the reopened cell the same way |
 | A layout pass resizes the table box under an open editor (a pane resize, a toolbar change; the edited table keeps its Auto breakout, SwRS-MDOKFSTUDIO-LAYOUT-023) | The table scrolls again so that the cell and its editor lie inside the new box |
 
+### Scenario (boundary): A table inside a quote or an admonition
+
+| Input | Outcome |
+| --- | --- |
+| Tab in the last cell of a pipe table inside a blockquote, a GFM alert or a MyST admonition | The row is added with the container prefix and, once the page renders the saved text, the editor reopens in the same table, found by its rank among the tables of the container, not in the first one (see SwRS-MDOKFSTUDIO-TABLE-121) |
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TABLE-048: the table bar above the table that shows the position of the selected cell after each move.

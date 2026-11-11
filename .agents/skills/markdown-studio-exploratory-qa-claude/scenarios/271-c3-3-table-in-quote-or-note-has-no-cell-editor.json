@@ -1,0 +1,66 @@
+{
+"name": "c3-3-table-in-quote-or-note-has-no-cell-editor",
+"file": "synth/structure-tables.md",
+"steps": [
+{
+"key": "Meta+1",
+"wait": 300
+},
+{
+"open": "${file}",
+"wait": 2500
+},
+{
+"palette": "Markdown OKF-Schema Studio: Open Preview to Side",
+"wait": 4000
+},
+{
+"waitFor": "D.querySelector('h1')",
+"timeout": 15000
+},
+{
+"editMode": true
+},
+{
+"key": "Escape"
+},
+{
+"clicksel": "td",
+"text": "qa",
+"exact": true,
+"wait": 1000
+},
+{
+"check": "feval",
+"expr": "!!D.querySelector('[data-sphinx-preview-table-cell-editor]')",
+"label": "c3-3 cell editor opens for a table inside a blockquote"
+},
+{
+"check": "feval",
+"expr": "!!D.querySelector('[data-sphinx-table-menu]')",
+"label": "c3-3 table toolbar shown for a quoted table"
+},
+{
+"key": "Escape"
+},
+{
+"clicksel": "td",
+"text": "nb",
+"exact": true,
+"wait": 1000
+},
+{
+"check": "feval",
+"expr": "!!D.querySelector('[data-sphinx-preview-table-cell-editor]')",
+"label": "c3-3 cell editor opens for a table inside a Note"
+},
+{
+"key": "Escape"
+},
+{
+"shot": "c3-3-fail",
+"clip": "preview",
+"onFail": true
+}
+]
+}

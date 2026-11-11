@@ -13,6 +13,7 @@ import { createSlashMenu } from "../modules/slashMenu";
 import { stickyBarShift } from "../modules/stickyBar";
 import { createTabHint, isEmptyModelRow, isTabNewRowCell } from "../modules/tableTabRow";
 import { fillGrid, spreadsheetGrid } from "../modules/tableGridPaste";
+import { tableRankIn } from "../modules/tableInContainer";
 import { isApplePlatform } from "../pageSettings";
 import type { BlockEdit, CaretPosition, PageRuntime, TableCellEditor } from "./pageRuntime";
 
@@ -161,6 +162,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       rt.blockEditor.rememberPendingBlockNavigation(edit.target, "end", undefined, {
         tableRowIndex: newRow,
         tableColumnIndex: 0,
+        tableRank: tableRankIn(edit.target, table),
       }, undefined, true);
       if (!rt.blockEditor.postBlockEditSave(true)) rt.blockEditor.clearPendingBlockNavigation();
       return;
@@ -358,7 +360,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       listTable: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16v14H4z"></path><path d="M4 10h16M9 5v14M6 7.5h.01M6 14.5h.01M12 14.5h6"></path></svg>',
     };
     const addAction = (name: string, icon: string, label: string, handler: () => void, disabled: boolean,
-      group: string): void => {
+      group: string, disabledReason?: string): void => {
       const button = document.createElement("button");
       button.type = "button";
       button.setAttribute("aria-label", name);
@@ -372,6 +374,11 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       labelText.textContent = label;
       button.appendChild(labelText);
       button.disabled = disabled;
+      // A disabled button says why, in its title and its tooltip.
+      if (disabled && disabledReason) {
+        button.setAttribute("title", disabledReason);
+        button.setAttribute("data-tooltip", disabledReason);
+      }
       button.addEventListener("click", () => {
         rememberCellValue();
         handler();
@@ -391,6 +398,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       blockEditor.rememberPendingBlockNavigation(edit.target, "end", undefined, {
         tableRowIndex: edit.tableRowIndex!,
         tableColumnIndex: edit.tableColumnIndex!,
+        tableRank: tableRankIn(edit.target, selectedCell.closest?.("table")),
       });
       if (!blockEditor.postBlockEditSave(true)) blockEditor.clearPendingBlockNavigation();
     };
@@ -426,8 +434,10 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
         edit.convertedText = converted.text;
         blockEditor.saveBlockEdit();
       }
-    }, tableFigure || Boolean(edit.tableModel!.listTable)
-      || Boolean(edit.tableModel!.sourceTails?.some((tail) => tail !== "")), "table");
+    }, tableFigure || Boolean(edit.tableModel!.listTable) || Boolean(edit.tableModel!.container)
+      || Boolean(edit.tableModel!.sourceTails?.some((tail) => tail !== "")), "table",
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-121
+    edit.tableModel!.container ? "Not available for a table inside a quote or an admonition" : undefined);
     // A list-table opened in the cell editor goes back to a pipe table from the same bar.
     if (edit.tableModel!.listTable) {
       addAction("Convert to pipe table", tableActionIcons.listTable, "Pipe table", () => {

@@ -41,6 +41,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-030
 - SwRS-MDOKFSTUDIO-TABLE-034
 - SwRS-MDOKFSTUDIO-TABLE-119
+- SwRS-MDOKFSTUDIO-TABLE-121
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -97,4 +98,5 @@ As a writer, I click a table cell in edit mode and edit its Markdown right where
   - [SwRS-MDOKFSTUDIO-TABLE-030](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-030.md): Following a link or pressing Back or Next saves an open cell first
   - [SwRS-MDOKFSTUDIO-TABLE-034](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-034.md): A host refusal is shown in the cell and keeps the typed text
   - [SwRS-MDOKFSTUDIO-TABLE-119](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-119.md): An outside change of the table under an open cell editor closes the editor and shows the buffer
+  - [SwRS-MDOKFSTUDIO-TABLE-121](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-121.md): A pipe table inside a quote or an admonition is edited cell by cell, its container prefix kept
 <!-- okf:links:end -->

@@ -61,6 +61,12 @@ When the writer presses List table in the table bar, the extension SHALL post th
 - WHEN the writer presses List table
 - THEN the line break is already a space (see SwRS-MDOKFSTUDIO-TABLE-091) and the table converts in one final save
 
+### Scenario (boundary): A table inside a quote or an admonition
+
+| Input | Outcome |
+| --- | --- |
+| The cell editor of a pipe table inside a blockquote, a GFM alert or a MyST admonition | The List table button is disabled and its title says "Not available for a table inside a quote or an admonition" (see SwRS-MDOKFSTUDIO-TABLE-121) |
+
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TABLE-073: the List table palette action that converts the table at the caret.
 - SwRS-MDOKFSTUDIO-TABLE-076: the refusal reasons of a conversion.

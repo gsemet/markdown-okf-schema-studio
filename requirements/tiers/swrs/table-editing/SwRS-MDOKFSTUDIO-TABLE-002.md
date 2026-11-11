@@ -120,6 +120,12 @@ The chord is not also read as the move of the whole table block.
 - WHEN the move is saved
 - THEN the page posts one `previewEditSave` of the whole table text (final) after one `previewEditOpen`, opens no cell editor, and the editor's undo restores the previous order in one step
 
+### Scenario (boundary): A table inside a quote or an admonition
+
+| Input | Outcome |
+| --- | --- |
+| The handle of a body row of a pipe table inside a blockquote, a GFM alert or a MyST admonition, dragged or moved with Alt+Up or Alt+Down | The row moves as for a top-level table and every line of the table keeps its container prefix; a source holding no pipe table or more than one is refused and nothing is saved (see SwRS-MDOKFSTUDIO-TABLE-121) |
+
 ### Known issues
 
 - Known issue: A row handle only appears for a pipe table or a `{list-table}` written directly in the document. Rows of a captioned `{table}` and of an HTML table cannot be reordered with a handle.

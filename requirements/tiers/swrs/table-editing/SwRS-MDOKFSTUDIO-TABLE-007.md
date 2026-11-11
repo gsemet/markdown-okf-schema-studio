@@ -101,6 +101,12 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | A drag or a key while a block editor, a frontmatter editor or a cell editor of another table is open, or while a move waits for its render | The drag is cancelled or the key is ignored and nothing is requested |
 | The host answers the request for the source with an error, or the source is no table that can be read as columns, or the move is refused by the table model (an index outside the table, the same place) | No edit is saved and the page tells the host the move is closed |
 
+### Scenario (boundary): A table inside a quote or an admonition
+
+| Input | Outcome |
+| --- | --- |
+| The handle of a column of a pipe table inside a blockquote, a GFM alert or a MyST admonition, dragged or moved with Alt+Left or Alt+Right | The column moves as for a top-level table and every line of the table keeps its container prefix; a source holding no pipe table or more than one is refused and nothing is saved (see SwRS-MDOKFSTUDIO-TABLE-121) |
+
 ### Known issues
 
 - Known issue: A column handle only appears for a pipe table or a `{list-table}` written directly in the document, as the row handle; a captioned `{table}` and an HTML table cannot be reordered with it.

@@ -55,6 +55,22 @@
   test/page/runtimeTableCellPaste.test.ts, test/integration/realInput/tableGridPaste.ts and the visual
   scenario table-editing/v32-grid-paste-light-900 (test/visual/capture_table_grid_paste.py).
 
+### A table inside a quote, an alert or an admonition opens the cell editor (CR 291, QA271 C3-3)
+
+- SwRS-MDOKFSTUDIO-TABLE-121 added (proposed, stable, not approved), deriving from StRS-MDOKFSTUDIO-TABLE-001:
+  a click on a cell of a pipe table inside a blockquote, a GFM alert or a MyST admonition opens the cell
+  editor and the table bar; every table line is written back with its container prefix, the other lines of
+  the container stay byte for byte, a table that cannot be located safely opens the raw block editor, and
+  Convert to list-table is disabled for it. The row and column handles move such a table with the prefix
+  kept. Non-normative boundary rows added to TABLE-002 and TABLE-007 (the row and column handles of a
+  contained table), TABLE-035 (the reopen after Tab finds the table by its rank) and TABLE-070 (Convert
+  to list-table disabled with its reason). TABLE-001 gains a related-requirements line. No approved requirement changed. Source:
+  src/page/modules/tableInContainer.ts, markdownTable.ts (serialize), features/blockSourceEditor.ts,
+  blockEditor.ts, editMode.ts, tableCellEditor.ts, tableRowMove.ts; tests:
+  test/page/modules/tableInContainer.test.ts, test/page/runtimeTableInContainer.test.ts,
+  test/page/runtimeTableRowMove.test.ts, visual scenarios table-editing/v33 and v34 and
+  test/integration/realInput/tableInContainer.ts.
+
 ## 2026-11-10
 
 ### Block ids and tokens at the end of a table row (CR 279, QA271-02 and QA271-10)
