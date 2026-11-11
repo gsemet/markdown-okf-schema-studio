@@ -34,7 +34,9 @@ even in git.
   - a short code sketch (5 to 15 lines) of the new interface, message or registration that a
     contributor will reuse, with `...` for the rest.
   A one-line fix may skip the section; a structural change never does.
-- Screenshots go in Impacts (see "Screenshots in the PR").
+- Impacts holds the evidence of the change: the before/after the Verifier produced (screenshots,
+  see "Screenshots in the PR"), or one line "No visual change" with the reason. Impacts never stays
+  at the template's comment; the Verifier fails a body whose Impacts has neither.
 - A decision an agent took without the user is listed in the PR body under "Autonomous decisions".
 
 ## Draft until mergeable
@@ -42,8 +44,8 @@ even in git.
 A pull request is a draft until it is mergeable.
 
 - Open it with `gh pr create --draft`.
-- Mark it ready with `gh pr ready <n>` only when CI is green at its head, the review is approved and
-  `ready` is reported.
+- Mark it ready with `gh pr ready <n>` only when CI is green at its head, the review is approved,
+  the Verifier's verdict at that head is `Verdict: VERIFIED` and `ready` is reported.
 - When a CR goes back for a new round, put it back to draft with `gh pr ready <n> --undo`.
 - In a stack, each PR turns ready on its own, as soon as it is mergeable, without waiting for the
   rest of the stack.
@@ -71,9 +73,11 @@ of a release, which may be merged on the owner's standing permission (see
 
 ## Screenshots in the PR
 
-Take them from the e2e/visual run of the final code, light and dark when themes matter. Push them
-as raw blobs to a side branch (bypasses Git LFS) and link the raw URLs (`<id>` is the change number and `<slug>`
-its short name):
+The Verifier takes them (before on a detached worktree of the base, after at the pushed head) from
+the e2e/visual run, light and dark when themes matter, and leaves them in
+`work/verifier/evidence/`; the agent that opens the PR pushes them as follows. Push them as raw
+blobs to a side branch (bypasses Git LFS) and link the raw URLs (`<id>` is the change number and
+`<slug>` its short name):
 
 ```bash
 tree=$(for f in shots/*.png; do
@@ -89,3 +93,6 @@ The screenshot branch is named after the change branch, with `-assets` added: th
 `change-requests/042-docs-stacked-prs-assets`. Keep it after merge: the PR body points at it.
 Landing removes the change branch only. Older PRs use `pr-assets/<n>` branches: keep them, their PR
 bodies point at them.
+
+Whoever opens the PR puts the links in Impacts with `gh pr edit <n> --body-file <file>`, then runs
+the verification step again if the body check had failed.
