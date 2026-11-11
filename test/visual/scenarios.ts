@@ -144,6 +144,8 @@ export interface Scenario {
   tableRowColourChecks?: "page" | "overflow" | "edit";
   /** QA271-14: in a pane narrower than the cell minimum the edited cell, its field and buttons stay in view. */
   cellRoomChecks?: boolean;
+  /** CR 281: with the unchanged title editor open, one click on the priority value below it opens priority. */
+  frontmatterClickChecks?: boolean;
   frontmatterLinkState?: "loading" | "loaded";
   hideDescriptionColumn?: boolean;
   contextTagChecks?: boolean;

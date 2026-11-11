@@ -733,6 +733,8 @@ async function activeControl(page: Page): Promise<string> {
  * RI-T44 (CR 218): a value the schema refuses leaves the field editor usable. The focus comes back
  * to the control, Escape closes it, and a click on another field closes the refused editor without
  * a save and opens the clicked field in the same click. The buffer never changes.
+ * QA271-07 (CR 281): with a field editor open and unchanged, one click on a field below it opens
+ * that field even though closing the editor moves the field up between press and release.
  */
 export async function scenarioRefusedValueKeepsEditorUsable(page: Page): Promise<void> {
   await withDocument("realinput-t44", REFUSED_DOCUMENT, async (document) => {
@@ -766,6 +768,35 @@ export async function scenarioRefusedValueKeepsEditorUsable(page: Page): Promise
         "priority shows its saved value");
     });
     assert.equal(bufferText(document), REFUSED_DOCUMENT, "the refused value is not posted again");
+    await press(page, "Escape");
+    await waitFor("RI-T44: the title editor closed after part 2", async () =>
+      await withCurrentFrame(page, (frame) => frame.locator("[data-okf-frontmatter-editor]").count()) === 0);
+
+    // 3. An unchanged title editor open, one click on priority below it: closing the editor moves
+    // priority up, and the click still opens it.
+    await withCurrentFrame(page, (frame) => frame.locator(TITLE_CELL).click());
+    await waitForEditor(page, "[data-okf-frontmatter-editor] textarea");
+    const before = await withCurrentFrame(page, (frame) => frame.locator(PRIORITY_CELL).boundingBox());
+    await withCurrentFrame(page, (frame) => frame.locator(PRIORITY_CELL).click());
+    await waitForEditor(page, `[data-okf-frontmatter-editor] ${PRIORITY_INPUT}`);
+    const after = await withCurrentFrame(page, (frame) => frame.locator(PRIORITY_CELL).boundingBox());
+    assert.ok(before && after && before.y - after.y > 20,
+      `closing the title editor moved priority up (from ${before?.y} to ${after?.y}), so the click crossed a shift`);
+    assert.equal(await activeControl(page), "INPUT Frontmatter priority");
+    await withCurrentFrame(page, async (frame) => {
+      assert.equal(await frame.locator("[data-okf-frontmatter-editor]").count(), 1, "no title editor is left");
+    });
+    assert.equal(bufferText(document), REFUSED_DOCUMENT, "an unchanged editor wrote nothing");
+    await press(page, "Escape");
+    await waitFor("RI-T44: the priority editor closed", async () =>
+      await withCurrentFrame(page, (frame) => frame.locator("[data-okf-frontmatter-editor]").count()) === 0);
+    // The reverse, priority then the title above it, still opens in one click.
+    await withCurrentFrame(page, (frame) => frame.locator(PRIORITY_CELL).click());
+    await waitForEditor(page, `[data-okf-frontmatter-editor] ${PRIORITY_INPUT}`);
+    await withCurrentFrame(page, (frame) => frame.locator(TITLE_CELL).click());
+    await waitForEditor(page, "[data-okf-frontmatter-editor] textarea");
+    assert.equal(await activeControl(page), "TEXTAREA Frontmatter title");
+    assert.equal(bufferText(document), REFUSED_DOCUMENT, "the reverse click wrote nothing");
     await press(page, "Escape");
   }, REFUSED_SCHEMA);
 }

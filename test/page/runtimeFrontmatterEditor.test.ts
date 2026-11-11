@@ -1278,3 +1278,119 @@ test("a refused key save puts the focus back in the key control and its blur pos
   keyInput.blur();
   assert.equal(frontmatterSaves(harness).length, 1, "the unchanged refused key is not posted again");
 });
+
+// QA271-07, CR 281: with an unchanged field editor open, the press on another field closes it (the
+// blur), the rows below move up, and the release lands on the common parent of the rows. The click
+// still belongs to the field pressed.
+function unchangedTitleEditorAbovePriority() {
+  const harness = createRuntimeHarness({
+    mapFrontmatter: true,
+    trackFocus: true,
+    blurOnFocusChange: true,
+    frontmatterRowAttributes: {
+      "data-okf-field": "priority",
+      "data-okf-type": "number",
+      "data-okf-value": "2",
+      "data-okf-value-yaml": "2\n",
+    },
+  });
+  const titleRow = new RuntimeElement({
+    "data-okf-editable": "true",
+    "data-okf-field": "title",
+    "data-okf-schema-found": "true",
+    "data-okf-type": "text",
+    "data-okf-value": '"Saved title"',
+    "data-okf-value-yaml": "Saved title\n",
+  }, harness.windowState, 0, 30, "tr");
+  const titleName = new RuntimeElement({ "data-okf-edit-cell": "name" }, harness.windowState, 0, 30, "th");
+  const titleDisplay = new RuntimeElement({ "data-okf-value-display": "true" }, harness.windowState, 0, 30, "span");
+  const titleCell = new RuntimeElement({
+    "data-okf-edit-cell": "value",
+    "data-okf-value-cell": "true",
+  }, harness.windowState, 0, 30, "td");
+  titleCell.appendChild(titleDisplay);
+  titleRow.appendChild(titleName);
+  titleRow.appendChild(titleCell);
+  const rows = harness.frontmatterRow.parentElement!;
+  rows.insertBefore(titleRow, harness.frontmatterRow);
+  harness.editModeButton.dispatch("click");
+  const click = (target: RuntimeElement) => harness.dispatchDocument("click", {
+    target,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const press = (target: RuntimeElement) => harness.dispatchDocument("mousedown", {
+    target,
+    button: 0,
+    ctrlKey: false,
+    metaKey: false,
+    shiftKey: false,
+    altKey: false,
+  });
+  click(titleCell);
+  const titleControl = harness.createdElements.find((element) => element.getAttribute("aria-label") === "Frontmatter title");
+  assert.ok(titleControl, "the title editor is open");
+  const priorityControl = () => harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter priority");
+  return { harness, rows, click, press, titleControl, titleDisplay, titleCell, priorityControl };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a click on a field below an unchanged editor opens it when the close moved the field", () => {
+  const { harness, rows, click, press, titleDisplay, priorityControl } = unchangedTitleEditorAbovePriority();
+  press(harness.frontmatterValueCell);
+  harness.frontmatterValueCell.focus();
+  assert.equal(titleDisplay.getAttribute("hidden"), null, "the unchanged title editor closed on the press");
+  assert.equal(frontmatterSaves(harness).length, 0, "closing an unchanged editor posts nothing");
+  // The release lands where the cell was, on the common parent of the rows.
+  click(rows);
+  assert.ok(priorityControl(), "the priority editor opened in the same click");
+  assert.equal(harness.frontmatterValueDisplay.getAttribute("hidden"), "");
+  assert.equal(frontmatterSaves(harness).length, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a click on a field below a changed editor saves it and opens no other editor", () => {
+  const { harness, rows, click, press, titleControl, priorityControl } = unchangedTitleEditorAbovePriority();
+  titleControl.value = "Another title";
+  press(harness.frontmatterValueCell);
+  harness.frontmatterValueCell.focus();
+  click(rows);
+  assert.equal(frontmatterSaves(harness).length, 1, "the changed value is saved once");
+  assert.equal(priorityControl(), undefined, "no other editor opens in that click");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a click that no press on a field cell started opens no editor", () => {
+  const { harness, rows, click, press, titleDisplay, priorityControl } = unchangedTitleEditorAbovePriority();
+  click(rows);
+  assert.equal(priorityControl(), undefined, "a click on the parent alone opens nothing");
+  // A press on the cell, released outside the rows (the target does not contain the cell).
+  press(harness.frontmatterValueCell);
+  harness.frontmatterValueCell.focus();
+  click(harness.body);
+  assert.equal(priorityControl(), undefined, "a release outside the pressed cell opens nothing");
+  // The press is consumed by the click: a later click on the parent opens nothing either.
+  click(rows);
+  assert.equal(priorityControl(), undefined);
+  assert.equal(titleDisplay.getAttribute("hidden"), null);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a press that another press replaced does not open the first cell", () => {
+  const { harness, rows, click, press, titleControl, priorityControl } = unchangedTitleEditorAbovePriority();
+  press(harness.frontmatterValueCell);
+  press(titleControl);
+  click(rows);
+  assert.equal(priorityControl(), undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a click on the name cell of a field below an unchanged editor opens its key editor", () => {
+  const { harness, rows, click, press } = unchangedTitleEditorAbovePriority();
+  press(harness.frontmatterNameCell);
+  harness.frontmatterNameCell.focus();
+  click(rows);
+  assert.ok(harness.createdElements.some((element) => element.getAttribute("aria-label") === "Frontmatter key priority"),
+    "the key editor of the pressed field opened");
+});

@@ -12,6 +12,8 @@
 - After an undo, a redo or a Revert File, the preview table shows what the file holds. A table whose
   cell editor is open closes it and shows the restored text instead of staying out of date, and a
   table whose cell you left with Tab is rebuilt instead of keeping the text you had typed.
+- In edit mode, one click on a property below an open field editor now opens it, instead of needing a
+  second click when the editor was left unchanged and closing it moved the rows up.
 
 ## 1.6.0 - 2026-11-10
 

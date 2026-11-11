@@ -32,6 +32,8 @@ tested_in_files:
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeEditorFlush.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
+- test/visual/capture_frontmatter_click.py
+- test/visual/frontmatterClickScenarios.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -60,6 +62,21 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 - GIVEN a field editor whose value is unchanged
 - WHEN the writer presses Enter or leaves the editor
 - THEN the editor closes and nothing is posted
+
+### Scenario (nominal): A click on another field opens it after an unchanged editor closes
+
+- GIVEN a field editor (value or key) whose value is unchanged, above other fields of the properties table
+- WHEN the writer clicks the value or key cell of another field, and closing the editor on the press moves that cell before the button is released
+- THEN the editor closes without a post and the clicked field's editor opens in the same click; a click on a field above the editor does the same
+
+### Scenario (refusal): A press that is not completed by its click
+
+| Input | Outcome |
+| --- | --- |
+| A press on a field cell released outside it (the click target does not contain the pressed cell) without an editor open | Nothing opens |
+| A click that no press on a field cell, made while an editor was open, started | Nothing opens |
+| A press on a field cell with Shift, Ctrl, Alt or Cmd held, or with another button | It is not remembered; the click opens nothing from it |
+| The writer clicks a field below an editor whose value was changed | The changed value is saved and no other editor opens in that click |
 
 ### Scenario (nominal): Escape cancels a field editor
 
@@ -127,8 +144,11 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (turning edit mode off closes a field editor without a save but saves a changed block editor; undo and redo keys stop at the control in the value and the key editor).
 - Method: test/page/runtimeFrontmatterEditor.test.ts (after a refused value save: the focus comes back to the control, Escape closes it, the unchanged refused text is not posted by a blur and a click on another field opens it, a corrected value is saved once by Enter or by the blur; a refused key save refocuses the key control and its blur posts nothing again).
 - Method: test/integration/realInput/frontmatterFields.ts, marked in test/integration/realInput/markers.ts (scenario scenarioRefusedValueKeepsEditorUsable, real keyboard and mouse: a value the schema refuses, focus back in the input, Escape closes it, another field opens; a click on another field after the refusal opens it at once; the buffer is unchanged).
+- Method: test/page/runtimeFrontmatterEditor.test.ts (QA271-07, CR 281: a click on the parent of the rows after a press on a field below an unchanged editor opens that field's value or key editor without a post; a changed editor saves once and opens nothing; a click without a press, a release outside the pressed cell and a replaced press open nothing).
+- Method: test/integration/realInput/frontmatterFields.ts, scenarioRefusedValueKeepsEditorUsable part 3 (real mouse: an unchanged title editor open, one click on priority below it opens it although closing the title editor moved priority up by more than 20 px; the reverse click opens title; the buffer is unchanged); replay .agents/skills/markdown-studio-exploratory-qa-claude/scenarios/271-c4-1-click-field-below-open-editor-is-lost.json.
+- Method: visual scenario frontmatter-editing/v09-click-field-below-open-editor-light-900 (test/visual/frontmatterClickScenarios.ts, check in test/visual/capture_frontmatter_click.py: light theme, edit mode, an unchanged title editor open, a real mouse press and release at one point on the priority value below it; priority moved up by more than 20 px and only the priority editor is open).
 - Method: visual scenario frontmatter-editing/v02-edit-enum-value-dark-900 in test/visual/scenarioDefinitions2.ts (refused save shown in the editor).
-- Criteria: receiveFrontmatterResult records the refused text and refocuses the control when the focus was lost; holdsRefusedText is true while the idle control holds that text; closeRefusedEditorFor closes such an editor for another cell; closeFrontmatterEditor is called without a save on edit mode off while the block editor path posts a final save; keepUndoInControl calls stopPropagation for Z and Y with Cmd or Ctrl.
+- Criteria: receiveFrontmatterResult records the refused text and refocuses the control when the focus was lost; holdsRefusedText is true while the idle control holds that text; closeRefusedEditorFor closes such an editor for another cell; closeFrontmatterEditor is called without a save on edit mode off while the block editor path posts a final save; keepUndoInControl calls stopPropagation for Z and Y with Cmd or Ctrl; the properties click handler resolves a click whose target contains the cell pressed while an editor was open to that cell (a primary press without modifier, remembered by the capture mousedown listener of installPageInput and cleared by every click).
 
 <!-- okf:links:start -->
 ### Links
