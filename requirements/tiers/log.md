@@ -14,6 +14,17 @@
   src/core/preview/styles/contentBlockStyles.ts); tests: test/page/modules/labelRename.test.ts,
   test/integration/realInput/labelRenameAboveTable.ts and test/visual/capture_label_rename.py.
 
+### Find scrolls a sideways-scrolled table to its hit (CR 289, QA271-08)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-010 (draft, not approved) amended: the current match is also brought into view
+  inside any box that scrolls sideways (a wide table or its wrapper, a code block), innermost first, so the
+  hit text lies inside the box with a 16 px margin (a hit wider than the box is aligned on its start; a hit
+  already in view writes no scrollLeft; the page never scrolls sideways). New nominal scenario and two
+  boundary rows. No approved requirement changed. Source: src/page/modules/revealInline.ts (called by
+  scrollToCurrent in src/page/modules/findBar.ts); tests: test/page/modules/findBar.test.ts,
+  test/visual/capture_find_wide_table.py (toolbar-navigation/v41) and
+  test/integration/realInput/findWideTable.ts.
+
 ## 2026-11-10
 
 ### Block ids and tokens at the end of a table row (CR 279, QA271-02 and QA271-10)

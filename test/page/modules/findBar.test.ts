@@ -49,7 +49,7 @@ interface Painted { ranges: unknown[]; current: unknown }
 function setup(options: {
   blocked?: string;
   sourceOf?: (element: Element) => FindSourceBlock | undefined;
-  rect?: { top: number; bottom: number; height: number };
+  rect?: { top: number; bottom: number; height: number; left?: number; right?: number };
   canRestoreFocus?: (target: Element) => boolean;
   /** The host answers only when the test calls `held[i].done(...)`. */
   holdAnswers?: boolean;
@@ -69,6 +69,7 @@ function setup(options: {
   const window = {
     navigator: { platform: "Linux" },
     innerHeight: 800,
+    getComputedStyle: (element: { overflowX?: string }) => ({ overflowX: element.overflowX ?? "visible" }),
     setTimeout: (run: () => void, delay: number) => {
       timers.set(nextTimer, { run, delay });
       delays.push(delay);
@@ -364,6 +365,47 @@ test("a match is scrolled to the middle only when it is outside the pane", () =>
   below.bar.open();
   below.type("[data-find-input]", "studio");
   assert.ok(below.page.scrolled.length > 0, "a match under the pane is brought to the middle");
+});
+
+/** A table that scrolls sideways: a 393 px box (left 0) holding 1257 px, scrolled by `scrollLeft`. */
+function wideTable(page: Page, scrollLeft: number) {
+  const table = page.node("table", []) as El & Record<string, unknown>;
+  Object.assign(table, {
+    overflowX: "auto", clientWidth: 393, scrollWidth: 1257, clientLeft: 0, scrollLeft,
+    getBoundingClientRect: () => ({ left: 0, right: 393, top: 0, bottom: 300, width: 393, height: 300 }),
+  });
+  page.node("td", ["a needle cell"], {}, table);
+  return table as unknown as El & { scrollLeft: number };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+test("a hit left of a sideways-scrolled table box scrolls the box back to it, with a margin", () => {
+  const harness = setup({ rect: { top: 100, bottom: 120, height: 20, left: -665, right: -622 } });
+  const table = wideTable(harness.page, 864);
+  harness.bar.open();
+  harness.type("[data-find-input]", "needle");
+  assert.equal(table.scrollLeft, 864 - 665 - 16, "the range starts 16 px inside the box");
+  assert.equal(harness.page.scrolled.length, 0, "a hit in view vertically is not centred");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+test("a hit right of a sideways-scrolled table box scrolls the box forward to it", () => {
+  const harness = setup({ rect: { top: 100, bottom: 120, height: 20, left: 500, right: 560 } });
+  const table = wideTable(harness.page, 0);
+  harness.bar.open();
+  harness.type("[data-find-input]", "needle");
+  assert.equal(table.scrollLeft, 560 - (393 - 16), "the range ends 16 px inside the box");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+test("a hit already inside the table box does not write scrollLeft", () => {
+  const harness = setup({ rect: { top: 100, bottom: 120, height: 20, left: 100, right: 160 } });
+  const table = wideTable(harness.page, 300);
+  let writes = 0;
+  Object.defineProperty(table, "scrollLeft", { get: () => 300, set: () => { writes++; } });
+  harness.bar.open();
+  harness.type("[data-find-input]", "needle");
+  assert.equal(writes, 0);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
