@@ -33,7 +33,7 @@ guideline holds. Project specifics (gates, commit format, install restrictions) 
   shipping code, tests (unit + e2e), documentation and screenshots for any visible change.
 - **PRD folder**: the working folder of a CR in progress, `.agents/changes/3-requests/NNN-<slug>/`.
   It is the only source of truth to resume a CR.
-- **Archive**: a landed CR, `.agents/changes/4-archives/NNN-<slug>/` (PRD folder + `report.md`).
+- **Archive**: a landed CR, `.agents/changes/4-archives/NNN-<slug>/` (PRD folder + `report.md` + `retro.md`).
 - **Trash**: an abandoned idea, `.agents/changes/5-trash/<slug>/`, kept for reference. Only the
   user abandons an item; agents never start work from the trash.
 - **NNN**: next free three-digit number across `4-archives/` and `3-requests/`.
@@ -59,7 +59,7 @@ guideline holds. Project specifics (gates, commit format, install restrictions) 
 │       ├── coder/T1-r<n>.md      ← coder report, round n
 │       ├── inspector/T1-r<n>.md  ← Inspector verdict, round n
 │       └── verifier/             ← Verifier verdict T1-r<n>.md, evidence/ (before-after.md, images)
-├── 4-archives/NNN-<slug>/        ← landed CRs
+├── 4-archives/NNN-<slug>/        ← landed CRs, with report.md and retro.md
 └── 5-trash/<slug>/               ← abandoned ideas (user decision)
 ```
 
@@ -111,7 +111,7 @@ Unless specified by user through your context otherwise, here are the default ro
 | 9 CI | driver | Watch the checks (see "Responsiveness"). Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. Never weaken a test. |
 | 10 Verify | Verifier (sub-agent started by the driver) | CI green at the head and the review approved: start a Verifier, fresh, on the pushed head. It writes `work/verifier/T1-r<n>.md` starting `Verdict: VERIFIED` or `Verdict: NOT VERIFIED`, and proves three things, each one a command run at the pushed head with its output (the notes of the coder and the Inspector, and a green CI, are not proof): (a) every claim of `03-change-spec.md` (each acceptance check and each behaviour the spec states); (b) the evidence of the change, in `work/verifier/evidence/` with a `before-after.md` that lists each pair, what it shows and the command that reproduces it: for a change the user sees, the before on a detached worktree of the base and the after at the head, taken with the technique the project's rules give (for the editor and the preview, the headless visual run of the local gates; otherwise the e2e group that covers it), light and dark when themes matter; or, for a change nobody sees (process text, tooling, internals), one line "no visible change" and the reason; (c) the posted PR body, read with `gh pr view <n> --json title,body` and checked against the diff and [pull-request.guidelines.md](pull-request.guidelines.md): every section of `.github/PULL_REQUEST_TEMPLATE.md` is present and filled; Impacts holds the before/after images or the "no visible change" line; "Autonomous decisions" exists and lists every choice a coder or the driver made without the owner (or says "None"); and Summary, Deliverables and Changes describe what the diff does, no more and no less. `NOT VERIFIED` because of the code (a claim fails) is a new round: step 5, round n+1, counted in the round limit. `NOT VERIFIED` because of the body or the evidence only: the driver fixes it itself (pushes the screenshots as in "Screenshots in the PR" of [pull-request.guidelines.md](pull-request.guidelines.md), `gh pr edit <n> --body-file <file>`), then runs the Verifier again; no round is used. When both causes are present, the code comes first. |
 | 11 Notify | driver | CI green at the head, the review approved and `Verdict: VERIFIED` at that head: mark the PR ready for review, then write `status: ready` in the header, then return. A CR sent back for a new round goes back to draft first. "At that head" means the verdict file names the head SHA it ran on; a push after the verdict makes it stale, so the driver runs the Verifier again. |
-| 12 Land | Foreman | After the user merges: write `report.md`, move the PRD folder to `4-archives/`, remove the worktree and the CR branch (keep its screenshot branch, see [pull-request.guidelines.md](pull-request.guidelines.md)). `report.md` follows the format below. The tracker issue closes by itself on merge, and nobody closes it by hand: the Foreman checks that it is closed and writes it in `report.md`; an issue left open is reported, not closed. After moving the folder, run `just orchestrator`. |
+| 12 Land | Foreman | After the user merges: write `report.md` and `retro.md` (see "`retro.md` (archive)"), move the PRD folder to `4-archives/`, remove the worktree and the CR branch (keep its screenshot branch, see [pull-request.guidelines.md](pull-request.guidelines.md)). `report.md` follows the format below. The tracker issue closes by itself on merge, and nobody closes it by hand: the Foreman checks that it is closed and writes it in `report.md`; an issue left open is reported, not closed. After moving the folder, run `just orchestrator`. |
 
 **Round limit**: a round is one coder pass, whether an Inspector verdict, a CI failure or a `NOT VERIFIED`
 on the code triggered it. At most 3 rounds per CR, all causes together. After round 3 without green CI, the driver sets
@@ -485,3 +485,28 @@ Issue: <link> (closed on merge) | none
 
 - Anything left, with the backlog folder it went to. "None." otherwise.
 ```
+
+## `retro.md` (archive)
+
+Every landed CR gets a retro, so the process improves from what went wrong. Written at step 12 from
+the CR's `work/` notes, `STATUS.md` and the PR history, in plain GFM. One row per event that cost
+time: a round, a CI failure, a rerun of the Verifier, a classifier or tool refusal, an owner
+correction or question, a rework after merge. A CR that ran clean writes one line: "Clean run,
+nothing to fix."
+
+```markdown
+# Retro — <slug>
+
+| What happened | Root cause | Process fix |
+| --- | --- | --- |
+| <the event, with the round or run id> | <why, one line; not "the coder made a mistake"> | <the change that prevents it: a guideline line, a test or check, a `task.md`/`rules.md` template line, or "None" when it worked as intended> |
+```
+
+A root cause names the missing rule, check or information, not the agent. A process fix is
+concrete: the file and the line to add or change.
+
+**End of a run or a release**: the Chief of Staff reads the `retro.md` of every CR of the run (and
+the release's), groups the fixes that recur, and sends the owner one message: each fix in one line,
+with its recommended form (a process CR, a project test, a memory line). The owner picks; each fix
+the owner accepts is filed in `1-inbox/` and run like any CR. A fix already applied during the run
+(an Auto-fix, an amended guideline) is listed as done.
