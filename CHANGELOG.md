@@ -12,6 +12,7 @@
   rightwards and downwards, and adds the rows and columns the table lacks. One undo takes the whole
   paste back. Pasting a single value works as before.
 - A table inside a quote, a GitHub alert (Note, Tip, ...) or a MyST admonition now opens the cell editor and the table bar, like any other table, instead of the raw Markdown editor. The `>` prefixes and the rest of the quote are kept as written.
+- Export to HTML (a command and a toolbar button) saves the page as one self-contained `.html` file in the preview's theme and width: images and Mermaid, PlantUML and Vega diagrams are embedded, tabs and dropdowns work without JavaScript, the properties table opens on a click, links to other files are removed after a warning, and comments and editing controls are left out.
 
 ## 1.6.1 - 2026-11-11
 

@@ -10,7 +10,7 @@
 import * as fs from "node:fs";
 import { execFileSync } from "node:child_process";
 import * as path from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { listGlobDocuments } from "../../src/core/render/documentGlob";
 import { renderMyst } from "../../src/core/render/mystRenderer";
@@ -41,11 +41,14 @@ import { CAPTURES } from "../shared/captureRegistry";
 import { GROUPS, groupIndex } from "../shared/e2eGroups";
 import { THEMES } from "./themes";
 import { writeGeneratedFixtures } from "./generatedFixtures";
-import { PINNED_WORKSPACE_CHOICES, pageFileName, pageKey, type PageIdentity, type ScenarioRenderOptions } from "./renderOptions";
+import { PINNED_WORKSPACE_CHOICES, exportFileName, pageFileName, pageKey, type PageIdentity, type ScenarioRenderOptions } from "./renderOptions";
 import { DEFAULT_VIEW_PREFERENCES } from "../../src/core/state/previewViewPreferences";
 import { DEFAULT_EDITING_CONFIGURATION } from "../../src/core/configuration/editingConfiguration";
 import { previewContentWidthCss } from "../../src/core/preview/previewStyles";
 import { VISUAL_REPORT_ROOT } from "../reportPaths";
+import { buildHtmlExport } from "../../src/core/export/htmlExport";
+import { katexFontUrls } from "../../src/core/export/exportStyles";
+import { THEME_TOKEN_NAMES, VSCODE_VARIABLE_PREFIX } from "../../src/core/preview/themeTokens";
 
 const visualRoot = path.resolve(__dirname, "../../../test/visual");
 const fixtureDirectory = path.join(visualRoot, "fixtures");
@@ -370,6 +373,69 @@ window.resolveVisualFrontmatterLinks = () => {
   return diagnostics.map((diagnostic) => `${fixture}:${diagnostic.line ?? "?"} ${diagnostic.message}`);
 }
 
+const IMAGE_MIME: Readonly<Record<string, string>> = {
+  ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".svg": "image/svg+xml", ".webp": "image/webp",
+};
+
+/** The data URI of a local image by the `file:` URL the page shows (the host reads it through the same map). */
+function imageDataUri(src: string): string | undefined {
+  if (!src.startsWith("file:")) return undefined;
+  const file = fileURLToPath(src.replace(/[?#].*$/u, ""));
+  const mime = IMAGE_MIME[path.extname(file).toLowerCase()];
+  return mime === undefined || !fs.existsSync(file) ? undefined : `data:${mime};base64,${fs.readFileSync(file).toString("base64")}`;
+}
+
+/**
+ * CR 288: the "Export to HTML" file of a scenario. The snapshot comes from the page written by
+ * `renderPage` (its content, the math styles) and the theme variables of `themes.ts`; the page script
+ * that resolves the tokens in a real webview does not run here, so the tokens are the host
+ * variables of the theme and the cream or dark mode stays a root attribute the sheet resolves.
+ * Mermaid is not drawn: the script that draws it is not part of this static build.
+ */
+function writeExportFile(scenario: (typeof SCENARIOS)[number]): void {
+  const identity = scenarioPage(scenario);
+  const theme = THEMES.find((candidate) => candidate.id === scenario.theme);
+  if (!theme) throw new Error(`Unknown theme: ${scenario.theme}`);
+  const page = fs.readFileSync(path.join(pageDirectory, pageFileName(identity)), "utf8");
+  const content = /<main\s+id="sphinx-myst-preview-content"[\s\S]*?<\/main>/u.exec(page)?.[0];
+  if (content === undefined) throw new Error(`no content in the page of ${scenario.id}`);
+  const tokens: Record<string, string> = {};
+  for (const name of THEME_TOKEN_NAMES) {
+    const value = theme.variables[`${VSCODE_VARIABLE_PREFIX}${name}`];
+    if (value !== undefined) tokens[name] = value;
+  }
+  const katexDirectory = path.resolve(__dirname, "../../../out/bundle/katex");
+  const katexCss = path.join(katexDirectory, "katex.min.css");
+  const katex = content.includes("data-studio-math-rendered") && fs.existsSync(katexCss)
+    ? (() => {
+      const css = fs.readFileSync(katexCss, "utf8");
+      const fonts = new Map<string, string>();
+      for (const url of katexFontUrls(css)) {
+        const file = path.join(katexDirectory, url);
+        if (fs.existsSync(file)) fonts.set(url, `data:font/woff2;base64,${fs.readFileSync(file).toString("base64")}`);
+      }
+      return { css, fonts };
+    })()
+    : undefined;
+  const result = buildHtmlExport({
+    contentHtml: content,
+    rootAttributes: {
+      "data-sphinx-preview-theme-mode": scenario.previewThemeMode ?? "current",
+      "data-sphinx-preview-width": "margin",
+      "data-sphinx-preview-theme": theme.id === "dark" ? "2" : "1",
+    },
+    tokens,
+    mathStyles: /<style data-studio-math-styles[^>]*>([\s\S]*?)<\/style>/u.exec(page)?.[1] ?? "",
+    shownTabs: [],
+  }, {
+    stem: scenario.fixture,
+    maxContentWidth: scenario.render?.maxContentWidth ?? DEFAULT_PREVIEW_CONFIGURATION.maxContentWidth,
+    imageData: imageDataUri,
+    ...(katex ? { katex } : {}),
+  });
+  fs.writeFileSync(path.join(pageDirectory, exportFileName(scenario.id)), result.html, "utf8");
+}
+
 function scenarioPage(scenario: (typeof SCENARIOS)[number]): PageIdentity {
   return {
     fixture: scenario.fixture,
@@ -395,6 +461,10 @@ async function main(): Promise<void> {
     notes.push(...await renderPage(identity));
   }
 
+  for (const scenario of SCENARIOS) {
+    if (scenario.exportHtml === true) writeExportFile(scenario);
+  }
+
   const manifest = {
     runId: process.env.STUDIO_E2E_RUN_ID ?? null,
     campaignStartedAt: process.env.STUDIO_E2E_STARTED_AT ?? null,
@@ -417,6 +487,7 @@ async function main(): Promise<void> {
       ...scenario,
       sequence: index + 1,
       page: pageFileName(scenarioPage(scenario)),
+      ...(scenario.exportHtml === true ? { exportFile: exportFileName(scenario.id) } : {}),
       themeLabel: THEMES.find((theme) => theme.id === scenario.theme)?.label ?? scenario.theme,
     })),
   };

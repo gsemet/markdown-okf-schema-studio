@@ -29,6 +29,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewListCitationsResult: { editId: "h", ok: true, items: [], truncated: false },
   previewPickDocumentResult: { editId: "h", ok: true, path: "a.md" },
   previewCopyTextResult: { editId: "h", ok: true },
+  previewExportHtmlResult: { editId: "h", ok: true, fileName: "a.html", missingImages: 1 },
   previewPickImageResult: { editId: "h", ok: true, cancelled: true },
   previewPasteImageResult: { editId: "h", ok: true, fileName: "a.png" },
   previewPasteHtmlResult: { editId: "h", ok: true, markdown: "**x**" },
@@ -49,6 +50,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewEditCommand: { command: "undo" },
   previewFoldCommand: { command: "foldAll" },
   previewFindCommand: { command: "open" },
+  previewExportCommand: {},
   themeChanged: { themeKind: 2 },
 };
 

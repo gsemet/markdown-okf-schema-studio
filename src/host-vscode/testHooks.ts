@@ -294,3 +294,41 @@ export async function clearStoredPaletteModeForTests(): Promise<void> {
 export async function resetPreviewThemeModeForTests(): Promise<void> {
   await current?.manager.choices.resetPreviewThemeMode();
 }
+
+/** What the export dialog stubs of {@link stubExportDialogsForTests} recorded. */
+export interface ExportDialogRecord {
+  /** The modal warnings shown, in order: the question and its detail. */
+  confirms: { message: string; detail: string | undefined }[];
+  /** The save dialogs shown, in order: the file they proposed. */
+  saves: string[];
+}
+
+/**
+ * Answers the warning and the save dialog of "Export to HTML" without a window: `confirm` is the
+ * answer to the warning, `savePath` the file the save dialog returns (undefined: cancelled). The
+ * returned record lists what was asked; `restore` puts the real dialogs back.
+ */
+export function stubExportDialogsForTests(answers: { confirm: boolean; savePath: string | undefined }): {
+  record: ExportDialogRecord;
+  restore(): void;
+} {
+  const record: ExportDialogRecord = { confirms: [], saves: [] };
+  const ui = current?.host.ui;
+  if (!ui) return { record, restore: () => undefined };
+  const { confirm, pickSaveFile } = ui;
+  ui.confirm = (options) => {
+    record.confirms.push({ message: options.message, detail: options.detail });
+    return Promise.resolve(answers.confirm);
+  };
+  ui.pickSaveFile = (options) => {
+    record.saves.push(options.defaultPath);
+    return Promise.resolve(answers.savePath);
+  };
+  return {
+    record,
+    restore: () => {
+      ui.confirm = confirm;
+      ui.pickSaveFile = pickSaveFile;
+    },
+  };
+}

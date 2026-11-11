@@ -125,6 +125,7 @@ export interface PreviewBlocksResultMessage extends RenderMessage<"previewBlocks
 /** The page message types that are host round trips answered by `<type>Result`. */
 export type HostRequestType =
   | "previewCopyText"
+  | "previewExportHtml"
   | "previewThreadReply"
   | "previewThreadDelete"
   | "previewFindReplace"
@@ -150,8 +151,10 @@ export interface HostRequestResultMessage extends RenderMessage<`${HostRequestTy
   /** Pickers: the chosen path, or `cancelled`. */
   path?: string;
   cancelled?: boolean;
-  /** Pasted image: the name the file was written under. */
+  /** Pasted image, HTML export: the name the file was written under. */
   fileName?: string;
+  /** HTML export: the images the file could not embed. */
+  missingImages?: number;
   /** Pasted HTML: the Markdown it became. */
   markdown?: string;
   /**
@@ -291,6 +294,9 @@ export interface PreviewFindCommandMessage extends RenderMessage<"previewFindCom
   command: "open";
 }
 
+/** A command of the host (the palette) asks the page to send a snapshot of itself to export as HTML. */
+export interface PreviewExportCommandMessage extends RenderMessage<"previewExportCommand"> {}
+
 /** Every message a host sends to a preview page. */
 export type HostToPageMessage =
   | PreviewPendingOverlayMessage
@@ -319,6 +325,7 @@ export type HostToPageMessage =
   | PreviewEditCommandMessage
   | PreviewFoldCommandMessage
   | PreviewFindCommandMessage
+  | PreviewExportCommandMessage
   | ThemeChangedMessage;
 
 /** The type names of {@link HostToPageMessage}. */
@@ -413,6 +420,8 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewBlocksResult: render,
     // Host round trips, matched by edit id by the page's pending requests.
     previewCopyTextResult: ownId,
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+    previewExportHtmlResult: ownId,
     previewThreadReplyResult: ownId,
     previewThreadDeleteResult: ownId,
     previewFindReplaceResult: ownId,
@@ -452,6 +461,8 @@ export function createHostMessageFilter(): HostMessageFilter {
     },
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
     previewFindCommand: { addressing: "render", isValid: (message) => message.command === "open" },
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+    previewExportCommand: render,
     themeChanged: render,
   };
   return {

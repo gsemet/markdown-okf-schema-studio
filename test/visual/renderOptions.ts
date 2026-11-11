@@ -117,3 +117,8 @@ export function pageFileName(identity: PageIdentity): string {
   const key = renderOptionsKey(identity.render);
   return key === "" ? `${base}.html` : `${base}--o${createHash("sha1").update(key).digest("hex").slice(0, 8)}.html`;
 }
+
+/** The file name of the "Export to HTML" file of a scenario, written next to its page (CR 288). */
+export function exportFileName(scenarioId: string): string {
+  return `${scenarioId.replace(/[^a-z0-9-]+/giu, "--")}.export.html`;
+}

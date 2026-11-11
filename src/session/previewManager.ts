@@ -25,6 +25,7 @@ import { CommentsController } from "./features/comments";
 import { DiagnosticsController } from "./features/diagnostics";
 import { FrontmatterController } from "./features/frontmatter";
 import { HistoryController } from "./features/history";
+import { HtmlExportController } from "./features/htmlExport";
 import { HostRequestController } from "./features/hostRequests";
 import { IncomingChangesController } from "./features/incomingChanges";
 import { LinkController } from "./features/links";
@@ -78,6 +79,7 @@ export class PreviewManager {
   public readonly diagnostics: DiagnosticsController;
   public readonly plantUml: PlantUmlController;
   public readonly requests: HostRequestController;
+  public readonly exports: HtmlExportController;
   public readonly scroll: ScrollSyncController;
   public readonly view: ViewStateController;
 
@@ -119,10 +121,11 @@ export class PreviewManager {
     this.diagnostics = new DiagnosticsController(this);
     this.plantUml = new PlantUmlController(this);
     this.requests = new HostRequestController(this);
+    this.exports = new HtmlExportController(this);
     this.scroll = new ScrollSyncController(this);
     this.view = new ViewStateController(this);
     for (const controller of [
-      this.requests, this.history, this.view, this.edits, this.sourceEdits, this.plantUml,
+      this.requests, this.exports, this.history, this.view, this.edits, this.sourceEdits, this.plantUml,
       this.comments, this.links, this.frontmatter, this.rendering, this.scroll,
     ]) {
       controller.register(this.router);
@@ -255,6 +258,26 @@ export class PreviewManager {
     fireAndForget(this.host.logger, session.postToPage({
       type: "previewFindCommand",
       command: "open",
+      documentId: stage.activeDocumentIdentity,
+      revision: revisionOfStage(stage),
+      requestId: stage.requestId,
+    }), "postToPage");
+    return true;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+  /**
+   * The Export to HTML command asks the focused preview, else the open preview of the active
+   * document, for a snapshot of its page. False when neither exists (the caller says so).
+   */
+  public runExportCommand(activeDocument: HostDocument | undefined): boolean {
+    const session = [...this.live].find((candidate) => !candidate.disposed && candidate.panel.active)
+      ?? (activeDocument ? this.latest((candidate) => candidate.documentUri === activeDocument.id) : undefined);
+    const stage = session?.stage;
+    if (!session || !stage) return false;
+    this.exports.expectSnapshot(session);
+    fireAndForget(this.host.logger, session.postToPage({
+      type: "previewExportCommand",
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,

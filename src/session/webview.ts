@@ -43,6 +43,11 @@ export interface PreviewWebviewResult {
   diagnostics: SecurityDiagnostic[];
   nonce: string;
   frontmatter?: FrontmatterResult;
+  /**
+   * The local images the page shows: the URL of the `img` (as the page has it) to the file system
+   * path it was made from. The HTML export embeds only these files.
+   */
+  resources?: ReadonlyMap<string, string>;
 }
 
 export {
@@ -180,15 +185,15 @@ export function buildPreviewWebviewHtml(
   const nonce = createNonce();
   const resolvedStylesheets = new Set<string>();
   const stylesheetDiagnostics: SecurityDiagnostic[] = [];
+  const resources = new Map<string, string>();
   const resolveResource = (request: string, baseDirectory: string): ResolvedResource | undefined => {
     const resourcePath = policy.resolveResource(request, baseDirectory, { image: true });
     if (!resourcePath) {
       return undefined;
     }
-    return {
-      path: resourcePath,
-      uri: `${assets.resourceUri(resourcePath)}${resourceReferenceSuffix(request)}`,
-    };
+    const uri = `${assets.resourceUri(resourcePath)}${resourceReferenceSuffix(request)}`;
+    resources.set(uri, resourcePath);
+    return { path: resourcePath, uri };
   };
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
   const resolveNavigation = (
@@ -286,6 +291,7 @@ export function buildPreviewWebviewHtml(
     diagnostics: [...policy.diagnostics, ...rewritten.diagnostics, ...stylesheetDiagnostics],
     nonce,
     frontmatter: frontmatter?.result,
+    resources,
   };
 }
 

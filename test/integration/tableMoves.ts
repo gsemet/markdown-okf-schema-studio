@@ -470,7 +470,7 @@ async function scenarioColumnDropZone(page: Page, syntax: "pipe" | "list-table")
     const stripPoint = { x: header.x, y: handleBox.y + handleBox.height / 2 };
     await holdAt(page, stripPoint);
     await dropShot(page, `${syntax}-${theme}-column-strip`);
-    // At the 1400x900 window the floating toolbar, three buttons wide (102 px), ends right of the strip point.
+    // At the 1400x900 window the floating toolbar, four buttons wide (134 px), ends right of the strip point.
     const geometry = await dropGeometry(page, stripPoint);
     console.log(`table moves: ${syntax} column strip geometry: ${geometry}`);
     assert.equal(await underToolbar(page, stripPoint), false,

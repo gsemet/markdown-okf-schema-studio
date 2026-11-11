@@ -37,6 +37,7 @@ import { run as runLabelRename } from "./labelRename.test";
 import { run as runMystPickers } from "./mystPickers.test";
 import { run as runPaletteMode } from "./paletteMode.test";
 import { run as runPreviewHistory } from "./previewHistory.test";
+import { run as runExportHtml } from "./exportHtml.test";
 import { run as runEditKeys } from "./editKeys.test";
 import { run as runGridCardEditorBlur } from "./gridCardEditorBlur.test";
 import { run as runPasteUrl } from "./pasteUrl.test";
@@ -212,6 +213,7 @@ async function runTrustedSuite(): Promise<void> {
     ["drop-files", runDropFiles],
     ["window-switch-keys", runWindowSwitchKeys],
     ["preview-history", runPreviewHistory],
+    ["export-html", runExportHtml],
     ["palette-mode", runPaletteMode],
     ["label-rename", runLabelRename],
     ["inline-thread", runInlineThread],

@@ -8,6 +8,7 @@ export const {
   deserializePreviewPanelForTests,
   disposeActivePreviewForTests,
   EDITOR_VIEW_TYPE,
+  EXPORT_HTML_COMMAND_ID,
   getActivePreviewForTests,
   getActivePreviewPanelForTests,
   getLivePreviewRolesForTests,
@@ -26,5 +27,6 @@ export const {
   setRenderOverrideForTests,
   storedEditModeForTests,
   storeWorkspaceChoicesForTests,
+  stubExportDialogsForTests,
   syncActiveEditorForTests,
 } = extensionApi;

@@ -16,6 +16,7 @@ import { reportsReloadedDocument } from "../core/preview/contentPatch";
 import type { MessageRouter } from "../core/protocol/router";
 import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
+import { EXPORT_REFUSED } from "../core/export/exportSnapshot";
 import { LABEL_GONE, MALFORMED_TOGGLE, STALE_REQUEST } from "../core/edits/sourceEdits";
 import { revisionOfStage } from "./sessionDocuments";
 import { fireAndForget } from "../host-api/logger";
@@ -60,6 +61,7 @@ export const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGa
   previewFrontmatterSave: "page-state",
   previewCheckboxToggle: "page-state",
   previewCopyText: "document",
+  previewExportHtml: "document",
   previewHistoryGo: "render",
   previewViewPreferenceChanged: "render",
   previewSideBySideChanged: "render",
@@ -105,6 +107,7 @@ export class PageMessageDispatcher {
   public handle(preview: PreviewSession, value: unknown): PromiseLike<void> | undefined {
     if (!isPageToHostMessage(value)) {
       this.answerMalformedToggle(preview, value);
+      this.answerRefusedExport(preview, value);
       return undefined;
     }
     const { manager } = this;
@@ -112,6 +115,7 @@ export class PageMessageDispatcher {
       case "own-id":
         return preview.disposed ? undefined : this.route(preview, value);
       case "document":
+        if (!preview.disposed && value.documentId !== preview.documentUri) this.answerRefusedExport(preview, value);
         return preview.disposed || value.documentId !== preview.documentUri
           ? undefined
           : this.route(preview, value);
@@ -146,6 +150,31 @@ export class PageMessageDispatcher {
       preview,
       { type, documentId, revision, requestId, editId } as PageMessageOf<"previewCheckboxToggle">,
       { error: MALFORMED_TOGGLE },
+    );
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+  /**
+   * An export request the host refuses (a snapshot over the bound or of the wrong shape, or one of
+   * another document) is answered, so the page ends its wait and the user is told. Only a message
+   * that names its request identity and `editId` can be answered.
+   */
+  private answerRefusedExport(preview: PreviewSession, value: unknown): void {
+    if (typeof value !== "object" || value === null || (value as { type?: unknown }).type !== "previewExportHtml") return;
+    if (preview.disposed || !this.manager.has(preview)) return;
+    const { type, documentId, revision, requestId, editId } = value as Record<string, unknown>;
+    if (
+      type !== "previewExportHtml"
+      || typeof documentId !== "string" || documentId.length > 2_000
+      || typeof revision !== "number" || typeof requestId !== "number"
+      || typeof editId !== "string" || editId === "" || editId.length > 100
+    ) return;
+    const { host, requests } = this.manager;
+    fireAndForget(host.logger, host.ui.showError(EXPORT_REFUSED), "showError");
+    requests.postHostResult(
+      preview,
+      { type, documentId, revision, requestId, editId } as PageMessageOf<"previewExportHtml">,
+      { ok: false, reason: EXPORT_REFUSED },
     );
   }
 

@@ -40,6 +40,8 @@ export function registerHostHandlers(rt: PageRuntime): void {
   });
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
   hostMessages.on("previewFindCommand", () => parts.find.open());
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+  hostMessages.on("previewExportCommand", () => parts.exportHtml.run(false));
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-156
   hostMessages.on("previewShowComments", (message) => {
     parts.chipToggle.setShowComments(message.showComments !== false);

@@ -10,7 +10,7 @@ import type * as vscode from "vscode";
 import { StudioActivation } from "./host-vscode/activation";
 import { setCurrentActivation } from "./host-vscode/testHooks";
 
-export { COMMAND_ID, EDITOR_VIEW_TYPE, PANEL_VIEW_TYPE, REFRESH_COMMAND_ID } from "./host-vscode/activation";
+export { COMMAND_ID, EDITOR_VIEW_TYPE, EXPORT_HTML_COMMAND_ID, PANEL_VIEW_TYPE, REFRESH_COMMAND_ID } from "./host-vscode/activation";
 export {
   clearStoredPaletteModeForTests,
   deserializePreviewPanelForTests,
@@ -27,6 +27,7 @@ export {
   sendPreviewMessageForTests,
   storedEditModeForTests,
   storeWorkspaceChoicesForTests,
+  stubExportDialogsForTests,
   syncActiveEditorForTests,
 } from "./host-vscode/testHooks";
 export { noteKeystrokeForTests } from "./host-vscode/keystrokes";

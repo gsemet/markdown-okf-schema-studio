@@ -190,6 +190,20 @@ export class RuntimeElement {
     this.attributes[name] = value;
   }
 
+  /** A copy with the same attributes and text (the HTML export clones the content). */
+  public cloneNode(_deep?: boolean): RuntimeElement {
+    const copy = new RuntimeElement({ ...this.attributes }, this.windowState, this.top, this.height, this.tagName.toLowerCase());
+    copy.innerHTML = this.innerHTML;
+    return copy;
+  }
+
+  /** The element as markup: its tag, attributes and `innerHTML` (the children are not serialized). */
+  public get outerHTML(): string {
+    const tag = this.tagName.toLowerCase();
+    const attributes = Object.entries(this.attributes).map(([name, value]) => ` ${name}="${value}"`).join("");
+    return `<${tag}${attributes}>${this.innerHTML}</${tag}>`;
+  }
+
   public removeAttribute(name: string): void {
     delete this.attributes[name];
   }
@@ -401,6 +415,9 @@ export interface RuntimeHarness {
   readonly observedResizeTarget: RuntimeElement | undefined;
   readonly themeButton: RuntimeElement;
   readonly refreshButton: RuntimeElement;
+  readonly exportButton: RuntimeElement;
+  /** The diagram containers `document.querySelectorAll` returns for the HTML export's wait. */
+  readonly diagrams: RuntimeElement[];
   readonly zoomOutButton: RuntimeElement;
   readonly zoomInButton: RuntimeElement;
   readonly widthButton: RuntimeElement;
@@ -613,6 +630,9 @@ export function createRuntimeHarness(configuration: Partial<{
   const anchor = new RuntimeElement({}, windowState, 800, 40);
   const themeButton = new RuntimeElement({ "data-theme-mode": "current" }, windowState, 0, 34);
   const refreshButton = new RuntimeElement({}, windowState, 0, 30);
+  const exportButton = new RuntimeElement({}, windowState, 0, 30, "button");
+  /** The diagram containers of the page (the HTML export waits for them); none by default. */
+  const diagrams: RuntimeElement[] = [];
   const zoomOutButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const zoomInButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const widthButton = new RuntimeElement({}, windowState, 0, 30, "button");
@@ -871,6 +891,7 @@ export function createRuntimeHarness(configuration: Partial<{
     querySelector: (selector: string): RuntimeElement | null => {
       if (selector === "[data-sphinx-preview-theme-toggle]") return themeButton;
       if (selector === "[data-sphinx-preview-refresh]") return refreshButton;
+      if (selector === "[data-sphinx-preview-export]") return exportButton;
       if (selector === "[data-sphinx-preview-zoom-out]") return zoomOutButton;
       if (selector === "[data-sphinx-preview-zoom-in]") return zoomInButton;
       if (selector === "[data-sphinx-preview-width-toggle]") return widthButton;
@@ -918,7 +939,8 @@ export function createRuntimeHarness(configuration: Partial<{
       return true;
     },
     querySelectorAll: (selector: string): RuntimeElement[] => (
-      selector === "img" ? [image]
+      selector === ".myst-mermaid-diagram, .myst-vega-diagram, .myst-plantuml-diagram" ? diagrams
+        : selector === "img" ? [image]
         : selector === "input.myst-checkbox" ? [checkbox]
         : selector === ".myst-radio" ? radios
         : selector === "[data-okf-description-toggle]" ? [descriptionButton]
@@ -1008,6 +1030,8 @@ export function createRuntimeHarness(configuration: Partial<{
     toolbar,
     themeButton,
     refreshButton,
+    exportButton,
+    diagrams,
     zoomOutButton,
     zoomInButton,
     widthButton,

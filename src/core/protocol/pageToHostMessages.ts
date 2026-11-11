@@ -4,6 +4,7 @@
  * are in `pageToHost.ts`, which re-exports every type of this module.
  */
 
+import type { ExportSnapshot } from "../export/exportSnapshot";
 import type { CommentAnchor } from "../comments/commentModel";
 import type { PreviewThemeMode } from "../state/previewTheme";
 import type { ViewPreferenceKey } from "../state/previewViewPreferences";
@@ -230,6 +231,13 @@ export interface PreviewCopyTextMessage extends PageMessageBase<"previewCopyText
   userGesture: boolean;
 }
 
+/** The page as it shows now, to be written as one HTML file by the host (the Export button or the command). */
+export interface PreviewExportHtmlMessage extends PageMessageBase<"previewExportHtml">, HostRequestFields {
+  snapshot: ExportSnapshot;
+  /** True when the request follows a click on the Export button; the command's snapshot has no click. */
+  userGesture: boolean;
+}
+
 /** Back / Next of toolbar row 2: the host walks the panel's navigation history. */
 export interface PreviewHistoryGoMessage extends PageMessageBase<"previewHistoryGo"> {
   direction: "back" | "forward";
@@ -410,6 +418,7 @@ export interface PreviewPasteHtmlMessage extends PageMessageBase<"previewPasteHt
 export type PageToHostMessage =
   | PageStateMessageUnion
   | PreviewCopyTextMessage
+  | PreviewExportHtmlMessage
   | PreviewHistoryGoMessage
   | PreviewViewPreferenceChangedMessage
   | PreviewSideBySideChangedMessage
