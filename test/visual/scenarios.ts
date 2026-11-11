@@ -148,6 +148,8 @@ export interface Scenario {
   findWideTableChecks?: boolean;
   /** QA271-13: the cell editor of the last cell shows "Tab: new row", inside the editor and the pane. */
   tabHintChecks?: boolean;
+  /** CR 292: a spreadsheet paste into the last cell fills the cells from it, adds a row and a column, in one save. */
+  tableGridPasteChecks?: boolean;
   /** CR 281: with the unchanged title editor open, one click on the priority value below it opens priority. */
   frontmatterClickChecks?: boolean;
   /** CR 290: the Rename label field of a table label opens above the icon and covers no cell. */

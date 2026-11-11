@@ -1,0 +1,13 @@
+{"name":"c5-2-pasted-tsv-keeps-raw-tab-in-cell","file":"synth/c5-reading.md","steps":[
+{"comment":"Precondition: put 'a<TAB>b<TAB>c<NEWLINE>1<TAB>2<TAB>3<NEWLINE>' on the system clipboard first (printf 'a\\tb\\tc\\n1\\t2\\t3\\n' | pbcopy)."},
+{"open":"${file}","wait":2500},
+{"palette":"Markdown OKF-Schema Studio: Open Preview to Side","wait":4000,"optional":true},
+{"waitFor":"[...D.querySelectorAll('td')].some(t=>t.textContent.includes('row five'))","timeout":20000},
+{"mark":"${file}"},
+{"editMode":true,"optional":true},
+{"clicksel":"td","text":"row five","exact":true,"wait":300},
+{"waitFor":"D.querySelector('[data-sphinx-preview-table-cell-editor] textarea')","label":"editor"},
+{"key":["Meta+a","Meta+v"],"wait":600},
+{"key":"Enter","wait":1000},
+{"check":"diff","file":"${file}","against":"mark","notContains":"\t","contains":["| Five | a ","| b ","| c |","| 1 ","| 2 ","| 3 |"],"label":"c5-2 a pasted spreadsheet selection fills the cells from row five (| Five | a | b | c | and a new row with 1, 2 and 3) and leaves no raw tab in the table"}
+]}

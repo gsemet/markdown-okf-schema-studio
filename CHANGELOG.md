@@ -8,6 +8,9 @@
   not see when the table was scrolled to another column.
 - In the last cell of a table, the cell editor now shows "Tab: new row". If you press Tab there
   by mistake, Escape (or Cancel) in the new row, still empty, removes it again.
+- Pasting cells copied from a spreadsheet into a table cell now fills the cells from that one,
+  rightwards and downwards, and adds the rows and columns the table lacks. One undo takes the whole
+  paste back. Pasting a single value works as before.
 
 ## 1.6.1 - 2026-11-11
 

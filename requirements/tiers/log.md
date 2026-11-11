@@ -43,6 +43,18 @@
   test/page/runtimeTableCellTabRow.test.ts, test/visual/capture_table_tab_hint.py (v30, v31) and
   test/integration/realInput/tableTabRow.ts (real window, CI only).
 
+### A spreadsheet paste into a table cell fills the cells (CR 292, QA271-12)
+
+- New SwRS-MDOKFSTUDIO-TABLE-120 (proposed, stable, not approved): a text with a tab pasted into a cell
+  text box is a grid paste. Its values fill the cells from the open cell, rightwards and downwards, the
+  missing columns are added at the right and the missing rows at the end, the table is saved in one edit
+  (one undo step) and the editor reopens in the start cell. SwRS-MDOKFSTUDIO-TABLE-091 (proposed, stable,
+  not approved) amended: its pasted line break scenario is a text without a tab, and it relates to
+  TABLE-120. No approved requirement changed. Source: src/page/modules/tableGridPaste.ts and the paste
+  listener of src/page/features/tableCellEditor.ts; tests: test/page/modules/tableGridPaste.test.ts,
+  test/page/runtimeTableCellPaste.test.ts, test/integration/realInput/tableGridPaste.ts and the visual
+  scenario table-editing/v32-grid-paste-light-900 (test/visual/capture_table_grid_paste.py).
+
 ## 2026-11-10
 
 ### Block ids and tokens at the end of a table row (CR 279, QA271-02 and QA271-10)

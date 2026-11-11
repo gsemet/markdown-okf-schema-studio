@@ -12,6 +12,7 @@ import { createEditPalette } from "../modules/editPalette";
 import { createSlashMenu } from "../modules/slashMenu";
 import { stickyBarShift } from "../modules/stickyBar";
 import { createTabHint, isEmptyModelRow, isTabNewRowCell } from "../modules/tableTabRow";
+import { fillGrid, spreadsheetGrid } from "../modules/tableGridPaste";
 import { isApplePlatform } from "../pageSettings";
 import type { BlockEdit, CaretPosition, PageRuntime, TableCellEditor } from "./pageRuntime";
 
@@ -304,6 +305,15 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       resizeInput();
       rememberCellValue();
       blockEditor.autosaveBlockEdit();
+    });
+
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-120
+    // Spreadsheet cells (text with a tab) fill the cells from this one; any other paste is native.
+    input.addEventListener("paste", (event) => {
+      const grid = spreadsheetGrid(event.clipboardData?.getData("text/plain") ?? "");
+      if (!grid || edit.finishing) return;
+      event.preventDefault();
+      structural(() => fillGrid(edit.tableModel!, tableTools, edit.tableRowIndex!, edit.tableColumnIndex!, grid));
     });
 
     const menu = edit.tableMenu || document.createElement("div");

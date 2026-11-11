@@ -33,6 +33,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-111
 - SwRS-MDOKFSTUDIO-TABLE-115
 - SwRS-MDOKFSTUDIO-TABLE-117
+- SwRS-MDOKFSTUDIO-TABLE-120
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -70,4 +71,5 @@ As a writer, I format text in a cell from the bar or with a shortcut and the tab
   - [SwRS-MDOKFSTUDIO-TABLE-111](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-111.md): Column alignment sets the colons of the caret's column
   - [SwRS-MDOKFSTUDIO-TABLE-115](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-115.md): Table with caption wraps the table at the caret in a table directive
   - [SwRS-MDOKFSTUDIO-TABLE-117](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-117.md): HTML table converts or inserts an HTML table
+  - [SwRS-MDOKFSTUDIO-TABLE-120](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-120.md): A spreadsheet paste into a table cell fills the cells from that cell
 <!-- okf:links:end -->

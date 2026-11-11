@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/modules/markdownTablePreservation.test.ts
 - test/page/runtimePaletteActions.test.ts
+- test/page/runtimeTableCellPaste.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -63,12 +64,13 @@ When the writer types text into a table cell or inserts text into a cell from th
 | the colour inserted from the bar | no test of its own for this rule (untested) |
 
 ### Scenario (boundary): Line break pasted into the cell text box
-- GIVEN the clipboard holds "a\nb" (or "a\r\nb") and the cell text box is focused
+- GIVEN the clipboard holds "a\nb" (or "a\r\nb"), a text without a tab, and the cell text box is focused
 - WHEN the writer pastes
 - THEN the text box holds "a b", the caret keeps its place after the pasted text and the source row stays one line with the same cell count
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TABLE-102: the cell splitting that leaves only a pipe after a backslash inside its cell.
+- SwRS-MDOKFSTUDIO-TABLE-120: a pasted text with a tab is a grid paste that fills the cells; only a text without a tab pastes as one cell.
 - SwRS-MDOKFSTUDIO-TABLE-070: the List table button, which converts the table after a pasted line break.
 
 ### Verification notes
