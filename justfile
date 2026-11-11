@@ -50,12 +50,33 @@ dev-ci STAGE="":
         sudo -n cp "${cached[@]}" /var/cache/apt/archives/
     fi
     apt_options=(-o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::ForceIPv4=true)
-    sudo -n apt-get "${apt_options[@]}" update
-    if ! { command -v plantuml && command -v dot; } >/dev/null; then
-        sudo -n apt-get "${apt_options[@]}" install --yes --no-install-recommends plantuml graphviz
+    # Fast path: the cached archives are every package the last run installed (plantuml, graphviz,
+    # Chromium's libraries), so install them from the files with no mirror contacted, then
+    # Chromium without --with-deps (that would run apt-get update), and prove it starts. An
+    # unreachable mirror otherwise costs minutes of apt-get update timeouts. Any failure (a new
+    # runner image, a new package) takes the full path below.
+    installed_from_cache=false
+    if ((${#cached[@]})); then
+        files=()
+        for archive in "${cached[@]}"; do files+=("$PWD/$archive"); done
+        if sudo -n apt-get "${apt_options[@]}" install --yes --no-install-recommends --no-download "${files[@]}" \
+            && command -v plantuml >/dev/null && command -v dot >/dev/null \
+            && uv run --no-sync --group docs playwright install chromium \
+            && uv run --no-sync --group docs python -c 'from playwright.sync_api import sync_playwright as s; p = s().start(); p.chromium.launch().close(); p.stop()'; then
+            installed_from_cache=true
+            echo "dev-ci: system packages installed from $archives, no mirror contacted"
+        else
+            echo "dev-ci: the cached archives are not enough; refreshing the package lists" >&2
+        fi
     fi
-    # Playwright runs its own apt-get install, which uses the same archive folder.
-    uv run --no-sync --group docs playwright install --with-deps chromium
+    if ! "$installed_from_cache"; then
+        sudo -n apt-get "${apt_options[@]}" update
+        if ! { command -v plantuml && command -v dot; } >/dev/null; then
+            sudo -n apt-get "${apt_options[@]}" install --yes --no-install-recommends plantuml graphviz
+        fi
+        # Playwright runs its own apt-get install, which uses the same archive folder.
+        uv run --no-sync --group docs playwright install --with-deps chromium
+    fi
     # Keep only the archives of the current package versions for the next run.
     sudo -n apt-get autoclean
     rm -f "$archives"/*.deb

@@ -17,7 +17,9 @@ The CI only runs what a developer can run locally. All logic lives in the task r
    from the lock files. `just dev` stays the developer entry point and may do more. A job sets up
    only what its target uses (`just dev-ci visual` adds Chromium, plantuml and graphviz). System
    packages come from a cache of their archives, never from a live mirror on every run: a mirror
-   that serves one runner at 50 kB/s must not decide whether a job passes.
+   that serves one runner at 50 kB/s must not decide whether a job passes. When the cache holds
+   every archive, the job installs from it without refreshing the package lists, so an
+   unreachable mirror costs nothing.
 5. **Parallel jobs are independent.** Each job builds what it needs. Jobs share results only
    through artifacts, and a final job (`ci-report`) merges them.
 6. **Keep one stable aggregate job name** (for example `checks`) that depends on all others, so
