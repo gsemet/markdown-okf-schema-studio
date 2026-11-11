@@ -57,7 +57,8 @@ guideline holds. Project specifics (gates, commit format, install restrictions) 
 │   ├── STATUS.md                 ← header (see below), then free notes
 │   └── work/
 │       ├── coder/T1-r<n>.md      ← coder report, round n
-│       └── inspector/T1-r<n>.md  ← Inspector verdict, round n
+│       ├── inspector/T1-r<n>.md  ← Inspector verdict, round n
+│       └── verifier/             ← Verifier verdict T1-r<n>.md, evidence/ (before-after.md, images)
 ├── 4-archives/NNN-<slug>/        ← landed CRs
 └── 5-trash/<slug>/               ← abandoned ideas (user decision)
 ```
@@ -80,6 +81,7 @@ Unless specified by user through your context otherwise, here are the default ro
 | Conflict resolver | as needed | — | — | pushes |
 | Coder | 1 per round | Sonnet | GPT 5.6 Luna (copilot) | commits, pushes, lives past its round |
 | Inspector | 1 per round | Sonnet | GPT 6.1 Sol (copilot) | edits files, lives past its round |
+| Verifier | 1 per run of step 10 | Sonnet | GPT 6.1 Sol (copilot) | is the round's coder or Inspector, edits code, lives past its run |
 
 - **Escalation to Opus**: the driver uses Opus for the coder after the second FIX-REQUIRED, or
   after two CI failures with the same cause. The Inspector uses Opus when the CR's blast radius is
@@ -88,6 +90,11 @@ Unless specified by user through your context otherwise, here are the default ro
 - **Never move a task up a level**: each role does only its own row, even for a single CR and even
   when a child fails. A failing child is restarted (see "Supervision"), never replaced by its
   parent. If sub-agents cannot be started at all, the agent returns "blocked" to its parent.
+- **Verifier**: a fresh agent started by the driver (the stack driver in stack mode), never the
+  round's coder or Inspector, so it does not grade its own work. It reads the project; it never
+  edits code. It may create one detached worktree (`git worktree add --detach <path> <base>`) and
+  must remove it before it returns. The base of a CR is `origin/main`, or in stack mode the branch
+  below it in the stack (its PR's base). It stays on Sonnet for every blast radius.
 
 ## Lifecycle
 
@@ -96,19 +103,27 @@ Unless specified by user through your context otherwise, here are the default ro
 | 1 Pick | Chief of Staff | In the highest priority with work, propose the easiest item: problem, file:line, fix, PR content (written as in [pull-request.guidelines.md](pull-request.guidelines.md)). |
 | 2 Grill | Chief of Staff | Ask only the questions that change the result, each with a recommended answer. "ok" accepts all. Record answers in `03-change-spec.md` (see [owner-review.guidelines.md](owner-review.guidelines.md)), and carry the `issue:` line into it. List the approved requirements the item would change and record the owner's answer, as in "Approved requirements" of [requirements/guidelines/project.guidelines.md](../../requirements/guidelines/project.guidelines.md). |
 | 3 Open | Chief of Staff | Create the PRD folder, move the backlog content in (partial item: copy the part, note the split in the backlog item), create the worktree and branch from fresh `origin/main` (see [local-worktree.guidelines.md](local-worktree.guidelines.md)). `01-intent.md` and `03-change-spec.md` follow [owner-review.guidelines.md](owner-review.guidelines.md). With a tracker issue, the Chief of Staff drafts the grill comment (what was understood, what will be done, with the plan and a demo attached when the tracker supports it), shows it to the owner, posts it after approval, and records the comment link in `02-answers.md`. |
-| 4 Brief | Chief of Staff | Write `task.md`, `rules.md` (plain GFM, see [owner-review.guidelines.md](owner-review.guidelines.md)), the `STATUS.md` header, then run `just orchestrator`. |
+| 4 Brief | Chief of Staff | Write `task.md`, `rules.md` (plain GFM, see [owner-review.guidelines.md](owner-review.guidelines.md)), the `STATUS.md` header, then run `just orchestrator`. `task.md` links to step 10 for the evidence and the PR body check; it never restates when a screenshot is required (a hand-written copy drifts). |
 | 5 Code | coder | Implement round n, run local gates, write `work/coder/T1-r<n>.md`. |
 | 6 Review | Inspector | Write `work/inspector/T1-r<n>.md` starting with `Verdict: APPROVE` or `Verdict: FIX-REQUIRED`. FIX-REQUIRED → step 5, round n+1. The Inspector checks the project guidelines, including the traceability rules of [requirements/guidelines/project.guidelines.md](../../requirements/guidelines/project.guidelines.md). |
 | 7 Commit | driver | Explicit paths only (never `git add -A` / `git add .`), project commit format. |
 | 8 PR | driver | Rebase on `origin/main`, push, open the PR as a draft with the template of [ci.guidelines.md](ci.guidelines.md), written as in [pull-request.guidelines.md](pull-request.guidelines.md); with a tracker issue, its body names the issue with the tracker's closing keyword. Before opening it, run the requirements check of [requirements/guidelines/project.guidelines.md](../../requirements/guidelines/project.guidelines.md). A gap is a new round (step 5). The Chief of Staff, on hearing the PR link, drafts the one-line comment with that link for the tracker issue and posts it after the owner approves it. |
 | 9 CI | driver | Watch the checks (see "Responsiveness"). Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. Never weaken a test. |
-| 10 Notify | driver | CI green at the head and the review approved: mark the PR ready for review, then write `status: ready` in the header, then return. A CR sent back for a new round goes back to draft first. |
-| 11 Land | Foreman | After the user merges: write `report.md`, move the PRD folder to `4-archives/`, remove the worktree and the CR branch (keep its screenshot branch, see [pull-request.guidelines.md](pull-request.guidelines.md)). `report.md` follows the format below. The tracker issue closes by itself on merge, and nobody closes it by hand: the Foreman checks that it is closed and writes it in `report.md`; an issue left open is reported, not closed. After moving the folder, run `just orchestrator`. |
+| 10 Verify | Verifier (sub-agent started by the driver) | CI green at the head and the review approved: start a Verifier, fresh, on the pushed head. It writes `work/verifier/T1-r<n>.md` starting `Verdict: VERIFIED` or `Verdict: NOT VERIFIED`, and proves three things, each one a command run at the pushed head with its output (the notes of the coder and the Inspector, and a green CI, are not proof): (a) every claim of `03-change-spec.md` (each acceptance check and each behaviour the spec states); (b) the evidence of the change, in `work/verifier/evidence/` with a `before-after.md` that lists each pair, what it shows and the command that reproduces it: for a change the user sees, the before on a detached worktree of the base and the after at the head, taken with the technique the project's rules give (for the editor and the preview, the headless visual run of the local gates; otherwise the e2e group that covers it), light and dark when themes matter; or, for a change nobody sees (process text, tooling, internals), one line "no visible change" and the reason; (c) the posted PR body, read with `gh pr view <n> --json title,body` and checked against the diff and [pull-request.guidelines.md](pull-request.guidelines.md): every section of `.github/PULL_REQUEST_TEMPLATE.md` is present and filled; Impacts holds the before/after images or the "no visible change" line; "Autonomous decisions" exists and lists every choice a coder or the driver made without the owner (or says "None"); and Summary, Deliverables and Changes describe what the diff does, no more and no less. `NOT VERIFIED` because of the code (a claim fails) is a new round: step 5, round n+1, counted in the round limit. `NOT VERIFIED` because of the body or the evidence only: the driver fixes it itself (pushes the screenshots as in "Screenshots in the PR" of [pull-request.guidelines.md](pull-request.guidelines.md), `gh pr edit <n> --body-file <file>`), then runs the Verifier again; no round is used. When both causes are present, the code comes first. |
+| 11 Notify | driver | CI green at the head, the review approved and `Verdict: VERIFIED` at that head: mark the PR ready for review, then write `status: ready` in the header, then return. A CR sent back for a new round goes back to draft first. "At that head" means the verdict file names the head SHA it ran on; a push after the verdict makes it stale, so the driver runs the Verifier again. |
+| 12 Land | Foreman | After the user merges: write `report.md`, move the PRD folder to `4-archives/`, remove the worktree and the CR branch (keep its screenshot branch, see [pull-request.guidelines.md](pull-request.guidelines.md)). `report.md` follows the format below. The tracker issue closes by itself on merge, and nobody closes it by hand: the Foreman checks that it is closed and writes it in `report.md`; an issue left open is reported, not closed. After moving the folder, run `just orchestrator`. |
 
-**Round limit**: a round is one coder pass, whether an Inspector verdict or a CI failure triggered
-it. At most 3 rounds per CR, all causes together. After round 3 without green CI, the driver sets
+**Round limit**: a round is one coder pass, whether an Inspector verdict, a CI failure or a `NOT VERIFIED`
+on the code triggered it. At most 3 rounds per CR, all causes together. After round 3 without green CI, the driver sets
 `status: blocked` with its diagnosis and a question, and returns. Only the user grants more rounds
-(written in `03-change-spec.md`, for example "rounds: 5").
+(written in `03-change-spec.md`, for example "rounds: 5"). A rerun of the Verifier for the body or
+the evidence is not a round.
+
+**Verifier output**: `work/verifier/T1-r<n>.md` starts with `Verdict: VERIFIED` or `Verdict:
+NOT VERIFIED`, then the head SHA, then each check as a claim, the command, its output (an excerpt
+with the exit status) and pass or fail. A verdict whose SHA is not the current head is stale. The
+evidence files are in `work/verifier/evidence/`; if a capture is impossible, `before-after.md`
+says why, and that alone is not `NOT VERIFIED` unless the project's rules require the capture.
 
 **Rebase rule**: when any PR merges, rebase every open CR branch on `origin/main` and push with
 `--force-with-lease`. This is the only allowed history rewrite. No merge commits. In stack mode the
@@ -121,15 +136,15 @@ rewritten at every transition and at every CI watch slice.
 Everything else reads it; nobody keeps a CR's state in memory only.
 
 **One writer**: exactly one agent writes a CR's header at a time. That is the Chief of Staff for
-steps 1–4, the CR driver for steps 5–10 (in stack mode: until its branch joins the stack), the
-stack driver once the branch is in the stack, and the Foreman for step 11. Every other agent
+steps 1–4, the CR driver for steps 5–11 (in stack mode: until its branch joins the stack), the
+stack driver once the branch is in the stack, and the Foreman for step 12. Every other agent
 reports the line it wants changed to the writer, through its parent. The writer re-reads the file
 right before rewriting it, always sets `updated:`, and reads it back after writing. No other
 checklist is kept in `STATUS.md`; `ORCHESTRATOR.md` shows the step.
 
 ```text
 driver: <agent id | none> · updated: <HH:MM>
-status: <working | wait-ci | ready | blocked | landed> · step: <1–11 name> · round: <n>/<limit>
+status: <working | wait-ci | ready | blocked | landed> · step: <1–12 name> · round: <n>/<limit>
 head: <sha> · PR: <#n | —> · run: <id> <pass | fail | pending>
 next: <next action> · question: <question for the user, or —>
 ```
@@ -343,7 +358,7 @@ section covers the role.
 
 1. First heartbeat, within 5 minutes of starting: for each CR in the table, read the header; start a
    driver (background) where `driver: none` and the status is not ready, blocked or landed.
-2. Every heartbeat: check merged PRs. On a merge: step 11 for that CR, then message each live driver to
+2. Every heartbeat: check merged PRs. On a merge: step 12 for that CR, then message each live driver to
    rebase (in stack mode, the stack driver); for a ready CR without a live driver, start one for
    "rebase, push, watch CI".
 3. Check every driver against the supervision rules and the round limit.
@@ -375,14 +390,15 @@ section covers the role.
 > `<#n or none>`). Read `.agents/guidelines/change-requests-lifecycle.guidelines.md` (lifecycle, round limit,
 > `STATUS.md` header, responsiveness), `.agents/guidelines/ci.guidelines.md`, and the PRD folder
 > `<absolute path>` (`03-change-spec.md`, `task.md`, `rules.md`, `STATUS.md`, latest report and verdict).
-> Resume from the `STATUS.md` header and write `driver: <your id>` in it. Run steps 5–10: start a
+> Resume from the `STATUS.md` header and write `driver: <your id>` in it. Run steps 5–11: start a
 > coder, then a separate Inspector, per round, in the background; commit, rebase, push, PR; watch
-> CI in slices of at most 5 minutes. Rewrite the header at every transition and every slice. Never
-> code or review yourself. Return with `status: ready` or `status: blocked` and a question with
-> your recommended answer.
+> CI in slices of at most 5 minutes; then start a separate Verifier at the pushed head (step 10)
+> and mark the PR ready only on `Verdict: VERIFIED`. Rewrite the header at every transition and
+> every slice. Never code, review or verify yourself. Return with `status: ready` or
+> `status: blocked` and a question with your recommended answer.
 
-In stack mode the Foreman replaces "Run steps 5–10 … PR; watch CI in slices of at most 5
-minutes" with "Run steps 5–7: start a coder, then a separate Inspector, per round, in the
+In stack mode the Foreman replaces "Run steps 5–11 … PR; watch CI …
+`Verdict: VERIFIED`" with "Run steps 5–7: start a coder, then a separate Inspector, per round, in the
 background; commit. Never push or open a PR: report the branch and head, and return".
 
 ### Stack mode
@@ -393,12 +409,12 @@ The rules of the stack itself (order, restacking, no auto-merge) are in
 - A CR driver runs steps 5–7 only: rounds, review, commit on its branch. When the commit is
   approved, it reports the branch and head to the Foreman and returns; it never pushes or
   opens a PR. A red CI in the stack is a new round for that CR, run by a new CR driver.
-- One stack driver owns all the stacked branches. It runs steps 8–10 for every branch: it places
+- One stack driver owns all the stacked branches. It runs steps 8–11 for every branch: it places
   the branch in the stack order, restacks, pushes with `--force-with-lease`, opens the PR against
-  the branch below, links the PRs, watches CI and writes the headers of the branches in the stack.
+  the branch below, links the PRs, watches CI, starts the Verifier of each branch (its base is the branch below) and writes the headers of the branches in the stack.
   A CR driver stops pushing once its PR is in the stack.
 - The stack driver marks each PR of the stack ready on its own, as soon as its CI is green at its
-  head and its CR is `ready`, without waiting for the rest of the stack.
+  head, its review is approved and the Verifier's verdict at that head is `VERIFIED`, and its CR is `ready`, without waiting for the rest of the stack.
 - A stack driver that finds an auto-merge reports it; only the user disables it or merges.
 - The open-PR cap counts every PR of the stack; a branch over the cap waits, committed, until the
   user merges part of the stack.
@@ -411,9 +427,11 @@ The rules of the stack itself (order, restacking, no auto-merge) are in
 > responsiveness), `.agents/guidelines/stacked-prs.guidelines.md`,
 > `.agents/guidelines/ci.guidelines.md` and `<absolute path>/3-requests/brief.md`. Order the stack,
 > rebase with a conflict resolver that keeps both sides' intent, push, open or retarget the PRs,
-> link them, and watch CI in slices of at most 5 minutes. Open each PR as a draft and mark it ready
-> on its own, as soon as its CI is green at its head and its CR is `ready`, without waiting for the
-> rest of the stack. Never merge and never enable auto-merge.
+> link them, and watch CI in slices of at most 5 minutes. Open each PR as a draft; once its CI is
+> green at its head, start a separate Verifier for it (step 10), and mark it ready on its own only
+> when the Verifier wrote `Verdict: VERIFIED` at that head and its CR is `ready`, without waiting
+> for the rest of the stack. A `NOT VERIFIED` on the code goes back to the Foreman as a failing
+> branch, like a red CI (a new round for that CR). Never merge and never enable auto-merge.
 > Return when every PR in the stack is green, or with the failing branch, its log excerpt and your
 > recommended next step.
 
@@ -442,6 +460,8 @@ The rules of the stack itself (order, restacking, no auto-merge) are in
   with their source and test files.
 - Report: files changed, tests added and their failure before the change, changed assertions and
   why, gate results with counts, screenshot paths, open points.
+- Verifier: follow step 10 of the lifecycle ("Verify"). The task links to that step; it never
+  restates what the Verifier proves or when a screenshot is required.
 
 ## `report.md` (archive)
 
@@ -459,7 +479,7 @@ Issue: <link> (closed on merge) | none
 
 ## Proof of completion
 
-- Tests added (failed before, pass after), local gate counts, CI run id, screenshots.
+- Tests added (failed before, pass after), local gate counts, CI run id, the Verifier's verdict with its head SHA (`work/verifier/T1-r<n>.md`), and the before/after evidence (screenshots, or the "no visible change" line).
 
 ## Open items
 
