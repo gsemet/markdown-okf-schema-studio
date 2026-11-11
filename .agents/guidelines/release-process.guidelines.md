@@ -67,7 +67,8 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    Marketplace publication and Pages, recovering a red heavy job as in "After the merge" above.
 7. The release is archived with a `report.md`: tag, release URL, CI runs (heavy run on `main`,
    version push), and the issues the release closed (from the PRs' closing references,
-   `gh pr view <n> --json closingIssuesReferences`, and the `issue:` lines of the changes).
+   `gh pr view <n> --json closingIssuesReferences`, and the `issue:` lines of the changes). A
+   `retro.md` next to it lists what cost time in the release, its root cause and the process fix.
 8. The agent that talks to the owner drafts "Released in
    https://github.com/gsemet/markdown-okf-schema-studio/releases/tag/vX.Y.Z" for each listed issue,
    gets one owner approval for the whole list, posts each with `gh issue comment`, and reads the
