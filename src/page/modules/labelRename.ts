@@ -49,11 +49,46 @@ export function installLabelRename(
   };
   const uses = (count: number): string => count === 1 ? "1 use" : `${count} uses`;
 
+  const gap = 6;
+  const edgeInset = 8;
+  /**
+   * The top obstruction of the pane over the horizontal span [left, right]: the bottom of the preview
+   * toolbar when it overlaps that span (it floats at the top right, so a field at the left clears it),
+   * else the viewport edge.
+   */
+  const topInset = (left: number, right: number): number => {
+    const toolbar = document.querySelector("[data-sphinx-preview-toolbar]")?.getBoundingClientRect();
+    const covers = toolbar !== undefined && toolbar.bottom > 0 && toolbar.left < right && toolbar.right > left;
+    return Math.max(edgeInset, covers ? toolbar.bottom + edgeInset : 0);
+  };
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-038
+  // Under the icon, except for an icon in an `.okf-anchor-row` (no paragraph or heading holds it:
+  // a table, a code block, a figure): the block it labels starts right below the icon, so the field
+  // opens above it, anchored by its bottom edge so that the status line grows away from the block.
+  // It goes above only when it fits between the icon and the top obstruction, after scrolling the
+  // page up by the missing height when the page can; otherwise it opens under the icon.
   const place = (anchor: Element): void => {
     if (!popover) return;
-    const bounds = anchor.getBoundingClientRect();
-    popover.style.setProperty("top", `${Math.round(bounds.bottom + 6)}px`);
+    let bounds = anchor.getBoundingClientRect();
     popover.style.setProperty("left", `${Math.round(Math.max(8, bounds.left))}px`);
+    if (anchor.closest(".okf-anchor-row")) {
+      const box = popover.getBoundingClientRect();
+      const height = box.height;
+      const left = Math.max(8, bounds.left);
+      const inset = (): number => topInset(left, left + (box.right - box.left));
+      const missing = height - (bounds.top - gap - inset());
+      if (missing > 0 && window.scrollY >= missing) {
+        window.scrollBy(0, -missing);
+        bounds = anchor.getBoundingClientRect();
+      }
+      if (bounds.top - gap - inset() >= height) {
+        popover.setAttribute("data-okf-label-rename-side", "above");
+        popover.style.setProperty("bottom", `${Math.round(window.innerHeight - (bounds.top - gap))}px`);
+        return;
+      }
+    }
+    popover.setAttribute("data-okf-label-rename-side", "below");
+    popover.style.setProperty("top", `${Math.round(bounds.bottom + gap)}px`);
   };
 
   const submit = (line: number, oldName: string): void => {

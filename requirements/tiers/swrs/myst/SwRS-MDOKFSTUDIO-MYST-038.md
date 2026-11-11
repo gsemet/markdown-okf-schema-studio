@@ -6,7 +6,8 @@ title: "The anchor icon opens a rename field that sends valid names"
 description: "When a reader clicks the anchor icon of a label in edit mode, the extension
   SHALL open a Rename label popover with a prefilled, selected, focused Label name
   field before block click handling, send a rename only for a changed valid name and
-  show the answer of the host in the field."
+  show the answer of the host in the field, placed so that it does not cover the block
+  its label introduces."
 project: markdown-okf-schema-studio
 scope: myst
 req_lifecycle: proposed
@@ -27,9 +28,12 @@ implemented_in_files:
 tested_in_files:
 - test/core/mapping/labelRename.test.ts
 - test/core/protocol/pageToHost.test.ts
+- test/integration/realInput/labelRenameAboveTable.ts
 - test/page/modules/labelRename.test.ts
 - test/page/modules/renderReq.labelRename.requirements.test.ts
 - test/session/trustReq.requirements.test.ts
+- test/visual/capture_label_rename.py
+- test/visual/labelRenameScenarios.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-MYST-039
@@ -46,12 +50,22 @@ supersedes:
 
 ### Normative behavior
 
-When a reader clicks the anchor icon of a label in edit mode, the extension SHALL open a Rename label popover with a prefilled, selected, focused Label name field before block click handling, send a rename only for a changed valid name and show the answer of the host in the field.
+When a reader clicks the anchor icon of a label in edit mode, the extension SHALL open a Rename label popover with a prefilled, selected, focused Label name field before block click handling, send a rename only for a changed valid name and show the answer of the host in the field, placed so that it does not cover the block its label introduces.
 
 ### Scenario (nominal): The click opens the rename field
 - GIVEN edit mode on and the label `(draft_1)=` before a paragraph, which shows an anchor icon with a pointer cursor
 - WHEN the anchor icon is clicked
 - THEN a dialog Rename label opens under it with the Label name field prefilled with `draft_1`, selected and focused, and no block editor opens
+
+### Scenario (boundary): A label above a table opens the field above its icon
+| Input | Outcome |
+| --- | --- |
+| Anchor icon of a label held by no paragraph or heading (`(table-label)=` right before a table, also a code block, a figure or a directive) clicked in edit mode, with room above the icon | The field opens above the icon: its bottom edge is 6 px above the icon's top edge, its left edge as for any label; it covers no cell of the table |
+| The same click with too little room above (less than the field's height between the icon and the top obstruction: the bottom of the preview toolbar when it overlaps the field's horizontal span, else 8 px from the top of the pane) and a page that can scroll up by the missing height | The page scrolls up by the missing height, then the field opens above the icon |
+| The same click at the very top of the document, where the page cannot scroll up by the missing height | The field opens under the icon, as for a label before a paragraph, and covers the first rows of the table until Escape or a press elsewhere |
+| Renaming..., Renamed. or a refusal shown in the field | The field grows upwards, away from the table |
+
+The field is anchored by its bottom edge when it opens above. A label held by a paragraph or a heading keeps the placement under its icon. The field never exceeds the width of the pane (its padding and border included).
 
 ### Scenario (refusal): Clicks that open no field
 | Input | Outcome |
@@ -92,6 +106,7 @@ The anchor icon, the field and the host share one name pattern: letters, digits 
 | --- | --- |
 | Escape | The field closes and nothing is sent |
 | Pointer press outside the popover and the icon | The field closes and nothing is sent |
+| Pointer press on a table cell while the field is open | The field closes, nothing is sent and the cell editor opens in the same click |
 
 ### Scenario (nominal): A successful rename reports the remaining uses
 | Input (rename succeeds) | Outcome |
@@ -121,8 +136,10 @@ Only `{ref}` forms are counted. The field closes itself 5 s after the success me
 - Method: test/session/trustReq.requirements.test.ts ("a label rename from an older render is answered with the stale-line refusal": stale render, other document, disposed preview)
 - Method: test/core/mapping/labelRename.test.ts ("the renderer, the page and the host share one label name pattern": shared pattern; "label names follow the MyST pattern and the length limit": invalid names; "counts {ref} uses with and without a title, not other roles or names": remaining uses)
 - Method: test/core/protocol/pageToHost.test.ts ("previewLabelRename validates the line and both label names": the validator repeats the name check)
-- Method: the pointer press outside the popover has no named test (untested)
-- Criteria: The icon shows a pointer cursor in edit mode only; no message is posted on a closed field, an invalid name or an unchanged name; page and host both reject invalid names; matching of the answer is by edit id; `{ref}`-only counting and the message texts match.
+- Method: test/page/modules/labelRename.test.ts ("an icon in an anchor row opens the field above the icon, anchored by its bottom edge", "with too little room above, the page scrolls up by the missing height, then the field opens above", "the preview toolbar band counts as the top obstruction", "a toolbar that floats beside the field, not over it, is no top obstruction", "when the page cannot scroll up by the missing height, the field opens below the icon", "an icon held by a paragraph or a heading keeps the placement under the icon": placement; "a press on an element outside the popover (a table cell) closes it; a press inside keeps it": outside press)
+- Method: test/integration/realInput/labelRenameAboveTable.ts (the field of a table label covers no cell; a click on a cell closes it and opens the cell editor)
+- Method: test/visual/capture_label_rename.py, scenario myst/v46-label-rename-above-table-light-290 (a 290 px pane: the field is above the icon, inside the pane, and covers no cell)
+- Criteria: The icon shows a pointer cursor in edit mode only; the field opens above the icon of a label held by no paragraph, never covers a cell of the table below it unless the page cannot scroll up; no message is posted on a closed field, an invalid name or an unchanged name; page and host both reject invalid names; matching of the answer is by edit id; `{ref}`-only counting and the message texts match.
 
 <!-- okf:links:start -->
 ### Links

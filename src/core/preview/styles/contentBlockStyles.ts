@@ -77,6 +77,7 @@ ${directiveStyle("figure")}
   z-index: 1060;
   display: grid;
   gap: 4px;
+  box-sizing: border-box;
   width: min(22em, calc(100vw - 16px));
   padding: 6px;
   border: 1px solid var(--studio-editorWidget-border, rgba(128, 128, 128, 0.45));

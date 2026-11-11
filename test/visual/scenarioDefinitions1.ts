@@ -45,6 +45,7 @@ import { WIDTH_SCROLL_SCENARIOS } from "./widthScrollScenarios";
 import { BREAKOUT_HANDLE_SCENARIOS } from "./breakoutHandleScenarios";
 import { TABLE_CELL_ROOM_SCENARIOS } from "./tableCellRoomScenarios";
 import { FRONTMATTER_CLICK_SCENARIOS } from "./frontmatterClickScenarios";
+import { LABEL_RENAME_SCENARIOS } from "./labelRenameScenarios";
 import { TABLE_ROW_COLOUR_SCENARIOS } from "./tableRowColourScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
@@ -483,6 +484,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...TABLE_ROW_COLOUR_SCENARIOS,
   ...TABLE_CELL_ROOM_SCENARIOS,
   ...FRONTMATTER_CLICK_SCENARIOS,
+  ...LABEL_RENAME_SCENARIOS,
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",

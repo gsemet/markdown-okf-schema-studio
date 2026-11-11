@@ -1,0 +1,18 @@
+{
+  "name": "c1-1-label-rename-popover-covers-table-cells",
+  "file": "synth/anchors-tables.md",
+  "steps": [
+    {"comment": "Preview in edit mode on synth/anchors-tables.md (side preview). Label (table-label)= sits above the first table."},
+    {"open": "${file}", "wait": 2500},
+    {"palette": "Markdown OKF-Schema Studio: Open Preview to Side", "wait": 4000},
+    {"waitFor": "D.querySelector('#sphinx-myst-preview-content [data-sphinx-source-line]')", "timeout": 20000},
+    {"editMode": true},
+    {"mark": true},
+    {"clicksel": ".okf-anchor[data-okf-label=table-label]", "wait": 600},
+    {"check": "noOverlap", "a": "[data-okf-label-rename]", "b": "table td", "label": "c1-1 rename popover must not cover table cells"},
+    {"clicksel": "td", "text": "alpha", "dx": 6, "dy": 4, "wait": 500},
+    {"check": "feval", "expr": "!!D.querySelector('table textarea')", "equals": true, "label": "c1-1 a click on a covered cell opens its editor"},
+    {"check": "diff", "against": "mark", "equal": true},
+    {"check": "errors"}
+  ]
+}

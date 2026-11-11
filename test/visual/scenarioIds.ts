@@ -727,6 +727,7 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "myst/v43-tabs-keyboard-light-900": "In the light theme at 900 px, a click on the third tab and then the Home, ArrowRight and End keys move the selection and the focus, and the last tab ends selected, focused and alone in showing its panel.",
   "myst/v44-tab-panel-edit-light-900": "In the light theme at 900 px in edit mode, a click on the paragraph of the shown Node tab panel opens exactly one Markdown editor holding the whole tab item, with its opening line, :selected: option and body.",
   "myst/v45-tab-panel-edit-dark-900": "In the dark theme at 900 px in edit mode, a click on the paragraph of the shown Node tab panel opens exactly one Markdown editor holding the whole tab item, with its opening line, :selected: option and body.",
+  "myst/v46-label-rename-above-table-light-290": "In the light theme at 290 px in edit mode, a click on the anchor icon of a labelled table opens the Rename label field above the icon, fully inside the pane, and no cell of the table below is covered by it.",
   "block-editing/v35-card-header-enter-commits-line-cream-900": "In edit mode in the cream preview at 900 px, a click on the header of a standalone card, End, a typed \" Q\" and Enter send one final save of the :header: line alone, so the document keeps :footer: right after the header line with no blank line between them, and the text box gets no newline."
 };
 
@@ -894,6 +895,7 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "table-editing/v24-table-bar-groups-light-360": ["arrowdown", "cell-bar", "cell-emoji", "open"],
   "table-editing/v25-table-bar-groups-dark-360": ["arrowdown", "cell-bar", "cell-emoji", "open"],
   "table-editing/v29-cell-editor-clamped-light-280": ["open"],
+  "myst/v46-label-rename-above-table-light-290": ["open"],
 };
 
 /**

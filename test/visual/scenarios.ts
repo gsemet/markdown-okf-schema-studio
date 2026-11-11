@@ -146,6 +146,8 @@ export interface Scenario {
   cellRoomChecks?: boolean;
   /** CR 281: with the unchanged title editor open, one click on the priority value below it opens priority. */
   frontmatterClickChecks?: boolean;
+  /** CR 290: the Rename label field of a table label opens above the icon and covers no cell. */
+  labelRenameChecks?: boolean;
   frontmatterLinkState?: "loading" | "loaded";
   hideDescriptionColumn?: boolean;
   contextTagChecks?: boolean;
