@@ -1,5 +1,19 @@
 # Update Log
 
+## 2026-11-11
+
+### The label rename field no longer covers the table below its icon (CR 290, QA271-09)
+
+- SwRS-MDOKFSTUDIO-MYST-038 (proposed, stable, not approved) amended: the Rename label field of a label
+  held by no paragraph or heading (a table, a code block, a figure, a directive) opens above its icon,
+  anchored by its bottom edge, after scrolling the page up by the missing height when the room above is
+  short; at the very top of the document it opens under the icon as before. A press on a table cell
+  while the field is open closes it and opens the cell editor in the same click (the outside-press
+  row, now tested). The field's padding and border no longer push it past a narrow pane. No approved
+  requirement changed. Source: place in src/page/modules/labelRename.ts (and box-sizing in
+  src/core/preview/styles/contentBlockStyles.ts); tests: test/page/modules/labelRename.test.ts,
+  test/integration/realInput/labelRenameAboveTable.ts and test/visual/capture_label_rename.py.
+
 ## 2026-11-10
 
 ### Block ids and tokens at the end of a table row (CR 279, QA271-02 and QA271-10)

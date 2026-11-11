@@ -38,6 +38,7 @@ import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfte
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
 import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
+import { scenarioLabelRenameAboveTable } from "./labelRenameAboveTable";
 import { scenarioTableShortDelimiter } from "./tableShortDelimiter";
 import { scenarioColumnMoveKeepsBlockIdAtRowEnd, scenarioTailedTableMovesAndOpensCellEditor } from "./tableRowTokens";
 import { scenarioUndoRestoresCommentMark } from "./tableCommentUndo";
@@ -175,6 +176,7 @@ export async function run(): Promise<void> {
         await scenarioRevertAfterExternalWriteRendersCell(page);
       },
       "table-escape": () => scenarioTableEscapeKeepsCellsLeft(page),
+      "label-rename-above-table": () => scenarioLabelRenameAboveTable(page),
       "table-short-delimiter": () => scenarioTableShortDelimiter(page),
       "table-row-tokens": async () => {
         await scenarioColumnMoveKeepsBlockIdAtRowEnd(page);
@@ -233,6 +235,8 @@ export async function run(): Promise<void> {
     await scenarioWideTableTab(page, evidence);
     // QA replay 271-c2-1: Escape cancels only the open cell; the cells left keep their text.
     await scenarioTableEscapeKeepsCellsLeft(page);
+    // QA replay 271-c1-1: the rename field of a table label opens above the icon, clear of the cells.
+    await scenarioLabelRenameAboveTable(page);
     // QA replay 271-c3-1: a table with a two-dash delimiter row opens the cell editor.
     await scenarioTableShortDelimiter(page);
     // QA replays 271-c1b-1 and 271-c1b-2: block ids and tokens at the end of a table row.

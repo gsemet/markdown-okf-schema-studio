@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The Rename label field of a table's label now opens above its anchor icon, so it no longer
+  hides the first rows of the table, and a click on a cell opens the cell editor right away.
+
 ## 1.6.1 - 2026-11-11
 
 - A table row with a block id or another token after its closing pipe (`| a | b | ^row-a`) can be edited
