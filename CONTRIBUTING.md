@@ -383,6 +383,24 @@ For serial debugging after rendering fixtures, run
 Real VS Code integration scenarios remain serial. The Pages workflow builds `out/site/` through
 `just preflight`; `just site` also runs the E2E campaign before generating the gallery and site.
 
+### Static scenarios that hold on CI
+
+The visual job renders on Linux, whose fonts are wider than the macOS ones, so a scenario that
+passes locally can fail on CI when it depends on text metrics:
+
+- A fixture line that must fit on one line at a width keeps a margin of at least one word; it
+  never fits exactly.
+- A scenario scrolls to a stable anchor (the top of the block it shows) with room left for the
+  floating toolbar and the editing bars, never to an offset whose result depends on the height
+  of the text above.
+- Run a changed scenario three times locally, alone and inside its group, before pushing.
+
+The floating toolbar's width is an input to other layout. The `conf.py` warning banner reserves
+room for it (`--sphinx-preview-warning-banner-reserve`, SwRS-MDOKFSTUDIO-MYST-081, checked in
+`test/core/preview/previewStyles.test.ts`), README crops must reach the viewport's right edge,
+and the 460 px scenarios leave room for it. A change that adds or removes a toolbar button, or
+changes a button's size, updates these values in the same pull request.
+
 ### Product-owner gallery and report pruning
 
 `npm run review:gallery` writes `out/reports/e2e/GALLERY.md` and one page per feature group in
