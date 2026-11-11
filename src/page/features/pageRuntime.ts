@@ -128,6 +128,11 @@ export interface BlockEdit {
   cellTextAtOpen?: string;
   /** A cell left earlier in this edit session (Tab, an arrow or a click) holds text that differs from its opening text. */
   keptCellChange?: boolean;
+  /**
+   * The rendered row index of a row that Tab added in the session before this one: Escape or Cancel
+   * in it removes the row while it is still empty. Lives for this session only.
+   */
+  tabAddedRow?: number;
   tableRowIndex?: number;
   tableColumnIndex?: number;
   initialCaretPosition: CaretPosition;
@@ -242,6 +247,8 @@ export interface PendingBlockNavigation {
   caretPosition: CaretPosition;
   tableRowIndex?: number;
   tableColumnIndex?: number;
+  /** The row of `tableRowIndex` was added by Tab: the reopened edit remembers it (`BlockEdit.tabAddedRow`). */
+  addedRow?: boolean;
 }
 
 /** Where a moved block selection is restored, by ordinal among the body blocks. */
@@ -481,7 +488,7 @@ export interface BlockEditor {
   clearPendingBlockNavigation(): void;
   rememberPendingBlockNavigation(target: Element, caretPosition: CaretPosition, selectedCell?: HTMLTableCellElement,
     explicitIndices?: { tableRowIndex: number; tableColumnIndex: number },
-    thenMove?: { direction: "up" | "down"; caretOffset: number }): void;
+    thenMove?: { direction: "up" | "down"; caretOffset: number }, addedRow?: boolean): void;
   createEditorButtons(edit: BlockEdit): HTMLElement;
   blockEditHint(edit: BlockEdit): string;
   moveBlockFromEditor(event: KeyboardEvent, control: TextControl): boolean;

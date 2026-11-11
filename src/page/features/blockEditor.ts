@@ -130,7 +130,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-079
   const rememberPendingBlockNavigation: BlockEditor["rememberPendingBlockNavigation"] = (
-    target, caretPosition, selectedCell, explicitIndices, thenMove,
+    target, caretPosition, selectedCell, explicitIndices, thenMove, addedRow,
   ) => {
     state.pendingBlockNavigation = {
       ...(thenMove ? { thenMove } : {}),
@@ -144,6 +144,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
         tableRowIndex: explicitIndices.tableRowIndex,
         tableColumnIndex: explicitIndices.tableColumnIndex,
       } : {}),
+      ...(addedRow ? { addedRow: true } : {}),
     };
     const saved = host.getState?.();
     host.setState?.({

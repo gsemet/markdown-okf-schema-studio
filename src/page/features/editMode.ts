@@ -193,6 +193,12 @@ export function installEditMode(rt: PageRuntime): EditMode {
     const table = target.closest?.("table");
     const cell = table?.rows?.[pending.tableRowIndex!]?.cells?.[pending.tableColumnIndex!];
     openMappedEditor(target, cell || target, caretPosition, true);
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-025
+    // The row Tab added is remembered by the editor that opens in it, for that session only.
+    const opened = state.activeBlockEdit;
+    if (pending.addedRow && cell && opened && opened.target === target && opened.selectedCell === cell) {
+      opened.tabAddedRow = pending.tableRowIndex;
+    }
   }
 
   return {

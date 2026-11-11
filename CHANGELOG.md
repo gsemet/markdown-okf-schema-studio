@@ -6,6 +6,8 @@
   hides the first rows of the table, and a click on a cell opens the cell editor right away.
 - Find now scrolls a wide table sideways to show the match, instead of counting a match you could
   not see when the table was scrolled to another column.
+- In the last cell of a table, the cell editor now shows "Tab: new row". If you press Tab there
+  by mistake, Escape (or Cancel) in the new row, still empty, removes it again.
 
 ## 1.6.1 - 2026-11-11
 

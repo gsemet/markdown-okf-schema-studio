@@ -25,6 +25,24 @@
   test/visual/capture_find_wide_table.py (toolbar-navigation/v41) and
   test/integration/realInput/findWideTable.ts.
 
+### A "Tab: new row" hint in the last cell, and Escape removes an empty row added by Tab (CR 293, QA271-13)
+
+- SwRS-MDOKFSTUDIO-TABLE-035 (proposed, stable, not approved) amended: in the last cell of the last
+  rendered row of a table the cell editor shows the hint Tab: new row in its actions row before Done
+  and Cancel, and the text box names it with `aria-describedby`; no other cell shows it; the editor
+  reopened in the row that Tab added remembers it (see TABLE-025). New scenario "The last cell shows the
+  Tab hint". SwRS-MDOKFSTUDIO-TABLE-025 (proposed, stable, not approved) amended: Escape or Cancel in a
+  row that Tab added in the session that opened in it, every cell of the row being empty once the open
+  cell is back to its opening text, removes the row and saves the table in one edit; the mark lives for
+  that session only and a row added with Row below is never marked. Five scenarios added (Escape, Cancel,
+  typing in the first cell, a cell left holding text, Row below). No approved requirement changed.
+  Source: src/page/modules/tableTabRow.ts, cancelTableCellEdit, tabThroughTableCells and
+  renderTableCellEditor in src/page/features/tableCellEditor.ts, the `addedRow` flag of
+  PendingBlockNavigation (src/page/features/pageRuntime.ts, blockEditor.ts) and
+  resumePendingBlockNavigation in src/page/features/editMode.ts; tests:
+  test/page/runtimeTableCellTabRow.test.ts, test/visual/capture_table_tab_hint.py (v30, v31) and
+  test/integration/realInput/tableTabRow.ts (real window, CI only).
+
 ## 2026-11-10
 
 ### Block ids and tokens at the end of a table row (CR 279, QA271-02 and QA271-10)

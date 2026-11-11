@@ -6,8 +6,10 @@ title: Escape cancels the open cell edit only, except during a composition
 description: When the writer presses Escape in a cell editor outside an IME
   composition, the extension SHALL close the editor and drop the text typed in
   that cell only, keep the text of the cells left earlier in the session with
-  Tab, an arrow key or a click, show in the preview what the buffer holds, and,
-  during an input-method composition, leave the editor open and post nothing.
+  Tab, an arrow key or a click, show in the preview what the buffer holds,
+  remove a row that Tab added in that session when every cell of it is empty,
+  and, during an input-method composition, leave the editor open and post
+  nothing.
 project: markdown-okf-schema-studio
 scope: table-editing
 req_lifecycle: proposed
@@ -23,12 +25,16 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/page/features/blockEditor.ts
+- src/page/features/editMode.ts
 - src/page/features/tableCellEditor.ts
+- src/page/modules/tableTabRow.ts
 tested_in_files:
 - test/integration/realInput/markers.ts
 - test/integration/realInput/tableEscape.ts
+- test/integration/realInput/tableTabRow.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/page/runtimeTableCellEscape.test.ts
+- test/page/runtimeTableCellTabRow.test.ts
 - test/visual/capture_table_escape.py
 default_owner_email: gaetan@xeberon.net
 ---
@@ -37,7 +43,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer presses Escape in a cell editor outside an IME composition, the extension SHALL close the editor and drop the text typed in that cell only: with no cell left earlier in the session holding typed text, the table is restored as before the session and no final save is sent; with such a cell, the open cell returns to its opening text, the table is saved with the text of the cells left (Tab, arrow key or click) and the preview shows what the buffer holds. During an input-method composition, the editor stays open and nothing is posted.
+When the writer presses Escape in a cell editor outside an IME composition, the extension SHALL close the editor and drop the text typed in that cell only: with no cell left earlier in the session holding typed text, the table is restored as before the session and no final save is sent; with such a cell, the open cell returns to its opening text, the table is saved with the text of the cells left (Tab, arrow key or click) and the preview shows what the buffer holds. When Escape or Cancel is pressed in a row that Tab added in the session that opened in it, and every cell of that row is empty once the open cell is back to its opening text (spaces trimmed), the row SHALL be removed and the table saved in one edit (one final save, one undo step). The mark lives for that session only: after Done, Enter, a click outside or a final save, a later Escape in that row is as above, and a row added with the Row below button is never marked. During an input-method composition, the editor stays open and nothing is posted.
 
 ### Scenario (nominal): Escape after typing
 - GIVEN a cell edited and not yet autosaved
@@ -63,6 +69,31 @@ When the writer presses Escape in a cell editor outside an IME composition, the 
 - GIVEN Tab out of a cell where nothing was typed, then text typed in the next cell
 - WHEN the writer presses Escape
 - THEN the whole session is cancelled as before: no final save is posted
+
+### Scenario (nominal): Escape on an empty row added by Tab
+- GIVEN the editor in the last cell of a table, Tab pressed there, and the editor reopened in the first cell of the new empty row
+- WHEN the writer presses Escape
+- THEN one final previewEditSave is posted whose text is the table without the new row (the table before the Tab, except the text typed in the cell where Tab was pressed), no previewEditCancel is posted and the editor closes; one undo from the source gives the empty row back and a second one undoes the Tab
+
+### Scenario (nominal): Cancel on an empty row added by Tab
+- GIVEN the editor reopened in the empty row that Tab added
+- WHEN the writer clicks the Cancel button
+- THEN it does the same as Escape: the row is removed with one final save
+
+### Scenario (boundary): Escape on a row added by Tab after typing in it
+- GIVEN the editor reopened in the row that Tab added, and text typed in its first cell only
+- WHEN the writer presses Escape
+- THEN the typed text is dropped (the open cell returns to its opening text), the row is empty and is removed
+
+### Scenario (boundary): A row added by Tab with a cell left holding text
+- GIVEN the editor reopened in the row that Tab added, text typed in its first cell, then Tab to its second cell
+- WHEN the writer presses Escape
+- THEN the row stays with the text of its first cell, as in the scenarios above
+
+### Scenario (boundary): A row added with the Row below button
+- GIVEN the editor reopened in the row that the Row below button added
+- WHEN the writer presses Escape
+- THEN the row is not removed: no final save without it is posted
 
 ### Scenario (boundary): Blur after Escape
 - GIVEN the editor closed by Escape
@@ -90,6 +121,7 @@ When the writer presses Escape in a cell editor outside an IME composition, the 
 - THEN the edit is cancelled
 
 ### Related requirements
+- SwRS-MDOKFSTUDIO-TABLE-035: Tab in the last cell adds the row whose reopened editor carries the mark, and the last cell shows the hint Tab: new row.
 - SwRS-MDOKFSTUDIO-TABLE-013: one edit session across cells; the cells left keep their text.
 - SwRS-MDOKFSTUDIO-TABLE-035: the cell left shows the text just typed, which Escape in the next cell keeps.
 - SwRS-MDOKFSTUDIO-BLOCK-053: the block editor equivalent of the cancel; the cell has its own listener.
@@ -97,6 +129,8 @@ When the writer presses Escape in a cell editor outside an IME composition, the 
 ### Verification notes
 - Method: test/page/runtimeTableCellEditor.test.ts ("Escape in a changed table cell cancels and never saves a final table" for Escape after typing and the blur after it; "Escape cancels a table cell even when focus is outside the cell editor" for the focus outside and the key inside, with the document-level handler in bindKeys of src/page/features/tableCellEditor.ts; "Escape during IME composition neither cancels nor saves a table cell" for the composition scenarios).
 - Method: test/page/runtimeTableCellEscape.test.ts (Escape after Tab, ArrowRight and a click, the Cancel button after a cell left, Escape after leaving an untouched cell, after two cells left, with the focus outside the cell editor, and in an untouched cell, in each case a final save holding the cells left and not the open cell's text) with the cancel branch cancelTableCellEdit of src/page/features/tableCellEditor.ts.
+- Method: test/page/runtimeTableCellTabRow.test.ts (Escape and Cancel in the empty row that Tab added, with and without text typed in its first cell, one final save with the table before the Tab; a cell of the row left holding text keeps the row; a row added with the Row below button is not removed) with the mark `tabAddedRow` set by resumePendingBlockNavigation in src/page/features/editMode.ts from the `addedRow` flag of the pending navigation (remembered by tabThroughTableCells), and the removal branch of cancelTableCellEdit in src/page/features/tableCellEditor.ts.
+- Method: test/integration/realInput/tableTabRow.ts (real-window scenario scenarioTableTabRow, id table-tab-row: click the last cell, Tab, Escape; the buffer equals the buffer before the Tab; two undos from the source give the empty row back, then undo the Tab).
 - Method: test/integration/realInput/tableEscape.ts (real-window scenario scenarioTableEscapeKeepsCellsLeft, QA replay 271-c2-1: type, Tab, Escape, then type, click, Escape; the buffer line and the shown cells agree).
 - Method: test/integration/realInput/textEditing.ts, markers in test/integration/realInput/markers.ts (real-window scenario scenarioEscapeCancels, id table-editing/r04-escape-cancels-cell: Escape after typing).
 - Method: visual scenarios table-editing/v02 to v05, v24 and v25 (check_cell_escape_keeps_cells_left in test/visual/capture_table_escape.py, run by check_preview_edit_mode: text typed in a cell, ArrowDown, Escape; the last save is final and holds the text of the cell left, no previewEditCancel is posted, and the editor closes once the host renders the page).

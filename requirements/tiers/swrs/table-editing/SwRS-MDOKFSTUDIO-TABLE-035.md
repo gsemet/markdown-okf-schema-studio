@@ -11,7 +11,8 @@ description: When the writer presses Tab, Shift+Tab or an arrow key at the edge
   can take it, and bring that cell and its editor into the visible part of the
   table's sideways scroll box without scrolling the page, and the cell left
   SHALL show the text just typed in it, rendered as inline Markdown, without
-  waiting for a re-render.
+  waiting for a re-render, and the cell editor of the last cell of the table
+  SHALL show a hint that Tab adds a row.
 project: markdown-okf-schema-studio
 scope: table-editing
 req_lifecycle: proposed
@@ -28,14 +29,19 @@ derived_by: []
 implemented_in_files:
 - src/page/features/tableCellEditor.ts
 - src/page/features/textControls.ts
+- src/page/modules/tableTabRow.ts
 tested_in_files:
 - test/integration/realInput/markers.ts
 - test/integration/realInput/tableStaleRender.ts
+- test/integration/realInput/tableTabRow.ts
 - test/page/cellInlineMarkdown.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/page/runtimeTableCellStale.test.ts
+- test/page/runtimeTableCellTabRow.test.ts
 - test/visual/capture_edit_checks.py
+- test/visual/capture_table_tab_hint.py
+- test/visual/tableTabHintScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -43,7 +49,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text in a cell text box, the extension SHALL move the editor to the next, previous or neighbouring rendered cell, with the caret at the end of its text (at the start for the cell to the right and the cell below), and leave the key to the browser or hand it to block-to-block navigation when no cell can take it, and bring that cell and its editor into the visible part of the table's sideways scroll box without scrolling the page, and the cell left SHALL show the text just typed in it, rendered as inline Markdown, without waiting for a re-render.
+When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text in a cell text box, the extension SHALL move the editor to the next, previous or neighbouring rendered cell, with the caret at the end of its text (at the start for the cell to the right and the cell below), and leave the key to the browser or hand it to block-to-block navigation when no cell can take it, and bring that cell and its editor into the visible part of the table's sideways scroll box without scrolling the page, and the cell left SHALL show the text just typed in it, rendered as inline Markdown, without waiting for a re-render, and, in the last cell of the last rendered row of the table (the cell where Tab adds a row), the cell editor SHALL show the hint Tab: new row in its actions row before Done and Cancel, described to the text box with `aria-describedby`.
 
 ### Scenario (nominal): Tab along a row and across rows
 
@@ -55,7 +61,13 @@ When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text i
 
 - GIVEN the editor in the last cell of a table with two body rows, with text typed in it
 - WHEN the writer presses Tab
-- THEN a final previewEditSave with an extra empty row at the end and the typed text is posted, and after the re-render the editor opens in the first cell of the new row
+- THEN a final previewEditSave with an extra empty row at the end and the typed text is posted, and after the re-render the editor opens in the first cell of the new row, which remembers that Tab added its row for that session only (see SwRS-MDOKFSTUDIO-TABLE-025)
+
+### Scenario (nominal): The last cell shows the Tab hint
+
+- GIVEN a table with two body rows, the editor in its first body cell
+- WHEN the writer clicks the last cell of the last row, then presses Shift+Tab
+- THEN the editor of the last cell shows the text Tab: new row (marked `data-sphinx-preview-table-cell-hint`) in its actions row, its text box names the hint with `aria-describedby`; the editor of every other cell shows no hint and no `aria-describedby`; the hint follows the editor when it moves (Tab, Shift+Tab, an arrow key, a click) and, in a narrow pane, wraps without widening the cell beyond the room of SwRS-MDOKFSTUDIO-TABLE-006 or hiding Done and Cancel
 
 ### Scenario (nominal): The cell left shows its new text
 
@@ -136,6 +148,7 @@ Home moves the caret to the start of the text, and Shift extends the selection.
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TABLE-048: the table bar above the table that shows the position of the selected cell after each move.
+- SwRS-MDOKFSTUDIO-TABLE-025: Escape or Cancel in a row that Tab added, while it is still empty, removes it.
 
 ### Verification notes
 
@@ -143,6 +156,9 @@ Home moves the caret to the start of the text, and Shift extends the selection.
 - Method: test/page/cellInlineMarkdown.test.ts (the inline Markdown the cell left shows: marks, link allowlist with `javascript:`, `data:` and protocol-relative `//host` targets left without href, backslash escapes, `<br>`, no emphasis inside a word such as `snake_case_name` or around spaces such as `2 * 3 * 4`, HTML never parsed).
 - Method: test/integration/realInput/markers.ts and real-window scenario scenarioTableTab (id table-editing/r05-tab-adds-row) in test/integration/realInput/editorWidgets.ts (Tab along a row, Tab in the last cell, the first cell of the new row shows the text typed after Tab).
 - Method: test/integration/realInput/markers.ts and real-window scenario scenarioWideTableTab in test/integration/realInput/wideTableTab.ts, assertion only (Tab in a table wider than the pane: real Tab and Shift+Tab presses through the row and across the wrap, and from the last cell of a table scrolled to its end, in Margin and Auto width).
+- Method: test/page/runtimeTableCellTabRow.test.ts (the Tab hint in the last cell only, none in the first cell or the last column of another row, `aria-describedby`, the hint after Tab into the last cell and gone after Shift+Tab out of it; createTabHint and isTabNewRowCell in src/page/modules/tableTabRow.ts).
+- Method: visual scenarios table-editing/v30 and v31 (check_table_tab_hint in test/visual/capture_table_tab_hint.py: no hint in the first body cell; in the last cell the text, `aria-describedby`, and the hint, Done and Cancel inside the editor, the table's box and the viewport, light at 900 px and dark at 360 px).
+- Method: test/integration/realInput/tableTabRow.ts (real-window scenario scenarioTableTabRow, id table-tab-row: the hint is visible after a click on the last cell).
 - Method: test/page/runtimeBlockEditor.test.ts (a table cell arrow inside a wrapped cell does not move to another cell; keys that stay native, wrapped cell row).
 - Method: test/page/runtimeEditorFlush.test.ts (Ctrl+Tab pass-through; Shift+Tab and held modifiers, Ctrl+Tab row).
 - Method: visual scenario table-editing/v02 (step arrowdown, ArrowDown only) and check_cell_end_key in test/visual/capture_edit_checks.py on scenario table-editing/v01 (Home and End); the scroll assertions bite on macOS only, because headless Chromium on Linux moves the caret natively.
