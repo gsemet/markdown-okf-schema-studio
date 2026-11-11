@@ -166,6 +166,9 @@ export class RuntimeElement {
       if (selector === "th, td") {
         return element.tagName === "TH" || element.tagName === "TD";
       }
+      if (selector === "table") {
+        return element.tagName === "TABLE";
+      }
       if (selector === "button, input, textarea, select, a, span, p") {
         return ["BUTTON", "INPUT", "TEXTAREA", "SELECT", "A", "SPAN", "P"].includes(element.tagName);
       }

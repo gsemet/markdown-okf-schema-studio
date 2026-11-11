@@ -28,6 +28,12 @@ export interface MarkdownTableModel {
    * the grid into the text to save, the list-table again.
    */
   listTable?: { write: (pipeText: string) => string };
+  /**
+   * Set when the table sits inside a quote or an admonition (see `tableInContainer.ts`): `write`
+   * puts the table text, with the container prefix on every line, back into the text of the
+   * container. Applied last, so every save path writes the container.
+   */
+  container?: { write: (text: string) => string };
 }
 
 export type MarkdownTableTools = ReturnType<typeof createMarkdownTableTools>;
@@ -262,7 +268,8 @@ export function createMarkdownTableTools() {
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-234
   function serialize(model: MarkdownTableModel): string {
     const pipe = serializePipe(model);
-    return model.listTable ? model.listTable.write(pipe) : pipe;
+    const text = model.listTable ? model.listTable.write(pipe) : pipe;
+    return model.container ? model.container.write(text) : text;
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-001

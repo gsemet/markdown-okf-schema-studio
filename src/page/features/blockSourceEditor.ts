@@ -10,14 +10,37 @@ import { clearCellEditorRoom } from "../modules/cellEditorRoom";
 import { caretRectOf } from "../modules/caretRect";
 import { imageParagraphEdit } from "../modules/pasteImage";
 import { createSlashMenu } from "../modules/slashMenu";
+import { containedTable, tableRankIn, tablesIn } from "../modules/tableInContainer";
 import { isApplePlatform } from "../pageSettings";
-import type { BlockSourceEditor, PageRuntime, PaletteMode } from "./pageRuntime";
+import type { MarkdownTableModel } from "../modules/markdownTable";
+import type { BlockEdit, BlockSourceEditor, PageRuntime, PaletteMode } from "./pageRuntime";
 
 /** The source editor of a page. */
 export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
   const { document, window, context, host, state } = rt;
   const { editorTrace, traceFocus } = rt.diagnostics;
   const { textEditing, editActions, figureTools, tableTools } = rt.tools;
+
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-121
+  // The table of a clicked cell inside a quote, an alert or an admonition: its source lines carry the
+  // container prefix, so the table is read without it and written back with it. Refused (the raw
+  // editor opens) when the rendered and the source tables do not match one for one.
+  const containedTableModel = (edit: BlockEdit, originalText: string): MarkdownTableModel | undefined => {
+    const clicked = edit.selectedCell?.closest?.("table");
+    if (!clicked) return undefined;
+    const rendered = tablesIn(edit.target);
+    const located = containedTable(originalText, tableRankIn(edit.target, clicked), rendered.length);
+    const model = located && tableTools.parse(located.tableText);
+    if (!located || !model) return undefined;
+    // The clicked table must have the shape of the source table, else the lines found are another table's.
+    const renderedRows = clicked.rows;
+    const renderedColumns = renderedRows?.[0]?.cells?.length;
+    if (!renderedRows || renderedRows.length !== model.rows.length - 1 || renderedColumns !== model.rows[0]?.length) {
+      return undefined;
+    }
+    model.container = { write: located.write };
+    return model;
+  };
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-029
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
@@ -78,7 +101,8 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
           ? String.fromCharCode(13)
           : "";
     if (edit.selectedCell) {
-      const model = tableTools.parse(originalText) ?? tableTools.parseListTable(originalText);
+      const model = tableTools.parse(originalText) ?? tableTools.parseListTable(originalText)
+        ?? containedTableModel(edit, originalText);
       if (
         model
         && edit.tableRowIndex! < model.rows.length - 1

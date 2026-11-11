@@ -14,6 +14,7 @@
  */
 
 import type { PreviewEditSourceMessage } from "../../core/protocol/hostToPage";
+import { containedTable } from "../modules/tableInContainer";
 import type { BlockEdit, PageRuntime, TableRowMove } from "./pageRuntime";
 
 /** How long a move waits for the host source before the handle is usable again. */
@@ -230,8 +231,12 @@ export function installTableRowMove(rt: PageRuntime): TableRowMove {
         ? tools.moveListTableRow(original, move.from, move.to)
         : tools.moveListTableColumn(original, move.from, move.to);
     }
-    const model = tools.parse(original);
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-121
+    // A table inside a quote or an admonition: its lines carry the container prefix, kept on the way back.
+    const located = tools.parse(original) ? undefined : containedTable(original, 0, 1);
+    const model = tools.parse(located ? located.tableText : original);
     if (!model) return undefined;
+    if (located) model.container = { write: located.write };
     const moved = move.axis === "row"
       ? tools.moveRow(model, move.from, move.to)
       : tools.moveColumn(model, move.from, move.to);

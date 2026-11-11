@@ -119,6 +119,7 @@ A table is editable when it has a header row, a delimiter row whose cells are at
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-BLOCK-014: a click in the frontmatter properties table never opens a block editor.
+- SwRS-MDOKFSTUDIO-TABLE-121: a table inside a quote, a GitHub alert or a MyST admonition opens the same cell editor, its container prefix kept.
 
 ### Verification notes
 - Method: test/page/runtimeTableCellEditor.test.ts (click and one previewEditOpen, selected mark and hidden-content wrapper, raw Markdown of the header and body cells via "table editing switches cells without losing changes and finalizes before leaving the table" and "table cell editing exposes row and column operations and saves the edited table", opening caret via "arrow keys move the table cell editor cell to cell in every direction", no status hint via "the table cell editor has Done and Cancel but no status hint").
