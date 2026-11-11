@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.6.1 - 2026-11-11
+
 - A table row with a block id or another token after its closing pipe (`| a | b | ^row-a`) can be edited
   and moved again: the handles work and a click on a cell opens the cell editor. A column move keeps a
   `^id` at the end of its row instead of carrying it into the middle.
@@ -12,6 +14,10 @@
 - After an undo, a redo or a Revert File, the preview table shows what the file holds. A table whose
   cell editor is open closes it and shows the restored text instead of staying out of date, and a
   table whose cell you left with Tab is rebuilt instead of keeping the text you had typed.
+- In a narrow pane, the editor of a table cell now fits the pane: its field and its Done and Cancel
+  buttons stay visible instead of running past the right edge.
+- When you undo or redo the deletion of a table row that carried a review comment, the comment mark
+  comes back on that row instead of staying lost.
 - In edit mode, one click on a property below an open field editor now opens it, instead of needing a
   second click when the editor was left unchanged and closing it moved the rows up.
 
