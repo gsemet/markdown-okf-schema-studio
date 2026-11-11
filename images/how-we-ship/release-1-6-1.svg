@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 520" width="1240" height="520" role="img" aria-labelledby="t d" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<title id="t">Release 1.6.1, hour by hour (UTC)</title>
+<desc id="d">Swimlane timeline of release 1.6.1 on 2026-11-11, in UTC. The evening before, the agents opened six fix pull requests. From 07:36 to 10:37 the owner merged them. The heavy CI run on main was green at 10:59. At 11:00 the owner said go; the Chief of Staff wrote the notes and opened version PR 354 at 11:16. The owner said publish at 11:30, then was asked nothing. The version push jobs were green and the tag, release, Marketplace and Pages were published from 11:52 to 11:55. The release was archived around 12:05. No fix change was needed. Two steps marked new were added after this release: the notes rendered in the version PR body, and a retro at the archive.</desc>
+<rect width="1240" height="520" rx="14" fill="#ffffff"/>
+<text x="30" y="42" font-size="22" font-weight="700" fill="#0f172a" text-anchor="start">Release 1.6.1 · 2026-11-11 · UTC</text>
+<rect x="20" y="80" width="1200" height="80" fill="#fffbeb"/>
+<line x1="20" y1="160" x2="1220" y2="160" stroke="#cbd5e1"/>
+<text x="32" y="126" font-size="16" font-weight="700" fill="#0f172a" text-anchor="start">Owner</text>
+<rect x="20" y="160" width="1200" height="90" fill="#f0fdf4"/>
+<line x1="20" y1="250" x2="1220" y2="250" stroke="#cbd5e1"/>
+<text x="32" y="211" font-size="16" font-weight="700" fill="#0f172a" text-anchor="start">Chief of Staff</text>
+<rect x="20" y="250" width="1200" height="60" fill="#f8fafc"/>
+<line x1="20" y1="310" x2="1220" y2="310" stroke="#cbd5e1"/>
+<text x="32" y="286" font-size="16" font-weight="700" fill="#0f172a" text-anchor="start">CR drivers</text>
+<rect x="20" y="310" width="1200" height="90" fill="#eff6ff"/>
+<line x1="20" y1="400" x2="1220" y2="400" stroke="#cbd5e1"/>
+<text x="32" y="361" font-size="16" font-weight="700" fill="#0f172a" text-anchor="start">CI</text>
+<rect x="20" y="400" width="1200" height="60" fill="#f5f3ff"/>
+<line x1="20" y1="460" x2="1220" y2="460" stroke="#cbd5e1"/>
+<text x="32" y="436" font-size="16" font-weight="700" fill="#0f172a" text-anchor="start">Published</text>
+<line x1="20" y1="80" x2="1220" y2="80" stroke="#cbd5e1"/>
+<line x1="333" y1="80" x2="333" y2="460" stroke="#e2e8f0" stroke-dasharray="2 4"/>
+<text x="333" y="72" font-size="14" font-weight="400" fill="#64748b" text-anchor="middle">08:00</text>
+<line x1="467" y1="80" x2="467" y2="460" stroke="#e2e8f0" stroke-dasharray="2 4"/>
+<text x="467" y="72" font-size="14" font-weight="400" fill="#64748b" text-anchor="middle">10:00</text>
+<line x1="718" y1="80" x2="718" y2="460" stroke="#e2e8f0" stroke-dasharray="2 4"/>
+<text x="718" y="72" font-size="14" font-weight="400" fill="#64748b" text-anchor="middle">11:00</text>
+<line x1="916" y1="80" x2="916" y2="460" stroke="#e2e8f0" stroke-dasharray="2 4"/>
+<text x="916" y="72" font-size="14" font-weight="400" fill="#64748b" text-anchor="middle">11:30</text>
+<line x1="1114" y1="80" x2="1114" y2="460" stroke="#e2e8f0" stroke-dasharray="2 4"/>
+<text x="1114" y="72" font-size="14" font-weight="400" fill="#64748b" text-anchor="middle">12:00</text>
+<text x="232" y="72" font-size="14" font-weight="400" fill="#64748b" text-anchor="middle">evening</text>
+<path d="M282 80 l6 8 l-6 8 l6 8" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+<path d="M505 80 l6 8 l-6 8 l6 8" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+<rect x="307" y="104" width="260" height="32" rx="7" fill="#fde68a" stroke="#d97706" stroke-width="1.5"/>
+<text x="436" y="126" font-size="16" font-weight="600" fill="#0f172a" text-anchor="middle">merges 6 PRs</text>
+<path d="M718 110 L728 120 L718 130 L708 120 Z" fill="#fde68a" stroke="#d97706" stroke-width="1.5"/>
+<text x="718" y="152" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle">go</text>
+<path d="M916 110 L926 120 L916 130 L906 120 Z" fill="#fbbf24" stroke="#b45309" stroke-width="1.5"/>
+<text x="916" y="152" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle">publish</text>
+<path d="M942 120 H1167" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="1055" y="112" font-size="14" font-weight="600" fill="#64748b" text-anchor="middle">hands off</text>
+<rect x="568" y="180" width="141" height="36" rx="7" fill="#bbf7d0" stroke="#059669" stroke-width="1.5"/>
+<text x="639" y="204" font-size="15" font-weight="600" fill="#0f172a" text-anchor="middle">checks</text>
+<rect x="720" y="180" width="102" height="36" rx="7" fill="#bbf7d0" stroke="#059669" stroke-width="1.5"/>
+<text x="771" y="204" font-size="15" font-weight="600" fill="#0f172a" text-anchor="middle">notes</text>
+<rect x="826" y="180" width="88" height="36" rx="7" fill="#bbf7d0" stroke="#059669" stroke-width="1.5"/>
+<text x="870" y="204" font-size="15" font-weight="600" fill="#0f172a" text-anchor="middle">PR #354</text>
+<rect x="925" y="180" width="174" height="36" rx="7" fill="#bbf7d0" stroke="#059669" stroke-width="1.5"/>
+<text x="1012" y="204" font-size="15" font-weight="600" fill="#0f172a" text-anchor="middle">publishes</text>
+<rect x="1116" y="180" width="82" height="36" rx="7" fill="#bbf7d0" stroke="#059669" stroke-width="1.5"/>
+<text x="1157" y="204" font-size="15" font-weight="600" fill="#0f172a" text-anchor="middle">archive</text>
+<rect x="849" y="225" width="42" height="19" rx="9" fill="#dcfce7" stroke="#16a34a"/>
+<text x="870" y="239" font-size="13" font-weight="700" fill="#166534" text-anchor="middle">new</text>
+<rect x="1133" y="225" width="42" height="19" rx="9" fill="#dcfce7" stroke="#16a34a"/>
+<text x="1154" y="239" font-size="13" font-weight="700" fill="#166534" text-anchor="middle">new</text>
+<rect x="196" y="264" width="74" height="34" rx="7" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5"/>
+<text x="233" y="287" font-size="15" font-weight="600" fill="#0f172a" text-anchor="middle">6 PRs</text>
+<rect x="639" y="264" width="251" height="34" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="764" y="287" font-size="14" font-weight="400" fill="#64748b" text-anchor="middle">fix CR · not needed</text>
+<rect x="566" y="330" width="145" height="32" rx="7" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.5"/>
+<text x="639" y="352" font-size="15" font-weight="600" fill="#0f172a" text-anchor="middle">heavy run ✓</text>
+<rect x="916" y="326" width="20" height="8" rx="3" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.5"/>
+<rect x="916" y="339" width="26" height="8" rx="3" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.5"/>
+<rect x="916" y="352" width="79" height="8" rx="3" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.5"/>
+<rect x="916" y="365" width="86" height="8" rx="3" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.5"/>
+<rect x="916" y="378" width="145" height="8" rx="3" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.5"/>
+<text x="1069" y="358" font-size="15" font-weight="600" fill="#0f172a" text-anchor="start">5 jobs ✓</text>
+<rect x="1061" y="416" width="20" height="28" rx="6" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="1052" y="436" font-size="15" font-weight="600" fill="#0f172a" text-anchor="end">tag · release · Marketplace · Pages</text>
+<text x="30" y="494" font-size="16" font-weight="400" fill="#334155" text-anchor="start">4 owner messages · 0 fix CRs · 0 red jobs · heavy run → Marketplace in 1 h 16</text>
+<rect x="1041" y="476" width="42" height="19" rx="9" fill="#dcfce7" stroke="#16a34a"/>
+<text x="1062" y="490" font-size="13" font-weight="700" fill="#166534" text-anchor="middle">new</text>
+<text x="1088" y="494" font-size="14" font-weight="400" fill="#475569" text-anchor="start">added after 1.6.1</text>
+</svg>
