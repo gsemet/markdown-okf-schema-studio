@@ -7,7 +7,6 @@ import * as vscode from "vscode";
 import { withDocument } from "./common";
 import {
   bufferText,
-  MOD,
   openSidePreview,
   press,
   setEditMode,
@@ -94,9 +93,11 @@ export async function scenarioUndoRestoresCommentMark(page: Page): Promise<void>
     await waitFor("the row to leave the buffer", () => !bufferText(document).includes("| beta |"));
     await press(page, "Escape");
 
+    // Undo from the source by command: it runs on the source editor once it is shown, so no key goes
+    // to the webview while the focus is still moving (a Ctrl+Z sent right after Ctrl+1 can be lost,
+    // the same race as in `tableStaleRender.ts`).
     await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
-    await press(page, `${MOD}+1`);
-    await press(page, `${MOD}+z`);
+    await vscode.commands.executeCommand("undo");
     await waitFor("the undo to restore the buffer", () => bufferText(document) === DOCUMENT);
     await waitForRender(document);
     await waitFor("both comment marks after the undo", async () => (await markedThreads(page)).sort().join() === "t1,t2");

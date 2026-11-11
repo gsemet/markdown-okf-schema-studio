@@ -153,7 +153,11 @@ export async function run(): Promise<void> {
     deleteRow.delete(vscode.Uri.file(undoPath), new vscode.Range(5, 0, 6, 0));
     assert.equal(await vscode.workspace.applyEdit(deleteRow), true);
     await waitFor("the orphan", () => getActivePreviewForTests()?.comments.last?.[0]?.orphaned === true);
+    // The preview panel took the focus when it opened, and the `undo` command runs on the focused
+    // part: show the source editor first, or the undo goes to the webview and is lost.
+    await vscode.window.showTextDocument(undoDocument, vscode.ViewColumn.One);
     await vscode.commands.executeCommand("undo");
+    await waitFor("the undo to restore the buffer", () => undoDocument.getText().includes("| beta | 2 |"));
     await waitFor("the thread placed again", () => {
       const last = getActivePreviewForTests()?.comments.last?.[0];
       return last?.orphaned === false && last.anchor.line === 6;
