@@ -4,6 +4,8 @@
 
 - The Rename label field of a table's label now opens above its anchor icon, so it no longer
   hides the first rows of the table, and a click on a cell opens the cell editor right away.
+- Find now scrolls a wide table sideways to show the match, instead of counting a match you could
+  not see when the table was scrolled to another column.
 
 ## 1.6.1 - 2026-11-11
 

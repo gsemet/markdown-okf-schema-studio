@@ -37,6 +37,7 @@ import { scenarioAddFieldPositionAndEscape, scenarioBooleanOneClick, scenarioCom
 import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfterFinalFigure, scenarioInsertBlocksFromPreview, scenarioLargeDocumentPatched, scenarioPendingOverlayWithoutReload, scenarioPropertiesTableWithoutReload, scenarioStatusPageTwoLines, withIncrementalUpdates } from "./renderPatching";
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
 import { scenarioFindRightAfterClick } from "./findAfterClick";
+import { scenarioFindWideTable } from "./findWideTable";
 import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
 import { scenarioLabelRenameAboveTable } from "./labelRenameAboveTable";
 import { scenarioTableShortDelimiter } from "./tableShortDelimiter";
@@ -184,6 +185,7 @@ export async function run(): Promise<void> {
       },
       "table-comment-undo": () => scenarioUndoRestoresCommentMark(page),
       "find-after-click": () => scenarioFindRightAfterClick(page),
+      "find-wide-table": () => scenarioFindWideTable(page),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
       "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),
       "qa210-replays": async () => {
@@ -275,6 +277,7 @@ export async function run(): Promise<void> {
     await scenarioFlushCellAndFrontmatter(page, evidence);
     await scenarioFlushFrontmatterKeptAsTyped(page, evidence);
     await scenarioFindRightAfterClick(page);
+    await scenarioFindWideTable(page);
     await scenarioSaveKeepsBlockInPlace(page, evidence);
     await scenarioStatusPageTwoLines(page, evidence);
     await scenarioTitleBarButton(page, evidence);

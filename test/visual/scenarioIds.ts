@@ -612,6 +612,7 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "toolbar-navigation/v38-mark-containing-block-dark-900": "In the dark preview a selection line inside a long code block outlines that block and no other, not the paragraph below it that starts closer to the line.",
   "toolbar-navigation/v39-sticky-running-text-light-900": "In the light preview scrolled to a heading inside a note, the sticky band shows the headings of the running text only and never the heading inside the note.",
   "toolbar-navigation/v40-sticky-running-text-dark-900": "In the dark preview scrolled to a heading inside a note, the sticky band shows the headings of the running text only and never the heading inside the note.",
+  "toolbar-navigation/v41-find-hit-in-wide-table-light-393": "In the light preview at 393 px in edit mode, a wide table scrolled to its last column and a Find for a word of its second column: Enter scrolls the table so the highlighted hit lies inside its box and the pane, and the page does not scroll sideways.",
   "block-editing/v17-block-selection-light-900": "In edit mode a Shift+click on two blocks outlines both as selected, announces two selected blocks and opens no editor.",
   "block-editing/v18-keyboard-selection-cream-900": "In the cream preview, Down, Down, Enter and Escape from the keyboard open and close the second block and leave it outlined as selected, with no editor open.",
   "block-editing/v19-keyboard-selection-dark-900": "In the dark preview, Down, Down, Enter and Escape from the keyboard open and close the second block and leave it outlined as selected, with no editor open.",
@@ -896,6 +897,7 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "table-editing/v25-table-bar-groups-dark-360": ["arrowdown", "cell-bar", "cell-emoji", "open"],
   "table-editing/v29-cell-editor-clamped-light-280": ["open"],
   "myst/v46-label-rename-above-table-light-290": ["open"],
+  "toolbar-navigation/v41-find-hit-in-wide-table-light-393": ["found"],
 };
 
 /**

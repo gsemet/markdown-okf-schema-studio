@@ -6,6 +6,7 @@ import {
   type FindOptions,
 } from "../../core/find/findMatches";
 import { collectTextBlocks, findInBlocks, type PageMatch, type TextBlock } from "./findIndex";
+import { revealRangeInline } from "./revealInline";
 
 /** The source block a rendered text block belongs to, when its text can be edited from the preview. */
 export interface FindSourceBlock {
@@ -257,6 +258,8 @@ export function installFindBar(
     } else if (rect.top < 70 || rect.bottom > viewport - 20) {
       target.scrollIntoView?.({ block: "center" });
     }
+    // After the vertical step: the range is measured again inside each box that scrolls sideways.
+    if (range) revealRangeInline(range, target, hooks.content(), window);
   };
 
   const showCurrent = (): void => {

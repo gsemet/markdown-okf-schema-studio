@@ -144,6 +144,8 @@ export interface Scenario {
   tableRowColourChecks?: "page" | "overflow" | "edit";
   /** QA271-14: in a pane narrower than the cell minimum the edited cell, its field and buttons stay in view. */
   cellRoomChecks?: boolean;
+  /** QA271-08: with a table scrolled to its end, Find for a word of an earlier column brings the hit into the table's box. */
+  findWideTableChecks?: boolean;
   /** CR 281: with the unchanged title editor open, one click on the priority value below it opens priority. */
   frontmatterClickChecks?: boolean;
   /** CR 290: the Rename label field of a table label opens above the icon and covers no cell. */
