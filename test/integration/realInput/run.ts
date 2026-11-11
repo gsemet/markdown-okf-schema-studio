@@ -40,6 +40,7 @@ import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioFindWideTable } from "./findWideTable";
 import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
 import { scenarioLabelRenameAboveTable } from "./labelRenameAboveTable";
+import { scenarioTableTabRow } from "./tableTabRow";
 import { scenarioTableShortDelimiter } from "./tableShortDelimiter";
 import { scenarioColumnMoveKeepsBlockIdAtRowEnd, scenarioTailedTableMovesAndOpensCellEditor } from "./tableRowTokens";
 import { scenarioUndoRestoresCommentMark } from "./tableCommentUndo";
@@ -178,6 +179,7 @@ export async function run(): Promise<void> {
       },
       "table-escape": () => scenarioTableEscapeKeepsCellsLeft(page),
       "label-rename-above-table": () => scenarioLabelRenameAboveTable(page),
+      "table-tab-row": () => scenarioTableTabRow(page),
       "table-short-delimiter": () => scenarioTableShortDelimiter(page),
       "table-row-tokens": async () => {
         await scenarioColumnMoveKeepsBlockIdAtRowEnd(page);

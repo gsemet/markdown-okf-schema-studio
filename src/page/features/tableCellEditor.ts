@@ -11,6 +11,7 @@ import { CELL_REVEAL_MARGIN, clearCellEditorRoom, fitCellToRoom } from "../modul
 import { createEditPalette } from "../modules/editPalette";
 import { createSlashMenu } from "../modules/slashMenu";
 import { stickyBarShift } from "../modules/stickyBar";
+import { createTabHint, isEmptyModelRow, isTabNewRowCell } from "../modules/tableTabRow";
 import { isApplePlatform } from "../pageSettings";
 import type { BlockEdit, CaretPosition, PageRuntime, TableCellEditor } from "./pageRuntime";
 
@@ -100,8 +101,22 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
   // Escape cancels only the cell it is pressed in. When a cell left earlier in the session holds
   // typed text, the open cell goes back to its opening text and the table is saved and closed, so
   // the buffer and the page keep the cells left; otherwise the whole edit is cancelled as before.
+  // A row that Tab added in the session that opened in it goes away when it is still empty once the
+  // open cell is back to its opening text: the table is saved once without it.
   function cancelTableCellEdit(edit: BlockEdit): void {
     if (edit.finishing) return;
+    if (edit.tabAddedRow !== undefined && edit.tabAddedRow === edit.tableRowIndex && edit.tableModel
+      && edit.tableInput && edit.cellTextAtOpen !== undefined) {
+      const addedRow = edit.tableModel.rows[modelRowOf(edit.tableRowIndex)];
+      const restored = addedRow?.map((text, column) => column === edit.tableColumnIndex ? edit.cellTextAtOpen! : text);
+      if (isEmptyModelRow(restored) && tableTools.deleteRow(edit.tableModel, edit.tableRowIndex) !== undefined) {
+        edit.tableInput.value = edit.cellTextAtOpen;
+        edit.tabAddedRow = undefined;
+        edit.convertedText = undefined;
+        rt.blockEditor.saveBlockEdit();
+        return;
+      }
+    }
     if (edit.keptCellChange && edit.tableModel && edit.tableInput && edit.cellTextAtOpen !== undefined) {
       edit.tableInput.value = edit.cellTextAtOpen;
       edit.tableModel.rows[modelRowOf(edit.tableRowIndex!)]![edit.tableColumnIndex!] = edit.cellTextAtOpen;
@@ -145,7 +160,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       rt.blockEditor.rememberPendingBlockNavigation(edit.target, "end", undefined, {
         tableRowIndex: newRow,
         tableColumnIndex: 0,
-      });
+      }, undefined, true);
       if (!rt.blockEditor.postBlockEditSave(true)) rt.blockEditor.clearPendingBlockNavigation();
       return;
     }
@@ -494,6 +509,13 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     // Done and Cancel under the field, without the status hint (the toolbar carries the position).
     const cellActions = document.createElement("div");
     cellActions.className = "sphinx-preview-block-editor-actions";
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+    // The last cell of the table says what Tab does there; the text box is described by it.
+    if (isTabNewRowCell(selectedCell)) {
+      const hintId = "sphinx-preview-table-cell-hint-" + edit.editId;
+      cellActions.appendChild(createTabHint(document, hintId));
+      input.setAttribute("aria-describedby", hintId);
+    }
     cellActions.appendChild(blockEditor.createEditorButtons(edit));
     edit.element.appendChild(cellActions);
     resizeInput();

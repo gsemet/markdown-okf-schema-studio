@@ -146,6 +146,8 @@ export interface Scenario {
   cellRoomChecks?: boolean;
   /** QA271-08: with a table scrolled to its end, Find for a word of an earlier column brings the hit into the table's box. */
   findWideTableChecks?: boolean;
+  /** QA271-13: the cell editor of the last cell shows "Tab: new row", inside the editor and the pane. */
+  tabHintChecks?: boolean;
   /** CR 281: with the unchanged title editor open, one click on the priority value below it opens priority. */
   frontmatterClickChecks?: boolean;
   /** CR 290: the Rename label field of a table label opens above the icon and covers no cell. */

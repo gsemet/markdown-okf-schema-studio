@@ -355,8 +355,18 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
 }
 
 .sphinx-preview-table-cell-editor .sphinx-preview-block-editor-actions {
+  justify-content: flex-start;
   margin-block-start: 4px;
   gap: 4px;
+}
+
+.sphinx-preview-table-cell-editor [data-sphinx-preview-table-cell-hint] {
+  flex: 0 1 auto;
+  min-width: 0;
+  color: var(--studio-descriptionForeground, GrayText);
+  font-size: 0.85em;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .sphinx-preview-table-cell-editor .sphinx-preview-block-editor-buttons {
