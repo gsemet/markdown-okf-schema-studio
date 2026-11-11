@@ -1,0 +1,20 @@
+{"name":"c4-1-click-field-below-open-editor-is-lost","file":"synth/frontmatter-edge.md","steps":[
+{"open":"${file}","wait":2500},
+{"palette":"Markdown OKF-Schema Studio: Open Preview to Side","wait":4000},
+{"waitFor":"D.querySelector('tr[data-okf-field=title]')","timeout":15000},
+{"editMode":true},
+{"mark":true},
+{"comment":"Unchanged title editor open: its row grows (31 -> 108 px). Mousedown on the notes cell closes it, the rows below move up and the click lands elsewhere."},
+{"clicksel":"tr[data-okf-field=title] td[data-okf-value-cell]"},{"wait":500},
+{"clicksel":"tr[data-okf-field=notes] td[data-okf-value-cell]"},{"wait":900},
+{"check":"feval","expr":"D.activeElement.getAttribute('aria-label')","equals":"Frontmatter notes","label":"c4-1 click on the notes cell below an open unchanged editor opens notes"},
+{"shot":"c4-1-currently","clip":"preview","annotate":["tr[data-okf-field=notes]"],"note":["Clicked here: nothing opens"],"color":["red"]},
+{"key":"Escape","wait":300},
+{"comment":"Working case: the same click on a field above the open editor."},
+{"clicksel":"tr[data-okf-field=notes] td[data-okf-value-cell]"},{"wait":500},
+{"clicksel":"tr[data-okf-field=title] td[data-okf-value-cell]"},{"wait":900},
+{"check":"feval","expr":"D.activeElement.getAttribute('aria-label')","equals":"Frontmatter title","label":"c4-1 click on the title cell above an open editor opens title"},
+{"shot":"c4-1-expected","clip":"preview","annotate":["tr[data-okf-field=title]"],"note":["Works: field above opens"],"color":["green"]},
+{"check":"diff","against":"mark","equals":true,"label":"c4-1 buffer unchanged"},
+{"check":"errors"}
+]}

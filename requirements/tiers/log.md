@@ -72,6 +72,20 @@
   src/core/preview/styles/editModeStyles.ts; tests: test/page/runtimeTableCellRoom.test.ts and the visual
   scenario table-editing/v29 (test/visual/capture_table_cell_room.py).
 
+### A click on a field below an open, unchanged field editor is no longer lost (CR 281, QA271-07)
+
+- SwRS-MDOKFSTUDIO-FMEDIT-019 (proposed, stable, not approved) amended: a new nominal scenario and a
+  refusal table. Closing an unchanged value or key editor on the press moves the rows below it up, so
+  the release lands on the common ancestor of the rows and the click was lost; the click now completes
+  the press on the field cell (a primary press without modifier, remembered while an editor was open
+  to another cell) and opens that field's editor in the same click. A changed value still saves and
+  opens nothing in that click; a click without such a press opens nothing. No approved requirement
+  changed. Source: installPageInput in src/page/features/pageInput.ts (a capture mousedown listener
+  and the fallback of the properties click handler); tests: test/page/runtimeFrontmatterEditor.test.ts,
+  test/integration/realInput/frontmatterFields.ts (RI-T44 part 3) and the replay
+  271-c4-1-click-field-below-open-editor-is-lost.json and the visual scenario
+  frontmatter-editing/v09 (test/visual/capture_frontmatter_click.py).
+
 ### Escape in a table cell cancels only that cell (CR 274, QA271-01)
 
 - SwRS-MDOKFSTUDIO-TABLE-025 (proposed, stable, not approved) amended: Escape in a cell editor outside a

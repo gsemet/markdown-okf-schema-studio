@@ -120,6 +120,25 @@ export function installPageInput(rt: PageRuntime): PageInput {
   /** The element an event happened on, when it is an element. */
   const elementOf = (event: Event): Element | undefined => event.target instanceof Element ? event.target : undefined;
 
+  /**
+   * The properties cell pressed while a field editor was open to another cell (QA271-07, CR 281).
+   * The press closes an unchanged editor, the rows below move up, and the release lands on an
+   * ancestor of the cell: the click is then the press's, not its target's.
+   */
+  let pressedField: { cell: Element; field: string; kind: string } | undefined;
+
+  /** The pressed cell a click completes: the cell itself, or its replacement after a re-render. */
+  function pressedCellOf(press: NonNullable<typeof pressedField>, target: Element): Element | undefined {
+    const { cell } = press;
+    if (cell.isConnected !== false) return target === cell || target.contains(cell) ? cell : undefined;
+    // The close applied deferred properties markup: find the field again in the current section.
+    const section = document.querySelector("[data-okf-properties]");
+    if (!section || !(target === section || section.contains(target) || target.contains(section))) return undefined;
+    const row = Array.from(section.querySelectorAll("tr[data-okf-field]"))
+      .find((candidate) => candidate.getAttribute("data-okf-field") === press.field);
+    return row?.querySelector(`[data-okf-edit-cell="${press.kind}"]`) ?? undefined;
+  }
+
   return {
     refreshPreview,
     applyDescriptionVisibility,
@@ -183,19 +202,41 @@ export function installPageInput(rt: PageRuntime): PageInput {
         applyFrontmatterVisibility();
         rt.scroll.measure();
       });
+      // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
+      // The press decides the field: it never prevents a default, so focus and selection behave as
+      // before; the click below completes it when the layout moved between press and release.
+      document.addEventListener("mousedown", (event) => {
+        pressedField = undefined;
+        const edit = state.activeFrontmatterEdit;
+        if (!state.editMode || !edit || event.button !== 0
+          || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !(event.target instanceof Element)
+          || event.target.closest("[data-okf-frontmatter-editor]")) return;
+        const cell = event.target.closest("[data-okf-edit-cell]");
+        const row = cell?.closest("tr[data-okf-field]");
+        const field = row?.getAttribute("data-okf-field");
+        const kind = cell?.getAttribute("data-okf-edit-cell");
+        if (!cell || !row || !field || !kind || row.getAttribute("data-okf-editable") !== "true"
+          || edit.valueCell === cell) return;
+        pressedField = { cell, field, kind };
+      }, true);
       // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
       // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-001
       // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
       document.addEventListener("click", (event) => {
+        const press = pressedField;
+        pressedField = undefined;
         if (event.target instanceof Element
           && event.target.closest('a[data-sphinx-preview-navigation^="okf-link:"]')) return;
         const frontmatterEditor = event.target instanceof Element
           ? event.target.closest("[data-okf-frontmatter-editor]")
           : undefined;
         if (frontmatterEditor) return;
-        const cell = event.target instanceof Element
+        const clicked = event.target instanceof Element
           ? event.target.closest("[data-okf-edit-cell]")
           : undefined;
+        // A click that completes a press on a cell the layout moved away from belongs to that cell.
+        const cell = clicked ?? (press && state.editMode && event.target instanceof Element
+          ? pressedCellOf(press, event.target) : undefined);
         const row = cell?.closest("tr[data-okf-field]");
         if (!cell || !row || !state.editMode) return;
         event.preventDefault?.();
