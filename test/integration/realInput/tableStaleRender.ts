@@ -7,7 +7,6 @@ import { withDocument } from "./common";
 import {
   bufferText,
   findCurrentFrame,
-  MOD,
   openSidePreview,
   press,
   setEditMode,
@@ -110,10 +109,15 @@ export async function scenarioUndoUnderCellEditorRendersTable(page: Page): Promi
       });
     }
 
-    await press(page, `${MOD}+1`);
-    for (let undo = 0; undo < 3; undo += 1) {
-      await press(page, `${MOD}+z`);
-      await new Promise<void>((resolve) => setTimeout(resolve, 250));
+    // Undo from the source, as the replay does. The command runs on the source editor once it is
+    // shown, so no key goes to the webview while the focus is still moving; each undo is awaited
+    // until it changed the buffer (a Ctrl+Z sent right after Ctrl+1 can reach the cell editor's text
+    // box and be lost, which left the buffer one step short on CI).
+    await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+    for (let undo = 1; undo <= 3; undo += 1) {
+      const before = bufferText(document);
+      await vscode.commands.executeCommand("undo");
+      await waitFor(`undo number ${undo} to change the buffer`, () => bufferText(document) !== before);
     }
     const original = ALIGNMENT_DOCUMENT;
     await waitFor("the three undos to restore the original buffer", () => bufferText(document) === original);
