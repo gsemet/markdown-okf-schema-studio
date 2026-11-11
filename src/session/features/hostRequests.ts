@@ -132,7 +132,7 @@ export class HostRequestController {
     preview: PreviewSession,
     message: PageMessageOf<HostRequestType>,
     result: HostListAnswer
-      | { ok: true; path?: string; cancelled?: boolean; fileName?: string; markdown?: string }
+      | { ok: true; path?: string; cancelled?: boolean; fileName?: string; markdown?: string; missingImages?: number }
       | { ok: true; id: string; text: string }
       | { ok: false; reason: string },
   ): void {

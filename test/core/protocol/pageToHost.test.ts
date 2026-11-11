@@ -59,6 +59,21 @@ test("previewCopyText needs an edit id and a string; the 1 MB limit is the host'
   assert.equal(isRegisteredPreviewMessage({ ...copy, editId: "" }), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+test("previewExportHtml needs an edit id, a user gesture flag and a snapshot of the page shape", () => {
+  const snapshot = { contentHtml: "<main></main>", rootAttributes: {}, tokens: {}, mathStyles: "", shownTabs: [0] };
+  const request = { type: "previewExportHtml", documentId: "doc", revision: 1, requestId: 1, editId: "e", snapshot, userGesture: true };
+  assert.equal(isRegisteredPreviewMessage(request), true);
+  assert.equal(isRegisteredPreviewMessage({ ...request, userGesture: false }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...request, userGesture: "yes" }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...request, editId: "" }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...request, snapshot: undefined }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...request, snapshot: { ...snapshot, contentHtml: 4 } }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...request, snapshot: { ...snapshot, shownTabs: ["a"] } }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...request, snapshot: { ...snapshot, tokens: { a: 1 } } }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...request, snapshot: { ...snapshot, contentHtml: "x".repeat(50_000_001) } }), false);
+});
+
 test("field helpers respect their boundaries", () => {
   assert.equal(isBoundedString("abc", 3), true);
   assert.equal(isBoundedString("abcd", 3), false);

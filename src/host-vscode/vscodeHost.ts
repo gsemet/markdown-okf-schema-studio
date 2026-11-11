@@ -160,6 +160,18 @@ function createVscodeUi(logger: Logger): HostUi {
       const file = picked?.[0];
       return file ? { path: file.fsPath, local: file.scheme === "file" } : undefined;
     }),
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+    pickSaveFile: (options) => Promise.resolve(vscode.window.showSaveDialog({
+      defaultUri: vscode.Uri.file(options.defaultPath),
+      filters: options.filters,
+      saveLabel: options.saveLabel,
+    })).then((picked) => picked?.fsPath),
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+    confirm: (options) => Promise.resolve(vscode.window.showWarningMessage(
+      options.message,
+      { modal: true, ...(options.detail === undefined ? {} : { detail: options.detail }) },
+      options.confirmLabel,
+    )).then((choice) => choice === options.confirmLabel),
     showProblems: () => vscode.commands.executeCommand<void>("workbench.actions.view.problems"),
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
     setPreviewEditing: (editing) => {

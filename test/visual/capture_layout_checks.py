@@ -98,7 +98,7 @@ def check_toolbar_collapse(page: Page, toolbar, page_name: str, failures: list[F
             failures.append(Failure(page_name, f"expanded toolbar state is wrong: {start}"))
         labels = start["tabOrder"]
         collapse = labels.index("Hide view controls") if "Hide view controls" in labels else -1
-        row_one = [name for name in labels[:collapse] if name in ("Refresh preview", "Toggle edit mode")]
+        row_one = [name for name in labels[:collapse] if name in ("Refresh preview", "Toggle edit mode", "Export to HTML")]
         after = labels[collapse + 1:]
         if collapse < 1 or len(row_one) != collapse or after[:3] != ["Anchor preview to text editor", "Back", "Next"]:
             failures.append(Failure(page_name, f"toolbar Tab order does not follow the rows: {labels}"))
@@ -117,8 +117,8 @@ def check_toolbar_collapse(page: Page, toolbar, page_name: str, failures: list[F
             failures.append(Failure(page_name, f"collapsed toolbar state is wrong: {collapsed}"))
         if collapsed["tabOrder"] != labels[:collapse] + ["Show view controls"]:
             failures.append(Failure(page_name, f"collapsed toolbar keeps rows 2 to 5 focusable: {collapsed['tabOrder']}"))
-        # No row holds more buttons than a full row 1 (3): the expanded toolbar is then as wide as the collapsed one.
-        if collapse == 2 and abs(start["width"] - collapsed["width"]) > 0.5:
+        # No row holds more buttons than the full row 1 (4: Refresh, Edit, Export, collapse): the expanded toolbar is then as wide as the collapsed one.
+        if collapse == 3 and abs(start["width"] - collapsed["width"]) > 0.5:
             failures.append(Failure(page_name, f"the expanded toolbar is not as wide as row 1: {start['width']} vs {collapsed['width']}"))
         if collapsed["height"] >= start["height"] - 40:
             failures.append(Failure(page_name, f"collapsing did not shrink the toolbar: {start['height']} -> {collapsed['height']}"))
@@ -276,6 +276,7 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
         ('[data-sphinx-preview-refresh]', "Refresh preview"),
         ('[data-sphinx-preview-anchor]', "Anchor preview to text editor"),
         ('[data-sphinx-preview-edit-toggle]', "Toggle edit mode"),
+        ('[data-sphinx-preview-export]', "Export to HTML"),
         ('[data-sphinx-preview-theme-toggle]',
          theme_labels.get(scenario.get("previewThemeMode"), "Preview theme: Current theme")),
     )
@@ -311,7 +312,7 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
           rect: (({top, bottom, left, right}) => ({top, bottom, left, right}))(child.getBoundingClientRect()),
         }))"""
     )
-    expected_main = 3 if toolbar.locator('[data-sphinx-preview-edit-toggle]').count() else 2
+    expected_main = 4 if toolbar.locator('[data-sphinx-preview-edit-toggle]').count() else 3
     if [row["row"] for row in rows] != ["main", "navigation", "appearance", "layout", "content"]:
         failures.append(Failure(page_name, f"toolbar is not five rows (main, navigation, appearance, layout, content): {rows}"))
         return
@@ -323,7 +324,7 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
     check_diff_toggle(page, toolbar, page_name, failures, starts_pressed=render_options.get("incomingChanges") is not False)
     if any(upper["rect"]["bottom"] > lower["rect"]["top"] + 0.5 for upper, lower in zip(rows, rows[1:])):
         failures.append(Failure(page_name, "toolbar rows overlap"))
-    # CR 153: the toolbar stays no wider than 134 px, so it never covers the table handle strip of a 1400 px window.
+    # CR 153: the toolbar stays no wider than 134 px (the four buttons of row 1), so it never covers the table handle strip of a 1400 px window.
     toolbar_width = toolbar.evaluate("element => element.getBoundingClientRect().width")
     if toolbar_width > 134.5:
         failures.append(Failure(page_name, f"the toolbar is wider than 134 px: {toolbar_width}"))

@@ -1,8 +1,8 @@
 # Inline code with `pedal_position`
 
-Control line without any code in it.
+Plain line.
 
-Control line with `pedal_position` inside it.
+Line with `pedal_position`.
 
 A longer paragraph that mixes prose with `inline_code`, the `--flag=value` option and a very long
 identifier such as `REGIONAL_ARBITER_ELECTION_TIMEOUT_MILLISECONDS_AFTER_QUORUM_LOSS` that must

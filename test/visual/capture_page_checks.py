@@ -418,8 +418,8 @@ def check_inline_code(page: Page, scenario: dict, failures: list[Failure]) -> No
     found = page.evaluate("""() => {
       const root = document.querySelector('#sphinx-myst-preview-content');
       const paragraph = (start) => [...root.querySelectorAll('p')].find(p => p.textContent.startsWith(start));
-      const plain = paragraph('Control line without');
-      const withCode = paragraph('Control line with ');
+      const plain = paragraph('Plain line');
+      const withCode = paragraph('Line with ');
       const code = withCode.querySelector('code');
       const style = getComputedStyle(code);
       const inLink = root.querySelector('a code');

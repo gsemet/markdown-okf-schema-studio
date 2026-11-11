@@ -318,9 +318,9 @@ html[data-sphinx-preview-toolbar-state="collapsed"]:not([data-sphinx-preview-too
   font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
-  /* Widest toolbar row, expanded or collapsed (3 buttons of 30px, 2px gaps, 3px padding, 1px border)
+  /* Widest toolbar row, expanded or collapsed (4 buttons of 30px, 2px gaps, 3px padding, 1px border)
      + 14px margin + 4px clearance + 4px slack. */
-  --sphinx-preview-warning-banner-reserve: calc(3 * 30px + 2 * 2px + 8px + 14px + 8px);
+  --sphinx-preview-warning-banner-reserve: calc(4 * 30px + 3 * 2px + 8px + 14px + 8px);
   --sphinx-preview-warning-accent: color-mix(in srgb, var(--studio-charts-yellow, #bf8803) 75%, var(--studio-editor-foreground, CanvasText));
 }
 

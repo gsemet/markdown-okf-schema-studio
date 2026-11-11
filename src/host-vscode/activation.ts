@@ -46,6 +46,8 @@ const FOLD_COMMAND_IDS: Readonly<Record<PreviewFoldCommandName, string>> = {
 };
 /** The command of the Cmd/Ctrl+F key binding on a focused preview (CR 144). */
 const FIND_COMMAND_ID = "markdown-okf-schema-studio.find";
+/** The command that exports the focused preview, or the preview of the active document, as one HTML file. */
+export const EXPORT_HTML_COMMAND_ID = "markdown-okf-schema-studio.exportHtml";
 /** The view type of the side preview panels (and of their serializer). */
 export const PANEL_VIEW_TYPE = "markdown-okf-schema-studio.preview";
 /** The view type of the custom editor (a fixed preview of one document). */
@@ -108,6 +110,13 @@ export class StudioActivation {
         vscode.commands.registerCommand(FOLD_COMMAND_IDS[command], () => manager.runFoldCommand(command))),
       // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
       vscode.commands.registerCommand(FIND_COMMAND_ID, () => manager.runFindCommand()),
+      // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+      vscode.commands.registerCommand(EXPORT_HTML_COMMAND_ID, () => {
+        const active = vscode.window.activeTextEditor?.document;
+        if (!manager.runExportCommand(active ? host.documents.of(active) : undefined)) {
+          fireAndForget(host.logger, host.ui.showInformation("Open the preview of this file to export it."), "showInformation");
+        }
+      }),
       vscode.window.registerWebviewPanelSerializer(PANEL_VIEW_TYPE, {
         deserializeWebviewPanel: (panel, state) => this.deserializePreviewPanel(panel, state),
       }),

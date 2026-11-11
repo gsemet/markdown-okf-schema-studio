@@ -71,6 +71,28 @@
   test/page/runtimeTableRowMove.test.ts, visual scenarios table-editing/v33 and v34 and
   test/integration/realInput/tableInContainer.ts.
 
+### Export a page to one self-contained HTML file (CR 288)
+
+- StRS-MDOKFSTUDIO-TOOLBAR-014 and SwRS-MDOKFSTUDIO-TOOLBAR-134, -135, -136, -137, SwRS-MDOKFSTUDIO-FMSCHEMA-091
+  and SwRS-MDOKFSTUDIO-DIAG-128 added (proposed, not approved): the Export to HTML command and toolbar
+  button, the removal of links to other files after a warning, the self-contained file without script,
+  the content without comments and editing controls, the closed properties details and the exported
+  diagrams. SwRS-MDOKFSTUDIO-TOOLBAR-001 (proposed, stable, not approved) amended on the owner's decision:
+  the toolbar holds 16 buttons, the main row has four (Refresh, Edit, Export to HTML, collapse) and the
+  other four rows keep three; the toolbar stays no wider than 134 px. SwRS-MDOKFSTUDIO-TRUST-001 counts
+  16 buttons. No approved requirement changed. Source: src/core/export/, src/page/modules/exportSnapshot.ts,
+  src/session/features/htmlExport.ts, src/core/preview/previewToolbar.ts and src/host-vscode/activation.ts;
+  tests: test/core/export/htmlExport.test.ts, test/page/modules/exportSnapshot.test.ts,
+  test/session/htmlExport.test.ts, test/core/preview/previewStyles.test.ts,
+  test/visual/capture_export_html.py and test/integration/exportHtml.test.ts.
+- CI fix at 460 px: SwRS-MDOKFSTUDIO-MYST-081 (proposed, not approved) now reserves 156 px at the right of the
+  warning banner (the four-button toolbar row) instead of 124 px; StRS-MDOKFSTUDIO-TOOLBAR-001 lists Export to
+  HTML in row 1. The inline-code control paragraph of test/visual/fixtures/22-inline-code.md is shorter so it
+  stays on one line beside the wider floating toolbar; the check itself is unchanged.
+- Round 2: TOOLBAR-134 states the too-large and refused snapshot (the page and the host answer, the
+  button works again); TOOLBAR-137 states that an unavailable diagram does not hold the export and
+  records the open block editor as a known issue (the block is missing from the file; backlog item).
+
 ## 2026-11-10
 
 ### Block ids and tokens at the end of a table row (CR 279, QA271-02 and QA271-10)

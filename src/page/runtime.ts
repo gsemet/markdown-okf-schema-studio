@@ -49,6 +49,7 @@ import type { HostTransport } from "./hostTransport";
 import { createBlockSelection } from "./modules/blockSelection";
 import { installChipToggle } from "./modules/chipToggle";
 import { installTabs } from "./modules/tabs";
+import { installExportSnapshot } from "./modules/exportSnapshot";
 import { installCodeCopy } from "./modules/codeCopy";
 import { installCommentCompose } from "./modules/commentCompose";
 import { installCommentThreads } from "./modules/commentThreads";
@@ -255,6 +256,12 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const chipToggle = installChipToggle(document, vscode, context, keepReadingLine);
   // MyST tab sets: a click or an arrow key on a tab shows its panel.
   const tabs = installTabs(document);
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+  // Export to HTML: the button of the toolbar and the command of the palette.
+  const exportHtml = installExportSnapshot(document, window, {
+    ask: (type, payload, settings, done) => hostRequests.ask(type, payload, settings, done),
+    report: (message) => statusRegion.applyStatusRegion({ status: "error", label: "Export to HTML", message, diagnostics: [] }),
+  });
   applyCodeBlockSettings(document.documentElement, context);
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
   const incomingChanges = installIncomingChanges(document);
@@ -421,7 +428,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.parts = {
     contentMorph, stickyBand, statusRegion, commentThreads, commentCompose, linkNavigation, firstClearance,
     codeCopy, labelRename, hostRequests, plantUmlFileRequests, pasteImage, pasteHtml, pasteUrl, warningBanner,
-    figureEditButton, chipToggle, tabs, incomingChanges, sideBySide, motion, historyControls, viewControls, widthMode,
+    figureEditButton, chipToggle, tabs, exportHtml, incomingChanges, sideBySide, motion, historyControls, viewControls, widthMode,
     tocColumn, headingFold, find: findBar, themeMode, anchorMode, checkboxes, inlineThreads, linkTooltip,
   };
   rt.editorChrome.bindPaletteSticky();

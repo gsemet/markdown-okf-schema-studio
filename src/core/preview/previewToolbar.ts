@@ -6,6 +6,8 @@ const ANCHOR_BUTTON = `<button type="button" data-sphinx-preview-anchor data-anc
 
 const EDIT_BUTTON = `<button type="button" data-sphinx-preview-edit-toggle data-edit-mode="off" aria-pressed="false" aria-label="Toggle edit mode" title="Edit mode" data-tooltip="Edit mode"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>`;
 
+const EXPORT_BUTTON = `<button type="button" data-sphinx-preview-export aria-label="Export to HTML" title="Export to HTML" data-tooltip="Export to HTML"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M4 17v3h16v-3"></path></svg></button>`;
+
 const BACK_BUTTON = `<button type="button" data-sphinx-preview-back disabled aria-label="Back" title="Back" data-tooltip="Back"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></button>`;
 
 const NEXT_BUTTON = `<button type="button" data-sphinx-preview-next disabled aria-label="Next" title="Next" data-tooltip="Next"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>`;
@@ -30,15 +32,16 @@ const COLLAPSE_BUTTON = `<button type="button" data-sphinx-preview-toolbar-colla
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-001
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
 /**
- * Five rows of at most three buttons, so the toolbar stays narrow. Row 1 (actions): Refresh, Edit (always enabled: trust never
- * makes a document read-only) and the collapse button. Row 2 (navigation): Anchor, Back, Next. Row 3 (appearance):
+ * Five rows, each of at most three buttons except the first. Row 1 (actions): Refresh, Edit (always enabled: trust never
+ * makes a document read-only), Export to HTML and the collapse button (four buttons: the only row that holds more than three). Row 2 (navigation): Anchor, Back, Next. Row 3 (appearance):
  * Theme, Zoom out, Zoom in. Row 4 (layout): Width, TOC, Side-by-side. Row 5 (content): Fold, Diff, Comments. Rows 2 to 5 sit in one
  * group that the collapse button hides; the Tab order follows the rows.
  */
 export function renderPreviewToolbar(): string {
   const row = (name: string, buttons: string): string => `<div data-sphinx-preview-toolbar-row="${name}">${buttons}</div>`;
-  const mainRow = row("main", `${REFRESH_BUTTON}${EDIT_BUTTON}${COLLAPSE_BUTTON}`);
+  const mainRow = row("main", `${REFRESH_BUTTON}${EDIT_BUTTON}${EXPORT_BUTTON}${COLLAPSE_BUTTON}`);
   const navigationRow = row("navigation", `${ANCHOR_BUTTON}${BACK_BUTTON}${NEXT_BUTTON}`);
   const appearanceRow = row("appearance", `${THEME_BUTTON}${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}`);
   const layoutRow = row("layout", `${WIDTH_BUTTON}${TOC_BUTTON}${SIDE_BY_SIDE_BUTTON}`);

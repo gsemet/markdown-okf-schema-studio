@@ -23,6 +23,7 @@ import type { HostMessageRouter } from "../hostMessages";
 import type { createBlockSelection } from "../modules/blockSelection";
 import type { installChipToggle } from "../modules/chipToggle";
 import type { installTabs } from "../modules/tabs";
+import type { installExportSnapshot } from "../modules/exportSnapshot";
 import type { installCodeCopy } from "../modules/codeCopy";
 import type { installCommentCompose } from "../modules/commentCompose";
 import type { installCommentThreads } from "../modules/commentThreads";
@@ -364,6 +365,7 @@ export interface PageParts {
   figureEditButton: FigureEditButton;
   chipToggle: ReturnType<typeof installChipToggle>;
   tabs: ReturnType<typeof installTabs>;
+  exportHtml: ReturnType<typeof installExportSnapshot>;
   incomingChanges: ReturnType<typeof installIncomingChanges>;
   sideBySide: ReturnType<typeof installSideBySide>;
   motion: ReturnType<typeof installMotion>;

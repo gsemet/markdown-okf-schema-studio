@@ -26,7 +26,8 @@ test("every page message type has one handler of a feature controller", () => {
   const router = (manager as unknown as { router: { on(type: string, handler: () => void): void } }).router;
   const types = Object.keys(PAGE_MESSAGE_GATES);
   // CR 147 added previewSideBySideChanged (43 -> 44 page message types).
-  assert.equal(types.length, 44);
+  // CR 288 added previewExportHtml (44 -> 45).
+  assert.equal(types.length, 45);
   for (const type of types) {
     // The router refuses a second handler: one is registered already.
     assert.throws(() => router.on(type, () => undefined), /already registered/u, type);
@@ -158,6 +159,87 @@ test("a hidden panel does not render until it is shown, then renders once", asyn
     await f.wait(200);
     assert.equal(f.renders.length, 1, "one render when the panel is shown");
     assert.equal(hidden.session.renderDirty, false);
+  } finally {
+    f.cleanup();
+  }
+});
+
+/** Gives a fixture session a stage and records what it posts to its page and the snapshots the host expects. */
+function exportProbe(f: ReturnType<typeof renderFixture>, entry: ReturnType<ReturnType<typeof renderFixture>["newSession"]>, withStage = true) {
+  const posted: Array<Record<string, unknown>> = [];
+  const session = entry.session as unknown as {
+    stage?: unknown; postToPage(message: Record<string, unknown>): PromiseLike<boolean>;
+  };
+  if (withStage) session.stage = { activeDocumentIdentity: "file:///w/a.md", activeDocumentRevision: 7, requestId: 3 };
+  session.postToPage = (message) => { posted.push(message); return Promise.resolve(true); };
+  const expected: unknown[] = [];
+  const exports = f.manager.exports as unknown as { expectSnapshot(session: unknown): void };
+  exports.expectSnapshot = (armed) => { expected.push(armed); };
+  return { posted, expected };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+test("the Export command asks the focused preview, even when another one shows the active document", () => {
+  const f = renderFixture();
+  try {
+    const focused = f.newSession(true);
+    const other = f.newSession(true);
+    (focused.session.panel as { active: boolean }).active = true;
+    const otherProbe = exportProbe(f, other);
+    const probe = exportProbe(f, focused);
+    assert.equal(f.manager.runExportCommand(f.document), true);
+    assert.deepEqual(probe.posted, [{
+      type: "previewExportCommand", documentId: "file:///w/a.md", revision: 7, requestId: 3,
+    }]);
+    assert.deepEqual(probe.expected, [focused.session], "the snapshot is expected from that preview");
+    assert.deepEqual(otherProbe.posted, [], "the other preview is not asked");
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+test("the Export command falls back to the latest preview of the active document when none has the focus", () => {
+  const f = renderFixture();
+  try {
+    const first = f.newSession(true);
+    const second = f.newSession(true);
+    const firstProbe = exportProbe(f, first);
+    const secondProbe = exportProbe(f, second);
+    assert.equal(f.manager.runExportCommand(f.document), true);
+    assert.equal(secondProbe.posted.length, 1);
+    assert.deepEqual(secondProbe.expected, [second.session]);
+    assert.deepEqual(firstProbe.posted, []);
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+test("the Export command returns false and posts nothing without a focused preview, a matching document or a render", () => {
+  const f = renderFixture();
+  try {
+    const entry = f.newSession(true);
+    const probe = exportProbe(f, entry);
+    assert.equal(f.manager.runExportCommand(undefined), false, "no active document, no focus");
+    assert.equal(f.manager.runExportCommand({ ...f.document, id: "file:///w/other.md" } as never), false, "no preview of that document");
+    assert.deepEqual(probe.posted, []);
+    assert.deepEqual(probe.expected, []);
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+test("the Export command returns false for a preview that has not rendered yet", () => {
+  const f = renderFixture();
+  try {
+    const entry = f.newSession(true);
+    (entry.session.panel as { active: boolean }).active = true;
+    const probe = exportProbe(f, entry, false);
+    assert.equal(f.manager.runExportCommand(f.document), false);
+    assert.deepEqual(probe.posted, []);
+    assert.deepEqual(probe.expected, []);
   } finally {
     f.cleanup();
   }

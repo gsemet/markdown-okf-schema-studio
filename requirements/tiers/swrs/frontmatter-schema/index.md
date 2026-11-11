@@ -93,5 +93,6 @@
 - [SwRS-MDOKFSTUDIO-FMSCHEMA-088 — The generic table is shown when no schema lookup is made](SwRS-MDOKFSTUDIO-FMSCHEMA-088.md) — When no schema lookup is made for the document, the extension SHALL show the generic frontmatter table.
 - [SwRS-MDOKFSTUDIO-FMSCHEMA-089 — Every violation of the schema is reported](SwRS-MDOKFSTUDIO-FMSCHEMA-089.md) — When the frontmatter violates the schema in several places, the extension SHALL report every violation, not only the first.
 - [SwRS-MDOKFSTUDIO-FMSCHEMA-090 — The frontmatter properties table collapses under its header and is shown again on every page load](SwRS-MDOKFSTUDIO-FMSCHEMA-090.md) — When a writer presses the toggle next to the Frontmatter properties title, the extension SHALL hide the table below the header, show it again on the next press, keep the state across content patches and edits of the open document, and show the table expanded whenever the page loads or a document is opened.
+- [SwRS-MDOKFSTUDIO-FMSCHEMA-091 — The exported properties table opens on a click](SwRS-MDOKFSTUDIO-FMSCHEMA-091.md) — When the exported page has frontmatter properties, the extension SHALL write the properties table as a closed details element that opens on a click and, when the schema was found, shows the Description column.
 
 <!-- okfreq:index:end -->

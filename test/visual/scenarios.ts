@@ -87,6 +87,11 @@ export interface Scenario {
   mermaidThemeSwitch?: true;
   /** K3: cycles the theme modes of an invalid diagram and asserts it keeps exactly one error with one parser-message details. */
   mermaidErrorThemeSwitch?: true;
+  /**
+   * CR 288: `npm run visual:render` also writes the "Export to HTML" file of this page (`<scenario>.export.html`,
+   * see `exportFileName` in renderOptions.ts) and `check_export_html` opens it with JavaScript off.
+   */
+  exportHtml?: true;
   /** Shown first in its group page and in the index thumbnails. */
   gallery?: "key";
   readme?: ReadmeSource;

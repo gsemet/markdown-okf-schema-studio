@@ -1,10 +1,10 @@
 # Floating Toolbar
 
-The floating toolbar at the top right of the preview has five rows of at most three buttons, so it
+The floating toolbar at the top right of the preview has five rows of at most four buttons, so it
 stays narrow and covers little of the page:
 
-1. **Actions:** Refresh, Edit (writable previews only), and a chevron button that hides or shows
-   rows 2 to 5.
+1. **Actions:** Refresh, Edit (writable previews only), Export to HTML (see below), and a chevron
+   button that hides or shows rows 2 to 5.
 2. **Navigation:** Anchor (link the preview scroll to the text editor), Back and Next.
 3. **Appearance:** Theme, Zoom out and Zoom in.
 4. **Layout:** Width, Table of contents and Side-by-side (see below).
@@ -26,6 +26,23 @@ stays), it works in reading mode only (the button is disabled in edit mode, wher
 remain), and it never changes the file. It needs the same conditions as the green bars: a file known
 to Git in a trusted workspace, with `preview.showIncomingChanges` on, which also hides the button
 when off.
+
+## Export to HTML
+
+The Export button, or the command **Export to HTML** of the command palette, saves the page as one
+`.html` file that a reader opens in any browser, with no editor and no other file. A save dialog
+proposes the name of the page with the `.html` extension; Cancel writes nothing.
+
+- The file keeps the preview's theme (including a forced dark, white or cream mode), content width
+  and width mode. The zoom is not kept: the file is written at 100 %.
+- Local images and the Mermaid, PlantUML and Vega diagrams are embedded in the file.
+- Tabs and dropdowns work without JavaScript, and the properties table is a closed section that
+  opens on a click.
+- Review comments, comment marks and editing controls are left out.
+- Links to other files (relative, wiki and blocked links) cannot work for the reader: they are
+  written as plain text, after a warning that lists them. Cancel the warning to stop the export.
+  Links to a web address and to a heading of the same page stay.
+- Export works in Restricted Mode.
 
 The chevron button collapses the toolbar to its first row when you want the most room for the
 text, and expands it again. The choice is remembered per workspace; a new workspace starts with

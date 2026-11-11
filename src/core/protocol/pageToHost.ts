@@ -21,6 +21,7 @@
  */
 
 import { isValidAnchor, MAX_BODY_LENGTH } from "../comments/commentModel";
+import { isExportSnapshot } from "../export/exportSnapshot";
 import { MAX_THREAD_REPLY_LENGTH } from "../comments/inlineThread";
 import { MAX_DROPPED_FILES, MAX_DROPPED_URI_LENGTH } from "../mapping/dropReferences";
 import { isValidLabelName } from "../mapping/labelRename";
@@ -242,6 +243,10 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // The size limit is the host's to answer (`previewCopyTextResult`); the shape check only keeps
   // a message of absurd size out of the host.
   previewCopyText: (message) => isHostRequest(message) && isBoundedString(message.text, MAX_COPY_TEXT_TRANSPORT_LENGTH)
+    && typeof message.userGesture === "boolean",
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+  // The page as it shows now, to be written as one HTML file by the host.
+  previewExportHtml: (message) => isHostRequest(message) && isExportSnapshot(message.snapshot)
     && typeof message.userGesture === "boolean",
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-058
   // Back / Next of toolbar row 2: the host walks the panel's navigation history.
