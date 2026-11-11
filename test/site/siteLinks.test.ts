@@ -15,6 +15,13 @@ test("site branding resolves from root and nested pages", () => {
   }
 });
 
+test("the site header links the How we ship page from root and nested pages", () => {
+  for (const [currentPage, target] of [["index.html", "docs/how-we-ship.html"], ["docs/guide.html", "how-we-ship.html"], ["reports/e2e/index.html", "../../docs/how-we-ship.html"]]) {
+    const document = pageDocument("Studio", currentPage, "<h1>Studio</h1>");
+    assert.ok(document.includes(`<a href="${target}">How we ship</a>`));
+  }
+});
+
 test("rewrites rendered Markdown documents and preserves fragments", () => {
   assert.equal(
     rewriteLinkTarget("docs/guide.md#setup", "README.md", "index.html", renderedPages),

@@ -63,6 +63,7 @@ export function pageDocument(title: string, currentPage: string, body: string): 
   const rootLink = relativeSitePath(currentPage, "index.html");
   const contributingLink = relativeSitePath(currentPage, "contributing.html");
   const galleryLink = relativeSitePath(currentPage, "gallery.html");
+  const howWeShipLink = relativeSitePath(currentPage, "docs/how-we-ship.html");
   const requirementsLink = relativeSitePath(currentPage, "requirements.html");
   return `<!doctype html>
 <html lang="en">
@@ -143,7 +144,7 @@ ${DARK_THEME_CSS}
 </style>
 </head>
 <body>
-<header><nav><a class="site-brand" href="${rootLink}"><img src="${relativeSitePath(currentPage, "images/logo.svg")}" alt="" width="44" height="44"><strong>Markdown OKF-Schema Studio</strong></a><a href="${rootLink}">Home</a><a href="${contributingLink}">Contributing</a><a href="${galleryLink}">Gallery</a><a href="${requirementsLink}">Requirements</a></nav></header>
+<header><nav><a class="site-brand" href="${rootLink}"><img src="${relativeSitePath(currentPage, "images/logo.svg")}" alt="" width="44" height="44"><strong>Markdown OKF-Schema Studio</strong></a><a href="${rootLink}">Home</a><a href="${contributingLink}">Contributing</a><a href="${howWeShipLink}">How we ship</a><a href="${galleryLink}">Gallery</a><a href="${requirementsLink}">Requirements</a></nav></header>
 <main>${body}</main>
 <footer>Generated from the repository README and current local reports.</footer>
 </body>
