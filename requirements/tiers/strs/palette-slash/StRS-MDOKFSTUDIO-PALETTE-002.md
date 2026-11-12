@@ -51,6 +51,21 @@ As a writer, I pick the set of buttons that matches the Markdown flavour of my p
 - A mode the writer chose in the workspace always wins over the setting.
 - The documented key combination in a block editor moves the focus to the palette mode choice and lets the writer come back to the text from the keyboard; it uses the command key of the platform.
 
+### Main paths
+
+#### Path 1: Switch the palette mode and find it again
+
+1. A block text box is open in edit mode
+   - SwRS-MDOKFSTUDIO-PALETTE-017: the writer presses Cmd+Shift+M, or Ctrl+Shift+M elsewhere, and the focus moves to the mode select
+2. The focus is in the mode select
+   - SwRS-MDOKFSTUDIO-PALETTE-001: the writer chooses another mode and the palette lists the buttons of that mode
+   - Option SwRS-MDOKFSTUDIO-PALETTE-010 (refusal): a mode other than strict, gfm, myst or full is refused and the stored mode stays
+3. The palette shows the buttons of the chosen mode
+   - SwRS-MDOKFSTUDIO-LIFE-169: the choice is kept in the saved state of the panel and stored for the workspace
+4. The mode is stored for the workspace
+   - SwRS-MDOKFSTUDIO-LIFE-170: a new page starts in the stored mode, else in the mode given by the setting
+5. A new preview opens with the same palette mode
+
 <!-- okf:links:start -->
 ### Links
 

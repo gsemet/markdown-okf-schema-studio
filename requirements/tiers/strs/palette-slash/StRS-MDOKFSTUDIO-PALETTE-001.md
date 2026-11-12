@@ -103,6 +103,27 @@ As a writer, I format and insert Markdown from buttons or keyboard shortcuts wit
 - The command key is Cmd on macOS and Ctrl elsewhere; the typed letter wins over the physical key, so other keyboard layouts keep their cut, copy and paste.
 - The tooltip of a button shows its shortcut.
 
+### Main paths
+
+#### Path 1: Bold a word, then take it back
+
+1. A block text box is open in edit mode
+   - SwRS-MDOKFSTUDIO-PALETTE-001: the palette opens above the text box with the Palette buttons select and the buttons of the mode in registry order
+2. The palette is shown above the text box
+   - SwRS-MDOKFSTUDIO-PALETTE-045: the writer presses Bold and the selection is wrapped in two asterisks
+   - Option SwRS-MDOKFSTUDIO-PALETTE-039 (refusal): an action that makes no edit leaves the text unchanged
+3. The selection is wrapped in markers
+   - SwRS-MDOKFSTUDIO-PALETTE-039: the writer undoes and the edit is taken back in one step
+4. The text is as it was before the button
+
+#### Path 2: Write a link
+
+1. The palette is shown above the text box
+   - SwRS-MDOKFSTUDIO-PALETTE-089: the writer presses Link, or Cmd+K or Ctrl+K, and the Insert link panel opens under the palette
+2. The Insert link panel is open
+   - SwRS-MDOKFSTUDIO-PALETTE-092: the writer presses Enter or Insert and [text](url) is written over the selection in one undoable step
+3. A link is written over the selection
+
 <!-- okf:links:start -->
 ### Links
 

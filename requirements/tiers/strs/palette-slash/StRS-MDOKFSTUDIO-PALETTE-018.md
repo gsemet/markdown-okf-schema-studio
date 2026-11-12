@@ -53,6 +53,30 @@ As a writer, I paste a screenshot and it becomes a picture of the document witho
 - When the conversion fails or leaves nothing, the plain text of the clipboard is pasted.
 - Only a few link and image address schemes are kept; every other element contributes its text only.
 
+### Main paths
+
+#### Path 1: Paste a screenshot
+
+1. A block text box is open in edit mode
+   - SwRS-MDOKFSTUDIO-PALETTE-203: the writer pastes a clipboard that holds only an image and the page sends it to the host
+   - Option SwRS-MDOKFSTUDIO-PALETTE-203 (refusal): the image cannot be read or the host refuses it
+2. The host receives the image
+   - SwRS-MDOKFSTUDIO-PALETTE-196: the host saves the image in the folder of the document under a name it chooses
+   - Option SwRS-MDOKFSTUDIO-PALETTE-196 (refusal): a check fails
+3. The image is saved next to the document
+   - SwRS-MDOKFSTUDIO-PALETTE-203: its reference is inserted as a paragraph of its own
+4. An image reference stands as a paragraph of its own
+
+#### Path 2: Paste rich text
+
+1. A block text box is open in edit mode
+   - SwRS-MDOKFSTUDIO-PALETTE-213: the writer pastes text/html and the host converts it to Markdown
+   - Option SwRS-MDOKFSTUDIO-PALETTE-213 (refusal): the conversion fails
+2. The host converts the HTML
+   - SwRS-MDOKFSTUDIO-PALETTE-217: each known element is written as its Markdown
+   - Option SwRS-MDOKFSTUDIO-PALETTE-229 (refusal): an unsafe address keeps only the text
+3. The selection is replaced by the converted Markdown
+
 <!-- okf:links:start -->
 ### Links
 
