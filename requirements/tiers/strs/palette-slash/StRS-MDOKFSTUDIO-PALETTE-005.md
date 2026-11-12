@@ -51,6 +51,27 @@ As a writer of a long block, I always find the palette buttons without scrolling
 - A native file dialog opened by a button does not count as leaving the editor.
 - The soft appearance is also given to the pickers and the slash menu; it is switched on by the first pointer or key press of the page and is part of the general preview motion, and none of the motion is shown if the system asks for less.
 
+### Main paths
+
+#### Path 1: Press a palette button and keep writing
+
+1. A block text box is open in edit mode
+   - SwRS-MDOKFSTUDIO-PALETTE-021: the palette is a toolbar named Edition palette on top of the editor frame, and a small palette sticks over a tall editor
+2. The palette is in view above the text box
+   - SwRS-MDOKFSTUDIO-PALETTE-036: the writer presses a palette control and the text box keeps the focus
+   - Option SwRS-MDOKFSTUDIO-PALETTE-031 (nominal): a popover opens inside the editor frame under its button, one at a time
+3. The editor is open with the focus in the text
+   - SwRS-MDOKFSTUDIO-BLOCK-047: the writer presses Done, or Cmd/Ctrl+Enter, or leaves the text box, and the edit is committed
+   - Option SwRS-MDOKFSTUDIO-BLOCK-047 (boundary): an editor whose text is unchanged closes
+4. The edit is saved and the editor is closed
+
+#### Path 2: See the palette appear softly
+
+1. A block text box is open in edit mode
+   - SwRS-MDOKFSTUDIO-CORE-050: the palette, its popovers and the slash menu appear with a soft fade
+   - Option SwRS-MDOKFSTUDIO-CORE-050 (refusal): when the reader prefers reduced motion, no preview motion is applied
+2. The palette is shown
+
 <!-- okf:links:start -->
 ### Links
 

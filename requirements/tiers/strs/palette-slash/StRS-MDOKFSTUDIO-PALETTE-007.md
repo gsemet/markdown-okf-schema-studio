@@ -63,6 +63,29 @@ As a writer, I create or fix a link by filling two fields, add pictures from the
 - A colour code in the text can be changed in place from a swatch.
 - The table picker lets the writer choose the number of rows and columns on a grid; the table that is written, and the other table actions, are specified with the table editing requirements.
 
+### Main paths
+
+#### Path 1: Insert an image
+
+1. The palette is shown above the text box
+   - SwRS-MDOKFSTUDIO-PALETTE-109: the writer presses Image, the host opens a native image file dialog and the editor stays open
+   - Option SwRS-MDOKFSTUDIO-PALETTE-109 (refusal): the dialog comes back without a path
+2. The image dialog is open
+   - SwRS-MDOKFSTUDIO-PALETTE-192: the writer picks an image and the host answers a path relative to the document
+   - Option SwRS-MDOKFSTUDIO-PALETTE-192 (refusal): the writer cancels the dialog
+3. A path relative to the document comes back
+   - SwRS-MDOKFSTUDIO-PALETTE-109: an image reference is inserted or replaces the one under the caret
+4. An image reference is in the text
+
+#### Path 2: Colour a selection
+
+1. The palette is shown above the text box
+   - SwRS-MDOKFSTUDIO-PALETTE-058: the writer presses Colour and a picker opens with the tabs Text and Background, sixteen swatches, a colour code field and a Remove button
+2. The colour picker is open
+   - SwRS-MDOKFSTUDIO-PALETTE-058: the writer picks a swatch or types a valid colour code and the selection is wrapped in a safe colour span
+   - Option SwRS-MDOKFSTUDIO-PALETTE-058 (refusal): an invalid colour code is typed in the field
+3. The selection is wrapped in a colour span
+
 <!-- okf:links:start -->
 ### Links
 
