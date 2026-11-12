@@ -13,10 +13,10 @@ scope: block-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-06T01:44:30+01:00'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-06T01:44:30+01:00'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -94,6 +94,30 @@ As a writer, I trust that every change I make from the preview lands on the line
 - The text a writer typed stays in the editor when a save is refused.
 - Autosaves of one session merge into one undo step in a text editor that shows the file; moves, cuts and pastes use explicit undo stops.
 - Known issue (deduced from the code, not run): a multi-line block of a CRLF document may have its second save refused (see SwRS-MDOKFSTUDIO-BLOCK-234).
+
+### Main paths
+
+#### Path 1: Edit a block and undo it
+
+1. A block editor is open
+   - SwRS-MDOKFSTUDIO-BLOCK-042: the typed text is autosaved as the smallest single replacement
+   - Option SwRS-MDOKFSTUDIO-BLOCK-216 (refusal): a refused save keeps the typed text and says why
+2. The typed text is in the document
+   - SwRS-MDOKFSTUDIO-BLOCK-058: the edit is one undo step and the preview renders once
+   - Option SwRS-MDOKFSTUDIO-BLOCK-058 (refusal): an edit that VS Code does not apply or rejects is answered with a reason
+   - Option SwRS-MDOKFSTUDIO-BLOCK-234: the line endings of the document are kept
+3. The edit is one undo step with the line endings kept
+
+#### Path 2: Cut blocks and paste them
+
+1. A run of blocks is selected
+   - SwRS-MDOKFSTUDIO-BLOCK-169: a cut puts their Markdown on the clipboard and deletes them with one blank separator
+   - Option SwRS-MDOKFSTUDIO-BLOCK-124 (refusal): ranges that do not match the document are refused with a reason
+   - Option SwRS-MDOKFSTUDIO-BLOCK-127 (refusal): copy and cut of an included block are refused
+2. The blocks are on the clipboard and gone from the document
+   - SwRS-MDOKFSTUDIO-BLOCK-174: paste inserts the clipboard text as new blocks after the insert point
+   - Option SwRS-MDOKFSTUDIO-BLOCK-174 (refusal): the document changed while the clipboard was read
+3. The blocks are in their new place
 
 <!-- okf:links:start -->
 ### Links

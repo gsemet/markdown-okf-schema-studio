@@ -58,6 +58,32 @@ As a writer, I swap a block or a selected run of blocks with its neighbour with 
 - A repeated key does not move the block twice.
 - The selection stays on the moved blocks after the move, also if the preview reloads meanwhile.
 
+### Main paths
+
+#### Path 1: Move a block with an arrow
+
+1. Edit mode is on
+   - SwRS-MDOKFSTUDIO-BLOCK-109: the writer clicks an enabled arrow of an insert point and the page asks the host to swap the block with its neighbour
+   - Option SwRS-MDOKFSTUDIO-BLOCK-109 (boundary): the arrows are disabled at the ends of the document
+   - Option SwRS-MDOKFSTUDIO-BLOCK-127 (refusal): the arrows beside an included block are disabled
+2. The host is asked to swap the block with its neighbour
+   - SwRS-MDOKFSTUDIO-BLOCK-117: the host replaces only the lines from the first block to the second, keeping the blank separator
+   - Option SwRS-MDOKFSTUDIO-BLOCK-124 (refusal): a move whose ranges do not match the document is refused with a reason
+3. The two blocks are swapped in the document
+   - SwRS-MDOKFSTUDIO-BLOCK-058: the swap is one undo step and the preview renders once
+4. The block is at its new place and one undo reverts the move
+
+#### Path 2: Move a block with the keyboard
+
+1. A body block is focused in edit mode
+   - SwRS-MDOKFSTUDIO-BLOCK-130: Alt+ArrowUp or Alt+ArrowDown requests the move and focuses the block at its new place
+   - Option SwRS-MDOKFSTUDIO-BLOCK-156 (nominal): with blocks selected the whole selection moves
+2. The host is asked to swap the block with its neighbour
+   - SwRS-MDOKFSTUDIO-BLOCK-117: the host replaces only the lines from the first block to the second, keeping the blank separator
+3. The two blocks are swapped in the document
+   - SwRS-MDOKFSTUDIO-BLOCK-058: the swap is one undo step and the preview renders once
+4. The block is at its new place and one undo reverts the move
+
 <!-- okf:links:start -->
 ### Links
 

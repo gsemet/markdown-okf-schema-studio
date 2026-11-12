@@ -49,6 +49,24 @@ As a writer, I type Markdown in the block editor and the keys do what I expect: 
 - Up and Down leave only from the first or last wrapped line; Left and Right leave at the very start or end.
 - The properties table is skipped: its fields have their own editor.
 
+### Main paths
+
+#### Path 1: Type a list
+
+1. A block editor is open on a list
+   - SwRS-MDOKFSTUDIO-BLOCK-061: Enter continues the list marker
+   - Option SwRS-MDOKFSTUDIO-BLOCK-061 (boundary): Enter on an empty list item
+   - Option SwRS-MDOKFSTUDIO-BLOCK-069 (nominal): typing a marker key over a selection wraps it
+   - Option SwRS-MDOKFSTUDIO-BLOCK-003 (nominal): the VS Code key bindings of undo and redo run on the text box
+2. The next item starts with its marker
+
+#### Path 2: Move on to the next block
+
+1. A block editor is open with the caret on its last line
+   - SwRS-MDOKFSTUDIO-BLOCK-079: ArrowDown saves a changed text and opens the editor of the next block with the caret at its start
+   - Option SwRS-MDOKFSTUDIO-BLOCK-079 (refusal): with a modifier or a selection the key stays with the text box
+2. The editor of the next block is open with the caret at its start
+
 <!-- okf:links:start -->
 ### Links
 

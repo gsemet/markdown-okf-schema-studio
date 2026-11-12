@@ -77,6 +77,29 @@ As a writer, I type in the preview and my Markdown file follows, so a closed win
 - Opening the editor with its edition palette does not move the text I clicked, and closing it does not move the page.
 - After a save the edited block is shown at the same place on the screen.
 
+### Main paths
+
+#### Path 1: Type, then finish
+
+1. A block editor is open
+   - SwRS-MDOKFSTUDIO-BLOCK-042: 400 milliseconds after the last keystroke the text is autosaved as the smallest single replacement
+   - Option SwRS-MDOKFSTUDIO-BLOCK-042 (boundary): an autosave of unchanged text sends nothing
+   - Option SwRS-MDOKFSTUDIO-BLOCK-193 (nominal): a render that arrives while the editor is open waits
+   - Option SwRS-MDOKFSTUDIO-BLOCK-216 (refusal): a refused save keeps the typed text and says why
+2. The typed text is in the document
+   - SwRS-MDOKFSTUDIO-BLOCK-047: Done, Cmd or Ctrl+Enter, or leaving the text box commits the edit
+   - Option SwRS-MDOKFSTUDIO-BLOCK-047 (refusal): the host refuses the final save
+   - Option SwRS-MDOKFSTUDIO-BLOCK-053 (nominal): Cancel or Escape restores the saved text
+3. The final text is saved
+   - SwRS-MDOKFSTUDIO-BLOCK-058: the preview renders once after the final save
+4. The preview shows the saved block once
+
+#### Path 2: Leave while typing
+
+1. A block editor is open
+   - SwRS-MDOKFSTUDIO-BLOCK-205: a followed link, Back or another document saves the typed text first
+2. The typed text is saved before the page leaves the document
+
 <!-- okf:links:start -->
 ### Links
 
