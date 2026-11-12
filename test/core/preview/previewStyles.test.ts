@@ -71,8 +71,10 @@ test("sticky headings align with content and emphasize text in a full-width band
     /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*font-size: calc\(var\(--sphinx-preview-zoomed-font-size\) \+ 2px\);/u,
   );
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*font-weight: 700;/u);
-  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*white-space: pre-wrap;/u);
-  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*overflow-wrap: anywhere;/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*white-space: pre;/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*overflow: hidden;/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*text-overflow: ellipsis;/u);
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*overflow-wrap: anywhere;/u);
   assert.doesNotMatch(
     PREVIEW_THEME_CSS,
     /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*min-height:/u,

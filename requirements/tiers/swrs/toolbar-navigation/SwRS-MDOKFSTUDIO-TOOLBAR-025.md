@@ -7,8 +7,8 @@ description: "When the band is shown, hidden or changes its number of lines, the
   SHALL keep it fixed to the top of the pane at full width with no gap above it, outside
   the document flow and ignoring pointer events, with its text aligned to the content
   column, ending before the toolbar and narrowed by the table of contents reserve,
-  wrapping a long heading path onto more lines, and draw it flat and bold, ended by
-  a one pixel rule."
+  keeping each heading level on one line, cut with an ellipsis when it is too long,
+  and draw it flat and bold, ended by a one pixel rule."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
 req_lifecycle: proposed
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_final_checks.py
 - test/visual/scenarioDefinitions2.ts
+- test/visual/stickyLongTitleScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -38,7 +39,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the band is shown, hidden or changes its number of lines, the extension SHALL keep it fixed to the top of the pane at full width with no gap above it, outside the document flow and ignoring pointer events, with its text aligned to the content column, ending before the toolbar and narrowed by the table of contents reserve, wrapping a long heading path onto more lines, and draw it flat and bold, ended by a one pixel rule.
+When the band is shown, hidden or changes its number of lines, the extension SHALL keep it fixed to the top of the pane at full width with no gap above it, outside the document flow and ignoring pointer events, with its text aligned to the content column, ending before the toolbar and narrowed by the table of contents reserve, keeping each heading level on one line, cut with an ellipsis when it is too long, and draw it flat and bold, ended by a one pixel rule.
 
 ### Scenario (nominal): Band grows
 - GIVEN a band that goes from one to three lines
@@ -74,12 +75,13 @@ When the band is shown, hidden or changes its number of lines, the extension SHA
 | 900 px pane with the table of contents open | the band is narrowed by 256 px and its right edge is at most the left edge of the column |
 | 460 px pane with the button pressed | the band width is not reduced, because the column is hidden |
 
-### Scenario (boundary): Long heading path wraps
+### Scenario (boundary): Long heading cut with an ellipsis
 - GIVEN a 460 px pane and long headings at depth 3
 - WHEN the band is measured
-- THEN the band shows more rendered lines than three, its height equals the lines and the document flow does not shift
-- WHEN a heading word is wider than the band
-- THEN the word breaks anywhere (overflow-wrap anywhere)
+- THEN it shows three rendered lines, each ended by an ellipsis where the heading does not fit, its height equals three lines and the document flow does not shift
+- GIVEN depth 1, a long H1 and a zoom of 160 %
+- WHEN the band is measured
+- THEN the band is one line and the first line of the section is below the band
 
 ### Scenario (nominal): Flat, bold style with a rule
 - GIVEN a shown band
@@ -95,8 +97,8 @@ When the band is shown, hidden or changes its number of lines, the extension SHA
 - Method: test/core/preview/previewStyles.test.ts (Band grows: sticky headings start at the viewport top without filler and leave horizontal room for controls; Text aligned with the column and Flat, bold style: sticky headings align with content and emphasize text in a full-width band; Room published for the toolbar; Table of contents reserve: the TOC column is hidden by default, reserves 256px when open and hides on narrow panes, asserting display none, the 760 px media block, 256 px and the band max-width).
 - Method: test/page/runtimeScroll.test.ts (Room published for the toolbar: does not shift sticky headings down when the floating toolbar grows).
 - Method: test/visual/capture_final_checks.py (check_sticky_headings on toolbar-navigation/v01 to v04: Band grows, Pointer, Text aligned with the column, Text stops before the toolbar as min(column right, toolbar left - 8), Flat, bold style with a rule; the rightmost toolbar button is not covered). The visual check_toc_column never shows a band (it measures after scrolling to the top, where the band is hidden), so the overlap with the column is asserted only by the CSS unit test.
-- Method: test/visual/scenarioDefinitions2.ts (Long heading path wraps: scenario toolbar-navigation/v05-sticky-wrapped-growth-dark-460).
-- Criteria: position fixed, inset-block-start 0, width 100 percent, pointer-events none; text left within 1 px of the content column; text right within 1 px of min(column right, toolbar left - 8); variable = toolbar width + 22, or 0; band max-width is 100 percent minus the reserve, which is 256 px at 760 px or more, else 0; white-space pre-wrap and overflow-wrap anywhere with height >= rendered lines times line height; weight >= 600, font larger than body, border-bottom 1 px, radius 0.
+- Method: test/visual/scenarioDefinitions2.ts (Long heading cut with an ellipsis: scenarios toolbar-navigation/v05-sticky-long-path-ellipsis-dark-460 and toolbar-navigation/v45-sticky-long-title-zoom-160-cream-900; check_sticky_headings reads white-space, overflow, text-overflow and the rendered lines, and checks the section start under the band).
+- Criteria: position fixed, inset-block-start 0, width 100 percent, pointer-events none; text left within 1 px of the content column; text right within 1 px of min(column right, toolbar left - 8); variable = toolbar width + 22, or 0; band max-width is 100 percent minus the reserve, which is 256 px at 760 px or more, else 0; white-space pre, overflow hidden and text-overflow ellipsis, rendered lines equal to the heading levels shown, height >= rendered lines times line height; weight >= 600, font larger than body, border-bottom 1 px, radius 0.
 
 <!-- okf:links:start -->
 ### Links

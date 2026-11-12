@@ -153,8 +153,15 @@ def check_sticky_headings(
           );
           const range = document.createRange();
           range.selectNodeContents(sticky);
+          // The band clips what does not fit (overflow hidden): only the drawn part can overlap.
+          const bandStyle = getComputedStyle(sticky);
+          const drawnRight = sticky.getBoundingClientRect().right - Number.parseFloat(bandStyle.borderRightWidth)
+            - Number.parseFloat(bandStyle.paddingRight);
+          const drawn = [...range.getClientRects()].map(rect => ({
+            left: rect.left, right: Math.min(rect.right, drawnRight), top: rect.top, bottom: rect.bottom,
+          }));
           return (topmost === button || button.contains(topmost))
-            && [...range.getClientRects()].every(bounds => bounds.right <= buttonBounds.left
+            && drawn.every(bounds => bounds.right <= buttonBounds.left
               || bounds.left >= buttonBounds.right || bounds.bottom <= buttonBounds.top
               || bounds.top >= buttonBounds.bottom);
         }""")
@@ -194,6 +201,9 @@ def check_sticky_headings(
         textLineCount,
         whiteSpace: computed.whiteSpace,
         overflowWrap: computed.overflowWrap,
+        overflow: computed.overflow,
+        textOverflow: computed.textOverflow,
+        textCut: element.scrollWidth > element.clientWidth,
         height: bounds.height,
         left: bounds.left,
         top: bounds.top,
@@ -257,10 +267,40 @@ def check_sticky_headings(
           f"expected about {expected_height:.1f}px",
         )
         )
-    if scenario.get("expectStickyGrowth") and style["textLineCount"] <= expected_depth:
+    # TOOLBAR-025: one rendered line per heading level, whatever the pane width or zoom.
+    if style["textLineCount"] != expected_depth:
       failures.append(
-        Failure(page_name, "long sticky headings did not expand beyond one line per heading level")
+        Failure(
+          page_name,
+          f"sticky heading renders {style['textLineCount']} lines for {expected_depth} heading levels",
+        )
       )
+    if scenario.get("expectStickyEllipsis"):
+      if style["whiteSpace"] != "pre" or style["overflow"].split(" ")[0] != "hidden" \
+          or style["textOverflow"] != "ellipsis":
+        failures.append(
+          Failure(
+            page_name,
+            f"sticky heading is white-space {style['whiteSpace']}, overflow {style['overflow']}, "
+            f"text-overflow {style['textOverflow']}; expected pre, hidden, ellipsis",
+          )
+        )
+      if not style["textCut"]:
+        failures.append(Failure(page_name, "long sticky heading text is not cut with an ellipsis"))
+    if scenario.get("expectSectionStartVisible"):
+      section_gap = page.evaluate("""() => {
+        const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+        const main = document.getElementById('sphinx-myst-preview-content');
+        const headings = [...main.querySelectorAll('h1, h2, h3, h4, h5, h6')];
+        const active = headings.filter(heading => heading.getBoundingClientRect().top <= band.getBoundingClientRect().bottom).pop();
+        const block = active && active.nextElementSibling;
+        if (!block) return null;
+        return block.getBoundingClientRect().top - band.getBoundingClientRect().bottom;
+      }""")
+      if section_gap is None or section_gap < -1:
+        failures.append(
+          Failure(page_name, f"the first block of the section is covered by the sticky heading (gap {section_gap})")
+        )
     flow_shift = style["mainDocumentTop"] - initial_main_document_top
     if abs(flow_shift) > 1:
       failures.append(Failure(page_name, "fixed sticky heading unexpectedly shifts document flow"))
@@ -283,8 +323,15 @@ def check_final_frame(page: Page, scenario: dict, failures: list[Failure]) -> di
         }
         const range = document.createRange();
         range.selectNodeContents(sticky);
+        // The band clips what does not fit (overflow hidden): only the drawn part can overlap.
+        const bandStyle = getComputedStyle(sticky);
+        const drawnRight = sticky.getBoundingClientRect().right - Number.parseFloat(bandStyle.borderRightWidth)
+          - Number.parseFloat(bandStyle.paddingRight);
+        const drawn = [...range.getClientRects()].map(rect => ({
+          left: rect.left, right: Math.min(rect.right, drawnRight), top: rect.top, bottom: rect.bottom,
+        }));
         const controls = toolbar.getBoundingClientRect();
-        if ([...range.getClientRects()].some(bounds => bounds.left < controls.right
+        if (drawn.some(bounds => bounds.left < controls.right
           && bounds.right > controls.left && bounds.top < controls.bottom && bounds.bottom > controls.top)) {
           errors.push('sticky heading text overlaps the floating controls');
         }

@@ -35,6 +35,16 @@
   value (their display kept `hidden`); `removeChrome` now unwraps and shows them. Verification adds
   that test and the visual scenario toolbar-navigation/v44.
 
+### A long heading in the sticky band stays on one line (CR 311)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-025 amended: each heading level of the band stays on one line, cut with an
+  ellipsis, instead of wrapping onto more lines; the scenario "Long heading path wraps" is replaced
+  by "Long heading cut with an ellipsis"; visual scenario v05 is reworded (new slug
+  `v05-sticky-long-path-ellipsis-dark-460`) and a new visual scenario
+  `toolbar-navigation/v45-sticky-long-title-zoom-160-cream-900` is added.
+- StRS-MDOKFSTUDIO-TOOLBAR-004: the rationale line says the band keeps each level on one line, cut with
+  an ellipsis, instead of wrapping in a narrow pane.
+
 ### One cream look for the whole published site (CR 303)
 
 - New, proposed, deriving from StRS-MDOKFSTUDIO-TRUST-014: SwRS-MDOKFSTUDIO-CORE-086 (every page and
