@@ -76,6 +76,13 @@ function begin(stage) {
   console.log(`export STUDIO_E2E_COMMAND=${quote(campaign.command)}`);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-076
+function failureText(failure) {
+  if (typeof failure === "string") return failure;
+  if (failure && typeof failure === "object" && "page" in failure) return `${failure.page}: ${failure.detail}`;
+  return JSON.stringify(failure);
+}
+
 function stageFrom(name, command, manifest, missing, campaign) {
   const now = new Date().toISOString();
   if (!manifest) {
@@ -89,7 +96,7 @@ function stageFrom(name, command, manifest, missing, campaign) {
     exitCode: passed ? 0 : 1,
     startedAt: manifest.startedAt ?? campaign.startedAt,
     completedAt: manifest.completedAt ?? now,
-    error: passed ? undefined : (manifest.error ?? (manifest.failures?.length ? manifest.failures.join("; ") : `${name} manifest status is ${manifest.status}`)),
+    error: passed ? undefined : (manifest.error ?? (manifest.failures?.length ? manifest.failures.map(failureText).join("; ") : `${name} manifest status is ${manifest.status}`)),
   };
 }
 

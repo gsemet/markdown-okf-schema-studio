@@ -2,6 +2,13 @@
 
 ## 2026-11-12
 
+### The e2e report names each failed visual check (CR 306)
+
+- SwRS-MDOKFSTUDIO-CORE-076 gains a boundary row on the failure text of the `report` stage: each
+  `{page, detail}` failure of a visual manifest prints as `<page>: <detail>`, never as
+  `[object Object]`. Its code is `scripts/e2e-campaign.mjs` (`failureText`) and its test is
+  `test/site/e2eCampaign.test.ts`.
+
 ### One cream look for the whole published site (CR 303)
 
 - New, proposed, deriving from StRS-MDOKFSTUDIO-TRUST-014: SwRS-MDOKFSTUDIO-CORE-086 (every page and
