@@ -50,6 +50,23 @@ As a reader, I enlarge or shrink the text with two buttons, the column grows or 
 - A zoom change does not draw the document again.
 - A zoom that VS Code cannot save still holds until the window closes.
 
+### Main paths
+
+#### Path 1: Zoom in and keep the zoom
+
+1. The page is shown at a zoom
+   - SwRS-MDOKFSTUDIO-THEME-038: the reader presses Zoom in, which changes the zoom by 10 points
+   - Option SwRS-MDOKFSTUDIO-THEME-038 (boundary): at the last step the button is disabled at its limit
+   - Option SwRS-MDOKFSTUDIO-THEME-038 (refusal): a click at a limit changes nothing
+2. The zoom has changed
+   - SwRS-MDOKFSTUDIO-THEME-043: the content font size and the content column width are set from the zoom, never wider than the pane
+3. The text and the column are scaled together
+   - SwRS-MDOKFSTUDIO-LIFE-169: the host stores the zoom for the workspace
+4. The zoom is stored
+   - SwRS-MDOKFSTUDIO-LIFE-170: the preview opens again at the saved zoom
+   - Option SwRS-MDOKFSTUDIO-LIFE-170 (boundary): the zoom is rounded to the grid and clamped
+5. The page opens at the zoom the reader chose
+
 <!-- okf:links:start -->
 ### Links
 
