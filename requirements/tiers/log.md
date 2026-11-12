@@ -2,6 +2,21 @@
 
 ## 2026-11-12
 
+### The site requirements viewer replaces the Requirements page (CR 302)
+
+- SwRS-MDOKFSTUDIO-CORE-069 (proposed, stable, not approved) amended: the Requirements home is now
+  written at `requirements/` and keeps the chain diagram, the worked example and the figures; the
+  old `requirements.html` redirects to it, the site navigation links `requirements/`, and the
+  lifecycle is read from `req_lifecycle` (falling back to `lifecycle`). Its source companion is now
+  `src/core/render/requirementsViewer.markers.ts`, its tests are in `test/site/requirementsViewer/`.
+- New, all proposed, all deriving from StRS-MDOKFSTUDIO-TRUST-014: CORE-080 (areas, area pages and use
+  case lists), CORE-081 (the map of a use case from its Main paths), CORE-082 (a page for each
+  behaviour), CORE-083 (retired requirements behind History), CORE-084 (the search index), CORE-085
+  (a social card for each level).
+- The `### Main paths` format is unchanged (documented in `project.guidelines.md`, checked by
+  `scripts/check_main_paths.py`); the viewer reads it with its own parser, which does not check the
+  cited ids.
+
 ### Main paths in the StRS
 
 - 78 of the 80 active StRS got a `### Main paths` section (one or two paths each), drawn from the StRS

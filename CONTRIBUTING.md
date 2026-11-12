@@ -303,11 +303,16 @@ remain visible with their original metadata and are not certified as part of the
 campaign.
 
 `just site` and `just ci-gallery` first write the requirements report (`just requirements-report`),
-and the published `out/site/requirements.html` ("Requirements" in the site navigation) is built
-from it: the chain from use case to test as a diagram, one real requirement as an example, and the
-counts of active requirements (per scope, marker coverage, exemptions, known issues; retired ones
-apart). Without the report the site still builds and the page says it was not generated. The page
-follows the reader's light or dark colour scheme, like the rest of the site.
+and the published `out/site/requirements/` ("Requirements" in the site navigation) is built from
+it, written by `test/site/requirementsViewer/`. The home holds the three layers, the areas, the
+chain from use case to test as a diagram, one real requirement as an example and the counts of
+active requirements (per scope, marker coverage, exemptions, known issues; retired ones apart).
+Each area, use case and behaviour has its own page (`requirements/<area>/<requirement id>/`): a use
+case with a `### Main paths` section is drawn as a map, a behaviour lists its scenarios and the
+files that implement and test it, and the retired requirements show behind the History button.
+The old address `out/site/requirements.html` redirects there. Without the report the site still
+builds and the home says it was not generated. The pages follow the reader's light or dark colour
+scheme, and the viewer has its own search.
 
 The shared logo source is [images/logo.svg](images/logo.svg).
 After editing it, run `fnm exec -- npm run logo:generate` to regenerate the PNG used by the README

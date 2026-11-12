@@ -8,12 +8,14 @@ import { renderMyst } from "../../src/core/render/mystRenderer";
 import { E2E_SCREENSHOT_ROOT, EXTENSION_ROOT, REPORTS_ROOT } from "../reportPaths";
 import {
   outputPathForMarkdown,
+  relativeFolderLink,
   relativeSitePath,
   rewriteLinkTarget,
 } from "./siteLinks";
-import { REQUIREMENTS_REPORT_PATH, writeRequirementsPage } from "./requirementsPage";
+import { headTags } from "./siteHead";
+import { REQUIREMENTS_REPORT_PATH, writeRequirementsViewer } from "./requirementsViewer/write";
 import { DARK_THEME_CSS } from "./siteTheme";
-import { cardDocument, escapeHtml, simpleCard, socialMetaTags, writeCardPictures, type SocialCard } from "./socialCard";
+import { cardDocument, escapeHtml, simpleCard, writeCardPictures, type SocialCard } from "./socialCard";
 
 interface HtmlAttribute {
   name: string;
@@ -61,15 +63,12 @@ export function pageDocument(title: string, currentPage: string, body: string, c
   const contributingLink = relativeSitePath(currentPage, "contributing.html");
   const galleryLink = relativeSitePath(currentPage, "gallery.html");
   const howWeShipLink = relativeSitePath(currentPage, "docs/how-we-ship.html");
-  const requirementsLink = relativeSitePath(currentPage, "requirements.html");
+  const requirementsLink = relativeFolderLink(currentPage, "requirements");
   return `<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="${relativeSitePath(currentPage, "favicon.svg")}" type="image/svg+xml">
-<title>${escapeHtml(title)} | Markdown OKF-Schema Studio</title>
-${card ? socialMetaTags(card) + "\n" : ""}<style>
+${headTags(`${title} | Markdown OKF-Schema Studio`, currentPage, card)}
+<style>
 :root { color-scheme: light dark; --ink: #16242c; --muted: #53636c; --line: #d7e0e3; --paper: #f7faf9; --panel: #ffffff; --accent: #0e6974; --accent-strong: #084b55; --warm: #e8b05d; --success: #1b6b4a; --danger: #a33a3a; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.65 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
@@ -387,7 +386,7 @@ async function main(): Promise<void> {
     fs.cpSync(REPORTS_ROOT, path.join(siteRoot, "reports"), { recursive: true, errorOnExist: false, force: true });
   }
   fs.mkdirSync(path.join(siteRoot, "reports"), { recursive: true });
-  writeRequirementsPage(path.join(siteRoot, "requirements.html"), REQUIREMENTS_REPORT_PATH(EXTENSION_ROOT), (body) => pageDocument("requirements", "requirements.html", body));
+  await writeRequirementsViewer(siteRoot, REQUIREMENTS_REPORT_PATH(EXTENSION_ROOT), EXTENSION_ROOT);
   const captureCount = listCaptures().length;
   const mosaic = curatedMosaic();
   const galleryPageCard: SocialCard = {

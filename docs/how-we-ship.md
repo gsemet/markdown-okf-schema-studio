@@ -45,7 +45,7 @@ merge.
 
 - **Tests first.** A new test must fail on the code before the change.
 - **Requirements are traced.** Each behaviour is a requirement anchored in the code and its tests;
-  the [requirements report](../requirements.html) is generated from them.
+  the [requirements report](https://gsemet.github.io/markdown-okf-schema-studio/requirements/) is generated from them.
 - **Screenshots or it did not happen.** A visible change shows before and after, in light and dark
   when themes matter. No screenshot, not mergeable.
 - **The heavy CI is the gate.** The real VS Code jobs (integration, stress) run on every push to
