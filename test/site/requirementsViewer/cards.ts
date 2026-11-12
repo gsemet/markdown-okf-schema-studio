@@ -11,12 +11,12 @@ const LAYERS: readonly { name: string; code: string }[] = [
 
 const CARD_STYLE = `<style>
 .chain { flex: 0 0 360px; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
-.chain li { position: relative; padding: 18px 24px; border: 2px solid var(--line); border-radius: 12px; background: #ffffff; color: var(--muted); }
+.chain li { position: relative; padding: 18px 24px; border: 2px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--soft); }
 .chain li + li::before { content: ""; position: absolute; left: 50%; top: -22px; width: 3px; height: 22px; background: var(--line); }
 .chain b { display: block; font-size: 30px; font-weight: 600; }
 .chain code { font-size: 18px; }
-.chain li.on { border-color: var(--accent); color: var(--ink); box-shadow: 0 0 0 5px rgba(14, 105, 116, .16); }
-.chain.areas li { border-color: var(--accent); }
+.chain li.on { border-color: var(--link); color: var(--ink); box-shadow: 0 0 0 5px rgba(161, 78, 50, .16); }
+.chain.areas li { border-color: var(--link); }
 .headline { font-size: 64px; }
 </style>`;
 

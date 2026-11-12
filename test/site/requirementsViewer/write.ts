@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+import { SITE_CSS } from "../siteTheme";
 import { SITE_URL, escapeHtml, writeCardPictures } from "../socialCard";
 import { levelCards } from "./cards";
 import { homePage } from "./home";
@@ -13,8 +14,6 @@ import { VIEWER_DIR } from "./urls";
 export { REQUIREMENTS_REPORT_PATH };
 
 /** Writes the viewer under `<siteRoot>/requirements/`: the pages, the search index, the assets and the old URL's redirect. */
-
-const ASSETS = ["viewer.css", "viewer.js"] as const;
 
 function writePage(siteRoot: string, spec: PageSpec, footer: PageFooter): void {
   const file = path.join(siteRoot, spec.dir, "index.html");
@@ -52,7 +51,7 @@ export function redirectDocument(): string {
 }
 
 /**
- * Writes the pages, the search index, the stylesheet, the script and the redirect.
+ * Writes the pages, the search index, the stylesheet (the shared site stylesheet then viewer.css), the script and the redirect.
  * A missing or broken report writes the home with a notice and the redirect only; it never throws.
  */
 export function writeViewerPages(siteRoot: string, reportPath: string, root: string): ViewerModel | undefined {
@@ -60,7 +59,10 @@ export function writeViewerPages(siteRoot: string, reportPath: string, root: str
   const footer: PageFooter = { sha: model?.sha ?? currentCommit(root), generatedAt: model?.generatedAt ?? "" };
   const folder = path.join(siteRoot, VIEWER_DIR);
   fs.mkdirSync(folder, { recursive: true });
-  for (const asset of ASSETS) fs.copyFileSync(path.join(root, "test", "site", "requirementsViewer", asset), path.join(folder, asset));
+  const source = path.join(root, "test", "site", "requirementsViewer");
+  // The one stylesheet source: the shared site stylesheet first, then the viewer's own rules.
+  fs.writeFileSync(path.join(folder, "viewer.css"), `${SITE_CSS}\n${fs.readFileSync(path.join(source, "viewer.css"), "utf8")}`);
+  fs.copyFileSync(path.join(source, "viewer.js"), path.join(folder, "viewer.js"));
   fs.writeFileSync(path.join(folder, "search-index.js"), searchIndexScript(model));
   for (const spec of viewerPages(model, root)) writePage(siteRoot, spec, footer);
   fs.writeFileSync(path.join(siteRoot, "requirements.html"), redirectDocument());

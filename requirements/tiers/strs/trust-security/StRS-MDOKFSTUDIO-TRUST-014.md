@@ -24,6 +24,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-083
 - SwRS-MDOKFSTUDIO-CORE-084
 - SwRS-MDOKFSTUDIO-CORE-085
+- SwRS-MDOKFSTUDIO-CORE-086
 - SwRS-MDOKFSTUDIO-TRUST-074
 - SwRS-MDOKFSTUDIO-TRUST-075
 default_owner_email: gaetan@xeberon.net
@@ -57,6 +58,7 @@ As a maintainer, I install on the pinned Node.js version from the official regis
   - [SwRS-MDOKFSTUDIO-CORE-083](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-083.md): The site requirements viewer keeps retired requirements behind History
   - [SwRS-MDOKFSTUDIO-CORE-084](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-084.md): The site requirements viewer has a search index
   - [SwRS-MDOKFSTUDIO-CORE-085](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-085.md): The site requirements viewer has a social card for each level
+  - [SwRS-MDOKFSTUDIO-CORE-086](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-086.md): The published site has one cream look on every page and picture
   - [SwRS-MDOKFSTUDIO-TRUST-074](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package ships its icon and its bundle
   - [SwRS-MDOKFSTUDIO-TRUST-075](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-075.md): The extension is built from pinned, official dependencies
 <!-- okf:links:end -->

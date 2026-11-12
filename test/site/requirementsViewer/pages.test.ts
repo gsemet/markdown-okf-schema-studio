@@ -117,12 +117,14 @@ test("behaviour page: files at the commit, test kinds, retired rows and the wher
   assert.equal(testKind("tests/fixtures/x.py"), "unit");
 });
 
-test("without JavaScript the search, Play and theme controls are hidden", () => {
+test("without JavaScript the search and Play controls are hidden", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-081
   // @tests_req SwRS-MDOKFSTUDIO-CORE-084
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
   for (const page of viewerPages(load(), "/nonexistent-root")) {
+    assert.ok(!viewerDocument(page, FOOTER).includes('id="theme"'), "no page has a Theme button");
     const rule = /<noscript><style>([^<]*)<\/style><\/noscript>/u.exec(viewerDocument(page, FOOTER))?.[1] ?? "";
-    for (const selector of ["#search-open", "#theme", ".play"]) {
+    for (const selector of ["#search-open", ".play"]) {
       assert.ok(rule.includes(selector), `${page.dir} hides ${selector}`);
     }
     assert.ok(!rule.includes("hist"), "the CSS-only History toggle stays");

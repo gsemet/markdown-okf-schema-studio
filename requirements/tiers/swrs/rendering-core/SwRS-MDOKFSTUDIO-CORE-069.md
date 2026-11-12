@@ -80,7 +80,8 @@ When a maintainer builds the Pages site, the build SHALL write the Requirements 
   report writes the home and the redirect only" in test/site/requirementsViewer/write.test.ts.
 - Criteria: The counts, the percentages and the degraded text match the fixture; the navigation of
   every page links requirements/ (it linked requirements.html before the viewer replaced the
-  page). The published look in light and dark is not asserted.
+  page). The published look is cream only and is asserted by
+  the tests of SwRS-MDOKFSTUDIO-CORE-086.
 
 <!-- okf:links:start -->
 ### Links

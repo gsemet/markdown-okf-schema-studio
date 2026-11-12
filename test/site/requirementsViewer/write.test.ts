@@ -34,6 +34,7 @@ test("the viewer is written under requirements/ with its assets, index and redir
   // @tests_req SwRS-MDOKFSTUDIO-CORE-069
   // @tests_req SwRS-MDOKFSTUDIO-CORE-080
   // @tests_req SwRS-MDOKFSTUDIO-CORE-084
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-requirements-"));
   try {
     const reportPath = path.join(root, "report.json");
@@ -46,7 +47,12 @@ test("the viewer is written under requirements/ with its assets, index and redir
     }
     assert.ok(!fs.existsSync(path.join(site, "requirements", "myst", "StRS-X-002")));
     const home = fs.readFileSync(path.join(site, "requirements", "index.html"), "utf8");
-    assert.ok(home.includes("prefers-color-scheme: dark") && home.includes('href="viewer.css"'));
+    // The dark mode was removed: the home has no dark rule and no data-theme, and still links its stylesheet.
+    assert.ok(!home.includes("prefers-color-scheme: dark") && !home.includes("data-theme") && home.includes('href="viewer.css"'));
+    const css = fs.readFileSync(path.join(site, "requirements", "viewer.css"), "utf8");
+    assert.ok(css.startsWith(":root{color-scheme:light;--bg:#f5f1e8") && css.includes(".crumbs{"), "the shared site stylesheet comes first, then viewer.css");
+    assert.ok(!css.includes("prefers-color-scheme") && !css.includes("data-theme"));
+    assert.ok(!fs.readFileSync(path.join(site, "requirements", "viewer.js"), "utf8").includes("req-theme"));
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
