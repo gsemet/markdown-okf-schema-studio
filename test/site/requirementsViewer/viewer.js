@@ -1,12 +1,7 @@
-// Studio requirements viewer: theme switch, History, search, and Play on the use case map.
+// Studio requirements viewer: History, search, and Play on the use case map.
 // Every page reads without this file.
 "use strict";
 (() => {
-  const root = document.documentElement;
-  document.getElementById("theme").onclick = () => {
-    root.dataset.theme = root.dataset.theme === "dark" ? "cream" : "dark";
-    localStorage.setItem("req-theme", root.dataset.theme);
-  };
   const history = document.getElementById("history");
   history.onchange = () => { localStorage.setItem("req-history", history.checked ? "1" : "0"); if (!box.hidden) draw(); };
 

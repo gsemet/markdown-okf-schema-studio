@@ -2,6 +2,16 @@
 
 ## 2026-11-12
 
+### One cream look for the whole published site (CR 303)
+
+- New, proposed, deriving from StRS-MDOKFSTUDIO-TRUST-014: SwRS-MDOKFSTUDIO-CORE-086 (every page and
+  social picture of the Pages site uses the cream palette of the extension, every page carries the one
+  site header, and no page has a dark palette, a `prefers-color-scheme: dark` rule or a theme switch).
+  Its source companion is `src/core/render/siteTheme.markers.ts`; its tests are in
+  `test/site/siteTheme.test.ts`, `test/site/siteLinks.test.ts` and `test/site/requirementsViewer/`.
+- SwRS-MDOKFSTUDIO-CORE-069 (proposed, not approved): its verification note no longer says that the
+  published look in light and dark is not asserted; the look is cream only and CORE-086 asserts it.
+
 ### The site requirements viewer replaces the Requirements page (CR 302)
 
 - SwRS-MDOKFSTUDIO-CORE-069 (proposed, stable, not approved) amended: the Requirements home is now

@@ -1,7 +1,8 @@
 import { headTags } from "../siteHead";
+import { siteHeader } from "../siteHeader";
 import { REPOSITORY_URL } from "../siteLinks";
 import { escapeHtml, type SocialCard } from "../socialCard";
-import { VIEWER_DIR, assetLink, dirLink, siteLink } from "./urls";
+import { VIEWER_DIR, assetLink, dirLink } from "./urls";
 
 /** The four levels of the viewer; each has one social picture shared by its pages. */
 export type Level = "areas" | "area" | "use-case" | "behaviour";
@@ -47,9 +48,8 @@ export function levelCard(spec: Pick<PageSpec, "dir" | "level" | "title" | "desc
   };
 }
 
-/** Without JavaScript, the controls that need it are absent: search, Play and the theme switch. */
-export const NOSCRIPT_STYLE = "#search-open,#theme,.play{display:none!important}";
-const THEME_SCRIPT = 'document.documentElement.dataset.theme = localStorage.getItem("req-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "cream");';
+/** Without JavaScript, the controls that need it are absent: search and Play. */
+export const NOSCRIPT_STYLE = "#search-open,.play{display:none!important}";
 const HISTORY_SCRIPT = 'document.getElementById("history").checked = localStorage.getItem("req-history") === "1";';
 
 function footerText(footer: PageFooter): string {
@@ -71,20 +71,14 @@ export function viewerDocument(spec: PageSpec, footer: PageFooter): string {
 <head>
 ${headTags(`${spec.title} | Studio requirements`, page, levelCard(spec))}
 <link rel="stylesheet" href="${assetLink(spec.dir, "viewer.css")}">
-<script>${THEME_SCRIPT}</script>
 <noscript><style>${NOSCRIPT_STYLE}</style></noscript>
 </head>
 <body${style}>
-<header class="top"><div class="in">
-  <input type="checkbox" id="history" class="hist" aria-label="Show retired requirements">
-  <script>${HISTORY_SCRIPT}</script>
-  <a class="home" href="${dirLink(spec.dir, VIEWER_DIR)}">Studio requirements</a>
-  <nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav>
-  <nav class="site" aria-label="Site"><a href="${siteLink(spec.dir, "index.html")}">Home</a><a href="${siteLink(spec.dir, "contributing.html")}">Contributing</a><a href="${siteLink(spec.dir, "docs/how-we-ship.html")}">How we ship</a><a href="${siteLink(spec.dir, "gallery.html")}">Gallery</a></nav>
-  <label class="btn hist-label" for="history" title="Show superseded and deprecated requirements">History</label>
-  <button class="btn" id="search-open" type="button" aria-label="Search">Search <kbd>/</kbd></button>
-  <button class="btn" id="theme" type="button" aria-label="Switch theme">Theme</button>
-</div></header>
+${siteHeader(page, {
+  lead: `<input type="checkbox" id="history" class="hist" aria-label="Show retired requirements"><script>${HISTORY_SCRIPT}</script>`,
+  middle: `<nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav>`,
+  trail: '<label class="btn hist-label" for="history" title="Show superseded and deprecated requirements">History</label><button class="btn" id="search-open" type="button" aria-label="Search">Search <kbd>/</kbd></button>',
+})}
 <main>
 ${spec.body}
 </main>

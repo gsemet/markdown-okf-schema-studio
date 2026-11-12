@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { pageDocument } from "./buildSite";
+import { viewerDocument } from "./requirementsViewer/shell";
 import { rewriteLinkTarget } from "./siteLinks";
 
 const renderedPages = new Set(["README.md", "CONTRIBUTING.md", "docs/guide.md"]);
@@ -19,6 +20,16 @@ test("the site header links the How we ship page from root and nested pages", ()
   for (const [currentPage, target] of [["index.html", "docs/how-we-ship.html"], ["docs/guide.html", "how-we-ship.html"], ["reports/e2e/index.html", "../../docs/how-we-ship.html"]]) {
     const document = pageDocument("Studio", currentPage, "<h1>Studio</h1>");
     assert.ok(document.includes(`<a href="${target}">How we ship</a>`));
+  }
+});
+
+test("a viewer page brands and links the site relative to its own folder", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  const html = viewerDocument({ dir: "requirements/area/StRS-X-001", level: "use-case", title: "T", description: "d", body: "", crumbs: [] }, { sha: "abc", generatedAt: "" });
+  assert.ok(html.includes('src="../../../images/logo.svg" alt="" width="44" height="44"'));
+  assert.ok(html.includes('class="site-brand" href="../../../index.html"'));
+  for (const [text, target] of [["Home", "../../../index.html"], ["Contributing", "../../../contributing.html"], ["How we ship", "../../../docs/how-we-ship.html"], ["Gallery", "../../../gallery.html"], ["Requirements", "../../"]]) {
+    assert.ok(html.includes(`<a href="${target}">${text}</a>`), text);
   }
 });
 
