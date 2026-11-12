@@ -12,10 +12,10 @@ scope: layout-width
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -59,6 +59,22 @@ As a reader, I never have to scroll the whole page sideways to read a document, 
 - Each layout check is not applicable, hence passing, when the page has no matching DOM; `identifier-split` flags only a cell whose own text node wraps over several lines.
 - Known issue: this is a page-wide promise that no documentation states; it is only locked by visual checks (no sideways scroll) and the wrapping unit test.
 - Known issue: the layout-check behaviour is undocumented outside its unit test.
+
+### Main paths
+
+#### Path 1: A wide table
+
+1. A document holds a table wider than the pane
+   - SwRS-MDOKFSTUDIO-LAYOUT-032: the table scrolls sideways inside its own box, limited to the column width
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-032 (refusal): a table that fits is left as it is
+2. The table scrolls in its own box and the page does not widen
+
+#### Path 2: Long words and URLs
+
+1. A document holds long words or long URLs
+   - SwRS-MDOKFSTUDIO-LAYOUT-001: the page stays free of sideways scrolling in every width mode, theme and pane width
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-001 (nominal): each width mode at 460 px
+2. The page does not scroll sideways
 
 <!-- okf:links:start -->
 ### Links
