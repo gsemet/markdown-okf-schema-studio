@@ -101,6 +101,33 @@ As a schema author, I declare that a field points to files so that writers get c
 - Click or Enter in read mode, Cmd/Ctrl+click in edit mode follows the link; the query and fragment are kept and the jump is recorded in the Back/Next history.
 - An invalid, unavailable or outside link is not followed and VS Code shows "Markdown OKF-Schema Studio could not follow the link: {reason}"; a malformed request shows "The frontmatter link request is invalid.". Filename-stem links are re-resolved at click time.
 
+### Main paths
+
+#### Path 1: Follow a link field
+
+1. A schema annotates a property with `x-okf-link`
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-046: the page finds the annotation and resolves the target apart from its query and fragment
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-046 (refusal): an invalid annotation or link value marks the field with an E10 error
+2. The link target is checked against the files
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-050: a document-relative, bundle-relative or project-relative target must be an existing file inside its root
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-055 (nominal): a filename-stem is accepted when exactly one file matches
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-060 (refusal): a configured root that cannot be used
+3. The link is shown pending, then resolved
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-063: about 150 ms later the table is replaced so that a resolving link is a keyboard-focusable link with a tooltip
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-063 (refusal): a link that does not resolve shows an error or warning mark and a plain label
+4. The link is a focusable link
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-073: a click or Enter opens the target in the editor at the marker line
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-067 (nominal): the tooltip lists the fields of the target found in its frontmatter
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-073 (refusal): an unusable link opens nothing and shows a warning
+5. The target is open in the editor
+
+#### Path 2: Link problems in the badge
+
+1. The link target is checked against the files
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-039: the badge in the table title counts the link problems
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-039 (refusal): a table with info rows only
+2. The badge counts the problems of the link fields
+
 <!-- okf:links:start -->
 ### Links
 

@@ -76,6 +76,27 @@ As a writer, I read my document metadata as a table above the text, safely, with
 - Any change to a frontmatter setting (table, strict additional properties, bundle root, project root, outside-workspace links) re-analyses the open preview whose document is the active editor's document; other previews are only re-rendered from their last good render (Known issue).
 - The frontmatter is re-analysed 300 ms after the last change; while a field editor is open the new table waits until it closes; a page not ready for the current render loads the full document instead.
 
+### Main paths
+
+#### Path 1: Read and fold the properties
+
+1. A document starts with a `---` line and a YAML mapping
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-001: the page shows the frontmatter as a properties table above the body
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-001 (refusal): invalid YAML gives one error row and the body still renders
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-004 (nominal): with the propertiesTable setting off, neither the table nor the raw text shows
+2. The properties table is shown
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-090: the writer presses the toggle next to the title and the table is hidden below the header
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-006 (nominal): each value is shown as YAML reads it, a boolean as a read-only checkbox
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-005 (nominal): without a type, a two-column Names and Values table lists the keys in source order
+3. The table is hidden below its header
+
+#### Path 2: Edit the frontmatter
+
+1. The properties table is shown
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-043: the page re-analyses the frontmatter 300 ms after the last change and replaces the table
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-043 (boundary): while a field editor is open the new table is held back
+2. The properties table shows the new frontmatter
+
 <!-- okf:links:start -->
 ### Links
 
