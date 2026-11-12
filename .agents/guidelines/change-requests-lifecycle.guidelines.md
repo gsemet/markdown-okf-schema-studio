@@ -195,11 +195,13 @@ user asks for several CRs at once. Open PRs never exceed the user's cap
 at once always ship as a stack (see [stacked-prs.guidelines.md](stacked-prs.guidelines.md)).
 
 The Chief of Staff runs in the main checkout for the whole run: the PRD folders, `ORCHESTRATOR.md`
-and `brief.md` live there, git-ignored, and a worktree session may be refused edits to
-them. A Chief of Staff that runs in a worktree anyway writes those files, and only those, through
-short shell scripts, and so does the Foreman sharing its folder. Before it starts a run, the Chief
-of Staff checks its own folder; in a worktree, it tells the user and proposes to continue from a
-session in the main checkout.
+and `brief.md` live there, git-ignored, and a worktree session may be refused edits to them.
+Before any grill, specification, `open` or session start, the Chief of Staff runs
+`git rev-parse --git-dir --git-common-dir`. When the two differ, it is in a worktree and stops at
+once: it does nothing more for the run and tells the user to open a Chief of Staff session in the
+main checkout (the repository folder, Worktree off). A nested session it starts with
+`use_worktree: false` shares its worktree, not the main checkout (`cwd` set to the repository root
+does not change it), so the Foreman would land in the worktree and refuse the batch.
 
 ```text
 Chief of Staff ── user interface: grill, decisions (the user merges); supervises the Foreman
