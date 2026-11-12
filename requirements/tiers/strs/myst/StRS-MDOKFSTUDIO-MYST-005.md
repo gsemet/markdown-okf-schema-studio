@@ -44,6 +44,22 @@ As a writer, I want to know which constructs need a full project build so that I
 
 - Placeholders never pretend to be the built result.
 
+### Main paths
+
+#### Path 1: A construct only a build resolves
+
+1. A document holds a construct that only a full project build can resolve
+   - SwRS-MDOKFSTUDIO-CORE-022: the page renders an inert, muted placeholder with its name, arguments and body, and lists a warning for a directive
+   - Option SwRS-MDOKFSTUDIO-CORE-022 (boundary): a citation
+2. A muted placeholder is drawn and the render stays successful
+
+#### Path 2: A fence the parser cannot build
+
+1. A document holds a directive or fence the parser cannot build
+   - SwRS-MDOKFSTUDIO-MYST-096: the page renders its raw source lines as a code block and renders the rest of the document
+   - Option SwRS-MDOKFSTUDIO-MYST-096 (refusal): labels and includes are not touched
+2. The raw source is shown as code and the rest of the document is drawn
+
 <!-- okf:links:start -->
 ### Links
 
