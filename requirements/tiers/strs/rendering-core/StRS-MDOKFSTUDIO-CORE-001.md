@@ -11,10 +11,10 @@ scope: rendering-core
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -92,6 +92,24 @@ Writers need to read their Markdown as formatted text, at any length, while they
 
 - Covers headings, lists, quotes, inline code, images and long documents. The rendering is the same in every palette mode.
 - Covers Japanese, Chinese, Korean, Hebrew and Arabic text and long unbreakable words such as long URLs, which wrap inside the preview column instead of scrolling sideways.
+
+### Main paths
+
+#### Path 1: Edit and see the preview follow
+
+1. A Markdown file is open beside its preview
+   - SwRS-MDOKFSTUDIO-CORE-001: the buffer changes and the extension renders the unsaved text completely
+   - Option SwRS-MDOKFSTUDIO-CORE-001 (refusal): the render is refused when trust is required
+2. The preview shows the unsaved text
+   - SwRS-MDOKFSTUDIO-LIFE-094: another tool, an undo or a redo changes the text and the updated blocks glow briefly
+3. The updated blocks glow briefly
+
+#### Path 2: Read text of any script
+
+1. The preview shows the unsaved text
+   - SwRS-MDOKFSTUDIO-CORE-041: a paragraph, heading, list item, quote or cell without a direction gets automatic direction, so right-to-left text aligns to the right
+   - Option SwRS-MDOKFSTUDIO-CORE-034 (nominal): a long word, URL or Japanese, Chinese or Korean paragraph wraps in the column
+2. Right-to-left text is aligned to the right
 
 <!-- okf:links:start -->
 ### Links

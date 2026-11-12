@@ -42,6 +42,16 @@ Writers need to build a document from several files and still edit it from the r
 
 - An include is read only from the document folder or the workspace root; refused includes are reported (see the use case about content the preview cannot render).
 
+### Main paths
+
+#### Path 1: Show an included file in place
+
+1. A trusted document holds an include directive
+   - SwRS-MDOKFSTUDIO-CORE-012: the preview renders the included Markdown file in place of the directive and maps every included block to the lines of the directive
+   - Option SwRS-MDOKFSTUDIO-CORE-012 (refusal): an unsupported include form stays an unresolved placeholder
+   - Option SwRS-MDOKFSTUDIO-CORE-013 (refusal): an include outside the allowed root, or a cycle, is refused
+2. The included content is shown in place
+
 <!-- okf:links:start -->
 ### Links
 
