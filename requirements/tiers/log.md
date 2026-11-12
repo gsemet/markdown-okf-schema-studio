@@ -1,5 +1,27 @@
 # Update Log
 
+## 2026-11-12
+
+### Main paths in the StRS
+
+- 78 of the 80 active StRS got a `### Main paths` section (one or two paths each), drawn from the StRS
+  and the active SwRS that derive from it. Each step and option cites an existing, active SwRS of that
+  StRS and says only what that SwRS specifies. No SwRS, scenario or criterion was changed.
+- StRS left without a section, because their SwRS are unrelated constraints and not a path:
+  StRS-MDOKFSTUDIO-TRUST-012 (SwRS TRUST-070 and TRUST-074: no mention of Sphinx, an icon) and
+  StRS-MDOKFSTUDIO-TRUST-014 (SwRS CORE-069, TRUST-074 and TRUST-075: requirements page, icon, Node and
+  registry pins).
+- The 16 approved StRS changed, with the owner's agreement of 2026-11-12 ("Yes, all 16"), were restamped:
+  `approved_at` (2026-11-12T12:30:00+01:00, `approved_by` stays gaetan@xeberon.net): BLOCK-003, BLOCK-025,
+  CORE-001, DIAG-001, DIAG-006, GFM-002, LAYOUT-001, LAYOUT-003, MYST-001, PALETTE-015, REVIEW-001,
+  REVIEW-003, REVIEW-012, REVIEW-015, TABLE-001, TABLE-012.
+- New check `scripts/check_main_paths.py`, run by `just requirements-lint`: every SwRS cited in a Main
+  paths section must exist, be active (draft, proposed or approved) and derive from that StRS. The
+  format is documented in `requirements/guidelines/project.guidelines.md`. The check is build tooling and
+  has no SwRS.
+- Verified: `just requirements-update` (no further change), `just requirements-lint` (main paths: 78 StRS
+  checked, 536 SwRS citations, all valid), `just release-tests`.
+
 ## 2026-11-11
 
 ### The label rename field no longer covers the table below its icon (CR 290, QA271-09)
