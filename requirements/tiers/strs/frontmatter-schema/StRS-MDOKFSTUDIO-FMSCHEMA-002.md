@@ -38,6 +38,15 @@ As a writer, I see why my frontmatter is rejected and keep reading my document; 
 - Invalid YAML shows one row "Invalid frontmatter YAML: {parser message}" and an error badge of 1; a list, a scalar or an empty block shows "Invalid frontmatter YAML: Frontmatter is not a mapping.". YAML aliases expand up to 100, beyond which the parse fails as invalid YAML.
 - Known issue: the parser message is the raw text of the YAML library, with frontmatter-relative line numbers and caret markers.
 
+### Main paths
+
+#### Path 1: A mistake in the YAML
+
+1. A document starts with a `---` line and YAML that does not parse
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-001: the page shows one error row "Invalid frontmatter YAML" with the parser message
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-001 (refusal): an opening fence without a closing fence
+2. The error row is shown and the body of the document renders below it
+
 <!-- okf:links:start -->
 ### Links
 
