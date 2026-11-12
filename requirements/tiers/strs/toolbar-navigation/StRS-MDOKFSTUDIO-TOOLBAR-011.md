@@ -59,6 +59,32 @@ As a reader, I click a link and land on the right document, line, heading or web
 - Hints already known survive an in-place update of the content.
 - A link to a missing or blocked target keeps its text and colour; a small warning icon follows it and its tooltip names the problem.
 
+### Main paths
+
+#### Path 1: See where a link leads and open it
+
+1. A link comes into view
+   - SwRS-MDOKFSTUDIO-TOOLBAR-079: the page asks the host for the target of its request, and the host answers with its kind and its path or reason
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-079 (boundary): the same request twice is asked once
+2. The target of the link is known
+   - SwRS-MDOKFSTUDIO-TOOLBAR-085: the link gets the target as its tooltip, or the reason when it is blocked
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-085 (boundary): a missing or blocked target keeps its link and gains a warning icon
+3. The tooltip names where the link leads
+   - SwRS-MDOKFSTUDIO-TOOLBAR-077: the reader clicks the link and the host opens the target
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-077 (refusal): the host refuses with a warning
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-090 (refusal): a scheme other than http, https or mailto, or an absolute path, is blocked with a reason
+4. The target is open
+   - SwRS-MDOKFSTUDIO-TOOLBAR-094: a relative Markdown link opens only a regular file below a workspace root
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-094 (refusal): a path outside every root is blocked
+5. The file is open
+
+#### Path 2: Follow an anchor
+
+1. A link comes into view
+   - SwRS-MDOKFSTUDIO-TOOLBAR-117: the reader follows an anchor, and the page scrolls to the mapped block to the reading line below the band
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-117 (refusal): an unknown or stale request does not scroll
+2. The heading of the anchor is at the reading line
+
 <!-- okf:links:start -->
 ### Links
 

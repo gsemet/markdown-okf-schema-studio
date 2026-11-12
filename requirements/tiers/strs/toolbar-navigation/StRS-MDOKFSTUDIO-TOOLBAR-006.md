@@ -52,6 +52,30 @@ As a reader, I open a table of contents next to a long document when I want an o
 - The column starts below the toolbar and stays inside the pane.
 - The pane width at which the column appears is specified in the software requirements.
 
+### Main paths
+
+#### Path 1: Open the table of contents and jump
+
+1. The page is shown without the table of contents
+   - SwRS-MDOKFSTUDIO-TOOLBAR-033: the reader presses the Table of contents button and the column opens
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-033 (boundary): the initial state of the column
+2. The column is open
+   - SwRS-MDOKFSTUDIO-TOOLBAR-040: the column lists the headings h1 to h4 that have text, in document order
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-040 (refusal): a document with no headings
+3. The headings are listed
+   - SwRS-MDOKFSTUDIO-TOOLBAR-045: the reading line marks the current entry, and a click on an entry scrolls its heading to the reading line below the band
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-045 (boundary): the parent of the current entry is folded
+4. The reader is at the heading they chose
+
+#### Path 2: Narrow pane
+
+1. The page is shown without the table of contents
+   - SwRS-MDOKFSTUDIO-TOOLBAR-033: the reader presses the Table of contents button and the column opens
+2. The column is open
+   - SwRS-MDOKFSTUDIO-TOOLBAR-037: on a pane narrower than 760 pixels, a rail with one tick per heading is shown instead
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-133 (nominal): the content is padded for the rail
+3. A rail with one tick per heading is shown
+
 <!-- okf:links:start -->
 ### Links
 

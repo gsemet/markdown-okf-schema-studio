@@ -45,6 +45,19 @@ As a writer, I send a rendered page, with its theme, diagrams and properties, to
 - Links to other files cannot work for the reader, so they are removed after a warning.
 - Export is available in Restricted Mode: it reads only what the preview already shows.
 
+### Main paths
+
+#### Path 1: Export the page to HTML
+
+1. A preview page is shown
+   - SwRS-MDOKFSTUDIO-TOOLBAR-134: the writer presses Export, and the extension asks where to save the file
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-135 (nominal): a modal warning lists the relative, wiki or blocked links, which are written as plain text, before the save dialog
+2. The place to save is chosen
+   - SwRS-MDOKFSTUDIO-TOOLBAR-136: the file is written with the styles, the theme and width and the local images, without any script
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-134 (boundary): the dialog is cancelled and nothing is written
+3. The HTML file is written
+   - SwRS-MDOKFSTUDIO-TOOLBAR-137: the content is written as the reader sees it, with every section unfolded and without review comments or editing controls
+
 <!-- okf:links:start -->
 ### Links
 
