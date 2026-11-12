@@ -14,10 +14,10 @@ scope: review-annotations
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-06T01:44:30+01:00'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-06T01:44:30+01:00'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -72,6 +72,38 @@ As a reviewer, I attach a comment to the exact words I am talking about, answer 
 - When the editor gives no answer in time, the text is kept and the reviewer can try again.
 - Every change of the comments file reads the latest file first, so a change made by another tool in between is kept too.
 - The author is the name the reviewer configured in a setting or, without one, the name known to Git or to the operating system; when no name can be found at all, the comment is stored as Anonymous.
+
+### Main paths
+
+#### Path 1: Add a comment on selected text
+
+1. A reader has selected text in a body block
+   - SwRS-MDOKFSTUDIO-REVIEW-038: a Comment button appears near the selection
+   - Option SwRS-MDOKFSTUDIO-REVIEW-038 (refusal): no button for a collapsed selection
+2. The Comment button is shown
+   - SwRS-MDOKFSTUDIO-REVIEW-217: the comment box opens next to its text, inside the window
+3. The comment box is open
+   - SwRS-MDOKFSTUDIO-REVIEW-044: the reader presses Save or Cmd/Ctrl+Enter and the typed text is sent to the host
+   - Option SwRS-MDOKFSTUDIO-REVIEW-044 (refusal): empty or blank text is not sent
+   - Option SwRS-MDOKFSTUDIO-REVIEW-044 (nominal): Escape or Cancel closes the box
+4. The comment is sent
+   - SwRS-MDOKFSTUDIO-REVIEW-049: the comment is anchored by its lines, quote and surroundings
+5. The comment has its anchor
+   - SwRS-MDOKFSTUDIO-REVIEW-054: the host appends it to the review comments file
+   - Option SwRS-MDOKFSTUDIO-REVIEW-065 (nominal): the author is the comments.authorName setting, else the Git user name
+6. The comment is in the review comments file
+
+#### Path 2: Reply to a thread and resolve it
+
+1. The thread popover is open
+   - SwRS-MDOKFSTUDIO-REVIEW-081: the reader sends a reply and the thread id and the trimmed text go to the host
+2. The reply is sent to the host
+   - SwRS-MDOKFSTUDIO-REVIEW-074: the host changes the named thread only
+3. The thread holds the reply
+   - SwRS-MDOKFSTUDIO-REVIEW-086: the reader presses Resolve and the host sets the flag
+   - Option SwRS-MDOKFSTUDIO-REVIEW-086 (nominal): Delete asks inside the popover
+   - Option SwRS-MDOKFSTUDIO-REVIEW-086 (refusal): a refused or unanswered resolve or delete
+4. The thread is resolved
 
 <!-- okf:links:start -->
 ### Links

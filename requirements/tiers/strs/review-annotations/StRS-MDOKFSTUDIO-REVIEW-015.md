@@ -13,10 +13,10 @@ scope: review-annotations
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-06T01:44:30+01:00'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-06T01:44:30+01:00'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -50,6 +50,29 @@ As a writer, I keep a discussion in the file itself and answer it where I read i
 - Only the lines of the thread change, in one undo step, and the line breaks of the document are kept.
 - Every preview offers the thread controls, Restricted Mode and a file outside the workspace included; a file that VS Code holds read-only is not changed and the writer is told.
 - The refusal under an open edit is made by the page first; the host refuses again when an edit of the Markdown is open on its side.
+
+### Main paths
+
+#### Path 1: Reply to an inline thread
+
+1. A document holds an inline THREAD comment
+   - SwRS-MDOKFSTUDIO-REVIEW-167: the renderer writes a green chip with a label, and the open thread lists one entry for each message
+2. The thread chip is open with its messages
+   - SwRS-MDOKFSTUDIO-REVIEW-171: the reader types in the Reply area and presses Reply, and the trimmed text goes to the host with the source lines of the thread
+   - Option SwRS-MDOKFSTUDIO-REVIEW-171 (refusal): the host refuses the change
+3. The reply is sent with the lines of the thread
+   - SwRS-MDOKFSTUDIO-REVIEW-186: the host appends the reply inside the thread comment under the author
+   - Option SwRS-MDOKFSTUDIO-REVIEW-186 (refusal): lines that are not exactly one thread
+4. The reply is in the thread comment
+
+#### Path 2: Delete an inline thread
+
+1. The thread chip is open with its messages
+   - SwRS-MDOKFSTUDIO-REVIEW-171: the reader presses Delete thread, which asks no confirmation, and the delete goes to the host
+2. The delete is sent with the lines of the thread
+   - SwRS-MDOKFSTUDIO-REVIEW-192: the host removes the lines of the thread and one surrounding blank line
+   - Option SwRS-MDOKFSTUDIO-BLOCK-058 (nominal): the edit is one undo step
+3. The thread is gone from the document
 
 <!-- okf:links:start -->
 ### Links

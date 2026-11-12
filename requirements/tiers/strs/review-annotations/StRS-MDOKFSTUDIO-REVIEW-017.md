@@ -49,6 +49,21 @@ As a writer, I see at a glance what I changed since the last commit, unsaved edi
 - The bars never move the text.
 - Hiding the changes is done with the toolbar button or the setting; the setting is the master switch and removes the toolbar button, and the button choice is kept per workspace.
 
+### Main paths
+
+#### Path 1: See what changed since the last commit
+
+1. A file tracked by Git differs from its last commit
+   - SwRS-MDOKFSTUDIO-REVIEW-195: the host posts the line ranges that differ from the file at HEAD
+   - Option SwRS-MDOKFSTUDIO-REVIEW-195 (refusal): an untracked file gets no marks
+2. The page holds the changed line ranges
+   - SwRS-MDOKFSTUDIO-REVIEW-207: the innermost mapped blocks that meet a range get a thin green change bar that moves nothing
+   - Option SwRS-MDOKFSTUDIO-REVIEW-208 (refusal): a malformed range is ignored
+   - Option SwRS-MDOKFSTUDIO-REVIEW-215 (nominal): a changed or added front matter field gets its own change bar
+3. Changed blocks carry a green bar
+   - SwRS-MDOKFSTUDIO-REVIEW-214: the reader presses the Diff button and the bars are hidden
+4. The change bars are hidden
+
 <!-- okf:links:start -->
 ### Links
 
