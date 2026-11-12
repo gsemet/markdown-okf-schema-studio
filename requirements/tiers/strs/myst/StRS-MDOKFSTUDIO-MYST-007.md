@@ -62,6 +62,28 @@ As a Sphinx author, I want to learn about unsupported syntax before building so 
 - The configuration file is read as text and never executed.
 - The banner can be closed and does not block editing; it also appears in Restricted Mode.
 
+### Main paths
+
+#### Path 1: Missing extensions are reported
+
+1. A document uses syntax of a MyST extension
+   - SwRS-MDOKFSTUDIO-MYST-066: the extension reads the enabled MyST extensions from the nearest `conf.py`, as text, never running it
+   - Option SwRS-MDOKFSTUDIO-MYST-066 (refusal): without a certain list nothing is reported
+2. The enabled MyST extensions are known
+   - SwRS-MDOKFSTUDIO-MYST-072: one `myst-extension` warning per extension is listed, at the first use of the syntax, with its line
+   - Option SwRS-MDOKFSTUDIO-MYST-072 (boundary): the same syntax twice gives one warning
+3. The warnings are listed
+   - SwRS-MDOKFSTUDIO-MYST-078: a live preview in a trusted workspace publishes them to the Problems view as whole-line warnings
+   - Option SwRS-MDOKFSTUDIO-MYST-078 (refusal): an untrusted workspace publishes nothing
+4. The warnings are in the Problems view
+
+#### Path 2: The banner
+
+1. The warnings are listed
+   - SwRS-MDOKFSTUDIO-MYST-081: a successful render shows a one-line banner with the count, an Open Problems button and a Close button
+   - Option SwRS-MDOKFSTUDIO-MYST-081 (refusal): other statuses show the full list instead
+2. The banner shows the number of MyST syntax warnings from conf.py
+
 <!-- okf:links:start -->
 ### Links
 
