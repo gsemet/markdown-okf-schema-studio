@@ -96,6 +96,23 @@ As a writer, I edit a document's metadata directly in the properties table, wher
 - A refusal keeps the editor open with the host message shown and the controls enabled again.
 - Each save is one edit of the document, so one Undo reverts it; undo keys typed in a field editor act on the field text only.
 
+### Main paths
+
+#### Path 1: Edit a field in place
+
+1. The properties table is shown in edit mode
+   - SwRS-MDOKFSTUDIO-FMEDIT-001: a click on a name or value cell opens a field editor inside that cell
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-001 (refusal): reading mode opens no editor
+2. A field editor is open
+   - SwRS-MDOKFSTUDIO-FMEDIT-004: Enter saves a one-line text value
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-003 (nominal): a boolean field toggles with one click
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-019 (nominal): Escape cancels the editor
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-016 (refusal): a YAML value that does not parse is refused
+   - Option SwRS-MDOKFSTUDIO-BLOCK-041 (nominal): other actions that would compete with the editor are refused with a reason
+3. The new value is saved
+   - SwRS-MDOKFSTUDIO-BLOCK-228: the final save keeps the properties table at its screen position
+4. The table shows the new value where it was
+
 <!-- okf:links:start -->
 ### Links
 

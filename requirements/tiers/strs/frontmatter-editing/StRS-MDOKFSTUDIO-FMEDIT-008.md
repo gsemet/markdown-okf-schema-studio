@@ -99,6 +99,27 @@ As a writer or reviewer, I expect a metadata edit to leave comments, quoting, li
 - Known issue: a content patch of the page closes an open field editor and drops its text, and the waiting properties update.
 - ArrowUp from the first block editor does not step into the properties table.
 
+### Main paths
+
+#### Path 1: Save a value without side effects
+
+1. A field editor is open
+   - SwRS-MDOKFSTUDIO-FMEDIT-043: the save changes only the lines of its field and keeps comments, quoting, spacing and line endings
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-043 (refusal): an edit that loses or corrupts a key is refused
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-016 (refusal): a value that breaks the YAML, the field type or the schema is refused and nothing changes
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-067 (nominal): a navigation saves the typed text as a flush
+2. The value is saved on the lines of its field
+   - SwRS-MDOKFSTUDIO-BLOCK-058: the edit is one undo step and the preview renders once
+   - Option SwRS-MDOKFSTUDIO-BLOCK-058 (refusal): an edit that VS Code does not apply or rejects is answered with a reason
+3. The edit is one undo step and the diff holds only the edited field
+
+#### Path 2: Remove a field
+
+1. A field editor is open
+   - SwRS-MDOKFSTUDIO-FMEDIT-029: Remove field deletes exactly the lines of the field and keeps the comment lines above it
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-029 (refusal): the host refuses to remove a required field
+2. The lines of the field are gone and the comments above are kept
+
 <!-- okf:links:start -->
 ### Links
 
