@@ -240,6 +240,8 @@ The full integration and screenshot campaigns require a local VS Code installati
 Playwright browser runtime. They can be run with `just integration`, `just visual`, and `just e2e`.
 Generated reports are stored under `out/reports/`; the README-derived Pages tree is stored under
 `out/site/`. `just preflight` runs every stage and returns a failure if any stage fails.
+On macOS a locked screen stops `ci-integration` at once (exit code 3) and `preflight` skips report
+and gallery.
 
 On macOS the real VS Code window tests use `/Applications/Visual Studio Code.app` when it exists
 (CI downloads the current stable build); set `STUDIO_VSCODE_EXECUTABLE` to the `Contents/MacOS/Code`
@@ -611,6 +613,10 @@ release guideline).
 	just preflight
 	git show --stat HEAD
 	```
+
+	If `just preflight` stops at `ci-integration` because the screen is locked, do not wait:
+	dispatch `gh workflow run ci.yml --ref <branch> -f heavy=true` at once on the release branch
+	and go on; its `integration` job is the real-window proof.
 
 	Keep release images and their Git LFS
 	objects committed and pushed, since Marketplace image URLs use the release tag.
