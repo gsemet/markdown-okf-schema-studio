@@ -9,13 +9,18 @@ release 1.2.0.
 
 The goal: the owner says "release X", and the release is almost guaranteed before the version
 commit exists. 1.3.0 and 1.3.1 were never tagged because the version push was the first real VS Code
-run of their code. The real VS Code jobs stay on `main`, so the version commit is never stacked on
-top of development: the development lands first, then the release runs on its own.
+run of their code. So the version commit lands only after a green heavy run of the exact code it
+releases. That happens in one of two ways:
+
+- the default: the stack lands on `main` first, then the heavy run of `main` HEAD;
+- the version PR on top of a ready stack, with the heavy run dispatched on the top branch (see "The
+  version PR on top of a stack" below).
 
 ## Rules of a release
 
 - **Merge rights**: the fix PRs of the release may be merged on the owner's standing permission for
-  release work. The owner merges the version PR. Nothing else is merged, auto-merge is never
+  release work. The owner merges the version PR and, when it tops a
+  stack, the whole stack with it. Nothing else is merged, auto-merge is never
   enabled, and no PR outside the release is touched.
 - **Nothing is asked of the owner** between the notes review and the publication, except a real
   blocker: a product decision is needed, or a fix cannot be completed. The release then stops with
@@ -37,9 +42,15 @@ named by the date of the pull request (the date may differ from the tag's; nothi
 ## The steps of a release
 
 1. The owner says "release X". The version number is agreed with the owner.
-2. The stack of the release lands on `main` first, with the changelog lines in its PRs, so they are
-   in `main` before the heavy run. Once the stack is merged, every other merge is held until the
-   release is published, and no work on a new change starts until then.
+2. The stack of the release lands on `main` first (or the version PR tops it: see "The version PR
+   on top of a stack"). Every PR with a `feat` or `fix` commit adds one user-facing line to
+   `CHANGELOG.md` `## Unreleased`, in that PR, appended at the end of the list; a rebase conflict
+   on that block keeps both lines. PRs that are only `test`, `ci`, `build`, `docs` or `chore` add
+   no line and tick the template checkbox with "No user-facing change". A `feat` or `fix` PR that
+   landed without its line is a gap of that PR: a fix PR adds the line before the version commit.
+   The version commit only moves the lines under the version heading. Once the stack is merged
+   (or, in the stacked way, from the dispatch of the branch heavy run), every other merge is held
+   until the release is published, and no work on a new change starts until then.
 3. The notes and the thread are drafted from `CHANGELOG.md` `## Unreleased` and the reports of the
    changes, in `docs/releases-notes/`. They go in the version PR.
 4. The last merge of the stack started the heavy run on `main` HEAD. Wait for
@@ -53,7 +64,8 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    ```
 
    Check that the run's `headSha` is the current `main` HEAD; a merge since then starts the step
-   again. A red job is fixed with a fix PR, which is merged, and the run of the new HEAD is
+   again. In the stacked way, the run is the one of the top branch: see "The version PR on top of a
+   stack". A red job is fixed with a fix PR, which is merged, and the run of the new HEAD is
    awaited. A flake: re-run once (`gh run rerun <run-id> --failed`); if it fails again, treat it as
    red.
 5. **Only then** the version commit: `just bump-version`, the changelog heading, the version pull
@@ -62,9 +74,15 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    without valid notes, so the PR cannot merge without them. The owner reviews the folder in the
    PR and merges it by rebase, the only merge method of the repository. The PR body also shows the
    notes and the thread themselves (see "The version PR body" below). The heavy run of the
-   version push (CI rule 14) stays the final gate.
+   version push (CI rule 14) stays the final gate. When the version PR tops a ready stack, the
+   version commit is made on the top branch: see "The version PR on top of a stack".
 6. The version push is monitored through the tag, the GitHub release with its notes and images, the
    Marketplace publication and Pages, recovering a red heavy job as in "After the merge" above.
+   The Marketplace check that counts is an HTTP 200 on
+   `https://marketplace.visualstudio.com/_apis/public/gallery/publishers/GaetanSemet/vsextensions/markdown-okf-schema-studio/X.Y.Z/vspackage`
+   (for example `curl -sS -o /dev/null -w '%{http_code}' -L <url>`). The listing page is not
+   checked. The listing page can lag by several minutes (more than 3 seen in 1.7.1); it is not a
+   gate.
 7. The release is archived with a `report.md`: tag, release URL, CI runs (heavy run on `main`,
    version push), and the issues the release closed (from the PRs' closing references,
    `gh pr view <n> --json closingIssuesReferences`, and the `issue:` lines of the changes). A
@@ -73,10 +91,31 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    https://github.com/gsemet/markdown-okf-schema-studio/releases/tag/vX.Y.Z" for each listed issue,
    gets one owner approval for the whole list, posts each with `gh issue comment`, and reads the
    comments back. This comes after the publication, so it does not break the rule that nothing is
-   asked of the owner between the notes review and the publication.
+   asked of the owner between the notes review and the publication. No issue closed by this
+   release: write that line in `report.md`; the step ends, no approval is asked.
 
 Between the notes review (step 5) and the publication, the owner is asked nothing, except a real
 blocker: a product decision is needed, or a fix cannot be completed.
+
+## The version PR on top of a stack
+
+The version PR may be the top PR of a stack that is ready to merge:
+
+1. The stack's bottom is based on the current `origin/main` HEAD. Every PR below the version PR is
+   ready (CI green, review done). The version commit (`just bump-version`, changelog heading, notes
+   folder) is made on the top branch, so Commitizen sees the commits of the stack.
+2. From here until the release is published, every other merge is held.
+3. Dispatch the heavy run on the top branch:
+   `gh workflow run ci.yml --ref <top-branch> -f heavy=true`. Find it with
+   `gh run list --workflow ci.yml --branch <top-branch> --event workflow_dispatch --limit 3`. Then
+   use the `gh run watch` and `gh run view ... --jq` commands of step 4, reading the result of each
+   of `integration` and `stress`. The run's `headSha` must be the top branch's head; a push to any
+   PR of the stack starts this step again. Red jobs and flakes are handled as in step 4.
+4. Only then the version PR is marked ready. The owner merges the whole stack by rebase, bottom up,
+   in order (`gh stack merge <version PR> --rebase`, see
+   [stacked-prs.guidelines.md](stacked-prs.guidelines.md)).
+5. The version push on `main` runs the heavy jobs again (CI rule 14). It stays the final gate and
+   makes the tag. Steps 6 to 8 follow as usual.
 
 ## The version PR body
 

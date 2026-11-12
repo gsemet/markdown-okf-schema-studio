@@ -118,10 +118,10 @@ Unless specified by user through your context otherwise, here are the default ro
 | 2 Grill | Chief of Staff | Ask only the questions that change the result, each with a recommended answer. "ok" accepts all. Record answers in `03-change-spec.md` (see [owner-review.guidelines.md](owner-review.guidelines.md)), and carry the `issue:` line into it. List the approved requirements the item would change and record the owner's answer (the requirements check of "Project bindings"). |
 | 3 Open | Chief of Staff | Create the PRD folder, move the backlog content in (partial item: copy the part, note the split in the backlog item), create the worktree and branch from fresh `origin/main` (see [local-worktree.guidelines.md](local-worktree.guidelines.md)). `01-intent.md` and `03-change-spec.md` follow [owner-review.guidelines.md](owner-review.guidelines.md). With a tracker issue, the Chief of Staff drafts the grill comment (what was understood, what will be done, with the plan and a demo attached when the tracker supports it), shows it to the owner, posts it after approval, and records the comment link in `02-answers.md`. |
 | 4 Brief | Chief of Staff | Write `task.md`, `rules.md` (plain GFM, see [owner-review.guidelines.md](owner-review.guidelines.md)), the `STATUS.md` header, then rebuild the status table. `task.md` links to step 10 for the evidence and the PR body check; it never restates when a screenshot is required (a hand-written copy drifts). When the change alters the size or a value of an element other code measures from (a fixed bar, a reserved margin, a limit), `task.md` lists every value derived from it, found by searching for the old value and for what is computed from it, and the coder updates or confirms each one. |
-| 5 Code | coder | Implement round n, run local gates, write `work/coder/T1-r<n>.md`. |
-| 6 Review | Inspector | Write `work/inspector/T1-r<n>.md` starting with `Verdict: APPROVE` or `Verdict: FIX-REQUIRED`. FIX-REQUIRED → step 5, round n+1. The Inspector checks the project guidelines, including the traceability rules of the requirements check. |
+| 5 Code | coder | Implement round n, run local gates, write `work/coder/T1-r<n>.md`. For a `feat` or `fix` change, write the `## Unreleased` line of `CHANGELOG.md` in the same round. |
+| 6 Review | Inspector | Write `work/inspector/T1-r<n>.md` starting with `Verdict: APPROVE` or `Verdict: FIX-REQUIRED`. FIX-REQUIRED → step 5, round n+1. The Inspector checks the project guidelines, including the traceability rules of the requirements check, and that the `## Unreleased` line is there, or that the change is not user-facing. |
 | 7 Commit | driver | Explicit paths only (never `git add -A` / `git add .`), project commit format. |
-| 8 PR | driver | Rebase on `origin/main`, push, open the PR as a draft with the template of [ci.guidelines.md](ci.guidelines.md), written as in [pull-request.guidelines.md](pull-request.guidelines.md); with a tracker issue, its body names the issue with the tracker's closing keyword. Before opening it, run the requirements check. A gap is a new round (step 5). The Chief of Staff, on hearing the PR link, drafts the one-line comment with that link for the tracker issue and posts it after the owner approves it. |
+| 8 PR | driver | Rebase on `origin/main`, push, open the PR as a draft with the template of [ci.guidelines.md](ci.guidelines.md), written as in [pull-request.guidelines.md](pull-request.guidelines.md); with a tracker issue, its body names the issue with the tracker's closing keyword. Before opening it, run the requirements check. A gap is a new round (step 5). The body's Changelog checkbox (the `## Unreleased` line) is ticked, or says "No user-facing change". The Chief of Staff, on hearing the PR link, drafts the one-line comment with that link for the tracker issue and posts it after the owner approves it. |
 | 9 CI | driver | Watch the checks (see "Responsiveness"). Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. A failure the change does not touch and that passes on the re-run is a flake: the driver names it (test, run id, symptom) in its report, and the Chief of Staff files it in `1-inbox/` unless an item already covers it. Never weaken a test. |
 | 10 Verify | Verifier (sub-agent started by the driver) | CI green at the head and the review approved: start a Verifier, fresh, on the pushed head. It writes `work/verifier/T1-r<n>.md` starting `Verdict: VERIFIED` or `Verdict: NOT VERIFIED`, and proves three things, each one a command run at the pushed head with its output (the notes of the coder and the Inspector, and a green CI, are not proof): (a) every claim of `03-change-spec.md` (each acceptance check and each behaviour the spec states); (b) the evidence of the change, in `work/verifier/evidence/` with a `before-after.md` that lists each pair, what it shows and the command that reproduces it: for a change the user sees, the before on a detached worktree of the base and the after at the head, taken with the visual evidence technique of "Project bindings", light and dark when themes matter; or, for a change nobody sees (process text, tooling, internals), one line "no visible change" and the reason; (c) the posted PR body, read with `gh pr view <n> --json title,body` and checked against the diff and [pull-request.guidelines.md](pull-request.guidelines.md): every section of the PR template is present and filled; Impacts holds the before/after images or the "no visible change" line; "Autonomous decisions" exists and lists every choice a coder or the driver made without the owner (or says "None"); and Summary, Deliverables and Changes describe what the diff does, no more and no less. `NOT VERIFIED` because of the code (a claim fails) is a new round: step 5, round n+1, counted in the round limit. `NOT VERIFIED` because of the body or the evidence only: the driver fixes it itself (pushes the screenshots as in "Screenshots in the PR" of [pull-request.guidelines.md](pull-request.guidelines.md), `gh pr edit <n> --body-file <file>`), then runs the Verifier again; no round is used. When both causes are present, the code comes first. |
 | 11 Notify | driver | CI green at the head, the review approved and `Verdict: VERIFIED` at that head: mark the PR ready for review, then write `status: ready` in the header, then return. A CR sent back for a new round goes back to draft first. "At that head" means the verdict file names the head SHA it ran on; a push after the verdict makes it stale, so the driver runs the Verifier again. |
@@ -328,12 +328,15 @@ Drivers stay background sub-agents of the Foreman.
 When the Chief of Staff gives a release to the Foreman (starting one if none is running), the
 Foreman keeps the version commit away from development. It brings the stack of the release to `main` the usual way, then asks the Chief of
 Staff to hold every other merge, and starts the release driver as a background driver of the run.
+When the version PR tops the stack, it starts the release driver once the PRs of the stack are
+ready, not merged: the heavy run is the top branch's, and the owner merges the whole stack.
 It does not start a driver for a new CR until the release is published. The steps are in
 [release-process.guidelines.md](release-process.guidelines.md).
 
 ### Release driver
 
-A special driver, started by the Foreman once the stack of the release is merged. It runs the
+A special driver, started by the Foreman once the stack of the release is merged (or ready, when
+the version PR tops it). It runs the
 release from there to the end, so the owner only agrees on the version, reviews the notes and the
 thread, and reads the result. The steps (notes, thread, heavy run on `main`, version commit,
 publishing, archive) are in [release-process.guidelines.md](release-process.guidelines.md); this
@@ -346,7 +349,8 @@ section covers the role.
   its lock, like for a CR driver.
 - **Lists** in the release folder the tracker issues the release closed; it never comments. The
   Chief of Staff drafts the "Released in" comments, after the publication, with one owner approval
-  for the whole list.
+  for the whole list. No issue closed by this release: the line goes in `report.md`, and nothing is
+  drafted or approved.
 - **Merges** only what the release guideline allows: the fix PRs of the release, on the owner's
   standing permission for release work. It never enables auto-merge and never touches a PR outside
   the release.
@@ -368,7 +372,7 @@ section covers the role.
 > `.agents/guidelines/ci.guidelines.md` and the release folder (`03-change-spec.md`, `STATUS.md`).
 > Resume from the `STATUS.md` header and write `driver: <your id>` in it. Follow the steps of
 > `release-process.guidelines.md` from step 3: notes and thread, a green heavy run on `main` HEAD,
-> then the version commit, then monitor the tag, Marketplace and Pages, and the archive.
+> or on the stack's top branch when the version PR tops the stack, then the version commit, then monitor the tag, Marketplace and Pages, and the archive.
 > Report a red job or another small problem to the Foreman, which runs the fix CR, and merge its
 > PR; never code or review yourself. Ask the owner nothing after the notes review except a real
 > blocker.

@@ -534,7 +534,9 @@ The Python project's version is tooling metadata and is not the extension releas
 The release notes, the announcement thread and their images are committed in the version pull
 request, under `docs/releases-notes/YYYY-MM-DD-vX.Y.Z/`, and `just check` fails without valid notes:
 see [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md), which also
-gives the order of a release. Make the version commit (step 3) only after a green heavy run of `main` HEAD (step 1).
+gives the order of a release. Make the version commit (step 3) only after a green heavy run of `main` HEAD (step 1), or of the
+top branch of the stack when the version PR tops it (see "The version PR on top of a stack" in the
+release guideline).
 
 1. Merge everything the release needs into `main`. The push runs the heavy jobs (`integration` and
 	`stress`) on `main` HEAD: wait for both to be green on that exact commit, reading the result of
@@ -547,7 +549,9 @@ gives the order of a release. Make the version commit (step 3) only after a gree
 	```
 
 	A red job: fix, merge, run again. A flake: `gh run rerun <run-id> --failed` once, then treat it
-	as red. Do not make the version commit before this run is green. The heavy run of the version
+	as red. When the version PR tops a ready stack, merge nothing first: dispatch
+	`gh workflow run ci.yml --ref <top-branch> -f heavy=true` and wait for green on that head.
+	Do not make the version commit before this run is green. The heavy run of the version
 	push (step 5) stays the final gate.
 
 2. Fetch release tags and commit the changes to include in the release:
@@ -557,8 +561,10 @@ gives the order of a release. Make the version commit (step 3) only after a gree
 	```
 
 	Then check that `## Unreleased` in `CHANGELOG.md` has one user-facing line for every
-	`feat` and `fix` commit since the last release tag, and add the missing ones in the release
-	branch (test, CI, build and documentation commits get none):
+	`feat` and `fix` commit since the last release tag, and treat a missing one as a gap of its
+	PR: a fix PR adds it before the version commit. Each PR adds its own line, appended at the end of
+	`## Unreleased` (test, CI, build and documentation commits get none). This check is the
+	release's safety net:
 
 	```bash
 	git log --format='%h %s' "$(git describe --tags --abbrev=0)"..origin/main | grep -E '^\S+ (feat|fix)'
