@@ -42,6 +42,18 @@ As a reader, I preview a Markdown file from anywhere on my disk and see the imag
 - The frontmatter schema is not searched for such a file (frontmatter-schema scope).
 - A missing file is a different outcome from a refused one: it is shown as a missing image or a warning by the rendering scopes.
 
+### Main paths
+
+#### Path 1: Load a local image
+
+1. The document refers to a local image
+   - SwRS-MDOKFSTUDIO-TRUST-025: the page gets the address of the file only if the reference is a relative path that decodes safely to an existing regular file inside the allowed roots
+   - Option SwRS-MDOKFSTUDIO-TRUST-025 (refusal): a reference that leaves the roots or names no regular file is refused with a code
+2. The page holds the address of a file inside the allowed roots
+   - SwRS-MDOKFSTUDIO-TRUST-007: the webview loads local files only from the resource root of the preview and the bundle folder of the extension
+   - Option SwRS-MDOKFSTUDIO-TRUST-007 (refusal): the pending page and the missing-source page allow no local file
+3. The image is shown from an allowed folder
+
 <!-- okf:links:start -->
 ### Links
 
