@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## 1.7.1 - 2026-11-12
+
+- The published site has a requirements viewer: the 16 areas, the use cases of an area, each use
+  case drawn as a map of its main paths, and each behaviour with its rule, scenarios, source files
+  and tests. Search works on every page and the pages read without JavaScript. The old
+  Requirements page link redirects to it, and its figures count the requirements by their real
+  lifecycle instead of "unknown".
+- Almost every use case of the requirements now has its main paths written step by step, each step
+  backed by the behaviours that move the user on. A check fails when a path cites a behaviour that
+  does not exist, is not active, or belongs to another use case.
+- The whole published site has one cream look, the one of the extension's Cream theme: the same
+  colours, fonts and header on every page and every share picture, with no dark mode.
+- A link to the home, Contributing, How we ship, Gallery or requirements pages shared on X or any
+  site that reads Open Graph shows a large picture card; the gallery card shows the live number of
+  captures.
+- On the site, the requirements breadcrumb shows the full current page on its own row, and wide
+  code blocks and tables scroll inside themselves instead of widening the page on a small screen.
+- Without JavaScript, the requirements viewer hides its search and play buttons, which need it.
+- The requirements viewer passes the accessibility checks.
+
 ## 1.7.0 - 2026-11-11
 
 - The Rename label field of a table's label now opens above its anchor icon, so it no longer
