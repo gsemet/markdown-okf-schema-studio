@@ -16,6 +16,15 @@
   editor on the card's own line, not the line above); no normative change. Tests in
   `test/core/render/gridCardTitleSourceLine.test.ts`.
 
+### A GitHub alert keeps its title when it starts with a heading or a bold line
+
+- SwRS-MDOKFSTUDIO-GFM-009 (proposed, not approved): new boundary scenario "The first body line never
+  becomes the title" (`> [!NOTE]` followed by a heading or a lone bold line keeps the title Note and
+  the line in the body, as GitHub renders it); `src/core/directives/admonition.ts` is added to its
+  sources and `test/core/render/alertTitle.test.ts` to its tests.
+- SwRS-MDOKFSTUDIO-MYST-001 (proposed, not approved): a boundary line says that a GitHub alert is not
+  an untitled admonition, so the title shortcut does not apply to it.
+
 ### One cream look for the whole published site (CR 303)
 
 - New, proposed, deriving from StRS-MDOKFSTUDIO-TRUST-014: SwRS-MDOKFSTUDIO-CORE-086 (every page and

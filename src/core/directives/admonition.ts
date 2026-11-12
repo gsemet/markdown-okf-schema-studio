@@ -26,7 +26,8 @@ export const ADMONITION_TITLES: Record<string, string> = {
 // @implements_req SwRS-MDOKFSTUDIO-MYST-006
 /**
  * The admonition directive gives its position to the admonition the parser built beneath it, and
- * an admonition without arguments or title takes its title from a leading heading or bold line.
+ * an admonition without arguments or title, except a rewritten GitHub alert, takes its title from
+ * a leading heading or bold line.
  */
 function renderAdmonition(node: MystNode): void {
   const admonition = findNode(node, "admonition");
@@ -40,6 +41,8 @@ function renderAdmonition(node: MystNode): void {
   if (
     admonition
     && !node.args?.trim()
+    // @implements_req SwRS-MDOKFSTUDIO-GFM-009
+    && admonition.data?.githubAlert !== true
     && !admonition.children?.some((child) => child.type === "admonitionTitle")
   ) {
     const inferredTitle = takeAdmonitionTitle(admonition.children ?? []);

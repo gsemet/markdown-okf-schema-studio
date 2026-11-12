@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/directives/registry.test.ts
 - test/core/preview/previewStyles.test.ts
+- test/core/render/alertTitle.test.ts
 - test/core/render/cardsTabs.test.ts
 - test/core/render/mystFeatures.test.ts
 - test/integration/mystBlocksWindow.ts
@@ -118,6 +119,8 @@ When a document holds an admonition directive, the extension SHALL render a pane
 | --- | --- |
 | `**A bold title**` | A bold title |
 | `### Title` | Title |
+
+A GitHub alert (`> [!NOTE]`, `> **Note**`) is not an untitled admonition here: its first body line stays in the body (SwRS-MDOKFSTUDIO-GFM-009).
 
 ### Scenario (boundary): Simple and icon-less admonitions
 

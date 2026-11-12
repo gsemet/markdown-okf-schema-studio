@@ -4,6 +4,9 @@
 
 - A click on a card of a grid written inside a quote, whose content starts with a blank quoted line,
   opens the editor on the card instead of the line above.
+- A GitHub alert that starts with a heading or a bold line keeps its title ("Note", or the text
+  after `[!NOTE]`) and shows that heading or bold line in its body, as GitHub does. MyST
+  admonitions and Quarto callouts still take their title from a leading heading or bold line.
 
 ## 1.7.1 - 2026-11-12
 
