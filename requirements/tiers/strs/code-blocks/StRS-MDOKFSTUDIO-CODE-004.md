@@ -50,6 +50,19 @@ Readers need to reuse code samples without selecting text by hand, even in Restr
 
 - Not available for blocks being edited or for diagram sources; the button is revealed by pointing or by keyboard focus on the block, and Enter or Space on it copies.
 
+### Main paths
+
+#### Path 1: Copy a code sample
+
+1. A code block is in the preview
+   - SwRS-MDOKFSTUDIO-CODE-017: the pointer over the block, or its keyboard focus, shows the Copy code button at its top-right corner
+   - Option SwRS-MDOKFSTUDIO-CODE-017 (refusal): some blocks never get a button
+2. The Copy code button is shown
+   - SwRS-MDOKFSTUDIO-CODE-019: the click puts the code lines on the clipboard and the button reads Copied
+   - Option SwRS-MDOKFSTUDIO-CODE-019 (refusal): the button never claims a copy that did not happen
+   - Option SwRS-MDOKFSTUDIO-CODE-026 (refusal): an oversized or non-string copy request is refused
+3. The code is on the clipboard and the button reads Copied
+
 <!-- okf:links:start -->
 ### Links
 
