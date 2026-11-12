@@ -168,6 +168,9 @@ jobs:
             rm -rf out/reports
             echo "reports=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Install Chromium to draw the social cards
+        if: steps.usable.outputs.reports == 'true'
+        run: uv run --no-sync --group docs playwright install --with-deps chromium
       - name: Build Pages site from the downloaded reports
         if: steps.usable.outputs.reports == 'true'
         run: just site-assemble

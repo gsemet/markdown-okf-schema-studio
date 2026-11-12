@@ -139,8 +139,9 @@ jobs:
       - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
-      # Only this job installs Ubuntu packages (just dev-ci visual); it keeps their archives in a
-      # cache so a slow mirror cannot stall it. The key changes only when the package set changes.
+      # Only the jobs "visual" and "gallery" install Ubuntu packages (just dev-ci visual); "visual"
+      # keeps their archives in a cache (gallery only restores it) so a slow mirror cannot stall
+      # them. The key changes only when the package set changes.
       # The key names the runner image (ImageOS, for example ubuntu24), so a new image release
       # starts its own archive set. ImageOS is a runner variable, which the env context does not
       # see until it is written to GITHUB_ENV.
@@ -432,7 +433,17 @@ jobs:
       - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
-      - run: just dev-ci
+      # The site build draws the social cards with Chromium, so this job sets up the visual stage.
+      # It only restores the Ubuntu package archives that the visual job saves.
+      - name: Name the runner image for the package cache
+        run: echo "RUNNER_IMAGE_OS=${ImageOS:-unknown}" >> "$GITHUB_ENV"
+      - name: Restore Ubuntu package archives
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .cache/apt-archives
+          key: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}
+          restore-keys: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}-
+      - run: just dev-ci visual
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: ${{ needs.report.outputs.artifact }}
