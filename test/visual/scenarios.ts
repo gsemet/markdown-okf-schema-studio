@@ -92,6 +92,12 @@ export interface Scenario {
    * see `exportFileName` in renderOptions.ts) and `check_export_html` opens it with JavaScript off.
    */
   exportHtml?: true;
+  /**
+   * CR 310: with `exportHtml`, the file is built from the page with the editor of the table cell holding this text
+   * open, and `check_export_html` checks that the cell's text is visible in the file (it replaces the checks written
+   * for the export fixture).
+   */
+  exportEditedCell?: string;
   /** Shown first in its group page and in the index thumbnails. */
   gallery?: "key";
   readme?: ReadmeSource;

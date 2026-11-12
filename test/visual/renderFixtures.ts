@@ -46,7 +46,7 @@ import { DEFAULT_VIEW_PREFERENCES } from "../../src/core/state/previewViewPrefer
 import { DEFAULT_EDITING_CONFIGURATION } from "../../src/core/configuration/editingConfiguration";
 import { previewContentWidthCss } from "../../src/core/preview/previewStyles";
 import { VISUAL_REPORT_ROOT } from "../reportPaths";
-import { drawnContentHtml } from "./drawnContent";
+import { contentWithCellEditorOpenHtml, drawnContentHtml } from "./drawnContent";
 import { buildHtmlExport } from "../../src/core/export/htmlExport";
 import { katexFontUrls } from "../../src/core/export/exportStyles";
 import { THEME_TOKEN_NAMES, VSCODE_VARIABLE_PREFIX } from "../../src/core/preview/themeTokens";
@@ -392,7 +392,8 @@ function imageDataUri(src: string): string | undefined {
  * that resolves the tokens in a real webview does not run here, so the tokens are the host
  * variables of the theme and the cream or dark mode stays a root attribute the sheet resolves.
  * A page with a Mermaid diagram is opened in a browser first, so the content is the drawn one the
- * webview sends on Export (CR 299).
+ * webview sends on Export (CR 299). A scenario with `exportEditedCell` is exported with the editor of
+ * that cell open (CR 310).
  */
 async function writeExportFile(scenario: (typeof SCENARIOS)[number]): Promise<void> {
   const identity = scenarioPage(scenario);
@@ -400,9 +401,12 @@ async function writeExportFile(scenario: (typeof SCENARIOS)[number]): Promise<vo
   if (!theme) throw new Error(`Unknown theme: ${scenario.theme}`);
   const page = fs.readFileSync(path.join(pageDirectory, pageFileName(identity)), "utf8");
   const staticContent = /<main\s+id="sphinx-myst-preview-content"[\s\S]*?<\/main>/u.exec(page)?.[0];
-  const content = staticContent?.includes('class="myst-mermaid-figure"')
-    ? await drawnContentHtml(path.join(pageDirectory, pageFileName(identity)))
-    : staticContent;
+  const pageFile = path.join(pageDirectory, pageFileName(identity));
+  const content = scenario.exportEditedCell !== undefined
+    ? await contentWithCellEditorOpenHtml(pageFile, scenario.exportEditedCell)
+    : staticContent?.includes('class="myst-mermaid-figure"')
+      ? await drawnContentHtml(pageFile)
+      : staticContent;
   if (content === undefined) throw new Error(`no content in the page of ${scenario.id}`);
   const tokens: Record<string, string> = {};
   for (const name of THEME_TOKEN_NAMES) {

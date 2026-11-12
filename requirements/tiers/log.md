@@ -25,6 +25,16 @@
 - SwRS-MDOKFSTUDIO-MYST-001 (proposed, not approved): a boundary line says that a GitHub alert is not
   an untitled admonition, so the title shortcut does not apply to it.
 
+### Export to HTML keeps what is under an open editor (CR 310)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-137 amended: the Known issue row ("A block editor is open") is replaced by
+  the behaviour: a block, a table cell or a front matter key or value being edited is written as last
+  rendered, the editor stays open and the export saves nothing. The Known issue was wrong for a block:
+  it was already exported. The reproduction (`test/page/exportWhileEditing.test.ts`) showed the real
+  losses were the table cell (its content stayed in a hidden wrapper) and the front matter key and
+  value (their display kept `hidden`); `removeChrome` now unwraps and shows them. Verification adds
+  that test and the visual scenario toolbar-navigation/v44.
+
 ### One cream look for the whole published site (CR 303)
 
 - New, proposed, deriving from StRS-MDOKFSTUDIO-TRUST-014: SwRS-MDOKFSTUDIO-CORE-086 (every page and

@@ -3,6 +3,7 @@
  * themes, plus the exported file of each (written by `renderFixtures.ts`, opened with JavaScript
  * off by `check_export_html` in capture_export_html.py). The Mermaid diagram of the fixture is drawn
  * in a browser before the file is built (`drawnContent.ts`), as the webview does on Export (CR 299).
+ * v44 exports a page whose table cell editor is open and checks the cell's text shows in the file (CR 310).
  */
 
 import { WIDE } from "./scenarioAssertions";
@@ -28,3 +29,19 @@ export const EXPORT_HTML_SCENARIOS: ScenarioDefinition[] = ([
     + "one file with no script, the page colours and width of the preview, a closed properties table that opens on a click, working tabs, "
     + "the external link kept and the link to another file as text, an embedded image, the Mermaid diagram drawn as an image with its source folded, and no comment or editing control.",
 }));
+
+export const EXPORT_EDITED_CELL_SCENARIOS: ScenarioDefinition[] = [
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+    id: "toolbar-navigation/v44-export-html-edited-cell-light-900",
+    fixture: "88-export-edited-cell",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    exportHtml: true as const,
+    exportEditedCell: "Compiler pioneer",
+    description: "A table whose cell editor is open when the page is exported, and the exported file opened with JavaScript off: "
+      + "the edited cell shows its text as last rendered, with no editor control and no hidden wrapper around it. "
+      + "The content of the file is the real DOM of the page with the cell editor open, read in headless Chromium.",
+  },
+];

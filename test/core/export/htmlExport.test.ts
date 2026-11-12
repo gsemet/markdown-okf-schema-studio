@@ -102,6 +102,45 @@ test("review comments, controls and editing chrome are left out, find marks keep
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+test("a table cell under the cell editor is exported with its content shown and without the editor", () => {
+  const { html } = build(
+    '<table><tr><td data-sphinx-preview-table-cell-selected="true">'
+    + '<span data-sphinx-table-cell-content="true" aria-hidden="true"><strong>y</strong></span>'
+    + '<div data-sphinx-preview-block-editor="true"><textarea>typed</textarea><button>Done</button></div></td></tr></table>',
+  );
+  const body = bodyOf(html);
+  assert.match(body, /<td><strong>y<\/strong><\/td>/u);
+  assert.doesNotMatch(body, /data-sphinx-table-cell-content|aria-hidden|block-editor|textarea|typed|<button/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+test("a paragraph under the block editor is exported, its editor is not", () => {
+  const { html } = build(
+    '<p data-sphinx-preview-editing="true">Rendered paragraph</p>'
+    + '<div data-sphinx-preview-block-editor-host="true"><div data-sphinx-preview-block-editor="true"><textarea>typed</textarea></div></div>',
+  );
+  const body = bodyOf(html);
+  assert.match(body, /<p>Rendered paragraph<\/p>/u);
+  assert.doesNotMatch(body, /data-sphinx-preview-editing|block-editor|textarea|typed/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+test("a front matter value and a key under their editors are exported shown, without the editor", () => {
+  const { html } = build(
+    '<section data-okf-properties="true"><table><tbody><tr data-okf-field="status">'
+    + '<th data-okf-edit-cell="name" data-okf-editing="true" data-okf-key-editing="true">'
+    + '<span class="okf-name-cell" hidden>status</span><div data-okf-frontmatter-editor="true"><input type="text"></div></th>'
+    + '<td data-okf-edit-cell="value" data-okf-value-cell="true" data-okf-editing="true">'
+    + '<span data-okf-value-display="true" hidden>draft</span><div data-okf-frontmatter-editor="true"><textarea>typed</textarea></div></td>'
+    + '</tr></tbody></table></section>',
+  );
+  const body = bodyOf(html);
+  assert.match(body, /<span class="okf-name-cell">status<\/span>/u);
+  assert.match(body, /<span data-okf-value-display="true">draft<\/span>/u);
+  assert.doesNotMatch(body, /hidden|data-okf-editing|data-okf-key-editing|frontmatter-editor|textarea|typed|<input/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
 test("a task list checkbox stays, disabled and without its edit attributes", () => {
   const { html } = build('<li><input type="checkbox" checked data-myst-checkbox-line="4"> done</li>');
   assert.match(html, /<input type="checkbox" checked="" disabled="">/u);
