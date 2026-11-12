@@ -38,6 +38,8 @@ Grade: <!-- 1 | 2 | 3 -->
 - [ ] New or changed tests (they fail on the previous code)
 - [ ] Requirements: SwRS updated or added, markers in code and tests, `just requirements-update`
       <!-- or "No behaviour change" -->
+- [ ] Changelog: one user-facing line under `## Unreleased` in `CHANGELOG.md`
+      <!-- or "No user-facing change" -->
 - [ ] Local gates: <!-- targets run and their counts -->
 - [ ] Review
 - [ ] CI green
