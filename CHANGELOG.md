@@ -7,6 +7,8 @@
 - A GitHub alert that starts with a heading or a bold line keeps its title ("Note", or the text
   after `[!NOTE]`) and shows that heading or bold line in its body, as GitHub does. MyST
   admonitions and Quarto callouts still take their title from a leading heading or bold line.
+- Export to HTML keeps the content of a table cell or a front matter field that is being edited, as
+  last saved; the editor stays open and is not in the file.
 
 ## 1.7.1 - 2026-11-12
 

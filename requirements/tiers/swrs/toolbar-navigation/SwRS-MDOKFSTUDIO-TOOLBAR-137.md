@@ -25,6 +25,7 @@ implemented_in_files:
 - src/page/modules/exportSnapshot.ts
 tested_in_files:
 - test/core/export/htmlExport.test.ts
+- test/page/exportWhileEditing.test.ts
 - test/page/modules/exportSnapshot.test.ts
 - test/visual/capture_export_html.py
 - test/visual/exportHtmlScenarios.ts
@@ -56,12 +57,12 @@ When the extension writes the exported file, it SHALL write the content as the r
 | A folded section | It is written unfolded |
 | A task checkbox | It is shown as checked or not as in the preview, and cannot be changed |
 | The diagrams are still drawing | The page waits up to 10 seconds, then exports what it shows (a diagram in error or unavailable does not hold the export) |
-| A block editor is open | Known issue: the block being edited is missing from the file; close the editor (Escape or save) before exporting |
+| A block, a table cell or a front matter key or value is being edited | It is written as last rendered (the text autosaved so far, about 400 ms behind the typing); the editor stays open, is not in the file, and the export saves nothing |
 
 ### Verification notes
 
-- Method: test/core/export/htmlExport.test.ts (the chrome rules, the tab conversion, the sections), test/page/modules/exportSnapshot.test.ts (the snapshot, the shown tabs, the diagram wait), test/visual/capture_export_html.py (the tabs and the missing chrome, scenarios toolbar-navigation/v41 and v42).
-- Criteria: no `button`, no review mark and no comment text in the file; the checked radio of each tab set shows its panel.
+- Method: test/core/export/htmlExport.test.ts (the chrome rules, the tab conversion, the sections, the content under an open editor), test/page/modules/exportSnapshot.test.ts (the snapshot, the shown tabs, the diagram wait), test/page/exportWhileEditing.test.ts (the real block, table cell and front matter editors opened, then the export built from the snapshot: the edited content is in the file, shown, with no editor, and the editor is still open), test/visual/capture_export_html.py (the tabs and the missing chrome, scenarios toolbar-navigation/v42 and v43; the text of an edited table cell visible in the file opened with JavaScript off, scenario toolbar-navigation/v44).
+- Criteria: no `button`, no review mark and no comment text in the file; the checked radio of each tab set shows its panel; the text under an open editor is in the file with no `hidden`, `aria-hidden` or cell-content wrapper around it.
 
 <!-- okf:links:start -->
 ### Links

@@ -53,7 +53,7 @@ const REMOVED_ATTRIBUTES = new Set([
   "contenteditable", "tabindex", "draggable", "spellcheck", "data-line", "data-okf-line", "data-okf-end-line",
   "data-okf-fold", "data-okf-folded", "data-okf-value", "data-okf-value-yaml", "data-okf-enums",
   "data-okf-edit-cell", "data-okf-editable", "data-okf-value-cell", "data-okf-available-keys",
-  "data-okf-available-fields",
+  "data-okf-available-fields", "data-okf-editing", "data-okf-key-editing",
 ]);
 
 const REMOVED_ATTRIBUTE_PREFIXES = [
@@ -142,13 +142,35 @@ function isTabRadio(element: HtmlElement): boolean {
   return element.tagName === "input" && attr(element, "type") === "radio" && hasAttr(element, "data-export-tab");
 }
 
+/** True for the display element of a front matter key or value (the editor hides it while it is open). */
+const isFrontmatterDisplay = (element: HtmlElement): boolean =>
+  hasClass(element, "okf-name-cell") || hasAttr(element, "data-okf-value-display");
+
+/** True when an ancestor of `element` is a front matter cell under an open editor. */
+function inEditedCell(element: HtmlElement): boolean {
+  for (let current = element.parentNode; current && "tagName" in current; current = current.parentNode) {
+    if (attr(current, "data-okf-editing") === "true") return true;
+  }
+  return false;
+}
+
+/** Shows what an open front matter editor hides: its display element comes back as last rendered. */
+function showEditedFrontmatter(root: HtmlParent): void {
+  walkElements(root, (element) => {
+    if (isFrontmatterDisplay(element) && hasAttr(element, "hidden") && inEditedCell(element)) removeAttr(element, "hidden");
+  });
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-137
 /**
  * Leaves out the review comments and the editing chrome: controls, chips, threads, find marks
  * (their text stays), handles, source-mapping attributes and edit-mode attributes. A task-list
- * checkbox stays, disabled.
+ * checkbox stays, disabled. Content under an open editor is shown as last rendered: the editor
+ * goes, the wrapper that hides a table cell's content is unwrapped and a hidden front matter
+ * display comes back.
  */
 function removeChrome(root: HtmlParent): void {
+  showEditedFrontmatter(root);
   walkElements(root, (element) => {
     if (element.tagName === "input") {
       if (isTabRadio(element)) return;
@@ -162,6 +184,11 @@ function removeChrome(root: HtmlParent): void {
     }
     if (isChrome(element)) {
       detach(element);
+      return;
+    }
+    // The content of the table cell under the cell editor goes back into the cell.
+    if (hasAttr(element, "data-sphinx-table-cell-content")) {
+      unwrap(element);
       return;
     }
     // A find mark and the highlight of a comment thread are text with a wrapper: the text stays.
