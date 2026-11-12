@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A click on a card of a grid written inside a quote, whose content starts with a blank quoted line,
+  opens the editor on the card instead of the line above.
+
 ## 1.7.1 - 2026-11-12
 
 - The published site has a requirements viewer: the 16 areas, the use cases of an area, each use

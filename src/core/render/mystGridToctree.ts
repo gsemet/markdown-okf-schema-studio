@@ -87,18 +87,47 @@ const CLOSING_FENCE = /^[ \t]*(?:`{3,}|~{3,}|:{3,})[ \t]*$/u;
  * would shift every line number inside the grid, so the body is cut from the source text; `value`
  * is only the fallback when the fences cannot be located.
  */
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
 function directiveBody(node: GridNode, source: GridSource): GridSource {
   const start = node.position?.start?.line;
   const end = node.position?.end?.line;
   if (start !== undefined && end !== undefined) {
     const open = start - source.firstLine;
     const close = end - source.firstLine;
-    if (open >= 0 && close > open && close < source.lines.length
-      && FENCE_LINE.test(source.lines[open]) && CLOSING_FENCE.test(source.lines[close])) {
-      return { lines: source.lines.slice(open + 1, close), firstLine: start + 1 };
+    if (open >= 0 && close > open && close < source.lines.length) {
+      const lines = stripQuotePrefix(source.lines.slice(open, close + 1));
+      if (FENCE_LINE.test(lines[0]) && CLOSING_FENCE.test(lines[lines.length - 1])) {
+        return { lines: lines.slice(1, -1), firstLine: start + 1 };
+      }
     }
   }
   return { lines: (node.value ?? "").split("\n"), firstLine: lineOf(node) + 1 };
+}
+
+const QUOTE_MARKER = /^[ \t]{0,3}>[ \t]?/u;
+
+/**
+ * The lines of a directive without the quote prefix of its opening line (one `>` marker with its
+ * optional space or tab per quote level). A line without the prefix, such as a lazy continuation,
+ * stays as is. Lines that are not in a quote are returned unchanged.
+ */
+function stripQuotePrefix(lines: string[]): string[] {
+  let depth = 0;
+  let rest = lines[0];
+  for (let match = QUOTE_MARKER.exec(rest); match; match = QUOTE_MARKER.exec(rest)) {
+    depth += 1;
+    rest = rest.slice(match[0].length);
+  }
+  if (depth === 0) return lines;
+  return lines.map((line) => {
+    let text = line;
+    for (let level = 0; level < depth; level += 1) {
+      const match = QUOTE_MARKER.exec(text);
+      if (!match) break;
+      text = text.slice(match[0].length);
+    }
+    return text;
+  });
 }
 
 /** Leading `:name: value` lines of a directive body; the lines are blanked so line numbers hold. */
