@@ -69,6 +69,29 @@ As a writer, I rename a metadata key without touching the rest of the frontmatte
 - Comment lines above a removed field are kept; removing the only field leaves a valid empty mapping.
 - A field the schema requires has a disabled Remove button and the host also refuses the removal.
 
+### Main paths
+
+#### Path 1: Rename a key
+
+1. The properties table is shown in edit mode
+   - SwRS-MDOKFSTUDIO-FMEDIT-024: a click on a field name opens the key editor
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-024 (boundary): the key editor works without a schema
+2. The key editor is open
+   - SwRS-MDOKFSTUDIO-FMEDIT-024: Enter or leaving with a changed name renames only the key text
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-024 (refusal): an empty or padded name is refused
+3. The key has its new name and the comments are kept
+
+#### Path 2: Add a field
+
+1. A field editor is open
+   - SwRS-MDOKFSTUDIO-FMEDIT-028: the Add field button adds a field chosen among the missing schema fields or typed as a custom key
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-028 (boundary): no custom key is offered when extra properties are forbidden
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-029 (nominal): Remove field deletes exactly the lines of the field
+   - Option SwRS-MDOKFSTUDIO-FMEDIT-029 (refusal): Remove field is disabled for a schema-required field
+2. A new field is added
+   - SwRS-MDOKFSTUDIO-FMEDIT-037: the field is one inserted line where its row shows and its editor opens by itself once
+3. The editor of the new field is open
+
 <!-- okf:links:start -->
 ### Links
 
