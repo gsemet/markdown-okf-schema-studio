@@ -22,6 +22,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/directives/admonition.ts
 - src/core/render/mystGithubAlerts.ts
 - src/core/render/mystNormalize.ts
 - src/core/syntax/blockQuoteRange.ts
@@ -30,6 +31,7 @@ tested_in_files:
 - test/core/render/alertInsideColonContainer.test.ts
 - test/core/render/alertLazyContinuation.test.ts
 - test/core/render/alertSourceLines.test.ts
+- test/core/render/alertTitle.test.ts
 - test/core/render/crlfAlerts.test.ts
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
@@ -81,6 +83,15 @@ When a block quote starts with [!NOTE], [!TIP], [!IMPORTANT], [!WARNING] or [!CA
 - GIVEN a block quote line '> **Note** and more'
 - WHEN the preview is rendered
 - THEN it stays a plain block quote
+
+### Scenario (boundary): The first body line never becomes the title
+
+| Input | Outcome |
+| --- | --- |
+| `> [!NOTE]`, `> # h`, `> b` | the title is Note; `h` is a heading in the body, on line 2, before the paragraph `b` |
+| `> [!NOTE]`, `> **Bold first**`, `>`, `> b` | the title is Note; `Bold first` is a bold paragraph in the body |
+| `> [!WARNING] Read this`, `> ## h` | the title is Read this; `h` is a heading in the body |
+| `> **Note**`, `> # h` | the title is Note; `h` is a heading in the body |
 
 ### Scenario (boundary): Fences keep alert markers literal
 
@@ -176,7 +187,8 @@ its own, and a container nested in another must use a shorter fence than the out
 - Method: visual scenario gfm/v09-alert-body-opens-whole-alert-dark-900 in test/visual/alertEditingScenarios.ts (a real click on the second paragraph of a two-paragraph note: one `previewEditOpen` for lines 5 to 8, the editor holds the whole alert and the alerts after it stay rendered). The tab item row is not asserted for the click.
 - Method: test/core/render/alertLazyContinuation.test.ts (the admonition ends where its block quote ends: `> [!NOTE]`, `> a`, `b` gives one admonition on lines 1 to 3 whose paragraph holds `b`; a table of the inside and outside rows (list markers, lazy setext underlines, delimiter rows and MyST block breaks, tables, HTML blocks), one test per row, checked against GitHub's rendering; a lazy setext underline or delimiter row adds no heading, title or table; a lazy line of an alert in a list item and of a CRLF alert: unit tests on the rendered admonitions, their titles, their text and their `data-line` and `data-end-line`).
 - Method: test/core/render/alertInsideColonContainer.test.ts (alerts inside a card, a tab item and a nested grid card: unit tests on the rendered structure and on the `data-line` and `data-end-line` of the blocks).
-- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains the quoted lines and the lazy continuation lines of its block quote, and nothing after a blank line or a line that starts a block; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written; a click in the body of a mapped alert posts the alert's own range, never a paragraph's or the enclosing list's; an alert inside a colon container is a backtick directive whose fence is longer than any backtick fence of its body, so neither the body nor its closing line ends the container.
+- Method: test/core/render/alertTitle.test.ts (the first body line never becomes the title: a heading or a lone bold first line, a titled alert, a legacy bold marker and an alert between context tags keep their title and their body; the committed GitHub HTML in test/core/render/alert-fixtures/ (`heading-first-line.github.html`, `bold-first-line.github.html`) has the same title and body order as Studio; a MyST admonition still takes its title from a leading heading: unit tests on the rendered admonitions, no network call).
+- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default, never the first body line; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains the quoted lines and the lazy continuation lines of its block quote, and nothing after a blank line or a line that starts a block; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written; a click in the body of a mapped alert posts the alert's own range, never a paragraph's or the enclosing list's; an alert inside a colon container is a backtick directive whose fence is longer than any backtick fence of its body, so neither the body nor its closing line ends the container.
 
 <!-- okf:links:start -->
 ### Links
