@@ -56,6 +56,26 @@ As a writer, I scroll the source and the preview shows the same passage; as a re
 - The Anchor button of the toolbar overrides the first choice for one panel.
 - A change of these settings reloads the preview page.
 
+### Main paths
+
+#### Path 1: Scroll one pane, the other follows
+
+1. The editor and the preview show the same document
+   - SwRS-MDOKFSTUDIO-LIFE-097: the editor is scrolled and the preview follows, as far as the setting allows
+   - Option SwRS-MDOKFSTUDIO-LIFE-097 (refusal): with the setting off the preview does not follow the editor
+2. The preview shows the line of the editor
+   - SwRS-MDOKFSTUDIO-LIFE-108: the reader scrolls the preview or activates a block and the source line is revealed in the editor
+   - Option SwRS-MDOKFSTUDIO-LIFE-108 (refusal): no visible text editor shows the file, so no editor moves
+3. Both panes show the same source line
+
+#### Path 2: The reading line survives an update
+
+1. The preview is scrolled to a reading line
+   - SwRS-MDOKFSTUDIO-LIFE-119: the page keeps its scroll anchor, a source line, through the rebuild or edit
+   - Option SwRS-MDOKFSTUDIO-LIFE-119 (boundary): lines added or removed above the anchor
+   - Option SwRS-MDOKFSTUDIO-LIFE-125 (nominal): the host records the reading state of each valid report
+2. The same source line stays at the reading line after the update
+
 <!-- okf:links:start -->
 ### Links
 

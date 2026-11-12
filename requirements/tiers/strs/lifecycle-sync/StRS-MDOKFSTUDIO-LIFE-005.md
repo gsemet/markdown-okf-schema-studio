@@ -64,6 +64,26 @@ As a writer, I see my unsaved changes in the preview as I type, and a quick burs
 - A page that does not answer an update in time gets the whole page.
 - A page that VS Code created again is given the current document.
 
+### Main paths
+
+#### Path 1: Typing updates the preview
+
+1. A preview shows a document
+   - SwRS-MDOKFSTUDIO-LIFE-039: the text changes, saved or not, and a render of it is queued after a short pause
+   - Option SwRS-MDOKFSTUDIO-LIFE-039 (boundary): edits made during a render wait for it
+2. A new render is done
+   - SwRS-MDOKFSTUDIO-LIFE-069: the page receives only the new content as a patch and applies it in place
+   - Option SwRS-MDOKFSTUDIO-LIFE-071 (nominal): a change of the page shell loads a new page document instead
+   - Option SwRS-MDOKFSTUDIO-LIFE-094 (nominal): an agent edit makes the updated blocks glow once
+3. The page shows the new content in place
+
+#### Path 2: A dependency changes
+
+1. A preview shows a document
+   - SwRS-MDOKFSTUDIO-LIFE-044: a file the render depends on changes, or a Studio, plantuml or frontmatter setting changes, and the page renders again or is brought up to date
+   - Option SwRS-MDOKFSTUDIO-LIFE-044 (refusal): events below build and tool folders are ignored
+2. A new render is done
+
 <!-- okf:links:start -->
 ### Links
 

@@ -37,6 +37,18 @@ As a reader, I find every Studio setting in the settings editor, grouped by what
 
 - A setting that is not set reads as its default; a stored value of the wrong type is normalized.
 
+### Main paths
+
+#### Path 1: Find and set a Studio setting
+
+1. The reader opens the settings editor
+   - SwRS-MDOKFSTUDIO-LIFE-156: the Studio settings are listed in the groups Preview, Editing, Frontmatter, Comments and PlantUML, in that order
+   - Option SwRS-MDOKFSTUDIO-LIFE-156 (boundary): a description is at most 700 characters
+2. The Studio settings are listed in their groups
+   - SwRS-MDOKFSTUDIO-LIFE-097: the reader sets scrollPreviewWithEditor and the panes scroll together as far as the setting allows
+   - Option SwRS-MDOKFSTUDIO-LIFE-069 (boundary): the incrementalUpdates setting
+3. The panes scroll together as far as the settings allow
+
 <!-- okf:links:start -->
 ### Links
 

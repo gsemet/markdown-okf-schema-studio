@@ -62,6 +62,25 @@ As a writer, I open a rendered preview of the Markdown file I am editing beside 
 - Several previews can be open at once, the side preview and one or more Open With tabs; each keeps its own state, render and file watching, and shows its own document and its own place.
 - Refresh Preview acts on one preview, the newest one still open.
 
+### Main paths
+
+#### Path 1: Open a side preview
+
+1. A saved Markdown file is the active editor
+   - SwRS-MDOKFSTUDIO-LIFE-003: the reader runs Open Preview to Side and a preview opens beside the editor, or is revealed if one is open
+   - Option SwRS-MDOKFSTUDIO-LIFE-010 (refusal): a file that is not a saved .md file opens no preview and shows a message
+2. A side preview shows the file
+   - SwRS-MDOKFSTUDIO-LIFE-026: another saved Markdown file becomes the active editor and the newest side preview switches to it
+   - Option SwRS-MDOKFSTUDIO-LIFE-026 (boundary): an editor change that is not a saved Markdown file leaves the preview as it was
+3. The side preview shows the new active file
+
+#### Path 2: Open as a tab
+
+1. A saved Markdown file is the active editor
+   - SwRS-MDOKFSTUDIO-LIFE-018: the reader opens it through Open With and the file shows in a tab that keeps showing it
+   - Option SwRS-MDOKFSTUDIO-LIFE-018 (refusal): a document that is not a saved Markdown file is not opened
+2. The file is shown in a Studio tab
+
 <!-- okf:links:start -->
 ### Links
 
