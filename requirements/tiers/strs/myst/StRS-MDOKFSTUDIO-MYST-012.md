@@ -40,6 +40,15 @@ As a writer, I want to see the document tree I declared so that I can catch miss
 
 - Documents that do not exist are marked, not silently dropped.
 
+### Main paths
+
+#### Path 1: A table of contents
+
+1. A document holds a `{toctree}`
+   - SwRS-MDOKFSTUDIO-MYST-057: the page lists its documents as links that open in the preview, labelled by title, first heading or file name
+   - Option SwRS-MDOKFSTUDIO-MYST-057 (refusal): a document that cannot be found shows as warned text without a link
+2. The linked documents are listed
+
 <!-- okf:links:start -->
 ### Links
 

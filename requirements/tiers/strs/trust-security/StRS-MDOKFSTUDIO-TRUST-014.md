@@ -18,6 +18,12 @@ user_need: As a maintainer, I install on the pinned Node.js version from the
   are in the package.
 derived_by:
 - SwRS-MDOKFSTUDIO-CORE-069
+- SwRS-MDOKFSTUDIO-CORE-080
+- SwRS-MDOKFSTUDIO-CORE-081
+- SwRS-MDOKFSTUDIO-CORE-082
+- SwRS-MDOKFSTUDIO-CORE-083
+- SwRS-MDOKFSTUDIO-CORE-084
+- SwRS-MDOKFSTUDIO-CORE-085
 - SwRS-MDOKFSTUDIO-TRUST-074
 - SwRS-MDOKFSTUDIO-TRUST-075
 default_owner_email: gaetan@xeberon.net
@@ -44,7 +50,13 @@ As a maintainer, I install on the pinned Node.js version from the official regis
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-CORE-069](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-069.md): The site Requirements page shows the requirements chain and the report figures
+  - [SwRS-MDOKFSTUDIO-CORE-069](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-069.md): The site Requirements home shows the requirements chain and the report figures
+  - [SwRS-MDOKFSTUDIO-CORE-080](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-080.md): The site requirements viewer has an area page and a use case list
+  - [SwRS-MDOKFSTUDIO-CORE-081](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-081.md): The site requirements viewer draws the map of a use case from its Main paths
+  - [SwRS-MDOKFSTUDIO-CORE-082](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-082.md): The site requirements viewer has a page for each behaviour
+  - [SwRS-MDOKFSTUDIO-CORE-083](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-083.md): The site requirements viewer keeps retired requirements behind History
+  - [SwRS-MDOKFSTUDIO-CORE-084](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-084.md): The site requirements viewer has a search index
+  - [SwRS-MDOKFSTUDIO-CORE-085](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-085.md): The site requirements viewer has a social card for each level
   - [SwRS-MDOKFSTUDIO-TRUST-074](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package ships its icon and its bundle
   - [SwRS-MDOKFSTUDIO-TRUST-075](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-075.md): The extension is built from pinned, official dependencies
 <!-- okf:links:end -->

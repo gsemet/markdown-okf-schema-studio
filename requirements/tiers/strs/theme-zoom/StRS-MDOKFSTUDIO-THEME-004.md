@@ -53,6 +53,18 @@ As a reader, I pick a theme once and every preview of this workspace opens in it
 - The same answer carries the editor pairing, which belongs to the lifecycle-sync requirements.
 - A value that is not one of Current, Dark, White and Cream is dropped without any message; the workspace then counts as having no stored choice.
 
+### Main paths
+
+#### Path 1: Pick a theme and find it again
+
+1. The page is shown in one theme mode
+   - SwRS-MDOKFSTUDIO-LIFE-169: the reader picks a mode, and the host validates it and stores it for the workspace
+   - Option SwRS-MDOKFSTUDIO-THEME-013 (refusal): a mode other than current, dark, white or cream is dropped and the stored mode does not change
+2. The mode is stored for the workspace
+   - SwRS-MDOKFSTUDIO-LIFE-170: the preview opens again and starts from the stored workspace value
+   - Option SwRS-MDOKFSTUDIO-LIFE-170 (refusal): an invalid value is ignored and the next source is used
+3. The page is shown in the mode the reader picked
+
 <!-- okf:links:start -->
 ### Links
 

@@ -39,6 +39,15 @@ As a writer, I want formulas rendered offline and failures left legible so that 
 
 - Works with no network; an invalid formula is shown as its source text, not dropped.
 
+### Main paths
+
+#### Path 1: A formula
+
+1. A document holds `$...$`, `$$...$$` or a `{math}` role or directive
+   - SwRS-MDOKFSTUDIO-MYST-024: the page typesets it with the KaTeX of the extension bundle, offline
+   - Option SwRS-MDOKFSTUDIO-MYST-024 (refusal): an unparsable formula stays readable
+2. The formula is typeset
+
 <!-- okf:links:start -->
 ### Links
 

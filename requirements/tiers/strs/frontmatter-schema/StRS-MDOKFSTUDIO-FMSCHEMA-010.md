@@ -70,6 +70,21 @@ As a writer, I see which fields the schema expects, in a stable order, with thei
 - The strict additional properties setting is a boolean, off by default; on, each undeclared field is listed with "Unknown field; it is not declared in the "{type}" schema." and the badge counts it; off, such fields are listed without warning.
 - The strict setting applies only when a schema matched and is independent of the schema's own additionalProperties.
 
+### Main paths
+
+#### Path 1: Fields and their problems
+
+1. The type of the document has a schema
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-029: the page shows Name, Value and Description columns, declared fields in schema order, then the other keys
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-029 (boundary): a required field that is absent
+2. The fields are listed in schema order
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-084: the page validates the frontmatter and marks each violation on the row of its field
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-084 (nominal): a whole-document error gets a row of its own
+3. Violations are marked on their field rows
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-039: the badge in the table title counts the errors then the warnings and scrolls to the first issue when pressed
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-039 (nominal): a red line under the table names the missing required fields
+4. The reader is at the first row with an issue
+
 <!-- okf:links:start -->
 ### Links
 

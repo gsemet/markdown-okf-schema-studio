@@ -55,6 +55,30 @@ As a writer, I see the table actions with text labels above the table and I alwa
 - Known issue: the separator before the cell formatting group can stay at the end of a line when the group wraps in a narrow pane.
 - Known issue: a column operation rewrites the whole table in one fixed style, so the table's own padding and indentation are lost.
 
+### Main paths
+
+#### Path 1: Add a row below the selected one
+
+1. A table is shown in edit mode
+   - SwRS-MDOKFSTUDIO-TABLE-001: the writer clicks a cell and the cell editor opens
+2. The cell editor is open
+   - SwRS-MDOKFSTUDIO-TABLE-048: a toolbar named Table row and column actions is created directly above the table and tells the position of the selected cell
+   - Option SwRS-MDOKFSTUDIO-TABLE-064 (nominal): the bar rides down with a tall table and stays visible
+3. The table bar is shown above the table
+   - SwRS-MDOKFSTUDIO-TABLE-055: the writer presses Row below and an empty row is inserted after the selected one
+   - Option SwRS-MDOKFSTUDIO-TABLE-003 (nominal): Row above inserts an empty row above a body row
+   - Option SwRS-MDOKFSTUDIO-TABLE-003 (refusal): Row above on the header row
+   - Option SwRS-MDOKFSTUDIO-TABLE-004 (nominal): Col left inserts an empty column to the left
+   - Option SwRS-MDOKFSTUDIO-TABLE-005 (nominal): the buttons also edit a plain list-table
+   - Option SwRS-MDOKFSTUDIO-TABLE-055 (refusal): disabled buttons and model refusals
+4. An empty row is next to the selected one
+
+#### Path 2: Delete a row
+
+1. The table bar is shown above the table
+   - SwRS-MDOKFSTUDIO-TABLE-055: the writer presses Row − and the selected row is deleted
+2. The selected row is gone
+
 <!-- okf:links:start -->
 ### Links
 

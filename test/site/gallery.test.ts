@@ -4,7 +4,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
 
-import { buildGallery } from "./buildSite";
+import { buildGallery, listCaptures } from "./buildSite";
 
 test("gallery includes every nested screenshot, structured summaries and complete sidecars", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-gallery-"));
@@ -23,6 +23,7 @@ test("gallery includes every nested screenshot, structured summaries and complet
     const html = buildGallery(root);
     assert.equal((html.match(/class="capture-open"/gu) ?? []).length, 5);
     assert.ok(html.includes("5 E2E screenshots"));
+    assert.equal(listCaptures(root).length, 5);
     assert.ok(html.includes("reports/e2e/screenshots/real%20run/checkpoint.png"));
     assert.ok(html.includes("Wrapped editor &lt;visible&gt; &amp; readable"));
     assert.ok(html.includes("No clipped controls"));

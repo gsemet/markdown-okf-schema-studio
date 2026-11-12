@@ -11,10 +11,10 @@ scope: myst
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -99,6 +99,26 @@ Writers want every admonition kind, custom title, dropdown and nesting to look l
 - Figures: width and alignment follow what the source says.
 - Grid cards reflow with the pane width rather than overflow sideways.
 - List, caption and CSV table directives show as ordinary tables; content stays as authored in the source.
+
+### Main paths
+
+#### Path 1: An admonition
+
+1. A document holds an admonition directive
+   - SwRS-MDOKFSTUDIO-MYST-001: the page renders a panel with the title, accent colour, badge and Markdown body of its kind
+   - Option SwRS-MDOKFSTUDIO-MYST-001 (boundary): a kind outside the named list
+2. The admonition is drawn as a panel
+   - SwRS-MDOKFSTUDIO-MYST-006: an admonition that contains another directive shows the inner panel inside its parent
+   - Option SwRS-MDOKFSTUDIO-MYST-006 (boundary): a dropdown admonition collapses under its title
+3. Nested directives are drawn as panels inside their parent
+
+#### Path 2: Tabs
+
+1. A document holds a tab set with tab items
+   - SwRS-MDOKFSTUDIO-MYST-098: the page renders a tab bar with the tab-item titles and shows the panel of the selected tab
+2. The tab bar shows the selected panel
+   - SwRS-MDOKFSTUDIO-MYST-099: a click on a tab selects it and shows only its panel
+3. The panel of the clicked tab is shown
 
 <!-- okf:links:start -->
 ### Links

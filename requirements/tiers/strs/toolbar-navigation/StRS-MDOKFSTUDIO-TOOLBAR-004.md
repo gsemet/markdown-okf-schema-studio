@@ -43,6 +43,25 @@ As a reader, I always know which section I am in while I scroll a long document,
 - The depth is set by the setting `markdownOkfSchemaStudio.preview.stickyHeadingDepth`; its default is three levels.
 - A depth outside one to six is brought back into range, and a value that is not a number means the default.
 
+### Main paths
+
+#### Path 1: Scroll and keep the section in view
+
+1. The reader scrolls the document
+   - SwRS-MDOKFSTUDIO-TOOLBAR-018: a heading lies at or above the reading line and the sticky band shows it with its parent headings, up to the depth setting
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-018 (boundary): above the first heading the band is hidden
+2. The band shows the current heading path
+   - SwRS-MDOKFSTUDIO-TOOLBAR-002: text passes under the band and a soft shadow is drawn below it
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-002 (boundary): at the top of the page no shadow is drawn
+3. The current section stays pinned at the top
+
+#### Path 2: Change the depth of the band
+
+1. The band shows the current heading path
+   - SwRS-MDOKFSTUDIO-TOOLBAR-022: the depth setting is changed while a preview is open, and the page is loaded again with the new depth
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-022 (boundary): a value out of range or not a number is rounded, kept between 1 and 6, or replaced by 3
+2. The band shows at most the configured number of lines
+
 <!-- okf:links:start -->
 ### Links
 

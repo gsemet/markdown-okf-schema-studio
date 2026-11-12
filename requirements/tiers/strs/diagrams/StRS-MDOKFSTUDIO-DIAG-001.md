@@ -14,10 +14,10 @@ scope: diagrams
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -93,6 +93,29 @@ Writers expect a Mermaid diagram written in a fence or a directive to appear as 
 - Known issue: a failed Mermaid diagram posts no diagnostic to the status line or the Problems list, because the drawing happens in the page.
 - Insert: the "Mermaid" button (GitHub group of the edition palette, tooltip "Mermaid diagram") and the "/Mermaid" slash entry (aliases diagram, chart, graph, flowchart) insert a fenced `mermaid` flowchart set apart after the selection, with its first label "Start" selected.
 - Only the GFM palette mode offers it: not Strict, not MyST, and no `{mermaid}` directive button exists.
+
+### Main paths
+
+#### Path 1: Insert a diagram and read it
+
+1. Edit mode is on with the GFM palette
+   - SwRS-MDOKFSTUDIO-DIAG-017: the writer picks Mermaid and a starter flowchart fence is inserted with Start selected
+   - Option SwRS-MDOKFSTUDIO-DIAG-017 (refusal): the Strict or MyST palette offers no Mermaid
+2. A Mermaid fence is in the document
+   - SwRS-MDOKFSTUDIO-DIAG-001: the preview renders the fence as one picture with its source in a collapsed "Diagram source" disclosure
+   - Option SwRS-MDOKFSTUDIO-DIAG-001 (boundary): an empty fence is left blank, with no message
+3. The diagram is drawn as a picture
+   - SwRS-MDOKFSTUDIO-DIAG-005: the reader changes the theme
+   - Option SwRS-MDOKFSTUDIO-DIAG-005 (boundary): the colours stay the same, nothing is redrawn
+   - Option SwRS-MDOKFSTUDIO-DIAG-009 (nominal): a content update that replaces the node keeps the earlier picture
+4. The diagram is redrawn in the new theme, labels kept
+
+#### Path 2: Break a diagram
+
+1. A Mermaid fence holds invalid syntax
+   - SwRS-MDOKFSTUDIO-DIAG-015: the page cannot draw it and shows one message with a collapsed "Show the parser error" section
+   - Option SwRS-MDOKFSTUDIO-DIAG-015 (boundary): a reason that holds markup is shown as text
+2. A parser message shows and the source stays available
 
 <!-- okf:links:start -->
 ### Links

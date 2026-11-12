@@ -57,6 +57,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Side channel**: host-to-page message carrying data that is not rendered HTML, for example `previewPropertiesTable`.
 - **Sidecar file**: `<name>.comments.json` next to the document, holding its review comment threads.
 - **Slash menu**: the `/` command menu of the block text boxes; it lists the palette's actions (`EditPalette.menuEntries`) and filters them as you type (`src/page/modules/slashMenu.ts`).
+- **Social card**: the picture and the Open Graph and Twitter meta tags that a site page carries so that a shared link shows a large picture (`test/site/socialCard.ts`; pictures in `og/` of the site, 1200 x 630).
 - **Sticky heading band**: fixed band at the top of the preview showing the current heading path (`docs/scroll-anchoring.md`).
 - **Table bar**: menu shown on a table in edit mode (`.sphinx-preview-table-menu`).
 - **Table-cell editor**: block editor opened on one table cell ("Markdown table cell editor").

@@ -18,6 +18,12 @@ export function relativeSitePath(fromPage: string, target: string): string {
   return relative || path.posix.basename(target);
 }
 
+/** Link from a page to a folder of the site, written with a trailing slash (`./` for the page's own folder). */
+export function relativeFolderLink(fromPage: string, folder: string): string {
+  const link = relativeSitePath(fromPage, `${folder.replace(/\/+$/u, "")}/index.html`);
+  return link === "index.html" ? "./" : link.replace(/index\.html$/u, "");
+}
+
 function publishedTargetForSource(sourceTarget: string): string {
   if (sourceTarget === "out/reports") return "reports";
   if (sourceTarget.startsWith("out/reports/")) return sourceTarget.slice("out/".length);

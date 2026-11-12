@@ -56,6 +56,22 @@ Writers need to know what the preview leaves out, so that a gap is never mistake
 - When a render fails, the last good page stays visible and is marked as outdated, or an error page shows the failure message.
 - A newer edit supersedes a render in progress; the previous page stays visible until a new one is ready.
 
+### Main paths
+
+#### Path 1: A render fails after a good one
+
+1. The preview shows a good render
+   - SwRS-MDOKFSTUDIO-CORE-025: the next render fails and the status region lists each diagnostic while the previous page stays
+   - Option SwRS-MDOKFSTUDIO-CORE-025 (refusal): the very first render fails
+   - Option SwRS-MDOKFSTUDIO-CORE-008 (refusal): an image whose file is missing is kept
+2. The last good page stays with the diagnostics listed
+
+#### Path 2: A construct needs a full build
+
+1. The preview shows a good render
+   - SwRS-MDOKFSTUDIO-CORE-022: an unknown directive or another construct that only a build resolves shows an inert placeholder with a warning
+2. A placeholder with a warning stands in its place
+
 <!-- okf:links:start -->
 ### Links
 

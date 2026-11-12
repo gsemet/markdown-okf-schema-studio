@@ -47,6 +47,28 @@ As a writer, I keep one preview beside my editor and it shows the Markdown file 
 - Refresh is offered as a command and as a toolbar button.
 - A refresh never discards text that is being typed in an open editor of the preview without being asked: the toolbar button refuses while an editor is open.
 
+### Main paths
+
+#### Path 1: Follow the active file
+
+1. A saved Markdown file is the active editor
+   - SwRS-MDOKFSTUDIO-LIFE-003: the reader runs Open Preview to Side and the side preview shows the file
+   - Option SwRS-MDOKFSTUDIO-LIFE-003 (refusal): no eligible file opens no preview
+2. A side preview shows the file
+   - SwRS-MDOKFSTUDIO-LIFE-026: another saved Markdown file becomes active and the preview switches to it, with Preview pending until its render ends
+   - Option SwRS-MDOKFSTUDIO-LIFE-026 (boundary): quick switching renders only the last requested document
+3. The preview shows the newly active file
+   - SwRS-MDOKFSTUDIO-LIFE-049: the status reads Preview ready after a good render
+   - Option SwRS-MDOKFSTUDIO-LIFE-049 (refusal): a failed render is labelled in the status
+4. The status says the render is ready
+
+#### Path 2: Refresh on demand
+
+1. A side preview shows the file
+   - SwRS-MDOKFSTUDIO-LIFE-032: the reader runs Refresh Preview or presses the Refresh button and the document is rendered again from its buffer
+   - Option SwRS-MDOKFSTUDIO-LIFE-032 (refusal): the active text editor shows another document and nothing happens
+2. The preview shows the text of the buffer, unsaved text included
+
 <!-- okf:links:start -->
 ### Links
 

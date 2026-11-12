@@ -51,6 +51,26 @@ As a writer, I convert a table between a Markdown pipe table, a MyST list-table 
 - Saving an unchanged table gives back the original text byte for byte for compact, padded, no-spaces, aligned, no-outer-pipes, escaped, indented, CRLF and wider-than-padding tables.
 - A column button keeps the padding, the indentation and the outer pipes of every line, and a pipe inside a code span splits a cell in the editor as it does in the preview.
 
+### Main paths
+
+#### Path 1: Convert a table to a list-table and back
+
+1. The caret is on a pipe table in MyST mode
+   - SwRS-MDOKFSTUDIO-TABLE-073: the writer runs List table and the table is replaced by a list-table in one edit
+   - Option SwRS-MDOKFSTUDIO-TABLE-076 (refusal): a conversion that would lose content, or a table already in the target form, is refused with a reason
+2. The table is written as a list-table
+   - SwRS-MDOKFSTUDIO-TABLE-074: the writer runs Pipe table and the list-table is replaced by a pipe table in one edit
+   - Option SwRS-MDOKFSTUDIO-TABLE-080 (nominal): escaped pipes are kept across forms
+3. The table is a pipe table again
+
+#### Path 2: Save a cell edit
+
+1. A cell editor is open in a pipe table
+   - SwRS-MDOKFSTUDIO-TABLE-094: the writer edits one cell and only the line of that cell changes in the source
+   - Option SwRS-MDOKFSTUDIO-TABLE-094 (nominal): an unchanged table gives back the original text
+   - Option SwRS-MDOKFSTUDIO-TABLE-070 (nominal): List table in the table bar converts the table, including the text typed in the current cell, in one final save
+2. Only the line of the cell is changed
+
 <!-- okf:links:start -->
 ### Links
 

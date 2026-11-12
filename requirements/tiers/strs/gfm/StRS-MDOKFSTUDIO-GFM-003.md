@@ -50,6 +50,31 @@ Writers and reviewers expect to tick a task checkbox without opening an editor, 
 
 - A toggle is refused while an edit is open, when the preview is out of date, and for a file that VS Code holds read-only; the box then returns to its previous state.
 
+### Main paths
+
+#### Path 1: Tick a task
+
+1. A task-list item holds [ ]
+   - SwRS-MDOKFSTUDIO-GFM-016: the page renders a checkbox in place of the bullet
+   - Option SwRS-MDOKFSTUDIO-GFM-016 (refusal): a marker with another meaning stays literal
+2. The task shows a checkbox
+   - SwRS-MDOKFSTUDIO-GFM-021: a click edits only the character between the brackets
+   - Option SwRS-MDOKFSTUDIO-GFM-021 (refusal): the host refuses the toggle, the checkbox reverts and the reason shows next to it
+   - Option SwRS-MDOKFSTUDIO-BLOCK-041 (nominal): an open block editor makes the toggle refused with its reason
+3. The source holds [x] for the task
+   - SwRS-MDOKFSTUDIO-BLOCK-058: the edit is one undo step and the preview refreshes once
+4. The checkbox is shown ticked
+
+#### Path 2: Choose a radio option
+
+1. A list holds consecutive items that start with '( )' or '(x)'
+   - SwRS-MDOKFSTUDIO-GFM-039: the page renders them as one radio group
+   - Option SwRS-MDOKFSTUDIO-GFM-039 (boundary): only consecutive items form a group
+2. The items are shown as a radio group
+   - SwRS-MDOKFSTUDIO-GFM-039: a click on an unselected option writes '(x)' on it and '( )' on the previous one, as one undo step
+   - Option SwRS-MDOKFSTUDIO-GFM-039 (refusal): an open editor or a refused choice writes nothing
+3. The chosen option is selected
+
 <!-- okf:links:start -->
 ### Links
 

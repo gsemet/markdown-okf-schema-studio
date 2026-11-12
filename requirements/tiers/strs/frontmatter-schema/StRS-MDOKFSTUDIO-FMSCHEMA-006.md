@@ -70,6 +70,27 @@ As a writer of Open Knowledge Format documents, I get schema-aware metadata simp
 - Resolved schemas and compiled validators are reused only while the schema file and every inlined or probed reference keep the same content (compared by content, not time); edited, replaced, reverted or deleted files are picked up and at most 64 schemas are cached.
 - Known issue: editing a schema does not refresh open previews by itself; the table is re-validated on the next document change, refresh, re-render or settings change.
 
+### Main paths
+
+#### Path 1: A schema is found and loaded
+
+1. The frontmatter has a string `type`
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-019: the page walks up to the nearest `_schema` folder and picks the file named by the type
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-019 (refusal): no schema folder, or no file for the type
+2. A schema file is found
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-023: the page loads it from YAML, JSON or JSON5, inlining its relative `$ref` references
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-023 (refusal): a schema that cannot be parsed shows a row of the table
+3. The schema is loaded
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-027: an edit of the schema is used at the next analysis, without refreshing the open preview by itself
+4. The next analysis uses the new content of the schema
+
+#### Path 2: No schema is looked up
+
+1. The frontmatter has no string `type`
+   - SwRS-MDOKFSTUDIO-FMSCHEMA-005: the page shows a two-column Names and Values table of the keys in source order
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-005 (refusal): markup in a name or a value is shown as text
+2. The generic Names and Values table is shown
+
 <!-- okf:links:start -->
 ### Links
 

@@ -14,10 +14,10 @@ scope: palette-slash
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -62,6 +62,30 @@ As a writer, I get a command menu from the slash without it getting in the way o
 - A command is run as its palette button is, in one undoable step.
 - In forced-colours mode the highlighted command stays readable.
 - The cell menu lists only the commands that make sense in a table cell and follows the palette mode like the block menu does.
+
+### Main paths
+
+#### Path 1: Run a command from the slash menu
+
+1. A block text box is open in edit mode
+   - SwRS-MDOKFSTUDIO-PALETTE-232: the writer types a slash at the start of a line or after whitespace and the slash menu opens
+   - Option SwRS-MDOKFSTUDIO-PALETTE-232 (refusal): a slash inside a word or an address does not open the menu
+2. The slash menu lists the commands of the mode
+   - SwRS-MDOKFSTUDIO-PALETTE-240: the writer types a query and the list narrows, best matches first
+   - Option SwRS-MDOKFSTUDIO-PALETTE-238 (refusal): a query that matches nothing
+3. The list is narrowed to the query
+   - SwRS-MDOKFSTUDIO-PALETTE-242: the writer presses Enter or Tab and the lit command runs in one edit
+   - Option SwRS-MDOKFSTUDIO-PALETTE-242 (boundary): Escape closes the menu and keeps the typed text
+4. The edit of the command is in the text
+
+#### Path 2: Find a command by its alternative name
+
+1. The slash menu lists the commands of the mode
+   - SwRS-MDOKFSTUDIO-PALETTE-263: the writer types an alternative name and the command that carries it is listed
+   - Option SwRS-MDOKFSTUDIO-PALETTE-263 (refusal): a command outside its mode or place is not listed
+2. The command found by its alias is lit
+   - SwRS-MDOKFSTUDIO-PALETTE-242: the writer clicks it and it runs
+3. The edit of the command is in the text
 
 <!-- okf:links:start -->
 ### Links

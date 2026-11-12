@@ -65,6 +65,28 @@ As a reader or writer, I see every document start at the same comfortable distan
 - Known issue: CHANGELOG entry 0.2.1 still quotes the superseded margins.
 - Known issue: the 480 px limit between wide and narrow is a rule of the visual tests only; the code decides by overlap with the toolbar and a 320 px minimum frame width, so a 481 px pane with a long toolbar could also push content down.
 
+### Main paths
+
+#### Path 1: The first element starts below the top
+
+1. A document opens in read mode or in edit mode
+   - SwRS-MDOKFSTUDIO-LAYOUT-007: the first element starts 40 px below the top of the pane
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-007 (boundary): other first blocks and the Start writing button follow the same gap
+2. The first element is 40 px below the top
+   - SwRS-MDOKFSTUDIO-LAYOUT-043: when the floating toolbar overlaps the column, the first running text wraps outside the toolbar and other blocks start below it
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-043 (boundary): a toolbar beside the column reserves nothing
+3. The first blocks are clear of the floating toolbar
+
+#### Path 2: The toolbar covers the first control
+
+1. The floating toolbar covers the first control of the page
+   - SwRS-MDOKFSTUDIO-LAYOUT-011: the page moves the control down or narrows it out of the toolbar's way
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-011 (nominal): a toolbar beside the column gives a clearance of 0
+2. The first control is clear of the toolbar
+   - SwRS-MDOKFSTUDIO-LAYOUT-018: the page measures the clearance again when the window, the toolbar or the width mode changes
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-018 (boundary): a burst of updates is measured in one trailing update
+3. The clearance follows the layout
+
 <!-- okf:links:start -->
 ### Links
 

@@ -13,10 +13,10 @@ scope: block-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -66,6 +66,19 @@ As a writer, I click a paragraph, heading, list, admonition, code block or image
 - The rendered block stays hidden while its editor is open and comes back when the editor closes.
 - The text box has no spell check or auto-correction, grows with its text and uses a monospace font.
 - The editor of the first block of a document stays clear of the floating toolbar; the spacing values and the clearance rules are specified under layout and width, and this use case covers which editors count as the first-block editor.
+
+### Main paths
+
+#### Path 1: Edit a block in place
+
+1. Edit mode is on
+   - SwRS-MDOKFSTUDIO-BLOCK-014: the writer clicks a rendered block and its editor opens with the lines of the block
+   - Option SwRS-MDOKFSTUDIO-BLOCK-014 (refusal): in reading mode a click opens no editor
+   - Option SwRS-MDOKFSTUDIO-BLOCK-017 (nominal): hovering outlines the element a click would edit
+   - Option SwRS-MDOKFSTUDIO-BLOCK-026 (nominal): the caret is placed at the clicked word
+2. The framed editor is open in place of the block
+   - SwRS-MDOKFSTUDIO-BLOCK-033: the host sends the source and the frame shows the text box, the line range and the keys, with Done and Cancel
+3. The writer edits the raw Markdown of the block with Done and Cancel at hand
 
 <!-- okf:links:start -->
 ### Links

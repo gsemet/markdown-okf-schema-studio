@@ -48,6 +48,25 @@ As a reader, I choose per preview panel whether scrolling the text editor scroll
 - The mark goes to the block that contains the cursor line.
 - The mark is refreshed when the editor scrolls or the preview is rendered again, not on every cursor move.
 
+### Main paths
+
+#### Path 1: Scroll the two panes together
+
+1. The Anchor button is enabled
+   - SwRS-MDOKFSTUDIO-TOOLBAR-120: the reader presses it, the button shows the anchor mode and the pairing, and the preview is aligned with the first visible line of each text editor that shows its document
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-120 (refusal): no text editor shows the file, so the button is disabled
+2. The preview and the text editor scroll together
+   - SwRS-MDOKFSTUDIO-TOOLBAR-126: the choice is accepted by the host only when anchorToEditor is a boolean
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-126 (refusal): a value that is not a boolean is not accepted
+3. The choice is kept for the panel
+
+#### Path 2: See the cursor in the preview
+
+1. The setting that marks the editor selection is on
+   - SwRS-MDOKFSTUDIO-TOOLBAR-128: the host sends the cursor line and the preview outlines the block that contains it
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-128 (refusal): with the setting off or no editor, nothing is outlined
+2. The block that matches the cursor line is outlined
+
 <!-- okf:links:start -->
 ### Links
 

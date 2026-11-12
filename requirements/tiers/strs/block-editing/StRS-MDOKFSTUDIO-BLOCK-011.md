@@ -47,6 +47,25 @@ As a writer, I add a paragraph, a list or a heading between two blocks, or after
 - The Start writing button is not offered when the render failed.
 - Escape in the first editor brings the button back.
 
+### Main paths
+
+#### Path 1: Add a block between two blocks
+
+1. Edit mode is on
+   - SwRS-MDOKFSTUDIO-BLOCK-087: the writer clicks the plus button of an insert point and an empty insertion editor opens
+   - Option SwRS-MDOKFSTUDIO-BLOCK-087 (boundary): the properties table has an insert point too
+2. An empty insertion editor is open
+   - SwRS-MDOKFSTUDIO-BLOCK-094: the host writes the new block with one blank line before it and one after it
+   - Option SwRS-MDOKFSTUDIO-BLOCK-094 (refusal): a whitespace-only new block writes nothing
+3. The new block is in the document between its neighbours
+
+#### Path 2: Start an empty document
+
+1. Edit mode is on and the body of the document is empty
+   - SwRS-MDOKFSTUDIO-BLOCK-102: the writer clicks Start writing and the editor of the first block opens
+   - Option SwRS-MDOKFSTUDIO-BLOCK-253 (nominal): Enter on the selected Start writing button opens the same editor
+2. The editor of the first block is open
+
 <!-- okf:links:start -->
 ### Links
 

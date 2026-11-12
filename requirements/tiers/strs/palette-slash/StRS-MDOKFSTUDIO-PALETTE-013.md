@@ -60,6 +60,29 @@ As a writer, I link to a label, a document or a bibliography entry by choosing i
 - A request answered after the editor closed is ignored.
 - The language list includes the short names (aliases) of the languages; plain text is always offered first.
 
+### Main paths
+
+#### Path 1: Refer to a label of the document
+
+1. The palette is shown above the text box
+   - SwRS-MDOKFSTUDIO-PALETTE-140: the writer presses Reference and a popover opens with a filter field, showing Loading... until the host answers
+2. The host is asked for the labels
+   - SwRS-MDOKFSTUDIO-PALETTE-178: the host lists the (name)= lines of the document that lie outside code fences
+   - Option SwRS-MDOKFSTUDIO-PALETTE-178 (refusal): lines inside fences and bad names are not listed
+3. The labels are listed
+   - SwRS-MDOKFSTUDIO-PALETTE-147: the writer chooses a label and {ref} with the label in backticks is written in place of the selection
+   - Option SwRS-MDOKFSTUDIO-PALETTE-140 (boundary): the list is empty, the host fails, or the list is cut
+4. A ref role is in the text
+
+#### Path 2: Fence code in a language
+
+1. The palette is shown above the text box
+   - SwRS-MDOKFSTUDIO-PALETTE-054: the writer presses Code block and a menu lists text, then each language the preview highlights, once and sorted
+2. The language menu is open
+   - SwRS-MDOKFSTUDIO-PALETTE-054: the writer chooses a language and the touched lines are wrapped in a fence of that language
+   - Option SwRS-MDOKFSTUDIO-PALETTE-054 (refusal): no language or an invalid language name
+3. The lines are wrapped in a fenced code block
+
 <!-- okf:links:start -->
 ### Links
 

@@ -13,10 +13,10 @@ scope: gfm
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -75,6 +75,28 @@ Writers expect a pasted address to be clickable as on GitHub, without code sampl
 - Applies to documents using LF or CRLF line endings; alerts inside code fences stay literal.
 - Only http(s) and www addresses become links; code, existing links and unsafe schemes stay plain text, trailing sentence punctuation stays outside the link, and editing a paragraph still shows the raw URL text.
 - Scripts, styles, frames and other active content are removed; only hex and rgb colours are kept on coloured text.
+
+### Main paths
+
+#### Path 1: Paste a link and a table
+
+1. Prose holds a bare URL
+   - SwRS-MDOKFSTUDIO-GFM-001: the page renders it as a link that follows the Markdown link policy
+   - Option SwRS-MDOKFSTUDIO-GFM-001 (refusal): text with another meaning or another scheme is left unlinked
+2. The URL is a link, and the prose holds struck text, a footnote or a pipe table
+   - SwRS-MDOKFSTUDIO-GFM-008: the page renders the struck text, the footnote and the table with its column alignment
+   - Option SwRS-MDOKFSTUDIO-GFM-008 (boundary): a single tilde pair and tildes in code stay literal
+3. The struck text, the footnote and the aligned table are drawn
+
+#### Path 2: Alerts and raw HTML tables
+
+1. A block quote starts with [!NOTE], [!TIP], [!IMPORTANT], [!WARNING] or [!CAUTION]
+   - SwRS-MDOKFSTUDIO-GFM-009: the page renders it as an admonition of that type
+   - Option SwRS-MDOKFSTUDIO-GFM-009 (refusal): an unknown alert type is not an admonition
+2. The alert is drawn as an admonition, and the document holds a raw HTML table
+   - SwRS-MDOKFSTUDIO-GFM-031: the page rebuilds the table from the allow-list of tags and attributes
+   - Option SwRS-MDOKFSTUDIO-GFM-031 (refusal): unsafe style and active content are removed
+3. The raw HTML table is drawn with its spans and safe colours
 
 <!-- okf:links:start -->
 ### Links

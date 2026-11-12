@@ -62,6 +62,32 @@ Writers want to see where each cross-reference points so that they can spot brok
 - Targets that cannot be resolved without a project build are shown as written rather than hidden.
 - A refused rename tells the writer why and leaves the document unchanged.
 
+### Main paths
+
+#### Path 1: Reference a label
+
+1. A document holds a `(name)=` label
+   - SwRS-MDOKFSTUDIO-MYST-036: the page shows a faint anchor icon on the next paragraph or heading, without moving the text
+   - Option SwRS-MDOKFSTUDIO-MYST-036 (boundary): a label before another block or at the end
+2. The label shows an anchor icon
+   - SwRS-MDOKFSTUDIO-MYST-019: a `{ref}` to the label renders an in-page link showing the target text or the given text
+   - Option SwRS-MDOKFSTUDIO-MYST-019 (boundary): explicit text and paragraph labels
+3. The reference is an in-page link
+
+#### Path 2: Rename a label
+
+1. The label shows an anchor icon
+   - SwRS-MDOKFSTUDIO-MYST-038: in edit mode a click on the icon opens a Rename label popover with the name selected
+   - Option SwRS-MDOKFSTUDIO-MYST-038 (refusal): an invalid name is not sent
+   - Option SwRS-MDOKFSTUDIO-BLOCK-041 (nominal): an open block editor makes the label rename refused with its reason
+2. The Rename label popover is open
+   - SwRS-MDOKFSTUDIO-MYST-051: the page posts the rename with a source line, two valid names and the current render, and the host answers with the same edit id
+   - Option SwRS-MDOKFSTUDIO-MYST-051 (refusal): a malformed or stale message
+3. The host holds a valid rename
+   - SwRS-MDOKFSTUDIO-MYST-045: the host changes only the `(old)=` text of the stated line, as one undo step
+   - Option SwRS-MDOKFSTUDIO-MYST-045 (refusal): a line that is no longer `(old)=` changes nothing
+4. The label has its new name in the source
+
 <!-- okf:links:start -->
 ### Links
 

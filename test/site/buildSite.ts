@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { parseFragment, serialize } from "parse5";
 
@@ -7,11 +8,14 @@ import { renderMyst } from "../../src/core/render/mystRenderer";
 import { E2E_SCREENSHOT_ROOT, EXTENSION_ROOT, REPORTS_ROOT } from "../reportPaths";
 import {
   outputPathForMarkdown,
+  relativeFolderLink,
   relativeSitePath,
   rewriteLinkTarget,
 } from "./siteLinks";
-import { REQUIREMENTS_REPORT_PATH, writeRequirementsPage } from "./requirementsPage";
+import { headTags } from "./siteHead";
+import { REQUIREMENTS_REPORT_PATH, writeRequirementsViewer } from "./requirementsViewer/write";
 import { DARK_THEME_CSS } from "./siteTheme";
+import { cardDocument, escapeHtml, simpleCard, writeCardPictures, type SocialCard } from "./socialCard";
 
 interface HtmlAttribute {
   name: string;
@@ -26,11 +30,6 @@ interface HtmlNode {
 
 const siteRoot = path.join(EXTENSION_ROOT, "out", "site");
 const renderedPages = new Set<string>(["README.md", "CONTRIBUTING.md"]);
-
-function escapeHtml(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
-}
 
 function attribute(node: HtmlNode, name: string): HtmlAttribute | undefined {
   return node.attrs?.find((candidate) => candidate.name === name);
@@ -59,19 +58,16 @@ function walkMarkdown(directory: string): string[] {
   return files;
 }
 
-export function pageDocument(title: string, currentPage: string, body: string): string {
+export function pageDocument(title: string, currentPage: string, body: string, card?: SocialCard): string {
   const rootLink = relativeSitePath(currentPage, "index.html");
   const contributingLink = relativeSitePath(currentPage, "contributing.html");
   const galleryLink = relativeSitePath(currentPage, "gallery.html");
   const howWeShipLink = relativeSitePath(currentPage, "docs/how-we-ship.html");
-  const requirementsLink = relativeSitePath(currentPage, "requirements.html");
+  const requirementsLink = relativeFolderLink(currentPage, "requirements");
   return `<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="${relativeSitePath(currentPage, "favicon.svg")}" type="image/svg+xml">
-<title>${escapeHtml(title)} | Markdown OKF-Schema Studio</title>
+${headTags(`${title} | Markdown OKF-Schema Studio`, currentPage, card)}
 <style>
 :root { color-scheme: light dark; --ink: #16242c; --muted: #53636c; --line: #d7e0e3; --paper: #f7faf9; --panel: #ffffff; --accent: #0e6974; --accent-strong: #084b55; --warm: #e8b05d; --success: #1b6b4a; --danger: #a33a3a; }
 * { box-sizing: border-box; }
@@ -163,10 +159,36 @@ async function renderMarkdown(sourcePath: string, outputPath: string): Promise<v
   const relativeOutput = path.relative(siteRoot, outputPath).split(path.sep).join("/");
   const body = rewriteRenderedLinks(result.html, relativeSource, relativeOutput);
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, pageDocument(path.basename(outputPath, ".html"), relativeOutput, body));
+  fs.writeFileSync(outputPath, pageDocument(path.basename(outputPath, ".html"), relativeOutput, body, simpleCardFor(relativeSource)?.card));
 }
 
-export function buildGallery(screenshotRoot = E2E_SCREENSHOT_ROOT): string {
+interface SimpleCardEntry {
+  card: SocialCard;
+  eyebrow: string;
+  headline: string;
+  line: string;
+}
+
+function simpleEntry(page: string, name: string, eyebrow: string, headline: string, line: string, title: string, description: string): SimpleCardEntry {
+  return { card: { title, description, page, image: `og/${name}.png`, imageAlt: `${eyebrow}: ${headline}` }, eyebrow, headline, line };
+}
+
+/** The pages written from Markdown that carry a simple social card, keyed by Markdown source path. */
+export const SIMPLE_CARDS: Record<string, SimpleCardEntry> = {
+  "README.md": simpleEntry("index.html", "home", "VS Code extension", "Markdown OKF-Schema Studio", "Read the rendered page, click a block to edit its source",
+    "Markdown OKF-Schema Studio", "A visual Markdown editor for VS Code: read a clean rendered page and click any block to edit its source. CommonMark, GitHub Flavored Markdown, MyST, OKF and OKF-Schema."),
+  "CONTRIBUTING.md": simpleEntry("contributing.html", "contributing", "Contributing", "Build, test and change Studio", "Setup, checks and the rules every change follows",
+    "Contributing: Markdown OKF-Schema Studio", "How to set up, build, test and change Markdown OKF-Schema Studio."),
+  "docs/how-we-ship.md": simpleEntry("docs/how-we-ship.html", "how-we-ship", "How we ship", "One owner, a team of AI agents", "The workflow, followed through one real release",
+    "How we ship: Markdown OKF-Schema Studio", "How one owner and a team of AI agents in Claude Code ship Markdown OKF-Schema Studio, followed through one real release."),
+};
+
+function simpleCardFor(relativeSource: string): SimpleCardEntry | undefined {
+  return Object.hasOwn(SIMPLE_CARDS, relativeSource) ? SIMPLE_CARDS[relativeSource] : undefined;
+}
+
+/** The images (png, jpg, jpeg, webp) under the screenshot root, in name order. */
+export function listCaptures(screenshotRoot = E2E_SCREENSHOT_ROOT): string[] {
   const captures: string[] = [];
   const visit = (directory: string): void => {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true }).sort((left, right) => left.name.localeCompare(right.name))) {
@@ -176,6 +198,27 @@ export function buildGallery(screenshotRoot = E2E_SCREENSHOT_ROOT): string {
     }
   };
   if (fs.existsSync(screenshotRoot)) visit(screenshotRoot);
+  return captures;
+}
+
+/** Body of the gallery card: the live count and a mosaic of curated captures (image URLs). */
+export function galleryCard(captureCount: number, mosaic: string[]): string {
+  const text = `<div class="text"><p class="eyebrow">Screenshot gallery</p><h1 class="headline">${captureCount} screenshots</h1><p class="line">End-to-end captures, each with the test that took it</p></div>`;
+  if (mosaic.length === 0) return text;
+  const kind = mosaic.length >= 3 ? "" : mosaic.length === 2 ? " pair" : " single";
+  const tiles = mosaic.slice(0, 3).map((image) => `<img src="${escapeHtml(image)}" alt="">`).join("");
+  return `${text}<div class="mosaic${kind}">${tiles}</div>`;
+}
+
+function curatedMosaic(): string[] {
+  const file = path.join(EXTENSION_ROOT, "images", "gallery.json");
+  if (!fs.existsSync(file)) return [];
+  const curated = JSON.parse(fs.readFileSync(file, "utf8")) as { captures?: { image: string }[] };
+  return (curated.captures ?? []).slice(0, 3).map((capture) => pathToFileURL(path.join(EXTENSION_ROOT, capture.image)).toString());
+}
+
+export function buildGallery(screenshotRoot = E2E_SCREENSHOT_ROOT): string {
+  const captures = listCaptures(screenshotRoot);
   const cards = captures.map((filename) => {
     const relative = path.relative(screenshotRoot, filename).split(path.sep).join("/");
     const stem = filename.replace(/\.[^.]+$/u, "");
@@ -343,14 +386,29 @@ async function main(): Promise<void> {
     fs.cpSync(REPORTS_ROOT, path.join(siteRoot, "reports"), { recursive: true, errorOnExist: false, force: true });
   }
   fs.mkdirSync(path.join(siteRoot, "reports"), { recursive: true });
-  writeRequirementsPage(path.join(siteRoot, "requirements.html"), REQUIREMENTS_REPORT_PATH(EXTENSION_ROOT), (body) => pageDocument("requirements", "requirements.html", body));
-  fs.writeFileSync(path.join(siteRoot, "gallery.html"), pageDocument("gallery", "gallery.html", buildGallery()));
+  await writeRequirementsViewer(siteRoot, REQUIREMENTS_REPORT_PATH(EXTENSION_ROOT), EXTENSION_ROOT);
+  const captureCount = listCaptures().length;
+  const mosaic = curatedMosaic();
+  const galleryPageCard: SocialCard = {
+    title: "Screenshot gallery: Markdown OKF-Schema Studio",
+    description: `${captureCount} end-to-end screenshots of Markdown OKF-Schema Studio, a VS Code extension that previews and edits Markdown and MyST, each with the test that took it.`,
+    page: "gallery.html",
+    image: "og/gallery.png",
+    imageAlt: `Markdown OKF-Schema Studio screenshot gallery: ${captureCount} screenshots, with ${mosaic.length} of them shown`,
+  };
+  fs.writeFileSync(path.join(siteRoot, "gallery.html"), pageDocument("gallery", "gallery.html", buildGallery(), galleryPageCard));
   fs.writeFileSync(path.join(siteRoot, "reports", "index.html"), pageDocument("reports", "reports/index.html", "<h1>Reports</h1><p><a class=\"report-link\" href=\"e2e/REVIEW.md\">Open the E2E review index</a></p>"));
+  const pictures = [
+    { name: "gallery", html: cardDocument(galleryCard(captureCount, mosaic)) },
+    ...Object.values(SIMPLE_CARDS).map((entry) => ({ name: path.posix.basename(entry.card.image, ".png"), html: cardDocument(simpleCard(entry.eyebrow, entry.headline, entry.line)) })),
+  ];
+  await writeCardPictures(siteRoot, pictures);
   fs.writeFileSync(path.join(siteRoot, "site-manifest.json"), JSON.stringify({
     generatedAt: new Date().toISOString(),
     pages: markdownFiles.map((sourcePath) => outputPathForMarkdown(path.relative(EXTENSION_ROOT, sourcePath).split(path.sep).join("/"))),
     gallery: fs.existsSync(E2E_SCREENSHOT_ROOT),
     reports: fs.existsSync(REPORTS_ROOT),
+    cards: ["og/gallery.png", ...Object.values(SIMPLE_CARDS).map((entry) => entry.card.image)],
   }, null, 2) + "\n");
   console.log(`Built static site at ${siteRoot}`);
 }

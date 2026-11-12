@@ -67,6 +67,25 @@ Writers need code samples to read as they would in published documentation, in t
 - A diff is a visualization only: no comparison and no per-line navigation. The literal markers stay in the text.
 - Line numbers, emphasized lines, file names and captions apply to MyST code directives; plain fences are covered by the highlighted code samples.
 
+### Main paths
+
+#### Path 1: Read highlighted code
+
+1. A document holds a fenced code block
+   - SwRS-MDOKFSTUDIO-CODE-001: the preview colours the keywords, strings, numbers and comments of the language named by the fence label
+   - Option SwRS-MDOKFSTUDIO-CODE-001 (refusal): an unknown or absent language stays plain text
+2. The code is coloured
+   - SwRS-MDOKFSTUDIO-CODE-039: with the line numbers setting on, a block of two lines or more is numbered
+   - Option SwRS-MDOKFSTUDIO-CODE-039 (boundary): a single line is never numbered
+3. The lines of the code are numbered
+
+#### Path 2: Review a diff
+
+1. A document holds a diff block
+   - SwRS-MDOKFSTUDIO-CODE-008: lines starting with + are marked as additions and lines starting with - as deletions
+   - Option SwRS-MDOKFSTUDIO-CODE-008 (boundary): the first character decides the mark
+2. Additions and deletions are marked in a full-width panel
+
 <!-- okf:links:start -->
 ### Links
 

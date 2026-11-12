@@ -46,6 +46,18 @@ As a writer, I open a document in Restricted Mode, or a file from outside my wor
 - A feature that needs trust, such as PlantUML with Java or the citation list, is disabled with its reason; there is no banner.
 - The viewing actions (zoom, theme, links, code copy) are specified in the theme and zoom, toolbar and navigation, and code block scopes.
 
+### Main paths
+
+#### Path 1: Edit in an untrusted workspace
+
+1. A preview is created for a document in no workspace folder, or in an untrusted workspace
+   - SwRS-MDOKFSTUDIO-TRUST-001: every affordance that edits, comments or changes the document is kept, as in a trusted workspace
+   - Option SwRS-MDOKFSTUDIO-TRUST-001 (boundary): a feature that needs trust stays disabled and gives its reason
+2. The document is editable
+   - SwRS-MDOKFSTUDIO-TRUST-005: a write request for the render the host holds is handled as for a trusted workspace
+   - Option SwRS-MDOKFSTUDIO-TRUST-005 (refusal): the citation list needs a trusted workspace folder and the refusal names its cause
+3. The edit is written to the document
+
 <!-- okf:links:start -->
 ### Links
 
