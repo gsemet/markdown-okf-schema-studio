@@ -51,6 +51,26 @@ As a writer, I turn edit mode on to change my document in the preview and off to
 - The choice is remembered per workspace; a preview that was already open and reloaded keeps its own state first.
 - Every preview has the Edit button, in Restricted Mode and for a file outside every workspace folder too; trust never takes it away. A file that VS Code holds read-only keeps its button, and a write to it is refused with the reason "This file is read-only in VS Code.".
 
+### Main paths
+
+#### Path 1: Turn edit mode on and off
+
+1. The preview shows the document in reading mode
+   - SwRS-MDOKFSTUDIO-BLOCK-001: the writer clicks Edit and the page turns edit mode on, shows it on the button and posts it to the host, with the reading layout unchanged
+   - Option SwRS-MDOKFSTUDIO-BLOCK-236 (refusal): the host accepts an edit mode change only when the value is a boolean
+2. Edit mode is on
+   - SwRS-MDOKFSTUDIO-BLOCK-001: the writer clicks Edit again, the open block editor is saved and the selection and hover outline are cleared
+   - Option SwRS-MDOKFSTUDIO-BLOCK-001 (boundary): with nothing open there is nothing to tidy up
+   - Option SwRS-MDOKFSTUDIO-LIFE-169 (nominal): the host remembers the edit mode for the workspace
+3. The preview is back in reading mode with the edit state removed
+
+#### Path 2: Reopen a document
+
+1. A document is opened in a new preview
+   - SwRS-MDOKFSTUDIO-LIFE-170: each view choice starts from the saved panel state, else the stored workspace value, else its default
+   - Option SwRS-MDOKFSTUDIO-LIFE-170 (refusal): an invalid value is ignored and the next source is used
+2. The preview opens with the view choices last made
+
 <!-- okf:links:start -->
 ### Links
 

@@ -60,6 +60,23 @@ As a writer, I select a run of blocks with Shift+click or Shift+Arrow to treat t
 - Copy never changes the document; cut and paste are one undo step each.
 - The clipboard keys stay native in a text box, a field, the properties table and in reading mode.
 
+### Main paths
+
+#### Path 1: Select blocks, copy and paste them
+
+1. Edit mode is on and no editor is open
+   - SwRS-MDOKFSTUDIO-BLOCK-140: Shift+click selects the run of body blocks from the anchor and opens no editor
+   - Option SwRS-MDOKFSTUDIO-BLOCK-140 (nominal): Shift+Arrow grows and shrinks the selection
+   - Option SwRS-MDOKFSTUDIO-BLOCK-127 (boundary): a selection never reaches an included block
+2. A run of blocks is selected
+   - SwRS-MDOKFSTUDIO-BLOCK-166: Cmd or Ctrl+C puts the exact Markdown of the selected blocks on the clipboard
+   - Option SwRS-MDOKFSTUDIO-BLOCK-169 (nominal): a cut also deletes the blocks with their blank separator
+   - Option SwRS-MDOKFSTUDIO-BLOCK-148 (nominal): a content patch clears the selection
+3. The Markdown of the blocks is on the clipboard
+   - SwRS-MDOKFSTUDIO-BLOCK-174: paste inserts the clipboard text as new blocks after the selection or insert point
+   - Option SwRS-MDOKFSTUDIO-BLOCK-174 (refusal): an empty clipboard pastes nothing
+4. The blocks are pasted as new blocks
+
 <!-- okf:links:start -->
 ### Links
 
