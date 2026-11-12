@@ -30,11 +30,11 @@ attach it to a mail or drop it in a shared folder: it needs nothing else.
 
 | In VS Code | The exported file |
 | --- | --- |
-| ![A requirement page in the Cream theme, with its properties table, tabs and a rendered diagram, and the Export button in the toolbar](html-export-preview-light.png) | ![The exported file of a page opened in a browser with JavaScript off, dark theme: the properties table closed, tabs, a dropdown, an image and a drawn diagram above a folded Diagram source](html-export-file-dark.png) |
-| The page and its Export button, Cream theme | The exported file in a browser, JavaScript off, dark theme |
+| ![A requirement page in the Cream theme, with its properties table, tabs and a rendered diagram, and the Export button in the toolbar](html-export-preview-light.png) | ![The same page saved as one HTML file and opened in a browser with JavaScript off, Cream theme: the properties table, tabs, a dropdown, an image and a drawn diagram above a folded Diagram source](html-export-file-cream.png) |
+| The page and its Export button, Cream theme | The same page as one HTML file in a browser, JavaScript off |
 
-The exported file above was opened with JavaScript turned off: the properties table is closed until
-you click it, the tabs and the "Read more" dropdown work, the image and the diagram are drawn, and
+The exported file above was opened with JavaScript turned off: the properties table opens on a
+click (open in the picture), the tabs and the "Read more" dropdown work, the image and the diagram are drawn, and
 the diagram keeps its source in a folded "Diagram source".
 
 A plan or a review written with an agent can now be read by someone who has no VS Code.
