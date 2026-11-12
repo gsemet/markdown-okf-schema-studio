@@ -222,6 +222,48 @@ def test_preflight_skips_only_the_stages_that_need_linux_or_macos_on_windows() -
     assert 'exit "$failures"' in recipe[skip:recipe.index("just ci-visual")]
 
 
+def _locked_screen_run(tmp_path: Path, *arguments: str) -> "subprocess.CompletedProcess[str]":
+    import subprocess
+
+    return subprocess.run(
+        ["just", "--justfile", str(ROOT / "justfile"), "--working-directory", str(tmp_path), *arguments],
+        env={**os.environ, "STUDIO_SCREEN_LOCKED": "1"},
+        capture_output=True,
+        text=True,
+    )
+
+
+@pytest.mark.parametrize("arguments", [["ci-integration"], ["ci-stress", "1"]])
+def test_ci_integration_and_stress_stop_on_a_locked_screen(
+    tmp_path: Path, arguments: list[str]
+) -> None:
+    result = _locked_screen_run(tmp_path, *arguments)
+    assert result.returncode == 3
+    assert "screen locked" in result.stderr
+    assert f"{arguments[0]}: screen locked" in result.stderr
+    assert "gh workflow run ci.yml --ref" in result.stderr
+    assert "-f heavy=true" in result.stderr
+    assert "Unlock the screen" in result.stderr
+    assert "caffeinate" in result.stderr
+    assert not (tmp_path / "out").exists()
+
+
+def test_preflight_skips_report_and_gallery_when_the_screen_is_locked() -> None:
+    justfile = (ROOT / "justfile").read_text()
+    recipe = justfile.split("\npreflight: ")[1].split("\n\n")[0]
+    assert recipe.index("just ci-visual") < recipe.index("just ci-integration")
+    assert "_require-unlocked-screen preflight" in recipe
+    assert recipe.index("_require-unlocked-screen") < recipe.index("just ci-visual")
+    locked = recipe[recipe.index('"$integration" -eq 3'):]
+    skipped = locked.split("else")[0]
+    assert "ci-report: skipped, integration did not run (screen locked)" in skipped
+    assert "ci-gallery: skipped, integration did not run (screen locked)" in skipped
+    assert "failures=$((failures + 1))" in skipped
+    assert "just ci-report" not in skipped
+    assert "just ci-gallery" not in skipped
+    assert "just ci-report" in locked.split("else")[1]
+
+
 def test_release_dispatch_can_publish_placeholder_notes(tmp_path: Path) -> None:
     import subprocess
 

@@ -202,8 +202,30 @@ sphinx-check:
     mkdir -p out/reports/contract
     uv run --no-sync --group docs pytest sphinx/tests/test_sphinx_preview_mapping.py --junitxml=out/reports/contract/tests-sphinx.xml
 
+# Private: stop with exit code 3 when the screen is locked (the real VS Code window cannot become active).
+# STUDIO_SCREEN_LOCKED=1 forces it on every OS (tests); the real probe runs on macOS only.
+_require-unlocked-screen STAGE="ci-integration":
+    #!/usr/bin/env bash
+    set -uo pipefail
+    locked=0
+    if [[ "${STUDIO_SCREEN_LOCKED:-}" == "1" ]]; then
+        locked=1
+    elif [[ "{{ os() }}" == "macos" ]] && ioreg -n Root -d1 2>/dev/null | grep -Eq '"CGSSessionScreenIsLocked"[[:space:]]*=[[:space:]]*Yes'; then
+        locked=1
+    fi
+    if [[ "$locked" -eq 1 ]]; then
+        {
+            echo "{{ STAGE }}: screen locked, the VS Code window cannot become active; the real VS Code tests did not run."
+            echo "Unlock the screen and run it again, or prove the branch in CI at once:"
+            echo "  gh workflow run ci.yml --ref <branch> -f heavy=true"
+            echo "To keep the screen from locking during an unattended run, see \"App-window tests\" in"
+            echo ".agents/guidelines/local-worktree.guidelines.md (caffeinate)."
+        } >&2
+        exit 3
+    fi
+
 # Run integration tests.
-integration:
+integration: (_require-unlocked-screen "integration")
     {{ npm }} run test:integration
 
 # Run visual tests.
@@ -211,7 +233,7 @@ visual:
     {{ npm }} run test:visual
 
 # Run end-to-end tests.
-e2e:
+e2e: (_require-unlocked-screen "e2e")
     {{ npm }} run test:e2e
 
 # Generate the gallery after end-to-end tests.
@@ -269,7 +291,7 @@ ci-visual:
     fi
 
 # CI job "integration": the VS Code integration end-to-end stage, reports under out/reports/e2e.
-ci-integration:
+ci-integration: (_require-unlocked-screen "ci-integration")
     #!/usr/bin/env bash
     set -uo pipefail
     eval "$(node scripts/e2e-campaign.mjs begin integration)"
@@ -313,7 +335,7 @@ ci-hang-dump:
 # narrows the scenarios. REPEAT must be an integer from 1 to 100. Above about 20 rounds, narrow
 # STUDIO_STRESS_SCENARIOS (for example alert-dropdown): all scenarios take about 3.6 s per round and
 # scenario, so 100 rounds of all of them would pass the 26-minute launch deadline and the job limit.
-ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "20"):
+ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "20"): (_require-unlocked-screen "ci-stress")
     #!/usr/bin/env bash
     set -uo pipefail
     repeat={{ quote(REPEAT) }}
@@ -392,10 +414,21 @@ preflight: clean format
         echo "preflight: visual, integration, report and gallery stages skipped on Windows; CI runs them"
         exit "$failures"
     fi
+    if ! just _require-unlocked-screen preflight >/dev/null 2>&1; then
+        echo "preflight: the screen is locked; ci-integration will stop unless it is unlocked before then" >&2
+    fi
     just ci-visual || failures=$((failures + 1))
-    just ci-integration || failures=$((failures + 1))
-    just ci-report || failures=$((failures + 1))
-    just ci-gallery || failures=$((failures + 1))
+    just ci-integration
+    integration=$?
+    if [[ "$integration" -eq 3 ]]; then
+        failures=$((failures + 1))
+        echo "ci-report: skipped, integration did not run (screen locked)" >&2
+        echo "ci-gallery: skipped, integration did not run (screen locked)" >&2
+    else
+        [[ "$integration" -eq 0 ]] || failures=$((failures + 1))
+        just ci-report || failures=$((failures + 1))
+        just ci-gallery || failures=$((failures + 1))
+    fi
     if [[ "$failures" -ne 0 ]]; then
         echo "$failures preflight stage(s) failed" >&2
         exit 1
