@@ -87,6 +87,7 @@ export const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGa
   previewCommentDelete: "comment",
   previewPlantUmlInclude: "document",
   previewShowProblems: "document",
+  previewSaveRequest: "document",
   previewWarningBannerClosed: "document",
   previewEditClosed: "own-id",
   previewEditFlushed: "own-id",

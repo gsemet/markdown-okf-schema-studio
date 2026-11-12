@@ -39,6 +39,7 @@ import { run as runPaletteMode } from "./paletteMode.test";
 import { run as runPreviewHistory } from "./previewHistory.test";
 import { run as runExportHtml } from "./exportHtml.test";
 import { run as runEditKeys } from "./editKeys.test";
+import { run as runSaveKey } from "./saveKey.test";
 import { run as runGridCardEditorBlur } from "./gridCardEditorBlur.test";
 import { run as runPasteUrl } from "./pasteUrl.test";
 import { run as runDropFiles } from "./dropFiles.test";
@@ -208,6 +209,7 @@ async function runTrustedSuite(): Promise<void> {
   }
   const remainingSteps: ReadonlyArray<readonly [string, () => Promise<void>]> = [
     ["edit-keys", runEditKeys],
+    ["save-key", runSaveKey],
     ["grid-card-editor-blur", runGridCardEditorBlur],
     ["paste-url", runPasteUrl],
     ["drop-files", runDropFiles],

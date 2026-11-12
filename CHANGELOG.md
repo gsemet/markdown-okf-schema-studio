@@ -11,6 +11,9 @@
   last saved; the editor stays open and is not in the file.
 - A long heading in the sticky band stays on one line, cut with an ellipsis, and no longer covers the
   first line of the section below.
+- Cmd+S (Ctrl+S elsewhere) saves the document from the preview, even while a block, a table cell
+  or a frontmatter field is being edited: the text typed so far is written first, the text box stays
+  open and a frontmatter field closes.
 
 ## 1.7.1 - 2026-11-12
 

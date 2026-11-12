@@ -52,7 +52,7 @@ test("the Mermaid theme-switch check is keyed by a flag, not by an id", () => {
 });
 
 test("integration test rows name existing test files", () => {
-  assert.equal(INTEGRATION_TESTS.length, 31, "28 rows plus the edit-keys test (CR 119), the window-switch keys test (CR 129) and the export-to-HTML test (CR 288)");
+  assert.equal(INTEGRATION_TESTS.length, 32, "28 rows plus the edit-keys test (CR 119), the window-switch keys test (CR 129), the export-to-HTML test (CR 288) and the save-key test (CR 312)");
   for (const row of INTEGRATION_TESTS) {
     assert.ok(isGroupId(row.group), row.file);
     assert.ok(fs.existsSync(path.resolve(__dirname, "../../..", row.file)), row.file);

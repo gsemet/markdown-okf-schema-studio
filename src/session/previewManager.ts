@@ -14,7 +14,7 @@ import type { HostServices } from "../host-api/index";
 import type { PanelGroups, PreviewPanel } from "../host-api/previewPanel";
 import type { WorkspaceFolderInfo } from "../host-api/workspaceInfo";
 import { createPreviewNavigator, type PreviewNavigator } from "./previewNavigator";
-import { LatestRequest } from "../core/preview/flushWait";
+import { FLUSH_WAIT_MS, LatestRequest } from "../core/preview/flushWait";
 import { createMessageRouter } from "../core/protocol/router";
 import type { PreviewEditCommandName, PreviewFoldCommandName } from "../core/protocol/hostToPage";
 import type { PageToHostMessage } from "../core/protocol/pageToHost";
@@ -262,6 +262,49 @@ export class PreviewManager {
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
     }), "postToPage");
+    return true;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-173
+  /**
+   * The key binding of Cmd/Ctrl+S saves the document of the preview that has the focus: the page
+   * writes its typed text first, then asks the host to save ({@link BlockEditController.saveDocument}),
+   * so the 400 ms autosave cannot leave the document dirty again. A page that is not ready, or that
+   * cannot be reached, has nothing to flush: the document is saved at once. False when no preview
+   * is focused.
+   */
+  public runSaveCommand(): boolean {
+    const session = [...this.live].find((candidate) => !candidate.disposed && candidate.panel.active);
+    const stage = session?.stage;
+    if (!session || !stage) return false;
+    const saveNow = (): void => {
+      fireAndForget(this.host.logger, this.edits.saveDocument(session), "saveDocument");
+    };
+    if (session.page.readyRequestId === undefined) {
+      saveNow();
+      return true;
+    }
+    session.postToPage({
+      type: "previewSaveCommand",
+      documentId: stage.activeDocumentIdentity,
+      revision: revisionOfStage(stage),
+      requestId: stage.requestId,
+    }).then((posted) => {
+      if (!posted) {
+        saveNow();
+        return;
+      }
+      // The page may never answer: the document is still saved after the bounded wait.
+      const previous = session.edits.saveFallback;
+      if (previous?.timer !== undefined) clearTimeout(previous.timer);
+      const fallback: { timer?: ReturnType<typeof setTimeout>; fired: boolean } = { fired: false };
+      fallback.timer = setTimeout(() => {
+        fallback.timer = undefined;
+        fallback.fired = true;
+        if (!session.disposed) saveNow();
+      }, FLUSH_WAIT_MS);
+      session.edits.saveFallback = fallback;
+    }, saveNow);
     return true;
   }
 
@@ -596,6 +639,8 @@ export class PreviewManager {
     this.incoming.clear(session);
     this.comments.clear(session);
     session.edits.active = undefined;
+    if (session.edits.saveFallback?.timer !== undefined) clearTimeout(session.edits.saveFallback.timer);
+    session.edits.saveFallback = undefined;
     // A render result that waited for an open editor frees its stage with the preview.
     session.edits.lock.drop("render-result");
     session.edits.lock.release();

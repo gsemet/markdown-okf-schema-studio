@@ -50,6 +50,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewEditCommand: { command: "undo" },
   previewFoldCommand: { command: "foldAll" },
   previewFindCommand: { command: "open" },
+  previewSaveCommand: {},
   previewExportCommand: {},
   themeChanged: { themeKind: 2 },
 };
@@ -147,4 +148,15 @@ test("CR147: a baseline message needs an html string and well-formed hunks", () 
   assert.equal(send({ html: "x", hunks: [null] }), false);
   assert.equal(send({ html: "x".repeat(20 * 1024 * 1024 + 1), hunks: [] }), false);
   assert.equal(send({ html: "x", hunks: new Array(100_001).fill(hunk) }), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+test("the save command names the render and carries nothing else", () => {
+  const send = (identity: Record<string, unknown>): boolean => filter.accepts({ type: "previewSaveCommand", ...identity }, page);
+  assert.equal(send({ ...page }), true);
+  assert.equal(send({ ...page, revision: 8 }), false, "another revision");
+  assert.equal(send({ ...page, requestId: 12 }), false, "another request");
+  assert.equal(send({ ...page, documentId: "file:///other.md" }), false, "another document");
+  assert.equal(send({}), false, "no identity");
+  assert.equal(filter.rules.previewSaveCommand.addressing, "render");
 });

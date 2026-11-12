@@ -25,6 +25,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-069
 - SwRS-MDOKFSTUDIO-BLOCK-077
 - SwRS-MDOKFSTUDIO-BLOCK-079
+- SwRS-MDOKFSTUDIO-LIFE-173
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -78,4 +79,5 @@ As a writer, I type Markdown in the block editor and the keys do what I expect: 
   - [SwRS-MDOKFSTUDIO-BLOCK-069](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-069.md): Marker keys wrap a selection; Home, End, select-all and undo stay in the text box
   - [SwRS-MDOKFSTUDIO-BLOCK-077](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-077.md): Keys no editor handled still reach VS Code
   - [SwRS-MDOKFSTUDIO-BLOCK-079](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-079.md): Arrow keys at the edges open the previous or next block
+  - [SwRS-MDOKFSTUDIO-LIFE-173](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-173.md): Save key saves the previewed document
 <!-- okf:links:end -->

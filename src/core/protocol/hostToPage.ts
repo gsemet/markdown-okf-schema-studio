@@ -294,6 +294,10 @@ export interface PreviewFindCommandMessage extends RenderMessage<"previewFindCom
   command: "open";
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-173
+/** A command of the host (the key binding of Cmd/Ctrl+S) asks the page to flush its typed text, then request the save. */
+export interface PreviewSaveCommandMessage extends RenderMessage<"previewSaveCommand"> {}
+
 /** A command of the host (the palette) asks the page to send a snapshot of itself to export as HTML. */
 export interface PreviewExportCommandMessage extends RenderMessage<"previewExportCommand"> {}
 
@@ -325,6 +329,7 @@ export type HostToPageMessage =
   | PreviewEditCommandMessage
   | PreviewFoldCommandMessage
   | PreviewFindCommandMessage
+  | PreviewSaveCommandMessage
   | PreviewExportCommandMessage
   | ThemeChangedMessage;
 
@@ -461,6 +466,8 @@ export function createHostMessageFilter(): HostMessageFilter {
     },
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
     previewFindCommand: { addressing: "render", isValid: (message) => message.command === "open" },
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-173
+    previewSaveCommand: render,
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
     previewExportCommand: render,
     themeChanged: render,

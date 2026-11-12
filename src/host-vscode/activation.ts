@@ -46,6 +46,7 @@ const FOLD_COMMAND_IDS: Readonly<Record<PreviewFoldCommandName, string>> = {
 };
 /** The command of the Cmd/Ctrl+F key binding on a focused preview (CR 144). */
 const FIND_COMMAND_ID = "markdown-okf-schema-studio.find";
+const SAVE_COMMAND_ID = "markdown-okf-schema-studio.saveDocument";
 /** The command that exports the focused preview, or the preview of the active document, as one HTML file. */
 export const EXPORT_HTML_COMMAND_ID = "markdown-okf-schema-studio.exportHtml";
 /** The view type of the side preview panels (and of their serializer). */
@@ -110,6 +111,8 @@ export class StudioActivation {
         vscode.commands.registerCommand(FOLD_COMMAND_IDS[command], () => manager.runFoldCommand(command))),
       // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
       vscode.commands.registerCommand(FIND_COMMAND_ID, () => manager.runFindCommand()),
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-173
+      vscode.commands.registerCommand(SAVE_COMMAND_ID, () => manager.runSaveCommand()),
       // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
       vscode.commands.registerCommand(EXPORT_HTML_COMMAND_ID, () => {
         const active = vscode.window.activeTextEditor?.document;

@@ -59,6 +59,12 @@ export interface EditState {
   /** Flush requests posted to the page and not answered yet, by flush id (CR 025). */
   flushWaiters: Map<string, () => void>;
   flushSequence: number;
+  /**
+   * The save command (CR 312) waits for the page's save request: `timer` is the bounded fallback that
+   * saves when the page never answers; `fired` marks a fallback that already saved, so the late
+   * request does not save again.
+   */
+  saveFallback?: { timer?: ReturnType<typeof setTimeout>; fired: boolean };
   /** The page editor the page was asked to report the close of (`previewEditorWatch`, STAB-03). */
   watchedPageEditorId?: string;
   /** An explicit refresh asked for the next render: it reaches the page even over an open editor. */
@@ -95,6 +101,16 @@ export class BlockEditController {
     // The page closed an inline editor the host was waiting for (STAB-03). It edits nothing.
     router.on("previewEditClosed", (message, preview) => {
       this.closePageEditor(preview, message.editId);
+    });
+    router.on("previewSaveRequest", (_message, preview) => {
+      const fallback = preview.edits.saveFallback;
+      if (fallback?.fired) {
+        preview.edits.saveFallback = undefined;
+        return undefined;
+      }
+      if (fallback?.timer !== undefined) clearTimeout(fallback.timer);
+      preview.edits.saveFallback = undefined;
+      return this.saveDocument(preview);
     });
     router.on("previewEditOpen", (message, preview) => this.handleEditOpen(preview, message));
     router.on("previewEditSave", (message, preview) => this.handleEditSave(preview, message));
@@ -578,6 +594,26 @@ export class BlockEditController {
   /** Waits, bounded, until the block edit and the frontmatter saves of the preview reached the document. */
   public async settleHostEdits(preview: PreviewSession): Promise<void> {
     await waitForSettled(() => preview.disposed || (!preview.edits.active && preview.edits.pendingSaves.size === 0));
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-173
+  /**
+   * Saves the document the preview shows, once the texts the page sent before its request reached
+   * it (CR 312). Unlike {@link settleHostEdits} it does not wait for the block edit to end: the
+   * editor stays open, so the wait is for its pending text to be applied. Bounded by `FLUSH_WAIT_MS`;
+   * a refused or cancelled save is silent.
+   */
+  public async saveDocument(preview: PreviewSession): Promise<void> {
+    await waitForSettled(() => {
+      const edit = preview.edits.active;
+      return preview.disposed || ((edit === undefined || (edit.pendingText === undefined && !edit.applying))
+        && preview.edits.pendingSaves.size === 0);
+    });
+    const document = preview.document;
+    if (preview.disposed || !document) return;
+    await this.manager.host.documents.save(document).then(() => undefined, (error: unknown) => {
+      this.manager.host.logger.warn(`save from the preview failed: ${error instanceof Error ? error.message : String(error)}`);
+    });
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
