@@ -9,6 +9,13 @@
   `[object Object]`. Its code is `scripts/e2e-campaign.mjs` (`failureText`) and its test is
   `test/site/e2eCampaign.test.ts`.
 
+### A grid inside a quote maps its cards to their own lines (CR 308)
+
+- SwRS-MDOKFSTUDIO-BLOCK-258 (proposed, not approved): new boundary scenario "A grid card inside a
+  quote" (a `{grid}` written in a `>` quote whose body starts with a blank quoted line opens the
+  editor on the card's own line, not the line above); no normative change. Tests in
+  `test/core/render/gridCardTitleSourceLine.test.ts`.
+
 ### One cream look for the whole published site (CR 303)
 
 - New, proposed, deriving from StRS-MDOKFSTUDIO-TRUST-014: SwRS-MDOKFSTUDIO-CORE-086 (every page and

@@ -174,3 +174,94 @@ test("a linked card title is marked single-line like any card title", async () =
   const title = findElements(tree, (element) => hasClass(element, "myst-grid-card-title"))[0];
   assert.deepEqual(singleLineParts(title), ["div:3-3"]);
 });
+
+// A grid or card written inside a quote maps its parts to their own source lines.
+function partLine(root: HtmlElement, className: string): number {
+  const part = findElements(root, (element) => hasClass(element, className))[0];
+  assert.ok(part, `the ${className} part is rendered`);
+  const mapped = [part, ...findElements(part, () => true)].find((element) => attribute(element, "data-line") !== undefined);
+  assert.ok(mapped, `the ${className} part carries a data-line`);
+  return Number(attribute(mapped, "data-line"));
+}
+
+async function cardMapping(source: string, cardClass: string) {
+  const root = parseHtml((await renderMyst(source)).html);
+  const card = findElements(root, (element) => hasClass(element, cardClass))[0];
+  assert.ok(card, `a ${cardClass} is rendered`);
+  return {
+    card: Number(attribute(card, "data-line")),
+    title: partLine(card, `${cardClass}-title`),
+    body: partLine(card, `${cardClass}-body`),
+  };
+}
+
+const QUOTED_CARD_CASES: Array<{ name: string; source: string; cardClass: string; card: number; body: number }> = [
+  {
+    name: "a quoted grid whose body starts with a blank quoted line",
+    source: "# H\n\n> ::::{grid} 2\n>\n> :::{grid-item-card} A\n> Body.\n> :::\n> ::::\n",
+    cardClass: "myst-grid-card", card: 5, body: 6,
+  },
+  {
+    name: "a doubly quoted grid whose body starts with a blank quoted line",
+    source: "# H\n\n> > ::::{grid} 2\n> >\n> > :::{grid-item-card} A\n> > Body.\n> > :::\n> > ::::\n",
+    cardClass: "myst-grid-card", card: 5, body: 6,
+  },
+  {
+    name: "a quoted grid with the cards on the next line",
+    source: "# H\n\n> ::::{grid} 2\n> :::{grid-item-card} A\n> Body.\n> :::\n> ::::\n",
+    cardClass: "myst-grid-card", card: 4, body: 5,
+  },
+  {
+    name: "a quoted grid with a gutter option and a blank line",
+    source: "# H\n\n> ::::{grid} 2\n> :gutter: 2\n>\n> :::{grid-item-card} A\n> Body.\n> :::\n> ::::\n",
+    cardClass: "myst-grid-card", card: 6, body: 7,
+  },
+  {
+    name: "an unquoted grid whose body starts with a blank line",
+    source: "# H\n\n::::{grid} 2\n\n:::{grid-item-card} A\nBody.\n:::\n::::\n",
+    cardClass: "myst-grid-card", card: 5, body: 6,
+  },
+  {
+    name: "a quoted standalone card",
+    source: "# H\n\n> :::{card} A\n> Body.\n> :::\n",
+    cardClass: "myst-grid-card", card: 3, body: 4,
+  },
+  {
+    name: "a quoted standalone card with a backtick fence and a blank first body line",
+    source: "# H\n\n> ```{card} A\n>\n> Body.\n> ```\n",
+    cardClass: "myst-grid-card", card: 3, body: 5,
+  },
+  {
+    name: "an unquoted standalone card with a backtick fence and a blank first body line",
+    source: "# H\n\n```{card} A\n\nBody.\n```\n",
+    cardClass: "myst-grid-card", card: 3, body: 5,
+  },
+  {
+    name: "a doubly quoted standalone card",
+    source: "# H\n\n> > :::{card} A\n> > Body.\n> > :::\n",
+    cardClass: "myst-grid-card", card: 3, body: 4,
+  },
+  {
+    name: "a quoted card with an option line",
+    source: "# H\n\n> :::{card} A\n> :class-card: x\n> Body.\n> :::\n",
+    cardClass: "myst-grid-card", card: 3, body: 5,
+  },
+  {
+    name: "a quoted card with the header and footer markers",
+    source: "# H\n\n> :::{card} A\n> Head\n> ^^^\n> Body.\n> +++\n> Foot\n> :::\n",
+    cardClass: "myst-grid-card", card: 3, body: 6,
+  },
+  {
+    name: "a quoted card whose body has a lazy continuation line",
+    source: "# H\n\n> :::{card} A\n> Body\nlazy.\n> More.\n> :::\n",
+    cardClass: "myst-grid-card", card: 3, body: 4,
+  },
+];
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+for (const row of QUOTED_CARD_CASES) {
+  test(`${row.name} maps its card, title and body to their own lines`, async () => {
+    const got = await cardMapping(row.source, row.cardClass);
+    assert.deepEqual(got, { card: row.card, title: row.card, body: row.body });
+  });
+}
