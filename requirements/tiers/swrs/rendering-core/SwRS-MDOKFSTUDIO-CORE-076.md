@@ -57,6 +57,7 @@ Every push to main SHALL run the heavy jobs (`integration` and `stress`); when t
 | only `stress` was re-run | `report` is not re-run; Pages uses `studio-reports-attempt-1` |
 | `integration` is skipped | `report` downloads no integration artifact and reports the real VS Code stage as skipped |
 | the calling run passes `reports_from_caller` without a `reports_artifact` | Pages warns and runs the suite (an empty name would download every artifact) |
+| a failed visual manifest lists `{page, detail}` failures | `report` prints each as `<page>: <detail>`, joined with `; `, never `[object Object]`; string failures print as they are; `error` of the manifest keeps its priority |
 | the visual and integration stages started two hours apart or more | `report` fails, unless both campaigns carry the same run id pinned by `STUDIO_E2E_RUN_ID` (`pinnedRunId`) |
 
 ### Scenario (nominal): Push to main without a version change

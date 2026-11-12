@@ -103,6 +103,21 @@ test("the visual-only report fails when the visual stage failed or did not run",
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-076
+test("the report names each failed check of a visual manifest", () => {
+  const { root, e2e } = workspace();
+  writeCampaign(e2e, "visual", "run-v", hoursAgo(0.1));
+  fs.writeFileSync(path.join(e2e, "review.json"), JSON.stringify({ status: "passed" }));
+  const manifest = path.join(e2e, "screenshots", "run-manifest.json");
+  fs.writeFileSync(manifest, JSON.stringify({ status: "failed", failures: [{ page: "home", detail: "blank" }, { page: "toc", detail: "overflow" }] }));
+  const objects = run(root, "report", "--visual-only");
+  assert.equal(objects.status, 1);
+  assert.match(objects.stdout, /FAILED visual: home: blank; toc: overflow/);
+  assert.doesNotMatch(objects.stdout, /\[object Object\]/);
+  fs.writeFileSync(manifest, JSON.stringify({ status: "failed", failures: ["first", "second"] }));
+  assert.match(run(root, "report", "--visual-only").stdout, /FAILED visual: first; second/);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076
 test("a stage records that its run id was pinned by the CI workflow", () => {
   const { root, e2e } = workspace();
   assert.equal(runWith(root, { STUDIO_E2E_RUN_ID: "4242" }, "begin", "visual").status, 0);
