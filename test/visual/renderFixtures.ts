@@ -46,6 +46,7 @@ import { DEFAULT_VIEW_PREFERENCES } from "../../src/core/state/previewViewPrefer
 import { DEFAULT_EDITING_CONFIGURATION } from "../../src/core/configuration/editingConfiguration";
 import { previewContentWidthCss } from "../../src/core/preview/previewStyles";
 import { VISUAL_REPORT_ROOT } from "../reportPaths";
+import { drawnContentHtml } from "./drawnContent";
 import { buildHtmlExport } from "../../src/core/export/htmlExport";
 import { katexFontUrls } from "../../src/core/export/exportStyles";
 import { THEME_TOKEN_NAMES, VSCODE_VARIABLE_PREFIX } from "../../src/core/preview/themeTokens";
@@ -390,14 +391,18 @@ function imageDataUri(src: string): string | undefined {
  * `renderPage` (its content, the math styles) and the theme variables of `themes.ts`; the page script
  * that resolves the tokens in a real webview does not run here, so the tokens are the host
  * variables of the theme and the cream or dark mode stays a root attribute the sheet resolves.
- * Mermaid is not drawn: the script that draws it is not part of this static build.
+ * A page with a Mermaid diagram is opened in a browser first, so the content is the drawn one the
+ * webview sends on Export (CR 299).
  */
-function writeExportFile(scenario: (typeof SCENARIOS)[number]): void {
+async function writeExportFile(scenario: (typeof SCENARIOS)[number]): Promise<void> {
   const identity = scenarioPage(scenario);
   const theme = THEMES.find((candidate) => candidate.id === scenario.theme);
   if (!theme) throw new Error(`Unknown theme: ${scenario.theme}`);
   const page = fs.readFileSync(path.join(pageDirectory, pageFileName(identity)), "utf8");
-  const content = /<main\s+id="sphinx-myst-preview-content"[\s\S]*?<\/main>/u.exec(page)?.[0];
+  const staticContent = /<main\s+id="sphinx-myst-preview-content"[\s\S]*?<\/main>/u.exec(page)?.[0];
+  const content = staticContent?.includes('class="myst-mermaid-figure"')
+    ? await drawnContentHtml(path.join(pageDirectory, pageFileName(identity)))
+    : staticContent;
   if (content === undefined) throw new Error(`no content in the page of ${scenario.id}`);
   const tokens: Record<string, string> = {};
   for (const name of THEME_TOKEN_NAMES) {
@@ -462,7 +467,7 @@ async function main(): Promise<void> {
   }
 
   for (const scenario of SCENARIOS) {
-    if (scenario.exportHtml === true) writeExportFile(scenario);
+    if (scenario.exportHtml === true) await writeExportFile(scenario);
   }
 
   const manifest = {

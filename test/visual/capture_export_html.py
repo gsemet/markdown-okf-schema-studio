@@ -31,7 +31,8 @@ SECOND_PANEL = f"{TAB_SET} .myst-tab-panel[data-export-tab='2']"
 def check_export_html(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Opens `<scenario>.export.html` (next to the page) in a context with JavaScript disabled and checks what
   a reader of the single file gets: no script, the preview's page colour and column width, a properties
-  table that opens on a click, tabs that switch, links, the embedded image and no review or editing control.
+  table that opens on a click, tabs that switch, links, the embedded image, the drawn Mermaid diagram with
+  its folded source and no review or editing control.
   Saves a full-page shot as the `export` step."""
   export_file = scenario.get("exportFile")
   if not export_file:
@@ -104,6 +105,22 @@ def check_export_html(page: Page, scenario: dict, failures: list[Failure]) -> No
     sources = export.locator("img").evaluate_all("images => images.map((image) => image.getAttribute('src') || '')")
     if not sources or not all(source.startswith("data:") for source in sources):
       fail(f"the images are not all embedded data: {[source[:30] for source in sources]}")
+
+    diagram = export.locator("img.myst-mermaid-image")
+    if diagram.count() != 1:
+      fail(f"expected one drawn Mermaid image, found {diagram.count()}")
+    else:
+      if not (diagram.get_attribute("src") or "").startswith("data:image/svg+xml"):
+        fail("the Mermaid image is not an embedded SVG")
+      if not diagram.is_visible() or diagram.evaluate("image => image.naturalWidth") == 0:
+        fail("the Mermaid image does not show")
+    source = export.locator("details.myst-mermaid-source")
+    if source.count() != 1 or export.evaluate("() => document.querySelector('details.myst-mermaid-source').open"):
+      fail("the Mermaid source is not in one closed details")
+    elif "flowchart LR" not in (source.text_content() or ""):
+      fail("the folded Mermaid source lost its text")
+    if export.locator(".myst-mermaid-diagram", has_text="flowchart LR").count() != 0:
+      fail("the Mermaid source is shown in the diagram")
 
     export.locator(SECOND_LABEL).click()
     export.check_trace = page.check_trace
