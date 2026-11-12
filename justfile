@@ -166,6 +166,7 @@ requirements-lint:
     {{ okfreq }} validate requirements --check-links --project-root .
     {{ okfreq }} lint requirements --check --check-links --project-root .
     {{ okfreq }} update-coverage requirements --check
+    uv run --no-sync --group requirements python scripts/check_main_paths.py requirements
 
 # Refresh generated coverage fields, OKF fields (status, verified, Links) and navigation after adding requirements or markers.
 requirements-update:
@@ -182,7 +183,7 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_generate_orchestrator.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py
+    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_generate_orchestrator.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py test/build/test_check_main_paths.py
 
 # Rebuild .agents/changes/3-requests/ORCHESTRATOR.md from the STATUS.md headers, the backlog and the archives.
 orchestrator CHANGES=".agents/changes":
