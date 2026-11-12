@@ -80,6 +80,27 @@ Writers who split diagrams into files expect the preview to assemble them, follo
 - PUML files: `{uml} path.puml` and a body-less `{plantuml} path.puml` draw the diagram stored in that file; its text is the diagram and the expandable source. The file is a render dependency: editing it re-renders the preview. With the JAR option the JAR receives the file text.
 - A file that cannot be read is replaced by a message and one warning in the status line: not found (and watched, so the diagram appears once the file is created), outside the workspace (or the document's folder in Restricted Mode), an absolute path or URL ("must be a relative path"), or too large. An include cycle is an engine-side include message and posts no status-line warning. Known issue: the "too large" and "budget exhausted" messages are not triggered by any test in this scope.
 
+### Main paths
+
+#### Path 1: Include a local file in a diagram
+
+1. A diagram includes a local file
+   - SwRS-MDOKFSTUDIO-DIAG-046: the page asks the extension for the file and draws the diagram with the text it returns
+   - Option SwRS-MDOKFSTUDIO-DIAG-046 (refusal): a refused include gives its reason to the engine once
+   - Option SwRS-MDOKFSTUDIO-DIAG-054 (refusal): a name that is never read is refused with a reason
+   - Option SwRS-MDOKFSTUDIO-DIAG-061 (refusal): an include cycle stops with a reason on the diagram
+2. The assembled picture is drawn
+   - SwRS-MDOKFSTUDIO-DIAG-053: the included file changes on disk and the page draws the diagrams that read files again
+   - Option SwRS-MDOKFSTUDIO-DIAG-053 (boundary): while a block editor is open the message is sent after it closes
+3. The diagram is drawn again with the new file text
+
+#### Path 2: Keep a diagram in a PUML file
+
+1. A uml directive names a PUML file
+   - SwRS-MDOKFSTUDIO-DIAG-068: the preview renders the diagram stored in the file
+   - Option SwRS-MDOKFSTUDIO-DIAG-068 (refusal): a missing file shows a message in place of the diagram
+2. The diagram of the file is drawn
+
 <!-- okf:links:start -->
 ### Links
 

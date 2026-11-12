@@ -13,10 +13,10 @@ scope: diagrams
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -92,6 +92,23 @@ Writers expect PlantUML to work from the first preview, without Java, Graphviz, 
 - When the engine fails (syntax error or exception) the diagram reads "The built-in PlantUML engine could not render this diagram: followed by the reason", the reason as plain text without a Java-style class prefix, with the JAR option hint, no picture, and the source kept. Known issue: no diagnostic reaches the status line; only the picture area shows the message.
 - A source longer than 1 MiB is refused before the engine runs with "The PlantUML source exceeds the 1 MiB preview limit."
 - Known issue: a diagram with empty source is skipped and left blank.
+
+### Main paths
+
+#### Path 1: Read a PlantUML diagram
+
+1. The document holds a PlantUML diagram
+   - SwRS-MDOKFSTUDIO-DIAG-023: the built-in engine draws the fence or directive as one inert centred picture
+   - Option SwRS-MDOKFSTUDIO-DIAG-023 (boundary): the text is kept as written
+   - Option SwRS-MDOKFSTUDIO-DIAG-039 (nominal): a content patch draws only the new diagrams
+2. The diagram is drawn as a picture in the light or dark variant of the preview
+
+#### Path 2: Learn why a diagram has no picture
+
+1. The document holds a PlantUML diagram
+   - SwRS-MDOKFSTUDIO-DIAG-032: the built-in engine fails or refuses a library, a URL or too long a source and shows one message that says why
+   - Option SwRS-MDOKFSTUDIO-DIAG-032 (boundary): a source over 1 MiB
+2. A message says why there is no picture
 
 <!-- okf:links:start -->
 ### Links
