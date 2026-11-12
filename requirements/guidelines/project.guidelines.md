@@ -28,6 +28,52 @@ the relations or the schema annotations and run `just requirements-update`.
 A heading of `tiers/log.md` is exactly `## YYYY-MM-DD`, newest first, one per date. The topic of
 an entry goes in a `### Topic` sub-heading under its date, never in the date heading.
 
+## Main paths of a StRS
+
+A StRS describes a whole use case: A, then B, then C gives D. Testing every way through it end to
+end is too combinatorial; its SwRS are the options at each state, each tested on its own. A StRS
+may therefore carry a `### Main paths` section that names one or two paths through the use case,
+step by step, each step backed by the SwRS that moves the user to the next state.
+
+```markdown
+### Main paths
+
+#### Path 1: <short name of the path>
+
+1. <state, in the reader's words>
+   - SwRS-<ID>: <what moves the reader to the next state>
+   - Option SwRS-<ID> (<nominal|boundary|refusal>): <another thing that can happen here>
+2. <next state>
+   ...
+3. <final state: the result the user wanted>
+
+#### Path 2: <name>
+
+1. <a state already named in path 1, same words: the paths join there>
+   - SwRS-<ID>: ...
+2. <final state>
+```
+
+- A state is the same state in every path when its text is the same.
+- The first bullet without `Option` is the step to the next state; it is drawn on the path.
+- `Option` bullets are the other outcomes at that state; the scenario kind in brackets, when
+  given, picks the scenarios of the SwRS that this option covers.
+- The last state of a path has no bullet.
+- A SwRS that derives from the StRS and appears in no path is read as "also serves this need"; it
+  is not written in the StRS.
+- One or two paths per StRS. A StRS whose SwRS do not form a path has no section.
+- Every cited SwRS exists, is active (`req_lifecycle` is `draft`, `proposed` or `approved`, not
+  `deprecated` nor `superseded`; a `draft` SwRS may be cited) and has that StRS in its
+  `derives_from`.
+- Paths state what the extension does today, like the rest of the requirement; a step never
+  describes behaviour that no cited SwRS specifies.
+- The section is authored text: it sits after the last authored section of the StRS (usually
+  `### Rationale and constraints`) and before the generated `<!-- okf:links:start -->` block.
+- `just requirements-lint` runs `scripts/check_main_paths.py`, which verifies the cited SwRS only
+  (not the wording of states, the kind in brackets or the shape of the list). Its last line is
+  `main paths: <n> StRS checked, <m> SwRS citations, all valid`, where `<n>` counts the StRS that
+  have a section.
+
 ## During a change
 
 These rules hold for every change, whoever makes or checks it.
