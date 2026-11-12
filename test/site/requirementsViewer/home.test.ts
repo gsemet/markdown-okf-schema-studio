@@ -74,6 +74,7 @@ test("marker snippets come from the repository files and fall back to the path",
     const { body } = homePage(load(), root);
     assert.ok(body.includes("<code>src/a.ts:1</code>"));
     assert.ok(body.includes("export function &lt;f&gt;() {}"), "snippet is escaped");
+    assert.ok(body.includes(`<pre tabindex="0" role="region" aria-label="Marker in src/a.ts">`), "a scrollable block is focusable and named");
     assert.ok(body.includes("<code>test/a.test.ts</code>") && body.includes("could not be read"), "the unreadable test file keeps its path");
   } finally {
     fs.rmSync(root, { recursive: true, force: true });

@@ -7,6 +7,7 @@ import { test } from "node:test";
 import { pageDocument } from "../buildSite";
 import { SITE_URL } from "../socialCard";
 import { fixtureReport } from "./fixture";
+import { viewerDocument } from "./shell";
 import { redirectDocument, writeViewerPages } from "./write";
 
 const EXTENSION_ROOT = path.resolve(__dirname, "..", "..", "..", "..");
@@ -69,4 +70,12 @@ test("a missing report writes the home and the redirect only", () => {
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("the History checkbox sits inside the header landmark", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
+  const html = viewerDocument({ dir: "", level: "areas", title: "T", description: "d", body: "<p>x</p>", crumbs: [] }, { sha: "abc", generatedAt: "2026-01-01" });
+  const header = html.slice(html.indexOf('<header class="top">'), html.indexOf("</header>"));
+  assert.ok(header.includes('id="history"'));
+  assert.ok(html.indexOf('id="history"') > html.indexOf("<header"));
 });
