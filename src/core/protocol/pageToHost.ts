@@ -360,6 +360,9 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
       || (isBoundedString(message.from, MAX_PLANTUML_INCLUDE_PATH_LENGTH) && message.from !== "")),
   // CR 050: the warning banner's button opens the Problems view; it carries nothing else.
   previewShowProblems: () => true,
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-173
+  // The page asks the host to save the document after its flush; it carries nothing else.
+  previewSaveRequest: () => true,
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-086
   // CR 050: the warning banner was closed; the key of its warning set (made by the page) is kept
   // for the document until the end of the session.

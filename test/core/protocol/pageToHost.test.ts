@@ -383,3 +383,11 @@ test("CR147: previewSideBySideChanged carries a boolean and names the current re
   assert.equal(isRegisteredPreviewMessage({ ...base, on: "yes" }), false);
   assert.equal(isRegisteredPreviewMessage({ ...base }), false);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+test("the save request is registered, needs the envelope and carries nothing else", () => {
+  const envelope = { documentId: "file:///chapter.md", revision: 3, requestId: 7 };
+  assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewSaveRequest" }), true);
+  assert.equal(isRegisteredPreviewMessage({ type: "previewSaveRequest" }), false, "the envelope is required");
+  assert.equal(isRegisteredPreviewMessage({ ...envelope, documentId: 4, type: "previewSaveRequest" }), false);
+});

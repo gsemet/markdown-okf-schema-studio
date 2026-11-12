@@ -1344,3 +1344,56 @@ test("CR 169: a block source that arrives with the focus still on the page takes
   assert.ok(textarea);
   assert.equal(harness.document.activeElement, textarea);
 });
+
+const SAVE_COMMAND = { type: "previewSaveCommand", documentId: "file:///active.md", revision: 7, requestId: 11 };
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+test("CR 312: the save command posts the typed text as an autosave, then the save request, and keeps the editor open", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Typed just now\nsecond line";
+  textarea.dispatch("input");
+  textarea.setSelectionRange(3, 9);
+  const before = harness.messages.length;
+  harness.dispatchMessage(SAVE_COMMAND);
+  const posted = harness.messages.slice(before);
+  assert.deepEqual(posted.map((message) => message.type), ["previewEditSave", "previewSaveRequest"]);
+  assert.equal(posted[0].final, false, "an autosave: the editor is not closed");
+  assert.equal(posted[0].editedText, "Typed just now\nsecond line\n");
+  assert.deepEqual([posted[1].documentId, posted[1].revision, posted[1].requestId], ["file:///active.md", 7, 11]);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true", "the editor stays open");
+  assert.equal(textarea.value, "Typed just now\nsecond line", "the value is unchanged");
+  assert.deepEqual([textarea.selectionStart, textarea.selectionEnd], [3, 9], "the selection is unchanged");
+  assert.equal(harness.pendingTimerCount(), 0, "the autosave timer was consumed");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+test("CR 312: the save command with no pending autosave posts only the save request", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  harness.dispatchMessage(SAVE_COMMAND);
+  assert.deepEqual(harness.messages.slice(before).map((message) => message.type), ["previewSaveRequest"]);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(textarea.value.length > 0, true);
+  const noEditor = createRuntimeHarness();
+  const start = noEditor.messages.length;
+  noEditor.dispatchMessage(SAVE_COMMAND);
+  assert.deepEqual(noEditor.messages.slice(start).map((message) => message.type), ["previewSaveRequest"], "no editor open");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+test("CR 312: Cmd+S and Ctrl+S in the block text box are left to VS Code (not stopped, nothing posted)", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  for (const modifier of [{ metaKey: true }, { ctrlKey: true }]) {
+    let stopped = 0;
+    textarea.dispatch("keydown", {
+      key: "s", keyCode: 83, ...modifier, stopPropagation: () => { stopped += 1; }, stopImmediatePropagation: () => { stopped += 1; },
+      preventDefault: () => undefined,
+    });
+    assert.equal(stopped, 0, "the key keeps travelling to VS Code");
+  }
+  assert.equal(harness.messages.length, before, "the page posts nothing by itself");
+});

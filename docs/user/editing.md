@@ -82,6 +82,11 @@ environments),
   Box", "Select All in the Edited Text Box" and "Delete Line in the Edited Text Box" (key
   bindings only, none in the Command Palette) while a text box is open in the focused preview, so
   rebinding them in Keyboard Shortcuts changes the keys.
+  Cmd/Ctrl+S in the preview saves the document, wherever the focus is: the text typed so far in a
+  block or table-cell text box is written first and the text box stays open with its caret, while an
+  open frontmatter field of the properties table writes its value and closes. It is the command
+  "Save the Previewed Document" (key binding only, none in the Command Palette), so it can be
+  rebound in Keyboard Shortcuts.
   The Thread button (or `/thread`) inserts an inline comment thread after the block: a
   `<!-- THREAD` comment holding `Author (YYYY-MM-DD HH:MM):` headers, each followed by the indented
   text of the message. In the preview it is a green chip with a speech bubble; click it to read the

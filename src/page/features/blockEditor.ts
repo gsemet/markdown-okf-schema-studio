@@ -412,9 +412,39 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     rt.frontmatter.flushFrontmatterEditor();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-173
+  // The save key (the host asks, CR 312): write the typed text of the open block or cell editor with
+  // an autosave and keep that editor open, save an open frontmatter field as a flush (it closes, as
+  // for a navigation), then ask the host to save the document. Messages arrive in order, so the
+  // host knows every text above when the request comes.
+  function saveDocumentFromKey(): void {
+    const blockEdit = state.activeBlockEdit;
+    if (blockEdit && !blockEdit.finishing) {
+      copyCellTextIntoModel(blockEdit);
+      if (blockEdit.autosaveTimer !== undefined) postBlockEditSave(false);
+    }
+    afterFrontmatterPlainSave(rt.frontmatter.flushFrontmatterEditor(), () => {
+      host.postMessage({
+        type: "previewSaveRequest",
+        documentId: context.documentId,
+        revision: context.revision,
+        requestId: context.requestId,
+      });
+    });
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-047
   function saveBlockEdit(): void {
     postBlockEditSave(true);
+  }
+
+  // The cell editor keeps its typed text in the input until a save reads the table model.
+  function copyCellTextIntoModel(blockEdit: BlockEdit): void {
+    if (blockEdit.tableModel && blockEdit.tableInput && blockEdit.selectedCell) {
+      const modelRowIndex = blockEdit.tableRowIndex === 0 ? 0 : blockEdit.tableRowIndex! + 1;
+      const modelRow = blockEdit.tableModel.rows[modelRowIndex];
+      if (modelRow) modelRow[blockEdit.tableColumnIndex!] = blockEdit.tableInput.value;
+    }
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-067
@@ -426,11 +456,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     let flushed = false;
     const blockEdit = state.activeBlockEdit;
     if (blockEdit && !blockEdit.finishing) {
-      if (blockEdit.tableModel && blockEdit.tableInput && blockEdit.selectedCell) {
-        const modelRowIndex = blockEdit.tableRowIndex === 0 ? 0 : blockEdit.tableRowIndex! + 1;
-        const modelRow = blockEdit.tableModel.rows[modelRowIndex];
-        if (modelRow) modelRow[blockEdit.tableColumnIndex!] = blockEdit.tableInput.value;
-      }
+      copyCellTextIntoModel(blockEdit);
       state.flushingEditors = true;
       try {
         flushed = postBlockEditSave(true) === true;
@@ -449,7 +475,12 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
   // wait too (bounded, below the host's own 1.5 s wait) and save again as a flush when it was
   // refused. With nothing pending, navigate runs at once.
   function flushOpenEditorsThen(navigate: (flushed: boolean) => void): void {
-    const flushed = flushOpenEditors();
+    afterFrontmatterPlainSave(flushOpenEditors(), navigate);
+  }
+
+  // Calls navigate(flushed) at once, or, when a frontmatter field waits for the result of a plain
+  // save, once that result is known (bounded) and the field was flushed again if it was refused.
+  function afterFrontmatterPlainSave(flushed: boolean, navigate: (flushed: boolean) => void): void {
     const edit = state.activeFrontmatterEdit;
     if (!edit || !edit.plainSavePending) {
       navigate(flushed);
@@ -529,6 +560,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     saveBlockEdit,
     cancelBlockEdit,
     flushOpenEditorsThen,
+    saveDocumentFromKey,
     clearPendingBlockNavigation,
     rememberPendingBlockNavigation,
     createEditorButtons,

@@ -98,6 +98,11 @@
         "category": "Markdown OKF-Schema Studio"
       },
       {
+        "command": "markdown-okf-schema-studio.saveDocument",
+        "title": "Save the Previewed Document",
+        "category": "Markdown OKF-Schema Studio"
+      },
+      {
         "command": "markdown-okf-schema-studio.foldAll",
         "title": "Fold All Sections in Preview",
         "category": "Markdown OKF-Schema Studio"
@@ -137,6 +142,10 @@
         },
         {
           "command": "markdown-okf-schema-studio.editDeleteLine",
+          "when": "false"
+        },
+        {
+          "command": "markdown-okf-schema-studio.saveDocument",
           "when": "false"
         },
         {
@@ -212,6 +221,12 @@
         "key": "ctrl+f",
         "mac": "cmd+f",
         "when": "(activeWebviewPanelId == 'markdown-okf-schema-studio.preview' || activeCustomEditorId == 'markdown-okf-schema-studio.editor') && !editorTextFocus && !inputFocus"
+      },
+      {
+        "command": "markdown-okf-schema-studio.saveDocument",
+        "key": "ctrl+s",
+        "mac": "cmd+s",
+        "when": "activeWebviewPanelId == 'markdown-okf-schema-studio.preview'"
       }
     ],
     "configuration": [

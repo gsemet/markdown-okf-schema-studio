@@ -489,6 +489,7 @@ export interface BlockEditor {
   saveBlockEdit(): void;
   cancelBlockEdit(): void;
   flushOpenEditorsThen(navigate: (flushed: boolean) => void): void;
+  saveDocumentFromKey(): void;
   clearPendingBlockNavigation(): void;
   rememberPendingBlockNavigation(target: Element, caretPosition: CaretPosition, selectedCell?: HTMLTableCellElement,
     explicitIndices?: { tableRowIndex: number; tableColumnIndex: number; tableRank?: number },

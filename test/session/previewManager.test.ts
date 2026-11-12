@@ -27,7 +27,8 @@ test("every page message type has one handler of a feature controller", () => {
   const types = Object.keys(PAGE_MESSAGE_GATES);
   // CR 147 added previewSideBySideChanged (43 -> 44 page message types).
   // CR 288 added previewExportHtml (44 -> 45).
-  assert.equal(types.length, 45);
+  // CR 312 added previewSaveRequest (45 -> 46).
+  assert.equal(types.length, 46);
   for (const type of types) {
     // The router refuses a second handler: one is registered already.
     assert.throws(() => router.on(type, () => undefined), /already registered/u, type);

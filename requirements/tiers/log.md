@@ -1,5 +1,18 @@
 # Update Log
 
+## 2026-11-13
+
+### Cmd+S saves the document from the preview (CR 312)
+
+- New, proposed, deriving from StRS-MDOKFSTUDIO-BLOCK-008: SwRS-MDOKFSTUDIO-LIFE-173 (the save key with
+  the focus in the side preview writes the text typed in an open block or cell editor, keeps that editor
+  open, writes and closes an open frontmatter field, then saves the document the preview shows). Its
+  sources are `src/host-vscode/activation.ts`, `src/session/previewManager.ts`,
+  `src/session/features/blockEdits.ts`, the two protocol messages and `src/page/features/blockEditor.ts`;
+  its tests are `test/session/saveCommand.test.ts`, the page runtime tests, the protocol tests,
+  `test/security/package-contract.test.ts` and `test/integration/saveKey.test.ts`.
+- The custom editor is not claimed: its native save is checked in the real-window test (decision 5).
+
 ## 2026-11-12
 
 ### The e2e report names each failed visual check (CR 306)

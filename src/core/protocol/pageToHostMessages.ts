@@ -404,6 +404,10 @@ export interface PreviewPlantUmlIncludeMessage extends PageMessageBase<"previewP
 /** The warning banner's button opens the Problems view. */
 export type PreviewShowProblemsMessage = PageMessageBase<"previewShowProblems">;
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-173
+/** The page flushed its typed text and asks the host to save the document the preview shows. */
+export type PreviewSaveRequestMessage = PageMessageBase<"previewSaveRequest">;
+
 /** The warning banner was closed for the warning set named by `key`. */
 export interface PreviewWarningBannerClosedMessage extends PageMessageBase<"previewWarningBannerClosed"> {
   key: string;
@@ -445,6 +449,7 @@ export type PageToHostMessage =
   | PreviewPasteImageMessage
   | PreviewPlantUmlIncludeMessage
   | PreviewShowProblemsMessage
+  | PreviewSaveRequestMessage
   | PreviewWarningBannerClosedMessage
   | PreviewPasteHtmlMessage;
 
