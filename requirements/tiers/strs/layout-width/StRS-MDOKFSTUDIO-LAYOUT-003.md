@@ -13,10 +13,10 @@ scope: layout-width
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-10T13:38:21+01:00'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-10T13:38:21+01:00'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -92,6 +92,29 @@ As a writer or team, I choose how wide the text column is, from a narrow measure
 - Known issue: the code and docs/user/toolbar.md put the button on row 4, while the file header of the width mode module and an older bullet of the Unreleased change-log entry say row 2.
 - Known issue: the paths for %/em/rem figures, declared pixel widths, the Mermaid wrapper and the 1 px tolerance are not directly tested, and no visual scenario combines the open table-of-contents column with Auto.
 - Known issue: some visual scenario titles (`v05`, `v06` "full") do not match what they assert.
+
+### Main paths
+
+#### Path 1: Change the width mode
+
+1. The text column is as wide as the setting says
+   - SwRS-MDOKFSTUDIO-LAYOUT-020: the reader presses the Width button and the mode goes Margin, Auto, Full width, back to Margin, keeping the reading line
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-020 (boundary): no reading position is known yet
+2. The width mode has changed
+   - SwRS-MDOKFSTUDIO-LAYOUT-023: in Auto, a table, figure, image, code block or Mermaid diagram wider than the column is widened up to the available area
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-022 (nominal): in Full width the column limit is lifted and the page keeps a 16 px gutter
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-044 (nominal): in Auto, a table whose column minimums fit stays inside the text column
+3. Wide content is drawn at the width it needs
+   - SwRS-MDOKFSTUDIO-LIFE-169: the page keeps the choice in the saved panel state and the host stores it for the workspace
+   - Option SwRS-MDOKFSTUDIO-LIFE-169 (refusal): the host refuses a value outside the table
+4. The width choice is kept for the workspace
+
+#### Path 2: Set the width in the settings
+
+1. The setting maxContentWidth is changed
+   - SwRS-MDOKFSTUDIO-LAYOUT-002: the page shows a text column exactly that wide, centred in a wider pane
+   - Option SwRS-MDOKFSTUDIO-LAYOUT-002 (boundary): a value of 0 lifts the limit
+2. The text column is as wide as the setting says
 
 <!-- okf:links:start -->
 ### Links
