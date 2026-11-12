@@ -557,7 +557,8 @@ html[data-sphinx-preview-toolbar-state="collapsed"]:not([data-sphinx-preview-too
   display: block;
 }
 
-/* Fixed, out of flow: showing or resizing the band never moves the content (scroll anchoring R8). */
+/* Fixed, out of flow: showing or resizing the band never moves the content (scroll anchoring R8).
+   One line per heading level, cut with an ellipsis: the band is never taller than the depth. */
 [data-sphinx-preview-sticky-headings] {
   position: fixed;
   inset-block-start: 0;
@@ -579,8 +580,9 @@ html[data-sphinx-preview-toolbar-state="collapsed"]:not([data-sphinx-preview-too
   font-size: calc(var(--sphinx-preview-zoomed-font-size) + 2px);
   font-weight: 700;
   line-height: var(--sphinx-preview-line-height);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
   pointer-events: none;
 }
 

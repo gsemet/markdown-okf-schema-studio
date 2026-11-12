@@ -20,7 +20,7 @@ Filler paragraph 8 keeps the third heading far enough down to scroll under the s
 
 ### Checking the complete dependency graph after each asynchronous validation and review
 
-The sticky heading band must expand to show every wrapped line without clipping its content.
+The sticky heading band keeps one line per heading level, each cut with an ellipsis when it does not fit.
 
 Trailing paragraph 1 keeps the page scrollable.
 

@@ -290,7 +290,10 @@ export interface Scenario {
   codeCopyChecks?: boolean;
   /** The copy button is reached with the keyboard: focus on the first code block reveals it, Tab focuses it, Enter copies. */
   codeCopyKeyboardChecks?: boolean;
-  expectStickyGrowth?: boolean;
+  /** TOOLBAR-025: the sticky band keeps one rendered line per heading level, cut with an ellipsis (white-space pre, text-overflow ellipsis). */
+  expectStickyEllipsis?: boolean;
+  /** TOOLBAR-025: the first block after the active heading starts at or below the bottom of the sticky band. */
+  expectSectionStartVisible?: boolean;
   /** Geometry checks (test/shared/geometry-checks.js) that fail this scenario when applicable and failing. */
   machineChecks?: string[];
   description: string;

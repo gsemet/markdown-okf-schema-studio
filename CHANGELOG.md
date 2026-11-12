@@ -9,6 +9,8 @@
   admonitions and Quarto callouts still take their title from a leading heading or bold line.
 - Export to HTML keeps the content of a table cell or a front matter field that is being edited, as
   last saved; the editor stays open and is not in the file.
+- A long heading in the sticky band stays on one line, cut with an ellipsis, and no longer covers the
+  first line of the section below.
 
 ## 1.7.1 - 2026-11-12
 
