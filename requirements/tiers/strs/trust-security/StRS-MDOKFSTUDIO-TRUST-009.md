@@ -54,6 +54,27 @@ As a reader or writer, I rely on what the preview page asks of the extension bei
 - An answer is addressed by the document, the revision and the render request, or by an identifier of its own.
 - A save or cancel from an older page is answered with an error instead of being dropped (block-editing and frontmatter-editing scopes).
 
+### Main paths
+
+#### Path 1: The page asks the host to act
+
+1. The page sends a message to the host
+   - SwRS-MDOKFSTUDIO-TRUST-052: the host hands the value to a handler only if it is a registered message type with a valid envelope
+   - Option SwRS-MDOKFSTUDIO-TRUST-052 (refusal): a value that is not a registered message is ignored without a visible change
+2. The message is a registered one
+   - SwRS-MDOKFSTUDIO-TRUST-065: the host passes it to the handler of its type after it matches the render or document the host holds
+   - Option SwRS-MDOKFSTUDIO-TRUST-065 (refusal): an older render is answered as out of date, and a foreign render is dropped
+3. The message reaches the handler of its type
+
+#### Path 2: The host answers the page
+
+1. The page receives a message from the host
+   - SwRS-MDOKFSTUDIO-TRUST-059: the page treats it as a host message only if its type is registered and it is addressed to the page
+2. The page accepts a host message
+   - SwRS-MDOKFSTUDIO-TRUST-061: a content patch within its bounds is accepted
+   - Option SwRS-MDOKFSTUDIO-TRUST-061 (refusal): a patch out of bounds is not accepted
+3. The content patch is accepted
+
 <!-- okf:links:start -->
 ### Links
 

@@ -50,6 +50,19 @@ As a reader, and as a reviewer of an untrusted repository, I open any Markdown f
 - Only a small subset of raw HTML is rendered at all (rendering-core and gfm scopes); this record covers what the page-building step does to the HTML that remains.
 - The step removes known dangerous elements and attributes and rewrites links and resource addresses; it does not keep a short list of allowed elements.
 
+### Main paths
+
+#### Path 1: Preview a document that carries scripts and unsafe HTML
+
+1. A document carries a script and raw HTML
+   - SwRS-MDOKFSTUDIO-TRUST-011: the sanitizer removes every script element of the document, inline or with a source
+   - Option SwRS-MDOKFSTUDIO-TRUST-011 (refusal): an inline script and a nonce attribute written by the document are removed
+2. The scripts of the document are gone
+   - SwRS-MDOKFSTUDIO-TRUST-036: the sanitizer removes the embed, iframe, form, object and style elements and the on* attributes
+3. The raw HTML is inert
+   - SwRS-MDOKFSTUDIO-TRUST-012: the page policy sets the default source and the connect source to none and keeps no wildcard, unsafe-inline or unsafe-eval source
+4. The page shows the document with no foreign code and no network load
+
 <!-- okf:links:start -->
 ### Links
 
