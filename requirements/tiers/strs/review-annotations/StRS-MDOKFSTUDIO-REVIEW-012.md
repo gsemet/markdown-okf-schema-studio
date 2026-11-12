@@ -13,10 +13,10 @@ scope: review-annotations
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -52,6 +52,27 @@ As a writer, I see the notes left in the source without opening the source, I re
 - Hiding the comments is done with the toolbar button or the setting; the setting is the master switch and removes the toolbar button, and the button choice is kept per workspace.
 - The TODO shortcut action is also offered by the edition palette and the slash menu.
 - Each TODO toggle is one undo step.
+
+### Main paths
+
+#### Path 1: Open a comment chip
+
+1. A document holds an HTML comment
+   - SwRS-MDOKFSTUDIO-REVIEW-133: the renderer writes a gray chip labelled comment
+   - Option SwRS-MDOKFSTUDIO-REVIEW-139 (nominal): the word TODO shows as a green chip
+   - Option SwRS-MDOKFSTUDIO-REVIEW-133 (refusal): a tool comment gets no chip
+2. A chip stands in the text
+   - SwRS-MDOKFSTUDIO-REVIEW-143: the reader clicks the chip, or presses Enter or Space on it, and its comment box opens
+   - Option SwRS-MDOKFSTUDIO-REVIEW-003 (nominal): in edit mode the opened block is titled with the literal tag
+3. The comment box shows the comment text
+
+#### Path 2: Hide the gray chips
+
+1. A chip stands in the text
+   - SwRS-MDOKFSTUDIO-REVIEW-152: the reader presses the Comments button and the gray and thread chips are hidden while the TODO chips stay
+2. The gray chips are hidden and the TODO chips stay
+   - SwRS-MDOKFSTUDIO-LIFE-170: a new page starts from the stored choice
+3. A new page opens with the same choice
 
 <!-- okf:links:start -->
 ### Links

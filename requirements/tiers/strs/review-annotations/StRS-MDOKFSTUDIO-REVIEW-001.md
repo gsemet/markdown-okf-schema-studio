@@ -14,10 +14,10 @@ scope: review-annotations
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -60,6 +60,26 @@ As a reviewer, I see where each discussion sits in the document and read it wher
 - When the review comments file of a document is not valid, the Studio shows none of its threads, warns the reviewer once and leaves the file untouched.
 - A file that is too large, not JSON, of another version or with one bad thread counts as not valid.
 - Writing a new comment is refused while the file is not valid.
+
+### Main paths
+
+#### Path 1: Open a thread from its highlight
+
+1. A document with a review comments file is shown
+   - SwRS-MDOKFSTUDIO-REVIEW-012: the host posts the threads of the file to the page
+   - Option SwRS-MDOKFSTUDIO-REVIEW-004 (refusal): a file with any problem or over its limits is ignored
+2. The threads reach the page
+   - SwRS-MDOKFSTUDIO-REVIEW-017: the first occurrence of each thread quote is highlighted once in its block
+   - Option SwRS-MDOKFSTUDIO-REVIEW-028 (nominal): a thread that cannot be placed is listed in the Orphaned comments box
+3. The quoted text is highlighted
+   - SwRS-MDOKFSTUDIO-REVIEW-021: the reader clicks the highlight, or presses Enter or Space on it, and the thread popover opens
+4. The thread popover lists the comments
+
+#### Path 2: A thread comes back after an undo
+
+1. A thread is listed in the Orphaned comments box
+   - SwRS-MDOKFSTUDIO-REVIEW-219: the quote is found again and the thread is placed on the found lines
+2. The quoted text is highlighted
 
 <!-- okf:links:start -->
 ### Links
