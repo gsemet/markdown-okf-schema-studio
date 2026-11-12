@@ -62,6 +62,26 @@ As a reader, I click one Theme button to go through Current, Dark, White and Cre
 - The forced modes set their colours directly and never read the host's.
 - A colour the host does not set leaves the fallback written in each rule in force.
 
+### Main paths
+
+#### Path 1: Go to the next theme
+
+1. The page is shown in one theme mode
+   - SwRS-MDOKFSTUDIO-THEME-001: the reader presses the Theme button, and the button names the new mode and the next one
+   - Option SwRS-MDOKFSTUDIO-THEME-001 (boundary): from Cream the next press gives Current again
+2. A theme mode is active
+   - SwRS-MDOKFSTUDIO-THEME-025: the mode is Dark, White or Cream and paints the page, toolbar, heading band and notes from its own palette
+   - Option SwRS-MDOKFSTUDIO-THEME-016 (nominal): the mode is Current and the page keeps the colours of the VS Code theme
+   - Option SwRS-MDOKFSTUDIO-THEME-025 (boundary): the colours are the same on a dark and on a light VS Code theme
+3. The whole page is painted in the colours of the mode
+
+#### Path 2: Switch the theme when the system asks for reduced motion
+
+1. The page is shown in one theme mode
+   - SwRS-MDOKFSTUDIO-CORE-050: the reader presses the Theme button and the preview applies no motion
+   - Option SwRS-MDOKFSTUDIO-CORE-050 (refusal): the reduced-motion preference is on, so the colours do not fade
+2. The theme has changed without animation
+
 <!-- okf:links:start -->
 ### Links
 
