@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files:
 - src/core/render/requirementsViewer.markers.ts
 tested_in_files:
+- test/site/requirementsViewer/pages.test.ts
 - test/site/requirementsViewer/search.test.ts
 - test/site/requirementsViewer/write.test.ts
 default_owner_email: gaetan@xeberon.net

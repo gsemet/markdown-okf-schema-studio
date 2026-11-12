@@ -115,3 +115,15 @@ test("behaviour page: files at the commit, test kinds, retired rows and the wher
   assert.equal(testKind("test/visual/a.ts"), "visual");
   assert.equal(testKind("tests/fixtures/x.py"), "unit");
 });
+
+test("without JavaScript the search, Play and theme controls are hidden", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-084
+  for (const page of viewerPages(load(), "/nonexistent-root")) {
+    const rule = /<noscript><style>([^<]*)<\/style><\/noscript>/u.exec(viewerDocument(page, FOOTER))?.[1] ?? "";
+    for (const selector of ["#search-open", "#theme", ".play"]) {
+      assert.ok(rule.includes(selector), `${page.dir} hides ${selector}`);
+    }
+    assert.ok(!rule.includes("hist"), "the CSS-only History toggle stays");
+  }
+});
