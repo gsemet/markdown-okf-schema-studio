@@ -52,6 +52,24 @@ As a reader, I follow a link to another document or a heading, and come back to 
 - An editor with nothing typed is closed without a save.
 - The page half (the final save before the move) is specified in the block-editing and table-editing scopes (SwRS-MDOKFSTUDIO-BLOCK-205).
 
+### Main paths
+
+#### Path 1: Follow a link and go Back
+
+1. The reader has typed in an open block editor and clicks a link
+   - SwRS-MDOKFSTUDIO-BLOCK-205: the text typed in every open editor is saved before the page goes away
+   - Option SwRS-MDOKFSTUDIO-BLOCK-205 (refusal): a save refused during the flush warns that the text was not saved
+2. The typed text is saved
+   - SwRS-MDOKFSTUDIO-TOOLBAR-059: the link to another Markdown document, or an anchor that resolves to a source line, is recorded in the history of the panel
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-059 (boundary): an unknown line is not recorded as a place
+3. The place is recorded
+   - SwRS-MDOKFSTUDIO-TOOLBAR-054: the Back button is enabled and a press posts one history move
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-054 (refusal): there is nowhere to go and the state is posted again
+4. The reader has pressed Back
+   - SwRS-MDOKFSTUDIO-TOOLBAR-059: Back opens the stored document with the stored line selected, or scrolls the preview to the stored line
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-058 (refusal): a history move with an invalid direction is not accepted
+5. The reader is back at the document and the line they left
+
 <!-- okf:links:start -->
 ### Links
 

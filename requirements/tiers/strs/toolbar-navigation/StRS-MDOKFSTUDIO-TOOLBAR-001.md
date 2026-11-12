@@ -60,6 +60,23 @@ As a reader, I find the preview controls in five clear rows, fold the toolbar do
 - Known issue: the toolbar floats over the page, so text that scrolls under it is covered; only the first element of a document gets room under it (see the first-element gap of the layout-width scope).
 - When the workspace storage cannot be written, the choice is kept for the session and the reader gets one short warning that it will not survive a restart.
 
+### Main paths
+
+#### Path 1: Collapse the toolbar and find it collapsed
+
+1. A preview page is built
+   - SwRS-MDOKFSTUDIO-TOOLBAR-001: the toolbar is drawn as five rows of titled buttons, inside the pane and without overlap
+2. The toolbar is expanded
+   - SwRS-MDOKFSTUDIO-TOOLBAR-007: the reader presses the collapse button and the rows of navigation and view are hidden
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-007 (boundary): when collapsed, the hidden rows are out of the Tab order
+3. The toolbar is collapsed
+   - SwRS-MDOKFSTUDIO-LIFE-169: the host validates the choice and stores it for the workspace
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-013 (refusal): a message with a value that is not a boolean is dropped without an answer
+4. The collapsed state is stored
+   - SwRS-MDOKFSTUDIO-LIFE-170: the preview opens again from the saved panel state, else the stored workspace value
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-130 (nominal): the rows unroll once and roll up again, without changing the saved choice
+5. The preview opens with the toolbar collapsed
+
 <!-- okf:links:start -->
 ### Links
 

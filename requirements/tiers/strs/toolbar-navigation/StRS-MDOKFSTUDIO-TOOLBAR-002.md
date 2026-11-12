@@ -43,6 +43,21 @@ Readers of a long document want to hide the sections they are not reading and se
 - Folding works in read mode and in edit mode; a block inside a folded section cannot be edited until the section is unfolded.
 - Search in the preview and navigation to an anchor open the folded section that holds their target.
 
+### Main paths
+
+#### Path 1: Fold sections and keep them folded
+
+1. The document is shown with its sections open
+   - SwRS-MDOKFSTUDIO-TOOLBAR-003: the reader presses the chevron of a heading, which hides the blocks up to the next heading of the same or a higher level
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-005 (nominal): the Fold button or the command folds every section that has content
+2. A section is folded
+   - SwRS-MDOKFSTUDIO-TOOLBAR-004: the folded headings are kept in the webview state and applied again after every content update and reload
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-008 (boundary): a block inside the folded section stays mapped
+3. The folds stay as the reader left them
+   - SwRS-MDOKFSTUDIO-TOOLBAR-003: the reader presses the chevron again and the blocks are shown again
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-006 (nominal): the browser find reaches text in the folded section, which unfolds
+4. The section is unfolded
+
 <!-- okf:links:start -->
 ### Links
 
