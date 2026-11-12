@@ -72,7 +72,7 @@ function findSnippet(root: string, files: readonly string[], id: string): Marker
 
 function renderSnippet(kind: string, snippet: MarkerSnippet | undefined, files: readonly string[]): string {
   const caption = (file: string, line?: number) => `<p class="req-kind">${kind} <code>${e(file)}${line ? `:${line}` : ""}</code></p>`;
-  if (snippet) return `${caption(snippet.file, snippet.line)}<pre><code>${e(snippet.code)}</code></pre>`;
+  if (snippet) return `${caption(snippet.file, snippet.line)}<pre tabindex="0" role="region" aria-label="Marker in ${e(snippet.file)}"><code>${e(snippet.code)}</code></pre>`;
   const file = files[0];
   return file ? `${caption(file)}<p class="req-missing">The marker could not be read from this file when the site was built.</p>` : "";
 }

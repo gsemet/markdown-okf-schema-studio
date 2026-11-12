@@ -75,9 +75,9 @@ ${headTags(`${spec.title} | Studio requirements`, page, levelCard(spec))}
 <noscript><style>${NOSCRIPT_STYLE}</style></noscript>
 </head>
 <body${style}>
-<input type="checkbox" id="history" class="hist" aria-label="Show retired requirements">
-<script>${HISTORY_SCRIPT}</script>
 <header class="top"><div class="in">
+  <input type="checkbox" id="history" class="hist" aria-label="Show retired requirements">
+  <script>${HISTORY_SCRIPT}</script>
   <a class="home" href="${dirLink(spec.dir, VIEWER_DIR)}">Studio requirements</a>
   <nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav>
   <nav class="site" aria-label="Site"><a href="${siteLink(spec.dir, "index.html")}">Home</a><a href="${siteLink(spec.dir, "contributing.html")}">Contributing</a><a href="${siteLink(spec.dir, "docs/how-we-ship.html")}">How we ship</a><a href="${siteLink(spec.dir, "gallery.html")}">Gallery</a></nav>

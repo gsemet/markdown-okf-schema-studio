@@ -159,7 +159,7 @@ export function metroSvg(model: ViewerModel, paths: readonly MainPath[], fromDir
   const width = padX * 2 + (columns - 1) * columnWidth;
   const height = top + maxTrack * trackHeight + 100;
   const point = (node: StateNode): [number, number] => [padX + node.col * columnWidth, top + node.track * trackHeight];
-  const out = [`<svg class="metro" viewBox="0 0 ${width.toFixed(0)} ${height.toFixed(0)}" role="img" aria-label="Map of the use case: states joined by behaviours">`];
+  const out = [`<svg class="metro" viewBox="0 0 ${width.toFixed(0)} ${height.toFixed(0)}" role="group" aria-label="Map of the use case: states joined by behaviours; each behaviour is a link">`];
   for (const edge of edges) {
     const [x1, y1] = point(edge.a);
     const [x2, y2] = point(edge.b);

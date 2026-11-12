@@ -1,8 +1,8 @@
 /* Studio requirements viewer. Serif for what is read, sans for labels, mono for identifiers. Colour means
    the area; path 1, path 2 and the scenario kinds are the only other colours. */
 :root{--serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--max:1080px;--c:#1d4ed8}
-[data-theme=cream]{--bg:#f6f1e7;--paper:#fffdf8;--ink:#2b2620;--soft:#6c6357;--faint:#cdc3b2;--line:#e5ddce;--p1:#b5532a;--p2:#7a4fa0;--alt:#a39883;--nom:#2f8f6f;--bnd:#2d6fb0;--ref:#c0392b}
-[data-theme=dark]{--bg:#16150f;--paper:#1f1d17;--ink:#ece5d7;--soft:#a69c8a;--faint:#4b453a;--line:#322e25;--p1:#ec875a;--p2:#b495da;--alt:#6d6455;--nom:#5fcca5;--bnd:#7fb0ee;--ref:#ff7a6b}
+[data-theme=cream]{--bg:#f6f1e7;--paper:#fffdf8;--ink:#2b2620;--soft:#6c6357;--faint:#cdc3b2;--line:#e5ddce;--p1:#a34822;--kt:#fff;--p2:#7a4fa0;--alt:#a39883;--nom:#26775b;--bnd:#2d6fb0;--ref:#c0392b}
+[data-theme=dark]{--bg:#16150f;--paper:#1f1d17;--ink:#ece5d7;--soft:#a69c8a;--faint:#4b453a;--line:#322e25;--p1:#ec875a;--kt:#16150f;--p2:#b495da;--alt:#6d6455;--nom:#5fcca5;--bnd:#7fb0ee;--ref:#ff7a6b}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--sans)}
@@ -126,7 +126,7 @@ svg.metro{display:block;width:100%;height:auto}
 .scn summary::-webkit-details-marker{display:none}
 .scn summary::after{content:"+";margin-left:auto;color:var(--soft)}
 .scn[open] summary::after{content:"−"}
-.k{font:600 10.5px var(--sans);text-transform:uppercase;letter-spacing:.05em;color:#fff;border-radius:4px;padding:2px 7px;flex:none}
+.k{font:600 10.5px var(--sans);text-transform:uppercase;letter-spacing:.05em;color:var(--kt);border-radius:4px;padding:2px 7px;flex:none}
 .gwt{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
 .gwt div{padding:10px 14px;font-size:14px;border-right:1px solid var(--line)}
 .gwt div:last-child{border-right:0}
@@ -157,12 +157,12 @@ svg.metro{display:block;width:100%;height:auto}
 :focus-visible{outline:2px solid var(--c);outline-offset:2px}
 /* history: retired requirements are in the page, hidden until the History box is checked */
 .hist{position:absolute;opacity:0;pointer-events:none}
-.hist:focus-visible~.top .hist-label{outline:2px solid var(--c);outline-offset:2px}
-.hist:checked~.top .hist-label{background:var(--ink);color:var(--paper)}
+.top:has(.hist:focus-visible) .hist-label{outline:2px solid var(--c);outline-offset:2px}
+.top:has(.hist:checked) .hist-label{background:var(--ink);color:var(--paper)}
 .retired{display:none}
-.hist:checked~main .retired{display:block}
-.hist:checked~main li.retired{display:list-item}
-.hist:checked~main .brow.retired{display:grid}
+body:has(.hist:checked) main .retired{display:block}
+body:has(.hist:checked) main li.retired{display:list-item}
+body:has(.hist:checked) main .brow.retired{display:grid}
 .retired{opacity:.7}
 .retired .need{display:block;-webkit-line-clamp:unset}
 .stop .by,.brow .by{color:var(--soft)}

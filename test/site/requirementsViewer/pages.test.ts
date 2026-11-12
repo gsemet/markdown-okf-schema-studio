@@ -58,6 +58,7 @@ test("a use case with paths draws the map, the phone list and the walk count", (
   const model = load();
   const page = useCasePage(model, model.byId.get("StRS-X-001")!);
   assert.ok(page.body.includes('<svg class="metro"') || page.body.includes("<svg"));
+  assert.ok(page.body.includes('<svg class="metro"') && !/<svg class="metro"[^>]*role="img"/u.test(page.body), "the map holds links, so it is not an image widget");
   assert.ok(page.body.includes('class="metro-list"'));
   assert.ok(page.body.includes("State A") && page.body.includes("State C"));
   // A -> B once (1 scenario), B -> C twice (2 scenarios), B -> refusal option once (1 refusal scenario): 1 + 3 = 4 walks.
