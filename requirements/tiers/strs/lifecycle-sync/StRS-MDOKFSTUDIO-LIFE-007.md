@@ -44,6 +44,26 @@ As a reader, I can tell whether the preview is current, still rendering, stale a
 - The states are announced politely to assistive technology.
 - The preview comes back by itself when the file is created again.
 
+### Main paths
+
+#### Path 1: Wait for a render
+
+1. A new preview waits for its render
+   - SwRS-MDOKFSTUDIO-LIFE-049: the status reads Preview pending, with a pending notice for a slow render
+   - Option SwRS-MDOKFSTUDIO-LIFE-055 (refusal): a pending notice that is oversized or malformed is ignored
+2. The status reads Preview ready
+   - Option SwRS-MDOKFSTUDIO-LIFE-049 (refusal): a failed render is labelled in the status
+
+#### Path 2: The source is gone
+
+1. The Markdown file of a preview is missing
+   - SwRS-MDOKFSTUDIO-LIFE-062: the page is replaced by the status Preview source missing with the reason of the case
+   - Option SwRS-MDOKFSTUDIO-LIFE-127 (refusal): a saved state that cannot be restored shows the same status with its reason
+2. The status says Preview source missing
+   - SwRS-MDOKFSTUDIO-LIFE-062: the file is created and the source is rendered again
+   - Option SwRS-MDOKFSTUDIO-LIFE-062 (refusal): a created file that is not the source changes nothing
+3. The preview shows the file again
+
 <!-- okf:links:start -->
 ### Links
 
