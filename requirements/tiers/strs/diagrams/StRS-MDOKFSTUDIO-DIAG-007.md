@@ -101,6 +101,22 @@ Writers and security-minded teams expect to choose between a safe bundled engine
 - Error text from a process is capped at 64 KiB with "[stderr truncated at 64 KiB]".
 - Cancelling a render (a newer render stage, the preview closing) sends SIGTERM to the whole process group on POSIX, falling back to the direct child; an exited child is not signalled. A render that sees close, error and timeout together settles once. Known issue: Windows, which has no process group, is untested.
 
+### Main paths
+
+#### Path 1: Draw with an own JAR
+
+1. PlantUML diagrams are drawn by the built-in engine
+   - SwRS-MDOKFSTUDIO-DIAG-024: the writer sets useJar to true and the JAR pipeline is selected
+   - Option SwRS-MDOKFSTUDIO-DIAG-024 (refusal): a value that is not the boolean true keeps the built-in engine
+2. The JAR pipeline is selected
+   - SwRS-MDOKFSTUDIO-DIAG-084: java or the plantuml command runs once per diagram
+   - Option SwRS-MDOKFSTUDIO-DIAG-089 (refusal): a jarPath that does not exist shows a message on the diagram
+   - Option SwRS-MDOKFSTUDIO-DIAG-097 (refusal): a render that runs past 30 seconds stops with a message
+3. The JAR has drawn the diagrams of the render
+   - SwRS-MDOKFSTUDIO-DIAG-105: each result replaces the content of its diagram in document order
+   - Option SwRS-MDOKFSTUDIO-DIAG-105 (boundary): one failing diagram does not affect the others
+4. Each diagram shows the picture the JAR drew
+
 <!-- okf:links:start -->
 ### Links
 
