@@ -5,8 +5,8 @@ a{color:inherit}
 .in,main{max-width:var(--max);margin:0 auto;padding:0 24px}
 main{padding-top:36px;padding-bottom:64px}
 /* header */
-.crumbs{flex:1;min-width:0;display:flex;gap:8px;align-items:center;font:13px var(--sans);color:var(--soft);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
-.crumbs::-webkit-scrollbar{display:none}
+.crumbs{order:5;flex:1 1 100%;min-width:0;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:center;padding-bottom:8px;font:13px var(--sans);color:var(--soft)}
+.top .in:has(.crumbs){flex-wrap:wrap}
 .crumbs a{text-decoration:none}.crumbs a:hover{color:var(--ink);text-decoration:underline}
 .crumbs .sep{color:var(--faint)}
 .crumbs [aria-current]{color:var(--ink)}
@@ -206,7 +206,6 @@ h3{font:600 16px var(--sans);margin:26px 0 8px}
   .stop .need{grid-column:1}
   .gwt{grid-template-columns:1fr}.gwt div{border-right:0;border-bottom:1px solid var(--line)}
   .cols{grid-template-columns:1fr;gap:0}
-  .crumbs{order:5;flex:1 1 100%}
   .req-stats{grid-template-columns:1fr 1fr}
   .pager{flex-direction:column}
   .search{padding:0}.search .box{max-height:100vh;height:100%;border-radius:0}

@@ -61,9 +61,10 @@ html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--sans)}
 a{color:var(--link)}
 code,pre{font-family:var(--mono)}
-pre{overflow-x:auto;padding:1rem;border:1px solid var(--line);border-radius:8px;background:var(--code-bg)}
-code{padding:.12rem .28rem;border-radius:4px;background:var(--code-bg)}
-pre code{padding:0;background:transparent}
+pre{max-width:100%;overflow-x:auto;padding:1rem;border:1px solid var(--line);border-radius:8px;background:var(--code-bg)}
+table{display:block;max-width:100%;overflow-x:auto}
+code{overflow-wrap:anywhere;padding:.12rem .28rem;border-radius:4px;background:var(--code-bg)}
+pre code{overflow-wrap:normal;padding:0;background:transparent}
 blockquote{margin-left:0;padding:.6rem 1rem;border-left:4px solid var(--faint);background:var(--quote-bg)}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 /* site header: the same on every page */

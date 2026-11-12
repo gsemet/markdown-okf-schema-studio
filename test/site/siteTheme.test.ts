@@ -1,4 +1,6 @@
 import * as assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { test } from "node:test";
 
 import { PAGE_CHROME_CSS } from "../../src/core/preview/styles/pageChromeStyles";
@@ -73,4 +75,14 @@ test("the social card documents are cream", () => {
     assert.ok(html.includes("#f5f1e8"));
     for (const former of [...FORMER_VALUES, "--accent", "rgba(14, 105, 116"]) assert.ok(!html.includes(former), former);
   }
+});
+
+test("the stylesheet keeps wide content and the breadcrumb inside the page", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  assert.ok(/pre\{max-width:100%;overflow-x:auto;/u.test(SITE_CSS));
+  assert.ok(SITE_CSS.includes("code{overflow-wrap:anywhere;") && SITE_CSS.includes("pre code{overflow-wrap:normal;"));
+  assert.ok(SITE_CSS.includes("table{display:block;max-width:100%;overflow-x:auto}"));
+  const viewer = readFileSync(join(__dirname, "../../../test/site/requirementsViewer/viewer.css"), "utf8");
+  assert.ok(viewer.includes(".crumbs{order:5;flex:1 1 100%;min-width:0;display:flex;flex-wrap:wrap;"));
+  assert.ok(!/\.crumbs\{[^}]*(overflow-x|nowrap)/u.test(viewer));
 });
