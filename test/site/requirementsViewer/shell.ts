@@ -47,6 +47,8 @@ export function levelCard(spec: Pick<PageSpec, "dir" | "level" | "title" | "desc
   };
 }
 
+/** Without JavaScript, the controls that need it are absent: search, Play and the theme switch. */
+export const NOSCRIPT_STYLE = "#search-open,#theme,.play{display:none!important}";
 const THEME_SCRIPT = 'document.documentElement.dataset.theme = localStorage.getItem("req-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "cream");';
 const HISTORY_SCRIPT = 'document.getElementById("history").checked = localStorage.getItem("req-history") === "1";';
 
@@ -70,6 +72,7 @@ export function viewerDocument(spec: PageSpec, footer: PageFooter): string {
 ${headTags(`${spec.title} | Studio requirements`, page, levelCard(spec))}
 <link rel="stylesheet" href="${assetLink(spec.dir, "viewer.css")}">
 <script>${THEME_SCRIPT}</script>
+<noscript><style>${NOSCRIPT_STYLE}</style></noscript>
 </head>
 <body${style}>
 <input type="checkbox" id="history" class="hist" aria-label="Show retired requirements">
