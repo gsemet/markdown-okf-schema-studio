@@ -13,10 +13,10 @@ scope: table-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-10-28T00:00:00Z'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-10-28T00:00:00Z'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -56,6 +56,30 @@ As a writer, I format text in a cell from the bar or with a shortcut and the tab
 - Table inserts a pipe table of 1 to 9 rows and 1 to 9 columns (the header counts as a row) after the selection and on its own lines; with the caret inside a pipe table, a `{list-table}` or an HTML table, the new table (Table, HTML table, Table with caption) goes after that table and never splits it.
 - Column alignment (GFM and MyST) rewrites only the delimiter cell of the caret's column; Table with caption (MyST) wraps the pipe table at the caret in a `{table}` directive.
 - The size chooser popover and the palette buttons and slash entries themselves belong to the palette-slash scope.
+
+### Main paths
+
+#### Path 1: Format the text of a cell
+
+1. A cell editor is open
+   - SwRS-MDOKFSTUDIO-TABLE-085: the writer presses a button of the Cell formatting group of the table bar and it applies to the cell text
+   - Option SwRS-MDOKFSTUDIO-TABLE-085 (refusal): a block-only shortcut does nothing in the cell
+   - Option SwRS-MDOKFSTUDIO-TABLE-085 (nominal): the slash menu of a cell offers the commands allowed in a cell
+2. The cell text is formatted
+   - SwRS-MDOKFSTUDIO-TABLE-018: the writer presses Enter or Done and the cell is committed
+   - Option SwRS-MDOKFSTUDIO-TABLE-091 (nominal): pipes of link text and URL inserted from the bar are written as \|
+3. The cell is saved with its formatted text
+
+#### Path 2: Insert a table and shape it
+
+1. A block text box is open in edit mode
+   - SwRS-MDOKFSTUDIO-TABLE-106: the writer runs Table with a size of R x C and a pipe table is inserted after the end of the selection
+   - Option SwRS-MDOKFSTUDIO-TABLE-106 (refusal): a missing, malformed or out-of-range size
+2. A pipe table is in the text
+   - SwRS-MDOKFSTUDIO-TABLE-111: the writer runs Column alignment and only the delimiter cell of the caret's column is rewritten
+   - Option SwRS-MDOKFSTUDIO-TABLE-115 (nominal): Table with caption wraps the pipe table in a table directive
+   - Option SwRS-MDOKFSTUDIO-TABLE-117 (nominal): HTML table replaces the pipe table with an HTML table
+3. The column is aligned
 
 <!-- okf:links:start -->
 ### Links

@@ -14,10 +14,10 @@ scope: table-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-06T01:44:30+01:00'
+approved_at: '2026-11-12T12:30:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-06T01:44:30+01:00'
+  at: '2026-11-12T12:30:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -79,6 +79,29 @@ As a writer, I click a table cell in edit mode and edit its Markdown right where
 - When the page is hidden or closed, typing that is still waiting to be saved is sent at once; the editor is not closed because the page is going away.
 - The causes of a refusal (stale revision, changed text, a file that VS Code holds read-only) are host-side and belong to the block-editing and trust-security scopes; edit mode is available whatever the trust, so the cell editor opens in Restricted Mode and for a standalone file.
 - The refusal message is shown in the status line of the editor: in the table bar once the cell text box exists, and in the cell editor while the source is loading; the navigation that waited for the save does not carry on.
+
+### Main paths
+
+#### Path 1: Edit one cell
+
+1. A pipe table is shown in edit mode
+   - SwRS-MDOKFSTUDIO-TABLE-001: the writer clicks a body cell and an editor named Markdown table cell editor opens in the cell with its raw Markdown
+   - Option SwRS-MDOKFSTUDIO-TABLE-001 (refusal): with edit mode off no editor opens
+2. The cell editor is open
+   - SwRS-MDOKFSTUDIO-TABLE-013: the writer types and each change is remembered in the table model, so the autosave carries the whole table
+   - Option SwRS-MDOKFSTUDIO-TABLE-034 (refusal): a host refusal is shown in the cell and the typed text stays
+   - Option SwRS-MDOKFSTUDIO-TABLE-119 (nominal): an outside undo, redo or revert over the table closes the editor without saving
+3. The typed text is in the table model
+   - SwRS-MDOKFSTUDIO-TABLE-018: the writer presses Enter or Done, or leaves the cell, and the cell is committed
+   - Option SwRS-MDOKFSTUDIO-TABLE-018 (boundary): an unchanged cell closes without a save
+   - Option SwRS-MDOKFSTUDIO-TABLE-025 (nominal): Escape closes the editor and drops the text typed in that cell
+4. The cell is committed and the editor is closed
+
+#### Path 2: Edit a cell of a quoted table
+
+1. A pipe table inside a blockquote, a GFM alert or a MyST admonition is shown in edit mode
+   - SwRS-MDOKFSTUDIO-TABLE-121: the writer clicks a cell and the cell editor opens, the prefix of the table kept
+2. The cell editor is open
 
 <!-- okf:links:start -->
 ### Links

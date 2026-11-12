@@ -46,6 +46,16 @@ As a writer, I move through a table with the keyboard, cell by cell, and add a r
 - Home and End move the caret to the start or end of the cell text and do not scroll the page or a wide table.
 - Undo, redo, select all, wrapping a selection with a marker and keeping handled keys away from VS Code work in a cell as in any text box of the block editor, and are specified there (see SwRS-MDOKFSTUDIO-BLOCK-069); keys the editor does not use, such as Ctrl+Tab, still reach VS Code.
 
+### Main paths
+
+#### Path 1: Move through the cells with the keyboard
+
+1. A cell editor is open
+   - SwRS-MDOKFSTUDIO-TABLE-035: the writer presses Tab, Shift+Tab or an arrow key at the edge of the text and the editor moves to the next, previous or neighbouring cell
+   - Option SwRS-MDOKFSTUDIO-TABLE-035 (nominal): Tab in the last cell adds a row
+   - Option SwRS-MDOKFSTUDIO-TABLE-035 (refusal): the final save cannot be posted
+2. The editor is in the neighbouring cell
+
 <!-- okf:links:start -->
 ### Links
 

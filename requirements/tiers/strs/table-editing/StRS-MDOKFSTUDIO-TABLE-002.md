@@ -42,6 +42,22 @@ As a writer, I reorder the rows and the columns of a table by dragging a handle,
 - The handle of a column is the same mark, turned; it sits just above the table, outside its cells, centred on its column. Only a pipe table and a `{list-table}` show them.
 - A move is one edit of the document, so one undo reverts it.
 
+### Main paths
+
+#### Path 1: Move a row
+
+1. A table is shown in edit mode with a handle beside each body row
+   - SwRS-MDOKFSTUDIO-TABLE-002: the writer drags the handle onto another row, or presses Alt+Up or Alt+Down, and the row moves as one source edit with the header rows kept
+   - Option SwRS-MDOKFSTUDIO-TABLE-002 (refusal): a table or state without a row move
+2. The row is at its new position
+
+#### Path 2: Move a column
+
+1. A table is shown in edit mode with a handle above each column
+   - SwRS-MDOKFSTUDIO-TABLE-007: the writer drags the handle onto another column, or presses Alt+Left or Alt+Right, and the column moves
+   - Option SwRS-MDOKFSTUDIO-TABLE-007 (refusal): a table or state without a column move
+2. The column is at its new position
+
 <!-- okf:links:start -->
 ### Links
 
