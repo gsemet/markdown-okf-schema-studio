@@ -357,8 +357,13 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
                   if (band && !band.hidden) {
                     const range = document.createRange();
                     range.selectNodeContents(band);
+                    // The band clips what does not fit (overflow hidden): only the drawn part can overlap.
+                    const bandStyle = getComputedStyle(band);
+                    const drawnRight = band.getBoundingClientRect().right - Number.parseFloat(bandStyle.borderRightWidth)
+                      - Number.parseFloat(bandStyle.paddingRight);
                     for (const rect of range.getClientRects()) {
-                      if (rect.width > 0 && rect.left < toolbar.right && rect.right > toolbar.left
+                      const right = Math.min(rect.right, drawnRight);
+                      if (right > rect.left && rect.left < toolbar.right && right > toolbar.left
                         && rect.top < toolbar.bottom && rect.bottom > toolbar.top) bandOverlap = true;
                     }
                   }
