@@ -2,6 +2,12 @@
 
 ## 2026-11-13
 
+### A grid behind a tab list marker opens the editor on its own line (CR 321)
+
+- Changed: SwRS-MDOKFSTUDIO-BLOCK-258 (boundary scenario "A grid card inside a list item" now covers a
+  marker followed by a tab and cards indented with a tab; verification note extended; no normative change).
+- Sources: `src/core/render/mystGridToctree.ts`. Tests: `test/core/render/gridCardTitleSourceLine.test.ts`.
+
 ### A grid card in a list item opens the editor on its own line (CR 319)
 
 - Changed: SwRS-MDOKFSTUDIO-BLOCK-258 (new boundary scenario "A grid card inside a list item" and its
