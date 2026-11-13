@@ -103,6 +103,16 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
         if (run) longest = Math.max(longest, run[1].length);
       }
       colons = "`".repeat(longest + 1);
+    } else {
+      // Longer than any colon fence in the body (a `::::{grid}` of `:::{card}`), so the body's
+      // containers close before the admonition does.
+      let longest = 2;
+      for (let at = index + 1; at <= end; at += 1) {
+        const body = stripQuote(lines[at]);
+        const run = body.match(COLON_OPEN) ?? body.match(COLON_CLOSE);
+        if (run) longest = Math.max(longest, run[1].length);
+      }
+      colons = ":".repeat(longest + 1);
     }
     alertLines.push(output.length + 1);
     push(index, `${indent}${colons}{${kind}}${title ? ` ${title}` : ""}`, `${indent}:class: simple`);

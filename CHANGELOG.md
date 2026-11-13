@@ -6,6 +6,8 @@
   Anchor, Theme, Back and Next; Width, Fold, Zoom out and Zoom in; then Table of contents,
   Side-by-side, Diff and Comments. It keeps the same width, so it still covers as little of the page,
   and it is one row shorter.
+- A grid written inside a GitHub alert stays inside it, with all its cards, and the text after the
+  alert is no longer swallowed into a code block.
 
 ## 1.8.1 - 2026-11-13
 
