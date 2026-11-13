@@ -226,7 +226,7 @@
         "command": "markdown-okf-schema-studio.saveDocument",
         "key": "ctrl+s",
         "mac": "cmd+s",
-        "when": "activeWebviewPanelId == 'markdown-okf-schema-studio.preview'"
+        "when": "activeWebviewPanelId == 'markdown-okf-schema-studio.preview' || activeCustomEditorId == 'markdown-okf-schema-studio.editor'"
       }
     ],
     "configuration": [
