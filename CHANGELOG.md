@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.1 - 2026-11-13
+
 ## 1.8.0 - 2026-11-13
 
 - A click on a card of a grid written inside a quote, whose content starts with a blank quoted line,
