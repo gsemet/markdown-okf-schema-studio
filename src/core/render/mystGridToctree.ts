@@ -105,48 +105,93 @@ function directiveBody(node: GridNode, source: GridSource): GridSource {
 }
 
 const QUOTE_MARKER = /^[ \t]{0,3}>[ \t]?/u;
-const LIST_MARKER = /^[ \t]*(?:[-*+]|\d{1,9}[.)]) +/u;
+const LIST_MARKER = /^[ \t]*(?:[-*+]|\d{1,9}[.)])[ \t]+/u;
 
 /** One container level of a directive's opening line: a quote marker or a list item marker. */
-type ContainerLevel = { kind: "quote" } | { kind: "list"; width: number };
+type ContainerLevel = { kind: "quote" } | { kind: "list"; contentColumn: number };
+
+/** The column after `text`, which starts at `column`; a tab goes to the next multiple of 4. */
+function advanceColumn(column: number, text: string): number {
+  let result = column;
+  for (const char of text) result += char === "\t" ? 4 - (result % 4) : 1;
+  return result;
+}
+
+/**
+ * The leading spaces and tabs of `text` (which starts at `column`) up to `target`, a column. A tab
+ * that crosses `target` is replaced by the spaces it has left past it. When `target` is not a
+ * multiple of 4 the remaining leading tabs are written as spaces, since the nested parse counts
+ * its columns from 0.
+ */
+function stripToColumn(text: string, column: number, target: number): { text: string; column: number } {
+  let index = 0;
+  let col = column;
+  while (col < target && index < text.length && (text[index] === " " || text[index] === "\t")) {
+    const width = text[index] === "\t" ? 4 - (col % 4) : 1;
+    if (col + width > target) {
+      const left = col + width - target;
+      return { text: " ".repeat(left) + text.slice(index + 1), column: col + width };
+    }
+    col += width;
+    index += 1;
+  }
+  let rest = text.slice(index);
+  if (target % 4 !== 0) {
+    const lead = /^[ \t]*/u.exec(rest)?.[0] ?? "";
+    if (lead.includes("\t")) {
+      rest = " ".repeat(advanceColumn(col, lead) - col) + rest.slice(lead.length);
+    }
+  }
+  return { text: rest, column: col };
+}
 
 /**
  * The lines of a directive without the container prefix of its opening line. The opening line is
  * read from the left as quote markers (`>` with its optional space or tab) and list item markers
- * (`-`, `*`, `+` or digits with `.` or `)`, then spaces). The opening line loses its markers; each
- * following line loses, level by level, one quote marker or up to the item's content width of
- * leading spaces. A line without a level's prefix, such as a blank line or a lazy continuation,
- * loses only what it has. Lines whose opener has no container are returned unchanged.
+ * (`-`, `*`, `+` or digits with `.` or `)`, then spaces or tabs). The opening line loses its
+ * markers; each following line loses, level by level, one quote marker or the leading spaces and
+ * tabs up to the item's content column, counted from the start of the original line with tabs at
+ * multiples of 4 columns. A line without a level's prefix, such as a blank line or a lazy
+ * continuation, loses only what it has. Lines whose opener has no container are returned unchanged.
  */
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
 function stripContainerPrefix(lines: string[]): string[] {
   const levels: ContainerLevel[] = [];
   let rest = lines[0];
+  let column = 0;
   for (;;) {
     const quote = QUOTE_MARKER.exec(rest);
     if (quote) {
       levels.push({ kind: "quote" });
+      column = advanceColumn(column, quote[0]);
       rest = rest.slice(quote[0].length);
       continue;
     }
     const item = LIST_MARKER.exec(rest);
     if (!item) break;
-    levels.push({ kind: "list", width: item[0].length });
+    column = advanceColumn(column, item[0]);
+    levels.push({ kind: "list", contentColumn: column });
     rest = rest.slice(item[0].length);
   }
   if (levels.length === 0) return lines;
   return lines.map((line, index) => {
     let text = line;
+    let col = 0;
     for (const level of levels) {
       if (level.kind === "quote") {
         const match = QUOTE_MARKER.exec(text);
-        if (match) text = text.slice(match[0].length);
+        if (match) {
+          col = advanceColumn(col, match[0]);
+          text = text.slice(match[0].length);
+        }
       } else if (index === 0) {
         const match = LIST_MARKER.exec(text);
-        if (match) text = text.slice(match[0].length);
+        if (match) {
+          col = advanceColumn(col, match[0]);
+          text = text.slice(match[0].length);
+        }
       } else {
-        const indent = /^ */u.exec(text)?.[0].length ?? 0;
-        text = text.slice(Math.min(indent, level.width));
+        ({ text, column: col } = stripToColumn(text, col, level.contentColumn));
       }
     }
     return text;

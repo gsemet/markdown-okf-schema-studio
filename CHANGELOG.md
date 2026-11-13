@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A click on a card of a grid written in a list item whose marker is followed by a tab, or whose cards
+  are indented with a tab, opens the editor on the card instead of the line above.
 - A click on a card of a grid written in a list item, whose content starts with a blank line, opens the
   editor on the card instead of the line above.
 - The floating toolbar is now four buttons wide on four rows: Refresh, Edit, Export and the chevron;
