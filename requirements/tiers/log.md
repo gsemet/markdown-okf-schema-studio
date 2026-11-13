@@ -2,6 +2,13 @@
 
 ## 2026-11-13
 
+### A grid inside a GitHub alert stays inside it (CR 320)
+
+- Changed: SwRS-MDOKFSTUDIO-GFM-009 (new row in "Alerts inside a colon container": the admonition's colon
+  fence is longer than every colon fence of its body, so a `::::{grid}` of cards stays in the note and the
+  text after the alert stays outside; criteria and method extended).
+- Sources: `src/core/render/mystGithubAlerts.ts`. Tests: `test/core/render/alertInsideColonContainer.test.ts`.
+
 ### The floating toolbar becomes a 4 x 4 grid (CR 318)
 
 - Changed: SwRS-MDOKFSTUDIO-TOOLBAR-001 (four rows of four buttons: main, navigation, view, review; the

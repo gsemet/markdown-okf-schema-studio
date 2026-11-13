@@ -128,3 +128,60 @@ test("a four-backtick code block in an alert body inside a card does not end the
   const blocks = mapped(html).filter((element) => ["aside", "p"].includes(element.tagName)).map(blockOf);
   assert.deepEqual(blocks, [["aside", 2, 5], ["p", 7, 7], ["p", 10, 10]]);
 });
+
+function gridAlert(head: string): string {
+  return [
+    head,
+    "> ::::{grid} 2",
+    "> :::{card} A",
+    "> Alpha",
+    "> :::",
+    "> :::{card} B",
+    "> Beta",
+    "> :::",
+    "> ::::",
+    "",
+    "After.",
+    "",
+  ].join("\n");
+}
+
+for (const head of ["> [!NOTE]", "> **Note**"]) {
+  // @tests_req SwRS-MDOKFSTUDIO-GFM-009
+  test(`a grid inside the alert "${head}" stays inside its note`, async () => {
+    const { html } = await renderMyst(gridAlert(head));
+    const root = parseHtml(html);
+    const asides = findElements(root, (element) => element.tagName === "aside");
+    assert.equal(asides.length, 1, "one note");
+    const text = textContent(asides[0]);
+    for (const part of ["A", "Alpha", "B", "Beta"]) assert.match(text, new RegExp(part, "u"));
+    assert.doesNotMatch(text, /After\./u);
+    const after = findElements(root, (element) => element.tagName === "p" && textContent(element).trim() === "After.");
+    assert.equal(after.length, 1, "After. is a paragraph");
+    assert.equal(findElements(asides[0], (element) => element.tagName === "p" && /After\./u.test(textContent(element))).length, 0);
+    assert.equal(findElements(root, (element) => element.tagName === "pre").length, 0, "no code block");
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+test("the blocks of a grid inside an alert map to the lines of the document", async () => {
+  const { html } = await renderMyst(gridAlert("> [!NOTE]"));
+  const root = parseHtml(html);
+  const blocks = mapped(html).map(blockOf);
+  const lineOf = (tag: string, text: string): Block | undefined =>
+    blockOf(findElements(root, (element) => element.tagName === tag && textContent(element).trim() === text)[0]);
+  assert.deepEqual(lineOf("p", "Alpha"), ["p", 4, 4]);
+  assert.deepEqual(lineOf("p", "Beta"), ["p", 7, 7]);
+  assert.deepEqual(lineOf("p", "After."), ["p", 11, 11]);
+  assert.ok(blocks.some(([tag, line, end]) => tag === "aside" && line === 1 && end === 9), JSON.stringify(blocks));
+  assert.ok(blocks.some(([, line, end]) => line === 2 && end === 9), "the grid is lines 2 to 9");
+  assert.ok(blocks.some(([, line, end]) => line === 3 && end === 5), "card A is lines 3 to 5");
+  assert.ok(blocks.some(([, line, end]) => line === 6 && end === 8), "card B is lines 6 to 8");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+test("an alert without a colon fence in its body keeps the three-colon admonition", () => {
+  const { text } = expandGithubAlertsWithLines(["> [!NOTE]", "> plain", ""].join("\n"));
+  assert.equal(text.split("\n")[0], ":::{note}");
+  assert.equal(text.split("\n")[3], ":::");
+});
