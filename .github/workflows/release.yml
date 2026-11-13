@@ -38,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     env:
       RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
@@ -103,19 +104,8 @@ jobs:
           path: release-notes.md
           if-no-files-found: error
       - run: npm run package
-      - name: Verify Marketplace token
-        shell: bash
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: |
-          if [[ -z "${VSCE_PAT:-}" ]]; then
-            echo "The release environment must provide the VSCE_PAT secret" >&2
-            exit 1
-          fi
       - name: Publish to VS Code Marketplace
-        run: npx --no-install vsce publish --skip-duplicate --packagePath out/reports/package/markdown-okf-schema-studio.vsix
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: npx --no-install vsce publish --oidc --skip-duplicate --packagePath out/reports/package/markdown-okf-schema-studio.vsix
       - name: Attach VSIX and images to GitHub release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
