@@ -470,7 +470,7 @@ export async function scenarioCrlfAlertEditKeepsLineEndings(page: Page): Promise
 }
 
 const TOOLBAR_DOCUMENT = [
-  "# Research, plan, implement",
+  "# Plan and build",
   "",
   "In the previous chapters we setup an harness around your project to help coding agents be more",
   "effective in discovering and using your codebase.",

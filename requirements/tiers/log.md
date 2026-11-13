@@ -5,7 +5,7 @@
 ### The floating toolbar becomes a 4 x 4 grid (CR 318)
 
 - Changed: SwRS-MDOKFSTUDIO-TOOLBAR-001 (four rows of four buttons: main, navigation, view, review; the
-  Tab order; the handle strip geometry y 12 to 146, to confirm from the heavy run log),
+  Tab order; the handle strip geometry y 12 to 146, confirmed by the heavy run log: toolbar 134x134 at 12),
   SwRS-MDOKFSTUDIO-TOOLBAR-005 (Fold on row 3), -007 (the collapsed Tab order is Refresh, Edit, Export to
   HTML and Show view controls, fixing a wrong scenario; the group holds three rows), -130 (rows 2 to 4),
   SwRS-MDOKFSTUDIO-TRUST-001, SwRS-MDOKFSTUDIO-LIFE-049 (pending notice 160 px from the top when
