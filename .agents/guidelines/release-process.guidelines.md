@@ -86,7 +86,9 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    (for example `curl -sS -o /dev/null -w '%{http_code}' -L <url>`). The listing page is not
    checked. The listing page can lag by several minutes (more than 3 seen in 1.7.1); it is not a
    gate.
-7. The release is archived with a `report.md`: tag, release URL, CI runs (heavy run on `main`,
+7. The release is archived with a `04-report.md` in the release CR's folder, next to `01-intent.md`,
+   `02-answers.md` and `03-change-spec.md` (a subagent cannot write some Markdown names, such as
+   `report.md`, but a numbered name works): tag, release URL, CI runs (heavy run on `main`,
    version push), and the issues the release closed (from the PRs' closing references,
    `gh pr view <n> --json closingIssuesReferences`, and the `issue:` lines of the changes). A
    `retro.md` next to it lists what cost time in the release, its root cause and the process fix.
@@ -95,7 +97,7 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    gets one owner approval for the whole list, posts each with `gh issue comment`, and reads the
    comments back. This comes after the publication, so it does not break the rule that nothing is
    asked of the owner between the notes review and the publication. No issue closed by this
-   release: write that line in `report.md`; the step ends, no approval is asked.
+   release: write that line in `04-report.md`; the step ends, no approval is asked.
 
 Between the notes review (step 5) and the publication, the owner is asked nothing, except a real
 blocker: a product decision is needed, or a fix cannot be completed.

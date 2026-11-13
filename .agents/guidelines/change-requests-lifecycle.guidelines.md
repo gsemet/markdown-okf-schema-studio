@@ -349,7 +349,7 @@ section covers the role.
   its lock, like for a CR driver.
 - **Lists** in the release folder the tracker issues the release closed; it never comments. The
   Chief of Staff drafts the "Released in" comments, after the publication, with one owner approval
-  for the whole list. No issue closed by this release: the line goes in `report.md`, and nothing is
+  for the whole list. No issue closed by this release: the line goes in `04-report.md`, and nothing is
   drafted or approved.
 - **Merges** only what the release guideline allows: the fix PRs of the release, on the owner's
   standing permission for release work. It never enables auto-merge and never touches a PR outside
