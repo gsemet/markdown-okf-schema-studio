@@ -637,9 +637,11 @@ release guideline).
 6. CI calls **Release VSIX** explicitly with that tag. A tag pushed by `GITHUB_TOKEN`
 	does not trigger another push workflow, so this call is required. The release job
 	verifies the tag, manifest, and default-branch ancestry, prepares the reviewed notes of the
-	tag, packages the extension, publishes to Marketplace with trusted publishing (OIDC), and
-	attaches the VSIX, the notes and their images to a GitHub release. The notes must be valid
-	before publication.
+	tag, packages the extension, publishes to the VS Code Marketplace with trusted publishing
+	(OIDC), attaches the VSIX, the notes and their images to a GitHub release, then publishes the
+	same VSIX to Open VSX with trusted publishing. The notes must be valid before publication.
+	After the release job, watch both registries as described in step 6 of the
+	[release guideline](.agents/guidelines/release-process.guidelines.md).
 	CI also calls **Deploy GitHub Pages** with the tag: it builds the site from the
 	end-to-end reports of that same run (its heavy jobs are green) instead of running the
 	suite again. A later manual Pages dispatch of the tag finds that run as well
@@ -682,16 +684,21 @@ and at most 50 attempts per run; after that, release a new version.
 ### GitHub Configuration
 
 Create a GitHub environment named `release`, allowing releases from the default branch
-and `v*` tags. The workflow publishes to the Marketplace with Trusted Publishing (GitHub
-Actions OIDC) and reads no stored token:
+and `v*` tags. The workflow publishes to the VS Code Marketplace and to Open VSX with Trusted
+Publishing (GitHub Actions OIDC) and reads no stored token:
 
 - A Marketplace Trusted Publishing policy "Release workflow" exists on the `GaetanSemet`
   publisher: provider GitHub Actions, repository owner `gsemet`, repository
   `markdown-okf-schema-studio`, workflow `release.yml`, environment `release`.
+- An Open VSX trusted publisher exists on the `GaetanSemet/markdown-okf-schema-studio`
+  extension (open-vsx.org, Settings, Trusted Publishers): provider GitHub, owner `gsemet`,
+  repository `markdown-okf-schema-studio`, workflow `release.yml`, environment `release`. The
+  namespace `GaetanSemet` must stay verified and equal to the `publisher` field of
+  `package.json`. No `OVSX_PAT` secret exists: `ovsx` gives a token precedence over OIDC.
 - The `package` job of `release.yml` and its caller job `release` in `ci.yml` both grant
   `id-token: write` (a called workflow cannot get more permissions than its caller job).
-- Renaming `release.yml` or the `release` environment breaks publication until the policy is
-  updated.
+- Renaming `release.yml` or the `release` environment breaks both publications until the
+  Marketplace policy and the Open VSX trusted publisher are updated.
 - `VSCE_PAT` is no longer used by the workflow. It stays in the `release` environment until a
   release published with `--oidc` has succeeded; the owner then deletes it.
 
@@ -705,13 +712,21 @@ only in the developer's local environment, never in workflow files or lockfile U
 
 If tagging succeeded but publication failed, rerun the failed release job or dispatch
 **Release VSIX** with the existing `vX.Y.Z` tag. Do not move the tag or bump again just
-to retry. Marketplace publication skips an already published version, allowing a retry
-to finish the GitHub release. Manual pushes of valid `vX.Y.Z` tags also run this workflow.
+to retry. Marketplace and Open VSX publications skip an already published version, allowing a
+retry to finish the GitHub release. Manual pushes of valid `vX.Y.Z` tags also run this workflow.
 
 If the Marketplace token exchange (OIDC) fails, the job fails before the GitHub release is
 written. Fix the cause, then dispatch **Release VSIX** with the existing tag. In an emergency the
 owner publishes locally with `vsce publish` and the PAT they keep. There is no automatic fallback
 to the PAT.
+
+If the Open VSX step fails, the step is last: the Marketplace and the GitHub release are already
+done and the job is red. Fix the cause if any, then re-run the failed job or dispatch **Release
+VSIX** with the existing tag. The Marketplace step skips the duplicate, the GitHub release step
+rewrites the release body from the reviewed notes file (a hand edit made on GitHub in between is
+lost: redo it), and Open VSX is retried. In an emergency the owner publishes the VSIX of the
+GitHub release by hand with `npx ovsx publish <file.vsix> -p <token>` and a personal Open VSX
+token never stored in GitHub. There is no automatic fallback to a token.
 
 A tag older than 1.4.0 has no notes folder: dispatch **Release VSIX** with `notes: placeholder`,
 then replace the notes by hand.

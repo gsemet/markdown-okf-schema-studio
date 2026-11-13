@@ -115,3 +115,7 @@ jobs:
           files: |
             out/reports/package/markdown-okf-schema-studio.vsix
             ${{ runner.temp }}/release-assets/*
+      # Open VSX trusted publishing: an OIDC token of this job, no stored token. Last, so an Open
+      # VSX failure leaves the Marketplace publication and the GitHub release done.
+      - name: Publish to Open VSX
+        run: npx --no-install ovsx publish --trusted-publishing --skip-duplicate --packagePath out/reports/package/markdown-okf-schema-studio.vsix

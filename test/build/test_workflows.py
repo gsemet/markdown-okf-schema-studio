@@ -82,6 +82,28 @@ def test_release_publishes_to_the_marketplace_with_trusted_publishing() -> None:
     assert _ci_jobs()["release"]["permissions"]["id-token"] == "write"
 
 
+def test_release_publishes_to_open_vsx_with_trusted_publishing() -> None:
+    package = _release()["jobs"]["package"]
+    assert package["permissions"]["id-token"] == "write"
+    assert package["environment"] == "release"
+    publish = _step("Publish to Open VSX")
+    for part in (
+        "npx --no-install ovsx publish",
+        "--trusted-publishing",
+        "--skip-duplicate",
+        "--packagePath out/reports/package/markdown-okf-schema-studio.vsix",
+    ):
+        assert part in publish["run"]
+    assert "env" not in publish
+    assert "continue-on-error" not in publish
+    assert "OVSX_PAT" not in RELEASE.read_text()
+    names = [step.get("name") for step in package["steps"]]
+    assert names.index("Publish to VS Code Marketplace") < names.index("Publish to Open VSX")
+    assert names.index("Attach VSIX and images to GitHub release") < names.index(
+        "Publish to Open VSX"
+    )
+
+
 def test_static_ci_target_runs_an_online_audit_of_production_dependencies() -> None:
     justfile = (ROOT / "justfile").read_text()
     audit = re.search(r"(?m)^audit:\n((?:    .*\n)+)", justfile)
