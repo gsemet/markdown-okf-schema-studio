@@ -1,6 +1,6 @@
 # Release process guidelines
 
-The mechanics of a release (version commit, changelog heading, CI tag, Marketplace publication)
+The mechanics of a release (version commit, changelog heading, CI tag, Marketplace and Open VSX publication)
 are in "How to Release" in [CONTRIBUTING.md](../../CONTRIBUTING.md). This guideline covers the
 steps of a release and what the owner reviews in the version pull request: the release notes, the
 announcement thread and the hero image, in `docs/releases-notes/<date>-vX.Y.Z/`. The merge of
@@ -79,17 +79,28 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    If the local `just preflight` stops at `ci-integration` because the screen is locked, do not
    wait: dispatch `gh workflow run ci.yml --ref <branch> -f heavy=true` at once on the release branch
    and go on; its `integration` job is the real-window proof.
-6. The version push is monitored through the tag, the GitHub release with its notes and images, the
-   Marketplace publication and Pages, recovering a red heavy job as in "After the merge" above.
-   The Marketplace check that counts is an HTTP 200 on
-   `https://marketplace.visualstudio.com/_apis/public/gallery/publishers/GaetanSemet/vsextensions/markdown-okf-schema-studio/X.Y.Z/vspackage`
-   (for example `curl -sS -o /dev/null -w '%{http_code}' -L <url>`). The listing page is not
-   checked. The listing page can lag by several minutes (more than 3 seen in 1.7.1); it is not a
-   gate.
-   The publication uses the Marketplace Trusted Publishing policy "Release workflow" (no stored
-   token). A failed OIDC exchange is recovered as in "Recovery and Release Notes" of
-   CONTRIBUTING.md. The owner deletes `VSCE_PAT` once a release published with `--oidc` has
-   succeeded.
+6. The version push is monitored through the tag, the GitHub release with its notes and images,
+   the Marketplace and Open VSX publications and Pages, recovering a red heavy job as in "After
+   the merge" above. After the release job, watch **both** registries for 10 to 15 minutes (poll
+   about once a minute) until each serves the new version, and report each one's state (served,
+   at which minute, or not served after 15 minutes). The checks of record, HTTP 200 each:
+   - VS Code Marketplace:
+     `https://marketplace.visualstudio.com/_apis/public/gallery/publishers/GaetanSemet/vsextensions/markdown-okf-schema-studio/X.Y.Z/vspackage`
+     (for example `curl -sS -o /dev/null -w '%{http_code}' -L <url>`). The listing page is not
+     checked. The listing page can lag by several minutes (more than 3 seen in 1.7.1); it is not a
+     gate.
+   - Open VSX: `https://open-vsx.org/api/GaetanSemet/markdown-okf-schema-studio/X.Y.Z` (for
+     example `curl -sS -o /dev/null -w '%{http_code}' <url>`). The extension page
+     `https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio` is not a gate.
+
+   A registry still not serving after 15 minutes: read the job log of its step. A red step is
+   recovered as in "Recovery and Release Notes" of CONTRIBUTING.md; a green step whose version is
+   not served yet is reported to the owner, not retried.
+   The Marketplace publication uses the Marketplace Trusted Publishing policy "Release workflow"
+   (no stored token). A failed OIDC exchange is recovered as in "Recovery and Release Notes" of
+   CONTRIBUTING.md. The Open VSX publication uses the trusted publisher registered on
+   open-vsx.org (no stored token). The owner deletes `VSCE_PAT` once a release published with
+   `--oidc` has succeeded.
 7. The release is archived with a `04-report.md` in the release CR's folder, next to `01-intent.md`,
    `02-answers.md` and `03-change-spec.md` (a subagent cannot write some Markdown names, such as
    `report.md`, but a numbered name works): tag, release URL, CI runs (heavy run on `main`,
@@ -172,8 +183,11 @@ no internal terms (agent roles, change request numbers, rounds). Structure, in t
      the commits of `vPREVIOUS..vX.Y.Z^` without merges and without the `chore: version` commits
      of unpublished versions (for 1.3.2: without the unpublished 1.3.0 and 1.3.1 version commits):
      `git rev-list --no-merges --grep='^chore: version' --invert-grep --count vPREVIOUS..vX.Y.Z^`.
-2. **Links**, centred, one line: Install from the Marketplace · Read the guide · Full changelog
-   (`blob/vX.Y.Z/CHANGELOG.md`) · 1.0 showcase. Then a `---` rule.
+2. **Links**, centred, one line:
+   `[Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio)`
+   · `[Install from Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio)`
+   · Read the guide · Full changelog (`blob/vX.Y.Z/CHANGELOG.md`) · 1.0 showcase. Then a `---`
+   rule.
 3. **Two to four highlight sections**, `## <emoji> <what the reader can now do>`. Each one says
    what changes for the reader in a short paragraph; adds a short Markdown example when the
    feature is a syntax; shows one picture, or a light and dark pair in a two-column table with a
@@ -196,7 +210,7 @@ branch. The release attaches them as assets and points the links to
 ### Publishing
 
 CI publishes the reviewed file as it is, with `scripts/release_notes.py --prepare`, before the
-Marketplace publication. A typo found afterwards is fixed by editing the release on GitHub: the
+Marketplace and Open VSX publications. A typo found afterwards is fixed by editing the release on GitHub: the
 published text may then differ from the file, and that is accepted.
 
 ## Announcement thread
