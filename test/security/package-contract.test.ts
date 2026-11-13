@@ -385,7 +385,7 @@ test("the Marketplace listing declares its categories and keywords", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-173
-test("CR 312: Cmd/Ctrl+S runs the save command on the side preview, and the command is not in the palette", () => {
+test("CR 312: Cmd/Ctrl+S runs the save command on the side preview and the custom editor, and the command is not in the palette", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: {
       commands: Array<{ command: string; title: string; category?: string }>;
@@ -402,6 +402,6 @@ test("CR 312: Cmd/Ctrl+S runs the save command on the side preview, and the comm
     { command: id, when: "false" },
   ], "the command is for the key binding, not for the palette");
   assert.deepEqual(packageJson.contributes.keybindings.filter((entry) => entry.command === id), [
-    { command: id, key: "ctrl+s", mac: "cmd+s", when: "activeWebviewPanelId == 'markdown-okf-schema-studio.preview'" },
+    { command: id, key: "ctrl+s", mac: "cmd+s", when: "activeWebviewPanelId == 'markdown-okf-schema-studio.preview' || activeCustomEditorId == 'markdown-okf-schema-studio.editor'" },
   ], "no input or editor focus clause: the key saves from every text box of the page");
 });
