@@ -66,8 +66,8 @@ async function expectSaved(document: vscode.TextDocument, typed: string): Promis
  * CR 312: Cmd/Ctrl+S with the focus in the side preview saves the document. The key is pressed at
  * once after typing, inside the autosave delay: the text typed so far is written first, the editor
  * stays open with its caret, and a frontmatter field closes. The last step checks the custom editor
- * (decision 5): VS Code saves a custom text editor natively, and the check says whether that save
- * meets the same outcome.
+ * (decision 5): the native save of a custom text editor did not meet the same outcome in the real
+ * window, so the binding covers the custom editor and the step checks our command path there.
  */
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
@@ -118,7 +118,7 @@ export async function run(): Promise<void> {
     await setEditMode(page, false);
     await closeAllEditors();
 
-    // Decision 5: the custom editor, saved natively by VS Code.
+    // Decision 5: the custom editor, saved by our command (the native save did not meet the outcome).
     await openStudioEditor(vscode.Uri.file(fixture.path("save.md")));
     await waitForRender(document);
     await setEditMode(page, true);
