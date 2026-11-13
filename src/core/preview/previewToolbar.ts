@@ -34,19 +34,18 @@ const COLLAPSE_BUTTON = `<button type="button" data-sphinx-preview-toolbar-colla
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
 /**
- * Five rows, each of at most three buttons except the first. Row 1 (actions): Refresh, Edit (always enabled: trust never
- * makes a document read-only), Export to HTML and the collapse button (four buttons: the only row that holds more than three). Row 2 (navigation): Anchor, Back, Next. Row 3 (appearance):
- * Theme, Zoom out, Zoom in. Row 4 (layout): Width, TOC, Side-by-side. Row 5 (content): Fold, Diff, Comments. Rows 2 to 5 sit in one
- * group that the collapse button hides; the Tab order follows the rows.
+ * Four rows of four buttons. Row 1 (main): Refresh, Edit (always enabled: trust never makes a document read-only), Export to
+ * HTML and the collapse button. Row 2 (navigation): Anchor, Theme, Back, Next. Row 3 (view): Width, Fold, Zoom out, Zoom in.
+ * Row 4 (review): TOC, Side-by-side, Diff, Comments. Rows 2 to 4 sit in one group that the collapse button hides; the Tab
+ * order follows the rows.
  */
 export function renderPreviewToolbar(): string {
   const row = (name: string, buttons: string): string => `<div data-sphinx-preview-toolbar-row="${name}">${buttons}</div>`;
   const mainRow = row("main", `${REFRESH_BUTTON}${EDIT_BUTTON}${EXPORT_BUTTON}${COLLAPSE_BUTTON}`);
-  const navigationRow = row("navigation", `${ANCHOR_BUTTON}${BACK_BUTTON}${NEXT_BUTTON}`);
-  const appearanceRow = row("appearance", `${THEME_BUTTON}${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}`);
-  const layoutRow = row("layout", `${WIDTH_BUTTON}${TOC_BUTTON}${SIDE_BY_SIDE_BUTTON}`);
-  const contentRow = row("content", `${FOLD_BUTTON}${DIFF_BUTTON}${COMMENTS_BUTTON}`);
-  const moreRows = `<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">${navigationRow}${appearanceRow}${layoutRow}${contentRow}</div>`;
+  const navigationRow = row("navigation", `${ANCHOR_BUTTON}${THEME_BUTTON}${BACK_BUTTON}${NEXT_BUTTON}`);
+  const viewRow = row("view", `${WIDTH_BUTTON}${FOLD_BUTTON}${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}`);
+  const reviewRow = row("review", `${TOC_BUTTON}${SIDE_BY_SIDE_BUTTON}${DIFF_BUTTON}${COMMENTS_BUTTON}`);
+  const moreRows = `<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">${navigationRow}${viewRow}${reviewRow}</div>`;
   return `<div data-sphinx-preview-toolbar role="toolbar" aria-label="Preview controls">${mainRow}${moreRows}</div>`;
 }
 

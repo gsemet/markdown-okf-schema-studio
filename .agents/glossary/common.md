@@ -67,9 +67,9 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Theme mode**: preview colour scheme, one of `current`, `dark`, `white`, `cream` (`PreviewThemeMode` in `src/core/state/previewTheme.ts`).
 - **TOC column**: runtime-created right column listing h1-h4 headings (`[data-sphinx-preview-toc]`), built by `src/page/modules/tocColumn.ts`.
 - **Toolbar**: the controls bar at the top of the preview (`[data-sphinx-preview-toolbar]`).
-- **Toolbar row**: `data-sphinx-preview-toolbar-row` `main` (Refresh/Anchor/Edit/Theme) or `view`.
+- **Toolbar row**: `data-sphinx-preview-toolbar-row` `main` (Refresh, Edit, Export, collapse), `navigation` (Anchor, Theme, Back, Next), `view` (Width, Fold, Zoom out, Zoom in) or `review` (TOC, Side-by-side, Diff, Comments).
 - **Top-level block**: mapped block that is a direct child of the content container (`topLevelMappedBlocks` in `src/page/features/mappedBlocks.ts`).
 - **Update glow**: one brief wash of the focus colour on the blocks a content patch updated after a change made outside the preview and not in the active text editor, or an undo/redo (`data-sphinx-preview-updated`); the host sends `updatedRanges` (`src/core/preview/updatedRanges.ts`), the page marks them (`src/page/modules/motion.ts`).
-- **View preference**: per-workspace preview setting changed from toolbar row 2 (zoom, width mode, TOC, incoming changes), `src/core/state/previewViewPreferences.ts`.
+- **View preference**: per-workspace preview setting changed from toolbar rows 2 to 4, `src/core/state/previewViewPreferences.ts`.
 - **Warning banner**: one-line notice at the top of a successfully rendered page counting the `conf.py` MyST extension warnings, with Open Problems and close buttons; out of the flow, closed per document for the session (`[data-sphinx-preview-warning-banner]`, `src/page/modules/warningBanner.ts`).
 - **Width mode**: Margin / Auto / Full width preview column state (`data-sphinx-preview-width`); Auto lets wide tables and figures break out of the column.

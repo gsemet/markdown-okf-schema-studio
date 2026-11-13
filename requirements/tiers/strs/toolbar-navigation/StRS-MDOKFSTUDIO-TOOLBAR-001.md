@@ -4,7 +4,7 @@ id: StRS-MDOKFSTUDIO-TOOLBAR-001
 uuid: 4a5407ea-d383-42da-b785-a7d78937fb65
 title: The toolbar groups its controls, collapses and remembers view choices
 description: When a reader opens a preview, the Studio SHALL show its controls
-  in five clearly grouped rows that never overlap each other, let the reader
+  in four clearly grouped rows that never overlap each other, let the reader
   collapse them to the first row, and keep the view choices for the workspace,
   in Restricted Mode and for standalone files too.
 project: markdown-okf-schema-studio
@@ -14,7 +14,7 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
-user_need: As a reader, I find the preview controls in five clear rows, fold the
+user_need: As a reader, I find the preview controls in four clear rows, fold the
   toolbar down to its first row to free the top of the pane and unfold it again,
   and find my view choices (zoom, width mode, table of contents, incoming-change
   marks, comments and the collapsed toolbar) again when I reopen a preview of
@@ -39,18 +39,18 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a reader opens a preview, the Studio SHALL show its controls in five clearly grouped rows that never overlap each other, let the reader collapse them to the first row, and keep the view choices for the workspace, in Restricted Mode and for standalone files too.
+When a reader opens a preview, the Studio SHALL show its controls in four clearly grouped rows that never overlap each other, let the reader collapse them to the first row, and keep the view choices for the workspace, in Restricted Mode and for standalone files too.
 
 ### Preserved stakeholder intent
 
-As a reader, I find the preview controls in five clear rows, fold the toolbar down to its first row to free the top of the pane and unfold it again, and find my view choices (zoom, width mode, table of contents, incoming-change marks, comments and the collapsed toolbar) again when I reopen a preview of the same workspace, in Restricted Mode and for a standalone file too.
+As a reader, I find the preview controls in four clear rows, fold the toolbar down to its first row to free the top of the pane and unfold it again, and find my view choices (zoom, width mode, table of contents, incoming-change marks, comments and the collapsed toolbar) again when I reopen a preview of the same workspace, in Restricted Mode and for a standalone file too.
 
 ### Rationale and constraints
 
-- Row 1 holds Refresh, Edit, Export to HTML and the collapse button; row 2 holds Anchor, Back and Next; row 3 holds Theme, Zoom out and Zoom in; row 4 holds Width, Table of contents and Side-by-side; row 5 holds Fold, Diff and Comments. No other row holds more than three buttons, so the toolbar stays narrow and covers little of the page.
+- Row 1 holds Refresh, Edit, Export to HTML and the collapse button; row 2 holds Anchor, Theme, Back and Next; row 3 holds Width, Fold, Zoom out and Zoom in; row 4 holds Table of contents, Side-by-side, Diff and Comments. Every row holds four buttons, no wider than the first row, so the toolbar stays narrow and covers little of the page.
 - A preview in Restricted Mode or of a standalone file shows the same rows, with the Edit button enabled.
 - The rows stay inside the pane at narrow and wide widths, at the zoom limits, in the light, dark, white and cream themes, expanded or collapsed.
-- Pressing the chevron of the toolbar hides or shows rows 2 to 5, and the choice is kept for the workspace.
+- Pressing the chevron of the toolbar hides or shows rows 2 to 4, and the choice is kept for the workspace.
 - A workspace that has stored no choice opens with the toolbar collapsed.
 - Hidden rows are skipped by the Tab key, so keyboard users reach only what is shown.
 - The state of a restored panel wins over the workspace choice, which wins over the default.
@@ -65,7 +65,7 @@ As a reader, I find the preview controls in five clear rows, fold the toolbar do
 #### Path 1: Collapse the toolbar and find it collapsed
 
 1. A preview page is built
-   - SwRS-MDOKFSTUDIO-TOOLBAR-001: the toolbar is drawn as five rows of titled buttons, inside the pane and without overlap
+   - SwRS-MDOKFSTUDIO-TOOLBAR-001: the toolbar is drawn as four rows of titled buttons, inside the pane and without overlap
 2. The toolbar is expanded
    - SwRS-MDOKFSTUDIO-TOOLBAR-007: the reader presses the collapse button and the rows of navigation and view are hidden
    - Option SwRS-MDOKFSTUDIO-TOOLBAR-007 (boundary): when collapsed, the hidden rows are out of the Tab order
@@ -85,7 +85,7 @@ As a reader, I find the preview controls in five clear rows, fold the toolbar do
 - Derived by:
   - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
-  - [SwRS-MDOKFSTUDIO-TOOLBAR-001](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar has five rows of titled buttons that float over the page
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-001](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar has four rows of four titled buttons that float over the page
   - [SwRS-MDOKFSTUDIO-TOOLBAR-007](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-007.md): The chevron collapses the toolbar to its first row
   - [SwRS-MDOKFSTUDIO-TOOLBAR-013](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-013.md): The host accepts only a known view preference with a valid value
   - [SwRS-MDOKFSTUDIO-TOOLBAR-129](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-129.md): Toolbar, edit bar and table menu tooltips slide in from the left

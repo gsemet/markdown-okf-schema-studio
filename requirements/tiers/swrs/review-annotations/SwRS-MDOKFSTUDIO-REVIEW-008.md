@@ -3,7 +3,7 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-008
 uuid: 511de4c1-902d-4f50-b6af-c9d088e587f6
 title: The Side-by-side button switches the diff and is disabled in edit mode
-description: When the reader presses the Side-by-side button of toolbar row 3,
+description: When the reader presses the Side-by-side button of toolbar row 4,
   the page SHALL toggle the side-by-side diff, set the button pressed state and
   label to match, post the new state to the host, and, while edit mode is on,
   disable the button, show no diff and leave the green change bars as they are.
@@ -34,7 +34,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the reader presses the Side-by-side button of toolbar row 3, the page SHALL toggle the side-by-side diff, set the button pressed state and label to match, post the new state to the host, and, while edit mode is on, disable the button, show no diff and leave the green change bars as they are.
+When the reader presses the Side-by-side button of toolbar row 4, the page SHALL toggle the side-by-side diff, set the button pressed state and label to match, post the new state to the host, and, while edit mode is on, disable the button, show no diff and leave the green change bars as they are.
 
 ### Scenario (nominal): The button
 

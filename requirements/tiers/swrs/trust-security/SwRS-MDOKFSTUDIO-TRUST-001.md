@@ -90,7 +90,7 @@ When a preview is created for a document that lies in no workspace folder, or wh
 
 | Affordance | In a preview with restricted reads |
 | --- | --- |
-| Edit button | Enabled: the toolbar holds the same five rows with 16 buttons, the Edit button has no aria-disabled attribute and its title and tooltip say "Edit mode"; a click toggles the edit mode |
+| Edit button | Enabled: the toolbar holds the same four rows with 16 buttons, the Edit button has no aria-disabled attribute and its title and tooltip say "Edit mode"; a click toggles the edit mode |
 | Edit mode at start | Off, or on when the saved state of the same document holds edit mode true |
 | Edition palette | Built, and the palette mode message previewPaletteModeChanged is posted and stored for the workspace |
 | Comment button | Installed (the runtime context carries commentsEnabled true); Cmd+Alt+M or Ctrl+Alt+M opens the comment box |

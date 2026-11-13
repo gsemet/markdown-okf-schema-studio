@@ -225,7 +225,7 @@ ${FORCED_THEME_MODES_CSS}
   gap: 2px;
 }
 
-/* Rows 2 to 5: the collapse button of row 1 hides them (the hidden attribute removes them from
+/* Rows 2 to 4: the collapse button of row 1 hides them (the hidden attribute removes them from
    the Tab order as well). */
 [data-sphinx-preview-toolbar-more] {
   display: flex;
@@ -265,7 +265,7 @@ ${FORCED_THEME_MODES_CSS}
 /* Shown by the runtime when a render stays pending; fixed and pointer-transparent, so no content moves. */
 [data-sphinx-preview-pending-overlay] {
   position: fixed;
-  inset-block-start: 192px;
+  inset-block-start: 160px;
   inset-inline-end: 14px;
   z-index: 1099;
   box-sizing: border-box;
@@ -281,7 +281,7 @@ ${FORCED_THEME_MODES_CSS}
   pointer-events: none;
 }
 
-/* Below the toolbar: five rows, or one row when rows 2 to 5 are collapsed. */
+/* Below the toolbar: four rows, or one row when rows 2 to 4 are collapsed. */
 html[data-sphinx-preview-toolbar-state="collapsed"]:not([data-sphinx-preview-toolbar-hint]) [data-sphinx-preview-pending-overlay] {
   inset-block-start: 62px;
 }

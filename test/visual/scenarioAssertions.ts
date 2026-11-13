@@ -474,7 +474,7 @@ export const FRESH_WORKSPACE_ASSERTIONS: ContentAssertion[] = [
   { message: "the page is the light cream paper whatever the host theme", selector: "body", css: { backgroundColor: "rgb(245, 241, 232)", color: "rgb(43, 42, 39)" } },
   { message: "the floating toolbar is collapsed", selector: "html", attr: { name: "data-sphinx-preview-toolbar-state", value: "collapsed" } },
   { message: "the collapse button offers to show the view controls", selector: "[data-sphinx-preview-toolbar-collapse]", count: 1, visible: true, attr: { name: "aria-label", value: "Show view controls" } },
-  { message: "rows 2 to 5 of the toolbar are hidden", selector: "[data-sphinx-preview-toolbar-more]", count: 1, expr: "(() => { const more = document.querySelector('[data-sphinx-preview-toolbar-more]'); return more.hidden && more.getBoundingClientRect().height === 0; })()" },
+  { message: "rows 2 to 4 of the toolbar are hidden", selector: "[data-sphinx-preview-toolbar-more]", count: 1, expr: "(() => { const more = document.querySelector('[data-sphinx-preview-toolbar-more]'); return more.hidden && more.getBoundingClientRect().height === 0; })()" },
 ];
 
 export const zoomAssertions = (zoom: number): ContentAssertion[] => [
@@ -704,7 +704,7 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
       firstElementGap: kind as Scenario["firstElementGap"],
       description: `First element: ${name}, edit mode, 360 px pane.`,
     })),
-  // P8: the floating toolbar on five rows, expanded and collapsed, in every preview theme, wide
+  // P8: the floating toolbar on four rows, expanded and collapsed, in every preview theme, wide
   // and at 360 px. The expanded 360 px captures also prove the rows never overlap the text.
   ...(([
     ["light", undefined],
@@ -726,8 +726,8 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     ...(state === "collapsed" ? { toolbarState: "collapsed" as const } : {}),
     description: `Floating toolbar, ${state}, ${mode ?? theme} theme, ${viewport.width} px pane: row 1 Refresh, `
-      + "Anchor, Edit and the collapse button; row 2 Back, Next, Zoom -, Zoom +; row 3 Theme, Width, TOC; row 4 Fold, Diff, Comments. "
-      + (state === "collapsed" ? "Rows 2 to 5 are hidden." : "No row overlaps the text or another row."),
+      + "Edit, Export and the collapse button; row 2 Anchor, Theme, Back, Next; row 3 Width, Fold, Zoom -, Zoom +; row 4 TOC, Side-by-side, Diff, Comments. "
+      + (state === "collapsed" ? "Rows 2 to 4 are hidden." : "No row overlaps the text or another row."),
   })))),
   // Collapsed toolbar: the first element clears the shorter toolbar (P3) at 360 px.
   ...FIRST_GAP_CASES.filter(([name]) => ["paragraph", "table"].includes(name))

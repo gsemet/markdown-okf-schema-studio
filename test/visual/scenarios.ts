@@ -121,7 +121,7 @@ export interface Scenario {
   linkDetailsChecks?: boolean;
   horizontalOverflow?: boolean;
   previewThemeMode?: "white" | "cream" | "dark";
-  /** P8: leave the floating toolbar collapsed (rows 2 to 5 hidden) for the checks and the capture. */
+  /** P8: leave the floating toolbar collapsed (rows 2 to 4 hidden) for the checks and the capture. */
   toolbarState?: "collapsed";
   stickyHeadingDepth?: number;
   expectedStickyHeadings?: string;
