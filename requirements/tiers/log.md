@@ -2,6 +2,12 @@
 
 ## 2026-11-13
 
+### A grid card in a list item opens the editor on its own line (CR 319)
+
+- Changed: SwRS-MDOKFSTUDIO-BLOCK-258 (new boundary scenario "A grid card inside a list item" and its
+  verification note; no normative change).
+- Sources: `src/core/render/mystGridToctree.ts`. Tests: `test/core/render/gridCardTitleSourceLine.test.ts`.
+
 ### A grid inside a GitHub alert stays inside it (CR 320)
 
 - Changed: SwRS-MDOKFSTUDIO-GFM-009 (new row in "Alerts inside a colon container": the admonition's colon

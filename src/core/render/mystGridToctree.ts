@@ -95,7 +95,7 @@ function directiveBody(node: GridNode, source: GridSource): GridSource {
     const open = start - source.firstLine;
     const close = end - source.firstLine;
     if (open >= 0 && close > open && close < source.lines.length) {
-      const lines = stripQuotePrefix(source.lines.slice(open, close + 1));
+      const lines = stripContainerPrefix(source.lines.slice(open, close + 1));
       if (FENCE_LINE.test(lines[0]) && CLOSING_FENCE.test(lines[lines.length - 1])) {
         return { lines: lines.slice(1, -1), firstLine: start + 1 };
       }
@@ -105,26 +105,49 @@ function directiveBody(node: GridNode, source: GridSource): GridSource {
 }
 
 const QUOTE_MARKER = /^[ \t]{0,3}>[ \t]?/u;
+const LIST_MARKER = /^[ \t]*(?:[-*+]|\d{1,9}[.)]) +/u;
+
+/** One container level of a directive's opening line: a quote marker or a list item marker. */
+type ContainerLevel = { kind: "quote" } | { kind: "list"; width: number };
 
 /**
- * The lines of a directive without the quote prefix of its opening line (one `>` marker with its
- * optional space or tab per quote level). A line without the prefix, such as a lazy continuation,
- * stays as is. Lines that are not in a quote are returned unchanged.
+ * The lines of a directive without the container prefix of its opening line. The opening line is
+ * read from the left as quote markers (`>` with its optional space or tab) and list item markers
+ * (`-`, `*`, `+` or digits with `.` or `)`, then spaces). The opening line loses its markers; each
+ * following line loses, level by level, one quote marker or up to the item's content width of
+ * leading spaces. A line without a level's prefix, such as a blank line or a lazy continuation,
+ * loses only what it has. Lines whose opener has no container are returned unchanged.
  */
-function stripQuotePrefix(lines: string[]): string[] {
-  let depth = 0;
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+function stripContainerPrefix(lines: string[]): string[] {
+  const levels: ContainerLevel[] = [];
   let rest = lines[0];
-  for (let match = QUOTE_MARKER.exec(rest); match; match = QUOTE_MARKER.exec(rest)) {
-    depth += 1;
-    rest = rest.slice(match[0].length);
+  for (;;) {
+    const quote = QUOTE_MARKER.exec(rest);
+    if (quote) {
+      levels.push({ kind: "quote" });
+      rest = rest.slice(quote[0].length);
+      continue;
+    }
+    const item = LIST_MARKER.exec(rest);
+    if (!item) break;
+    levels.push({ kind: "list", width: item[0].length });
+    rest = rest.slice(item[0].length);
   }
-  if (depth === 0) return lines;
-  return lines.map((line) => {
+  if (levels.length === 0) return lines;
+  return lines.map((line, index) => {
     let text = line;
-    for (let level = 0; level < depth; level += 1) {
-      const match = QUOTE_MARKER.exec(text);
-      if (!match) break;
-      text = text.slice(match[0].length);
+    for (const level of levels) {
+      if (level.kind === "quote") {
+        const match = QUOTE_MARKER.exec(text);
+        if (match) text = text.slice(match[0].length);
+      } else if (index === 0) {
+        const match = LIST_MARKER.exec(text);
+        if (match) text = text.slice(match[0].length);
+      } else {
+        const indent = /^ */u.exec(text)?.[0].length ?? 0;
+        text = text.slice(Math.min(indent, level.width));
+      }
     }
     return text;
   });
