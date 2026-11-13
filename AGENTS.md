@@ -55,6 +55,8 @@ request (a pull request opened directly): the project guidelines apply the same 
   `cygpath` on `PATH`; see "Windows" in CONTRIBUTING.md.
 - `just dev` installs Node.js, JavaScript and Python dependencies, and Playwright Chromium
   (`just install` also works); JavaScript dependencies alone: `fnm exec -- npm ci`.
+- In a new worktree or a clean checkout, run `just dev` first, before any build, check, test or
+  gate; see [local-worktree.guidelines.md](.agents/guidelines/local-worktree.guidelines.md).
 - `just update` upgrades dependencies; `just dev-ci` (`just dev-ci visual`) sets up a CI machine
   from the lock files.
 
