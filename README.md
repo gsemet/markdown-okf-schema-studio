@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/gsemet/markdown-okf-schema-studio/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/gsemet/markdown-okf-schema-studio/actions/workflows/ci.yml) [![Latest release](https://img.shields.io/github/v/release/gsemet/markdown-okf-schema-studio?display_name=tag&sort=semver)](https://github.com/gsemet/markdown-okf-schema-studio/releases) [![License](https://img.shields.io/github/license/gsemet/markdown-okf-schema-studio)](LICENSE)
 
-[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio) | [Screenshot report/gallery](https://gsemet.github.io/markdown-okf-schema-studio/gallery.html) | [Requirements](https://gsemet.github.io/markdown-okf-schema-studio/requirements/)
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio) | [Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio) | [Screenshot report/gallery](https://gsemet.github.io/markdown-okf-schema-studio/gallery.html) | [Requirements](https://gsemet.github.io/markdown-okf-schema-studio/requirements/)
 
 Markdown OKF-Schema Studio is a visual Markdown editor for VS Code. You read a clean rendered
 page and click any block to edit its source. It renders [CommonMark](https://commonmark.org/),
@@ -190,9 +190,11 @@ are one button away.
 
 ## Install
 
-Install **Markdown OKF-Schema Studio** from the
-[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio),
-or search for it in the Extensions view and select **Install**.
+Install **Markdown OKF-Schema Studio** in VS Code from the
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio).
+VSCodium, Cursor and other compatible editors install it from
+[Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio).
+In any of them you can also search for it in the Extensions view and select **Install**.
 
 ## Usage with coding agent
 

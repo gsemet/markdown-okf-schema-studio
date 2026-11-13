@@ -1,10 +1,10 @@
 # Install and Open Studio
 
-Install **Markdown OKF-Schema Studio** from the
-[VS Code
-Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio),
-or open the Extensions view in VS Code, search for `Markdown OKF-Schema Studio`, and select
-**Install**.
+Install **Markdown OKF-Schema Studio** in VS Code from the
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio).
+VSCodium, Cursor and other compatible editors install it from [Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio).
+In any of them you can also open the Extensions view, search for `Markdown OKF-Schema Studio`, and
+select **Install**.
 
 ## Open Studio
 
