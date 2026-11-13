@@ -195,7 +195,7 @@ async function cardMapping(source: string, cardClass: string) {
   };
 }
 
-const QUOTED_CARD_CASES: Array<{ name: string; source: string; cardClass: string; card: number; body: number }> = [
+const CONTAINED_CARD_CASES: Array<{ name: string; source: string; cardClass: string; card: number; body: number }> = [
   {
     name: "a quoted grid whose body starts with a blank quoted line",
     source: "# H\n\n> ::::{grid} 2\n>\n> :::{grid-item-card} A\n> Body.\n> :::\n> ::::\n",
@@ -256,12 +256,81 @@ const QUOTED_CARD_CASES: Array<{ name: string; source: string; cardClass: string
     source: "# H\n\n> :::{card} A\n> Body\nlazy.\n> More.\n> :::\n",
     cardClass: "myst-grid-card", card: 3, body: 4,
   },
+  {
+    name: "a bullet grid whose body starts with a blank line",
+    source: "# H\n\n- ::::{grid} 2\n\n  :::{grid-item-card} A\n  Body.\n  :::\n  ::::\n",
+    cardClass: "myst-grid-card", card: 5, body: 6,
+  },
+  {
+    name: "a star bullet grid whose body starts with a blank line",
+    source: "# H\n\n* ::::{grid} 2\n\n  :::{grid-item-card} A\n  Body.\n  :::\n  ::::\n",
+    cardClass: "myst-grid-card", card: 5, body: 6,
+  },
+  {
+    name: "an ordered grid whose body starts with a blank line",
+    source: "# H\n\n1. ::::{grid} 2\n\n   :::{grid-item-card} A\n   Body.\n   :::\n   ::::\n",
+    cardClass: "myst-grid-card", card: 5, body: 6,
+  },
+  {
+    name: "a two-digit ordered grid whose body starts with a blank line",
+    source: "# H\n\n10. ::::{grid} 2\n\n    :::{grid-item-card} A\n    Body.\n    :::\n    ::::\n",
+    cardClass: "myst-grid-card", card: 5, body: 6,
+  },
+  {
+    name: "a nested bullet grid whose body starts with a blank line",
+    source: "# H\n\n- item\n  - ::::{grid} 2\n\n    :::{grid-item-card} A\n    Body.\n    :::\n    ::::\n",
+    cardClass: "myst-grid-card", card: 6, body: 7,
+  },
+  {
+    name: "a list item inside a quote whose grid body starts with a blank line",
+    source: "# H\n\n> - ::::{grid} 2\n>\n>   :::{grid-item-card} A\n>   Body.\n>   :::\n>   ::::\n",
+    cardClass: "myst-grid-card", card: 5, body: 6,
+  },
+  {
+    name: "a quote inside a list item whose grid body starts with a blank line",
+    source: "# H\n\n- > ::::{grid} 2\n  >\n  > :::{grid-item-card} A\n  > Body.\n  > :::\n  > ::::\n",
+    cardClass: "myst-grid-card", card: 5, body: 6,
+  },
+  {
+    name: "a standalone card in a list item with a blank first body line",
+    source: "# H\n\n- :::{card} A\n\n  Body.\n  :::\n",
+    cardClass: "myst-grid-card", card: 3, body: 5,
+  },
+  {
+    name: "a bullet grid with the cards on the next line",
+    source: "# H\n\n- ::::{grid} 2\n  :::{grid-item-card} A\n  Body.\n  :::\n  ::::\n",
+    cardClass: "myst-grid-card", card: 4, body: 5,
+  },
+  {
+    name: "an ordered grid with the cards on the next line",
+    source: "# H\n\n1. ::::{grid} 2\n   :::{grid-item-card} A\n   Body.\n   :::\n   ::::\n",
+    cardClass: "myst-grid-card", card: 4, body: 5,
+  },
+  {
+    name: "a bullet grid with a gutter option and a blank line",
+    source: "# H\n\n- ::::{grid} 2\n  :gutter: 2\n\n  :::{grid-item-card} A\n  Body.\n  :::\n  ::::\n",
+    cardClass: "myst-grid-card", card: 6, body: 7,
+  },
+  {
+    name: "a grid opened on its own indented line in a list item",
+    source: "# H\n\n- text\n\n  ::::{grid} 2\n\n  :::{grid-item-card} A\n  Body.\n  :::\n  ::::\n",
+    cardClass: "myst-grid-card", card: 7, body: 8,
+  },
 ];
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
-for (const row of QUOTED_CARD_CASES) {
+for (const row of CONTAINED_CARD_CASES) {
   test(`${row.name} maps its card, title and body to their own lines`, async () => {
     const got = await cardMapping(row.source, row.cardClass);
     assert.deepEqual(got, { card: row.card, title: row.card, body: row.body });
   });
 }
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+test("a tab panel of a tab set written in a list item maps to its directive line", async () => {
+  const source = "# H\n\n- ::::{tab-set}\n\n  :::{tab-item} A\n  Body.\n  :::\n  ::::\n";
+  const root = parseHtml((await renderMyst(source)).html);
+  const panel = findElements(root, (element) => hasClass(element, "myst-tab-panel"))[0];
+  assert.ok(panel, "a tab panel is rendered");
+  assert.equal(Number(attribute(panel, "data-line")), 5);
+});
