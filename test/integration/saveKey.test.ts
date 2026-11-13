@@ -101,7 +101,11 @@ export async function run(): Promise<void> {
     assert.equal(cell.tag, "TEXTAREA", "the cell text box keeps the focus");
     assert.ok(cell.value?.includes("cellTyped"), "and its value");
 
-    // A frontmatter field: the value is written and the field closes.
+    // A frontmatter field: the value is written and the field closes. The cell editor is closed
+    // first: a field editor does not open while a block or cell editor is still active.
+    await press(page, "Escape");
+    await waitFor("the cell editor to close", async () => withCurrentFrame(page, async (frame) =>
+      await frame.locator("[data-sphinx-preview-block-editor], [data-sphinx-preview-table-cell-editor]").count() === 0));
     await withCurrentFrame(page, (frame) =>
       frame.locator('tr[data-okf-field="title"] [data-okf-edit-cell="value"]').click());
     await waitForEditor(page, "[data-okf-frontmatter-editor] textarea");
