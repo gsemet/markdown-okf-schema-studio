@@ -637,8 +637,9 @@ release guideline).
 6. CI calls **Release VSIX** explicitly with that tag. A tag pushed by `GITHUB_TOKEN`
 	does not trigger another push workflow, so this call is required. The release job
 	verifies the tag, manifest, and default-branch ancestry, prepares the reviewed notes of the
-	tag, packages the extension, publishes to Marketplace, and attaches the VSIX, the notes and
-	their images to a GitHub release. The notes must be valid before publication.
+	tag, packages the extension, publishes to Marketplace with trusted publishing (OIDC), and
+	attaches the VSIX, the notes and their images to a GitHub release. The notes must be valid
+	before publication.
 	CI also calls **Deploy GitHub Pages** with the tag: it builds the site from the
 	end-to-end reports of that same run (its heavy jobs are green) instead of running the
 	suite again. A later manual Pages dispatch of the tag finds that run as well
@@ -681,9 +682,18 @@ and at most 50 attempts per run; after that, release a new version.
 ### GitHub Configuration
 
 Create a GitHub environment named `release`, allowing releases from the default branch
-and `v*` tags. Configure these secrets in that environment or at repository level:
+and `v*` tags. The workflow publishes to the Marketplace with Trusted Publishing (GitHub
+Actions OIDC) and reads no stored token:
 
-- `VSCE_PAT`: a Marketplace publisher token authorized for `GaetanSemet`.
+- A Marketplace Trusted Publishing policy "Release workflow" exists on the `GaetanSemet`
+  publisher: provider GitHub Actions, repository owner `gsemet`, repository
+  `markdown-okf-schema-studio`, workflow `release.yml`, environment `release`.
+- The `package` job of `release.yml` and its caller job `release` in `ci.yml` both grant
+  `id-token: write` (a called workflow cannot get more permissions than its caller job).
+- Renaming `release.yml` or the `release` environment breaks publication until the policy is
+  updated.
+- `VSCE_PAT` is no longer used by the workflow. It stays in the `release` environment until a
+  release published with `--oidc` has succeeded; the owner then deletes it.
 
 The workflow's normal `GITHUB_TOKEN` is used for tags and GitHub releases.
 Repository rules must permit the CI token to create version tags. Environment approval
@@ -697,6 +707,11 @@ If tagging succeeded but publication failed, rerun the failed release job or dis
 **Release VSIX** with the existing `vX.Y.Z` tag. Do not move the tag or bump again just
 to retry. Marketplace publication skips an already published version, allowing a retry
 to finish the GitHub release. Manual pushes of valid `vX.Y.Z` tags also run this workflow.
+
+If the Marketplace token exchange (OIDC) fails, the job fails before the GitHub release is
+written. Fix the cause, then dispatch **Release VSIX** with the existing tag. In an emergency the
+owner publishes locally with `vsce publish` and the PAT they keep. There is no automatic fallback
+to the PAT.
 
 A tag older than 1.4.0 has no notes folder: dispatch **Release VSIX** with `notes: placeholder`,
 then replace the notes by hand.

@@ -62,6 +62,26 @@ def test_release_job_keeps_dependency_install_scripts_off() -> None:
     assert "patch-myst-imports" not in text
 
 
+def test_release_publishes_to_the_marketplace_with_trusted_publishing() -> None:
+    package = _release()["jobs"]["package"]
+    assert package["permissions"]["id-token"] == "write"
+    publish = _step("Publish to VS Code Marketplace")
+    for flag in (
+        "--oidc",
+        "--skip-duplicate",
+        "--packagePath out/reports/package/markdown-okf-schema-studio.vsix",
+    ):
+        assert flag in publish["run"]
+    assert "env" not in publish
+    assert "VSCE_PAT" not in RELEASE.read_text()
+    names = [step.get("name") for step in package["steps"]]
+    assert "Verify Marketplace token" not in names
+    assert names.index("Publish to VS Code Marketplace") < names.index(
+        "Attach VSIX and images to GitHub release"
+    )
+    assert _ci_jobs()["release"]["permissions"]["id-token"] == "write"
+
+
 def test_static_ci_target_runs_an_online_audit_of_production_dependencies() -> None:
     justfile = (ROOT / "justfile").read_text()
     audit = re.search(r"(?m)^audit:\n((?:    .*\n)+)", justfile)

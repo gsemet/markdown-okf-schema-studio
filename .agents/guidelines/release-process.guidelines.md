@@ -86,6 +86,10 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    (for example `curl -sS -o /dev/null -w '%{http_code}' -L <url>`). The listing page is not
    checked. The listing page can lag by several minutes (more than 3 seen in 1.7.1); it is not a
    gate.
+   The publication uses the Marketplace Trusted Publishing policy "Release workflow" (no stored
+   token). A failed OIDC exchange is recovered as in "Recovery and Release Notes" of
+   CONTRIBUTING.md. The owner deletes `VSCE_PAT` once a release published with `--oidc` has
+   succeeded.
 7. The release is archived with a `04-report.md` in the release CR's folder, next to `01-intent.md`,
    `02-answers.md` and `03-change-spec.md` (a subagent cannot write some Markdown names, such as
    `report.md`, but a numbered name works): tag, release URL, CI runs (heavy run on `main`,
