@@ -5,17 +5,19 @@ habits that keep an unattended session working.
 
 ## One worktree per change
 
-One worktree per change, dependencies symlinked, never staged (`<id>` is the change number and `<slug>`
-its short name):
+One worktree per change; each worktree gets its own dependencies from `just dev`, and they are
+never staged (`<id>` is the change number and `<slug>` its short name):
 
 ```bash
 git worktree add -b change-requests/<id>-<slug> ../<repo>.worktrees/<id> origin/main --no-track
-ln -s "$PWD/node_modules" ../<repo>.worktrees/<id>/node_modules
-(cd ../<repo>.worktrees/<id> && uv sync --group requirements)
+(cd ../<repo>.worktrees/<id> && just dev)
 ```
 
-The `uv sync` gives the worktree its own Python environment from the lock file, so
-`uv run --no-sync --group requirements okfreq` runs CI's okfreq there, not a global one.
+`just dev` runs first in a new worktree or a clean checkout, before any build, check, test or gate.
+It installs the worktree's own `node_modules` (`npm ci`) and Python environment (the `requirements`
+group included), so `uv run --no-sync --group requirements okfreq` still runs CI's okfreq there. The
+worktree does not symlink `node_modules`, because `npm ci` would replace the main checkout's
+`node_modules` through the symlink.
 
 ## App-window tests
 
