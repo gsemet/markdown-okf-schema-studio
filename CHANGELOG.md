@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.0 - 2026-11-13
+
 - A click on a card of a grid written inside a quote, whose content starts with a blank quoted line,
   opens the editor on the card instead of the line above.
 - A GitHub alert that starts with a heading or a bold line keeps its title ("Note", or the text
