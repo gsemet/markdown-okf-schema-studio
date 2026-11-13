@@ -2,6 +2,21 @@
 
 ## 2026-11-13
 
+### The floating toolbar becomes a 4 x 4 grid (CR 318)
+
+- Changed: SwRS-MDOKFSTUDIO-TOOLBAR-001 (four rows of four buttons: main, navigation, view, review; the
+  Tab order; the handle strip geometry y 12 to 146, to confirm from the heavy run log),
+  SwRS-MDOKFSTUDIO-TOOLBAR-005 (Fold on row 3), -007 (the collapsed Tab order is Refresh, Edit, Export to
+  HTML and Show view controls, fixing a wrong scenario; the group holds three rows), -130 (rows 2 to 4),
+  SwRS-MDOKFSTUDIO-TRUST-001, SwRS-MDOKFSTUDIO-LIFE-049 (pending notice 160 px from the top when
+  expanded), -170, SwRS-MDOKFSTUDIO-REVIEW-008 (Side-by-side on row 4), SwRS-MDOKFSTUDIO-THEME-001 (Theme
+  on row 2), the known issue of SwRS-MDOKFSTUDIO-LAYOUT-020 and StRS-MDOKFSTUDIO-TOOLBAR-001.
+- Approved: StRS-MDOKFSTUDIO-LAYOUT-003 changed with the owner's agreement of 2026-11-13 (the Width button
+  is on row 3; `approved_by` gaetan@xeberon.net, new `approved_at`).
+- Sources: `src/core/preview/previewToolbar.ts`, `src/core/preview/styles/pageChromeStyles.ts`. Tests:
+  `test/core/preview/previewStyles.test.ts`, `test/visual/capture_layout_checks.py`,
+  `test/integration/tableMoves.ts`, `test/page/runtimePageControls.test.ts`.
+
 ### Cmd+S saves the document from the preview (CR 312)
 
 - New, proposed, deriving from StRS-MDOKFSTUDIO-BLOCK-008: SwRS-MDOKFSTUDIO-LIFE-173 (the save key with

@@ -5,7 +5,7 @@ export interface ToolbarCollapseContext {
   initialViewPreferences?: { toolbarCollapsed?: boolean };
 }
 
-/** How long the load hint keeps rows 2 to 5 open before they roll up again. */
+/** How long the load hint keeps rows 2 to 4 open before they roll up again. */
 const HINT_OPEN_MS = 700;
 /** Webview state key (true): this panel already showed the load hint; the state snapshots carry it. */
 const HINT_STATE_KEY = "viewToolbarHintShown";
@@ -15,7 +15,7 @@ const HINT_STATE_KEY = "viewToolbarHintShown";
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
- * Collapse button of toolbar row 1: hides or shows rows 2 to 5 (the `hidden` attribute also
+ * Collapse button of toolbar row 1: hides or shows rows 2 to 4 (the `hidden` attribute also
  * takes them out of the Tab order). The choice is the `toolbarCollapsed` view preference:
  * posted to the host (kept per workspace) and mirrored on `<html>` as
  * `data-sphinx-preview-toolbar-state` ("expanded" / "collapsed"). Without a stored choice the toolbar

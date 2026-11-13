@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The floating toolbar is now four buttons wide on four rows: Refresh, Edit, Export and the chevron;
+  Anchor, Theme, Back and Next; Width, Fold, Zoom out and Zoom in; then Table of contents,
+  Side-by-side, Diff and Comments. It keeps the same width, so it still covers as little of the page,
+  and it is one row shorter.
+
 ## 1.8.1 - 2026-11-13
 
 ## 1.8.0 - 2026-11-13

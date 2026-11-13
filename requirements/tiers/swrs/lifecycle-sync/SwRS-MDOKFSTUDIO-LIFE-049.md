@@ -90,7 +90,7 @@ When the preview shows a render state, the extension SHALL label the status Prev
 
 | Input | Outcome |
 | --- | --- |
-| the notice shown with the toolbar expanded | the notice is fixed 14 px from the right and 192 px from the top (below the five rows of the toolbar), with pointer-events none and no effect on the layout |
+| the notice shown with the toolbar expanded | the notice is fixed 14 px from the right and 160 px from the top (right under the four rows of the toolbar), with pointer-events none and no effect on the layout |
 | the toolbar collapsed to its first row | the notice sits 62 px from the top |
 
 ### Related requirements

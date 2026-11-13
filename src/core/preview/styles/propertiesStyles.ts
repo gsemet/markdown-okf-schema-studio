@@ -543,7 +543,7 @@ html[data-sphinx-preview-theme-switching="true"] body * {
     transition: none !important;
   }
 
-  /* The toolbar motion of pageChromeStyles: the tooltip slide-in and the unroll of rows 2 to 5. */
+  /* The toolbar motion of pageChromeStyles: the tooltip slide-in and the unroll of rows 2 to 4. */
   [data-sphinx-preview-toolbar] button[data-tooltip]::after,
   .sphinx-preview-table-menu button[data-tooltip]::after,
   .sphinx-preview-edit-palette > button[data-tooltip]::after,

@@ -4,7 +4,7 @@ id: SwRS-MDOKFSTUDIO-TOOLBAR-130
 uuid: 1bf95932-5bcf-4b93-8151-400fc118d94d
 title: The toolbar rows unroll as one block and a load hint shows them
 description: When the reader expands or collapses the toolbar, the extension
-  SHALL unroll or roll up rows 2 to 5 as one block over 160 ms (height and
+  SHALL unroll or roll up rows 2 to 4 as one block over 160 ms (height and
   fade), and when a panel opens its preview with the toolbar saved as collapsed,
   the extension SHALL unroll the rows once for 700 ms and roll them up again
   without changing the saved choice, cancelled by any pointer or key press, and
@@ -36,12 +36,12 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the reader expands or collapses the toolbar, the extension SHALL unroll or roll up rows 2 to 5 as one block over 160 ms (height and fade), and when a panel opens its preview with the toolbar saved as collapsed, the extension SHALL unroll the rows once for 700 ms and roll them up again without changing the saved choice, cancelled by any pointer or key press, and with no motion when the user prefers reduced motion.
+When the reader expands or collapses the toolbar, the extension SHALL unroll or roll up rows 2 to 4 as one block over 160 ms (height and fade), and when a panel opens its preview with the toolbar saved as collapsed, the extension SHALL unroll the rows once for 700 ms and roll them up again without changing the saved choice, cancelled by any pointer or key press, and with no motion when the user prefers reduced motion.
 
-### Scenario (nominal): Rows 2 to 5 unroll and roll up as one block
+### Scenario (nominal): Rows 2 to 4 unroll and roll up as one block
 - GIVEN a preview with the toolbar
 - WHEN the reader presses the chevron
-- THEN rows 2 to 5 get the animating mark before the hidden attribute changes, unroll (from zero height, fading in) or roll up (height and opacity to zero) together over 160 ms, and lose the mark at the end
+- THEN rows 2 to 4 get the animating mark before the hidden attribute changes, unroll (from zero height, fading in) or roll up (height and opacity to zero) together over 160 ms, and lose the mark at the end
 - AND the layout is measured again when the mark goes, 200 ms after the last change, also after the load hint
 
 ### Scenario (nominal): Load hint
@@ -51,7 +51,7 @@ When the reader expands or collapses the toolbar, the extension SHALL unroll or 
 | a pointer press or key press (not on the chevron) while the hint runs | the hint stops and the rows are hidden at once; a press or key on the chevron is left to its click, which keeps the open rows as they are (no new animation) |
 | the hint ends or is cancelled | the saved choice, the toolbar state attribute, aria-expanded and the posted preferences are unchanged |
 | a refresh, a reload, a content patch, or the panel following another document | no hint (a boolean in the webview state, carried by every state snapshot, records that the panel showed it) |
-| the pending overlay while the hint runs | it stays below the five open rows |
+| the pending overlay while the hint runs | it stays below the four open rows |
 | the toolbar is saved as expanded | no hint and no animation at page start |
 
 ### Scenario (refusal): Reduced motion

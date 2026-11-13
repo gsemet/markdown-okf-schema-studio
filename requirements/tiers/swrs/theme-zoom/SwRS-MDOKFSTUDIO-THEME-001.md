@@ -43,7 +43,7 @@ When the reader presses the Theme button, the extension SHALL switch the preview
 
 ### Scenario (nominal): Four clicks
 
-- GIVEN the page in Current mode (a workspace that stored Current) and the Theme button on toolbar row 3
+- GIVEN the page in Current mode (a workspace that stored Current) and the Theme button on toolbar row 2
 - WHEN the button is clicked four times
 - THEN the attribute data-sphinx-preview-theme-mode of the html element reads dark, white, cream and current in turn, and the attribute data-theme-mode of the button follows it
 
