@@ -63,7 +63,7 @@ When the writer presses the VS Code save key binding with the focus in the side 
 | The document is untitled | `save` opens VS Code's Save As dialog; a cancelled dialog or a refused save is silent |
 | Format on save or another save participant changes the text | They run as with any save; the preview shows their result as an external change |
 | The command is looked for in the Command Palette | It is hidden (`"when": "false"`); the key binding is its only entry |
-| The preview is the custom editor | Not claimed here: see the verification notes |
+| The preview is the custom editor | The binding covers it too (`activeCustomEditorId`): the key runs the same command, because the native save of the custom editor did not save the typed text inside the autosave delay |
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-BLOCK-003: the other keys of the text box, which reach VS Code the same way
@@ -71,7 +71,7 @@ When the writer presses the VS Code save key binding with the focus in the side 
 ### Verification notes
 - Method: test/session/saveCommand.test.ts (command routing, wait for the autosave and the frontmatter save, edit still active, page that never answers), test/core/protocol/hostToPage.test.ts and test/core/protocol/pageToHost.test.ts (the two messages), test/page/runtimeBlockEditor.test.ts and test/page/runtimeSaveKey.test.ts (the table-cell editor and the frontmatter field: the flush before the request), test/security/package-contract.test.ts (command, key binding, `when` clause, absent from the palette)
 - Method: test/integration/saveKey.test.ts (real-input scenario scenarioSaveKeySavesPreview, real keys through the VS Code key binding, and the check of the custom editor)
-- Criteria: the document is clean after the key, its text holds the typed text, the block or cell text box is still focused with its value, the frontmatter field is closed; no `previewEditSave` with `final: true` is posted by the key; the custom editor clause is added to the binding only when its check shows the native save fails
+- Criteria: the document is clean after the key, its text holds the typed text, the block or cell text box is still focused with its value, the frontmatter field is closed; no `previewEditSave` with `final: true` is posted by the key; the custom editor clause is in the binding because the real-window check of the native save failed: the saved text did not appear (the step timed out), so the command now handles that key too
 
 <!-- okf:links:start -->
 ### Links
