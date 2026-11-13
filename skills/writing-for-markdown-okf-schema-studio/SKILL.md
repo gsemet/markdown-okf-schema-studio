@@ -25,10 +25,10 @@ it does not, and how to choose. Every example here is rendered by its own pipeli
 ## Install the extension
 
 The skill only writes the documents; the reader needs the extension to see them. If it is missing,
-tell the user to install it from the
+tell the user to install it in VS Code from the
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio),
-with `code --install-extension GaetanSemet.markdown-okf-schema-studio`, or by searching for
-"Markdown OKF-Schema Studio" in the Extensions view.
+with `code --install-extension GaetanSemet.markdown-okf-schema-studio`, or from the Extensions view.
+VSCodium and Cursor install the same ID from [Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio).
 
 ## What renders
 

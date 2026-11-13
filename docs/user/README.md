@@ -2,7 +2,7 @@
 
 The [project README](../../README.md) shows what Studio does. These pages hold the details.
 
-- [Install and Open Studio](open-studio.md): Marketplace install, Open With, preview to the side,
+- [Install and Open Studio](open-studio.md): install from the VS Code Marketplace or Open VSX, Open With, preview to the side,
   the Agents window.
 - [Features and Inline Editing](editing.md): MyST rendering, block editing, the edition palette,
   block selection, rich paste.
