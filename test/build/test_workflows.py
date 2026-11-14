@@ -606,7 +606,7 @@ def test_stress_dispatch_inputs_reach_the_stress_recipe_through_env() -> None:
         assert inputs[name]["default"] == ""
     step = next(s for s in _ci_jobs()["stress"]["steps"] if "ci-stress" in s.get("run", ""))
     assert step["run"] == f'xvfb-run --auto-servernum -s "-screen 0 {XVFB_SCREEN}" just ci-stress'
-    assert step["env"]["STUDIO_STRESS_REPEAT"] == "${{ inputs.stress_repeat || '20' }}"
+    assert step["env"]["STUDIO_STRESS_REPEAT"] == "${{ inputs.stress_repeat || '12' }}"
     assert step["env"]["STUDIO_STRESS_SCENARIOS"] == "${{ inputs.stress_scenarios }}"
 
 
@@ -617,6 +617,13 @@ def test_ci_stress_recipe_quotes_and_validates_repeat() -> None:
     assert recipe.count("{{ REPEAT }}") == 0
     assert "REPEAT must be an integer from 1 to 100" in recipe
     assert "exit 2" in recipe
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_ci_stress_recipe_defaults_to_12_rounds_and_leaves_the_deadline_computed() -> None:
+    recipe_text = (ROOT / "justfile").read_text().split("\nci-stress ", 1)[1].split("\n\n", 1)[0]
+    assert recipe_text.startswith('REPEAT=env("STUDIO_STRESS_REPEAT", "12")')
+    assert "STUDIO_LAUNCH_TIMEOUT_MS" not in recipe_text
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076

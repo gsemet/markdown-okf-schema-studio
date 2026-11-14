@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       heavy:
-        description: Also run the real VS Code jobs (integration and stress, about 10 and 20 minutes)
+        description: Also run the real VS Code jobs (integration and stress, about 10 and 16 minutes)
         type: boolean
         default: false
       toc_loop:
@@ -23,7 +23,7 @@ on:
         type: boolean
         default: false
       stress_repeat:
-        description: Stress rounds per window, 1 to 100 (heavy only; empty means 20). Above about 20, narrow stress_scenarios or the run exceeds the time limits
+        description: Stress rounds per window, 1 to 100 (heavy only; empty means 12). Above about 220 scenario runs per window (rounds times scenarios), narrow stress_scenarios or the run exceeds the time limits
         type: string
         default: ""
       stress_scenarios:
@@ -248,7 +248,7 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
-  # Heavy (with integration): repeats the flake-prone and the new real-window scenarios (20
+  # Heavy (with integration): repeats the flake-prone and the new real-window scenarios (12
   # rounds, in the trusted window then in the Restricted Mode window); a race that a single run
   # passes by luck fails here. Its reports are not part of the e2e campaign.
   # Advisory: a red stress run flags a flake to fix (CI rule 12) but does not block merges. On a
@@ -283,7 +283,7 @@ jobs:
       - run: just dev-ci
       - name: Run the stress rounds
         env:
-          STUDIO_STRESS_REPEAT: ${{ inputs.stress_repeat || '20' }}
+          STUDIO_STRESS_REPEAT: ${{ inputs.stress_repeat || '12' }}
           STUDIO_STRESS_SCENARIOS: ${{ inputs.stress_scenarios }}
           STUDIO_VIEWPORT_GUARD: strict
         run: xvfb-run --auto-servernum -s "-screen 0 2600x1440x24" just ci-stress

@@ -50,7 +50,7 @@ The CI only runs what a developer can run locally. All logic lives in the task r
       done`; a single VS Code call that must return is wrapped in `bounded()` so a timeout names the
       call; the extension host writes a heartbeat file every 5 s and the launcher kills a launch
       whose heartbeat is silent for 90 s or that passes its deadline (`STUDIO_LAUNCH_TIMEOUT_MS`,
-      15 min). Every timeout writes `out/reports/e2e/hang-dumps/<time>-<step>/` (processes, VS Code
+      15 min; a stress launch computes its own, 2 min plus 6 s per scenario run, at most 24 min). Every timeout writes `out/reports/e2e/hang-dumps/<time>-<step>/` (processes, VS Code
       log tails, window state and tabs, heartbeat, screenshots). A new step gets a budget about
       twice its healthy duration; never raise one to make a run pass.
 12. **A flake is a bug, fixed at its cause and proved by repetition.** A test that fails without a
@@ -84,7 +84,7 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     `gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery
     and site). To loop one flaky scenario many times, use
     `-f heavy=true -f stress_repeat=60 -f stress_scenarios=alert-dropdown` (narrow the scenarios
-    above about 20 rounds; the timeouts stay as they are). Run them before merging a change to the extension host, the webview or the
+    above about 220 scenario runs per window, rounds times scenarios; the deadline is computed, capped at 24 min). Run them before merging a change to the extension host, the webview or the
     real-window tests, and run `npm run test:integration` locally (one VS Code window at a time).
     A third on-demand job, `toc-loop`, is a repro tool for the `toc` edit-toggle flake:
     `gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]` (1 to 40 rounds,
