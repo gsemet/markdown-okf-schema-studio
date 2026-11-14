@@ -76,6 +76,7 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    notes and the thread themselves (see "The version PR body" below). The heavy run of the
    version push (CI rule 14) stays the final gate. When the version PR tops a ready stack, the
    version commit is made on the top branch: see "The version PR on top of a stack".
+   The version commit carries no `Signed-off-by` trailer: amend it without `-s`.
    If the local `just preflight` stops at `ci-integration` because the screen is locked, do not
    wait: dispatch `gh workflow run ci.yml --ref <branch> -f heavy=true` at once on the release branch
    and go on; its `integration` job is the real-window proof.

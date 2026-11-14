@@ -438,11 +438,11 @@ preflight: clean format
 package:
     {{ npm }} run package
 
-# Compute the next npm version and create a signed-off version commit, without tagging.
+# Compute the next npm version and create a version commit, without tagging.
 bump-version:
     uv run --group release python scripts/version.py
 
-# Set X.Y.Z and create a signed-off version commit, without tagging.
+# Set X.Y.Z and create a version commit, without tagging.
 version VERSION:
     uv run --group release python scripts/version.py "{{ VERSION }}"
 

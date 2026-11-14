@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-11-14
+
+### The version commit carries no Signed-off-by trailer (CR 325)
+
+- Changed: SwRS-MDOKFSTUDIO-CORE-075 (the version script creates one commit `chore: version X.Y.Z` with
+  no `Signed-off-by` trailer; description, normative text and nominal scenario).
+- Sources: `scripts/version.py`. Tests: `test/build/test_release.py`.
+
 ## 2026-11-13
 
 ### A grid behind a tab list marker opens the editor on its own line (CR 321)
