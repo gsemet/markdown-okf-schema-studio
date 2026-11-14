@@ -25,6 +25,7 @@ import {
 } from "../realWindowGaps";
 import { scenarioTableStructure } from "../tableStructureReal";
 import { scenarioToc } from "../tocWindow";
+import { scenarioReadmeHtml } from "../readmeHtmlWindow";
 import { scenarioPerformanceProbe } from "../performanceProbe";
 import * as fs from "node:fs";
 import { E2E_REPORT_ROOT } from "../../reportPaths";
@@ -141,6 +142,9 @@ async function runTocLoop(page: Page): Promise<void> {
     let atFailure: string | undefined;
     try {
       // The dump is read where the scenario failed, before its cleanup closes the editors.
+      // The two integration failures of the toggle ran `toc` right after `readme-html` (CR 326);
+      // STUDIO_TOC_AFTER_README_HTML=1 repeats that adjacency in each round.
+      if (process.env.STUDIO_TOC_AFTER_README_HTML === "1") await scenarioReadmeHtml(page);
       await withFocusDumpOnFailure(page, () => scenarioToc(page), (dump) => { atFailure = dump; });
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
       tally.passed += 1;

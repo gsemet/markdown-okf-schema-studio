@@ -19,6 +19,7 @@ import type { Page } from "playwright-core";
 import * as vscode from "vscode";
 
 import { injectToggleDelay } from "../shared/tocLoop";
+import { clickFailureDetails, waitForFirstClickReady } from "./windowFocus";
 import { getActivePreviewForTests } from "./extensionApi";
 import {
   bufferText,
@@ -158,6 +159,7 @@ export async function scenarioToc(page: Page): Promise<void> {
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
       await setViewport(page, { width: 1400, height: 900 });
+      await waitForFirstClickReady(page);
       for (const [name, host, mode] of [
         ["cream", "Default Light Modern", "cream"],
         ["dark", "Default Dark Modern", "current"],
@@ -211,6 +213,9 @@ export async function scenarioToc(page: Page): Promise<void> {
       await withCurrentFrame(page, (frame) => frame.locator("h2", { hasText: "Usage" }).click());
       await waitFor("the editor to close", async () => (await editTitles(page)).length === 3);
       assert.equal(bufferText(textDocument), TEXT, "nothing outside the marker changed, and no list was written");
+    } catch (error) {
+      // Read before the cleanup below closes the editors (CI guidelines rule 12).
+      throw new Error(`${error instanceof Error ? error.message : String(error)} ${await clickFailureDetails(page)}`);
     } finally {
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
       await vscode.commands.executeCommand("workbench.action.toggleSidebarVisibility");

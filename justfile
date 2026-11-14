@@ -362,6 +362,8 @@ ci-toc-loop $STUDIO_TOC_LOOP="30" $STUDIO_TOGGLE_DELAY_MS="0":
     #!/usr/bin/env bash
     set -uo pipefail
     export STUDIO_REAL_INPUT_SCENARIO=toc-loop
+    # `toc` failed twice in the integration job right after `readme-html`: each round repeats that.
+    export STUDIO_TOC_AFTER_README_HTML=1
     export STUDIO_LAUNCH_TIMEOUT_MS="${STUDIO_LAUNCH_TIMEOUT_MS:-1800000}"
     if {{ npm }} run test:integration -- --trusted-only; then
         echo "ci-toc-loop: finished ($STUDIO_TOC_LOOP rounds, delay up to $STUDIO_TOGGLE_DELAY_MS ms)"
