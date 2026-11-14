@@ -12,7 +12,7 @@
       "name": "markdown-okf-schema-studio",
       "source": "./",
       "description": "Agent skill that teaches how to write Markdown that renders well in Markdown OKF-Schema Studio, the VS Code Markdown preview.",
-      "version": "1.8.1",
+      "version": "1.9.0",
       "author": {
         "name": "Gaetan Semet",
         "url": "https://github.com/gsemet"
