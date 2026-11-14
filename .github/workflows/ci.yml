@@ -11,11 +11,19 @@ on:
         type: boolean
         default: false
       toc_loop:
-        description: Rounds of the toc edit-toggle repro loop (real window, 0 = off, at most 40, about 30 minutes)
+        description: Rounds of the toc edit-toggle repro loop (real window, 0 = off, at most 40; the launch deadline is computed from the rounds and the steps, at most 30 minutes)
         type: string
         default: "0"
       toc_delay_ms:
         description: Upper bound of the random delay injected around the edit toggle in the toc loop
+        type: string
+        default: "0"
+      toc_steps:
+        description: Steps of a toc loop round, comma-separated among readme-html, toc, myst-blocks (empty means all three, in that order)
+        type: string
+        default: ""
+      toc_control:
+        description: Toc loop control, 1 closes the side bar before each step (0 or empty = off)
         type: string
         default: "0"
       gallery:
@@ -296,7 +304,9 @@ jobs:
           if-no-files-found: warn
 
   # Repro loop of the `toc` edit-toggle flake: `gh workflow run ci.yml --ref <branch> -f toc_loop=30
-  # [-f toc_delay_ms=300]`. Runs only when toc_loop > 0 (at most 40 rounds, 30-minute deadline).
+  # [-f toc_delay_ms=300] [-f toc_steps=readme-html,toc,myst-blocks] [-f toc_control=1]`. Runs only
+  # when toc_loop > 0 (at most 40 rounds; the launch deadline is computed from the rounds and the
+  # steps, 26 minutes for 40 rounds of the three default steps, never above 30).
   # A repro tool: it is not part of `checks` and does not gate merges. Failed rounds are counted
   # and logged with the recorded toggle state; the job is red if any round failed.
   toc-loop:
@@ -328,6 +338,8 @@ jobs:
         env:
           TOC_LOOP: ${{ inputs.toc_loop }}
           TOC_DELAY_MS: ${{ inputs.toc_delay_ms }}
+          TOC_STEPS: ${{ inputs.toc_steps }}
+          TOC_CONTROL: ${{ inputs.toc_control }}
         run: |
           if ! [[ "$TOC_LOOP" =~ ^[1-9][0-9]*$ ]] || (( TOC_LOOP > 40 )); then
             echo "toc_loop must be an integer from 1 to 40 (0 = off), got '$TOC_LOOP'" >&2
@@ -337,14 +349,25 @@ jobs:
             echo "toc_delay_ms must be an integer from 0 to 2000, got '$TOC_DELAY_MS'" >&2
             exit 1
           fi
-      # Below the job's 45 minutes, above the 30-minute launch deadline: the watchdog writes its
-      # dump first, and a hang cancels this step so the dump and upload steps still run.
-      - run: xvfb-run --auto-servernum -s "-screen 0 2600x1440x24" just ci-toc-loop "$TOC_LOOP" "$TOC_DELAY_MS"
+          if [[ -n "$TOC_STEPS" ]] && ! [[ "$TOC_STEPS" =~ ^(readme-html|toc|myst-blocks)(,(readme-html|toc|myst-blocks)){0,5}$ ]]; then
+            echo "toc_steps must be 1 to 6 comma-separated names among readme-html, toc, myst-blocks, got '$TOC_STEPS'" >&2
+            exit 1
+          fi
+          if [[ -n "$TOC_CONTROL" ]] && ! [[ "$TOC_CONTROL" =~ ^[01]$ ]]; then
+            echo "toc_control must be 0 or 1, got '$TOC_CONTROL'" >&2
+            exit 1
+          fi
+      # Below the job's 45 minutes, above the launch deadline (computed from the rounds and the
+      # steps, at most 30 minutes: 26 for 40 rounds of three steps): the watchdog writes its dump
+      # first, and a hang cancels this step so the dump and upload steps still run.
+      - run: xvfb-run --auto-servernum -s "-screen 0 2600x1440x24" just ci-toc-loop "$TOC_LOOP" "$TOC_DELAY_MS" "$TOC_STEPS" "${TOC_CONTROL:-0}"
         timeout-minutes: 35
         env:
           STUDIO_VIEWPORT_GUARD: strict
           TOC_LOOP: ${{ inputs.toc_loop }}
           TOC_DELAY_MS: ${{ inputs.toc_delay_ms }}
+          TOC_STEPS: ${{ inputs.toc_steps }}
+          TOC_CONTROL: ${{ inputs.toc_control }}
       - name: Collect hang diagnostics
         if: always()
         run: just ci-hang-dump

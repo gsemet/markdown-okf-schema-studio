@@ -353,19 +353,19 @@ ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "12"): (_require-unlocked-screen "c
         exit 1
     fi
 
-# CI job "toc-loop" (workflow_dispatch input toc_loop): repeats the `toc` scenario ROUNDS times in the
-# trusted window to force the edit-toggle flake. DELAY_MS > 0 injects a random 0..DELAY_MS pause
-# around the toggle's clicks and the host theme change. Failed rounds are counted, not fatal.
-# The parameters are exported variables (never spliced into the script). CI only: it opens a VS Code window.
-ci-toc-loop $STUDIO_TOC_LOOP="30" $STUDIO_TOGGLE_DELAY_MS="0":
+# CI job "toc-loop" (workflow_dispatch input toc_loop): repeats the steps STEPS (default
+# readme-html,toc,myst-blocks, the three that reopen the side bar) ROUNDS times in the trusted
+# window to force the edit-toggle flake. CONTROL=1 closes the side bar before each step. DELAY_MS > 0
+# injects a random 0..DELAY_MS pause around the toggle's clicks and the host theme change. Failed
+# rounds are counted, not fatal. The launch deadline is computed from the rounds and the steps
+# (test/shared/tocLoop.ts), never set here. The parameters are exported variables (never spliced
+# into the script). CI only: it opens a VS Code window.
+ci-toc-loop $STUDIO_TOC_LOOP="30" $STUDIO_TOGGLE_DELAY_MS="0" $STUDIO_TOC_LOOP_STEPS="" $STUDIO_TOC_LOOP_CONTROL="0":
     #!/usr/bin/env bash
     set -uo pipefail
     export STUDIO_REAL_INPUT_SCENARIO=toc-loop
-    # `toc` failed twice in the integration job right after `readme-html`: each round repeats that.
-    export STUDIO_TOC_AFTER_README_HTML=1
-    export STUDIO_LAUNCH_TIMEOUT_MS="${STUDIO_LAUNCH_TIMEOUT_MS:-1800000}"
     if {{ npm }} run test:integration -- --trusted-only; then
-        echo "ci-toc-loop: finished ($STUDIO_TOC_LOOP rounds, delay up to $STUDIO_TOGGLE_DELAY_MS ms)"
+        echo "ci-toc-loop: finished ($STUDIO_TOC_LOOP rounds of ${STUDIO_TOC_LOOP_STEPS:-the default steps}, control $STUDIO_TOC_LOOP_CONTROL, delay up to $STUDIO_TOGGLE_DELAY_MS ms)"
     else
         echo "ci-toc-loop: FAILED" >&2
         exit 1

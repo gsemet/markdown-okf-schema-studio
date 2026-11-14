@@ -5,13 +5,34 @@
  * Both default to off, so a normal run is unchanged.
  *
  * - `STUDIO_TOC_LOOP`: rounds of the `toc-loop` scenario, an integer from 1 to `MAX_TOC_LOOP`.
+ * - `STUDIO_TOC_LOOP_STEPS`: the steps of a round, comma-separated names of `TOC_LOOP_STEP_NAMES`
+ *   (default `readme-html,toc,myst-blocks`): the three steps that reopen the side bar in their
+ *   cleanup, in the order the trusted suite runs them (CR 328). It replaces the former
+ *   `STUDIO_TOC_AFTER_README_HTML`.
+ * - `STUDIO_TOC_LOOP_CONTROL`: `1` closes the side bar before each step, so the step starts with
+ *   the side bar already closed (the control of the adjacency); `0` or empty is off.
  * - `STUDIO_TOGGLE_DELAY_MS`: upper bound of a random delay, 0 to `MAX_TOGGLE_DELAY_MS` (default 0).
  *   It only acts when `STUDIO_REAL_INPUT_SCENARIO` is `toc-loop`, so a stray variable never slows
  *   the normal integration job.
  *
- * `MAX_TOC_LOOP` is what fits the 30-minute launch deadline of the `toc-loop` step.
+ * `MAX_TOC_LOOP` rounds of the default three steps fit the computed launch deadline
+ * (`tocLoopDeadlineMs`) inside the `toc-loop` step.
  */
 export const MAX_TOC_LOOP = 40;
+export const TOC_LOOP_STEP_NAMES = ["readme-html", "toc", "myst-blocks"] as const;
+export type TocLoopStepName = (typeof TOC_LOOP_STEP_NAMES)[number];
+/** Most steps in one round: twice the default list. */
+export const MAX_TOC_LOOP_STEPS = 6;
+/** Window start before the first round (as the stress runs: measured about 30 s, bounded by the heartbeat). */
+export const TOC_LOOP_START_MS = 2 * 60_000;
+/**
+ * Budget of one step run of the loop. Not measured on the loop yet (the stress scenarios take 4 s,
+ * these steps open a preview, switch two themes and close it): a deliberately wide 12 s, so 40
+ * rounds of three steps (120 runs) get 26 minutes, under the 35-minute step of the workflow.
+ */
+export const TOC_LOOP_STEP_BUDGET_MS = 12_000;
+/** Ceiling of the launch deadline of the loop: under the workflow step's 35 minutes, so the watchdog fires first. */
+export const TOC_LOOP_DEADLINE_CEILING_MS = 30 * 60_000;
 export const MAX_TOGGLE_DELAY_MS = 2_000;
 
 function integerKnob(raw: string | undefined, name: string, min: number, max: number, fallback: number): number {
@@ -26,6 +47,30 @@ function integerKnob(raw: string | undefined, name: string, min: number, max: nu
 
 export function tocLoopRounds(environment: { STUDIO_TOC_LOOP?: string } = process.env): number {
   return integerKnob(environment.STUDIO_TOC_LOOP, "STUDIO_TOC_LOOP", 1, MAX_TOC_LOOP, 1);
+}
+
+export function tocLoopSteps(environment: { STUDIO_TOC_LOOP_STEPS?: string } = process.env): TocLoopStepName[] {
+  const text = environment.STUDIO_TOC_LOOP_STEPS?.trim() ?? "";
+  if (text === "") return [...TOC_LOOP_STEP_NAMES];
+  const names = text.split(",").map((name) => name.trim());
+  const unknown = names.filter((name) => !(TOC_LOOP_STEP_NAMES as readonly string[]).includes(name));
+  if (unknown.length > 0 || names.length > MAX_TOC_LOOP_STEPS) {
+    throw new Error(`STUDIO_TOC_LOOP_STEPS must be 1 to ${MAX_TOC_LOOP_STEPS} comma-separated names of `
+      + `${TOC_LOOP_STEP_NAMES.join(", ")}, got "${text}"`);
+  }
+  return names as TocLoopStepName[];
+}
+
+export function tocLoopControl(environment: { STUDIO_TOC_LOOP_CONTROL?: string } = process.env): boolean {
+  const text = environment.STUDIO_TOC_LOOP_CONTROL?.trim() ?? "";
+  if (text === "" || text === "0") return false;
+  if (text === "1") return true;
+  throw new Error(`STUDIO_TOC_LOOP_CONTROL must be 0 or 1 (empty means 0), got "${text}"`);
+}
+
+/** Launch deadline of a loop of `rounds` rounds of `steps` steps, capped. */
+export function tocLoopDeadlineMs(rounds: number, steps: number): number {
+  return Math.min(TOC_LOOP_DEADLINE_CEILING_MS, TOC_LOOP_START_MS + rounds * steps * TOC_LOOP_STEP_BUDGET_MS);
 }
 
 export function toggleDelayMaxMs(environment: { STUDIO_TOGGLE_DELAY_MS?: string } = process.env): number {
@@ -56,4 +101,17 @@ export interface TocLoopTally {
 
 export function tocLoopSummary(tally: TocLoopTally): string {
   return `toc-loop: ${tally.rounds} round(s), ${tally.passed} clean, ${tally.failed} failed`;
+}
+
+/** The line a loop launch prints before its window opens: the deadline and where it comes from. */
+export function tocLoopDeadlineLine(
+  deadline: number,
+  rounds: number,
+  steps: readonly string[],
+  fromEnvironment: boolean,
+): string {
+  if (fromEnvironment) return `toc-loop: launch deadline ${deadline} ms (STUDIO_LAUNCH_TIMEOUT_MS)`;
+  const capped = TOC_LOOP_START_MS + rounds * steps.length * TOC_LOOP_STEP_BUDGET_MS > TOC_LOOP_DEADLINE_CEILING_MS;
+  return `toc-loop: launch deadline ${deadline} ms (${rounds} rounds x ${steps.length} steps, `
+    + `ceiling ${TOC_LOOP_DEADLINE_CEILING_MS} ms)${capped ? "; capped: lower the rounds or the steps" : ""}`;
 }

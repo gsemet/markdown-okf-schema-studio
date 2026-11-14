@@ -30,6 +30,7 @@ import {
 } from "../shared/hangWatchdog";
 import { watchLaunch } from "../shared/launchWatchdog";
 import { STRESS_SCENARIOS_BY_HOST } from "../shared/stressPlan";
+import { tocLoopDeadlineMs } from "../shared/tocLoop";
 
 /**
  * The dump and the kill read the process list with `ps` and send POSIX signals; Windows has
@@ -321,4 +322,14 @@ test("CR 327: the default stress plan keeps a third of margin under its deadline
   const expected = 30_000 + 12 * STRESS_SCENARIOS_BY_HOST.trusted.length * 3_960;
   assert.ok(expected <= (deadline * 2) / 3, `expected ${expected} ms vs deadline ${deadline} ms: revisit the default rounds`);
   assert.ok(STRESS_DEADLINE_CEILING_MS <= 30 * 60_000 - 3 * 60_000);
+});
+
+test("a toc-loop launch computes its deadline from its rounds and steps unless one is set", () => {
+  const loop = { STUDIO_REAL_INPUT_SCENARIO: "toc-loop" };
+  assert.equal(launchDeadlineMs({ ...loop, STUDIO_TOC_LOOP: "40" }), tocLoopDeadlineMs(40, 3));
+  assert.equal(launchDeadlineMs({ ...loop, STUDIO_TOC_LOOP: "40", STUDIO_TOC_LOOP_STEPS: "toc" }), tocLoopDeadlineMs(40, 1));
+  assert.equal(launchDeadlineMs({ ...loop, STUDIO_TOC_LOOP: "40", STUDIO_LAUNCH_TIMEOUT_MS: "5000" }), 5_000);
+  assert.throws(() => launchDeadlineMs({ ...loop, STUDIO_TOC_LOOP: "41" }), /STUDIO_TOC_LOOP/u);
+  assert.match(stressDeadlineLine({ ...loop, STUDIO_TOC_LOOP: "40" }) ?? "", /^toc-loop: launch deadline 1560000 ms \(40 rounds x 3 steps/u);
+  assert.equal(stressDeadlineLine({ STUDIO_REAL_INPUT_SCENARIO: "toolbar" }), undefined);
 });

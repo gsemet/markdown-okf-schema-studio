@@ -19,6 +19,7 @@ import * as path from "node:path";
 
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { hostStressPlan } from "./stressPlan";
+import { tocLoopDeadlineLine, tocLoopDeadlineMs, tocLoopRounds, tocLoopSteps } from "./tocLoop";
 
 /** How often the extension host rewrites its heartbeat file. */
 export const HEARTBEAT_INTERVAL_MS = 5_000;
@@ -90,7 +91,7 @@ export function stressDeadlinePlan(environment: NodeJS.ProcessEnv = process.env)
 
 /**
  * The launch deadline. A set `STUDIO_LAUNCH_TIMEOUT_MS` (a positive integer of milliseconds) wins;
- * else a stress run computes it from its rounds and scenarios; else LAUNCH_DEADLINE_MS.
+ * else a stress run computes it from its rounds and scenarios, and a toc-loop run from its rounds and steps; else LAUNCH_DEADLINE_MS.
  */
 export function launchDeadlineMs(environment: NodeJS.ProcessEnv = process.env): number {
   const raw = environment.STUDIO_LAUNCH_TIMEOUT_MS?.trim();
@@ -98,6 +99,9 @@ export function launchDeadlineMs(environment: NodeJS.ProcessEnv = process.env): 
     if (environment.STUDIO_REAL_INPUT_SCENARIO === "stress") {
       const plan = stressDeadlinePlan(environment);
       return stressLaunchDeadlineMs(plan.repeat, plan.scenarios);
+    }
+    if (environment.STUDIO_REAL_INPUT_SCENARIO === "toc-loop") {
+      return tocLoopDeadlineMs(tocLoopRounds(environment), tocLoopSteps(environment).length);
     }
     return LAUNCH_DEADLINE_MS;
   }
@@ -107,8 +111,12 @@ export function launchDeadlineMs(environment: NodeJS.ProcessEnv = process.env): 
   return Number(raw);
 }
 
-/** The line a stress launch prints before its window opens (the deadline and where it comes from). */
+/** The line a stress or toc-loop launch prints before its window opens (the deadline and where it comes from). */
 export function stressDeadlineLine(environment: NodeJS.ProcessEnv = process.env): string | undefined {
+  if (environment.STUDIO_REAL_INPUT_SCENARIO === "toc-loop") {
+    return tocLoopDeadlineLine(launchDeadlineMs(environment), tocLoopRounds(environment), tocLoopSteps(environment),
+      (environment.STUDIO_LAUNCH_TIMEOUT_MS?.trim() ?? "") !== "");
+  }
   if (environment.STUDIO_REAL_INPUT_SCENARIO !== "stress") return undefined;
   const deadline = launchDeadlineMs(environment);
   if ((environment.STUDIO_LAUNCH_TIMEOUT_MS?.trim() ?? "") !== "") {
