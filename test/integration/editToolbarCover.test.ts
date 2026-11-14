@@ -14,6 +14,7 @@ import { escapeUntilClosed } from "./escapeClose";
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused, waitForActiveSourceEditor } from "./windowFocus";
+import { setViewport } from "./realWindowViewport";
 
 let lastButtonState = "not sampled";
 
@@ -108,7 +109,7 @@ export async function run(): Promise<void> {
   const failures: string[] = [];
   try {
     await workbench.update("colorTheme", hostTheme, vscode.ConfigurationTarget.Workspace);
-    await page.setViewportSize({ width, height: 900 });
+    await setViewport(page, { width, height: 900 });
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     await vscode.window.showTextDocument(wrapped, vscode.ViewColumn.One);

@@ -14,6 +14,7 @@ import {
   setRenderDelayForTests,
 } from "./extensionApi";
 import { RealWindowEvidence } from "./evidence";
+import { setViewport } from "./realWindowViewport";
 import { saveThenWriteLinkedTarget } from "./linkedTargetSave";
 import { captureByLegacy } from "../shared/captureRegistry";
 import { E2E_SCREENSHOT_ROOT } from "../reportPaths";
@@ -278,7 +279,7 @@ export async function run(): Promise<void> {
     tooltip: "Custom accessible link tooltips have dedicated hover captures; native browser popups are not captured.",
   };
   evidence.writeManifest(manifest);
-  await page.setViewportSize({ width: 2400, height: 1100 });
+  await setViewport(page, { width: 2400, height: 1100 });
   await vscode.commands.executeCommand("workbench.action.closeSidebar");
   await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
   const projectRoot = extensionRoot;
@@ -567,7 +568,7 @@ export async function run(): Promise<void> {
     );
 
     for (const layout of ["wide", "narrow"] as const) {
-    await page.setViewportSize({ width: layout === "wide" ? 2400 : 1000, height: 1100 });
+    await setViewport(page, { width: layout === "wide" ? 2400 : 1000, height: 1100 });
     for (const theme of ["white", "dark"] as const) {
       const frame = await previewFrame(page);
       for (let attempt = 0; attempt < 3
@@ -592,7 +593,7 @@ export async function run(): Promise<void> {
       await captureDescriptionState(evidence, page, refreshedFrame, theme, "expanded-again", layout);
     }
     }
-    await page.setViewportSize({ width: 2400, height: 1100 });
+    await setViewport(page, { width: 2400, height: 1100 });
     const longDescription = "Saved target metadata with a deliberately long description. ".repeat(12).trim();
     fs.writeFileSync(path.join(directory, "references/frontmatter-target.md"), `---\ndescription: ${longDescription}\n---\n# Target\n\n## Supported\n`, "utf8");
     await waitFor("long target metadata refresh", () => getActivePreviewForTests()?.html.includes(longDescription) ?? false);

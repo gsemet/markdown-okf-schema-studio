@@ -24,6 +24,7 @@ import {
   setEditMode,
   waitFor,
   withCurrentFrame,
+  setViewport,
 } from "./realInput/harness";
 
 export interface ContrastRow {
@@ -233,7 +234,7 @@ async function shootPopover(page: Page, file: string): Promise<void> {
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   try {
-    await page.setViewportSize({ width: 1400, height: 900 });
+    await setViewport(page, { width: 1400, height: 900 });
     await scenarioCommentContrast(page);
   } finally {
     await browser.close();

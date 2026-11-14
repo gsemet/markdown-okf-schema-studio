@@ -20,6 +20,7 @@ import {
   waitForEditor,
   waitForRender,
   withCurrentFrame,
+  setViewport,
 } from "./realInput/harness";
 
 const SOURCE = "Read the guide for details.\nLogo:  then text.\nHome:  then text.\n\nSecond paragraph.\n";
@@ -92,7 +93,7 @@ export async function run(): Promise<void> {
   try {
     await workbench.update("colorTheme", mode === "cream" ? "Default Light Modern" : "Default Dark Modern",
       vscode.ConfigurationTarget.Workspace);
-    await page.setViewportSize({ width: 1200, height: 800 });
+    await setViewport(page, { width: 1200, height: 800 });
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     const source = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("paste.md")));

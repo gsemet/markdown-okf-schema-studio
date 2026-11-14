@@ -11,6 +11,7 @@ import {
 } from "./extensionApi";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { RealWindowEvidence } from "./evidence";
+import { setViewport } from "./realWindowViewport";
 import { traceDocumentChanges, waitForActiveSourceEditor, windowFocusReport } from "./windowFocus";
 import { markProgress } from "../shared/hangWatchdog";
 import { bounded } from "./stepWatchdog";
@@ -140,7 +141,7 @@ export async function run(): Promise<void> {
     vscode.workspace.openTextDocument(vscode.Uri.file(filePath)));
   try {
     // Setup calls bounded one by one: a hang after the coexistence step names the call that never returned.
-    await bounded("page.setViewportSize", page.setViewportSize({ width: 1400, height: 900 }));
+    await bounded("setViewport", setViewport(page, { width: 1400, height: 900 }));
     await bounded("workbench.action.closeSidebar", vscode.commands.executeCommand("workbench.action.closeSidebar"));
     // The chat view sits in the auxiliary bar.
     await bounded("workbench.action.closeAuxiliaryBar", vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar"));

@@ -15,6 +15,7 @@ import {
   waitFor,
   waitForRender,
   withCurrentFrame,
+  setViewport,
 } from "./realInput/harness";
 
 const DOCUMENT = "---\nname: Visite guid\u00e9e du stack P1\ndescription: Document de d\u00e9monstration des correctifs de la nuit\nmetadata: un champ au nom un peu long pour tester la colonne des cl\u00e9s\n---\n\n# Visite guid\u00e9e\n\n## 1. Citation\n\n> toto\n>\n> tata avec du `code inline`\n\n## 2. Dropdown\n\n:::{note} Cliquer pour ouvrir\n:class: dropdown\n\nContenu cach\u00e9.\n:::\n\n## 3. Directive non ferm\u00e9e\n\n\nLa preview doit afficher la ligne brute ci-dessus, sans planter, et ce paragraphe doit rester rendu.\n\n## 4. Tableau\n\n| Colonne 1 | Colonne 2 | Colonne 3 |\n| --- | --- | --- |\n| a1 | a2 | a3 |\n| b1 | b2 | b3 |\n| c1 | c2 | c3 |\n\n## 5. Bloc \u00e0 d\u00e9placer\n\nPremier paragraphe.\n\nDeuxi\u00e8me paragraphe, \u00e0 remonter avec la fl\u00e8che.\n\n## 6. R\u00e8gle horizontale\n\n---\n\n## 7. Fin\n\nDernier paragraphe pour tester la navigation au clavier.\n";
@@ -101,7 +102,7 @@ export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   const fixture = createFixture("window-switch-keys", { "doc.md": DOCUMENT, "other.txt": "Other text.\n" });
   try {
-    await page.setViewportSize({ width: 1400, height: 900 });
+    await setViewport(page, { width: 1400, height: 900 });
     const document = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("doc.md")));
     const other = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("other.txt")));
     await openSidePreview(document);

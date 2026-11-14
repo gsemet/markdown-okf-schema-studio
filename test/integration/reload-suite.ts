@@ -8,6 +8,7 @@ import { captureByLegacy } from "../shared/captureRegistry";
 import { freePort } from "../shared/runIsolation";
 import { writeTestProfileSettings } from "../shared/testProfile";
 import { RealWindowEvidence } from "./evidence";
+import { setViewport } from "./realWindowViewport";
 import { activateMacProcess, frontmostPid, macFocusDiagnostics } from "./macWindow";
 
 async function waitFor(label: string, predicate: () => boolean | Promise<boolean>,
@@ -139,7 +140,7 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
     const workbench = browser.contexts()[0].pages().find(candidate => candidate.url().includes("workbench"));
     assert.ok(workbench);
     const page: Page = workbench;
-    await page.setViewportSize({ width: 1440, height: 900 });
+    await setViewport(page, { width: 1440, height: 900 });
     await page.locator(".monaco-workbench").waitFor();
     await ensureCampaignWindowFocused(page, child.pid);
     await command(page, "Markdown OKF-Schema Studio: Open Preview to Side");

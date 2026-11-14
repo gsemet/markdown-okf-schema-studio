@@ -33,6 +33,7 @@ import {
   waitFor,
   waitForEditor,
   withCurrentFrame,
+  setViewport,
 } from "./realInput/harness";
 
 const FILLER = Array.from({ length: 6 }, (_, index) =>
@@ -156,7 +157,7 @@ export async function scenarioToc(page: Page): Promise<void> {
       });
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
-      await page.setViewportSize({ width: 1400, height: 900 });
+      await setViewport(page, { width: 1400, height: 900 });
       for (const [name, host, mode] of [
         ["cream", "Default Light Modern", "cream"],
         ["dark", "Default Dark Modern", "current"],
@@ -225,7 +226,7 @@ export async function scenarioToc(page: Page): Promise<void> {
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   try {
-    await page.setViewportSize({ width: 1400, height: 900 });
+    await setViewport(page, { width: 1400, height: 900 });
     await scenarioToc(page);
   } finally {
     await browser.close();

@@ -13,7 +13,10 @@ import {
 } from "../extensionApi";
 import { E2E_SCREENSHOT_ROOT } from "../../reportPaths";
 import { injectToggleDelay } from "../../shared/tocLoop";
+import { realWindowBounds } from "../realWindowViewport";
 import { RealWindowEvidence } from "../evidence";
+
+export { realWindowBounds, setViewport } from "../realWindowViewport";
 
 export const MOD: "Meta" | "Control" = process.platform === "darwin" ? "Meta" : "Control";
 
@@ -29,6 +32,8 @@ export async function connectWorkbench(): Promise<{ browser: Browser; page: Page
   const browser: Browser = await chromium.connectOverCDP(`http://127.0.0.1:${process.env.STUDIO_CDP_PORT}`);
   const page = browser.contexts()[0]?.pages().find((candidate) => candidate.url().includes("workbench"));
   assert.ok(page, "the VS Code workbench is attached");
+  // Once per connected page: the CI log shows the real window the emulated viewports must fit in.
+  console.log(`real window bounds: ${JSON.stringify(await realWindowBounds(page))}`);
   return { browser, page };
 }
 
@@ -113,26 +118,45 @@ export async function waitForRender(
   });
 }
 
-/** The visible webview frame showing the host's current render, or undefined if none is ready. */
+/**
+ * The visible webview frame showing the host's current render, or undefined if none is ready.
+ * Each Playwright call is bounded (about 10 s) and named: a call stuck on a hidden or detaching
+ * frame fails the step with its name, instead of hanging to the step budget (CI run 43500084136).
+ */
 export async function findCurrentFrame(page: Page): Promise<Frame | undefined> {
   const preview = getActivePreviewForTests();
   if (preview === undefined) return undefined;
   for (const frame of page.frames()) {
     try {
-      if (await frame.locator("#sphinx-myst-preview-content").count() === 0) continue;
-      if (!await (await frame.frameElement()).isVisible()) continue;
+      if (await frameCall("locator.count", frame, frame.locator("#sphinx-myst-preview-content").count()) === 0) continue;
+      const element = await frameCall("frame.frameElement", frame, frame.frameElement());
+      if (!await frameCall("isVisible", frame, element.isVisible())) continue;
       const root = frame.locator("html");
       // Requests and versions restart per webview, so a second visible Studio webview can carry the
       // same version and request id. The document id tells the two apart.
-      if (await root.getAttribute("data-sphinx-preview-document-id") !== preview.documentUri) continue;
-      if (await root.getAttribute("data-sphinx-preview-document-version") !== String(preview.documentVersion)) continue;
-      if (await root.getAttribute("data-sphinx-preview-request-id") !== String(preview.requestId)) continue;
+      if (await frameCall("getAttribute document-id", frame, root.getAttribute("data-sphinx-preview-document-id")) !== preview.documentUri) continue;
+      if (await frameCall("getAttribute document-version", frame, root.getAttribute("data-sphinx-preview-document-version")) !== String(preview.documentVersion)) continue;
+      if (await frameCall("getAttribute request-id", frame, root.getAttribute("data-sphinx-preview-request-id")) !== String(preview.requestId)) continue;
       return frame;
     } catch (error) {
       if (!detachedFrameError.test(String(error))) throw error;
     }
   }
   return undefined;
+}
+
+/** Bound of one Playwright call of the frame lookup: normally milliseconds, never a step budget. */
+const FRAME_CALL_TIMEOUT_MS = 10_000;
+
+function frameCall<T>(call: string, frame: Frame, promise: Promise<T>): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  const timedOut = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(
+      `TIMEOUT: ${call} did not return within ${FRAME_CALL_TIMEOUT_MS} ms (frame ${frame.url().slice(0, 120)})`)), FRAME_CALL_TIMEOUT_MS);
+  });
+  // The abandoned call may still reject later: swallow it so it cannot become an unhandled rejection.
+  promise.catch(() => undefined);
+  return Promise.race([promise, timedOut]).finally(() => clearTimeout(timer));
 }
 
 /** Waits until the current webview shows a raw-Markdown or table-cell editor matching `selector`. */
@@ -189,11 +213,11 @@ export async function currentPreviewFrame(page: Page): Promise<Frame> {
   }).catch(async (error: unknown) => {
     const preview = getActivePreviewForTests();
     const frames = await Promise.all(page.frames().map(async (frame) => ({
-      url: frame.url(), root: await frame.locator("html").evaluate((element) => ({
+      url: frame.url(), root: await frameCall("html evaluate (failure dump)", frame, frame.locator("html").evaluate((element) => ({
         version: element.getAttribute("data-sphinx-preview-document-version"),
         requestId: element.getAttribute("data-sphinx-preview-request-id"),
         documentId: element.getAttribute("data-sphinx-preview-document-id"),
-      })).catch(() => undefined),
+      }))).catch(() => undefined),
     })));
     throw new Error(`${String(error)} Expected preview: ${JSON.stringify({
       documentUri: preview?.documentUri, version: preview?.documentVersion, requestId: preview?.requestId,
@@ -250,10 +274,34 @@ interface EditToggleState {
   /** The element at the toggle's centre in the workbench: the webview iframe unless something covers it. */
   workbenchHit?: string;
   focus: string;
+  /** The real window and screen sizes (CDP window bounds, `screen.width/height`). */
+  realWindow?: string;
+  /** The click point in page coordinates (the toggle's centre), when the toggle has a box. */
+  clickPoint?: string;
+  /** The host frame (`index.html`, parent of the content frame): focus, active element, element at the click point. */
+  hostFrame?: string;
   /** Clicks that reached the toggle in this frame since the probe was installed (counted at `document`, capture phase). */
   clicks: number;
   /** Uncaught errors of the frame since the probe was installed (the last five). */
   errors: string[];
+}
+
+/**
+ * What the host frame (`index.html`, the parent of the content frame) holds: `document.hasFocus()`,
+ * its active element and the element at the click point (page coordinates). Diagnostic only: a
+ * failed read is reported as text, never thrown.
+ */
+async function hostFrameProbe(frame: Frame, x: number, y: number): Promise<string> {
+  const host = frame.parentFrame();
+  if (host === null) return "no parent frame";
+  return host.evaluate(([px, py]) => {
+    const name = (element: Element | null): string => element === null ? "none"
+      : `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}`;
+    // The host frame is the webview shell: its coordinates are the content frame's page offset,
+    // so the point is only a hint when the shell is not at the page origin.
+    return `hasFocus=${String(document.hasFocus())} active=${name(document.activeElement)} `
+      + `atPoint=${name(document.elementFromPoint(px, py))}`;
+  }, [x, y] as const).catch((error: unknown) => `unreadable: ${String(error).slice(0, 80)}`);
 }
 
 /**
@@ -322,7 +370,14 @@ async function editToggleState(page: Page, frame: Frame): Promise<EditToggleStat
       const classes = typeof element.className === "string" ? element.className.trim().split(/\s+/u).filter(Boolean) : [];
       return `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${classes.map((name) => `.${name}`).join("")}`;
     }, [box.x + box.width / 2, box.y + box.height / 2] as const).catch(() => "unreadable");
+    if (box !== null) {
+      state.clickPoint = `${Math.round(box.x + box.width / 2)},${Math.round(box.y + box.height / 2)}`;
+      state.hostFrame = await hostFrameProbe(frame, box.x + box.width / 2, box.y + box.height / 2);
+    }
   }
+  const real = await realWindowBounds(page);
+  state.realWindow = `window ${real.window ? `${real.window.width}x${real.window.height}` : "unreadable"}`
+    + `${real.windowState ? ` (${real.windowState})` : ""}, screen ${real.screen ? `${real.screen.width}x${real.screen.height}` : "unreadable"}`;
   return state;
 }
 
@@ -368,8 +423,11 @@ export async function setEditMode(page: Page, on: boolean): Promise<Frame> {
   const maxClicks = 3;
   const maxBootWaits = 3;
   const attempts: string[] = [];
+  const clickPoints: string[] = [];
+  // Every attempt's state carries the click point (page coordinates), the real window bounds and the host frame probe.
   const failure = (reason: string): Error => new Error(
-    `Edit mode did not switch to ${wanted}: ${reason}. Attempts: ${attempts.join(" | ") || "none"}`);
+    `Edit mode did not switch to ${wanted}: ${reason}. Click point in page coordinates: ${clickPoints.join(" ") || "unknown"}. `
+    + `Attempts: ${attempts.join(" | ") || "none"}`);
   let bootWaits = 0;
   for (let click = 1; click <= maxClicks; click += 1) {
     await waitForEditModeRuntime(page);
@@ -413,6 +471,7 @@ export async function setEditMode(page: Page, on: boolean): Promise<Frame> {
     }
     // In order: the state the click was made on, then what the injected pauses did around it.
     attempts.push(`#${click} before ${JSON.stringify(before.state)}`);
+    if (before.state.clickPoint !== undefined) clickPoints.push(`#${click}=(${before.state.clickPoint})`);
     if (before.injectedBefore > 0) attempts.push(`#${click} injected ${before.injectedBefore} ms before the click`);
     if (before.unclicked !== undefined) {
       attempts.push(`#${click} CHANGED WITH NO CLICK during the injected pause: ${before.unclicked}`);
@@ -664,4 +723,9 @@ export async function closeAllEditors(): Promise<void> {
   }
   await vscode.commands.executeCommand("workbench.action.closeAllEditors");
   await previewGroupUnlocksSettledForTests();
+  // A tab left open leaks into the next step (CI run 43500084136: preview and dirty tabs of earlier
+  // steps were still open when `checkbox-toggle` hung). Name what remains.
+  const remaining = vscode.window.tabGroups.all.flatMap((group, index) =>
+    group.tabs.map((tab) => `group ${index + 1}: ${tab.label}${tab.isDirty ? " (dirty)" : ""}`));
+  assert.deepEqual(remaining, [], `closeAllEditors left tabs open: ${remaining.join("; ")}`);
 }

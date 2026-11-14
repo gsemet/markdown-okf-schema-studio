@@ -14,6 +14,7 @@ import {
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused, waitForActiveSourceEditor } from "./windowFocus";
+import { setViewport } from "./realWindowViewport";
 
 async function waitFor(
   description: string,
@@ -125,7 +126,7 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
   const openPreview = async (mode: "cream" | "dark", hostTheme: string): Promise<Frame> => {
     await storeWorkspaceChoicesForTests({ previewThemeMode: mode, toolbarCollapsed: false, paletteMode: "myst" });
     await workbench.update("colorTheme", hostTheme, vscode.ConfigurationTarget.Workspace);
-    await page.setViewportSize({ width: 1100, height: 760 });
+    await setViewport(page, { width: 1100, height: 760 });
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     await vscode.window.showTextDocument(notes, vscode.ViewColumn.One);
@@ -372,7 +373,7 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
     await workbench.update("colorTheme", originalTheme, vscode.ConfigurationTarget.Workspace);
     await vscode.window.showTextDocument(notes, vscode.ViewColumn.One);
     await vscode.commands.executeCommand("workbench.action.revertAndCloseActiveEditor");
-    if (viewport !== null) await page.setViewportSize(viewport);
+    if (viewport !== null) await setViewport(page, viewport);
     fs.rmSync(directory, { recursive: true, force: true });
   }
 }
