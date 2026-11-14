@@ -51,3 +51,8 @@ export function formatListMarks(marks: readonly { at: number; mark: string }[] |
   if (typeof marks === "string") return `list marks [${marks}]`;
   return `list marks [${marks.length === 0 ? "none" : marks.map((entry) => `${entry.at - origin} ${entry.mark}`).join("; ")}]`;
 }
+
+/** The failure message of a hover that never reached the page, with the landing summary. */
+export function formatHoverNeverReached(option: string, timeoutMs: number, landing: string): string {
+  return `the hover on list option ${option} never reached the page within ${timeoutMs} ms; ${landing}`;
+}

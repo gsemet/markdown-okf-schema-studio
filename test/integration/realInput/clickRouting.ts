@@ -11,6 +11,7 @@ import type { Frame, Page } from "playwright-core";
 import * as vscode from "vscode";
 
 import {
+  formatHoverNeverReached,
   formatLandingRecords,
   formatListMarks,
   LANDING_RECORD_LIMIT,
@@ -256,4 +257,43 @@ export async function readListMarks(frame: Frame | undefined, origin: number): P
   const marks = await frame.evaluate(() => (window as unknown as { studioListMarks?: { at: number; mark: string }[] }).studioListMarks?.slice())
     .catch((error: unknown) => `unreadable: ${String(error).slice(0, 80)}`);
   return formatListMarks(marks ?? "not watching", origin);
+}
+
+/** Page side of the hover recorder: the `data-edit-option` under the pointer, capture phase, never altering an event. */
+function recordHover(): void {
+  const scope = window as unknown as { studioHoveredOption?: string | null; studioHoverInstalled?: boolean };
+  if (scope.studioHoverInstalled === true) return;
+  scope.studioHoverInstalled = true;
+  scope.studioHoveredOption = null;
+  for (const type of ["mouseover", "pointerover"]) {
+    document.addEventListener(type, (event) => {
+      const option = (event.target as Element | null)?.closest?.("[data-edit-option]");
+      scope.studioHoveredOption = option?.getAttribute("data-edit-option") ?? null;
+    }, true);
+  }
+}
+
+/**
+ * Clicks an option of a list that has just opened, the way a real mouse does: hover first, wait
+ * until the page reports the hover on that option, then press. A synthesized press with no
+ * preceding hover can be routed by the host to the workbench instead of the webview process: in CI
+ * stress run 43608210974 (round 17, palette) the press on the heading option landed on
+ * `iframe.webview.ready` in the workbench document, the webview saw no mousedown and the block
+ * editor committed on the blur; the earlier runs 43582068953 and 43576429177 lost the same click.
+ * A real mouse always hovers before it presses, so the scenario does too. No sleep, no retry: the
+ * wait is on a state the page reports. When the hover never arrives, the error says so and carries
+ * the landing summary of the workbench and the host frame.
+ */
+export async function clickListOption(page: Page, frame: Frame, option: string, hoverTimeoutMs = 5_000): Promise<void> {
+  const startedAt = Date.now();
+  await frame.evaluate(recordHover);
+  const target = frame.locator(`[data-edit-option='${option}']`);
+  await target.hover();
+  try {
+    await frame.waitForFunction((wanted) =>
+      (window as unknown as { studioHoveredOption?: string | null }).studioHoveredOption === wanted, option, { timeout: hoverTimeoutMs });
+  } catch {
+    throw new Error(formatHoverNeverReached(option, hoverTimeoutMs, await readLandingSummary(page, frame, startedAt, startedAt)));
+  }
+  await target.click();
 }

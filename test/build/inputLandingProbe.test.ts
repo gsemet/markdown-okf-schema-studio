@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { formatLandingRecords, formatListMarks } from "../shared/inputLandingProbe";
+import { formatHoverNeverReached, formatLandingRecords, formatListMarks } from "../shared/inputLandingProbe";
 
 test("CR 330: records are relative to the origin, filtered by start, and a failed read is text", () => {
   const text = formatLandingRecords([
@@ -26,4 +26,9 @@ test("CR 330: list marks are on the scenario clock", () => {
     "list marks [120 inserted; 300 transitionend]");
   assert.equal(formatListMarks([], 0), "list marks [none]");
   assert.equal(formatListMarks("unreadable: x", 0), "list marks [unreadable: x]");
+});
+
+test("CR 330: a hover that never reached the page names the option and carries the landing", () => {
+  assert.equal(formatHoverNeverReached("2", 5_000, "landing workbench [none]"),
+    "the hover on list option 2 never reached the page within 5000 ms; landing workbench [none]");
 });
