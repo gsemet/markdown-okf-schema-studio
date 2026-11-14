@@ -83,11 +83,11 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   "slash-menu": scenarioSlashMenu,
   "save-position": scenarioSaveKeepsBlockInPlace,
   "alert-dropdown": scenarioAlertDropdown,
-  // The scenario reopens the sidebar it closed; the other stress scenarios run without it.
-  toc: async (page) => {
-    await scenarioToc(page);
-    await vscode.commands.executeCommand("workbench.action.closeSidebar");
-  },
+  // CR 328: the three steps that open a preview and click the edit toggle first. Each closes the
+  // side bar before its preview opens and restores the state it found.
+  "readme-html": scenarioReadmeHtml,
+  toc: scenarioToc,
+  "myst-blocks": scenarioMystBlocks,
   "find-in-preview": (page) => scenarioFindInPreview(page),
   // CR 326: palette lost a block editor to a late focus move once; checkbox-toggle hung once.
   palette: scenarioPalette,
@@ -137,7 +137,7 @@ const TOC_LOOP_STEPS: Record<TocLoopStepName, (page: Page) => Promise<void>> = {
 
 /**
  * `STUDIO_REAL_INPUT_SCENARIO=toc-loop`: the steps of `STUDIO_TOC_LOOP_STEPS` (default
- * `readme-html,toc,myst-blocks`, the three steps that reopen the side bar) in a round,
+ * `readme-html,toc,myst-blocks`, the three steps that once reopened the side bar) in a round,
  * `STUDIO_TOC_LOOP` rounds (default 1). `STUDIO_TOC_LOOP_CONTROL=1` closes the side bar before each
  * step. Optionally with `STUDIO_TOGGLE_DELAY_MS` delays around the edit toggle. A failed round is
  * logged with its message (it carries the toggle state #205 records) and the loop goes on, so one
