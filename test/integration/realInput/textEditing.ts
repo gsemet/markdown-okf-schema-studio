@@ -22,6 +22,7 @@ import {
   waitForRender,
   withCurrentFrame,
 } from "./harness";
+import { installLandingProbe, readLandingSummary, readListMarks, watchListAppearance } from "./clickRouting";
 import {
   traceDocumentChanges,
   waitForActiveSourceEditor,
@@ -654,6 +655,8 @@ export async function scenarioPalette(page: Page, evidence: Evidence): Promise<v
             .map((move) => ({ at: move.at - startedAt, command: move.command })),
           windowStates: windowStates.map((state) => ({ at: state.at - startedAt, focused: state.focused })),
         })
+        + " " + await readListMarks(await findCurrentFrame(page), startedAt)
+        + " " + await readLandingSummary(page, await findCurrentFrame(page), startedAt, startedAt)
         + " " + await windowFocusReport(page));
       const expectValue = async (description: string, expected: string): Promise<void> => {
         try {
@@ -671,6 +674,12 @@ export async function scenarioPalette(page: Page, evidence: Evidence): Promise<v
       step("focus readiness");
       await waitForWorkbenchFocusSettled(page);
       await waitForPageSettled(page, "palette", source);
+      // Read-only recorders of where each press lands and when the lists appear (CR 330).
+      const probed = await findCurrentFrame(page);
+      if (probed !== undefined) {
+        await installLandingProbe(page, probed);
+        await watchListAppearance(probed);
+      }
       step("paragraph click");
       await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
       await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
@@ -690,7 +699,9 @@ export async function scenarioPalette(page: Page, evidence: Evidence): Promise<v
       await press(page, "Home");
       await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='heading']").click());
       await waitFor("the heading list", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
+      step("heading option click");
       await withCurrentFrame(page, (frame) => frame.locator("[data-edit-option='2']").click());
+      step("heading option clicked");
       await expectValue("Heading 2 to prefix the line", "## Second paragraph.**xy**");
       assert.equal(await count(".sphinx-preview-edit-palette-menu"), 0, "choosing closes the list");
       await press(page, MOD + "+z");

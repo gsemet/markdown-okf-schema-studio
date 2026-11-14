@@ -27,6 +27,7 @@ import {
   waitForRender,
   withCurrentFrame,
 } from "./harness";
+import { installLandingProbe, readLandingSummary, readListMarks, watchListAppearance } from "./clickRouting";
 import { ensureTestWindowFocused, waitForWorkbenchFocusSettled, windowFocusReport } from "../windowFocus";
 import { editorBlurBeforePress } from "../../shared/editorBlurInterruption";
 import {
@@ -240,6 +241,8 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
             .map((move) => ({ at: move.at - startedAt, command: move.command })),
           windowStates: windowStates.map((state) => ({ at: state.at - startedAt, focused: state.focused })),
         })
+        + " " + await readListMarks(await findCurrentFrame(page), startedAt)
+        + " " + await readLandingSummary(page, await findCurrentFrame(page), startedAt, startedAt)
         + " " + await windowFocusReport(page));
       const expectValue = async (description: string, expected: string): Promise<void> => {
         try {
@@ -257,6 +260,12 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
 
       // Opens the paragraph's editor, writes the alert and waits for a steady editor with its type list.
       const openTypeList = async (): Promise<void> => {
+        // Read-only recorders of where each press lands and when the lists appear (CR 330).
+        const probed = await findCurrentFrame(page);
+        if (probed !== undefined) {
+          await installLandingProbe(page, probed);
+          await watchListAppearance(probed);
+        }
         step("paragraph click");
         await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: original }).click());
         await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
@@ -297,6 +306,7 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
       const pickWarning = async (): Promise<void> => {
         step("warning click");
         await withCurrentFrame(page, (frame) => frame.locator("[data-edit-option='WARNING']").click());
+        step("warning clicked");
         await waitFor("Warning to change the type", async () => (await readEditor()).value === warning);
       };
 
