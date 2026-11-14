@@ -71,6 +71,10 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "toc",
     // Find in preview: a late block editor focus once failed it on a heavy run only.
     "find-in-preview",
+    // CR 326: both failed once on a heavy run (a block editor closed by a late focus move; a hang
+    // while waiting for the first checkbox render).
+    "palette",
+    "checkbox-toggle",
     // "wide-table-tab" is out of the stress plan: its LASTCELL click was unstable on a heavy run.
   ],
   untrusted: ["untrusted-read-only"],

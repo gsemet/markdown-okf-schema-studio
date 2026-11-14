@@ -27,7 +27,7 @@ import {
   waitForRender,
   withCurrentFrame,
 } from "./harness";
-import { ensureTestWindowFocused, windowFocusReport } from "../windowFocus";
+import { ensureTestWindowFocused, waitForWorkbenchFocusSettled, windowFocusReport } from "../windowFocus";
 import { editorBlurBeforePress } from "../../shared/editorBlurInterruption";
 import {
   type PageWitness,
@@ -205,6 +205,10 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
       await waitForRender(source);
       step("edit mode on");
       await setEditMode(page, true);
+      // The window, the workbench and the page hold the focus before the first click that opens the
+      // editor, so a late focus move cannot blur its text box (CR 326).
+      step("focus readiness");
+      await waitForWorkbenchFocusSettled(page);
       const readEditor = async (): Promise<{ tag: string | undefined; value: string | undefined }> => {
         const current = await findCurrentFrame(page);
         if (current === undefined) return { tag: undefined, value: undefined };

@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { parse as parseYaml } from "yaml";
 import { type Page } from "playwright-core";
 
+import { previewGroupFocusMovesForTests } from "../extensionApi";
 import { lineDelta } from "../../shared/lineDelta";
 import { undoOneStep, undoUntil, type UndoStepDriver } from "../../shared/undoSteps";
 import {
@@ -24,8 +25,10 @@ import {
 import {
   traceDocumentChanges,
   waitForActiveSourceEditor,
+  waitForWorkbenchFocusSettled,
   windowFocusReport,
 } from "../windowFocus";
+import { type WindowState } from "../../shared/stepInterruption";
 import { captureAfter, escapeBlockEditor, realInputId, SMOKE, waitForCaretAtEnd, waitForNoBlockEditor, withDocument, withSmokeDocument } from "./common";
 import { explained, selectAllInControl, waitForPageSettled, waitForTextInput } from "./flushBeforeNavigate";
 
@@ -607,64 +610,108 @@ export async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise
 /** RI-T21: palette buttons edit the text box without closing it, and one undo reverts each. */
 export async function scenarioPalette(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t21", async (source) => {
-    await openSidePreview(source);
-    await waitForRender(source);
-    await setEditMode(page, true);
-    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
-    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
-    const readEditor = async (): Promise<{ tag: string | undefined; value: string | undefined }> => {
-      const current = await findCurrentFrame(page);
-      if (current === undefined) return { tag: undefined, value: undefined };
-      return current.evaluate(() => {
-        const element = document.activeElement;
-        return {
-          tag: element?.tagName,
-          value: element instanceof HTMLTextAreaElement ? element.value : undefined,
-        };
-      });
+    // Each step with its time since the scenario started, the window focus changes and the focus
+    // commands the extension ran, for the failure message (CI rule 12), as scenarioAlertDropdown does.
+    const startedAt = Date.now();
+    const steps: Array<{ at: number; step: string }> = [];
+    const step = (name: string): void => {
+      steps.push({ at: Date.now() - startedAt, step: name });
     };
-    const expectValue = async (description: string, expected: string): Promise<void> => {
-      try {
-        await waitFor(description, async () => (await readEditor()).value === expected);
-      } catch (error) {
-        throw new Error(String(error) + " Editor state: " + JSON.stringify(await readEditor()));
-      }
-    };
-    const count = async (selector: string): Promise<number> => {
-      const current = await findCurrentFrame(page);
-      return current === undefined ? -1 : current.locator(selector).count();
-    };
-    await press(page, "End");
+    const windowStates: WindowState[] = [];
+    const windowWatch = vscode.window.onDidChangeWindowState((state) => {
+      windowStates.push({ at: Date.now(), focused: state.focused });
+    });
+    try {
+      step("open preview");
+      await openSidePreview(source);
+      await waitForRender(source);
+      step("edit mode on");
+      await setEditMode(page, true);
+      const readEditor = async (): Promise<{ tag: string | undefined; value: string | undefined }> => {
+        const current = await findCurrentFrame(page);
+        if (current === undefined) return { tag: undefined, value: undefined };
+        return current.evaluate(() => {
+          const element = document.activeElement;
+          return {
+            tag: element?.tagName,
+            value: element instanceof HTMLTextAreaElement ? element.value : undefined,
+          };
+        });
+      };
+      // The page trace's start on the scenario's clock, so its entries line up with the steps.
+      const pageTraceStart = async (): Promise<number | undefined> => {
+        const startedAtInPage = await (await findCurrentFrame(page))?.evaluate(() =>
+          (window as unknown as { __studioDiagnostics?: { startedAt?: () => number } }).__studioDiagnostics?.startedAt?.());
+        return typeof startedAtInPage === "number" ? startedAtInPage - startedAt : undefined;
+      };
+      const explain = async (error: unknown): Promise<Error> => new Error(String(error)
+        + " Editor state: " + JSON.stringify(await readEditor())
+        + " Scenario: " + JSON.stringify({
+          steps,
+          pageTraceStart: await pageTraceStart(),
+          host: { version: source.version, dirty: source.isDirty, text: source.getText() },
+          focusMoves: previewGroupFocusMovesForTests(startedAt - 5_000)
+            .map((move) => ({ at: move.at - startedAt, command: move.command })),
+          windowStates: windowStates.map((state) => ({ at: state.at - startedAt, focused: state.focused })),
+        })
+        + " " + await windowFocusReport(page));
+      const expectValue = async (description: string, expected: string): Promise<void> => {
+        try {
+          await waitFor(description, async () => (await readEditor()).value === expected);
+        } catch (error) {
+          throw await explain(error);
+        }
+      };
+      const count = async (selector: string): Promise<number> => {
+        const current = await findCurrentFrame(page);
+        return current === undefined ? -1 : current.locator(selector).count();
+      };
+      // The window, the workbench and the page hold the focus, and nothing can still replace the
+      // content, before the first click that opens an editor.
+      step("focus readiness");
+      await waitForWorkbenchFocusSettled(page);
+      await waitForPageSettled(page, "palette", source);
+      step("paragraph click");
+      await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
+      await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+      await waitForTextInput(page, "[data-sphinx-preview-block-editor] textarea", "palette");
+      await press(page, "End");
 
-    // Click Bold, then type: the text lands between the markers and the focus never left.
-    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='bold']").click());
-    await expectValue("Bold to insert an empty pair at the caret", "Second paragraph.****");
-    assert.equal((await readEditor()).tag, "TEXTAREA", "clicking Bold keeps the focus in the editor");
-    await typeText(page, "xy");
-    await expectValue("typing after Bold to land inside the markers", "Second paragraph.**xy**");
+      // Click Bold, then type: the text lands between the markers and the focus never left.
+      step("bold");
+      await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='bold']").click());
+      await expectValue("Bold to insert an empty pair at the caret", "Second paragraph.****");
+      assert.equal((await readEditor()).tag, "TEXTAREA", "clicking Bold keeps the focus in the editor");
+      await typeText(page, "xy");
+      await expectValue("typing after Bold to land inside the markers", "Second paragraph.**xy**");
 
-    // A heading level from the list; one Cmd/Ctrl+Z reverts it.
-    await press(page, "Home");
-    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='heading']").click());
-    await waitFor("the heading list", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
-    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-option='2']").click());
-    await expectValue("Heading 2 to prefix the line", "## Second paragraph.**xy**");
-    assert.equal(await count(".sphinx-preview-edit-palette-menu"), 0, "choosing closes the list");
-    await press(page, MOD + "+z");
-    await expectValue("one undo to remove the heading prefix", "Second paragraph.**xy**");
-    assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
+      // A heading level from the list; one Cmd/Ctrl+Z reverts it.
+      step("heading");
+      await press(page, "Home");
+      await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='heading']").click());
+      await waitFor("the heading list", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
+      await withCurrentFrame(page, (frame) => frame.locator("[data-edit-option='2']").click());
+      await expectValue("Heading 2 to prefix the line", "## Second paragraph.**xy**");
+      assert.equal(await count(".sphinx-preview-edit-palette-menu"), 0, "choosing closes the list");
+      await press(page, MOD + "+z");
+      await expectValue("one undo to remove the heading prefix", "Second paragraph.**xy**");
+      assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
 
-    // Escape closes the open list first, and only the next Escape closes the editor.
-    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='codeFence']").click());
-    await waitFor("the language list", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
-    // Captured with the language list open, before the Escape that closes it.
-    await captureAfter(evidence, page, "palette-slash/r04-palette-bold-heading",
-      "Edit mode on; Bold then typing wrote inside the markers and Heading 2 was undone by one Cmd/Ctrl+Z; "
-      + "the image shows the open language list that the next Escape closes while the editor stays open.");
-    await press(page, "Escape");
-    await waitFor("Escape to close the list", async () => await count(".sphinx-preview-edit-palette-menu") === 0);
-    assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
-    await escapeBlockEditor(page, "the block editor to close after the second Escape");
+      // Escape closes the open list first, and only the next Escape closes the editor.
+      step("code fence");
+      await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='codeFence']").click());
+      await waitFor("the language list", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
+      // Captured with the language list open, before the Escape that closes it.
+      await captureAfter(evidence, page, "palette-slash/r04-palette-bold-heading",
+        "Edit mode on; Bold then typing wrote inside the markers and Heading 2 was undone by one Cmd/Ctrl+Z; "
+        + "the image shows the open language list that the next Escape closes while the editor stays open.");
+      await press(page, "Escape");
+      await waitFor("Escape to close the list", async () => await count(".sphinx-preview-edit-palette-menu") === 0);
+      assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
+      await escapeBlockEditor(page, "the block editor to close after the second Escape");
+    } finally {
+      windowWatch.dispose();
+    }
   });
 }
 

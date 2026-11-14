@@ -7,6 +7,7 @@ import {
   hostStressPlan,
   STRESS_SCENARIOS_BY_HOST,
 } from "../../shared/stressPlan";
+import { run as runCheckboxToggle } from "../checkboxToggle.test";
 import { scenarioFindInPreview } from "../findInPreview.test";
 import { scenarioLinkedTargetSave } from "../linkedTargetSave";
 import { scenarioTableMoves } from "../tableMoves";
@@ -78,6 +79,11 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
   },
   "find-in-preview": (page) => scenarioFindInPreview(page),
+  // CR 326: palette lost a block editor to a late focus move once; checkbox-toggle hung once.
+  palette: scenarioPalette,
+  // A step of the trusted suite with its own CDP connection and evidence: it ignores the page and
+  // evidence of the round and closes its own connection, so each round is the step as CI runs it.
+  "checkbox-toggle": async () => runCheckboxToggle(),
   // "wide-table-tab" is out of the stress table: its LASTCELL click was unstable (under investigation).
 };
 
