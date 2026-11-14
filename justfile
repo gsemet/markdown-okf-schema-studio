@@ -332,10 +332,12 @@ ci-hang-dump:
 # CI job "stress": repeat the flake-prone real-window scenarios REPEAT times, in the trusted window
 # then in the Restricted Mode window (one window each). The rounds come from the argument, else from
 # STUDIO_STRESS_REPEAT (the workflow_dispatch input); STUDIO_STRESS_SCENARIOS (comma-separated names)
-# narrows the scenarios. REPEAT must be an integer from 1 to 100. Above about 20 rounds, narrow
-# STUDIO_STRESS_SCENARIOS (for example alert-dropdown): all scenarios take about 3.6 s per round and
-# scenario, so 100 rounds of all of them would pass the 26-minute launch deadline and the job limit.
-ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "20"): (_require-unlocked-screen "ci-stress")
+# narrows the scenarios. REPEAT must be an integer from 1 to 100. One scenario run costs about 4 s;
+# the launch deadline is computed from the plan (2 min plus 6 s per scenario run, at most 24 min,
+# test/shared/hangWatchdog.ts). The default 12 rounds of all 17 trusted scenarios take about 14 min.
+# Up to about 220 scenario runs per window (rounds times scenarios) fit under the ceiling: 12 rounds
+# of all 17, 60 rounds of 3, 100 rounds of 2. Above that, narrow STUDIO_STRESS_SCENARIOS.
+ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "12"): (_require-unlocked-screen "ci-stress")
     #!/usr/bin/env bash
     set -uo pipefail
     repeat={{ quote(REPEAT) }}
@@ -344,9 +346,6 @@ ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "20"): (_require-unlocked-screen "c
         exit 2
     fi
     export STUDIO_REAL_INPUT_SCENARIO=stress STUDIO_STRESS_REPEAT="$repeat"
-    # 20 rounds take about 18 minutes in the trusted window: the 15-minute launch deadline of the
-    # hang watchdog (test/shared/hangWatchdog.ts) would cut a healthy run; 26 still fails before the job.
-    export STUDIO_LAUNCH_TIMEOUT_MS="${STUDIO_LAUNCH_TIMEOUT_MS:-1560000}"
     if {{ npm }} run test:integration -- --trusted-only && node out/test/integration/run-tests.js --untrusted-only; then
         echo "ci-stress: passed ($repeat rounds)"
     else
