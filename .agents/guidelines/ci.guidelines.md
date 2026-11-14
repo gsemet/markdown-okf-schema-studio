@@ -91,7 +91,8 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     delay 0 to 2000 ms, launch deadline 30 minutes inside a 35-minute step). It does not gate merges
     and is not part of `checks`; failed rounds are counted and the job is red if any failed. The
     flake's cause was the 1280 px default Xvfb screen under a 1400 px emulated viewport (CR 326);
-    the loop stays as a repro tool.
+    the loop stays as a repro tool. Each round runs `readme-html` first, because the toggle failed in
+    the integration job right after that step.
 14. **A release is tagged only after a green heavy run of its commit.** On a push to `main` that
     changes the package version, the `release-check` job detects the change
     (`scripts/version.py --bump-since`, the same test `tag-release` uses) and `stress` blocks

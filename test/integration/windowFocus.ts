@@ -52,6 +52,33 @@ export async function ensureTestWindowFocused(): Promise<void> {
 }
 
 /**
+ * What a step that fails on its first real click should carry: the host and workbench focus report
+ * and the tabs left in every group (a leftover tab from an earlier step shows up here).
+ */
+export async function clickFailureDetails(page: Page): Promise<string> {
+  const tabs = vscode.window.tabGroups.all.map((group, index) =>
+    `group ${index + 1}${group.isActive ? " (active)" : ""}: ${group.tabs.map((tab) => `${tab.label}${tab.isActive ? "*" : ""}${tab.isDirty ? " (dirty)" : ""}`).join(", ") || "no tab"}`);
+  return `Window focus: ${await windowFocusReport(page)}; tabs: ${tabs.join(" | ")}`;
+}
+
+/**
+ * Waits until the window can take the first real click of a step that has just opened its preview:
+ * Chromium activates the page (CDP `Page.bringToFront`), VS Code reports the window focused and no
+ * group unlock focus command is pending. States the host reports, no delay; the webview itself is
+ * not required to be the active element yet (it becomes so by that very click).
+ */
+export async function waitForFirstClickReady(page: Page): Promise<void> {
+  try {
+    await ensureTestWindowFocused();
+    await bounded("page.bringToFront", page.bringToFront());
+    await bounded("previewGroupUnlocksSettledForTests", previewGroupUnlocksSettledForTests());
+    await waitFor("the window to be focused", () => vscode.window.state.focused);
+  } catch (error) {
+    throw new Error(`${error instanceof Error ? error.message : String(error)} ${await windowFocusReport(page)}`);
+  }
+}
+
+/**
  * Waits until a real click in the preview cannot be preceded by a late focus move: VS Code reports
  * the window focused, no group unlock focus command is pending, the webview is the workbench's active
  * element and the content document has the focus. Each condition is a state the host or the page
