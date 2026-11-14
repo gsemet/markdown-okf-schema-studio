@@ -305,7 +305,7 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
       };
       const pickWarning = async (): Promise<void> => {
         step("warning click");
-        await withCurrentFrame(page, (frame) => clickListOption(page, frame, "WARNING"));
+        await withCurrentFrame(page, (frame) => clickListOption(page, frame, "WARNING", "[data-edit-action='alert']"));
         step("warning clicked");
         await waitFor("Warning to change the type", async () => (await readEditor()).value === warning);
       };

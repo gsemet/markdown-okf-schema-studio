@@ -11,6 +11,7 @@ import type { Frame, Page } from "playwright-core";
 import * as vscode from "vscode";
 
 import {
+  formatHoverDiagnostics,
   formatHoverNeverReached,
   formatLandingRecords,
   formatListMarks,
@@ -259,18 +260,44 @@ export async function readListMarks(frame: Frame | undefined, origin: number): P
   return formatListMarks(marks ?? "not watching", origin);
 }
 
-/** Page side of the hover recorder: the `data-edit-option` under the pointer, capture phase, never altering an event. */
-function recordHover(): void {
-  const scope = window as unknown as { studioHoveredOption?: string | null; studioHoverInstalled?: boolean };
-  if (scope.studioHoverInstalled === true) return;
-  scope.studioHoverInstalled = true;
-  scope.studioHoveredOption = null;
-  for (const type of ["mouseover", "pointerover"]) {
-    document.addEventListener(type, (event) => {
-      const option = (event.target as Element | null)?.closest?.("[data-edit-option]");
-      scope.studioHoveredOption = option?.getAttribute("data-edit-option") ?? null;
-    }, true);
+/** Page side of the hover recorder: the `data-edit-option` under the pointer plus move/over counters, capture phase, never altering an event. */
+function recordHover(): { mousemove: number; mouseover: number; hasFocus: boolean } {
+  const scope = window as unknown as {
+    studioHoveredOption?: string | null;
+    studioHoverCounts?: { mousemove: number; mouseover: number };
+  };
+  if (scope.studioHoverCounts === undefined) {
+    const counts = { mousemove: 0, mouseover: 0 };
+    scope.studioHoverCounts = counts;
+    scope.studioHoveredOption = null;
+    document.addEventListener("mousemove", () => { counts.mousemove += 1; }, true);
+    for (const type of ["mouseover", "pointerover"]) {
+      document.addEventListener(type, (event) => {
+        if (type === "mouseover") counts.mouseover += 1;
+        const option = (event.target as Element | null)?.closest?.("[data-edit-option]");
+        scope.studioHoveredOption = option?.getAttribute("data-edit-option") ?? null;
+      }, true);
+    }
   }
+  return { ...scope.studioHoverCounts, hasFocus: document.hasFocus() };
+}
+
+/** Installs the hover counters in the workbench, the host frame and the content frame (idempotent, best-effort). */
+async function installHoverCounters(page: Page, frame: Frame): Promise<void> {
+  await page.evaluate(recordHover).catch(() => undefined);
+  await frame.parentFrame()?.evaluate(recordHover).catch(() => undefined);
+  await frame.evaluate(recordHover);
+}
+
+async function readHoverDiagnostics(page: Page, frame: Frame, point: { x: number; y: number } | undefined): Promise<string> {
+  const unreadable = (error: unknown): string => `unreadable: ${String(error).slice(0, 80)}`;
+  const host = frame.parentFrame();
+  const documents = [
+    { name: "workbench", counts: await page.evaluate(recordHover).catch(unreadable) },
+    { name: "host", counts: host === null ? "no host frame" : await host.evaluate(recordHover).catch(unreadable) },
+    { name: "content", counts: await frame.evaluate(recordHover).catch(unreadable) },
+  ];
+  return formatHoverDiagnostics(documents, { focused: vscode.window.state.focused, active: vscode.window.state.active }, point);
 }
 
 /**
@@ -280,20 +307,51 @@ function recordHover(): void {
  * stress run 43608210974 (round 17, palette) the press on the heading option landed on
  * `iframe.webview.ready` in the workbench document, the webview saw no mousedown and the block
  * editor committed on the blur; the earlier runs 43582068953 and 43576429177 lost the same click.
- * A real mouse always hovers before it presses, so the scenario does too. No sleep, no retry: the
- * wait is on a state the page reports. When the hover never arrives, the error says so and carries
- * the landing summary of the workbench and the host frame.
+ * A real mouse always hovers before it presses, so the scenario does too. Stress runs 43609871967
+ * (round 5) and 43609886530 (round 13) showed that the hover itself is sometimes not delivered to
+ * the webview process for seconds. The recovery is bounded and driven by the page's report: when the
+ * hover is not reported after half of `hoverTimeoutMs`, the mouse moves away to the centre of the
+ * list's trigger button and hovers the option again, then waits the other half; a recovery is logged
+ * ("hover recovered after re-move (CR 330)"). No sleep, no retry of the press. When the hover still
+ * never arrives, the error carries the move/over counters, the focus of each document, the window
+ * state, the mouse point and the landing summary.
  */
-export async function clickListOption(page: Page, frame: Frame, option: string, hoverTimeoutMs = 5_000): Promise<void> {
+export async function clickListOption(
+  page: Page,
+  frame: Frame,
+  option: string,
+  triggerSelector: string,
+  hoverTimeoutMs = 5_000,
+): Promise<void> {
   const startedAt = Date.now();
-  await frame.evaluate(recordHover);
+  await installHoverCounters(page, frame);
   const target = frame.locator(`[data-edit-option='${option}']`);
+  const reported = async (timeout: number): Promise<boolean> => {
+    try {
+      await frame.waitForFunction((wanted) =>
+        (window as unknown as { studioHoveredOption?: string | null }).studioHoveredOption === wanted, option, { timeout });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const centre = async (locator: ReturnType<Frame["locator"]>): Promise<{ x: number; y: number } | undefined> => {
+    const box = await locator.boundingBox().catch(() => null);
+    return box === null ? undefined : { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  };
   await target.hover();
-  try {
-    await frame.waitForFunction((wanted) =>
-      (window as unknown as { studioHoveredOption?: string | null }).studioHoveredOption === wanted, option, { timeout: hoverTimeoutMs });
-  } catch {
-    throw new Error(formatHoverNeverReached(option, hoverTimeoutMs, await readLandingSummary(page, frame, startedAt, startedAt)));
+  let point = await centre(target);
+  const half = Math.floor(hoverTimeoutMs / 2);
+  if (!await reported(half)) {
+    const away = await centre(frame.locator(triggerSelector));
+    if (away !== undefined) await page.mouse.move(away.x, away.y, { steps: 4 });
+    await target.hover();
+    point = await centre(target);
+    if (!await reported(hoverTimeoutMs - half)) {
+      throw new Error(formatHoverNeverReached(option, hoverTimeoutMs, await readHoverDiagnostics(page, frame, point),
+        await readLandingSummary(page, frame, startedAt, startedAt)));
+    }
+    console.log("hover recovered after re-move (CR 330)");
   }
   await target.click();
 }

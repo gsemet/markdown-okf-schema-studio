@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { formatHoverNeverReached, formatLandingRecords, formatListMarks } from "../shared/inputLandingProbe";
+import { formatHoverDiagnostics, formatHoverNeverReached, formatLandingRecords, formatListMarks } from "../shared/inputLandingProbe";
 
 test("CR 330: records are relative to the origin, filtered by start, and a failed read is text", () => {
   const text = formatLandingRecords([
@@ -28,7 +28,15 @@ test("CR 330: list marks are on the scenario clock", () => {
   assert.equal(formatListMarks("unreadable: x", 0), "list marks [unreadable: x]");
 });
 
-test("CR 330: a hover that never reached the page names the option and carries the landing", () => {
-  assert.equal(formatHoverNeverReached("2", 5_000, "landing workbench [none]"),
-    "the hover on list option 2 never reached the page within 5000 ms; landing workbench [none]");
+test("CR 330: a hover that never reached the page names the option and carries the diagnostics and the landing", () => {
+  const diagnostics = formatHoverDiagnostics([
+    { name: "workbench", counts: { mousemove: 0, mouseover: 0, hasFocus: true } },
+    { name: "host", counts: "unreadable: closed" },
+  ], { focused: true, active: false }, { x: 10.4, y: 20.6 });
+  assert.equal(diagnostics,
+    "hover counts workbench [mousemove 0, mouseover 0, hasFocus true] host [unreadable: closed]; window focused true active false; mouse point 10,21");
+  assert.equal(formatHoverDiagnostics([], { focused: false, active: false }, undefined),
+    "hover counts ; window focused false active false; mouse point unknown");
+  assert.equal(formatHoverNeverReached("2", 5_000, "D", "landing workbench [none]"),
+    "the hover on list option 2 never reached the page within 5000 ms (after one re-move); D; landing workbench [none]");
 });
