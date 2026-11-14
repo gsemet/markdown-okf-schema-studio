@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.9.0 - 2026-11-14
+
 - A click on a card of a grid written in a list item whose marker is followed by a tab, or whose cards
   are indented with a tab, opens the editor on the card instead of the line above.
 - A click on a card of a grid written in a list item, whose content starts with a blank line, opens the
