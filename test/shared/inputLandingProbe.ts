@@ -52,7 +52,26 @@ export function formatListMarks(marks: readonly { at: number; mark: string }[] |
   return `list marks [${marks.length === 0 ? "none" : marks.map((entry) => `${entry.at - origin} ${entry.mark}`).join("; ")}]`;
 }
 
-/** The failure message of a hover that never reached the page, with the landing summary. */
-export function formatHoverNeverReached(option: string, timeoutMs: number, landing: string): string {
-  return `the hover on list option ${option} never reached the page within ${timeoutMs} ms; ${landing}`;
+/** Mouse move and over counts and the focus of one document, or why it could not be read. */
+export interface HoverDocument {
+  name: string;
+  counts: { mousemove: number; mouseover: number; hasFocus: boolean } | string;
+}
+
+/** The hover diagnostics: per-document counters and focus, the window state, the mouse point used. */
+export function formatHoverDiagnostics(
+  documents: readonly HoverDocument[],
+  windowState: { focused: boolean; active: boolean },
+  point: { x: number; y: number } | undefined,
+): string {
+  const docs = documents.map((doc) => typeof doc.counts === "string"
+    ? `${doc.name} [${doc.counts}]`
+    : `${doc.name} [mousemove ${doc.counts.mousemove}, mouseover ${doc.counts.mouseover}, hasFocus ${String(doc.counts.hasFocus)}]`);
+  const at = point === undefined ? "mouse point unknown" : `mouse point ${Math.round(point.x)},${Math.round(point.y)}`;
+  return `hover counts ${docs.join(" ")}; window focused ${String(windowState.focused)} active ${String(windowState.active)}; ${at}`;
+}
+
+/** The failure message of a hover that never reached the page, with the diagnostics and the landing summary. */
+export function formatHoverNeverReached(option: string, timeoutMs: number, diagnostics: string, landing: string): string {
+  return `the hover on list option ${option} never reached the page within ${timeoutMs} ms (after one re-move); ${diagnostics}; ${landing}`;
 }
