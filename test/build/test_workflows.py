@@ -580,6 +580,22 @@ def test_heavy_jobs_run_on_every_push_to_main_and_on_a_heavy_dispatch(name: str)
     assert not _run_if(condition, _context("workflow_dispatch", heavy=False))
 
 
+XVFB_SCREEN = "2600x1440x24"
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_every_xvfb_screen_is_wider_than_the_emulated_viewports() -> None:
+    """CR 326: the default 1280x1024 screen dropped clicks past x=1280 (2400 px is the widest viewport)."""
+    import re
+
+    calls = re.findall(r"xvfb-run [^\n]*", CI.read_text())
+    assert len(calls) == 3
+    for call in calls:
+        match = re.search(r'-s "-screen 0 (\d+)x(\d+)x\d+"', call)
+        assert match is not None, call
+        assert int(match.group(1)) >= 2600 and int(match.group(2)) >= 1440, call
+
+
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076
 def test_stress_dispatch_inputs_reach_the_stress_recipe_through_env() -> None:
     import yaml
@@ -589,7 +605,7 @@ def test_stress_dispatch_inputs_reach_the_stress_recipe_through_env() -> None:
         assert inputs[name]["type"] == "string"
         assert inputs[name]["default"] == ""
     step = next(s for s in _ci_jobs()["stress"]["steps"] if "ci-stress" in s.get("run", ""))
-    assert step["run"] == "xvfb-run --auto-servernum just ci-stress"
+    assert step["run"] == f'xvfb-run --auto-servernum -s "-screen 0 {XVFB_SCREEN}" just ci-stress'
     assert step["env"]["STUDIO_STRESS_REPEAT"] == "${{ inputs.stress_repeat || '20' }}"
     assert step["env"]["STUDIO_STRESS_SCENARIOS"] == "${{ inputs.stress_scenarios }}"
 
