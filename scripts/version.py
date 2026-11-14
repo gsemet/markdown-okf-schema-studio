@@ -1,4 +1,4 @@
-"""Update npm versions and create a signed-off version commit without tagging."""
+"""Update npm versions and create a version commit without tagging."""
 
 from __future__ import annotations
 
@@ -196,13 +196,12 @@ def main() -> int:
         git(
             "commit",
             "--only",
-            "-s",
             "-m",
             f"chore: version {next_version}",
             "--",
             *VERSIONED_PATHS,
         )
-        print(f"Created signed-off commit: chore: version {next_version}")
+        print(f"Created commit: chore: version {next_version}")
         print("CI creates the tag after merge.")
         return 0
     except (ValueError, subprocess.CalledProcessError) as error:

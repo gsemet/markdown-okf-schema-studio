@@ -171,7 +171,7 @@ def repository(tmp_path: Path) -> Path:
 def test_automatic_version(
     repository: Path, message: str | None, expected: str
 ) -> None:
-    """Classify commits and create a signed-off version commit without a tag."""
+    """Classify commits and create a version commit without a tag."""
     if message:
         subprocess.run(
             ["git", "commit", "--allow-empty", "--quiet", "-m", message],
@@ -182,7 +182,7 @@ def test_automatic_version(
 
 
 def assert_version(repository: Path, arguments: list[str], expected: str) -> None:
-    """Check synchronized versions and the isolated signed-off commit."""
+    """Check synchronized versions and the isolated version commit."""
     before = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository)
     result = subprocess.run(
         [sys.executable, str(ROOT / "scripts/version.py"), *arguments],
@@ -201,7 +201,8 @@ def assert_version(repository: Path, arguments: list[str], expected: str) -> Non
         ["git", "log", "-1", "--format=%B"], cwd=repository, text=True
     )
     assert message.splitlines()[0] == f"chore: version {expected}"
-    assert "Signed-off-by: Release Test <test@example.com>" in message
+    assert message.strip() == f"chore: version {expected}"
+    assert "Signed-off-by:" not in message
     changed = subprocess.check_output(
         ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"],
         cwd=repository,
