@@ -35,6 +35,7 @@ import {
   withCurrentFrame,
   setViewport,
 } from "./realInput/harness";
+import { logSideBarState } from "./realInput/clickRouting";
 
 const TEXT = [
   "# Release notes",
@@ -151,6 +152,7 @@ async function readBlocks(page: Page): Promise<{ titles: string[]; card: string[
 // @tests_req SwRS-MDOKFSTUDIO-MYST-099
 /** myst-blocks: version titles, the card and the tab set render in read and edit mode. */
 export async function scenarioMystBlocks(page: Page): Promise<void> {
+  await logSideBarState(page, "myst-blocks");
   const workbench = vscode.workspace.getConfiguration("workbench");
   const originalTheme = workbench.inspect<string>("colorTheme")?.globalValue;
   const shots = process.env.STUDIO_MYST_BLOCKS_SHOTS;

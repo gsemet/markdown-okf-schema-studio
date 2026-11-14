@@ -36,6 +36,7 @@ import {
   withCurrentFrame,
   setViewport,
 } from "./realInput/harness";
+import { logSideBarState } from "./realInput/clickRouting";
 
 const FILLER = Array.from({ length: 6 }, (_, index) =>
   `Paragraph ${index + 1} of filler text that makes the page long enough to scroll.`).join("\n\n");
@@ -143,6 +144,7 @@ async function editTitles(page: Page): Promise<string[]> {
 // @tests_req SwRS-MDOKFSTUDIO-CORE-072
 /** rendering-core: [TOC], [[_TOC_]] and {contents} list the headings with links in read mode and is titled in edit mode. */
 export async function scenarioToc(page: Page): Promise<void> {
+  await logSideBarState(page, "toc");
   const workbench = vscode.workspace.getConfiguration("workbench");
   const originalTheme = workbench.inspect<string>("colorTheme")?.globalValue;
   const shots = process.env.STUDIO_TOC_SHOTS;

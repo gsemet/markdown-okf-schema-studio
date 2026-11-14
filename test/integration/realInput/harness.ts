@@ -13,6 +13,7 @@ import {
 } from "../extensionApi";
 import { E2E_SCREENSHOT_ROOT } from "../../reportPaths";
 import { injectToggleDelay } from "../../shared/tocLoop";
+import { readLayoutFacts, readRoutingCounts } from "./clickRouting";
 import { realWindowBounds } from "../realWindowViewport";
 import { RealWindowEvidence } from "../evidence";
 
@@ -280,6 +281,10 @@ interface EditToggleState {
   clickPoint?: string;
   /** The host frame (`index.html`, parent of the content frame): focus, active element, element at the click point. */
   hostFrame?: string;
+  /** Pointer events counted at the content frame, the host frame and the workbench (see clickRouting.ts). */
+  routing?: string;
+  /** The webview iframe box against its editor group box, the side bar visibility and the focused part. */
+  layout?: string;
   /** Clicks that reached the toggle in this frame since the probe was installed (counted at `document`, capture phase). */
   clicks: number;
   /** Uncaught errors of the frame since the probe was installed (the last five). */
@@ -374,6 +379,9 @@ async function editToggleState(page: Page, frame: Frame): Promise<EditToggleStat
       state.clickPoint = `${Math.round(box.x + box.width / 2)},${Math.round(box.y + box.height / 2)}`;
       state.hostFrame = await hostFrameProbe(frame, box.x + box.width / 2, box.y + box.height / 2);
     }
+    state.routing = await readRoutingCounts(page, frame);
+    state.layout = box === null ? await readLayoutFacts(page, undefined, undefined)
+      : await readLayoutFacts(page, box.x + box.width / 2, box.y + box.height / 2);
   }
   const real = await realWindowBounds(page);
   state.realWindow = `window ${real.window ? `${real.window.width}x${real.window.height}` : "unreadable"}`
