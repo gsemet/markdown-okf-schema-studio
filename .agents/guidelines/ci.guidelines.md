@@ -86,13 +86,20 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     `-f heavy=true -f stress_repeat=60 -f stress_scenarios=alert-dropdown` (narrow the scenarios
     above about 220 scenario runs per window, rounds times scenarios; the deadline is computed, capped at 24 min). Run them before merging a change to the extension host, the webview or the
     real-window tests, and run `npm run test:integration` locally (one VS Code window at a time).
-    A third on-demand job, `toc-loop`, is a repro tool for the `toc` edit-toggle flake:
-    `gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]` (1 to 40 rounds,
-    delay 0 to 2000 ms, launch deadline 30 minutes inside a 35-minute step). It does not gate merges
-    and is not part of `checks`; failed rounds are counted and the job is red if any failed. The
-    flake's cause was the 1280 px default Xvfb screen under a 1400 px emulated viewport (CR 326);
-    the loop stays as a repro tool. Each round runs `readme-html` first, because the toggle failed in
-    the integration job right after that step.
+    A third on-demand job, `toc-loop`, is a repro tool for the edit-toggle flake of the steps that
+    follow a side-bar reopen:
+    `gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]
+    [-f toc_steps=readme-html,toc,myst-blocks] [-f toc_control=1]` (1 to 40 rounds, delay 0 to
+    2000 ms, 1 to 6 steps among `readme-html`, `toc`, `myst-blocks`, default all three in the suite's
+    order). `readme-html`, `toc` and `myst-blocks` are the only steps that reopen the side bar in
+    their cleanup, so the next one starts with the side bar open and a `closeSidebar` after its
+    preview opened is a real layout change (CR 328; the 1280 px Xvfb default screen was the earlier
+    cause, CR 326). `toc_control=1` closes the side bar before each step, the control: green over 40
+    rounds while the default fails confirms the lead. The launch deadline is computed from the
+    rounds and the steps (2 minutes plus 12 s per step run, at most 30 minutes: 26 minutes for 40
+    rounds of three steps), inside the 35-minute step of the 45-minute job; the launcher prints it.
+    The job does not gate merges and is not part of `checks`; failed rounds are counted and the job
+    is red if any failed.
 14. **A release is tagged only after a green heavy run of its commit.** On a push to `main` that
     changes the package version, the `release-check` job detects the change
     (`scripts/version.py --bump-since`, the same test `tag-release` uses) and `stress` blocks

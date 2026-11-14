@@ -943,3 +943,24 @@ def yaml_jobs(path: Path) -> dict[str, dict]:
     import yaml
 
     return yaml.safe_load(path.read_text())["jobs"]
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_toc_loop_inputs_reach_the_recipe_and_leave_the_deadline_computed() -> None:
+    import yaml
+
+    inputs = yaml.safe_load(CI.read_text())[True]["workflow_dispatch"]["inputs"]
+    assert inputs["toc_steps"]["default"] == ""
+    assert inputs["toc_control"]["default"] == "0"
+    steps = _ci_jobs()["toc-loop"]["steps"]
+    check = next(s for s in steps if s.get("name") == "Check the toc loop inputs")
+    assert check["env"]["TOC_STEPS"] == "${{ inputs.toc_steps }}"
+    assert check["env"]["TOC_CONTROL"] == "${{ inputs.toc_control }}"
+    assert "toc_steps must be" in check["run"] and "toc_control must be" in check["run"]
+    run = next(s for s in steps if "ci-toc-loop" in s.get("run", ""))
+    assert run["run"].endswith('just ci-toc-loop "$TOC_LOOP" "$TOC_DELAY_MS" "$TOC_STEPS" "${TOC_CONTROL:-0}"')
+    assert run["env"]["TOC_STEPS"] == "${{ inputs.toc_steps }}"
+    assert run["env"]["TOC_CONTROL"] == "${{ inputs.toc_control }}"
+    recipe = (ROOT / "justfile").read_text().split("\nci-toc-loop ", 1)[1].split("\n\n", 1)[0]
+    assert "STUDIO_LAUNCH_TIMEOUT_MS" not in recipe
+    assert "STUDIO_TOC_AFTER_README_HTML" not in recipe

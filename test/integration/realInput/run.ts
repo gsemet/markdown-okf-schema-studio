@@ -26,10 +26,19 @@ import {
 import { scenarioTableStructure } from "../tableStructureReal";
 import { scenarioToc } from "../tocWindow";
 import { scenarioReadmeHtml } from "../readmeHtmlWindow";
+import { scenarioMystBlocks } from "../mystBlocksWindow";
 import { scenarioPerformanceProbe } from "../performanceProbe";
 import * as fs from "node:fs";
 import { E2E_REPORT_ROOT } from "../../reportPaths";
-import { tocLoopRounds, tocLoopSummary, toggleDelayMaxMs, type TocLoopTally } from "../../shared/tocLoop";
+import {
+  tocLoopControl,
+  tocLoopRounds,
+  tocLoopSteps,
+  tocLoopSummary,
+  toggleDelayMaxMs,
+  type TocLoopStepName,
+  type TocLoopTally,
+} from "../../shared/tocLoop";
 import { setWorkbenchPage, takeFailureFocusDump } from "./common";
 import { scenarioAlertTypePickProbe } from "./alertPickProbe";
 import { installWorkbenchFocusTrace, withFocusDumpOnFailure, workbenchFocusDump } from "../../shared/workbenchFocusDump";
@@ -120,9 +129,17 @@ async function runStress(page: Page): Promise<void> {
   console.log(`stress: ${plan.repeat} round(s) passed`);
 }
 
+const TOC_LOOP_STEPS: Record<TocLoopStepName, (page: Page) => Promise<void>> = {
+  "readme-html": scenarioReadmeHtml,
+  toc: scenarioToc,
+  "myst-blocks": scenarioMystBlocks,
+};
+
 /**
- * `STUDIO_REAL_INPUT_SCENARIO=toc-loop`: the `toc` scenario `STUDIO_TOC_LOOP` times (default 1),
- * optionally with `STUDIO_TOGGLE_DELAY_MS` delays around the edit toggle. A failed round is
+ * `STUDIO_REAL_INPUT_SCENARIO=toc-loop`: the steps of `STUDIO_TOC_LOOP_STEPS` (default
+ * `readme-html,toc,myst-blocks`, the three steps that reopen the side bar) in a round,
+ * `STUDIO_TOC_LOOP` rounds (default 1). `STUDIO_TOC_LOOP_CONTROL=1` closes the side bar before each
+ * step. Optionally with `STUDIO_TOGGLE_DELAY_MS` delays around the edit toggle. A failed round is
  * logged with its message (it carries the toggle state #205 records) and the loop goes on, so one
  * dispatch counts the clean and the failed rounds; the step fails at the end if any round failed.
  */
@@ -130,22 +147,27 @@ async function runTocLoop(page: Page): Promise<void> {
   // Validate both knobs before round 1: a bad value is a configuration error, not N failed rounds.
   const rounds = tocLoopRounds(process.env);
   const delayMax = toggleDelayMaxMs(process.env);
+  const steps = tocLoopSteps(process.env);
+  const control = tocLoopControl(process.env);
   const tally: TocLoopTally = { rounds, passed: 0, failed: 0, failures: [] };
   const summaryFile = path.join(E2E_REPORT_ROOT, "toc-loop-summary.json");
   const writeSummary = (): void => {
     fs.mkdirSync(E2E_REPORT_ROOT, { recursive: true });
     fs.writeFileSync(summaryFile, `${JSON.stringify(tally, null, 2)}\n`);
   };
-  console.log(`toc-loop: ${rounds} round(s), toggle delay up to ${delayMax} ms`);
+  console.log(`toc-loop: ${rounds} round(s) of ${steps.join(",")}, side bar control ${control ? "on" : "off"}, `
+    + `toggle delay up to ${delayMax} ms`);
   for (let round = 1; round <= rounds; round += 1) {
     const started = Date.now();
     let atFailure: string | undefined;
     try {
-      // The dump is read where the scenario failed, before its cleanup closes the editors.
-      // The two integration failures of the toggle ran `toc` right after `readme-html` (CR 326);
-      // STUDIO_TOC_AFTER_README_HTML=1 repeats that adjacency in each round.
-      if (process.env.STUDIO_TOC_AFTER_README_HTML === "1") await scenarioReadmeHtml(page);
-      await withFocusDumpOnFailure(page, () => scenarioToc(page), (dump) => { atFailure = dump; });
+      // The dump is read where a step failed, before its cleanup closes the editors. The failures of
+      // the toggle ran right after a step that reopens the side bar (CR 328): the default round
+      // repeats that adjacency; the control closes the side bar before each step.
+      for (const step of steps) {
+        if (control) await vscode.commands.executeCommand("workbench.action.closeSidebar");
+        await withFocusDumpOnFailure(page, () => TOC_LOOP_STEPS[step](page), (dump) => { atFailure = `${step}: ${dump}`; });
+      }
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
       tally.passed += 1;
       console.log(`PASS toc-loop ${round}/${rounds} (${Date.now() - started} ms)`);
