@@ -634,8 +634,11 @@ release guideline).
 	change) leave the tags unchanged. It never commits files back to
 	`main`.
 
-6. CI calls **Release VSIX** explicitly with that tag. A tag pushed by `GITHUB_TOKEN`
-	does not trigger another push workflow, so this call is required. The release job
+6. CI **dispatches** **Release VSIX** with that tag on the default branch, as a run of its own.
+	A tag pushed by `GITHUB_TOKEN` starts no workflow, but a dispatch does; and a dispatch (not a
+	reusable-workflow call) is needed so that the OIDC token names `release.yml`, the workflow
+	both trusted publishers are registered for. Watch that **Release VSIX** run
+	(`gh run list --workflow release.yml --limit 3`), not only the CI run. The release job
 	verifies the tag, manifest, and default-branch ancestry, prepares the reviewed notes of the
 	tag, packages the extension, publishes to the VS Code Marketplace with trusted publishing
 	(OIDC), attaches the VSIX, the notes and their images to a GitHub release, then publishes the
@@ -663,7 +666,7 @@ the same CI run, with no new commit and no manual tag:
 
 3. GitHub re-runs the failed jobs and the jobs that depend on them, including skipped ones:
 	the heavy job, then `report` and `checks` after an integration failure, `tag-release`,
-	`release` and `pages`. Jobs that passed keep their results and outputs, so `release-check`
+	then `release` (which dispatches Release VSIX, a separate run) and `pages`. Jobs that passed keep their results and outputs, so `release-check`
 	still reports the version change. The re-run uses the same commit and push event, and
 	`tag-release` tags that commit when everything is green.
 4. Each attempt uploads its own artifacts: every artifact name of the CI workflow ends with
@@ -675,7 +678,9 @@ the same CI run, with no new commit and no manual tag:
 	re-run hours or days later still passes `report`. To fetch the reports of a run by hand, use
 	`just site-from-run <run-id>`, which picks the newest attempt.
 5. Once the tag exists, only re-run the failed jobs. Re-running `tag-release` then finds the
-	existing tag, outputs no tag and skips `release` and `pages`.
+	existing tag, outputs no tag and skips `release` and `pages`. A failed publication is re-run
+	in the Release VSIX run; in the CI run, re-run only `release` (if the dispatch itself failed)
+	or `pages`.
 
 When the failure is a real bug, or the same job fails again after a re-run, fix the cause in a
 new pull request, then release a new version (`just version`). GitHub allows re-runs for 30 days
@@ -695,10 +700,11 @@ Publishing (GitHub Actions OIDC) and reads no stored token:
   repository `markdown-okf-schema-studio`, workflow `release.yml`, environment `release`. The
   namespace `GaetanSemet` must stay verified and equal to the `publisher` field of
   `package.json`. No `OVSX_PAT` secret exists: `ovsx` gives a token precedence over OIDC.
-- The `package` job of `release.yml` and its caller job `release` in `ci.yml` both grant
-  `id-token: write` (a called workflow cannot get more permissions than its caller job).
+- The `package` job of `release.yml` grants `id-token: write`; the `release` job of `ci.yml`
+  only dispatches it (`actions: write`).
 - Renaming `release.yml` or the `release` environment breaks both publications until the
-  Marketplace policy and the Open VSX trusted publisher are updated.
+  Marketplace policy and the Open VSX trusted publisher are updated. Calling `release.yml` as a
+  reusable workflow breaks the Open VSX publication (the token would name the caller).
 - `VSCE_PAT` is no longer used by the workflow. It stays in the `release` environment until a
   release published with `--oidc` has succeeded; the owner then deletes it.
 
@@ -710,7 +716,7 @@ only in the developer's local environment, never in workflow files or lockfile U
 
 ### Recovery and Release Notes
 
-If tagging succeeded but publication failed, rerun the failed release job or dispatch
+If tagging succeeded but publication failed, re-run the failed job of the **Release VSIX** run or dispatch
 **Release VSIX** with the existing `vX.Y.Z` tag. Do not move the tag or bump again just
 to retry. Marketplace and Open VSX publications skip an already published version, allowing a
 retry to finish the GitHub release. Manual pushes of valid `vX.Y.Z` tags also run this workflow.
