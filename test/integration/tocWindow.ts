@@ -36,7 +36,7 @@ import {
   withCurrentFrame,
   setViewport,
 } from "./realInput/harness";
-import { logSideBarState } from "./realInput/clickRouting";
+import { closeSideBarIfOpen, logSideBarState, restoreSideBar, waitForLayoutLanded } from "./realInput/clickRouting";
 
 const FILLER = Array.from({ length: 6 }, (_, index) =>
   `Paragraph ${index + 1} of filler text that makes the page long enough to scroll.`).join("\n\n");
@@ -145,6 +145,8 @@ async function editTitles(page: Page): Promise<string[]> {
 /** rendering-core: [TOC], [[_TOC_]] and {contents} list the headings with links in read mode and is titled in edit mode. */
 export async function scenarioToc(page: Page): Promise<void> {
   await logSideBarState(page, "toc");
+  // Closed before the preview opens, never toggled blind; the cleanup restores the state found.
+  const sideBarWasOpen = await closeSideBarIfOpen(page);
   const workbench = vscode.workspace.getConfiguration("workbench");
   const originalTheme = workbench.inspect<string>("colorTheme")?.globalValue;
   const shots = process.env.STUDIO_TOC_SHOTS;
@@ -158,9 +160,9 @@ export async function scenarioToc(page: Page): Promise<void> {
         const preview = getActivePreviewForTests();
         return preview?.documentUri === textDocument.uri.toString() && preview.phase === "ready" && preview.webviewReady;
       });
-      await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
       await setViewport(page, { width: 1400, height: 900 });
+      await waitForLayoutLanded(page);
       await waitForFirstClickReady(page);
       for (const [name, host, mode] of [
         ["cream", "Default Light Modern", "cream"],
@@ -220,7 +222,7 @@ export async function scenarioToc(page: Page): Promise<void> {
       throw new Error(`${error instanceof Error ? error.message : String(error)} ${await clickFailureDetails(page)}`);
     } finally {
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
-      await vscode.commands.executeCommand("workbench.action.toggleSidebarVisibility");
+      await restoreSideBar(sideBarWasOpen);
       await closeAllEditors();
     }
   } finally {
