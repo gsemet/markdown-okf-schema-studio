@@ -231,8 +231,12 @@ jobs:
           just-version: 1.58.0
       - run: just dev-ci
       # Below the job's 30 minutes: a hang cancels this step and the dump and upload steps still run.
-      - run: xvfb-run --auto-servernum just ci-integration
+      # The X screen is wider than every emulated viewport (2400 px at most): input outside the real
+      # screen never reaches the webview (CR 326).
+      - run: xvfb-run --auto-servernum -s "-screen 0 2600x1440x24" just ci-integration
         timeout-minutes: 20
+        env:
+          STUDIO_VIEWPORT_GUARD: strict
       - name: Collect hang diagnostics
         if: always()
         run: just ci-hang-dump
@@ -281,7 +285,8 @@ jobs:
         env:
           STUDIO_STRESS_REPEAT: ${{ inputs.stress_repeat || '20' }}
           STUDIO_STRESS_SCENARIOS: ${{ inputs.stress_scenarios }}
-        run: xvfb-run --auto-servernum just ci-stress
+          STUDIO_VIEWPORT_GUARD: strict
+        run: xvfb-run --auto-servernum -s "-screen 0 2600x1440x24" just ci-stress
       - name: Publish reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -334,9 +339,10 @@ jobs:
           fi
       # Below the job's 45 minutes, above the 30-minute launch deadline: the watchdog writes its
       # dump first, and a hang cancels this step so the dump and upload steps still run.
-      - run: xvfb-run --auto-servernum just ci-toc-loop "$TOC_LOOP" "$TOC_DELAY_MS"
+      - run: xvfb-run --auto-servernum -s "-screen 0 2600x1440x24" just ci-toc-loop "$TOC_LOOP" "$TOC_DELAY_MS"
         timeout-minutes: 35
         env:
+          STUDIO_VIEWPORT_GUARD: strict
           TOC_LOOP: ${{ inputs.toc_loop }}
           TOC_DELAY_MS: ${{ inputs.toc_delay_ms }}
       - name: Collect hang diagnostics

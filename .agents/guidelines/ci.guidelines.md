@@ -12,7 +12,8 @@ The CI only runs what a developer can run locally. All logic lives in the task r
    `just ci-<name>`, the target is incomplete.
 3. **The workflow keeps only what the platform must do**: checkout (with LFS), toolchain setup
    actions (language runtimes, task runner), caches, artifact upload/download, a display server
-   for GUI tests, secrets, permissions. Nothing else.
+   for GUI tests, secrets, permissions. Nothing else. The display server is wider than every emulated
+   viewport (`xvfb-run -s "-screen 0 2600x1440x24"`): input outside the real screen is dropped.
 4. **Setup is a target too.** `just dev-ci` installs exactly what CI jobs need, non-interactively,
    from the lock files. `just dev` stays the developer entry point and may do more. A job sets up
    only what its target uses (`just dev-ci visual` adds Chromium, plantuml and graphviz). System
@@ -88,7 +89,9 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     A third on-demand job, `toc-loop`, is a repro tool for the `toc` edit-toggle flake:
     `gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]` (1 to 40 rounds,
     delay 0 to 2000 ms, launch deadline 30 minutes inside a 35-minute step). It does not gate merges
-    and is not part of `checks`; failed rounds are counted and the job is red if any failed.
+    and is not part of `checks`; failed rounds are counted and the job is red if any failed. The
+    flake's cause was the 1280 px default Xvfb screen under a 1400 px emulated viewport (CR 326);
+    the loop stays as a repro tool.
 14. **A release is tagged only after a green heavy run of its commit.** On a push to `main` that
     changes the package version, the `release-check` job detects the change
     (`scripts/version.py --bump-since`, the same test `tag-release` uses) and `stress` blocks
