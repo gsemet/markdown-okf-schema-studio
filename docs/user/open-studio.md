@@ -6,6 +6,10 @@ VSCodium, Cursor and other compatible editors install it from [Open VSX](https:/
 In any of them you can also open the Extensions view, search for `Markdown OKF-Schema Studio`, and
 select **Install**.
 
+Studio needs VS Code 1.95 or later, or an editor built on it. It is expected to work in VSCodium,
+Cursor and Windsurf, installed from Open VSX: their current builds are based on newer VS Code
+versions.
+
 ## Open Studio
 
 Use **Open With...** on a Markdown tab and select **Markdown OKF-Schema Studio**.
@@ -22,6 +26,9 @@ For a side-by-side source and preview, select the book icon in the editor title 
 Every image in this guide opens at full size when selected.
 
 ## In the Agents window
+
+The Agents window is a VS Code feature. Other editors, such as VSCodium, Cursor and Windsurf, have
+no Agents window, and Studio works there in the normal editor.
 
 Studio also runs in the VS Code Agents window, the companion window for agent sessions. Open a
 Markdown file there, then use **Open With...** and select **Markdown OKF-Schema Studio**.
