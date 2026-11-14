@@ -15,6 +15,7 @@ import { READ_ONLY_FILE } from "../../src/core/edits/readOnlyReasons";
 import { COMMAND_ID, disposeActivePreviewForTests } from "./extensionApi";
 import {
   connectWorkbench, createFixture, currentPreviewFrame, setEditMode, waitFor, waitForEditor, waitForRender,
+  setViewport,
 } from "./realInput/harness";
 import { traceDocumentChanges, waitForActiveSourceEditor, windowFocusReport } from "./windowFocus";
 import { markProgress } from "../shared/hangWatchdog";
@@ -166,7 +167,7 @@ async function withPlan(
   const document = await bounded("workspace.openTextDocument of plan.md",
     vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("plan.md"))));
   try {
-    await bounded("page.setViewportSize", page.setViewportSize({ width: 1400, height: 900 }));
+    await bounded("setViewport", setViewport(page, { width: 1400, height: 900 }));
     await bounded("workbench.action.closeSidebar", vscode.commands.executeCommand("workbench.action.closeSidebar"));
     await bounded("workbench.action.closeAuxiliaryBar", vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar"));
     await bounded("window.showTextDocument of plan.md", vscode.window.showTextDocument(document, vscode.ViewColumn.One));

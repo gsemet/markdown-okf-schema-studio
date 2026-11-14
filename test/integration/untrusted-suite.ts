@@ -14,7 +14,7 @@ import { runUntrusted as runBlockMoveUntrusted } from "./blockMove.test";
 import { runUntrusted as runBlockClipboardUntrusted } from "./blockClipboard.test";
 import { runUntrusted as runCommentWriteUntrusted } from "./commentWrite.test";
 import { runUntrusted as runMystDiagnostics } from "./mystDiagnostics.test";
-import { closeAllEditors, connectWorkbench, createEvidence } from "./realInput/harness";
+import { closeAllEditors, connectWorkbench, createEvidence, setViewport } from "./realInput/harness";
 import { scenarioRestrictedEdit } from "./realWindowGaps";
 import { hostStressPlan } from "../shared/stressPlan";
 import { ensureTestWindowFocused } from "./windowFocus";
@@ -40,7 +40,7 @@ async function waitForPreview(): Promise<void> {
 async function runCaptures(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   try {
-    await page.setViewportSize({ width: 1400, height: 900 });
+    await setViewport(page, { width: 1400, height: 900 });
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     await closeAllEditors();

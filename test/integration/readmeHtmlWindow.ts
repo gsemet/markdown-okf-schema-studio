@@ -32,6 +32,7 @@ import {
   waitFor,
   waitForEditor,
   withCurrentFrame,
+  setViewport,
 } from "./realInput/harness";
 
 const svg = (width: number, height: number, fill: string, label: string): string =>
@@ -175,7 +176,7 @@ export async function scenarioReadmeHtml(page: Page): Promise<void> {
       // A wide preview, like a README on a page: the side bar goes away and the preview group fills the window.
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
-      await page.setViewportSize({ width: 1400, height: 900 });
+      await setViewport(page, { width: 1400, height: 900 });
       for (const [name, host, mode, pictureImage] of [
         ["cream", "Default Light Modern", "cream", "logo-light.svg"],
         ["dark", "Default Dark Modern", "current", "logo-dark.svg"],
@@ -237,7 +238,7 @@ export async function scenarioReadmeHtml(page: Page): Promise<void> {
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   try {
-    await page.setViewportSize({ width: 1400, height: 900 });
+    await setViewport(page, { width: 1400, height: 900 });
     await scenarioReadmeHtml(page);
   } finally {
     await browser.close();

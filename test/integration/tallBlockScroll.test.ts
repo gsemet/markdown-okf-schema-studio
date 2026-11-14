@@ -14,6 +14,7 @@ import { escapeUntilClosed } from "./escapeClose";
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused, waitForActiveSourceEditor } from "./windowFocus";
+import { setViewport } from "./realWindowViewport";
 
 async function waitFor(description: string, predicate: () => boolean | Promise<boolean>, timeoutMs = 15_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -353,7 +354,7 @@ export async function run(): Promise<void> {
 
   try {
     await workbench.update("colorTheme", "Default Dark Modern", vscode.ConfigurationTarget.Workspace);
-    await page.setViewportSize({ width, height: 800 });
+    await setViewport(page, { width, height: 800 });
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
 
@@ -363,7 +364,7 @@ export async function run(): Promise<void> {
     // the bar (none of its buttons). The bar wraps with the width, so look for such a width.
     let layoutWidth: number | undefined;
     for (let candidate = width; candidate <= 2600 && layoutWidth === undefined; candidate += 40) {
-      await page.setViewportSize({ width: candidate, height: 800 });
+      await setViewport(page, { width: candidate, height: 800 });
       await pause(350);
       const at = await sample();
       if (at && at.controlsBottomOverButtons === null && at.frameTop < at.paletteTop) layoutWidth = candidate;
@@ -380,7 +381,7 @@ export async function run(): Promise<void> {
     await wheelDown("tall block", 12);
     await closeEditor();
     disposeActivePreviewForTests();
-    await page.setViewportSize({ width, height: 800 });
+    await setViewport(page, { width, height: 800 });
 
     // (b) An empty document, Start writing, a very large text pasted in the text box; then the same
     // in the dark preview theme (CR 134: the editor stays open and the page does not move).

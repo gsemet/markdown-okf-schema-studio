@@ -23,6 +23,7 @@ import {
   setEditMode,
   waitFor,
   withCurrentFrame,
+  setViewport,
 } from "./realInput/harness";
 
 const TEXT = [
@@ -140,7 +141,7 @@ export async function scenarioCommentTitle(page: Page): Promise<void> {
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   try {
-    await page.setViewportSize({ width: 1400, height: 900 });
+    await setViewport(page, { width: 1400, height: 900 });
     await scenarioCommentTitle(page);
   } finally {
     await browser.close();

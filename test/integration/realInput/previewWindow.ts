@@ -32,6 +32,7 @@ import {
   waitForEditor,
   waitForRender,
   withCurrentFrame,
+  setViewport,
 } from "./harness";
 import { captureAfter, realInputId, SMOKE, withDocument, withSmokeDocument } from "./common";
 import { run } from "./run";
@@ -356,7 +357,7 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
       await workbench.update("colorTheme", originalTheme, vscode.ConfigurationTarget.Workspace);
     }
     // The boxes start below the expanded toolbar, so the demo needs more than the 900 px of the run.
-    await page.setViewportSize({ width: 1400, height: 1040 });
+    await setViewport(page, { width: 1400, height: 1040 });
     try {
       await withCurrentFrame(page, async (frame) => {
         const themeButton = frame.locator("[data-sphinx-preview-theme-toggle]");
@@ -420,7 +421,7 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
         "A white-background preview restores edit mode and renders a nested MyST admonition, "
         + "a Mermaid dispatch flowchart, and a local SVG fleet operating loop.");
     } finally {
-      await page.setViewportSize({ width: 1400, height: 900 });
+      await setViewport(page, { width: 1400, height: 900 });
     }
   });
 

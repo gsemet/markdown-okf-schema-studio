@@ -33,6 +33,7 @@ import {
   waitFor,
   waitForEditor,
   withCurrentFrame,
+  setViewport,
 } from "./realInput/harness";
 
 const TEXT = [
@@ -165,7 +166,7 @@ export async function scenarioMystBlocks(page: Page): Promise<void> {
       });
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
-      await page.setViewportSize({ width: 1400, height: 1000 });
+      await setViewport(page, { width: 1400, height: 1000 });
       for (const [name, host, mode] of [
         ["cream", "Default Light Modern", "cream"],
         ["dark", "Default Dark Modern", "current"],
@@ -232,7 +233,7 @@ export async function scenarioMystBlocks(page: Page): Promise<void> {
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   try {
-    await page.setViewportSize({ width: 1400, height: 1000 });
+    await setViewport(page, { width: 1400, height: 1000 });
     await scenarioMystBlocks(page);
   } finally {
     await browser.close();

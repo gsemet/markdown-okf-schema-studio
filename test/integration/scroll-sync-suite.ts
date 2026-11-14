@@ -9,6 +9,7 @@ import { disposeActivePreviewForTests, getActivePreviewForTests, getActivePrevie
 import { captureByLegacy, captureFile } from "../shared/captureRegistry";
 import { installWorkbenchFocusTrace, workbenchFocusDump } from "../shared/workbenchFocusDump";
 import { RealWindowEvidence } from "./evidence";
+import { setViewport } from "./realWindowViewport";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
 import { withSuiteWatchdog } from "./stepWatchdog";
@@ -288,7 +289,7 @@ async function runScrollSyncSuite(): Promise<void> {
   const page = browser.contexts()[0].pages().find((candidate) => candidate.url().includes("workbench"));
   assert.ok(page, "the VS Code workbench is attached");
   await installWorkbenchFocusTrace(page); // for the failure dump (workbenchFocusDump.ts)
-  await page.setViewportSize({ width: 1440, height: 900 });
+  await setViewport(page, { width: 1440, height: 900 });
   const directory = fs.mkdtempSync(path.join("/tmp", "studio-scroll-"));
   const filePath = path.join(directory, "long-scroll.md");
   const sections = Array.from({ length: 800 }, (_, index) => [

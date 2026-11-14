@@ -14,6 +14,7 @@ import {
   connectWorkbench,
   createEvidence,
   type Evidence,
+  setViewport,
 } from "./harness";
 import {
   scenarioFigureInsert,
@@ -162,7 +163,7 @@ export async function run(): Promise<void> {
   // Records the focus moves of the workbench, so a failure dump can name what took the focus.
   await installWorkbenchFocusTrace(page);
   try {
-    await page.setViewportSize({ width: 1400, height: 900 });
+    await setViewport(page, { width: 1400, height: 900 });
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     // A single scenario: the registry completeness check is skipped. The stress rounds keep their own

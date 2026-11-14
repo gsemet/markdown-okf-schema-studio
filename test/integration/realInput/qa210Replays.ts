@@ -19,6 +19,7 @@ import {
   waitForEditor,
   waitForRender,
   withCurrentFrame,
+  setViewport,
 } from "./harness";
 import { escapeBlockEditor, waitForNoBlockEditor, withDocument } from "./common";
 import { selectAllInControl } from "./flushBeforeNavigate";
@@ -521,7 +522,7 @@ async function clickToolbarCollapse(page: Page, wanted: "expanded" | "collapsed"
  * loaded with the rows already shown; this one checks the rows shown by a click after the render.
  */
 export async function scenarioToolbarExpandKeepsFirstLinesClear(page: Page): Promise<void> {
-  await page.setViewportSize({ width: 900, height: 900 });
+  await setViewport(page, { width: 900, height: 900 });
   try {
     await withDocument("realinput-qa210-c7-1", TOOLBAR_DOCUMENT, async (document) => {
       await openSidePreview(document);
@@ -549,7 +550,7 @@ export async function scenarioToolbarExpandKeepsFirstLinesClear(page: Page): Pro
       }
     });
   } finally {
-    await page.setViewportSize({ width: 1400, height: 900 });
+    await setViewport(page, { width: 1400, height: 900 });
   }
 }
 

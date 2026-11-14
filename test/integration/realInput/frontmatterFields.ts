@@ -22,6 +22,7 @@ import {
   waitForRender,
   withCurrentFrame,
   writeSchema,
+  setViewport,
 } from "./harness";
 import { captureAfter, leaveEditModeOff, withDocument } from "./common";
 import { previewDiagnostics, waitForPageSettled } from "./flushBeforeNavigate";
@@ -301,7 +302,7 @@ const SCOPE_SCHEMA = [
 /** RI-T23: the field actions sit inside the edited row at a 540 px preview and cover nothing. */
 export async function scenarioFrontmatterActionsLayout(page: Page, evidence: Evidence): Promise<void> {
   const required = ["overlay-covers-text", "overlay-clipped"];
-  await page.setViewportSize({ width: 1100, height: 900 });
+  await setViewport(page, { width: 1100, height: 900 });
   try {
     await withDocument("realinput-t23", SCOPE_DOCUMENT, async (document) => {
       await openSidePreview(document);
@@ -344,7 +345,7 @@ export async function scenarioFrontmatterActionsLayout(page: Page, evidence: Evi
         { checks: { required } }));
     }, SCOPE_SCHEMA);
   } finally {
-    await page.setViewportSize({ width: 1400, height: 900 });
+    await setViewport(page, { width: 1400, height: 900 });
   }
 }
 
