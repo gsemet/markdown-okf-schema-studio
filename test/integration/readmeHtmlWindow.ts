@@ -19,6 +19,7 @@ import type { Page } from "playwright-core";
 import * as vscode from "vscode";
 
 import { getActivePreviewForTests } from "./extensionApi";
+import { waitForFirstClickReady } from "./windowFocus";
 import {
   bufferText,
   closeAllEditors,
@@ -34,7 +35,7 @@ import {
   withCurrentFrame,
   setViewport,
 } from "./realInput/harness";
-import { logSideBarState } from "./realInput/clickRouting";
+import { closeSideBarIfOpen, logSideBarState, restoreSideBar, waitForLayoutLanded } from "./realInput/clickRouting";
 
 const svg = (width: number, height: number, fill: string, label: string): string =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`
@@ -162,6 +163,8 @@ async function editTitles(page: Page): Promise<string[]> {
 /** rendering-core: README HTML renders centred and theme-aware, is titled in edit mode and edits raw. */
 export async function scenarioReadmeHtml(page: Page): Promise<void> {
   await logSideBarState(page, "readme-html");
+  // Closed before the preview opens, never toggled blind; the cleanup restores the state found.
+  const sideBarWasOpen = await closeSideBarIfOpen(page);
   const workbench = vscode.workspace.getConfiguration("workbench");
   const originalTheme = workbench.inspect<string>("colorTheme")?.globalValue;
   const shots = process.env.STUDIO_README_HTML_SHOTS;
@@ -176,9 +179,10 @@ export async function scenarioReadmeHtml(page: Page): Promise<void> {
         return preview?.documentUri === document.uri.toString() && preview.phase === "ready" && preview.webviewReady;
       });
       // A wide preview, like a README on a page: the side bar goes away and the preview group fills the window.
-      await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
       await setViewport(page, { width: 1400, height: 900 });
+      await waitForLayoutLanded(page);
+      await waitForFirstClickReady(page);
       for (const [name, host, mode, pictureImage] of [
         ["cream", "Default Light Modern", "cream", "logo-light.svg"],
         ["dark", "Default Dark Modern", "current", "logo-dark.svg"],
@@ -227,7 +231,7 @@ export async function scenarioReadmeHtml(page: Page): Promise<void> {
       assert.equal(bufferText(document), expected);
     } finally {
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
-      await vscode.commands.executeCommand("workbench.action.toggleSidebarVisibility");
+      await restoreSideBar(sideBarWasOpen);
       await closeAllEditors();
     }
   } finally {

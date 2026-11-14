@@ -21,6 +21,7 @@ import type { Page } from "playwright-core";
 import * as vscode from "vscode";
 
 import { getActivePreviewForTests } from "./extensionApi";
+import { waitForFirstClickReady } from "./windowFocus";
 import {
   bufferText,
   closeAllEditors,
@@ -35,7 +36,7 @@ import {
   withCurrentFrame,
   setViewport,
 } from "./realInput/harness";
-import { logSideBarState } from "./realInput/clickRouting";
+import { closeSideBarIfOpen, logSideBarState, restoreSideBar, waitForLayoutLanded } from "./realInput/clickRouting";
 
 const TEXT = [
   "# Release notes",
@@ -153,6 +154,8 @@ async function readBlocks(page: Page): Promise<{ titles: string[]; card: string[
 /** myst-blocks: version titles, the card and the tab set render in read and edit mode. */
 export async function scenarioMystBlocks(page: Page): Promise<void> {
   await logSideBarState(page, "myst-blocks");
+  // Closed before the preview opens, never toggled blind; the cleanup restores the state found.
+  const sideBarWasOpen = await closeSideBarIfOpen(page);
   const workbench = vscode.workspace.getConfiguration("workbench");
   const originalTheme = workbench.inspect<string>("colorTheme")?.globalValue;
   const shots = process.env.STUDIO_MYST_BLOCKS_SHOTS;
@@ -166,9 +169,10 @@ export async function scenarioMystBlocks(page: Page): Promise<void> {
         const preview = getActivePreviewForTests();
         return preview?.documentUri === textDocument.uri.toString() && preview.phase === "ready" && preview.webviewReady;
       });
-      await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
       await setViewport(page, { width: 1400, height: 1000 });
+      await waitForLayoutLanded(page);
+      await waitForFirstClickReady(page);
       for (const [name, host, mode] of [
         ["cream", "Default Light Modern", "cream"],
         ["dark", "Default Dark Modern", "current"],
@@ -222,7 +226,10 @@ export async function scenarioMystBlocks(page: Page): Promise<void> {
       assert.equal(bufferText(textDocument), TEXT, "opening and closing the editor changed nothing");
     } finally {
       await vscode.commands.executeCommand("workbench.action.toggleMaximizeEditorGroup");
-      await vscode.commands.executeCommand("workbench.action.toggleSidebarVisibility");
+      // The stress window runs every scenario at 1400x900: a later scenario must not inherit this
+      // step's taller viewport (incoming-changes' capture failed in round 2 after it).
+      await setViewport(page, { width: 1400, height: 900 });
+      await restoreSideBar(sideBarWasOpen);
       await closeAllEditors();
     }
   } finally {
