@@ -10,6 +10,14 @@
 import type { Frame, Page } from "playwright-core";
 import * as vscode from "vscode";
 
+import {
+  formatLandingRecords,
+  formatListMarks,
+  LANDING_RECORD_LIMIT,
+  type LandingRecord,
+  type LandingSource,
+} from "../../shared/inputLandingProbe";
+
 /** Event counts of one document since its counters were installed (capture phase, at `document`). */
 interface RoutingCounts {
   pointerdown: number;
@@ -162,4 +170,90 @@ export async function waitForLayoutLanded(page: Page): Promise<void> {
   } catch (error) {
     throw new Error(`the webview layout did not land: ${String(error).slice(0, 80)} ${await readLayoutFacts(page, undefined, undefined)}`);
   }
+}
+
+const LANDING_EVENTS = ["pointerdown", "mousedown", "focusin"] as const;
+
+/**
+ * Installs (once per document) capture-phase recorders of the landing events and returns the records.
+ * Runs in a page: it must stay self-contained. Read-only: it never clicks, focuses or stops an event.
+ */
+function recordLanding([events, limit]: readonly [readonly string[], number]): LandingRecord[] {
+  const scope = window as unknown as { studioLanding?: LandingRecord[] };
+  if (scope.studioLanding === undefined) {
+    const records: LandingRecord[] = [];
+    scope.studioLanding = records;
+    const describe = (target: EventTarget | null): string => {
+      if (!(target instanceof Element)) return target === document ? "document" : String(target);
+      const id = target.id === "" ? undefined : target.id;
+      const text = target.tagName.toLowerCase() + (id === undefined ? "" : "#" + id)
+        + Array.from(target.classList).slice(0, 3).map((name) => "." + name).join("");
+      return text.length > 80 ? text.slice(0, 79) + "…" : text;
+    };
+    for (const type of events) {
+      document.addEventListener(type, (event) => {
+        const point = event as MouseEvent;
+        const mouse = typeof point.clientX === "number";
+        records.push({ at: Date.now(), type, target: describe(event.target), x: mouse ? point.clientX : undefined, y: mouse ? point.clientY : undefined });
+        if (records.length > limit) records.splice(0, records.length - limit);
+      }, true);
+    }
+  }
+  return scope.studioLanding.slice();
+}
+
+/**
+ * Installs the landing recorders in the workbench document and the webview host frame (idempotent).
+ * Call it at the start of a real-window scenario; a failed install is ignored (the read says why).
+ */
+export async function installLandingProbe(page: Page, frame: Frame): Promise<void> {
+  await page.evaluate(recordLanding, [LANDING_EVENTS, LANDING_RECORD_LIMIT] as const).catch(() => undefined);
+  await frame.parentFrame()?.evaluate(recordLanding, [LANDING_EVENTS, LANDING_RECORD_LIMIT] as const).catch(() => undefined);
+}
+
+/** A text summary of the landing records since `since` (host `Date.now()`), times relative to `origin`. */
+export async function readLandingSummary(page: Page, frame: Frame | undefined, origin: number, since: number): Promise<string> {
+  const unreadable = (error: unknown): string => `unreadable: ${String(error).slice(0, 80)}`;
+  const read = async (target: Page | Frame, name: string): Promise<LandingSource> => ({
+    name,
+    records: await (target as Page).evaluate(recordLanding, [LANDING_EVENTS, LANDING_RECORD_LIMIT] as const).catch(unreadable),
+  });
+  const host = frame?.parentFrame() ?? null;
+  const sources: LandingSource[] = [await read(page, "workbench")];
+  sources.push(host === null ? { name: "host", records: "no host frame" } : await read(host, "host"));
+  return formatLandingRecords(sources, origin, since);
+}
+
+/** Page side of the list marks: the menu insertion and its transitionend, `Date.now()` stamped. */
+function watchList(selector: string): void {
+  const scope = window as unknown as { studioListMarks?: { at: number; mark: string }[] };
+  if (scope.studioListMarks !== undefined) return;
+  const marks: { at: number; mark: string }[] = [];
+  scope.studioListMarks = marks;
+  const seen = new WeakSet<Element>();
+  const attach = (): void => {
+    for (const menu of Array.from(document.querySelectorAll(selector))) {
+      if (seen.has(menu)) continue;
+      seen.add(menu);
+      marks.push({ at: Date.now(), mark: "inserted" });
+      menu.addEventListener("transitionend", (event) => {
+        marks.push({ at: Date.now(), mark: "transitionend " + (event as TransitionEvent).propertyName });
+      });
+    }
+  };
+  new MutationObserver(attach).observe(document.documentElement, { childList: true, subtree: true });
+  attach();
+}
+
+/** Starts recording the appearance of the palette lists in the content frame (idempotent, best-effort). */
+export async function watchListAppearance(frame: Frame): Promise<void> {
+  await frame.evaluate(watchList, ".sphinx-preview-edit-palette-menu").catch(() => undefined);
+}
+
+/** The list appearance marks of the content frame, on the clock of `origin`. */
+export async function readListMarks(frame: Frame | undefined, origin: number): Promise<string> {
+  if (frame === undefined) return formatListMarks("no content frame", origin);
+  const marks = await frame.evaluate(() => (window as unknown as { studioListMarks?: { at: number; mark: string }[] }).studioListMarks?.slice())
+    .catch((error: unknown) => `unreadable: ${String(error).slice(0, 80)}`);
+  return formatListMarks(marks ?? "not watching", origin);
 }
