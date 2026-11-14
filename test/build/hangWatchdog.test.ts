@@ -18,6 +18,9 @@ import {
   setHangHandler,
   startHeartbeat,
   stepBudgetMs,
+  STRESS_DEADLINE_CEILING_MS,
+  stressDeadlineLine,
+  stressLaunchDeadlineMs,
   STEP_BUDGET_DEFAULT_MS,
   watchdogVerdict,
   WHOLE_SUITE_STEPS,
@@ -26,6 +29,7 @@ import {
   type HangReport,
 } from "../shared/hangWatchdog";
 import { watchLaunch } from "../shared/launchWatchdog";
+import { STRESS_SCENARIOS_BY_HOST } from "../shared/stressPlan";
 
 /**
  * The dump and the kill read the process list with `ps` and send POSIX signals; Windows has
@@ -294,4 +298,27 @@ test("CR 173: without a root pid the watchdog kills the launch found by its user
     }
     fs.rmSync(directory, { recursive: true, force: true });
   }
+});
+
+test("CR 327: a stress launch computes its deadline from its rounds and scenarios", () => {
+  assert.equal(stressLaunchDeadlineMs(12, 17), 2 * 60_000 + 12 * 17 * 6_000);
+  assert.equal(stressLaunchDeadlineMs(12, 17), 1_344_000);
+  assert.equal(stressLaunchDeadlineMs(100, 17), STRESS_DEADLINE_CEILING_MS);
+  const trusted = STRESS_SCENARIOS_BY_HOST.trusted.length;
+  const stress = { STUDIO_REAL_INPUT_SCENARIO: "stress", STUDIO_STRESS_REPEAT: "12" };
+  assert.equal(launchDeadlineMs(stress), stressLaunchDeadlineMs(12, trusted));
+  assert.equal(launchDeadlineMs({ ...stress, STUDIO_STRESS_SCENARIOS: "untrusted-read-only" }), stressLaunchDeadlineMs(12, 1));
+  assert.equal(launchDeadlineMs({ ...stress, STUDIO_LAUNCH_TIMEOUT_MS: "5000" }), 5_000);
+  assert.throws(() => launchDeadlineMs({ ...stress, STUDIO_STRESS_REPEAT: "0" }), /STUDIO_STRESS_REPEAT/u);
+  assert.match(stressDeadlineLine(stress) ?? "", /^stress: launch deadline 1344000 ms \(12 rounds x 17 scenarios, ceiling 1440000 ms\)$/u);
+  assert.match(stressDeadlineLine({ ...stress, STUDIO_STRESS_REPEAT: "100" }) ?? "", /; capped: narrow/u);
+  assert.equal(stressDeadlineLine({ ...stress, STUDIO_LAUNCH_TIMEOUT_MS: "5000" }), "stress: launch deadline 5000 ms (STUDIO_LAUNCH_TIMEOUT_MS)");
+  assert.equal(stressDeadlineLine({}), undefined);
+});
+
+test("CR 327: the default stress plan keeps a third of margin under its deadline", () => {
+  const deadline = launchDeadlineMs({ STUDIO_REAL_INPUT_SCENARIO: "stress", STUDIO_STRESS_REPEAT: "12" });
+  const expected = 30_000 + 12 * STRESS_SCENARIOS_BY_HOST.trusted.length * 3_960;
+  assert.ok(expected <= (deadline * 2) / 3, `expected ${expected} ms vs deadline ${deadline} ms: revisit the default rounds`);
+  assert.ok(STRESS_DEADLINE_CEILING_MS <= 30 * 60_000 - 3 * 60_000);
 });

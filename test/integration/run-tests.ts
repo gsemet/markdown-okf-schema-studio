@@ -7,7 +7,7 @@ import { runReloadCampaign } from "./reload-suite";
 import { testProfileLaunchArgs, writeTestProfileSettings } from "../shared/testProfile";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { createRunDirectories, freePort, instanceIdFromEnvironment, instanceTag } from "../shared/runIsolation";
-import { heartbeatFileFor, launchDeadlineMs, RELOAD_LAUNCH_DEADLINE_MS } from "../shared/hangWatchdog";
+import { heartbeatFileFor, launchDeadlineMs, RELOAD_LAUNCH_DEADLINE_MS, stressDeadlineLine } from "../shared/hangWatchdog";
 import { resetHeartbeat, watchLaunch } from "../shared/launchWatchdog";
 
 const extensionRoot = path.resolve(__dirname, "../../..");
@@ -189,7 +189,9 @@ async function runWatchedReloadCampaign(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  launchDeadlineMs(); // an invalid STUDIO_LAUNCH_TIMEOUT_MS fails here, before any VS Code starts
+  launchDeadlineMs(); // an invalid STUDIO_LAUNCH_TIMEOUT_MS or stress plan fails here, before any VS Code starts
+  const deadlineLine = stressDeadlineLine();
+  if (deadlineLine !== undefined && !process.argv.includes("--reload-only")) console.log(deadlineLine);
   if (process.argv.includes("--reload-only")) {
     await runWatchedReloadCampaign();
     return;

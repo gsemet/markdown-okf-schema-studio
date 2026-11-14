@@ -18,6 +18,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 import { E2E_REPORT_ROOT } from "../reportPaths";
+import { hostStressPlan } from "./stressPlan";
 
 /** How often the extension host rewrites its heartbeat file. */
 export const HEARTBEAT_INTERVAL_MS = 5_000;
@@ -25,6 +26,18 @@ export const HEARTBEAT_INTERVAL_MS = 5_000;
 export const HEARTBEAT_STALE_MS = 90_000;
 /** Default hard deadline of one VS Code launch (`STUDIO_LAUNCH_TIMEOUT_MS` overrides it). */
 export const LAUNCH_DEADLINE_MS = 15 * 60_000;
+/** Window start before the first stress round (measured about 30 s, bounded by the heartbeat anyway). */
+export const STRESS_START_MS = 2 * 60_000;
+/**
+ * Budget of one stress scenario run: 1.5 times the measured 3.96 s (heavy run 43581058313: a round
+ * of 17 scenarios took 67.3 s), so a healthy run keeps a third of margin under its deadline.
+ */
+export const STRESS_SCENARIO_BUDGET_MS = 6_000;
+/**
+ * Ceiling of the stress launch deadline: under the 30-minute `stress` job less its setup, its
+ * build and the other window, so the watchdog (which dumps and names the step) fires first.
+ */
+export const STRESS_DEADLINE_CEILING_MS = 24 * 60_000;
 /** How often the launcher checks the heartbeat and the deadline. */
 export const WATCHDOG_POLL_MS = 2_000;
 /** Bound of one awaited VS Code API or CDP call that normally returns in well under a second. */
@@ -60,14 +73,52 @@ export const DUMP_TOTAL_TIMEOUT_MS = 60_000;
 /** Lines kept from the end of each VS Code log file in a dump. */
 export const DUMP_LOG_TAIL_LINES = 300;
 
-/** The launch deadline from `STUDIO_LAUNCH_TIMEOUT_MS` (a positive integer of milliseconds). */
+/** Launch deadline of a stress window of `repeat` rounds of `scenarios` scenarios, capped. */
+export function stressLaunchDeadlineMs(repeat: number, scenarios: number): number {
+  return Math.min(STRESS_DEADLINE_CEILING_MS, STRESS_START_MS + repeat * scenarios * STRESS_SCENARIO_BUDGET_MS);
+}
+
+/** The stress plan behind the computed deadline: its rounds and the larger window's scenario count. */
+export function stressDeadlinePlan(environment: NodeJS.ProcessEnv = process.env): { repeat: number; scenarios: number } {
+  const trusted = hostStressPlan(environment, "trusted", 10);
+  const untrusted = hostStressPlan(environment, "untrusted", 10);
+  return {
+    repeat: trusted?.repeat ?? untrusted?.repeat ?? 10,
+    scenarios: Math.max(trusted?.scenarios.length ?? 0, untrusted?.scenarios.length ?? 0),
+  };
+}
+
+/**
+ * The launch deadline. A set `STUDIO_LAUNCH_TIMEOUT_MS` (a positive integer of milliseconds) wins;
+ * else a stress run computes it from its rounds and scenarios; else LAUNCH_DEADLINE_MS.
+ */
 export function launchDeadlineMs(environment: NodeJS.ProcessEnv = process.env): number {
   const raw = environment.STUDIO_LAUNCH_TIMEOUT_MS?.trim();
-  if (raw === undefined || raw === "") return LAUNCH_DEADLINE_MS;
+  if (raw === undefined || raw === "") {
+    if (environment.STUDIO_REAL_INPUT_SCENARIO === "stress") {
+      const plan = stressDeadlinePlan(environment);
+      return stressLaunchDeadlineMs(plan.repeat, plan.scenarios);
+    }
+    return LAUNCH_DEADLINE_MS;
+  }
   if (!/^\d+$/u.test(raw) || Number(raw) <= 0) {
     throw new Error(`STUDIO_LAUNCH_TIMEOUT_MS must be a positive number of milliseconds, got "${raw}".`);
   }
   return Number(raw);
+}
+
+/** The line a stress launch prints before its window opens (the deadline and where it comes from). */
+export function stressDeadlineLine(environment: NodeJS.ProcessEnv = process.env): string | undefined {
+  if (environment.STUDIO_REAL_INPUT_SCENARIO !== "stress") return undefined;
+  const deadline = launchDeadlineMs(environment);
+  if ((environment.STUDIO_LAUNCH_TIMEOUT_MS?.trim() ?? "") !== "") {
+    return `stress: launch deadline ${deadline} ms (STUDIO_LAUNCH_TIMEOUT_MS)`;
+  }
+  const plan = stressDeadlinePlan(environment);
+  const capped = plan.repeat * plan.scenarios * STRESS_SCENARIO_BUDGET_MS + STRESS_START_MS > STRESS_DEADLINE_CEILING_MS;
+  return `stress: launch deadline ${deadline} ms (${plan.repeat} rounds x ${plan.scenarios} scenarios, `
+    + `ceiling ${STRESS_DEADLINE_CEILING_MS} ms)`
+    + (capped ? "; capped: narrow STUDIO_STRESS_SCENARIOS or lower the rounds" : "");
 }
 
 /**
