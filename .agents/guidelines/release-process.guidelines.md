@@ -82,7 +82,11 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    and go on; its `integration` job is the real-window proof.
 6. The version push is monitored through the tag, the GitHub release with its notes and images,
    the Marketplace and Open VSX publications and Pages, recovering a red heavy job as in "After
-   the merge" above. After the release job, watch **both** registries for 10 to 15 minutes (poll
+   the merge" above. The version push dispatches a separate **Release VSIX** run (event
+   `workflow_dispatch`, branch `main`, found with `gh run list --workflow release.yml --limit 3`);
+   watch it with `gh run watch <run-id>`. Its Open VSX step must be green without a recovery
+   dispatch; a recovery dispatch is still allowed, and its use is reported as a failure of the
+   version-push path. After the release run, watch **both** registries for 10 to 15 minutes (poll
    about once a minute) until each serves the new version, and report each one's state (served,
    at which minute, or not served after 15 minutes). The checks of record, HTTP 200 each:
    - VS Code Marketplace:

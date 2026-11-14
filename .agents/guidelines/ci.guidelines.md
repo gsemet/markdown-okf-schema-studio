@@ -102,6 +102,11 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     commit itself is made only after a green heavy run of `main` HEAD, or of the top branch
     when the version PR tops a stack (see [release-process.guidelines.md](release-process.guidelines.md)); the
     heavy run of the version push stays the final gate.
+15. **A job that publishes with OIDC trusted publishing runs in a top-level run of the workflow file
+    the registry knows.** The release is `release.yml`, started by a dispatch from the `release`
+    job of `ci.yml`, never through `workflow_call` (a called workflow's token names the caller, so
+    the Open VSX trusted publisher does not match). A change to that wiring is proven by the next
+    version push, not only by a manual dispatch.
 
 ## Recovering from a red heavy job on a release push
 
@@ -115,7 +120,8 @@ same run; no new commit and no manual tag are needed.
    `gh run rerun <run-id> --failed` (the run id is in the summary and in the run URL).
 3. What to expect: GitHub re-runs the failed jobs and the jobs that depend on them, including the
    ones that were skipped: the heavy job, then `report` and `checks` (after an integration
-   failure), `tag-release`, `release` and `pages`. The jobs that passed are not re-run and keep
+   failure), `tag-release`, then `release` (which dispatches Release VSIX, a separate run) and
+   `pages`. The jobs that passed are not re-run and keep
    their results and outputs (`release-check` keeps `bump=true`). The re-run uses the same commit
    and the same push event, so `tag-release` tags that commit when everything is green.
 4. Artifacts per attempt: every artifact name of `ci.yml` ends with `-attempt-<n>`
@@ -129,7 +135,9 @@ same run; no new commit and no manual tag are needed.
    `report` accepts them however far apart they started; the two-hour limit applies only to local
    campaigns. Keep each upload and its download consistent (test/build/test_workflows.py).
 5. Once the tag exists, re-run only the failed jobs (`release`, `pages`). Never re-run all jobs
-   then: `tag-release` would find the tag, output none, and skip `release` and `pages`.
+   then: `tag-release` would find the tag, output none, and skip `release` and `pages`. A failed
+   publication is re-run in the Release VSIX run; in the CI run, re-run only `release` (if the
+   dispatch itself failed) or `pages`.
 
 Fix and release a new version instead when the failure is a real bug, or when the same job fails
 again after a re-run: open a fix, merge it, then bump the version (`just version`) and push.

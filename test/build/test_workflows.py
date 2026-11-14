@@ -79,7 +79,6 @@ def test_release_publishes_to_the_marketplace_with_trusted_publishing() -> None:
     assert names.index("Publish to VS Code Marketplace") < names.index(
         "Attach VSIX and images to GitHub release"
     )
-    assert _ci_jobs()["release"]["permissions"]["id-token"] == "write"
 
 
 def test_release_publishes_to_open_vsx_with_trusted_publishing() -> None:
@@ -102,6 +101,32 @@ def test_release_publishes_to_open_vsx_with_trusted_publishing() -> None:
     assert names.index("Attach VSIX and images to GitHub release") < names.index(
         "Publish to Open VSX"
     )
+
+
+def test_the_version_push_dispatches_release_yml_so_its_token_names_release_yml() -> None:
+    job = _ci_jobs()["release"]
+    for key in ("uses", "with", "secrets"):
+        assert key not in job
+    assert job["permissions"] == {"actions": "write"}
+    steps = [s for s in job["steps"] if s.get("name") == "Dispatch Release VSIX with the tag"]
+    assert len(steps) == 1
+    step = steps[0]
+    for part in ("gh workflow run release.yml", '--ref "$DEFAULT_BRANCH"', '-f tag="$TAG"'):
+        assert part in step["run"]
+    assert "${{" not in step["run"]
+    assert step["env"]["TAG"] == "${{ needs.tag-release.outputs.tag }}"
+    assert step["env"]["DEFAULT_BRANCH"] == "${{ github.event.repository.default_branch }}"
+    assert step["env"]["GH_TOKEN"] == "${{ github.token }}"
+    assert step["env"]["GH_REPO"] == "${{ github.repository }}"
+    triggers = _release()[True]
+    assert "workflow_call" not in triggers
+    assert triggers["workflow_dispatch"]["inputs"]["tag"]["required"] is True
+    assert "push" in triggers
+    for workflow in WORKFLOWS:
+        assert "uses: ./.github/workflows/release.yml" not in workflow.read_text()
+    package = _release()["jobs"]["package"]
+    assert package["environment"] == "release"
+    assert package["permissions"]["id-token"] == "write"
 
 
 def test_static_ci_target_runs_an_online_audit_of_production_dependencies() -> None:
@@ -189,7 +214,8 @@ def test_release_and_pages_run_when_a_tag_was_created(name: str) -> None:
 
 
 # The release workflow checks out the tag. A manual dispatch runs the notes script of the workflow's
-# own ref, so a fix on main can release an older tag; tag pushes and workflow_call keep the tag's.
+# own ref, so a fix on main can release an older tag; a tag push keeps the tag's; the version push
+# is a dispatch.
 RELEASE = ROOT / ".github/workflows/release.yml"
 DISPATCH = "github.event_name == 'workflow_dispatch'"
 
@@ -225,7 +251,7 @@ def test_release_dispatch_runs_the_notes_script_of_the_workflow_ref() -> None:
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-078
-def test_release_tag_and_call_run_the_notes_script_of_the_tag() -> None:
+def test_release_tag_push_runs_the_notes_script_of_the_tag() -> None:
     step = _step("Prepare the reviewed release notes")
     assert str(step["if"]) == "github.event_name != 'workflow_dispatch'"
     assert step["run"].strip() == 'uv run python scripts/release_notes.py --prepare "$RELEASE_TAG" --assets "$RUNNER_TEMP/release-assets"'

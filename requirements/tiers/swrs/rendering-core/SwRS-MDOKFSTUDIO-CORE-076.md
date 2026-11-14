@@ -40,7 +40,7 @@ Every push to main SHALL run the heavy jobs (`integration` and `stress`); when t
 
 - GIVEN a push to main whose `package.json` version differs from the version before the push (`release-check` outputs `bump=true`, the same test `scripts/version.py --tag-before` applies)
 - WHEN the `integration` and `stress` jobs of that push run succeed and `checks` succeeds
-- THEN `tag-release` tags the commit, `release` and `pages` run, and `pages` builds the site from the merged reports artifact of the same run (`studio-reports-attempt-<n>`, the name the `report` job outputs) instead of running the suite
+- THEN `tag-release` tags the commit, `release` dispatches the **Release VSIX** workflow with the tag on the default branch, and `pages` builds the site from the merged reports artifact of the same run (`studio-reports-attempt-<n>`, the name the `report` job outputs) instead of running the suite
 
 ### Scenario (nominal): Re-run of the failed jobs of a version change
 

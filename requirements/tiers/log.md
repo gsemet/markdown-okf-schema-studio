@@ -8,6 +8,12 @@
   no `Signed-off-by` trailer; description, normative text and nominal scenario).
 - Sources: `scripts/version.py`. Tests: `test/build/test_release.py`.
 
+### The version push dispatches the release workflow (CR 324)
+
+- Changed: SwRS-MDOKFSTUDIO-CORE-076 (nominal scenario "Version change on main with a green heavy run":
+  `release` dispatches the Release VSIX workflow with the tag instead of calling it; no other change).
+- Sources: `.github/workflows/ci.yml`, `.github/workflows/release.yml`. Tests: `test/build/test_workflows.py`.
+
 ## 2026-11-13
 
 ### A grid behind a tab list marker opens the editor on its own line (CR 321)
