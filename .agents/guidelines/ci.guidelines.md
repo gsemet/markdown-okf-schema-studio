@@ -66,6 +66,7 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     - **Failure messages carry diagnostics.** A wait or an assertion that can fail on a race says
       what the host and the page held when it failed (state, focus, the page's event trace), so
       the next failure explains itself.
+    - **Real-window clicks on a just-opened list option hover first.** Use `clickListOption`: hover the option, wait for the page to report the hover, then press, because a press with no preceding hover can be routed to the workbench instead of the webview.
     - **Prove it with the stress mode.** Add the scenario to the stress list
       (`test/shared/stressPlan.ts`) and let the `stress` job (`just ci-stress`, N rounds per window)
       pass. It is the one CI-only job: it repeats scenarios that preflight runs once, so it adds

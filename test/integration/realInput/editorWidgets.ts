@@ -27,7 +27,7 @@ import {
   waitForRender,
   withCurrentFrame,
 } from "./harness";
-import { installLandingProbe, readLandingSummary, readListMarks, watchListAppearance } from "./clickRouting";
+import { clickListOption, installLandingProbe, readLandingSummary, readListMarks, watchListAppearance } from "./clickRouting";
 import { ensureTestWindowFocused, waitForWorkbenchFocusSettled, windowFocusReport } from "../windowFocus";
 import { editorBlurBeforePress } from "../../shared/editorBlurInterruption";
 import {
@@ -305,7 +305,7 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
       };
       const pickWarning = async (): Promise<void> => {
         step("warning click");
-        await withCurrentFrame(page, (frame) => frame.locator("[data-edit-option='WARNING']").click());
+        await withCurrentFrame(page, (frame) => clickListOption(page, frame, "WARNING"));
         step("warning clicked");
         await waitFor("Warning to change the type", async () => (await readEditor()).value === warning);
       };

@@ -22,7 +22,7 @@ import {
   waitForRender,
   withCurrentFrame,
 } from "./harness";
-import { installLandingProbe, readLandingSummary, readListMarks, watchListAppearance } from "./clickRouting";
+import { clickListOption, installLandingProbe, readLandingSummary, readListMarks, watchListAppearance } from "./clickRouting";
 import {
   traceDocumentChanges,
   waitForActiveSourceEditor,
@@ -700,7 +700,7 @@ export async function scenarioPalette(page: Page, evidence: Evidence): Promise<v
       await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='heading']").click());
       await waitFor("the heading list", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
       step("heading option click");
-      await withCurrentFrame(page, (frame) => frame.locator("[data-edit-option='2']").click());
+      await withCurrentFrame(page, (frame) => clickListOption(page, frame, "2"));
       step("heading option clicked");
       await expectValue("Heading 2 to prefix the line", "## Second paragraph.**xy**");
       assert.equal(await count(".sphinx-preview-edit-palette-menu"), 0, "choosing closes the list");
