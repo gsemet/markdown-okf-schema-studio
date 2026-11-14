@@ -311,7 +311,10 @@ test("CR 327: a stress launch computes its deadline from its rounds and scenario
   assert.equal(launchDeadlineMs({ ...stress, STUDIO_STRESS_SCENARIOS: "untrusted-read-only" }), stressLaunchDeadlineMs(12, 1));
   assert.equal(launchDeadlineMs({ ...stress, STUDIO_LAUNCH_TIMEOUT_MS: "5000" }), 5_000);
   assert.throws(() => launchDeadlineMs({ ...stress, STUDIO_STRESS_REPEAT: "0" }), /STUDIO_STRESS_REPEAT/u);
-  assert.match(stressDeadlineLine(stress) ?? "", /^stress: launch deadline 1344000 ms \(12 rounds x 17 scenarios, ceiling 1440000 ms\)$/u);
+  // CR 328: 19 scenarios x 12 rounds meet the ceiling, so the default line says it is capped.
+  assert.equal(stressDeadlineLine(stress),
+    `stress: launch deadline ${stressLaunchDeadlineMs(12, trusted)} ms (12 rounds x ${trusted} scenarios, ceiling ${STRESS_DEADLINE_CEILING_MS} ms)`
+    + (stressLaunchDeadlineMs(12, trusted) === STRESS_DEADLINE_CEILING_MS ? "; capped: narrow STUDIO_STRESS_SCENARIOS or lower the rounds" : ""));
   assert.match(stressDeadlineLine({ ...stress, STUDIO_STRESS_REPEAT: "100" }) ?? "", /; capped: narrow/u);
   assert.equal(stressDeadlineLine({ ...stress, STUDIO_LAUNCH_TIMEOUT_MS: "5000" }), "stress: launch deadline 5000 ms (STUDIO_LAUNCH_TIMEOUT_MS)");
   assert.equal(stressDeadlineLine({}), undefined);
