@@ -1,5 +1,8 @@
 import type { Page } from "playwright-core";
 import * as vscode from "vscode";
+import { previewGroupUnlocksSettledForTests } from "./extensionApi";
+import { findCurrentFrame, waitFor } from "./realInput/harness";
+import { bounded } from "./stepWatchdog";
 import { activateMacProcess, macFocusDiagnostics } from "./macWindow";
 import { workbenchFocusDump } from "../shared/workbenchFocusDump";
 
@@ -10,24 +13,28 @@ import { workbenchFocusDump } from "../shared/workbenchFocusDump";
  * makes `document.hasFocus()` true), yet the workbench sees no focused code editor, so `undo`,
  * `cursorTop` and typed keys reach nothing. macOS leaves a newly launched app in the background when
  * the user is working in another app (cooperative activation) or when the screen is locked; CI's
- * xvfb display always focuses the window. Losing the focus later is harmless; never having it is not.
+ * xvfb display has no window manager, so on Linux the window can be unfocused when the first real
+ * click arrives: the click then activates it late and the workbench restores its focus through
+ * `body`, blurring the block editor (CR 326). Losing the focus later is harmless; never having it is not.
  */
 const ACTIVATION_TIMEOUT_MS = 10_000;
 
 /**
- * Waits until VS Code reports the test window as focused (`window.state.focused`), asking macOS
- * to bring the window to the front first when it is not. Fails with the window diagnostics when
- * the window cannot become active (a locked screen). Other platforms return at once.
+ * Waits until VS Code reports the test window as focused (`window.state.focused`), asking the OS
+ * to bring the window to the front first when it is not (macOS: System Events; Linux: nothing
+ * can raise it from the extension host, `waitForWorkbenchFocusSettled` does it over CDP). The wait
+ * is bounded and event driven (`onDidChangeWindowState`). Fails with the window diagnostics when the window cannot become active (a locked screen). Windows returns
+ * at once.
  */
 export async function ensureTestWindowFocused(): Promise<void> {
   if (process.platform !== "darwin" || vscode.window.state.focused) return;
-  // The extension host is a child of the window's main process, the app macOS activates; that VS
-  // Code build is also the app that asks for the Automation permission.
+  // The extension host is a child of the window's main process, the app the OS activates; on macOS
+  // that VS Code build is also the app that asks for the Automation permission.
   const activation = activateMacProcess(process.ppid, `the VS Code build at ${vscode.env.appRoot}`);
   await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => {
       subscription.dispose();
-      reject(new Error("The VS Code test window never became the active window (macOS activation "
+      reject(new Error("The VS Code test window never became the active window (OS activation "
         + `${activation}). The real-window tests need an unlocked session. ${hostFocusReport()}`));
     }, ACTIVATION_TIMEOUT_MS);
     const subscription = vscode.window.onDidChangeWindowState((state) => {
@@ -42,6 +49,34 @@ export async function ensureTestWindowFocused(): Promise<void> {
       resolve();
     }
   });
+}
+
+/**
+ * Waits until a real click in the preview cannot be preceded by a late focus move: VS Code reports
+ * the window focused, no group unlock focus command is pending, the webview is the workbench's active
+ * element and the content document has the focus. Each condition is a state the host or the page
+ * reports; none is a delay. Fails with the focus report (CI guidelines rule 12).
+ */
+export async function waitForWorkbenchFocusSettled(page: Page): Promise<void> {
+  try {
+    await ensureTestWindowFocused();
+    // Chromium's own request to activate the window and page (CDP Page.bringToFront); the one
+    // focus request that needs no package on a display without a window manager.
+    await bounded("page.bringToFront", page.bringToFront());
+    await bounded("previewGroupUnlocksSettledForTests", previewGroupUnlocksSettledForTests());
+    await waitFor("the window focused, the webview active in the workbench and the content focused", async () => {
+      if (!vscode.window.state.focused) return false;
+      const webviewActive = await page.evaluate(() => {
+        const active = document.activeElement;
+        return active instanceof HTMLIFrameElement && active.classList.contains("webview");
+      });
+      if (!webviewActive) return false;
+      const frame = await findCurrentFrame(page);
+      return frame !== undefined && await frame.evaluate(() => document.hasFocus());
+    });
+  } catch (error) {
+    throw new Error(`${error instanceof Error ? error.message : String(error)} ${await windowFocusReport(page)}`);
+  }
 }
 
 /**
