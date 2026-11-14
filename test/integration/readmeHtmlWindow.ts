@@ -34,6 +34,7 @@ import {
   withCurrentFrame,
   setViewport,
 } from "./realInput/harness";
+import { logSideBarState } from "./realInput/clickRouting";
 
 const svg = (width: number, height: number, fill: string, label: string): string =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`
@@ -160,6 +161,7 @@ async function editTitles(page: Page): Promise<string[]> {
 // @tests_req SwRS-MDOKFSTUDIO-CORE-071
 /** rendering-core: README HTML renders centred and theme-aware, is titled in edit mode and edits raw. */
 export async function scenarioReadmeHtml(page: Page): Promise<void> {
+  await logSideBarState(page, "readme-html");
   const workbench = vscode.workspace.getConfiguration("workbench");
   const originalTheme = workbench.inspect<string>("colorTheme")?.globalValue;
   const shots = process.env.STUDIO_README_HTML_SHOTS;
