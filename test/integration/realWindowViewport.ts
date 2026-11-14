@@ -12,6 +12,18 @@ import { type PixelSize, type RealSurface, viewportFitProblem, viewportGuardIsSt
  * `Browser.getWindowForTarget`) and `screen.width/height`. A size that cannot be read is omitted.
  */
 export async function realWindowBounds(page: Page): Promise<RealSurface & { windowState?: string }> {
+  // Device-metrics emulation also changes what `screen` and the window report, so the first reading
+  // of a page (taken before any emulation by the harness connect or by `setViewport`) is the real one.
+  const known = realBoundsByPage.get(page);
+  if (known !== undefined) return known;
+  const result = await readRealWindowBounds(page);
+  realBoundsByPage.set(page, result);
+  return result;
+}
+
+const realBoundsByPage = new WeakMap<Page, RealSurface & { windowState?: string }>();
+
+async function readRealWindowBounds(page: Page): Promise<RealSurface & { windowState?: string }> {
   const result: { window?: PixelSize; screen?: PixelSize; windowState?: string } = {};
   try {
     const session = await page.context().newCDPSession(page);
@@ -40,8 +52,9 @@ export async function realWindowBounds(page: Page): Promise<RealSurface & { wind
  * emulated viewport (CR-326); before that, a 1280 px Xvfb screen would fail every 1400 px test.
  */
 export async function setViewport(page: Page, size: PixelSize): Promise<void> {
+  const real = await realWindowBounds(page); // before the emulation changes what the page reports
   await page.setViewportSize(size);
-  const problem = viewportFitProblem(size, await realWindowBounds(page));
+  const problem = viewportFitProblem(size, real);
   if (problem === undefined) return;
   console.log(problem);
   if (viewportGuardIsStrict()) throw new Error(problem);
