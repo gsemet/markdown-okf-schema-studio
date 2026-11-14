@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.9.1 - 2026-11-14
+
 ## 1.9.0 - 2026-11-14
 
 - A click on a card of a grid written in a list item whose marker is followed by a tab, or whose cards
