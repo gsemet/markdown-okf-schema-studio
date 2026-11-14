@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The install docs name Windsurf next to VSCodium and Cursor, give VS Code 1.95 as the minimum, and say the
+  Agents window is a VS Code feature.
+
 ## 1.9.1 - 2026-11-14
 
 ## 1.9.0 - 2026-11-14
