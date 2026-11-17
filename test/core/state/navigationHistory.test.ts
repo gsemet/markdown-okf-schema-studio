@@ -28,6 +28,7 @@ test("push, back and forward walk the visited places", () => {
   assert.equal(history.forward(), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
 test("a push after going back drops the forward entries", () => {
   const history = new NavigationHistory();
   history.push(place("a", 1));
@@ -39,6 +40,7 @@ test("a push after going back drops the forward entries", () => {
   assert.deepEqual(history.snapshot().entries.map((entry) => entry.uri), ["a", "b", "d"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
 test("a duplicate of the current entry is ignored", () => {
   const history = new NavigationHistory();
   history.push(place("a", 1));
@@ -59,6 +61,7 @@ test("the history keeps at most 50 entries, the newest", () => {
   assert.equal(history.canForward(), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
 test("depart updates the line of the same document and pushes another document", () => {
   const history = new NavigationHistory();
   history.depart(place("a", 4));

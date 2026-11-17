@@ -83,3 +83,12 @@ test("the scheme is read on the raw link: a percent sign before the first colon 
     assert.equal(classifyPreviewReference(request).kind, "external", request);
   }
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+test("a query-only link is blocked and a file with a query is relative", () => {
+  assert.deepEqual(classifyPreviewReference("?x=1"), {
+    kind: "blocked",
+    reason: "Query-only navigation targets are not valid file links.",
+  });
+  assert.deepEqual(classifyPreviewReference("other.md?view=1"), { kind: "relative", value: "other.md?view=1" });
+});

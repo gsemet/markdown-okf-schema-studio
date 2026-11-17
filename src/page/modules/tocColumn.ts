@@ -5,10 +5,6 @@ export interface TocColumnContext {
   initialViewPreferences?: { toc?: boolean };
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-033
-// @implements_req SwRS-MDOKFSTUDIO-LIFE-169
-// @implements_req SwRS-MDOKFSTUDIO-LIFE-170
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-037
 /**
  * TOC column: a right-hand column below the toolbar that lists the h1-h4 headings of the content.
  * The column is runtime UI appended to the body (never part of the page shell) and is
@@ -50,6 +46,7 @@ export function installTocColumn(
     + "[data-sphinx-preview-block-editor], [data-sphinx-preview-sticky-headings]";
   const button = document.querySelector("[data-sphinx-preview-toc-toggle]");
   const saved = vscode.getState?.() as { viewToc?: unknown; tocCollapsed?: unknown } | undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
   let open = typeof saved?.viewToc === "boolean"
     ? saved.viewToc
     : context.initialViewPreferences?.toc === true;
@@ -376,6 +373,7 @@ export function installTocColumn(
     else run();
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-033
   const apply = (): void => {
     document.documentElement.setAttribute("data-sphinx-preview-toc", open ? "open" : "closed");
     if (button) {
@@ -395,6 +393,7 @@ export function installTocColumn(
   };
 
   apply();
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-033
   button?.addEventListener("click", () => {
     open = !open;
     apply();
@@ -403,6 +402,7 @@ export function installTocColumn(
       ...(state && typeof state === "object" ? state : {}),
       viewToc: open,
     });
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
     vscode.postMessage({
       type: "previewViewPreferenceChanged",
       documentId: context.documentId,

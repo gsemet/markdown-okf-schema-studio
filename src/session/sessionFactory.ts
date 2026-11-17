@@ -48,7 +48,6 @@ export class SessionFactory {
     private readonly hooks: SessionFactoryHooks,
   ) {}
 
-  // @implements_req SwRS-MDOKFSTUDIO-LIFE-049
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-038
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-007

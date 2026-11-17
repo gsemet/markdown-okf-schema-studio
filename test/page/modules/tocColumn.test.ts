@@ -157,6 +157,8 @@ test("the TOC is off by default and the page is marked closed", () => {
   assert.equal(nav().getAttribute("aria-label"), "Table of contents");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 test("the workspace preference opens the TOC and the saved webview state wins", () => {
   assert.equal(setup({ toc: true }).root.getAttribute("data-sphinx-preview-toc"), "open");
   assert.equal(setup({ toc: true, saved: { viewToc: false } }).root.getAttribute("data-sphinx-preview-toc"), "closed");
@@ -181,6 +183,7 @@ test("the entries list h1 to h4 with their level and without the permalink glyph
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 test("headings in properties, admonitions, block editors and the sticky band are left out", () => {
   const { content, toc, flush, entries } = setup({ toc: true });
   const properties = new FakeElement("div");
@@ -200,6 +203,7 @@ test("headings in properties, admonitions, block editors and the sticky band are
   assert.deepEqual(entries().map((entry) => entry.textContent), ["Kept"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 test("an empty document shows No headings", () => {
   const { toc, flush, nav, entries } = setup({ toc: true });
   toc.refresh();
@@ -208,6 +212,7 @@ test("an empty document shows No headings", () => {
   assert.match(nav().textContent, /No headings/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 test("the TOC is rebuilt after the content is replaced, once per frame", () => {
   const { content, toc, flush, entries, frames } = setup({ toc: true });
   content.appendChild(heading("h1", "Old"));
@@ -223,6 +228,7 @@ test("the TOC is rebuilt after the content is replaced, once per frame", () => {
   assert.deepEqual(entries().map((entry) => entry.textContent), ["New one", "New two"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 test("clicking an entry scrolls to its heading and does not navigate", () => {
   const { content, toc, flush, entries, scrolled } = setup({ toc: true });
   const first = content.appendChild(heading("h1", "One"));
@@ -237,6 +243,7 @@ test("clicking an entry scrolls to its heading and does not navigate", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
 test("the toggle opens the TOC, posts the preference, remembers it and builds the entries", () => {
   const { content, button, root, posted, flush, entries, getState, changes } = setup();
   content.appendChild(heading("h1", "Title"));
@@ -278,6 +285,7 @@ function outline(content: FakeElement) {
 }
 const hiddenOf = (entry: FakeElement) => entry.parent!.hasAttribute("hidden");
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 test("only parent entries get a twisty with aria-expanded", () => {
   const { content, toc, flush, twisties } = setup({ toc: true });
   outline(content);
@@ -302,6 +310,7 @@ test("the twisty name says Fold when open and Unfold when folded", () => {
   assert.equal(twisties()[0].getAttribute("aria-label"), open);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 test("collapsing a parent hides its descendants, and a rebuild keeps it collapsed", () => {
   const { content, toc, flush, twisties, entries, getState } = setup({ toc: true });
   outline(content);
@@ -321,6 +330,7 @@ test("collapsing a parent hides its descendants, and a rebuild keeps it collapse
   assert.deepEqual(entries().map(hiddenOf), [false, false, false, false, false]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 test("collapsing a middle parent hides only its own subtree", () => {
   const { content, toc, flush, twisties, entries } = setup({ toc: true });
   outline(content);
@@ -348,6 +358,7 @@ test("the current entry follows the reading line and is marked aria-current", ()
   assert.deepEqual(current(), [null, null, null, null, "location"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 test("a collapsed parent carries the highlight of a hidden current section", () => {
   const { content, toc, window, flush, entries, twisties } = setup({ toc: true });
   outline(content);
@@ -361,6 +372,7 @@ test("a collapsed parent carries the highlight of a hidden current section", () 
   assert.equal(entries()[2].getAttribute("aria-current"), "location");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 test("the scroll tracking reads no layout: tops are cached until remeasure", () => {
   const { content, toc, window, flush, entries } = setup({ toc: true });
   const headings = outline(content);
@@ -385,6 +397,7 @@ test("the scroll tracking reads no layout: tops are cached until remeasure", () 
   assert.equal(entries()[3].getAttribute("aria-current"), "location");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 test("the TOC scrolls itself, not the page, to keep the current entry visible", () => {
   const { content, toc, window, flush, nav, entries } = setup({ toc: true });
   outline(content);
@@ -398,6 +411,7 @@ test("the TOC scrolls itself, not the page, to keep the current entry visible", 
   assert.equal((nav() as any).scrollTop, 90);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 test("a click right after a content patch scrolls to the live heading", () => {
   const { content, toc, flush, entries, scrolled } = setup({ toc: true });
   outline(content);
@@ -412,6 +426,7 @@ test("a click right after a content patch scrolls to the live heading", () => {
   assert.notEqual(scrolled[0], old[1]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 test("a repeated heading text is told apart by its occurrence", () => {
   const { content, toc, flush, entries, scrolled } = setup({ toc: true });
   const first = content.appendChild(heading("h2", "Notes"));
@@ -427,6 +442,7 @@ test("a repeated heading text is told apart by its occurrence", () => {
   assert.notEqual(freshFirst, first);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 test("a heading revealed at the reading line becomes current despite a fractional top", () => {
   const { content, toc, window, flush, entries } = setup({ toc: true });
   const headings = outline(content);
@@ -441,6 +457,7 @@ test("a heading revealed at the reading line becomes current despite a fractiona
   assert.equal(entries()[3].getAttribute("aria-current"), "location");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 test("a comment chip and its hidden body stay out of the entry label, a TODO word chip stays in", () => {
   const { content, toc, flush, entries } = setup({ toc: true });
   const comment = new FakeElement("span", ["okf-comment"]);

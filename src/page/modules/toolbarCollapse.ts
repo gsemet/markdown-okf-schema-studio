@@ -10,10 +10,6 @@ const HINT_OPEN_MS = 700;
 /** Webview state key (true): this panel already showed the load hint; the state snapshots carry it. */
 const HINT_STATE_KEY = "viewToolbarHintShown";
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-007
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
-// @implements_req SwRS-MDOKFSTUDIO-LIFE-169
-// @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
  * Collapse button of toolbar row 1: hides or shows rows 2 to 4 (the `hidden` attribute also
  * takes them out of the Tab order). The choice is the `toolbarCollapsed` view preference:
@@ -45,10 +41,12 @@ export function installToolbarCollapse(
   const button = document.querySelector("[data-sphinx-preview-toolbar-collapse]");
   const rows = document.querySelector("[data-sphinx-preview-toolbar-more]") as HTMLElement | null;
   const saved = vscode.getState?.() as { viewToolbarCollapsed?: unknown } | undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
   let collapsed = typeof saved?.viewToolbarCollapsed === "boolean"
     ? saved.viewToolbarCollapsed
     : context.initialViewPreferences?.toolbarCollapsed !== false;
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-007
   const apply = (): void => {
     document.documentElement.setAttribute("data-sphinx-preview-toolbar-state", collapsed ? "collapsed" : "expanded");
     if (rows) rows.hidden = collapsed;
@@ -74,6 +72,7 @@ export function installToolbarCollapse(
   const ANIMATING = "data-sphinx-preview-toolbar-animating";
   const ANIMATION_MS = 200;
   let animatingTimer: number | undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
   /** Marks the rows as animating when the next change of `hidden` may animate. */
   const markAnimating = (): void => {
     if (!window || !rows || reduced()) return;
@@ -111,6 +110,7 @@ export function installToolbarCollapse(
       && (event.target === button || (button as Element).contains?.(event.target as Node))) return;
     endHint(false);
   }
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
   const startHint = (): void => {
     if (!window || !rows || !collapsed || hintActive) return;
     hintActive = true;
@@ -145,6 +145,7 @@ export function installToolbarCollapse(
       ...(state && typeof state === "object" ? state : {}),
       viewToolbarCollapsed: collapsed,
     });
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
     vscode.postMessage({
       type: "previewViewPreferenceChanged",
       documentId: context.documentId,

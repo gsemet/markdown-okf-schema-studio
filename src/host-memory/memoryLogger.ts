@@ -15,7 +15,6 @@ export interface MemoryLogger extends Logger {
   readonly entries: readonly MemoryLogEntry[];
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-LIFE-002
 /** Creates an empty memory logger. */
 export function createMemoryLogger(): MemoryLogger {
   const entries: MemoryLogEntry[] = [];

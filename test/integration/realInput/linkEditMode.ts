@@ -64,6 +64,7 @@ function assertStayedOn(source: vscode.TextDocument, target: vscode.Uri, label: 
   assert.notEqual(dirty, true, `${label}: ${path.basename(target.fsPath)} is not changed`);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
 /**
  * CR 217: in edit mode a real click on a link-only paragraph and on the footer of a `:link:` card
  * opens the block editor and leaves the active file as it is; keys typed after the footer click go

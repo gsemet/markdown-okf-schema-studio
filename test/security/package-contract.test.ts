@@ -32,11 +32,6 @@ test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the share
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-024
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-018
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-001
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-156
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
@@ -57,6 +52,8 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(packageJson.displayName, "Markdown OKF-Schema Studio");
   assert.match(packageJson.scripts["test:integration"], /npm run bundle/u);
   // CR 119 appended the four edit-mode commands (asserted below); the first two are unchanged.
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-032
   assert.deepEqual(packageJson.contributes.commands.slice(0, 2), [
     {
       command: "markdown-okf-schema-studio.openPreview",
@@ -72,7 +69,9 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       enablement: "resourceExtname == .md",
     },
   ]);
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-001
   assert.doesNotMatch(serialized, /markdown\./u);
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-018
   assert.deepEqual(packageJson.contributes.customEditors, [{
     viewType: "markdown-okf-schema-studio.editor",
     displayName: "Markdown OKF-Schema Studio",
@@ -111,6 +110,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       when: "editorTextFocus && resourceExtname == .md",
     },
   ]);
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-156
   // The Settings UI shows the categories in this order, most used first; every setting sits in the
   // category of its key prefix.
   const categories = packageJson.contributes.configuration;

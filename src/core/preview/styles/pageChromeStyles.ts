@@ -1,6 +1,4 @@
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-002
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-129
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
 import { CALLOUT_ICONS } from "../calloutIcons";
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
@@ -142,13 +140,135 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   --studio-charts-orange: #94500c;
 }`;
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+/** The floating toolbar box, its rows, and the hidden rows 2 to 4. */
+const TOOLBAR_ROWS_CSS = `[data-sphinx-preview-toolbar] {
+  position: fixed;
+  inset-block-start: 12px;
+  inset-inline-end: 14px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--sphinx-preview-border);
+  border-radius: 14px;
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-icon-foreground, var(--studio-editor-foreground, CanvasText));
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
+}
+
+[data-sphinx-preview-toolbar-row] {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Rows 2 to 4: the collapse button of row 1 hides them (the hidden attribute removes them from
+   the Tab order as well). */
+[data-sphinx-preview-toolbar-more] {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+[data-sphinx-preview-toolbar-more][hidden] {
+  display: none;
+}`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+/** The rows unroll and roll up as one block (the animating mark and its keyframes). */
+const TOOLBAR_ROWS_MOTION_CSS = `/* The rows unroll and roll up as one block (height and fade). Everything sits under the mark the
+   runtime sets just before it changes 'hidden', so a page that loads with the rows open never
+   animates them. 'display' and the starting style let the hidden state animate too. */
+[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating] {
+  overflow: hidden;
+  interpolate-size: allow-keywords;
+  transition: height var(--sphinx-preview-motion, 160ms) var(--sphinx-preview-motion-ease, ease),
+    opacity var(--sphinx-preview-motion, 160ms) var(--sphinx-preview-motion-ease, ease),
+    display var(--sphinx-preview-motion, 160ms) allow-discrete;
+}
+
+[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating][hidden] {
+  height: 0;
+  opacity: 0;
+}
+
+[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating]:not([hidden]) {
+  animation: sphinx-preview-toolbar-unroll var(--sphinx-preview-motion, 160ms) var(--sphinx-preview-motion-ease, ease);
+}
+
+@keyframes sphinx-preview-toolbar-unroll {
+  from { height: 0; opacity: 0; }
+}`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-129
+/** The slide-in keyframes of every tooltip bubble. */
+const TOOLBAR_TOOLTIP_KEYFRAMES_CSS = `/* One slide-in for every tooltip bubble (main toolbar, edit palette, table menu): from 6 px to the
+   left of its place, fading in. It uses 'translate', which adds to each bubble's own 'transform'.
+   Reduced motion turns it off (end of the Motion section of propertiesStyles). */
+@keyframes sphinx-preview-tooltip-in {
+  from { opacity: 0; translate: -6px 0; }
+  to { opacity: 1; translate: 0 0; }
+}`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-129
+/** The rule that shows a tooltip bubble on hover or focus, with the slide-in animation. */
+const TOOLBAR_TOOLTIP_SHOW_CSS = `[data-sphinx-preview-toolbar] button[data-tooltip]:hover::after,
+[data-sphinx-preview-toolbar] button[data-tooltip]:focus-visible::after,
+.sphinx-preview-table-menu button[data-tooltip]:hover::after,
+.sphinx-preview-table-menu button[data-tooltip]:focus-visible::after,
+.sphinx-preview-edit-palette > button[data-tooltip]:hover::after,
+.sphinx-preview-edit-palette > button[data-tooltip]:focus-visible::after {
+  visibility: visible;
+  opacity: 1;
+  animation: sphinx-preview-tooltip-in var(--sphinx-preview-motion-fast, 120ms) var(--sphinx-preview-motion-ease, ease);
+}`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+/** The sticky heading band: fixed and out of flow, and the shadow under it while text scrolls under it. */
+const TOOLBAR_STICKY_BAND_CSS = `/* Fixed, out of flow: showing or resizing the band never moves the content (scroll anchoring R8).
+   One line per heading level, cut with an ellipsis: the band is never taller than the depth. */
+[data-sphinx-preview-sticky-headings] {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 999;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(100% - var(--sphinx-preview-toc-reserve, 0px));
+  margin: 0;
+  padding-block: 0 4px;
+  padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-toc-reserve, 0px) - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)));
+  padding-inline-end: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-toc-reserve, 0px) - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)), calc(var(--sphinx-preview-toolbar-width, 0px) - var(--sphinx-preview-toc-reserve, 0px)));
+  border: 0;
+  border-bottom: 1px solid var(--sphinx-preview-border);
+  border-radius: 0;
+  background: var(--studio-editor-background, Canvas);
+  color: var(--studio-editor-foreground, CanvasText);
+  font-family: var(--sphinx-preview-font);
+  font-size: calc(var(--sphinx-preview-zoomed-font-size) + 2px);
+  font-weight: 700;
+  line-height: var(--sphinx-preview-line-height);
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* A soft shadow under the band while content scrolls under it. A box-shadow takes no layout space
+   (no shift of the content or the reading offset) and the band is below the toolbar (z-index). It
+   appears and disappears at once, so there is no motion to reduce. */
+[data-sphinx-preview-sticky-headings][data-scrolled-under] {
+  box-shadow: 0 6px 8px -5px var(--sphinx-preview-band-shadow, rgba(0, 0, 0, 0.28));
+}`;
+
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
-// @implements_req SwRS-MDOKFSTUDIO-LIFE-049
 // @implements_req SwRS-MDOKFSTUDIO-MYST-081
 // @implements_req SwRS-MDOKFSTUDIO-THEME-031
 // @implements_req SwRS-MDOKFSTUDIO-THEME-043
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-001
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
 /**
  * The page chrome: layout variables, the theme modes, the toolbar and its menus, the status banners,
  * the sticky heading band and the tooltips.
@@ -202,65 +322,9 @@ body {
 
 ${FORCED_THEME_MODES_CSS}
 
-[data-sphinx-preview-toolbar] {
-  position: fixed;
-  inset-block-start: 12px;
-  inset-inline-end: 14px;
-  z-index: 1100;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--sphinx-preview-border);
-  border-radius: 14px;
-  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
-  color: var(--studio-icon-foreground, var(--studio-editor-foreground, CanvasText));
-  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
-}
+${TOOLBAR_ROWS_CSS}
 
-[data-sphinx-preview-toolbar-row] {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-/* Rows 2 to 4: the collapse button of row 1 hides them (the hidden attribute removes them from
-   the Tab order as well). */
-[data-sphinx-preview-toolbar-more] {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
-
-[data-sphinx-preview-toolbar-more][hidden] {
-  display: none;
-}
-
-/* The rows unroll and roll up as one block (height and fade). Everything sits under the mark the
-   runtime sets just before it changes 'hidden', so a page that loads with the rows open never
-   animates them. 'display' and the starting style let the hidden state animate too. */
-[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating] {
-  overflow: hidden;
-  interpolate-size: allow-keywords;
-  transition: height var(--sphinx-preview-motion, 160ms) var(--sphinx-preview-motion-ease, ease),
-    opacity var(--sphinx-preview-motion, 160ms) var(--sphinx-preview-motion-ease, ease),
-    display var(--sphinx-preview-motion, 160ms) allow-discrete;
-}
-
-[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating][hidden] {
-  height: 0;
-  opacity: 0;
-}
-
-[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating]:not([hidden]) {
-  animation: sphinx-preview-toolbar-unroll var(--sphinx-preview-motion, 160ms) var(--sphinx-preview-motion-ease, ease);
-}
-
-@keyframes sphinx-preview-toolbar-unroll {
-  from { height: 0; opacity: 0; }
-}
+${TOOLBAR_ROWS_MOTION_CSS}
 
 /* Shown by the runtime when a render stays pending; fixed and pointer-transparent, so no content moves. */
 [data-sphinx-preview-pending-overlay] {
@@ -502,13 +566,7 @@ html[data-sphinx-preview-toolbar-state="collapsed"]:not([data-sphinx-preview-too
   transform: none;
 }
 
-/* One slide-in for every tooltip bubble (main toolbar, edit palette, table menu): from 6 px to the
-   left of its place, fading in. It uses 'translate', which adds to each bubble's own 'transform'.
-   Reduced motion turns it off (end of the Motion section of propertiesStyles). */
-@keyframes sphinx-preview-tooltip-in {
-  from { opacity: 0; translate: -6px 0; }
-  to { opacity: 1; translate: 0 0; }
-}
+${TOOLBAR_TOOLTIP_KEYFRAMES_CSS}
 
 .sphinx-preview-table-menu button[data-tooltip]::after,
 .sphinx-preview-table-menu button[data-tooltip]:hover::after,
@@ -519,16 +577,7 @@ html[data-sphinx-preview-toolbar-state="collapsed"]:not([data-sphinx-preview-too
   transform: none;
 }
 
-[data-sphinx-preview-toolbar] button[data-tooltip]:hover::after,
-[data-sphinx-preview-toolbar] button[data-tooltip]:focus-visible::after,
-.sphinx-preview-table-menu button[data-tooltip]:hover::after,
-.sphinx-preview-table-menu button[data-tooltip]:focus-visible::after,
-.sphinx-preview-edit-palette > button[data-tooltip]:hover::after,
-.sphinx-preview-edit-palette > button[data-tooltip]:focus-visible::after {
-  visibility: visible;
-  opacity: 1;
-  animation: sphinx-preview-tooltip-in var(--sphinx-preview-motion-fast, 120ms) var(--sphinx-preview-motion-ease, ease);
-}
+${TOOLBAR_TOOLTIP_SHOW_CSS}
 
 /* Tooltip bubble (shared rules in pageChromeStyles): centred under the button and sliding in like the
    other tooltips (sphinx-preview-tooltip-in). It is not rendered until the button is hovered or focused (a hidden bubble would
@@ -557,39 +606,5 @@ html[data-sphinx-preview-toolbar-state="collapsed"]:not([data-sphinx-preview-too
   display: block;
 }
 
-/* Fixed, out of flow: showing or resizing the band never moves the content (scroll anchoring R8).
-   One line per heading level, cut with an ellipsis: the band is never taller than the depth. */
-[data-sphinx-preview-sticky-headings] {
-  position: fixed;
-  inset-block-start: 0;
-  inset-inline: 0;
-  z-index: 999;
-  box-sizing: border-box;
-  width: 100%;
-  max-width: calc(100% - var(--sphinx-preview-toc-reserve, 0px));
-  margin: 0;
-  padding-block: 0 4px;
-  padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-toc-reserve, 0px) - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)));
-  padding-inline-end: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-toc-reserve, 0px) - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)), calc(var(--sphinx-preview-toolbar-width, 0px) - var(--sphinx-preview-toc-reserve, 0px)));
-  border: 0;
-  border-bottom: 1px solid var(--sphinx-preview-border);
-  border-radius: 0;
-  background: var(--studio-editor-background, Canvas);
-  color: var(--studio-editor-foreground, CanvasText);
-  font-family: var(--sphinx-preview-font);
-  font-size: calc(var(--sphinx-preview-zoomed-font-size) + 2px);
-  font-weight: 700;
-  line-height: var(--sphinx-preview-line-height);
-  white-space: pre;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: none;
-}
-
-/* A soft shadow under the band while content scrolls under it. A box-shadow takes no layout space
-   (no shift of the content or the reading offset) and the band is below the toolbar (z-index). It
-   appears and disappears at once, so there is no motion to reduce. */
-[data-sphinx-preview-sticky-headings][data-scrolled-under] {
-  box-shadow: 0 6px 8px -5px var(--sphinx-preview-band-shadow, rgba(0, 0, 0, 0.28));
-}
+${TOOLBAR_STICKY_BAND_CSS}
 `;

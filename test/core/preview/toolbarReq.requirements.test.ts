@@ -1,12 +1,11 @@
 /**
  * Requirement tests of the toolbar-navigation scope on pure modules: the stylesheet rule of the
- * marked block and the classification of a query-only link.
+ * marked block.
  */
 
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { classifyPreviewReference } from "../../../src/core/navigation/previewNavigation";
 import { PREVIEW_ACCESSIBILITY_CSS } from "../../../src/core/preview/previewStyles";
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
@@ -20,13 +19,4 @@ test("in forced-colors mode the marked block is outlined in the highlight colour
     forced[1],
     /\[data-sphinx-preview-current="true"\] \{\s*outline: 2px solid Highlight;\s*\}/u,
   );
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
-test("a query-only link is blocked and a file with a query is relative", () => {
-  assert.deepEqual(classifyPreviewReference("?x=1"), {
-    kind: "blocked",
-    reason: "Query-only navigation targets are not valid file links.",
-  });
-  assert.deepEqual(classifyPreviewReference("other.md?view=1"), { kind: "relative", value: "other.md?view=1" });
 });
