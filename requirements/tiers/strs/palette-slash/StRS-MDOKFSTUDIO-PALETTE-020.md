@@ -61,14 +61,14 @@ sequenceDiagram
     actor Writer
     participant Palette as Palette or slash menu
     participant Action as GFM action
-    participant Box as Text box
+    participant Field as Text box
     Writer->>Palette: press Alert or type /alert
     Palette->>Action: run on the touched lines
     alt the caret is outside an alert
-        Action->>Box: quote the lines under a note head, one edit
+        Action->>Field: quote the lines under a note head, one edit
         Palette-->>Writer: list of alert types at the caret
         Writer->>Palette: choose a type
-        Palette->>Box: the type word of the head is replaced
+        Palette->>Field: the type word of the head is replaced
     else the caret is already in an alert
         Action-->>Writer: the text is unchanged
     end

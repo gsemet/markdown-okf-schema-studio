@@ -59,24 +59,24 @@ sequenceDiagram
     actor Writer
     participant Page as Page paste handler
     participant Host as Host
-    participant Box as Text box
+    participant Field as Text box
     Writer->>Page: paste, or drop files from the Explorer
     alt the clipboard holds text
-        Page->>Box: ordinary text paste
+        Page->>Field: ordinary text paste
     else an image only
         Page->>Host: save the image
         Host-->>Page: the file image-N with its extension
-        Page->>Box: a reference as a paragraph of its own
+        Page->>Field: a reference as a paragraph of its own
     else rich text
         Page->>Host: convert to the safe subset
         Host-->>Page: Markdown
-        Page->>Box: replace the selection
+        Page->>Field: replace the selection
     else a URL
-        Page->>Box: a link, an autolink or an image
+        Page->>Field: a link, an autolink or an image
     else files dropped from the Explorer
-        Page->>Box: links or images at the drop point
+        Page->>Field: links or images at the drop point
     end
-    Note over Page,Box: one undoable edit saved with the other text
+    Note over Page,Field: one undoable edit saved with the other text
 ```
 
 Text on the clipboard always wins; every other branch ends in one undoable edit.

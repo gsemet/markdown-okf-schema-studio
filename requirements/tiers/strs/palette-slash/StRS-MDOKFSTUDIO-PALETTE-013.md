@@ -62,7 +62,7 @@ sequenceDiagram
     actor Writer
     participant Page as Preview page
     participant Host as Host
-    participant Box as Text box
+    participant Field as Text box
     Writer->>Page: press the Reference button
     Page-->>Writer: the list shows Loading
     Page->>Host: ask for the targets
@@ -71,7 +71,7 @@ sequenceDiagram
         Host-->>Page: the entries, possibly cut, with a note
         Page-->>Writer: the list of targets
         Writer->>Page: pick one
-        Page->>Box: write the reference or the citation
+        Page->>Field: write the reference or the citation
     else the list is empty or the host fails
         Host-->>Page: an empty list or an error
         Page-->>Writer: a message and no edit

@@ -69,13 +69,13 @@ sequenceDiagram
     actor Writer
     participant Palette as Palette, slash menu or shortcut
     participant Action as Formatting action
-    participant Box as Text box
+    participant Field as Text box
     Writer->>Palette: press a button, pick a command or type a shortcut
     Palette->>Action: run on the selection or the caret
     alt the action returns an edit
-        Action->>Box: one native edit, saved by the autosave
-        Writer->>Box: undo
-        Box-->>Writer: the text is as it was
+        Action->>Field: one native edit, saved by the autosave
+        Writer->>Field: undo
+        Field-->>Writer: the text is as it was
     else the action returns nothing
         Action-->>Writer: the text is unchanged and the status line gives the reason
     end
