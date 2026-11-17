@@ -46,9 +46,6 @@ const HEADING_PATTERN = /^H([1-6])$/u;
 /** The key a fold-all button of the toolbar reads: pressed while any section is folded. */
 const FOLD_BUTTON = "[data-sphinx-preview-fold-toggle]";
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-004
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-006
 /**
  * Folding of the sections of the content. Each heading that has blocks after it gets a chevron
  * button; a folded section hides its blocks with `hidden="until-found"`, so the browser find still
@@ -108,12 +105,14 @@ export function installHeadingFold(
     return { blocks, levels, keys: headingKeys };
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-004
   const persist = (): void => {
     folds = withDocumentFolds(folds, context.documentId, Array.from(keys));
     const state = vscode.getState?.();
     vscode.setState?.({ ...(state && typeof state === "object" ? state : {}), headingFolds: folds });
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
   const setToggle = (heading: HTMLElement, foldable: boolean, folded: boolean, text: string): void => {
     let toggle = Array.from(heading.children).find((child) => has(child, "data-okf-fold-toggle")) as
       HTMLElement | undefined;
@@ -186,6 +185,7 @@ export function installHeadingFold(
     return true;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
   const toggle = (heading: Element): void => {
     change(() => {
       const index = layout().blocks.indexOf(heading as HTMLElement);
@@ -194,6 +194,7 @@ export function installHeadingFold(
     });
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
   const foldAll = (): void => {
     change(() => {
       const { levels, keys: headingKeys } = layout();
@@ -205,6 +206,7 @@ export function installHeadingFold(
     });
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
   const unfoldAll = (): void => {
     change(() => {
       if (keys.size === 0) return false;
@@ -254,6 +256,7 @@ export function installHeadingFold(
     });
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-006
   const reveal = (target: Element): boolean => {
     if (keys.size === 0) return false;
     const { blocks, levels, keys: headingKeys } = layout();

@@ -26,7 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/host-vscode/groupFocus.test.ts
 - test/host/lifeReq.requirements.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/previewWindow.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

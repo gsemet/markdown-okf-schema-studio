@@ -35,7 +35,7 @@ tested_in_files:
 - test/integration/findInPreview.test.ts
 - test/integration/realInput/qa210Replays.ts
 - test/page/modules/findBar.test.ts
-- test/session/reviewReqThreads.requirements.test.ts
+- test/session/findReplace.test.ts
 - test/visual/capture_find_checks.py
 default_owner_email: gaetan@xeberon.net
 supersedes:

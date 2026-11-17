@@ -77,55 +77,9 @@ const TOOLBAR_FLOAT_CSS = `/*
   display: none;
 }`;
 
-// @implements_req SwRS-MDOKFSTUDIO-CORE-028
-// @implements_req SwRS-MDOKFSTUDIO-CORE-034
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-037
-// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-001
-// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
-// @implements_req SwRS-MDOKFSTUDIO-THEME-001
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-045
-/**
- * The toolbar toggle icons, the TOC column, the width modes and the content typography (wrapping,
- * paragraphs, lists, checkboxes).
- *
- * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
- * the parts in cascade order: moving a rule to another part changes the cascade.
- */
-export const CONTENT_LAYOUT_CSS = `
-[data-sphinx-preview-theme-toggle] svg {
-  display: none;
-}
-
-[data-sphinx-preview-theme-toggle][data-theme-mode="current"] [data-theme-icon="current"],
-[data-sphinx-preview-theme-toggle][data-theme-mode="dark"] [data-theme-icon="dark"],
-[data-sphinx-preview-theme-toggle][data-theme-mode="white"] [data-theme-icon="white"],
-[data-sphinx-preview-theme-toggle][data-theme-mode="cream"] [data-theme-icon="cream"] {
-  display: block;
-}
-
-[data-sphinx-preview-toolbar-collapse] svg {
-  display: none;
-}
-
-[data-sphinx-preview-toolbar-collapse][aria-expanded="true"] [data-collapse-icon="hide"],
-[data-sphinx-preview-toolbar-collapse][aria-expanded="false"] [data-collapse-icon="show"] {
-  display: block;
-}
-
-[data-sphinx-preview-width-toggle] svg {
-  display: none;
-}
-
-[data-sphinx-preview-width-toggle][data-width-mode="margin"] [data-width-icon="margin"],
-[data-sphinx-preview-width-toggle][data-width-mode="auto"] [data-width-icon="auto"],
-[data-sphinx-preview-width-toggle][data-width-mode="full"] [data-width-icon="full"] {
-  display: block;
-}
-
-/* TOC column (runtime-created nav, filled by the page script). Off by default; when open and the
+/** The TOC column on the right below the toolbar, and the rail with its overlay in a narrow pane. */
+const TOC_COLUMN_CSS = `/* TOC column (runtime-created nav, filled by the page script). Off by default; when open and the
    pane is at least 760px wide it takes 240px plus a 16px gap from the right of the pane, so the
    content and the sticky band narrow by 256px. Narrower panes show a rail instead (below). */
 nav[data-sphinx-preview-toc] {
@@ -249,9 +203,11 @@ nav[data-sphinx-preview-toc] {
     font-size: 13px;
     line-height: 1.35;
   }
-}
+}`;
 
-nav[data-sphinx-preview-toc] ol {
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+/** The TOC entries: the list, the twisty, the current section mark and the empty state. */
+const TOC_ENTRIES_CSS = `nav[data-sphinx-preview-toc] ol {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -323,14 +279,137 @@ nav[data-sphinx-preview-toc] [data-sphinx-preview-toc-empty] {
   margin: 0;
   padding: 3px 6px;
   opacity: 0.7;
-}
+}`;
 
-/* Full width: no column limit. A large pixel width keeps the sticky band padding math valid. The side
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+/** The Full width column variables that the sticky band padding reads, so the band text lines up with the column. */
+const BAND_FULL_WIDTH_CSS = `/* Full width: no column limit. A large pixel width keeps the sticky band padding math valid. The side
    margin is the 16 px gutter a table keeps when it breaks out in Auto, so both modes line up. */
 html[data-sphinx-preview-width="full"] {
   --sphinx-preview-column-width: 100000px;
   --sphinx-preview-content-gutter: 16px;
+}`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+/** The fold chevron in the margin of a heading, and the folded blocks that collapse to nothing. */
+const FOLD_CHEVRON_CSS = `/* CR 143: folding. The chevron hangs in the left margin of a heading that has a section; it shows
+   on hover, on focus and while the section is folded. The blocks of a folded section are
+   hidden="until-found" (the browser find still reaches their text and opens the section), so
+   their own spacing is dropped: only the heading and the next heading are left. */
+#sphinx-myst-preview-content > :is(h1, h2, h3, h4, h5, h6)[data-okf-fold] {
+  position: relative;
 }
+
+#sphinx-myst-preview-content [data-okf-fold-toggle] {
+  position: absolute;
+  top: 0.04em;
+  left: -1.5em;
+  box-sizing: border-box;
+  width: 1.2em;
+  height: 1.2em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--studio-descriptionForeground, #717171);
+  font-size: 1em;
+  line-height: 1;
+  opacity: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+#sphinx-myst-preview-content [data-okf-fold-toggle]::before {
+  content: "";
+  display: block;
+  box-sizing: border-box;
+  width: 0.4em;
+  height: 0.4em;
+  margin: 0 auto 0.15em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+#sphinx-myst-preview-content [data-okf-fold="closed"] > [data-okf-fold-toggle]::before {
+  margin: 0 auto 0 0.3em;
+  transform: rotate(-45deg);
+}
+
+#sphinx-myst-preview-content :is(h1, h2, h3, h4, h5, h6):hover > [data-okf-fold-toggle],
+#sphinx-myst-preview-content :is(h1, h2, h3, h4, h5, h6):focus-within > [data-okf-fold-toggle],
+#sphinx-myst-preview-content [data-okf-fold="closed"] > [data-okf-fold-toggle] {
+  opacity: 1;
+}
+
+#sphinx-myst-preview-content [data-okf-fold-toggle]:hover {
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+  color: var(--studio-editor-foreground, CanvasText);
+}
+
+/* A heading that carries an anchor icon in the margin: the chevron sits left of it. */
+#sphinx-myst-preview-content :is(h1, h2, h3, h4, h5, h6):has(.okf-anchor) > [data-okf-fold-toggle] {
+  left: -2.9em;
+}
+
+#sphinx-myst-preview-content > [data-okf-folded] {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+}`;
+
+// @implements_req SwRS-MDOKFSTUDIO-CORE-028
+// @implements_req SwRS-MDOKFSTUDIO-CORE-034
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-001
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
+// @implements_req SwRS-MDOKFSTUDIO-THEME-001
+/**
+ * The toolbar toggle icons, the TOC column, the width modes and the content typography (wrapping,
+ * paragraphs, lists, checkboxes).
+ *
+ * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
+ * the parts in cascade order: moving a rule to another part changes the cascade.
+ */
+export const CONTENT_LAYOUT_CSS = `
+[data-sphinx-preview-theme-toggle] svg {
+  display: none;
+}
+
+[data-sphinx-preview-theme-toggle][data-theme-mode="current"] [data-theme-icon="current"],
+[data-sphinx-preview-theme-toggle][data-theme-mode="dark"] [data-theme-icon="dark"],
+[data-sphinx-preview-theme-toggle][data-theme-mode="white"] [data-theme-icon="white"],
+[data-sphinx-preview-theme-toggle][data-theme-mode="cream"] [data-theme-icon="cream"] {
+  display: block;
+}
+
+[data-sphinx-preview-toolbar-collapse] svg {
+  display: none;
+}
+
+[data-sphinx-preview-toolbar-collapse][aria-expanded="true"] [data-collapse-icon="hide"],
+[data-sphinx-preview-toolbar-collapse][aria-expanded="false"] [data-collapse-icon="show"] {
+  display: block;
+}
+
+[data-sphinx-preview-width-toggle] svg {
+  display: none;
+}
+
+[data-sphinx-preview-width-toggle][data-width-mode="margin"] [data-width-icon="margin"],
+[data-sphinx-preview-width-toggle][data-width-mode="auto"] [data-width-icon="auto"],
+[data-sphinx-preview-width-toggle][data-width-mode="full"] [data-width-icon="full"] {
+  display: block;
+}
+
+${TOC_COLUMN_CSS}
+
+${TOC_ENTRIES_CSS}
+
+${BAND_FULL_WIDTH_CSS}
 
 /* Auto: a table, figure, image or code block wider than the column breaks out, centred on the
    available area (pane minus the TOC column and gutters), never wider than it. The runtime sets the extra width and the centring shift; an element under
@@ -465,74 +544,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 #sphinx-myst-preview-content h3 { font-size: 1.25em; }
 #sphinx-myst-preview-content h4 { font-size: 1em; }
 
-/* CR 143: folding. The chevron hangs in the left margin of a heading that has a section; it shows
-   on hover, on focus and while the section is folded. The blocks of a folded section are
-   hidden="until-found" (the browser find still reaches their text and opens the section), so
-   their own spacing is dropped: only the heading and the next heading are left. */
-#sphinx-myst-preview-content > :is(h1, h2, h3, h4, h5, h6)[data-okf-fold] {
-  position: relative;
-}
-
-#sphinx-myst-preview-content [data-okf-fold-toggle] {
-  position: absolute;
-  top: 0.04em;
-  left: -1.5em;
-  box-sizing: border-box;
-  width: 1.2em;
-  height: 1.2em;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--studio-descriptionForeground, #717171);
-  font-size: 1em;
-  line-height: 1;
-  opacity: 0;
-  cursor: pointer;
-  user-select: none;
-}
-
-#sphinx-myst-preview-content [data-okf-fold-toggle]::before {
-  content: "";
-  display: block;
-  box-sizing: border-box;
-  width: 0.4em;
-  height: 0.4em;
-  margin: 0 auto 0.15em;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);
-}
-
-#sphinx-myst-preview-content [data-okf-fold="closed"] > [data-okf-fold-toggle]::before {
-  margin: 0 auto 0 0.3em;
-  transform: rotate(-45deg);
-}
-
-#sphinx-myst-preview-content :is(h1, h2, h3, h4, h5, h6):hover > [data-okf-fold-toggle],
-#sphinx-myst-preview-content :is(h1, h2, h3, h4, h5, h6):focus-within > [data-okf-fold-toggle],
-#sphinx-myst-preview-content [data-okf-fold="closed"] > [data-okf-fold-toggle] {
-  opacity: 1;
-}
-
-#sphinx-myst-preview-content [data-okf-fold-toggle]:hover {
-  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
-  color: var(--studio-editor-foreground, CanvasText);
-}
-
-/* A heading that carries an anchor icon in the margin: the chevron sits left of it. */
-#sphinx-myst-preview-content :is(h1, h2, h3, h4, h5, h6):has(.okf-anchor) > [data-okf-fold-toggle] {
-  left: -2.9em;
-}
-
-#sphinx-myst-preview-content > [data-okf-folded] {
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  height: 0 !important;
-  min-height: 0 !important;
-}
+${FOLD_CHEVRON_CSS}
 
 ${FIRST_ELEMENT_GAP_CSS}
 

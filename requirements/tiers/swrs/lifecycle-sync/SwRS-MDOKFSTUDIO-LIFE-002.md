@@ -21,7 +21,6 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/host-api/logger.ts
-- src/host-memory/memoryLogger.ts
 - src/host-vscode/vscodeHost.ts
 tested_in_files:
 - test/host-memory/memoryHost.test.ts

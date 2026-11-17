@@ -43,9 +43,6 @@ async function openPreview(uri: vscode.Uri): Promise<void> {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-128
 /**
  * The Export to HTML command in the real host: the command is declared and registered; a page with a
  * Mermaid diagram, a PNG and a relative link is written as one file with the image and the diagram
@@ -57,6 +54,7 @@ export async function run(): Promise<void> {
   const manifest = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: { commands: { command: string; title: string }[]; menus: { commandPalette: { command: string }[] } };
   };
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
   assert.equal(manifest.contributes.commands.find((entry) => entry.command === EXPORT_HTML_COMMAND_ID)?.title, "Export to HTML");
   assert.ok(manifest.contributes.menus.commandPalette.some((entry) => entry.command === EXPORT_HTML_COMMAND_ID));
   assert.ok((await vscode.commands.getCommands(true)).includes(EXPORT_HTML_COMMAND_ID));
@@ -71,6 +69,7 @@ export async function run(): Promise<void> {
   try {
     await openPreview(uri);
 
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
     // Cancel the warning: no save dialog and no file.
     const cancelled = stubExportDialogsForTests({ confirm: false, savePath: outputPath });
     await vscode.commands.executeCommand(EXPORT_HTML_COMMAND_ID);
@@ -91,7 +90,9 @@ export async function run(): Promise<void> {
     const html = fs.readFileSync(outputPath, "utf8");
     assert.doesNotMatch(html, /<script|<link|@import|javascript:/u);
     assert.match(html, /<img[^>]+src="data:image\/png;base64,/u);
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-128
     assert.match(html, /<img[^>]+class="myst-mermaid-image"[^>]+src="data:image\/svg\+xml/u);
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
     assert.match(html, /href="https:\/\/example\.com\/guide"/u);
     assert.doesNotMatch(html, /href="other\.md"/u);
     assert.match(html, /other file/u);

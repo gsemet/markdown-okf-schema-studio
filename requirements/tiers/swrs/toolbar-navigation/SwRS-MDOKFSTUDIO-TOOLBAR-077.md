@@ -32,7 +32,7 @@ implemented_in_files:
 - src/session/features/links.ts
 tested_in_files:
 - test/integration/previewHistory.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/linkEditMode.ts
 - test/page/linkEditModeClick.test.ts
 - test/page/modules/linkNavigation.test.ts
 - test/page/modules/toolbarReq.requirements.test.ts

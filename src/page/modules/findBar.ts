@@ -110,9 +110,6 @@ const fieldSelection = (element: Element | null): string | undefined => {
   return value.slice(start, end);
 };
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-010
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 /**
  * The find bar: Cmd/Ctrl+F opens it over the preview, the matches in the rendered text are painted,
  * Enter / Shift+Enter / F3 walk them and Escape closes it. The replace row asks the host to edit the
@@ -186,6 +183,7 @@ export function installFindBar(
 
   const replaceRowOpen = (): boolean => bar !== undefined && replaceRow.hidden === false;
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
   const updateNote = (): void => {
     if (!bar) return;
     if (message !== "") {
@@ -201,6 +199,7 @@ export function installFindBar(
     note.textContent = skipped === 0 ? "" : `${plural(skipped, "match")} cannot be replaced from the preview`;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
   const updateReplaceState = (): void => {
     if (!bar) return;
     const blocked = hooks.replaceBlockedReason();
@@ -237,6 +236,7 @@ export function installFindBar(
     else findInput.removeAttribute("title");
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-010
   const paint = (): void => {
     ranges = matches.map((match) => hooks.createRange(match));
     hooks.paint(ranges, ranges[current]);
@@ -269,6 +269,7 @@ export function installFindBar(
     scrollToCurrent();
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-010
   const findMatches = (keepIndex: boolean): void => {
     if (!bar) return;
     const previous = current;
@@ -331,6 +332,7 @@ export function installFindBar(
    * With the replace row open and matches on the page, asks the host 150 ms later to plan Replace
    * all without applying it; its skipped count joins the note. A refusal keeps the page's count.
    */
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
   const scheduleDryRun = (): void => {
     cancelDryRun();
     if (!opened || !replaceRowOpen() || matches.length === 0 || hooks.replaceBlockedReason() !== undefined) return;
@@ -356,6 +358,7 @@ export function installFindBar(
     scheduleDryRun();
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-010
   const move = (step: number): void => {
     if (matches.length === 0) return;
     current = (current + step + matches.length) % matches.length;
@@ -369,6 +372,7 @@ export function installFindBar(
     bar.querySelector("[data-find-regex]")?.setAttribute("aria-pressed", String(options.regex));
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-010
   const toggleOption = (name: keyof FindOptions): void => {
     options[name] = !options[name];
     syncToggles();
@@ -417,6 +421,7 @@ export function installFindBar(
     return items;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
   const runReplace = (selected: readonly PageMatch[], afterIndex: number): void => {
     const blocked = hooks.replaceBlockedReason();
     if (blocked !== undefined) {
@@ -658,6 +663,7 @@ export function installFindBar(
     if (active === null || active === document.body || active === document.documentElement) findInput.focus();
   });
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
   // Cmd/Ctrl+F and F3, before VS Code's own handling of the key (it would open the webview find
   // widget). The text editor keeps its own find: this listener lives in the webview only.
   // Cmd/Ctrl+F in a field of an open editor opens the bar too, at once: left to VS Code, the bar

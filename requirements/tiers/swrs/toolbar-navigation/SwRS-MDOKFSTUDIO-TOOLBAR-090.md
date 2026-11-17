@@ -27,7 +27,6 @@ implemented_in_files:
 - src/host-vscode/vscodeHost.ts
 tested_in_files:
 - test/core/navigation/previewNavigation.test.ts
-- test/core/preview/toolbarReq.requirements.test.ts
 - test/host-vscode/openExternal.test.ts
 - test/session/previewNavigator.test.ts
 default_owner_email: gaetan@xeberon.net
