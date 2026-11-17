@@ -26,9 +26,8 @@ derived_by: []
 implemented_in_files:
 - src/page/features/editMode.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/editorWidgets.ts
 - test/page/blockReq.requirements.test.ts
-- test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/page/runtimePageControls.test.ts
 default_owner_email: gaetan@xeberon.net

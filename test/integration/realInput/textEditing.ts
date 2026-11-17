@@ -442,7 +442,10 @@ export async function scenarioUndoStaysInEditor(
   });
 }
 
-/** RI-T20: Cmd/Ctrl+B and Ctrl+/ edit the text box, and one Cmd/Ctrl+Z undoes each of them. */
+/**
+ * RI-T20: Cmd/Ctrl+B and Ctrl+/ edit the text box, and one Cmd/Ctrl+Z undoes each of them.
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+ */
 export async function scenarioShortcuts(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t20", async (source) => {
     await openSidePreview(source);

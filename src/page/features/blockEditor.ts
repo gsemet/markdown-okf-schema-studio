@@ -36,11 +36,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     edit.renderedCellContent = undefined;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-148
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-228
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-089
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-064
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-085
   // The cancel branch is used by Cancel and Escape when something reached the document;
   // Done, Cmd/Ctrl+Enter and leaving edit mode commit the text instead.
   function closeBlockEdit(cancel = false): void {
@@ -49,6 +46,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     editorTrace.record(edit.selectedCell ? "cell editor closed" : "block editor closed",
       (cancel ? "cancel " : "") + "line=" + edit.line + " " + traceFocus(), traceStack());
     state.activeBlockEdit = undefined;
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-148
     // An editor that closes without the patch of its save has nothing left to wait for.
     if (!state.applyingContentPatch) state.pendingBlockSelection = undefined;
     document.documentElement?.removeAttribute?.("data-sphinx-preview-block-editing");
@@ -70,6 +68,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
         ...(edit.insertAfterLine !== undefined ? { insertAfterLine: edit.insertAfterLine } : {}),
       });
     }
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-064
     if (edit.tableMenuPositionListener) {
       window.removeEventListener?.("scroll", edit.tableMenuPositionListener, true);
       window.removeEventListener?.("resize", edit.tableMenuPositionListener);
@@ -82,6 +81,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     edit.codeBlockPanel?.destroy();
     edit.codeBlockPanel = undefined;
     edit.slashMenu?.destroy();
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-085
     edit.cellSlash?.destroy();
     edit.palette?.destroy();
     edit.cellPalette?.destroy();
@@ -221,14 +221,10 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     return true;
   };
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-102
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
   const openBlockEditor: BlockEditor["openBlockEditor"] = (target, selectedCell, sourceRange, initialCaretPosition = "end") => {
     // An editor whose open was refused only shows the reason: a new open replaces it.
     if (state.activeBlockEdit?.openRefused) closeBlockEdit(false);
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
     if (state.activeBlockEdit) return;
     // A field editor is open (a click on a block or a "+" blurred it and posted a plain save):
     // wait for the answer. A refused value is discarded and the field shows its saved value; a
@@ -248,9 +244,11 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       }
       if (!field.saving) rt.frontmatter.closeFrontmatterEditor("block editor opened");
     }
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
     const line = sourceRange?.line ?? Number(target.getAttribute("data-sphinx-source-line"));
     const endLine = sourceRange?.endLine
       ?? Number(target.getAttribute("data-sphinx-source-end-line") || line);
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-102
     const insertAfterLine = sourceRange?.insertAfterLine;
     const rowIndex = (selectedCell?.parentElement as HTMLTableRowElement | null | undefined)?.rowIndex;
     const columnIndex = selectedCell?.cellIndex;
@@ -277,12 +275,14 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     if (selectedCell) {
       renderedCellContent = hideTableCellContent(selectedCell);
     }
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
     const status = document.createElement("p");
     status.setAttribute("data-sphinx-preview-edit-status", "");
     status.setAttribute("role", "status");
     status.textContent = selectedCell ? "Loading Markdown table source…" : "Loading Markdown source…";
     element.appendChild(status);
     element.addEventListener("click", (event) => event.stopPropagation?.());
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
     if (selectedCell) {
       selectedCell.setAttribute("data-sphinx-preview-table-cell-selected", "true");
     } else {
@@ -520,7 +520,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     return lines + keys + (applePlatform ? "⌘↩" : "Ctrl+Enter") + ": done";
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-006
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
   // Done and Cancel, shared by the block editor and the table-cell editor. The mousedown default is
   // prevented to keep the focus in the field, so its blur commit does not run before the click.
   function createEditorButtons(edit: BlockEdit): HTMLElement {

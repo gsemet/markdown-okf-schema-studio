@@ -272,9 +272,6 @@ export function createMarkdownTableTools() {
     return model.container ? model.container.write(text) : text;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-002
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-007
   function serializePipe(model: MarkdownTableModel): string {
     if (
       !model.sourceLines

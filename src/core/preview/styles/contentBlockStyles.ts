@@ -3,28 +3,8 @@ import { MERMAID_FONT_FAMILY, MERMAID_FONT_SIZE, MERMAID_MEASURE_CLASS } from ".
 import { gridColumnCss } from "../../render/mystGridToctree";
 import { TABLE_CSS } from "./tableStyles";
 
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
-// @implements_req SwRS-MDOKFSTUDIO-MYST-100
-// @implements_req SwRS-MDOKFSTUDIO-MYST-098
-// @implements_req SwRS-MDOKFSTUDIO-CODE-007
-// @implements_req SwRS-MDOKFSTUDIO-CODE-008
-// @implements_req SwRS-MDOKFSTUDIO-CODE-014
-// @implements_req SwRS-MDOKFSTUDIO-CORE-028
-// @implements_req SwRS-MDOKFSTUDIO-CORE-034
-// @implements_req SwRS-MDOKFSTUDIO-CORE-022
-// @implements_req SwRS-MDOKFSTUDIO-CORE-008
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-032
-// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-043
-/**
- * Rendered blocks: inline images, label anchors, figures, admonitions, code and highlighting,
- * diagrams, tables, project-only placeholders, grids, toctrees and math.
- *
- * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
- * the parts in cascade order: moving a rule to another part changes the cascade.
- */
-export const CONTENT_BLOCK_CSS = `
+/** Rendered blocks up to the tables. */
+const RENDERED_BLOCKS_CSS = `
 /* CR 050: an image written inside a paragraph is part of its line of text: the line runs through
    its middle, so a tall image does not read as a picture above the text. A paragraph holding only
    an image is a figure (centred block, data-sphinx-preview-figure) and keeps the default. */
@@ -485,7 +465,11 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 
 ${TABLE_CSS}
 ${directiveStyle("tables")}
-/* The line is 1px, but the box is 25px tall (12px of padding on each side, painted transparent), so a
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+/** The hit area of a horizontal rule: a click near the line opens its editor. */
+const HR_HIT_AREA_CSS = `/* The line is 1px, but the box is 25px tall (12px of padding on each side, painted transparent), so a
    click near the line lands on the rule and opens its editor. The margin gives the padding back. */
 #sphinx-myst-preview-content hr {
   box-sizing: content-box;
@@ -497,7 +481,10 @@ ${directiveStyle("tables")}
   background-clip: content-box;
 }
 
-#sphinx-myst-preview-content dt {
+`;
+
+/** Definition lists, citations and display math. */
+const RENDERED_BLOCKS_TAIL_CSS = `#sphinx-myst-preview-content dt {
   margin-top: 1em;
   font-weight: 600;
 }
@@ -738,3 +725,29 @@ ${gridColumnCss()}
   text-align: center;
 }
 `;
+
+// @implements_req SwRS-MDOKFSTUDIO-MYST-100
+// @implements_req SwRS-MDOKFSTUDIO-MYST-098
+// @implements_req SwRS-MDOKFSTUDIO-CODE-007
+// @implements_req SwRS-MDOKFSTUDIO-CODE-008
+// @implements_req SwRS-MDOKFSTUDIO-CODE-014
+// @implements_req SwRS-MDOKFSTUDIO-CORE-028
+// @implements_req SwRS-MDOKFSTUDIO-CORE-034
+// @implements_req SwRS-MDOKFSTUDIO-CORE-022
+// @implements_req SwRS-MDOKFSTUDIO-CORE-008
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-032
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-043
+/**
+ * Rendered blocks: inline images, label anchors, figures, admonitions, code and highlighting,
+ * diagrams, tables, project-only placeholders, grids, toctrees and math.
+ *
+ * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
+ * the parts in cascade order: moving a rule to another part changes the cascade.
+ */
+export const CONTENT_BLOCK_CSS = [
+  RENDERED_BLOCKS_CSS,
+  HR_HIT_AREA_CSS,
+  RENDERED_BLOCKS_TAIL_CSS,
+].join("");

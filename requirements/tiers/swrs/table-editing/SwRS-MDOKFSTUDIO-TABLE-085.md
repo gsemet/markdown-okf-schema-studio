@@ -25,7 +25,7 @@ implemented_in_files:
 - src/page/features/tableCellEditor.ts
 - src/page/features/textControls.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/blockKeys.ts
 - test/page/modules/slashMenu.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/visual/capture_edit_checks.py

@@ -21,7 +21,6 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/page/features/tableCellEditor.ts
 - src/page/modules/markdownTable.ts
 - src/page/modules/textEditing.ts
 tested_in_files:

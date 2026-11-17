@@ -29,7 +29,6 @@ implemented_in_files:
 - src/page/features/tableCellEditor.ts
 - src/page/modules/tableTabRow.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
 - test/integration/realInput/tableEscape.ts
 - test/integration/realInput/tableTabRow.ts
 - test/page/runtimeTableCellEditor.test.ts

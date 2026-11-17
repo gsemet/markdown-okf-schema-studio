@@ -191,6 +191,7 @@ test("T39: included blocks stop the range and the properties table is never sele
   assert.equal(properties.getAttribute(SELECTED), null, "Shift+Up stops at the first body block");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148
 test("T39 r2: blocks are named by position, so an edit that adds lines selects the right blocks", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
@@ -206,6 +207,7 @@ test("T39 r2: blocks are named by position, so an edit that adds lines selects t
   assert.equal(selectionAnnouncement(harness), "2 blocks selected");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148
 test("T39 r2: a save that changes the number of blocks selects nothing instead of another block", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
@@ -217,6 +219,7 @@ test("T39 r2: a save that changes the number of blocks selects nothing instead o
   assert.deepEqual(selectedLines(harness), []);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148
 test("T39 r2: a pending selection does not survive its editor closing without the patch", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");

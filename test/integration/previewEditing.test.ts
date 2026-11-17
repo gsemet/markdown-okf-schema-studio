@@ -241,13 +241,6 @@ async function captureLinkState(
 
 // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
 // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-014
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-003
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-094
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
@@ -1080,6 +1073,7 @@ export async function run(): Promise<void> {
     });
     assert.equal(document.getText(), beforeRejectedObject);
 
+    // @tests_req StRS-MDOKFSTUDIO-BLOCK-003
     const bodyEditContext = currentContext(document);
     const sourceLines = document.getText().split(/\r?\n/u);
     const bodyStartLine = sourceLines.indexOf("First line") + 1;
@@ -1107,6 +1101,8 @@ export async function run(): Promise<void> {
     assert.match(document.getText(), /# Preserve this comment/u);
 
     await waitForCurrentPreview(document);
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
     const autosaveContext = currentContext(document);
     const autosaveEditId = "integration-body-autosave";
     const autosaveOriginalText = "Edited first line\nEdited second line\n";
@@ -1159,6 +1155,8 @@ export async function run(): Promise<void> {
     await waitForCurrentPreview(document);
     assert.match(document.getText(), /Autosaved final line\nAutosaved second line\n/u);
 
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
     const latest = currentContext(document);
     const beforeMismatchedBlockEdit = document.getText();
     sendPreviewMessageForTests({
@@ -1217,6 +1215,7 @@ export async function run(): Promise<void> {
     for (const value of ["edited x", "edited q", "edited B"]) {
       assert.ok(getActivePreviewForTests()?.html.includes(value), `the final preview must retain ${value}`);
     }
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-094
     // Block insertion protocol (T27): previewEditOpen/Save/Cancel carry `insertAfterLine`.
     const insertAfterLine = tableStartLine + 3;
     const insertSeparators = (before: string, text: string): string => {
@@ -1253,6 +1252,7 @@ export async function run(): Promise<void> {
       await waitForCurrentPreview(document);
 
       const withBlock = document.getText();
+      // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
       const cancelContext = currentContext(document);
       const cancelBase = {
         ...cancelContext,

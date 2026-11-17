@@ -28,7 +28,7 @@ implemented_in_files:
 - src/page/features/linkEditing.ts
 tested_in_files:
 - test/core/preview/blockReq.requirements.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/editorWidgets.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/linkEditModeClick.test.ts
 - test/page/runtimeBlockEditor.test.ts

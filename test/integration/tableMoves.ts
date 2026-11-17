@@ -188,8 +188,8 @@ async function activeHandle(page: Page, selector: string): Promise<boolean> {
     frame.locator(selector).evaluate((element) => element === element.ownerDocument.activeElement));
 }
 
+// @tests_req StRS-MDOKFSTUDIO-TABLE-013
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-001
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 /** The pipe table becomes a list-table with every cell, stays in view, and comes back as a pipe table. */
 async function scenarioConversionRoundTrip(page: Page): Promise<void> {

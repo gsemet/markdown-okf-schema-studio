@@ -379,7 +379,11 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
   });
 }
 
-/** RI-T11: Enter in a nested list continues the list at the same indentation. */
+/**
+ * RI-T11: Enter in a nested list continues the list at the same indentation.
+ * @tests_req StRS-MDOKFSTUDIO-BLOCK-008
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+ */
 export async function scenarioEnterContinuesList(page: Page, evidence: Evidence): Promise<void> {
   const LIST_DOCUMENT = [
     "# List document",
@@ -416,7 +420,11 @@ export async function scenarioEnterContinuesList(page: Page, evidence: Evidence)
   });
 }
 
-/** RI-T32: the edited block keeps its viewport top across the render that follows Save. */
+/**
+ * RI-T32: the edited block keeps its viewport top across the render that follows Save.
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
+ * @tests_req StRS-MDOKFSTUDIO-TABLE-001
+ */
 export async function scenarioSaveKeepsBlockInPlace(page: Page, evidence: Evidence): Promise<void> {
   const filler = (count: number, label: string): string[] =>
     Array.from({ length: count }, (_, index) => `${label} paragraph ${index + 1} of filler text.`);
@@ -578,7 +586,10 @@ export async function scenarioSaveKeepsBlockInPlace(page: Page, evidence: Eviden
   });
 }
 
-/** RI-T12: Tab and Shift+Tab indent and outdent in the block editor; Escape then Tab leaves it. */
+/**
+ * RI-T12: Tab and Shift+Tab indent and outdent in the block editor; Escape then Tab leaves it.
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+ */
 export async function scenarioTabIndents(page: Page, evidence: Evidence): Promise<void> {
   const LIST_DOCUMENT = [
     "# List document",
@@ -666,7 +677,12 @@ export async function scenarioPreviewKeepsMarkdown(page: Page, evidence: Evidenc
   }
 }
 
-/** RI-T14: clicking a word opens the editor with the caret at that word, not at the block end. */
+/**
+ * RI-T14: clicking a word opens the editor with the caret at that word, not at the block end.
+ * @tests_req StRS-MDOKFSTUDIO-BLOCK-003
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-026
+ */
 export async function scenarioCaretAtClick(page: Page, evidence: Evidence): Promise<void> {
   const PARAGRAPH = "Alpha bravo charlie\ndelta echo foxtrot\ngolf hotel india.";
   const DOCUMENT = "# Caret document\n\n" + PARAGRAPH + "\n";
@@ -701,7 +717,11 @@ export async function scenarioCaretAtClick(page: Page, evidence: Evidence): Prom
   });
 }
 
-/** RI-T15: hover outlines what a click edits; Done keeps and Cancel restores the block text. */
+/**
+ * RI-T15: hover outlines what a click edits; Done keeps and Cancel restores the block text.
+ * @tests_req StRS-MDOKFSTUDIO-BLOCK-003
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+ */
 export async function scenarioEditAffordances(page: Page, evidence: Evidence): Promise<void> {
   const DOCUMENT = "# Affordance document\n\n- outer one\n  - inner a\n  - inner b\n- outer two\n\nAlpha paragraph.\n";
   const CANCEL = "button[aria-label='Cancel editing and restore the original text']";
@@ -741,7 +761,11 @@ export async function scenarioEditAffordances(page: Page, evidence: Evidence): P
   });
 }
 
-/** RI-T16: turning edit mode on keeps the reading layout of paragraphs that are not being edited. */
+/**
+ * RI-T16: turning edit mode on keeps the reading layout of paragraphs that are not being edited.
+ * @tests_req StRS-MDOKFSTUDIO-BLOCK-001
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
+ */
 export async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): Promise<void> {
   const WORDS = "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike november";
   const paragraph = (seed: number): string => {
@@ -787,7 +811,12 @@ export async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): 
   });
 }
 
-/** RI-T17: Tab moves between table cells, adds a row on the last cell, and focus loss commits. */
+/**
+ * RI-T17: Tab moves between table cells, adds a row on the last cell, and focus loss commits.
+ * @tests_req StRS-MDOKFSTUDIO-TABLE-006
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-123
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-018
+ */
 export async function scenarioTableTab(page: Page, evidence: Evidence): Promise<void> {
   const CELL = "[data-sphinx-preview-table-cell-editor] textarea";
   const cellValue = async (): Promise<string | undefined> => {
@@ -863,7 +892,11 @@ export async function scenarioTableTab(page: Page, evidence: Evidence): Promise<
   });
 }
 
-/** RI-T18: the table toolbar sits above the table, never covers a cell, and the cell does not jump. */
+/**
+ * RI-T18: the table toolbar sits above the table, never covers a cell, and the cell does not jump.
+ * @tests_req StRS-MDOKFSTUDIO-TABLE-008
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-048
+ */
 export async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<void> {
   const CELL = "[data-sphinx-preview-table-cell-editor] textarea";
   const TARGET_CELL = "tbody tr:first-child td:nth-child(2)";

@@ -41,7 +41,6 @@ implemented_in_files:
 tested_in_files:
 - test/host/previewTiming.test.ts
 - test/integration/radioChoice.test.ts
-- test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/linkEditModeClick.test.ts

@@ -26,7 +26,6 @@ implemented_in_files:
 - src/page/features/tableCellEditor.ts
 - src/page/features/textControls.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/session/heldEditSource.test.ts

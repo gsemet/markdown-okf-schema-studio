@@ -24,7 +24,7 @@ implemented_in_files:
 - src/page/features/blockEditor.ts
 - src/page/features/textControls.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/blockKeys.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts

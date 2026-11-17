@@ -42,13 +42,6 @@ import { isSafeOkfColor } from "../../../src/core/security/spanColors";
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-149
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-106
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-111
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-115
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-117
 
 const registry = createEditActions([], createMarkdownTableTools());
 
@@ -558,6 +551,7 @@ function rawTable(value: string, selection: [number, number], arg: string | unde
   return { result: value.slice(0, edit.start) + edit.text + value.slice(edit.end), edit };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-106
 test("table 1x1 is a header and its separator", () => {
   assert.equal(rawTable("", [0, 0], "1x1")?.result, "| Column 1 |\n| --- |");
 });
@@ -601,6 +595,7 @@ test("a table keeps a selection and goes after it", () => {
   assert.equal(rawTable("say foo now", [4, 7], "1x1")?.result, "say foo\n\n| Column 1 |\n| --- |\n\n now");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-106
 test("table refuses a missing, malformed or out-of-range size", () => {
   for (const arg of [undefined, "", "3", "0x3", "3x0", "10x2", "2x10", "ax2", "3x4x5", "3 x 4"]) {
     assert.equal(rawTable("x", [0, 0], arg), undefined, String(arg));
@@ -754,6 +749,8 @@ test("T25: checkbox is its own inverse on a list item", () => {
 
 const HTML_TABLE_SOURCE = "| Name | Qty | Note |\n| :--- | ---: | :---: |\n| a&b | <3 | x\\|y |\n| `c\\|d` |  | z |";
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-117
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("T25: htmlTable converts the pipe table under the caret, text escaped, alignment kept", () => {
   const value = "Intro\n\n" + HTML_TABLE_SOURCE + "\n\nAfter";
   const caret = value.indexOf("a&b") + 1;
@@ -880,6 +877,7 @@ test("T26: mermaid inserts a flowchart fence set apart, first label selected", (
 
 const ALIGN_TABLE = "| Name | Qty |\n| --- | --- |\n| a | 1 |";
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-111
 test("T26: columnAlign rewrites only the delimiter cell of the caret's column", () => {
   const at = ALIGN_TABLE.indexOf("Qty");
   assert.equal(applyTo("columnAlign", ALIGN_TABLE, [at, at], "right")!.value,
@@ -1074,6 +1072,7 @@ test("T30: dropdown inserts a note with :class: dropdown or wraps the touched li
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-115
 test("T30: tableCaption wraps the pipe table at the caret, or inserts a new one", () => {
   const table = "| A | B |\n| --- | --- |\n| 1 | 2 |";
   const source = "before\n\n" + table + "\n\nafter";
@@ -1410,6 +1409,7 @@ test("CR038: listTable and pipeTable are MyST block actions with no shortcut", (
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("CR038: listTable converts the pipe table under the caret in place", () => {
   const value = "Intro\n\n" + LT_PIPE + "\n\nAfter";
   const caret = value.indexOf("apple") + 2;
@@ -1426,6 +1426,7 @@ test("CR038: pipeTable converts the list-table under the caret from any line of 
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("CR038: the conversion round-trips and keeps the neighbouring tables and lines", () => {
   const value = LT_PIPE + "\n\ntext\n\n" + LT_PIPE;
   const caret = value.lastIndexOf("apple");

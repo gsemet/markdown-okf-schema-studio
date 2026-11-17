@@ -27,7 +27,7 @@ implemented_in_files:
 - src/page/features/blockEditor.ts
 - src/page/features/blockMoves.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/blockKeys.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockMoves.test.ts
 default_owner_email: gaetan@xeberon.net

@@ -24,7 +24,6 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/preview/styles/editModeStyles.ts
-- src/page/features/blockEditor.ts
 - src/page/features/tableCellEditor.ts
 - src/page/modules/cellEditorRoom.ts
 tested_in_files:

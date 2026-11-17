@@ -30,7 +30,7 @@ implemented_in_files:
 - src/page/modules/hostRequests.ts
 tested_in_files:
 - test/integration/gridCardEditorBlur.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/blockKeys.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/modules/hostRequests.test.ts
 - test/page/runtimeBlockEditor.test.ts

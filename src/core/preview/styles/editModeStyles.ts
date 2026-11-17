@@ -1,23 +1,5 @@
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-260
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-017
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-140
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-254
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
-// @implements_req SwRS-MDOKFSTUDIO-TABLE-006
-// @implements_req SwRS-MDOKFSTUDIO-TABLE-048
-// @implements_req SwRS-MDOKFSTUDIO-TABLE-064
-/**
- * Edit mode: scroll anchoring, editable blocks, insert points and move buttons, the block and table
- * cell editors and the table menu.
- *
- * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
- * the parts in cascade order: moving a rule to another part changes the cascade.
- */
-export const EDIT_MODE_CSS = `
+/** Scroll anchoring and the hidden sticky headings. */
+const PAGE_BASE_CSS = `
 /* The runtime owns scroll anchoring; browser scroll anchoring would fight it. */
 html,
 body {
@@ -28,20 +10,32 @@ body {
   display: none;
 }
 
-/* A plain click on a link edits its block too (CR 217): the link shows the text cursor of the block.
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+/** The text cursor over what a click opens for editing. */
+const LINK_CLICK_CURSOR_CSS = `/* A plain click on a link edits its block too (CR 217): the link shows the text cursor of the block.
    The page marks only those links (linkEditing.ts); every other link keeps its pointer. */
 html[data-sphinx-preview-edit-mode="on"] [data-sphinx-source-file][data-sphinx-source-line],
 html[data-sphinx-preview-edit-mode="on"] a[data-sphinx-preview-link-edits="true"] {
   cursor: text;
 }
 
-/* Edit mode: the stretched overlay of a linked card no longer catches the pointer, so the part of
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-260
+/** A linked card's overlay lets the part under the pointer decide what opens. */
+const CARD_PART_OPENS_CSS = `/* Edit mode: the stretched overlay of a linked card no longer catches the pointer, so the part of
    the card under it (title, header, body, footer) decides what opens (CR 217). */
 html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content .myst-grid-card-link::after {
   pointer-events: none;
 }
 
-[data-sphinx-preview-editing="true"] {
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-017
+/** The dashed hover outline of what a click would edit. */
+const EDIT_HOVER_OUTLINE_CSS = `[data-sphinx-preview-editing="true"] {
   display: none !important;
 }
 
@@ -50,7 +44,12 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-edit-hover="true"]
   outline-offset: 3px;
 }
 
-html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-block-selected="true"] {
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-140
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-254
+/** The ring of the keyboard block selection and its screen-reader status. */
+const BLOCK_SELECTION_RING_CSS = `html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-block-selected="true"] {
   outline: 2px solid var(--studio-focusBorder, Highlight);
   outline-offset: 3px;
 }
@@ -77,7 +76,11 @@ html[data-sphinx-preview-edit-mode="on"][data-sphinx-preview-actions-owner="poin
   white-space: nowrap;
 }
 
-.sphinx-preview-insert-point {
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
+/** The insert point and its plus button after every body. */
+const INSERT_POINT_CSS = `.sphinx-preview-insert-point {
   position: relative;
   height: 0;
   margin: 0;
@@ -135,7 +138,11 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   opacity: 1;
 }
 
-/* The block actions follow what moved last: while the keyboard selection owns them, the hovered
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
+/** The up and down move buttons of an insert point. */
+const MOVE_BUTTONS_CSS = `/* The block actions follow what moved last: while the keyboard selection owns them, the hovered
    block does not show them and the bar of the selection does. */
 html[data-sphinx-preview-actions-owner="keyboard"] [data-sphinx-source-line]:hover
   + .sphinx-preview-insert-point:not([data-sphinx-actions-shown="true"]) button:not(:hover):not(:focus-visible) {
@@ -188,7 +195,11 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   font-size: 0.85em;
 }
 
-.sphinx-preview-insert-point--start {
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
+/** The insert point of an empty document. */
+const START_POINT_CSS = `.sphinx-preview-insert-point--start {
   height: auto;
   margin: 0 0 1em;
 }
@@ -215,7 +226,11 @@ html[data-sphinx-preview-edit-mode="on"] .sphinx-preview-insert-point--start but
   outline-offset: 3px;
 }
 
-.sphinx-preview-block-editor {
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
+/** The block editor with its status line, Done and Cancel. */
+const BLOCK_EDITOR_CSS = `.sphinx-preview-block-editor {
   position: relative;
   z-index: 1;
   margin: 0;
@@ -302,7 +317,11 @@ html[data-sphinx-preview-edit-mode="on"] .sphinx-preview-insert-point--start but
   font-size: 0.75em;
 }
 
-[data-sphinx-preview-table-cell-selected="true"] {
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-006
+/** The table cell text box. */
+const CELL_EDITOR_CSS = `[data-sphinx-preview-table-cell-selected="true"] {
   position: relative;
   z-index: 2;
 }
@@ -387,7 +406,11 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
   line-height: 1.4;
 }
 
-/* CR 168: positioned (no offset, so still in the flow) with a z-index above the row and column handle
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-048
+/** The table bar above the table. */
+const TABLE_MENU_CSS = `/* CR 168: positioned (no offset, so still in the flow) with a z-index above the row and column handle
    layer (2): a handle that lands on a button, because it was placed before the bar grew or wrapped or
    because the table sits right of the bar, never takes the press. */
 .sphinx-preview-table-menu {
@@ -410,7 +433,11 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
 }
 
-/* CR 034: while its table scrolls, the runtime translates the bar down to just under the sticky band
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-064
+/** The table bar rides down with a tall table. */
+const TABLE_MENU_STUCK_CSS = `/* CR 034: while its table scrolls, the runtime translates the bar down to just under the sticky band
    or the preview controls (never past the table's bottom); nothing is laid out again, so the text
    stays where it is. The menu is not translated otherwise. */
 .sphinx-preview-table-menu[data-sphinx-table-menu-stuck="true"] {
@@ -419,7 +446,11 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
   transform: translateY(var(--sphinx-preview-table-menu-shift, 0px));
 }
 
-.sphinx-preview-table-menu button {
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-048
+/** The buttons of the table bar. */
+const TABLE_MENU_BUTTONS_CSS = `.sphinx-preview-table-menu button {
   display: inline-flex;
   align-items: center;
   width: auto;
@@ -490,7 +521,10 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
   opacity: 0.55;
 }
 
-/* Row handles of a pipe table or a list-table (the column handles follow below): the mark of the list editor sits just left of the
+`;
+
+/** Row and column handles of a table. */
+const TABLE_HANDLES_CSS = `/* Row handles of a pipe table or a list-table (the column handles follow below): the mark of the list editor sits just left of the
    table, outside it and centred on its row. A table scrolls sideways (overflow), so the handles live
    in a layer of their own at the page origin; the runtime sets each handle's left and top. A table
    with no room on its left is pushed right by the width of a handle. */
@@ -572,3 +606,28 @@ html[data-sphinx-preview-edit-mode="on"] .sphinx-preview-table-menu:has(+ [data-
   box-shadow: inset -2px 0 0 var(--studio-focusBorder, Highlight);
 }
 `;
+
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
+/**
+ * Edit mode: scroll anchoring, editable blocks, insert points and move buttons, the block and table
+ * cell editors and the table menu.
+ *
+ * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
+ * the parts in cascade order: moving a rule to another part changes the cascade.
+ */
+export const EDIT_MODE_CSS = [
+  PAGE_BASE_CSS,
+  LINK_CLICK_CURSOR_CSS,
+  CARD_PART_OPENS_CSS,
+  EDIT_HOVER_OUTLINE_CSS,
+  BLOCK_SELECTION_RING_CSS,
+  INSERT_POINT_CSS,
+  MOVE_BUTTONS_CSS,
+  START_POINT_CSS,
+  BLOCK_EDITOR_CSS,
+  CELL_EDITOR_CSS,
+  TABLE_MENU_CSS,
+  TABLE_MENU_STUCK_CSS,
+  TABLE_MENU_BUTTONS_CSS,
+  TABLE_HANDLES_CSS,
+].join("");

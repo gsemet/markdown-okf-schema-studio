@@ -125,10 +125,6 @@ export function installEditMode(rt: PageRuntime): EditMode {
     }
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-018
   function openMappedEditor(target: HTMLElement, eventTarget: Element, initialCaretPosition: CaretPosition = "end",
     reveal = false): void {
     if (eventTarget.closest?.("[data-okf-properties]")) return;
@@ -140,6 +136,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
     if (state.activeBlockEdit?.openRefused) rt.blockEditor.closeBlockEdit(false);
     const edit = state.activeBlockEdit;
     if (edit?.selectedCell) {
+      // @implements_req SwRS-MDOKFSTUDIO-TABLE-018
       if (table === edit.selectedCell.closest("table")) {
         rt.tableCellEditor.switchTableCell(edit, selectedCell!, initialCaretPosition);
         return;
@@ -152,6 +149,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
       }
       return;
     }
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
     if (edit) {
       if (target === edit.target) return;
       // A block editor is open: its text is saved first and this block opens once the save is
@@ -164,10 +162,12 @@ export function installEditMode(rt: PageRuntime): EditMode {
       }
       return;
     }
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
     if (selectedCell && table && !selectedCell.closest?.("[data-okf-properties]")) {
       rt.blockEditor.openBlockEditor(target, selectedCell, undefined, initialCaretPosition);
       return;
     }
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
     const editing = rt.blocks.editingElementFor(target);
     rt.blockEditor.openBlockEditor(editing.element, undefined, editing.sourceRange, initialCaretPosition);
   }
