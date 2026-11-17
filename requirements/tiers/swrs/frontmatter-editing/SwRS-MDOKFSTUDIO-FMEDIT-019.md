@@ -134,7 +134,6 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-FMEDIT-016: the host checks that produce the refusal messages.
-- SwRS-MDOKFSTUDIO-FMEDIT-054: the shape of the save message and of its result.
 - SwRS-MDOKFSTUDIO-FMEDIT-067: the navigation flush that saves the open editor.
 
 ### Verification notes

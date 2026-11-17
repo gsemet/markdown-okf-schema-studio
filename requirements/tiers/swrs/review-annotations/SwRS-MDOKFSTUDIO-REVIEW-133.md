@@ -91,6 +91,12 @@ When a document holds an HTML comment that is not a tool comment, the renderer S
 | A rendered comment chip is sanitized | The chip keeps role button, tabindex 0 and its title |
 | A chip with an onclick attribute is sanitized | The attribute is removed (deduced from the test name, not asserted separately) |
 
+### Scenario (boundary): An HTML comment inside a tab item keeps its own source lines
+
+- GIVEN a tab item that holds a paragraph and the comment `<!-- review: inner -->` on line 5
+- WHEN the document is rendered
+- THEN the comment wrapper carries data-line 5 and data-end-line 5, the tab panel stays one block, and the paragraph beside the comment carries no source line
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-018: the sticky band entries of a heading holding a comment.
@@ -101,6 +107,7 @@ When a document holds an HTML comment that is not a tool comment, the renderer S
 - Method: test/core/render/commentMarkers.test.ts: `a block comment renders as a positioned gray chip with a hidden body`, `a multi-line block comment spans its source lines`, `data-line follows the frontmatter offset` (block comments); `an inline comment renders as a chip inside its paragraph`, `a comment in a heading does not change the heading's id or attributes` (inline comment; the table cell row is untested); `comment text never reaches the DOM as HTML`, `a comment followed by markup is never rendered as HTML` (text never rendered as HTML); `comments written on one line, one after the other, are separate chips`, `comments before and after a list each render as a real comment chip, never as a <!-- label`, `a list item can hold a comment chip between its items`, `a raw HTML table next to comments is unchanged` (several comments and lists; the tool comment mixed case is untested); `tool comments stay hidden` (tool comments); `context tags still produce their admonition, with and without a comment inside` (context tags); `chip markup survives the sanitizer without event attributes` (sanitizer).
 - Method: visual scenarios review-annotations/v02-comment-todo-chips-light-900, v03-comment-todo-chips-dark-900 and v04-comment-todo-chips-cream-900 (block comment chips); review-annotations/v07-comment-list-chips-visible-light-900 to v10-comment-list-chips-hidden-dark-900 (comments next to lists).
 - Criteria: The rendered HTML holds the wrapper, the chip and the hidden body with the stated attributes; the wrapper of an inline comment is a span without data-line and the heading attributes are equal with and without the comment; the DOM holds no element created from the comment text and the chip keeps role, tabindex and title only; the number of chips equals the number of non-tool comments; each list comment becomes one chip and the table markup is identical with and without comments; no okf-comment element exists for the tool comments; the admonition element exists and contains the chip or the wrapper; the sanitized chip has no attribute starting with on.
+- Method: test/core/render/cardsTabs.test.ts, unit test `a comment and a thread in a tab item keep their own source line range` (An HTML comment inside a tab item keeps its own source lines).
 
 <!-- okf:links:start -->
 ### Links

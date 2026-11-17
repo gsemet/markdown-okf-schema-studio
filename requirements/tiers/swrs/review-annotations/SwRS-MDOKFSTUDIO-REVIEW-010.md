@@ -13,8 +13,8 @@ description: When the extension compares a base text with the current text for
   20 000 lines differ or more than 2000 edits are needed.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -22,11 +22,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/mapping/lineDiff.ts
-tested_in_files:
-- test/core/mapping/lineHunks.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-009
 ---
 
 ## The line diff reports hunks with both sides
@@ -57,7 +57,7 @@ When the extension compares a base text with the current text for the side-by-si
 | A block of the current text and the hunks | the block is changed when it meets a hunk with current lines or holds a removal; its base lines are the base side of the hunk it lies in, or its own lines shifted by the hunks before it |
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-REVIEW-200: the line diff of the green bars, which shares the Myers search.
+- SwRS-MDOKFSTUDIO-REVIEW-195: the line diff of the green bars, which shares the Myers search.
 - SwRS-MDOKFSTUDIO-REVIEW-009: the page that cuts changed blocks with these hunks.
 
 ### Verification notes
@@ -72,4 +72,6 @@ When the extension compares a base text with the current text for the side-by-si
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-009](SwRS-MDOKFSTUDIO-REVIEW-009.md): A changed block shows as a side-by-side diff with its word marks, cut by line hunks, and a malformed baseline message is dropped
 <!-- okf:links:end -->

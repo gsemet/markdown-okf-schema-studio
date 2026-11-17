@@ -71,7 +71,7 @@ test("T45: lines inserted above move the thread to the new line", () => {
   assert.deepEqual(result, { state: "moved", line: 9, endLine: 9 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-101
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: a deleted quote orphans the thread and keeps its old line", () => {
   const text = ["# Title", "", "Something else entirely.", "", "More unrelated words."].join("\n");
   const result = reanchor(text, thread("a", { line: 3, endLine: 3, quote: "quick brown fox" }));

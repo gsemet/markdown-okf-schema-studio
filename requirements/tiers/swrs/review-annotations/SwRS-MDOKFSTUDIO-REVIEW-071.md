@@ -8,8 +8,8 @@ description: When a previewCommentResolve or previewCommentDelete message
   a non-empty thread id and, for resolve, a boolean resolved flag.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -21,12 +21,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-- src/session/features/comments.ts
-tested_in_files:
-- test/core/protocol/pageToHost.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-074
 ---
 
 ## Resolve and delete messages name a thread; resolve carries a flag
@@ -64,4 +63,6 @@ When a previewCommentResolve or previewCommentDelete message reaches the host, t
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-074](SwRS-MDOKFSTUDIO-REVIEW-074.md): Reply, resolve, reopen and delete change the named thread only, and a malformed message changes nothing
 <!-- okf:links:end -->

@@ -11,8 +11,8 @@ description: When the page reports the side-by-side diff switch or the host
   any other message.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,13 +20,12 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/hostToPage.ts
-- src/core/protocol/pageToHost.ts
-tested_in_files:
-- test/core/protocol/hostToPage.test.ts
-- test/core/protocol/pageToHost.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-006
+- SwRS-MDOKFSTUDIO-REVIEW-009
 ---
 
 ## The side-by-side messages are validated and gated
@@ -67,4 +66,7 @@ When the page reports the side-by-side diff switch or the host posts a baseline,
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-006](SwRS-MDOKFSTUDIO-REVIEW-006.md): The host posts the baseline rendering while the side-by-side diff is on and takes only a well-formed switch message
+  - [SwRS-MDOKFSTUDIO-REVIEW-009](SwRS-MDOKFSTUDIO-REVIEW-009.md): A changed block shows as a side-by-side diff with its word marks, cut by line hunks, and a malformed baseline message is dropped
 <!-- okf:links:end -->

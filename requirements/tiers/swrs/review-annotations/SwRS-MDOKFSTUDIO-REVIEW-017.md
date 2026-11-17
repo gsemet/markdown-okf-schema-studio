@@ -2,13 +2,16 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-017
 uuid: ef06d1d8-a4c0-4d05-a0db-4cb7f88aa5b3
-title: The quote of a thread is highlighted once in its block
-description: When review threads are applied to the page, the extension SHALL
-  wrap the first occurrence of each thread quote, found inside one text node of
-  the innermost mapped block that covers the anchor line, in one highlight, or
-  add a badge to that block when the quote is not found inside one text node,
-  and never mark code, math, diagrams, the properties table, open editors or
-  included content.
+title: "The quote of a thread is highlighted once in its block, also over a line break
+  of the source"
+description: "When review threads are applied to the page, the extension SHALL wrap
+  the first occurrence of each thread quote, found inside one text node of the innermost
+  mapped block that covers the anchor line, in one highlight, or add a badge to that
+  block when the quote is not found inside one text node, and never mark code, math,
+  diagrams, the properties table, open editors or included content; a run of whitespace
+  of the text node, such as the line break of a paragraph or list item wrapped over
+  several lines of the source, matches a space of the quote, and the matched text
+  is highlighted as one highlight."
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -24,19 +27,22 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/page/modules/commentThreadData.ts
 - src/page/modules/commentThreads.ts
 tested_in_files:
 - test/page/modules/commentThreads.test.ts
+- test/page/modules/commentThreadsLongDocument.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-DIAG-019
+- SwRS-MDOKFSTUDIO-REVIEW-216
 ---
 
-## The quote of a thread is highlighted once in its block
+## The quote of a thread is highlighted once in its block, also over a line break of the source
 
 ### Normative behavior
 
-When review threads are applied to the page, the extension SHALL wrap the first occurrence of each thread quote, found inside one text node of the innermost mapped block that covers the anchor line, in one highlight, or add a badge to that block when the quote is not found inside one text node, and never mark code, math, diagrams, the properties table, open editors or included content.
+When review threads are applied to the page, the extension SHALL wrap the first occurrence of each thread quote, found inside one text node of the innermost mapped block that covers the anchor line, in one highlight, or add a badge to that block when the quote is not found inside one text node, and never mark code, math, diagrams, the properties table, open editors or included content; a run of whitespace of the text node, such as the line break of a paragraph or list item wrapped over several lines of the source, matches a space of the quote, and the matched text is highlighted as one highlight.
 
 ### Scenario (nominal): Quote in the block of the line
 - GIVEN two paragraphs holding the same sentence and a thread anchored on the line of the second
@@ -82,11 +88,28 @@ When review threads are applied to the page, the extension SHALL wrap the first 
 | A resolved thread with a highlighted quote | The highlight carries the resolved attribute and is drawn differently from an open one; its badge and orphaned comments entry are drawn in the resolved style too |
 | An open thread | The highlight has no resolved attribute |
 
+### Scenario (nominal): Quote over a wrapped line
+- GIVEN a paragraph wrapped over several lines of the source, so that its text node holds a line break, and a thread whose quote has a space where the line break is
+- WHEN the thread is posted
+- THEN the text from the first to the last word of the quote is highlighted once, with the line break kept inside the highlight, and the text of the page does not change
+
+### Scenario (boundary): Long document
+- GIVEN a long document with raw HTML, images and tables whose paragraphs, list items and cells are wrapped, and one thread on each text of them, re-anchored by the host
+- WHEN the threads are posted
+- THEN every thread is highlighted on its text, none gets a badge or goes to the Orphaned comments box, and the length of the document changes nothing
+
+### Scenario (refusal): Another word
+- GIVEN a quote with a word that the text node does not hold at that place
+- WHEN the thread is posted
+- THEN no highlight is created and the existing rule applies: a badge on the block of the line
+
 ### Verification notes
 - Method: test/page/modules/commentThreads.test.ts: `T42: the first occurrence of the quote is wrapped in a mark`, `T42: the block that covers the line is searched, not another with the same text` (quote in the block of the line), `T42 r2: a quote at index 0 leaves no empty text node and clear restores the structure` (quote at the start of a text node), `T42: code, math, mermaid, plantuml and the properties table are never wrapped`, `T42: blocks inside an open editor are left alone (O10)`, `T42 r2: included content and blocks under a skipped ancestor are never chosen` (regions that are never marked, same text in a figure and in a paragraph), `T42: a quote that spans an element boundary gets a badge, not a mark` (quote across an element boundary), `T42: re-applying is idempotent and survives replaced content` (applied again), `T42: the popover shows author, date and bodies as text, never as HTML` (asserts the resolved attribute).
 - Method: real window review-annotations/r02-review-thread-popover (quote in the block of the line, in preview and in edit mode); visual scenario review-annotations/v18-review-thread-resolved-light-900 (resolved style).
 - Method: the after-the-block placement for the listed tags (block that takes no children) is not asserted by a test (untested).
 - Criteria: A mark element with the thread id wraps exactly the quote in the expected block; figure text is unchanged and no mark or badge is placed inside a figure; no mark element appears under the skipped ancestors; the block holds a button with attribute data-okf-comment-badge and the aria-label and the block text is unchanged; the DOM after the second apply equals the DOM after the first; the attribute data-okf-comment-resolved is set exactly for resolved threads and the stylesheet draws it differently.
+- Method: Unit test of the comment threads on the rendered content of a long README-like document, with the host re-anchoring and the page placement run one after the other.
+- Criteria: Each thread has one highlight, no badge and no orphan entry; the text content of the page is unchanged.
 
 <!-- okf:links:start -->
 ### Links
@@ -99,4 +122,5 @@ When review threads are applied to the page, the extension SHALL wrap the first 
   - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-DIAG-019](../diagrams/SwRS-MDOKFSTUDIO-DIAG-019.md): Comment quotes are never wrapped inside diagrams
+  - [SwRS-MDOKFSTUDIO-REVIEW-216](SwRS-MDOKFSTUDIO-REVIEW-216.md): A quote over a line break of the source is highlighted
 <!-- okf:links:end -->

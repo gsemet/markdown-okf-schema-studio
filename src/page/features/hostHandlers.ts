@@ -44,7 +44,7 @@ export function registerHostHandlers(rt: PageRuntime): void {
   hostMessages.on("previewSaveCommand", () => rt.blockEditor.saveDocumentFromKey());
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
   hostMessages.on("previewExportCommand", () => parts.exportHtml.run(false));
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-156
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
   hostMessages.on("previewShowComments", (message) => {
     parts.chipToggle.setShowComments(message.showComments !== false);
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152

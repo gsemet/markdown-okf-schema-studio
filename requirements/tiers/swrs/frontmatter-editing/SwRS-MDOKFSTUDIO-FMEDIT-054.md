@@ -8,8 +8,8 @@ description: When a previewFrontmatterSave message is malformed, because it does
   accepted shape, the extension SHALL ignore it without a reply.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -23,11 +23,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-tested_in_files:
-- test/core/protocol/pageStateMessages.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-FMEDIT-016
 ---
 
 ## A frontmatter save message names its editor and field, or is ignored
@@ -87,4 +87,6 @@ The envelope, the size bound and the pin fields (pinLine, pinViewportTop) are ch
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-016](SwRS-MDOKFSTUDIO-FMEDIT-016.md): The host refuses a value that breaks YAML, the field type or the schema, and ignores a malformed save message
 <!-- okf:links:end -->

@@ -4,9 +4,10 @@ id: SwRS-MDOKFSTUDIO-REVIEW-086
 uuid: a2afd35e-acbc-4395-b689-d098cac85402
 title: Resolve, Reopen and a confirmed Delete wait for the host, one action at a
   time
-description: When a reader presses Resolve or Reopen in a thread popover, the
-  extension SHALL send the new flag to the host, wait for its answer, and change
-  the highlight only when the thread is posted again.
+description: "When a reader presses Resolve or Reopen in a thread popover, or presses
+  Delete and confirms it in the popover, the extension SHALL send the new flag or
+  the delete to the host, wait for its answer, change the highlight or remove the
+  thread only when the thread is posted again, and run one such action at a time."
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -34,7 +35,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a reader presses Resolve or Reopen in a thread popover, the extension SHALL send the new flag to the host, wait for its answer, and change the highlight only when the thread is posted again.
+When a reader presses Resolve or Reopen in a thread popover, or presses Delete and confirms it in the popover, the extension SHALL send the new flag or the delete to the host, wait for its answer, change the highlight or remove the thread only when the thread is posted again, and run one such action at a time.
 
 ### Scenario (nominal): Resolve and Reopen
 

@@ -229,7 +229,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
     (message) => typeof message.originalText === "string" && typeof message.editedText === "string"),
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewEditCancel: stateMessage("previewEditCancel"),
-  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-054
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-016
   previewFrontmatterSave: stateMessage("previewFrontmatterSave", (message) => message.frontmatterAction === "remove"
     || Object.prototype.hasOwnProperty.call(message, "fieldValue")),
   // @implements_req SwRS-MDOKFSTUDIO-GFM-027
@@ -255,7 +255,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   previewViewPreferenceChanged: (message) => typeof message.preference === "string"
     && Object.hasOwn(VIEW_PREFERENCE_VALIDATORS, message.preference)
     && VIEW_PREFERENCE_VALIDATORS[message.preference](message.value),
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-007
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-006
   // The side-by-side diff button of toolbar row 4: on or off.
   previewSideBySideChanged: (message) => typeof message.on === "boolean",
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-010
@@ -265,7 +265,8 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // Rename of a MyST label from its anchor icon: the source line of `(oldName)=` and both names.
   previewLabelRename: (message) => isSourceLine(message.line)
     && isValidLabelName(message.oldName) && isValidLabelName(message.newName),
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-178
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-186
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-192
   // Inline comment threads (`<!-- THREAD`): reply to or delete the thread at these source lines.
   // The host picks the author and the time and re-checks that the lines are still a thread.
   previewThreadReply: (message) => isHostRequest(message) && isSourceLine(message.line)
@@ -312,14 +313,14 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
     && message.uris.every((uri) => isBoundedString(uri, MAX_DROPPED_URI_LENGTH) && uri !== "")
     && (message.pinLine === undefined || isSourceLine(message.pinLine))
     && isPinViewportTop(message.pinViewportTop),
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-069
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-054
   // Review comments (T43): a new thread on a selection and a reply. The host picks the author, the
   // ids and the time; it writes the sidecar file next to the document.
   previewCommentCreate: (message) => isValidAnchor(message.anchor) && isCommentBody(message.body),
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-070
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-074
   previewCommentReply: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "" && isCommentBody(message.body),
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-071
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-074
   // Resolve, reopen and delete a thread (T44). The host answers.
   previewCommentResolve: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "" && typeof message.resolved === "boolean",

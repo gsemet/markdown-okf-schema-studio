@@ -70,7 +70,6 @@ export function installIncomingChanges(document: Document): {
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-207
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-215
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-208
   const apply = (): void => {
     marked.forEach((element) => element.removeAttribute(MARK));
     marked = [];

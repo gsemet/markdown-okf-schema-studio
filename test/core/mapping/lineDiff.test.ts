@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { changedLineRanges } from "../../../src/core/mapping/lineDiff";
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-200
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195
 test("T16: identical text has no changed range", () => {
   assert.deepEqual(changedLineRanges("a\nb\nc\n", "a\nb\nc\n"), []);
 });

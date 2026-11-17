@@ -552,7 +552,7 @@ export function installCommentThreads(
     (popover as HTMLElement).style.setProperty("top", `${top}px`);
   };
 
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-081
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-044
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   const open = (thread: PageCommentThread, target: Element): void => {
     close();

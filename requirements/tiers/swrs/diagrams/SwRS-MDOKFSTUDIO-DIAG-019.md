@@ -56,5 +56,5 @@ When a review thread anchor falls inside a Mermaid or PlantUML figure, the page 
   - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
   - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-REVIEW-017](../review-annotations/SwRS-MDOKFSTUDIO-REVIEW-017.md): The quote of a thread is highlighted once in its block
+  - [SwRS-MDOKFSTUDIO-REVIEW-017](../review-annotations/SwRS-MDOKFSTUDIO-REVIEW-017.md): The quote of a thread is highlighted once in its block, also over a line break of the source
 <!-- okf:links:end -->

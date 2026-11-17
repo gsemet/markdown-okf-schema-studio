@@ -74,7 +74,6 @@ The answer is matched to the request, see SwRS-MDOKFSTUDIO-TRUST-090.
 | The host answers with ok false and no reason | The status line reads "The change was not saved." |
 
 ### Related requirements
-- SwRS-MDOKFSTUDIO-REVIEW-178: shape of the reply and delete messages of an inline thread.
 - SwRS-MDOKFSTUDIO-REVIEW-186: the host appends the reply inside the thread comment.
 - SwRS-MDOKFSTUDIO-REVIEW-192: the host removes the whole lines of a deleted thread.
 - SwRS-MDOKFSTUDIO-REVIEW-086: a review thread's Delete asks first, unlike Delete thread of an inline thread.

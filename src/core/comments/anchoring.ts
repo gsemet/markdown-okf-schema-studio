@@ -441,7 +441,6 @@ function fuzzyCandidates(index: DocumentIndex, quote: string, budget: { cells: n
 export type AnchorThread = { anchor: CommentThread["anchor"] };
 
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-100
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-101
 function reanchorWith(index: DocumentIndex, thread: AnchorThread, budget: { cells: number }): AnchorResult {
   const { line, endLine } = thread.anchor;
   const orphaned: AnchorResult = { state: "orphaned", line, endLine };

@@ -81,7 +81,7 @@ A flush does not refuse: it trims the key and an empty key keeps the old one (se
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-FMEDIT-067: a flush trims the typed key and keeps the old key when the typed one is empty.
-- SwRS-MDOKFSTUDIO-FMEDIT-054: the accepted shape of the save message that carries the rename.
+- SwRS-MDOKFSTUDIO-FMEDIT-016: the accepted shape of the save message that carries the rename.
 
 ### Verification notes
 - Method: test/page/runtimeFrontmatterEditor.test.ts (scenarios: click opens the key editor with suggestions, no schema, Enter or blur renames, unchanged name and Escape), visual scenario frontmatter-editing/v01-edit-key-suggestions-dark-900 in test/visual/scenarioDefinitions2.ts (key editor opens focused with the suggestion list).

@@ -8,8 +8,8 @@ description: When the popover of a review thread opens in a preview, the
   Reply button.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -22,11 +22,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/commentThreads.ts
-tested_in_files:
-- test/page/modules/commentThreads.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-044
 ---
 
 ## The thread popover of a preview sends a reply and keeps it until accepted
@@ -113,4 +113,6 @@ When the popover of a review thread opens in a preview, the extension SHALL show
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-044](SwRS-MDOKFSTUDIO-REVIEW-044.md): A comment editor sends its text on Save or Cmd+Enter and keeps it until the host accepts it
 <!-- okf:links:end -->

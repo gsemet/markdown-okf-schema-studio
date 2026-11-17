@@ -134,7 +134,7 @@ test("values that are not host messages are refused", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-007
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
 test("CR147: a baseline message needs an html string and well-formed hunks", () => {
   const send = (extra: Record<string, unknown>): boolean => filter.accepts({ type: "previewBaselineDiff", ...page, ...extra }, page);
   const hunk = { baseStart: 2, baseEnd: 1, start: 2, end: 3 };

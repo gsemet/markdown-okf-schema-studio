@@ -108,7 +108,7 @@ When a link annotation has the resolution `filename-stem`, the extension SHALL l
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the document, bundle or project root and stay inside it
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the configured or default root and stay inside it
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-056](SwRS-MDOKFSTUDIO-FMSCHEMA-056.md): An ambiguous or unknown stem is an error
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-057](SwRS-MDOKFSTUDIO-FMSCHEMA-057.md): An unreadable stem candidate gives a warning

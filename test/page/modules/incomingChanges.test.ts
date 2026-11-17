@@ -99,7 +99,7 @@ test("T16: elements in or under an open editor are skipped", () => {
   assert.deepEqual(marked(), [plain]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-208
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
 test("T16: malformed ranges are ignored and enabled is reported", () => {
   const { main, marks, block, marked } = setup();
   block(main, 1);

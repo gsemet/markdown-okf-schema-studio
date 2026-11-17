@@ -188,14 +188,6 @@ function nameTitleAttribute(name: string, escapedTooltip: string): string {
   return ` title="${escapeHtml(name)}${escapedTooltip ? `\n${escapedTooltip}` : ""}"`;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
-// @implements_req SwRS-MDOKFSTUDIO-TRUST-001
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-215
 /**
  * Builds the Obsidian-style properties table. Two columns (name | value) by
  * default; when an OKF schema matched, a third column shows each field's
@@ -207,6 +199,7 @@ export function renderPropertiesTable(
   enabled: boolean,
   sourceMapping?: SourceMappingOptions,
 ): string {
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
   if (!result.present || !enabled) {
     return "";
   }
@@ -222,12 +215,15 @@ export function renderPropertiesTable(
     (result.availableKeys ?? []).filter((name) => !presentFields.has(name)),
   ));
   const availableFields = escapeHtml(JSON.stringify(result.availableFields ?? []));
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
   const badge = totalIssues > 0
     ? ` <button type="button" data-okf-badge data-okf-errors="${result.summary.errors}" data-okf-warnings="${result.summary.warnings}" data-okf-infos="${result.summary.infos}" aria-label="Go to the first frontmatter issue">${result.summary.errors > 0 ? `✖ ${result.summary.errors}` : ""}${result.summary.warnings > 0 ? `${result.summary.errors > 0 ? " " : ""}⚠ ${result.summary.warnings}` : ""}${result.summary.infos > 0 && result.summary.errors + result.summary.warnings === 0 ? `ℹ ${result.summary.infos}` : ""}</button>`
     : "";
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
   const descriptionToggle = '<button type="button" data-okf-description-toggle aria-expanded="true" aria-label="Collapse Description column" title="Collapse Description column"><span aria-hidden="true" class="okf-description-collapse">&#9664;</span><span aria-hidden="true" class="okf-description-expand">&#9654;</span></button>';
   // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
   const frontmatterToggle = '<button type="button" data-okf-frontmatter-toggle aria-expanded="true" aria-label="Collapse frontmatter properties" title="Collapse frontmatter properties"><span aria-hidden="true" class="okf-frontmatter-collapse">&#9660;</span><span aria-hidden="true" class="okf-frontmatter-expand">&#9654;</span></button>';
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
   const header = withDocs
     ? `<thead><tr><th scope="col">Name</th><th scope="col"><span class="okf-column-heading">Value<span class="okf-description-restore">${descriptionToggle}</span></span></th><th scope="col"><span class="okf-column-heading">Description${descriptionToggle}</span></th></tr></thead>`
     : `<thead><tr><th scope="col">Names</th><th scope="col">Values</th></tr></thead>`;
@@ -259,6 +255,7 @@ export function renderPropertiesTable(
     const scalarLink = fieldLinks.find((link) => link.arrayIndex === undefined);
     const structuredValue = field.value !== null && typeof field.value === "object";
     const objectValue = structuredValue && !Array.isArray(field.value);
+    // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
     const valueDisplay = objectValue && fieldLinks.length === 0
       ? `<pre class="okf-value-yaml" data-okf-value-display><code class="language-yaml">${escapeHtml(valueYaml)}</code></pre>`
       : objectValue
@@ -268,6 +265,7 @@ export function renderPropertiesTable(
       : Array.isArray(field.value)
         ? `<span class="okf-list-display" data-okf-value-display>${formatListValue(field.value, fieldLinks, field.name)}</span>`
       : `<span data-okf-value-display>${formatLinkedValue(field.value, scalarLink)}</span>`;
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
     const editable = structuredValue
       || field.valueKind !== "scalar"
       || field.fieldType !== "unknown"
@@ -280,11 +278,13 @@ export function renderPropertiesTable(
     const typeLabel = withDocs
       ? `<span class="okf-type-label">(${typeNameLabelOf(field)})</span>`
       : "";
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-215
     const lineAttributes = sourceMapping && field.sourceLines
       ? ` data-okf-line="${field.sourceLines.start}" data-okf-end-line="${field.sourceLines.end}"`
       : "";
     return `<tr class="${rowClass}" data-okf-field="${escapeHtml(field.name)}"${lineAttributes} data-okf-schema-found="${result.schemaFound}" data-okf-value-kind="${escapeHtml(field.valueKind)}" data-okf-nullable="${field.nullable}"${field.required ? ' data-okf-required="true"' : ""} data-okf-type="${escapeHtml(field.fieldType ?? "unknown")}" data-okf-value="${escapeHtml(valueJson)}" data-okf-value-yaml="${escapeHtml(valueYaml)}" data-okf-editable="${editable}"${suggestionsAttribute}${enumsJson ? ` data-okf-enums="${escapeHtml(enumsJson)}"` : ""} title="${tooltip}"><th scope="row"${nameCellAttributes}><span class="okf-name-cell">${typeIcon}<span class="okf-name-text"${nameTitleAttribute(field.name, tooltip)}>${escapeHtml(field.name)}</span>${typeLabel}</span></th><td class="${worst ? SEVERITY_CLASS[worst] : ""}"${valueCellAttributes}>${valueDisplay}</td>${withDocs ? `<td class="okf-doc">${escapeHtml(field.doc?.description ?? "")}</td>` : ""}</tr>`;
   }).join("");
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
   const infoRows = result.info.length > 0
     ? result.info.map((issue) => `<tr class="okf-info-row ${SEVERITY_CLASS[issue.severity]}" title="${escapeHtml(issue.message)}"><th scope="row" colspan="${withDocs ? 3 : 2}"${issue.severity === "error" ? ' role="alert"' : ""}>${escapeHtml(issue.severity === "error" ? "✖" : issue.severity === "warning" ? "⚠" : "ℹ")} ${escapeHtml(issue.message)}</th></tr>`).join("")
     : "";

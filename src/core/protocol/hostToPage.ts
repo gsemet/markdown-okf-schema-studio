@@ -397,7 +397,7 @@ export function createHostMessageFilter(): HostMessageFilter {
   };
   const MAX_BASELINE_LENGTH = 20 * 1024 * 1024;
   const MAX_BASELINE_HUNKS = 100_000;
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-007
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
   const isValidBaselineDiff = (message: Readonly<Record<string, unknown>>): boolean => {
     if (typeof message.html !== "string" || message.html.length > MAX_BASELINE_LENGTH) return false;
     const hunks = message.hunks;

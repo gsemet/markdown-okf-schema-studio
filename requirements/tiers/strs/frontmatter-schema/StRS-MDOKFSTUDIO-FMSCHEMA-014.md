@@ -80,27 +80,37 @@ As a schema author, I declare that a field points to files so that writers get c
 
 ### Rationale and constraints
 
-- Annotations are found on top-level and nested properties, array items (items, prefixItems), patternProperties, additionalProperties, local references, every allOf branch, the matching anyOf branches, the single matching oneOf branch and the selected if/then/else branch; duplicate links are reported once and nested results attach to the top-level field.
-- An invalid annotation (not an object, missing or unknown resolution or syntax, non-string markers, field lists that are not lists of names, non-boolean show_line_number) marks the field with "[E10] x-okf-link ... at '{field}'".
-- A non-string value, a wikilink not written [[target]] or [[target|label]], or an empty target is an error; #fragment and ?query are split off and kept for navigation. Syntaxes are plain and wikilink.
-- Modes: document-relative, bundle-relative and bundle-relative-stem (target plus .md), project-relative and filename-stem; absolute paths (POSIX, drive letter, UNC) are refused, and a bundle or project target that leaves its root, also through a symlink, is refused; a missing file reads "does not resolve to a file".
-- filename-stem looks the stem up under the workspace folders and the bundle root: exactly one match is required ("is ambiguous" or "was not found"), a match leaving its root is refused and unreadable candidates give the warning W15. The stem index skips node_modules, .git, _build, .venv, out, dist, output and hidden folders and is rebuilt when a Markdown file changes in a workspace folder.
-- Known issue: a bundle root outside the workspace is not watched, so new files in its sub-folders can be missed.
-- The bundle root setting (string, empty by default) sets the bundle root, relative to the first workspace folder; empty uses the schema folder's parent when it contains the document and an index or log file; otherwise links show "Link root unavailable" (W15).
-- Known issue: a configured bundle root that does not exist is reported the same way, without naming the setting.
-- The project root setting (string, empty by default) sets the project root; empty uses the nearest folder with a .git entry above the document inside a workspace folder; otherwise "Link root unavailable".
-- Known issue: the project root is one value for the whole workspace, and the message does not name the root tried.
-- The outside-workspace links setting (boolean, off by default): off, a document-relative link outside every workspace folder is the error "Outside the allowed folder"; on, it resolves and can be followed.
-- A resolving link shows as a link; otherwise the text shows with an error or warning mark and a plain label ("File not found", "Outside the allowed folder", "Link root unavailable", "Absolute paths are not allowed", "Several files match", "Empty link", "Invalid link" or "Link unavailable"), is keyboard-focusable, carries the full "[E10]" or "[W15]" message in its tooltip and counts in the badge. Link issues do not block saving other fields.
-- Link inspection is deferred: the first paint shows each annotated value with a spinner and "File links are being resolved" (and no Studio link tooltip); about 150 ms after the render the host resolves the links and swaps the table in place; it waits while a block or field editor is open and drops stale results.
-- Known issue: during the deferred first paint, native title attributes remain.
-- The tooltip shows the workspace-relative target path then one "name: value" line per tooltip field found in the target's frontmatter; preview fields' values are shown beside the link as one excerpt (whitespace collapsed, joined by "; ", clipped with an ellipsis); only string, number and boolean values count and a target with a byte-order mark is read.
-- With show_line_number on and a basename marker, the link shows "line N", the 1-based line of the first line carrying the marker and the document identity: the id marker field value, or the document's file name stem when the annotation names no id marker (an id marker naming a missing field gives no line); no matching line, no label.
-- The metadata refreshes when a linked target is saved, created or deleted on disk, through a watcher per displayed target backed by the preview-wide file watcher.
-- Known issue: a link whose annotation lists no tooltip field, no preview field and no show_line_number gets no watcher of its own and relies on the preview-wide watcher.
-- Hovering or focusing a link (not while pending) shows a tooltip below or above it, never under the toolbar, of limited width, closing on Escape, scroll, resize, outside click or when pointer and focus leave.
-- Click or Enter in read mode, Cmd/Ctrl+click in edit mode follows the link; the query and fragment are kept and the jump is recorded in the Back/Next history.
-- An invalid, unavailable or outside link is not followed and VS Code shows "Markdown OKF-Schema Studio could not follow the link: {reason}"; a malformed request shows "The frontmatter link request is invalid.". Filename-stem links are re-resolved at click time.
+- A field is a link field when its schema annotates it with x-okf-link; its values are plain or wikilink targets, and a #fragment or ?query is kept for navigation.
+- A target is resolved document-relative, bundle-relative, project-relative or by filename stem (exactly one match required); the bundle root and project root settings and the outside-workspace links setting choose the roots.
+- Absolute paths and a target that leaves its root, also through a symlink, are refused; a missing file is reported as not resolving to a file.
+- A resolving link shows as a link; otherwise the text shows with an error or warning mark and a plain label that says why, counted in the badge; link problems never block saving other fields.
+- Link inspection is deferred: the first paint shows the values as pending and about 150 ms later the table is replaced in place.
+- A tooltip shows the target path and the fields found in the target frontmatter.
+- Click or Enter in read mode, Cmd/Ctrl+click in edit mode, follows a resolving link; an unusable link is not followed and VS Code shows the reason.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Page as Preview
+    participant Host
+    participant Files as File system and stem index
+    participant Editor as VS Code editor
+    Page->>Writer: first paint with the link values pending
+    Page->>Host: resolve the links about 150 ms after the render
+    Host->>Files: resolve each target from its root
+    Files-->>Host: found, missing, ambiguous or outside the root
+    Host->>Page: the table with the status of each link
+    Writer->>Page: hover or focus a link and read its tooltip
+    Writer->>Page: click, or press Enter on, a link
+    Page->>Host: follow the link
+    alt the link resolves
+        Host->>Editor: open the target
+    else the link is unusable
+        Host-->>Writer: a warning with the reason
+    end
+```
 
 ### Main paths
 
@@ -112,7 +122,7 @@ As a schema author, I declare that a field points to files so that writers get c
 2. The link target is checked against the files
    - SwRS-MDOKFSTUDIO-FMSCHEMA-050: a document-relative, bundle-relative or project-relative target must be an existing file inside its root
    - Option SwRS-MDOKFSTUDIO-FMSCHEMA-055 (nominal): a filename-stem is accepted when exactly one file matches
-   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-060 (refusal): a configured root that cannot be used
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-050 (refusal): a configured root that cannot be used
 3. The link is shown pending, then resolved
    - SwRS-MDOKFSTUDIO-FMSCHEMA-063: about 150 ms later the table is replaced so that a resolving link is a keyboard-focusable link with a tooltip
    - Option SwRS-MDOKFSTUDIO-FMSCHEMA-063 (refusal): a link that does not resolve shows an error or warning mark and a plain label
@@ -140,7 +150,7 @@ As a schema author, I declare that a field points to files so that writers get c
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-047](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-047.md): An invalid x-okf-link annotation marks the field
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-048](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-048.md): Link values are checked for type and syntax
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-049](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-049.md): Query and fragment are split off a link target
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the document, bundle or project root and stay inside it
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the configured or default root and stay inside it
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-051](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-051.md): Bundle-relative links resolve from the bundle root
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-052](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-052.md): Project-relative links resolve from the project root
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-053](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-053.md): Absolute link targets are refused

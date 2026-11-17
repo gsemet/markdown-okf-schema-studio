@@ -70,6 +70,22 @@ As a writer, I see which fields the schema expects, in a stable order, with thei
 - The strict additional properties setting is a boolean, off by default; on, each undeclared field is listed with "Unknown field; it is not declared in the "{type}" schema." and the badge counts it; off, such fields are listed without warning.
 - The strict setting applies only when a schema matched and is independent of the schema's own additionalProperties.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    participant Host
+    participant Validator
+    participant Page as Preview
+    actor Writer
+    Host->>Validator: the frontmatter and the schema of its type
+    Validator-->>Host: the issues (JSON Schema 2020-12)
+    Host->>Page: fields in schema order with their issues on their rows
+    Host->>Page: the badge and the line of missing required fields
+    Writer->>Page: press the badge
+    Page-->>Writer: scroll to the first row with an issue and focus its value cell
+```
+
 ### Main paths
 
 #### Path 1: Fields and their problems

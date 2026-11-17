@@ -14,6 +14,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-014
+relates_to:
+- StRS-MDOKFSTUDIO-FMSCHEMA-001
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -57,4 +59,6 @@ When the exported page has frontmatter properties, the extension SHALL write the
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-014](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-014.md): A writer shares one page as a self-contained HTML file
+- Relates to:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
 <!-- okf:links:end -->

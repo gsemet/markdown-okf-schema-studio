@@ -61,7 +61,7 @@ When a reader saves a comment on a selection, the page SHALL anchor it from the 
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-REVIEW-044: the comment box that sends the anchor.
-- SwRS-MDOKFSTUDIO-REVIEW-069: the accepted shape of the create message and its anchor.
+- SwRS-MDOKFSTUDIO-REVIEW-054: the accepted shape of the create message and its anchor.
 
 ### Verification notes
 

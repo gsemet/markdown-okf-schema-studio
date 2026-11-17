@@ -12,8 +12,8 @@ description: When `markdownOkfSchemaStudio.frontmatter.bundleRoot` or
   whether a document-relative link may leave every workspace folder.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -23,18 +23,12 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/configuration/settingsRegistry.ts
-- src/core/frontmatter/fileLinks.ts
-tested_in_files:
-- test/core/configuration/frontmatterConfiguration.test.ts
-- test/core/frontmatter/fileLinks.test.ts
-- test/core/frontmatter/okfFrontmatter.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
-supersedes:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-061
-- SwRS-MDOKFSTUDIO-FMSCHEMA-062
-- SwRS-MDOKFSTUDIO-FMSCHEMA-081
+supersedes: []
+superseded_by:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-050
 ---
 ## The bundleRoot, projectRoot and allowOutsideWorkspaceLinks settings set the roots
 
@@ -100,9 +94,7 @@ When `markdownOkfSchemaStudio.frontmatter.bundleRoot` or `markdownOkfSchemaStudi
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the document, bundle or project root and stay inside it
-- Supersedes:
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-061](SwRS-MDOKFSTUDIO-FMSCHEMA-061.md): The projectRoot setting sets the project root
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-062](SwRS-MDOKFSTUDIO-FMSCHEMA-062.md): The allowOutsideWorkspaceLinks setting default refuses outside links
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-081](SwRS-MDOKFSTUDIO-FMSCHEMA-081.md): The allowOutsideWorkspaceLinks setting set to true allows outside links
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the configured or default root and stay inside it
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the configured or default root and stay inside it
 <!-- okf:links:end -->

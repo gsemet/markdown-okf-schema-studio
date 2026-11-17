@@ -2,12 +2,15 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-074
 uuid: 495194d0-2127-40ff-a77a-99f239aa50cd
-title: Reply, resolve, reopen and delete change the named thread only
-description: When the host handles a reply, resolve or delete message for a
-  thread of the review comments file, the extension SHALL append the comment,
-  set the resolved flag or remove the thread of that name only and change no
-  other thread, and refuse with a reason and write nothing when that thread does
-  not exist or already holds 200 comments.
+title: "Reply, resolve, reopen and delete change the named thread only, and a malformed
+  message changes nothing"
+description: "When the host handles a reply, resolve or delete message for a thread
+  of the review comments file, the extension SHALL append the comment, set the resolved
+  flag or remove the thread of that name only and change no other thread, and refuse
+  with a reason and write nothing when that thread does not exist or already holds
+  200 comments; a reply, resolve or delete message is dropped without an answer unless
+  it has a non-empty thread id, a reply has a body of 1 to 10 000 characters and a
+  resolve has a boolean resolved flag."
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -19,23 +22,30 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-090
+- SwRS-MDOKFSTUDIO-TRUST-052
+- SwRS-MDOKFSTUDIO-TRUST-065
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/comments/commentModel.ts
+- src/core/protocol/pageToHost.ts
 - src/session/features/comments.ts
 tested_in_files:
 - test/core/comments/commentEditing.test.ts
+- test/core/protocol/pageToHost.test.ts
 - test/integration/commentWrite.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-REVIEW-070
+- SwRS-MDOKFSTUDIO-REVIEW-071
 ---
 
-## Reply, resolve, reopen and delete change the named thread only
+## Reply, resolve, reopen and delete change the named thread only, and a malformed message changes nothing
 
 ### Normative behavior
 
-When the host handles a reply, resolve or delete message for a thread of the review comments file, the extension SHALL append the comment, set the resolved flag or remove the thread of that name only and change no other thread, and refuse with a reason and write nothing when that thread does not exist or already holds 200 comments.
+When the host handles a reply, resolve or delete message for a thread of the review comments file, the extension SHALL append the comment, set the resolved flag or remove the thread of that name only and change no other thread, and refuse with a reason and write nothing when that thread does not exist or already holds 200 comments; a reply, resolve or delete message is dropped without an answer unless it has a non-empty thread id, a reply has a body of 1 to 10 000 characters and a resolve has a boolean resolved flag.
 
 ### Scenario (nominal): Reply
 
@@ -78,13 +88,44 @@ When the host handles a reply, resolve or delete message for a thread of the rev
 
 The refusals of the host that apply to every comment change (a document that is not a saved file, a comments file with unsaved changes in an editor, the size and thread limits of the file) and the warning shown with them are in SwRS-MDOKFSTUDIO-REVIEW-054.
 
+### Scenario (nominal): Valid reply message
+
+- GIVEN a previewCommentReply message with a thread id and a body of 1 character
+- WHEN the message is validated
+- THEN it is accepted
+
+### Scenario (refusal): Invalid reply message
+
+| Input | Outcome |
+| --- | --- |
+| An empty thread id | dropped without an answer |
+| A body of 0 characters | dropped without an answer |
+| A body of 10 001 characters | dropped without an answer |
+
+### Scenario (boundary): Accepted limits of a reply message
+
+| Input | Outcome |
+| --- | --- |
+| A body of 1 character, a body of 10 000 characters | accepted |
+
+### Scenario (nominal): Valid resolve and delete messages
+
+- GIVEN a previewCommentResolve message with a thread id and resolved true, and a previewCommentDelete message with a thread id
+- WHEN the messages are validated
+- THEN both are accepted
+
+### Scenario (refusal): Invalid resolve and delete messages
+
+| Input | Outcome |
+| --- | --- |
+| previewCommentResolve or previewCommentDelete with an empty thread id | dropped without an answer |
+| previewCommentResolve with a resolved flag that is not a boolean | dropped without an answer |
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-REVIEW-054: the per-file queue and the refusals shared by every comment change.
 - SwRS-MDOKFSTUDIO-REVIEW-065: the author stored with a reply.
-- SwRS-MDOKFSTUDIO-REVIEW-070: the accepted shape of the reply message.
-- SwRS-MDOKFSTUDIO-REVIEW-071: the accepted shape of the resolve and delete messages.
-- SwRS-MDOKFSTUDIO-REVIEW-081: the thread popover that sends the reply.
+- SwRS-MDOKFSTUDIO-REVIEW-044: the thread popover that sends the reply.
 - SwRS-MDOKFSTUDIO-REVIEW-086: the thread popover that sends resolve, reopen and delete.
 
 ### Verification notes
@@ -93,6 +134,10 @@ The refusals of the host that apply to every comment change (a document that is 
 - Method: test/integration/commentWrite.test.ts (reply to the named thread; unknown thread refused with the file unchanged; resolve, reopen, resolve a second thread; delete a second thread with the others staying; deleting the last thread keeps the file and the page gets the empty list; delete of an unknown thread refused with the file unchanged). The 200-comment limit through addReply is covered by no test, and the resolve refusal through the host is untested.
 - Method: real window review-annotations/r05-thread-reply (Reply) and review-annotations/r06-thread-resolved (Resolve and reopen).
 - Criteria: The thread holds the comments in order and the other thread is identical. The resolved flag changes for the named thread only. The remaining ids match and the file exists with threads [] after the last delete. addReply returns undefined for a missing or full thread, setResolved and deleteThread return undefined for a missing thread, and the page gets the reason.
+- Method: test/core/protocol/pageToHost.test.ts (unit test `T43: previewCommentCreate and previewCommentReply validate anchor, id and body limits`: scenarios valid reply message, invalid reply message message, accepted limits of a reply message).
+- Criteria: The validator accepts the boundary values and refuses one more.
+- Method: test/core/protocol/pageToHost.test.ts (unit test `T44: previewCommentResolve and previewCommentDelete validate the thread id and the flag`: scenarios valid resolve and delete messages, invalid resolve and delete messages).
+- Criteria: The validators accept only the valid shapes.
 
 <!-- okf:links:start -->
 ### Links
@@ -104,4 +149,9 @@ The refusals of the host that apply to every comment change (a document that is 
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-REVIEW-070](SwRS-MDOKFSTUDIO-REVIEW-070.md): A comment reply message names a thread and carries a bounded body
+  - [SwRS-MDOKFSTUDIO-REVIEW-071](SwRS-MDOKFSTUDIO-REVIEW-071.md): Resolve and delete messages name a thread; resolve carries a flag
 <!-- okf:links:end -->

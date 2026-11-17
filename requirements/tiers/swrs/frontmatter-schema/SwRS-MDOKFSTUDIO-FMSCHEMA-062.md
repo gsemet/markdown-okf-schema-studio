@@ -16,12 +16,12 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-014
 annotation_exemption: true
-exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-060; no marker expected."
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-050; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-060
+- SwRS-MDOKFSTUDIO-FMSCHEMA-050
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -56,5 +56,5 @@ When `markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks` is false, 
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-060](SwRS-MDOKFSTUDIO-FMSCHEMA-060.md): The bundleRoot, projectRoot and allowOutsideWorkspaceLinks settings set the roots
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the configured or default root and stay inside it
 <!-- okf:links:end -->

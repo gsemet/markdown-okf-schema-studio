@@ -7,8 +7,8 @@ description: When a range received by the page is not a pair of integers with 1
   <= start <= end, the extension SHALL ignore it.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -18,11 +18,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/incomingChanges.ts
-tested_in_files:
-- test/page/modules/incomingChanges.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-207
 ---
 
 ## Malformed incoming-change ranges are ignored
@@ -67,4 +67,6 @@ When a range received by the page is not a pair of integers with 1 <= start <= e
   - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-207](SwRS-MDOKFSTUDIO-REVIEW-207.md): Changed blocks get a thin change bar that moves nothing, and malformed ranges are ignored
 <!-- okf:links:end -->

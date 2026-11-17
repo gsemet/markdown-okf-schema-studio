@@ -14,8 +14,9 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-005
 - StRS-MDOKFSTUDIO-FMSCHEMA-010
+relates_to:
+- StRS-MDOKFSTUDIO-FMEDIT-005
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -119,7 +120,6 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
   - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-FMEDIT-086](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-086.md): A closed schema flags the properties section
@@ -129,4 +129,6 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-041](SwRS-MDOKFSTUDIO-FMSCHEMA-041.md): A closed schema reports every undeclared field
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-042](SwRS-MDOKFSTUDIO-FMSCHEMA-042.md): The strict setting warns on undeclared fields
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-089](SwRS-MDOKFSTUDIO-FMSCHEMA-089.md): Every violation of the schema is reported
+- Relates to:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
 <!-- okf:links:end -->

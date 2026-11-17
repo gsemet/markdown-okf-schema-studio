@@ -38,7 +38,6 @@ import { needsSymlinks } from "../../shared/symlinks";
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-060
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
 

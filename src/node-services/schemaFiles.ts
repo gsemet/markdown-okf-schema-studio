@@ -24,7 +24,6 @@ function isFile(candidate: string): boolean {
   }
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
 // The file names of a schema directory change only when an entry is added, removed or renamed,
 // and that moves the directory's own modification time. A render lists the directory, so the
 // listing (a readdir and one stat per entry) is kept while one stat of the directory still shows
@@ -47,6 +46,7 @@ function directoryStamp(dir: string): { stamp: string; modifiedMs: number } | un
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
 function listFiles(dir: string): string[] {
   const current = directoryStamp(dir);
   if (current === undefined) {

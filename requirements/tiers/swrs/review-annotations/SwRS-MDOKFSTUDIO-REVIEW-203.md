@@ -10,8 +10,8 @@ description: When the extension needs the text of a file at HEAD, it SHALL read
   only when the HEAD commit id has changed.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,11 +20,11 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/host-vscode/headBaseline.ts
-tested_in_files:
-- test/host-vscode/headBaseline.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-195
 ---
 
 ## The HEAD text comes from the built-in Git extension for small files
@@ -77,4 +77,6 @@ When the extension needs the text of a file at HEAD, it SHALL read it through th
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-195](SwRS-MDOKFSTUDIO-REVIEW-195.md): The host posts the lines that differ from the last commit, read from Git for small files
 <!-- okf:links:end -->

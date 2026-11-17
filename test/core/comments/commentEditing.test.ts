@@ -58,7 +58,7 @@ test("T43: addReply appends to the named thread only", () => {
   assert.equal(addReply(crowded, "t1", { commentId: "cx", author: "B", body: "z", now: NOW }), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-069
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
 test("T43: isValidAnchor enforces lines and the 500 / 32 / 32 limits", () => {
   assert.equal(isValidAnchor(anchor), true);
   assert.equal(isValidAnchor({ ...anchor, quote: "" }), true);

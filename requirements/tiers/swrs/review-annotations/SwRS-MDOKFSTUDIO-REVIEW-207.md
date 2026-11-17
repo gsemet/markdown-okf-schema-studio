@@ -2,12 +2,14 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-207
 uuid: 5f50da33-a834-4a77-ab88-cfc1442cf99f
-title: Changed blocks get a thin change bar that moves nothing
-description: When the page receives line ranges, the extension SHALL mark the
-  innermost mapped element whose lines meet a range with
-  data-sphinx-preview-changed and draw, for each marked block, a green bar 3 px
-  wide with square ends, as high as the box of the block, in one column at the
-  left margin of the page, without moving any block or text edge.
+title: "Changed blocks get a thin change bar that moves nothing, and malformed ranges
+  are ignored"
+description: "When the page receives line ranges, the extension SHALL mark the innermost
+  mapped element whose lines meet a range with data-sphinx-preview-changed and draw,
+  for each marked block, a green bar 3 px wide with square ends, as high as the box
+  of the block, in one column at the left margin of the page, without moving any block
+  or text edge; a range that is not a pair of integers with 1 <= start <= end is ignored,
+  as is a range list that is not a list."
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -16,7 +18,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-017
-depends_on: []
+depends_on:
+- SwRS-MDOKFSTUDIO-TRUST-059
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -29,13 +32,15 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-REVIEW-208
 ---
 
-## Changed blocks get a thin change bar that moves nothing
+## Changed blocks get a thin change bar that moves nothing, and malformed ranges are ignored
 
 ### Normative behavior
 
-When the page receives line ranges, the extension SHALL mark the innermost mapped element whose lines meet a range with data-sphinx-preview-changed and draw, for each marked block, a green bar 3 px wide with square ends, as high as the box of the block, in one column at the left margin of the page, without moving any block or text edge.
+When the page receives line ranges, the extension SHALL mark the innermost mapped element whose lines meet a range with data-sphinx-preview-changed and draw, for each marked block, a green bar 3 px wide with square ends, as high as the box of the block, in one column at the left margin of the page, without moving any block or text edge; a range that is not a pair of integers with 1 <= start <= end is ignored, as is a range list that is not a list.
 
 ### Scenario (nominal): Marking the innermost blocks
 
@@ -75,9 +80,26 @@ When the page receives line ranges, the extension SHALL mark the innermost mappe
 | A content patch that moves a marked block | the bar moves with the block |
 | A change of content size, or an image load | the bars are placed again (stabilizeLayout of the scroll core) |
 
+### Scenario (nominal): Valid ranges
+
+- GIVEN a previewIncomingChanges message whose ranges are pairs of integers with 1 <= start <= end
+- WHEN it is received
+- THEN the blocks that meet them are marked and the enabled value is reported
+
+### Scenario (refusal): Bad ranges
+
+- GIVEN ranges with a zero, a negative number, a fraction or an end before the start
+- WHEN they are received
+- THEN no block is marked from them
+
+### Scenario (refusal): Not a list
+
+- GIVEN a previewIncomingChanges message whose ranges are not a list
+- WHEN it is received
+- THEN all marks are cleared
+
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-REVIEW-208: the ranges the page ignores as malformed.
 - SwRS-MDOKFSTUDIO-REVIEW-195: the host that posts the ranges.
 - SwRS-MDOKFSTUDIO-REVIEW-214: the Diff button that hides the bar layer.
 
@@ -89,6 +111,8 @@ When the page receives line ranges, the extension SHALL mark the innermost mappe
 - Method: test/page/modules/reviewReq.requirements.test.ts (unit test: the change bars are placed again on a window resize and after a content change: scenario laid out again).
 - Method: visual scenarios review-annotations/v05-change-bar-light-900, v06-change-bar-dark-900, v14-incoming-bars-light-900 and v15-incoming-bars-dark-900 (scenarios size of one bar, one column and no layout shift in the light and dark themes); real window review-annotations/r03-incoming-change-bars. The cream theme is not asserted.
 - Criteria: Only innermost elements carry the attribute and it follows the last ranges; no mark appears under an editor or under an included element; the bar style has width 3px and no radius, and the layout sets its top and height from the block box; the layer is absolutely positioned with pointer events off and no block geometry changes; layout() runs on window resize, after apply and in stabilizeLayout of the scroll core (window, visual viewport and content resize, image load).
+- Method: test/page/modules/incomingChanges.test.ts (unit test `T16: malformed ranges are ignored and enabled is reported`: scenarios valid ranges, bad ranges, not a list).
+- Criteria: Only valid ranges produce marks.
 
 <!-- okf:links:start -->
 ### Links
@@ -97,4 +121,8 @@ When the page receives line ranges, the extension SHALL mark the innermost mappe
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-REVIEW-208](SwRS-MDOKFSTUDIO-REVIEW-208.md): Malformed incoming-change ranges are ignored
 <!-- okf:links:end -->

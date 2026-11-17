@@ -11,8 +11,8 @@ description: When the extension compares the text of a block at the last commit
   exceed 4 000 000 word pairs.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,12 +20,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/mapping/wordDiff.ts
-tested_in_files:
-- test/core/mapping/wordDiff.test.ts
-- test/page/sideBySideCards.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-009
 ---
 
 ## The word diff reports the added and removed words
@@ -66,4 +65,6 @@ When the extension compares the text of a block at the last commit with its text
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-009](SwRS-MDOKFSTUDIO-REVIEW-009.md): A changed block shows as a side-by-side diff with its word marks, cut by line hunks, and a malformed baseline message is dropped
 <!-- okf:links:end -->

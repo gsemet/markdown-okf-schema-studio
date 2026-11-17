@@ -530,7 +530,7 @@ test("T11: Back and Next post previewHistoryGo and follow previewHistoryState", 
   assert.equal(harness.messages.at(-1)?.direction, "forward");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-156
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
 test("T15: previewShowComments sets the show-comments attribute of the page, stale ids are ignored", () => {
   const harness = createRuntimeHarness();
   const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };

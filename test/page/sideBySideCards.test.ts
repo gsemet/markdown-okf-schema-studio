@@ -101,7 +101,6 @@ function cardViews(opened: Opened): CardView[] {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-005
 test("CR147: a changed block is a card with HEAD left, now right and the words marked", () => {
   const opened = open();
   toggle(opened);

@@ -61,8 +61,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMEDIT-080
 - SwRS-MDOKFSTUDIO-FMEDIT-083
 - SwRS-MDOKFSTUDIO-FMEDIT-085
-- SwRS-MDOKFSTUDIO-TRUST-005
-- SwRS-MDOKFSTUDIO-TRUST-065
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
@@ -87,18 +85,26 @@ As a writer or reviewer, I expect a metadata edit to leave comments, quoting, li
 ### Rationale and constraints
 
 - Quoting style, folded or literal headers, comments, fences, the body and line endings are preserved; anchored or aliased values fall back to a whole-block rewrite.
-- Every edit is re-parsed and refused when it would lose, duplicate or corrupt a key.
-- A refusal explains itself and never leaves the document half-edited.
+- Every edit is re-parsed and refused when it would lose, duplicate or corrupt a key; a refusal explains itself and never leaves the document half-edited.
 - Trust does not refuse a metadata edit: it works in Restricted Mode and for a file outside every workspace folder as in a trusted workspace. A file that VS Code holds read-only is refused with the reason "This file is read-only in VS Code.", as is every other write.
 - The schema check covers type, enum, null and conditional rules; link problems do not block a save.
-- Malformed page messages are ignored without a reply.
-- Known issue: the stale-field message is shared by stale renders and schema mismatches.
-- When a writer navigates away or the preview needs to flush an open field editor, the typed text is saved as is instead of being dropped, and a warning shows if it is refused.
-- A flush saves the typed text without the type and schema check, so the preview shows any problem.
+- When a writer navigates away or the preview needs to flush an open field editor, the typed text is saved as is, without the type and schema check, instead of being dropped, and a warning shows if it is refused.
 - A plain save refused by the host is saved again as a flush when a navigation waits for it; a save that gets no result still lets the navigation go after a bounded wait.
-- While a field editor is open, refresh, checkbox toggles, block selection and block moves are blocked and the properties table stays out of block selection, movement and navigation: toolbar Refresh is disabled and checkbox toggles are refused with a status message.
-- Known issue: a content patch of the page closes an open field editor and drops its text, and the waiting properties update.
-- ArrowUp from the first block editor does not step into the properties table.
+- While a field editor is open, the page does not replace the properties table under it.
+
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Open: the writer opens a field editor
+    Open --> Saving: the writer saves the value
+    Saving --> Saved: only the lines of the field change
+    Saving --> Refused: the reason is shown and the typed text is kept
+    Refused --> Open: the writer corrects the value
+    Open --> Flushed: the writer navigates away and the text is written as typed
+    Saved --> [*]
+    Flushed --> [*]
+```
 
 ### Main paths
 
@@ -109,17 +115,7 @@ As a writer or reviewer, I expect a metadata edit to leave comments, quoting, li
    - Option SwRS-MDOKFSTUDIO-FMEDIT-043 (refusal): an edit that loses or corrupts a key is refused
    - Option SwRS-MDOKFSTUDIO-FMEDIT-016 (refusal): a value that breaks the YAML, the field type or the schema is refused and nothing changes
    - Option SwRS-MDOKFSTUDIO-FMEDIT-067 (nominal): a navigation saves the typed text as a flush
-2. The value is saved on the lines of its field
-   - SwRS-MDOKFSTUDIO-BLOCK-058: the edit is one undo step and the preview renders once
-   - Option SwRS-MDOKFSTUDIO-BLOCK-058 (refusal): an edit that VS Code does not apply or rejects is answered with a reason
-3. The edit is one undo step and the diff holds only the edited field
-
-#### Path 2: Remove a field
-
-1. A field editor is open
-   - SwRS-MDOKFSTUDIO-FMEDIT-029: Remove field deletes exactly the lines of the field and keeps the comment lines above it
-   - Option SwRS-MDOKFSTUDIO-FMEDIT-029 (refusal): the host refuses to remove a required field
-2. The lines of the field are gone and the comments above are kept
+2. The value is saved on the lines of its field and the diff holds only the edited field
 
 <!-- okf:links:start -->
 ### Links
@@ -129,7 +125,7 @@ As a writer or reviewer, I expect a metadata edit to leave comments, quoting, li
 - Derived by:
   - [SwRS-MDOKFSTUDIO-BLOCK-193](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-193.md): Page updates wait while an inline editor is open
   - [SwRS-MDOKFSTUDIO-FMEDIT-002](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-002.md): A field editor does not open while another editor is open
-  - [SwRS-MDOKFSTUDIO-FMEDIT-016](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-016.md): The host refuses a value that breaks YAML, the field type or the schema
+  - [SwRS-MDOKFSTUDIO-FMEDIT-016](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-016.md): The host refuses a value that breaks YAML, the field type or the schema, and ignores a malformed save message
   - [SwRS-MDOKFSTUDIO-FMEDIT-018](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-018.md): A null value is refused for a field that is not nullable
   - [SwRS-MDOKFSTUDIO-FMEDIT-024](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-024.md): A click on a field name renames the key
   - [SwRS-MDOKFSTUDIO-FMEDIT-025](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-025.md): Enter or leaving the key editor renames the key
@@ -166,8 +162,6 @@ As a writer or reviewer, I expect a metadata edit to leave comments, quoting, li
   - [SwRS-MDOKFSTUDIO-FMEDIT-080](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-080.md): The figure editor and insert points ignore input while a field editor is open
   - [SwRS-MDOKFSTUDIO-FMEDIT-083](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-083.md): A save for a missing field or revision is refused as stale
   - [SwRS-MDOKFSTUDIO-FMEDIT-085](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-085.md): Hiding or closing the page saves the open field editor as a flush
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
-  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply

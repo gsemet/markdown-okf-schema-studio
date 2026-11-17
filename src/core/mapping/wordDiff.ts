@@ -50,7 +50,7 @@ function rangesOf(words: Token[], marked: boolean[]): CharRange[] {
   return ranges;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-005
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
 /**
  * Compares two texts word by word (a longest common subsequence of the words). The result lists
  * the character ranges of `before` that are not in `after` and the ranges of `after` that are not in
@@ -122,7 +122,7 @@ function splitRanges(segments: readonly string[], ranges: readonly CharRange[]):
   return result;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-005
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
 /**
  * {@link diffWords} for texts that come in pieces (the text nodes of a rendered block). The pieces
  * are compared as one text in which a piece boundary separates words; the ranges come back inside

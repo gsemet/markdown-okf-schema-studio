@@ -102,7 +102,7 @@ function gitRoot(filePath: string): string | undefined {
   }
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-060
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
 function configuredRoot(
   configured: string | undefined,
   filePath: string,

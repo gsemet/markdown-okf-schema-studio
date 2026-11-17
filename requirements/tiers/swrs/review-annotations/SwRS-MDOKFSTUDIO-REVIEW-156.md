@@ -8,8 +8,8 @@ description: When a previewShowComments message names another document, revision
   state.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,11 +19,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/features/hostHandlers.ts
-tested_in_files:
-- test/page/runtimePageControls.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-152
 ---
 
 ## A show-comments message of another render is ignored
@@ -58,4 +58,6 @@ When a previewShowComments message names another document, revision or request t
   - [StRS-MDOKFSTUDIO-REVIEW-012](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-012.md): A writer sees HTML comments and TODO notes as chips and toggles them
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-152](SwRS-MDOKFSTUDIO-REVIEW-152.md): The showComments setting and the Comments button hide and show every review mark, and a message of another render changes nothing
 <!-- okf:links:end -->

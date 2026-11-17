@@ -124,7 +124,7 @@ When a properties table with annotated link values is rendered, the extension SH
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the document, bundle or project root and stay inside it
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the configured or default root and stay inside it
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-055](SwRS-MDOKFSTUDIO-FMSCHEMA-055.md): A filename stem resolves when exactly one file matches
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-064](SwRS-MDOKFSTUDIO-FMSCHEMA-064.md): A link that does not resolve shows its problem

@@ -41,7 +41,6 @@ const readThreads = (file: string): any[] => JSON.parse(fs.readFileSync(file, "u
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-069
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065
 /**

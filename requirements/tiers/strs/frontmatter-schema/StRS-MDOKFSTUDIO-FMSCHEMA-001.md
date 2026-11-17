@@ -7,7 +7,8 @@ description: When a writer opens a document that starts with YAML frontmatter,
   the Studio SHALL show it as a properties table at the top of the preview,
   escaping every value, in a compact YAML-like form that fits the preview width,
   that follows the frontmatter settings and that refreshes in place shortly
-  after the last edit.
+  after the last edit, and, when the frontmatter is invalid, explains why while
+  the body still renders.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
 req_lifecycle: proposed
@@ -36,13 +37,17 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-014
 - SwRS-MDOKFSTUDIO-FMSCHEMA-015
 - SwRS-MDOKFSTUDIO-FMSCHEMA-016
+- SwRS-MDOKFSTUDIO-FMSCHEMA-017
+- SwRS-MDOKFSTUDIO-FMSCHEMA-018
 - SwRS-MDOKFSTUDIO-FMSCHEMA-043
 - SwRS-MDOKFSTUDIO-FMSCHEMA-044
 - SwRS-MDOKFSTUDIO-FMSCHEMA-045
 - SwRS-MDOKFSTUDIO-FMSCHEMA-075
+- SwRS-MDOKFSTUDIO-FMSCHEMA-076
 - SwRS-MDOKFSTUDIO-FMSCHEMA-090
 default_owner_email: gaetan@xeberon.net
 supersedes:
+- StRS-MDOKFSTUDIO-FMSCHEMA-002
 - StRS-MDOKFSTUDIO-FMSCHEMA-003
 - StRS-MDOKFSTUDIO-FMSCHEMA-004
 - StRS-MDOKFSTUDIO-FMSCHEMA-005
@@ -53,7 +58,7 @@ supersedes:
 
 ### Normative behavior
 
-When a writer opens a document that starts with YAML frontmatter, the Studio SHALL show it as a properties table at the top of the preview, escaping every value, in a compact YAML-like form that fits the preview width, that follows the frontmatter settings and that refreshes in place shortly after the last edit.
+When a writer opens a document that starts with YAML frontmatter, the Studio SHALL show it as a properties table at the top of the preview, escaping every value, in a compact YAML-like form that fits the preview width, that follows the frontmatter settings and that refreshes in place shortly after the last edit, and, when the frontmatter is invalid, explains why while the body still renders.
 
 ### Preserved stakeholder intent
 
@@ -61,20 +66,34 @@ As a writer, I read my document metadata as a table above the text, safely, with
 
 ### Rationale and constraints
 
-- A block needs a first-line fence and a closing fence alone on its line; a value ending in the closing fence marks does not close it and a document without a closing fence has no frontmatter. An empty block (two adjacent fences) is recognised but shows the "Frontmatter is not a mapping." error row instead of an empty table (Known issue). CRLF fences are accepted.
-- Frontmatter without a string type, or whose type has no schema, shows a generic two-column table headed "Names / Values" in source key order, with nested mappings as YAML code.
-- The properties section maps to source line 1, so syncing the source to line 1 shows the top of the preview.
-- Known issue: a leading byte-order mark in the document itself is not stripped, so such a file shows no frontmatter (it is stripped only for linked targets).
-- Known issue: the generic header reads "Names / Values" while a schema table reads "Name / Value".
-- Booleans show as a read-only checkbox followed by true or false; lists show one dash-marked item per line, at most 50 items then "+ N more"; an empty list shows [] and null shows null.
-- The table has a lean frame (no outer border, transparent cells, grey header cells) and in a narrow preview uses a fixed layout in which names, values, links and type labels wrap anywhere, so the table never pushes the page sideways.
-- Known issue: in a narrow preview a word can still break in the middle of a name; there is no stacked layout.
-- Known issue: an unused helper of the table renderer would show an em dash for null; today null shows null.
-- A toggle in the column headers collapses and restores the Description column, keeping Name and Value readable; error rows re-span the visible columns; the choice survives a refresh and is kept for the 200 most recent documents.
-- Without a remembered choice, a narrow preview starts with the Description column collapsed (measured when the page starts).
-- The frontmatter table setting is a boolean, on by default; off, the body (its first heading) still renders and neither the table nor the raw YAML is shown. The frontmatter is still parsed and validated while it is off, but nothing is shown.
-- Any change to a frontmatter setting (table, strict additional properties, bundle root, project root, outside-workspace links) re-analyses the open preview whose document is the active editor's document; other previews are only re-rendered from their last good render (Known issue).
-- The frontmatter is re-analysed 300 ms after the last change; while a field editor is open the new table waits until it closes; a page not ready for the current render loads the full document instead.
+- A block needs a first-line fence and a closing fence alone on its line; a document without a closing fence has no frontmatter. CRLF fences are accepted.
+- Invalid YAML shows one row "Invalid frontmatter YAML: {parser message}" and an error badge of 1; a list, a scalar or an empty block shows "Invalid frontmatter YAML: Frontmatter is not a mapping."; the body of the document still renders.
+- Frontmatter without a string type, or whose type has no schema, shows a generic two-column table in source key order.
+- Values read like YAML in a lean table that fits the preview width and never pushes the page sideways.
+- A toggle in the column headers collapses and restores the Description column; the choice survives a refresh and a narrow preview starts collapsed.
+- The frontmatter table setting is a boolean, on by default; off, the body still renders and neither the table nor the raw YAML is shown.
+- The frontmatter is re-analysed 300 ms after the last change; while a field editor is open the new table waits.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Doc as VS Code document
+    participant Host as Host (analyse)
+    participant Page as Preview
+    Writer->>Doc: open a document that starts with frontmatter
+    Doc->>Host: the document text
+    Host->>Host: extract the block between the fences and parse the YAML
+    alt the block is a valid YAML mapping
+        Host->>Page: the properties table and the body
+    else the YAML is invalid
+        Host->>Page: one error row with the parser message and the body
+    end
+    Writer->>Doc: edit the text
+    Doc->>Host: re-analyse 300 ms after the last change
+    Host->>Page: patch the table in place, held while a field editor is open
+```
 
 ### Main paths
 
@@ -82,7 +101,8 @@ As a writer, I read my document metadata as a table above the text, safely, with
 
 1. A document starts with a `---` line and a YAML mapping
    - SwRS-MDOKFSTUDIO-FMSCHEMA-001: the page shows the frontmatter as a properties table above the body
-   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-001 (refusal): invalid YAML gives one error row and the body still renders
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-001 (refusal): YAML that does not parse shows one error row "Invalid frontmatter YAML" with the parser message, and the body still renders
+   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-001 (refusal): an opening fence without a closing fence
    - Option SwRS-MDOKFSTUDIO-FMSCHEMA-004 (nominal): with the propertiesTable setting off, neither the table nor the raw text shows
 2. The properties table is shown
    - SwRS-MDOKFSTUDIO-FMSCHEMA-090: the writer presses the toggle next to the title and the table is hidden below the header
@@ -119,12 +139,16 @@ As a writer, I read my document metadata as a table above the text, safely, with
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-014](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-014.md): The Description column collapses and the choice is kept per document
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-015](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-015.md): The Description choice is remembered per document
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-016](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-016.md): Narrow previews start with the Description column collapsed
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-017](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-017.md): Invalid YAML gives one error row and an error badge
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-018](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-018.md): Frontmatter that is not a mapping gives an error row
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-043](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-043.md): The table is refreshed in place after edits, after the field editor closes
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-044](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-044.md): A new table waits while a field editor is open
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-045](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-045.md): A frontmatter setting change re-analyses the open previews
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-075](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-075.md): The body still renders when the table is off
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-076](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-076.md): Invalid YAML does not stop the body from rendering
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-090](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-090.md): The frontmatter properties table collapses under its header and is shown again on every page load
 - Supersedes:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-002](StRS-MDOKFSTUDIO-FMSCHEMA-002.md): Invalid frontmatter is explained and the body still renders
   - [StRS-MDOKFSTUDIO-FMSCHEMA-003](StRS-MDOKFSTUDIO-FMSCHEMA-003.md): Property values read like YAML
   - [StRS-MDOKFSTUDIO-FMSCHEMA-004](StRS-MDOKFSTUDIO-FMSCHEMA-004.md): The Description column can be collapsed
   - [StRS-MDOKFSTUDIO-FMSCHEMA-005](StRS-MDOKFSTUDIO-FMSCHEMA-005.md): Frontmatter settings control the table and apply live
