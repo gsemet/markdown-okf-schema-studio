@@ -5,12 +5,14 @@ Prints (1) what the automated suites already exercise, so charters skip it, and 
 files changed since the last campaign, mapped to use-case areas (references/use-cases.md).
 
 Baseline revision, in order: --since REV; the revision recorded in the index of --campaign DIR; the
-newest archived QA campaign under <changes-root>/4-archives/*qa-campaign*/. The index records it as
+newest archived QA campaign under <changes-root>/5-archives/*qa-campaign*/. The index records it as
 a line `Revision: `<sha>`` or as the prose "at commit `<sha>`" (campaign 210 form). A sha that is not
 an ancestor of HEAD is reported and skipped.
 
-The changes root is $QA_CHANGES_ROOT, else <repo>/.agents/changes (git-ignored: absent in a
-worktree, so point the variable at the main checkout's folder).
+The changes root is $QA_CHANGES_ROOT, else the planning folder of AGENTS.md's `planning:` line,
+read from a checkout of the planning surface next to the repository's main checkout
+(<parent>/gsemet-foss-planning-surface/projects/markdown-okf-schema-studio/changes). In a worktree
+or another layout, point the variable at that folder.
 
 Usage: python3 coverage-map.py [--since REV] [--campaign DIR]
 """
@@ -23,6 +25,10 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[4]
 EXT = REPO
+# Planning folder (AGENTS.md "chantier" section): a sibling checkout of the planning surface.
+PLANNING_CHANGES = (
+    REPO.parent / "gsemet-foss-planning-surface/projects/markdown-okf-schema-studio/changes"
+)
 
 # Source path pattern -> use-case areas. First match wins; keep in step with use-cases.md.
 AREAS = [
@@ -57,7 +63,7 @@ def words(name):
 
 
 def changes_root():
-    return Path(os.environ.get("QA_CHANGES_ROOT") or REPO / ".agents/changes")
+    return Path(os.environ.get("QA_CHANGES_ROOT") or PLANNING_CHANGES)
 
 
 REV_PATTERNS = [
@@ -95,8 +101,8 @@ def campaign_indexes(campaign):
 
 
 def newest_archived_campaign(root):
-    """Newest <root>/4-archives/*qa-campaign*/ by the date in its name, else by name."""
-    found = [p.parent for p in Path(root).glob("4-archives/*qa-campaign*/00-index.md")]
+    """Newest <root>/5-archives/*qa-campaign*/ by the date in its name, else by name."""
+    found = [p.parent for p in Path(root).glob("5-archives/*qa-campaign*/00-index.md")]
     return max(found, key=lambda p: (re.findall(r"\d{4}-\d{2}-\d{2}", p.name) or [""])[-1] + p.name, default=None)
 
 
@@ -107,8 +113,8 @@ def resolve_campaign(campaign=None):
     root = changes_root()
     newest = newest_archived_campaign(root)
     if newest:
-        return newest, f"newest archived QA campaign under {root}/4-archives"
-    legacy = root / "4-archives/001-deep-UX-analysis"
+        return newest, f"newest archived QA campaign under {root}/5-archives"
+    legacy = root / "5-archives/001-deep-UX-analysis"
     if legacy.exists():
         return legacy, f"legacy default under {root}"
     return None, f"no campaign found (changes root {root}; set QA_CHANGES_ROOT or pass --campaign)"

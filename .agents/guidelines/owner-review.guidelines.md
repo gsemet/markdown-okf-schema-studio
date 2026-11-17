@@ -9,9 +9,8 @@ Which documents follow `skills/writing-for-markdown-okf-schema-studio/SKILL.md`:
 
 | Document | Writing skill |
 | --- | --- |
-| `01-intent.md`, `03-change-spec.md`, QA sheets and campaign `00-index.md`, archive `report.md` | ✅ yes |
-| `ORCHESTRATOR.md` (generated), `STATUS.md` header (four fixed lines) | ⚠️ a little, no format change to `STATUS.md` |
-| `task.md`, `rules.md`, `work/` reports and verdicts, SwRS and StRS, PR bodies, GitHub issues | ❌ no: plain GFM |
+| `01-intent.md`, `03-change-spec.md`, QA sheets and campaign `00-index.md`, archive `delivery.md` | ✅ yes |
+| `work/` tasks, rules, rounds, reports and reviews, SwRS and StRS, PR bodies, GitHub issues | ❌ no: plain GFM |
 
 The "yes" documents are read by the owner in the Studio, so they use its MyST features (alerts,
 tables, diagrams). Working files, PR bodies and GitHub issues stay plain GFM because GitHub does not
@@ -24,7 +23,8 @@ A status report to the owner names a PR, change request, run or file with its li
 ## Demo tour
 
 Once the stack top has green heavy CI, the agent talking to the owner installs the VSIX built from
-the top branch, writes one `.agents/changes/demo/tour.md` (git-ignored, inside the trusted
-workspace so edit mode works) with a section per change that exercises it, then guides the owner
+the top branch, writes one `tour.md` in a folder that git does not track and that the trusted
+workspace holds, so edit mode works (the batch's `work/` folder in the planning folder, opened in
+that workspace), with a section per change that exercises it, then guides the owner
 one step at a time (what to do, what they should see), waiting for their reply between steps. Warn
 before any VS Code reload.

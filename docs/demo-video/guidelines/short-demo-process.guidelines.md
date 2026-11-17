@@ -161,7 +161,8 @@ The first trial is also what showed the video was too short.
 
 ### 7. Take
 
-Copy [short-demo-01/](../short-demo-01/) to a working folder (`.agents/changes` for a change request), then:
+Copy [short-demo-01/](../short-demo-01/) to a working folder (for a change request, its `work/` folder in the planning
+folder), then:
 
 ```bash
 mkdir -p /private/tmp/demo/remo && cd /private/tmp/demo/remo

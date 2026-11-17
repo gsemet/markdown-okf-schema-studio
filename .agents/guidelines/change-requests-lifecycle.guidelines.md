@@ -1,12 +1,15 @@
 # Change Requests Life Cycle: inbox → backlog → change request → PR → archive
 
 This is the process guideline: how agent sessions turn backlog items into merged pull requests, one
-CR at a time or several in parallel ("Parallel Change Requests Orchestration"). It says who does
-what and when. It ranks below the constitution, `AGENTS.md` and every project guideline: on a
-conflict the project guideline wins and the conflict is reported; where they are silent, this
-guideline holds. Project specifics (gates, commit format, install restrictions) come from
-`AGENTS.md`. The rules a pull request must respect come from the project guidelines:
-[ci.guidelines.md](ci.guidelines.md), [pull-request.guidelines.md](pull-request.guidelines.md),
+CR at a time or several in parallel ("Parallel Change Requests Orchestration"). The change requests
+live in the planning folder, and [chantier](https://github.com/gsemet/chantier) runs their stages,
+files, status and batches: its cards (`chantier rules`, the role cards) describe them, and this
+guideline no longer repeats them. It keeps what is specific to this project. It ranks below the
+constitution, `AGENTS.md` and every project guideline: on a conflict the project guideline wins and
+the conflict is reported; where they are silent, this guideline holds. Project specifics (gates,
+commit format, install restrictions) come from `AGENTS.md`. The rules a pull request must respect
+come from the project guidelines: [ci.guidelines.md](ci.guidelines.md),
+[pull-request.guidelines.md](pull-request.guidelines.md),
 [stacked-prs.guidelines.md](stacked-prs.guidelines.md),
 [local-worktree.guidelines.md](local-worktree.guidelines.md),
 [owner-review.guidelines.md](owner-review.guidelines.md) and
@@ -21,64 +24,36 @@ replacing this table.
 | Hook | In this project |
 | --- | --- |
 | Requirements check | [requirements/guidelines/project.guidelines.md](../../requirements/guidelines/project.guidelines.md): "Approved requirements" at the grill, "During a change" (the SwRS, the markers, `just requirements-update`, the log entry) while coding, and its check before the PR |
-| Status table | `just orchestrator`, which writes `3-requests/ORCHESTRATOR.md` (see "Status table") |
+| Status table | chantier's board (`chantier board`), see "Status table" |
 | Visual evidence | the headless visual run of the local gates for the editor and the preview; otherwise the e2e group that covers the change |
 | PR template | `.github/PULL_REQUEST_TEMPLATE.md`, filled as in [pull-request.guidelines.md](pull-request.guidelines.md) |
 | Keep awake | `caffeinate`, as in [local-worktree.guidelines.md](local-worktree.guidelines.md) |
 
-## Vocabulary
+## Where the change requests live
 
-- **Inbox item**: a new idea, bug or request not yet prioritised. One folder
-  `.agents/changes/1-inbox/<slug>/` holding the intent (`01-intent.md`). New items always land
-  here; triage moves them to the backlog with a priority.
-- **Backlog item**: a prioritised item not yet started. One folder
-  `.agents/changes/2-backlog/<P1|P2|P3|P4>/<slug>/` holding the intent (`01-intent.md`, plus any
-  analysis and `02-answers.md` with user decisions). P1 = do first, P4 = someday. The Backlog
-  table of the generated `3-requests/ORCHESTRATOR.md` lists them.
-- **Chief of Staff**: the session the user talks to (not the Chantier tool). It keeps the backlog,
-  grills, records decisions, opens the CRs and supervises the Foreman.
-- **Foreman**: the nested session the Chief of Staff starts to run the drivers and land the CRs.
-- **Heartbeat**: the Foreman's periodic wake-up (a `/loop` every 600 seconds while a driver is
-  live) to check the drivers and the merged PRs; see "Foreman session and its loop".
-- **Tracker issue**: the issue an item comes from, if any, recorded as an `issue:` line in the
-  `01-intent.md` front matter (`issue: none` when there is none). An item with no tracker issue
-  skips the issue steps below with one line in its notes.
-- **Change request (CR)**: one unit of delivered work. One CR = one branch = one PR with green CI,
-  shipping code, tests (unit + e2e), documentation and screenshots for any visible change.
-- **PRD folder**: the working folder of a CR in progress, `.agents/changes/3-requests/NNN-<slug>/`.
-  It is the only source of truth to resume a CR.
-- **Archive**: a landed CR, `.agents/changes/4-archives/NNN-<slug>/` (PRD folder + `report.md` + `retro.md`).
-- **Trash**: an abandoned idea, `.agents/changes/5-trash/<slug>/`, kept for reference. Only the
-  user abandons an item; agents never start work from the trash.
-- **NNN**: next free three-digit number across `4-archives/` and `3-requests/`.
-  Never reuse or skip.
+The planning folder is the one `AGENTS.md` names on its `planning:` line (section "chantier"):
+`projects/markdown-okf-schema-studio/changes/` of the planning surface. No change request lives in
+this repository, and a pull request body never links to the planning folder (see
+[pull-request.guidelines.md](pull-request.guidelines.md)).
 
-`.agents/changes/` is git-ignored local working memory: never commit it, never link to it.
+chantier 0.11 owns the layout, so this guideline only names it:
 
-## Layout
+- Stages, by folder: `1-inbox`, `2-backlog/P1`..`P4` (P1 = do first, P4 = someday), `3-ready`,
+  `4-batch/1-pending`, `4-batch/2-actives`, `4-batch/3-done`, `5-archives`, `6-trash`. Moving a
+  change request is changing its stage or priority. Only the user abandons an item (`6-trash`);
+  agents never start work from the trash.
+- A change request folder holds `intake/`, `01-intent.md`, `02-answers.md`, `03-change-spec.md`,
+  `summary.json` (title, summary and origin, written by `chantier summary set`, never by hand),
+  `evidence/` and `work/` (rules, tasks, rounds, reports, reviews, pull request bodies). An archive
+  adds `delivery.md`. `just validate` in the planning surface checks it.
+- The tracker issue an item comes from is the origin in its `summary.json`; an item with no issue
+  skips the issue steps with one line in its notes.
+- One change request is one branch, one pull request with green CI, shipping code, tests (unit and
+  e2e), documentation and screenshots for any visible change.
 
-```text
-.agents/changes/
-├── 1-inbox/<slug>/               ← new items, not yet prioritised
-├── 2-backlog/P1|P2|P3|P4/<slug>/ ← prioritised items not started
-├── 3-requests/ORCHESTRATOR.md    ← the status table (generated): Active, Backlog, Landed
-├── 3-requests/ORCHESTRATOR-NOTES.md ← hand-written notes, included as is (optional)
-├── 3-requests/brief.md           ← run state for the Foreman (see "Foreman session and its loop")
-├── 3-requests/NNN-<slug>/        ← PRD folder
-│   ├── 03-change-spec.md         ← intent + user decisions
-│   ├── task.md                   ← brief: files, change, tests first, docs, gates
-│   ├── rules.md                  ← hard rules for sub-agents (see below)
-│   ├── STATUS.md                 ← header (see below), then free notes
-│   └── work/
-│       ├── coder/T1-r<n>.md      ← coder report, round n
-│       ├── inspector/T1-r<n>.md  ← Inspector verdict, round n
-│       └── verifier/             ← Verifier verdict T1-r<n>.md, evidence/ (before-after.md, images)
-├── 4-archives/NNN-<slug>/        ← landed CRs, with report.md and retro.md
-└── 5-trash/<slug>/               ← abandoned ideas (user decision)
-```
-
-Archives keep the file names they were written under: an archived CR's spec is `03-change-spec.md`,
-else `00-request.md`.
+The old lifecycle of this guideline (the `3-requests/` PRD folders, `task.md`, `rules.md`, the
+`STATUS.md` header, `brief.md`, the Foreman heartbeat, the driver and stack driver prompts, the
+`report.md` and `retro.md` formats) is replaced by chantier's: read its cards instead.
 
 ## Roles and models
 
@@ -95,378 +70,97 @@ Unless specified by user through your context otherwise, here are the default ro
 | Conflict resolver | as needed | — | — | pushes |
 | Coder | 1 per round | Sonnet | GPT 5.6 Luna (copilot) | commits, pushes, lives past its round |
 | Inspector | 1 per round | Sonnet | GPT 6.1 Sol (copilot) | edits files, lives past its round |
-| Verifier | 1 per run of step 10 | Sonnet | GPT 6.1 Sol (copilot) | is the round's coder or Inspector, edits code, lives past its run |
+| Verifier | 1 per run of the verify step | Sonnet | GPT 6.1 Sol (copilot) | is the round's coder or Inspector, edits code, lives past its run |
+
+Chantier's own role cards name its roles (Driver, Coder, Reviewer and so on); where they differ
+from this table, chantier's cards win for what a role does, and this table still sets the models.
 
 - **Escalation to Opus**: the driver uses Opus for the coder after the second FIX-REQUIRED, or
   after two CI failures with the same cause. The Inspector uses Opus when the CR's blast radius is
   2 or 3. The Foreman and the drivers stay on Sonnet (a session limit on one model must not stop
   the whole tree).
 - **Never move a task up a level**: each role does only its own row, even for a single CR and even
-  when a child fails. A failing child is restarted (see "Supervision"), never replaced by its
-  parent. If sub-agents cannot be started at all, the agent returns "blocked" to its parent.
-- **Verifier**: a fresh agent started by the driver (the stack driver in stack mode), never the
-  round's coder or Inspector, so it does not grade its own work. It reads the project; it never
-  edits code. It may create one detached worktree (`git worktree add --detach <path> <base>`) and
-  must remove it before it returns. The base of a CR is `origin/main`, or in stack mode the branch
-  below it in the stack (its PR's base). It stays on Sonnet for every blast radius.
+  when a child fails. A failing child is restarted, never replaced by its parent. If sub-agents
+  cannot be started at all, the agent returns "blocked" to its parent.
+- **Verifier**: a fresh agent, never the round's coder or Inspector, so it does not grade its own
+  work. It reads the project; it never edits code. It may create one detached worktree
+  (`git worktree add --detach <path> <base>`) and must remove it before it returns. The base of a
+  CR is `origin/main`, or in stack mode the branch below it in the stack (its PR's base). It stays
+  on Sonnet for every blast radius.
 
-## Lifecycle
+## Project rules on top of chantier's steps
 
-| Step | Owner | Action |
-| --- | --- | --- |
-| 1 Pick | Chief of Staff | In the highest priority with work, propose the easiest item: problem, file:line, fix, PR content (written as in [pull-request.guidelines.md](pull-request.guidelines.md)). |
-| 2 Grill | Chief of Staff | Ask only the questions that change the result, each with a recommended answer. "ok" accepts all. Record answers in `03-change-spec.md` (see [owner-review.guidelines.md](owner-review.guidelines.md)), and carry the `issue:` line into it. List the approved requirements the item would change and record the owner's answer (the requirements check of "Project bindings"). |
-| 3 Open | Chief of Staff | Create the PRD folder, move the backlog content in (partial item: copy the part, note the split in the backlog item), create the worktree and branch from fresh `origin/main` (see [local-worktree.guidelines.md](local-worktree.guidelines.md)). `01-intent.md` and `03-change-spec.md` follow [owner-review.guidelines.md](owner-review.guidelines.md). With a tracker issue, the Chief of Staff drafts the grill comment (what was understood, what will be done, with the plan and a demo attached when the tracker supports it), shows it to the owner, posts it after approval, and records the comment link in `02-answers.md`. |
-| 4 Brief | Chief of Staff | Write `task.md`, `rules.md` (plain GFM, see [owner-review.guidelines.md](owner-review.guidelines.md)), the `STATUS.md` header, then rebuild the status table. `task.md` links to step 10 for the evidence and the PR body check; it never restates when a screenshot is required (a hand-written copy drifts). When the change alters the size or a value of an element other code measures from (a fixed bar, a reserved margin, a limit), `task.md` lists every value derived from it, found by searching for the old value and for what is computed from it, and the coder updates or confirms each one. |
-| 5 Code | coder | Implement round n, run local gates, write `work/coder/T1-r<n>.md`. For a `feat` or `fix` change, write the `## Unreleased` line of `CHANGELOG.md` in the same round. |
-| 6 Review | Inspector | Write `work/inspector/T1-r<n>.md` starting with `Verdict: APPROVE` or `Verdict: FIX-REQUIRED`. FIX-REQUIRED → step 5, round n+1. The Inspector checks the project guidelines, including the traceability rules of the requirements check, and that the `## Unreleased` line is there, or that the change is not user-facing. |
-| 7 Commit | driver | Explicit paths only (never `git add -A` / `git add .`), project commit format. |
-| 8 PR | driver | Rebase on `origin/main`, push, open the PR as a draft with the template of [ci.guidelines.md](ci.guidelines.md), written as in [pull-request.guidelines.md](pull-request.guidelines.md); with a tracker issue, its body names the issue with the tracker's closing keyword. Before opening it, run the requirements check. A gap is a new round (step 5). The body's Changelog checkbox (the `## Unreleased` line) is ticked, or says "No user-facing change". The Chief of Staff, on hearing the PR link, drafts the one-line comment with that link for the tracker issue and posts it after the owner approves it. |
-| 9 CI | driver | Watch the checks (see "Responsiveness"). Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. A failure the change does not touch and that passes on the re-run is a flake: the driver names it (test, run id, symptom) in its report, and the Chief of Staff files it in `1-inbox/` unless an item already covers it. Never weaken a test. |
-| 10 Verify | Verifier (sub-agent started by the driver) | CI green at the head and the review approved: start a Verifier, fresh, on the pushed head. It writes `work/verifier/T1-r<n>.md` starting `Verdict: VERIFIED` or `Verdict: NOT VERIFIED`, and proves three things, each one a command run at the pushed head with its output (the notes of the coder and the Inspector, and a green CI, are not proof): (a) every claim of `03-change-spec.md` (each acceptance check and each behaviour the spec states); (b) the evidence of the change, in `work/verifier/evidence/` with a `before-after.md` that lists each pair, what it shows and the command that reproduces it: for a change the user sees, the before on a detached worktree of the base and the after at the head, taken with the visual evidence technique of "Project bindings", light and dark when themes matter; or, for a change nobody sees (process text, tooling, internals), one line "no visible change" and the reason; (c) the posted PR body, read with `gh pr view <n> --json title,body` and checked against the diff and [pull-request.guidelines.md](pull-request.guidelines.md): every section of the PR template is present and filled; Impacts holds the before/after images or the "no visible change" line; "Autonomous decisions" exists and lists every choice a coder or the driver made without the owner (or says "None"); and Summary, Deliverables and Changes describe what the diff does, no more and no less. `NOT VERIFIED` because of the code (a claim fails) is a new round: step 5, round n+1, counted in the round limit. `NOT VERIFIED` because of the body or the evidence only: the driver fixes it itself (pushes the screenshots as in "Screenshots in the PR" of [pull-request.guidelines.md](pull-request.guidelines.md), `gh pr edit <n> --body-file <file>`), then runs the Verifier again; no round is used. When both causes are present, the code comes first. |
-| 11 Notify | driver | CI green at the head, the review approved and `Verdict: VERIFIED` at that head: mark the PR ready for review, then write `status: ready` in the header, then return. A CR sent back for a new round goes back to draft first. "At that head" means the verdict file names the head SHA it ran on; a push after the verdict makes it stale, so the driver runs the Verifier again. |
-| 12 Land | Foreman | After the user merges: write `report.md` and `retro.md` (see "`retro.md` (archive)"), move the PRD folder to `4-archives/`, remove the worktree and the CR branch (keep its screenshot branch, see [pull-request.guidelines.md](pull-request.guidelines.md)). `report.md` follows the format below. The tracker issue closes by itself on merge, and nobody closes it by hand: the Foreman checks that it is closed and writes it in `report.md`; an issue left open is reported, not closed. After moving the folder, rebuild the status table. |
+These hold whoever runs the steps:
 
-**Round limit**: a round is one coder pass, whether an Inspector verdict, a CI failure or a `NOT VERIFIED`
-on the code triggered it. At most 3 rounds per CR, all causes together. After round 3 without green CI, the driver sets
-`status: blocked` with its diagnosis and a question, and returns. Only the user grants more rounds
-(written in `03-change-spec.md`, for example "rounds: 5"). A rerun of the Verifier for the body or
-the evidence is not a round.
+- **Grill and spec**: the requirements check of "Project bindings" is part of the grill: list the
+  approved requirements the item would change and record the owner's answer in `02-answers.md`.
+  The documents the owner reads follow [owner-review.guidelines.md](owner-review.guidelines.md).
+- **Code**: for a `feat` or `fix` change, write the `## Unreleased` line of `CHANGELOG.md` in the
+  same round. A change that alters the size or a value other code measures from (a fixed bar, a
+  reserved margin, a limit) lists every value derived from it, found by searching for the old value
+  and for what is computed from it, and the coder updates or confirms each one.
+- **Commit**: explicit paths only (never `git add -A` / `git add .`), project commit format.
+- **Pull request**: rebase on `origin/main`, push, open it as a draft with the template of
+  [ci.guidelines.md](ci.guidelines.md), written as in
+  [pull-request.guidelines.md](pull-request.guidelines.md); with a tracker issue, its body names
+  the issue with the tracker's closing keyword. Before opening it, run the requirements check; a gap
+  is a new round. The Changelog checkbox is ticked, or says "No user-facing change".
+- **CI**: a product or test failure is a new round with the log excerpt. An infra failure (setup,
+  network) is re-run once. A failure the change does not touch and that passes on the re-run is a
+  flake: name it (test, run id, symptom) in the report and file it in `1-inbox/` unless an item
+  already covers it. Never weaken a test.
+- **Verify**: before a pull request turns ready, a fresh Verifier proves, at the pushed head, each
+  claim of `03-change-spec.md` with a command and its output; the evidence of the change (before on
+  a detached worktree of the base, after at the head, light and dark when themes matter, or one line
+  "no visible change" and the reason); and the posted pull request body, read with
+  `gh pr view <n> --json title,body`, against the diff and
+  [pull-request.guidelines.md](pull-request.guidelines.md) (every template section filled, Impacts
+  holds the images or the "no visible change" line, "Autonomous decisions" exists). The verdict
+  names the head SHA it ran on; a push after it makes it stale.
+- **Round limit**: at most 3 rounds per change request, all causes together. Only the user grants
+  more (written in `03-change-spec.md`, for example "rounds: 5").
+- **Landing**: after the owner merges, remove the worktree and the CR branch (keep its screenshot
+  branch, see [pull-request.guidelines.md](pull-request.guidelines.md)). The tracker issue closes by
+  itself on merge and nobody closes it by hand; an issue left open is reported, not closed.
+- **Rebase rule**: when any pull request merges, rebase every open CR branch on `origin/main` and
+  push with `--force-with-lease`. This is the only allowed history rewrite. No merge commits.
+- **Branch names** follow the change request, never the pull request; the change type (`feat`,
+  `fix`, `docs`…) lives in the commit messages and the title, not in the branch name.
+- **Worktrees**: one per change request, set up as in
+  [local-worktree.guidelines.md](local-worktree.guidelines.md).
 
-**Verifier output**: `work/verifier/T1-r<n>.md` starts with `Verdict: VERIFIED` or `Verdict:
-NOT VERIFIED`, then the head SHA, then each check as a claim, the command, its output (an excerpt
-with the exit status) and pass or fail. A verdict whose SHA is not the current head is stale. The
-evidence files are in `work/verifier/evidence/`; if a capture is impossible, `before-after.md`
-says why, and that alone is not `NOT VERIFIED` unless the project's rules require the capture.
+## Status table
 
-**Rebase rule**: when any PR merges, rebase every open CR branch on `origin/main` and push with
-`--force-with-lease`. This is the only allowed history rewrite. No merge commits. In stack mode the
-Foreman messages the stack driver, which restacks and pushes (see "Stack mode").
-
-### `STATUS.md` header
-
-Each change request folder holds a `STATUS.md`: a four-line header, then free notes. The header is
-rewritten at every transition and at every CI watch slice.
-Everything else reads it; nobody keeps a CR's state in memory only.
-
-**One writer**: exactly one agent writes a CR's header at a time. That is the Chief of Staff for
-steps 1–4, the CR driver for steps 5–11 (in stack mode: until its branch joins the stack), the
-stack driver once the branch is in the stack, and the Foreman for step 12. Every other agent
-reports the line it wants changed to the writer, through its parent. The writer re-reads the file
-right before rewriting it, always sets `updated:`, and reads it back after writing. After a push,
-a rebase or a restack, `head:` is read from the remote (`git ls-remote`), never written from
-memory or from an earlier report. No other
-checklist is kept in `STATUS.md`; `ORCHESTRATOR.md` shows the step.
-
-```text
-driver: <agent id | none> · updated: <HH:MM>
-status: <working | wait-ci | ready | blocked | landed> · step: <1–12 name> · round: <n>/<limit>
-head: <sha> · PR: <#n | —> · run: <id> <pass | fail | pending>
-next: <next action> · question: <question for the user, or —>
-```
-
-`driver:` is a lock: a CR has at most one live driver. A new Foreman reads it before starting
-a driver and messages the existing one instead of starting a second.
-
-### Status table
-
-The status table is generated from the `STATUS.md` headers; this section describes its binding in
-this project. `3-requests/ORCHESTRATOR.md` is generated, never edited by hand. Run `just orchestrator [CHANGES]`
-(`CHANGES` defaults to `.agents/changes`) after any change to a `STATUS.md` header, the backlog or
-the archives. It runs `scripts/generate_orchestrator.py` (options `--repo owner/name`, `--output`,
-`--today YYYY-MM-DD`) and reads the `STATUS.md` headers of `3-requests/*`, the folders of
-`2-backlog/P*`, and `4-archives/NNN-*` (PR and date from `report.md`). The only hand-written part
-is `3-requests/ORCHESTRATOR-NOTES.md`, appended as is.
-
-- **Exit codes**: 0 on success; 1 when a `STATUS.md` is missing or its header does not match (the
-  path is printed on stderr, the row is marked `unparsable header`, never guessed, and the file is
-  still written); 2 for a bad changes root or repository.
-- **Drift**: a backlog item that is also the `backlog-item/` folder of a CR (same name without the
-  `NNN-` prefix, or same title) is listed only under its CR, named in a "Drift" list and reported
-  as `warning: drift` on stderr (exit 0). Move or remove the stale backlog folder.
-- **Write only on change**: the alert holds the date of the last content change. If the content is
-  identical apart from that date, the file is not rewritten, so a second run is a no-op.
+The batch state (what is pending, active and done, and each change request's step, branch and pull
+request) is chantier's: `chantier board` owns the status table, from the `summary.json` files. This
+repository generates no status file.
 
 ## Parallel Change Requests Orchestration
 
-A single CR runs the same tree: the Foreman and one CR driver. Use the rest of this section when the
-user asks for several CRs at once. Open PRs never exceed the user's cap
-(default 4), every PR of a stack counted; further CRs wait locally until a PR merges. Several CRs
-at once always ship as a stack (see [stacked-prs.guidelines.md](stacked-prs.guidelines.md)).
+Several change requests at once are a chantier batch (`4-batch/`). Open pull requests never exceed
+the user's cap (default 4), every pull request of a stack counted; further change requests wait
+locally until one merges. Several at once always ship as a stack (see
+[stacked-prs.guidelines.md](stacked-prs.guidelines.md)). In stack mode a change request's coder and
+review stop at the commit; one stack driver restacks, pushes with `--force-with-lease`, opens each
+pull request against the branch below, links them and watches CI; only the user merges or disables
+an auto-merge.
 
-The Chief of Staff runs in the main checkout for the whole run: the PRD folders, `ORCHESTRATOR.md`
-and `brief.md` live there, git-ignored, and a worktree session may be refused edits to them.
-Before any grill, specification, `open` or session start, the Chief of Staff runs
-`git rev-parse --git-dir --git-common-dir`. When the two differ, it is in a worktree and stops at
-once: it does nothing more for the run and tells the user to open a Chief of Staff session in the
-main checkout (the repository folder, Worktree off). A nested session it starts with
-`use_worktree: false` shares its worktree, not the main checkout (`cwd` set to the repository root
-does not change it), so the Foreman would land in the worktree and refuse the batch.
+## Planning a release
 
-```text
-Chief of Staff ── user interface: grill, decisions (the user merges); supervises the Foreman
- └─ Foreman (nested session) ── one driver per CR, in parallel; /loop heartbeat every
-    600 s while a driver is live; landing
-     ├─ CR driver A ── coder r1 → Inspector r1 → coder r2 … (max 3) → commit → PR → CI watch
-     ├─ CR driver B ── same, own worktree
-     └─ CR driver C ── same, own worktree
-```
+The release is a change request like the others, in the planning folder; its steps (notes, thread,
+heavy run on `main`, version commit, publishing, archive) are in
+[release-process.guidelines.md](release-process.guidelines.md). The version commit stays away from
+development: the stack of the release reaches `main` first, other merges wait until the release is
+published, and no new change request starts meanwhile. The release driver asks the owner nothing
+between the notes review and the publication, except a real blocker (round limit reached, a product
+decision), merges only what the release guideline allows, and never enables auto-merge. The
+"Released in" comments on the tracker issues are drafted after the publication, with one owner
+approval for the whole list; only the Chief of Staff posts on a tracker issue, and only text the
+owner approved.
 
-### Setup (Chief of Staff)
+## Constraints
 
-1. One worktree per CR, set up as in [local-worktree.guidelines.md](local-worktree.guidelines.md).
-
-   **Branch names** follow the CR, never the PR: `NNN` is the three-digit CR number (with its
-   leading zeros) and `<slug>` the CR folder name, so `3-requests/042-docs-stacked-prs` is worked on
-   branch `change-requests/042-docs-stacked-prs`. The change type
-   (`feat`, `fix`, `docs`…) lives in the commit messages and the PR title, not in the branch name.
-   Branches created before this rule keep their names.
-
-2. `3-requests/ORCHESTRATOR.md` holds only the CR tables. It is the generated status table
-   and is never edited by hand; the only hand-written part is
-   `3-requests/ORCHESTRATOR-NOTES.md`, included as is. Every cell that names a file or a PR is a
-   link: the CR number opens its spec (`03-change-spec.md`), the status opens its `STATUS.md`, the PR
-   number opens the PR on GitHub. Links are relative to `3-requests/`. The situation of each CR
-   lives in its `STATUS.md` header; the Foreman rebuilds the status table at each heartbeat. A landed
-   CR moves to "Landed" and links to its archived `report.md`. "Backlog", between the two, lists
-   the items of `2-backlog/P*/` not yet started (a CR moved out of the backlog leaves it; a
-   finished backlog item moves to `4-archives/`). Output shape:
-
-   ```markdown
-   # CR table
-
-   <!-- Generated by `just orchestrator` (scripts/generate_orchestrator.py). Do not edit: edit
-   ORCHESTRATOR-NOTES.md or the STATUS.md headers, then run `just orchestrator`. -->
-
-   > [!NOTE]
-   > Updated 2026-10-31: 1 active CR.
-
-   Repository: [<owner>/<repo>](https://github.com/<owner>/<repo>). Process:
-   [change-requests-lifecycle.guidelines.md](../../guidelines/change-requests-lifecycle.guidelines.md).
-   Worktree of CR NNN: `../<repo>.worktrees/NNN`.
-
-   ## Active
-
-   | CR (spec) | Subject | Status (STATUS.md) | Branch | PR |
-   | --- | --- | --- | --- | --- |
-   | [044](044-<slug>/03-change-spec.md) | <one line> | [🟡 working 5 Code 1/3](044-<slug>/STATUS.md) | `change-requests/044-<slug>` | [#38](https://github.com/<owner>/<repo>/pull/38) |
-
-   ## Backlog
-
-   | Priority | Item | Title | Files |
-   | --- | --- | --- | --- |
-   | P3 | [drawio-block](../2-backlog/P3/drawio-block/01-intent.md) | Draw IO Integration | 1 |
-
-   ## Landed
-
-   | CR (spec) | Subject | Report | PR | Date |
-   | --- | --- | --- | --- | --- |
-   | [041](../4-archives/041-<slug>/03-change-spec.md) | <one line> | [report](../4-archives/041-<slug>/report.md) | [#35](https://github.com/<owner>/<repo>/pull/35) | 2026-10-31 |
-   ```
-
-3. Start the Foreman in its own nested session (Sonnet), pointing it to this guideline and
-   the table (see "Foreman session and its loop").
-4. When any CR may run app-window tests locally, the Foreman keeps the machine awake for the
-   whole run with the keep-awake tool of "Project bindings": it
-   starts it, restarts it at a heartbeat if it has ended, and stops it when the run ends,
-   only if it started it.
-
-### Responsiveness
-
-No agent blocks: a message from its parent is read within 5 minutes.
-
-- **Foreman**: no command longer than a few seconds (no watch, no test, no rebase). It wakes
-  on a driver's return, on a message, or on its `/loop` heartbeat (see "Foreman session and its loop").
-- **Driver**: watches its own CI, in slices of at most 5 minutes (`gh pr checks <n>`, then a
-  background `sleep`, or `gh pr checks <n> --watch` run in the background), reads its messages
-  between slices, and rewrites the `STATUS.md` header at every slice.
-- **Coder and Inspector**: one round, then return. Their gates run in the foreground but never
-  outlive the round.
-
-### Foreman session and its loop
-
-The Foreman runs as a nested session of the Chief of Staff, not as a sub-agent:
-a session can run `/loop` and so keep its prompt cache warm between heartbeats; a sub-agent cannot.
-Drivers stay background sub-agents of the Foreman.
-
-- **Start**: the Chief of Staff calls `start_session` with `initiation: "user_asked"` (the user
-  asked for the parallel run), `context: "fresh"`, `model: "sonnet"` and `use_worktree: false`:
-  the Foreman shares the Chief of Staff's folder (the main checkout, see above) and never edits a
-  CR worktree. The session title names the run, not its first CRs; when a batch joins the run, the
-  Chief of Staff renames it (`set_session_title`).
-- **Brief file and loop prompt**: the run's state lives in `3-requests/brief.md`, written
-  and kept current by the Chief of Staff: the CRs with their worktrees and branches, the open-PR
-  cap, stack mode and its order, the owner's decisions, and permissions granted during the run.
-  The loop prompt stays short and fixed: "`/loop` One heartbeat of the run: read this guideline and
-  `3-requests/brief.md`, then do the Foreman heartbeat." A change of plan is a write to
-  the brief file plus a message, never a new loop prompt.
-- **Loop while a driver is live**: a driver is live when its background agent has not returned or
-  a `STATUS.md` header holds its `driver:` lock with status working or wait-ci. While at least one
-  is live, every heartbeat ends with `ScheduleWakeup` at 600 seconds, passing the same loop prompt
-  back (`noop: true` when the heartbeat changed nothing). A nested session keeps a 1-hour prompt
-  cache, so a 600-second heartbeat still reads its context from the cache, and waking more often
-  only to keep the cache warm is waste. The Foreman wakes at once on a driver's return or a
-  message, so the longer heartbeat misses nothing.
-- **Stop when no driver is live**: every CR ready, blocked or landed, or waiting for a free PR
-  slot. The Foreman calls `ScheduleWakeup` with `stop: true` and ends its turn with its report. An
-  idle Foreman costs nothing; a message from the Chief of Staff (a merge, a decision) wakes it, and
-  it restarts the loop as soon as it starts a driver again.
-- **Report**: the Chief of Staff receives the start of the Foreman's last report (about 400
-  characters) as a note. So every Foreman turn, whether a heartbeat, a message or a driver's return,
-  opens with one counts line, `ready 2 [#282 #283] · wait-ci 1 · working 3 · blocked 0 · landed
-  1`, then the questions with their recommended answers; the details stay in the `STATUS.md`
-  headers and `ORCHESTRATOR.md`.
-- **Messages**: the Chief of Staff writes to the Foreman with `SendMessage` to its `local_…`
-  session id, never by starting a second Foreman.
-- **Without nested sessions** (another harness, or `start_session` unavailable): the Chief of Staff
-  starts the Foreman as a background sub-agent, and its heartbeat is a 270-second `sleep` run in
-  the background, restarted at the end of every heartbeat. A sub-agent has a 5-minute prompt
-  cache, and 270 seconds keeps the next heartbeat under it.
-
-### Planning a release
-
-When the Chief of Staff gives a release to the Foreman (starting one if none is running), the
-Foreman keeps the version commit away from development. It brings the stack of the release to `main` the usual way, then asks the Chief of
-Staff to hold every other merge, and starts the release driver as a background driver of the run.
-When the version PR tops the stack, it starts the release driver once the PRs of the stack are
-ready, not merged: the heavy run is the top branch's, and the owner merges the whole stack.
-It does not start a driver for a new CR until the release is published. The steps are in
-[release-process.guidelines.md](release-process.guidelines.md).
-
-### Release driver
-
-A special driver, started by the Foreman once the stack of the release is merged (or ready, when
-the version PR tops it). It runs the
-release from there to the end, so the owner only agrees on the version, reviews the notes and the
-thread, and reads the result. The steps (notes, thread, heavy run on `main`, version commit,
-publishing, archive) are in [release-process.guidelines.md](release-process.guidelines.md); this
-section covers the role.
-
-- **Opens and owns** the release CR folder `.agents/changes/3-requests/NNN-release-x-y-z/`: it
-  creates the folder, its `03-change-spec.md` (the owner's request, the scope (the CRs and PRs in
-  the release), the decisions) and the `STATUS.md` header. The folder is named with the next free CR
-  number. It is the one writer of that header from the notes draft to the archive, and `driver:` is
-  its lock, like for a CR driver.
-- **Lists** in the release folder the tracker issues the release closed; it never comments. The
-  Chief of Staff drafts the "Released in" comments, after the publication, with one owner approval
-  for the whole list. No issue closed by this release: the line goes in `04-report.md`, and nothing is
-  drafted or approved.
-- **Merges** only what the release guideline allows: the fix PRs of the release, on the owner's
-  standing permission for release work. It never enables auto-merge and never touches a PR outside
-  the release.
-- **Fixes** go through the Foreman: before the version PR merges, the release driver reports a red
-  heavy job or another small problem, and the Foreman runs a fix CR with a CR driver (the round
-  limit, escalation to Opus). The release driver never codes or reviews.
-- **Asks the owner nothing** between the notes review and the publication, except a real blocker:
-  the round limit is reached or a product decision is needed. It then returns `status: blocked`
-  with the question and its recommended answer.
-- **Watches** in slices of at most 5 minutes and rewrites the header at every transition and every
-  slice.
-
-**Release driver prompt** (the Foreman fills the placeholders):
-
-> You are the release driver for release `<X.Y.Z>`. You alone own the release CR folder
-> `<absolute path>` and its `STATUS.md` header. Read
-> `.agents/guidelines/release-process.guidelines.md`,
-> `.agents/guidelines/change-requests-lifecycle.guidelines.md` ("`STATUS.md` header"),
-> `.agents/guidelines/ci.guidelines.md` and the release folder (`03-change-spec.md`, `STATUS.md`).
-> Resume from the `STATUS.md` header and write `driver: <your id>` in it. Follow the steps of
-> `release-process.guidelines.md` from step 3: notes and thread, a green heavy run on `main` HEAD,
-> or on the stack's top branch when the version PR tops the stack, then the version commit, then monitor the tag, Marketplace and Pages, and the archive.
-> Report a red job or another small problem to the Foreman, which runs the fix CR, and merge its
-> PR; never code or review yourself. Ask the owner nothing after the notes review except a real
-> blocker.
-> Return with `status: ready` when the release is archived, or `status: blocked` and a question
-> with your recommended answer.
-
-### Foreman heartbeat
-
-1. First heartbeat, within 5 minutes of starting: for each CR in the table, read the header; start a
-   driver (background) where `driver: none` and the status is not ready, blocked or landed.
-2. Every heartbeat: check merged PRs. On a merge: step 12 for that CR, then message each live driver to
-   rebase (in stack mode, the stack driver); for a ready CR without a live driver, start one for
-   "rebase, push, watch CI".
-3. Check every driver against the supervision rules and the round limit.
-4. Rebuild the status table from the headers.
-5. Schedule the next heartbeat while a driver is live. When every CR is ready, blocked or landed, stop
-   the loop and report each question with a recommended answer.
-
-### Supervision
-
-- Parents supervise only their own children: the Chief of Staff supervises the Foreman; the
-  Foreman its drivers; a driver its coder and Inspector.
-- **Stuck**: the child's header is more than 15 minutes old (for the Foreman, the time of its
-  last report or the alert date of `ORCHESTRATOR.md`). The parent messages it; if the next heartbeat
-  shows no change, the parent stops it and starts the same role with the same brief, which resumes
-  from the files. For the Foreman: `stop_session`, then a new nested session.
-- **Crashed** (for example a session limit, HTTP 429): the parent resumes the same agent (for the
-  Foreman, the same session) by message after the reset time instead of starting a new one, so it
-  keeps its history.
-- **Round limit exceeded** without `status: blocked`: the Foreman stops the driver, sets the
-  CR to blocked and reports the question upward.
-- After two restarts of the same child without progress, the parent reports "blocked" upward.
-- **Verify before reporting**: an agent states a write, a push or a GitHub change as done only
-  after reading it back (the file, `git ls-remote`, `gh pr view`). A write refused by a hook or a
-  tool is reported as refused, with the error.
-
-### Driver prompt (the Foreman fills the placeholders)
-
-> You are the CR driver for CR `<NNN>`. You alone own worktree `<path>` (branch `<branch>`, PR
-> `<#n or none>`). Read `.agents/guidelines/change-requests-lifecycle.guidelines.md` (lifecycle, round limit,
-> `STATUS.md` header, responsiveness), `.agents/guidelines/ci.guidelines.md`, and the PRD folder
-> `<absolute path>` (`03-change-spec.md`, `task.md`, `rules.md`, `STATUS.md`, latest report and verdict).
-> Resume from the `STATUS.md` header and write `driver: <your id>` in it. Run steps 5–11: start a
-> coder, then a separate Inspector, per round, in the background; commit, rebase, push, PR; watch
-> CI in slices of at most 5 minutes; then start a separate Verifier at the pushed head (step 10)
-> and mark the PR ready only on `Verdict: VERIFIED`. Rewrite the header at every transition and
-> every slice. Never code, review or verify yourself. Return with `status: ready` or
-> `status: blocked` and a question with your recommended answer.
-
-In stack mode the Foreman replaces "Run steps 5–11 … PR; watch CI …
-`Verdict: VERIFIED`" with "Run steps 5–7: start a coder, then a separate Inspector, per round, in the
-background; commit. Never push or open a PR: report the branch and head, and return".
-
-### Stack mode
-
-The rules of the stack itself (order, restacking, no auto-merge) are in
-[stacked-prs.guidelines.md](stacked-prs.guidelines.md). The roles:
-
-- A CR driver runs steps 5–7 only: rounds, review, commit on its branch. When the commit is
-  approved, it reports the branch and head to the Foreman and returns; it never pushes or
-  opens a PR. A red CI in the stack is a new round for that CR, run by a new CR driver.
-- One stack driver owns all the stacked branches. It runs steps 8–11 for every branch: it places
-  the branch in the stack order, restacks, pushes with `--force-with-lease`, opens the PR against
-  the branch below, links the PRs, watches CI, starts the Verifier of each branch (its base is the branch below) and writes the headers of the branches in the stack.
-  A CR driver stops pushing once its PR is in the stack.
-- The stack driver marks each PR of the stack ready on its own, as soon as its CI is green at its
-  head, its review is approved and the Verifier's verdict at that head is `VERIFIED`, and its CR is `ready`, without waiting for the rest of the stack.
-- A stack driver that finds an auto-merge reports it; only the user disables it or merges.
-- The open-PR cap counts every PR of the stack; a branch over the cap waits, committed, until the
-  user merges part of the stack.
-
-**Stack driver prompt** (the Foreman fills the placeholders):
-
-> You are the stack driver of this run. You alone push the branches `<branch list>` and write
-> their `STATUS.md` headers once they are in the stack. Read
-> `.agents/guidelines/change-requests-lifecycle.guidelines.md` ("Stack mode", "`STATUS.md` header",
-> responsiveness), `.agents/guidelines/stacked-prs.guidelines.md`,
-> `.agents/guidelines/ci.guidelines.md` and `<absolute path>/3-requests/brief.md`. Order the stack,
-> rebase with a conflict resolver that keeps both sides' intent, push, open or retarget the PRs,
-> link them, and watch CI in slices of at most 5 minutes. Open each PR as a draft; once its CI is
-> green at its head, start a separate Verifier for it (step 10), and mark it ready on its own only
-> when the Verifier wrote `Verdict: VERIFIED` at that head and its CR is `ready`, without waiting
-> for the rest of the stack. A `NOT VERIFIED` on the code goes back to the Foreman as a failing
-> branch, like a red CI (a new round for that CR). Never merge and never enable auto-merge.
-> Return when every PR in the stack is green, or with the failing branch, its log excerpt and your
-> recommended next step.
-
-### Constraints
-
-- One driver per worktree; PRD folders stay in the main checkout (absolute paths).
 - No agent starts a new backlog item: the user decides. Merges follow
-  [pull-request.guidelines.md](pull-request.guidelines.md).
-- Only the Chief of Staff posts on a tracker issue, and only text the owner approved; drivers, the
-  Foreman and sub-agents never comment on issues. The commands are in
   [pull-request.guidelines.md](pull-request.guidelines.md).
 - Everything written to the repository or GitHub is in English, as the constitution requires.
 - No agent runs `git stash`: the stash stack is shared by every worktree of the repository, so a
@@ -475,69 +169,7 @@ The rules of the stack itself (order, restacking, no auto-merge) are in
   the machine. An agent stops only a process it started, by its own id.
 - An action a host may refuse runs in its own command, never chained with routine steps: one
   refusal must not block the steps around it.
-
-## Sub-agent rules (copy into `rules.md`)
-
-- Work on the CR branch only. Never commit, push, stash or switch branches (driver's job).
-- Read `.agents/constitution.md` first; it ranks above this briefing.
-- No installs, no network unless `AGENTS.md` allows it.
-- Run only the gates `task.md` lists, in the foreground; leave nothing running.
-- Documents read by the owner follow the writing skill (see
-  `.agents/guidelines/owner-review.guidelines.md`); working files stay plain GFM.
-- Touch only the files the task needs. Never change an existing assertion's intent. New tests must
-  fail on the unchanged code.
-- A behaviour change follows the requirements check of "Project bindings" (in
-  `.agents/guidelines/change-requests-lifecycle.guidelines.md`). The report lists the requirement
-  IDs with their source and test files.
-- Report: files changed, tests added and their failure before the change, changed assertions and
-  why, gate results with counts, screenshot paths, open points.
-- Verifier: follow step 10 of the lifecycle ("Verify"). The task links to that step; it never
-  restates what the Verifier proves or when a screenshot is required.
-
-## `report.md` (archive)
-
-```markdown
-# Report — <slug>
-
-Status: **done** | **partial** (date, branch, PR #<n>, merge commit).
-
-Issue: <link> (closed on merge) | none
-
-## Delivered
-
-| Task | Change | Commit |
-| --- | --- | --- |
-
-## Proof of completion
-
-- Tests added (failed before, pass after), local gate counts, CI run id, the Verifier's verdict with its head SHA (`work/verifier/T1-r<n>.md`), and the before/after evidence (screenshots, or the "no visible change" line).
-
-## Open items
-
-- Anything left, with the backlog folder it went to. "None." otherwise.
-```
-
-## `retro.md` (archive)
-
-Every landed CR gets a retro, so the process improves from what went wrong. Written at step 12 from
-the CR's `work/` notes, `STATUS.md` and the PR history, in plain GFM. One row per event that cost
-time: a round, a CI failure, a rerun of the Verifier, a classifier or tool refusal, an owner
-correction or question, a rework after merge. A CR that ran clean writes one line: "Clean run,
-nothing to fix."
-
-```markdown
-# Retro — <slug>
-
-| What happened | Root cause | Process fix |
-| --- | --- | --- |
-| <the event, with the round or run id> | <why, one line; not "the coder made a mistake"> | <the change that prevents it: a guideline line, a test or check, a `task.md`/`rules.md` template line, or "None" when it worked as intended> |
-```
-
-A root cause names the missing rule, check or information, not the agent. A process fix is
-concrete: the file and the line to add or change.
-
-**End of a run or a release**: the Chief of Staff reads the `retro.md` of every CR of the run (and
-the release's), groups the fixes that recur, and sends the owner one message: each fix in one line,
-with its recommended form (a process CR, a project test, a memory line). The owner picks; each fix
-the owner accepts is filed in `1-inbox/` and run like any CR. A fix already applied during the run
-(an Auto-fix, an amended guideline) is listed as done.
+- A behaviour change follows the requirements check of "Project bindings"; the report lists the
+  requirement IDs with their source and test files.
+- Sub-agents read `.agents/constitution.md` first; it ranks above their briefing. No installs, no
+  network unless `AGENTS.md` allows it.
