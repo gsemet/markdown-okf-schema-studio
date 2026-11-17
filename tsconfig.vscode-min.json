@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "vscode-min"],
+    "paths": { "vscode": ["./node_modules/@types/vscode-min/index.d.ts"] }
+  },
+  "include": ["src/**/*.ts"]
+}

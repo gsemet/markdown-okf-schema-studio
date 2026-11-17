@@ -102,6 +102,10 @@ Tests mirror this tree under `test/` (`test/core/render/` tests `src/core/render
 
 `just check` enforces the layout:
 
+- `just check-min-vscode` type-checks `src/` against `@types/vscode` 1.95, the `engines.vscode`
+  minimum, with `tsconfig.vscode-min.json`: it maps `vscode` to the npm alias `@types/vscode-min`
+  (`npm:@types/vscode@1.95.0`), while the main build keeps the newer `@types/vscode`. It fails on
+  any API newer than 1.95. Raise the alias together with `engines.vscode` and `@types/vscode`.
 - `just check-boundaries` runs dependency-cruiser with the rules of `.dependency-cruiser.cjs` over
   a transpiled copy of `src/` (type-only imports count). The few known exceptions are listed there,
   each with its reason and its removal plan: Node built-ins still used by some core files

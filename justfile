@@ -130,6 +130,10 @@ unit:
 contracts:
     {{ npm }} run test:contracts
 
+# Type-check src/ against @types/vscode 1.95, the engines.vscode minimum (tsconfig.vscode-min.json), so no API newer than 1.95 slips in.
+check-min-vscode:
+    {{ npm }} run check:min-vscode
+
 # Check the import boundaries between the layers of src/ (dependency-cruiser; rules in .dependency-cruiser.cjs).
 check-boundaries:
     {{ npm }} run check:boundaries
@@ -154,8 +158,8 @@ check-settings:
 generate-settings:
     {{ npm }} run generate:settings
 
-# Format the justfile and run TypeScript, boundary, size, unused-export, marker companion, settings schema, unit, contract, security and requirements checks.
-check: format compile check-boundaries check-limits check-exports check-markers check-settings unit contracts security release-tests release-notes-check requirements-lint
+# Format the justfile and run TypeScript, minimum-VS-Code type, boundary, size, unused-export, marker companion, settings schema, unit, contract, security and requirements checks.
+check: format compile check-min-vscode check-boundaries check-limits check-exports check-markers check-settings unit contracts security release-tests release-notes-check requirements-lint
 
 # Audit the production npm dependencies against the registry advisories (online): fails on high or critical.
 audit:
@@ -267,7 +271,7 @@ site-from-run RUN_ID:
     rm -rf out/reports-download
     just site-assemble
 
-# CI job "static": justfile format check, TypeScript, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks, online npm audit, Sphinx contract, requirements report.
+# CI job "static": justfile format check, TypeScript, minimum-VS-Code type, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks, online npm audit, Sphinx contract, requirements report.
 ci-static:
     #!/usr/bin/env bash
     set -uo pipefail
