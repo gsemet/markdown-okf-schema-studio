@@ -212,7 +212,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   previewLinkDiscover: stateMessage("previewLinkDiscover", (message) => Array.isArray(message.requests)
     && message.requests.length <= 64
     && message.requests.every((request) => typeof request === "string" && request.length <= 4096)),
-  // @implements_req SwRS-MDOKFSTUDIO-THEME-013
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
   previewThemeModeChanged: stateMessage("previewThemeModeChanged",
     (message) => isPreviewThemeMode(message.previewThemeMode)),
   previewRefresh: stateMessage("previewRefresh"),
@@ -258,7 +258,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-006
   // The side-by-side diff button of toolbar row 4: on or off.
   previewSideBySideChanged: (message) => typeof message.on === "boolean",
-  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-010
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
   // The palette mode select of the edition palette: strict, GFM or MyST buttons (workspace state).
   previewPaletteModeChanged: (message) => isOneOf(message.mode, PALETTE_MODES),
   // @implements_req SwRS-MDOKFSTUDIO-MYST-051

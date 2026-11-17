@@ -1,4 +1,3 @@
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-002
 import { CALLOUT_ICONS } from "../calloutIcons";
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
@@ -265,10 +264,8 @@ const TOOLBAR_STICKY_BAND_CSS = `/* Fixed, out of flow: showing or resizing the 
   box-shadow: 0 6px 8px -5px var(--sphinx-preview-band-shadow, rgba(0, 0, 0, 0.28));
 }`;
 
-// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-049
 // @implements_req SwRS-MDOKFSTUDIO-MYST-081
-// @implements_req SwRS-MDOKFSTUDIO-THEME-031
-// @implements_req SwRS-MDOKFSTUDIO-THEME-043
 /**
  * The page chrome: layout variables, the theme modes, the toolbar and its menus, the status banners,
  * the sticky heading band and the tooltips.

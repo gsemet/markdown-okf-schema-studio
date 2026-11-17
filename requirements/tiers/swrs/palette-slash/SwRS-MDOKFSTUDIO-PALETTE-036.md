@@ -119,7 +119,7 @@ The link panel follows the same rule: a press on its padding or on the Insert bu
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
-  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): While a writer edits a block, the palette stays in reach, appears softly and keeps the editor open
   - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
 - Depends on:
   - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them

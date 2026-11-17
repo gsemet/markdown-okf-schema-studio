@@ -26,7 +26,6 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/page/modules/editPalette.ts
 - src/page/modules/inlineEditActions.ts
 - src/session/features/hostRequests.ts
 tested_in_files:

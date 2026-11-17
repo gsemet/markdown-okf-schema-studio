@@ -42,9 +42,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     return model;
   };
 
-  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
-  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
   const receiveBlockEditSource: BlockSourceEditor["receiveBlockEditSource"] = (message) => {
     if (rt.tableRowMove.receiveSource(message)) return;
     const edit = state.activeBlockEdit;
@@ -241,6 +239,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     // the preview controls, and not at all on a page scrolled to its very top.
     const textTopBefore = textarea.getBoundingClientRect?.().top;
     edit.palette?.destroy();
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
     const palette = createEditPalette(document, {
       actions: editActions,
       getControl: () => textarea,
@@ -317,6 +316,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       getCaretRect: () => caretRectOf(document, window, textarea),
       preferGroup: () => (state.paletteMode === "myst" ? "myst" : state.paletteMode === "full" ? "full" : undefined),
     });
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
     editorChrome.placePaletteAboveFrame(edit, palette.element);
     editorChrome.syncPaletteSticky(edit);
     const shift = editorChrome.keepTextInPlaceBelowPalette(edit, textTopBefore);

@@ -16,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
-- StRS-MDOKFSTUDIO-PALETTE-001
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -100,5 +99,4 @@ When the writer presses Enter in the Text or URL field of the link panel or pres
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 <!-- okf:links:end -->

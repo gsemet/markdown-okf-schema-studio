@@ -15,7 +15,6 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
 - StRS-MDOKFSTUDIO-PALETTE-007
-- StRS-MDOKFSTUDIO-PALETTE-001
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -119,5 +118,4 @@ When the writer types an alternative name after the slash, the extension SHALL l
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
   - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 <!-- okf:links:end -->

@@ -18,7 +18,6 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
 - StRS-MDOKFSTUDIO-PALETTE-018
 annotation_exemption: false
 exemption_reason:
@@ -89,6 +88,5 @@ When the writer drops one or more local files from the VS Code Explorer onto the
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
   - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
 <!-- okf:links:end -->

@@ -21,7 +21,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/pageChromeStyles.ts
+- src/core/preview/styles/pageChromeStyles.markers.ts
 tested_in_files:
 - test/core/preview/creamTheme.test.ts
 - test/visual/capture_page_checks.py

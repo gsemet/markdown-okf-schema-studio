@@ -16,6 +16,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+depends_on:
+- SwRS-MDOKFSTUDIO-LIFE-169
+- SwRS-MDOKFSTUDIO-LIFE-170
 user_need: As a reader, I pick a theme once and every preview of this workspace
   opens in it afterwards, also after a window reload; when I open the preview
   for the first time in a workspace, I see a calm warm paper page without having
@@ -24,8 +27,6 @@ user_need: As a reader, I pick a theme once and every preview of this workspace
   Code theme, not in stale ones; and I never get a broken or unreadable preview
   because a stored theme setting is damaged.
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-169
-- SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-THEME-001
 - SwRS-MDOKFSTUDIO-THEME-013
 - SwRS-MDOKFSTUDIO-THEME-016
@@ -53,13 +54,35 @@ As a reader, I pick a theme once and every preview of this workspace opens in it
 - The same answer carries the editor pairing, which belongs to the lifecycle-sync requirements.
 - A value that is not one of Current, Dark, White and Cream is dropped without any message; the workspace then counts as having no stored choice.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Reader
+    participant Page as Preview page
+    participant Host as Host
+    participant Store as Workspace state
+    Reader->>Page: press the Theme button
+    Page->>Host: the chosen mode
+    alt a known mode
+        Host->>Store: store the mode
+    else an unknown mode
+        Host-->>Page: dropped, the stored mode stays
+    end
+    Reader->>Page: reopen the preview
+    Page->>Host: ready
+    Host-->>Page: the stored workspace mode, else the saved panel mode, else Cream
+```
+
+An unknown mode is dropped and the stored mode stays.
+
 ### Main paths
 
 #### Path 1: Pick a theme and find it again
 
 1. The page is shown in one theme mode
    - SwRS-MDOKFSTUDIO-LIFE-169: the reader picks a mode, and the host validates it and stores it for the workspace
-   - Option SwRS-MDOKFSTUDIO-THEME-013 (refusal): a mode other than current, dark, white or cream is dropped and the stored mode does not change
+   - Option SwRS-MDOKFSTUDIO-LIFE-169 (refusal): a mode other than current, dark, white or cream is dropped and the stored mode does not change
 2. The mode is stored for the workspace
    - SwRS-MDOKFSTUDIO-LIFE-170: the preview opens again and starts from the stored workspace value
    - Option SwRS-MDOKFSTUDIO-LIFE-170 (refusal): an invalid value is ignored and the next source is used
@@ -71,9 +94,10 @@ As a reader, I pick a theme once and every preview of this workspace opens in it
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
-  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-THEME-001](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-001.md): The Theme button cycles Current, Dark, White and Cream
   - [SwRS-MDOKFSTUDIO-THEME-013](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-013.md): The host drops a theme-mode message with an unknown mode
   - [SwRS-MDOKFSTUDIO-THEME-016](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-016.md): Current mode follows the VS Code theme and redraws on change
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
 <!-- okf:links:end -->

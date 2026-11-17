@@ -2,12 +2,11 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-PALETTE-002
 uuid: e07509d3-c0d9-463d-baf5-258b09b85ac8
-title: Every edit bar button shows the slide-in tooltip and the rule button a
-  dashes icon
+title: Every edit bar button shows the slide-in tooltip
 description: While a block editor is open, the extension SHALL give every button
   of its edit bar the data-tooltip attribute with the text of its title, so that
   hovering or focusing the button shows the same sliding tooltip bubble as the
-  floating toolbar, and SHALL draw the Horizontal rule button as three dashes.
+  floating toolbar.
 project: markdown-okf-schema-studio
 scope: palette-slash
 req_lifecycle: proposed
@@ -15,13 +14,13 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
+- StRS-MDOKFSTUDIO-PALETTE-019
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/palette/paletteIcons.ts
-- src/core/preview/styles/pageChromeStyles.ts
+- src/core/preview/styles/pageChromeStyles.markers.ts
 - src/page/modules/editPalette.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
@@ -30,11 +29,11 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## Every edit bar button shows the slide-in tooltip and the rule button a dashes icon
+## Every edit bar button shows the slide-in tooltip
 
 ### Normative behavior
 
-While a block editor is open, the extension SHALL give every button of its edit bar the data-tooltip attribute with the text of its title, so that hovering or focusing the button shows the same sliding tooltip bubble as the floating toolbar, and SHALL draw the Horizontal rule button as three dashes.
+While a block editor is open, the extension SHALL give every button of its edit bar the data-tooltip attribute with the text of its title, so that hovering or focusing the button shows the same sliding tooltip bubble as the floating toolbar.
 
 ### Scenario (nominal): Hovering a button
 
@@ -42,16 +41,16 @@ While a block editor is open, the extension SHALL give every button of its edit 
 - WHEN the pointer rests on the Horizontal rule button
 - THEN the button carries data-tooltip "Horizontal rule" and a bubble with that text slides in under it within 100 ms, as under a floating toolbar button
 
-### Scenario (boundary): Shortcut and rule icon
+### Scenario (boundary): Shortcut in the tooltip
 
 - GIVEN the edit bar of a paragraph editor
 - WHEN the buttons are built
-- THEN each data-tooltip equals the title of its button, including the shortcut in parentheses (for example "Bold (Ctrl+B)"), the title stays for the accessible hint, and the Horizontal rule icon is three separate dashes on one line, not the lines of centred text
+- THEN each data-tooltip equals the title of its button, including the shortcut in parentheses (for example "Bold (Ctrl+B)") and the title stays for the accessible hint
 
 ### Verification notes
 
-- Method: test/page/runtimeEditPalette.test.ts (T21b: every palette button carries a data-tooltip equal to its title; the rule icon is dashes); test/core/preview/previewStyles.test.ts (the edit bar tooltip rules); visual scenarios palette-slash/v23-edit-bar-tooltip-rule-cream-900 and v24-edit-bar-tooltip-rule-dark-900 (hovered rule button shows its bubble)
-- Criteria: Every direct button of the edit bar has a non-empty data-tooltip equal to its title; the computed ::after of the hovered button is visible, opaque and contains the button's name; the rule icon path has no segment other than three short horizontal dashes.
+- Method: test/page/runtimeEditPalette.test.ts (T21b: every palette button carries a data-tooltip equal to its title); test/core/preview/previewStyles.test.ts (the edit bar tooltip rules); visual scenarios palette-slash/v23-edit-bar-tooltip-rule-cream-900 and v24-edit-bar-tooltip-rule-dark-900 (hovered button shows its bubble)
+- Criteria: Every direct button of the edit bar has a non-empty data-tooltip equal to its title; the computed ::after of the hovered button is visible, opaque and contains the button's name.
 
 <!-- okf:links:start -->
 ### Links
@@ -59,5 +58,5 @@ While a block editor is open, the extension SHALL give every button of its edit 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-019](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-019.md): A writer formats text with buttons and shortcuts
 <!-- okf:links:end -->

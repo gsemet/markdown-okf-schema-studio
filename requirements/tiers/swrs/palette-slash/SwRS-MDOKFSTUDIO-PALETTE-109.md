@@ -14,7 +14,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
-- StRS-MDOKFSTUDIO-PALETTE-001
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
@@ -23,7 +22,6 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/page/modules/blockEditActions.ts
-- src/page/modules/editPalette.ts
 - src/page/modules/linkEditActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
@@ -93,7 +91,6 @@ When the writer presses Image, the extension SHALL ask the host for a native ima
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error

@@ -54,7 +54,7 @@ export class ViewStateController {
     router.on("previewWarningBannerClosed", (message, preview) => {
       manager.choices.dismissedWarningBanners.set(preview.documentUri, message.key);
     });
-    // @implements_req SwRS-MDOKFSTUDIO-THEME-013
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
     router.on("previewThemeModeChanged", (message) => {
       if (isPreviewThemeMode(message.previewThemeMode)) {
         manager.choices.setPreviewThemeMode(message.previewThemeMode);

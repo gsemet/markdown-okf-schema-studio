@@ -33,7 +33,6 @@ test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the share
 
 // @tests_req StRS-MDOKFSTUDIO-LIFE-021
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-024
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     name: string;

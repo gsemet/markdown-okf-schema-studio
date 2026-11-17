@@ -144,6 +144,7 @@ export class ScrollSyncController {
           continue;
         }
         // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
+        // @implements_req SwRS-MDOKFSTUDIO-PALETTE-279
         // The editor scrolled to show the edit the preview just applied: the page is where the writer is.
         if (preview.scroll.ownEditUntil !== undefined && Date.now() < preview.scroll.ownEditUntil) {
           continue;

@@ -37,7 +37,6 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-228
-  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-089
   // The cancel branch is used by Cancel and Escape when something reached the document;
   // Done, Cmd/Ctrl+Enter and leaving edit mode commit the text instead.
   function closeBlockEdit(cancel = false): void {

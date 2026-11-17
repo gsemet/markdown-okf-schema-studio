@@ -21,7 +21,6 @@ test("previewReady without a lock releases nothing", () => {
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-105
-// @tests_req SwRS-MDOKFSTUDIO-THEME-016
 test("reloads are deferred while held and flushed once on release", () => {
   const lock = new EditLock();
   const calls: string[] = [];

@@ -1,7 +1,6 @@
 /**
  * The screenshot scenarios, second part, in campaign order (after `scenarioDefinitions1.ts`).
  */
-
 import { LINK_HINT_SCENARIOS } from "./linkHintScenarios";
 import { RELEASE_SHOWCASE_SCENARIOS } from "./releaseShowcaseScenarios";
 import {
@@ -512,6 +511,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   ...([
     ["light", WIDE], ["light", XLARGE], ["light", NARROW], ["dark", WIDE],
   ] as const).flatMap(([theme, viewport]) => (["margin", "auto", "full"] as const).map((mode) => ({
+    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-001
     id: `width-mode-break-${mode}-${theme === "dark" ? "dark-" : ""}${viewport.width}`,
     fixture: "34-width-mode-break",
     theme,

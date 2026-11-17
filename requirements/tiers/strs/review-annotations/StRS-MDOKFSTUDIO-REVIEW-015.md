@@ -26,6 +26,7 @@ user_need: As a writer, I keep a discussion in the file itself and answer it
   where I read it, and I never have a thread change collide with the text I am
   typing.
 derived_by:
+- SwRS-MDOKFSTUDIO-PALETTE-114
 - SwRS-MDOKFSTUDIO-REVIEW-167
 - SwRS-MDOKFSTUDIO-REVIEW-171
 - SwRS-MDOKFSTUDIO-REVIEW-178
@@ -98,6 +99,7 @@ sequenceDiagram
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-114](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-114.md): Thread inserts an empty comment thread after the block with the author and the date
   - [SwRS-MDOKFSTUDIO-REVIEW-167](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-167.md): An inline THREAD comment shows as a thread chip with its messages
   - [SwRS-MDOKFSTUDIO-REVIEW-171](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-171.md): An open inline thread offers Reply and Delete thread
   - [SwRS-MDOKFSTUDIO-REVIEW-178](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-178.md): An inline thread change message carries valid lines and a non-blank text

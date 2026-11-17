@@ -701,6 +701,7 @@ test("the host sends the first visible line and the cursor line when the editor 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-279
 test("the page does not follow the editor's scroll caused by an edit the preview applied (CR 134)", () => {
   const f = fixture();
   try {

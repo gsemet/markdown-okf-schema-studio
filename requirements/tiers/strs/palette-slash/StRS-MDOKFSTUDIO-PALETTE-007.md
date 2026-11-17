@@ -36,8 +36,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-160
 - SwRS-MDOKFSTUDIO-PALETTE-192
 - SwRS-MDOKFSTUDIO-PALETTE-263
-- SwRS-MDOKFSTUDIO-TRUST-005
-- SwRS-MDOKFSTUDIO-TRUST-065
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -62,6 +60,31 @@ As a writer, I create or fix a link by filling two fields, add pictures from the
 - Colours are written as markup the preview keeps; nothing is written that the sanitizer would strip.
 - A colour code in the text can be changed in place from a swatch.
 - The table picker lets the writer choose the number of rows and columns on a grid; the table that is written, and the other table actions, are specified with the table editing requirements.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Page as Preview page
+    participant Host as Host
+    participant Dialog as Native dialog
+    participant Box as Text box
+    Writer->>Page: press the Image button
+    Page->>Host: ask for an image file
+    Host->>Dialog: open the file dialog, the editor stays open
+    alt the writer picks a file
+        Dialog-->>Host: the file path
+        Host-->>Page: the path relative to the document
+        Page->>Box: insert or replace the image reference, one undo step
+    else the writer cancels
+        Dialog-->>Host: nothing
+        Host-->>Page: no path
+        Page-->>Writer: the text is unchanged
+    end
+```
+
+The editor stays open while the native dialog is shown.
 
 ### Main paths
 
@@ -106,6 +129,4 @@ As a writer, I create or fix a link by filling two fields, add pictures from the
   - [SwRS-MDOKFSTUDIO-PALETTE-160](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-160.md): Apply rewrites the figure directive in one minimal edit
   - [SwRS-MDOKFSTUDIO-PALETTE-192](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-192.md): The host image picker answers a path relative to the document
   - [SwRS-MDOKFSTUDIO-PALETTE-263](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-263.md): Slash commands have short alternative names
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
-  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 <!-- okf:links:end -->

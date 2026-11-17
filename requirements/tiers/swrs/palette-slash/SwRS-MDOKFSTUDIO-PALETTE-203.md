@@ -19,7 +19,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-018
-- StRS-MDOKFSTUDIO-PALETTE-013
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-090
 annotation_exemption: false
@@ -108,7 +107,6 @@ The alternative text equals the file name; no dialog asks for it.
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
-  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 <!-- okf:links:end -->

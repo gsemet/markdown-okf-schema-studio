@@ -15,7 +15,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
-- StRS-MDOKFSTUDIO-PALETTE-001
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-039
 annotation_exemption: false
@@ -24,7 +23,6 @@ derived_by: []
 implemented_in_files:
 - src/page/features/editorChrome.ts
 - src/page/modules/blockEditActions.ts
-- src/page/modules/editPalette.ts
 tested_in_files:
 - test/integration/realWindowGaps.ts
 - test/page/modules/editActions.test.ts
@@ -110,7 +108,6 @@ When the host answers a path for the Figure button outside a figure, the extensi
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 - Depends on:
   - [SwRS-MDOKFSTUDIO-PALETTE-039](SwRS-MDOKFSTUDIO-PALETTE-039.md): A palette action edits in one undo step or leaves the text unchanged and says why
 <!-- okf:links:end -->

@@ -17,14 +17,13 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
 - StRS-MDOKFSTUDIO-PALETTE-005
 depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/contentLayoutStyles.ts
+- src/core/preview/styles/contentLayoutStyles.markers.ts
 - src/core/preview/styles/editPaletteStyles.ts
 - src/page/features/blockSourceEditor.ts
 - src/page/features/editorChrome.ts
@@ -109,7 +108,8 @@ When a block editor opens, the extension SHALL place the edition palette as a to
 | the caret line ends less than 8 px above the bottom of the viewport, or below it, the palette stuck or not (the end of a large paste) | the page scrolls down so that the caret line ends 8 px above the bottom of the viewport |
 | the caret is below the palette, or more than 8 px above the viewport bottom | the page does not scroll |
 | the palette is still above the frame (not stuck) and the caret line is above its bottom | the page does not scroll |
-| the text of a paste is applied to the document by the autosave | the editor stays open, the caret stays where the paste ended and the page does not move: the scroll of the text editor to the applied edit does not move the page, from the start of the autosave until 750 ms after it settled (CR 134) |
+
+The page does not follow the scroll that an applied edit causes in the text editor: see SwRS-MDOKFSTUDIO-PALETTE-279.
 
 ### Scenario (nominal): Native scrolling keeps clear of the stuck palette
 
@@ -166,6 +166,5 @@ The distance is measured when the editor opens and when the layout changes (resi
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
-  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): While a writer edits a block, the palette stays in reach, appears softly and keeps the editor open
 <!-- okf:links:end -->

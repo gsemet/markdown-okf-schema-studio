@@ -142,6 +142,7 @@ export async function run(): Promise<void> {
     const secondPreview = getActivePreviewForTests();
     assert.ok(secondPreview);
     assert.doesNotMatch(secondPreview.html, /Markdown OKF-Schema Studio Fixture/u);
+    // @tests_req StRS-MDOKFSTUDIO-THEME-004
     assert.match(secondPreview.html, /"previewThemeMode":"dark"/u);
     assert.equal(secondPreview.lastRevealedSourceLine, undefined);
 

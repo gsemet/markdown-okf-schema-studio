@@ -13,7 +13,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
+- StRS-MDOKFSTUDIO-PALETTE-021
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -64,5 +64,5 @@ When the writer presses Label, the extension SHALL write the line `(label-name)=
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-021](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-021.md): A writer inserts MyST constructs
 <!-- okf:links:end -->

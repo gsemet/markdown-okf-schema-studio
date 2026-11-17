@@ -738,7 +738,6 @@ ${gridColumnCss()}
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-001
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-023
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-032
-// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-043
 /**
  * Rendered blocks: inline images, label anchors, figures, admonitions, code and highlighting,
  * diagrams, tables, project-only placeholders, grids, toctrees and math.

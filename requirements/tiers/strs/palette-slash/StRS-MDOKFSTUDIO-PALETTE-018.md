@@ -36,7 +36,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer pastes an image or rich text into a block text box, the Studio SHALL save an image as a file next to the document with a reference as a paragraph of its own, or replace the selection with the rich text converted to Markdown without scripts, styles, hidden content or unsafe addresses, in one undoable step saved with the other text of that editor.
+When a writer pastes an image, rich text or a URL into a block text box, or drops files from the Explorer on it, the Studio SHALL save an image as a file next to the document with a reference as a paragraph of its own, replace the selection with the rich text converted to Markdown without scripts, styles, hidden content or unsafe addresses, turn a pasted URL into a link, an autolink or an image, and link or embed the dropped files at the drop point, each in one undoable step saved with the other text of that editor.
 
 ### Preserved stakeholder intent
 
@@ -46,12 +46,40 @@ As a writer, I paste a screenshot and it becomes a picture of the document witho
 
 ### Rationale and constraints
 
-- The conversion rules and the image file handling belong to the palette and paste use cases; this use case covers the result landing in the right editor.
 - Text on the clipboard always wins: the paste then stays an ordinary text paste.
 - The Studio chooses the file name; it never overwrites a file and refuses anything that is not a png, jpeg, gif or webp image.
 - Pasting as plain text stays available with the paste-as-plain-text key combination.
 - When the conversion fails or leaves nothing, the plain text of the clipboard is pasted.
 - Only a few link and image address schemes are kept; every other element contributes its text only.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Page as Page paste handler
+    participant Host as Host
+    participant Box as Text box
+    Writer->>Page: paste, or drop files from the Explorer
+    alt the clipboard holds text
+        Page->>Box: ordinary text paste
+    else an image only
+        Page->>Host: save the image
+        Host-->>Page: the file image-N with its extension
+        Page->>Box: a reference as a paragraph of its own
+    else rich text
+        Page->>Host: convert to the safe subset
+        Host-->>Page: Markdown
+        Page->>Box: replace the selection
+    else a URL
+        Page->>Box: a link, an autolink or an image
+    else files dropped from the Explorer
+        Page->>Box: links or images at the drop point
+    end
+    Note over Page,Box: one undoable edit saved with the other text
+```
+
+Text on the clipboard always wins; every other branch ends in one undoable edit.
 
 ### Main paths
 

@@ -16,10 +16,6 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-014
 - StRS-MDOKFSTUDIO-BLOCK-001
-- StRS-MDOKFSTUDIO-LAYOUT-003
-- StRS-MDOKFSTUDIO-PALETTE-002
-- StRS-MDOKFSTUDIO-THEME-004
-- StRS-MDOKFSTUDIO-THEME-011
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TRUST-006
@@ -44,6 +40,7 @@ implemented_in_files:
 - src/session/features/viewState.ts
 - src/session/workspaceChoices.ts
 tested_in_files:
+- test/core/protocol/pageStateMessages.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/core/state/previewTheme.test.ts
 - test/core/state/previewViewPreferences.test.ts
@@ -61,6 +58,8 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-LAYOUT-021
+- SwRS-MDOKFSTUDIO-PALETTE-010
+- SwRS-MDOKFSTUDIO-THEME-013
 - SwRS-MDOKFSTUDIO-TOOLBAR-013
 ---
 
@@ -149,6 +148,27 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 | A list, or missing | Every field has its default: zoom 100, widthMode margin, toc off, incomingChanges on, comments on, toolbarCollapsed on |
 | Any applied preference | The whole object is normalized again (applyViewPreference), so the stored object is always valid |
 
+### Scenario (refusal): A palette mode or a theme mode outside the four is dropped
+
+- GIVEN a workspace whose stored palette mode is gfm and an open preview
+- WHEN the page posts previewPaletteModeChanged with a mode of the table, or previewThemeModeChanged with a theme mode of the table
+- THEN the message is rejected by the protocol validator of its type, nothing is stored, no result is posted to the page, and the next preview still starts in the stored mode
+
+| Message | Field value | Outcome |
+| --- | --- | --- |
+| previewPaletteModeChanged | html | rejected |
+| previewPaletteModeChanged | the empty text | rejected |
+| previewPaletteModeChanged | a number or true (not a string) | rejected |
+| previewPaletteModeChanged | missing | rejected |
+| previewThemeModeChanged | sepia (or neon) | rejected |
+| previewThemeModeChanged | missing previewThemeMode | rejected |
+
+### Scenario (nominal): An accepted palette mode or theme mode
+
+- GIVEN a palette whose select changes to another of the modes strict, gfm, myst or full, or the Theme button pressed (any of current, dark, white and cream)
+- WHEN the page posts the message once, with the identity fields documentId, revision and requestId (the envelope is checked first, see SwRS-MDOKFSTUDIO-TRUST-052) and the field mode or previewThemeMode
+- THEN the host accepts it through the gate of its type (see SwRS-MDOKFSTUDIO-TRUST-065), stores the mode for the workspace, and the next preview starts in it (see SwRS-MDOKFSTUDIO-LIFE-170)
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-LIFE-170: the start of a new page from the saved, stored or default value of each choice, with its rounding.
@@ -167,6 +187,8 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 - Method: test/core/state/previewViewPreferences.test.ts (one key, normalized object, no write without storage) and test/core/protocol/pageToHost.test.ts (validators, width mode wide refused).
 - Method: test/session/diagReq.viewState.requirements.test.ts (a theme mode or a view preference that cannot be saved still holds for the session, is logged by the logger of the host, and warns the reader once).
 - Method: test/integration/previewEditing.test.ts (previewAnchorModeChanged false then true sets the configuration of the preview; the update of the loaded context is untested).
+- Method: test/core/protocol/pageToHost.test.ts (previewPaletteModeChanged accepts only strict, gfm, myst or full: html, the empty text, true and a missing mode are rejected; the number case is deduced from the validator, not tested) and test/integration/paletteMode.test.ts (an invalid palette mode is not stored); test/integration/untrusted-suite.ts (the palette mode of a Restricted Mode preview)
+- Method: test/core/protocol/pageStateMessages.test.ts, unit test `the page-state validators accept exactly what the frozen validator accepted` (the theme modes cream and neon and an absent mode, on the live validator PAGE_TO_HOST_VALIDATORS.previewThemeModeChanged in src/core/protocol/pageToHost.ts; the guard in src/session/features/viewState.ts repeats the check and is not tested separately)
 - Criteria: after each change the saved state, the posted message and the stored value equal the value shown; an invalid value leaves the stored value unchanged.
 
 <!-- okf:links:start -->
@@ -177,10 +199,6 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, and each document keeps its reading place and view choices
   - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
-  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
-  - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
-  - [StRS-MDOKFSTUDIO-THEME-004](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-004.md): The theme choice holds for the workspace and survives slow loads and bad values
-  - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-170](SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
@@ -188,5 +206,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-LAYOUT-021](../layout-width/SwRS-MDOKFSTUDIO-LAYOUT-021.md): A width mode choice is saved for the workspace
+  - [SwRS-MDOKFSTUDIO-PALETTE-010](../palette-slash/SwRS-MDOKFSTUDIO-PALETTE-010.md): An unknown palette mode is refused and stores nothing
+  - [SwRS-MDOKFSTUDIO-THEME-013](../theme-zoom/SwRS-MDOKFSTUDIO-THEME-013.md): The host drops a theme-mode message with an unknown mode
   - [SwRS-MDOKFSTUDIO-TOOLBAR-013](../toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-013.md): The host accepts only a known view preference with a valid value
 <!-- okf:links:end -->

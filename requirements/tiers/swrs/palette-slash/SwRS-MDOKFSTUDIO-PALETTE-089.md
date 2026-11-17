@@ -15,13 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
-- StRS-MDOKFSTUDIO-PALETTE-001
 depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/page/features/blockEditor.ts
 - src/page/features/editorChrome.ts
 - src/page/modules/linkEditActions.ts
 - src/page/modules/linkPanel.ts
@@ -112,5 +110,4 @@ When the writer presses the Link button or Cmd+K or Ctrl+K, the extension SHALL 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 <!-- okf:links:end -->

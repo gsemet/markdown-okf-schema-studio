@@ -15,18 +15,18 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+depends_on:
+- SwRS-MDOKFSTUDIO-LIFE-169
+- SwRS-MDOKFSTUDIO-LIFE-170
 user_need: As a writer, I pick the set of buttons that matches the Markdown
   flavour of my project, the next preview remembers it, and I change the mode
   without taking my hands off the keyboard; as a maintainer of a project, I set
   the palette mode that all writers of the workspace start with.
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-169
-- SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-PALETTE-001
 - SwRS-MDOKFSTUDIO-PALETTE-010
 - SwRS-MDOKFSTUDIO-PALETTE-017
 - SwRS-MDOKFSTUDIO-PALETTE-036
-- SwRS-MDOKFSTUDIO-TRUST-001
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -34,7 +34,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer works in a workspace, the Studio SHALL let the writer choose between a strict Markdown, a GitHub Flavored Markdown and a MyST set of palette buttons, keep the choice for the workspace, show only the buttons of the chosen set, start a workspace without a choice in the mode given by the settings, and let the writer reach the choice from the keyboard.
+When a writer works in a workspace, the Studio SHALL let the writer choose between four sets of palette buttons, Strict, GFM, MyST and Full, each set containing the one before, keep the choice for the workspace, show only the buttons of the chosen set, start a workspace without a choice in the mode given by the settings, and let the writer reach the choice from the keyboard.
 
 ### Preserved stakeholder intent
 
@@ -44,12 +44,38 @@ As a writer, I pick the set of buttons that matches the Markdown flavour of my p
 
 ### Rationale and constraints
 
-- The sets add up: the GitHub set holds the strict buttons, and the MyST set holds the GitHub buttons.
+- The four sets are nested: GFM holds the Strict buttons, MyST holds the GFM buttons and Full holds the MyST buttons and adds charts and diagrams.
 - The mode changes the buttons and the slash menu only, never how the preview renders a document.
 - A table cell editor offers the inline buttons of the chosen set that make sense in a cell, and has no mode choice.
 - When a workspace has not chosen a palette mode yet, its palettes start in the mode given by the settings, and in the GitHub Flavored Markdown mode when the settings give none.
 - A mode the writer chose in the workspace always wins over the setting.
 - The documented key combination in a block editor moves the focus to the palette mode choice and lets the writer come back to the text from the keyboard; it uses the command key of the platform.
+
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "Full: Strict, GFM, MyST buttons and charts and diagrams" as Full
+    state "MyST: Strict and GFM buttons and MyST constructs" as MyST
+    state "GFM: Strict buttons and GFM constructs" as GFM
+    state "Strict: Markdown buttons" as Strict
+    [*] --> GFM: no choice yet and no setting
+    Strict --> GFM: the next set adds buttons
+    GFM --> MyST: the next set adds buttons
+    MyST --> Full: the next set adds buttons
+    Full --> MyST: the writer picks a smaller set
+    MyST --> GFM: the writer picks a smaller set
+    GFM --> Strict: the writer picks a smaller set
+    state "Stored for the workspace" as Stored
+    Strict --> Stored: the writer picks a mode, the host validates and stores it
+    GFM --> Stored: the writer picks a mode, the host validates and stores it
+    MyST --> Stored: the writer picks a mode, the host validates and stores it
+    Full --> Stored: the writer picks a mode, the host validates and stores it
+    Stored --> [*]: the next preview starts in the stored mode
+```
+
+The sets are nested, and a writer moves between them with the mode select or from the keyboard; the choice is validated, stored for the workspace and used by the next preview.
 
 ### Main paths
 
@@ -59,7 +85,7 @@ As a writer, I pick the set of buttons that matches the Markdown flavour of my p
    - SwRS-MDOKFSTUDIO-PALETTE-017: the writer presses Cmd+Shift+M, or Ctrl+Shift+M elsewhere, and the focus moves to the mode select
 2. The focus is in the mode select
    - SwRS-MDOKFSTUDIO-PALETTE-001: the writer chooses another mode and the palette lists the buttons of that mode
-   - Option SwRS-MDOKFSTUDIO-PALETTE-010 (refusal): a mode other than strict, gfm, myst or full is refused and the stored mode stays
+   - Option SwRS-MDOKFSTUDIO-LIFE-169 (refusal): a mode other than strict, gfm, myst or full is refused and the stored mode stays
 3. The palette shows the buttons of the chosen mode
    - SwRS-MDOKFSTUDIO-LIFE-169: the choice is kept in the saved state of the panel and stored for the workspace
 4. The mode is stored for the workspace
@@ -72,11 +98,11 @@ As a writer, I pick the set of buttons that matches the Markdown flavour of my p
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
-  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-PALETTE-001](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-001.md): The palette mode decides the button sets, in registry order
   - [SwRS-MDOKFSTUDIO-PALETTE-010](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-010.md): An unknown palette mode is refused and stores nothing
   - [SwRS-MDOKFSTUDIO-PALETTE-017](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-017.md): Cmd/Ctrl+Shift+M reaches the mode select and Escape or Enter returns to the text
   - [SwRS-MDOKFSTUDIO-PALETTE-036](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
 <!-- okf:links:end -->

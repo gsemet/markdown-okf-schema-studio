@@ -33,9 +33,9 @@ implemented_in_files:
 - src/session/features/viewState.ts
 - src/session/hostEvents.ts
 tested_in_files:
-- test/core/state/editLock.test.ts
+- test/core/preview/layoutThemeStyles.test.ts
 - test/integration/lifecycle.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/previewWindow.ts
 - test/page/runtimePageControls.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -129,6 +129,7 @@ When the Current theme mode is shown or the active VS Code colour theme changes,
 - Method: test/page/runtimePageControls.test.ts, unit test `a page whose pairing and theme messages were lost while it loaded gets both from the host's answer to its ready report` (the value 2 of the theme kind and the ready answer built with pageLiveStateMessages and dispatched); the values default, 1, 3 and 4 are untested. ScrollSyncController.postPageLiveState and the ready handler in src/session/features/rendering.ts are not covered by a session test. The pairing message of the same answer belongs to lifecycle-sync.
 - Method: test/integration/lifecycle.test.ts switches the VS Code colour theme and waits for the render that follows (step `the theme-triggered bounded render`: the request number rises once and stays stable afterwards); the themeChanged message itself, the preview without a render and the non-Markdown case (read from isDocumentEligible in src/session/sessionDocuments.ts) are not asserted.
 - Method: test/core/state/editLock.test.ts, unit tests of EditLock.shouldDeferReload, the condition deferWhileEditing uses (editor open and no editor); the CHANGELOG records the guarantee. Not asserted: the theme-render key and the order in ViewStateController.notifyTheme (src/session/features/viewState.ts). A test would hold the edit lock and count renders before and after it is released.
+- Method: test/page/runtimePageControls.test.ts (theme kinds): the root records default at boot, then 2, 1, 3 and 4 for the themeChanged messages; test/core/preview/layoutThemeStyles.test.ts: no rule of the page style is keyed to a theme kind, so the host variables rule in high contrast.
 - Criteria: The four computed colours equal the probe colours of the four variables on both hosts. The attribute equals the String of the reported kind, or default. One message per rendered preview, none for a preview without a stage. The request number rises once after the change and stays stable afterwards. The answer to a ready report holds a themeChanged message with the live kind and the report's identity.
 
 <!-- okf:links:start -->

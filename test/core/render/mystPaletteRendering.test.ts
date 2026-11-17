@@ -125,7 +125,7 @@ test("a Mermaid fence inserted by the edition palette renders a diagram containe
   assert.match(textContent(diagram), /flowchart TD/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278
 test("the Vega-Lite and Vega charts inserted by the edition palette render as chart figures", async () => {
   for (const [id, kind] of [["vegaLite", "vega-lite"], ["vega", "vega"]] as const) {
     const { html } = await renderPalette(paletteInsert(id, "Intro", 5));

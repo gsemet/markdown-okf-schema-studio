@@ -1,4 +1,5 @@
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-002
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-280
 /**
  * The icons of the edition palette and the `/` menu: static markup, never user text, keyed by the
  * `icon` of a palette action (`PaletteActionDescriptor.icon`). Pure data: no host API, no DOM, no

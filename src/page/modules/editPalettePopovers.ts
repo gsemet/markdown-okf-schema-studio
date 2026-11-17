@@ -394,7 +394,6 @@ export function buildChoices(
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-058
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-036
 /**
  * The colour picker: Text and Background tabs, 16 swatches, a hex field and Remove. A swatch
  * applies at once; the hex field validates as the user types and Enter applies it. For the
@@ -451,6 +450,7 @@ export function buildColor(
     swatch.setAttribute("aria-label", colour);
     swatch.setAttribute("data-color-swatch", colour);
     swatch.style.setProperty("background-color", colour);
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-036
     swatch.addEventListener("mousedown", keepFocus);
     swatch.addEventListener("click", (event: { preventDefault?: () => void; stopPropagation?: () => void }) => {
       event.preventDefault?.();

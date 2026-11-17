@@ -2,8 +2,8 @@
 type: StRS
 id: StRS-MDOKFSTUDIO-PALETTE-005
 uuid: 0bfe6e3d-b330-4b85-b72e-6451154bdaae
-title: The palette stays in reach, appears softly and never closes the editor by
-  accident
+title: While a writer edits a block, the palette stays in reach, appears softly
+  and keeps the editor open
 description: While a writer edits a block, the Studio SHALL keep the edition
   palette visible next to the text box, also for a very tall text box and in a
   narrow pane, show it and its menus with a short fade unless the writer prefers
@@ -26,15 +26,15 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-021
 - SwRS-MDOKFSTUDIO-PALETTE-031
 - SwRS-MDOKFSTUDIO-PALETTE-036
-- SwRS-MDOKFSTUDIO-PALETTE-115
+- SwRS-MDOKFSTUDIO-PALETTE-279
 default_owner_email: gaetan@xeberon.net
 ---
 
-## The palette stays in reach, appears softly and never closes the editor by accident
+## While a writer edits a block, the palette stays in reach, appears softly and keeps the editor open
 
 ### Normative behavior
 
-While a writer edits a block, the Studio SHALL keep the edition palette visible next to the text box, also for a very tall text box and in a narrow pane, show it and its menus with a short fade unless the writer prefers reduced motion, and keep the editor open with the focus in the text when a palette button is pressed or a picker is opened, saving only when the writer leaves it.
+While a writer edits a block, the Studio SHALL keep the edition palette in reach next to the text box, also for a very tall text box and in a narrow pane, show it and its menus with a short fade unless the writer prefers reduced motion, and keep the editor open with the focus in the text when a palette button is pressed or a picker is opened, saving only when the writer leaves it.
 
 ### Preserved stakeholder intent
 
@@ -50,6 +50,23 @@ As a writer of a long block, I always find the palette buttons without scrolling
 - Escape closes an open picker first and only then cancels the editor.
 - A native file dialog opened by a button does not count as leaving the editor.
 - The soft appearance is also given to the pickers and the slash menu; it is switched on by the first pointer or key press of the page and is part of the general preview motion, and none of the motion is shown if the system asks for less.
+
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Editing: the writer opens a block editor
+    Editing --> Editing: a palette button is pressed, the editor stays open
+    Editing --> Editing: the native file dialog opens and closes, the editor stays open
+    Editing --> Popover: a picker or the slash menu opens
+    Popover --> Editing: Escape closes the popover only
+    Editing --> Committed: Done, Cmd or Ctrl and Enter, or leaving the editor
+    Editing --> Closed: Escape cancels the editor
+    Committed --> Closed
+```
+
+Pressing a palette button or using the file dialog never commits the edit; only Done, the shortcut or leaving the editor does.
 
 ### Main paths
 
@@ -83,5 +100,5 @@ As a writer of a long block, I always find the palette buttons without scrolling
   - [SwRS-MDOKFSTUDIO-PALETTE-021](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-021.md): The palette is a toolbar above the editor that sticks over a tall editor
   - [SwRS-MDOKFSTUDIO-PALETTE-031](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
   - [SwRS-MDOKFSTUDIO-PALETTE-036](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
-  - [SwRS-MDOKFSTUDIO-PALETTE-115](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-115.md): Alert inserts a GitHub alert and offers its type list
+  - [SwRS-MDOKFSTUDIO-PALETTE-279](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-279.md): The page does not follow an editor scroll caused by an edit
 <!-- okf:links:end -->

@@ -7,7 +7,6 @@ const ROOT = path.resolve(__dirname, "../../..");
 const INTEGRATION = path.join(ROOT, "test", "integration");
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-264
 /**
  * CR 152: the workspace remembers the edit mode for the next preview, and the real-window scenarios
  * run one after the other in the same window. A scenario that turns edit mode on and leaves it on

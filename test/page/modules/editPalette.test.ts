@@ -127,7 +127,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-017
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("P6: the real registry shows the MyST-specific buttons in MyST mode only, per mode", () => {
   const ids = (mode: EditActionMode): string[] => {
     const textbox = { value: "", selectionStart: 0, selectionEnd: 0, focus: () => undefined };
@@ -737,7 +737,7 @@ test("T26: Column alignment lists left, center and right; a choice rewrites the 
   assert.equal(popover(h.root), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-126
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-276
 test("T26: Details, Footnote, Mermaid and Key are one-click actions", () => {
   const h = openGfm("word", 4);
   button(h.root, "footnote").dispatch("click", click);

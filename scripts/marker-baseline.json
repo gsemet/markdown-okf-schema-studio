@@ -3,14 +3,11 @@
   "limit": 3,
   "blocks": {
     "src/core/preview/styles/codeBlockStyles.ts": 4,
-    "src/core/preview/styles/contentBlockStyles.ts": 13,
-    "src/core/preview/styles/contentLayoutStyles.ts": 6,
-    "src/core/preview/styles/pageChromeStyles.ts": 4,
+    "src/core/preview/styles/contentBlockStyles.ts": 12,
     "src/core/render/mystRenderer.ts": 4,
     "src/core/render/renderPipeline.ts": 4,
     "src/core/security/html-sanitizer.ts": 8,
     "src/page/features/contentPatch.ts": 4,
-    "src/page/modules/editPalette.ts": 17,
     "src/session/features/sourceEdits.ts": 4,
     "src/session/webview.ts": 5,
     "test/core/preview/previewStyles.test.ts": 4,
@@ -26,16 +23,13 @@
     "test/integration/lifecycle.test.ts": 6,
     "test/integration/mystBlocksWindow.ts": 4,
     "test/integration/mystPickers.test.ts": 4,
-    "test/integration/paletteMode.test.ts": 4,
     "test/integration/previewHistory.test.ts": 7,
     "test/integration/projectFeatures.test.ts": 4,
-    "test/integration/realInput/markers.ts": 15,
     "test/integration/reviewComments.test.ts": 4,
     "test/integration/scroll-sync-suite.ts": 5,
     "test/integration/standalone-suite.ts": 5,
     "test/integration/untrusted-suite.ts": 4,
     "test/page/chartCsp.test.ts": 4,
-    "test/page/modules/editActions.test.ts": 35,
     "test/site/requirementsViewer/write.test.ts": 4,
     "test/visual/capture_export_html.py": 4,
     "test/visual/exportHtmlScenarios.ts": 4,
@@ -43,6 +37,6 @@
     "test/visual/scenarioDefinitions2.ts": 4
   },
   "unnamedCompanionLines": {
-    "test/integration/realInput/markers.ts": 15
+    "test/integration/realInput/markers.ts": 2
   }
 }

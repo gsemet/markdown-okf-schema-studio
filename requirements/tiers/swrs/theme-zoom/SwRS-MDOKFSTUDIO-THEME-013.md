@@ -8,8 +8,8 @@ description: "When a previewThemeModeChanged message carries a mode other than c
   or answering."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -21,12 +21,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-- src/session/features/viewState.ts
-tested_in_files:
-- test/core/protocol/pageStateMessages.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-LIFE-169
 ---
 
 ## The host drops a theme-mode message with an unknown mode
@@ -73,5 +72,7 @@ When a previewThemeModeChanged message carries a mode other than current, dark, 
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+- Superseded by:
   - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
 <!-- okf:links:end -->

@@ -106,7 +106,7 @@ test("a width mode change keeps the line at the reading position, with or withou
   assert.equal(fresh.windowState.scrollY, 350, "the anchor is taken from the line at the current scroll position");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-018
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
 test("a width mode change measures the first-element clearance again, even when nothing moved", () => {
   const harness = createRuntimeHarness();
   const property = "--sphinx-preview-toolbar-bottom";

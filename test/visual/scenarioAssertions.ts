@@ -733,7 +733,7 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
   // Collapsed toolbar: the first element clears the shorter toolbar (P3) at 360 px.
   ...FIRST_GAP_CASES.filter(([name]) => ["paragraph", "table"].includes(name))
     .map(([name, fixture, kind]) => ({
-      // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-018
+      // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
       id: `first-element-gap-${name}-360-collapsed`,
       fixture,
       theme: "light" as const,

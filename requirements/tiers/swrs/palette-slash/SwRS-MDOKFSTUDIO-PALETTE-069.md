@@ -24,7 +24,6 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/page/modules/colourEditActions.ts
-- src/page/modules/editPalette.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts

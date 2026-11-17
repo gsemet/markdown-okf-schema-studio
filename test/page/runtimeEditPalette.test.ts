@@ -84,6 +84,7 @@ test("T21b: every palette button carries the slide-in tooltip of its title", () 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-002
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-280
 test("T21c: the rule button is three dashes, not the lines of centred text", () => {
   const harness = createRuntimeHarness();
   openBlockEditorWithSource(harness);
@@ -816,7 +817,7 @@ test("T23: the stored workspace mode is used, and the saved webview state wins o
   assert.equal(paletteOf(invalid)!.getAttribute("data-palette-mode"), "gfm");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("CR 149: the Full mode is a mode of the page: stored, saved, chosen in the select and reported to the host", () => {
   const stored = createRuntimeHarness({ initialPaletteMode: "full" });
   openBlockEditorWithSource(stored);
@@ -1295,7 +1296,7 @@ test("T25: Checkbox and HTML table edit the text box as one undo step each", () 
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-267
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("Option turns the line into an option item and back as one undo step each", () => {
   const harness = createRuntimeHarness({ initialPaletteMode: "gfm" });
   const textarea = openBlockEditorWithSource(harness);

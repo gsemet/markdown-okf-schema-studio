@@ -15,7 +15,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-016
-- StRS-MDOKFSTUDIO-PALETTE-001
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -103,5 +102,4 @@ When the writer runs Column alignment with left, center or right, the extension 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TABLE-016](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-016.md): A writer inserts and shapes a table from the palette
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 <!-- okf:links:end -->

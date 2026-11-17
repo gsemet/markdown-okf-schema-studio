@@ -15,8 +15,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
-- StRS-MDOKFSTUDIO-PALETTE-005
+- StRS-MDOKFSTUDIO-PALETTE-020
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
 annotation_exemption: false
@@ -25,7 +24,6 @@ derived_by: []
 implemented_in_files:
 - src/core/syntax/blockQuoteRange.ts
 - src/page/modules/blockEditActions.ts
-- src/page/modules/editPalette.ts
 tested_in_files:
 - test/page/modules/alertLazyEditAction.test.ts
 - test/page/modules/editActions.test.ts
@@ -115,8 +113,7 @@ A list opened by the insertion itself is not closed by the input event of that i
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
-  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+  - [StRS-MDOKFSTUDIO-PALETTE-020](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-020.md): A writer inserts GitHub Flavored Markdown constructs
 - Depends on:
   - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
 <!-- okf:links:end -->

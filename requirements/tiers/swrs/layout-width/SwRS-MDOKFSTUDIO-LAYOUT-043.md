@@ -21,7 +21,6 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/contentBlockStyles.ts
 - src/core/preview/styles/contentLayoutStyles.ts
 - src/page/modules/firstClearance.ts
 tested_in_files:

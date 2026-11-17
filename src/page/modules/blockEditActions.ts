@@ -33,7 +33,7 @@ export function setHeading(ctx: EditActionContext): TextEdit | undefined {
   });
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-049
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-277
 /**
  * Quotes every touched line with `> ` in front of any list marker, or removes one quote level
  * when every non-blank touched line is already quoted.
@@ -55,8 +55,7 @@ export function toggleQuote(ctx: EditActionContext): TextEdit | undefined {
   });
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-052
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-053
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-277
 /**
  * Turns the touched lines into a bulleted (`- `) or numbered (`1. `) list, or removes the marker
  * when every non-blank touched line already has it. A marker of the other kind is replaced; an
@@ -302,7 +301,7 @@ function toggleMarker(
   };
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-123
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-277
 /**
  * Toggles a task-list checkbox on the touched lines: when every non-blank line has one they
  * lose it (the list item stays), otherwise the lines without one gain `[ ]` after their list
@@ -312,7 +311,7 @@ export function toggleCheckbox(ctx: EditActionContext): TextEdit | undefined {
   return toggleMarker(ctx, CHECKBOX_LINE, undefined, "[ ] ");
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-267
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-277
 /**
  * Toggles an option marker `( )` on the touched lines, as Toggle checkbox does for `[ ]`: when
  * every non-blank line has one they lose it, otherwise the lines without one gain `( )` after
@@ -390,8 +389,6 @@ export function retypeAdmonition(ctx: EditActionContext): TextEdit | undefined {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-127
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-130
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-268
 /**
  * Wraps the touched lines in a MyST colon-fence admonition (`:::{type}`), or inserts an empty one;
  * "custom" writes `{admonition} Title` with a `:class:`, and a version admonition writes
@@ -540,7 +537,7 @@ export function insertFigure(ctx: EditActionContext): TextEdit | undefined {
   return insertBlockAt(ctx, text, head.length, 0);
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-137
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-127
 /** A MyST dropdown: a note admonition with `:class: dropdown`; the touched lines become its body. */
 export function insertDropdown(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -563,7 +560,7 @@ export function insertDropdown(ctx: EditActionContext): TextEdit | undefined {
   return insertBlockAt(ctx, text, titleAt, 5);
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-265
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-278
 /** A fenced Vega-Lite bar chart with inline data, set apart after the selection, its title selected. */
 export function insertVegaLite(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -586,7 +583,7 @@ export function insertVegaLite(ctx: EditActionContext): TextEdit | undefined {
   ].join("\n"), "Chart title");
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-265
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-278
 /** A fenced Vega bar chart with inline data, set apart after the selection, its title selected. */
 export function insertVega(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -631,7 +628,7 @@ export function insertMermaid(ctx: EditActionContext): TextEdit | undefined {
     ctx, "```mermaid\nflowchart TD\n  A[Start] --> B[End]\n```", "Start");
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-273
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-278
 /** A MyST tab set of two tabs set apart after the selection, the first tab title selected. */
 export function insertTabs(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -647,7 +644,7 @@ export function insertTabs(ctx: EditActionContext): TextEdit | undefined {
   ].join("\n"), "Tab 1");
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-274
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-278
 /** A fenced PlantUML sequence diagram set apart after the selection, its first message selected. */
 export function insertPlantUml(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;

@@ -31,12 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-174
 - SwRS-MDOKFSTUDIO-PALETTE-178
 - SwRS-MDOKFSTUDIO-PALETTE-183
-- SwRS-MDOKFSTUDIO-PALETTE-192
-- SwRS-MDOKFSTUDIO-PALETTE-196
-- SwRS-MDOKFSTUDIO-PALETTE-203
-- SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-006
-- SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
 default_owner_email: gaetan@xeberon.net
 ---
@@ -59,6 +54,31 @@ As a writer, I link to a label, a document or a bibliography entry by choosing i
 - A preview that is not trusted does not read the workspace for citations or documents; it refuses what reads or writes files, and reading the labels of the open document stays allowed.
 - A request answered after the editor closed is ignored.
 - The language list includes the short names (aliases) of the languages; plain text is always offered first.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Page as Preview page
+    participant Host as Host
+    participant Box as Text box
+    Writer->>Page: press the Reference button
+    Page-->>Writer: the list shows Loading
+    Page->>Host: ask for the targets
+    Host->>Host: list the labelled targets, or scan at most 20 bibliography files of at most 2 MiB each
+    alt the list has entries
+        Host-->>Page: the entries, possibly cut, with a note
+        Page-->>Writer: the list of targets
+        Writer->>Page: pick one
+        Page->>Box: write the reference or the citation
+    else the list is empty or the host fails
+        Host-->>Page: an empty list or an error
+        Page-->>Writer: a message and no edit
+    end
+```
+
+The list is bounded and says when it was cut.
 
 ### Main paths
 
@@ -98,11 +118,6 @@ As a writer, I link to a label, a document or a bibliography entry by choosing i
   - [SwRS-MDOKFSTUDIO-PALETTE-174](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-174.md): The host drops a request that does not name the render it holds
   - [SwRS-MDOKFSTUDIO-PALETTE-178](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-178.md): The host lists the label targets of the document
   - [SwRS-MDOKFSTUDIO-PALETTE-183](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-183.md): The host scans nearby bibliography files for citation keys within bounds
-  - [SwRS-MDOKFSTUDIO-PALETTE-192](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-192.md): The host image picker answers a path relative to the document
-  - [SwRS-MDOKFSTUDIO-PALETTE-196](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-196.md): The host saves a pasted image next to the document under a name it chooses
-  - [SwRS-MDOKFSTUDIO-PALETTE-203](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-203.md): A pasted image is sent to the host and its name inserted on its own paragraph
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
-  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 <!-- okf:links:end -->

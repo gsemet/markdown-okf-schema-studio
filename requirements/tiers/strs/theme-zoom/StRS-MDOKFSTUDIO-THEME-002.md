@@ -23,7 +23,6 @@ user_need: As a reader, I click one Theme button to go through Current, Dark,
   reduced motion. As a maintainer, I can give the preview the palette of another
   host by mapping one list of named colours.
 derived_by:
-- SwRS-MDOKFSTUDIO-CORE-028
 - SwRS-MDOKFSTUDIO-CORE-050
 - SwRS-MDOKFSTUDIO-THEME-001
 - SwRS-MDOKFSTUDIO-THEME-016
@@ -57,10 +56,28 @@ As a reader, I click one Theme button to go through Current, Dark, White and Cre
 - Code and YAML colours in the forced White and Cream themes belong to the code-blocks requirements; the Mermaid redraw on a theme change is SwRS-MDOKFSTUDIO-DIAG-005.
 - Cream gives every text colour at least a 4.5 to 1 contrast on every Cream surface it is drawn on; only Cream is checked for contrast, White and Dark are not.
 - Notes in Cream use a panel colour distinct from the page and keep the body text colour for the text that follows.
-- When the system prefers reduced motion, the theme changes without animation; the colour fade of a theme switch and the general rule of no motion under reduced motion are SwRS-MDOKFSTUDIO-CORE-050; this scope records the reduced-motion preference on the page.
+- When the system prefers reduced motion, the theme changes without animation; the colour fade of a theme switch and the general rule of no motion under reduced motion are SwRS-MDOKFSTUDIO-CORE-050.
 - Every page colour comes from one named list that the host can map to its own palette; each colour has a name that matches the host's own colour name, so the mapping is mechanical; SwRS-MDOKFSTUDIO-THEME-034 gives the names.
 - The forced modes set their colours directly and never read the host's.
 - A colour the host does not set leaves the fallback written in each rule in force.
+
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Cream: no theme chosen yet
+    Current --> Dark: the Theme button
+    Dark --> White: the Theme button
+    White --> Cream: the Theme button
+    Cream --> Current: the Theme button
+    Current: Follows the VS Code theme
+    Dark: Paints the page, toolbar, heading band and notes
+    White: Paints the page, toolbar, heading band and notes
+    Cream: Paints the page, toolbar, heading band and notes
+    note right of Current: the redraw waits while a block editor is open
+```
+
+Each theme paints the whole page; Current follows the host.
 
 ### Main paths
 
@@ -88,7 +105,6 @@ As a reader, I click one Theme button to go through Current, Dark, White and Cre
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-CORE-028](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and inline code are typeset readably
   - [SwRS-MDOKFSTUDIO-CORE-050](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-050.md): Soft appearance and colour transitions honour reduced motion
   - [SwRS-MDOKFSTUDIO-THEME-001](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-001.md): The Theme button cycles Current, Dark, White and Cream
   - [SwRS-MDOKFSTUDIO-THEME-016](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-016.md): Current mode follows the VS Code theme and redraws on change
@@ -96,6 +112,6 @@ As a reader, I click one Theme button to go through Current, Dark, White and Cre
   - [SwRS-MDOKFSTUDIO-THEME-024](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-024.md): A theme switch starts no colour transition under reduced motion
   - [SwRS-MDOKFSTUDIO-THEME-025](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-025.md): Dark, White and Cream paint the whole page the same on any VS Code theme
   - [SwRS-MDOKFSTUDIO-THEME-031](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-031.md): Cream text meets a 4.5 to 1 contrast and keeps the body colour after an admonition
-  - [SwRS-MDOKFSTUDIO-THEME-034](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-034.md): Page colours go through one token map of VS Code variables
+  - [SwRS-MDOKFSTUDIO-THEME-034](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-034.md): A host colour that is set is used, an unset one keeps the fallback
   - [SwRS-MDOKFSTUDIO-THEME-056](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-056.md): The toolbar takes the forced mode colours
 <!-- okf:links:end -->

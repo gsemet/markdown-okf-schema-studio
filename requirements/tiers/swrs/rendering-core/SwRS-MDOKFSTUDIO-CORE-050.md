@@ -21,7 +21,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/propertiesStyles.ts
+- src/core/preview/styles/propertiesStyles.markers.ts
 - src/page/features/themeMode.ts
 - src/page/modules/motion.ts
 tested_in_files:
@@ -94,7 +94,7 @@ When the preview shows an editor, a bar, a menu, a closed editor or a theme chan
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
-  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): While a writer edits a block, the palette stays in reach, appears softly and keeps the editor open
   - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CORE-051](SwRS-MDOKFSTUDIO-CORE-051.md): Enable soft appearance after the first input

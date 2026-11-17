@@ -27,6 +27,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/preview/previewStatus.ts
+- src/core/preview/styles/pageChromeStyles.ts
 - src/page/features/statusRegion.ts
 - src/session/features/pageDocument.ts
 tested_in_files:

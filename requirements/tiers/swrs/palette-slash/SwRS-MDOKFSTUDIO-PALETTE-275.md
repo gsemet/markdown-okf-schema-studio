@@ -2,10 +2,10 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-PALETTE-275
 uuid: 0f4fd84d-7ebf-4789-8986-3f864701cfab
-title: Every rendered syntax has a slash menu entry or a documented exception
-description: The extension SHALL list in the slash menu of the palette mode that
-  offers it every syntax the writing skill documents as rendered, except the
-  syntaxes of a documented exception list that have another way in.
+title: Every syntax the preview renders can be inserted from the slash menu
+description: The extension SHALL let the writer insert from the slash menu every
+  syntax the preview renders, in the palette mode that offers it, except the
+  documented exceptions that have another way in.
 project: MDOKFSTUDIO
 scope: palette-slash
 req_lifecycle: proposed
@@ -13,7 +13,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
+- StRS-MDOKFSTUDIO-PALETTE-015
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -24,11 +24,11 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## Every rendered syntax has a slash menu entry or a documented exception
+## Every syntax the preview renders can be inserted from the slash menu
 
 ### Normative behavior
 
-The extension SHALL list in the slash menu of the palette mode that offers it every syntax the writing skill documents as rendered, except the syntaxes of a documented exception list that have another way in.
+The extension SHALL let the writer insert from the slash menu every syntax the preview renders, in the palette mode that offers it, except the documented exceptions that have another way in.
 
 ### Scenario (nominal): A rendered syntax is reachable from the slash menu
 
@@ -53,5 +53,5 @@ The extension SHALL list in the slash menu of the palette mode that offers it ev
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
 <!-- okf:links:end -->

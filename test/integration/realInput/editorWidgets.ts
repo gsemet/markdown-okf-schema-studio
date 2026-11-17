@@ -57,6 +57,7 @@ const FIGURE_DOCUMENT = [
 
 const FIGURE_IMAGE = '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60"><rect width="120" height="60" fill="#789"/></svg>\n';
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
 /** RI-T32: the Edit figure button opens the form; Apply rewrites the directive, undo restores it, Cmd/Ctrl+Enter saves. */
 export async function scenarioFigureEditor(page: Page, evidence: Evidence): Promise<void> {
   const fixture = createFixture("realinput-t32", { "smoke.md": FIGURE_DOCUMENT, "images/chip.svg": FIGURE_IMAGE });

@@ -622,7 +622,6 @@ FIRST_GAP_REPORT_DIR = VISUAL_REPORT_DIR / "first-gap"
 
 # @tests_req SwRS-MDOKFSTUDIO-LAYOUT-007
 # @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
-# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-018
 def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """P3: one uniform 40px gap above the first element, in every case, state and width mode.
 

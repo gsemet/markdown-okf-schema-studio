@@ -20,24 +20,6 @@ export type {
   EditPaletteMenuEntry,
 } from "./editPaletteTypes";
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-002
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-017
-// @implements_req SwRS-MDOKFSTUDIO-LIFE-169
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-036
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-039
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-069
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-078
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-083
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-109
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-115
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-148
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-150
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-238
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-242
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-269
-
 /**
  * The edition palette: a pill-shaped bar of edit actions shown above an open block editor. It is
  * data-driven from the action registry, so a new registered action shows up as a new button, with
@@ -64,6 +46,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   }
   root.addEventListener("click", (event) => event.stopPropagation?.());
   // A press on the bar's padding, gaps or rounded edge must not blur the text box either.
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-036
   const keepFocus = (event: { preventDefault?: () => void }): void => event.preventDefault?.();
   root.addEventListener("mousedown", keepFocus);
 
@@ -104,6 +87,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   modeSelect.setAttribute("aria-label", "Palette buttons");
   modeSelect.setAttribute("title", "Palette buttons" + (deps.modeShortcut ? " (" + deps.modeShortcut + ")" : ""));
   modeSelect.setAttribute("data-edit-palette-mode-select", "true");
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-002
   const MODE_LABELS: Array<[EditActionMode, string]> = [
     ["strict", "Strict Markdown"],
     ["gfm", "GitHub (GFM)"],
@@ -137,6 +121,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     if (next && deps.isInsideFrame?.(next)) return;
     deps.onLeave?.();
   });
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-017
   modeSelect.addEventListener("keydown", (event: {
     key?: string;
     metaKey?: boolean;
@@ -160,6 +145,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       else backToText();
     }
   });
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
   modeSelect.addEventListener("change", () => {
     const chosen = String(modeSelect.value);
     if (!MODE_LABELS.some(([value]) => value === chosen)) {
@@ -213,6 +199,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-039
   function runAction(action: EditAction, arg?: string): void {
     const control = deps.getControl();
     const edit = action.apply({
@@ -298,6 +285,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
   function openPopover(action: EditAction, button: HTMLElement): void {
     closePopover();
     const menu = document.createElement("div");
@@ -403,6 +391,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     build();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
   /** The actions the current mode and scope show (additive modes), in registry order. */
   function visibleActions(): EditAction[] {
     const rank = MODE_RANK[mode] ?? 0;
@@ -413,6 +402,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       && action.modes.some((candidate) => (MODE_RANK[candidate] ?? 0) <= rank));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-269
   /**
    * The type picker: with the caret on the type of an alert or admonition head, lists the types of
    * that syntax above it; a choice replaces the type text only. Called as the caret moves.
@@ -510,6 +500,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     run(action);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-238
   function menuEntries(): EditPaletteMenuEntry[] {
     const ctx = contextOf();
     const entries: EditPaletteMenuEntry[] = [];
@@ -540,6 +531,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     return entries;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-242
   function runMenuEntry(key: string, range: { start: number; end: number }): void {
     const entry = menuEntries().find((candidate) => candidate.key === key);
     const action = entry ? deps.actions.byId.get(entry.id) : undefined;
