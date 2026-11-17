@@ -14,7 +14,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-CORE-001
+- StRS-MDOKFSTUDIO-CORE-007
 annotation_exemption: true
 exemption_reason: Declarative CI workflow configuration and build scripts
   (scripts/version.py, scripts/select_e2e_run.py, scripts/e2e-campaign.mjs),
@@ -101,5 +101,5 @@ Every push to main SHALL run the heavy jobs (`integration` and `stress`); when t
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+  - [StRS-MDOKFSTUDIO-CORE-007](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-007.md): A maintainer ships a version only after green checks and reviewed release notes
 <!-- okf:links:end -->

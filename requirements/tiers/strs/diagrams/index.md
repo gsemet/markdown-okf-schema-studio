@@ -17,5 +17,6 @@
 - [StRS-MDOKFSTUDIO-DIAG-012 — Render PlantUML with my own JAR or command](StRS-MDOKFSTUDIO-DIAG-012.md) — When the JAR option is on in a trusted workspace, the Studio SHALL draw each PlantUML diagram with the configured JAR or the plantuml command and show the result in the open preview.
 - [StRS-MDOKFSTUDIO-DIAG-013 — Understand why a JAR-rendered diagram failed or was blocked](StRS-MDOKFSTUDIO-DIAG-013.md) — When a writer previews a PlantUML diagram whose JAR rendering is blocked or fails, the Studio SHALL show a message naming the cause on the diagram, and never start a process in an untrusted workspace.
 - [StRS-MDOKFSTUDIO-DIAG-014 — A runaway PlantUML process cannot hang the preview](StRS-MDOKFSTUDIO-DIAG-014.md) — When a JAR-rendered diagram is too large, too slow, too chatty or cancelled, the Studio SHALL stop it and report the reason.
+- [StRS-MDOKFSTUDIO-DIAG-015 — A writer reads charts and drawings in the page](StRS-MDOKFSTUDIO-DIAG-015.md) — When a document holds a Vega-Lite or Vega chart fence or an inline SVG, the Studio SHALL show it themed in the page without executing or fetching anything, and lead from a click on a picture to its source.
 
 <!-- okfreq:index:end -->

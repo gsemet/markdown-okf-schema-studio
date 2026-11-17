@@ -14,7 +14,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMEDIT-008
-- StRS-MDOKFSTUDIO-TRUST-009
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-005
@@ -81,7 +80,6 @@ The envelope, the size bound and the pin fields (pinLine, pinViewportTop) are ch
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
-  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust

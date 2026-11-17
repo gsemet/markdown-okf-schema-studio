@@ -20,7 +20,6 @@ user_need: As a writer, I open a document in Restricted Mode, or a file from
   more than the folder of the document, and I am told why a feature that needs
   trust is off.
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-026
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-006
@@ -64,7 +63,6 @@ As a writer, I open a document in Restricted Mode, or a file from outside my wor
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-026](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-026.md): The side preview follows the active Markdown editor
   - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action

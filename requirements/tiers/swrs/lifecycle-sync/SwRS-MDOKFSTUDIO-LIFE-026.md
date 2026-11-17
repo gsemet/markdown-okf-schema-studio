@@ -17,7 +17,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-003
-- StRS-MDOKFSTUDIO-TRUST-001
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -112,5 +111,4 @@ When another saved Markdown file becomes the active editor, the extension SHALL 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
-  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document opens editable whatever the trust, with narrow reads outside a trusted folder
 <!-- okf:links:end -->

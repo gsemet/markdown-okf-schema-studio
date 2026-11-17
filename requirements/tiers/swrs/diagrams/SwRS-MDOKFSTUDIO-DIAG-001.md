@@ -16,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
-- StRS-MDOKFSTUDIO-DIAG-006
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -144,7 +143,6 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
-  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-DIAG-002](SwRS-MDOKFSTUDIO-DIAG-002.md): The Mermaid renderer loads only when a Mermaid figure exists
   - [SwRS-MDOKFSTUDIO-DIAG-003](SwRS-MDOKFSTUDIO-DIAG-003.md): Mermaid diagrams are drawn as inert pictures

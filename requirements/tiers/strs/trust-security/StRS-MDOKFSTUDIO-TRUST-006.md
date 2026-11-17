@@ -20,7 +20,6 @@ user_need: As a reader, and as a reviewer of an untrusted repository, I open any
   its code, call out to the network or read my other files.
 derived_by:
 - SwRS-MDOKFSTUDIO-CORE-013
-- SwRS-MDOKFSTUDIO-CORE-041
 - SwRS-MDOKFSTUDIO-TRUST-007
 - SwRS-MDOKFSTUDIO-TRUST-011
 - SwRS-MDOKFSTUDIO-TRUST-012
@@ -70,7 +69,6 @@ As a reader, and as a reviewer of an untrusted repository, I open any Markdown f
 
 - Derived by:
   - [SwRS-MDOKFSTUDIO-CORE-013](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-013.md): Includes are bounded by depth, budget, size and allowed roots
-  - [SwRS-MDOKFSTUDIO-CORE-041](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-041.md): Right-to-left text aligns to the right and blocks get an automatic direction
   - [SwRS-MDOKFSTUDIO-TRUST-007](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-007.md): A page loads local files only from its resource roots
   - [SwRS-MDOKFSTUDIO-TRUST-011](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-011.md): No script of a document reaches the preview
   - [SwRS-MDOKFSTUDIO-TRUST-012](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-012.md): Every page carries a deny-by-default content security policy

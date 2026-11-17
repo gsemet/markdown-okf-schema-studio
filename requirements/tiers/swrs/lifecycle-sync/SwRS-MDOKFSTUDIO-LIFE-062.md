@@ -15,7 +15,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-007
-- StRS-MDOKFSTUDIO-TRUST-004
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -92,5 +91,4 @@ When the source of a preview is not an existing Markdown file inside its root, t
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
-  - [StRS-MDOKFSTUDIO-TRUST-004](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-004.md): Local files load only from the allowed folders
 <!-- okf:links:end -->

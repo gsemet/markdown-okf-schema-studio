@@ -14,8 +14,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-003
-- StRS-MDOKFSTUDIO-DIAG-001
-- StRS-MDOKFSTUDIO-DIAG-006
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-BLOCK-041
@@ -104,8 +102,6 @@ When a reader selects text inside mapped body blocks of a preview, the page SHAL
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
-  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
-  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes

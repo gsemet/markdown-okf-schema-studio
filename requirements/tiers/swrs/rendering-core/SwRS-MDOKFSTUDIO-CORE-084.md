@@ -13,7 +13,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-TRUST-014
+- StRS-MDOKFSTUDIO-CORE-008
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -55,5 +55,5 @@ When a maintainer builds the Pages site, the build SHALL write a search index of
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-TRUST-014](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-014.md): The extension is built from pinned dependencies and ships what it loads
+  - [StRS-MDOKFSTUDIO-CORE-008](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-008.md): A reviewer reads the published site and its requirements
 <!-- okf:links:end -->

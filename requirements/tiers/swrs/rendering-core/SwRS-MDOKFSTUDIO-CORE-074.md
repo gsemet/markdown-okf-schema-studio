@@ -15,7 +15,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-CORE-001
+- StRS-MDOKFSTUDIO-CORE-006
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -58,5 +58,5 @@ When the repository is checked, the packaging SHALL provide a Claude Code plugin
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+  - [StRS-MDOKFSTUDIO-CORE-006](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-006.md): An agent writes Markdown for Studio with the shipped writing skill
 <!-- okf:links:end -->

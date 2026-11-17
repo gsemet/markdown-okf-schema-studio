@@ -21,9 +21,6 @@ user_need: As a reader or writer, I rely on what the preview page asks of the
   answer, an edit, a move or a request meant for another document or for an
   older version of my page land in the current document.
 derived_by:
-- SwRS-MDOKFSTUDIO-BLOCK-238
-- SwRS-MDOKFSTUDIO-FMEDIT-054
-- SwRS-MDOKFSTUDIO-GFM-027
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-055
 - SwRS-MDOKFSTUDIO-TRUST-059
@@ -81,9 +78,6 @@ As a reader or writer, I rely on what the preview page asks of the extension bei
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-BLOCK-238](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-238.md): previewEditSave needs both texts and valid optional fields
-  - [SwRS-MDOKFSTUDIO-FMEDIT-054](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-054.md): A frontmatter save message names its editor and field, or is ignored
-  - [SwRS-MDOKFSTUDIO-GFM-027](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-027.md): The host validates checkbox toggle messages
   - [SwRS-MDOKFSTUDIO-TRUST-052](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-055](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-055.md): The validator of the message type must accept the payload
   - [SwRS-MDOKFSTUDIO-TRUST-059](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render

@@ -17,7 +17,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-009
-- StRS-MDOKFSTUDIO-CORE-001
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -116,7 +115,6 @@ When the host receives a value from the page, it SHALL hand it to a handler only
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
-  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CORE-066](../rendering-core/SwRS-MDOKFSTUDIO-CORE-066.md): Ignore invalid page messages
 <!-- okf:links:end -->
