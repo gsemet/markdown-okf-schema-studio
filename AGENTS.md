@@ -33,9 +33,16 @@ parallel runs) is the process guideline
 [change-requests-lifecycle.guidelines.md](.agents/guidelines/change-requests-lifecycle.guidelines.md).
 It ranks below the project guidelines: when it conflicts with one of them, the project guideline
 wins and the conflict is reported. Load it when picking up backlog work or change requests in
-`.agents/changes/`, including Parallel Change Requests Orchestration, when preparing or running a
-release, and when writing the header of a `STATUS.md`. A change may also run without a change
+the planning folder (see "chantier"), including Parallel Change Requests Orchestration, when
+preparing or running a release, and when writing the header of a `STATUS.md`. A change may also run without a change
 request (a pull request opened directly): the project guidelines apply the same way.
+
+## chantier
+
+- planning: https://github.com/gsemet/gsemet-foss-planning-surface, projects/markdown-okf-schema-studio
+
+The change requests (inbox, backlog, batches, archives) live in that planning surface, not in
+this repository.
 
 ## Structure
 
