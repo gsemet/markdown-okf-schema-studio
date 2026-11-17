@@ -142,7 +142,7 @@ check-boundaries:
 check-limits:
     {{ npm }} run check:limits
 
-# Check the companion marker files (*.markers.ts): host file exists, markers name existing requirements.
+# Check the requirement markers: a source marker on every in-force SwRS, at most 3 IDs per marker block, companion marker lines that name their target (baseline: scripts/marker-baseline.json).
 check-markers:
     {{ npm }} run check:markers
 

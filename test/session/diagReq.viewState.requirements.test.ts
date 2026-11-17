@@ -104,7 +104,6 @@ function hostWithWarnings(warnings: string[], logger: MemoryLogger = createMemor
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-002
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-021
 test("a view preference that cannot be saved holds for the session and warns the reader once", async () => {
   const log = createMemoryLogger();
   const warnings: string[] = [];

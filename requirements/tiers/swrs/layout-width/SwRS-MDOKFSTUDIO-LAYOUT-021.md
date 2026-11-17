@@ -18,8 +18,7 @@ annotation_exemption: true
 exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LIFE-169; no marker expected."
 derived_by: []
 implemented_in_files: []
-tested_in_files:
-- test/session/diagReq.viewState.requirements.test.ts
+tested_in_files: []
 superseded_by:
 - SwRS-MDOKFSTUDIO-LIFE-169
 default_owner_email: gaetan@xeberon.net
