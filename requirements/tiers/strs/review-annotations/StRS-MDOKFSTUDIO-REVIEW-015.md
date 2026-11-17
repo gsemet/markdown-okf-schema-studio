@@ -13,10 +13,10 @@ scope: review-annotations
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-17T22:55:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-17T22:55:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -32,7 +32,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-186
 - SwRS-MDOKFSTUDIO-REVIEW-190
 - SwRS-MDOKFSTUDIO-REVIEW-192
-- SwRS-MDOKFSTUDIO-TRUST-065
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -51,6 +50,25 @@ As a writer, I keep a discussion in the file itself and answer it where I read i
 - Only the lines of the thread change, in one undo step, and the line breaks of the document are kept.
 - Every preview offers the thread controls, Restricted Mode and a file outside the workspace included; a file that VS Code holds read-only is not changed and the writer is told.
 - The refusal under an open edit is made by the page first; the host refuses again when an edit of the Markdown is open on its side.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Page as Preview
+    participant Host
+    participant Doc as Document
+    Writer->>Page: click the thread chip
+    Page-->>Writer: the thread opens
+    Writer->>Page: Reply or Delete
+    Page->>Host: the change
+    alt an edit is open
+        Host-->>Writer: save or cancel the edit first
+    else
+        Host->>Doc: change only the thread lines
+    end
+```
 
 ### Main paths
 
@@ -72,7 +90,6 @@ As a writer, I keep a discussion in the file itself and answer it where I read i
    - SwRS-MDOKFSTUDIO-REVIEW-171: the reader presses Delete thread, which asks no confirmation, and the delete goes to the host
 2. The delete is sent with the lines of the thread
    - SwRS-MDOKFSTUDIO-REVIEW-192: the host removes the lines of the thread and one surrounding blank line
-   - Option SwRS-MDOKFSTUDIO-BLOCK-058 (nominal): the edit is one undo step
 3. The thread is gone from the document
 
 <!-- okf:links:start -->
@@ -84,10 +101,9 @@ As a writer, I keep a discussion in the file itself and answer it where I read i
   - [SwRS-MDOKFSTUDIO-REVIEW-167](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-167.md): An inline THREAD comment shows as a thread chip with its messages
   - [SwRS-MDOKFSTUDIO-REVIEW-171](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-171.md): An open inline thread offers Reply and Delete thread
   - [SwRS-MDOKFSTUDIO-REVIEW-178](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-178.md): An inline thread change message carries valid lines and a non-blank text
-  - [SwRS-MDOKFSTUDIO-REVIEW-186](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-186.md): The host appends a reply inside the thread comment under the author
+  - [SwRS-MDOKFSTUDIO-REVIEW-186](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-186.md): The host appends a valid reply inside the thread comment under the author
   - [SwRS-MDOKFSTUDIO-REVIEW-190](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-190.md): An empty or too long reply is refused by the host
-  - [SwRS-MDOKFSTUDIO-REVIEW-192](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-192.md): Deleting an inline thread removes whole lines
-  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-REVIEW-192](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-192.md): Deleting an inline thread removes whole lines, and a malformed delete message changes nothing
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
 <!-- okf:links:end -->
