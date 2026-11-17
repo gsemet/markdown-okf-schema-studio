@@ -14,10 +14,10 @@ scope: review-annotations
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-17T22:55:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-17T22:55:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -73,6 +73,29 @@ As a reviewer, I attach a comment to the exact words I am talking about, answer 
 - Every change of the comments file reads the latest file first, so a change made by another tool in between is kept too.
 - The author is the name the reviewer configured in a setting or, without one, the name known to Git or to the operating system; when no name can be found at all, the comment is stored as Anonymous.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Reviewer
+    participant Page as Preview
+    participant Host
+    participant File as Comments file
+    Reviewer->>Page: select text and press Comment
+    Page-->>Reviewer: the comment box opens
+    Reviewer->>Page: Save
+    Page->>Host: create the thread
+    Host->>File: append one change after another under the author name
+    alt accepted
+        Host->>Page: post the threads again
+    else refused
+        Host-->>Page: the reason
+        Page-->>Reviewer: the typed text stays
+    end
+    Reviewer->>Page: reply, resolve, reopen or delete (confirmed)
+    Page->>Host: the change for that thread
+```
+
 ### Main paths
 
 #### Path 1: Add a comment on selected text
@@ -96,7 +119,7 @@ As a reviewer, I attach a comment to the exact words I am talking about, answer 
 #### Path 2: Reply to a thread and resolve it
 
 1. The thread popover is open
-   - SwRS-MDOKFSTUDIO-REVIEW-081: the reader sends a reply and the thread id and the trimmed text go to the host
+   - SwRS-MDOKFSTUDIO-REVIEW-044: the reader sends a reply and the thread id and the trimmed text go to the host
 2. The reply is sent to the host
    - SwRS-MDOKFSTUDIO-REVIEW-074: the host changes the named thread only
 3. The thread holds the reply
@@ -117,20 +140,20 @@ As a reviewer, I attach a comment to the exact words I am talking about, answer 
   - [SwRS-MDOKFSTUDIO-REVIEW-012](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-012.md): The host posts the threads of the review comments file and follows its changes
   - [SwRS-MDOKFSTUDIO-REVIEW-021](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-021.md): A highlight, badge or orphan entry opens the thread popover
   - [SwRS-MDOKFSTUDIO-REVIEW-038](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-038.md): Selected body text offers a Comment button and a keyboard shortcut
-  - [SwRS-MDOKFSTUDIO-REVIEW-044](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-044.md): The comment box sends a comment and keeps its text until the host accepts it
+  - [SwRS-MDOKFSTUDIO-REVIEW-044](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-044.md): A comment editor sends its text on Save or Cmd+Enter and keeps it until the host accepts it
   - [SwRS-MDOKFSTUDIO-REVIEW-049](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-049.md): A new comment is anchored by its lines, quote and surroundings
-  - [SwRS-MDOKFSTUDIO-REVIEW-054](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-054.md): The host writes comment changes one after another within the file limits
+  - [SwRS-MDOKFSTUDIO-REVIEW-054](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-054.md): The host writes comment changes one after another within the file limits and drops a malformed create message
   - [SwRS-MDOKFSTUDIO-REVIEW-065](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-065.md): A comment carries the configured, Git or system author name
   - [SwRS-MDOKFSTUDIO-REVIEW-069](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-069.md): A comment create message needs a valid anchor and a bounded body
   - [SwRS-MDOKFSTUDIO-REVIEW-070](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-070.md): A comment reply message names a thread and carries a bounded body
   - [SwRS-MDOKFSTUDIO-REVIEW-071](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-071.md): Resolve and delete messages name a thread; resolve carries a flag
   - [SwRS-MDOKFSTUDIO-REVIEW-073](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-073.md): Comment messages are accepted for any revision of the document
-  - [SwRS-MDOKFSTUDIO-REVIEW-074](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-074.md): Reply, resolve, reopen and delete change the named thread only
+  - [SwRS-MDOKFSTUDIO-REVIEW-074](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-074.md): Reply, resolve, reopen and delete change the named thread only, and a malformed message changes nothing
   - [SwRS-MDOKFSTUDIO-REVIEW-081](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-081.md): The thread popover of a preview sends a reply and keeps it until accepted
   - [SwRS-MDOKFSTUDIO-REVIEW-086](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-086.md): Resolve, Reopen and a confirmed Delete wait for the host, one action at a time
   - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only
   - [SwRS-MDOKFSTUDIO-REVIEW-143](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-143.md): A click or Enter on a chip toggles its comment box
-  - [SwRS-MDOKFSTUDIO-REVIEW-186](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-186.md): The host appends a reply inside the thread comment under the author
+  - [SwRS-MDOKFSTUDIO-REVIEW-186](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-186.md): The host appends a valid reply inside the thread comment under the author
   - [SwRS-MDOKFSTUDIO-REVIEW-217](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-217.md): The comment editors stay inside the window and follow their text
   - [SwRS-MDOKFSTUDIO-REVIEW-218](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-218.md): Escape or a press outside closes a comment editor and asks before dropping a draft
 <!-- okf:links:end -->
