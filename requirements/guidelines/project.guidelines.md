@@ -97,10 +97,12 @@ page of the requirements site.
 - The diagram speaks of actors (the writer, the preview, VS Code, the file), never of SwRS: no
   SwRS ID in a diagram, so it does not compete with the Main paths map.
 - PlantUML is not allowed: GitHub does not render it.
-- `okfreq` validates the section with no error. GitHub rendering of the fence: not yet checked on
-  GitHub (the pull request that adds this rule checks it on a branch preview, and this line states
-  the result once checked). GitHub's Mermaid version may differ from the site's `mermaid ^12.2.0`,
-  so a diagram can look different, or fail, on one side only.
+- `okfreq` validates the section with no error. GitHub rendering of the fence: checked on a GitHub
+  branch preview, GitHub draws a sequence, a flowchart and a state diagram fence natively. It uses
+  its own theme (not the site's cream colours) and a newer Mermaid than the site's `mermaid
+  ^12.2.0`, and shows the figure in an iframe with pan, zoom and copy buttons. The layout and the
+  text match the site and no label was cut. The two renderers can still differ, so a diagram can
+  look different, or fail, on one side only.
 - On the site the diagram is drawn once, in the cream colours of the site (the site has no dark
   mode); a fence that Mermaid cannot draw fails the site build with the StRS id and Mermaid's
   message.
