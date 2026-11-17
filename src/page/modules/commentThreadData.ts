@@ -67,7 +67,7 @@ export const sanitize = (value: unknown): PageCommentThread[] => {
   return result;
 };
 
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-216
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-017
 // Where a quote sits in a text node. The quote has its whitespace collapsed, the node keeps the line
 // breaks of a wrapped source paragraph: a whitespace run of the quote matches any run of the node.
 export const locate = (value: string, variant: string, from: number): { index: number; length: number } | undefined => {

@@ -21,6 +21,8 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
+relates_to:
+- StRS-MDOKFSTUDIO-FMEDIT-008
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -164,4 +166,6 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-BLOCK-129](SwRS-MDOKFSTUDIO-BLOCK-129.md): The page applies a move result only for its own render
   - [SwRS-MDOKFSTUDIO-FMEDIT-064](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-064.md): The insert point after the table has no move buttons
+- Relates to:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
 <!-- okf:links:end -->

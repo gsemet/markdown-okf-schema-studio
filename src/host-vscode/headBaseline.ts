@@ -40,7 +40,7 @@ export interface HeadBaseline<U> {
   watch(uri: U, listener: (commit: string | undefined) => void): { dispose(): void } | undefined;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-203
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-195
 export function createHeadBaseline<U extends { scheme: string; fsPath: string }>(
   getExtension: () => GitExtensionLike<U> | undefined,
 ): HeadBaseline<U> {

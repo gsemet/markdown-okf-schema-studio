@@ -102,7 +102,6 @@ Other refusals (stale field, bad key, YAML that cannot be patched) still apply t
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-FMEDIT-016: the host checks that a flush save skips.
-- SwRS-MDOKFSTUDIO-FMEDIT-054: the shape of the frontmatter save message that carries the flush flag.
 
 ### Verification notes
 - Method: test/page/runtimeEditorFlush.test.ts (scenarios: CR 025 a host flush request saves an open frontmatter field and marks it as a flush, invalid YAML is still sent on a flush, what the flush sends for each editor, pagehide and a hidden page save an open frontmatter editor as a flush, a normal frontmatter save does not carry the flush flag, a blur save refused before a host flush is saved again as a flush, an accepted one is not saved twice, no result still answers after a bounded wait).

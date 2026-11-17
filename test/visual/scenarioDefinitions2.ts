@@ -925,7 +925,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "engine draws it with the Smetana layout, the theme colours and the icon, without a request.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-002
+    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
     id: "frontmatter-schema/v20-invalid-yaml-dark-900",
     fixture: "41-invalid-yaml",

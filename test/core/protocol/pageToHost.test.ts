@@ -274,8 +274,8 @@ test("T1: previewPasteHtml accepts a bounded non-empty HTML string with an edit 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-069
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-070
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
 test("T43: previewCommentCreate and previewCommentReply validate anchor, id and body limits", () => {
   const anchor = { line: 2, endLine: 3, quote: "q", prefix: "p", suffix: "s" };
   const create = { type: "previewCommentCreate", documentId: "doc", revision: 1, requestId: 1, anchor, body: "Why?" };
@@ -298,7 +298,7 @@ test("T43: previewCommentCreate and previewCommentReply validate anchor, id and 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-071
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
 test("T44: previewCommentResolve and previewCommentDelete validate the thread id and the flag", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1, threadId: "t_0a0b0c0d" };
   const resolve = { type: "previewCommentResolve", ...base, resolved: true };
@@ -337,7 +337,8 @@ test("STAB-03: previewEditClosed carries the id of the closed editor", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-178
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-192
 test("previewThreadReply and previewThreadDelete validate the lines, the edit id and the text", () => {
   const reply = {
     type: "previewThreadReply", documentId: "doc", revision: 1, requestId: 1, editId: "host-1",
@@ -412,7 +413,7 @@ test("CR 050: the warning banner messages are registered with a bounded key", ()
   assert.equal(isRegisteredPreviewMessage({ type: "previewShowProblems" }), false, "the envelope is required");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-007
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
 test("CR147: previewSideBySideChanged carries a boolean and names the current render", () => {
   const base = { type: "previewSideBySideChanged", documentId: "doc", revision: 1, requestId: 1 };
   assert.equal(isRegisteredPreviewMessage({ ...base, on: true }), true);

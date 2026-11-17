@@ -350,7 +350,7 @@ const popoverOf = (document: FakeDocument) => document.querySelector("[data-okf-
 const sendButton = (document: FakeDocument) =>
   popoverOf(document).querySelectorAll("button").find((candidate) => candidate.textContent === "Reply")!;
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-081
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
 test("T43: the popover has a reply box that posts the thread id and the trimmed body", () => {
   const { document, comments, replies } = setupWithReply();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -589,7 +589,7 @@ test("T44: Escape closes the popover and forgets the question", () => {
   assert.equal(popoverOf(document).querySelector("[data-okf-comment-confirm]"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-081
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
 test("CR 174: the trace names what closed an open popover, and a re-apply that keeps it is silent", () => {
   const document = new FakeDocument();
   provideGlobalElement(FakeElement);
@@ -623,7 +623,7 @@ test("CR 174: the trace names what closed an open popover, and a re-apply that k
   assert.deepEqual(traced.slice(4), [["comment popover closed", "toggled, thread t2"]], "a closed popover records nothing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-081
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
 test("CR 186: the popover stays open through a reply and a resolve in the host's order, with no close traced", () => {
   // The review-threads stress scenario: the host posts the threads, then its answer; a content
   // update re-applies the threads in between. On the same page nothing here closes the popover.

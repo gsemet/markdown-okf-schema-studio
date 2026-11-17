@@ -259,6 +259,7 @@ export function addReply(
   return threads.map((thread) => (thread === target ? { ...thread, comments: [...thread.comments, comment] } : thread));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-074
 /** Sets the resolved flag of the named thread; undefined when it does not exist. */
 export function setResolved(
   threads: readonly CommentThread[],
@@ -270,6 +271,7 @@ export function setResolved(
   return threads.map((thread) => (thread === target ? { ...thread, resolved } : thread));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-074
 /** Removes the named thread (the list may become empty); undefined when it does not exist. */
 export function deleteThread(threads: readonly CommentThread[], threadId: string): CommentThread[] | undefined {
   if (!threads.some((thread) => thread.id === threadId)) return undefined;

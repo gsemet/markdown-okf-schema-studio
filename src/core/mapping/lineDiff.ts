@@ -70,7 +70,7 @@ function editIndexes(base: string[], current: string[]): { inserted: number[]; d
   return { inserted: inserted.reverse(), deleted: deleted.reverse() };
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-200
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-195
 /**
  * Line ranges of `current` that differ from `base` (added or modified lines; lines that only
  * disappeared have no range). Line endings are ignored. Large or very different texts report the
@@ -116,7 +116,7 @@ export interface LineHunk {
   end: number;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-010
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
 /**
  * The differences between `base` and `current` as hunks: runs of lines added, removed or changed,
  * with the lines of both texts. Unlike {@link changedLineRanges}, a run of removed lines is a hunk
@@ -180,7 +180,7 @@ function blankLines(lines: readonly string[], from: number, to: number): boolean
   return true;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-010
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
 /**
  * Merges a pure removal or a pure addition with the hunk next to it when only blank lines separate
  * them on both sides. Myers matches a blank line between two paragraphs as a common line, so a
@@ -212,7 +212,7 @@ export interface LineSpan {
   end: number;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-010
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
 /**
  * True when a block that covers `span` (lines of the current text) changed: it meets a hunk that has
  * current lines, or it holds the place where a hunk removed lines (the removal lies after its first
@@ -224,7 +224,7 @@ export function spanChanged(span: LineSpan, hunks: readonly LineHunk[]): boolean
     : span.start < hunk.start && hunk.start <= span.end);
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-010
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
 /**
  * The lines of the base text that a block covering `span` (lines of the current text) comes from.
  * A line inside a hunk maps to the whole base side of the hunk; the lines between hunks shift by the

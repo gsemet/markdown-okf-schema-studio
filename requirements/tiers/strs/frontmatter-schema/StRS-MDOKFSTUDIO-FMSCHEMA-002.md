@@ -8,19 +8,17 @@ description: When a document's frontmatter is not valid YAML or is not a
   while still rendering the Markdown body.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
 user_need: As a writer, I see why my frontmatter is rejected and keep reading my
   document; a broken metadata block must never blank the preview.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-001
-- SwRS-MDOKFSTUDIO-FMSCHEMA-017
-- SwRS-MDOKFSTUDIO-FMSCHEMA-018
-- SwRS-MDOKFSTUDIO-FMSCHEMA-076
+derived_by: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- StRS-MDOKFSTUDIO-FMSCHEMA-001
 ---
 
 ## Invalid frontmatter is explained and the body still renders
@@ -38,23 +36,11 @@ As a writer, I see why my frontmatter is rejected and keep reading my document; 
 - Invalid YAML shows one row "Invalid frontmatter YAML: {parser message}" and an error badge of 1; a list, a scalar or an empty block shows "Invalid frontmatter YAML: Frontmatter is not a mapping.". YAML aliases expand up to 100, beyond which the parse fails as invalid YAML.
 - Known issue: the parser message is the raw text of the YAML library, with frontmatter-relative line numbers and caret markers.
 
-### Main paths
-
-#### Path 1: A mistake in the YAML
-
-1. A document starts with a `---` line and YAML that does not parse
-   - SwRS-MDOKFSTUDIO-FMSCHEMA-001: the page shows one error row "Invalid frontmatter YAML" with the parser message
-   - Option SwRS-MDOKFSTUDIO-FMSCHEMA-001 (refusal): an opening fence without a closing fence
-2. The error row is shown and the body of the document renders below it
-
 <!-- okf:links:start -->
 ### Links
 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
-- Derived by:
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-001](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-001.md): The frontmatter block is found by its fences and parsed as a YAML mapping
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-017](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-017.md): Invalid YAML gives one error row and an error badge
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-018](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-018.md): Frontmatter that is not a mapping gives an error row
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-076](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-076.md): Invalid YAML does not stop the body from rendering
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
 <!-- okf:links:end -->

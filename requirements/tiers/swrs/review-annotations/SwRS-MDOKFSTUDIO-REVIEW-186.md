@@ -2,13 +2,15 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-186
 uuid: 7734894d-d131-4ec7-a255-fb2b67af57f6
-title: The host appends a reply inside the thread comment under the author
-description: When the host receives a reply to an inline thread, the extension
-  SHALL, if the named lines are still exactly one thread comment and the
-  document has not changed meanwhile, add one message, a header with the author
-  on one line and the local date and time as YYYY-MM-DD HH:MM and the reply text
-  indented by two spaces, above the closing --> and change nothing else, and
-  otherwise answer with the reason and leave the document unchanged.
+title: "The host appends a valid reply inside the thread comment under the author"
+description: "When the host receives a reply to an inline thread, the extension SHALL,
+  if the named lines are still exactly one thread comment and the document has not
+  changed meanwhile, add one message, a header with the author on one line and the
+  local date and time as YYYY-MM-DD HH:MM and the reply text indented by two spaces,
+  above the closing --> and change nothing else, and otherwise answer with the reason
+  and leave the document unchanged; a previewThreadReply message is dropped unless
+  it has an edit id, integer lines with 1 <= line <= endLine and a text of 1 to 10
+  000 characters that is not blank."
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -30,20 +32,24 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/comments/inlineThread.ts
+- src/core/protocol/pageToHost.ts
 - src/session/features/sourceEdits.ts
 tested_in_files:
 - test/core/comments/inlineThread.test.ts
 - test/core/edits/sourceEdits.test.ts
+- test/core/protocol/pageToHost.test.ts
 - test/integration/inlineThread.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-REVIEW-178
 ---
 
-## The host appends a reply inside the thread comment under the author
+## The host appends a valid reply inside the thread comment under the author
 
 ### Normative behavior
 
-When the host receives a reply to an inline thread, the extension SHALL, if the named lines are still exactly one thread comment and the document has not changed meanwhile, add one message, a header with the author on one line and the local date and time as YYYY-MM-DD HH:MM and the reply text indented by two spaces, above the closing --> and change nothing else, and otherwise answer with the reason and leave the document unchanged.
+When the host receives a reply to an inline thread, the extension SHALL, if the named lines are still exactly one thread comment and the document has not changed meanwhile, add one message, a header with the author on one line and the local date and time as YYYY-MM-DD HH:MM and the reply text indented by two spaces, above the closing --> and change nothing else, and otherwise answer with the reason and leave the document unchanged; a previewThreadReply message is dropped unless it has an edit id, integer lines with 1 <= line <= endLine and a text of 1 to 10 000 characters that is not blank.
 
 ### Scenario (nominal): Reply above the closing marker
 
@@ -88,9 +94,24 @@ When the host receives a reply to an inline thread, the extension SHALL, if the 
 | A reply whose author lookup is slow and an edit of the document in between | the answer is "The document changed meanwhile. Try again." and nothing is changed |
 | No edit in between | the reply is planned and applied |
 
+### Scenario (nominal): Valid reply message
+
+- GIVEN a previewThreadReply message with an edit id, lines 5 and 8 and the text ok
+- WHEN the message is validated
+- THEN it is accepted
+
+### Scenario (refusal): Invalid reply message
+
+| Input | Outcome |
+| --- | --- |
+| A missing edit id | dropped |
+| Line 0 | dropped |
+| An end line before the line | dropped |
+| A blank text in a previewThreadReply | dropped |
+| A text of 10 001 characters in a previewThreadReply | dropped |
+
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-REVIEW-178: the accepted shape of the reply message.
 - SwRS-MDOKFSTUDIO-REVIEW-192: the delete of an inline thread, which re-reads the same lines.
 - SwRS-MDOKFSTUDIO-REVIEW-065: the order in which the author name is resolved.
 
@@ -101,6 +122,8 @@ When the host receives a reply to an inline thread, the extension SHALL, if the 
 - Method: test/integration/inlineThread.test.ts (reply appended, text before and after unchanged, LF and CRLF, author Bob Reviewer, lines that are not exactly the thread change nothing: scenarios reply above the closing marker, line break, author, lines that are not exactly one thread).
 - Method: test/session/reviewReqThreads.requirements.test.ts (unit test: a document that changes while the author is resolved gets the changed-meanwhile answer: scenario document changed while the author is resolved).
 - Criteria: Only the closing line is replaced by the new lines and the closing marker; the edit text uses the document end of line and the marker line keeps its prefix and suffix; the header author has no control character or line break; the document text is identical after a refused request; the revision of the document is compared again after the author is known.
+- Method: test/core/protocol/pageToHost.test.ts (unit test `previewThreadReply and previewThreadDelete validate the lines, the edit id and the text`: scenarios valid, invalid).
+- Criteria: The validators accept the boundary values and refuse one more.
 
 <!-- okf:links:start -->
 ### Links
@@ -117,4 +140,6 @@ When the host receives a reply to an inline thread, the extension SHALL, if the 
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-REVIEW-178](SwRS-MDOKFSTUDIO-REVIEW-178.md): An inline thread change message carries valid lines and a non-blank text
 <!-- okf:links:end -->

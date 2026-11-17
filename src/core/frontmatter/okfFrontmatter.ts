@@ -320,11 +320,8 @@ export function analyzeFrontmatter(options: FrontmatterOptions): FrontmatterResu
   return { ...result, fields, additionalPropertiesAllowed: result.additionalPropertiesAllowed ?? true };
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
 function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult {
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
   const extraction = extractFrontmatterShared(options.sourceText);
   if (!extraction.present) {
     return {
@@ -351,6 +348,7 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
   const frontmatter = extraction.frontmatter;
   const info: FieldIssue[] = [];
   const typeValue = typeof frontmatter.type === "string" ? frontmatter.type : undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
   if (!typeValue) {
     return {
       present: true,
@@ -365,6 +363,7 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
   const schemaDir = options.allowSchemaResolution === false
     ? undefined
     : options.schemaDirOverride ?? findSchemaDirectory(options.schemaFiles, options.filePath, options.stopDir);
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
   if (!schemaDir) {
     const schemaSuppressed = options.allowSchemaResolution === false;
     const suppressionInfo = schemaSuppressed
@@ -473,6 +472,7 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
       };
     });
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
   // Map ajv instance paths to field names for per-row underlines.
   const fieldIssues = new Map<string, FieldIssue[]>();
   try {
@@ -526,6 +526,7 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
   const summary = { errors: 0, warnings: 0, infos: 0 };
   for (const field of fields) {
     for (const issue of field.issues) {

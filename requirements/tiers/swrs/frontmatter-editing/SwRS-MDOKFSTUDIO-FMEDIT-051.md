@@ -14,6 +14,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMEDIT-008
+depends_on:
+- SwRS-MDOKFSTUDIO-TRUST-005
 annotation_exemption: true
 exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-005; no marker expected."
 derived_by: []
@@ -54,6 +56,8 @@ When the preview is read-only because the workspace is untrusted or the file is 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
 - Superseded by:
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
 <!-- okf:links:end -->

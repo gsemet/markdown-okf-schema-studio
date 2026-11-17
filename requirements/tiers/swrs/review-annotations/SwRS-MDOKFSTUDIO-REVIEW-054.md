@@ -2,15 +2,18 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-054
 uuid: 55130de2-cc11-47c6-8ac0-30305b4c0217
-title: The host writes comment changes one after another within the file limits
-description: When the host receives a create message from a preview of a saved
-  document, the extension SHALL append a thread with the anchor as sent,
-  resolved false and one comment, with thread and comment ids and the time
-  chosen by the host, in the review comments file next to the document, running
-  the changes of one file one after another on its latest content and refusing
-  with a reason and a warning, and writing nothing, a change that the file state
-  or its limits do not allow, and writing through a temporary file renamed onto
-  the comments file and never into a comments file that is a symbolic link.
+title: "The host writes comment changes one after another within the file limits and
+  drops a malformed create message"
+description: "When the host receives a create message from a preview of a saved document,
+  the extension SHALL append a thread with the anchor as sent, resolved false and
+  one comment, with thread and comment ids and the time chosen by the host, in the
+  review comments file next to the document, running the changes of one file one after
+  another on its latest content and refusing with a reason and a warning, and writing
+  nothing, a change that the file state or its limits do not allow, and writing through
+  a temporary file renamed onto the comments file and never into a comments file that
+  is a symbolic link; a create message is dropped without an answer unless its anchor
+  has integer lines with 1 <= line <= endLine, a quote of at most 500 characters and
+  a prefix and suffix of at most 32 characters, and its body has 1 to 10 000 characters."
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -23,29 +26,34 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
+- SwRS-MDOKFSTUDIO-TRUST-052
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/comments/commentModel.ts
 - src/core/comments/commentStore.ts
+- src/core/protocol/pageToHost.ts
 - src/host-vscode/vscodeHost.ts
 - src/session/features/comments.ts
 tested_in_files:
 - test/core/comments/commentEditing.test.ts
 - test/core/comments/reviewReq.requirements.test.ts
+- test/core/protocol/pageToHost.test.ts
 - test/host-vscode/fileRename.test.ts
 - test/integration/commentWrite.test.ts
 - test/node-services/nodeServices.test.ts
 - test/session/reviewReqComments.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-REVIEW-069
 ---
 
-## The host writes comment changes one after another within the file limits
+## The host writes comment changes one after another within the file limits and drops a malformed create message
 
 ### Normative behavior
 
-When the host receives a create message from a preview of a saved document, the extension SHALL append a thread with the anchor as sent, resolved false and one comment, with thread and comment ids and the time chosen by the host, in the review comments file next to the document, running the changes of one file one after another on its latest content and refusing with a reason and a warning, and writing nothing, a change that the file state or its limits do not allow, and writing through a temporary file renamed onto the comments file and never into a comments file that is a symbolic link.
+When the host receives a create message from a preview of a saved document, the extension SHALL append a thread with the anchor as sent, resolved false and one comment, with thread and comment ids and the time chosen by the host, in the review comments file next to the document, running the changes of one file one after another on its latest content and refusing with a reason and a warning, and writing nothing, a change that the file state or its limits do not allow, and writing through a temporary file renamed onto the comments file and never into a comments file that is a symbolic link; a create message is dropped without an answer unless its anchor has integer lines with 1 <= line <= endLine, a quote of at most 500 characters and a prefix and suffix of at most 32 characters, and its body has 1 to 10 000 characters.
 
 ### Scenario (nominal): First comment on a text
 
@@ -112,11 +120,34 @@ When the host refuses a comment change, it answers the page ok false with the re
 | A comment that keeps the file below 2 MiB | The comment is written |
 | A preview of a saved file, and a comment is created | The comment is written |
 
+### Scenario (nominal): Valid create message
+
+- GIVEN a previewCommentCreate message with an anchor on lines 3 to 3 with a quote of 5 characters and a body of 1 character
+- WHEN the message is validated
+- THEN it is accepted
+
+### Scenario (refusal): Invalid create messages
+
+| Input | Outcome |
+| --- | --- |
+| An anchor with line 0 | dropped without an answer and nothing is written |
+| An anchor with endLine before line | dropped without an answer and nothing is written |
+| A quote of 501 characters | dropped without an answer and nothing is written |
+| A prefix or suffix of 33 characters | dropped without an answer and nothing is written |
+| A body of 0 characters | dropped without an answer and nothing is written |
+| A body of 10 001 characters | dropped without an answer and nothing is written |
+
+### Scenario (boundary): Accepted limits of a create message
+
+| Input | Outcome |
+| --- | --- |
+| A quote of 500 characters, a prefix and a suffix of 32 characters | accepted |
+| A body of 1 character, a body of 10 000 characters | accepted |
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-REVIEW-044: the comment box that shows the answer of the host.
 - SwRS-MDOKFSTUDIO-REVIEW-065: the author stored with the comment.
-- SwRS-MDOKFSTUDIO-REVIEW-069: the accepted shape of the create message.
 - SwRS-MDOKFSTUDIO-REVIEW-074: the other changes of a thread that use the same queue and refusals.
 
 ### Verification notes
@@ -129,6 +160,10 @@ When the host refuses a comment change, it answers the page ok false with the re
 - Method: test/node-services/nodeServices.test.ts, unit test `the Node file system reports a link itself, a dangling one included, and not a missing path` (the link check of the Node file system).
 - Method: real window review-annotations/r04-thread-created (First comment on a text).
 - Criteria: The written file matches the pattern for ids and dates and holds the anchor as sent, and parses with version 1. After concurrent changes the file holds every change, and the second change is written after the first was refused. The refusal comes before the write when the UTF-8 length exceeds MAX_SIDECAR_BYTES, writeComment refuses when the document uri does not start with file:, and for an unsaved comments file the reason names the file and the disk content is identical. showWarning is called with the prefix and the reason on every refusal in writeComment; the refusals of an empty or too long body, an unknown thread id and an unexpected error are answered to the page without a warning.
+- Method: test/core/protocol/pageToHost.test.ts (unit test `T43: previewCommentCreate and previewCommentReply validate anchor, id and body limits`: scenarios valid create message, invalid create messages, accepted limits of a create message).
+- Method: test/core/comments/commentEditing.test.ts (unit test `T43: isValidAnchor enforces lines and the 500 / 32 / 32 limits`: scenarios invalid create messages, accepted limits of a create message).
+- Method: test/integration/commentWrite.test.ts (invalid create messages write nothing: scenario invalid create messages).
+- Criteria: The validator accepts the boundary values and refuses one more.
 
 <!-- okf:links:start -->
 ### Links
@@ -141,4 +176,7 @@ When the host refuses a comment change, it answers the page ok false with the re
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-REVIEW-069](SwRS-MDOKFSTUDIO-REVIEW-069.md): A comment create message needs a valid anchor and a bounded body
 <!-- okf:links:end -->

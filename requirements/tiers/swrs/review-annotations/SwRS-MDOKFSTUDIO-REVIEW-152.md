@@ -2,15 +2,16 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-152
 uuid: 6561d8e8-67f9-4613-92c9-cca85bb539e7
-title: The showComments setting and the Comments button hide and show every
-  review mark
-description: When the setting markdownOkfSchemaStudio.preview.showComments is
-  read, the extension SHALL treat the value false as off and every other value,
-  including no value, as on, and while the setting is off or the Comments button
-  is off it SHALL hide the gray and the thread chips and every review mark of
-  the preview (highlight colour and underline, badges, the Orphaned comments
-  box), keeping the quoted text as plain text that opens no thread popover and
-  is not in the Tab order.
+title: "The showComments setting and the Comments button hide and show every review
+  mark, and a message of another render changes nothing"
+description: "When the setting markdownOkfSchemaStudio.preview.showComments is read,
+  the extension SHALL treat the value false as off and every other value, including
+  no value, as on, and while the setting is off or the Comments button is off it SHALL
+  hide the gray and the thread chips and every review mark of the preview (highlight
+  colour and underline, badges, the Orphaned comments box), keeping the quoted text
+  as plain text that opens no thread popover and is not in the Tab order; a previewShowComments
+  message that names another document, revision or request than the page's does not
+  change the show-comments state."
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -22,6 +23,7 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+- SwRS-MDOKFSTUDIO-TRUST-059
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,17 +42,20 @@ tested_in_files:
 - test/page/modules/commentThreads.test.ts
 - test/page/modules/commentsToggle.test.ts
 - test/page/runtimeCommentsHidden.test.ts
+- test/page/runtimePageControls.test.ts
 - test/session/reviewReqIncoming.requirements.test.ts
 - test/visual/reviewMarksHiddenScenarios.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-REVIEW-156
 ---
 
-## The showComments setting and the Comments button hide and show every review mark
+## The showComments setting and the Comments button hide and show every review mark, and a message of another render changes nothing
 
 ### Normative behavior
 
-When the setting markdownOkfSchemaStudio.preview.showComments is read, the extension SHALL treat the value false as off and every other value, including no value, as on, and while the setting is off or the Comments button is off it SHALL hide the gray and the thread chips and every review mark of the preview (highlight colour and underline, badges, the Orphaned comments box), keeping the quoted text as plain text that opens no thread popover and is not in the Tab order.
+When the setting markdownOkfSchemaStudio.preview.showComments is read, the extension SHALL treat the value false as off and every other value, including no value, as on, and while the setting is off or the Comments button is off it SHALL hide the gray and the thread chips and every review mark of the preview (highlight colour and underline, badges, the Orphaned comments box), keeping the quoted text as plain text that opens no thread popover and is not in the Tab order; a previewShowComments message that names another document, revision or request than the page's does not change the show-comments state.
 
 Comments are hidden while either trigger is off: the setting (master switch, which also removes the button) or the Comments button (a view choice stored for the workspace). The TODO chips and the text-selection Comment button (SwRS-MDOKFSTUDIO-REVIEW-038) stay.
 
@@ -117,8 +122,19 @@ Comments are hidden while either trigger is off: the setting (master switch, whi
 | comments hidden after a closed popover | comments are shown again | no popover opens by itself |
 | comments hidden | the layout moves because a badge after a block is no longer displayed | the reading line is kept by the same layout callback as the chips |
 
+### Scenario (nominal): Current show-comments message
+
+- GIVEN a previewShowComments message that names the page's render
+- WHEN it reaches the page
+- THEN the data-okf-show-comments attribute follows its value
+
+### Scenario (refusal): Stale show-comments message
+
+- GIVEN a previewShowComments message that names another document, revision or request
+- WHEN it reaches the page
+- THEN the attribute is unchanged
+
 ### Related requirements
-- SwRS-MDOKFSTUDIO-REVIEW-156: a show-comments message of another render is ignored.
 - SwRS-MDOKFSTUDIO-REVIEW-021: a highlight, badge or orphaned comments entry opens the thread popover only while comments are shown.
 
 ### Verification notes
@@ -134,6 +150,8 @@ Comments are hidden while either trigger is off: the setting (master switch, whi
 - Method: test/page/runtimeCommentsHidden.test.ts (`the setting false closes the open thread popover and a click on the highlight is plain text; true restores it`): the page message previewShowComments with showComments false removes the open popover through hostHandlers, a click on the former highlight reveals its source line and opens nothing, showComments true brings the popover back.
 - Untested: the Tab order after the setting changed, at runtime level (the runtime harness has no text nodes, so no highlight is placed; it is asserted on the thread module in commentThreads.test.ts and in a real window for the button); the badge layout shift and the reading line kept across it (the layout callback is the one of the chips); the text-selection Comment button while hidden (SwRS-MDOKFSTUDIO-REVIEW-038).
 - Criteria: package.json declares the setting as boolean with default true and the boot flag is on for every value but false; the page attribute data-okf-show-comments is false and the stylesheet hides the two kinds and the button; postShowComments runs in onSettingsChanged and after a page load; the pressed state and the three texts match the state; the page attribute data-sphinx-preview-comments is off after the button, the post carries preference comments with value false, the layout callback runs so that the reading position is kept, and the stylesheet hides the comment and the thread kinds (not the TODO kind). Under either attribute (data-sphinx-preview-comments off or data-okf-show-comments false) the stylesheet gives mark[data-okf-comment-thread] a transparent background, no text decoration, no radius and an inherited cursor, and display none to button[data-okf-comment-badge] and [data-okf-orphans]; the thread interceptor and the Enter and Space handler neither prevent nor stop an event on a holder and open no popover; the marks carry no tabindex, role or aria-haspopup; a popover open when comments become hidden, by the button or by the previewShowComments message of the setting, is removed and not reopened by a re-apply.
+- Method: test/page/runtimePageControls.test.ts (unit test `T15: previewShowComments sets the show-comments attribute of the page, stale ids are ignored`: scenarios current show-comments message, stale show-comments message).
+- Criteria: The attribute changes only for the current render.
 
 <!-- okf:links:start -->
 ### Links
@@ -145,4 +163,7 @@ Comments are hidden while either trigger is off: the setting (master switch, whi
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-REVIEW-156](SwRS-MDOKFSTUDIO-REVIEW-156.md): A show-comments message of another render is ignored
 <!-- okf:links:end -->

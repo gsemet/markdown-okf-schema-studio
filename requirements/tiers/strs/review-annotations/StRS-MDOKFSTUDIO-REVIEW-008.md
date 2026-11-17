@@ -45,6 +45,22 @@ As a reviewer, I find a discussion on its text after the author edited the docum
 - The comments file is never created by this follow-up.
 - Nothing is overwritten on a rename: when a comments file already exists under the new name, the old one stays and a warning says so.
 
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Anchored: the thread sits on its quote
+    Anchored --> Shifted: edits above move its lines in memory
+    Shifted --> SavedLines: the document is saved
+    SavedLines --> Anchored
+    Anchored --> Moved: the quote is found at another place
+    Moved --> SavedLines
+    Anchored --> Orphaned: the quote is gone and the lines are kept
+    Orphaned --> Anchored: the quote comes back
+    Anchored --> Renamed: the document is renamed or moved
+    Renamed --> Anchored: the comments file follows unless the new name is taken
+```
+
 ### Main paths
 
 #### Path 1: Keep a thread on its text while the document changes
@@ -53,7 +69,7 @@ As a reviewer, I find a discussion on its text after the author edited the docum
    - SwRS-MDOKFSTUDIO-REVIEW-094: lines inserted or removed above a thread move its stored lines in memory
    - Option SwRS-MDOKFSTUDIO-REVIEW-100 (nominal): a quote found at one other place is followed by its thread
    - Option SwRS-MDOKFSTUDIO-REVIEW-107 (nominal): a slightly changed quote is followed by a bounded fuzzy search
-   - Option SwRS-MDOKFSTUDIO-REVIEW-101 (nominal): a deleted quote orphans the thread
+   - Option SwRS-MDOKFSTUDIO-REVIEW-100 (nominal): a deleted quote orphans the thread and it keeps its lines
 2. The stored lines of the thread have moved
    - SwRS-MDOKFSTUDIO-REVIEW-119: the document save writes the moved lines to the comments file
    - Option SwRS-MDOKFSTUDIO-REVIEW-119 (refusal): typing alone writes nothing
@@ -72,8 +88,8 @@ As a reviewer, I find a discussion on its text after the author edited the docum
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-REVIEW-094](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-094.md): Edits move the stored lines of a thread in memory
-  - [SwRS-MDOKFSTUDIO-REVIEW-100](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-100.md): A thread follows its quote in the plain text, narrowed by its context
+  - [SwRS-MDOKFSTUDIO-REVIEW-094](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-094.md): Edits move the stored lines of a thread in memory and write nothing to its file
+  - [SwRS-MDOKFSTUDIO-REVIEW-100](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-100.md): A thread follows its quote in the plain text, narrowed by its context, or is orphaned and keeps its lines
   - [SwRS-MDOKFSTUDIO-REVIEW-101](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-101.md): A thread whose quote is gone or ambiguous is orphaned and keeps its lines
   - [SwRS-MDOKFSTUDIO-REVIEW-107](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-107.md): A slightly changed quote is followed by a bounded fuzzy search
   - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only

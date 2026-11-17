@@ -8,8 +8,8 @@ description: When the quote of a review thread cannot be found and its old lines
   its stored lines and comments.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,11 +19,11 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/comments/anchoring.ts
-tested_in_files:
-- test/core/comments/anchoring.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-100
 ---
 
 ## A thread whose quote is gone or ambiguous is orphaned and keeps its lines
@@ -80,4 +80,6 @@ When the quote has no acceptable place but at least 60 percent of its words occu
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-008](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-008.md): Review threads follow edits and renames of the document
   - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-100](SwRS-MDOKFSTUDIO-REVIEW-100.md): A thread follows its quote in the plain text, narrowed by its context, or is orphaned and keeps its lines
 <!-- okf:links:end -->

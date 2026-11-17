@@ -53,22 +53,34 @@ As a writer of Open Knowledge Format documents, I get schema-aware metadata simp
 
 ### Rationale and constraints
 
-- The schema folder is the first _schema folder (preferred) or _schemas folder found walking up from the document's folder to the workspace folder root.
-- The schema file is {type}.schema.yaml, .yml, .json or .json5 whose stem equals the type, case-insensitively; .yaml wins over .yml, .json, .json5.
-- A missing schema file shows the info row "No schema found for type "{type}" in {folder}/." and an info badge; no schema folder gives the generic table with no info row.
-- In Restricted Mode, and for a standalone file outside the workspace, no schema is looked up and the info row "Schema validation requires a trusted workspace; showing generic frontmatter." is shown.
-- The info row appears only when the frontmatter has a string type.
-- Known issue: a file outside every workspace folder in a trusted workspace is also told that schema validation requires a trusted workspace.
-- JSON5 support is minimal: only line and block comments (outside strings) are stripped; trailing commas and unquoted keys fail as a schema that cannot be parsed.
-- A relative reference that is a whole node is inlined from the schema folder, trying the name as written then .json, .json5, .yaml, .yml, with the extension fallbacks; a fragment written without the leading slash (base.schema.yaml#defs) selects that key.
-- Known issue: a standard JSON pointer (#/defs/s) leaves the property that holds the reference without a schema, so the schema does not compile and the table shows the red row "Schema validation failed to run"; a second reference to a file that is already inlined, a reference cycle and a missing target all become a reference to the schema root.
-- Known issue: a reference such as ../../x.yaml is read even when it leaves the schema folder (workspace trust applies).
-- A JSON or JSON5 schema that cannot be read or parsed gives the generic table with the warning row "Schema could not be parsed: {error}".
-- An empty or comment-only YAML schema file has no content yet: the type stays without schema, the table is generic and one informational row reads "schema file '{name}' is empty".
-- Known issue: a YAML syntax error is not reported (the partly parsed schema is applied silently).
-- A schema that cannot be compiled shows a red row "Schema validation failed to run: {diagnostic}" spanning every visible column, counted as one error in the badge; the fields stay listed in schema order with their documentation.
-- Resolved schemas and compiled validators are reused only while the schema file and every inlined or probed reference keep the same content (compared by content, not time); edited, replaced, reverted or deleted files are picked up and at most 64 schemas are cached.
-- Known issue: editing a schema does not refresh open previews by itself; the table is re-validated on the next document change, refresh, re-render or settings change.
+- The schema folder is the first _schema (preferred) or _schemas folder found walking up from the folder of the document to the workspace folder root; the schema file is {type}.schema.yaml, .yml, .json or .json5 whose stem equals the type, case-insensitively.
+- A missing schema file shows an info row and an info badge; no schema folder gives the generic table with no info row; the info row appears only when the frontmatter has a string type.
+- In Restricted Mode, and for a standalone file outside the workspace, no schema is looked up and an info row says that schema validation requires a trusted workspace.
+- A relative reference that is a whole node is inlined from the schema folder; JSON5 support is minimal (comments only).
+- A schema that cannot be parsed gives the generic table with a warning row, an empty schema file leaves the type without schema with an informational row, and a schema that cannot be compiled shows a red row counted as one error while the fields stay listed.
+- A schema edit is used at the next analysis (a document change, refresh, re-render or settings change); open previews are not refreshed by it.
+
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Typed: the frontmatter has a string type
+    Typed --> Untrusted: Restricted Mode or a standalone file
+    Typed --> Searching: walk up to the nearest schema folder
+    Searching --> NoFolder: no schema folder
+    Searching --> NoFile: no file named by the type
+    Searching --> Parsing: the schema file is found
+    Parsing --> ParseError: the file cannot be parsed
+    Parsing --> Compiling: relative references inlined
+    Compiling --> CompileError: the schema cannot be compiled
+    Compiling --> Applied: the schema applies to the frontmatter
+    Untrusted --> [*]: info row
+    NoFolder --> [*]: generic table
+    NoFile --> [*]: info row
+    ParseError --> [*]: warning row
+    CompileError --> [*]: red row
+    Applied --> [*]: fields follow the schema
+```
 
 ### Main paths
 

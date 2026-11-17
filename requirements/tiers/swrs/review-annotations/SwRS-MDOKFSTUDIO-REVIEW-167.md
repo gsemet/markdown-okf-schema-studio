@@ -68,12 +68,19 @@ When a document holds a `<!-- THREAD` comment as its own block, the renderer SHA
 | A header dated 2026-1-2 3:04 (another date format) | Not a thread |
 | A THREAD comment inside a paragraph | A gray comment chip |
 
+### Scenario (boundary): A thread inside a tab item keeps its own source lines
+
+- GIVEN a tab item that holds an inline thread comment from line 7 to line 12
+- WHEN the document is rendered
+- THEN the thread wrapper carries data-line 7 and data-end-line 12, so that the reply and the delete of the thread name those lines, and the tab panel stays one block
+
 ### Verification notes
 - Method: test/core/render/commentMarkers.test.ts (`a THREAD comment is a green thread chip with one entry per message`, `a single-message thread chip shows only the author`, `a THREAD comment with CRLF line ends and trailing spaces renders the same`, `a THREAD without a valid message, or inside a paragraph, stays an ordinary comment`).
 - Method: test/core/comments/inlineThread.test.ts (`a thread body is read as messages with author, date and text`, `CRLF line ends and trailing spaces or tabs do not change the messages`, `blank lines inside a message are kept, and a tab indent is accepted`, `what is not a thread is refused`).
 - Method: test/core/preview/previewStyles.test.ts (`an inline thread is a green chip with a bubble, a green titled box, and goes with the gray chips`).
 - Method: visual scenarios review-annotations/v11-inline-thread-light-900, v12-inline-thread-dark-900 and v13-inline-thread-cream-900 (v13 asserts only).
 - Criteria: The wrapper carries data-okf-comment-kind thread and the chip label follows the number of messages; the hidden body holds one entry per message with author, date and text elements; the parsed messages equal the expected author, date and text; parseThreadBody returns undefined and the chip kind is comment for what is not a thread.
+- Method: test/core/render/cardsTabs.test.ts, unit test `a comment and a thread in a tab item keep their own source line range` (A thread inside a tab item keeps its own source lines).
 
 <!-- okf:links:start -->
 ### Links

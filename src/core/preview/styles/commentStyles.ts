@@ -1,18 +1,8 @@
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
-// @implements_req SwRS-MDOKFSTUDIO-CORE-008
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-028
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-143
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-002
-/**
- * Comments: comment and TODO chips, inline threads, incoming-change marks, review comment popovers,
- * the orphaned comments box and the toolbar and setting toggles that hide them.
- *
- * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
- * the parts in cascade order: moving a rule to another part changes the cascade.
- */
-export const COMMENT_CSS = `
+/** Comment and TODO chips, the opened comment box and inline threads. */
+const COMMENT_CHIP_CSS = `
 /* Comment and TODO chips: gray for an HTML comment, green for TODO. The chip never changes the line
    height; the comment text lives in a hidden body that expansion reveals. */
 #sphinx-myst-preview-content .okf-chip {
@@ -212,7 +202,10 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content .okf-comme
   font-size: 0.9em;
 }
 
-/* Incoming-change mark: a green bar for each block changed since the last commit. All bars sit in
+`;
+
+/** Incoming-change marks and the side-by-side diff cards. */
+const COMMENT_INCOMING_CHANGE_CSS = `/* Incoming-change mark: a green bar for each block changed since the last commit. All bars sit in
    one column at the inline start of the page, whatever the indentation of the block, with square
    ends and the full height of the block. They are drawn in a layer after the content (placed by the
    page script from the block boxes), so no block, neighbour or text edge moves and no ancestor
@@ -326,7 +319,11 @@ html[data-okf-incoming-changes="false"] [data-sphinx-preview-sbs-toggle] {
   display: none;
 }
 
-/* Review comments: a highlighted quote (or a badge on its block) opens a popover with the thread.
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-002
+/** Review comment highlights, badges, popover, comment box and reply box; their text colors keep the 4.5:1 contrast on every theme. */
+const COMMENT_REVIEW_POPOVER_CSS = `/* Review comments: a highlighted quote (or a badge on its block) opens a popover with the thread.
    Marks only paint; badges and the popover are out of the flow, so nothing moves. */
 #sphinx-myst-preview-content mark[data-okf-comment-thread] {
   background: var(--studio-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
@@ -567,7 +564,11 @@ button[data-okf-comment-create]:hover {
   overflow-wrap: anywhere;
 }
 
-/* The "Orphaned comments" box (T44) follows the content element, outside the patched HTML. Its top
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-028
+/** The Orphaned comments box. */
+const COMMENT_ORPHAN_BOX_CSS = `/* The "Orphaned comments" box (T44) follows the content element, outside the patched HTML. Its top
    margin cancels the content's bottom padding, so it sits in that empty space: the scrollable
    height of the page only grows when the box is taller than the padding, and the end of the
    document, the first-element gap and the insert points of the content are untouched. The box
@@ -617,7 +618,11 @@ button[data-okf-comment-create]:hover {
   overflow-wrap: anywhere;
 }
 
-/* Toolbar Diff button off: the marks go away at once; the host stops sending ranges. */
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
+/** The rules that hide the review marks with the Comments button or the showComments setting. */
+const COMMENT_HIDDEN_MARKS_CSS = `/* Toolbar Diff button off: the marks go away at once; the host stops sending ranges. */
 html[data-sphinx-preview-incoming="off"] [data-sphinx-preview-change-layer] {
   display: none;
 }
@@ -669,8 +674,28 @@ html[data-okf-show-comments="false"] [data-okf-orphans] {
   display: none;
 }
 
-#sphinx-myst-preview-content img {
+`;
+
+/** Image fit inside the content. */
+const COMMENT_IMAGE_CSS = `#sphinx-myst-preview-content img {
   max-width: 100%;
   height: auto;
 }
 `;
+
+// @implements_req SwRS-MDOKFSTUDIO-CORE-008
+/**
+ * Comments: comment and TODO chips, inline threads, incoming-change marks, review comment popovers,
+ * the orphaned comments box and the toolbar and setting toggles that hide them.
+ *
+ * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
+ * the parts in cascade order: moving a rule to another part changes the cascade. The named parts
+ * above are joined in the order of the former single constant, so the output is unchanged.
+ */
+export const COMMENT_CSS =
+  COMMENT_CHIP_CSS
+  + COMMENT_INCOMING_CHANGE_CSS
+  + COMMENT_REVIEW_POPOVER_CSS
+  + COMMENT_ORPHAN_BOX_CSS
+  + COMMENT_HIDDEN_MARKS_CSS
+  + COMMENT_IMAGE_CSS;

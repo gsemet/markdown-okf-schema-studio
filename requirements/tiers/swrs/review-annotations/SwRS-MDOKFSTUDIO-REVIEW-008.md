@@ -14,7 +14,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-REVIEW-017
+- StRS-MDOKFSTUDIO-REVIEW-018
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -54,7 +54,7 @@ When the reader presses the Side-by-side button of toolbar row 4, the page SHALL
 
 - SwRS-MDOKFSTUDIO-REVIEW-214: the Diff button next to it.
 - SwRS-MDOKFSTUDIO-TOOLBAR-001: the toolbar rows.
-- SwRS-MDOKFSTUDIO-REVIEW-007: the message it posts.
+- SwRS-MDOKFSTUDIO-REVIEW-006: the message it posts.
 
 ### Verification notes
 
@@ -67,5 +67,5 @@ When the reader presses the Side-by-side button of toolbar row 4, the page SHALL
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+  - [StRS-MDOKFSTUDIO-REVIEW-018](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-018.md): A writer compares each changed block with its last-commit version side by side
 <!-- okf:links:end -->

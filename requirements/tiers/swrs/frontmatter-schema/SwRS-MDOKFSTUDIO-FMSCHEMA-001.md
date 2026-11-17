@@ -17,7 +17,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-001
-- StRS-MDOKFSTUDIO-FMSCHEMA-002
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -120,7 +119,6 @@ When a document starts with a `---` line, the extension SHALL take the lines up 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
-  - [StRS-MDOKFSTUDIO-FMSCHEMA-002](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-002.md): Invalid frontmatter is explained and the body still renders
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-002](SwRS-MDOKFSTUDIO-FMSCHEMA-002.md): A document without a closing fence has no frontmatter
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-003](SwRS-MDOKFSTUDIO-FMSCHEMA-003.md): Frontmatter fences accept Windows line endings

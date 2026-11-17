@@ -88,6 +88,6 @@ When the page receives line ranges that meet the lines of a front matter field, 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
 - Relates to:
-  - [SwRS-MDOKFSTUDIO-REVIEW-195](SwRS-MDOKFSTUDIO-REVIEW-195.md): The host posts the lines that differ from the last commit
-  - [SwRS-MDOKFSTUDIO-REVIEW-207](SwRS-MDOKFSTUDIO-REVIEW-207.md): Changed blocks get a thin change bar that moves nothing
+  - [SwRS-MDOKFSTUDIO-REVIEW-195](SwRS-MDOKFSTUDIO-REVIEW-195.md): The host posts the lines that differ from the last commit, read from Git for small files
+  - [SwRS-MDOKFSTUDIO-REVIEW-207](SwRS-MDOKFSTUDIO-REVIEW-207.md): Changed blocks get a thin change bar that moves nothing, and malformed ranges are ignored
 <!-- okf:links:end -->

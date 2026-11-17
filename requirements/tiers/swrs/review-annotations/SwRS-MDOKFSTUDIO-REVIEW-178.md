@@ -9,8 +9,8 @@ description: When a previewThreadReply or previewThreadDelete message reaches
   that is not blank.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -23,11 +23,12 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-tested_in_files:
-- test/core/protocol/pageToHost.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-186
+- SwRS-MDOKFSTUDIO-REVIEW-192
 ---
 
 ## An inline thread change message carries valid lines and a non-blank text
@@ -69,4 +70,7 @@ When a previewThreadReply or previewThreadDelete message reaches the host, the e
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-186](SwRS-MDOKFSTUDIO-REVIEW-186.md): The host appends a valid reply inside the thread comment under the author
+  - [SwRS-MDOKFSTUDIO-REVIEW-192](SwRS-MDOKFSTUDIO-REVIEW-192.md): Deleting an inline thread removes whole lines, and a malformed delete message changes nothing
 <!-- okf:links:end -->

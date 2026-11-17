@@ -2,12 +2,21 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-195
 uuid: bd06bae2-5d2a-4711-b9ea-b41dc7347736
-title: The host posts the lines that differ from the last commit
-description: When the shown document is a file tracked by Git, in a trusted
-  workspace, with preview.showIncomingChanges on and the Diff choice on, the
-  extension SHALL post to the page the line ranges of the shown text, unsaved
-  edits included, that differ from the file at HEAD, and in every other case
-  post an empty list of ranges only to take back marks the page shows.
+title: "The host posts the lines that differ from the last commit, read from Git for
+  small files"
+description: "When the shown document is a file tracked by Git, in a trusted workspace,
+  with preview.showIncomingChanges on and the Diff choice on, the extension SHALL
+  post to the page the line ranges of the shown text, unsaved edits included, that
+  differ from the file at HEAD, and in every other case post an empty list of ranges
+  only to take back marks the page shows; it reports the added and modified lines
+  of the shown text as 1-based ranges, merging adjacent lines and keeping separate
+  edits as separate ranges, reports no range for a difference of line endings, of
+  a missing final newline or of deleted lines only, and reports the whole differing
+  middle as one range when more than 20 000 lines differ or more than 2000 edits are
+  needed; it reads the text at HEAD through the built-in Git extension without starting
+  a process, returns nothing when Git cannot give it or when the shown text, the document
+  or the HEAD text is not a file under 1 MiB, and announces a change of the Git state
+  only when the HEAD commit id has changed."
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -21,18 +30,25 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/mapping/lineDiff.ts
+- src/host-vscode/headBaseline.ts
 - src/session/features/incomingChanges.ts
 tested_in_files:
+- test/core/mapping/lineDiff.test.ts
+- test/host-vscode/headBaseline.test.ts
 - test/integration/incomingChanges.test.ts
 - test/session/reviewReqIncoming.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-REVIEW-200
+- SwRS-MDOKFSTUDIO-REVIEW-203
 ---
 
-## The host posts the lines that differ from the last commit
+## The host posts the lines that differ from the last commit, read from Git for small files
 
 ### Normative behavior
 
-When the shown document is a file tracked by Git, in a trusted workspace, with preview.showIncomingChanges on and the Diff choice on, the extension SHALL post to the page the line ranges of the shown text, unsaved edits included, that differ from the file at HEAD, and in every other case post an empty list of ranges only to take back marks the page shows.
+When the shown document is a file tracked by Git, in a trusted workspace, with preview.showIncomingChanges on and the Diff choice on, the extension SHALL post to the page the line ranges of the shown text, unsaved edits included, that differ from the file at HEAD, and in every other case post an empty list of ranges only to take back marks the page shows; it reports the added and modified lines of the shown text as 1-based ranges, merging adjacent lines and keeping separate edits as separate ranges, reports no range for a difference of line endings, of a missing final newline or of deleted lines only, and reports the whole differing middle as one range when more than 20 000 lines differ or more than 2000 edits are needed; it reads the text at HEAD through the built-in Git extension without starting a process, returns nothing when Git cannot give it or when the shown text, the document or the HEAD text is not a file under 1 MiB, and announces a change of the Git state only when the HEAD commit id has changed.
 
 ### Scenario (nominal): Changed lines and unsaved edits
 
@@ -68,12 +84,61 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 | A page that shows marks and a document that now equals HEAD | an empty list is posted |
 | A page that shows marks and the Diff choice turned off | an empty list is posted |
 
+### Scenario (nominal): Added, modified and separate edits
+
+| Input | Outcome |
+| --- | --- |
+| A base and a current text with two lines added | the added lines are reported in the line numbers of the current text |
+| One modified line | one range |
+| Two separate edits | two ranges |
+| Identical texts | no range |
+
+### Scenario (boundary): Differences that do not count
+
+| Input | Outcome |
+| --- | --- |
+| A base with LF and a current text with CRLF | no range is reported |
+| A base without a final newline against one with it | no range is reported |
+| A current text with lines removed and nothing added | no range is reported |
+
+### Scenario (boundary): Range size limits
+
+| Input | Outcome |
+| --- | --- |
+| A middle part of more than 20 000 lines (above the line cap) | one range covers the whole middle |
+| More than 2000 edits (above the edit budget) | one range covers the whole middle |
+
+### Scenario (nominal): Git available
+
+- GIVEN a repository with the file in HEAD
+- WHEN the base is read
+- THEN the commit id and the text are returned
+
+### Scenario (refusal): Git missing or failing
+
+- GIVEN no Git extension, no repository, no file in HEAD or a failing show
+- WHEN the base is read
+- THEN nothing is returned and nothing is marked
+
+### Scenario (boundary): Only file documents under 1 MiB
+
+| Input | Outcome |
+| --- | --- |
+| A shown text of more than 1 MiB | nothing is returned |
+| A document that is not a file | nothing is returned |
+| A file whose HEAD text is longer than 1 MiB (a big blob) | nothing is returned |
+
+### Scenario (nominal): A new HEAD commit is announced
+
+| Input | Outcome |
+| --- | --- |
+| A state change that moves HEAD to a new commit | the listener is called with the new commit id, once per commit change |
+| A state change with the same commit id | no listener call is made |
+| No repository, no Git extension or no active API | no listener call is made |
+
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-REVIEW-200: the comparison that gives the ranges.
-- SwRS-MDOKFSTUDIO-REVIEW-203: the HEAD text and the announcement of a new commit.
 - SwRS-MDOKFSTUDIO-REVIEW-207: how the page marks blocks from the ranges.
-- SwRS-MDOKFSTUDIO-REVIEW-208: how the page treats malformed ranges.
 
 ### Verification notes
 
@@ -81,6 +146,10 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 - Method: test/integration/incomingChanges.test.ts (an untracked file gets no incoming-change message: scenario an untracked file, another scheme, an untrusted workspace or an off choice); the other gates and the take-back are untested at host level.
 - Method: test/page/modules/incomingChanges.test.ts (page side only); real window review-annotations/r03-incoming-change-bars shows the bars. The host-side positive path (IncomingChangesController.post) has no integration test, so the scenario changed lines and unsaved edits is checked only through the real window.
 - Criteria: The posted ranges equal changedLineRanges(text at HEAD, shown text); the posted-message count stays 0 for the untracked file without marks and an empty list is posted when marks are showing; schedule() clears the pending timer and starts a new one of 300 ms, and each immediate trigger calls schedule with a delay of 0; the post count does not grow in the no-message case and an empty list follows in the take-back cases.
+- Method: test/core/mapping/lineDiff.test.ts (unit tests `T16: identical text has no changed range`, `T16: added lines are reported in current line numbers`, `T16: a modified line is one range and two separate edits are two ranges`: scenario added, modified and separate edits; `T16: line endings do not count as changes`, `T16: a base without a trailing newline matches one with it`, `T16: deleted-only lines give no range`: scenario differences that do not count; `T16: above the size cap the whole middle counts as changed`, `T16: many differences beyond the edit budget fall back to the whole middle`: scenario range size limits).
+- Criteria: The ranges equal the expected start and end lines; the result is an empty list in each no-range case; MAX_DIFF_LINES = 20000 and MAX_DIFF_EDITS = 2000 switch to one range.
+- Method: test/host-vscode/headBaseline.test.ts (unit tests `T16: no Git extension, no repository or a failing show give undefined`: scenario Git missing or failing; `T16: only file documents under 1 MB are compared, big blobs are skipped`: scenario only file documents under 1 MiB; `T16: a state change with the same commit id does not notify, a new commit does`, `T16: watch gives nothing without the extension, a repository or an active API`: scenario a new HEAD commit is announced). The scenario Git available is checked with the same test file (the commit id and the text are returned) and by the real window review-annotations/r03-incoming-change-bars.
+- Criteria: read() returns undefined in the failing cases; MAX_BASELINE_BYTES = 1048576 gates the read; the listener runs once per commit change.
 
 <!-- okf:links:start -->
 ### Links
@@ -89,4 +158,7 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-REVIEW-200](SwRS-MDOKFSTUDIO-REVIEW-200.md): The line diff reports added and modified lines
+  - [SwRS-MDOKFSTUDIO-REVIEW-203](SwRS-MDOKFSTUDIO-REVIEW-203.md): The HEAD text comes from the built-in Git extension for small files
 <!-- okf:links:end -->

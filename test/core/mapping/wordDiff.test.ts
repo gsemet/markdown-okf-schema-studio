@@ -6,12 +6,12 @@ import { diffSegments, diffWords, MAX_WORD_DIFF_CELLS, sharedWordRatio } from ".
 const slices = (text: string, ranges: readonly { start: number; end: number }[]): string[] =>
   ranges.map((range) => text.slice(range.start, range.end));
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-005
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
 test("CR147: identical texts have no changed word", () => {
   assert.deepEqual(diffWords("one two", "one two"), { removed: [], added: [] });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-005
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
 test("CR147: a replaced word is removed on the left and added on the right", () => {
   const before = "the quick brown fox";
   const after = "the slow brown fox";
@@ -20,7 +20,7 @@ test("CR147: a replaced word is removed on the left and added on the right", () 
   assert.deepEqual(slices(after, diff.added), ["slow"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-005
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
 test("CR147: consecutive changed words are one range, separate ones are separate", () => {
   const before = "a b c d e";
   const after = "a X Y d Z";
@@ -29,7 +29,7 @@ test("CR147: consecutive changed words are one range, separate ones are separate
   assert.deepEqual(slices(after, diff.added), ["X Y", "Z"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-005
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
 test("CR147: inserted and deleted words only mark one side", () => {
   const diff = diffWords("a c", "a b c");
   assert.deepEqual(diff.removed, []);
@@ -39,13 +39,13 @@ test("CR147: inserted and deleted words only mark one side", () => {
   assert.deepEqual(gone.added, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-005
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
 test("CR147: an empty side marks all of the other", () => {
   assert.deepEqual(diffWords("", "new text"), { removed: [], added: [{ start: 0, end: 8 }] });
   assert.deepEqual(diffWords("old text", ""), { removed: [{ start: 0, end: 8 }], added: [] });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-005
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
 test("CR147: a very long pair marks everything", () => {
   const size = Math.ceil(Math.sqrt(MAX_WORD_DIFF_CELLS)) + 1;
   const words = Array.from({ length: size }, (_, index) => `w${index}`);
@@ -57,7 +57,7 @@ test("CR147: a very long pair marks everything", () => {
   assert.equal(diff.removed[0].end, words.join(" ").length);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-005
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
 test("CR147: pieces of text are compared as one text and the ranges come back inside their piece", () => {
   const before = ["Hello ", "brave", " world"];
   const after = ["Hello ", "new", " world"];

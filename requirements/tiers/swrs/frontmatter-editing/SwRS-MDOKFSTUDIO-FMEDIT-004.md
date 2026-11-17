@@ -94,7 +94,7 @@ When a writer edits the value of a text field, the extension SHALL show a text b
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-FMEDIT-019: the commit rules of every field editor (leaving the editor, Escape).
-- SwRS-MDOKFSTUDIO-FMEDIT-054: the shape of the save message these editors post.
+- SwRS-MDOKFSTUDIO-FMEDIT-016: the shape of the save message these editors post.
 
 ### Verification notes
 

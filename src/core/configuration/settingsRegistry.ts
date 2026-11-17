@@ -281,7 +281,7 @@ export const FRONTMATTER_SETTINGS = {
     markdownDescription: "Controls warnings for frontmatter fields that the matching OKF schema does not declare. **On**: such fields are reported as warnings. **Off**: they are accepted silently.",
     order: 61,
   }, asStored),
-  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-060
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
   /** The bundle root of `x-okf-link` values (trimmed); empty: found from the schema folder. */
   bundleRoot: setting<string>({
     type: "string",

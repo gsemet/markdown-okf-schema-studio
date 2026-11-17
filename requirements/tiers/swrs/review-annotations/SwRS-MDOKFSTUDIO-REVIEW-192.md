@@ -2,11 +2,13 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-REVIEW-192
 uuid: 471a5f82-0279-4bb3-8b6e-9dcd93f7d8b6
-title: Deleting an inline thread removes whole lines
-description: When the host applies a delete of an inline thread, the extension
-  SHALL remove the lines of the thread and one surrounding blank line when both
-  neighbours are blank or missing, remove the line break before a thread that
-  ends the file, and change nothing else.
+title: "Deleting an inline thread removes whole lines, and a malformed delete message
+  changes nothing"
+description: "When the host applies a delete of an inline thread, the extension SHALL
+  remove the lines of the thread and one surrounding blank line when both neighbours
+  are blank or missing, remove the line break before a thread that ends the file,
+  and change nothing else; a previewThreadDelete message is dropped unless it has
+  an edit id and integer lines with 1 <= line <= endLine."
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -27,18 +29,22 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/comments/inlineThread.ts
+- src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/comments/inlineThread.test.ts
 - test/core/edits/sourceEdits.test.ts
+- test/core/protocol/pageToHost.test.ts
 - test/integration/inlineThread.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-REVIEW-178
 ---
 
-## Deleting an inline thread removes whole lines
+## Deleting an inline thread removes whole lines, and a malformed delete message changes nothing
 
 ### Normative behavior
 
-When the host applies a delete of an inline thread, the extension SHALL remove the lines of the thread and one surrounding blank line when both neighbours are blank or missing, remove the line break before a thread that ends the file, and change nothing else.
+When the host applies a delete of an inline thread, the extension SHALL remove the lines of the thread and one surrounding blank line when both neighbours are blank or missing, remove the line break before a thread that ends the file, and change nothing else; a previewThreadDelete message is dropped unless it has an edit id and integer lines with 1 <= line <= endLine.
 
 ### Scenario (nominal): Blank neighbours
 
@@ -60,9 +66,22 @@ When the host applies a delete of an inline thread, the extension SHALL remove t
 - WHEN a delete is asked
 - THEN the answer is "The thread is no longer in the source. Refresh the preview." and the document is unchanged, as for a reply (see SwRS-MDOKFSTUDIO-REVIEW-186)
 
+### Scenario (nominal): Valid delete message
+
+- GIVEN a previewThreadDelete message with an edit id and lines 5 and 8
+- WHEN the message is validated
+- THEN it is accepted
+
+### Scenario (refusal): Invalid delete message
+
+| Input | Outcome |
+| --- | --- |
+| A missing edit id | dropped |
+| Line 0 | dropped |
+| An end line before the line | dropped |
+
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-REVIEW-178: the accepted shape of the delete message.
 - SwRS-MDOKFSTUDIO-REVIEW-186: the reply to an inline thread and the refusal of lines that are not one thread.
 
 ### Verification notes
@@ -71,6 +90,8 @@ When the host applies a delete of an inline thread, the extension SHALL remove t
 - Method: test/core/edits/sourceEdits.test.ts (unit tests `deleting a thread removes whole lines and one of two surrounding blank lines`, `deleting a thread at the end of the file removes the line break before it`, `thread lines are read only when they are exactly one thread comment`: scenarios blank neighbours, position of the thread in the file, lines that are not exactly one thread).
 - Method: test/integration/inlineThread.test.ts (delete between paragraphs; lines that are not exactly the thread change nothing: scenarios blank neighbours, lines that are not exactly one thread).
 - Criteria: The result text equals the document without the thread and one blank line; the document text is identical after a refused request.
+- Method: test/core/protocol/pageToHost.test.ts (unit test `previewThreadReply and previewThreadDelete validate the lines, the edit id and the text`: scenarios valid, invalid).
+- Criteria: The validators accept the boundary values and refuse one more.
 
 <!-- okf:links:start -->
 ### Links
@@ -86,4 +107,6 @@ When the host applies a delete of an inline thread, the extension SHALL remove t
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-REVIEW-178](SwRS-MDOKFSTUDIO-REVIEW-178.md): An inline thread change message carries valid lines and a non-blank text
 <!-- okf:links:end -->

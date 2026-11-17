@@ -42,7 +42,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMEDIT-043
 - SwRS-MDOKFSTUDIO-FMEDIT-084
 - SwRS-MDOKFSTUDIO-FMEDIT-086
-- SwRS-MDOKFSTUDIO-FMSCHEMA-084
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-FMEDIT-006
@@ -68,6 +67,28 @@ As a writer, I rename a metadata key without touching the rest of the frontmatte
 - Known issue: adding a key that already exists gets the generic stale-field message from the host, not an already-exists message.
 - Comment lines above a removed field are kept; removing the only field leaves a valid empty mapping.
 - A field the schema requires has a disabled Remove button and the host also refuses the removal.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Menu as Field action menu
+    participant Host
+    participant Doc as VS Code document
+    Writer->>Menu: open a field editor and choose Add field
+    Menu-->>Writer: the missing schema fields, or a custom key
+    Writer->>Menu: pick a schema field or type a custom key
+    Menu->>Host: add the field
+    Host->>Doc: insert one line where the row appears
+    Doc-->>Writer: the table is re-rendered and the editor of the new field opens
+    opt Remove field
+        Writer->>Menu: choose Remove field
+        Note over Menu: disabled when the schema requires the field
+        Menu->>Host: remove the field
+        Host->>Doc: delete exactly the lines of the field
+    end
+```
 
 ### Main paths
 
@@ -120,7 +141,6 @@ As a writer, I rename a metadata key without touching the rest of the frontmatte
   - [SwRS-MDOKFSTUDIO-FMEDIT-043](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-043.md): A frontmatter edit changes only the lines of its field
   - [SwRS-MDOKFSTUDIO-FMEDIT-084](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-084.md): The field action menu stays inside its row in a narrow preview
   - [SwRS-MDOKFSTUDIO-FMEDIT-086](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-086.md): A closed schema flags the properties section
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-084](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-084.md): Every schema violation is reported on its field or in a row of its own
 - Supersedes:
   - [StRS-MDOKFSTUDIO-FMEDIT-006](StRS-MDOKFSTUDIO-FMEDIT-006.md): Add a metadata field
   - [StRS-MDOKFSTUDIO-FMEDIT-007](StRS-MDOKFSTUDIO-FMEDIT-007.md): Remove a metadata field

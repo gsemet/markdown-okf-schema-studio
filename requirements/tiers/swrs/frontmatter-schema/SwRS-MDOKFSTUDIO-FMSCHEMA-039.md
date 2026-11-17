@@ -21,7 +21,6 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/frontmatter/frontmatterValidate.ts
 - src/core/frontmatter/okfFrontmatter.ts
 - src/core/frontmatter/propertiesTable.ts
 - src/page/features/pageInput.ts

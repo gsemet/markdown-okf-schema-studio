@@ -459,8 +459,6 @@ function tabLabel(node: GridNode, parse: GridParse, index: number): string {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-098
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-133
-// @implements_req SwRS-MDOKFSTUDIO-REVIEW-167
 /**
  * Drops the source line attributes under a tab item, so that only the item itself is a mapped block
  * (a table, code block, grid, card or nested tab set in the item is no block of its own). The node
@@ -469,6 +467,8 @@ function tabLabel(node: GridNode, parse: GridParse, index: number): string {
  */
 function unmapPlainBlocks(nodes: readonly GridNode[]): void {
   for (const node of nodes) {
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-133
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-167
     if (node.type === "html" && isCommentHtml(node.value)) continue;
     const properties = node.data?.hProperties as Record<string, unknown> | undefined;
     if (properties) {

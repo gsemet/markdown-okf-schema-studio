@@ -83,19 +83,33 @@ As a writer, I edit a document's metadata directly in the properties table, wher
 
 - Only one editor is open at a time; a field editor does not open while a block editor is open.
 - Plain clicks on a link inside a field value open the editor in edit mode; Cmd/Ctrl+click still follows the link.
-- Known issue: an editor left in an error state blocks every other field until it is cancelled.
 - Field and key editors have no edition palette or slash menu.
-- The control is a choice list for enums, a text box, number, date and time inputs, a checkbox, an item list or a YAML text box. Enum values come from the schema; booleans toggle on one click; fields without a schema, of unknown type or holding an object are edited as YAML.
-- A nullable field offers Set to null; the schema is not applied to the controls, so out-of-range values are caught only at save time.
-- Known issue: the schema minimum, maximum and pattern are not applied to the number and text inputs.
-- Known issue: without a schema a boolean is edited as text, and date-time fields are edited as plain text.
-- A list field shows one input per item that can be added, removed and reordered, and known Markdown file names are suggested for filename-stem link lists. Items are inputs with a drag handle, a remove button and Add item; there is no Save or Cancel button, leaving the editor saves.
-- A filename not found among the Markdown files only warns; the value is still saved as typed.
-- Known issue: list items are edited as strings, so a non-string item type is saved as text.
-- Only a changed value is saved and the progress and any refusal show in the editor; unchanged values are not written; Escape cancels unless a save is in flight; turning edit mode off closes the editor without saving.
-- Known issue: leaving edit mode discards an unsaved field value while block editors save theirs.
+- The control fits the field type: a choice list for enums, a text box, number, date and time inputs, a checkbox, an item list or a YAML text box; the schema is not applied to the controls, so out-of-range values are caught only at save time.
+- Only a changed value is saved; Escape cancels unless a save is in flight; turning edit mode off closes the editor without saving.
 - A refusal keeps the editor open with the host message shown and the controls enabled again.
 - Each save is one edit of the document, so one Undo reverts it; undo keys typed in a field editor act on the field text only.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Page as Preview (properties table)
+    participant Editor as Field editor
+    participant Host
+    participant Doc as VS Code document
+    Writer->>Page: click a name or value cell in edit mode
+    Page->>Editor: open the editor of the field type in that cell
+    Writer->>Editor: type a value and press Enter
+    Editor->>Host: save the field
+    Host->>Host: plan the edit and check YAML, type and schema
+    alt the value is accepted
+        Host->>Doc: change only the lines of the field
+        Doc-->>Page: the table is re-rendered in place
+    else the value is refused
+        Host-->>Editor: the reason is shown and the editor stays open
+    end
+```
 
 ### Main paths
 
@@ -109,7 +123,6 @@ As a writer, I edit a document's metadata directly in the properties table, wher
    - Option SwRS-MDOKFSTUDIO-FMEDIT-003 (nominal): a boolean field toggles with one click
    - Option SwRS-MDOKFSTUDIO-FMEDIT-019 (nominal): Escape cancels the editor
    - Option SwRS-MDOKFSTUDIO-FMEDIT-016 (refusal): a YAML value that does not parse is refused
-   - Option SwRS-MDOKFSTUDIO-BLOCK-041 (nominal): other actions that would compete with the editor are refused with a reason
 3. The new value is saved
    - SwRS-MDOKFSTUDIO-BLOCK-228: the final save keeps the properties table at its screen position
 4. The table shows the new value where it was
@@ -136,7 +149,7 @@ As a writer, I edit a document's metadata directly in the properties table, wher
   - [SwRS-MDOKFSTUDIO-FMEDIT-013](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-013.md): A plain click on a link value edits the field
   - [SwRS-MDOKFSTUDIO-FMEDIT-014](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-014.md): Link lists suggest the known Markdown file stems
   - [SwRS-MDOKFSTUDIO-FMEDIT-015](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-015.md): Fields without a schema type are edited as YAML text
-  - [SwRS-MDOKFSTUDIO-FMEDIT-016](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-016.md): The host refuses a value that breaks YAML, the field type or the schema
+  - [SwRS-MDOKFSTUDIO-FMEDIT-016](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-016.md): The host refuses a value that breaks YAML, the field type or the schema, and ignores a malformed save message
   - [SwRS-MDOKFSTUDIO-FMEDIT-017](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-017.md): Nullable fields offer Set to null
   - [SwRS-MDOKFSTUDIO-FMEDIT-018](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-018.md): A null value is refused for a field that is not nullable
   - [SwRS-MDOKFSTUDIO-FMEDIT-019](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-019.md): A field editor saves a changed value and Escape cancels it

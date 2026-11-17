@@ -76,10 +76,6 @@ export function frontmatterValueMatchesField(field: FrontmatterField, value: unk
   }
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-016
-// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-024
-// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-037
-// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-067
 /**
  * Plans one save of the properties table on `sourceText`, given the frontmatter analysis the table
  * was built from (`frontmatter`, undefined when the document has none).
@@ -102,12 +98,14 @@ export function planFrontmatterSave(
     return { error: FRONTMATTER_STALE };
   }
   const currentField = field as FrontmatterField;
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-024
   const newFieldName = !isAdd && !isRemove ? request.newFieldName : undefined;
   if ((isAdd && (!fieldName.trim() || fieldName !== fieldName.trim() || /[\r\n]/u.test(fieldName)))
     || (newFieldName !== undefined && (!newFieldName.trim() || newFieldName !== newFieldName.trim()))) {
     return { error: "Enter a non-empty frontmatter key without leading or trailing spaces." };
   }
   let fieldValue = request.fieldValue;
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-016
   if (!isRemove && request.fieldValueFormat === "yaml") {
     if (typeof fieldValue !== "string") {
       return { error: "The YAML field value must be text." };
@@ -120,7 +118,9 @@ export function planFrontmatterSave(
     }
   }
   const schemaFound = frontmatter?.schemaFound === true;
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-067
   const flushed = request.flush === true;
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-016
   if (!isAdd && !isRemove && newFieldName === undefined && !flushed
     && !frontmatterValueMatchesField(currentField, fieldValue, schemaFound)) {
     return { error: FRONTMATTER_STALE };
@@ -131,6 +131,7 @@ export function planFrontmatterSave(
     && frontmatter?.fields.some((candidate) => candidate.name === request.afterField)
     ? { afterField: request.afterField }
     : undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-037
   const addPlacement = isAdd
     ? schemaFound && frontmatter?.availableKeys
       ? frontmatterAddPlacement(

@@ -19,7 +19,6 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-001
 - StRS-MDOKFSTUDIO-LAYOUT-003
 - StRS-MDOKFSTUDIO-PALETTE-002
-- StRS-MDOKFSTUDIO-REVIEW-012
 - StRS-MDOKFSTUDIO-THEME-004
 - StRS-MDOKFSTUDIO-THEME-011
 depends_on:
@@ -191,7 +190,6 @@ The Cream start is the same on a light and on a dark host theme:
   - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
   - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
   - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
-  - [StRS-MDOKFSTUDIO-REVIEW-012](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-012.md): A writer sees HTML comments and TODO notes as chips and toggles them
   - [StRS-MDOKFSTUDIO-THEME-004](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-004.md): The theme choice holds for the workspace and survives slow loads and bad values
   - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
 - Depends on:

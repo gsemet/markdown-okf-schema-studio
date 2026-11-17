@@ -172,7 +172,7 @@ function place(document: FakeDocument, text: string, threads: CommentThread[]): 
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-216
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
 test("CR266: every comment of a long README-like document is highlighted on its text", async () => {
   const text = readme(40);
   assert.ok(text.split("\n").length > 600, "a long document");
@@ -184,7 +184,7 @@ test("CR266: every comment of a long README-like document is highlighted on its 
   assert.deepEqual(result, { marks: threads.length, badges: 0, orphans: 0 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-216
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
 test("CR266: a quote that spans a soft line break of the source is highlighted, short document too", async () => {
   const text = readme(1);
   const document = await pageOf(text);
@@ -200,7 +200,7 @@ test("CR266: a quote that spans a soft line break of the source is highlighted, 
   assert.equal(collapse(document.content.textContent), collapse(textBefore));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-216
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
 test("CR266: the highlight of a quote over a line break keeps the text of the page", () => {
   const document = new FakeDocument();
   provideGlobalElement(FakeElement);
@@ -218,7 +218,7 @@ test("CR266: the highlight of a quote over a line break keeps the text of the pa
   assert.equal(innerBlock(marks[0]), one);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-216
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
 test("CR266: a quote with a word the wrapped text does not hold stays a badge", () => {
   const document = new FakeDocument();
   provideGlobalElement(FakeElement);

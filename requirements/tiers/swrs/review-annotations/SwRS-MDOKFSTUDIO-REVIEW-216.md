@@ -11,8 +11,8 @@ description: When review threads are applied to the page and the quote of a
   space of the quote and highlight the matched text as one highlight.
 project: markdown-okf-schema-studio
 scope: review-annotations
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,11 +20,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/commentThreadData.ts
-tested_in_files:
-- test/page/modules/commentThreadsLongDocument.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-REVIEW-017
 ---
 
 ## A quote over a line break of the source is highlighted
@@ -60,4 +60,6 @@ When review threads are applied to the page and the quote of a thread, whose whi
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-017](SwRS-MDOKFSTUDIO-REVIEW-017.md): The quote of a thread is highlighted once in its block, also over a line break of the source
 <!-- okf:links:end -->

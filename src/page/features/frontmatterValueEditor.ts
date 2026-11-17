@@ -62,6 +62,7 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
   const setListEditorDisabled = (disabled: boolean): void => listEditor?.setDisabled(disabled);
   let checkboxValueLabel: HTMLElement | undefined;
   let setNullButton: HTMLButtonElement | undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-003
   if (nullable) {
     setNullButton = document.createElement("button");
     setNullButton.type = "button";
@@ -118,6 +119,7 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
     control.setAttribute("aria-keyshortcuts", "Enter Shift+Enter");
     control.setAttribute("title", "Enter saves · Shift+Enter adds a line");
   } else if (fieldType === "checkbox") {
+    // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-003
     control.type = "checkbox";
     control.className = "okf-value-checkbox";
     control.checked = value === true;
@@ -125,6 +127,7 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
     checkboxValueLabel.className = "okf-boolean-value";
     checkboxValueLabel.textContent = String(control.checked);
   } else {
+    // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-003
     control.type = fieldType === "number" ? "number"
       : fieldType === "date" ? "date"
         : fieldType === "time" ? "time"

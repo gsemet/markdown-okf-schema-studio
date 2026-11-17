@@ -269,7 +269,7 @@ export class CommentsController {
     for (const preview of this.manager.sessions()) {
       const view = preview.comments.view;
       if (!view || preview.documentUri !== documentIdentity) continue;
-      // @implements_req SwRS-MDOKFSTUDIO-REVIEW-119
+      // @implements_req SwRS-MDOKFSTUDIO-REVIEW-094
       // The dirty flag of a change event is the state before the change (VS Code reports the flip in a
       // later event without contents), so an undo back to the saved text still says "dirty". An undo or
       // a redo flagged dirty shifts the lines followed, then checks every thread again from them; one
@@ -540,7 +540,6 @@ export class CommentsController {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-054
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-069
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-044
   private handleCreate(preview: PreviewSession, message: PageMessageOf<"previewCommentCreate">): Promise<void> {
     const body = normalizeBody(message.body);
@@ -553,7 +552,6 @@ export class CommentsController {
     });
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-070
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-074
   private handleReply(preview: PreviewSession, message: PageMessageOf<"previewCommentReply">): Promise<void> {
     const body = normalizeBody(message.body);
@@ -566,7 +564,7 @@ export class CommentsController {
     });
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-071
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-074
   private handleResolve(preview: PreviewSession, message: PageMessageOf<"previewCommentResolve">): Promise<void> {
     const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
     const resolved = message.resolved === true;
@@ -577,6 +575,7 @@ export class CommentsController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-074
   private handleDelete(preview: PreviewSession, message: PageMessageOf<"previewCommentDelete">): Promise<void> {
     const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
     return this.answer(preview, "delete", threadId, async () => {

@@ -316,9 +316,6 @@ export function fieldUsesFilenameStemLinks(property: unknown): boolean {
     || isFilenameStemAnnotation((property as Record<string, unknown>).items);
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
 /**
  * The table rows of a frontmatter mapping: schema fields in schema order, then unknown fields in
  * YAML order (warned about when `strict`), each with its link results and their issues.
@@ -339,6 +336,7 @@ export function fieldsFromYaml(
         message: `Unknown field; it is not declared in the "${String(frontmatter.type ?? "schema")}" schema.`,
       });
     }
+    // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
     const fieldLinks = linkResults.filter((link) =>
       link.fieldPath === name
       || link.fieldPath.startsWith(`${name}[`)
@@ -364,6 +362,7 @@ export function fieldsFromYaml(
       linkResults: fieldLinks,
     });
   };
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
   if (effective) {
     for (const name of effective.order) {
       if (Object.hasOwn(frontmatter, name)) {

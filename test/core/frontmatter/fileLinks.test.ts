@@ -148,7 +148,6 @@ test("conditional, patternProperties, and additionalProperties schemas are trave
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-060
 test("document-relative links stay inside workspace roots unless explicitly allowed", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-containment-"));
   const workspace = path.join(root, "workspace");
