@@ -89,7 +89,7 @@ A paste after a line that does not exist, that is blank or that lies in the fron
 
 - SwRS-MDOKFSTUDIO-BLOCK-166: copy produces the Markdown that paste inserts
 - SwRS-MDOKFSTUDIO-BLOCK-169: cut shares the answer and the selection clearing
-- SwRS-MDOKFSTUDIO-BLOCK-243: the accepted shape of previewBlocksPaste
+- SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewBlocksPaste
 
 ### Verification notes
 

@@ -1387,7 +1387,7 @@ test("CR 162: reduced motion turns off the tooltip slide-in and the toolbar rows
   assert.match(selectors, /animation: none !important;\s*transition: none !important;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-002
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("CR 112: a horizontal rule is 12px taller above and below than its line, with the spacing unchanged", () => {
   const rule = /#sphinx-myst-preview-content hr \{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   assert.match(rule, /height: 1px;/u);

@@ -17,10 +17,11 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-BLOCK-001
+- StRS-MDOKFSTUDIO-BLOCK-003
 relates_to:
 - SwRS-MDOKFSTUDIO-PALETTE-021
 - SwRS-MDOKFSTUDIO-TABLE-006
+depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -73,7 +74,7 @@ While a block editor is open in the title, header, body or footer of a grid card
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
 - Relates to:
   - [SwRS-MDOKFSTUDIO-PALETTE-021](../palette-slash/SwRS-MDOKFSTUDIO-PALETTE-021.md): The palette is a toolbar above the editor that sticks over a tall editor
   - [SwRS-MDOKFSTUDIO-TABLE-006](../table-editing/SwRS-MDOKFSTUDIO-TABLE-006.md): The cell text box wraps and fits its text in the block editor font

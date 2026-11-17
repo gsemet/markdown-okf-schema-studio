@@ -41,7 +41,7 @@ function renderedTable(harness: RuntimeHarness): { table: RuntimeElement; cells:
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-069
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-125
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-119
 test("a table whose cell was left with Tab is rebuilt by a patch that carries the first render again", () => {
   const harness = createRuntimeHarness();

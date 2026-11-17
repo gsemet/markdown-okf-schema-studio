@@ -92,7 +92,7 @@ const ALLOWED_ATTRIBUTES = new Set([
 ]);
 const ALLOWED_ATTRIBUTE_PREFIXES = ["aria-", "data-sphinx-", "data-okf-", "data-myst-", "data-plantuml-", "data-footnote"];
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-260
 // `data-single-line`: a one-line card part whose editor takes Enter as done.
 const ALLOWED_DATA_ATTRIBUTES = new Set([
   "data-line", "data-end-line", "data-single-line", "data-line-number", "data-footnotes",

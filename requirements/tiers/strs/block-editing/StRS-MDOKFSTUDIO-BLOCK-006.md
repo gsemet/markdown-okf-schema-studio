@@ -16,22 +16,14 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
-user_need: As a writer, I type in the preview and my Markdown file follows, so a
-  closed window or a crash loses almost nothing; I keep typing while a render, a
-  theme change, a change elsewhere in the file or a reload happens; I follow a
-  link to another file, go Back or let the preview follow another tab with my
-  last words saved first; I end an edit with Done or by clicking away to keep
-  it, and with Cancel or Escape to throw it away, and I keep my place on the
-  screen when I open an editor, save it and close it.
+user_need: As a writer, I never lose the text I typed in the preview, saved to
+  my Markdown file as I type; I keep it or drop it with one clear action; and I
+  leave the block, the file or the window with my last words saved first.
 derived_by:
-- SwRS-MDOKFSTUDIO-BLOCK-033
-- SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-042
 - SwRS-MDOKFSTUDIO-BLOCK-047
 - SwRS-MDOKFSTUDIO-BLOCK-053
 - SwRS-MDOKFSTUDIO-BLOCK-058
-- SwRS-MDOKFSTUDIO-BLOCK-148
-- SwRS-MDOKFSTUDIO-BLOCK-169
 - SwRS-MDOKFSTUDIO-BLOCK-191
 - SwRS-MDOKFSTUDIO-BLOCK-193
 - SwRS-MDOKFSTUDIO-BLOCK-205
@@ -43,6 +35,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-064
 - SwRS-MDOKFSTUDIO-TRUST-065
+depends_on:
+- SwRS-MDOKFSTUDIO-BLOCK-041
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -62,7 +56,7 @@ Writers expect the preview to stay still while they type, and to be told when a 
 
 Writers expect navigation never to throw away their last words, and expect the page not to jump while they edit.
 
-As a writer, I type in the preview and my Markdown file follows, so a closed window or a crash loses almost nothing; I keep typing while a render, a theme change, a change elsewhere in the file or a reload happens; I follow a link to another file, go Back or let the preview follow another tab with my last words saved first; I end an edit with Done or by clicking away to keep it, and with Cancel or Escape to throw it away, and I keep my place on the screen when I open an editor, save it and close it.
+As a writer, I never lose the text I typed in the preview, saved to my Markdown file as I type; I keep it or drop it with one clear action; and I leave the block, the file or the window with my last words saved first.
 
 ### Rationale and constraints
 
@@ -106,14 +100,10 @@ As a writer, I type in the preview and my Markdown file follows, so a closed win
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-BLOCK-033](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-033.md): The status line shows the lines and keys, with Done and Cancel beside it
-  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-042](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-042.md): Typing is autosaved as the smallest single replacement
   - [SwRS-MDOKFSTUDIO-BLOCK-047](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-047.md): Done, Cmd/Ctrl+Enter or leaving the text box commits the edit
   - [SwRS-MDOKFSTUDIO-BLOCK-053](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-053.md): Cancel and Escape restore the saved text
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
-  - [SwRS-MDOKFSTUDIO-BLOCK-148](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-148.md): A block selection survives saves and is cleared by patches
-  - [SwRS-MDOKFSTUDIO-BLOCK-169](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-169.md): Cut removes the selected blocks with one blank separator
   - [SwRS-MDOKFSTUDIO-BLOCK-191](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-191.md): The host holds an open block edit and ends it when the block changes
   - [SwRS-MDOKFSTUDIO-BLOCK-193](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-193.md): Page updates wait while an inline editor is open
   - [SwRS-MDOKFSTUDIO-BLOCK-205](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-205.md): Open editors are saved before the page hides or leaves the document
@@ -125,4 +115,6 @@ As a writer, I type in the preview and my Markdown file follows, so a closed win
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-064](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-064.md): Flush and editor watch messages are addressed by their own id
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 <!-- okf:links:end -->

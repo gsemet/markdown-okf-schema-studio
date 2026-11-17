@@ -839,7 +839,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Whole-page edit mode preserves source layout while a focused paragraph editor shows its caret.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-029
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
     id: "edit-paragraph-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -1395,7 +1395,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   })),
   ...(["cream", "dark"] as const).map((mode, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-PALETTE-002
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-002
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
     id: `palette-slash/v${23 + index}-edit-bar-tooltip-rule-${mode}-900`,
     fixture: "64-rule-edit",
     theme: mode === "dark" ? "dark" as const : "light" as const,

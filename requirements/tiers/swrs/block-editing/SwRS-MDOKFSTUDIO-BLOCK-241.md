@@ -7,8 +7,8 @@ description: "The host SHALL accept previewBlocksCopy only with positive integer
   and endLine."
 project: markdown-okf-schema-studio
 scope: block-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,11 +19,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-tested_in_files:
-- test/core/protocol/pageToHost.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-BLOCK-259
 ---
 
 ## previewBlocksCopy needs a line range
@@ -62,4 +62,6 @@ The host SHALL accept previewBlocksCopy only with positive integer line and endL
   - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-259](SwRS-MDOKFSTUDIO-BLOCK-259.md): The host ignores a malformed block-editing message and changes nothing
 <!-- okf:links:end -->

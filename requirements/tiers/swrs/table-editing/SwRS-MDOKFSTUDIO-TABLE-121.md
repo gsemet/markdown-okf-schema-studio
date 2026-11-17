@@ -72,8 +72,8 @@ When the writer clicks a cell of a pipe table inside a blockquote, a GFM alert o
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TABLE-001: the cell editor of a top-level table
-- SwRS-MDOKFSTUDIO-TABLE-035: Tab from cell to cell and the reopen after a save
-- SwRS-MDOKFSTUDIO-TABLE-070: the conversion to a list-table
+- SwRS-MDOKFSTUDIO-TABLE-123: Tab from cell to cell and the reopen after a save
+- SwRS-MDOKFSTUDIO-TABLE-122: the conversion to a list-table
 - SwRS-MDOKFSTUDIO-TABLE-002: the move of a body row with its handle
 
 ### Verification notes

@@ -11,8 +11,8 @@ description: "When a block editor is open, the page SHALL expose its frame as a 
   block it replaces."
 project: markdown-okf-schema-studio
 scope: block-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -21,15 +21,11 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/preview/styles/editModeStyles.ts
-- src/page/features/blockEditor.ts
-- src/page/features/blockSourceEditor.ts
-tested_in_files:
-- test/page/blockReq.requirements.test.ts
-- test/page/runtimeBlockEditor.test.ts
-- test/visual/scenarioDefinitions1.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-BLOCK-033
 ---
 
 ## The block editor is a labelled one-pixel frame that hides its rendered block
@@ -106,4 +102,6 @@ When a block editor is open, the page SHALL expose its frame as a region named "
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-033](SwRS-MDOKFSTUDIO-BLOCK-033.md): The status line shows the lines and keys, with Done and Cancel beside it
 <!-- okf:links:end -->

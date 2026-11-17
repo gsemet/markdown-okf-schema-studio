@@ -64,7 +64,7 @@ function tabIntoNewRow(harness: RuntimeHarness, typed?: string) {
   return { ...opened, table, row, newCells };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-124
 test("the Tab hint shows in the last cell only, follows the editor and is described by the text box", () => {
   const harness = createRuntimeHarness();
   const { cells, click, input } = openTableCellEditorForTab(harness, { start: [1, 0] });
@@ -83,7 +83,7 @@ test("the Tab hint shows in the last cell only, follows the editor and is descri
   assert.equal(hintsOf(harness).length, 0, "no hint in the last column of another row");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-124
 test("the Tab hint appears after Tab into the last cell and goes after Shift+Tab out of it", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness, { start: [2, 0] });

@@ -169,7 +169,7 @@ test("T30: the list and pick messages carry an edit id and no other payload", ()
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-240
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
 test("previewBlockMove validates both ranges, the direction and the optional pin", () => {
   const move = {
     type: "previewBlockMove", documentId: "doc", revision: 1, requestId: 1,
@@ -186,9 +186,9 @@ test("previewBlockMove validates both ranges, the direction and the optional pin
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-241
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-242
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-243
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
 test("T40: the block clipboard messages validate their lines and the optional pin", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
   for (const type of ["previewBlocksCopy", "previewBlocksCut"]) {
@@ -277,7 +277,7 @@ test("T44: previewCommentResolve and previewCommentDelete validate the thread id
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-245
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
 test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
   const flushed = {
     type: "previewEditFlushed", documentId: "doc", revision: 1, requestId: 1, flushId: "flush-1", flushed: true,
@@ -290,7 +290,7 @@ test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-244
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
 test("STAB-03: previewEditClosed carries the id of the closed editor", () => {
   const closed = { type: "previewEditClosed", documentId: "doc", revision: 1, requestId: 1, editId: "edit-3" };
   assert.equal(isRegisteredPreviewMessage(closed), true);

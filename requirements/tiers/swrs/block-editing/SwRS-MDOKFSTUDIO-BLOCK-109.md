@@ -6,7 +6,9 @@ title: The up and down arrows of an insert point move its block
 description: "While edit mode is on, the page SHALL give the insert point of every
   body block an up arrow labelled \"Move the block above up\" and a down arrow labelled
   \"Move the block above down\", and a click on an enabled arrow asks the host to
-  swap the block with its neighbour."
+  swap the block with its neighbour; the page SHALL apply a previewBlockMoveResult
+  only for the render it shows and ignore one that names another document, revision
+  or request."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -15,7 +17,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-014
-- StRS-MDOKFSTUDIO-BLOCK-025
 - StRS-MDOKFSTUDIO-FMEDIT-008
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
@@ -26,6 +27,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/preview/styles/editModeStyles.ts
+- src/core/protocol/hostToPage.ts
 - src/page/features/blockMoves.ts
 - src/page/features/blockSelectionView.ts
 - src/page/features/editMode.ts
@@ -37,6 +39,7 @@ tested_in_files:
 - test/page/runtimeBlockMoves.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
+- SwRS-MDOKFSTUDIO-BLOCK-129
 - SwRS-MDOKFSTUDIO-FMEDIT-064
 ---
 
@@ -106,10 +109,31 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 - THEN the owner is "pointer", the hovered block shows its actions again, the bar of the selection hides and the selection outline is removed
 - AND a selection that is cleared leaves the owner unset, so the hover alone shows the actions
 
+### Scenario (nominal): A result for the render the page shows
+
+- GIVEN a previewBlockMoveResult whose documentId, revision and requestId are those of the page's render
+- WHEN it arrives
+- THEN it is handled, and a refusal reason is shown next to the insert point bar
+
+### Scenario (refusal): A result for another context
+
+| Input | Outcome |
+| --- | --- |
+| a result whose requestId differs | ignored: no status is shown and no focus changes |
+| a result that names another document | ignored |
+| a result that names another revision | ignored |
+
+### Scenario (boundary): A move refused as stale is sent once more
+
+| Input | Outcome |
+| --- | --- |
+| A move whose result says "The preview is out of date. Try again once it has refreshed." | No message is shown; once the next render is in, the page sends the same move again from the blocks of that render |
+| The second answer is the same refusal | The reason is shown next to the bar; the move is not sent a third time |
+| No render arrives within five seconds | The reason is shown next to the bar |
+
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-BLOCK-240: the accepted shape of previewBlockMove.
-- SwRS-MDOKFSTUDIO-BLOCK-129: the page applies a move result only for its own render.
+- SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewBlockMove.
 - SwRS-MDOKFSTUDIO-BLOCK-117: what the host does with the swap.
 - SwRS-MDOKFSTUDIO-BLOCK-124: the host refuses ranges that do not match the document.
 - SwRS-MDOKFSTUDIO-BLOCK-127: an included block is never moved.
@@ -122,7 +146,10 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 - Method: test/core/protocol/pageToHost.test.ts: `previewBlockMove validates both ranges, the direction and the optional pin` (scenario 5).
 - Method: test/page/runtimeBlockMoves.test.ts: `the block actions follow whichever moved last: the keyboard selection or the pointer` (owner attribute and shown bar, scenario 8), and test/core/preview/blockReq.requirements.test.ts: `the block actions of a hovered block yield to the keyboard selection, which shows its own bar` (the style rules).
 - Method: test/integration/blockActionsFollowSelection.test.ts (real window, cream and dark preview themes): the computed opacity of the bars and the outline after a keyboard move and after a pointer move.
+- Method: Unit test `T36: a refused move says why next to the bar; a result of another context is ignored` in test/page/runtimeBlockMoves.test.ts (both scenarios; the differing requestId case is the one run, the document and revision rows follow from the same addressing rule); the addressing rule is `previewBlockMoveResult: render` in src/core/protocol/hostToPage.ts.
+- Method: Unit test `T36: a move refused as stale is sent once more after the next render, before any message` in test/page/runtimeBlockMoves.test.ts (the stale scenario).
 - Criteria: Two buttons with data-sphinx-move up and down per body bar. The disabled attribute is set when the neighbour is missing. addMoveButtons is called only for body bars. The stylesheet hides the buttons under the open-editor attribute. postBlockMove returns false when an editor is open. The status lives 6000 ms.
+- Criteria: createHostMessageFilter accepts the message only for the render the page shows.
 
 <!-- okf:links:start -->
 ### Links
@@ -131,12 +158,12 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
-  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
   - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 - Supersedes:
+  - [SwRS-MDOKFSTUDIO-BLOCK-129](SwRS-MDOKFSTUDIO-BLOCK-129.md): The page applies a move result only for its own render
   - [SwRS-MDOKFSTUDIO-FMEDIT-064](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-064.md): The insert point after the table has no move buttons
 <!-- okf:links:end -->

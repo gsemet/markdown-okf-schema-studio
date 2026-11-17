@@ -17,7 +17,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
-- StRS-MDOKFSTUDIO-BLOCK-025
+- StRS-MDOKFSTUDIO-TABLE-006
+depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -82,5 +83,5 @@ When a writer presses the VS Code key binding of undo, redo, select all or delet
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-008](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-008.md): A writer types and moves between blocks with text editor keys
-  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-TABLE-006](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-006.md): Tab, arrows and editing keys work in a table cell
 <!-- okf:links:end -->

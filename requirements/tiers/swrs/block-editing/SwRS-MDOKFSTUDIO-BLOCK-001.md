@@ -16,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-001
-- StRS-MDOKFSTUDIO-BLOCK-016
 - StRS-MDOKFSTUDIO-BLOCK-003
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-001
@@ -97,7 +96,7 @@ When a writer clicks the Edit button of a preview, the page SHALL switch edit mo
 
 - SwRS-MDOKFSTUDIO-TRUST-001: the Edit button is enabled whatever the trust
 - SwRS-MDOKFSTUDIO-LIFE-169: the edit mode choice is stored for the workspace
-- SwRS-MDOKFSTUDIO-BLOCK-236: the accepted shape of previewEditModeChanged
+- SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewEditModeChanged
 - SwRS-MDOKFSTUDIO-FMEDIT-019: closing of a frontmatter field editor
 - SwRS-MDOKFSTUDIO-MYST-038: the label rename field itself
 
@@ -118,7 +117,6 @@ When a writer clicks the Edit button of a preview, the page SHALL switch edit mo
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
-  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
   - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted

@@ -6,8 +6,8 @@ title: "previewEditCancel needs an edit id and a line range"
 description: "The host SHALL accept previewEditCancel only with the fields of a previewEditOpen."
 project: markdown-okf-schema-studio
 scope: block-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -17,11 +17,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-tested_in_files:
-- test/core/protocol/pageStateMessages.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-BLOCK-259
 ---
 
 ## previewEditCancel needs an edit id and a line range
@@ -60,4 +60,6 @@ The host SHALL accept previewEditCancel only with the fields of a previewEditOpe
   - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-259](SwRS-MDOKFSTUDIO-BLOCK-259.md): The host ignores a malformed block-editing message and changes nothing
 <!-- okf:links:end -->

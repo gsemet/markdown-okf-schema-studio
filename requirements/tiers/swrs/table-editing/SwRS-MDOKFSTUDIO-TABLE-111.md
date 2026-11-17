@@ -71,7 +71,7 @@ When the writer runs Column alignment with left, center or right, the extension 
 | the caret in a table and no choice | no edit is produced |
 
 ### Scenario (boundary): Caret in the text after a row's closing pipe
-- GIVEN the caret in the tail of a row, the text after the closing pipe of its last column (see SwRS-MDOKFSTUDIO-TABLE-102)
+- GIVEN the caret in the tail of a row, the text after the closing pipe of its last column (see SwRS-MDOKFSTUDIO-TABLE-094)
 - WHEN a column alignment is chosen
 - THEN no edit is produced: no column is under the caret
 

@@ -42,7 +42,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     return model;
   };
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-029
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
@@ -386,7 +386,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       })) return;
       if (blockEditor.navigateBlockEdit(event, textarea)) return;
       if (textControls.homeEndInControl(event, textarea)) return;
-      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-261
       // A one-line card part never takes a newline: Shift+Enter, Alt+Enter and Alt+Shift+Enter do
       // nothing (plain Enter and Cmd/Ctrl+Enter are done below).
       if (
@@ -414,7 +414,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
           textarea.setSelectionRange(afterImage, afterImage);
           return;
         }
-        // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+        // @implements_req SwRS-MDOKFSTUDIO-BLOCK-261
         // A one-line card part: Enter is done, like Cmd/Ctrl+Enter (a blank line would cut the card).
         if (edit.singleLine) {
           event.preventDefault?.();
@@ -442,7 +442,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       ) {
         // Tab never leaves the editor; Escape (cancel) and Cmd/Ctrl+Enter (done) are the exits.
         event.preventDefault?.();
-        // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+        // @implements_req SwRS-MDOKFSTUDIO-BLOCK-261
         // A one-line card part is never indented: Tab and Shift+Tab do nothing.
         if (edit.singleLine) return;
         const indentation = textEditing.indentSelection(

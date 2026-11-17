@@ -22,7 +22,6 @@ user_need: As a writer or reviewer, I expect a metadata edit to leave comments,
   schema rejects or that no longer matches the document, and I do not lose what
   I typed when I follow a link or go back.
 derived_by:
-- SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-BLOCK-109
 - SwRS-MDOKFSTUDIO-BLOCK-193
@@ -66,6 +65,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMEDIT-085
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+depends_on:
+- SwRS-MDOKFSTUDIO-BLOCK-041
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-FMEDIT-009
@@ -126,7 +127,6 @@ As a writer or reviewer, I expect a metadata edit to leave comments, quoting, li
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
   - [SwRS-MDOKFSTUDIO-BLOCK-109](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-109.md): The up and down arrows of an insert point move its block
   - [SwRS-MDOKFSTUDIO-BLOCK-193](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-193.md): Page updates wait while an inline editor is open
@@ -170,6 +170,8 @@ As a writer or reviewer, I expect a metadata edit to leave comments, quoting, li
   - [SwRS-MDOKFSTUDIO-FMEDIT-085](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-085.md): Hiding or closing the page saves the open field editor as a flush
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 - Supersedes:
   - [StRS-MDOKFSTUDIO-FMEDIT-009](StRS-MDOKFSTUDIO-FMEDIT-009.md): Refuse metadata edits that break the schema or the document state
   - [StRS-MDOKFSTUDIO-FMEDIT-010](StRS-MDOKFSTUDIO-FMEDIT-010.md): Keep typed metadata text when leaving the editor

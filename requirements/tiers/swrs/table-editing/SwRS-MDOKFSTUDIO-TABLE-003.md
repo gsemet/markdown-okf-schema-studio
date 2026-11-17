@@ -9,8 +9,8 @@ description: When the writer presses Row above on the table bar with the cell
   the cell editor in the new row, with Row above disabled in the header row.
 project: markdown-okf-schema-studio
 scope: table-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -18,11 +18,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/tableStructure.ts
-tested_in_files:
-- test/page/runtimeTableCellEditor.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TABLE-055
 ---
 
 ## EARS Expression
@@ -55,4 +55,6 @@ When the writer presses Row above on the table bar with the cell editor in a bod
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TABLE-008](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-008.md): A table bar locates the writer and edits rows and columns
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TABLE-055](SwRS-MDOKFSTUDIO-TABLE-055.md): Row and column buttons add and remove rows and columns
 <!-- okf:links:end -->

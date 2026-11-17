@@ -105,7 +105,7 @@ export const CARDS_TABS_SCENARIOS: ScenarioDefinition[] = [
     description: `A click on the paragraph of the shown tab panel in edit mode opens the whole Node tab item in one Markdown editor, ${variant.name} theme, 900 px pane.`,
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
     id: "block-editing/v35-card-header-enter-commits-line-cream-900",
     fixture: "68-cards-tabs-version",
     theme: "light",

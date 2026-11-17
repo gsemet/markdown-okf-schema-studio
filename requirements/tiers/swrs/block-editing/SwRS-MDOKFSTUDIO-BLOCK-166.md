@@ -15,7 +15,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-016
-- StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-TRUST-090
@@ -89,7 +88,7 @@ When a writer presses the platform copy chord with blocks selected in edit mode 
 
 - SwRS-MDOKFSTUDIO-BLOCK-169: cut removes the selected blocks.
 - SwRS-MDOKFSTUDIO-BLOCK-174: paste inserts the clipboard as new blocks.
-- SwRS-MDOKFSTUDIO-BLOCK-241: previewBlocksCopy needs a line range.
+- SwRS-MDOKFSTUDIO-BLOCK-259: previewBlocksCopy needs a line range.
 
 ### Verification notes
 
@@ -105,7 +104,6 @@ When a writer presses the platform copy chord with blocks selected in edit mode 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
-  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error

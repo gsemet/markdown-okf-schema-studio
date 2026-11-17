@@ -15,8 +15,8 @@ description: When the writer presses Tab, Shift+Tab or an arrow key at the edge
   SHALL show a hint that Tab adds a row.
 project: markdown-okf-schema-studio
 scope: table-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -26,23 +26,14 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/features/tableCellEditor.ts
-- src/page/features/textControls.ts
-- src/page/modules/tableTabRow.ts
-tested_in_files:
-- test/integration/realInput/markers.ts
-- test/integration/realInput/tableStaleRender.ts
-- test/integration/realInput/tableTabRow.ts
-- test/page/cellInlineMarkdown.test.ts
-- test/page/runtimeBlockEditor.test.ts
-- test/page/runtimeTableCellEditor.test.ts
-- test/page/runtimeTableCellStale.test.ts
-- test/page/runtimeTableCellTabRow.test.ts
-- test/visual/capture_edit_checks.py
-- test/visual/capture_table_tab_hint.py
-- test/visual/tableTabHintScenarios.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TABLE-123
+- SwRS-MDOKFSTUDIO-TABLE-124
+- SwRS-MDOKFSTUDIO-TABLE-125
+- SwRS-MDOKFSTUDIO-TABLE-126
 ---
 
 ## Tab and the arrow keys move through the table cells
@@ -179,4 +170,9 @@ Home moves the caret to the start of the text, and Shift extends the selection.
   - [StRS-MDOKFSTUDIO-TABLE-006](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-006.md): Tab, arrows and editing keys work in a table cell
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TABLE-123](SwRS-MDOKFSTUDIO-TABLE-123.md): Tab and the arrow keys move between table cells
+  - [SwRS-MDOKFSTUDIO-TABLE-124](SwRS-MDOKFSTUDIO-TABLE-124.md): Tab in the last cell adds a row and shows the hint
+  - [SwRS-MDOKFSTUDIO-TABLE-125](SwRS-MDOKFSTUDIO-TABLE-125.md): The cell left shows its typed text rendered
+  - [SwRS-MDOKFSTUDIO-TABLE-126](SwRS-MDOKFSTUDIO-TABLE-126.md): The cell editor is revealed in the table's scroll box
 <!-- okf:links:end -->

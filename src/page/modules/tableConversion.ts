@@ -54,7 +54,7 @@ export function createTableConversionTools({ parse, escapeCellPipes }: TableConv
     return parse(source) ? "pipe" : undefined;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-076
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-122
   function pipeGrid(source: string): GridResult {
     const model = parse(source);
     if (!model) return { ok: false, reason: "This is not a pipe table." };
@@ -79,7 +79,7 @@ export function createTableConversionTools({ parse, escapeCellPipes }: TableConv
     };
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-076
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-122
   function listTableGrid(source: string): GridResult {
     const lineEnding = lineEndingOf(source);
     const trailingLineEnding = /(?:\r\n|\r|\n)$/u.test(source);
@@ -265,7 +265,7 @@ export function createTableConversionTools({ parse, escapeCellPipes }: TableConv
     };
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-080
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-122
   function gridToListTable(grid: TableGrid): TableConversion {
     let ticks = 2;
     for (const row of grid.rows) {

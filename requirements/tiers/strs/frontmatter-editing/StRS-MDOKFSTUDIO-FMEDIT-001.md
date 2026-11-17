@@ -21,7 +21,6 @@ user_need: As a writer, I edit a document's metadata directly in the properties
   whether my edit was saved, refused or cancelled and can undo it.
 derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-041
-- SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-BLOCK-228
 - SwRS-MDOKFSTUDIO-FMEDIT-001
 - SwRS-MDOKFSTUDIO-FMEDIT-002
@@ -61,6 +60,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMEDIT-081
 - SwRS-MDOKFSTUDIO-FMEDIT-082
 - SwRS-MDOKFSTUDIO-FMEDIT-087
+depends_on:
+- SwRS-MDOKFSTUDIO-BLOCK-058
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-FMEDIT-002
@@ -120,7 +121,6 @@ As a writer, I edit a document's metadata directly in the properties table, wher
 
 - Derived by:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
-  - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
   - [SwRS-MDOKFSTUDIO-BLOCK-228](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-228.md): Opening, saving and closing an editor keep the reading position
   - [SwRS-MDOKFSTUDIO-FMEDIT-001](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-001.md): A click on a field in edit mode opens its editor in place
   - [SwRS-MDOKFSTUDIO-FMEDIT-002](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-002.md): A field editor does not open while another editor is open
@@ -160,6 +160,8 @@ As a writer, I edit a document's metadata directly in the properties table, wher
   - [SwRS-MDOKFSTUDIO-FMEDIT-081](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-081.md): A chosen enum value is posted when the select loses focus or Enter is pressed
   - [SwRS-MDOKFSTUDIO-FMEDIT-082](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-082.md): An accepted field save shows that the preview is refreshing
   - [SwRS-MDOKFSTUDIO-FMEDIT-087](../../swrs/frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-087.md): A tall properties table scrolls to both ends at 460 px and returns to line 1 on source sync
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
 - Supersedes:
   - [StRS-MDOKFSTUDIO-FMEDIT-002](StRS-MDOKFSTUDIO-FMEDIT-002.md): Edit each kind of metadata value with a fitting control
   - [StRS-MDOKFSTUDIO-FMEDIT-003](StRS-MDOKFSTUDIO-FMEDIT-003.md): Edit list fields and link lists item by item

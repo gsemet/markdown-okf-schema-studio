@@ -96,7 +96,7 @@ When edit mode is on and the writer clicks a cell of a rendered pipe table, the 
 - THEN the region still holds no status and the bar status shows the new position
 
 ### Scenario (boundary): Only a well-formed pipe table opens a cell editor
-A table is editable when it has a header row, a delimiter row whose cells are at least one dash with optional colons (the delimiter rule is /^:?-+:?$/ on each delimiter cell with spaces removed; when a delimiter cell has fewer than three dashes, the delimiter line holds a pipe), the same number of cells in the header and in the delimiter row, and in every body row at least as many cells as the header. The text of a body row after the closing pipe of the header's last column is the row tail (see SwRS-MDOKFSTUDIO-TABLE-102): the preview ignores it and the editor keeps it verbatim.
+A table is editable when it has a header row, a delimiter row whose cells are at least one dash with optional colons (the delimiter rule is /^:?-+:?$/ on each delimiter cell with spaces removed; when a delimiter cell has fewer than three dashes, the delimiter line holds a pipe), the same number of cells in the header and in the delimiter row, and in every body row at least as many cells as the header. The text of a body row after the closing pipe of the header's last column is the row tail (see SwRS-MDOKFSTUDIO-TABLE-094): the preview ignores it and the editor keeps it verbatim.
 
 | Input | Outcome |
 | --- | --- |
@@ -114,7 +114,7 @@ A table is editable when it has a header row, a delimiter row whose cells are at
 ### Scenario (refusal): A block that is no editable pipe table opens in the raw Markdown editor
 | Input | Outcome |
 | --- | --- |
-| a cell of a rendered MyST list-table that is not plain (see SwRS-MDOKFSTUDIO-TABLE-005), a raw HTML table or a table inside a {table} directive, in edit mode, after the host sends the block source | the cell shows its rendered content again, the region is renamed "Raw Markdown editor" and a text box labelled "Raw Markdown block" holds the whole block source and the region leaves the cell and sits after the table, which is hidden while its source is edited, so the editor stays in view |
+| a cell of a rendered MyST list-table that is not plain (see SwRS-MDOKFSTUDIO-TABLE-055), a raw HTML table or a table inside a {table} directive, in edit mode, after the host sends the block source | the cell shows its rendered content again, the region is renamed "Raw Markdown editor" and a text box labelled "Raw Markdown block" holds the whole block source and the region leaves the cell and sits after the table, which is hidden while its source is edited, so the editor stays in view |
 | a pipe table whose rendered row has more cells than the parsed header, a cell beyond the parsed width clicked | the same fallback applies |
 
 ### Related requirements

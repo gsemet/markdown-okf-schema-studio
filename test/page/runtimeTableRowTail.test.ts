@@ -19,7 +19,7 @@ test("a cell of a table whose row has a token after its closing pipe opens the c
     false, "no raw Markdown editor");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-070
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("the List table button is disabled on a table whose row has a token after its closing pipe", () => {
   const harness = createRuntimeHarness();
   openTableCellEditorForTab(harness, {}, "| A | B |\n| --- | --- |\n| x | y | ^row-a\n| p | q |\n");

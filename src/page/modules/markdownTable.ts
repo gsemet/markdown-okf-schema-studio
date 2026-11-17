@@ -48,7 +48,7 @@ export type TableConversion = { ok: true; text: string } | { ok: false; reason: 
 const BLOCK_ID_END = /^(?:(.*?)\s+)?(\^[A-Za-z0-9-]+)$/u;
 
 export function createMarkdownTableTools() {
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-102
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-094
   // A backslash keeps the next character in the cell. A code span does not shelter a pipe: the
   // preview follows the GFM table rule, so an unescaped pipe splits the row inside backticks too.
   function splitRow(line: string): string[] {

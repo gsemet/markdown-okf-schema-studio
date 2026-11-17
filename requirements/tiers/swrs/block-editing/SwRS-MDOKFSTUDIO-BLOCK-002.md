@@ -9,8 +9,8 @@ description: The extension SHALL give every rendered horizontal rule a box 25 px
   the rule's block editor.
 project: markdown-okf-schema-studio
 scope: block-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -18,12 +18,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/preview/styles/contentBlockStyles.ts
-tested_in_files:
-- test/core/preview/previewStyles.test.ts
-- test/visual/scenarioDefinitions1.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-BLOCK-014
 ---
 
 ## A horizontal rule has a tall invisible hit area
@@ -56,4 +55,6 @@ The extension SHALL give every rendered horizontal rule a box 25 px tall (the 1 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-014](SwRS-MDOKFSTUDIO-BLOCK-014.md): A click or Enter on a mapped block opens its editor
 <!-- okf:links:end -->

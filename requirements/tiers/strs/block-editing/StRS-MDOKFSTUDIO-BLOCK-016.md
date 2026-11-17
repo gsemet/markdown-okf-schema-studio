@@ -19,10 +19,6 @@ user_need: "As a writer, I select a run of blocks with Shift+click or Shift+Arro
   to treat them as one, and I copy, cut and paste whole blocks as their exact Markdown
   while the document stays tidy: no double blank lines, no glued blocks."
 derived_by:
-- SwRS-MDOKFSTUDIO-BLOCK-001
-- SwRS-MDOKFSTUDIO-BLOCK-004
-- SwRS-MDOKFSTUDIO-BLOCK-041
-- SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-BLOCK-124
 - SwRS-MDOKFSTUDIO-BLOCK-127
 - SwRS-MDOKFSTUDIO-BLOCK-140
@@ -33,9 +29,11 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-241
 - SwRS-MDOKFSTUDIO-BLOCK-242
 - SwRS-MDOKFSTUDIO-BLOCK-243
-- SwRS-MDOKFSTUDIO-BLOCK-254
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+depends_on:
+- SwRS-MDOKFSTUDIO-BLOCK-041
+- SwRS-MDOKFSTUDIO-BLOCK-058
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -83,10 +81,6 @@ As a writer, I select a run of blocks with Shift+click or Shift+Arrow to treat t
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-BLOCK-001](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-001.md): The Edit button turns edit mode on and off and tidies up on exit
-  - [SwRS-MDOKFSTUDIO-BLOCK-004](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-004.md): Arrow keys, Enter and Escape drive block editing without the mouse
-  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
-  - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
   - [SwRS-MDOKFSTUDIO-BLOCK-124](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-124.md): Moves and clipboard edits are refused for ranges that do not match the document
   - [SwRS-MDOKFSTUDIO-BLOCK-127](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-127.md): An included block is never moved, cut, copied, selected or pasted after
   - [SwRS-MDOKFSTUDIO-BLOCK-140](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-140.md): Shift+click and Shift+Arrow select a run of blocks
@@ -97,7 +91,9 @@ As a writer, I select a run of blocks with Shift+click or Shift+Arrow to treat t
   - [SwRS-MDOKFSTUDIO-BLOCK-241](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-241.md): previewBlocksCopy needs a line range
   - [SwRS-MDOKFSTUDIO-BLOCK-242](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-242.md): previewBlocksCut needs a line range and an optional pin
   - [SwRS-MDOKFSTUDIO-BLOCK-243](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-243.md): previewBlocksPaste needs a line to paste after
-  - [SwRS-MDOKFSTUDIO-BLOCK-254](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-254.md): Right and Left move the block selection down and up the structure
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
 <!-- okf:links:end -->

@@ -128,7 +128,7 @@ test("T36: a disabled button posts nothing, and the buttons stand down while an 
   assert.equal(harness.messages.slice(opened).some((message) => message.type === "previewBlockMove"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-129
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-059
 test("T36: a refused move says why next to the bar; a result of another context is ignored", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
@@ -146,7 +146,7 @@ test("T36: a refused move says why next to the bar; a result of another context 
   assert.equal(statusOf()?.getAttribute("role"), "status");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-129
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
 test("T36: a move refused as stale is sent once more after the next render, before any message", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;

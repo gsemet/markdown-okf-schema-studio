@@ -50,8 +50,8 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 | strict, GFM or MyST mode | the actions of the palette buttons of that mode, in the order of the buttons, with Bulleted list and Numbered list |
 | caret inside a colour code | the Colour code command is listed as well |
 | caret outside a colour code | the Colour code command is not listed |
-| caret inside a pipe table | List table is listed, Pipe table is not (see SwRS-MDOKFSTUDIO-TABLE-073) |
-| caret inside a list table | Pipe table is listed, List table is not (see SwRS-MDOKFSTUDIO-TABLE-074) |
+| caret inside a pipe table | List table is listed, Pipe table is not (see SwRS-MDOKFSTUDIO-TABLE-122) |
+| caret inside a list table | Pipe table is listed, List table is not (see SwRS-MDOKFSTUDIO-TABLE-122) |
 
 ### Scenario (nominal): An empty query groups the commands, a query ranks them
 - GIVEN the MyST mode and the menu just opened

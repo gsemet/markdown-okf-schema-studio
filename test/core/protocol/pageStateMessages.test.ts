@@ -217,10 +217,10 @@ function variantsOf(base: Record<string, unknown>): Record<string, unknown>[] {
   return out;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-236
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-237
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-238
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-239
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-054
 // @tests_req SwRS-MDOKFSTUDIO-GFM-027
 // @tests_req SwRS-MDOKFSTUDIO-THEME-013

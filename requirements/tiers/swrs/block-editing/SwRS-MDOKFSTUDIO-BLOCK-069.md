@@ -2,8 +2,8 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-BLOCK-069
 uuid: 5f6a88c5-f2cd-4df4-ba73-d0fe092475a4
-title: Marker keys wrap a selection; Home, End, select-all and undo stay in the
-  text box
+title: "Marker keys wrap a selection; Home, End, select-all and undo stay in the text
+  box"
 description: When a writer presses a key in the text box of an open editor, the
   page SHALL give it the text-box behaviour of its row in the scenarios (wrap a
   selection, caret to the start or the end, select-all, undo, repeated spaces
@@ -18,7 +18,7 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
-- StRS-MDOKFSTUDIO-BLOCK-025
+- StRS-MDOKFSTUDIO-TABLE-006
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -140,5 +140,5 @@ When a writer presses a key in the text box of an open editor, the page SHALL gi
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-008](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-008.md): A writer types and moves between blocks with text editor keys
-  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-TABLE-006](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-006.md): Tab, arrows and editing keys work in a table cell
 <!-- okf:links:end -->

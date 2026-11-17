@@ -142,7 +142,7 @@ function linkedCard(harness: RuntimeHarness): { title: RuntimeElement; link: Lin
   return { title, link, body, footer };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("edit mode: a click on a linked card's title, body or footer opens that part's line, never the link", () => {
   for (const [part, line] of [["title", 14], ["body", 19], ["footer", 21]] as const) {
@@ -157,7 +157,7 @@ test("edit mode: a click on a linked card's title, body or footer opens that par
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 test("edit mode: a Cmd or Ctrl click on a linked card's title follows the card link", () => {
   for (const modifier of [{ metaKey: true }, { ctrlKey: true }]) {
     const harness = createRuntimeHarness();

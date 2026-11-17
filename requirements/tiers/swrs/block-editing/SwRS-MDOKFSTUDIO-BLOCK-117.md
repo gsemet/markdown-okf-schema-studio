@@ -82,7 +82,7 @@ When the host moves a block past its neighbour, it SHALL replace only the lines 
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-124: the host refuses ranges that do not match the document, blocks in the frontmatter and text between the blocks.
-- SwRS-MDOKFSTUDIO-BLOCK-240: the accepted shape of previewBlockMove.
+- SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewBlockMove.
 - SwRS-MDOKFSTUDIO-BLOCK-156: a block selection moves as one range.
 
 ### Verification notes

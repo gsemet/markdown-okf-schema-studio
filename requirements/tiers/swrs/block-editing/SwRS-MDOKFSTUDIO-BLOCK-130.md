@@ -16,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-014
-- StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
@@ -104,8 +103,7 @@ The move chord is Cmd+Alt with ArrowUp or ArrowDown on macOS and Ctrl+Alt elsewh
 
 - SwRS-MDOKFSTUDIO-BLOCK-109: the arrows of an insert point and the reason shown for a refused move.
 - SwRS-MDOKFSTUDIO-BLOCK-156: Alt+Arrow with a block selection moves the whole selection.
-- SwRS-MDOKFSTUDIO-BLOCK-240: the accepted shape of previewBlockMove.
-- SwRS-MDOKFSTUDIO-BLOCK-129: the page applies a move result only for its own render.
+- SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewBlockMove.
 
 ### Verification notes
 
@@ -123,7 +121,6 @@ The move chord is Cmd+Alt with ArrowUp or ArrowDown on macOS and Ctrl+Alt elsewh
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
-  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply

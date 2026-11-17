@@ -16,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-006
-- StRS-MDOKFSTUDIO-BLOCK-025
 - StRS-MDOKFSTUDIO-TABLE-001
 - StRS-MDOKFSTUDIO-TOOLBAR-009
 depends_on: []
@@ -110,7 +109,7 @@ When the page hides, closes or leaves the document (a followed link, Back, anoth
 | A cell editor unchanged, or still waiting for the host source, and edit mode turns off | The editor closes without a save |
 
 ### Related requirements
-- SwRS-MDOKFSTUDIO-BLOCK-245: the shape of previewEditFlushed
+- SwRS-MDOKFSTUDIO-BLOCK-259: the shape of previewEditFlushed
 - SwRS-MDOKFSTUDIO-BLOCK-042: the autosave of an open editor
 
 ### Verification notes
@@ -130,7 +129,6 @@ When the page hides, closes or leaves the document (a followed link, Back, anoth
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
-  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
   - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
   - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
 <!-- okf:links:end -->

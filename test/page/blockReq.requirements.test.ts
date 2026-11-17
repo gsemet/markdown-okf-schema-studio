@@ -340,7 +340,7 @@ test("the editor frame appears at once, empty, and is filled when the source arr
   findButton(harness, DONE);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-029
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
 test("the editor frame is a region named Raw Markdown editor and its text box is named Raw Markdown block", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);

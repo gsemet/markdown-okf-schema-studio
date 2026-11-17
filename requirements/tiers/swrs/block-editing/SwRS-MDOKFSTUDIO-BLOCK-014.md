@@ -6,8 +6,10 @@ title: "A click or Enter on a mapped block opens its editor"
 description: "When a writer clicks a rendered block in edit mode, or presses Enter
   or Space on a focused mapped block, the page SHALL open the editor of the mapped
   block under the click with previewEditOpen for its source lines instead of revealing
-  its source, and show in the editor the source text or the error that the host returns
-  in previewEditSource."
+  its source, show in the editor the source text or the error that the host returns
+  in previewEditSource, and give every rendered horizontal rule a box 25 px tall (the
+  1 px line plus 12 px of transparent padding above and below, with the page spacing
+  unchanged) so that a click within 12 px of the line opens the rule's block editor."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -24,6 +26,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/preview/styles/contentBlockStyles.ts
 - src/core/preview/styles/editModeStyles.ts
 - src/core/render/mystRenderer.ts
 - src/page/features/blockEditor.ts
@@ -33,6 +36,7 @@ implemented_in_files:
 - src/page/features/pageInput.ts
 - src/page/modules/linkNavigation.ts
 tested_in_files:
+- test/core/preview/previewStyles.test.ts
 - test/core/render/includeMapping.test.ts
 - test/integration/previewEditing.test.ts
 - test/integration/realInput/markers.ts
@@ -42,8 +46,11 @@ tested_in_files:
 - test/session/alertBlockEditOpen.test.ts
 - test/visual/alertEditingScenarios.ts
 - test/visual/linkEditModeScenarios.ts
+- test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-BLOCK-002
 ---
 
 ## A click or Enter on a mapped block opens its editor
@@ -138,12 +145,24 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
 | previewEditSource with neither an error string nor a string originalText | ignored |
 | previewEditSource that arrives when the text box already exists | ignored |
 
+### Scenario (nominal): Click above the line
+
+- GIVEN a rendered page with a horizontal rule and edit mode on
+- WHEN the writer clicks 10 px above or below the line of the rule
+- THEN the click lands on the rule and opens its block editor
+
+### Scenario (boundary): Spacing unchanged
+
+- GIVEN the same page
+- WHEN the rule is laid out
+- THEN its 12 px of padding on each side is taken from its margin, so the distance between the surrounding blocks is the same as with a bare 1 px rule
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TRUST-001: every preview offers its editing affordances
 - SwRS-MDOKFSTUDIO-BLOCK-041: one edit at a time
 - SwRS-MDOKFSTUDIO-TRUST-059: the page accepts only host messages addressed to its render
-- SwRS-MDOKFSTUDIO-BLOCK-237: the accepted shape of previewEditOpen
+- SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewEditOpen
 - SwRS-MDOKFSTUDIO-FMEDIT-001: the field editor of a properties table cell
 - SwRS-MDOKFSTUDIO-CORE-012: the mapping of included blocks
 - SwRS-MDOKFSTUDIO-DIAG-001: the Mermaid figure markup and its Diagram source disclosure
@@ -163,7 +182,9 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
 - Method: visual scenarios in test/visual/scenarioDefinitions2.ts, block-editing/v04 (paragraph click), block-editing/v05 (admonition title click and fenced block) and block-editing/v12 (edit-list-narrow: list item row). The nested list case, the line range of a list (sourceRangeForList in src/page/features/mappedBlocks.ts) and lists that mix files are untested.
 - Method: test/core/render/includeMapping.test.ts and test/integration/previewEditing.test.ts (an included block maps to the directive lines and carries data-sphinx-preview-included; a changed include target renders only after the edit: include row).
 - Method: the previewEditSource scenarios (nominal answer, error and malformed rows) are not asserted by a dedicated test; the page receives the answer in the unit tests of test/page/runtimeBlockEditor.test.ts and in the integration flow of test/integration/previewEditing.test.ts.
+- Method: test/core/preview/previewStyles.test.ts (the hr rule has 12px padding, content-box and a margin reduced by the padding); visual scenarios palette-slash/v23-edit-bar-tooltip-rule-cream-900 and v24-edit-bar-tooltip-rule-dark-900 (element at 10 px above and below the line is the rule, box 25 px tall)
 - Criteria: One previewEditOpen per click, carrying the mapped line range of the clicked block; the keydown listener opens the editor only for a mapped block outside the listed controls; the line range of a list is the span of the mapped elements of the nearest list that belong to the same source file and document; the line range of a block inside a mapped element carrying data-okf-github-alert, or an aside or details element of class admonition other than a context-tag panel (class myst-context-admonition, SwRS-MDOKFSTUDIO-MYST-013, which keeps the range of the clicked block), of the same source file and document is the range of the nearest such element, before any list; the frame is never inside the pre and the rendered text of the fence is the raw source; the capture listener of bindEditModeCaptureClicks acts only for an IMG inside an anchor outside the properties table and the editors; linkActivationEdits (src/page/features/linkEditing.ts) is true only in edit mode, without Cmd or Ctrl, for a click, Enter or Space (never an auxclick) whose target is inside a link and inside a mapped block, outside the properties table, an open editor, a comment body, a chip, a label anchor and an okf-link value; while it is true the link navigation posts nothing and the page input opens the editor; the click handler returns before openMappedEditor for the excluded targets and openMappedEditor returns at once when the event target is inside [data-okf-properties]; the editor range equals the directive lines and the included file is never opened; the click target of Diagram source resolves to the figure through the mapped-block selector and event.preventDefault is called in edit mode.
+- Criteria: The rule box is at least 24 px tall and document.elementFromPoint 10 px above and below its line returns the rule.
 
 <!-- okf:links:start -->
 ### Links
@@ -176,4 +197,6 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
   - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
   - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-BLOCK-002](SwRS-MDOKFSTUDIO-BLOCK-002.md): A horizontal rule has a tall invisible hit area
 <!-- okf:links:end -->

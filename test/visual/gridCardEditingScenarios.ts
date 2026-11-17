@@ -38,7 +38,7 @@ const variants = [
   { part: "title", click: `${CARD} .myst-grid-card-title`, what: "the title of the second card", editsLine: true },
 ] as const;
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 /** The title editor holds the directive line of the clicked card, not line 1 of the document. */
 const TITLE_LINE_ASSERTION: ContentAssertion = {
   message: "the open editor holds the directive line of the second card (:::{grid-item-card} 2. Status projection)",

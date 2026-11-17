@@ -42,9 +42,9 @@ import { isSafeOkfColor } from "../../../src/core/security/spanColors";
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-149
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-073
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-074
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-076
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-106
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-111
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-115

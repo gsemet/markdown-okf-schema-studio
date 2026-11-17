@@ -3,10 +3,10 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-BLOCK-102
 uuid: 5e67d7f3-6f2b-4dd5-8c9e-198247ce0ff7
 title: An empty body offers one Start writing button
-description: While edit mode is on and the body of a rendered document has no
-  block, the page SHALL show one Start writing button, after the properties
-  table when there is one, in place of the insert points, and open the
-  first-block editor from it on a click or on Enter.
+description: "While edit mode is on and the body of a rendered document has no block,
+  the page SHALL show one Start writing button, after the properties table when there
+  is one, in place of the insert points, and open the first-block editor from it on
+  a click."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -34,7 +34,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-While edit mode is on and the body of a rendered document has no block, the page SHALL show one Start writing button, after the properties table when there is one, in place of the insert points, and open the first-block editor from it on a click or on Enter.
+While edit mode is on and the body of a rendered document has no block, the page SHALL show one Start writing button, after the properties table when there is one, in place of the insert points, and open the first-block editor from it on a click.
 
 ### Scenario (nominal): Empty body shows one Start writing button
 
@@ -58,21 +58,6 @@ While edit mode is on and the body of a rendered document has no block, the page
 - GIVEN an empty document in edit mode
 - WHEN the writer clicks Start writing
 - THEN previewEditOpen carries insertAfterLine 0 and line 1, and the button is replaced by the focused editor
-
-### Scenario (nominal): Enter opens the same editor
-
-- GIVEN an empty document in edit mode with no open editor
-- WHEN the writer presses Enter
-- THEN the same Start writing editor opens focused and replaces the button, with no other click
-
-### Scenario (refusal): Enter does nothing where it would not start a document
-
-| Input | Outcome |
-| --- | --- |
-| Shift+Enter, Ctrl+Enter, Alt+Enter or Cmd+Enter on an empty document in edit mode | No editor opens |
-| Enter on a document with a body | No editor opens |
-| Enter in reading mode | No editor opens |
-| Enter inside a text box, select, button or link | No editor opens |
 
 ### Scenario (nominal): The button is hidden while its editor is open
 

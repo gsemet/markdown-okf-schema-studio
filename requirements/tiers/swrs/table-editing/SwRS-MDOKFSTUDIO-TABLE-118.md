@@ -11,8 +11,8 @@ description: When the source of a table cell editor reaches the page after
   Markdown table.
 project: markdown-okf-schema-studio
 scope: table-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,12 +20,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/features/tableCellEditor.ts
-- src/page/features/textControls.ts
-tested_in_files:
-- test/page/runtimeTableCellEditor.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-BLOCK-255
 ---
 
 ## A table cell editor that opens late leaves the focus in a field that took it
@@ -64,4 +63,6 @@ When the source of a table cell editor reaches the page after another text field
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TABLE-008](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-008.md): A table bar locates the writer and edits rows and columns
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-255](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-255.md): A block editor that opens late leaves the focus in a field that took it
 <!-- okf:links:end -->

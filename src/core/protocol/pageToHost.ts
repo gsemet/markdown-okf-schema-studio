@@ -219,15 +219,15 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-120
   previewAnchorModeChanged: stateMessage("previewAnchorModeChanged",
     (message) => typeof message.anchorToEditor === "boolean"),
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-236
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewEditModeChanged: stateMessage("previewEditModeChanged", (message) => typeof message.editMode === "boolean"),
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-237
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   // Inline edits: a block editor, a frontmatter field and a task-list checkbox.
   previewEditOpen: stateMessage("previewEditOpen"),
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-238
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewEditSave: stateMessage("previewEditSave",
     (message) => typeof message.originalText === "string" && typeof message.editedText === "string"),
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-239
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewEditCancel: stateMessage("previewEditCancel"),
   // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-054
   previewFrontmatterSave: stateMessage("previewFrontmatterSave", (message) => message.frontmatterAction === "remove"
@@ -280,7 +280,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
     && message.items.length >= 1 && message.items.length <= MAX_FIND_REPLACE_ITEMS
     && message.items.every(isFindReplaceItem)
     && (message.dryRun === undefined || typeof message.dryRun === "boolean"),
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-240
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   // Move of a body block past its neighbour from the "+" bar: both line ranges, the direction and
   // the moved block's viewport top (the host knows the new line). The host re-checks the ranges.
   previewBlockMove: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
@@ -289,15 +289,15 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
     && (message.pinViewportTop === undefined
       || (typeof message.pinViewportTop === "number" && Number.isFinite(message.pinViewportTop)
         && Math.abs(message.pinViewportTop) <= 100000)),
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-241
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   // Copy, cut and paste of selected blocks as Markdown (T40): the source lines of the selection
   // (or the line to paste after) and the viewport top of the block the screen is held on. The
   // host re-checks every line against the document.
   previewBlocksCopy: (message) => isSourceLine(message.line) && isSourceLine(message.endLine),
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-242
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewBlocksCut: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
     && isPinViewportTop(message.pinViewportTop),
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-243
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewBlocksPaste: (message) => Number.isSafeInteger(message.insertAfterLine)
     && (message.insertAfterLine as number) >= 0
     && (message.pinLine === undefined || isSourceLine(message.pinLine))
@@ -325,12 +325,12 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
     && message.threadId !== "" && typeof message.resolved === "boolean",
   previewCommentDelete: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "",
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-245
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   // The page's answer to a host flush request (CR 025): it posted the final save of every open
   // editor before this message, so the host can wait for those saves. It edits nothing.
   previewEditFlushed: (message) => isBoundedString(message.flushId, MAX_EDIT_ID_LENGTH)
     && message.flushId !== "" && typeof message.flushed === "boolean",
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-244
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   // The page closed an inline editor the host asked about with `previewEditorWatch` (STAB-03): the
   // page updates that waited for it can run. It edits nothing.
   previewEditClosed: (message) => isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "",

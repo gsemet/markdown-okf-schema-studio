@@ -22,7 +22,7 @@ function modelRowOf(renderedRow: number): number {
   return renderedRow === 0 ? 0 : renderedRow + 1;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-126
 // A table wider than the pane scrolls sideways in its own box. The selected cell and its editor
 // (the editor can be wider than the cell) are brought fully inside that box by moving only the
 // box's scrollLeft, instantly and by the smallest amount, with a margin on the side they enter
@@ -72,7 +72,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     edit.tableModel.rows[previousRowIndex]![edit.tableColumnIndex!] = edit.tableInput!.value;
     if (edit.tableInput!.value !== edit.cellTextAtOpen) edit.keptCellChange = true;
     rt.blockEditor.postBlockEditSave(false);
-    // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-125
     // The cell left shows the text just typed, not the content captured when the editor opened in
     // it (empty for a new row), rendered as inline Markdown until the next render of the page. A
     // cell whose text did not change keeps its full rendering.
@@ -129,7 +129,8 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     rt.blockEditor.cancelBlockEdit();
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-123
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-124
   // Tab / Shift+Tab: next or previous rendered cell, wrapping across rows; Tab on the last cell
   // adds a row and resumes in its first cell after the re-render.
   function tabThroughTableCells(edit: BlockEdit, backwards: boolean): void {
@@ -427,7 +428,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     // A table captioned by a {table} directive sits in a figure; wrapping a list-table in it is not
     // offered.
     const tableFigure = selectedCell.closest?.("table")?.parentElement?.tagName === "FIGURE";
-    // @implements_req SwRS-MDOKFSTUDIO-TABLE-070
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-122
     addAction("Convert to list-table", tableActionIcons.listTable, "List table", () => {
       const converted = tableTools.convertTable(tableTools.serialize(edit.tableModel!), "list-table");
       if (converted && converted.ok) {
@@ -529,7 +530,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     // Done and Cancel under the field, without the status hint (the toolbar carries the position).
     const cellActions = document.createElement("div");
     cellActions.className = "sphinx-preview-block-editor-actions";
-    // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-124
     // The last cell of the table says what Tab does there; the text box is described by it.
     if (isTabNewRowCell(selectedCell)) {
       const hintId = "sphinx-preview-table-cell-hint-" + edit.editId;
@@ -594,7 +595,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
         blockEditor.saveBlockEdit();
       }
     });
-    // @implements_req SwRS-MDOKFSTUDIO-TABLE-118
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-255
     // Same guard as the block source editor (BLOCK-255): a text field outside the editor that took
     // the focus since the editor opened (the find field) keeps it.
     if (textControls.focusMovedToAnotherField(edit)) {
@@ -604,7 +605,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       editorTrace.record("cell editor focused", "line=" + edit.line + " row=" + edit.tableRowIndex
         + " column=" + edit.tableColumnIndex + " " + traceFocus());
     }
-    // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-126
     // The editor is now in its cell, so both rects are current: every open, switch and reopen
     // brings the cell and its editor inside the table's sideways scroll box.
     fitCellToRoom(window, selectedCell);
@@ -615,7 +616,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     switchTableCell,
     renderTableCellEditor,
     cancelTableCellEdit,
-    // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-126
     // A layout pass (for example a pane resize or a toolbar change) can resize the box under an
     // open editor: the table keeps its Auto breakout and the open cell is scrolled back into view.
     revealOpenCell() {

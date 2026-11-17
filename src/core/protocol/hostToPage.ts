@@ -420,7 +420,7 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewCheckboxResult: render,
     // Matched by edit id: the rename itself moves the revision before the answer arrives.
     previewLabelRenameResult: ownId,
-    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-129
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
     previewBlockMoveResult: render,
     previewBlocksResult: render,
     // Host round trips, matched by edit id by the page's pending requests.

@@ -9,8 +9,8 @@ description: When a conversion between a pipe table, a {list-table} and a simple
   no table gets neither a conversion nor a reason.
 project: markdown-okf-schema-studio
 scope: table-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,14 +19,11 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/tableConversion.ts
-tested_in_files:
-- test/page/modules/editActions.test.ts
-- test/page/modules/fmtableReqTable.requirements.test.ts
-- test/page/modules/listTable.test.ts
-- test/page/modules/markdownTable.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TABLE-122
 ---
 
 ## A conversion that would lose content is refused with a reason
@@ -104,4 +101,6 @@ When a conversion between a pipe table, a {list-table} and a simple HTML table w
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TABLE-122](SwRS-MDOKFSTUDIO-TABLE-122.md): A table converts between pipe, list-table and HTML forms without loss, or is refused with a reason
 <!-- okf:links:end -->

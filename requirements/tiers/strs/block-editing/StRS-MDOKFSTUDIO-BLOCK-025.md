@@ -26,25 +26,15 @@ user_need: As a writer, I trust that every change I make from the preview lands
   told why when an edit, move or paste cannot be done, and my document and
   clipboard are left untouched.
 derived_by:
-- SwRS-MDOKFSTUDIO-BLOCK-003
-- SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-042
-- SwRS-MDOKFSTUDIO-BLOCK-053
 - SwRS-MDOKFSTUDIO-BLOCK-058
-- SwRS-MDOKFSTUDIO-BLOCK-069
 - SwRS-MDOKFSTUDIO-BLOCK-094
-- SwRS-MDOKFSTUDIO-BLOCK-109
 - SwRS-MDOKFSTUDIO-BLOCK-117
 - SwRS-MDOKFSTUDIO-BLOCK-124
 - SwRS-MDOKFSTUDIO-BLOCK-127
 - SwRS-MDOKFSTUDIO-BLOCK-129
-- SwRS-MDOKFSTUDIO-BLOCK-130
-- SwRS-MDOKFSTUDIO-BLOCK-156
-- SwRS-MDOKFSTUDIO-BLOCK-166
 - SwRS-MDOKFSTUDIO-BLOCK-169
 - SwRS-MDOKFSTUDIO-BLOCK-174
-- SwRS-MDOKFSTUDIO-BLOCK-191
-- SwRS-MDOKFSTUDIO-BLOCK-205
 - SwRS-MDOKFSTUDIO-BLOCK-216
 - SwRS-MDOKFSTUDIO-BLOCK-227
 - SwRS-MDOKFSTUDIO-BLOCK-232
@@ -62,6 +52,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-244
 - SwRS-MDOKFSTUDIO-BLOCK-245
 - SwRS-MDOKFSTUDIO-BLOCK-252
+- SwRS-MDOKFSTUDIO-BLOCK-259
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-TRUST-064
@@ -125,25 +116,15 @@ As a writer, I trust that every change I make from the preview lands on the line
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-BLOCK-003](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-003.md): Edit-mode text box follows VS Code undo, redo, select-all and delete-line key bindings
-  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-042](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-042.md): Typing is autosaved as the smallest single replacement
-  - [SwRS-MDOKFSTUDIO-BLOCK-053](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-053.md): Cancel and Escape restore the saved text
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
-  - [SwRS-MDOKFSTUDIO-BLOCK-069](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-069.md): Marker keys wrap a selection; Home, End, select-all and undo stay in the text box
   - [SwRS-MDOKFSTUDIO-BLOCK-094](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-094.md): The host inserts a new block with clean blank lines
-  - [SwRS-MDOKFSTUDIO-BLOCK-109](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-109.md): The up and down arrows of an insert point move its block
   - [SwRS-MDOKFSTUDIO-BLOCK-117](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-117.md): The host swaps two blocks in one edit and keeps their separators
   - [SwRS-MDOKFSTUDIO-BLOCK-124](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-124.md): Moves and clipboard edits are refused for ranges that do not match the document
   - [SwRS-MDOKFSTUDIO-BLOCK-127](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-127.md): An included block is never moved, cut, copied, selected or pasted after
   - [SwRS-MDOKFSTUDIO-BLOCK-129](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-129.md): The page applies a move result only for its own render
-  - [SwRS-MDOKFSTUDIO-BLOCK-130](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-130.md): Alt+Up and Alt+Down move the focused block, also from the text box
-  - [SwRS-MDOKFSTUDIO-BLOCK-156](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-156.md): A block selection moves as a whole
-  - [SwRS-MDOKFSTUDIO-BLOCK-166](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-166.md): Cmd/Ctrl+C copies the exact Markdown of the selected blocks
   - [SwRS-MDOKFSTUDIO-BLOCK-169](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-169.md): Cut removes the selected blocks with one blank separator
   - [SwRS-MDOKFSTUDIO-BLOCK-174](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-174.md): Paste inserts the clipboard as new blocks after the selection or insert point
-  - [SwRS-MDOKFSTUDIO-BLOCK-191](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-191.md): The host holds an open block edit and ends it when the block changes
-  - [SwRS-MDOKFSTUDIO-BLOCK-205](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-205.md): Open editors are saved before the page hides or leaves the document
   - [SwRS-MDOKFSTUDIO-BLOCK-216](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-216.md): A refused open or save keeps the typed text and says why
   - [SwRS-MDOKFSTUDIO-BLOCK-227](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-227.md): A thread reply or delete is refused while a block edit is open
   - [SwRS-MDOKFSTUDIO-BLOCK-232](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-232.md): Text edits apply in offset order
@@ -161,6 +142,7 @@ As a writer, I trust that every change I make from the preview lands on the line
   - [SwRS-MDOKFSTUDIO-BLOCK-244](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-244.md): previewEditClosed carries the id of the closed editor
   - [SwRS-MDOKFSTUDIO-BLOCK-245](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-245.md): previewEditFlushed carries the flush id and a flag
   - [SwRS-MDOKFSTUDIO-BLOCK-252](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-252.md): Overlapping or out-of-range planned edits leave the document unchanged
+  - [SwRS-MDOKFSTUDIO-BLOCK-259](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-259.md): The host ignores a malformed block-editing message and changes nothing
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-059](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
   - [SwRS-MDOKFSTUDIO-TRUST-064](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-064.md): Flush and editor watch messages are addressed by their own id
