@@ -11,8 +11,8 @@ description: When the table of contents is open on a pane narrower than 760
   other handler consumed it.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,14 +20,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/preview/styles/contentLayoutStyles.ts
-- src/page/modules/tocColumn.ts
-tested_in_files:
-- test/core/preview/previewStyles.test.ts
-- test/page/modules/tocColumn.test.ts
-- test/visual/capture_toc_rail.py
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-037
 ---
 
 ## The narrow-pane rail keeps the text and the other Escape handlers clear
@@ -70,4 +67,6 @@ When the table of contents is open on a pane narrower than 760 pixels, the exten
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-037](SwRS-MDOKFSTUDIO-TOOLBAR-037.md): The column sits below the toolbar on the right and never covers the text
 <!-- okf:links:end -->

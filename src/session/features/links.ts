@@ -67,7 +67,7 @@ export class LinkController {
     router.on("previewLinkDiscover", (message, preview) => {
       fireAndForget(this.manager.host.logger, this.handleDiscovery(preview, message), "handleDiscovery");
     });
-    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-113
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-077
     router.on("previewLink", (message, preview) => {
       this.manager.view.recordPreviewState(preview, message);
       if (message.request) {

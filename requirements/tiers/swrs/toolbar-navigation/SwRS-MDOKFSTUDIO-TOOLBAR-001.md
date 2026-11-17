@@ -28,7 +28,6 @@ implemented_in_files:
 - src/core/preview/styles/pageChromeStyles.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
-- test/integration/tableMoves.ts
 - test/visual/capture_final_checks.py
 - test/visual/capture_layout_checks.py
 default_owner_email: gaetan@xeberon.net
@@ -77,11 +76,6 @@ anchor rather than moving left by half the label width.
 | zoom buttons pressed until 70 percent | the zoom button is disabled, the toolbar stays inside the viewport and does not overlap the sticky heading text |
 | zoom buttons pressed until 200 percent | same outcome |
 
-### Scenario (boundary): Table handle strip at the top of the page
-- GIVEN the 1400x900 real VS Code window of the integration suite (preview frame 656 px wide), edit mode and a pipe table or a list-table right under the first heading, page at its top
-- WHEN a column handle is dragged and held in the handle strip at 80 percent of the third column
-- THEN the element at the pointer is not inside the toolbar: the toolbar (x 540 to 642, y 12 to 146 in the frame) ends right of the strip point (x 504 for the pipe table, 453 for the list-table)
-
 ### Scenario (nominal): Scrolling
 - GIVEN a long document
 - WHEN the reader scrolls
@@ -100,7 +94,6 @@ anchor rather than moving left by half the label width.
 - Method: test/core/preview/previewStyles.test.ts (Writable preview: the preview toolbar has four rows of four buttons, with Export to HTML after Edit in the main row, and the Tab order of the 16 buttons; Every button has a tooltip: it counts 16 data-tooltip attributes and compares the title and tooltip pair of the Refresh, Anchor and Edit buttons and the start of the Theme button, equality for all 16 buttons is not asserted; Tooltip: the tooltip rule takes its content from data-tooltip, hidden by default and visible on hover and focus-visible; Scrolling: position fixed and z-index 1100 of the toolbar; the 12 px and 14 px offsets and the covering of scrolled text are untested).
 - Method: test/visual/capture_layout_checks.py (Visual order on toolbar-navigation/v06 to v21: row names, button counts, Tab order, expanded width equal to the collapsed width when row 1 is full and at most 134 px; the Export to HTML control of the main row; Rows stay inside the pane through check_preview_toolbar_rows: rows, overlap, left edge, zoom 70 and 200; the 16 scenarios differ only in theme, width and collapse state; the 460 px width is covered by the sticky band scenarios only).
 - Method: test/visual/capture_final_checks.py (Every button has a tooltip: label per control; Tooltip on hover through check_tooltip_contrast, run on every visual scenario, which hovers the Refresh button; the keyboard case follows from the shared CSS rule and is not measured).
-- Method: test/integration/tableMoves.ts (Table handle strip at the top of the page: `elementFromPoint` at the strip point is not inside the toolbar, with the measured geometry logged).
 - Criteria: The markup holds 16 buttons in four rows with the listed controls; the visual probe reports the same rows and Tab order; every button has data-tooltip equal to title; ::after content is attr(data-tooltip) with visibility visible and opacity 1 on hover and focus-visible; contrast ratio >= 4.5, content not none, opacity not 0; no two rows overlap (0.5 px tolerance), left is 0 or more and right is at most the pane width at both zoom limits; the toolbar is position fixed, 12 px from the top and 14 px from the end, with z-index 1100.
 
 <!-- okf:links:start -->
@@ -109,5 +102,5 @@ anchor rather than moving left by half the label width.
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers its collapsed state
 <!-- okf:links:end -->

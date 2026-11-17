@@ -21,8 +21,6 @@ user_need: As a reader, I choose per preview panel whether scrolling the text
   to follow, and I see in the preview which block I am working on in the text
   editor, even when the preview does not follow the editor's scroll.
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-169
-- SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TOOLBAR-120
 - SwRS-MDOKFSTUDIO-TOOLBAR-122
 - SwRS-MDOKFSTUDIO-TOOLBAR-126
@@ -48,6 +46,23 @@ As a reader, I choose per preview panel whether scrolling the text editor scroll
 - The mark goes to the block that contains the cursor line.
 - The mark is refreshed when the editor scrolls or the preview is rendered again, not on every cursor move.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Ed as Text editor
+    participant Ext as Extension
+    participant Pre as Preview
+    Writer->>Pre: pairs the preview with the editor
+    Writer->>Pre: presses Anchor
+    Pre->>Ext: mode stored
+    Ext->>Pre: preview aligned
+    Writer->>Ed: scrolls
+    Ed->>Ext: cursor line, with the setting on
+    Ext->>Pre: block outlined
+```
+
 ### Main paths
 
 #### Path 1: Scroll the two panes together
@@ -56,9 +71,9 @@ As a reader, I choose per preview panel whether scrolling the text editor scroll
    - SwRS-MDOKFSTUDIO-TOOLBAR-120: the reader presses it, the button shows the anchor mode and the pairing, and the preview is aligned with the first visible line of each text editor that shows its document
    - Option SwRS-MDOKFSTUDIO-TOOLBAR-120 (refusal): no text editor shows the file, so the button is disabled
 2. The preview and the text editor scroll together
-   - SwRS-MDOKFSTUDIO-TOOLBAR-126: the choice is accepted by the host only when anchorToEditor is a boolean
-   - Option SwRS-MDOKFSTUDIO-TOOLBAR-126 (refusal): a value that is not a boolean is not accepted
-3. The choice is kept for the panel
+   - SwRS-MDOKFSTUDIO-TOOLBAR-120: the choice is kept for the panel
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-120 (refusal): a value that is not a boolean is not accepted by the host
+3. The panel keeps the choice
 
 #### Path 2: See the cursor in the preview
 
@@ -73,8 +88,6 @@ As a reader, I choose per preview panel whether scrolling the text editor scroll
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
-  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-TOOLBAR-120](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-120.md): The Anchor button switches whether the preview follows the editor
   - [SwRS-MDOKFSTUDIO-TOOLBAR-122](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-122.md): A pairing message for another document is ignored
   - [SwRS-MDOKFSTUDIO-TOOLBAR-126](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-126.md): The host accepts only a boolean anchor mode

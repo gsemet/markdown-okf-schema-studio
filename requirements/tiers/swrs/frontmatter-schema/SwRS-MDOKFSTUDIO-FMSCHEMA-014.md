@@ -120,7 +120,7 @@ When a writer presses the toggle in a column header of a schema table, the exten
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
-  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, and each document keeps its reading place and view choices
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-015](SwRS-MDOKFSTUDIO-FMSCHEMA-015.md): The Description choice is remembered per document
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-016](SwRS-MDOKFSTUDIO-FMSCHEMA-016.md): Narrow previews start with the Description column collapsed

@@ -11,8 +11,8 @@ description: "When Open Preview to Side runs, the extension SHALL preview only a
   and open no preview."
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -21,12 +21,11 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/host-vscode/activation.ts
-tested_in_files:
-- test/host/lifeReq.requirements.test.ts
-- test/integration/lifecycle.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-LIFE-003
 ---
 
 ## Open Preview to Side checks the file it is given
@@ -102,4 +101,6 @@ When Open Preview to Side runs, the extension SHALL preview only a saved file wi
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LIFE-003](SwRS-MDOKFSTUDIO-LIFE-003.md): Open Preview to Side opens or reveals a side preview
 <!-- okf:links:end -->

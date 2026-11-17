@@ -27,7 +27,6 @@ export function installStatusRegion(document: Document, router: HostMessageRoute
   let pendingOverlay: HTMLElement | null = null;
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-049
-  // @implements_req SwRS-MDOKFSTUDIO-LIFE-055
   function applyPendingOverlay(message: PendingOverlayState): void {
     if (typeof message.visible !== "boolean"
       || typeof message.label !== "string" || message.label.length > 500

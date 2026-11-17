@@ -127,7 +127,7 @@ export class ScrollSyncController {
     editor.revealLine(zeroBasedLine, position);
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-LIFE-097
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-100
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-128
   /** The editor's first visible line moves the pages of its document (all visible editors when undefined). */
   public syncEditorToPreview(editor: PairedEditor | undefined): void {

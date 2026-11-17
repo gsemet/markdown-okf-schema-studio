@@ -16,8 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-010
-- StRS-MDOKFSTUDIO-LIFE-003
-- StRS-MDOKFSTUDIO-LIFE-005
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
 annotation_exemption: false
@@ -33,11 +31,14 @@ tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/integration/scroll-sync-suite.ts
 - test/integration/sourceMapping.test.ts
+- test/page/pageSettings.test.ts
 - test/page/runtimeBundle.test.ts
 - test/page/runtimeContentPatch.test.ts
 - test/page/runtimeScroll.test.ts
 - test/session/lifeReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LIFE-097
 ---
 
 ## Scrolling the text editor scrolls the preview to the same line
@@ -101,11 +102,18 @@ When the text editor of a previewed document scrolls while the anchor mode is on
 | a 4000 line document, the preview and a text editor side by side, anchor mode on; the reader scrolls either pane down and up in reading mode, edit mode or with a block editor open | the other pane follows to the same place |
 | anchor mode off, or no text editor of the file; the reader scrolls either pane | the other pane stays still, the document is not edited and a block editor stays open |
 
+### Scenario (boundary): Defaults and the setting off
+
+| Input | Outcome |
+| --- | --- |
+| No stored value for markdownOkfSchemaStudio.preview.scrollPreviewWithEditor, settings and page boot context read | The setting is true (on by default); a boot entry that is absent or not false reads as on |
+| scrollPreviewWithEditor set to false and the writer scrolls the text editor | The preview stays where it is; the Anchor button overrides the setting for one panel |
+
 ### Related requirements
 - SwRS-MDOKFSTUDIO-LIFE-108: the reverse direction, from the preview to the text editor
 - SwRS-MDOKFSTUDIO-LIFE-119: the anchor both panes share
 - SwRS-MDOKFSTUDIO-TOOLBAR-120: the Anchor button that switches the anchor mode
-- SwRS-MDOKFSTUDIO-LIFE-097: the settings that decide how the panes follow each other
+- SwRS-MDOKFSTUDIO-LIFE-071: a change of the scroll settings replaces the page document
 
 ### Verification notes
 - Method: test/integration/scroll-sync-suite.ts (12 scenarios, paired and solo, reading, editing and block, anchored and independent: scenarios 2, 4, 6 and 8; source remains still checks the absence of scroll feedback in scenario 4; paired-reading-anchored, paired-editing-anchored and paired-block-anchored check scenario 2; the assertion that scrolling must not edit the document checks scenario 8)
@@ -115,7 +123,8 @@ When the text editor of a previewed document scrolls while the anchor mode is on
 - Method: test/host/lifeReq.requirements.test.ts (scenario 7, the change of visible editors: "the host tells each preview whether a text editor shows its file whenever the visible editors change")
 - Method: test/page/runtimeContentPatch.test.ts and test/page/runtimeBundle.test.ts (scenario 7, page side of the ready report: "T33: the startup sequence of effects and messages is stable" and "the bundled runtime file gives the pinned trace of a page session"; the host answer is checked by reading postPageLiveState)
 - Method: test/session/lifeReq.requirements.test.ts (scenario 7, host without text editors: "a host without text editors reports no pairing"; visibleEditorFor in src/session/features/scrollSync.ts and HostCapabilities.editorPairing)
-- Criteria: The scroll top is within 3 px of the expected one and the editor's top line is unchanged; scroll.anchor equals { line, owner editor } only while scrollPreviewWithEditor is on; no previewScroll follows a sourceScroll; isEcho is true inside the window and false after it; no scroll message returns to its sender; notifyPairing runs for every session on onDidChangeVisibleTextEditors; pageLiveStateMessages returns the pairing and the theme message for a ready report; visibleEditorFor returns undefined when the capability is false.
+- Method: test/core/configuration/settingsRegistry.test.ts (Defaults): "the page reads missing or odd boot entries with the page defaults"; test/page/pageSettings.test.ts: "page settings default to following both ways, without selection marks or double-click reveal".
+- Criteria: readPreviewConfiguration returns true for no value of scrollPreviewWithEditor; The scroll top is within 3 px of the expected one and the editor's top line is unchanged; scroll.anchor equals { line, owner editor } only while scrollPreviewWithEditor is on; no previewScroll follows a sourceScroll; isEcho is true inside the window and false after it; no scroll message returns to its sender; notifyPairing runs for every session on onDidChangeVisibleTextEditors; pageLiveStateMessages returns the pairing and the theme message for a ready report; visibleEditorFor returns undefined when the capability is false.
 
 <!-- okf:links:start -->
 ### Links
@@ -124,8 +133,8 @@ When the text editor of a previewed document scrolls while the anchor mode is on
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
-  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
-  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LIFE-097](SwRS-MDOKFSTUDIO-LIFE-097.md): Two settings decide how the panes follow each other
 <!-- okf:links:end -->

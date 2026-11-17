@@ -133,7 +133,7 @@ export function normalizePreviewContentWidth(value: unknown): number {
   return Math.min(MAX_PREVIEW_CONTENT_WIDTH, Math.round(value));
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-022
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-018
 /** The sticky band depth of a `preview.stickyHeadingDepth` value: rounded, clamped to 1..6, else 3. */
 export function normalizeStickyHeadingDepth(value: unknown): number {
   if (typeof value !== "number" || !Number.isFinite(value)) {

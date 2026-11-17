@@ -106,7 +106,7 @@ export class StudioActivation {
       // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
       ...PREVIEW_EDIT_COMMANDS.map((command) =>
         vscode.commands.registerCommand(EDIT_COMMAND_IDS[command], () => manager.runEditCommand(command))),
-      // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+      // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
       ...PREVIEW_FOLD_COMMANDS.map((command) =>
         vscode.commands.registerCommand(FOLD_COMMAND_IDS[command], () => manager.runFoldCommand(command))),
       // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
@@ -209,7 +209,7 @@ export class StudioActivation {
     }
     const textDocument = vscode.window.activeTextEditor?.document ?? (await this.openStudioTabDocument());
     const document = textDocument ? host.documents.of(textDocument) : undefined;
-    // @implements_req SwRS-MDOKFSTUDIO-LIFE-010
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-003
     if (!document || document.path === undefined || !isDocumentEligible(document)) {
       fireAndForget(host.logger, host.ui.showInformation(
         "Open a Markdown file to use Markdown OKF-Schema Studio.",

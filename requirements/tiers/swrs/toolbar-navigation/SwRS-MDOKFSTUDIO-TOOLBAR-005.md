@@ -10,8 +10,8 @@ description: When the reader presses the Fold button of the toolbar, or runs the
   in the preview that has the focus.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: draft
-status: draft
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,20 +19,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/preview/previewToolbar.ts
-- src/core/protocol/hostToPage.ts
-- src/host-vscode/activation.ts
-- src/page/features/hostHandlers.ts
-- src/page/modules/headingFold.ts
-- src/session/previewManager.ts
-tested_in_files:
-- test/core/preview/previewStyles.test.ts
-- test/page/modules/headingFold.test.ts
-- test/security/package-contract.test.ts
-- test/session/editCommands.test.ts
-- test/visual/capture_layout_checks.py
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-003
 ---
 
 ## Fold all and unfold all fold every section from the toolbar and the command palette
@@ -78,4 +69,6 @@ When the reader presses the Fold button of the toolbar, or runs the command Fold
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-002](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-002.md): The reader folds and unfolds the sections of the document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-003](SwRS-MDOKFSTUDIO-TOOLBAR-003.md): A chevron folds the section under a heading, and Fold all folds every section
 <!-- okf:links:end -->

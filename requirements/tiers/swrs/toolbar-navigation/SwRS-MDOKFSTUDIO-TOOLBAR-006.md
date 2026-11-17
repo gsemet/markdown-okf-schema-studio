@@ -9,8 +9,8 @@ description: When the browser find reaches text inside a folded section, or the
   before it is shown.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: draft
-status: draft
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:

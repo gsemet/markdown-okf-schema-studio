@@ -9,8 +9,8 @@ description: When a section is folded or unfolded, the extension SHALL keep the
   change the document text.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: draft
-status: draft
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:

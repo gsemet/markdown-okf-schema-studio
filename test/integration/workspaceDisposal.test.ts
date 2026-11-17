@@ -25,7 +25,7 @@ async function waitFor(
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
-// @tests_req StRS-MDOKFSTUDIO-LIFE-014
+// @tests_req StRS-MDOKFSTUDIO-LIFE-022
 export async function run(): Promise<void> {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   assert.ok(workspaceFolder);

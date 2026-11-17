@@ -19,10 +19,7 @@ user_need: As a writer, I scroll the source and the preview shows the same
   editor shows where that text comes from; and I keep my place when images load,
   the pane is resized, the zoom changes or lines are added above me.
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-026
 - SwRS-MDOKFSTUDIO-LIFE-048
-- SwRS-MDOKFSTUDIO-LIFE-069
-- SwRS-MDOKFSTUDIO-LIFE-071
 - SwRS-MDOKFSTUDIO-LIFE-097
 - SwRS-MDOKFSTUDIO-LIFE-100
 - SwRS-MDOKFSTUDIO-LIFE-108
@@ -31,7 +28,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-117
 - SwRS-MDOKFSTUDIO-LIFE-119
 - SwRS-MDOKFSTUDIO-LIFE-125
-- SwRS-MDOKFSTUDIO-LIFE-156
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -53,16 +49,33 @@ As a writer, I scroll the source and the preview shows the same passage; as a re
 - Scrolling in either pane never edits the document.
 - While a block or field editor is open its screen position is the anchor.
 - The reader chooses in the settings whether the preview follows the editor and whether the editor follows the preview.
-- The Anchor button of the toolbar overrides the first choice for one panel.
 - A change of these settings reloads the preview page.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Ed as Text editor
+    participant Ext as Extension
+    participant Pre as Preview
+    Writer->>Ed: scrolls
+    Ed->>Ext: first visible line
+    Ext->>Pre: page scrolls to that line
+    Pre-->>Ext: echo of the scroll, ignored
+    Writer->>Pre: scrolls or clicks
+    Pre->>Ext: top line of the preview
+    Ext->>Ed: editor reveals the line
+    Ext->>Pre: anchor restored after a patch
+```
 
 ### Main paths
 
 #### Path 1: Scroll one pane, the other follows
 
 1. The editor and the preview show the same document
-   - SwRS-MDOKFSTUDIO-LIFE-097: the editor is scrolled and the preview follows, as far as the setting allows
-   - Option SwRS-MDOKFSTUDIO-LIFE-097 (refusal): with the setting off the preview does not follow the editor
+   - SwRS-MDOKFSTUDIO-LIFE-100: the editor is scrolled and the preview follows, as far as the setting allows
+   - Option SwRS-MDOKFSTUDIO-LIFE-100 (refusal): with the setting off the preview does not follow the editor
 2. The preview shows the line of the editor
    - SwRS-MDOKFSTUDIO-LIFE-108: the reader scrolls the preview or activates a block and the source line is revealed in the editor
    - Option SwRS-MDOKFSTUDIO-LIFE-108 (refusal): no visible text editor shows the file, so no editor moves
@@ -82,10 +95,7 @@ As a writer, I scroll the source and the preview shows the same passage; as a re
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-026](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-026.md): The side preview follows the active Markdown editor
   - [SwRS-MDOKFSTUDIO-LIFE-048](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-048.md): A changed setting that the page reads only at startup loads a new page document
-  - [SwRS-MDOKFSTUDIO-LIFE-069](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-069.md): A render of the loaded document updates the page in place
-  - [SwRS-MDOKFSTUDIO-LIFE-071](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-071.md): A render that cannot patch loads a new page document
   - [SwRS-MDOKFSTUDIO-LIFE-097](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-097.md): Two settings decide how the panes follow each other
   - [SwRS-MDOKFSTUDIO-LIFE-100](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-100.md): Scrolling the text editor scrolls the preview to the same line
   - [SwRS-MDOKFSTUDIO-LIFE-108](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-108.md): Scrolling or clicking the preview reveals the source line
@@ -94,5 +104,4 @@ As a writer, I scroll the source and the preview shows the same passage; as a re
   - [SwRS-MDOKFSTUDIO-LIFE-117](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-117.md): The page ignores a source scroll for another render
   - [SwRS-MDOKFSTUDIO-LIFE-119](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-119.md): Both panes share one reading anchor that survives updates
   - [SwRS-MDOKFSTUDIO-LIFE-125](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-125.md): The reading state of recent documents is saved within bounds
-  - [SwRS-MDOKFSTUDIO-LIFE-156](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-156.md): The settings editor lists the Studio settings in titled groups
 <!-- okf:links:end -->

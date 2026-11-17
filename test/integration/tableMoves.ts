@@ -451,7 +451,6 @@ async function setPreviewTheme(page: Page, mode: "dark" | "cream"): Promise<void
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-007
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
 /**
  * CR 128: while a column handle is held, the strip of the handles above the table and every cell
  * of a column are a drop zone (the marker shows on the nearest gap and follows the pointer); a

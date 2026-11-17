@@ -502,7 +502,6 @@ test("hover or focus on the rail opens the overlay, which closes 300 ms after th
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-133
 test("Escape closes the overlay at once and puts the focus back on the rail", () => {
   const { content, toc, flush, rail, nav, key } = setup({ toc: true });
   content.appendChild(heading("h1", "Title"));

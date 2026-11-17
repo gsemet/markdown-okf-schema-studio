@@ -17,8 +17,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-021
-- StRS-MDOKFSTUDIO-LIFE-010
-- StRS-MDOKFSTUDIO-LIFE-001
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -76,23 +74,9 @@ The extension SHALL contribute exactly the settings of its settings registry, wi
 | No value for scrollPreviewWithEditor | The value is true, the schema default |
 | A stored value for the same setting | The stored value is read, normalized by the setting's own rule |
 
-### Scenario (nominal): Boot context written by the host
-
-- GIVEN a configuration with the scroll, reveal and sticky band settings
-- WHEN the host builds a page and writes the boot context
-- THEN the entries carry the configured values under their own names, in table order
-- AND the maxContentWidth and incrementalUpdates settings are not part of it, because the host applies them itself
-
-### Scenario (boundary): Boot context read by the page
-
-| Boot context | Outcome |
-| --- | --- |
-| Missing entries, and a string where a boolean is expected | Each setting gets its page default: scroll and reveal on, selection mark off |
-| A default-on flag with a value other than false | It reads as on |
-| A boot element that is empty, is not valid JSON, or holds `null`, an array or a primitive | The page starts with an empty boot context, so every entry reads as its page default, and no error is thrown |
-
 ### Verification notes
 
+- Internal scenarios (moved from the scenarios, not observable by the reader): (a) Boot context written by the host: for a configuration with the scroll, reveal and sticky band settings, the host writes the boot context with the entries under their own names, in table order; the maxContentWidth and incrementalUpdates settings are not part of it, because the host applies them itself. (b) Boot context read by the page: missing entries, and a string where a boolean is expected, give each setting its page default (scroll and reveal on, selection mark off); a default-on flag with a value other than false reads as on; a boot element that is empty, is not valid JSON, or holds null, an array or a primitive gives an empty boot context, every entry reads as its page default, and no error is thrown.
 - Method: test/core/configuration/settingsRegistry.test.ts "categories keep their titles and order, and settings are sorted by their order" (group order, sorting), "the generated settings schema is the package.json one, byte for byte" (generated schema; the hand-edit row follows from the same comparison, and the scripts are just generate-settings and just check-settings), "a setting with nothing stored reads as its schema default" (setting read), "the host writes the boot settings as configured, in table order" and "the page gets the scroll, reveal, sticky band and comment chip settings in its boot context" (boot context written), "the page reads missing or odd boot entries with the page defaults" (boot context read).
 - Method: test/security/package-contract.test.ts "contributes only opt-in Markdown OKF-Schema Studio commands" (key prefix) and "every contributed setting is explained with a markdownDescription and a unique order" (descriptions and order, description limit).
 - Method: test/page/bootContext.test.ts "the boot context reads a JSON object and falls back to an empty one for anything else" (a boot element that is not a JSON object).
@@ -106,6 +90,4 @@ The extension SHALL contribute exactly the settings of its settings registry, wi
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-021](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-021.md): The settings editor lists the Studio settings in clear groups
-  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
-  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
 <!-- okf:links:end -->

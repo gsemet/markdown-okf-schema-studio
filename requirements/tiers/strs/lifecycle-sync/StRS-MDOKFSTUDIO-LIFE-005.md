@@ -36,7 +36,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-091
 - SwRS-MDOKFSTUDIO-LIFE-093
 - SwRS-MDOKFSTUDIO-LIFE-094
-- SwRS-MDOKFSTUDIO-LIFE-100
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -58,11 +57,29 @@ As a writer, I see my unsaved changes in the preview as I type, and a quick burs
 - Folders that churn during builds do not trigger a render.
 - The colour theme follows the theme-zoom requirements and the incoming-change marks follow the review requirements.
 - Only the changed blocks are replaced and the unchanged blocks and the open sections are kept; a setting can turn the in-place update off and reload the whole page on every change.
-- When another tool, a file change on disk or an undo changes the previewed document, the changed blocks glow once, so the reader notices what an agent, another extension or an undo changed.
-- Typing in the text editor and the preview's own edits never glow; a change spread over too many places glows nowhere, and nothing glows when the system asks for reduced motion.
+- When another tool, a file change on disk or an undo changes the previewed document, the changed blocks glow once so that the reader notices what changed; typing in the text editor, the preview's own edits, a change spread over too many places and a system that asks for reduced motion never make a block glow.
 - A preview that cannot be updated in place loads the page again and keeps the reading place.
 - A page that does not answer an update in time gets the whole page.
 - A page that VS Code created again is given the current document.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant VS as VS Code
+    participant Ext as Extension
+    participant Wk as Render worker
+    participant Pre as Preview
+    Writer->>VS: edits, or the file changes outside
+    VS->>Ext: change event
+    Ext->>Ext: waits for the debounce
+    Ext->>Wk: render the document
+    Wk-->>Ext: result, or stopped if a newer edit supersedes it
+    Ext->>Pre: patch in place with a glow, or a new page
+    Pre-->>Writer: ready
+    Note over Ext,Pre: after the timeout the full document is rendered
+```
 
 ### Main paths
 
@@ -90,7 +107,7 @@ As a writer, I see my unsaved changes in the preview as I type, and a quick burs
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-004](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-004.md): Previews render in a worker thread that an abort stops
+  - [SwRS-MDOKFSTUDIO-LIFE-004](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-004.md): A long render never blocks the text editor, and a render that a newer edit supersedes stops
   - [SwRS-MDOKFSTUDIO-LIFE-032](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-032.md): Refresh Preview renders the shown document again
   - [SwRS-MDOKFSTUDIO-LIFE-039](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-039.md): Typing renders the new text after a short pause, without writing files
   - [SwRS-MDOKFSTUDIO-LIFE-044](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-044.md): Changes to files and settings the render depends on render again
@@ -107,5 +124,4 @@ As a writer, I see my unsaved changes in the preview as I type, and a quick burs
   - [SwRS-MDOKFSTUDIO-LIFE-091](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-091.md): A block with a link has the same key on the first page and after a patch
   - [SwRS-MDOKFSTUDIO-LIFE-093](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-093.md): A document loaded from a patched record gets a fresh nonce
   - [SwRS-MDOKFSTUDIO-LIFE-094](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-094.md): Blocks changed by another tool glow briefly
-  - [SwRS-MDOKFSTUDIO-LIFE-100](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-100.md): Scrolling the text editor scrolls the preview to the same line
 <!-- okf:links:end -->

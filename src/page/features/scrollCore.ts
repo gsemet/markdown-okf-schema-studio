@@ -495,7 +495,6 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     markWideTables,
     keepReadingLine,
     revealElement,
-    // @implements_req SwRS-MDOKFSTUDIO-LIFE-097
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-100
     followSourceScroll(message) {
       markSourceLine(Number(message.selectionLine ?? message.line));

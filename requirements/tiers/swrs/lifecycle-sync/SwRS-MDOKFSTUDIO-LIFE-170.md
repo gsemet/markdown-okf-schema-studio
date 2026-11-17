@@ -22,12 +22,8 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-012
 - StRS-MDOKFSTUDIO-THEME-004
 - StRS-MDOKFSTUDIO-THEME-011
-- StRS-MDOKFSTUDIO-TOOLBAR-001
-- StRS-MDOKFSTUDIO-TOOLBAR-006
-- StRS-MDOKFSTUDIO-TOOLBAR-013
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
-- SwRS-MDOKFSTUDIO-TOOLBAR-013
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -107,7 +103,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 | Preview in a trusted workspace whose stored edit mode is true | the page still starts in preview mode |
 | Stored palette mode myst and setting strict | the initial mode in the page context is myst |
 | Initial zoom preference 150, no saved state | the zoom is 150 |
-| Stored zoom 130 accepted from a preview (validation: SwRS-MDOKFSTUDIO-TOOLBAR-013; storage: SwRS-MDOKFSTUDIO-LIFE-169), next page of the workspace built | its initial view preferences carry the zoom 130 and, without saved state, it starts at 130 |
+| Stored zoom 130 accepted from a preview (validation and storage: SwRS-MDOKFSTUDIO-LIFE-169), next page of the workspace built | its initial view preferences carry the zoom 130 and, without saved state, it starts at 130 |
 | Preview at 130 %, window reloaded, or preview closed and reopened | the zoom is still 130 |
 | Stored toolbar choice expanded, no saved state | the toolbar is expanded |
 | No webview state and the comments preference false | the gray chips are hidden |
@@ -164,7 +160,7 @@ The Cream start is the same on a light and on a dark host theme:
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-LIFE-169: stores the choices that this requirement reads back at the next start.
-- SwRS-MDOKFSTUDIO-TOOLBAR-013: accepts and validates the view preference the host stores.
+- SwRS-MDOKFSTUDIO-LIFE-169: accepts and validates the view preference the host stores.
 
 ### Verification notes
 
@@ -190,19 +186,15 @@ The Cream start is the same on a light and on a dark host theme:
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, and each document keeps its reading place and view choices
   - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
   - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
   - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
   - [StRS-MDOKFSTUDIO-REVIEW-012](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-012.md): A writer sees HTML comments and TODO notes as chips and toggles them
   - [StRS-MDOKFSTUDIO-THEME-004](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-004.md): The theme choice holds for the workspace and survives slow loads and bad values
   - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
-  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
-  - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
-  - [StRS-MDOKFSTUDIO-TOOLBAR-013](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-013.md): The reader decides how the panes scroll together and sees the cursor block
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-169](SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
-  - [SwRS-MDOKFSTUDIO-TOOLBAR-013](../toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-013.md): The host accepts only a known view preference with a valid value
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-LAYOUT-038](../layout-width/SwRS-MDOKFSTUDIO-LAYOUT-038.md): The saved width mode is restored when the page starts
 <!-- okf:links:end -->

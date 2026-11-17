@@ -8,8 +8,8 @@ description: The extension SHALL declare in its manifest that it supports the VS
   setting.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,9 +19,10 @@ exemption_reason: "Declared in package.json, which carries no marker and is outs
   the source directories. No implementation marker is possible."
 derived_by: []
 implemented_in_files: []
-tested_in_files:
-- test/security/trustReq.requirements.test.ts
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-LIFE-001
 ---
 
 ## The manifest declares Agents window support
@@ -57,4 +58,6 @@ The extension SHALL declare in its manifest that it supports the VS Code Agents 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LIFE-001](SwRS-MDOKFSTUDIO-LIFE-001.md): The extension activates only on its own entry points
 <!-- okf:links:end -->

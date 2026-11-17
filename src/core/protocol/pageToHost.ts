@@ -48,7 +48,7 @@ export { isPageStateMessage } from "./pageToHostMessages";
 // ---------------------------------------------------------------------------------------------
 // Validators
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-013
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 const VIEW_PREFERENCE_VALIDATORS: Record<string, (value: unknown) => boolean> = {
   zoom: (value) => Number.isSafeInteger(value) && (value as number) >= 70 && (value as number) <= 200,
   widthMode: (value) => isOneOf(value, ["margin", "auto", "full"] as const),
@@ -208,7 +208,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   previewReveal: stateMessage("previewReveal"),
   previewState: stateMessage("previewState"),
   previewLink: stateMessage("previewLink"),
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-083
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-079
   previewLinkDiscover: stateMessage("previewLinkDiscover", (message) => Array.isArray(message.requests)
     && message.requests.length <= 64
     && message.requests.every((request) => typeof request === "string" && request.length <= 4096)),
@@ -216,7 +216,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   previewThemeModeChanged: stateMessage("previewThemeModeChanged",
     (message) => isPreviewThemeMode(message.previewThemeMode)),
   previewRefresh: stateMessage("previewRefresh"),
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-126
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-120
   previewAnchorModeChanged: stateMessage("previewAnchorModeChanged",
     (message) => typeof message.anchorToEditor === "boolean"),
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-236
@@ -248,7 +248,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // The page as it shows now, to be written as one HTML file by the host.
   previewExportHtml: (message) => isHostRequest(message) && isExportSnapshot(message.snapshot)
     && typeof message.userGesture === "boolean",
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-058
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-054
   // Back / Next of toolbar row 2: the host walks the panel's navigation history.
   previewHistoryGo: (message) => isOneOf(message.direction, ["back", "forward"] as const),
   // A view preference of the toolbar (zoom, width mode, TOC, incoming changes, collapsed toolbar).
@@ -274,7 +274,6 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   previewThreadDelete: (message) => isHostRequest(message) && isSourceLine(message.line)
     && isSourceLine(message.endLine) && (message.endLine as number) >= (message.line as number),
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-131
   // Find and replace: matches of the find bar as (source lines, matched text, occurrence, replacement).
   // `dryRun: true` asks for the counts of the plan only: the host edits nothing.
   previewFindReplace: (message) => isHostRequest(message) && Array.isArray(message.items)

@@ -8,8 +8,8 @@ description: The preview SHALL let the reader fold a section of the document
   without changing the document.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: draft
-status: draft
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -33,8 +33,6 @@ The preview SHALL let the reader fold a section of the document under its headin
 
 ### Preserved stakeholder intent
 
-## User Need
-
 Readers of a long document want to hide the sections they are not reading and see the outline of the document, and to come back to the same folded view later, without the document being modified.
 
 ### Rationale and constraints
@@ -43,13 +41,25 @@ Readers of a long document want to hide the sections they are not reading and se
 - Folding works in read mode and in edit mode; a block inside a folded section cannot be edited until the section is unfolded.
 - Search in the preview and navigation to an anchor open the folded section that holds their target.
 
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Open
+    Open --> Folded: fold a section, or Fold all
+    Folded --> Open: unfold, or Unfold all
+    Folded --> Open: find or navigation targets inside
+    Open --> Open: kept across a patch and a reload
+    Folded --> Folded: kept across a patch and a reload
+```
+
 ### Main paths
 
 #### Path 1: Fold sections and keep them folded
 
 1. The document is shown with its sections open
    - SwRS-MDOKFSTUDIO-TOOLBAR-003: the reader presses the chevron of a heading, which hides the blocks up to the next heading of the same or a higher level
-   - Option SwRS-MDOKFSTUDIO-TOOLBAR-005 (nominal): the Fold button or the command folds every section that has content
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-003 (nominal): the Fold button or the command folds every section that has content
 2. A section is folded
    - SwRS-MDOKFSTUDIO-TOOLBAR-004: the folded headings are kept in the webview state and applied again after every content update and reload
    - Option SwRS-MDOKFSTUDIO-TOOLBAR-008 (boundary): a block inside the folded section stays mapped
@@ -64,7 +74,7 @@ Readers of a long document want to hide the sections they are not reading and se
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-TOOLBAR-003](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-003.md): A chevron folds the section under a heading
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-003](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-003.md): A chevron folds the section under a heading, and Fold all folds every section
   - [SwRS-MDOKFSTUDIO-TOOLBAR-004](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-004.md): The folded sections are a view state kept per document
   - [SwRS-MDOKFSTUDIO-TOOLBAR-005](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-005.md): Fold all and unfold all fold every section from the toolbar and the command palette
   - [SwRS-MDOKFSTUDIO-TOOLBAR-006](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-006.md): Search and navigation unfold the folded section of their target

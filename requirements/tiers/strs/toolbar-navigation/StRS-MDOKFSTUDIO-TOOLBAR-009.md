@@ -52,6 +52,24 @@ As a reader, I follow a link to another document or a heading, and come back to 
 - An editor with nothing typed is closed without a save.
 - The page half (the final save before the move) is specified in the block-editing and table-editing scopes (SwRS-MDOKFSTUDIO-BLOCK-205).
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Pre as Preview
+    participant Ext as Extension
+    participant Src as Source file
+    Writer->>Pre: types in a block editor
+    Writer->>Pre: clicks a link
+    Pre->>Ext: save flushed first
+    Ext->>Src: change written
+    Pre->>Ext: place recorded
+    Ext->>Pre: target opened, history state pushed
+    Writer->>Pre: Back or Next
+    Pre-->>Writer: previous or next place
+```
+
 ### Main paths
 
 #### Path 1: Follow a link and go Back
@@ -67,7 +85,7 @@ As a reader, I follow a link to another document or a heading, and come back to 
    - Option SwRS-MDOKFSTUDIO-TOOLBAR-054 (refusal): there is nowhere to go and the state is posted again
 4. The reader has pressed Back
    - SwRS-MDOKFSTUDIO-TOOLBAR-059: Back opens the stored document with the stored line selected, or scrolls the preview to the stored line
-   - Option SwRS-MDOKFSTUDIO-TOOLBAR-058 (refusal): a history move with an invalid direction is not accepted
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-054 (refusal): a history move with an invalid direction is not accepted
 5. The reader is back at the document and the line they left
 
 <!-- okf:links:start -->

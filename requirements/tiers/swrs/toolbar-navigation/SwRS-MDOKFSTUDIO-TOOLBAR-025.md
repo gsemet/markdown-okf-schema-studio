@@ -8,7 +8,9 @@ description: "When the band is shown, hidden or changes its number of lines, the
   the document flow and ignoring pointer events, with its text aligned to the content
   column, ending before the toolbar and narrowed by the table of contents reserve,
   keeping each heading level on one line, cut with an ellipsis when it is too long,
-  and draw it flat and bold, ended by a one pixel rule."
+  and draw it flat and bold, ended by a one pixel rule, with a soft shadow below it,
+  in the colour set of the active theme, only while text scrolls under it, and none
+  at the top of the page."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
 req_lifecycle: proposed
@@ -33,13 +35,15 @@ tested_in_files:
 - test/visual/scenarioDefinitions2.ts
 - test/visual/stickyLongTitleScenarios.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-TOOLBAR-002
 ---
 
 ## The sticky band is fixed, aligned with the column and clear of the toolbar
 
 ### Normative behavior
 
-When the band is shown, hidden or changes its number of lines, the extension SHALL keep it fixed to the top of the pane at full width with no gap above it, outside the document flow and ignoring pointer events, with its text aligned to the content column, ending before the toolbar and narrowed by the table of contents reserve, keeping each heading level on one line, cut with an ellipsis when it is too long, and draw it flat and bold, ended by a one pixel rule.
+When the band is shown, hidden or changes its number of lines, the extension SHALL keep it fixed to the top of the pane at full width with no gap above it, outside the document flow and ignoring pointer events, with its text aligned to the content column, ending before the toolbar and narrowed by the table of contents reserve, keeping each heading level on one line, cut with an ellipsis when it is too long, and draw it flat and bold, ended by a one pixel rule, with a soft shadow below it, in the colour set of the active theme, only while text scrolls under it, and none at the top of the page.
 
 ### Scenario (nominal): Band grows
 - GIVEN a band that goes from one to three lines
@@ -86,9 +90,25 @@ When the band is shown, hidden or changes its number of lines, the extension SHA
 ### Scenario (nominal): Flat, bold style with a rule
 - GIVEN a shown band
 - WHEN its style is read
-- THEN the font weight is at least 600 and larger than the body text, the radius is 0, the shadow is none and the bottom border is 1 px
+- THEN the font weight is at least 600 and larger than the body text, the radius is 0, the shadow is none (the page is at the top) and the bottom border is 1 px
 - WHEN the borders of the band and of the first heading of the page are compared
 - THEN the band border and the h1 border have the same colour
+
+### Scenario (nominal): Text scrolls under the band
+- GIVEN a preview scrolled so that the sticky band is shown over text, in the light, dark, cream or white theme or the host's current theme
+- WHEN the page is more than 1 px below the top
+- THEN the band carries the data-scrolled-under marker and a box-shadow offset downward and blurred, in a shadow colour set per theme (darker in dark), which shifts no content and leaves the band fixed at the top
+- AND the toolbar, stacked above the band, is not covered by the shadow
+
+### Scenario (boundary): Page at the top
+- GIVEN a preview whose scroll position is 0 or 1 px
+- WHEN the sticky band is updated
+- THEN the band has no data-scrolled-under marker and no shadow, so nothing is drawn under a band over no scrolled text
+
+### Scenario (boundary): Back to the top
+- GIVEN a scrolled preview with the shadow shown
+- WHEN the page is scrolled back to the top
+- THEN the marker is removed again
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TOOLBAR-033: the table of contents button that opens the column whose reserve narrows the band.
@@ -99,6 +119,9 @@ When the band is shown, hidden or changes its number of lines, the extension SHA
 - Method: test/visual/capture_final_checks.py (check_sticky_headings on toolbar-navigation/v01 to v04: Band grows, Pointer, Text aligned with the column, Text stops before the toolbar as min(column right, toolbar left - 8), Flat, bold style with a rule; the rightmost toolbar button is not covered). The visual check_toc_column never shows a band (it measures after scrolling to the top, where the band is hidden), so the overlap with the column is asserted only by the CSS unit test.
 - Method: test/visual/scenarioDefinitions2.ts (Long heading cut with an ellipsis: scenarios toolbar-navigation/v05-sticky-long-path-ellipsis-dark-460 and toolbar-navigation/v45-sticky-long-title-zoom-160-cream-900; check_sticky_headings reads white-space, overflow, text-overflow and the rendered lines, and checks the section start under the band).
 - Criteria: position fixed, inset-block-start 0, width 100 percent, pointer-events none; text left within 1 px of the content column; text right within 1 px of min(column right, toolbar left - 8); variable = toolbar width + 22, or 0; band max-width is 100 percent minus the reserve, which is 256 px at 760 px or more, else 0; white-space pre, overflow hidden and text-overflow ellipsis, rendered lines equal to the heading levels shown, height >= rendered lines times line height; weight >= 600, font larger than body, border-bottom 1 px, radius 0.
+- Method: test/page/runtimeScroll.test.ts (Page at the top and Back to the top: the sticky band is marked as having content scrolled under it only below the top).
+- Method: visual scenarios toolbar-navigation/v32 to v34 in test/visual/scenarioDefinitions2.ts (Text scrolls under the band: the computed box-shadow, the fixed position at top 0 and the toolbar z-index over the band in the light, dark and cream themes).
+- Criteria: marker present if and only if scrollY > 1; computed box-shadow not none with a positive vertical offset and blur; band top 0; toolbar z-index above the band.
 
 <!-- okf:links:start -->
 ### Links
@@ -108,4 +131,6 @@ When the band is shown, hidden or changes its number of lines, the extension SHA
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-004](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-004.md): The reader always sees the section being read
   - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-002](SwRS-MDOKFSTUDIO-TOOLBAR-002.md): A soft shadow under the sticky heading band shows only while text scrolls under it
 <!-- okf:links:end -->

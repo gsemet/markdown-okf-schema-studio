@@ -10,8 +10,8 @@ description: When the reader types a native text-editing shortcut in the find or
   page or to VS Code.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,11 +19,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/findBar.ts
-tested_in_files:
-- test/page/modules/findBar.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-009
 ---
 
 ## The find and replace fields keep their native editing shortcuts
@@ -58,4 +58,6 @@ When the reader types a native text-editing shortcut in the find or replace fiel
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-003](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-003.md): The reader finds and replaces text in the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-009](SwRS-MDOKFSTUDIO-TOOLBAR-009.md): Cmd/Ctrl+F opens a find bar over the preview
 <!-- okf:links:end -->

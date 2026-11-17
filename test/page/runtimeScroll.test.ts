@@ -106,7 +106,7 @@ test("the top-aligned sticky band grows and shrinks with the active heading hier
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-002
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
 test("the sticky band is marked as having content scrolled under it only below the top", () => {
   const harness = createRuntimeHarness();
   harness.stickyHeadings.height = 50;
@@ -260,7 +260,7 @@ test("preserves preview scroll when layout changes during sticky heading activat
   assert.equal(harness.windowState.scrollY, 50);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-022
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
 test("uses the configured sticky heading depth", () => {
   const headings = [
     { depth: 1, expected: "### Topic" },
@@ -728,7 +728,7 @@ test("a viewport resize fired before the scroll it accompanies does not pull the
   assert.equal(scrollThenLayout(true), expected);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-097
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-100
 test("executes source and preview synchronization across layout changes", () => {
   const harness = createRuntimeHarness({ scrollEditorWithPreview: false });

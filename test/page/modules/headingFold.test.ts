@@ -140,7 +140,7 @@ test("apply puts the folds back on content that was replaced", () => {
   assert.equal(fresh[2]!.getAttribute("data-okf-fold"), "closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
 test("fold all folds every section that has content and unfold all opens them, from the toolbar button too", () => {
   const { blocks, fold, hidden, page, state } = setup();
   clickButton(page);
@@ -156,7 +156,7 @@ test("fold all folds every section that has content and unfold all opens them, f
   assert.equal(fold.anyFolded(), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
 test("fold all and unfold all do nothing while an editor is open", () => {
   const { fold, hidden, blocks } = setup({ busy: true });
   fold.foldAll();

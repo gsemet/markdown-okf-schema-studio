@@ -15,12 +15,12 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-014
 annotation_exemption: true
-exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TOOLBAR-113; no marker expected."
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TOOLBAR-077; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by:
-- SwRS-MDOKFSTUDIO-TOOLBAR-113
+- SwRS-MDOKFSTUDIO-TOOLBAR-077
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -55,5 +55,5 @@ When the navigation request of a frontmatter link is malformed, the extension SH
 - Derives from:
   - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-TOOLBAR-113](../toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-113.md): A link message needs a request, else it is ignored or refused
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-077](../toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-077.md): A click or Enter on a link is routed to the host and opened or refused with a warning
 <!-- okf:links:end -->

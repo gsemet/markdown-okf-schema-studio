@@ -8,8 +8,8 @@ description: The find bar SHALL offer the options match case, whole word and
   the count instead of searching.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: draft
-status: draft
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -17,15 +17,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/find/findMatches.ts
-- src/page/modules/findBar.ts
-tested_in_files:
-- test/core/find/findMatches.test.ts
-- test/integration/findInPreview.test.ts
-- test/page/modules/findBar.test.ts
-- test/visual/capture_find_checks.py
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-010
 ---
 
 ## The find bar matches case, whole words and regular expressions
@@ -64,4 +60,6 @@ The find bar SHALL offer the options match case, whole word and regular expressi
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-003](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-003.md): The reader finds and replaces text in the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-010](SwRS-MDOKFSTUDIO-TOOLBAR-010.md): The find bar paints the matches of the rendered text and walks them
 <!-- okf:links:end -->

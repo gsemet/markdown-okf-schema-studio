@@ -326,7 +326,7 @@ test("CR 119: undo, redo, select all and delete line are VS Code key bindings on
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
 test("CR 143: Fold All and Unfold All are command palette entries offered to the preview only", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: {

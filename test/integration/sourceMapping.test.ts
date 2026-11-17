@@ -103,7 +103,7 @@ export async function run(): Promise<void> {
       sourceFile: path.resolve(fixturePath),
       line: 2,
     });
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-097
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-108
     assert.equal(getActivePreviewForTests()?.lastRevealedSourceLine, 2);
     sendPreviewMessageForTests({
       type: "previewScroll",

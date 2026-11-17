@@ -34,14 +34,14 @@ test("regular expression characters of a literal query are plain text", () => {
   assert.deepEqual(spans("a-b", pattern("a-b")), [[0, 3]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-011
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
 test("whole word does not match inside a longer word", () => {
   const word = pattern("art", { wholeWord: true });
   assert.deepEqual(spans("part arts art", word), [[10, 13]]);
   assert.deepEqual(spans("éart art2 art", word), [[10, 13]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-011
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
 test("a regular expression query is used as written, and an invalid one answers with the reason", () => {
   assert.deepEqual(spans("v1 v22 vx", pattern("v\\d+", { regex: true })), [[0, 2], [3, 6]]);
   const broken = compileFind("(unclosed", { ...plain, regex: true });

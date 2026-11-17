@@ -10,8 +10,8 @@ description: When the text editor is scrolled or a block of the preview is
   on by default) allow.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -21,14 +21,12 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/features/scrollCore.ts
-- src/session/features/scrollSync.ts
-tested_in_files:
-- test/integration/sourceMapping.test.ts
-- test/page/pageSettings.test.ts
-- test/page/runtimeScroll.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-LIFE-100
+- SwRS-MDOKFSTUDIO-LIFE-108
 ---
 
 ## Two settings decide how the panes follow each other
@@ -94,4 +92,7 @@ When the text editor is scrolled or a block of the preview is scrolled to or cli
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
   - [StRS-MDOKFSTUDIO-LIFE-021](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-021.md): The settings editor lists the Studio settings in clear groups
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LIFE-100](SwRS-MDOKFSTUDIO-LIFE-100.md): Scrolling the text editor scrolls the preview to the same line
+  - [SwRS-MDOKFSTUDIO-LIFE-108](SwRS-MDOKFSTUDIO-LIFE-108.md): Scrolling or clicking the preview reveals the source line
 <!-- okf:links:end -->

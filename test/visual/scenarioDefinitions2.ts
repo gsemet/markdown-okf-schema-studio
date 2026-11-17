@@ -251,7 +251,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   {
     // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-022
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
     id: "preview-sticky-headings-1",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -1062,7 +1062,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   {
     // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-002
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
     id: "toolbar-navigation/v32-sticky-shadow-light-900",
     fixture: "05-long-chapter",
     theme: "light",
@@ -1076,7 +1076,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   {
     // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-002
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
     id: "toolbar-navigation/v33-sticky-shadow-dark-900",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -1090,7 +1090,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   {
     // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-002
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
     id: "toolbar-navigation/v34-sticky-shadow-cream-900",
     fixture: "05-long-chapter",
     theme: "dark",

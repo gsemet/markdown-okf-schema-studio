@@ -120,7 +120,7 @@ test("CR 144: the find command goes to the focused preview", async () => {
   assert.equal(f.posted.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
 test("CR 143: a fold command goes to the focused preview, whether an editor is open or not", async () => {
   const f = fixture();
   f.posted.length = 0;

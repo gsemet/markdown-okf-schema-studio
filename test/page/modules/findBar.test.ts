@@ -309,7 +309,7 @@ test("Enter, Shift+Enter and F3 walk the matches and wrap around; Escape closes 
   assert.equal(harness.key({ code: "F3" }).prevented, 0, "F3 is free again once the bar is closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-011
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
 test("match case, whole word and regular expression narrow the matches; a bad expression shows its reason", () => {
   const harness = setup();
   render(harness.page);
@@ -467,7 +467,7 @@ const mapParagraphs = (element: Element): FindSourceBlock | undefined => {
   return undefined;
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 test("with the replace row open, the note counts the matches the host would skip before any click", () => {
   const harness = setup({ sourceOf: mapParagraphs });
   harness.page.node("p", ["Para needle one."]);
@@ -495,7 +495,7 @@ test("with the replace row open, the note counts the matches the host would skip
   assert.equal(harness.asked.length, 2, "and asks again after the content refresh");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 test("no dry run while the replace row is closed; opening it asks, closing it drops the host's count", () => {
   const harness = setup({ sourceOf: mapParagraphs });
   harness.page.node("p", ["Para needle one."]);
@@ -517,7 +517,7 @@ test("no dry run while the replace row is closed; opening it asks, closing it dr
   assert.equal(harness.asked.length, 1, "still nothing asked with the row closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 test("a dry-run answer of an older search is ignored, and a refusal keeps the page's count", () => {
   const harness = setup({ sourceOf: mapParagraphs, holdAnswers: true });
   harness.page.node("p", ["one needle, one pin"]);
@@ -539,7 +539,7 @@ test("a dry-run answer of an older search is ignored, and a refusal keeps the pa
   assert.equal(text(harness, "[data-find-note]"), "2 matches cannot be replaced from the preview");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 test("the dry run sends no replacement text, so a replacement too long to apply still gets the announcement", () => {
   const harness = setup({ sourceOf: mapParagraphs });
   harness.page.node("p", ["Para needle one."]);
@@ -558,7 +558,7 @@ test("the dry run sends no replacement text, so a replacement too long to apply 
   assert.equal(text(harness, "[data-find-note]"), "The replacement text is too long.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-014
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 test("a read-only preview disables replace with the reason and never asks the host", () => {
   const harness = setup({ blocked: "Open a folder to edit.", sourceOf: (element) => ({ line: 1, endLine: 1, element }) });
   render(harness.page);
@@ -592,7 +592,7 @@ test("the matches are searched again when the content changes, keeping the curre
   assert.equal(harness.query("[data-sphinx-preview-find]").hidden, true, "a closed bar stays closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-132
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
 test("the native editing keys of the find and replace fields stop at the bar and keep their default action", () => {
   const harness = setup();
   render(harness.page);

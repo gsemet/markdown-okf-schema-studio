@@ -15,7 +15,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LIFE-014
+- StRS-MDOKFSTUDIO-LIFE-007
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -64,5 +64,5 @@ When a task the extension starts without waiting for it (a background write, a d
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
 <!-- okf:links:end -->

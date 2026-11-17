@@ -962,7 +962,7 @@ test("a narrow pane with the TOC on shows a rail and opens the column as an over
   assert.doesNotMatch(media, /animation|transition/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-133
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
 test("a narrow pane with the TOC on pads the content for the 16px rail and keeps the overlay under the toolbar tooltip", () => {
   const css = PREVIEW_THEME_CSS;
   const media = css.match(/@media \(max-width: 759px\) \{[\s\S]*?\n\}\n/u)?.[0] ?? "";
@@ -1417,7 +1417,7 @@ test("CR 143: the chevron shows on hover, focus and while folded, and a folded b
   assert.match(PREVIEW_THEME_CSS, /> \[data-okf-folded\] \{[^}]*margin: 0 !important;[^}]*padding: 0 !important;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
 test("CR 143: the toolbar has a Fold button, off until a section is folded", () => {
   assert.match(renderPreviewToolbar(),
     /<button type="button" data-sphinx-preview-fold-toggle aria-pressed="false" aria-label="Fold all sections"/u);

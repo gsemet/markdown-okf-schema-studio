@@ -226,7 +226,7 @@ export class PreviewManager {
     return true;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
   /**
    * A command of the palette folds or unfolds every section of the preview that has the focus.
    * False when no preview is focused.

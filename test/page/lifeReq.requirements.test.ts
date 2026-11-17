@@ -9,7 +9,7 @@ import { test } from "node:test";
 import { createRuntimeHarness } from "./runtimeHarness";
 import { overlayMessage, pendingOverlays } from "./runtimeTestSupport";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-055
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
 test("the page ignores a pending notice with an oversized or malformed field", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage(overlayMessage({ message: "x".repeat(501) }));

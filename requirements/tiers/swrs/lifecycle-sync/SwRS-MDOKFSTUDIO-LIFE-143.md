@@ -17,7 +17,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LIFE-014
+- StRS-MDOKFSTUDIO-LIFE-022
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -106,5 +106,5 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+  - [StRS-MDOKFSTUDIO-LIFE-022](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-022.md): Closing a preview or a folder leaves nothing behind
 <!-- okf:links:end -->
