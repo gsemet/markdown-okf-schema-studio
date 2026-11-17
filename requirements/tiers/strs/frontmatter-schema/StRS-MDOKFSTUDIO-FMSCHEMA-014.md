@@ -58,6 +58,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-083
 - SwRS-MDOKFSTUDIO-FMSCHEMA-086
 - SwRS-MDOKFSTUDIO-FMSCHEMA-087
+- SwRS-MDOKFSTUDIO-TOOLBAR-077
 - SwRS-MDOKFSTUDIO-TOOLBAR-113
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -171,6 +172,7 @@ As a schema author, I declare that a field points to files so that writers get c
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-083](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-083.md): A malformed frontmatter link request is refused
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-086](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-086.md): A link problem is keyboard-focusable and explained in its tooltip
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-087](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-087.md): A link problem counts in the badge
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-077](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-077.md): A click or Enter on a link is routed to the host and opened or refused with a warning
   - [SwRS-MDOKFSTUDIO-TOOLBAR-113](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-113.md): A link message needs a request, else it is ignored or refused
 - Supersedes:
   - [StRS-MDOKFSTUDIO-FMSCHEMA-015](StRS-MDOKFSTUDIO-FMSCHEMA-015.md): Links resolve against the right root

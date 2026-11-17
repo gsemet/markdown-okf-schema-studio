@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-258
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+- SwRS-MDOKFSTUDIO-LIFE-172
 - SwRS-MDOKFSTUDIO-TRUST-001
 default_owner_email: gaetan@xeberon.net
 ---
@@ -84,5 +85,6 @@ As a writer, I turn edit mode on to change my document in the preview and off to
   - [SwRS-MDOKFSTUDIO-BLOCK-258](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-258.md): A click on a card title or option opens the editor on its own line, the title is inline text and Enter saves a one-line editor
   - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-LIFE-172](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-172.md): A document opens in preview mode and E switches to edit mode
   - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
 <!-- okf:links:end -->

@@ -9,7 +9,11 @@ description: "When the column is open, the extension SHALL place it eight pixels
   that the text and the tables stay clear of it, and on a narrower pane show a rail
   on the right with one tick per heading instead, open the column as an overlay above
   the text while the pointer or the focus is on the rail, close it 300 ms after both
-  left or on Escape, and go to a heading when its tick is clicked."
+  left or on Escape, go to a heading when its tick is clicked, reserve 16 pixels at
+  the end of the content for the rail, place the overlay 40 pixels lower than the
+  column top so that it stays clear of the open toolbar tooltip, and close the overlay
+  on Escape only when the key comes from the overlay, the rail or no focused element
+  and no other handler consumed it."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
 req_lifecycle: proposed
@@ -32,13 +36,15 @@ tested_in_files:
 - test/visual/capture_toc_checks.py
 - test/visual/capture_toc_rail.py
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-TOOLBAR-133
 ---
 
 ## The column sits below the toolbar on the right and never covers the text
 
 ### Normative behavior
 
-When the column is open, the extension SHALL place it eight pixels below the toolbar and, on a pane of at least 760 pixels, show it as a fixed 240 pixel column 16 pixels from the right edge with 256 pixels reserved from the content so that the text and the tables stay clear of it, and on a narrower pane show a rail on the right with one tick per heading instead, the tick of the section at the reading line being highlighted. While the pointer or the keyboard focus is on the rail or on the overlay, the extension SHALL show the column as an overlay above the text without reserving width; it SHALL close the overlay 300 ms after both have left, or at once on Escape (the focus returns to the rail; the key is taken only when it comes from the overlay, the rail or no focused element, see SwRS-MDOKFSTUDIO-TOOLBAR-133), or when an entry of the overlay is clicked or the TOC is turned off. The rail is focusable, the overlay stays the navigation landmark Table of contents, a click on a tick goes to its heading, and the overlay appears without animation.
+When the column is open, the extension SHALL place it eight pixels below the toolbar and, on a pane of at least 760 pixels, show it as a fixed 240 pixel column 16 pixels from the right edge with 256 pixels reserved from the content so that the text and the tables stay clear of it, and on a narrower pane show a rail on the right with one tick per heading instead, the tick of the section at the reading line being highlighted. While the pointer or the keyboard focus is on the rail or on the overlay, the extension SHALL show the column as an overlay above the text without reserving width; it SHALL close the overlay 300 ms after both have left, or at once on Escape (the focus returns to the rail; the key is taken only when it comes from the overlay, the rail or no focused element), or when an entry of the overlay is clicked or the TOC is turned off. The rail is focusable, the overlay stays the navigation landmark Table of contents, a click on a tick goes to its heading, and the overlay appears without animation. On a pane narrower than 760 pixels the content reserves 16 pixels at its end for the rail, and the overlay sits 40 pixels lower than the column top so that it stays clear of the open toolbar tooltip.
 
 ### Scenario (nominal): Top edge follows the toolbar
 | Input | Outcome |
@@ -81,8 +87,27 @@ When the column is open, the extension SHALL place it eight pixels below the too
 - WHEN the page is measured
 - THEN the content still ends before the column and does not scroll sideways
 
+### Scenario (nominal): Content padded for the rail
+
+- GIVEN a 460 px pane with the table of contents on
+- WHEN the page is measured
+- THEN the content column ends 16 px before the pane edge, so the rail never covers text, and a 900 px pane keeps its 256 px reserve
+
+### Scenario (nominal): Overlay clear of the tooltip
+
+- GIVEN a 460 px pane, the rail hovered, and the toolbar tooltip of the TOC button open
+- WHEN the overlay is placed
+- THEN the overlay top is 40 px below the column top variable and lies below the bottom of the tooltip
+
+### Scenario (boundary): Escape belongs to its owner
+
+| Input | Outcome |
+| --- | --- |
+| Overlay open, Escape typed in the text or in a field (target outside the overlay and the rail) | The overlay stays open and the key is not prevented |
+| Overlay open, Escape already consumed by another handler | The overlay stays open |
+| Overlay open, Escape typed in the overlay, on the rail, or with no focused element (body) | The overlay closes at once and the key is prevented |
+
 ### Related requirements
-- SwRS-MDOKFSTUDIO-TOOLBAR-133: the 16 px padding for the rail, the overlay offset under the tooltips and the Escape scope.
 - SwRS-MDOKFSTUDIO-LAYOUT-023: Auto width is specified there, not here.
 
 ### Verification notes
@@ -94,6 +119,10 @@ When the column is open, the extension SHALL place it eight pixels below the too
 - Method: test/core/preview/previewStyles.test.ts (Wide pane and Pane width: the TOC column is hidden by default, reserves 256px when open and hides on narrow panes; the 760 px media block, 256 px, position fixed, inset-block-end 16px, width 240px, display none under 760 px). The exact 760 px boundary and the widening of the pane are untested.
 - Method: test/visual/capture_toc_checks.py (check_toc_column: the column starts at least 7 px under the toolbar bottom; check_toc_column and check_toc_shot on scenarios toolbar-navigation/v22 to v27 for the wide pane, Margin, Full width and zoom 200, light 900 px and dark 1600 px; v28 and v29 for the narrow pane: the column hidden at rest, the rail displayed, the content narrowed by the 16 px of the rail only, the button still pressed, and the overlay opened by a hover on the rail).
 - Criteria: --sphinx-preview-toc-top = toolbar bottom + 8, or 8; --sphinx-preview-toc-reserve is 256px at 760 px or more; nav width 240 px, inset-inline-end 16 px; display none under 760 px at rest, a rail of 16 px under 760 px, and padding on the body only from 760 px; columnRight <= nav.left + 1 and overflowX <= 1 for margin, full and zoom 200.
+- Method: test/page/modules/tocColumn.test.ts (Escape typed elsewhere than on the overlay is left to the handler that owns it).
+- Method: test/core/preview/previewStyles.test.ts (a narrow pane pads the content for the 16px rail: the reserve variable, the body padding, the overlay 40 px offset).
+- Method: test/visual/capture_toc_rail.py (check_toc_rail: content padding of 16 px and the overlay below the tooltip of the TOC button, scenarios toolbar-navigation/v28 and v29).
+- Criteria: --sphinx-preview-toc-reserve is 16px under 760 px with the TOC on and body padding-inline-end equals it; overlay inset-block-start is the top variable plus 40px; Escape closes only for a target inside the overlay or rail, or the body, and not when defaultPrevented.
 
 <!-- okf:links:start -->
 ### Links
@@ -102,4 +131,6 @@ When the column is open, the extension SHALL place it eight pixels below the too
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-133](SwRS-MDOKFSTUDIO-TOOLBAR-133.md): The narrow-pane rail keeps the text and the other Escape handlers clear
 <!-- okf:links:end -->

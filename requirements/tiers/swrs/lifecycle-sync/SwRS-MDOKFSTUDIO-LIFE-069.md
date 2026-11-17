@@ -15,9 +15,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-005
-- StRS-MDOKFSTUDIO-LIFE-007
-- StRS-MDOKFSTUDIO-LIFE-010
-- StRS-MDOKFSTUDIO-LIFE-021
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -103,27 +100,11 @@ When a render finishes and the loaded page can take its content, the extension S
 - WHEN the page replaces the content
 - THEN equal blocks pair in document order and each kept node is used once, a block with a link has the same key as on the first load, and page-added or text nodes are never kept
 
-### Scenario (boundary): The loaded page is not parsed again
-
-- GIVEN a patch that moved the page to a new render, and the next render of the same document
-- WHEN the host plans the next patch against the recorded page (the new render of the last plan, with the nonce of the loaded page)
-- THEN only the new render is parsed; the shell of the loaded page comes from the plan that produced it
-
 ### Scenario (nominal): A line inserted above keeps the blocks below
 
 - GIVEN a document of 200 blocks and a patch that adds one paragraph at the top, so that every block below it moves down by two source lines
 - WHEN the page replaces the content
 - THEN the 200 existing blocks are the same elements as before, the paragraph is the only new element, and each kept block carries the new `data-line`, `data-sphinx-source-line`, `data-sphinx-source-end-line` and `data-sphinx-preview-block` values (unit test test/page/modules/contentMorph.test.ts "P-07: a line inserted above keeps every block below it and moves its line attributes in place")
-
-### Scenario (boundary): What the key of a block holds
-
-| Input | Outcome |
-| --- | --- |
-| Two blocks whose HTML differs only in `data-line`, `data-sphinx-source-line`, `data-sphinx-source-end-line` or `data-sphinx-preview-block` | Equal keys; the kept node gets the new values written onto it and its descendants |
-| A patch that moves no block | No attribute of a kept node is written |
-| The key of a block | A hash of its HTML (two 32-bit hashes and the length), not the HTML itself |
-| An insertion bar of edit mode after a kept block | The bar stays after the block; the bar after a replaced or removed block is dropped |
-| Edit mode refreshed after a patch | A bar whose block and neighbouring blocks are unchanged is kept and only its line number moves; the others are created or removed |
 
 ### Scenario (boundary): A block the page rewrote is rebuilt
 
@@ -137,6 +118,7 @@ When a render finishes and the loaded page can take its content, the extension S
 
 ### Verification notes
 
+- Internal scenarios (moved from the scenarios, not observable by the reader): (a) The loaded page is not parsed again: when the host plans the next patch against the recorded page (the new render of the last plan, with the nonce of the loaded page), only the new render is parsed and the shell of the loaded page comes from the plan that produced it. (b) What the key of a block holds: blocks whose HTML differs only in `data-line`, `data-sphinx-source-line`, `data-sphinx-source-end-line` or `data-sphinx-preview-block` have equal keys and the kept node gets the new values written onto it and its descendants; a patch that moves no block writes no attribute; the key is a hash of the block's HTML (two 32-bit hashes and the length), not the HTML itself; an insertion bar of edit mode after a kept block stays, the bar after a replaced or removed block is dropped; after a patch, a bar whose block and neighbouring blocks are unchanged is kept and only its line number moves.
 - Method: test/core/preview/contentPatch.test.ts (Typing, One of the exceptions): "T34: two renders of one document type have equal shell keys despite other text, nonces and identifiers".
 - Method: test/core/preview/contentPatch.test.ts (The loaded page is not parsed again): "P-03: a plan parses the new page only, because the loaded page was analyzed as the previous new page".
 - Method: test/page/runtimeContentPatch.test.ts (Typing, Patches in a chain, Ready report after a patch, What the page does when it applies a patch): "T34: a content patch replaces the content, moves the identifiers and posts previewReady", "T34: patches sent before the page acknowledged the previous one apply in order", "T34: when a patch of a chain is rejected, the later ones are ignored and nothing is acknowledged", "STAB-02: a patch that closes an open block editor reports blockEditOpen false", "T34: open disclosures of the old content are open again in the new content", "T34: a patch with an anchor or a pin positions the page like a loaded page", "T34: a patch keeps the scroll position when the host sends no anchor", "T34: the patch removes the pending overlay and the link tooltip".
@@ -154,7 +136,4 @@ When a render finishes and the loaded page can take its content, the extension S
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
-  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
-  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
-  - [StRS-MDOKFSTUDIO-LIFE-021](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-021.md): The settings editor lists the Studio settings in clear groups
 <!-- okf:links:end -->

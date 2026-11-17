@@ -88,7 +88,6 @@ test("field helpers respect their boundaries", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-013
 test("previewViewPreferenceChanged validates the value per preference", () => {
   const base = { type: "previewViewPreferenceChanged", documentId: "doc", revision: 1, requestId: 1 };
   const ok = (preference: unknown, value: unknown): boolean =>
@@ -118,7 +117,7 @@ test("previewViewPreferenceChanged validates the value per preference", () => {
   assert.equal(ok("__proto__", true), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-058
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
 test("previewHistoryGo accepts only back or forward", () => {
   const base = { type: "previewHistoryGo", documentId: "doc", revision: 1, requestId: 1 };
   assert.equal(isRegisteredPreviewMessage({ ...base, direction: "back" }), true);
@@ -337,7 +336,7 @@ test("previewFindReplace validates the edit id and every item of the replacement
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 test("previewFindReplace takes an optional boolean dry-run flag", () => {
   const item = { line: 3, endLine: 4, find: "studio", occurrence: 1, occurrences: 2, replacement: "atelier" };
   const base = { type: "previewFindReplace", documentId: "doc", revision: 1, requestId: 1, editId: "find-1", items: [item] };

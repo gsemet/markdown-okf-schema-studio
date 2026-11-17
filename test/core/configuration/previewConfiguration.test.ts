@@ -110,7 +110,7 @@ test("normalizes preview content width and reserves zero for unlimited", () => {
   }).maxContentWidth, DEFAULT_PREVIEW_CONFIGURATION.maxContentWidth);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-022
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
 test("normalizes sticky heading depth to one through six levels", () => {
   const readDepth = (value: number): number => readPreviewConfiguration({
     get<T>(section: string, defaultValue: T): T {

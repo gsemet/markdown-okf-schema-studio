@@ -254,7 +254,7 @@ test("Refresh Preview acts on the preview created last that is still open", asyn
   assert.ok(side.probe.renderedStages > again);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-010
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
 test("Open Preview to Side refuses a file that is not a saved Markdown file", async (t) => {
   const studio = start(t);
   const typescript = writeFile("export {};\n", workspaceRoot, `code-${process.pid}.ts`);
@@ -272,7 +272,7 @@ test("Open Preview to Side refuses a file that is not a saved Markdown file", as
   assert.equal(fake.controls.panels.length, panels);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-010
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
 test("Open Preview to Side from a Studio Open With tab previews that tab's file", async (t) => {
   const studio = start(t);
   const file = writeFile("# From the Open With tab\n");

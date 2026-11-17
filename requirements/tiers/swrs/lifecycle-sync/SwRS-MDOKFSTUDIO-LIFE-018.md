@@ -17,7 +17,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-001
-- StRS-MDOKFSTUDIO-LIFE-007
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -97,5 +96,4 @@ When a reader opens a .md file with the optional Markdown OKF-Schema Studio edit
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
-  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
 <!-- okf:links:end -->

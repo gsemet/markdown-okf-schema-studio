@@ -17,7 +17,9 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-001
-depends_on: []
+depends_on:
+- SwRS-MDOKFSTUDIO-LIFE-169
+- SwRS-MDOKFSTUDIO-LIFE-170
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -58,6 +60,11 @@ The root never carries a data-sphinx-preview-toolbar attribute.
 - WHEN the page starts and the chevron is pressed twice
 - THEN the attribute is expanded at start, collapsed after the first press and expanded after the second
 
+### Scenario (nominal): The collapsed choice is kept for the workspace
+- GIVEN a toolbar the writer collapsed in one preview
+- WHEN a new page opens in the same workspace
+- THEN the new page starts with the toolbar collapsed; the choice is stored for the workspace and read back by the rules of SwRS-MDOKFSTUDIO-LIFE-169 and SwRS-MDOKFSTUDIO-LIFE-170
+
 ### Verification notes
 - Method: test/page/runtimePageControls.test.ts (unit test P8: the collapse button hides rows 2 to 4, label and aria-expanded after a click, the root attribute and the assertion that the root never matches the toolbar selector; scenarios Collapse then expand, Button and root attribute per state, At start and after each press).
 - Method: test/visual/capture_layout_checks.py (check_toolbar_collapse on toolbar-navigation/v07, v09, v11, v13, v15, v17, v19 and v21: Tab order, height shrinks, the toolbar does not move, expanding restores it, aria-expanded true or false; scenarios Collapse then expand, Keyboard order when collapsed, Button and root attribute per state).
@@ -69,5 +76,8 @@ The root never carries a data-sphinx-preview-toolbar attribute.
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers its collapsed state
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
 <!-- okf:links:end -->

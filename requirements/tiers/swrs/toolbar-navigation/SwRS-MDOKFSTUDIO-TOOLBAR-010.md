@@ -3,18 +3,21 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-TOOLBAR-010
 uuid: e79bb467-7fe5-4ea0-8e9b-4f8ab092850a
 title: The find bar paints the matches of the rendered text and walks them
-description: While the find bar holds a query, the extension SHALL paint every
-  match in the rendered text of the page, show the match count, move the current
-  match with Enter, Shift+Enter and F3, unfold the folded sections that hold it
-  and bring it into view, vertically and inside any box that scrolls sideways.
+description: "While the find bar holds a query, the extension SHALL paint every match
+  in the rendered text of the page, show the match count, move the current match with
+  Enter, Shift+Enter and F3, unfold the folded sections that hold it and bring it
+  into view, vertically and inside any box that scrolls sideways; the find bar SHALL
+  offer the options match case, whole word and regular expression, and report an invalid
+  regular expression in place of the count instead of searching."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: draft
-status: draft
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-003
+depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +37,15 @@ tested_in_files:
 - test/visual/capture_find_wide_table.py
 - test/visual/findWideTableScenarios.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-TOOLBAR-011
 ---
 
 ## The find bar paints the matches of the rendered text and walks them
 
 ### Normative behavior
 
-While the find bar holds a query, the extension SHALL paint every match in the rendered text of the page, show the match count, move the current match with Enter, Shift+Enter and F3, unfold the folded sections that hold it and bring it into view, vertically and inside any box that scrolls sideways.
+While the find bar holds a query, the extension SHALL paint every match in the rendered text of the page, show the match count, move the current match with Enter, Shift+Enter and F3, unfold the folded sections that hold it and bring it into view, vertically and inside any box that scrolls sideways; the find bar SHALL offer the options match case, whole word and regular expression, and report an invalid regular expression in place of the count instead of searching.
 
 ### Scenario (nominal): Matches are painted and walked
 - GIVEN a page whose rendered text holds a word four times, in a heading, a paragraph (once inside bold markup), an admonition and a table cell
@@ -70,6 +75,23 @@ While the find bar holds a query, the extension SHALL paint every match in the r
 | A hit already in view horizontally | No sideways scroll |
 | A hit wider than its scroll box | The box is aligned on the start of the hit |
 
+### Scenario (nominal): The three options
+- GIVEN a page with "Studio" and "studio" in its text
+- WHEN the reader turns on Match case (Alt+C), Whole word (Alt+W) or Regular expression (Alt+R)
+- THEN the matches are searched again at once: match case keeps the same letter case, whole word needs a non-word character (letter, digit, underscore) on each side, and the expression is used as written
+
+### Scenario (failure): An invalid expression
+- GIVEN the regular expression option is on
+- WHEN the field holds "stud(io"
+- THEN the count shows the reason of the engine, the field is marked aria-invalid, nothing is painted and nothing is replaced
+
+### Scenario (boundary): Literal queries
+| Input | Outcome |
+| --- | --- |
+| A query with ".", "+", "(" or "/" and the expression option off | Plain text |
+| A pattern that can match the empty string ("a*") | Empty matches are skipped |
+| An empty query | No search, no count |
+
 ### Verification notes
 
 - Method: test/page/modules/findIndex.test.ts (text blocks, white space, mapping a match back to its text nodes, no match across blocks, the limit).
@@ -78,6 +100,9 @@ While the find bar holds a query, the extension SHALL paint every match in the r
 - Method: test/core/preview/previewStyles.test.ts (the match paint reads the theme tokens and has a forced-colours rule).
 - Method: test/integration/findInPreview.test.ts, real VS Code window (matches in a table, an admonition and a link; a folded section unfolds; cream and dark shots).
 - Criteria: the count and the painted ranges equal the number of matches in the visible and folded rendered text.
+- Method: test/core/find/findMatches.test.ts (literal escaping, case, whole word with accents and digits, expression, invalid expression, empty matches, the limit).
+- Method: test/page/modules/findBar.test.ts (the toggles narrow the count, aria-pressed, an invalid expression shows its reason and aria-invalid, Alt+R).
+- Criteria: the matches of each option combination equal the expected spans.
 
 <!-- okf:links:start -->
 ### Links
@@ -86,4 +111,6 @@ While the find bar holds a query, the extension SHALL paint every match in the r
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-003](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-003.md): The reader finds and replaces text in the preview
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-011](SwRS-MDOKFSTUDIO-TOOLBAR-011.md): The find bar matches case, whole words and regular expressions
 <!-- okf:links:end -->

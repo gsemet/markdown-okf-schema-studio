@@ -31,7 +31,7 @@ const COMMENTS_BUTTON = `<button type="button" data-sphinx-preview-comments-togg
 const COLLAPSE_BUTTON = `<button type="button" data-sphinx-preview-toolbar-collapse aria-expanded="true" aria-controls="sphinx-preview-toolbar-more" aria-label="Hide view controls" title="Hide view controls" data-tooltip="Hide view controls"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-collapse-icon="hide"><path d="m6 15 6-6 6 6"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-collapse-icon="show"><path d="m6 9 6 6 6-6"></path></svg></button>`;
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-001
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
 /**
  * Four rows of four buttons. Row 1 (main): Refresh, Edit (always enabled: trust never makes a document read-only), Export to

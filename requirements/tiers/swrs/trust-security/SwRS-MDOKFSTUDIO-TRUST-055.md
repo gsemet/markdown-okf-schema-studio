@@ -43,14 +43,14 @@ When the host receives a page message, it SHALL accept it only if the validator 
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-CODE-026: copied text bound
-- SwRS-MDOKFSTUDIO-TOOLBAR-083: link discovery bound
+- SwRS-MDOKFSTUDIO-TOOLBAR-079: link discovery bound
 - SwRS-MDOKFSTUDIO-MYST-051: label rename validation
 - SwRS-MDOKFSTUDIO-DIAG-050: PlantUML include bound
 
 ### Verification notes
 
 - Method: Unit tests test/core/protocol/pageToHost.test.ts and test/core/protocol/pageStateMessages.test.ts (rejects a message the validator refuses; each message type has its own bounds test, for example previewHistoryGo accepts only back or forward).
-- Criteria: The bounds of each type are specified with the feature that sends it, for example SwRS-MDOKFSTUDIO-CODE-026 for the copied text, SwRS-MDOKFSTUDIO-TOOLBAR-083 for link discovery, SwRS-MDOKFSTUDIO-DIAG-050 for a PlantUML include and SwRS-MDOKFSTUDIO-BLOCK-244 and SwRS-MDOKFSTUDIO-BLOCK-245 for the editor and flush identifiers.
+- Criteria: The bounds of each type are specified with the feature that sends it, for example SwRS-MDOKFSTUDIO-CODE-026 for the copied text, SwRS-MDOKFSTUDIO-TOOLBAR-079 for link discovery, SwRS-MDOKFSTUDIO-DIAG-050 for a PlantUML include and SwRS-MDOKFSTUDIO-BLOCK-244 and SwRS-MDOKFSTUDIO-BLOCK-245 for the editor and flush identifiers.
 
 <!-- okf:links:start -->
 ### Links

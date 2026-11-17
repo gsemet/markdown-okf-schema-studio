@@ -48,7 +48,6 @@ const FOLD_BUTTON = "[data-sphinx-preview-fold-toggle]";
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-004
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-006
 /**
  * Folding of the sections of the content. Each heading that has blocks after it gets a chevron

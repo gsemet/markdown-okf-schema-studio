@@ -166,7 +166,6 @@ const FIND_DOCUMENT = [
 ].join("\n");
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
 /**
  * QA 210 c4-1: Replace all from the preview find bar replaces the visible matches of a list whose
  * link target repeats the query. The target, which the reader cannot see, is kept.

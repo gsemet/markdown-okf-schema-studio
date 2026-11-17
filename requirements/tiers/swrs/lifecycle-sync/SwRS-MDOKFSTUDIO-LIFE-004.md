@@ -2,10 +2,12 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-LIFE-004
 uuid: 3d7d7c0f-a2a8-4082-b017-dc68c89fb1b0
-title: Previews render in a worker thread that an abort stops
+title: A long render never blocks the text editor, and a render that a newer
+  edit supersedes stops
 description: When a preview renders a document in the VS Code host, the
-  extension SHALL run the MyST render in a worker thread, stop that thread when
-  the render is aborted, and render in-process when no worker can start.
+  extension SHALL keep the text editor responsive during a long render, stop a
+  render that a newer edit, a cancel or a closed preview supersedes, and still
+  render when no background thread can start.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -28,46 +30,37 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## Previews render in a worker thread that an abort stops
+## A long render never blocks the text editor, and a render that a newer edit supersedes stops
 
 ### Normative behavior
 
-When a preview renders a document in the VS Code host, the extension SHALL run the MyST render in a worker thread, stop that thread when the render is aborted, and render in-process when no worker can start.
+When a preview renders a document in the VS Code host, the extension SHALL keep the text editor responsive during a long render, stop a render that a newer edit, a cancel or a closed preview supersedes, and still render when no background thread can start.
 
 ### Scenario (nominal): A long render leaves the host free
 
 - GIVEN a preview of an 11,000-line document in the VS Code host
 - WHEN an edit triggers a render
-- THEN the MyST render runs in a worker thread, not on the extension host thread, and the preview shows the same HTML, diagnostics and dependencies as an in-process render
+- THEN the text editor stays responsive while the render runs, and the preview shows the same HTML, diagnostics and dependencies as any other render
 
-### Scenario (boundary): Aborted renders
-
-| Input | Outcome |
-| --- | --- |
-| a render whose request is aborted while the worker renders (a newer edit, a cancel, the preview closed) | the worker thread is terminated at once, the render rejects as canceled, and the next render starts a fresh worker |
-| a render whose request is aborted while its thread still starts | the render rejects as canceled, the thread is not stopped and never gets that render; the next render uses it |
-| a render waiting for the busy thread whose request is aborted | the render rejects as canceled and never reaches the thread |
-| a render whose request was aborted before it started | no worker is used and the render never starts |
-| the extension stops while a render runs | the render rejects as canceled and the workers are terminated |
-
-### Scenario (boundary): One warm thread
+### Scenario (boundary): A superseded render stops
 
 | Input | Outcome |
 | --- | --- |
-| the extension activates | one worker thread starts and loads the MyST engine before the first render |
-| two renders at the same time (two documents) | the second waits for the thread; no second, cold thread starts |
-| an aborted render | its thread is replaced by a new one at once, warm for the next render |
-| no render for 5 minutes | the idle thread stops; the next render starts a new one |
+| a render whose request is aborted while it runs (a newer edit, a cancel, the preview closed) | the render stops at once and rejects as canceled; the next render starts normally |
+| a render waiting its turn whose request is aborted | the render rejects as canceled and never starts |
+| a render whose request was aborted before it started | the render never starts |
+| the extension stops while a render runs | the render rejects as canceled |
 
-### Scenario (refusal): No worker can run
+### Scenario (refusal): No background thread can run
 
 | Input | Outcome |
 | --- | --- |
-| the worker script is missing or the thread fails before it is ready | the render, and every later one, runs in-process with the same output |
-| a worker that was ready dies during a render | that render fails with the reason (it is not repeated on the host thread); after three such deaths in a row renders run in-process |
+| the worker script is missing or the thread fails before it is ready | the render, and every later one, still completes with the same output |
+| a thread that was ready dies during a render | that render fails with the reason; after three such deaths in a row renders still complete |
 
 ### Verification notes
 
+- Design (moved from the scenarios): the MyST render runs in a worker thread; an abort terminates the thread at once and the next render starts a fresh one; one warm thread starts when the extension activates and loads the MyST engine before the first render; two renders at the same time wait for the thread, no second cold thread starts; an aborted render's thread is replaced by a new one at once; after 5 minutes without render the idle thread stops; a render aborted while its thread still starts keeps that thread for the next render; when no worker can start, or after three deaths in a row, renders run in-process.
 - Method: test/node-services/renderWorker.test.ts: "renders in a worker thread, with the output of the in-process render" (deep-equal output, another thread id), "the host thread stays free while a worker renders" (longest gap of a 5 ms interval below half the render time with the worker, above half without), "an abort stops the render at once, and the next render gets a fresh worker", "a render given up before it starts never reaches a worker", "a worker that cannot start falls back to the in-process render", "disposing the renderer cancels the render in flight", "warming starts one thread that the first render then uses".
 - Method: test/core/render/renderPipeline.test.ts "a render whose request was already given up never starts" and "the host's source renderer gets plain data and the signal, and its cancellation stays a cancellation".
 - Method: test/node-services/renderWorker.test.ts with a stub worker script: "a ready worker that dies during a render fails that render; three deaths in a row fall back", "a render waits for the busy worker instead of starting a second thread", "a waiting render that is given up never reaches the worker", "a render aborted while its thread still starts keeps that thread for the next render".

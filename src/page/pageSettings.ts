@@ -42,7 +42,7 @@ export function applyCodeBlockSettings(root: Element, context: PreviewRuntimeCon
   root.setAttribute("data-okf-code-line-numbers", boot["codeBlocks.lineNumbers"] ? "true" : "false");
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-022
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-018
 /** How many heading levels the sticky band shows: the setting rounded and clamped to 1..6, else 3. */
 export function stickyHeadingDepthOf(context: PreviewRuntimeContext): number {
   return readPreviewBootSettings(context).stickyHeadingDepth;

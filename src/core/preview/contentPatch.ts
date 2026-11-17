@@ -231,7 +231,7 @@ export type RuntimeContextSettings = {
   activeSourceFile: string;
 } & Partial<PreviewStartupSettings>;
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-022
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-018
 /** The key of {@link RuntimeContextSettings}: the document, then the startup settings in table order. */
 export function runtimeContextKey(context: RuntimeContextSettings): string {
   return JSON.stringify([

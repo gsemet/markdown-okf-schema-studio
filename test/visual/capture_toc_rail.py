@@ -38,7 +38,7 @@ def check_toc_rail(page: Page) -> list[str]:
 
 
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-133
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
 def check_toc_overlay(page: Page, shown_at_rest: bool) -> list[str]:
   """Hovers the rail and leaves the overlay open for the screenshot; it must stay inside the pane."""
   if shown_at_rest:

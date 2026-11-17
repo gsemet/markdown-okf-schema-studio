@@ -16,9 +16,8 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-001
 depends_on: []
-annotation_exemption: true
-exemption_reason: "Absence of code: no write to the built-in Markdown preview settings
-  exists. No implementation marker is possible."
+annotation_exemption: false
+exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/host-vscode/activation.ts

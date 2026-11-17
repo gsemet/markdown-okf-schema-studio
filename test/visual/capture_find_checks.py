@@ -10,7 +10,7 @@ from capture_support import Failure
 
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-011
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 def check_find_bar(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
     """In Chromium Ctrl+F opens the find bar over the page, the matches are painted with the Custom Highlight API, Enter walks them, Escape closes the bar, and Replace all asks the host for the mapped matches only."""

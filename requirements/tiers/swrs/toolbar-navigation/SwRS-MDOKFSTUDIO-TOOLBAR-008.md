@@ -9,8 +9,8 @@ description: While a section is folded, the extension SHALL leave the blocks of
   unfolded.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: draft
-status: draft
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:

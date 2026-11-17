@@ -17,12 +17,11 @@ user_need: As a reader, I can tell whether the preview is current, still
   rendering, stale after an error or recovered, and I am told whether the file
   was deleted, renamed, is not a Markdown file or could not be restored.
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-018
+- SwRS-MDOKFSTUDIO-LIFE-002
 - SwRS-MDOKFSTUDIO-LIFE-049
 - SwRS-MDOKFSTUDIO-LIFE-055
 - SwRS-MDOKFSTUDIO-LIFE-059
 - SwRS-MDOKFSTUDIO-LIFE-062
-- SwRS-MDOKFSTUDIO-LIFE-069
 - SwRS-MDOKFSTUDIO-LIFE-127
 default_owner_email: gaetan@xeberon.net
 ---
@@ -44,15 +43,31 @@ As a reader, I can tell whether the preview is current, still rendering, stale a
 - The states are announced politely to assistive technology.
 - The preview comes back by itself when the file is created again.
 
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> Ready: render done
+    Ready --> PendingNotice: new edit, notice shown
+    PendingNotice --> Ready: render done
+    PendingNotice --> Failed: render fails, last good page kept
+    Failed --> Recovered: next render succeeds
+    Recovered --> Ready
+    Ready --> SourceMissing: file deleted or moved
+    Failed --> SourceMissing: file deleted or moved
+    SourceMissing --> [*]
+```
+
 ### Main paths
 
 #### Path 1: Wait for a render
 
 1. A new preview waits for its render
    - SwRS-MDOKFSTUDIO-LIFE-049: the status reads Preview pending, with a pending notice for a slow render
-   - Option SwRS-MDOKFSTUDIO-LIFE-055 (refusal): a pending notice that is oversized or malformed is ignored
-2. The status reads Preview ready
+   - Option SwRS-MDOKFSTUDIO-LIFE-049 (refusal): a pending notice that is oversized or malformed is ignored
    - Option SwRS-MDOKFSTUDIO-LIFE-049 (refusal): a failed render is labelled in the status
+2. The status reads Preview ready
 
 #### Path 2: The source is gone
 
@@ -70,11 +85,10 @@ As a reader, I can tell whether the preview is current, still rendering, stale a
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-018](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-018.md): The Open With editor shows its own Markdown file
+  - [SwRS-MDOKFSTUDIO-LIFE-002](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-002.md): A background failure is logged to the extension output channel
   - [SwRS-MDOKFSTUDIO-LIFE-049](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-049.md): The status names the render state and shows pending, failed and recovered notices
   - [SwRS-MDOKFSTUDIO-LIFE-055](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-055.md): The page ignores a pending notice with an oversized or malformed field
   - [SwRS-MDOKFSTUDIO-LIFE-059](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-059.md): The status region is a polite live region of plain text
   - [SwRS-MDOKFSTUDIO-LIFE-062](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-062.md): A preview without a source says why and recovers when it returns
-  - [SwRS-MDOKFSTUDIO-LIFE-069](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-069.md): A render of the loaded document updates the page in place
   - [SwRS-MDOKFSTUDIO-LIFE-127](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-127.md): A restored panel reopens its document or explains why it cannot
 <!-- okf:links:end -->

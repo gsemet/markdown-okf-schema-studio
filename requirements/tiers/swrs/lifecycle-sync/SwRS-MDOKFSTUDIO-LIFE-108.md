@@ -29,9 +29,12 @@ implemented_in_files:
 tested_in_files:
 - test/integration/scroll-sync-suite.ts
 - test/integration/sourceMapping.test.ts
+- test/page/pageSettings.test.ts
 - test/page/runtimeScroll.test.ts
 - test/session/lifeReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LIFE-097
 ---
 
 ## Scrolling or clicking the preview reveals the source line
@@ -96,15 +99,23 @@ When the reader scrolls the preview to another source line or activates a render
 | --- | --- |
 | line, endLine, sourceLine or selectionLine a safe integer of at least 1 | accepted |
 | anchorLine a finite number of at least 1 and scrollTop a finite number of at least 0 | accepted |
-| activation click or keyboard, and a sourceFile string | accepted; the validator does not check them, the host compares the sourceFile path with the active document (see SwRS-MDOKFSTUDIO-LIFE-097 for the settings) |
+| activation click or keyboard, and a sourceFile string | accepted; the validator does not check them, the host compares the sourceFile path with the active document |
 | line 0, line 1.5, anchorLine below 1 or a negative scrollTop | malformed: dropped by the envelope check without a visible change, the editor is not moved (see SwRS-MDOKFSTUDIO-TRUST-052) |
 | a well-formed previewScroll while scrollPreviewWithEditor is off | the reading state is recorded, the editor is not moved |
+
+### Scenario (boundary): Defaults, the setting off and the double click
+
+| Input | Outcome |
+| --- | --- |
+| No stored value for markdownOkfSchemaStudio.preview.scrollEditorWithPreview, preview settings read | The setting is true (on by default) |
+| scrollEditorWithPreview set to false and the reader scrolls or clicks in the preview | The editor does not move |
+| The reader double-clicks rendered content outside edit mode | The page posts nothing beyond the reveals of its two clicks; there is no double-click setting (a doubleClickToSwitchToEditor value left in the user settings is not a setting of the extension and has no effect) |
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-LIFE-100: the reverse direction, from the text editor to the preview
 - SwRS-MDOKFSTUDIO-LIFE-119: the anchor line that previewScroll reports
 - SwRS-MDOKFSTUDIO-LIFE-125: the reading state that every previewScroll also reports
-- SwRS-MDOKFSTUDIO-LIFE-097: the settings that decide how the panes follow each other
+- SwRS-MDOKFSTUDIO-LIFE-071: a change of the scroll settings replaces the page document
 
 ### Verification notes
 - Method: test/integration/scroll-sync-suite.ts (scenarios 1 and 5: source follows preview, solo scenarios, scrolling must not edit the document)
@@ -112,7 +123,8 @@ When the reader scrolls the preview to another source line or activates a render
 - Method: test/integration/sourceMapping.test.ts (scenarios 2 and 3: previewScroll line 1 reveals line 1 and lastRevealedSourceLine equals the message line, click activation reveals line 2; the caret is not moved because revealRange does not change the selection, deduced from the code)
 - Method: test/session/lifeReq.requirements.test.ts (scenarios 6 and 7: "a reveal that names another source file moves nothing" and "a revealed line is clamped between the first and the last line of the document", by reading revealFromPage and revealEditorLine, Math.max(0, Math.min(lineCount - 1, line - 1)))
 - Method: scenario 8 is checked by the envelope tests of SwRS-MDOKFSTUDIO-TRUST-052 and by reading hasValidStateFields in src/core/protocol/pageToHost.ts (untested for the two message types themselves)
-- Criteria: previewScroll is posted only when the rounded line changed; lastRevealedSourceLine equals the message line; visibleTextEditors is unchanged and the document equals the file on disk when no editor shows the file; revealEditorLine runs only when the resolved paths are equal or no file is named; the zero-based line is between 0 and lineCount - 1.
+- Method: test/page/pageSettings.test.ts (Defaults): "page settings default to following both ways, without selection marks or double-click reveal"; test/page/runtimeScroll.test.ts (the double click): "executes source and preview synchronization across layout changes" (a dblclick posts nothing more). The click path with scrollEditorWithPreview off has no test (untested); checked by reading revealFromPage and revealEditorLine.
+- Criteria: readPreviewConfiguration returns true for no value of scrollEditorWithPreview; revealEditorLine returns before any reveal when scrollEditorWithPreview is false; the page registers no double-click listener; previewScroll is posted only when the rounded line changed; lastRevealedSourceLine equals the message line; visibleTextEditors is unchanged and the document equals the file on disk when no editor shows the file; revealEditorLine runs only when the resolved paths are equal or no file is named; the zero-based line is between 0 and lineCount - 1.
 
 <!-- okf:links:start -->
 ### Links
@@ -124,4 +136,6 @@ When the reader scrolls the preview to another source line or activates a render
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LIFE-097](SwRS-MDOKFSTUDIO-LIFE-097.md): Two settings decide how the panes follow each other
 <!-- okf:links:end -->

@@ -9,7 +9,6 @@ export interface TocColumnContext {
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-037
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-133
 /**
  * TOC column: a right-hand column below the toolbar that lists the h1-h4 headings of the content.
  * The column is runtime UI appended to the body (never part of the page shell) and is
@@ -142,7 +141,7 @@ export function installTocColumn(
   // element (the pointer alone can have opened it). A key typed in the text or in a field, or
   // already consumed by another handler, is not ours: it stays with its owner. The focus goes back
   // to the rail only when it was inside.
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-133
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-037
   window.addEventListener?.("keydown", (event) => {
     const key = event as KeyboardEvent;
     if (key.key !== "Escape" || !overlayOpen || key.defaultPrevented) return;

@@ -6,7 +6,9 @@ title: "Links in view are looked up in bounded batches"
 description: "When a link with a navigation request scrolls into view, the extension
   SHALL ask the host once for the target of its request, in previewLinkDiscover messages
   of at most 64 requests, and the host answers with previewLinkTargets that lists,
-  for each request in order, its kind and its path or reason."
+  for each request in order, its kind and its path or reason; the host accepts a previewLinkDiscover
+  message only when its requests are an array of at most 64 strings of at most 4096
+  characters each."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
 req_lifecycle: proposed
@@ -18,25 +20,30 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-006
 - SwRS-MDOKFSTUDIO-TRUST-065
+- SwRS-MDOKFSTUDIO-TRUST-052
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/protocol/pageToHost.ts
 - src/page/modules/linkNavigation.ts
 - src/session/features/links.ts
 tested_in_files:
+- test/core/protocol/pageStateMessages.test.ts
 - test/page/modules/linkNavigation.test.ts
 - test/page/modules/toolbarReq.requirements.test.ts
 - test/session/eventFanOut.test.ts
 - test/session/toolbarReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-TOOLBAR-083
 ---
 
 ## Links in view are looked up in bounded batches
 
 ### Normative behavior
 
-When a link with a navigation request scrolls into view, the extension SHALL ask the host once for the target of its request, in previewLinkDiscover messages of at most 64 requests, and the host answers with previewLinkTargets that lists, for each request in order, its kind and its path or reason. When the host looks for a file by name to answer a request, it SHALL skip the folders node_modules, .git, _build, .venv and venv, SHALL NOT apply the VS Code files.exclude setting (an explicit exclude replaces it, so files hidden by files.exclude can be found), and SHALL stop at 50 matching files per root, so a name matching more files may be truncated before it is resolved or reported as ambiguous.
+When a link with a navigation request scrolls into view, the extension SHALL ask the host once for the target of its request, in previewLinkDiscover messages of at most 64 requests, and the host answers with previewLinkTargets that lists, for each request in order, its kind and its path or reason; the host accepts a previewLinkDiscover message only when its requests are an array of at most 64 strings of at most 4096 characters each. When the host looks for a file by name to answer a request, it SHALL skip the folders node_modules, .git, _build, .venv and venv, SHALL NOT apply the VS Code files.exclude setting (an explicit exclude replaces it, so files hidden by files.exclude can be found), and SHALL stop at 50 matching files per root, so a name matching more files may be truncated before it is resolved or reported as ambiguous.
 
 ### Scenario (nominal): Link scrolls in
 
@@ -115,9 +122,24 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 - Known issue: a link name matching more than 50 files under one root is resolved from the first 50 found, not from all of them.
 - Known issue: while the preview stays focused and visible, a file created or deleted meanwhile is not noticed; the links are asked again only when the focus or the visibility comes back, or when the page is replaced.
 
+### Scenario (nominal): Requests within the bounds
+
+| Input | Outcome |
+| --- | --- |
+| 64 requests of 4096 characters | the message is accepted (the limit) |
+| an empty array | accepted |
+
+### Scenario (refusal): Requests over the bounds or of the wrong kind
+
+| Input | Outcome |
+| --- | --- |
+| 65 requests | refused |
+| a request of 4097 characters | refused |
+| a number among the requests | refused |
+| a value that is not an array | refused |
+
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-TOOLBAR-083: the bounds of the previewLinkDiscover message the host accepts.
 - SwRS-MDOKFSTUDIO-TOOLBAR-085: how the page marks the links with the answer.
 
 ### Verification notes
@@ -128,6 +150,8 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 - Method: test/session/toolbarReq.requirements.test.ts (the host answers a discovery with one target per request, in order; a discovery of another render gets no answer; a failed discovery shows a warning and sends no answer).
 - Method: test/session/eventFanOut.test.ts (the search for a link target skips node_modules, .git, _build, .venv and venv and returns at most 50 files).
 - Criteria: each request string is sent at most once per page until the window regains focus or the preview becomes visible, which forgets what was asked; each message holds at most 64 requests; the search passes DISCOVERY_EXCLUDE and MAX_DISCOVERED_FILES (src/session/features/links.ts) to findFiles; the skip pattern is the start of the request; one target per request in the order of the request; no previewLinkTargets after the render changed; showWarning is called once per failed batch.
+- Method: test/core/protocol/pageStateMessages.test.ts (both scenarios: the page-state validators accept exactly what the frozen validator accepted; the empty array row is by code only)
+- Criteria: requests.length <= 64 and every request is a string of at most 4096 characters.
 
 <!-- okf:links:start -->
 ### Links
@@ -139,4 +163,7 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-083](SwRS-MDOKFSTUDIO-TOOLBAR-083.md): The host accepts discovery messages of bounded size
 <!-- okf:links:end -->

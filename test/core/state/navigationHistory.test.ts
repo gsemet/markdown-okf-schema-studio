@@ -48,7 +48,7 @@ test("a duplicate of the current entry is ignored", () => {
   assert.equal(history.snapshot().entries.length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-065
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
 test("the history keeps at most 50 entries, the newest", () => {
   const history = new NavigationHistory();
   for (let n = 1; n <= NAVIGATION_HISTORY_CAP + 10; n += 1) history.push(place("a", n));

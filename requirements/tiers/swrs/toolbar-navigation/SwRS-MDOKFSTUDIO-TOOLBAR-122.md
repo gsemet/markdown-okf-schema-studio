@@ -7,8 +7,8 @@ description: "When previewPairing names another document, document version or re
   than the page's, the extension SHALL not change the Anchor button."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -18,11 +18,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/hostToPage.ts
-tested_in_files:
-- test/page/runtimePageControls.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-120
 ---
 
 ## A pairing message for another document is ignored
@@ -62,4 +62,6 @@ When previewPairing names another document, document version or request than the
   - [StRS-MDOKFSTUDIO-TOOLBAR-013](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-013.md): The reader decides how the panes scroll together and sees the cursor block
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-120](SwRS-MDOKFSTUDIO-TOOLBAR-120.md): The Anchor button switches whether the preview follows the editor
 <!-- okf:links:end -->

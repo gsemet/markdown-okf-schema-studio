@@ -20,16 +20,16 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-002
 - StRS-MDOKFSTUDIO-THEME-004
 - StRS-MDOKFSTUDIO-THEME-011
-- StRS-MDOKFSTUDIO-TOOLBAR-001
-- StRS-MDOKFSTUDIO-TOOLBAR-006
-- StRS-MDOKFSTUDIO-TOOLBAR-013
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TRUST-006
+- SwRS-MDOKFSTUDIO-TRUST-052
+- SwRS-MDOKFSTUDIO-TRUST-065
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/protocol/pageToHost.ts
 - src/core/state/previewViewPreferences.ts
 - src/page/features/anchorMode.ts
 - src/page/features/blockSourceEditor.ts
@@ -61,6 +61,7 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-LAYOUT-021
+- SwRS-MDOKFSTUDIO-TOOLBAR-013
 ---
 
 ## A view choice made on the page is stored for the workspace
@@ -105,6 +106,16 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 - GIVEN an open preview whose workspace holds no stored value
 - WHEN the page reports previewThemeModeChanged dark, previewEditModeChanged with editMode true, or previewPaletteModeChanged gfm
 - THEN the value is held for the session where the row says so, written to the workspace storage, and carried by the boot context of the next page of the workspace (the theme mode dark; the palette mode gfm wins over the setting)
+
+### Scenario (boundary): Zoom and own-key rows of a view preference message
+
+| Input | Outcome |
+| --- | --- |
+| zoom 70, 130 and 200 | all three are accepted |
+| zoom 60, 210, 1.2, the text 100 and NaN | all five are dropped without an answer and the stored zoom is unchanged |
+| toc, incomingChanges, comments and toolbarCollapsed with a boolean; widthMode margin, auto or full | each message is accepted |
+| toc of the string true, comments of 1, widthMode wide or the number 1 | each message is refused and the host does not change a preference |
+| an unknown preference name, or a name that is not an own key of the validators | refused |
 
 ### Scenario (boundary): No change, no message
 
@@ -164,18 +175,18 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, and each document keeps its reading place and view choices
   - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
   - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
   - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
   - [StRS-MDOKFSTUDIO-THEME-004](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-004.md): The theme choice holds for the workspace and survives slow loads and bad values
   - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
-  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
-  - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
-  - [StRS-MDOKFSTUDIO-TOOLBAR-013](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-013.md): The reader decides how the panes scroll together and sees the cursor block
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-170](SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-LAYOUT-021](../layout-width/SwRS-MDOKFSTUDIO-LAYOUT-021.md): A width mode choice is saved for the workspace
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-013](../toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-013.md): The host accepts only a known view preference with a valid value
 <!-- okf:links:end -->

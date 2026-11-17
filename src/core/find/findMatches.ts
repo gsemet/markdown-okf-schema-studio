@@ -31,7 +31,7 @@ const WORD_CHAR = "[\\p{L}\\p{N}_]";
 
 const escapeLiteral = (query: string): string => query.replace(/[.*+?^${}()|[\]\\/]/gu, "\\$&");
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-011
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-010
 /**
  * Compiles `query` for the options. A literal query is escaped; a whole-word query must start and
  * end between non-word characters. An empty query has no pattern (nothing is searched); a regular

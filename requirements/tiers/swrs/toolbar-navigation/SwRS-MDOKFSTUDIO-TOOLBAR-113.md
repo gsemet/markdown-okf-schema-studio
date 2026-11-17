@@ -9,8 +9,8 @@ description: "When previewLink reaches the host, the extension SHALL record the 
   reason The frontmatter link request is invalid."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -23,14 +23,12 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/session/features/links.ts
-tested_in_files:
-- test/session/diagReq.links.requirements.test.ts
-- test/session/toolbarReq.requirements.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
-supersedes:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-083
+supersedes: []
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-077
 ---
 
 ## A link message needs a request, else it is ignored or refused
@@ -93,6 +91,6 @@ When previewLink reaches the host, the extension SHALL record the page's scroll 
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
-- Supersedes:
-  - [SwRS-MDOKFSTUDIO-FMSCHEMA-083](../frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-083.md): A malformed frontmatter link request is refused
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-077](SwRS-MDOKFSTUDIO-TOOLBAR-077.md): A click or Enter on a link is routed to the host and opened or refused with a warning
 <!-- okf:links:end -->

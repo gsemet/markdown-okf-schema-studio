@@ -33,7 +33,7 @@ export function registerHostHandlers(rt: PageRuntime): void {
   });
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
   hostMessages.on("previewEditCommand", (message) => rt.textControls.runEditCommand(message.command));
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
   hostMessages.on("previewFoldCommand", (message) => {
     if (message.command === "foldAll") parts.headingFold.foldAll();
     else parts.headingFold.unfoldAll();

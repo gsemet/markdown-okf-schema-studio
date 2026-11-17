@@ -8,8 +8,8 @@ description: When the find bar holds a query and its replace row is open, the
   cannot be replaced from the preview.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -17,16 +17,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-- src/page/modules/findBar.ts
-- src/session/features/sourceEdits.ts
-tested_in_files:
-- test/core/protocol/pageToHost.test.ts
-- test/integration/realInput/qa210Replays.ts
-- test/page/modules/findBar.test.ts
-- test/session/reviewReqThreads.requirements.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-012
 ---
 
 ## Replace all announces the matches it will skip
@@ -68,4 +63,6 @@ When the find bar holds a query and its replace row is open, the extension SHALL
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-003](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-003.md): The reader finds and replaces text in the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-012](SwRS-MDOKFSTUDIO-TOOLBAR-012.md): Replace edits only the matched source spans
 <!-- okf:links:end -->

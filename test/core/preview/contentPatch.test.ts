@@ -195,7 +195,7 @@ test("T34: content that mentions a container inside the content does not change 
   assert.equal(shellKey(nested), shellKey(html));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-022
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
 test("T34: the runtime context key covers the startup settings and nothing the page follows itself", () => {
   const base = {
     documentId: "file:///a.md",

@@ -366,8 +366,8 @@ export interface HostMessageFilter {
   accepts(value: unknown, page: PageIdentity): value is HostToPageMessage;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-056
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-122
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-120
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
 /** The page's filter of host messages. */
 export function createHostMessageFilter(): HostMessageFilter {
@@ -459,7 +459,7 @@ export function createHostMessageFilter(): HostMessageFilter {
       addressing: "render",
       isValid: (message) => (PREVIEW_EDIT_COMMANDS as readonly unknown[]).includes(message.command),
     },
-    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
     previewFoldCommand: {
       addressing: "render",
       isValid: (message) => (PREVIEW_FOLD_COMMANDS as readonly unknown[]).includes(message.command),

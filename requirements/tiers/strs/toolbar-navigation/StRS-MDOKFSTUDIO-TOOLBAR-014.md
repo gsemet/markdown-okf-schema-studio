@@ -34,8 +34,6 @@ When a writer exports a preview page, the Studio SHALL save that page as one sel
 
 ### Preserved stakeholder intent
 
-## User Need
-
 As a writer, I send a rendered page, with its theme, diagrams and properties, to a reader who has no editor, as one file that needs nothing else to open.
 
 ### Rationale and constraints
@@ -44,6 +42,22 @@ As a writer, I send a rendered page, with its theme, diagrams and properties, to
 - Review comments and editing controls are not part of the file.
 - Links to other files cannot work for the reader, so they are removed after a warning.
 - Export is available in Restricted Mode: it reads only what the preview already shows.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Pre as Preview
+    participant Host as Extension host
+    participant File as HTML file
+    Writer->>Pre: Export
+    Pre->>Pre: diagrams awaited, snapshot taken
+    Host-->>Writer: link warning, cancel stops here
+    Host-->>Writer: save dialog, cancel stops here
+    Host->>Host: styles, theme, images and math embedded, no script
+    Host->>File: one file written
+```
 
 ### Main paths
 
@@ -55,8 +69,9 @@ As a writer, I send a rendered page, with its theme, diagrams and properties, to
 2. The place to save is chosen
    - SwRS-MDOKFSTUDIO-TOOLBAR-136: the file is written with the styles, the theme and width and the local images, without any script
    - Option SwRS-MDOKFSTUDIO-TOOLBAR-134 (boundary): the dialog is cancelled and nothing is written
-3. The HTML file is written
+3. The styles, the theme and the images are embedded
    - SwRS-MDOKFSTUDIO-TOOLBAR-137: the content is written as the reader sees it, with every section unfolded and without review comments or editing controls
+4. The HTML file is written
 
 <!-- okf:links:start -->
 ### Links

@@ -107,6 +107,11 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | --- | --- |
 | The handle of a column of a pipe table inside a blockquote, a GFM alert or a MyST admonition, dragged or moved with Alt+Left or Alt+Right | The column moves as for a top-level table and every line of the table keeps its container prefix; a source holding no pipe table or more than one is refused and nothing is saved (see SwRS-MDOKFSTUDIO-TABLE-121) |
 
+### Scenario (boundary): Handle strip at the top of the page
+- GIVEN the 1400x900 real VS Code window of the integration suite (preview frame 656 px wide), edit mode and a pipe table or a list-table right under the first heading, page at its top
+- WHEN a column handle is dragged and held in the handle strip at 80 percent of the third column
+- THEN the element at the pointer is not inside the toolbar: the toolbar (x 540 to 642, y 12 to 146 in the frame) ends right of the strip point (x 504 for the pipe table, 453 for the list-table)
+
 ### Known issues
 
 - Known issue: A column handle only appears for a pipe table or a `{list-table}` written directly in the document, as the row handle; a captioned `{table}` and an HTML table cannot be reordered with it.
@@ -120,7 +125,7 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 
 ### Verification notes
 
-- Method: test/integration/tableMoves.ts (real VS Code window: a real mouse drag of a column handle of a pipe table and of a list-table, held over the handle strip (not under the floating toolbar in the 1400x900 window, see SwRS-MDOKFSTUDIO-TOOLBAR-001) and the middle of a column: marker on the nearest gap, none outside the table, a release outside leaves the document as it was, a release in the strip moves the column).
+- Method: test/integration/tableMoves.ts (real VS Code window: a real mouse drag of a column handle of a pipe table and of a list-table, held over the handle strip (not under the floating toolbar in the 1400x900 window, scenario Handle strip at the top of the page) and the middle of a column: marker on the nearest gap, none outside the table, a release outside leaves the document as it was, a release in the strip moves the column).
 - Method: test/page/runtimeTableRowMove.test.ts (a column drag over the handle strip shows the marker on the nearest gap, none beyond the strip or beside the table, and a drop in the strip moves the column).
 - Method: test/page/modules/tableColumnMove.test.ts (a pipe column moves with its colons, padding and outer pipes as written; the model refuses an index outside the table or the same place; a list-table column moves with continuation lines, empty and nested cells, indentation, fence and line endings, and the `:widths:` numbers; ragged rows and non-list-tables refused; the same grid after a conversion).
 - Method: test/page/runtimeTableRowMove.test.ts (column handles above the columns of a pipe table and a list-table, outside the cells, none for a captioned table or a one-column table; a drag moves with one save and no cell editor; a drop in place requests nothing; Alt+Left and Alt+Right; refused or unreadable source; a click on a handle; a move while a cell editor is open).

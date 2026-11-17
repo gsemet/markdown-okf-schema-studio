@@ -16,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-010
-- StRS-MDOKFSTUDIO-LIFE-003
 depends_on:
 - SwRS-MDOKFSTUDIO-CORE-003
 annotation_exemption: false
@@ -121,7 +120,6 @@ When a preview is scrolled, rebuilt, re-laid out or edited, the extension SHALL 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
-  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
 - Depends on:
   - [SwRS-MDOKFSTUDIO-CORE-003](../rendering-core/SwRS-MDOKFSTUDIO-CORE-003.md): Every rendered block maps to its absolute source lines
 <!-- okf:links:end -->

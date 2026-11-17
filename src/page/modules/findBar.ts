@@ -86,7 +86,7 @@ const isMac = (window: Window): boolean => /Mac|iPhone|iPad/u.test(window.naviga
 const isEditingField = (target: Element | undefined): boolean => target !== undefined
   && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || (target as HTMLElement).isContentEditable === true);
 
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-132
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
 /**
  * True for a key that edits or moves inside a text field on its own: the primary-key chords select
  * all, copy, cut, paste, undo and redo, and the caret keys (arrows, Home, End, Backspace, Delete)
@@ -112,10 +112,7 @@ const fieldSelection = (element: Element | null): string | undefined => {
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-010
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-011
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-014
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-131
 /**
  * The find bar: Cmd/Ctrl+F opens it over the preview, the matches in the rendered text are painted,
  * Enter / Shift+Enter / F3 walk them and Escape closes it. The replace row asks the host to edit the

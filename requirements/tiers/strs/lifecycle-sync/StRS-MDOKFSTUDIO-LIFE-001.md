@@ -27,14 +27,10 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-003
 - SwRS-MDOKFSTUDIO-LIFE-010
 - SwRS-MDOKFSTUDIO-LIFE-018
-- SwRS-MDOKFSTUDIO-LIFE-026
-- SwRS-MDOKFSTUDIO-LIFE-032
 - SwRS-MDOKFSTUDIO-LIFE-038
-- SwRS-MDOKFSTUDIO-LIFE-049
 - SwRS-MDOKFSTUDIO-LIFE-127
 - SwRS-MDOKFSTUDIO-LIFE-149
 - SwRS-MDOKFSTUDIO-LIFE-151
-- SwRS-MDOKFSTUDIO-LIFE-156
 - SwRS-MDOKFSTUDIO-LIFE-171
 - SwRS-MDOKFSTUDIO-TRUST-072
 default_owner_email: gaetan@xeberon.net
@@ -62,17 +58,29 @@ As a writer, I open a rendered preview of the Markdown file I am editing beside 
 - Several previews can be open at once, the side preview and one or more Open With tabs; each keeps its own state, render and file watching, and shows its own document and its own place.
 - Refresh Preview acts on one preview, the newest one still open.
 
+### Use case diagram
+
+```mermaid
+flowchart LR
+    W([Writer]) -->|Open Preview to Side: command, Explorer, title button, key| P[Preview panel]
+    W -->|Open With: Markdown OKF Schema Studio tab| P
+    R([Reader]) -->|opens several previews, one per file| P
+    B[VS Code built-in preview] -.->|keeps working beside it| P
+    P -->|file refused: message, no panel| W
+```
+
 ### Main paths
 
 #### Path 1: Open a side preview
 
 1. A saved Markdown file is the active editor
    - SwRS-MDOKFSTUDIO-LIFE-003: the reader runs Open Preview to Side and a preview opens beside the editor, or is revealed if one is open
-   - Option SwRS-MDOKFSTUDIO-LIFE-010 (refusal): a file that is not a saved .md file opens no preview and shows a message
-2. A side preview shows the file
-   - SwRS-MDOKFSTUDIO-LIFE-026: another saved Markdown file becomes the active editor and the newest side preview switches to it
-   - Option SwRS-MDOKFSTUDIO-LIFE-026 (boundary): an editor change that is not a saved Markdown file leaves the preview as it was
-3. The side preview shows the new active file
+   - Option SwRS-MDOKFSTUDIO-LIFE-003 (refusal): a file that is not a saved .md file opens no preview and shows a message
+2. A side preview is open beside the editor
+   - SwRS-MDOKFSTUDIO-LIFE-151: the preview locks its editor group, so the files the reader opens next are shown in another group
+   - Option SwRS-MDOKFSTUDIO-LIFE-149 (nominal): the built-in Markdown preview, its commands and its settings stay as they were, beside the Studio preview
+   - Option SwRS-MDOKFSTUDIO-LIFE-038 (nominal): several previews can be open, each with its own state and only the newest following the active editor
+3. The side preview is open and the editor group is locked
 
 #### Path 2: Open as a tab
 
@@ -91,14 +99,10 @@ As a writer, I open a rendered preview of the Markdown file I am editing beside 
   - [SwRS-MDOKFSTUDIO-LIFE-003](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-003.md): Open Preview to Side opens or reveals a side preview
   - [SwRS-MDOKFSTUDIO-LIFE-010](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-010.md): Open Preview to Side checks the file it is given
   - [SwRS-MDOKFSTUDIO-LIFE-018](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-018.md): The Open With editor shows its own Markdown file
-  - [SwRS-MDOKFSTUDIO-LIFE-026](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-026.md): The side preview follows the active Markdown editor
-  - [SwRS-MDOKFSTUDIO-LIFE-032](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-032.md): Refresh Preview renders the shown document again
   - [SwRS-MDOKFSTUDIO-LIFE-038](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-038.md): Each preview has its own state and only the newest follows
-  - [SwRS-MDOKFSTUDIO-LIFE-049](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-049.md): The status names the render state and shows pending, failed and recovered notices
   - [SwRS-MDOKFSTUDIO-LIFE-127](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-127.md): A restored panel reopens its document or explains why it cannot
   - [SwRS-MDOKFSTUDIO-LIFE-149](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-149.md): The Studio runs beside the built-in Markdown preview
   - [SwRS-MDOKFSTUDIO-LIFE-151](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-151.md): A side preview locks its editor group
-  - [SwRS-MDOKFSTUDIO-LIFE-156](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-156.md): The settings editor lists the Studio settings in titled groups
   - [SwRS-MDOKFSTUDIO-LIFE-171](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-171.md): The manifest declares Agents window support
   - [SwRS-MDOKFSTUDIO-TRUST-072](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-072.md): The extension contributes no language, grammar or editors entry
 <!-- okf:links:end -->

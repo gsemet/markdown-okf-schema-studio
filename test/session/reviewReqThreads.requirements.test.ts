@@ -126,7 +126,6 @@ test("find and replace edits the matched spans in one undo step and answers with
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-014
 test("find and replace applies in a restricted-reads preview, is refused during an open edit and when nothing maps", async () => {
   const restricted = setup({ restrictedReads: true });
   await restricted.handlers.get("previewFindReplace")!(request({ items: [findItem()] }), restricted.preview);
@@ -145,7 +144,7 @@ test("find and replace applies in a restricted-reads preview, is refused during 
   assert.deepEqual(none.applied, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-131
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
 test("a find and replace dry run answers the counts of the plan and never edits the document", async () => {
   const writable = setup();
   await writable.handlers.get("previewFindReplace")!(request({

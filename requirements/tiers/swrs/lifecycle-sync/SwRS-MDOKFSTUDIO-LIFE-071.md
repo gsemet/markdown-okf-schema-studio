@@ -15,8 +15,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-005
-- StRS-MDOKFSTUDIO-LIFE-010
-- StRS-MDOKFSTUDIO-LIFE-014
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -109,6 +107,4 @@ When a render changes the page shell, for example a diagram engine or math appea
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
-  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
-  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
 <!-- okf:links:end -->

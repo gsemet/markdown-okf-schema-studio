@@ -14,15 +14,12 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
-user_need: As a reader, I open a table of contents next to a long document when
-  I want an overview and close it when I want the room, the preview remembers my
-  choice, I see in the table of contents where I am, fold the sections I do not
-  need, click a heading to go there without leaving the document, and read the
-  document and the table of contents side by side without either hiding part of
-  the other.
+user_need: "As a reader, I open a table of contents next to a long document when I
+  want an overview. I close it when I want the room, and the preview remembers my
+  choice. In the table of contents I see where I am, I fold the sections I do not
+  need, and I click a heading to go there without leaving the document. I read the
+  document and the table of contents side by side, and neither hides part of the other."
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-169
-- SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TOOLBAR-025
 - SwRS-MDOKFSTUDIO-TOOLBAR-033
 - SwRS-MDOKFSTUDIO-TOOLBAR-037
@@ -40,7 +37,7 @@ When a reader presses the Table of contents button, the Studio SHALL show or hid
 
 ### Preserved stakeholder intent
 
-As a reader, I open a table of contents next to a long document when I want an overview and close it when I want the room, the preview remembers my choice, I see in the table of contents where I am, fold the sections I do not need, click a heading to go there without leaving the document, and read the document and the table of contents side by side without either hiding part of the other.
+As a reader, I open a table of contents next to a long document when I want an overview. I close it when I want the room, and the preview remembers my choice. In the table of contents I see where I am, I fold the sections I do not need, and I click a heading to go there without leaving the document. I read the document and the table of contents side by side, and neither hides part of the other.
 
 ### Rationale and constraints
 
@@ -51,6 +48,20 @@ As a reader, I open a table of contents next to a long document when I want an o
 - The text stays clear of the column in Margin, Auto and Full width mode and at the highest zoom, with no sideways scrolling of the page.
 - The column starts below the toolbar and stays inside the pane.
 - The pane width at which the column appears is specified in the software requirements.
+
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Column: open, wide pane
+    Closed --> Rail: open, pane under 760 px
+    Column --> Closed: close
+    Rail --> Closed: close
+    Column --> Column: current entry follows, click an entry, twisty
+    Rail --> Rail: current entry follows, click an entry
+    Column --> Column: state stored
+```
 
 ### Main paths
 
@@ -73,7 +84,7 @@ As a reader, I open a table of contents next to a long document when I want an o
    - SwRS-MDOKFSTUDIO-TOOLBAR-033: the reader presses the Table of contents button and the column opens
 2. The column is open
    - SwRS-MDOKFSTUDIO-TOOLBAR-037: on a pane narrower than 760 pixels, a rail with one tick per heading is shown instead
-   - Option SwRS-MDOKFSTUDIO-TOOLBAR-133 (nominal): the content is padded for the rail
+   - Option SwRS-MDOKFSTUDIO-TOOLBAR-037 (nominal): the content is padded for the rail
 3. A rail with one tick per heading is shown
 
 <!-- okf:links:start -->
@@ -82,8 +93,6 @@ As a reader, I open a table of contents next to a long document when I want an o
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
-  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-TOOLBAR-025](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-025.md): The sticky band is fixed, aligned with the column and clear of the toolbar
   - [SwRS-MDOKFSTUDIO-TOOLBAR-033](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-033.md): The Table of contents button shows and hides the column
   - [SwRS-MDOKFSTUDIO-TOOLBAR-037](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-037.md): The column sits below the toolbar on the right and never covers the text

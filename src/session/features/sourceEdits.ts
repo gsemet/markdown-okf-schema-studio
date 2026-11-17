@@ -276,7 +276,6 @@ export class SourceEditController {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-131
   /**
    * Replaces the matches of the find bar. The page names the source lines, the matched text and the
    * occurrence; the planner edits those spans only (all of them in one undo step) and skips what

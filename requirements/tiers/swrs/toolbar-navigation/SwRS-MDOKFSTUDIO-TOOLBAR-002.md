@@ -10,8 +10,8 @@ description: When the preview is scrolled so that text passes under the sticky
   top, without moving the content or the toolbar.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,12 +19,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/features/stickyHeadings.ts
-tested_in_files:
-- test/page/runtimeScroll.test.ts
-- test/visual/scenarioDefinitions2.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-025
 ---
 
 ## A soft shadow under the sticky heading band shows only while text scrolls under it
@@ -62,4 +61,6 @@ When the preview is scrolled so that text passes under the sticky heading band, 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-004](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-004.md): The reader always sees the section being read
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-025](SwRS-MDOKFSTUDIO-TOOLBAR-025.md): The sticky band is fixed, aligned with the column and clear of the toolbar
 <!-- okf:links:end -->

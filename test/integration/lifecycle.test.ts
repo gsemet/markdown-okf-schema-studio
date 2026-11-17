@@ -230,7 +230,7 @@ export async function run(): Promise<void> {
     await vscode.window.showTextDocument(firstDocument, vscode.ViewColumn.One);
     await waitFor("the preview following the first document", () =>
       getActivePreviewForTests()?.documentUri === firstDocument.uri.toString());
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-010
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-003
     await vscode.commands.executeCommand(COMMAND_ID, secondDocument.uri);
     await waitFor("the preview showing the Uri passed to the command", () => {
       const preview = getActivePreviewForTests();

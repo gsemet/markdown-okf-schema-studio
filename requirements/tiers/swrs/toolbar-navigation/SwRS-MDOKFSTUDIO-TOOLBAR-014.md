@@ -7,8 +7,8 @@ description: While a block editor is open, the find bar SHALL keep finding and
   SHALL refuse every replacement with the reason, without editing the document.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: draft
-status: draft
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -16,13 +16,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/findBar.ts
-tested_in_files:
-- test/integration/findInPreview.test.ts
-- test/page/modules/findBar.test.ts
-- test/session/reviewReqThreads.requirements.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-012
 ---
 
 ## Replace is unavailable while a block editor is open
@@ -54,4 +52,6 @@ While a block editor is open, the find bar SHALL keep finding and SHALL refuse e
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-003](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-003.md): The reader finds and replaces text in the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-012](SwRS-MDOKFSTUDIO-TOOLBAR-012.md): Replace edits only the matched source spans
 <!-- okf:links:end -->

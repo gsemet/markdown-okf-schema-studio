@@ -372,7 +372,7 @@ test("the manifest declares limited support for untrusted workspaces", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-171
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-001
 test("the manifest declares support for the Agents window", () => {
   const manifest = JSON.parse(
     fs.readFileSync(path.join(path.resolve(__dirname, "../../.."), "package.json"), "utf8"),

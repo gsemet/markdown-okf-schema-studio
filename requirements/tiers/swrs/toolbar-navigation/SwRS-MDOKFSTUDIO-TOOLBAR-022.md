@@ -10,8 +10,8 @@ description: "When the page reads markdownOkfSchemaStudio.preview.stickyHeadingD
   is open."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,18 +20,11 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/configuration/settingsRegistry.ts
-- src/core/preview/contentPatch.ts
-- src/page/features/stickyHeadings.ts
-- src/page/pageSettings.ts
-tested_in_files:
-- test/core/configuration/previewConfiguration.test.ts
-- test/core/preview/contentPatch.test.ts
-- test/page/pageSettings.test.ts
-- test/page/runtimeScroll.test.ts
-- test/visual/scenarioDefinitions2.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-018
 ---
 
 ## The sticky heading depth setting decides how many levels stay pinned
@@ -78,4 +71,6 @@ When the page reads markdownOkfSchemaStudio.preview.stickyHeadingDepth, the exte
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TOOLBAR-004](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-004.md): The reader always sees the section being read
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-018](SwRS-MDOKFSTUDIO-TOOLBAR-018.md): The sticky band shows the current heading path
 <!-- okf:links:end -->

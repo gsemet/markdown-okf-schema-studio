@@ -5,10 +5,12 @@ uuid: 2eb5b113-1760-4a75-8557-372f5e31324d
 title: "Back and Next follow the host's history state"
 description: "When the page starts, the page receives a history state for its render
   or the reader presses Back or Next, the extension SHALL keep both buttons disabled
-  until the host reports a place to go to, enable each only when its flag in the state
-  is true, and post one history move per press, which the host answers by moving,
-  by posting the state again when there is nowhere to go, or by a warning when the
-  document cannot be opened."
+  until the host reports a place to go to, enable each only when its flag in a state
+  for the page's own render is true (a state of another render is ignored), and post
+  one history move per press, which the host accepts only when its direction is back
+  or forward and it names the current render, and answers by moving, by posting the
+  state again when there is nowhere to go, or by a warning when the document cannot
+  be opened."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
 req_lifecycle: proposed
@@ -20,26 +22,34 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-059
+- SwRS-MDOKFSTUDIO-TRUST-065
+- SwRS-MDOKFSTUDIO-TRUST-006
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/protocol/hostToPage.ts
+- src/core/protocol/pageToHost.ts
 - src/page/modules/historyControls.ts
 - src/session/features/history.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
+- test/core/protocol/pageToHost.test.ts
 - test/integration/previewHistory.test.ts
 - test/page/runtimePageControls.test.ts
 - test/session/toolbarReq.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-TOOLBAR-056
+- SwRS-MDOKFSTUDIO-TOOLBAR-058
 ---
 
 ## Back and Next follow the host's history state
 
 ### Normative behavior
 
-When the page starts, the page receives a history state for its render or the reader presses Back or Next, the extension SHALL keep both buttons disabled until the host reports a place to go to, enable each only when its flag in the state is true, and post one history move per press, which the host answers by moving, by posting the state again when there is nowhere to go, or by a warning when the document cannot be opened.
+When the page starts, the page receives a history state for its render or the reader presses Back or Next, the extension SHALL keep both buttons disabled until the host reports a place to go to, enable each only when its flag in a state for the page's own render is true (a state of another render is ignored), and post one history move per press, which the host accepts only when its direction is back or forward and it names the current render, and answers by moving, by posting the state again when there is nowhere to go, or by a warning when the document cannot be opened.
 
 ### Scenario (boundary): Start disabled
 - GIVEN a new preview page
@@ -74,6 +84,23 @@ When the page starts, the page receives a history state for its render or the re
 | Next to a place whose file cannot be opened | The warning "Markdown OKF-Schema Studio could not go forward: {reason}" is shown |
 | Either move that fails | The history position and the list stay as they were, and the state posted afterwards enables Back and Next as before the press |
 
+### Scenario (refusal): A history state of another render is ignored
+
+| Input | Outcome |
+| --- | --- |
+| a state with an older or different revision (for example 99 for a page at 7) | the buttons keep their state |
+| a state for another document | ignored in the same way |
+| a state for another request | ignored in the same way |
+| a state with the page's identifiers (the current render) | the buttons follow it (nominal row) |
+
+### Scenario (refusal): The host accepts only back or forward
+
+| Input | Outcome |
+| --- | --- |
+| a previewHistoryGo with direction back or forward | accepted |
+| the direction up, an empty string or a missing direction | refused |
+| a previewHistoryGo that names a render other than the shown one | refused by the render gate (see SwRS-MDOKFSTUDIO-TRUST-065) |
+
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TOOLBAR-059: the places that Back and Next move between are recorded there.
 
@@ -83,6 +110,7 @@ When the page starts, the page receives a history state for its render or the re
 - Method: test/integration/previewHistory.test.ts (State enables: history.posted states).
 - Method: test/visual/scenarioDefinitions2.ts (State enables: scenario toolbar-navigation/v30-back-enabled-after-anchor-light-900, Back enabled and Next disabled).
 - Method: test/session/toolbarReq.requirements.test.ts (Nowhere to go: Back with nowhere to go only posts the history state again; Document cannot be opened: a Back or Next that cannot open its document shows a warning).
+- Method: test/page/runtimePageControls.test.ts (a previewHistoryState of another document version is ignored; the other document and request rows are by code only) and test/core/protocol/pageToHost.test.ts (previewHistoryGo accepts only back or forward); the render gate of previewHistoryGo (pageMessages.ts) is untested.
 - Criteria: both buttons are disabled before the first previewHistoryState; disabled = (value !== true); exactly one message per press with the right direction; postHistoryState is called and no document is opened; host.ui.showWarning is called with the text and the error message.
 
 <!-- okf:links:start -->
@@ -95,4 +123,9 @@ When the page starts, the page receives a history state for its render or the re
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-056](SwRS-MDOKFSTUDIO-TOOLBAR-056.md): A history state of another render is ignored
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-058](SwRS-MDOKFSTUDIO-TOOLBAR-058.md): The host accepts only back or forward
 <!-- okf:links:end -->

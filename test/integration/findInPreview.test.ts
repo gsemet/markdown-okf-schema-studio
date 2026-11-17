@@ -71,9 +71,7 @@ const LIGHT_THEME = "Default Light Modern";
  */
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-011
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-014
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
   await vscode.extensions.getExtension("GaetanSemet.markdown-okf-schema-studio")?.activate();

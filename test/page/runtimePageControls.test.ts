@@ -167,7 +167,7 @@ test("a page whose pairing and theme messages were lost while it loaded gets bot
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme"), "2");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-122
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
 test("T38: a paired preview keeps the anchor button enabled, and a foreign previewPairing is ignored", () => {
   const harness = createRuntimeHarness();
   assert.equal(harness.anchorButton.disabled, false);
@@ -737,7 +737,7 @@ test("stored choice wins: a stored expanded toolbar and a stored theme mode are 
   assert.equal(restored.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "white");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-056
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
 test("T11: a previewHistoryState of another document version is ignored", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage({

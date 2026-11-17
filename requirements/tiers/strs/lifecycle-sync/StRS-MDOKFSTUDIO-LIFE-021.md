@@ -16,7 +16,6 @@ derives_from: []
 user_need: As a reader, I find every Studio setting in the settings editor,
   grouped by what it controls, with a default and an explanation.
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-069
 - SwRS-MDOKFSTUDIO-LIFE-097
 - SwRS-MDOKFSTUDIO-LIFE-156
 - SwRS-MDOKFSTUDIO-TRUST-073
@@ -36,6 +35,21 @@ As a reader, I find every Studio setting in the settings editor, grouped by what
 ### Rationale and constraints
 
 - A setting that is not set reads as its default; a stored value of the wrong type is normalized.
+- The groups come in a fixed order (Preview, Editing, Frontmatter, Comments, PlantUML), and each setting has its own place in its group.
+- Every setting carries a description, so that the reader knows what it changes before setting it.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Reader
+    participant VS as VS Code
+    participant Ext as Extension manifest
+    Reader->>VS: opens Settings
+    VS->>Ext: reads the contributed settings
+    Ext-->>VS: groups in order, with defaults and descriptions
+    VS-->>Reader: lists the groups
+```
 
 ### Main paths
 
@@ -43,11 +57,10 @@ As a reader, I find every Studio setting in the settings editor, grouped by what
 
 1. The reader opens the settings editor
    - SwRS-MDOKFSTUDIO-LIFE-156: the Studio settings are listed in the groups Preview, Editing, Frontmatter, Comments and PlantUML, in that order
-   - Option SwRS-MDOKFSTUDIO-LIFE-156 (boundary): a description is at most 700 characters
 2. The Studio settings are listed in their groups
-   - SwRS-MDOKFSTUDIO-LIFE-097: the reader sets scrollPreviewWithEditor and the panes scroll together as far as the setting allows
-   - Option SwRS-MDOKFSTUDIO-LIFE-069 (boundary): the incrementalUpdates setting
-3. The panes scroll together as far as the settings allow
+   - SwRS-MDOKFSTUDIO-LIFE-156: each setting shows its default and a description
+   - Option SwRS-MDOKFSTUDIO-LIFE-156 (boundary): a setting with nothing stored reads as its default
+3. Each setting shows its default and its description
 
 <!-- okf:links:start -->
 ### Links
@@ -55,7 +68,6 @@ As a reader, I find every Studio setting in the settings editor, grouped by what
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-069](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-069.md): A render of the loaded document updates the page in place
   - [SwRS-MDOKFSTUDIO-LIFE-097](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-097.md): Two settings decide how the panes follow each other
   - [SwRS-MDOKFSTUDIO-LIFE-156](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-156.md): The settings editor lists the Studio settings in titled groups
   - [SwRS-MDOKFSTUDIO-TRUST-073](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-073.md): A setting description has at most 700 characters

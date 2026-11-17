@@ -8,8 +8,8 @@ description: "When a previewLinkDiscover message reaches the host, the extension
   characters each."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -21,11 +21,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-tested_in_files:
-- test/core/protocol/pageStateMessages.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-079
 ---
 
 ## The host accepts discovery messages of bounded size
@@ -66,4 +66,6 @@ When a previewLinkDiscover message reaches the host, the extension SHALL accept 
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-079](SwRS-MDOKFSTUDIO-TOOLBAR-079.md): Links in view are looked up in bounded batches
 <!-- okf:links:end -->
