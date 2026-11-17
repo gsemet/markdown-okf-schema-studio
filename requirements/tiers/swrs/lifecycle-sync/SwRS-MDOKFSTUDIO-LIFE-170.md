@@ -17,10 +17,6 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-014
 - StRS-MDOKFSTUDIO-BLOCK-001
-- StRS-MDOKFSTUDIO-LAYOUT-003
-- StRS-MDOKFSTUDIO-PALETTE-002
-- StRS-MDOKFSTUDIO-THEME-004
-- StRS-MDOKFSTUDIO-THEME-011
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 annotation_exemption: false
@@ -188,10 +184,6 @@ The Cream start is the same on a light and on a dark host theme:
 - Derives from:
   - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, and each document keeps its reading place and view choices
   - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
-  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
-  - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
-  - [StRS-MDOKFSTUDIO-THEME-004](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-004.md): The theme choice holds for the workspace and survives slow loads and bad values
-  - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-169](SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
 - Supersedes:

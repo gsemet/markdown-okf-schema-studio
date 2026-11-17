@@ -280,7 +280,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const historyControls = installHistoryControls(document, vscode, context,
     (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate));
   const viewControls = installViewControls(document, vscode, context, keepReadingLine);
-  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-018
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-011
   // The toolbar changes size when rows 2 to 4 are collapsed: re-measure everything placed around it.
   installToolbarCollapse(document, vscode, context, () => {
     firstClearance.update();

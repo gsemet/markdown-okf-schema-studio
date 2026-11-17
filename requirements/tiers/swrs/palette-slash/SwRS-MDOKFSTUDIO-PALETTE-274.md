@@ -10,21 +10,21 @@ description: When the palette mode is Full, the extension SHALL list a PlantUML
   SHALL list it.
 project: MDOKFSTUDIO
 scope: palette-slash
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
+- StRS-MDOKFSTUDIO-PALETTE-021
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/palette/paletteActions.ts
-- src/page/modules/blockEditActions.ts
-tested_in_files:
-- test/page/modules/slashSyntaxCoverage.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-PALETTE-001
+- SwRS-MDOKFSTUDIO-PALETTE-278
 ---
 
 ## The Full palette mode adds a PlantUML diagram command
@@ -57,5 +57,8 @@ When the palette mode is Full, the extension SHALL list a PlantUML diagram actio
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-021](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-021.md): A writer inserts MyST constructs
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-001](SwRS-MDOKFSTUDIO-PALETTE-001.md): The palette mode decides the button sets, in registry order
+  - [SwRS-MDOKFSTUDIO-PALETTE-278](SwRS-MDOKFSTUDIO-PALETTE-278.md): Starter blocks insert a chart, a diagram or content tabs
 <!-- okf:links:end -->

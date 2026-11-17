@@ -18,7 +18,6 @@ const ROWS_REDUCED_MOTION_RULE = `  [data-sphinx-preview-toolbar-more][data-sphi
     transition: none !important;
   }`;
 
-// @implements_req SwRS-MDOKFSTUDIO-CORE-050
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
 /**
  * The OKF frontmatter properties table and the motion rules (transitions, reduced motion).

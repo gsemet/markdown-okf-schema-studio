@@ -19,7 +19,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-018
-- StRS-MDOKFSTUDIO-PALETTE-001
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -27,7 +26,6 @@ implemented_in_files:
 - src/page/features/blockSourceEditor.ts
 - src/page/modules/pasteUrl.ts
 tested_in_files:
-- test/build/integrationEditModeRestore.test.ts
 - test/integration/pasteUrl.test.ts
 - test/page/modules/pasteUrl.test.ts
 - test/page/runtimePaletteActions.test.ts
@@ -87,5 +85,4 @@ When the writer pastes into the block text box a clipboard whose plain text is a
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 <!-- okf:links:end -->

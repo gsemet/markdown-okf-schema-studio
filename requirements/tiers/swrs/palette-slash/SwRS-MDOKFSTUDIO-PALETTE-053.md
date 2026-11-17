@@ -8,22 +8,21 @@ description: When the writer runs Numbered list, the extension SHALL put 1. , 2.
   and remove the markers when every non-blank touched line already has one.
 project: markdown-okf-schema-studio
 scope: palette-slash
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
+- StRS-MDOKFSTUDIO-PALETTE-019
 depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/blockEditActions.ts
-tested_in_files:
-- test/page/modules/editActions.test.ts
-- test/page/modules/slashMenu.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-PALETTE-277
 ---
 
 ## Numbered list numbers the touched non-blank lines
@@ -74,5 +73,7 @@ The action exists only as a slash menu entry, like Bulleted list (see SwRS-MDOKF
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-019](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-019.md): A writer formats text with buttons and shortcuts
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-277](SwRS-MDOKFSTUDIO-PALETTE-277.md): Line-prefix buttons toggle their prefix on the touched lines
 <!-- okf:links:end -->

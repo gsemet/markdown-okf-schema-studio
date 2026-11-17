@@ -28,7 +28,7 @@ tested_in_files:
 - test/core/preview/diagReq.styles.requirements.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/core/preview/themeTokens.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/previewWindow.ts
 - test/visual/capture_page_checks.py
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts

@@ -16,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
-- StRS-MDOKFSTUDIO-PALETTE-001
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 annotation_exemption: false
@@ -27,7 +26,7 @@ implemented_in_files:
 - src/page/modules/figureDirective.ts
 - src/page/modules/figurePanel.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/editorWidgets.ts
 - test/integration/realWindowGaps.ts
 - test/page/figureEditButtonClearance.test.ts
 - test/page/modules/figureDirective.test.ts
@@ -157,7 +156,6 @@ The range recorded at opening is never applied to a different text.
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 <!-- okf:links:end -->

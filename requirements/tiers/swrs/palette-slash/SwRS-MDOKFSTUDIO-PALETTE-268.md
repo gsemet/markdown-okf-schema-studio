@@ -12,8 +12,8 @@ description: When the writer opens the slash menu in MyST mode, the extension
   placeholder, selected.
 project: markdown-okf-schema-studio
 scope: palette-slash
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -21,13 +21,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/palette/paletteActions.ts
-- src/page/modules/blockEditActions.ts
-tested_in_files:
-- test/page/modules/slashMenu.test.ts
-- test/visual/slashAdmonitionScenarios.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-PALETTE-238
 ---
 
 ## The MyST slash menu lists every admonition directive with its icon
@@ -78,4 +76,6 @@ When the writer opens the slash menu in MyST mode, the extension SHALL list one 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-238](SwRS-MDOKFSTUDIO-PALETTE-238.md): The slash menu lists the palette commands of the mode and scope
 <!-- okf:links:end -->

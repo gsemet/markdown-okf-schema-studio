@@ -343,6 +343,7 @@ export class BlockEditController {
     }
     edit.applying = true;
     // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-279
     // CR 134: the text editor scrolls to the edit; the page must not follow that echo.
     preview.scroll.ownEditUntil = Infinity;
     fireAndForget(this.manager.host.logger, applyWrittenEdits(this.manager.host.documents, source.document, [textEdit]).then((applied) => {

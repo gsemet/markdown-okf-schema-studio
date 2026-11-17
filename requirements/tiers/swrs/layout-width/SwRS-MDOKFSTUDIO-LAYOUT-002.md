@@ -23,11 +23,12 @@ derived_by: []
 implemented_in_files:
 - src/core/configuration/settingsRegistry.ts
 - src/core/preview/previewStyles.ts
-- src/core/preview/styles/pageChromeStyles.ts
+- src/core/preview/styles/pageChromeStyles.markers.ts
 - src/session/hostEvents.ts
 - src/session/webview.ts
 tested_in_files:
 - test/core/configuration/previewConfiguration.test.ts
+- test/core/preview/layoutThemeStyles.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/session/diagReq.settings.requirements.test.ts
 - test/session/previewRuntimeFile.test.ts
@@ -97,8 +98,6 @@ When a preview page is built or the setting markdownOkfSchemaStudio.preview.maxC
 
 ### Known issues
 - Known issue: The titles of visual scenarios v05 and v06 say full width but they assert only the 960 px column.
-- Known issue: The decimal rounding has no unit test.
-- Known issue: The negative value has no unit test.
 - Known issue: docs/user/settings.md says that with the setting at 0 the three width modes look the same, which is not exact: Full width keeps a 16 px side gutter where Margin and Auto keep a gutter of 16 to 78 px.
 - Known issue: The unit test asserts the rule text for 0 and 1200 only; the rendered column at 0 has no automated check.
 - Known issue: The full-page test PERF-11 matches only the number 720 in the inline style, not the whole text of the rule; the whole rule text is asserted on the builder alone.
@@ -111,6 +110,7 @@ When a preview page is built or the setting markdownOkfSchemaStudio.preview.maxC
 - Method: test/core/preview/previewStyles.test.ts (zero lifts the limit, configured width in the page style, invalid configured width): the width rule builder for 0 and 1200; the column behaviour follows from the CSS.
 - Method: test/session/previewRuntimeFile.test.ts (configured width in the page style): the full-page test PERF-11 (a page built with maxContentWidth 720 carries 720 in its inline style, which holds the width rule only); the call site passes preview.configuration.maxContentWidth.
 - Method: test/session/diagReq.settings.requirements.test.ts (open preview follows a change, no last good render): the unit test `a preview setting change reads the width again and updates the preview from its last good render`.
+- Method: test/core/configuration/previewConfiguration.test.ts and test/core/preview/layoutThemeStyles.test.ts (decimal rounding, negative input): 1049.6 gives 1050, -1 gives 960, 2400 stays, 1 gives 1px, 0 gives none, and the width rule builder agrees. The rendered column at 0 is a visual check only (a unit test cannot lay out the page).
 - Criteria: The column box measures the cap in a wider pane and never exceeds the pane; the normalised value is an integer between 0 and 2400, or 960 for every negative, non-numeric or non-finite input; the generated rule is none for 0 and a pixel value otherwise; the page style contains exactly one width rule; the settings handler re-reads the section and calls the preview update with the last good render, only when one exists.
 
 <!-- okf:links:start -->

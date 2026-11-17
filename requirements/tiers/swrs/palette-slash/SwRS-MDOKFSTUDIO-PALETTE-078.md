@@ -23,7 +23,6 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/page/modules/editPalette.ts
 - src/page/modules/editPalettePopovers.ts
 tested_in_files:
 - test/page/modules/editPalette.test.ts

@@ -153,7 +153,7 @@ test("a button that owns a popover announces it with aria-haspopup and an aria-e
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
-test("a select value outside the three modes is put back to the current mode and reported nothing", () => {
+test("a select value outside the four modes is put back to the current mode and reported nothing", () => {
   const changes: string[] = [];
   const { root } = open({ mode: "gfm", onModeChange: (mode) => changes.push(mode) });
   const select = root.children.find((child) => child.tagName === "select")!;

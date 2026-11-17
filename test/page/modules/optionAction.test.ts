@@ -18,7 +18,7 @@ function option(value: string, selection: [number, number]): Applied {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-267
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("option is a GFM block action listed right after checkbox, with no shortcut", () => {
   const ids = [...PALETTE_ACTION_IDS] as string[];
   assert.equal(ids.indexOf("option"), ids.indexOf("checkbox") + 1);
@@ -30,7 +30,7 @@ test("option is a GFM block action listed right after checkbox, with no shortcut
   assert.equal(PALETTE_ACTIONS.option.group, PALETTE_ACTIONS.checkbox.group);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-267
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("option puts - ( ) on a plain line and ( ) after the marker of a list item", () => {
   assert.equal(option("pick one", [3, 3]).value, "- ( ) pick one");
   assert.equal(option("- pick one", [3, 3]).value, "- ( ) pick one");
@@ -40,14 +40,14 @@ test("option puts - ( ) on a plain line and ( ) after the marker of a list item"
   assert.equal(option("  nested plain", [0, 0]).value, "  - ( ) nested plain");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-267
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("option removes an option marker, selected or not, and leaves the list item", () => {
   assert.equal(option("- ( ) done", [8, 8]).value, "- done");
   assert.equal(option("- (x) done", [8, 8]).value, "- done");
   assert.equal(option("1. (X) done", [8, 8]).value, "1. done");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-267
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("option keeps the caret on its text", () => {
   const out = option("- pick one", [5, 5]);
   assert.equal(out.value.slice(0, out.selection[0]), "- ( ) pic");
@@ -57,20 +57,20 @@ test("option keeps the caret on its text", () => {
   assert.equal(atStart.value.slice(0, atStart.selection[0]), "- ( ) ");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-267
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("option on several lines is one action: all markers go, else all lines get one", () => {
   assert.equal(option("- ( ) a\n- (x) b", [0, 15]).value, "- a\n- b");
   assert.equal(option("- ( ) a\n- b\nc", [0, 13]).value, "- ( ) a\n- ( ) b\n- ( ) c");
   assert.equal(option("a\n\nb", [0, 4]).value, "- ( ) a\n\n- ( ) b");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-267
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("option replaces the task box of a line", () => {
   assert.equal(option("- [ ] a", [0, 7]).value, "- ( ) a");
   assert.equal(option("- [x] a\n- ( ) b", [0, 15]).value, "- ( ) a\n- ( ) b");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-267
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("option on an empty line inserts the marker with the caret after it, and is its own inverse", () => {
   const out = option("a\n\nb", [2, 2]);
   assert.equal(out.value, "a\n- ( ) \nb");

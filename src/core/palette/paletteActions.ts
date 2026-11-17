@@ -42,6 +42,7 @@ export interface EditActionOption {
   label: string;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-275
 /**
  * Data of the `/` command menu, next to the action it belongs to. `aliases` are short names the
  * completion also matches (`/hr` finds the horizontal rule). `variants` are extra entries that run
@@ -49,6 +50,7 @@ export interface EditActionOption {
  * chosen (`/h2`, `/warning`); `variantsOnly` lists only the variants, not the action itself.
  */
 export interface EditActionSlash {
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-263
   /** Short names the completion also matches. */
   aliases?: string[];
   /** Entries that run the action with a ready-made argument. */
@@ -72,6 +74,7 @@ export interface PaletteActionDescriptor {
   icon: PaletteIcon;
   /** The palette group (`inline`, `block`, `insert`, `annotation`, `github`, `myst`, `full`). */
   group: string;
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
   /** The modes that list the action (additive, see the interface comment). */
   modes: EditActionMode[];
   /** The text boxes that offer the action. */
@@ -194,7 +197,7 @@ const ALERT_SLASH = ALERT_OPTIONS.map((option) => ({
   arg: option.value,
   aliases: [option.label.toLowerCase(), "callout", "github"],
 }));
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-268
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-238
 const ADMONITION_SLASH = [
   ...ADMONITION_OPTIONS.slice(0, -1),
   ...VERSION_ADMONITION_TYPES.map((type) => ({ value: type, label: type })),
@@ -206,9 +209,6 @@ const ADMONITION_SLASH = [
   icon: ADMONITION_ICONS[option.value],
 }));
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-263
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-275
 /**
  * Every palette action, by id, in display order (palette buttons and `/` menu entries follow this
  * order). Add an action here and its handler in `src/page/modules/editActions.ts`.
@@ -304,7 +304,7 @@ export const PALETTE_ACTIONS = {
     scopes: ["block"],
     popover: "language",
   },
-  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-052
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-277
   bulletList: {
     slash: { menuOnly: true, aliases: ["bullet", "bullets", "ul", "unordered", "list", "-", "*"] },
     label: "Bulleted list",
@@ -313,6 +313,7 @@ export const PALETTE_ACTIONS = {
     modes: ["strict"],
     scopes: ["block"],
   },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-277
   numberedList: {
     slash: { menuOnly: true, aliases: ["numbered", "ol", "ordered", "list", "1."] },
     label: "Numbered list",
@@ -656,7 +657,7 @@ export const PALETTE_ACTIONS = {
     scopes: ["block"],
     panel: "grid",
   },
-  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-273
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-278
   tabs: {
     slash: { aliases: ["tab-set", "tab-item", "tabset", "tabbed", "switch"] },
     label: "Content tabs",
@@ -686,7 +687,7 @@ export const PALETTE_ACTIONS = {
     scopes: ["block"],
     panel: "codeBlock",
   },
-  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-265
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-278
   vegaLite: {
     slash: { aliases: ["chart", "vega-lite", "vegalite", "plot", "graph"] },
     label: "Vega-Lite chart",
@@ -696,7 +697,7 @@ export const PALETTE_ACTIONS = {
     modes: ["full"],
     scopes: ["block"],
   },
-  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-265
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-278
   vega: {
     slash: { aliases: ["vega", "chart", "plot"] },
     label: "Vega chart",
@@ -706,7 +707,7 @@ export const PALETTE_ACTIONS = {
     modes: ["full"],
     scopes: ["block"],
   },
-  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-274
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-278
   plantuml: {
     slash: { aliases: ["uml", "sequence", "diagram", "puml"] },
     label: "PlantUML diagram",

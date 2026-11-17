@@ -15,7 +15,6 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
 - StRS-MDOKFSTUDIO-PALETTE-002
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
@@ -32,12 +31,17 @@ implemented_in_files:
 tested_in_files:
 - test/core/configuration/editingConfiguration.test.ts
 - test/core/palette/paletteActions.test.ts
+- test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/paletteReq.requirements.test.ts
+- test/page/modules/slashSyntaxCoverage.test.ts
 - test/page/runtimeEditPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
-- test/security/package-contract.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-PALETTE-265
+- SwRS-MDOKFSTUDIO-PALETTE-273
+- SwRS-MDOKFSTUDIO-PALETTE-274
 ---
 
 ## The palette mode decides the button sets, in registry order
@@ -63,7 +67,7 @@ When the extension builds the edition palette of a block editor, the extension S
 | strict | Heading, Bold, Italic, Strikethrough, Colour, Colour code, Link, Image, Code block, Blockquote, Horizontal rule, Table, Emoji, TODO and Thread; Colour code is hidden until the caret is in a colour code; the two list actions of the slash menu have no button | no GitHub or MyST button: Alert, Checkbox, HTML table, Admonition and Figure |
 | gfm | the strict buttons, followed by the eight GitHub buttons Alert, Checkbox, HTML table, Collapsible, Footnote, Mermaid, Column alignment and Key | Admonition, Math and Figure |
 | myst | the GitHub buttons, followed by the MyST buttons Admonition, Definition list, Math, Subscript, Superscript, Label, Reference, Document link, Citation, Dropdown, Table with caption, List table, Pipe table, Figure and Key (MyST); List table and Pipe table are hidden unless the caret is in a table of the matching form | none; both Key (the HTML kbd element) and Key (MyST) (the kbd role) are present, because the modes add up |
-| full | the MyST buttons, followed by the Full buttons Vega-Lite chart and Vega chart (see SwRS-MDOKFSTUDIO-PALETTE-265) | nothing of the other modes is missing |
+| full | the MyST buttons, followed by the Full buttons Vega-Lite chart and Vega chart (see SwRS-MDOKFSTUDIO-PALETTE-278) | nothing of the other modes is missing |
 
 ### Scenario (nominal): Order and groups
 
@@ -83,7 +87,7 @@ When the extension builds the edition palette of a block editor, the extension S
 - WHEN the writer chooses MyST in the select
 - THEN the buttons are rebuilt at once, the MyST buttons are shown, the select reads MyST, the text and the focus stay in the text box and no save is posted (the choice is stored for the workspace, see SwRS-MDOKFSTUDIO-LIFE-169)
 
-### Scenario (refusal): Same mode again or a value outside the three modes
+### Scenario (refusal): Same mode again or a value outside the four modes
 
 - GIVEN a palette in the GFM mode
 - WHEN the select fires a change
@@ -118,10 +122,35 @@ When the extension builds the edition palette of a block editor, the extension S
 | gfm | Bold, Italic, Strikethrough, Colour, Colour code, Link, Emoji and Key, and no Subscript or Superscript |
 | myst | also Subscript, Superscript and Key (MyST) |
 
+### Scenario (refusal): A mode that does not list an insertion command offers none
+
+- GIVEN the palette or the slash menu in a mode below the one that lists a command
+- WHEN the palette is shown or the slash is typed
+- THEN the command is not offered, as the table says; the constructs of the document are rendered all the same (the insertion itself is SwRS-MDOKFSTUDIO-PALETTE-278)
+
+| Command | Listed in | Not offered in |
+| --- | --- | --- |
+| Vega-Lite chart and Vega chart (/chart, /vega) | full | strict, gfm, myst |
+| PlantUML diagram (/plantuml, /uml) | full | strict, gfm, myst |
+| Content tabs (/tab-set, /tabs) | myst and full | strict, gfm |
+
+### Scenario (nominal): The mode setting and the stored choice
+
+- GIVEN the select of the palette, the setting defaultPaletteMode or a stored choice
+- WHEN the mode is chosen
+- THEN the table says what follows
+
+| Input | Outcome |
+| --- | --- |
+| the select of the palette | offers Strict Markdown, GitHub (GFM), MyST and Full |
+| the setting defaultPaletteMode or a stored choice full | the page starts in the Full mode |
+| a message previewPaletteModeChanged with mode full | accepted and stored for the workspace |
+
 ### Verification notes
 
 - Method: test/page/modules/editPalette.test.ts (select in the palette, each mode adds its buttons, choosing another mode, order); test/page/runtimeEditPalette.test.ts (each mode adds its buttons, the editor opened from an insert point, a mode change does not save the block and the next editor opens in the new mode, order of all 38 buttons); test/page/runtimePaletteActions.test.ts (strict mode shows no GitHub buttons, the MyST buttons show in MyST mode only, the cell bar keeps the table operations and adds the inline group); test/page/modules/paletteReq.requirements.test.ts (a select value outside the three modes is put back); test/core/configuration/editingConfiguration.test.ts (the setting, an unknown or non-string value); test/core/palette/paletteActions.test.ts (the registry lists every palette action once, in display order); visual scenarios palette-slash/v05-mode-strict-light-900, palette-slash/v06-mode-strict-dark-900, palette-slash/v07-mode-gfm-light-900, palette-slash/v08-mode-gfm-dark-900, palette-slash/v09-mode-myst-light-900, palette-slash/v10-mode-myst-dark-900 (each mode, and the editor opened from an insert point)
 - Method: the same-mode case is deduced from the code (the change handler returns when the value equals the mode), not tested; the mode follow-up of the cell group and the MyST additions are deduced from the code (cellPalette.setMode and the scopes of the registry), not asserted by a test; the absence of the select in a cell is covered by the cell group requirement of the table editing scope; the contributed setting in package.json lists the same three values and the default gfm
+- Method: test/core/palette/paletteActions.test.ts and test/page/modules/slashMenu.test.ts (the chart, tab-set and PlantUML commands are listed in their modes only: /vega finds the commands in Full, none in MyST); test/core/protocol/pageToHost.test.ts and test/core/configuration/editingConfiguration.test.ts (full is a valid mode, the message with mode full is accepted)
 - Criteria: The select has the aria-label Palette buttons, the four options in the order strict, gfm, myst, full with the four labels, and its value equals the mode of the palette. The visible buttons equal the actions registered for the mode and the modes before it with the block scope, in registry order, and the palette root carries the mode. The button ids of the paragraph editor and of the editor opened from an insert point are equal for each mode. After a mode change the palette root carries the new data-palette-mode, the text box value and focus are unchanged and no previewEditSave was posted. After a foreign value the select value equals the mode of the palette and no onModeChange call happened. The normalizer returns the value when it is a palette mode and gfm otherwise; the setting changes the buttons and the slash menu only, never the rendering of the preview (see SwRS-MDOKFSTUDIO-CORE-001). The buttons of the cell group equal the registry actions with the cell scope and a mode rank at or below the current one; the palette of scope cell appends no select.
 
 <!-- okf:links:start -->
@@ -130,9 +159,12 @@ When the extension builds the edition palette of a block editor, the extension S
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
   - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-PALETTE-265](SwRS-MDOKFSTUDIO-PALETTE-265.md): The Full palette mode adds Vega-Lite and Vega chart commands
+  - [SwRS-MDOKFSTUDIO-PALETTE-273](SwRS-MDOKFSTUDIO-PALETTE-273.md): The MyST palette mode adds a Content tabs command
+  - [SwRS-MDOKFSTUDIO-PALETTE-274](SwRS-MDOKFSTUDIO-PALETTE-274.md): The Full palette mode adds a PlantUML diagram command
 <!-- okf:links:end -->

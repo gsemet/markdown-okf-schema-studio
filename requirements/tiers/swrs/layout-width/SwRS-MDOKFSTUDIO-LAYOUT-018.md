@@ -14,8 +14,8 @@ description: When the window is resized, the column, toolbar or leading
   trailing update.
 project: markdown-okf-schema-studio
 scope: layout-width
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -23,20 +23,16 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/firstClearance.ts
-- src/page/runtime.ts
-tested_in_files:
-- test/page/diagReq.layout.requirements.test.ts
-- test/page/modules/firstClearance.test.ts
-- test/visual/capture_comment_checks.py
-- test/visual/scenarioAssertions.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-LAYOUT-013
 - SwRS-MDOKFSTUDIO-LAYOUT-017
 - SwRS-MDOKFSTUDIO-LAYOUT-019
 - SwRS-MDOKFSTUDIO-LAYOUT-041
+superseded_by:
+- SwRS-MDOKFSTUDIO-LAYOUT-011
 ---
 
 ## The clearance is measured again after layout events, in bounded bursts
@@ -99,6 +95,8 @@ When the window is resized, the column, toolbar or leading properties table chan
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-011](SwRS-MDOKFSTUDIO-LAYOUT-011.md): A control under the floating toolbar is moved or narrowed out of its way
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-LAYOUT-013](SwRS-MDOKFSTUDIO-LAYOUT-013.md): Collapsing the toolbar measures the clearance again
   - [SwRS-MDOKFSTUDIO-LAYOUT-017](SwRS-MDOKFSTUDIO-LAYOUT-017.md): The toolbar bottom edge is published for the sticky palette

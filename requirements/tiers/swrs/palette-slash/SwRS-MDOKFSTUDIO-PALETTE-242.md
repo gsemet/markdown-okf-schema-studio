@@ -15,7 +15,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
-- StRS-MDOKFSTUDIO-PALETTE-001
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
 annotation_exemption: false
@@ -25,7 +24,7 @@ implemented_in_files:
 - src/page/modules/editPalette.ts
 - src/page/modules/slashMenu.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/textEditing.ts
 - test/page/modules/slashMenu.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -106,7 +105,6 @@ When the slash menu is open, the extension SHALL take ArrowDown, ArrowUp, Enter,
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 - Depends on:
   - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
 <!-- okf:links:end -->

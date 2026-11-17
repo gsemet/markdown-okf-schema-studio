@@ -8,22 +8,22 @@ description: "When the writer presses Dropdown, the extension SHALL write a note
   or around the sample Content, with Title selected."
 project: markdown-okf-schema-studio
 scope: palette-slash
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
+- StRS-MDOKFSTUDIO-PALETTE-021
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-127
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/blockEditActions.ts
-tested_in_files:
-- test/page/modules/editActions.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-PALETTE-127
 ---
 
 ## Dropdown writes a note admonition with the dropdown class
@@ -59,7 +59,9 @@ When the writer presses Dropdown, the extension SHALL write a note admonition wi
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-021](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-021.md): A writer inserts MyST constructs
 - Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-127](SwRS-MDOKFSTUDIO-PALETTE-127.md): Admonition wraps lines in a colon fence of a chosen type
+- Superseded by:
   - [SwRS-MDOKFSTUDIO-PALETTE-127](SwRS-MDOKFSTUDIO-PALETTE-127.md): Admonition wraps lines in a colon fence of a chosen type
 <!-- okf:links:end -->

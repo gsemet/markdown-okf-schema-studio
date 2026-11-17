@@ -56,7 +56,7 @@ test("a popover descriptor carries what its popover shows", () => {
   assert.deepEqual(PALETTE_ACTIONS.admonition.options.map((option) => option.value), [...ADMONITION_TYPES, "custom"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("the two chart actions are listed for Full only, in the Full group, with the chart slash names", () => {
   for (const id of ["vegaLite", "vega"] as const) {
     const descriptor = PALETTE_ACTIONS[id] as PaletteActionDescriptor;

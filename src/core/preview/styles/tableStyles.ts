@@ -1,6 +1,5 @@
 // @implements_req SwRS-MDOKFSTUDIO-CORE-034
 // @implements_req SwRS-MDOKFSTUDIO-CORE-077
-// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-032
 /**
  * Tables of the page: the box of a wide table, the cells, and the tints of the heading and the rows.
  *

@@ -30,7 +30,7 @@ implemented_in_files:
 - src/page/modules/figurePanel.ts
 - src/page/modules/linkPanel.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/textEditing.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/paletteReq.requirements.test.ts
 - test/page/runtimeEditPalette.test.ts
@@ -123,7 +123,7 @@ A button whose action has a popover has aria-haspopup menu and an aria-expanded 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): While a writer edits a block, the palette stays in reach, appears softly and keeps the editor open
   - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
   - [StRS-MDOKFSTUDIO-TABLE-016](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-016.md): A writer inserts and shapes a table from the palette
 <!-- okf:links:end -->

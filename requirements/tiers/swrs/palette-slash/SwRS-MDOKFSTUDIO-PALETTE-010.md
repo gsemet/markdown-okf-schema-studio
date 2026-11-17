@@ -8,8 +8,8 @@ description: When the page posts previewPaletteModeChanged with a mode other
   keep the stored mode unchanged.
 project: markdown-okf-schema-studio
 scope: palette-slash
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -22,12 +22,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-tested_in_files:
-- test/core/protocol/pageToHost.test.ts
-- test/integration/paletteMode.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-LIFE-169
 ---
 
 ## An unknown palette mode is refused and stores nothing
@@ -79,4 +78,6 @@ When the page posts previewPaletteModeChanged with a mode other than strict, gfm
   - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
 <!-- okf:links:end -->

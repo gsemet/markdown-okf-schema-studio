@@ -9,21 +9,21 @@ description: When the writer presses Key (MyST), the extension SHALL wrap the
   backtick.
 project: markdown-okf-schema-studio
 scope: palette-slash
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
+- StRS-MDOKFSTUDIO-PALETTE-021
 depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/inlineEditActions.ts
-tested_in_files:
-- test/page/modules/editActions.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-PALETTE-276
 ---
 
 ## Key (MyST) wraps the selection in the kbd role
@@ -68,5 +68,7 @@ When the writer presses Key (MyST), the extension SHALL wrap the selection in th
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-021](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-021.md): A writer inserts MyST constructs
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-276](SwRS-MDOKFSTUDIO-PALETTE-276.md): Inline marker buttons toggle their markers around the selection
 <!-- okf:links:end -->

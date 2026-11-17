@@ -92,6 +92,7 @@ export function createLinkPanel(document: Document, deps: LinkPanelDeps): LinkPa
     deps.onCancel();
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-089
   insertButton.addEventListener("click", (event: { preventDefault?: () => void; stopPropagation?: () => void }) => {
     event.preventDefault?.();
     event.stopPropagation?.();

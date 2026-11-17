@@ -17,7 +17,6 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
 - StRS-MDOKFSTUDIO-CORE-001
-- StRS-MDOKFSTUDIO-THEME-002
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -124,7 +123,6 @@ When the preview shows paragraphs, list items, table cells, quotes, captions, he
 - Derives from:
   - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
   - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
-  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CODE-038](../code-blocks/SwRS-MDOKFSTUDIO-CODE-038.md): Colour YAML code text with the link colour in the forced white and cream themes
   - [SwRS-MDOKFSTUDIO-CORE-029](SwRS-MDOKFSTUDIO-CORE-029.md): Style headings

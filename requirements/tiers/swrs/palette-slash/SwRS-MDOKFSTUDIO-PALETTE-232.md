@@ -24,7 +24,7 @@ implemented_in_files:
 - src/page/features/blockSourceEditor.ts
 - src/page/modules/slashMenu.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/textEditing.ts
 - test/page/modules/slashMenu.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

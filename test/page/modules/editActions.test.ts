@@ -1,46 +1,10 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-
 import { PALETTE_ACTION_IDS, PALETTE_ACTIONS } from "../../../src/core/palette/paletteActions";
 import { createEditActions } from "../../../src/page/modules/editActions";
 import { createMarkdownTableTools } from "../../../src/page/modules/markdownTable";
 import { isSafeOkfColor } from "../../../src/core/security/spanColors";
-
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-017
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-039
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-043
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-045
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-048
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-049
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-050
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-052
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-053
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-054
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-058
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-069
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-072
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-083
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-089
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-092
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-109
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-114
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-123
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-124
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-125
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-126
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-127
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-130
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-132
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-133
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-135
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-136
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-137
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-138
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-147
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-149
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
 
 const registry = createEditActions([], createMarkdownTableTools());
 
@@ -124,6 +88,7 @@ for (const [id, input, expected] of cases) {
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-276
 test("bold then italic then unwrapping both restores the text", () => {
   const value = "x foo y";
   const apply = (id: string, text: string, a: number, b: number) => {
@@ -176,6 +141,7 @@ for (const [input, expected] of todoCases) {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("the todo toggle is its own inverse", () => {
   const original = "- one\n- two";
   const wrapped = run("todo", "[" + original + "]")!;
@@ -183,7 +149,7 @@ test("the todo toggle is its own inverse", () => {
   assert.equal(run("todo", wrapped), "[" + original + "]");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("the registry lists the actions with metadata and indexes them by id", () => {
   // P11: the `/` menu's own entries (Bulleted and Numbered list) are registered but have no button.
   assert.deepEqual(registry.actions.filter((action) => action.slash?.menuOnly).map((action) => action.id), ["bulletList", "numberedList"]);
@@ -220,6 +186,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
 type KeyInit = Record<string, unknown>;
 const key = (init: KeyInit, mac = false) => registry.shortcutFor({ key: "", code: "", ...init }, mac);
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-083
 test("shortcutFor uses Cmd on macOS and Ctrl elsewhere for B and I", () => {
   assert.equal(key({ metaKey: true, code: "KeyB", key: "b" }, true)?.id, "bold");
   assert.equal(key({ metaKey: true, code: "KeyI", key: "i" }, true)?.id, "italic");
@@ -261,6 +228,7 @@ test("shortcutFor ignores plain keys, other modifiers, composition and AltGr", (
   assert.equal(key({ ctrlKey: true, code: "KeyJ", key: "j" }), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-039
 test("a selection cutting into a marker run on one side produces no edit", () => {
   assert.equal(run("bold", "**f[oo]**"), undefined);
   assert.equal(run("italic", "*[fo]o*"), undefined);
@@ -290,6 +258,7 @@ const headingCases: [string, string, string | undefined][] = [
   ["2", "[a\n\nb]", "[## a\n\n## b]"],
 ];
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-043
 for (const [arg, input, expected] of headingCases) {
   test("editActions heading " + arg + " " + JSON.stringify(input), () => {
     assert.equal(run("heading", input, arg), expected);
@@ -314,6 +283,7 @@ const strikeCases: [string, string][] = [
   ["[a\nb]", "~~[a\nb]~~"],
 ];
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-276
 for (const [input, expected] of strikeCases) {
   test("editActions strikethrough " + JSON.stringify(input), () => {
     assert.equal(run("strikethrough", input), expected);
@@ -335,6 +305,7 @@ const quoteCases: [string, string][] = [
   ["[a\n]b", "[> a\n]b"],
 ];
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 for (const [input, expected] of quoteCases) {
   test("editActions quote " + JSON.stringify(input), () => {
     assert.equal(run("quote", input), expected);
@@ -352,6 +323,7 @@ const fenceCases: [string, string, string][] = [
   ["text", "x\n[a]\ny", "x\n```text\n[a]\n```\ny"],
 ];
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-054
 for (const [arg, input, expected] of fenceCases) {
   test("editActions codeFence " + arg + " " + JSON.stringify(input), () => {
     assert.equal(run("codeFence", input, arg), expected);
@@ -372,6 +344,7 @@ const ruleCases: [string, string][] = [
   ["[a\nb]", "a\nb\n\n---\n\n|"],
 ];
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-050
 for (const [input, expected] of ruleCases) {
   test("editActions rule " + JSON.stringify(input), () => {
     assert.equal(run("rule", input), expected);
@@ -436,6 +409,7 @@ function link(input: string, text: string, url: string): string {
   return result.slice(0, edit.selectionStart) + "|" + result.slice(edit.selectionStart);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-089
 test("link is a strict action for blocks and cells that opens the link panel", () => {
   const action = registry.byId.get("link");
   assert.ok(action);
@@ -459,6 +433,7 @@ test("Cmd+K on macOS and Ctrl+K elsewhere find the link action, matched on key b
   assert.equal(registry.shortcutFor({ key: "k", code: "KeyK", ctrlKey: true, isComposing: true }, false), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-089
 test("linkDraft prefills the text from the selection and the URL when the selection is one", () => {
   assert.deepEqual(registry.linkDraft(ctxOf("say [foo] now")), { text: "foo", url: "", start: 4, end: 7 });
   assert.deepEqual(registry.linkDraft(ctxOf("see |here")), { text: "", url: "", start: 4, end: 4 });
@@ -508,6 +483,7 @@ const linkCases: [string, string, string, string][] = [
   // Whitespace around the typed values is dropped.
   ["[a]", " a ", " u ", "[a](u)|"],
 ];
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-092
 for (const [input, text, url, expected] of linkCases) {
   test("linkEdit " + JSON.stringify([input, text, url]), () => {
     assert.equal(link(input, text, url), expected);
@@ -519,6 +495,7 @@ test("the link action applies the argument as the target of the selected text", 
   assert.equal(run("link", "say [foo] now"), "say [foo](|) now");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-092
 test("linkEdit escapes brackets in the text and reads escaped text back", () => {
   assert.equal(link("[a]", "a]b [c", "u"), "[a\\]b \\[c](u)|");
   const draft = registry.linkDraft(ctxOf("x [a\\]b|](u) y"));
@@ -527,6 +504,7 @@ test("linkEdit escapes brackets in the text and reads escaped text back", () => 
   assert.equal(draft.end - draft.start, "[a\\]b](u)".length);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-092
 test("linkEdit never breaks the target: < and > are encoded, spaces get angle brackets", () => {
   assert.equal(link("[a]", "a", "http://x/<b>"), "[a](http://x/%3Cb%3E)|");
   assert.equal(link("[a]", "a", "my file>.md"), "[a](<my file%3E.md>)|");
@@ -607,6 +585,7 @@ test("the table action is for blocks only; emoji is for blocks and cells", () =>
   assert.deepEqual(registry.byId.get("emoji")!.scopes, ["block", "cell"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-072
 test("emoji inserts at the caret and replaces the selection", () => {
   assert.equal(run("emoji", "say | now", "\u2705"), "say \u2705| now");
   assert.equal(run("emoji", "say [foo] now", "\u26a0\ufe0f"), "say \u26a0\ufe0f| now");
@@ -657,6 +636,7 @@ test("T25: the GitHub actions are block actions of the gfm mode with no shortcut
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
 test("T25: alert on an empty line writes the NOTE head and a quoted line with the caret in it", () => {
   const out = applyTo("alert", "", [0, 0])!;
   assert.equal(out.value, "> [!NOTE]\n> ");
@@ -703,6 +683,7 @@ function checkbox(value: string, selection: [number, number]): Applied {
   return applyTo("checkbox", value, selection)!;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("T25: checkbox puts - [ ] on a plain line and [ ] after the marker of a list item", () => {
   assert.equal(checkbox("buy milk", [3, 3]).value, "- [ ] buy milk");
   assert.equal(checkbox("- buy milk", [3, 3]).value, "- [ ] buy milk");
@@ -841,6 +822,7 @@ test("T26: the five proposals are gfm actions with no shortcut; only kbd also wo
   assert.deepEqual(registry.byId.get("columnAlign")!.options!.map((o) => o.value), ["left", "center", "right"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-124
 test("T26: details inserts a collapsible sample after the selection, summary selected", () => {
   const out = applyTo("details", "Intro", [5, 5])!;
   assert.equal(out.value, "Intro\n\n<details>\n<summary>Summary</summary>\n\nContent\n\n</details>");
@@ -853,6 +835,7 @@ test("T26: details wraps the touched lines and keeps them as content", () => {
   assert.equal(out.value.slice(...out.selection), "Summary");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-125
 test("T26: footnote takes the next free number and writes the definition at the end", () => {
   const out = applyTo("footnote", "A claim here.\n\nMore text.", [7, 7])!;
   assert.equal(out.value, "A claim[^1] here.\n\nMore text.\n\n[^1]: ");
@@ -908,6 +891,7 @@ test("T26: columnAlign works from a body row, outside pipes and in tables withou
   assert.equal(applyTo("columnAlign", ALIGN_TABLE, [2, 2], "justify"), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-276
 test("T26: kbd wraps the selection, unwraps it, and inserts a sample on a caret", () => {
   const wrapped = applyTo("kbd", "Press Ctrl now", [6, 10])!;
   assert.equal(wrapped.value, "Press <kbd>Ctrl</kbd> now");
@@ -938,6 +922,7 @@ test("T28: the MyST actions are myst-only with no shortcut; sub and sup also wor
   assert.deepEqual(registry.byId.get("math")!.options!.map((o) => o.value), ["inline", "display", "aligned"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-127
 test("T28: admonition wraps the touched lines in a colon fence and selects the body", () => {
   const out = applyTo("admonition", "one\ntwo\nthree", [2, 6], "warning")!;
   assert.equal(out.value, ":::{warning}\none\ntwo\n:::\nthree");
@@ -972,6 +957,7 @@ test("T28: a selection ending at a line start does not pull that line into the a
   assert.equal(out.value, ":::{note}\none\n:::\ntwo\n");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-127
 test("T28: custom admonition writes a titled block with a class and selects the title", () => {
   const out = applyTo("admonition", "Body", [0, 4], "custom")!;
   assert.equal(out.value, ":::{admonition} Title\n:class: note\n\nBody\n:::");
@@ -981,6 +967,7 @@ test("T28: custom admonition writes a titled block with a class and selects the 
   assert.equal(empty.value.slice(...empty.selection), "Title");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-132
 test("T28: deflist makes the selection the term and selects the definition", () => {
   const out = applyTo("deflist", "Alpha\nrest", [0, 5])!;
   assert.equal(out.value, "Alpha\n: Definition\nrest");
@@ -990,6 +977,7 @@ test("T28: deflist makes the selection the term and selects the definition", () 
   assert.equal(empty.value.slice(...empty.selection), "Term");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-133
 test("T28: math inline, display and aligned", () => {
   assert.equal(applyTo("math", "a b c", [2, 3], "inline")!.value, "a $b$ c");
   const inline = applyTo("math", "a  c", [2, 2], "inline")!;
@@ -1004,6 +992,7 @@ test("T28: math inline, display and aligned", () => {
   assert.equal(applyTo("math", "x", [0, 1], "bogus"), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-276
 test("T28: sub and sup wrap the selection in a role; empty puts the caret inside", () => {
   assert.equal(run("sub", "H[2]O"), "H{sub}`[2]`O");
   assert.equal(run("sup", "x[2]"), "x{sup}`[2]`");
@@ -1012,6 +1001,7 @@ test("T28: sub and sup wrap the selection in a role; empty puts the caret inside
   assert.deepEqual(out.selection, [7, 7]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-136
 test("T28: label inserts (name)= above the block with the name selected", () => {
   const out = applyTo("label", "Para\ntext", [6, 6])!;
   assert.equal(out.value, "(label-name)=\nPara\ntext");
@@ -1034,6 +1024,7 @@ test("T30: ref, doc, cite, dropdown, tableCaption and roleKbd are myst-only with
   assert.deepEqual(registry.byId.get("roleKbd")!.scopes, ["block", "cell"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-147
 test("T30: ref inserts {ref} with the chosen label and keeps a selection as the link text", () => {
   assert.equal(run("ref", "see |", "intro"), "see {ref}`intro`|");
   assert.equal(run("ref", "see [the intro] now", "intro"), "see {ref}`the intro <intro>`| now");
@@ -1043,6 +1034,7 @@ test("T30: ref inserts {ref} with the chosen label and keeps a selection as the 
   assert.equal(run("ref", "see [two\nlines]", "x"), undefined, "a selection with a line break is refused");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148
 test("T30: doc inserts {doc} with the picked path", () => {
   assert.equal(run("doc", "read |", "../guide/setup"), "read {doc}`../guide/setup`|");
   assert.equal(run("doc", "read [the setup] now", "setup"), "read {doc}`the setup <setup>`| now");
@@ -1050,6 +1042,7 @@ test("T30: doc inserts {doc} with the picked path", () => {
   assert.equal(run("doc", "read |"), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-149
 test("T30: cite inserts {cite} with the chosen key", () => {
   assert.equal(run("cite", "claim |", "smith2024"), "claim {cite}`smith2024`|");
   assert.equal(run("cite", "claim [text]", "smith2024"), "claim {cite}`smith2024`|", "a selection is replaced");
@@ -1057,6 +1050,7 @@ test("T30: cite inserts {cite} with the chosen key", () => {
   assert.equal(run("cite", "claim |"), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-127
 test("T30: dropdown inserts a note with :class: dropdown or wraps the touched lines", () => {
   assert.equal(
     run("dropdown", "intro|"),
@@ -1091,6 +1085,7 @@ test("T30: tableCaption wraps the pipe table at the caret, or inserts a new one"
     "an already captioned table is left alone");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-276
 test("T30: roleKbd wraps the selection in {kbd}, or inserts a sample key", () => {
   assert.equal(run("roleKbd", "press [Ctrl] now"), "press {kbd}`[Ctrl]` now");
   assert.equal(run("roleKbd", "press | now"), "press {kbd}`[Ctrl+K]` now");
@@ -1109,6 +1104,7 @@ test("T31: image is a strict action and figure a myst one, both asking the host 
   assert.deepEqual(figure.scopes, ["block"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-109
 test("T31: image inserts ![name](path) with the name selected", () => {
   const out = applyTo("image", "see ", [4, 4], "img/logo.png")!;
   assert.equal(out.value, "see ![logo](img/logo.png)");
@@ -1131,6 +1127,7 @@ test("T31: image refuses a missing or unwritable path and keeps brackets out of 
   assert.equal(applyTo("image", "", [0, 0], "a\\.png")!.value, "![a](a\\.png)", "a trailing backslash would escape ]");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
 test("T31: figure inserts the directive with alt text and an empty caption line", () => {
   const out = applyTo("figure", "Intro", [5, 5], "img/logo.png")!;
   assert.equal(out.value, "Intro\n\n:::{figure} img/logo.png\n:alt: logo\n\n\n:::");
@@ -1179,6 +1176,7 @@ test("T34: color is a strict-mode action for blocks and cells with a swatch popo
   assert.equal(new Set(action.colors).size, 16);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-058
 test("T34: color wraps the selection in the exact span the renderer keeps", () => {
   assert.equal(colour("color", "say [foo] now", "text:#c00"), 'say <span style="color:#c00">[foo]</span> now');
   assert.equal(colour("color", "say [foo] now", "background:#ff0"),
@@ -1273,6 +1271,7 @@ test("T34: colorCode is available only with the caret in a colour code", () => {
   assert.equal(action.current!({ value: "plain", selectionStart: 1, selectionEnd: 1, scope: "block" }), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-069
 test("T34: colorCode replaces the code under the caret in place, validated", () => {
   assert.equal(colour("colorCode", "a #c0|0 b", "#00f"), "a #00f| b");
   assert.equal(colour("colorCode", "a rgb(1, 2, 3)| b", "#ff8800"), "a #ff8800| b");
@@ -1297,6 +1296,7 @@ test("P11: the list actions are menu-only, block-scope and in every mode", () =>
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("P11: Bulleted list on an empty line, a text line, several lines, and toggled off", () => {
   assert.deepEqual(listEdit("bulletList", "", 0), { result: "- ", caret: [2, 2] });
   assert.deepEqual(listEdit("bulletList", "a\n\n", 3), { result: "a\n\n- ", caret: [5, 5] });
@@ -1307,6 +1307,7 @@ test("P11: Bulleted list on an empty line, a text line, several lines, and toggl
   assert.equal(listEdit("bulletList", "- one\ntwo", 0, 9)?.result, "- one\n- two", "a mixed selection adds");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
 test("P11: Numbered list numbers the non-blank lines and toggles off", () => {
   assert.deepEqual(listEdit("numberedList", "", 0), { result: "1. ", caret: [3, 3] });
   assert.equal(listEdit("numberedList", "a\nb\n\nc", 0, 6)?.result, "1. a\n2. b\n\n3. c");
@@ -1377,6 +1378,7 @@ test("CR035: the image action replaces the image around the caret and keeps alt 
   assert.equal(applyTo("image", "![alt](old.png) ", [16, 16], "n.png")!.value, "![alt](old.png) ![n](n.png)");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-114
 test("thread inserts an empty comment thread after the block, with the author and the local date", () => {
   const threaded = createEditActions([], createMarkdownTableTools(), isSafeOkfColor, "Ada\nLovelace");
   const apply = (value: string, caret: number) => threaded.byId.get("thread")!.apply({

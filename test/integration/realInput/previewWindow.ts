@@ -214,6 +214,7 @@ export async function scenarioTitleBarButton(page: Page, evidence: Evidence): Pr
 }
 
 // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-013
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016
 /** RI-T38: the anchor button needs a paired text editor; a reopened preview starts in preview mode. */
 export async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<void> {
   const demo = [
@@ -351,6 +352,9 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
               return actual.every((color, index) => color === expected[index]);
             }, { mode, palettes });
           });
+          // @tests_req StRS-MDOKFSTUDIO-THEME-002
+          // @tests_req SwRS-MDOKFSTUDIO-THEME-001
+          // @tests_req SwRS-MDOKFSTUDIO-THEME-025
           await captureAfter(evidence, page, realInputId(`38-toolbar-${host.toLowerCase()}-${mode}`),
             `${mode} preview mode updates the document and floating toolbar on the ${host} VS Code theme.`);
         }

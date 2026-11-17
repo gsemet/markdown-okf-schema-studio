@@ -7,7 +7,7 @@ import { isSpace, isWordChar, touchedLines, validSelection } from "./editActionH
 import type { EditActionContext } from "./editActions";
 import type { TextEdit } from "./textEditing";
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-045
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-276
 /**
  * Toggles an inline `*` marker pair (`*` italic, `**` bold) around the selection. A run of `n`
  * asterisks around the content holds bold when `n >= 2` and italic when `n` is odd, so
@@ -236,7 +236,7 @@ export function insertThread(ctx: EditActionContext, threadAuthor?: string): Tex
   return { start, end, text, selectionStart: caret, selectionEnd: caret };
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-048
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-276
 /** Toggles a `~~` pair around the selection or the word at the caret. */
 export function toggleStrikethrough(ctx: EditActionContext): TextEdit | undefined {
   const { value, selectionStart, selectionEnd } = ctx;
@@ -302,7 +302,7 @@ export function toggleStrikethrough(ctx: EditActionContext): TextEdit | undefine
   };
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-135
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-276
 /** Wraps the selection in a MyST role (`{sub}` or `{sup}`); empty puts the caret between the quotes. */
 export function wrapRole(ctx: EditActionContext, role: string): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -354,7 +354,7 @@ export function insertTargetRole(ctx: EditActionContext, role: string, textAllow
   return { start: ctx.selectionStart, end: ctx.selectionEnd, text, selectionStart: caret, selectionEnd: caret };
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-138
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-276
 /** Wraps the selection in the `{kbd}` role, or inserts a sample key with the sample selected. */
 export function insertKbdRole(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -369,7 +369,7 @@ export function insertKbdRole(ctx: EditActionContext): TextEdit | undefined {
   return wrapRole(ctx, "kbd");
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-PALETTE-126
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-276
 /** Wraps the selection in `<kbd>`, removes the tags when it already has them, or inserts a sample. */
 export function toggleKbd(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;

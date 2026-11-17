@@ -21,9 +21,10 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/preview/contentPatch.ts
-- src/core/preview/styles/pageChromeStyles.ts
+- src/core/preview/styles/pageChromeStyles.markers.ts
 tested_in_files:
 - test/core/preview/contentPatch.test.ts
+- test/core/preview/layoutThemeStyles.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
@@ -79,8 +80,9 @@ When the zoom is set, the extension SHALL set the content font size to the base 
 ### Verification notes
 
 - Method: test/core/preview/previewStyles.test.ts, unit test `T08: zoom scales the content font size and the column width together` (rule text of the font size and of the column width).
-- Method: test/visual/scenarioDefinitions2.ts, visual scenarios theme-zoom/v09, v10 and v11 (zoomAssertions in test/visual/scenarioAssertions.ts: font size, wide pane, narrow pane). The unchanged toolbar size is not asserted.
+- Method: test/visual/scenarioDefinitions2.ts, visual scenarios theme-zoom/v09, v10 and v11 (zoomAssertions in test/visual/scenarioAssertions.ts: font size, wide pane, narrow pane). The toolbar scope is checked on the style rules (layoutThemeStyles.test.ts), not on a measured size.
 - Method: test/core/preview/contentPatch.test.ts, unit test `T08: two renders with different zoom have the same shell key and the same context key` (shell keys and canPatch for the two-zooms scenario, the context keys for the second).
+- Method: test/core/preview/layoutThemeStyles.test.ts (toolbar does not scale): no rule that reads the zoom variables belongs to a toolbar selector.
 - Criteria: The computed paragraph size equals the base size times the zoom. The measured column equals the smaller of the pane and the zoomed maximum width, within 40 px. shellKey and runtimeContextKey are equal for the two zooms and canPatch is true.
 
 <!-- okf:links:start -->

@@ -238,7 +238,7 @@ test("the leading properties table is observed itself, also after it is replaced
   assert.deepEqual(sectionObserver.targets, [page.currentSection()]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-018
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
 test("a late load or font settlement measures again", (context) => {
   const page = dynamicPage();
   context.after(page.restore);
@@ -388,4 +388,17 @@ test("CR 226: no float is published when the page's CSS hides it (a document wit
   const hidden = setup(rect(0, 0, 393, 2000), rect(12, 277, 102, 166), { floatDisplay: "none" });
   assert.equal(hidden.published.get("--sphinx-preview-toolbar-float-width"), "0px");
   assert.equal(hidden.published.get("--sphinx-preview-toolbar-float-height"), "0px");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
+test("a leading properties table too narrow to be shortened is pushed down instead (inset 0)", () => {
+  // 460 px column, toolbar from 200 px reaching down to 84 px, a right-aligned toggle under it:
+  // narrowing the table would leave less than 320 px, so the clearance moves it down.
+  const { clearance, published } = setup(rect(0, 0, 460, 2000), rect(12, 200, 250, 72), {
+    kind: "properties",
+    toggles: [rect(45, 410, 24, 24)],
+  });
+  assert.equal(clearance.inset(), 0, "the table is not shortened");
+  assert.ok(clearance.value() > 0, "it is pushed down below the toolbar");
+  assert.equal(published.get("--sphinx-preview-first-inset"), "0px");
 });

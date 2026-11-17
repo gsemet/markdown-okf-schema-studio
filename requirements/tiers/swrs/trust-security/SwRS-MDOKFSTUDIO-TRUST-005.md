@@ -22,8 +22,6 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-006
 - StRS-MDOKFSTUDIO-GFM-003
 - StRS-MDOKFSTUDIO-MYST-009
-- StRS-MDOKFSTUDIO-PALETTE-013
-- StRS-MDOKFSTUDIO-PALETTE-007
 - StRS-MDOKFSTUDIO-PALETTE-018
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
@@ -138,8 +136,6 @@ When the host receives a write request from a preview for the render it holds, t
   - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
   - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
   - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
-  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
-  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
   - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-065](SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type

@@ -24,7 +24,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/tableStyles.ts
+- src/core/preview/styles/tableStyles.markers.ts
 - src/page/features/scrollCore.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts

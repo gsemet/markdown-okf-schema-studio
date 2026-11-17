@@ -760,3 +760,17 @@ test("T13: a state snapshot keeps the TOC visibility and the folded sections", (
   assert.equal((state.tocCollapsed as string[]).length, 0);
   assert.equal(state.viewZoom, 100);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016
+test("the page root records the theme kind: 2, 1, 3 then 4, and default without one", () => {
+  const harness = createRuntimeHarness();
+  const ready = harness.messages.find((message) => message.type === "previewReady") as PageIdentity | undefined;
+  assert.ok(ready, "the page reports ready once it listens");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme"), "default", "a boot context without a kind");
+  const seen: Array<string | null> = [];
+  for (const themeKind of [2, 1, 3, 4]) {
+    harness.dispatchMessage({ type: "themeChanged", documentId: ready.documentId, revision: ready.revision, requestId: ready.requestId, themeKind });
+    seen.push(harness.documentElement.getAttribute("data-sphinx-preview-theme"));
+  }
+  assert.deepEqual(seen, ["2", "1", "3", "4"]);
+});

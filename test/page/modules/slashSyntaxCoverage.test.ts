@@ -178,7 +178,8 @@ function insertion(id: string, value: string, at: number): { value: string; sele
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-273
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("CR 248: tabs inserts a tab set of two tabs set apart, first title selected, in MyST and Full", () => {
   const out = insertion("tabs", "Intro\n\nOutro", 5);
   assert.equal(out.value,
@@ -188,7 +189,8 @@ test("CR 248: tabs inserts a tab set of two tabs set apart, first title selected
   for (const mode of ["myst", "full"] as const) assert.equal(keysByMode[mode].has("tabs"), true, mode);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-274
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("CR 248: plantuml inserts a sequence diagram fence set apart, first message selected, in Full only", () => {
   const out = insertion("plantuml", "Intro\n\nOutro", 5);
   assert.equal(out.value, "Intro\n\n```plantuml\n@startuml\nAlice -> Bob: Hello\n@enduml\n```\n\nOutro");

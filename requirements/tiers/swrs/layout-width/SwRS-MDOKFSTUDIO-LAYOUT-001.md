@@ -18,7 +18,8 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/contentLayoutStyles.ts
+- src/core/preview/styles/contentBlockStyles.markers.ts
+- src/core/preview/styles/contentLayoutStyles.markers.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/geometryChecks.test.ts
@@ -40,34 +41,25 @@ When a document holds wide content, long words or long URLs, the extension SHALL
 - WHEN the preview is rendered in Margin, Auto and Full width
 - THEN the page does not scroll horizontally (horizontal overflow of at most 1 px) in all three modes
 
-### Scenario (nominal): Narrow table and long words
-- GIVEN a service-level table wider than a 460 px pane in the dark theme (visual scenario v01), and text blocks, links and table cells holding long words or bare URLs
+### Scenario (nominal): Long words and URLs wrap
+- GIVEN text blocks, links and table cells holding long words or bare URLs
 - WHEN the preview is rendered
-- THEN the table scrolls inside its own wrapper to its far-right column without widening the page, and the text blocks, links and table cells carry overflow-wrap anywhere so that long words and URLs wrap
+- THEN the text blocks, links and table cells carry overflow-wrap anywhere so that long words and URLs wrap and the page does not widen (a table wider than the pane scrolls inside its own box, see SwRS-MDOKFSTUDIO-LAYOUT-032)
 
 ### Scenario (nominal): GitHub Flavored Markdown gallery
 - GIVEN the GFM gallery document (five alerts, strikethrough, two footnotes, three task checkboxes, a right-aligned column, a raw HTML table, a raw details block and an autolink) in dark at 900 px, light at 900 px and light at 460 px (visual scenarios gfm/v02, gfm/v03 and gfm/v04)
 - WHEN the preview is rendered
 - THEN the page has no horizontal overflow in all three cases
 
-### Scenario (boundary): Machine geometry checks
-| Input | Outcome |
-| --- | --- |
-| The geometry checks function run on a page without any content | Four results are reported in the order overlay-covers-text, overlay-clipped, identifier-split, status-two-lines, each not applicable and passing |
-| Identifier-split check on a cell whose single text node wraps over two lines | That text node fails and its text is named in the detail |
-| Identifier-split check on a cell whose text nodes share one line | Passes |
-| Identifier-split check on list items on separate lines | Passes |
-
 ### Known issues
 - Known issue: No documentation states this promise (docs/user/wide-tables.md speaks only of a comfortable narrow column); it is locked by visual checks and the wrapping unit test only.
 - Known issue: The GFM gallery check is a composite; its atomic parts belong to the gfm requirements (autolinks, strikethrough, alerts, footnotes, tables, task lists, raw HTML).
-- Known issue: The machine geometry checks are test tooling with no user-visible effect, and they are undocumented outside their unit test; the overlay checks serve other scopes' visual scenarios.
 
 ### Verification notes
-- Method: test/visual/scenarioDefinitions1.ts and test/visual/capture_layout_checks.py (width modes at 460 px, narrow table and long words, GFM gallery): visual scenarios v01, v66 to v71 and v78 to v83 (the NO_HORIZONTAL_SCROLL assertion and the width-mode checks, panes from 360 to 2000 px) and gfm/v02 to v04.
-- Method: test/core/preview/previewStyles.test.ts (narrow table and long words): unit test K1, long words and bare URLs wrap inside text blocks, links and table cells.
-- Method: test/page/geometryChecks.test.ts (machine geometry checks): four ids, not applicable without a DOM, identifier-split cases, nested text node counted once.
-- Criteria: Horizontal overflow of the page is at most 1 px in every scenario, the wrapping rule covers the text blocks, links and table cells, and the geometry check ids and order are exact with every check passing when it is not applicable.
+- Method: test/visual/scenarioDefinitions1.ts and test/visual/capture_layout_checks.py (width modes at 460 px, long words, GFM gallery): visual scenarios v01, v66 to v71 and v78 to v83 (the NO_HORIZONTAL_SCROLL assertion and the width-mode checks, panes from 360 to 2000 px) and gfm/v02 to v04.
+- Method: test/core/preview/previewStyles.test.ts (long words): unit test K1, long words and bare URLs wrap inside text blocks, links and table cells.
+- Note: the four machine geometry checks of test/page/geometryChecks.test.ts are test infrastructure with no user-visible effect and are not a requirement.
+- Criteria: Horizontal overflow of the page is at most 1 px in every scenario, the wrapping rule covers the text blocks, links and table cells.
 
 <!-- okf:links:start -->
 ### Links

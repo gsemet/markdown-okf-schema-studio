@@ -14,19 +14,19 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+depends_on:
+- SwRS-MDOKFSTUDIO-LIFE-169
+- SwRS-MDOKFSTUDIO-LIFE-170
 user_need: As a reader, I enlarge or shrink the text with two buttons, the
   column grows or shrinks with it, I always see the zoom the next click gives,
   and I stay on the text I was reading; I set the text size once and the
   previews of this workspace open at that size, also after reloading the window
   or closing and reopening the preview.
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-169
-- SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-THEME-038
 - SwRS-MDOKFSTUDIO-THEME-043
 - SwRS-MDOKFSTUDIO-THEME-055
 - SwRS-MDOKFSTUDIO-TOOLBAR-013
-- SwRS-MDOKFSTUDIO-TRUST-006
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -49,6 +49,23 @@ As a reader, I enlarge or shrink the text with two buttons, the column grows or 
 - Precedence at start: the zoom saved with the panel, then the zoom stored for the workspace, then 100 %.
 - A zoom change does not draw the document again.
 - A zoom that VS Code cannot save still holds until the window closes.
+
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Zoom100: no zoom saved
+    Zoom100: 100 percent
+    Zoom70: 70 percent, Zoom out disabled
+    Zoom200: 200 percent, Zoom in disabled
+    Zoom100 --> Zoom70: Zoom out, steps of 10 points
+    Zoom100 --> Zoom200: Zoom in, steps of 10 points
+    Zoom70 --> Zoom100: Zoom in, steps of 10 points
+    Zoom200 --> Zoom100: Zoom out, steps of 10 points
+    note right of Zoom100: reopening starts from the panel zoom, else the workspace zoom, else 100
+```
+
+Zoom moves in steps of 10 points between the two limits.
 
 ### Main paths
 
@@ -73,11 +90,11 @@ As a reader, I enlarge or shrink the text with two buttons, the column grows or 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
-  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
   - [SwRS-MDOKFSTUDIO-THEME-038](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-038.md): Zoom in and out change the zoom by 10 points within limits
   - [SwRS-MDOKFSTUDIO-THEME-043](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-043.md): Zoom scales the text and the column without a redraw
   - [SwRS-MDOKFSTUDIO-THEME-055](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-055.md): A zoom that cannot be saved still holds for the session
   - [SwRS-MDOKFSTUDIO-TOOLBAR-013](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-013.md): The host accepts only a known view preference with a valid value
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
 <!-- okf:links:end -->

@@ -305,7 +305,7 @@ export function installFirstClearance(
     window.requestAnimationFrame(tick);
   };
 
-  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-018
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-011
   window.addEventListener("resize", on("window resize"));
   if (typeof ResizeObserver !== "undefined") {
     sectionObserver = new ResizeObserver(on("properties section resize"));

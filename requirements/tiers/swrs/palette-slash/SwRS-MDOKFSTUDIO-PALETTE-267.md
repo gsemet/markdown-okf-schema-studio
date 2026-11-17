@@ -9,22 +9,20 @@ description: When the writer presses Option, the extension SHALL add ( ) after
   list item.
 project: markdown-okf-schema-studio
 scope: palette-slash
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-PALETTE-001
+- StRS-MDOKFSTUDIO-PALETTE-020
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/blockEditActions.ts
-tested_in_files:
-- test/page/modules/optionAction.test.ts
-- test/page/runtimeEditPalette.test.ts
-- test/visual/optionListScenarios.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-PALETTE-277
 ---
 
 ## Option toggles a choice list marker on the touched lines
@@ -69,5 +67,7 @@ When the writer presses Option, the extension SHALL add ( ) after the list marke
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-020](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-020.md): A writer inserts GitHub Flavored Markdown constructs
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-277](SwRS-MDOKFSTUDIO-PALETTE-277.md): Line-prefix buttons toggle their prefix on the touched lines
 <!-- okf:links:end -->

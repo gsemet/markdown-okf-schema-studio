@@ -29,6 +29,7 @@ function applyTo(
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @tests_req StRS-MDOKFSTUDIO-PALETTE-020
 test("alert: a caret on a lazy line is in the alert above it", () => {
   const value = "> [!TIP]\n> first\nSecond";
   const caret = value.indexOf("Second") + 2;

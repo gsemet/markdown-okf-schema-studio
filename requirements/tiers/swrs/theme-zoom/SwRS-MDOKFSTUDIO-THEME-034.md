@@ -2,11 +2,11 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-THEME-034
 uuid: 257662c7-ec3e-46eb-b159-757fb3e22a20
-title: "Page colours go through one token map of VS Code variables"
-description: "When the stylesheet is built, the extension SHALL declare each neutral
-  --studio- token on the root and on body as the VS Code variable of the same name,
-  so that the --vscode- prefix appears only inside that token map and every --studio-
-  token the stylesheet or the Mermaid theme reads is in it."
+title: "A host colour that is set is used, an unset one keeps the fallback"
+description: "When the host sets a colour the page uses, the extension SHALL paint
+  the page with that colour, and when the host does not set it, the page SHALL keep
+  the fallback colour written in its rule; the --vscode- variables are read through
+  one token map and every token the page reads is in it."
 project: markdown-okf-schema-studio
 scope: theme-zoom
 req_lifecycle: proposed
@@ -26,11 +26,11 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## Page colours go through one token map of VS Code variables
+## A host colour that is set is used, an unset one keeps the fallback
 
 ### Normative behavior
 
-When the stylesheet is built, the extension SHALL declare each neutral --studio- token on the root and on body as the VS Code variable of the same name, so that the --vscode- prefix appears only inside that token map and every --studio- token the stylesheet or the Mermaid theme reads is in it.
+When the host sets a colour the page uses, the extension SHALL paint the page with that colour, and when the host does not set it, the page SHALL keep the fallback colour written in its rule. The page reads the host variables through one token map: each neutral --studio- token is declared on the root and on body as the VS Code variable of the same name, the --vscode- prefix appears only inside that map, and every --studio- token the stylesheet or the Mermaid theme reads is in it.
 
 ### Scenario (nominal): Token map
 

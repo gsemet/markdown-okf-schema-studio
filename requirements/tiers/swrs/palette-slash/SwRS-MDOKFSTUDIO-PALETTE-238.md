@@ -17,7 +17,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
-- StRS-MDOKFSTUDIO-PALETTE-001
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-001
 annotation_exemption: false
@@ -28,10 +27,13 @@ implemented_in_files:
 - src/page/modules/editPalette.ts
 - src/page/modules/slashMenu.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/textEditing.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/slashMenu.test.ts
+- test/visual/slashAdmonitionScenarios.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-PALETTE-268
 ---
 
 ## The slash menu lists the palette commands of the mode and scope
@@ -72,8 +74,33 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 | --- | --- |
 | Heading 1 to Heading 5 and Paragraph | run Heading with the argument that choosing the same option in the Heading popover gives |
 | one Alert per type | run Alert with the argument of the same option in the Alert popover |
-| one admonition per type | run Admonition with the argument of the same option in the Admonition popover, plus the version admonitions (see SwRS-MDOKFSTUDIO-PALETTE-268) |
+| one admonition per type | run Admonition with the argument of the same option in the Admonition popover, plus the version admonitions (see the scenario of the admonition entries below) |
 | the pickers Alert, Admonition and Code block | stay listed |
+
+### Scenario (nominal): MyST admonitions are listed with their icons
+
+- GIVEN the MyST mode and an empty text box
+- WHEN / is typed
+- THEN the list holds an entry "<kind> admonition" for note, tip, hint, important, warning, caution, attention, danger, error, seealso, versionadded, versionchanged and deprecated, and "Custom admonition", each with the icon of its preview callout badge
+
+| Kind | Icon (as the preview callout badge) |
+| --- | --- |
+| note | information circle |
+| tip, hint, versionadded | light bulb |
+| important | star |
+| warning, attention, versionchanged | triangle |
+| caution | octagon |
+| danger, error, deprecated | circle with a cross |
+| seealso | circle with an arrow |
+| Custom admonition | the Admonition icon |
+
+- GIVEN the MyST mode and an empty text box
+- WHEN /versionadded is typed and Enter is pressed
+- THEN the text box holds the block `:::{versionadded} 1.0`, an empty line and `:::`, with 1.0 selected, in one undo step; versionchanged and deprecated write the same block with their name
+
+- GIVEN the GFM mode, or the Admonition type popover of the MyST mode
+- WHEN the slash menu or the popover is opened
+- THEN the GFM menu lists no admonition entry, and the popover keeps offering only the ten simple types and Custom (the version admonitions are not options of the popover, see SwRS-MDOKFSTUDIO-PALETTE-127)
 
 ### Scenario (boundary): The Key commands in MyST mode
 - GIVEN the MyST mode, then the GFM mode
@@ -102,6 +129,7 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 
 ### Verification notes
 - Method: test/page/modules/slashMenu.test.ts, unit tests "P11: the menu lists exactly the actions of the palette for each mode" (mode lists), "P11: the colour-code button is listed only with the caret inside a colour code" (colour code), "P11: the empty query groups by category, a query lists best match first with the category" (grouping and ranked list), "P11: variants write what choosing the option in the palette popover writes" and "P11: heading is offered as Heading 1 to 5 and Paragraph, alerts and admonitions as their types" (variants), "P11 r2: in MyST the MyST entry ranks before its GFM equivalent; GFM and exact labels are unchanged" (the kbd rows), "P11: no command shows a No command row; Enter and Tab are left to the editor" (No command).
+- Method: test/page/modules/slashMenu.test.ts, unit tests "P11: the MyST slash menu lists every admonition directive, each with its own icon" and "P11: /versionadded inserts a valid version admonition with the version selected"; visual scenarios palette-slash/v34-slash-myst-admonitions-light-900 and palette-slash/v35-slash-myst-admonitions-dark-900 (the menu scrolled to its last entries, with the icons). The block renders as an admonition titled with the version (see SwRS-MDOKFSTUDIO-MYST-001).
 - Method: test/page/modules/editPalette.test.ts, unit test "CR038: the slash menu offers the conversion only inside a table of the other form" (List table and Pipe table rows of the mode lists).
 - Method: test/integration/realInput/markers.ts and the real-window scenario scenarioSlashMenu in test/integration/realInput/textEditing.ts (palette-slash/r01-slash-no-command) (No command).
 - Method: visual scenarios palette-slash/v11-slash-strict-light-900, palette-slash/v12-slash-gfm-light-900, palette-slash/v13-slash-myst-light-900 (mode lists and grouping), palette-slash/v14-slash-myst-filtered-dark-900 (ranked list with categories), palette-slash/v12-slash-gfm-light-900 (the nomatch state), palette-slash/v09-mode-myst-light-900 (the kbd role button).
@@ -114,7 +142,8 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
-  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
 - Depends on:
   - [SwRS-MDOKFSTUDIO-PALETTE-001](SwRS-MDOKFSTUDIO-PALETTE-001.md): The palette mode decides the button sets, in registry order
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-PALETTE-268](SwRS-MDOKFSTUDIO-PALETTE-268.md): The MyST slash menu lists every admonition directive with its icon
 <!-- okf:links:end -->

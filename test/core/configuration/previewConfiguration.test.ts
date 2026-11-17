@@ -124,3 +124,16 @@ test("normalizes sticky heading depth to one through six levels", () => {
   assert.equal(readDepth(8), 6);
   assert.equal(readDepth(Number.NaN), 3);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
+test("the content width setting is rounded to whole pixels and a negative value gives the default", () => {
+  const readWidth = (value: number): number => readPreviewConfiguration({
+    get<T>(section: string, defaultValue: T): T {
+      return (section === "maxContentWidth" ? value : defaultValue) as T;
+    },
+  }).maxContentWidth;
+  assert.equal(readWidth(1049.6), 1050);
+  assert.equal(readWidth(2400), 2400);
+  assert.equal(readWidth(-1), DEFAULT_PREVIEW_CONFIGURATION.maxContentWidth);
+  assert.equal(readWidth(0), 0);
+});
