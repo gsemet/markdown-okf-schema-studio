@@ -80,3 +80,26 @@ test("a host without text editors reports no pairing", () => {
   assert.equal(vscode.scroll.visibleEditorFor(vscode.preview), vscode.editor, "an editor that shows the document is paired");
   assert.equal(vscode.scroll.visibleEditorFor({ ...vscode.preview, documentUri: "file:///workspace/other.md" }), undefined);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+test("a new render starts at the stored anchor, else at the editor's first visible line, else nowhere", () => {
+  const { scroll, preview, editor } = setup();
+  const anchorOf = (candidate: unknown): number | undefined =>
+    (scroll as unknown as { initialAnchorLine(session: unknown): number | undefined }).initialAnchorLine(candidate);
+  const withScroll = (anchor: unknown, follow = true): unknown => ({
+    ...preview,
+    configuration: { ...preview.configuration, scrollPreviewWithEditor: follow },
+    scroll: { ...preview.scroll, anchor },
+  });
+
+  assert.equal(anchorOf(withScroll({ documentId: DOCUMENT_ID, line: 80 })), 80, "the anchor of the shown document");
+  editor.firstVisibleLine = 30;
+  assert.equal(anchorOf(withScroll(undefined)), 31, "no anchor: the editor's zero-based first visible line, one-based");
+  assert.equal(anchorOf(withScroll({ documentId: "file:///workspace/other.md", line: 80 })), 31, "an anchor of another document is not used");
+  assert.equal(anchorOf(withScroll(undefined, false)), undefined, "no anchor and the follow setting off: none is passed");
+  assert.equal(anchorOf(withScroll({ documentId: DOCUMENT_ID, line: 80 }, false)), 80, "the stored anchor does not depend on the setting");
+  const unpaired = setup({ pairing: false });
+  assert.equal(
+    (unpaired.scroll as unknown as { initialAnchorLine(session: unknown): number | undefined }).initialAnchorLine(unpaired.preview),
+    undefined, "without a visible editor of the document there is no anchor");
+});

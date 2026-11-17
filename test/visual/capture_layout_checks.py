@@ -203,7 +203,7 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
 
 
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+# @tests_req StRS-MDOKFSTUDIO-TOOLBAR-002
 def check_heading_fold(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
     """In Chromium the Fold button folds every section with content, a folded block keeps no height, and a chevron folds one section."""
     button = toolbar.locator("[data-sphinx-preview-fold-toggle]")

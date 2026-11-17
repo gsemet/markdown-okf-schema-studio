@@ -69,6 +69,7 @@ const LIGHT_THEME = "Default Light Modern";
  * only takes the screenshots (on the code that has no find bar), anything else runs the checks and
  * takes the "after" screenshots into `STUDIO_FIND_SHOTS` (default: the e2e report folder).
  */
+// @tests_req StRS-MDOKFSTUDIO-TOOLBAR-003
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
   await vscode.extensions.getExtension("GaetanSemet.markdown-okf-schema-studio")?.activate();

@@ -124,3 +124,31 @@ test("the page reads missing or odd boot entries with the page defaults", () => 
     "codeBlocks.lineNumbers": false,
   });
 });
+
+function sourceFiles(directory: string): string[] {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) return sourceFiles(full);
+    return entry.name.endsWith(".ts") ? [full] : [];
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-149
+test("the Studio settings live under their own prefix, and no source writes a setting of the built-in Markdown preview", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, "package.json"), "utf8")) as {
+    contributes: { configuration: Array<{ properties: Record<string, unknown> }> };
+  };
+  const keys = manifest.contributes.configuration.flatMap((category) => Object.keys(category.properties));
+  assert.ok(keys.length > 0);
+  for (const key of keys) {
+    assert.ok(key.startsWith("markdownOkfSchemaStudio."), `${key} is a Studio setting, not a markdown.* one`);
+  }
+  const readers: string[] = [];
+  for (const file of sourceFiles(path.join(projectRoot, "src"))) {
+    const text = fs.readFileSync(file, "utf8");
+    assert.ok(!/ConfigurationTarget/u.test(text), `${path.relative(projectRoot, file)} writes no setting`);
+    if (/getConfiguration\(/u.test(text)) readers.push(path.relative(projectRoot, file).split(path.sep).join("/"));
+    assert.ok(!/["'`]markdown\.(preview|styles)/u.test(text), `${path.relative(projectRoot, file)} names no markdown.preview key`);
+  }
+  assert.deepEqual(readers, ["src/host-vscode/vscodeHost.ts"], "settings are reached through one reader, by section name");
+});

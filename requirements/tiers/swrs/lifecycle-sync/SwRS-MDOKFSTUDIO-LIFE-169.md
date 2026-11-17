@@ -162,8 +162,8 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 - Method: test/page/runtimePageControls.test.ts (zoom buttons post zoom and write viewZoom, the zoom limits post nothing more, the width button cycles margin, auto, full, the collapse button, the table of contents button).
 - Method: test/page/modules/editPalette.test.ts and test/page/runtimeEditPalette.test.ts (one previewPaletteModeChanged per chosen mode, none after setMode).
 - Method: test/page/modules/tocColumn.test.ts (the toggle posts toc and remembers it).
-- Method: test/integration/paletteMode.test.ts (a reported palette mode is stored and wins over the setting in the next panel; the Restricted Mode case is deduced from the code, untested).
-- Method: test/integration/lifecycle.test.ts and test/core/state/previewTheme.test.ts (previewThemeModeChanged dark is stored and carried by the next page; the stale-message drop is untested).
+- Method: test/integration/paletteMode.test.ts (a reported palette mode is stored and wins over the setting in the next panel; the Restricted Mode case is checked in test/session/diagReq.viewState.requirements.test.ts).
+- Method: test/integration/lifecycle.test.ts and test/core/state/previewTheme.test.ts (previewThemeModeChanged dark is stored and carried by the next page; the stale-message drop is checked in test/session/diagReq.viewState.requirements.test.ts).
 - Method: test/core/state/previewViewPreferences.test.ts (one key, normalized object, no write without storage) and test/core/protocol/pageToHost.test.ts (validators, width mode wide refused).
 - Method: test/session/diagReq.viewState.requirements.test.ts (a theme mode or a view preference that cannot be saved still holds for the session, is logged by the logger of the host, and warns the reader once).
 - Method: test/integration/previewEditing.test.ts (previewAnchorModeChanged false then true sets the configuration of the preview; the update of the loaded context is untested).

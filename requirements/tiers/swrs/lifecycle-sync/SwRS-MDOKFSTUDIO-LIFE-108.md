@@ -27,6 +27,7 @@ implemented_in_files:
 - src/page/features/scrollCore.ts
 - src/session/features/scrollSync.ts
 tested_in_files:
+- test/core/protocol/pageToHost.test.ts
 - test/integration/scroll-sync-suite.ts
 - test/integration/sourceMapping.test.ts
 - test/page/pageSettings.test.ts
@@ -122,7 +123,7 @@ When the reader scrolls the preview to another source line or activates a render
 - Method: test/page/runtimeScroll.test.ts (scenarios 1, 3 and 4: "disabling editor anchoring stops preview-to-editor scrolling"; "executes source and preview synchronization across layout changes" dispatches the click and asserts previewReveal with line 50 and activation click, and dispatches Enter and asserts previewReveal with activation keyboard; the exclusion list of buttons, inputs, links, chips and insertion controls is untested, checked by reading the keydown handler of bindClicks in src/page/features/pageInput.ts)
 - Method: test/integration/sourceMapping.test.ts (scenarios 2 and 3: previewScroll line 1 reveals line 1 and lastRevealedSourceLine equals the message line, click activation reveals line 2; the caret is not moved because revealRange does not change the selection, deduced from the code)
 - Method: test/session/lifeReq.requirements.test.ts (scenarios 6 and 7: "a reveal that names another source file moves nothing" and "a revealed line is clamped between the first and the last line of the document", by reading revealFromPage and revealEditorLine, Math.max(0, Math.min(lineCount - 1, line - 1)))
-- Method: scenario 8 is checked by the envelope tests of SwRS-MDOKFSTUDIO-TRUST-052 and by reading hasValidStateFields in src/core/protocol/pageToHost.ts (untested for the two message types themselves)
+- Method: scenario 8 is checked by the envelope tests of SwRS-MDOKFSTUDIO-TRUST-052 and by reading hasValidStateFields in src/core/protocol/pageToHost.ts (the shape of the two message types is checked in test/core/protocol/pageToHost.test.ts)
 - Method: test/page/pageSettings.test.ts (Defaults): "page settings default to following both ways, without selection marks or double-click reveal"; test/page/runtimeScroll.test.ts (the double click): "executes source and preview synchronization across layout changes" (a dblclick posts nothing more). The click path with scrollEditorWithPreview off has no test (untested); checked by reading revealFromPage and revealEditorLine.
 - Criteria: readPreviewConfiguration returns true for no value of scrollEditorWithPreview; revealEditorLine returns before any reveal when scrollEditorWithPreview is false; the page registers no double-click listener; previewScroll is posted only when the rounded line changed; lastRevealedSourceLine equals the message line; visibleTextEditors is unchanged and the document equals the file on disk when no editor shows the file; revealEditorLine runs only when the resolved paths are equal or no file is named; the zero-based line is between 0 and lineCount - 1.
 

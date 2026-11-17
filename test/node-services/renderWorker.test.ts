@@ -269,3 +269,23 @@ test("a render aborted while its thread still starts keeps that thread for the n
   assert.equal(stats.aborted, 0);
   assert.equal(stats.workerRenders, 1);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+test("an idle worker stops after the idle time, so the next render starts a new thread; within it the thread is reused", async (context) => {
+  const root = workspace(context);
+  const kept = createWorkerRenderer({ idleMs: 60_000 });
+  context.after(() => kept.dispose());
+  await kept.render(input(root, "# One\n"));
+  await kept.render(input(root, "# Two\n"));
+  assert.equal(kept.stats().started, 1, "within the idle time the warm thread serves the next render");
+
+  const renderer = createWorkerRenderer({ idleMs: 40 });
+  context.after(() => renderer.dispose());
+  await renderer.render(input(root, "# One\n"));
+  assert.equal(renderer.stats().started, 1);
+  await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  await renderer.render(input(root, "# Two\n"));
+  assert.equal(renderer.stats().started, 2, "the idle thread was stopped, a new one serves the render");
+  assert.equal(renderer.stats().workerRenders, 2);
+  assert.equal(renderer.stats().fallbackRenders, 0);
+});

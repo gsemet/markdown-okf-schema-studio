@@ -24,6 +24,7 @@ implemented_in_files:
 - src/session/features/rendering.ts
 - src/session/previewManager.ts
 tested_in_files:
+- test/host/lifeReq.requirements.test.ts
 - test/integration/lifecycle.test.ts
 - test/integration/serializer.test.ts
 default_owner_email: gaetan@xeberon.net
@@ -63,7 +64,7 @@ When a preview panel is created, restored, switched to another document or finis
 
 ### Verification notes
 
-- Method: test/integration/lifecycle.test.ts (Side preview: title Studio · preview.md; Render finished: asserts the title after the first render; the title after a switch (Switch) is untested).
+- Method: test/integration/lifecycle.test.ts (Side preview: title Studio · preview.md; Render finished: asserts the title after the first render; the title after a switch (Switch) and the bare file name of an Open With tab are checked in test/host/lifeReq.requirements.test.ts).
 - Method: test/integration/serializer.test.ts (Fixed preview and panel without a document: the older restored panel is not titled Studio; the other rows are by reading previewTitle).
 - Criteria: panel.title equals the expected string for each role, and equals previewTitle for the shown path after each switch and render.
 
