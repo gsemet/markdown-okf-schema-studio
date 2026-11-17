@@ -14,10 +14,10 @@ scope: review-annotations
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-17T22:55:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-17T22:55:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -38,7 +38,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-119
 - SwRS-MDOKFSTUDIO-REVIEW-216
 - SwRS-MDOKFSTUDIO-REVIEW-219
-- SwRS-MDOKFSTUDIO-TRUST-001
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -60,6 +59,26 @@ As a reviewer, I see where each discussion sits in the document and read it wher
 - When the review comments file of a document is not valid, the Studio shows none of its threads, warns the reviewer once and leaves the file untouched.
 - A file that is too large, not JSON, of another version or with one bad thread counts as not valid.
 - Writing a new comment is refused while the file is not valid.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor Reviewer
+    participant Host
+    participant File as Comments file
+    participant Page as Preview
+    Host->>File: read the comments file
+    alt the file is valid
+        Host->>Page: the threads
+        Page->>Page: highlight each quote and list the orphans
+        Page-->>Reviewer: highlights and orphan list
+    else the file is not valid
+        Host-->>Reviewer: one warning, the file stays untouched
+    end
+    Reviewer->>Page: click a highlight
+    Page-->>Reviewer: the thread popover
+```
 
 ### Main paths
 
@@ -90,14 +109,13 @@ As a reviewer, I see where each discussion sits in the document and read it wher
   - [SwRS-MDOKFSTUDIO-REVIEW-001](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-001.md): The review comments file next to a document holds its threads as data
   - [SwRS-MDOKFSTUDIO-REVIEW-004](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-004.md): A review comments file with any problem or over its limits is ignored with one warning
   - [SwRS-MDOKFSTUDIO-REVIEW-012](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-012.md): The host posts the threads of the review comments file and follows its changes
-  - [SwRS-MDOKFSTUDIO-REVIEW-017](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-017.md): The quote of a thread is highlighted once in its block
+  - [SwRS-MDOKFSTUDIO-REVIEW-017](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-017.md): The quote of a thread is highlighted once in its block, also over a line break of the source
   - [SwRS-MDOKFSTUDIO-REVIEW-021](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-021.md): A highlight, badge or orphan entry opens the thread popover
   - [SwRS-MDOKFSTUDIO-REVIEW-028](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-028.md): Threads that cannot be placed are listed in the Orphaned comments box
-  - [SwRS-MDOKFSTUDIO-REVIEW-100](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-100.md): A thread follows its quote in the plain text, narrowed by its context
+  - [SwRS-MDOKFSTUDIO-REVIEW-100](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-100.md): A thread follows its quote in the plain text, narrowed by its context, or is orphaned and keeps its lines
   - [SwRS-MDOKFSTUDIO-REVIEW-101](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-101.md): A thread whose quote is gone or ambiguous is orphaned and keeps its lines
   - [SwRS-MDOKFSTUDIO-REVIEW-107](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-107.md): A slightly changed quote is followed by a bounded fuzzy search
   - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only
   - [SwRS-MDOKFSTUDIO-REVIEW-216](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-216.md): A quote over a line break of the source is highlighted
   - [SwRS-MDOKFSTUDIO-REVIEW-219](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-219.md): An orphaned thread whose quote returns is placed again
-  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
 <!-- okf:links:end -->
