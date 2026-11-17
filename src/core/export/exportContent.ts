@@ -255,6 +255,7 @@ export function imageSourcesOf(root: HtmlParent): string[] {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-128
 /**
  * Every local image becomes a data URI through `imageData`. An image that cannot be embedded loses
  * its `src` and `srcset`, keeps its `alt`, and is counted. A `data:` image (a diagram) is kept as it is.

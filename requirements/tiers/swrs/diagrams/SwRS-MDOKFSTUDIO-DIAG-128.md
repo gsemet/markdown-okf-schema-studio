@@ -18,7 +18,9 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files: []
+implemented_in_files:
+- src/core/export/exportContent.ts
+- src/page/modules/exportSnapshot.ts
 tested_in_files:
 - test/integration/exportHtml.test.ts
 - test/page/modules/exportSnapshot.test.ts

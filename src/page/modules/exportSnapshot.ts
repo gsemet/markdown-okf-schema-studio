@@ -82,6 +82,7 @@ export function takeExportSnapshot(document: ExportDocument, window: ExportWindo
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-128
 /** Calls `done` when no diagram is drawing any more, or after `timeoutMs`. */
 export function whenDiagramsSettled(
   document: Pick<Document, "querySelectorAll">,
@@ -121,6 +122,7 @@ export function installExportSnapshot(
     run(userGesture) {
       if (running) return;
       setBusy(true);
+      // @implements_req SwRS-MDOKFSTUDIO-DIAG-128
       whenDiagramsSettled(document, window, EXPORT_DIAGRAM_WAIT_MS, () => {
         const snapshot = takeExportSnapshot(document, window);
         if (!snapshot) {

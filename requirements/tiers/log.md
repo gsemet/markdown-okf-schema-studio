@@ -1,5 +1,19 @@
 # Update Log
 
+## 2026-11-17
+
+### Requirement markers gated
+
+- Changed: SwRS-MDOKFSTUDIO-DIAG-128 gets its implementation markers (`whenDiagramsSettled` and the export
+  run in `src/page/modules/exportSnapshot.ts`, `embedImages` in `src/core/export/exportContent.ts`); the stale
+  `@tests_req SwRS-MDOKFSTUDIO-LAYOUT-021` is removed from `test/session/diagReq.viewState.requirements.test.ts`;
+  `just check-markers` now refuses an in-force SwRS with no `@implements_req`, a marker block of more than 3 IDs
+  and a companion marker line that does not name its scenario or code point (baseline
+  `scripts/marker-baseline.json`); the four `*.markers.ts` companions name their code points and
+  `plantumlBundle.markers.ts` now marks `esbuild.mjs`. No normative change.
+- Sources: `scripts/check-marker-companions.mjs`, `src/page/modules/exportSnapshot.ts`,
+  `src/core/export/exportContent.ts`. Tests: `test/build/checkMarkers.test.ts`.
+
 ## 2026-11-14
 
 ### The version commit carries no Signed-off-by trailer (CR 325)

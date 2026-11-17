@@ -94,6 +94,37 @@ runs it (`okfreq validate --check-links --project-root .` and coverage with CI's
 a gap is fixed before the PR opens. The PR body's Tests section lists the requirement IDs added or
 changed with their source and test files.
 
+### Marker placement
+
+A marker links a requirement to the code or test that carries it, so it sits at that code point,
+never in a list on a file header or a constant. `just check-markers` (part of `just check`) holds
+the rules below; the definition comes first.
+
+> **Marker block**: the requirement markers that sit together with no line of code between them.
+> Several one-ID marker comments above one declaration or one test form one block, even when blank
+> lines or prose comment lines (a JSDoc, an explanation) separate them; only a code line ends a
+> block. A block names at most 3 distinct requirement IDs. To mark more, put each marker at the
+> code or test it names: on another declaration, or inside the test body that checks it.
+
+- **A source marker on every SwRS.** An in-force SwRS (`draft`, `proposed`, `approved`) that is not
+  exempt (`annotation_exemption` is not `true`) has an `@implements_req` in a source directory
+  of `requirements/config.yml`. No baseline.
+- **At most 3 IDs per marker block**, in every file under the source and test directories.
+- **A companion names its target.** A companion marker file is a tracked file under `src/` or
+  `test/` named `*.markers.ts` or holding a `// Companion of: <path>` line: it holds markers that
+  cannot live in the file they belong to (the host), only comment lines and `export {};`. Each of
+  its marker lines is `// @tests_req <ID> — <scenario>` or `// @implements_req <ID> — <code point>`
+  (an em dash between spaces, then a name): the scenario that checks the ID, or the function,
+  constant, module or build entry that implements it. The name occurs as text in the host file or
+  in a file directly in the host's folder. A companion whose lines are all named is not held to the
+  cap of 3.
+- **The baseline** `scripts/marker-baseline.json` freezes the offenders that existed when the gate
+  started (`blocks`: files with an over-limit block; `unnamedCompanionLines`: companions with
+  unnamed lines). An entry may only shrink: when a file improves, lower the entry with
+  `node scripts/check-marker-companions.mjs --update` (the check says so), which also removes the
+  entries that reached 0. A new marker list over 3 IDs or a new unnamed companion line is never
+  added to the baseline: put the markers at their code or tests.
+
 ### Approved requirements
 
 Before the change starts, the requirements the change would alter are listed: every `approved`
