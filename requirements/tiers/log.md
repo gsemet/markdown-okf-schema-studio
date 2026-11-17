@@ -2,6 +2,16 @@
 
 ## 2026-11-17
 
+### Use case diagram on each StRS page
+
+- Added: SwRS-MDOKFSTUDIO-CORE-087 (proposed, derived from StRS-MDOKFSTUDIO-TRUST-014): the site requirements
+  viewer draws the Mermaid fence of a `### Use case diagram` section as an inline SVG in the site's colours under
+  the user need, and the site build stops with the StRS id and Mermaid's message when a fence cannot be drawn.
+  `project.guidelines.md` gets the rule "Use case diagram of a StRS" (optional, before Main paths).
+- Sources: `test/site/requirementsViewer/useCaseDiagram.ts`, `write.ts`, `pages.ts`; marker in
+  `src/core/render/requirementsViewer.markers.ts`. Tests: `test/site/requirementsViewer/useCaseDiagram.test.ts`,
+  `pages.test.ts`, `model.test.ts`.
+
 ### Requirement markers gated
 
 - Changed: SwRS-MDOKFSTUDIO-DIAG-128 gets its implementation markers (`whenDiagramsSettled` and the export
