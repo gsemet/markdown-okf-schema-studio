@@ -405,10 +405,12 @@ test("Auto measures a table again on a real resize while a cell is edited", asyn
     await openCellEditor(page, 0);
     const open = await layoutPass(page);
     assert.equal(open.wide, true, `${themeId}: wide with the editor open`);
-    await page.setViewportSize({ width: 760, height: 1400 });
+    // The pane must be narrower than the table's natural width, which depends on the font
+    // (705 to 797 px across platforms); 600 px is below it everywhere.
+    await page.setViewportSize({ width: 600, height: 1400 });
     const narrower = await layoutPass(page);
     assert.ok(narrower.width < open.width, `${themeId}: the breakout follows the pane (${open.width} then ${narrower.width} px)`);
-    assert.ok(narrower.width <= 760, `${themeId}: the table fits the narrower pane`);
+    assert.ok(narrower.width <= 600, `${themeId}: the table fits the narrower pane`);
   });
 });
 
