@@ -272,3 +272,12 @@ test("T22: rescan keeps observing the links that are still in the content", () =
   assert.equal(runtime.unobserved.length, 0);
   assert.equal(runtime.observed.length, 3);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+test("an auxclick with button 2 posts nothing and leaves the default action", () => {
+  const runtime = harness(["references/PROPERTIES.md"]);
+  let prevented = 0;
+  runtime.listeners.get("auxclick")!({ type: "auxclick", button: 2, target: runtime.links[0], preventDefault: () => prevented += 1 });
+  assert.equal(prevented, 0);
+  assert.equal(runtime.messages.length, 0);
+});

@@ -130,7 +130,7 @@ When the reader clicks, middle-clicks or presses Enter or Space on a link that c
 
 ### Verification notes
 
-- Method: test/page/modules/linkNavigation.test.ts (local and wiki clicks are host-routed even before discovery, including middle click; the auxclick button 2 refusal has no test).
+- Method: test/page/modules/linkNavigation.test.ts (local and wiki clicks are host-routed even before discovery, including middle click; the auxclick button 2 refusal is checked too).
 - Method: test/page/modules/toolbarReq.requirements.test.ts (Enter or Space on a link is routed to the host and another key is not).
 - Method: test/integration/previewHistory.test.ts (link to second.md#target opens the second document; external link with a stubbed openExternal, one call, history unchanged; javascript:alert(1) leaves the history unchanged, the warning text is not asserted; the second.md#missing case has no test).
 - Method: test/page/linkEditModeClick.test.ts (edit mode scenario: a plain click, Enter or Space posts no previewLink; Cmd and Ctrl click, Cmd and Ctrl+Enter and a middle click post one; a click on a link while another editor is open posts none).

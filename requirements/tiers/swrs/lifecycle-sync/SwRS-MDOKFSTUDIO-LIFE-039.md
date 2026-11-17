@@ -37,6 +37,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/state/editLock.test.ts
 - test/host-memory/memoryHostSession.test.ts
+- test/host/lifeReq.requirements.test.ts
 - test/host/previewTiming.test.ts
 - test/integration/dirtySnapshots.test.ts
 - test/node-services/build/buildQueue.test.ts
@@ -123,7 +124,7 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 - Method: test/node-services/build/buildQueue.test.ts "adapts the debounce to twice the last build time, within its bounds" "aborts a build that overruns twice the last build time once a newer edit is due" and "never aborts a build of a small document whose wall time exceeds its reported render time" (mocked clock: the second build starts at 600 ms, not 40 ms; with the bound of the wait at 200 ms instead of 1 s, the overrunning build's signal aborts at 250 ms, not before; a 60 ms build whose render reports 2 ms is not aborted when a newer edit is due at 40 ms). The 1 s upper bound has no test of its own.
 - Method: test/core/state/editLock.test.ts "a save of an unchanged open buffer needs no render (PERF-06)" and "a save of the already rendered buffer is skipped (PERF-06), any other state renders" cover the decision of the save rows; the wiring in refreshReferencedPath has no integration test.
 - Method: test/core/protocol/pageStateMessages.test.ts (the previewReady message accepted and refused) and test/core/state/editLock.test.ts "a previewReady with another requestId releases the lock (STAB-02)" and "previewReady without a lock releases nothing".
-- Method: the source gone scenario is untested.
+- Method: the source gone scenario is checked in test/host/lifeReq.requirements.test.ts (a change event of a file that is gone shows Preview source missing).
 - Method: test/session/previewManager.test.ts "two previews of one document and revision share one render, each with its own request id" and "a hidden panel does not render until it is shown, then renders once" (renders counted through the render override: 2 before the change for two previews and 2 for a hidden panel, 1 and 0 after); test/session/sharedRenders.test.ts (join, release with the last copy, new revision, invalidation).
 - Criteria: the HTML of the ready render contains the typed marker; debounceMs is 40 in the session's queue (until a render time is known) and a burst yields one build; the final page holds only the newest marker and the request ids grow; both hashes equal their values before the test; isUnchangedSave is true only for the active document at the staged revision.
 

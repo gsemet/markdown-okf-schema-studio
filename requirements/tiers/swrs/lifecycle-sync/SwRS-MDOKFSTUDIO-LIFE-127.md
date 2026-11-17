@@ -111,7 +111,7 @@ The identity is kept in every row.
 - Method: test/host/lifeReq.requirements.test.ts "a saved state with an invalid source URI shows an explanation" (refusal row for the unparsable id), "a saved source that is not a Markdown file shows an explanation" (refusal rows for notes.txt and untitled), "a restored side preview owns the group lock the workbench restored" (group lock), "of two restored panels only the newer one switches with the active editor" (older panel after a newer restore).
 - Method: test/core/state/previewState.test.ts "parses bounded preview panel state and preserves supported fields" and "rejects invalid identity and drops malformed optional state" (identity and optional field boundaries, no saved state and empty document id as parser results; no integration step produces the page for these two rows).
 - Method: test/integration/reload-suite.ts covers the view choices that survive a window reload.
-- Method: the file outside a folder scenario is untested; it is checked by reading deserializePreviewPanel.
+- Method: the file outside a folder scenario is checked in test/host/lifeReq.requirements.test.ts (a restored panel renders with restricted reads); it is checked by reading deserializePreviewPanel.
 - Criteria: sourceLine, scrollTop and descriptionsCollapsed equal the saved values; parsePreviewPanelState returns undefined for an invalid identity and each optional field is present only inside its bound; the page holds the message of the row and lockedColumn equals the panel column of each restored panel.
 
 <!-- okf:links:start -->

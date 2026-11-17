@@ -25,6 +25,7 @@ implemented_in_files:
 - src/host-vscode/activation.ts
 - src/session/sessionFactory.ts
 tested_in_files:
+- test/host/lifeReq.requirements.test.ts
 - test/integration/serializer.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -61,7 +62,7 @@ When several previews are open, the extension SHALL give each its own session wi
 
 ### Verification notes
 
-- Method: test/integration/serializer.test.ts asserts two live sessions (getLivePreviewRolesForTests length 2) and, for two restored panels, the roles [false, true] (followsActiveEditor) and the older title (two restored panels coexist); the independence of the queues and watchers (two previews, same document twice) is by reading createSession; the single restored panel is untested.
+- Method: test/integration/serializer.test.ts asserts two live sessions (getLivePreviewRolesForTests length 2) and, for two restored panels, the roles [false, true] (followsActiveEditor) and the older title (two restored panels coexist); the independence of the queues and watchers (two previews, same document twice) is by reading createSession; the single restored panel is untested; the render of only the previews that show a changed file is checked in test/host/lifeReq.requirements.test.ts.
 - Criteria: manager.sessions() holds one session per panel and each owns a BuildQueue and a watcher; getLivePreviewRolesForTests returns followsActiveEditor [false, true].
 
 <!-- okf:links:start -->

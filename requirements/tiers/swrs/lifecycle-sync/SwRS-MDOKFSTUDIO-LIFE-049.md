@@ -123,7 +123,7 @@ When the preview shows a render state, the extension SHALL label the status Prev
 
 ### Verification notes
 
-- Method: test/integration/stockCoexistence.test.ts (Open With stayed loading while MyST was rendering) asserts a pending status page while the first render is delayed; the exact message is untested.
+- Method: test/integration/stockCoexistence.test.ts (Open With stayed loading while MyST was rendering) asserts a pending status page while the first render is delayed; the exact message of an Open With editor on an existing file is checked in test/host/lifeReq.requirements.test.ts.
 - Method: test/integration/lifecycle.test.ts (the stale lifecycle render, lifecycle recovery) and test/integration/dirtySnapshots.test.ts (Preview is stale in the page, recovery after the failing directive) cover good render and failed render; the label wording has no unit test of PREVIEW_STATUS_LABELS.
 - Method: test/node-services/build/buildQueue.test.ts "retains a successful result as stale after a failed newer build" (recovery).
 - Method: test/host/previewTiming.test.ts "a render pending for 1500 ms over a ready page shows the overlay, hidden again before the patch", "a render that finishes before 1500 ms never shows the overlay" and "a preview disposed while its render is debouncing, building or awaiting a patch acknowledgement stays silent" (pending render over a shown page, the 1.5 second notice); the nothing-shown case is by reading handleQueueState, the pending message texts of the pending render are untested there, and the clearing of the notice on assignment is by reading assignWebviewHtml.

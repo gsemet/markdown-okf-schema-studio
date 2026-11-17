@@ -938,3 +938,230 @@ test("switching back to a document brings back its remembered state", async (t) 
   assert.deepEqual(session.state?.openDisclosures, [1], "the open sections of A are back");
   assert.equal(session.state?.sourceLine, 80, "the scroll line of A is back");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-038
+test("a change of a file renders only the previews that show it, each on its own schedule", async (t) => {
+  const studio = start(t);
+  const fileA = writeFile("# Page A\n\nText of A.\n");
+  const fileB = writeFile("# Page B\n\nText of B.\n");
+  const { document, panel } = await studio.openSide(fileA);
+  const side = studio.manager.active!;
+  const withPanel = await openWith(studio, fileB);
+  const fixed = studio.manager.active!;
+  await studio.advance(200);
+  assert.notEqual(side, fixed, "each preview has its own session");
+  const [sideBefore, fixedBefore] = [side.probe.renderedStages, fixed.probe.renderedStages];
+  const fixedHtml = withPanel.htmlAssignments.length;
+  fake.controls.changeDocument(document, "# Page A\n\nText of A changed.\n");
+  assert.equal(fixed.overlay.message, "", "the queue of the other preview shows no state");
+  await studio.advance(300);
+  assert.ok(side.probe.renderedStages > sideBefore, "the preview of the changed file renders again");
+  assert.match(lastRendered(panel), /Text of A changed\./u);
+  assert.equal(fixed.probe.renderedStages, fixedBefore, "the preview of another file does not render");
+  assert.equal(withPanel.htmlAssignments.length, fixedHtml);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-038
+test("two previews of one document both render the new text", async (t) => {
+  const studio = start(t);
+  const file = writeFile("# Twice\n\nOld text.\n");
+  const { document, panel } = await studio.openSide(file);
+  const side = studio.manager.active!;
+  const withPanel = await openWith(studio, file);
+  const fixed = studio.manager.active!;
+  await studio.advance(200);
+  const [sideBefore, fixedBefore] = [side.probe.renderedStages, fixed.probe.renderedStages];
+  fake.controls.changeDocument(document, "# Twice\n\nNew text.\n");
+  await studio.advance(300);
+  assert.ok(side.probe.renderedStages > sideBefore);
+  assert.ok(fixed.probe.renderedStages > fixedBefore);
+  assert.match(lastRendered(panel), /New text\./u);
+  assert.match(lastRendered(withPanel), /New text\./u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-024
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-026
+test("switching the active file retitles the side preview and shows the following message until the render ends", async (t) => {
+  const studio = start(t);
+  const fileA = writeFile("# A\n", workspaceRoot, `title-a-${process.pid}.md`);
+  const fileB = writeFile("# B\n", workspaceRoot, `title-b-${process.pid}.md`);
+  const { panel } = await studio.openSide(fileA);
+  assert.equal(panel.title, `Studio · title-a-${process.pid}.md`);
+  const assignments = panel.htmlAssignments.length;
+  await fake.controls.showDocument(fileB);
+  fake.controls.events.changeActiveEditor.fire(fake.vscode.window.activeTextEditor);
+  await studio.until(() => studio.manager.active!.documentUri === Uri.file(fileB).toString(), "the switch to B");
+  assert.equal(panel.title, `Studio · title-b-${process.pid}.md`, "the title follows the switch");
+  assert.ok(
+    panel.htmlAssignments.slice(assignments).some((html) => /Following the active Markdown editor\./u.test(html)),
+    "the pending page names the reason",
+  );
+  await studio.advance(300);
+  assert.match(lastRendered(panel), /<h1[^>]*>B<\/h1>/u);
+  assert.doesNotMatch(lastHtml(panel), /Following the active Markdown editor\./u, "the pending message ends with the render");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-024
+test("an Open With tab is titled with the bare file name", async (t) => {
+  const studio = start(t);
+  const file = writeFile("# Fixed\n", workspaceRoot, `fixed-${process.pid}.md`);
+  const panel = await openWith(studio, file);
+  assert.equal(panel.title, `fixed-${process.pid}.md`);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+test("a change event of a file that is gone shows Preview source missing instead of rendering", async (t) => {
+  const studio = start(t);
+  const file = writeFile("# Gone soon\n\nText.\n");
+  const { document, panel } = await studio.openSide(file);
+  await studio.advance(100);
+  fs.rmSync(file);
+  fake.controls.changeDocument(document, "# Gone soon\n\nEdited.\n");
+  await studio.advance(300);
+  assert.match(lastHtml(panel), /Preview source missing/u);
+  assert.doesNotMatch(lastHtml(panel), /Edited\./u, "the edit is not rendered");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+test("with incrementalUpdates off a render assigns the page document instead of a content patch", async (t) => {
+  const studio = start(t);
+  const { document, panel } = await studio.openSide(writeFile("# Patch\n\nBefore.\n"));
+  await studio.advance(100);
+  await studio.ready(panel);
+  const session = studio.manager.active!;
+  assert.equal(session.configuration.incrementalUpdates, true, "on by default");
+  const patches = (): number => panel.posted.filter((message) => message.type === "previewContentPatch").length;
+  fake.controls.changeDocument(document, "# Patch\n\nMiddle.\n");
+  await studio.advance(300);
+  assert.equal(patches(), 1, "with the setting on the render is a patch");
+  await studio.ready(panel);
+  session.configuration = { ...session.configuration, incrementalUpdates: false };
+  const assignments = panel.htmlAssignments.length;
+  fake.controls.changeDocument(document, "# Patch\n\nAfter.\n");
+  await studio.advance(300);
+  assert.equal(patches(), 1, "with the setting off no patch is posted");
+  assert.ok(panel.htmlAssignments.length > assignments, "the page document is assigned again");
+  assert.match(lastRendered(panel), /After\./u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-127
+test("a restored panel of a file in no workspace folder renders with restricted reads", async (t) => {
+  const studio = start(t);
+  const outside = writeFile("# Outside\n\nStandalone.\n", outsideRoot);
+  const panel = newPanel(DEFAULT_PANEL_TYPE, 2);
+  await restore(studio, panel, restoredState(outside));
+  const [session] = sessionsOf(studio);
+  assert.ok(session);
+  assert.equal(session.restrictedReads, true);
+  assert.equal(session.workspaceRoot, outsideRoot, "the resource folder is the directory of the file");
+  assert.match(lastRendered(panel), /Standalone\./u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-125
+test("a state report records its fields within bounds and leaves out the ones that fail the host's parse", async (t) => {
+  const studio = start(t);
+  const { panel } = await studio.openSide(writeFile("# Bounds\n\nText.\n"));
+  await studio.advance(100);
+  const session = studio.manager.active!;
+  await studio.ready(panel, undefined, { sourceLine: 4, scrollTop: 88, descriptionsCollapsed: true });
+  assert.deepEqual([session.state?.sourceLine, session.state?.scrollTop, session.state?.descriptionsCollapsed], [4, 88, true]);
+  await studio.ready(panel, undefined, {
+    sourceLine: 5,
+    focusedBlockId: "b".repeat(201),
+    selectedText: "s".repeat(4097),
+    openDisclosures: [0, 3, -1, 10_000, 2.5, "4", 9_999],
+    descriptionsCollapsed: "yes",
+  });
+  assert.equal(session.state?.sourceLine, 5, "the valid fields of the report are recorded");
+  assert.equal(session.state?.focusedBlockId, undefined, "201 characters are too long for a block id");
+  assert.equal(session.state?.selectedText, undefined, "4097 characters are too long for a selection");
+  assert.deepEqual(session.state?.openDisclosures, [0, 3, 9_999], "only safe integers from 0 to 9999 are kept");
+  assert.equal(studio.manager.choices.collapsedDescriptionsOf(session.documentUri), true,
+    "a non-boolean keeps the previous Description choice of the workspace");
+  // Known issue: the field is dropped from the session's recorded state, whose Description value is
+  // read back only through the stored choice above.
+  assert.equal(session.state?.descriptionsCollapsed, undefined);
+  await studio.ready(panel, undefined, {
+    focusedBlockId: "b".repeat(200), selectedText: "s".repeat(4096), openDisclosures: Array.from({ length: 120 }, (_, index) => index),
+  });
+  const recorded = session.state as { focusedBlockId?: string; selectedText?: string; openDisclosures?: number[] } | undefined;
+  assert.equal(recorded?.focusedBlockId?.length, 200);
+  assert.equal(recorded?.selectedText?.length, 4096);
+  assert.equal(recorded?.openDisclosures?.length, 100, "at most the first 100 indexes");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-125
+test("a state report that names another document leaves the recorded state unchanged", async (t) => {
+  const studio = start(t);
+  const { panel } = await studio.openSide(writeFile("# Other\n\nText.\n"));
+  await studio.advance(100);
+  const session = studio.manager.active!;
+  await studio.ready(panel, undefined, { sourceLine: 7 });
+  const before = session.state;
+  panel.fromPage.fire({
+    type: "previewState", documentId: "file:///elsewhere/other.md", revision: 1, requestId: 1, sourceLine: 99, scrollTop: 5,
+  });
+  await studio.advance(100);
+  assert.equal(session.state, before);
+  assert.equal(session.state?.sourceLine, 7);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+test("a previewRefresh of the current render records the state and renders again, one of an older render is dropped", async (t) => {
+  const studio = start(t);
+  const { panel } = await studio.openSide(writeFile("# Refresh\n\nText.\n"));
+  await studio.advance(100);
+  await studio.ready(panel);
+  const session = studio.manager.active!;
+  const identity = identityOfDocument(lastRendered(panel))!;
+  const stages = session.probe.renderedStages;
+  panel.fromPage.fire({ type: "previewRefresh", ...identity, requestId: identity.requestId - 1, sourceLine: 77 });
+  await studio.advance(300);
+  assert.equal(session.probe.renderedStages, stages, "an older render's refresh starts no render");
+  assert.notEqual(session.state?.sourceLine, 77);
+  const posted = panel.posted.length;
+  const assignments = panel.htmlAssignments.length;
+  panel.fromPage.fire({ type: "previewRefresh", ...identity, sourceLine: 120, scrollTop: 900, openDisclosures: [1, 3], descriptionsCollapsed: true });
+  await studio.advance(300);
+  assert.equal(session.state?.sourceLine, 120);
+  assert.deepEqual(session.state?.openDisclosures, [1, 3]);
+  assert.ok(session.probe.renderedStages > stages, "a new render follows");
+  assert.ok(
+    panel.htmlAssignments.length > assignments || panel.posted.slice(posted).some((message) => message.type === "previewContentPatch"),
+    "the page gets the new render",
+  );
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
+test("the first page of an Open With editor on an existing file says Preview pending: Waiting for the first render.", async (t) => {
+  const studio = start(t);
+  const file = writeFile("# First\n\nText.\n");
+  const document = await fake.controls.showDocument(file);
+  const panel = newPanel(EDITOR_TYPE);
+  await captured.provider!.resolveCustomTextEditor(document, panel);
+  const first = panel.htmlAssignments[0];
+  assert.ok(first, "a page is assigned before the render");
+  assert.match(first, /data-sphinx-preview-status="pending"/u);
+  assert.match(first, /Preview pending/u);
+  assert.match(first, /Waiting for the first render\./u);
+  await studio.renderDone(panel);
+  assert.match(lastRendered(panel), /data-sphinx-preview-status="success"/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044
+test("a change of a preview setting makes the previews read their settings again, a change of another section is ignored", async (t) => {
+  const studio = start(t);
+  await studio.openSide(writeFile("# Settings\n\nText.\n"));
+  await studio.advance(100);
+  const session = studio.manager.active!;
+  const stale = { ...session.configuration, incrementalUpdates: false };
+  session.configuration = stale;
+  const section = (names: string[]) => ({ affectsConfiguration: (name: string) => names.some((candidate) => name === candidate) });
+  fake.controls.events.changeConfiguration.fire(section(["markdownOkfSchemaStudio.comments"]));
+  await studio.advance(100);
+  assert.equal(session.configuration, stale, "a setting outside the three sections leaves the configuration as it was");
+  fake.controls.events.changeConfiguration.fire(section(["markdownOkfSchemaStudio.preview"]));
+  await studio.advance(100);
+  assert.notEqual(session.configuration, stale, "the preview section is read again");
+  assert.equal(session.configuration.incrementalUpdates, true, "with the value the settings hold");
+});

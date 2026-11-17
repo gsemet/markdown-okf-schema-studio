@@ -82,6 +82,10 @@ When the page reports its reading state while the reader scrolls, the extension 
 | a state stored again for a remembered document | the entry becomes the most recent and the map does not grow |
 | a capacity that is not valid | rejected; the default capacity is 200 |
 
+### Known issues
+
+- Known issue: a previewReady whose descriptionsCollapsed is not a boolean leaves the workspace choice unchanged, but the recorded state of the session loses that field (undefined) instead of keeping the previous Description state.
+
 ### Related requirements
 - SwRS-MDOKFSTUDIO-LIFE-108: previewScroll and previewReveal, which also report the state
 - SwRS-MDOKFSTUDIO-LIFE-119: the anchor that a new render starts at
@@ -89,7 +93,7 @@ When the page reports its reading state while the reader scrolls, the extension 
 ### Verification notes
 - Method: test/page/pageTimers.test.ts and test/page/pageHost.test.ts (scenarios 1 and 2: "the webview state is written at once, then at most once per 100 ms with the last state", "previewState messages are throttled to one per 100 ms; previewScroll is never held back", "a hidden page writes the held-back state and posts the held-back previewState at once")
 - Method: test/integration/lifecycle.test.ts (scenario 3: sourceLine and scrollTop after previewState)
-- Method: scenario 4 is checked by reading parsePreviewPanelState in src/core/state/previewState.ts and hasValidStateFields in src/core/protocol/pageToHost.ts (untested for the field bounds)
+- Method: scenario 4 is checked by reading parsePreviewPanelState in src/core/state/previewState.ts and hasValidStateFields in src/core/protocol/pageToHost.ts ; the field bounds, the other-document case and the dropped fields are checked in test/host/lifeReq.requirements.test.ts ("a state report records its fields within bounds ...", "a state report that names another document ...")
 - Method: test/host/lifeReq.requirements.test.ts (scenario 5: "switching back to a document brings back its remembered state", the session path A to line 80 with a focused block and an open section, B, back to A)
 - Method: test/core/state/boundedState.test.ts (scenario 6: "evicts the least recently set entry once the cap is exceeded", "reading an entry protects it from eviction, peek does not", "default capacity is 200 and rejects invalid capacities", "overwriting a key refreshes it and never grows the map")
 - Criteria: STATE_THROTTLE_MS is 100 and the last state always reaches the host; preview.state equals the parsed state of the message; session.state is the remembered state of the returned-to document when its render builds its context, and initialAnchor is the stored anchor when it names that document; size never exceeds 200 and the order is least to most recent.

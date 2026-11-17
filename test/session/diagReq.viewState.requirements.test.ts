@@ -34,7 +34,8 @@ function memoryStore(): KeyValueStore & { values: Map<string, unknown> } {
 
 function readOnlyHarness() {
   const choices = new WorkspaceChoices({} as HostServices);
-  choices.load(memoryStore());
+  const store = memoryStore();
+  choices.load(store);
   const errors: string[] = [];
   const session = {
     disposed: false,
@@ -50,6 +51,7 @@ function readOnlyHarness() {
     matchesCurrent: PreviewManager.prototype.matchesCurrent,
     has: () => true,
     choices,
+    host: { logger: createMemoryLogger() },
     incoming: { schedule: () => undefined },
     edits: { postEditSourceError: (_preview: unknown, _message: unknown, text: string) => errors.push(text) },
     frontmatter: { postEditError: () => undefined },
@@ -59,7 +61,7 @@ function readOnlyHarness() {
   const dispatcher = new PageMessageDispatcher(manager as unknown as PreviewManager, router);
   const send = (message: Record<string, unknown>): unknown =>
     dispatcher.handle(session, { documentId: DOCUMENT, revision: 4, requestId: 9, ...message } as PageToHostMessage);
-  return { choices, errors, send };
+  return { choices, errors, send, store };
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-006
@@ -83,6 +85,48 @@ test("a restricted-reads preview stores a theme choice; its edit requests reach 
   send({ type: "previewEditOpen", line: 3, endLine: 4, editId: "e1" });
   assert.deepEqual(errors, [], "no refusal is posted");
   assert.equal(choices.previewThemeMode, "white");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+test("a preview with restricted reads stores its palette mode, and a message of an older render or with an unknown mode stores nothing", async () => {
+  const { store, send } = readOnlyHarness();
+  const key = "markdownOkfSchemaStudio.paletteMode";
+
+  send({ type: "previewPaletteModeChanged", mode: "myst" });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(store.values.get(key), "myst", "stored like in a trusted workspace");
+
+  send({ type: "previewPaletteModeChanged", mode: "full", revision: 3 });
+  send({ type: "previewPaletteModeChanged", mode: "turbo" });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(store.values.get(key), "myst", "the stale message and the unknown mode are dropped");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+test("a view preference message of a render older than the host holds stores nothing, whatever the preference", () => {
+  const { choices, send } = readOnlyHarness();
+
+  send({ type: "previewViewPreferenceChanged", preference: "toc", value: true });
+  send({ type: "previewViewPreferenceChanged", preference: "toc", value: false, requestId: 8 });
+  send({ type: "previewViewPreferenceChanged", preference: "widthMode", value: "full", documentId: "file:///notes/other.md" });
+  assert.equal(choices.viewPreferences.toc, true, "an older request id is dropped");
+  assert.notEqual(choices.viewPreferences.widthMode, "full", "another document's message is dropped");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+test("a stored theme mode outside the four is not carried to the page, so the page starts in Cream", () => {
+  for (const stored of ["sepia", 3, null, ""]) {
+    const store = memoryStore();
+    store.values.set("previewThemeMode", stored);
+    const choices = new WorkspaceChoices({} as HostServices);
+    choices.load(store);
+    assert.equal(choices.previewThemeMode, undefined, `${String(stored)} is skipped`);
+  }
+  const valid = memoryStore();
+  valid.values.set("previewThemeMode", "current");
+  const kept = new WorkspaceChoices({} as HostServices);
+  kept.load(valid);
+  assert.equal(kept.previewThemeMode, "current", "current is a choice of its own, not replaced by Cream");
 });
 
 const NOT_SAVED = "The Markdown preview could not save your display choice; it holds until VS Code closes.";

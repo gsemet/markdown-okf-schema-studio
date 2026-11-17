@@ -48,6 +48,7 @@ async function openPreview(uri: vscode.Uri): Promise<void> {
  * Mermaid diagram, a PNG and a relative link is written as one file with the image and the diagram
  * embedded and the link as text, after the warning; and a cancelled warning writes no file.
  */
+// @tests_req StRS-MDOKFSTUDIO-TOOLBAR-014
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const extensionRoot = path.resolve(__dirname, "../../..");

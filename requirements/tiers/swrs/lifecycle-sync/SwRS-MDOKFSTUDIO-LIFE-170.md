@@ -54,6 +54,7 @@ tested_in_files:
 - test/page/runtimeEditPalette.test.ts
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeScroll.test.ts
+- test/session/diagReq.viewState.requirements.test.ts
 - test/visual/capture_layout_checks.py
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -177,7 +178,7 @@ The Cream start is the same on a light and on a dark host theme:
 - Method: test/integration/lifecycle.test.ts (a posted theme mode dark is the stored mode in the html of the next page)
 - Method: test/integration/reload-suite.ts (130 % survives a window reload and a reopen)
 - Method: visual scenarios theme-zoom/v12 and theme-zoom/v13 (Cream start on a light and on a dark host), test/visual/capture_layout_checks.py check_fresh_workspace (zero posted messages, collapsed toolbar)
-- Method: the Cream result for an unknown stored theme value on the page is not asserted by a session test (untested)
+- Method: the Cream result for an unknown stored theme value is asserted in test/session/diagReq.viewState.requirements.test.ts
 - Criteria: each view choice equals the first valid source in the order of the table, the theme mode taking the stored value first; the zoom equals the listed rounded values; nothing is posted at start except one previewAnchorModeChanged when the saved anchor mode differs from the setting.
 
 <!-- okf:links:start -->

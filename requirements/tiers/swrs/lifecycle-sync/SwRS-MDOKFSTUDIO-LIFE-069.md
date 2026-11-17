@@ -30,6 +30,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/configuration/previewConfiguration.test.ts
 - test/core/preview/contentPatch.test.ts
+- test/host/lifeReq.requirements.test.ts
 - test/integration/realInput/tableStaleRender.ts
 - test/page/modules/contentMorph.test.ts
 - test/page/runtimeContentPatch.test.ts
@@ -122,7 +123,7 @@ When a render finishes and the loaded page can take its content, the extension S
 - Method: test/core/preview/contentPatch.test.ts (Typing, One of the exceptions): "T34: two renders of one document type have equal shell keys despite other text, nonces and identifiers".
 - Method: test/core/preview/contentPatch.test.ts (The loaded page is not parsed again): "P-03: a plan parses the new page only, because the loaded page was analyzed as the previous new page".
 - Method: test/page/runtimeContentPatch.test.ts (Typing, Patches in a chain, Ready report after a patch, What the page does when it applies a patch): "T34: a content patch replaces the content, moves the identifiers and posts previewReady", "T34: patches sent before the page acknowledged the previous one apply in order", "T34: when a patch of a chain is rejected, the later ones are ignored and nothing is acknowledged", "STAB-02: a patch that closes an open block editor reports blockEditOpen false", "T34: open disclosures of the old content are open again in the new content", "T34: a patch with an anchor or a pin positions the page like a loaded page", "T34: a patch keeps the scroll position when the host sends no anchor", "T34: the patch removes the pending overlay and the link tooltip".
-- Method: test/core/configuration/previewConfiguration.test.ts (The incrementalUpdates setting, default row): "incremental updates can be turned off and default to on"; the off path is never exercised end to end (untested).
+- Method: test/core/configuration/previewConfiguration.test.ts (The incrementalUpdates setting, default row): "incremental updates can be turned off and default to on"; the off path is checked in test/host/lifeReq.requirements.test.ts (with incrementalUpdates off a render assigns the page document).
 - Method: test/page/modules/contentMorph.test.ts (Unchanged blocks stay in place, Repeated blocks and links): "PERF-05: unchanged blocks are kept in place, changed and new ones come from the patch", "PERF-05: equal blocks pair in document order and each kept node is used once", "PERF-05: the first page and a patch give a block with a link the same key", "PERF-05: nodes without a recorded key (text, nodes the page added) are never kept", "PERF-05: a link title the host wrote itself stays part of the key".
 - Method: test/page/modules/contentMorph.test.ts (A line inserted above keeps the blocks below, What the key of a block holds): "P-07: the key leaves out the source-position attributes and a hash replaces the HTML", "P-07: a line inserted above keeps every block below it and moves its line attributes in place", "P-07: the insertion bars of kept blocks stay with them and bars of dropped blocks go".
 - Method: test/page/runtimeContentPatch.test.ts (What the key of a block holds, edit mode row): "P-07: edit mode keeps the insertion point of a block that did not change and moves its line".

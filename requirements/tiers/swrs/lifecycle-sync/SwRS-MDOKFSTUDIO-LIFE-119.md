@@ -33,6 +33,7 @@ tested_in_files:
 - test/page/lifeReq.requirements.test.ts
 - test/page/runtimeContentPatch.test.ts
 - test/page/runtimeScroll.test.ts
+- test/session/lifeReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -106,7 +107,7 @@ When a preview is scrolled, rebuilt, re-laid out or edited, the extension SHALL 
 ### Verification notes
 - Method: test/page/runtimeScroll.test.ts, `a pending layout-induced scroll does not replace the reading anchor` distinguishes changed block geometry from the unchanged geometry in `a viewport resize fired before the scroll it accompanies does not pull the page back`.
 - Method: test/core/scroll/anchorPolicy.test.ts (scenarios 1, 2, 5: "converts lines to scroll positions and back through the reading offset", "reports the editor top line as the floor of the anchor", "ramps the reading line so the top of the page is line 1", "anchors long paragraphs at the start of each source line", "falls back to block bounds when paragraph lines cannot be measured", "shifts the anchor when lines change above it only")
-- Method: test/page/runtimeContentPatch.test.ts (scenario 3, page half: a boot context with initialAnchor 50); the host rule (stored anchor, then the editor's first visible line, then none) is untested
+- Method: test/page/runtimeContentPatch.test.ts (scenario 3, page half: a boot context with initialAnchor 50); the host rule (stored anchor, then the editor's first visible line, then none) is checked in test/session/lifeReq.requirements.test.ts
 - Method: test/integration/scroll-sync-suite.ts (scenarios 4 and 6: width-cycle-reading-line; block editor stays open through scrolling)
 - Method: test/page/runtimeScroll.test.ts (scenarios 4 and 6: "preserves preview scroll when layout changes during sticky heading activation", "refreshes source anchor geometry after a block editor changes document flow", "source scrolling remains bidirectional while a block editor is open")
 - Method: test/integration/sourceMapping.test.ts (scenario 7: the attributes, the block ids, the figure tabindex and that no zero or negative line appears; block ids are per render)

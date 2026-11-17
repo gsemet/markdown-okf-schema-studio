@@ -390,3 +390,41 @@ test("the save request is registered, needs the envelope and carries nothing els
   assert.equal(isRegisteredPreviewMessage({ type: "previewSaveRequest" }), false, "the envelope is required");
   assert.equal(isRegisteredPreviewMessage({ ...envelope, documentId: 4, type: "previewSaveRequest" }), false);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
+test("previewScroll and previewReveal accept a source line, an anchor line and a scroll offset within bounds", () => {
+  const base = { documentId: "doc", revision: 1, requestId: 1 };
+  for (const type of ["previewScroll", "previewReveal"]) {
+    const ok = (fields: Record<string, unknown>): boolean => isRegisteredPreviewMessage({ ...base, type, ...fields });
+    assert.equal(ok({ line: 14 }), true);
+    assert.equal(ok({ line: 1, endLine: 3, sourceLine: 2, selectionLine: 2 }), true);
+    assert.equal(ok({ line: 14, anchorLine: 14.6, scrollTop: 0 }), true);
+    assert.equal(ok({ line: 14, activation: "click", sourceFile: "/notes/a.md" }), true, "activation and sourceFile are for the host to compare");
+    assert.equal(ok({ line: 0 }), false);
+    assert.equal(ok({ line: 1.5 }), false);
+    assert.equal(ok({ line: 2 ** 53 }), false);
+    assert.equal(ok({ line: 3, anchorLine: 0.5 }), false);
+    assert.equal(ok({ line: 3, scrollTop: -1 }), false);
+    assert.equal(ok({ line: 3, scrollTop: Number.POSITIVE_INFINITY }), false);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+test("previewRefresh carries the reading state as optional fields and refuses the fields of other types", () => {
+  const base = { type: "previewRefresh", documentId: "doc", revision: 1, requestId: 1 };
+  const ok = (fields: Record<string, unknown>): boolean => isRegisteredPreviewMessage({ ...base, ...fields });
+  assert.equal(ok({}), true);
+  assert.equal(ok({
+    sourceLine: 120, scrollTop: 900, anchorLine: 120.5, openDisclosures: [1, 3], descriptionsCollapsed: true,
+    previewThemeMode: "dark", anchorToEditor: true, editMode: false, request: "r1",
+  }), true);
+  assert.equal(ok({ sourceLine: 0 }), false);
+  assert.equal(ok({ scrollTop: -5 }), false);
+  assert.equal(ok({ previewThemeMode: "sepia" }), false);
+  assert.equal(ok({ editMode: "yes" }), false);
+  assert.equal(ok({ pinLine: 3, pinViewportTop: 10 }), false, "a pin belongs to the edit saves");
+  assert.equal(ok({ blockEditOpen: true }), false, "blockEditOpen belongs to previewReady");
+  assert.equal(ok({ final: true }), false);
+  assert.equal(ok({ column: 1 }), false);
+  assert.equal(ok({ fieldValueFormat: "yaml" }), false);
+});
