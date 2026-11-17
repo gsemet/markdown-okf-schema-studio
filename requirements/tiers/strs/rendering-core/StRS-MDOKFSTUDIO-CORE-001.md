@@ -63,16 +63,10 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-070
 - SwRS-MDOKFSTUDIO-CORE-071
 - SwRS-MDOKFSTUDIO-CORE-072
-- SwRS-MDOKFSTUDIO-CORE-073
-- SwRS-MDOKFSTUDIO-CORE-074
-- SwRS-MDOKFSTUDIO-CORE-075
-- SwRS-MDOKFSTUDIO-CORE-076
 - SwRS-MDOKFSTUDIO-CORE-077
-- SwRS-MDOKFSTUDIO-CORE-078
 - SwRS-MDOKFSTUDIO-CORE-079
 - SwRS-MDOKFSTUDIO-GFM-029
 - SwRS-MDOKFSTUDIO-LIFE-094
-- SwRS-MDOKFSTUDIO-TRUST-052
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-CORE-004
@@ -159,16 +153,10 @@ Writers need to read their Markdown as formatted text, at any length, while they
   - [SwRS-MDOKFSTUDIO-CORE-070](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-070.md): A parse splits the source into lines once, whatever the number of directives
   - [SwRS-MDOKFSTUDIO-CORE-071](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-071.md): README-style HTML renders like GitHub and shows its tag in edit mode
   - [SwRS-MDOKFSTUDIO-CORE-072](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-072.md): A \[TOC\] marker or a contents directive renders the table of contents
-  - [SwRS-MDOKFSTUDIO-CORE-073](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-073.md): The writing skill's examples render without error
-  - [SwRS-MDOKFSTUDIO-CORE-074](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-074.md): The writing skill is packaged as an installable agent plugin
-  - [SwRS-MDOKFSTUDIO-CORE-075](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-075.md): Plugin manifest versions equal the package version
-  - [SwRS-MDOKFSTUDIO-CORE-076](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-076.md): CI tags a version change only after a green heavy run of the commit
   - [SwRS-MDOKFSTUDIO-CORE-077](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-077.md): A table tints its heading, its even rows and the hovered row
-  - [SwRS-MDOKFSTUDIO-CORE-078](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-078.md): A version ships only with its reviewed release notes
   - [SwRS-MDOKFSTUDIO-CORE-079](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-079.md): Inline code shows a front matter value of the document
   - [SwRS-MDOKFSTUDIO-GFM-029](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
   - [SwRS-MDOKFSTUDIO-LIFE-094](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-094.md): Blocks changed by another tool glow briefly
-  - [SwRS-MDOKFSTUDIO-TRUST-052](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
 - Supersedes:
   - [StRS-MDOKFSTUDIO-CORE-004](StRS-MDOKFSTUDIO-CORE-004.md): Read text in any script and direction
 <!-- okf:links:end -->

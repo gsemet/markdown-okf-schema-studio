@@ -13,7 +13,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-CORE-001
+- StRS-MDOKFSTUDIO-CORE-007
 annotation_exemption: true
 exemption_reason: Implemented in scripts/release_notes.py and the declarative
   release workflow, outside the scanned source directories; verified by
@@ -65,5 +65,5 @@ The repository check SHALL fail when the package version has no valid notes file
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+  - [StRS-MDOKFSTUDIO-CORE-007](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-007.md): A maintainer ships a version only after green checks and reviewed release notes
 <!-- okf:links:end -->

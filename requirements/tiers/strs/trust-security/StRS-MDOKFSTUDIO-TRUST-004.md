@@ -18,7 +18,6 @@ user_need: As a reader, I preview a Markdown file from anywhere on my disk and
   see the images and media beside it, without the preview reading the rest of my
   disk, whether the path uses parent paths, encoding or links.
 derived_by:
-- SwRS-MDOKFSTUDIO-LIFE-062
 - SwRS-MDOKFSTUDIO-TRUST-002
 - SwRS-MDOKFSTUDIO-TRUST-007
 - SwRS-MDOKFSTUDIO-TRUST-025
@@ -60,7 +59,6 @@ As a reader, I preview a Markdown file from anywhere on my disk and see the imag
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-LIFE-062](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-062.md): A preview without a source says why and recovers when it returns
   - [SwRS-MDOKFSTUDIO-TRUST-002](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-002.md): A preview with restricted reads reads no include, shows images only, and reads no home folder or dot-directory
   - [SwRS-MDOKFSTUDIO-TRUST-007](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-007.md): A page loads local files only from its resource roots
   - [SwRS-MDOKFSTUDIO-TRUST-025](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-025.md): A resource reference resolves only to an existing file inside a root

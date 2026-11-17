@@ -53,8 +53,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-DIAG-074
 - SwRS-MDOKFSTUDIO-DIAG-113
 - SwRS-MDOKFSTUDIO-DIAG-114
-- SwRS-MDOKFSTUDIO-TRUST-065
-- SwRS-MDOKFSTUDIO-TRUST-090
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-DIAG-011
@@ -141,8 +139,6 @@ Writers who split diagrams into files expect the preview to assemble them, follo
   - [SwRS-MDOKFSTUDIO-DIAG-074](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-074.md): Nested diagrams resolve includes next to their own file
   - [SwRS-MDOKFSTUDIO-DIAG-113](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-113.md): Include silence and malformed answers reach the diagram as reasons
   - [SwRS-MDOKFSTUDIO-DIAG-114](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-114.md): A non-string from is sent as null
-  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
-  - [SwRS-MDOKFSTUDIO-TRUST-090](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 - Supersedes:
   - [StRS-MDOKFSTUDIO-DIAG-011](StRS-MDOKFSTUDIO-DIAG-011.md): Preview a diagram stored in a PUML file
 <!-- okf:links:end -->

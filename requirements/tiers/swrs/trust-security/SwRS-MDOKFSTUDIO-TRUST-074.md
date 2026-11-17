@@ -16,7 +16,6 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-012
 - StRS-MDOKFSTUDIO-TRUST-014
-- StRS-MDOKFSTUDIO-DIAG-006
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -88,7 +87,6 @@ The package SHALL declare images/logo.png, a PNG of 256 by 256 pixels, as its ex
 - Derives from:
   - [StRS-MDOKFSTUDIO-TRUST-012](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-012.md): Visible text and the icon speak of the product
   - [StRS-MDOKFSTUDIO-TRUST-014](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-014.md): The extension is built from pinned dependencies and ships what it loads
-  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-DIAG-080](../diagrams/SwRS-MDOKFSTUDIO-DIAG-080.md): The built-in engine bundle and licence are packaged
 <!-- okf:links:end -->

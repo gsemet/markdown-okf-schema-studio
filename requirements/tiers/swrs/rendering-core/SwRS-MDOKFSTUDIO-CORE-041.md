@@ -16,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-- StRS-MDOKFSTUDIO-TRUST-006
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -63,5 +62,4 @@ When a paragraph, heading, list item, block quote or table cell holds text, the 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
-  - [StRS-MDOKFSTUDIO-TRUST-006](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-006.md): The preview runs no foreign code and unsafe HTML is made inert
 <!-- okf:links:end -->

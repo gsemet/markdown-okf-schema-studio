@@ -24,7 +24,6 @@ user_need: As a writer, I get PlantUML pictures right after installing the
   extension, also in Restricted Mode, and learn why a diagram has no picture and
   what to change instead of seeing a blank block.
 derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-001
 - SwRS-MDOKFSTUDIO-DIAG-019
 - SwRS-MDOKFSTUDIO-DIAG-020
 - SwRS-MDOKFSTUDIO-DIAG-022
@@ -58,10 +57,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-DIAG-112
 - SwRS-MDOKFSTUDIO-DIAG-115
 - SwRS-MDOKFSTUDIO-DIAG-119
-- SwRS-MDOKFSTUDIO-REVIEW-017
-- SwRS-MDOKFSTUDIO-REVIEW-038
-- SwRS-MDOKFSTUDIO-TRUST-074
-- SwRS-MDOKFSTUDIO-TRUST-075
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-DIAG-008
@@ -116,7 +111,6 @@ Writers expect PlantUML to work from the first preview, without Java, Graphviz, 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-DIAG-001](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-001.md): Mermaid fences become inert diagram pictures
   - [SwRS-MDOKFSTUDIO-DIAG-019](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-019.md): Comment quotes are never wrapped inside diagrams
   - [SwRS-MDOKFSTUDIO-DIAG-020](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-020.md): Selecting text inside a diagram offers no comment
   - [SwRS-MDOKFSTUDIO-DIAG-022](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-022.md): A diagram under edit is hidden
@@ -150,10 +144,6 @@ Writers expect PlantUML to work from the first preview, without Java, Graphviz, 
   - [SwRS-MDOKFSTUDIO-DIAG-112](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-112.md): Unsupported directives never reach the engine or the host
   - [SwRS-MDOKFSTUDIO-DIAG-115](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-115.md): A theme switch between light and dark redraws built-in diagrams
   - [SwRS-MDOKFSTUDIO-DIAG-119](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-119.md): PlantUML pictures are centred
-  - [SwRS-MDOKFSTUDIO-REVIEW-017](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-017.md): The quote of a thread is highlighted once in its block, also over a line break of the source
-  - [SwRS-MDOKFSTUDIO-REVIEW-038](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-038.md): Selected body text offers a Comment button and a keyboard shortcut
-  - [SwRS-MDOKFSTUDIO-TRUST-074](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package ships its icon and its bundle
-  - [SwRS-MDOKFSTUDIO-TRUST-075](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-075.md): The extension is built from pinned, official dependencies
 - Supersedes:
   - [StRS-MDOKFSTUDIO-DIAG-008](StRS-MDOKFSTUDIO-DIAG-008.md): Understand why a bundled PlantUML diagram is not drawn
   - [StRS-MDOKFSTUDIO-DIAG-010](StRS-MDOKFSTUDIO-DIAG-010.md): Keep PlantUML pictures in place while typing

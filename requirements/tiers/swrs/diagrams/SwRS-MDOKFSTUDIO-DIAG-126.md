@@ -15,7 +15,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-001
+- StRS-MDOKFSTUDIO-DIAG-015
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -66,5 +66,5 @@ When the preview draws an svg picture, it SHALL define the variables surface, ba
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+  - [StRS-MDOKFSTUDIO-DIAG-015](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-015.md): A writer reads charts and drawings in the page
 <!-- okf:links:end -->

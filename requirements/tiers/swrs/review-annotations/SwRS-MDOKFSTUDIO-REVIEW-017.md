@@ -20,8 +20,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-001
-- StRS-MDOKFSTUDIO-DIAG-001
-- StRS-MDOKFSTUDIO-DIAG-006
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -118,8 +116,6 @@ When review threads are applied to the page, the extension SHALL wrap the first 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
-  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
-  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-DIAG-019](../diagrams/SwRS-MDOKFSTUDIO-DIAG-019.md): Comment quotes are never wrapped inside diagrams
   - [SwRS-MDOKFSTUDIO-REVIEW-216](SwRS-MDOKFSTUDIO-REVIEW-216.md): A quote over a line break of the source is highlighted

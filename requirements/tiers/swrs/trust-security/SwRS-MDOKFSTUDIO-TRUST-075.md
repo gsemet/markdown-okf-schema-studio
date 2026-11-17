@@ -15,7 +15,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-014
-- StRS-MDOKFSTUDIO-DIAG-006
 depends_on: []
 annotation_exemption: true
 exemption_reason: "Declarative: the Node version file. No implementation marker is
@@ -86,7 +85,6 @@ The repository SHALL pin Node.js 24 in its .nvmrc file, resolve every package of
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TRUST-014](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-014.md): The extension is built from pinned dependencies and ships what it loads
-  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-DIAG-079](../diagrams/SwRS-MDOKFSTUDIO-DIAG-079.md): The built-in engine is pinned to an exact version
 <!-- okf:links:end -->
