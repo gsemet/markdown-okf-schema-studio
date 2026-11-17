@@ -14,6 +14,11 @@
 - Sources: `scripts/check-marker-companions.mjs`, `src/page/modules/exportSnapshot.ts`,
   `src/core/export/exportContent.ts`. Tests: `test/build/checkMarkers.test.ts`.
 
+### A Main path may cite an SwRS the StRS depends on (CR 341)
+
+- Changed: `requirements/guidelines/project.guidelines.md` ("Main paths of a StRS"): a cited SwRS derives from the StRS or is in its `depends_on`. No requirement changed.
+- Sources: `scripts/check_main_paths.py`. Tests: `test/build/test_check_main_paths.py`.
+
 ## 2026-11-14
 
 ### The version commit carries no Signed-off-by trailer (CR 325)

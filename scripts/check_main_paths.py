@@ -3,7 +3,8 @@
 Usage: check_main_paths.py <bundle root>
 
 Every SwRS ID cited in the section must exist, be active (`draft`, `proposed` or `approved`) and
-derive from the StRS that cites it. Prints one line per problem (`<path>:<line>: <message>`) and
+either derive from the StRS that cites it (`derives_from`) or be listed in that StRS's
+`depends_on` (a shared rule the use case relies on). Prints one line per problem (`<path>:<line>: <message>`) and
 exits 1, or prints a one-line summary and exits 0. The format is documented in
 `requirements/guidelines/project.guidelines.md` ("Main paths of a StRS").
 """
@@ -87,7 +88,12 @@ def check(root: Path) -> tuple[list[str], int, int]:
         lines = section_lines(text)
         if not lines:
             continue
-        strs_id = str(frontmatter(text).get("id", path.stem))
+        strs_meta = frontmatter(text)
+        strs_id = str(strs_meta.get("id", path.stem))
+        depends = strs_meta.get("depends_on") or []
+        if isinstance(depends, str):
+            depends = [depends]
+        depends_on = {str(d) for d in depends}
         checked += 1
         for number, line in lines:
             for swrs_id in id_pattern.findall(line):
@@ -99,8 +105,10 @@ def check(root: Path) -> tuple[list[str], int, int]:
                     continue
                 if swrs.lifecycle not in ACTIVE:
                     problems.append(f"{where}: {swrs_id} is {swrs.lifecycle}, not active")
-                if strs_id not in swrs.derives_from:
-                    problems.append(f"{where}: {swrs_id} does not derive from {strs_id}")
+                if strs_id not in swrs.derives_from and swrs_id not in depends_on:
+                    problems.append(
+                        f"{where}: {swrs_id} does not derive from {strs_id} and is not in its depends_on"
+                    )
     return problems, checked, citations
 
 

@@ -64,7 +64,9 @@ step by step, each step backed by the SwRS that moves the user to the next state
 - One or two paths per StRS. A StRS whose SwRS do not form a path has no section.
 - Every cited SwRS exists, is active (`req_lifecycle` is `draft`, `proposed` or `approved`, not
   `deprecated` nor `superseded`; a `draft` SwRS may be cited) and has that StRS in its
-  `derives_from`.
+  `derives_from`, or is listed in that StRS's `depends_on` (a shared rule the use case relies on).
+- A shared rule that many StRS rely on is cited with `depends_on` rather than derived by every StRS
+  that relies on it.
 - Paths state what the extension does today, like the rest of the requirement; a step never
   describes behaviour that no cited SwRS specifies.
 - The section is authored text: it sits after the last authored section of the StRS (usually
