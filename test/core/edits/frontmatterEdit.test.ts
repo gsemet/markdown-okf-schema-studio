@@ -54,6 +54,8 @@ test("a YAML value is parsed; invalid YAML is refused unless the save is a flush
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-067
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024
 test("a stale field, a bad new key and a value of the wrong type are refused", () => {
   const frontmatter = result([field("title", "Old", "text"), field("count", 3, "number")], { schemaFound: true });
   assert.deepEqual(planFrontmatterSave(SOURCE, frontmatter, { fieldName: "gone", fieldValue: "x" }), { error: FRONTMATTER_STALE });
@@ -73,6 +75,16 @@ test("a stale field, a bad new key and a value of the wrong type are refused", (
   assert.equal(flushed.needsSchemaCheck, false, "a flush writes the value as typed");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-067
+test("a flush writes the value as typed and asks for no schema check", () => {
+  const frontmatter = result([field("title", "Old", "text"), field("count", 3, "number")], { schemaFound: true });
+  const checked = plan(planFrontmatterSave(SOURCE, frontmatter, { fieldName: "title", fieldValue: "New" }));
+  assert.equal(checked.needsSchemaCheck, true, "a plain save is checked against the schema");
+  const flushed = plan(planFrontmatterSave(SOURCE, frontmatter, { fieldName: "count", fieldValue: "three", flush: true }));
+  assert.equal(flushed.needsSchemaCheck, false, "a flush is not checked");
+  assert.equal(applyTextEdits(SOURCE, [flushed.edit]), "---\ntitle: Old\ncount: three\n---\nBody\n");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024
 test("add, rename and remove plan their edits; a duplicate name is named in the error", () => {
   const frontmatter = result([field("title", "Old", "text"), field("count", 3, "number")]);
@@ -90,6 +102,7 @@ test("add, rename and remove plan their edits; a duplicate name is named in the 
   });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016
 test("with a schema the save needs the check of its edited text", () => {
   const frontmatter = result([field("title", "Old", "text")], { schemaFound: true });
   const save = plan(planFrontmatterSave(SOURCE, frontmatter, { fieldName: "title", fieldValue: "New" }));

@@ -24,7 +24,7 @@ implemented_in_files:
 - src/page/features/hostHandlers.ts
 - src/session/features/frontmatter.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/frontmatterFields.ts
 - test/page/runtimeFrontmatterFields.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

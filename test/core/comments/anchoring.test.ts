@@ -35,6 +35,7 @@ test("T45: shiftThreadLines follows lines inserted and removed above", () => {
   assert.equal(shiftThreadLines(threads, []), threads);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-094
 test("T45: shiftThreadLines applies several changes of one event (multi-cursor, undo order)", () => {
   const threads = [thread("a", { line: 20 })];
   const changes = toLineChanges([
@@ -52,12 +53,14 @@ test("T45: shiftThreadLines applies several changes of one event (multi-cursor, 
   ])), undo)[0].anchor.line, 20);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-094
 test("T45: shiftThreadLines keeps endLine at or after line", () => {
   const shifted = shiftThreadLines([thread("a", { line: 5, endLine: 8 })],
     [{ startLine: 6, endLine: 12, insertedLineCount: 0 }]);
   assert.ok(shifted[0].anchor.endLine >= shifted[0].anchor.line);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-094
 test("T45: a quote still inside its lines stays anchored", () => {
   const text = ["# Title", "", "The quick brown fox jumps.", "", "tail"].join("\n");
   const result = reanchor(text, thread("a", { line: 3, quote: "quick brown fox" }));
@@ -78,6 +81,7 @@ test("T45: a deleted quote orphans the thread and keeps its old line", () => {
   assert.deepEqual(result, { state: "orphaned", line: 3, endLine: 3 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: a long unique quote that moved far away is found", () => {
   const text = [...filler(300), "The quick brown fox jumps over.", ...filler(10)].join("\n");
   const result = reanchor(text, thread("a", { line: 4, quote: "quick brown fox jumps" }));
@@ -85,6 +89,7 @@ test("T45: a long unique quote that moved far away is found", () => {
   assert.equal(result.line, 301);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: a short quote is only found inside the +-50 line window", () => {
   const near = [...filler(20), "see the Fox here", ...filler(5)].join("\n");
   assert.equal(reanchor(near, thread("a", { line: 3, quote: "Fox" })).state, "moved");
@@ -92,6 +97,7 @@ test("T45: a short quote is only found inside the +-50 line window", () => {
   assert.deepEqual(reanchor(far, thread("a", { line: 3, quote: "Fox" })), { state: "orphaned", line: 3, endLine: 3 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: duplicate quotes are decided by prefix and suffix", () => {
   const text = [...filler(10), "Please fix the login flow soon.", ...filler(10),
     "Do not fix the login flow today.", ...filler(5)].join("\n");
@@ -103,6 +109,7 @@ test("T45: duplicate quotes are decided by prefix and suffix", () => {
   assert.equal(first.line, 11);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: duplicate quotes without usable context use proximity only inside the window", () => {
   const text = [...filler(10), "Please fix the login flow soon.", ...filler(200),
     "Do not fix the login flow today.", ...filler(5)].join("\n");
@@ -117,12 +124,14 @@ test("T45: duplicate quotes without usable context use proximity only inside the
   assert.equal(reanchor(equal, thread("c", { line: 21, quote: "fix the login flow" })).state, "orphaned");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: markdown markup does not hide the quote", () => {
   const text = ["", "- see **the quick** brown [fox](https://example.com) now", ""].join("\n");
   const result = reanchor(text, thread("a", { line: 9, quote: "the quick brown fox now" }));
   assert.deepEqual(result, { state: "moved", line: 2, endLine: 2 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: a quote that spans lines is found, and CRLF documents work", () => {
   const text = ["# T", "", "The quick brown", "fox jumps over", "the lazy dog.", ""].join("\r\n");
   const result = reanchor(text, thread("a", { line: 9, quote: "brown fox jumps over the lazy" }));
@@ -130,6 +139,7 @@ test("T45: a quote that spans lines is found, and CRLF documents work", () => {
   assert.equal(reanchor(text, thread("a", { line: 3, endLine: 5, quote: "brown fox jumps" })).state, "anchored");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: text inside code fences and front matter is never a match", () => {
   const text = ["---", "title: the quick brown fox", "---", "", "```", "the quick brown fox", "```", "", "other"].join("\n");
   assert.equal(reanchor(text, thread("a", { line: 9, quote: "the quick brown fox" })).state, "orphaned");
@@ -144,12 +154,14 @@ test("T45: a small edit of the quote is followed by the fuzzy search", () => {
   assert.equal(result.line, 31);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-107
 test("T45: a quote that changed by more than 20 percent is orphaned, not guessed", () => {
   const quote = "the scheduler retries the failed upload twice";
   const text = [...filler(30), "the scheduler stops after the first problem", ...filler(5)].join("\n");
   assert.deepEqual(reanchor(text, thread("a", { line: 31, quote })), { state: "orphaned", line: 31, endLine: 31 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-107
 test("T45: two fuzzy matches far apart are ambiguous and orphan the thread", () => {
   const text = [...filler(10), "the scheduler retries the failed uploads twice", ...filler(200),
     "the scheduler retries the failed uploaded twice", ...filler(5)].join("\n");
@@ -157,18 +169,21 @@ test("T45: two fuzzy matches far apart are ambiguous and orphan the thread", () 
   assert.equal(reanchor(text, thread("a", { line: 100, quote })).state, "orphaned");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-107
 test("T45: fuzzy search needs a candidate containing the rarest word", () => {
   // Every word of the quote is gone from the document, so there is no candidate at all.
   const text = [...filler(20), "completely different sentence about nothing relevant"].join("\n");
   assert.equal(reanchor(text, thread("a", { line: 5, quote: "zebra giraffe elephant antelope rhino" })).state, "orphaned");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-094
 test("T45: a thread without quote stays where it is while the line exists", () => {
   const text = filler(5).join("\n");
   assert.equal(reanchor(text, thread("a", { line: 3 })).state, "anchored");
   assert.equal(reanchor(text, thread("a", { line: 30 })).state, "orphaned");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: reanchorThreads updates moved threads, keeps orphans untouched and loses nothing", () => {
   const text = [...filler(10), "The quick brown fox jumps.", "", "Second remark lives here."].join("\n");
   const threads = [
@@ -188,6 +203,7 @@ test("T45: reanchorThreads updates moved threads, keeps orphans untouched and lo
   assert.equal(reanchorThreads(text, [threads[2]]).changed, false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: the cost stays bounded for a large document and many fuzzy threads", () => {
   const lines = filler(20000);
   const text = lines.join("\n");
@@ -202,6 +218,7 @@ test("T45: the cost stays bounded for a large document and many fuzzy threads", 
 
 // ---- T45 r2 ----
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45r2: text that renders differently from its source stays anchored at the original line", () => {
   const cases: Array<[string, string]> = [
     ["As shown in {cite}`smith2020` the result holds.", "As shown in Smith, 2020 the result holds."],
@@ -220,6 +237,7 @@ test("T45r2: text that renders differently from its source stays anchored at the
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-107
 test("T45r2: a quote that resembles the old lines (60 % of its words, in order) is not orphaned", () => {
   const text = ["# T", "", "The scheduler stops after a first problem happens.", ""].join("\n");
   const kept = reanchor(text, thread("a", { line: 3, quote: "The scheduler stops after the first problem" }));
@@ -228,18 +246,21 @@ test("T45r2: a quote that resembles the old lines (60 % of its words, in order) 
   assert.equal(gone.state, "orphaned");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45r2: a short quote never re-attaches when the surroundings disagree", () => {
   const text = [...filler(2), "unrelated words here", ...filler(3), "## Overview", ...filler(2)].join("\n");
   const result = reanchor(text, thread("a", { line: 3, quote: "Overview", prefix: "Intro: ", suffix: "of the product" }));
   assert.deepEqual(result, { state: "orphaned", line: 3, endLine: 3 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45r2: several copies and no context match is no move", () => {
   const text = [...filler(10), "Please fix the login flow soon.", ...filler(5), "Do not fix the login flow today.", ...filler(3)].join("\n");
   const result = reanchor(text, thread("a", { line: 18, quote: "fix the login flow", prefix: "Warning: ", suffix: "Never." }));
   assert.equal(result.state, "orphaned");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45r2: a copy in the old lines that does not fit the context yields to the copy that does", () => {
   // Copy A moved onto the old lines of copy B (lines inserted above A by an external change).
   const text = [...filler(20), "Intro: fix the login flow here.", ...filler(3), "Between fix the login flow today.", ...filler(2)].join("\n");
@@ -251,6 +272,7 @@ test("T45r2: a copy in the old lines that does not fit the context yields to the
   assert.equal(reanchor(single, thread("b", { line: 21, quote: "fix the login flow", prefix: "Between ", suffix: " today." })).state, "anchored");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45r2: the old lines are checked before the candidate cap", () => {
   const many = Array.from({ length: 300 }, () => "x item x").join("\n");
   const text = `${many}\nlast item here`;
@@ -258,6 +280,7 @@ test("T45r2: the old lines are checked before the candidate cap", () => {
   assert.deepEqual(result, { state: "anchored", line: 301, endLine: 301 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-107
 test("T45r2: fuzzy matches must agree on numbers and negations", () => {
   const withText = (sentence: string) => [...filler(30), sentence, ...filler(5)].join("\n");
   const negated = reanchor(withText("You should not enable the cache for every request now."),

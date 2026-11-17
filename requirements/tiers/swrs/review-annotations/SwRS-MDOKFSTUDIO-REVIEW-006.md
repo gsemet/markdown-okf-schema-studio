@@ -30,7 +30,6 @@ implemented_in_files:
 - src/session/features/viewState.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
-- test/integration/realWindowGaps.ts
 - test/session/baselineDiff.test.ts
 - test/session/reviewReqIncoming.requirements.test.ts
 default_owner_email: gaetan@xeberon.net

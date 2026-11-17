@@ -25,7 +25,7 @@ implemented_in_files:
 - src/core/frontmatter/frontmatterSerialize.ts
 - src/page/features/frontmatterValueEditor.ts
 tested_in_files:
-- test/core/frontmatter/okfFrontmatter.test.ts
+- test/core/frontmatter/okfFrontmatterPatches.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

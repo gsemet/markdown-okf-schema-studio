@@ -316,6 +316,7 @@ test("T24: choosing a field in the picker adds it right after the open row", () 
   assert.equal(confirm?.hidden, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
 test("T24: the text-input picker adds on Enter with afterField", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.frontmatterRow.closest("[data-okf-properties]")?.setAttribute("data-okf-available-fields", "[]");
@@ -352,6 +353,7 @@ function customKeyHarness(attributes: Record<string, string> = {}) {
   return { harness, select, options, customInput, status };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
 test("T25: the picker offers Custom key only when additional properties are allowed", () => {
   const allowed = customKeyHarness();
   assert.deepEqual(allowed.options().map((option) => option.value).slice(-1), ["__custom__"]);
@@ -360,6 +362,7 @@ test("T25: the picker offers Custom key only when additional properties are allo
   assert.equal(forbidden.options().some((option) => option.value === "__custom__"), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
 test("T25: choosing Custom key shows the name input and posts nothing", () => {
   const { harness, select, customInput } = customKeyHarness();
   const before = harness.messages.length;
@@ -369,6 +372,7 @@ test("T25: choosing Custom key shows the name input and posts nothing", () => {
   assert.equal(harness.messages.length, before);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
 test("T25: Enter in the custom key input adds the field with an empty value", () => {
   const { harness, select, customInput } = customKeyHarness();
   select.value = "__custom__";
@@ -496,6 +500,7 @@ test("T25: a later render does not reopen an editor that was already opened for 
   assert.equal(second.getWebviewState().pendingFrontmatterEdit, undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
 test("T30: previewPropertiesTable replaces the properties section in place", () => {
   const harness = createRuntimeHarness();
   const old = harness.currentProperties();
@@ -511,6 +516,7 @@ test("T30: previewPropertiesTable replaces the properties section in place", () 
   assert.deepEqual(harness.previewContent.childElements, contentBefore, "nothing else in the content moved");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
 test("T30: previewPropertiesTable inserts the section when it is absent and removes it on empty markup", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage(propertiesMessage(""));

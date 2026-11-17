@@ -36,6 +36,7 @@ test("a block comment renders as a positioned gray chip with a hidden body", asy
   assert.equal(textContent(body), "remember this");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
 test("a multi-line block comment spans its source lines", async () => {
   const { doc } = await render("<!--\nline one\nline two\n-->\n\ntext\n");
   const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
@@ -45,6 +46,7 @@ test("a multi-line block comment spans its source lines", async () => {
   assert.equal(attribute(chips(doc)[0], "title"), "line one\nline two");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
 test("an inline comment renders as a chip inside its paragraph", async () => {
   const { doc } = await render("a <!-- inline note --> b\n");
   const paragraph = findElement(doc, (e) => e.tagName === "p");
@@ -229,6 +231,7 @@ const OKFKB_LIST = [
   "",
 ].join("\n");
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
 test("comments before and after a list each render as a real comment chip, never as a `<!--` label", async () => {
   const { doc, html } = await render(OKFKB_LIST);
   const found = chips(doc);
@@ -247,6 +250,7 @@ test("comments before and after a list each render as a real comment chip, never
   assert.equal(findElements(list, (e) => hasClass(e, "okf-comment")).length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
 test("comments written on one line, one after the other, are separate chips", async () => {
   const { doc, html } = await render("<!-- one --> <!-- TODO two -->\n<!-- markdownlint-disable -->\n\ntext\n");
   const found = chips(doc);
@@ -256,6 +260,7 @@ test("comments written on one line, one after the other, are separate chips", as
   assert.equal(findElements(doc, (e) => hasClass(e, "okf-comment-body")).length, 2);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
 test("a list item can hold a comment chip between its items", async () => {
   const { doc } = await render("- one\n<!-- between -->\n- two\n");
   assert.deepEqual(chips(doc).map((chip) => textContent(chip)), ["comment"]);
@@ -286,6 +291,7 @@ test("a THREAD comment is a green thread chip with one entry per message", async
   assert.equal(textContent(findElement(messages[1], (e) => hasClass(e, "okf-thread-text"))!), "a reply");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
 test("a THREAD comment with CRLF line ends and trailing spaces renders the same", async () => {
   const { doc } = await render(`${THREAD.replace(/\n/gu, "  \r\n")}\r\n`);
   const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
@@ -293,6 +299,7 @@ test("a THREAD comment with CRLF line ends and trailing spaces renders the same"
   assert.equal(findElements(doc, (e) => hasClass(e, "okf-thread-message")).length, 2);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
 test("a single-message thread chip shows only the author", async () => {
   const { doc } = await render("<!-- THREAD\nAda (2026-10-16 10:47):\n  one\n-->\n");
   assert.equal(textContent(chips(doc)[0]), "Ada");

@@ -7,6 +7,9 @@ import { COMMENT_CSS } from "../../../src/core/preview/styles/commentStyles";
 // The comment stylesheet is joined from named parts (chips, incoming changes, review popovers,
 // orphaned comments box, hiding rules, image fit). Splitting it must not change one byte: the length
 // and digest below are those of the former single constant.
+// @tests_req SwRS-MDOKFSTUDIO-CORE-008
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-143
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028
 test("the comment stylesheet joined from its parts equals the former single constant", () => {
   assert.equal(Buffer.byteLength(COMMENT_CSS, "utf8"), 21977);
   assert.equal(

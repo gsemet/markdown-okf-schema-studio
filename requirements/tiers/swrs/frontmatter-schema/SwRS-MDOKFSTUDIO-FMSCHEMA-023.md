@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/frontmatter/diagReq.frontmatter.requirements.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/schemaRegistry.test.ts
+- test/integration/previewEditing.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

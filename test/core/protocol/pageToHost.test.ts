@@ -316,6 +316,22 @@ test("T44: previewCommentResolve and previewCommentDelete validate the thread id
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016
+test("previewFrontmatterSave is refused without a field name, an edit id, or a value or a removal", () => {
+  const save = {
+    type: "previewFrontmatterSave", documentId: "doc", revision: 1, requestId: 1,
+    editId: "e1", fieldName: "status", fieldValue: "ready",
+  };
+  assert.equal(isRegisteredPreviewMessage(save), true);
+  assert.equal(isRegisteredPreviewMessage({ ...save, fieldValue: undefined, frontmatterAction: "remove" }), true);
+  for (const patch of [{ fieldName: "" }, { fieldName: 3 }, { editId: "" }, { editId: undefined }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...save, ...patch }), false, JSON.stringify(patch));
+  }
+  const { fieldValue: _dropped, ...noValue } = save;
+  assert.equal(isRegisteredPreviewMessage(noValue), false, "neither a value nor a removal");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
 test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
   const flushed = {
     type: "previewEditFlushed", documentId: "doc", revision: 1, requestId: 1, flushId: "flush-1", flushed: true,

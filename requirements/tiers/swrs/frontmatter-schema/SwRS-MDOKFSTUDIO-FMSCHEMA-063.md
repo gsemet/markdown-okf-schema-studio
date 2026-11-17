@@ -30,7 +30,6 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/propertiesTable.test.ts
 - test/integration/previewEditing.test.ts
-- test/integration/realInput/markers.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net

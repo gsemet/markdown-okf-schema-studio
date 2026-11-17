@@ -77,6 +77,7 @@ test("T43: a selection inside one block shows the Comment button near the range 
   assert.equal(box(), null, "the box closes when the host says ok");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-049
 test("T43: the quote is whitespace-collapsed and capped at 500, prefix and suffix at 32", () => {
   const { document, select, button, click, box, posted } = setup();
   const long = "w ".repeat(400);
@@ -105,6 +106,7 @@ test("T43: a selection across blocks anchors first block line to last block end 
   assert.deepEqual([posted[0].fields.anchor.line, posted[0].fields.anchor.endLine], [3, 10]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-049
 test("T43: a triple-click selection that ends at offset 0 of the next block stays in its own block", () => {
   const { document, select, button, click, box, posted } = setup();
   const first = document.add("p", { "data-line": "3", "data-end-line": "3" }, document.content, "A whole paragraph");
@@ -259,6 +261,7 @@ function openAndType(text = "My remark") {
   return { ...kit, input, save };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
 test("T43 r2: a refused save keeps the box and the text, shows the reason as text and allows a retry", () => {
   const { click, save, box, input, posted, compose } = openAndType();
   click(save());
@@ -280,6 +283,7 @@ test("T43 r2: a refused save keeps the box and the text, shows the reason as tex
   assert.equal(box(), null);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
 test("T43 r2: no answer in time keeps the text, says so, and a late ok still closes the box", () => {
   const { click, save, box, input, fireTimers, compose, posted } = openAndType();
   click(save());
@@ -293,6 +297,7 @@ test("T43 r2: no answer in time keeps the text, says so, and a late ok still clo
   assert.equal(box(), null, "a late success closes the box");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
 test("T43 r2: results of other kinds, or without a pending save, are ignored", () => {
   const { click, save, box, compose } = openAndType();
   assert.equal(compose.result({ kind: "create", ok: true }), false, "nothing was sent yet");

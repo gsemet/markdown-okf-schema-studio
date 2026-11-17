@@ -2,11 +2,7 @@
   "description": "Requirement markers that were already wrong when the gate started (see scripts/check-marker-companions.mjs). blocks: files with a marker block of more than 3 requirement IDs, with the sum of IDs over their over-limit blocks. unnamedCompanionLines: companion files with marker lines that do not name their scenario or code point. They may only shrink: lower an entry when its file improves (node scripts/check-marker-companions.mjs --update) and remove it once the file is clean. Never add a file or raise a number.",
   "limit": 3,
   "blocks": {
-    "src/core/edits/frontmatterEdit.ts": 4,
-    "src/core/frontmatter/okfFrontmatter.ts": 4,
-    "src/core/frontmatter/propertiesTable.ts": 8,
     "src/core/preview/styles/codeBlockStyles.ts": 4,
-    "src/core/preview/styles/commentStyles.ts": 5,
     "src/core/preview/styles/contentBlockStyles.ts": 13,
     "src/core/preview/styles/contentLayoutStyles.ts": 6,
     "src/core/preview/styles/pageChromeStyles.ts": 4,
@@ -18,14 +14,13 @@
     "src/session/features/links.ts": 5,
     "src/session/features/sourceEdits.ts": 4,
     "src/session/webview.ts": 5,
-    "test/core/frontmatter/okfFrontmatter.test.ts": 15,
     "test/core/preview/previewStyles.test.ts": 4,
     "test/core/protocol/hostToPage.test.ts": 5,
-    "test/core/protocol/pageStateMessages.test.ts": 6,
+    "test/core/protocol/pageStateMessages.test.ts": 5,
     "test/integration/blockClipboard.test.ts": 7,
     "test/integration/blockMove.test.ts": 7,
     "test/integration/commentAnchors.test.ts": 7,
-    "test/integration/commentWrite.test.ts": 10,
+    "test/integration/commentWrite.test.ts": 9,
     "test/integration/imagePaste.test.ts": 5,
     "test/integration/inlineThread.test.ts": 5,
     "test/integration/labelRename.test.ts": 4,
@@ -33,16 +28,15 @@
     "test/integration/mystBlocksWindow.ts": 4,
     "test/integration/mystPickers.test.ts": 4,
     "test/integration/paletteMode.test.ts": 4,
-    "test/integration/previewEditing.test.ts": 10,
     "test/integration/previewHistory.test.ts": 7,
     "test/integration/projectFeatures.test.ts": 4,
-    "test/integration/realInput/markers.ts": 24,
+    "test/integration/realInput/markers.ts": 15,
     "test/integration/reviewComments.test.ts": 4,
     "test/integration/scroll-sync-suite.ts": 5,
     "test/integration/standalone-suite.ts": 5,
     "test/integration/untrusted-suite.ts": 4,
     "test/page/chartCsp.test.ts": 4,
-    "test/page/modules/editActions.test.ts": 36,
+    "test/page/modules/editActions.test.ts": 35,
     "test/site/requirementsViewer/write.test.ts": 4,
     "test/visual/capture_export_html.py": 4,
     "test/visual/exportHtmlScenarios.ts": 4,
@@ -50,6 +44,6 @@
     "test/visual/scenarioDefinitions2.ts": 4
   },
   "unnamedCompanionLines": {
-    "test/integration/realInput/markers.ts": 24
+    "test/integration/realInput/markers.ts": 15
   }
 }

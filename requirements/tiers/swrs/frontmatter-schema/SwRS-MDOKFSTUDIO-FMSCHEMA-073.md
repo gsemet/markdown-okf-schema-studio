@@ -27,6 +27,7 @@ implemented_in_files:
 - src/session/features/links.ts
 tested_in_files:
 - test/integration/previewEditing.test.ts
+- test/session/diagReq.links.requirements.test.ts
 - test/session/links.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

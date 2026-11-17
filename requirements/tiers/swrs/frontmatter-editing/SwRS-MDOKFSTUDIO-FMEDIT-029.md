@@ -30,6 +30,7 @@ tested_in_files:
 - test/core/edits/frontmatterEdit.test.ts
 - test/core/frontmatter/frontmatterPreservation.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
+- test/core/frontmatter/okfFrontmatterPatches.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
 default_owner_email: gaetan@xeberon.net
