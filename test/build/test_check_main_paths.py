@@ -19,8 +19,17 @@ tiers:
 """
 
 
-def req(tier: str, rid: str, lifecycle: str = "proposed", derives: list[str] | None = None, body: str = "") -> str:
+def req(
+    tier: str,
+    rid: str,
+    lifecycle: str = "proposed",
+    derives: list[str] | None = None,
+    body: str = "",
+    depends: list[str] | None = None,
+) -> str:
     head = f"---\ntype: {tier}\nid: {rid}\nreq_lifecycle: {lifecycle}\n"
+    if depends is not None:
+        head += "depends_on:\n" + "".join(f"- {d}\n" for d in depends)
     if derives is not None:
         head += "derives_from:\n" + "".join(f"- {d}\n" for d in derives)
     return head + "---\n# T\n\n" + body
@@ -30,12 +39,12 @@ def section(*lines: str) -> str:
     return "### Rationale\n\nx\n\n### Main paths\n\n#### Path 1: p\n\n" + "\n".join(lines) + "\n\n<!-- okf:links:start -->\n"
 
 
-def bundle(tmp: Path, strs_body: str, crlf: bool = False) -> Path:
+def bundle(tmp: Path, strs_body: str, crlf: bool = False, depends: list[str] | None = None) -> Path:
     (tmp / "tiers/strs/a").mkdir(parents=True)
     (tmp / "tiers/swrs/a").mkdir(parents=True)
     (tmp / "config.yml").write_text(CONFIG, encoding="utf-8")
     files = {
-        "tiers/strs/a/StRS-T-A-001.md": req("StRS", "StRS-T-A-001", body=strs_body),
+        "tiers/strs/a/StRS-T-A-001.md": req("StRS", "StRS-T-A-001", body=strs_body, depends=depends),
         "tiers/strs/a/StRS-T-A-002.md": req("StRS", "StRS-T-A-002", body="no section\n"),
         "tiers/swrs/a/SwRS-T-A-001.md": req("SwRS", f"{P}-A-001", derives=["StRS-T-A-001"]),
         "tiers/swrs/a/SwRS-T-A-002.md": req("SwRS", f"{P}-A-002", "approved", ["StRS-T-A-001"]),
@@ -50,8 +59,10 @@ def bundle(tmp: Path, strs_body: str, crlf: bool = False) -> Path:
     return tmp
 
 
-def run(tmp: Path, body: str, crlf: bool = False) -> tuple[list[str], int, int]:
-    return cmp.check(bundle(tmp, body, crlf))
+def run(
+    tmp: Path, body: str, crlf: bool = False, depends: list[str] | None = None
+) -> tuple[list[str], int, int]:
+    return cmp.check(bundle(tmp, body, crlf, depends))
 
 
 def test_valid_section_passes(tmp_path: Path) -> None:
@@ -105,3 +116,18 @@ def test_crlf_file_is_read_the_same(tmp_path: Path) -> None:
     crlf = run(tmp_path / "crlf", body, crlf=True)
     strip = lambda r: [p.split("/tiers/", 1)[1] for p in r[0]]  # noqa: E731
     assert strip(lf) == strip(crlf) and len(crlf[0]) == 1 and lf[1:] == crlf[1:]
+
+
+def test_depends_on_sibling_passes(tmp_path: Path) -> None:
+    assert run(tmp_path, section(f"   - {P}-A-005: shared"), depends=[f"{P}-A-005"]) == ([], 1, 1)
+
+
+def test_neither_derived_nor_depended_fails_with_both_ways(tmp_path: Path) -> None:
+    problems, _, _ = run(tmp_path, section(f"   - {P}-A-005: a"), depends=[f"{P}-A-001"])
+    assert len(problems) == 1
+    assert "does not derive from StRS-T-A-001 and is not in its depends_on" in problems[0]
+
+
+def test_superseded_depends_on_fails(tmp_path: Path) -> None:
+    problems, _, _ = run(tmp_path, section(f"   - {P}-A-003: a"), depends=[f"{P}-A-003"])
+    assert len(problems) == 1 and "superseded, not active" in problems[0]
