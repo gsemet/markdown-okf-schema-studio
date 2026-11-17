@@ -69,14 +69,14 @@ sequenceDiagram
     participant Page as Preview page
     participant Host as Host
     participant Dialog as Native dialog
-    participant Box as Text box
+    participant Field as Text box
     Writer->>Page: press the Image button
     Page->>Host: ask for an image file
     Host->>Dialog: open the file dialog, the editor stays open
     alt the writer picks a file
         Dialog-->>Host: the file path
         Host-->>Page: the path relative to the document
-        Page->>Box: insert or replace the image reference, one undo step
+        Page->>Field: insert or replace the image reference, one undo step
     else the writer cancels
         Dialog-->>Host: nothing
         Host-->>Page: no path

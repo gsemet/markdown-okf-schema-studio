@@ -72,15 +72,15 @@ sequenceDiagram
     actor Writer
     participant Palette as Palette or slash menu
     participant Action as MyST action
-    participant Box as Text box
+    participant Field as Text box
     Writer->>Palette: press Admonition or type /admonition
     Palette-->>Writer: list of admonition types
     Writer->>Palette: choose a type
     Palette->>Action: run on the touched lines
     alt the type is known
-        Action->>Box: wrap the lines in a colon fence, one edit
-        Writer->>Box: undo
-        Box-->>Writer: the text is as it was
+        Action->>Field: wrap the lines in a colon fence, one edit
+        Writer->>Field: undo
+        Field-->>Writer: the text is as it was
     else the type is missing or unknown
         Action-->>Writer: the text is unchanged
     end
