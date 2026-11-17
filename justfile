@@ -89,7 +89,7 @@ dev-ci STAGE="":
 # Upgrade dependencies from npmjs.org and PyPI and refresh the development environment.
 update:
     fnm install
-    {{ npm }} exec --yes --package=npm-check-updates -- ncu --upgrade --reject @types/node,@types/vscode --registry https://registry.npmjs.org/
+    {{ npm }} exec --yes --package=npm-check-updates -- ncu --upgrade --reject @types/node,@types/vscode,@types/vscode-min --registry https://registry.npmjs.org/
     rm -rf node_modules package-lock.json
     {{ npm }} install --package-lock-only --ignore-scripts
     {{ npm }} install --save-dev @types/node@24 --package-lock-only --ignore-scripts
