@@ -14,10 +14,10 @@ scope: palette-slash
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-17T22:42:16+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-17T22:42:16+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -37,7 +37,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-256
 - SwRS-MDOKFSTUDIO-PALETTE-263
 - SwRS-MDOKFSTUDIO-PALETTE-268
-- SwRS-MDOKFSTUDIO-TABLE-085
+- SwRS-MDOKFSTUDIO-PALETTE-275
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -62,6 +62,23 @@ As a writer, I get a command menu from the slash without it getting in the way o
 - A command is run as its palette button is, in one undoable step.
 - In forced-colours mode the highlighted command stays readable.
 - The cell menu lists only the commands that make sense in a table cell and follows the palette mode like the block menu does.
+
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Open: a slash at the start of a line or after a space
+    Closed --> Closed: a slash inside a word
+    Open --> Filtered: the writer types, matched by alias or label
+    Filtered --> Open: the writer erases the filter
+    Open --> Closed: Enter, Tab or a click runs the command in one edit
+    Filtered --> Closed: Enter, Tab or a click runs the command in one edit
+    Open --> Closed: Escape or the caret leaves, the text is kept
+    Filtered --> Closed: Escape or the caret leaves, the text is kept
+```
+
+A command is one edit, and Escape leaves the text as it is.
 
 ### Main paths
 
@@ -103,5 +120,5 @@ As a writer, I get a command menu from the slash without it getting in the way o
   - [SwRS-MDOKFSTUDIO-PALETTE-256](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-256.md): The slash menu stays next to the caret inside the viewport
   - [SwRS-MDOKFSTUDIO-PALETTE-263](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-263.md): Slash commands have short alternative names
   - [SwRS-MDOKFSTUDIO-PALETTE-268](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-268.md): The MyST slash menu lists every admonition directive with its icon
-  - [SwRS-MDOKFSTUDIO-TABLE-085](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-085.md): The table bar's cell group formats the cell text
+  - [SwRS-MDOKFSTUDIO-PALETTE-275](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-275.md): Every syntax the preview renders can be inserted from the slash menu
 <!-- okf:links:end -->
