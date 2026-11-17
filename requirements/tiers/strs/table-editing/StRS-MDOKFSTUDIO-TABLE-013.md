@@ -43,6 +43,25 @@ As a writer, I convert a table between a Markdown pipe table, a MyST list-table 
 - The HTML table writer of the HTML table button belongs here as the third form.
 - Escaped pipes and cell text are kept across the forms.
 
+### Use case diagram
+
+Converting a table between pipe and list-table forms.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Preview
+    participant VSCode as VS Code
+    participant File
+    Writer->>Preview: runs List table, Pipe table or the table bar button
+    alt content would be lost, or already in the target form
+        Preview-->>Writer: reason ending Nothing was changed.
+    else conversion accepted
+        Preview->>VSCode: convert the table
+        VSCode->>File: table in the other form, one edit
+    end
+```
+
 ### Main paths
 
 #### Path 1: Convert a table to a list-table and back

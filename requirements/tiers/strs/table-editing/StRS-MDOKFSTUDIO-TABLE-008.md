@@ -53,6 +53,27 @@ As a writer, I see the table actions with text labels above the table and I alwa
 - A bar that appears hidden under the sticky headings or the preview controls is scrolled into view when that does not push the selected cell out of the pane.
 - Known issue: the separator before the cell formatting group can stay at the end of a line when the group wraps in a narrow pane.
 
+### Use case diagram
+
+The table bar appears with the cell editor and edits rows and columns.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Preview
+    participant VSCode as VS Code
+    participant File
+    Writer->>Preview: clicks a cell
+    Preview-->>Writer: cell editor and the table bar with the position of the cell
+    Writer->>Preview: presses Row below, Row above, Col left or Row −
+    alt button disabled or model refuses
+        Preview-->>Writer: nothing changed
+    else edit accepted
+        Preview->>VSCode: save the table edit
+        VSCode->>File: table with the row or column changed
+    end
+```
+
 ### Main paths
 
 #### Path 1: Add a row below the selected one

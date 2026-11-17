@@ -170,7 +170,7 @@ When the page posts a block-editing message (previewEditModeChanged, previewEdit
 
 - Method: Unit test `the page-state validators accept exactly what the frozen validator accepted` in test/core/protocol/pageStateMessages.test.ts (previewEditModeChanged, previewEditOpen, previewEditSave, previewEditCancel scenarios, including the insert point rows).
 - Method: Unit tests `previewBlockMove validates both ranges, the direction and the optional pin`, `T40: the block clipboard messages validate their lines and the optional pin`, `STAB-03: previewEditClosed carries the id of the closed editor` and `CR 025: previewEditFlushed validates the flush id and the flag` in test/core/protocol/pageToHost.test.ts (the other six messages; the 100-character bound of the flush id is named in the criteria and not in the test title).
-- Method: one refusal test per message of previewEditModeChanged, previewEditOpen, previewEditSave and previewEditCancel is to be added in a later round (today only the oracle test above covers them).
+- Method: unit test `previewEditModeChanged, previewEditOpen, previewEditSave and previewEditCancel refuse a malformed message` in test/core/protocol/pageToHost.test.ts (the refusal rows of those four messages and the insert point boundary).
 - Criteria: The validators of src/core/protocol/pageToHost.ts decide (isEditRequest, hasValidStateFields, isPinViewportTop); the order of two lines is checked by the planner, not here; the edit id has no upper length bound in previewEditOpen (only previewEditClosed and previewEditFlushed bound theirs to 100, MAX_EDIT_ID_LENGTH).
 
 <!-- okf:links:start -->

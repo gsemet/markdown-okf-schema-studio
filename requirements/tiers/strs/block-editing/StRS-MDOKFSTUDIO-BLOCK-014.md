@@ -59,6 +59,27 @@ As a writer, I swap a block or a selected run of blocks with its neighbour with 
 - A repeated key does not move the block twice.
 - The selection stays on the moved blocks after the move, also if the preview reloads meanwhile.
 
+### Use case diagram
+
+Moving a block with an arrow or with the keyboard.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Preview
+    participant VSCode as VS Code
+    participant File
+    Writer->>Preview: clicks an arrow, or presses Alt+ArrowUp or Alt+ArrowDown
+    Preview->>VSCode: swap the block with its neighbour
+    alt ranges do not match the document
+        VSCode-->>Preview: refused with a reason
+    else swap accepted
+        VSCode->>File: replace the lines from the first block to the second
+        VSCode-->>Preview: one undo step, one render
+        Preview-->>Writer: block at its new place
+    end
+```
+
 ### Main paths
 
 #### Path 1: Move a block with an arrow

@@ -567,3 +567,15 @@ test("a block save on a file VS Code holds read-only is told, and the images pas
     assert.equal(readOnly.document.getText(), MARKDOWN);
   }
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+test("a cancelled session that autosaved restores the original text as an ordinary edit", async () => {
+  const run = fixture();
+  await run.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
+  await run.send("previewEditSave", { ...SECOND, editedText: "Second A.\n", final: false });
+  assert.equal(run.document.getText(), "# Title\n\nFirst paragraph.\n\nSecond A.\n");
+  const before = run.applyCalls.length;
+  await run.send("previewEditCancel", { editId: "e1", line: 5, endLine: 5 });
+  assert.equal(run.document.getText(), MARKDOWN, "the original text is back");
+  assert.equal(run.applyCalls.length, before + 1, "the restore is one ordinary edit");
+});

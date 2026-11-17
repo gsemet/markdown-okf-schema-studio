@@ -42,6 +42,26 @@ As a writer, I reorder the rows and the columns of a table by dragging a handle,
 - The handle of a column is the same mark, turned; it sits just above the table, outside its cells, centred on its column. Only a pipe table and a `{list-table}` show them.
 - A move is one edit of the document, so one undo reverts it.
 
+### Use case diagram
+
+Moving a body row or a column by its handle.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Preview
+    participant VSCode as VS Code
+    participant File
+    Writer->>Preview: drags a row or column handle, or presses Alt+arrow
+    Preview->>VSCode: move the row or column
+    alt table or state without a move
+        VSCode-->>Preview: refused
+    else move accepted
+        VSCode->>File: one source edit, header rows kept
+        Preview-->>Writer: row or column at its new position
+    end
+```
+
 ### Main paths
 
 #### Path 1: Move a row

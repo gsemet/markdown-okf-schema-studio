@@ -406,9 +406,11 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       const row = tableTools.insertRowBefore(edit.tableModel!, edit.tableRowIndex!);
       if (row !== undefined) edit.tableRowIndex = row;
     }), edit.tableRowIndex === 0, "row");
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
     addAction("Insert row after selected row", tableActionIcons.addRow, "Row below", () => structural(() => {
       edit.tableRowIndex = tableTools.insertRowAfter(edit.tableModel!, edit.tableRowIndex!);
     }), false, "row");
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
     addAction("Delete selected row", tableActionIcons.deleteRow, "Row −", () => structural(() => {
       const nextRow = tableTools.deleteRow(edit.tableModel!, edit.tableRowIndex!);
       if (nextRow !== undefined) edit.tableRowIndex = nextRow;
@@ -417,9 +419,11 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     addAction("Insert column before selected column", tableActionIcons.addColumnBefore, "Col left", () => structural(() => {
       edit.tableColumnIndex = tableTools.insertColumnBefore(edit.tableModel!, edit.tableColumnIndex!);
     }), false, "column");
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
     addAction("Insert column after selected column", tableActionIcons.addColumn, "Col right", () => structural(() => {
       edit.tableColumnIndex = tableTools.insertColumnAfter(edit.tableModel!, edit.tableColumnIndex!);
     }), false, "column");
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
     addAction("Delete selected column", tableActionIcons.deleteColumn, "Col −", () => structural(() => {
       const nextColumn = tableTools.deleteColumn(edit.tableModel!, edit.tableColumnIndex!);
       if (nextColumn !== undefined) edit.tableColumnIndex = nextColumn;

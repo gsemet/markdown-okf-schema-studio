@@ -168,6 +168,46 @@ test("T30: the list and pick messages carry an edit id and no other payload", ()
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+test("previewEditModeChanged, previewEditOpen, previewEditSave and previewEditCancel refuse a malformed message", () => {
+  const base = { documentId: "doc", revision: 1, requestId: 1 };
+  assert.equal(isRegisteredPreviewMessage({ ...base, type: "previewEditModeChanged", editMode: true }), true);
+  for (const editMode of ["yes", undefined, 1, null]) {
+    assert.equal(isRegisteredPreviewMessage({ ...base, type: "previewEditModeChanged", editMode }), false, String(editMode));
+  }
+  const open = { ...base, type: "previewEditOpen", editId: "e1", line: 3, endLine: 5 };
+  const save = { ...base, type: "previewEditSave", editId: "e1", line: 3, endLine: 5, originalText: "a", editedText: "b" };
+  const cancel = { ...open, type: "previewEditCancel" };
+  assert.equal(isRegisteredPreviewMessage(open), true);
+  assert.equal(isRegisteredPreviewMessage(save), true);
+  assert.equal(isRegisteredPreviewMessage(cancel), true);
+  // The range and the edit id are checked on all three messages.
+  for (const message of [open, save, cancel]) {
+    for (const patch of [{ line: 0 }, { endLine: 2 }, { endLine: undefined }, { editId: "" }, { editId: undefined }, { editId: 7 }]) {
+      assert.equal(isRegisteredPreviewMessage({ ...message, ...patch }), false, `${message.type} ${JSON.stringify(patch)}`);
+    }
+  }
+  // The insert point is an integer of at least 0 on all three; 0 is accepted.
+  for (const message of [open, save, cancel]) {
+    assert.equal(isRegisteredPreviewMessage({ ...message, insertAfterLine: 0 }), true, message.type);
+    assert.equal(isRegisteredPreviewMessage({ ...message, insertAfterLine: -1 }), false, message.type);
+  }
+  // An open or a cancel carries no save or pin field.
+  for (const message of [open, cancel]) {
+    for (const patch of [{ final: true }, { pinLine: 3, pinViewportTop: 10 }]) {
+      assert.equal(isRegisteredPreviewMessage({ ...message, ...patch }), false, `${message.type} ${JSON.stringify(patch)}`);
+    }
+  }
+  // A save: the texts are strings, final is a boolean, flush is only true, a pin comes only with a final save.
+  for (const patch of [{ originalText: undefined }, { editedText: 4 }, { final: "yes" }, { flush: false }, { pinLine: 3, pinViewportTop: 10 },
+    { final: true, pinLine: 3, pinViewportTop: 200000 }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...save, ...patch }), false, JSON.stringify(patch));
+  }
+  assert.equal(isRegisteredPreviewMessage({ ...save, flush: true }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...save, final: true }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...save, final: true, pinLine: 3, pinViewportTop: 10 }), true);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
 test("previewBlockMove validates both ranges, the direction and the optional pin", () => {
@@ -186,8 +226,6 @@ test("previewBlockMove validates both ranges, the direction and the optional pin
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
 test("T40: the block clipboard messages validate their lines and the optional pin", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };

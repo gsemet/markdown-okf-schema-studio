@@ -31,6 +31,7 @@ implemented_in_files:
 - src/session/features/frontmatter.ts
 - src/session/features/sourceEdits.ts
 tested_in_files:
+- test/host-vscode/documents.test.ts
 - test/host/fmtableReq.requirements.test.ts
 - test/integration/blockClipboard.test.ts
 - test/integration/blockMove.test.ts
@@ -120,7 +121,8 @@ When the host writes an edit of the source document for the preview, it SHALL ma
 - Method: test/integration/inlineThread.test.ts (reply and delete rows: runUndo, "one undo should remove the reply" and "one undo should restore the thread"; needs a focused window and is skipped on a locked screen; the failure answers of the finish handler are untested)
 - Method: test/host/fmtableReq.requirements.test.ts (frontmatter row: a value save, an add, a rename and a remove are each one text edit; a frontmatter save that VS Code does not apply is answered with a message and a thrown error gives its text); the Undo step itself is untested, it needs a real VS Code window
 - Method: test/session/blockReq.requirements.test.ts (failure table rows for block save, move, cut, paste and copy: `an edit that VS Code does not apply or rejects is reported and the final request is reset`, `a move that VS Code does not apply or rejects is answered with ok false`, `a cut or paste that VS Code does not apply, and a failing clipboard, are answered with ok false`; the block that changed under the host: `a block that changed in the document under the host is reported and the lock is released`)
-- Method: the cancelled-session, checkbox failure, label rename failure and label rename undo cases are untested
+- Method: test/session/blockReq.requirements.test.ts (`a cancelled session that autosaved restores the original text as an ordinary edit`: Cancelled session) and test/host-vscode/documents.test.ts (`an own undo step without a visible editor, and a plain edit, go through a workspace edit`: No visible text editor).
+- Method: the checkbox failure, label rename failure and label rename undo cases are untested
 - Criteria: applyEdits is called without ownUndoStep for block text edits and with ownUndoStep true for a move, a cut, a paste, a checkbox toggle, a label rename and a thread change (editor.edit with undo stops before and after); completeActiveBlockEdit refreshes only when hasAppliedEdit is true and the document revision differs from the stage; every failure branch posts the reason of the table, finalRequested is false after a failed block save and releaseHostEditKeepingEditor runs after the changed-under-host error
 
 <!-- okf:links:start -->

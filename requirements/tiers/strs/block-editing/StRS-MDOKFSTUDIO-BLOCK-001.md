@@ -51,6 +51,19 @@ As a writer, I turn edit mode on to change my document in the preview and off to
 - The choice is remembered per workspace; a preview that was already open and reloaded keeps its own state first.
 - Every preview has the Edit button, in Restricted Mode and for a file outside every workspace folder too; trust never takes it away. A file that VS Code holds read-only keeps its button, and a write to it is refused with the reason "This file is read-only in VS Code.".
 
+### Use case diagram
+
+The preview is in reading mode or in edit mode, and the writer or the saved choice moves it between them.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Reading: new preview, edit mode last off
+    [*] --> Editing: new preview, edit mode last on
+    Reading --> Editing: writer clicks Edit, layout unchanged
+    Editing --> Reading: writer clicks Edit, open editor saved
+    Editing --> Editing: choice remembered for the workspace
+```
+
 ### Main paths
 
 #### Path 1: Turn edit mode on and off

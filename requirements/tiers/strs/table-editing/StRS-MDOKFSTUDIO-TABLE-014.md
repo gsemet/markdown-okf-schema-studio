@@ -41,6 +41,22 @@ As a reviewer, I see a one-line diff for a one-cell edit, and the table's layout
 - Saving an unchanged table gives back the original text byte for byte for compact, padded, no-spaces, aligned, no-outer-pipes, escaped, indented, CRLF and wider-than-padding tables.
 - A column button keeps the padding, the indentation and the outer pipes of every line, and a pipe inside a code span splits a cell in the editor as it does in the preview.
 
+### Use case diagram
+
+Saving a cell edit changes only the line of the cell.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Preview
+    participant VSCode as VS Code
+    participant File
+    Writer->>Preview: edits one cell of a pipe table
+    Preview->>VSCode: save the table
+    VSCode->>File: only the line of that cell changes
+    Note over File: an unchanged table gives back the original text
+```
+
 ### Main paths
 
 #### Path 1: Save a cell edit

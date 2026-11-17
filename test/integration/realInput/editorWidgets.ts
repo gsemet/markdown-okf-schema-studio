@@ -808,6 +808,28 @@ export async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): 
       "scrollHeight changed from " + before.height + " to " + after.height);
     assert.ok(Math.abs(after.top - before.top) <= 2,
       "third paragraph top moved from " + before.top + " to " + after.top);
+    // Hover and click do not reflow: the other paragraphs keep their height, only the clicked block becomes an editor.
+    const heights = (): Promise<Record<string, number>> => withCurrentFrame(page, (frame) =>
+      frame.locator("p[data-sphinx-source-line]").evaluateAll((elements) => Object.fromEntries(elements.map((element) =>
+        [element.getAttribute("data-sphinx-source-line") ?? "", element.getBoundingClientRect().height]))));
+    const reading = await heights();
+    await withCurrentFrame(page, (frame) => frame.locator("p[data-sphinx-source-line]").nth(1).hover());
+    const hovered = await heights();
+    assert.deepEqual(hovered, reading, "hovering a paragraph changed no paragraph height");
+    await withCurrentFrame(page, (frame) => frame.locator("p[data-sphinx-source-line]").nth(0).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    const clicked = await heights();
+    for (const [line, height] of Object.entries(clicked)) {
+      assert.ok(Math.abs(height - (reading[line] ?? Number.NaN)) <= 2, `paragraph at line ${line} changed height from ${reading[line]} to ${height}`);
+    }
+    assert.equal(Object.keys(clicked).length, Object.keys(reading).length - 1, "only the clicked block became an editor");
+    await escapeBlockEditor(page, "the block editor to close after Escape");
+    // Reopen: closing the preview and opening a new one finds the edit mode last chosen.
+    await closeAllEditors();
+    await openSidePreview(source);
+    await waitForRender(source);
+    await waitFor("edit mode to still be on in the reopened preview", () => withCurrentFrame(page, async (frame) =>
+      await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode") === "on"));
   });
 }
 

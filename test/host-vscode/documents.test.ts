@@ -69,6 +69,7 @@ test("an edit that is its own undo step goes through the visible editor, with un
   assert.deepEqual(editorEdits[0]!.replaces.map((replace) => [lines(replace.range), replace.text]), [[[1, 0, 1, 3], "TWO"]]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
 test("an own undo step without a visible editor, and a plain edit, go through a workspace edit", async () => {
   const { store, document, window, editor, workspaceEdits, editorEdits } = setup();
   const view = store.of(document as never);

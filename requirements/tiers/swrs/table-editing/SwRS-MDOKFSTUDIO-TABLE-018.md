@@ -31,6 +31,7 @@ tested_in_files:
 - test/integration/realInput/editorWidgets.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimePaletteActions.test.ts
+- test/page/runtimeTableCellBlur.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -104,6 +105,7 @@ When the writer presses Enter in the cell text box, with or without Cmd, Ctrl or
 - Method: test/integration/realInput/blockKeys.ts, markers in test/integration/realInput/markers.ts (real-window scenario scenarioTableCellEnter, id table-editing/r01-cell-enter-saves: Enter after typing).
 - Method: test/page/fmtableReqTable.requirements.test.ts ("an unchanged cell closes without a save; typed back after an autosave it saves a final text"; "a click outside any editable block saves the open cell once").
 - Method: test/page/runtimePaletteActions.test.ts (T35 "a popover opened from the cell bar keeps the editor open, outside focus still commits" and T35 "the link panel opened from the cell keeps the editor open and clicking outside commits").
+- Method: test/page/runtimeTableCellBlur.test.ts (a pointer press just before the blur: no save; a press 560 ms before: the cell is committed; A pointer press in the last 500 ms).
 - Method: visual scenarios table-editing/v01 to v05 (Done under the field).
 - Criteria: A final previewEditSave follows the key, the Done click, an outside blur, an outside leave of the formatting group and a click outside, and none follows a blur into the editor or the bar, an inside move, or a recent pointer press. The mousedown default is prevented on both buttons, read from createEditorButtons. The order of the messages is final previewEditSave before the open of the other block; with an unchanged cell no pending navigation remains. Untested: Shift+Enter and the other chords for cells (the keydown handler accepts any Enter), a blur because the whole window lost the focus, and the host-dialog branch (hostRequests.isDialogOpen in the onLeave handler of tableCellEditor.ts) for cells.
 

@@ -89,10 +89,10 @@ While edit mode is on and the body of a rendered document has no block, the page
 
 ### Verification notes
 
-- Method: test/page/runtimeBlockMoves.test.ts: `T28: an empty body shows a single Start writing point after line 0` and `T28: a frontmatter-only document gets one Start writing point` (scenario 1), `T28: a failed render offers no Start writing point` (scenario 2), `T28: Start writing opens at line 1 with insertAfterLine 0` (scenario 3).
-- Method: test/page/runtimeBlockEditor.test.ts: `top spacing: the editor opened from Start writing carries the first-block class` (scenarios 3 and 7), `empty document: Enter in edit mode opens the new-block editor like Start writing` (scenario 4), `empty document: Enter with a modifier, in a field, outside edit mode or on a filled document does nothing` (scenario 5), `empty document: Cmd/Ctrl+Enter saves the new block and Escape cancels back to Start writing` (scenario 6), and the six `top spacing: ...` cases (scenario 7).
-- Method: visual scenario block-editing/v11 (scenario 4; the lock asks for at least 20 px below the top, the real gap is SwRS-MDOKFSTUDIO-LAYOUT-007, and SwRS-MDOKFSTUDIO-LAYOUT-011 pushes the button only under the toolbar).
-- Criteria: The button needs a render status of success or recovery. The open message names line 1 and insertAfterLine 0. The keydown listener opens an editor only for an unmodified Enter outside controls. The first-block class is present exactly in the cases of scenario 7.
+- Method: test/page/runtimeBlockMoves.test.ts: `T28: an empty body shows a single Start writing point after line 0` and `T28: a frontmatter-only document gets one Start writing point` (Empty body shows one Start writing button), `T28: a failed render offers no Start writing point` (No Start writing button on a failed or pending render), `T28: Start writing opens at line 1 with insertAfterLine 0` (A click opens the editor of the first block).
+- Method: test/page/runtimeBlockEditor.test.ts: `top spacing: the editor opened from Start writing carries the first-block class` and the six `top spacing: ...` cases (The first-block editor is marked). The Enter key on the selected Start writing button is specified and tested by SwRS-MDOKFSTUDIO-BLOCK-253, not here.
+- Method: visual scenario block-editing/v11 (the position of the button; the lock asks for at least 20 px below the top, the real gap is SwRS-MDOKFSTUDIO-LAYOUT-007, and SwRS-MDOKFSTUDIO-LAYOUT-011 pushes the button only under the toolbar).
+- Criteria: The button needs a render status of success or recovery. The open message names line 1 and insertAfterLine 0. The first-block class is present exactly in the cases of scenario 7.
 
 <!-- okf:links:start -->
 ### Links
