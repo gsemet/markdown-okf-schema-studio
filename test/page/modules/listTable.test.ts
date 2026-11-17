@@ -172,3 +172,28 @@ test("an HTML table with spans, markup or no body cells in a row is refused", ()
     }
   }
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+test("a table in another style comes back from the round trip as the canonical table", () => {
+  const styled = [
+    ["| Name  | Qty |\n| ----- | --- |\n| apple | 3   |", "| Name | Qty |\n| --- | --- |\n| apple | 3 |"],
+    ["  | Name | Qty |\n  | --- | --- |\n  | apple | 3 |", "| Name | Qty |\n| --- | --- |\n| apple | 3 |"],
+    ["| Name | Qty |\n| :--- | ---: |\n| apple | 3 |", "| Name | Qty |\n| --- | --- |\n| apple | 3 |"],
+    ["| Name | Qty |\n| :---: | ------ |\n| apple | 3 |", "| Name | Qty |\n| --- | --- |\n| apple | 3 |"],
+  ];
+  for (const [source, canonical] of styled) {
+    const list = convert(source, "list-table");
+    assert.equal(list.ok, true, source);
+    if (!list.ok) continue;
+    assert.deepEqual(convert(list.text, "pipe"), { ok: true, text: canonical }, source);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
+test("a closing pipe after an odd number of backslashes belongs to the last cell", () => {
+  const head = "| A | B |\n| --- | --- |\n";
+  const odd = tools.parse(head + "| a | b\\|")!;
+  assert.deepEqual(odd.rows[2], ["a", "b\\|"]);
+  const even = tools.parse(head + "| a | b\\\\|")!;
+  assert.deepEqual(even.rows[2], ["a", "b\\\\"]);
+});

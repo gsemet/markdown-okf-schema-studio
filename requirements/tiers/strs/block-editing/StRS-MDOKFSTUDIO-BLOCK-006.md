@@ -71,6 +71,31 @@ As a writer, I never lose the text I typed in the preview, saved to my Markdown 
 - Opening the editor with its edition palette does not move the text I clicked, and closing it does not move the page.
 - After a save the edited block is shown at the same place on the screen.
 
+### Use case diagram
+
+Typing in a block editor, then finishing or leaving the document.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Preview
+    participant VSCode as VS Code
+    participant File
+    Writer->>Preview: types in a block editor
+    Preview->>VSCode: 400 ms after the last keystroke, smallest replacement
+    VSCode->>File: autosave of the typed text
+    alt save refused
+        VSCode-->>Preview: reason
+        Preview-->>Writer: typed text kept, reason shown
+    end
+    Writer->>Preview: Done, Cmd or Ctrl+Enter, or leaves the text box
+    Preview->>VSCode: final save
+    VSCode->>File: final text
+    VSCode-->>Preview: one render after the final save
+    Writer->>Preview: follows a link, Back or opens another document
+    Preview->>VSCode: typed text saved first
+```
+
 ### Main paths
 
 #### Path 1: Type, then finish

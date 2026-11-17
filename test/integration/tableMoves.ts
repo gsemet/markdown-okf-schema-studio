@@ -252,6 +252,7 @@ async function scenarioRawListTable(page: Page): Promise<void> {
   });
 }
 
+// @tests_req StRS-MDOKFSTUDIO-TABLE-002
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
 /** A body row moves by mouse and by key, with and without a cell editor open. */
 async function scenarioRowMoves(page: Page, syntax: "pipe" | "list-table"): Promise<void> {
@@ -296,6 +297,7 @@ async function scenarioRowMoves(page: Page, syntax: "pipe" | "list-table"): Prom
   });
 }
 
+// @tests_req StRS-MDOKFSTUDIO-TABLE-002
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-007
 /** A column moves by mouse and by key, with and without a cell editor open. */
 async function scenarioColumnMoves(page: Page, syntax: "pipe" | "list-table"): Promise<void> {

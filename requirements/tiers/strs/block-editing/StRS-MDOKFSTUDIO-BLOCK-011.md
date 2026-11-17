@@ -47,6 +47,25 @@ As a writer, I add a paragraph, a list or a heading between two blocks, or after
 - The Start writing button is not offered when the render failed.
 - Escape in the first editor brings the button back.
 
+### Use case diagram
+
+Adding a block between two blocks and starting an empty document.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Preview
+    participant VSCode as VS Code
+    participant File
+    Writer->>Preview: clicks the plus button of an insert point
+    Preview-->>Writer: empty insertion editor
+    Writer->>Preview: types the new block
+    Preview->>VSCode: insert the block
+    VSCode->>File: block with one blank line before and after
+    Writer->>Preview: clicks Start writing on an empty document
+    Preview-->>Writer: editor of the first block
+```
+
 ### Main paths
 
 #### Path 1: Add a block between two blocks

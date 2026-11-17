@@ -308,8 +308,9 @@ export async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Pro
 }
 
 /**
- * T39: Shift+click across three blocks, Shift+Up shrinks, Escape clears; CR 157: Right and Escape walk into and out of a table; nothing is edited.
+ * T39: Shift+click across three blocks, Shift+Up shrinks, Cmd or Ctrl+C copies, Escape clears; CR 157: Right and Escape walk into and out of a table; nothing is edited.
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+ * @tests_req StRS-MDOKFSTUDIO-BLOCK-016
  */
 export async function scenarioBlockSelection(page: Page, evidence: Evidence): Promise<void> {
   const text = ["# Selection", "", "Alpha paragraph.", "", "Beta paragraph.", "", "Gamma paragraph.", "",
@@ -335,6 +336,17 @@ export async function scenarioBlockSelection(page: Page, evidence: Evidence): Pr
     await press(page, "Shift+ArrowUp");
     await waitFor("Shift+Up to shrink the selection", async () => (await selected()).length === 2);
     assert.equal(await announced(), "2 blocks selected");
+    // Copy puts the exact Markdown of the selected blocks on the clipboard and changes no text.
+    const savedClipboard = await vscode.env.clipboard.readText();
+    try {
+      await vscode.env.clipboard.writeText("sentinel");
+      await press(page, `${MOD}+C`);
+      await waitFor("Cmd or Ctrl+C to copy the selected blocks", async () =>
+        (await vscode.env.clipboard.readText()) === "Alpha paragraph.\n\nBeta paragraph.");
+    } finally {
+      await vscode.env.clipboard.writeText(savedClipboard);
+    }
+    assert.equal(bufferText(document), text, "copying changes nothing in the document");
     await press(page, "Escape");
     await waitFor("Escape to clear the selection", async () => (await selected()).length === 0);
     // CR 157: with the keyboard on the table, Right goes down into its first cell and Escape back up.

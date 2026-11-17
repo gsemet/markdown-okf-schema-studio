@@ -58,6 +58,23 @@ As a writer, I select a run of blocks with Shift+click or Shift+Arrow to treat t
 - Copy never changes the document; cut and paste are one undo step each.
 - The clipboard keys stay native in a text box, a field, the properties table and in reading mode.
 
+### Use case diagram
+
+Selecting blocks, then copying, cutting and pasting them.
+
+```mermaid
+stateDiagram-v2
+    [*] --> NoSelection: edit mode on, no editor open
+    NoSelection --> Selected: Shift+click selects a run of blocks
+    Selected --> Selected: Shift+Arrow grows or shrinks the run
+    Selected --> Copied: Cmd or Ctrl+C puts the Markdown on the clipboard
+    Selected --> Copied: cut also deletes the blocks
+    Selected --> NoSelection: content patch clears the selection
+    Copied --> Pasted: paste inserts new blocks after the selection
+    Copied --> Copied: empty clipboard pastes nothing
+    Pasted --> [*]
+```
+
 ### Main paths
 
 #### Path 1: Select blocks, copy and paste them

@@ -53,6 +53,20 @@ As a writer, I type Markdown in the block editor and the keys do what I expect: 
 - Up and Down leave only from the first or last wrapped line; Left and Right leave at the very start or end.
 - The properties table is skipped: its fields have their own editor.
 
+### Use case diagram
+
+A block editor keeps the writer in the flow of typing and moves on to the next block.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Editor: block editor open
+    Editor --> Editor: Enter continues the list marker
+    Editor --> Editor: marker key wraps a selection
+    Editor --> Editor: ArrowDown with a modifier or a selection stays in the text box
+    Editor --> NextEditor: ArrowDown on the last line, changed text saved
+    NextEditor --> [*]: editor of the next block open, caret at its start
+```
+
 ### Main paths
 
 #### Path 1: Type a list
