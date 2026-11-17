@@ -7,7 +7,8 @@ non-user-facing PRs (chore/ci/build/test/docs/... titles or labels) are listed a
 
 The previous campaign's date comes from `--since DATE`, else from `--campaign DIR` (its 00-index.md
 `Date:` line, else the commit date of its recorded revision), else from the newest archived QA
-campaign under $QA_CHANGES_ROOT (default <repo>/.agents/changes), the same lookup as
+campaign under $QA_CHANGES_ROOT (default: the planning folder, see coverage-map.py), the same
+lookup as
 coverage-map.py. The search is `merged:>=DATE` (a PR merged on the campaign day after the recorded
 revision still counts). PRs already in the recorded revision are dropped: merge commit an ancestor,
 or a log subject exactly "<title> (#N)", or (only when the revision is an ancestor of the default

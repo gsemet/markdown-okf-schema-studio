@@ -34,8 +34,8 @@ parallel runs) is the process guideline
 It ranks below the project guidelines: when it conflicts with one of them, the project guideline
 wins and the conflict is reported. Load it when picking up backlog work or change requests in
 the planning folder (see "chantier"), including Parallel Change Requests Orchestration, when
-preparing or running a release, and when writing the header of a `STATUS.md`. A change may also run without a change
-request (a pull request opened directly): the project guidelines apply the same way.
+preparing or running a release. A change may also run without a change request (a pull request
+opened directly): the project guidelines apply the same way.
 
 ## chantier
 

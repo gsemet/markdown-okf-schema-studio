@@ -57,7 +57,7 @@ Budgets), references/charters.md (the charter prompt below), references/harness-
 
 Campaign folder: <campaign> (sheets go in <campaign>/<group>/). Environment to export (it only
 affects the scope scripts, not launch or scenario):
-  QA_CHANGES_ROOT=<changes root, when .agents/changes is not in this checkout>
+  QA_CHANGES_ROOT=<changes root, when the planning folder is not the default sibling checkout>
 Charters (in this order; new-feature charters first):
 <paste the charter blocks>
 Window allowance: <n> charter windows at a time (the Foreman keeps the campaign total at 2–3).

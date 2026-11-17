@@ -156,7 +156,8 @@ just before it.
 - `grep` may be wrapped by a token-saving proxy; use `rtk proxy grep` for raw output.
 - `sed -i ''` may behave as GNU sed (a `sed` from Homebrew first in `PATH`): edit files with the
   editor tool, or check `sed --version` first.
-- `QA_CHANGES_ROOT` only tells `coverage-map.py` and `new-features.py` where `.agents/changes` is.
+- `QA_CHANGES_ROOT` only tells `coverage-map.py` and `new-features.py` where the planning folder's
+  `changes/` is.
   `launch`, `scenario` and `setup-workspace.sh` ignore it; they use `QA_ROOT` and `--ws`.
 
 ## Cost

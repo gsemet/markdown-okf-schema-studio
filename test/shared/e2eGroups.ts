@@ -1,6 +1,7 @@
 /**
- * The e2e feature groups of the P9 campaign (the future okfreq scopes), tracked in git because
- * `.agents/changes/` is ignored. Imported by `test/visual/scenarios.ts` and `renderFixtures.ts`
+ * The e2e feature groups of the P9 campaign (the future okfreq scopes), tracked in git, not left
+ * in a change request's working folder. Imported by `test/visual/scenarios.ts` and
+ * `renderFixtures.ts`
  * (which hands the list to `capture.py` through the render manifest).
  *
  * Group ids are frozen after P9: scenarios, captures and requirements refer to them.

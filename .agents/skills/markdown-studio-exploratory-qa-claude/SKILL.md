@@ -1,11 +1,11 @@
 ---
 name: markdown-studio-exploratory-qa-claude
-description: This skill should be used when asked to run, resume, or re-validate an exploratory QA campaign on the Markdown OKF-Schema Studio VS Code extension in a real VS Code window (real mouse and keyboard through CDP), and to write one bug sheet per finding under .agents/changes/3-requests/. A Foreman picks charters from a coverage map and the PRs merged since the last campaign, hands groups of charters to QA Driver sub-agents, and each Driver runs charter agents that drive their own window with scenario files and automatic checks. It ships the driver, scenario engine, no-op sweep, a read-only spy extension, synthetic fixtures, a use-case catalogue, and the harness pitfalls learned in previous campaigns.
+description: This skill should be used when asked to run, resume, or re-validate an exploratory QA campaign on the Markdown OKF-Schema Studio VS Code extension in a real VS Code window (real mouse and keyboard through CDP), and to write one bug sheet per finding under the campaign change request's work/ folder in the planning folder. A Foreman picks charters from a coverage map and the PRs merged since the last campaign, hands groups of charters to QA Driver sub-agents, and each Driver runs charter agents that drive their own window with scenario files and automatic checks. It ships the driver, scenario engine, no-op sweep, a read-only spy extension, synthetic fixtures, a use-case catalogue, and the harness pitfalls learned in previous campaigns.
 compatibility: macOS with Visual Studio Code installed at /Applications, fnm with Node 24, the extension's node_modules (playwright-core), rsync, git, sips.
 metadata:
   owner: "Gaetan Semet <gaetan.semet@ampere.cars>"
   keywords: [markdown, okf, studio, vscode, exploratory, qa, ux, cdp]
-  previous-campaigns: [".agents/changes/4-archives/001-deep-UX-analysis/", ".agents/changes/4-archives/210-qa-campaign-2026-10-31/", ".agents/changes/4-archives/215-qa-campaign-2026-10-31/"]
+  previous-campaigns: ["projects/markdown-okf-schema-studio/changes/5-archives/001-deep-UX-analysis/", "projects/markdown-okf-schema-studio/changes/5-archives/210-qa-campaign-2026-10-31/", "projects/markdown-okf-schema-studio/changes/5-archives/215-qa-campaign-2026-10-31/"]
 ---
 
 # Markdown Studio Exploratory QA (Claude)
@@ -75,9 +75,10 @@ git rev-parse --short HEAD; git status --short
 
 `coverage-map.py` takes its baseline from the revision recorded in the previous campaign's
 `00-index.md` (a line `Revision: ` plus the sha in backticks, or the prose "at commit " plus the sha
-in backticks), else from the newest archived QA campaign. `.agents/changes` is git-ignored, so in a
-worktree point the scripts at the main checkout with
-`export QA_CHANGES_ROOT=<main-checkout>/.agents/changes`, or pass `--campaign DIR` (both scripts;
+in backticks), else from the newest archived QA campaign. The scripts read the planning folder of
+`AGENTS.md` (a sibling checkout of the planning surface); when it is elsewhere, point them at it
+with `export QA_CHANGES_ROOT=<planning surface>/projects/markdown-okf-schema-studio/changes`, or
+pass `--campaign DIR` (both scripts;
 `new-features.py` also takes `--since DATE`, `--repo`, `--dry-run` to print the `gh` command without
 calling it, and `--json-file` for saved `gh` output). A
 sha that is not an ancestor of HEAD is reported and skipped.
@@ -211,8 +212,8 @@ and never drives a window except the smoke check.
 Write the index and the sheets as described in
 [qa-bug-template.md](references/qa-bug-template.md) (the owner reads them in the Studio).
 
-Under `.agents/changes/3-requests/<campaign-folder>/` (for a follow-up, a new folder or a `part-N/`
-subfolder linked from the previous index):
+Under `work/<campaign-folder>/` of the campaign's change request in the planning folder (for a
+follow-up, a new folder or a `part-N/` subfolder linked from the previous index):
 
 - `00-index.md`: date, revision, status (`partial`/`completed`), summary, findings table sorted by
   severity with an `approved` column (`[ ]`), **Decisions for the owner** (the findings whose

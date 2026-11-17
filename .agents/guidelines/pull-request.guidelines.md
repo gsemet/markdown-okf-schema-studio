@@ -7,15 +7,15 @@ rules hold whoever opens the pull request.
 ## PR body for an external reader
 
 The PR is read by people outside the agent session: reviewers, stakeholders, future maintainers.
-They do not know the backlog, the CR numbers or the plan files, and `.agents/changes/` is not
-even in git.
+They do not know the backlog, the CR numbers or the plan files, and the planning folder is not
+even in this repository.
 
 - Explain the change from the reader's side: what was wrong or missing, what the PR changes, what
   they will notice. Name features by what they do ("incoming-changes bars", "Restricted Mode
   window"), not by internal ids.
 - No internal references in the body text: no CR numbers (`CR 043`), backlog or plan ids (`P9`,
-  `T2`, `B5`, `F`), task or round numbers, scenario ids, agent roles, or paths under
-  `.agents/changes/`. Define any project term the reader needs on first use.
+  `T2`, `B5`, `F`), task or round numbers, scenario ids, agent roles, or paths in the planning
+  folder. Define any project term the reader needs on first use.
 - If a reference helps the maintainers, put it in one last section, "Internal references", just
   before the Claude Code line.
 - The title follows the same rule: a Conventional Commit subject that says what changes.

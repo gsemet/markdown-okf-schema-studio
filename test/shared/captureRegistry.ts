@@ -1,8 +1,8 @@
 /**
  * The registry of real-window captures: every screenshot the real VS Code suites write, with its
- * stable id, group and the sentence it locks. Tracked in git (like `e2eGroups.ts`) because
- * `.agents/changes/` is ignored. The shared evidence writer (`test/integration/evidence.ts`) rejects
- * ids that are not listed here and, at the end of a complete suite, fails when a registered capture
+ * stable id, group and the sentence it locks. Tracked in git (like `e2eGroups.ts`), not left in
+ * a change request's working folder. The shared evidence writer (`test/integration/evidence.ts`)
+ * rejects ids that are not listed here and, at the end of a complete suite, fails when a registered capture
  * of that suite was not taken. The README and gallery scripts read the `readme`/`curated` flags.
  *
  * Ids are `<group>/rNN-<slug>`; `NN` is permanent once assigned (new captures take the next free
