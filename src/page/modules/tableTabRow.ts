@@ -6,7 +6,7 @@
 /** The text of the hint shown in the last cell of a table. */
 const TAB_HINT_TEXT = "Tab: new row";
 
-// @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-124
 /** True for the last cell of the last rendered row of its table, where Tab adds a row. */
 export function isTabNewRowCell(cell: HTMLTableCellElement): boolean {
   const rows = cell.closest?.("table")?.rows;
@@ -15,7 +15,7 @@ export function isTabNewRowCell(cell: HTMLTableCellElement): boolean {
   return rows[rows.length - 1] === row && cell.cellIndex === (row.cells?.length ?? 0) - 1;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-124
 /** The hint of the last cell: a small description-coloured text the text box is described by. */
 export function createTabHint(document: Document, id: string): HTMLElement {
   const hint = document.createElement("span");

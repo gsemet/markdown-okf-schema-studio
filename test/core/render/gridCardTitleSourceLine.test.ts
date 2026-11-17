@@ -1,4 +1,4 @@
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 /**
  * Source line of a `{grid-item-card}` title that looks like an ordered list item. The title is
  * parsed on its own, so its blocks must still carry the document line of the directive line, since
@@ -119,7 +119,7 @@ test("a standalone card header option maps to its own option line and keeps its 
   assert.deepEqual(findElements(header, (element) => element.tagName === "ol" || element.tagName === "li"), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 test("header and footer options that are not the first option line map to their own lines", async () => {
   const source = [
     "# Doc", "", ":::{card} Title", ":class-card: x", ":header: 4. H", ":footer: 5. F", "Body text.", ":::", "",
@@ -146,7 +146,7 @@ function singleLineParts(element: HtmlElement | undefined): string[] {
     .map((node) => `${node.tagName}:${attribute(node, "data-line")}-${attribute(node, "data-end-line")}`);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 test("the header, footer and unlinked title lines are marked single-line; the body is not", async () => {
   const source = [
     "# Doc", "", "One line paragraph.", "", ":::{card} Title", ":header: H", ":footer: F", "Body text.", ":::", "",
@@ -167,7 +167,7 @@ test("the header, footer and unlinked title lines are marked single-line; the bo
   assert.deepEqual(outside, [], "a one-line paragraph or heading is no single-line part");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 test("a linked card title is marked single-line like any card title", async () => {
   const source = ["# Doc", "", ":::{card} Linked", ":link: https://example.com", "Body text.", ":::", ""].join("\n");
   const tree = parseHtml((await renderMyst(source)).html);
@@ -388,7 +388,7 @@ const CONTAINED_CARD_CASES: Array<{ name: string; source: string; cardClass: str
   },
 ];
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 for (const row of CONTAINED_CARD_CASES) {
   test(`${row.name} maps its card, title and body to their own lines`, async () => {
     const got = await cardMapping(row.source, row.cardClass);
@@ -396,7 +396,7 @@ for (const row of CONTAINED_CARD_CASES) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 test("a tab panel of a tab set written in a list item maps to its directive line", async () => {
   const source = "# H\n\n- ::::{tab-set}\n\n  :::{tab-item} A\n  Body.\n  :::\n  ::::\n";
   const root = parseHtml((await renderMyst(source)).html);
@@ -405,7 +405,7 @@ test("a tab panel of a tab set written in a list item maps to its directive line
   assert.equal(Number(attribute(panel, "data-line")), 5);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 test("a tab panel of a tab set behind a tab list marker maps to its directive line", async () => {
   const source = "# H\n\n-\t::::{tab-set}\n\n    :::{tab-item} A\n    Body.\n    :::\n    ::::\n";
   const root = parseHtml((await renderMyst(source)).html);

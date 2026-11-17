@@ -47,13 +47,11 @@ As a writer, I see the table actions with text labels above the table and I alwa
 ### Rationale and constraints
 
 - The bar appears with the first cell editor of a table, stays while the writer moves between cells and is removed when the editor closes.
-- It carries five labelled buttons (Row +, Row −, Col +, Col −, List table) in three groups, and a status such as "Header · column 1 of 2" or "Row 1 of 2 · column 2 of 2".
+- It carries seven labelled buttons (Row above, Row below, Row −, Col left, Col right, Col −, List table) in three groups, and a status such as "Header · column 1 of 2" or "Row 1 of 2 · column 2 of 2".
 - The header row, the last body row and the last column cannot be deleted from the bar.
-- A row operation changes the source by one line; a column operation rewrites the whole table in one fixed style, so the table's own padding and indentation are lost.
 - The bar stays just under the sticky band or the preview controls, never past the end of the table; it moves without moving the table text, and a bar that is very tall compared with the pane stays where it is.
 - A bar that appears hidden under the sticky headings or the preview controls is scrolled into view when that does not push the selected cell out of the pane.
 - Known issue: the separator before the cell formatting group can stay at the end of a line when the group wraps in a narrow pane.
-- Known issue: a column operation rewrites the whole table in one fixed style, so the table's own padding and indentation are lost.
 
 ### Main paths
 
@@ -66,10 +64,10 @@ As a writer, I see the table actions with text labels above the table and I alwa
    - Option SwRS-MDOKFSTUDIO-TABLE-064 (nominal): the bar rides down with a tall table and stays visible
 3. The table bar is shown above the table
    - SwRS-MDOKFSTUDIO-TABLE-055: the writer presses Row below and an empty row is inserted after the selected one
-   - Option SwRS-MDOKFSTUDIO-TABLE-003 (nominal): Row above inserts an empty row above a body row
-   - Option SwRS-MDOKFSTUDIO-TABLE-003 (refusal): Row above on the header row
-   - Option SwRS-MDOKFSTUDIO-TABLE-004 (nominal): Col left inserts an empty column to the left
-   - Option SwRS-MDOKFSTUDIO-TABLE-005 (nominal): the buttons also edit a plain list-table
+   - Option SwRS-MDOKFSTUDIO-TABLE-055 (nominal): Row above inserts an empty row above a body row
+   - Option SwRS-MDOKFSTUDIO-TABLE-055 (refusal): Row above on the header row
+   - Option SwRS-MDOKFSTUDIO-TABLE-055 (nominal): Col left inserts an empty column to the left
+   - Option SwRS-MDOKFSTUDIO-TABLE-055 (nominal): the buttons also edit a plain list-table
    - Option SwRS-MDOKFSTUDIO-TABLE-055 (refusal): disabled buttons and model refusals
 4. An empty row is next to the selected one
 

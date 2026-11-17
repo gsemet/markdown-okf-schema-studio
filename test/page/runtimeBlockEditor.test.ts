@@ -23,7 +23,7 @@ import {
  * top spacing of the first block (features/blockEditor.ts, textControls.ts).
  */
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-029
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
 test("fenced Markdown editors sit outside the rendered pre and preserve source when saving", () => {
   const harness = createRuntimeHarness();
   const code = harness.mappings[1];
@@ -875,7 +875,7 @@ test("ArrowUp/ArrowDown leave the block only on the first/last visual line", () 
   assert.equal(harness.messages.at(-1)?.type, "previewEditSave", "the unchanged block moves on");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-123
 test("a table cell arrow inside a wrapped cell does not move to another cell", () => {
   const harness = createRuntimeHarness();
   const { cells, input } = openTableCellEditorForTab(harness);

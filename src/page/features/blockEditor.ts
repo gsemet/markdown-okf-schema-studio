@@ -222,7 +222,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
   };
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-029
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-102
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
@@ -308,7 +308,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       ...(insertAfterLine !== undefined ? { insertAfterLine } : {}),
       ...(selectedCell ? { selectedCell, renderedCellContent, tableRowIndex: rowIndex, tableColumnIndex: columnIndex } : {}),
       initialCaretPosition,
-      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-261
       // A one-line card part (marked by the renderer): a blank line would end the card's options.
       ...(!selectedCell && sourceRange === undefined && target.getAttribute("data-single-line") !== null
         ? { singleLine: true }

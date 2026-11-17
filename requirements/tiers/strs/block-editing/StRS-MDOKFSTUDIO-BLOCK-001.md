@@ -22,7 +22,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-001
 - SwRS-MDOKFSTUDIO-BLOCK-012
 - SwRS-MDOKFSTUDIO-BLOCK-236
-- SwRS-MDOKFSTUDIO-BLOCK-257
 - SwRS-MDOKFSTUDIO-BLOCK-258
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
@@ -58,7 +57,6 @@ As a writer, I turn edit mode on to change my document in the preview and off to
 
 1. The preview shows the document in reading mode
    - SwRS-MDOKFSTUDIO-BLOCK-001: the writer clicks Edit and the page turns edit mode on, shows it on the button and posts it to the host, with the reading layout unchanged
-   - Option SwRS-MDOKFSTUDIO-BLOCK-236 (refusal): the host accepts an edit mode change only when the value is a boolean
 2. Edit mode is on
    - SwRS-MDOKFSTUDIO-BLOCK-001: the writer clicks Edit again, the open block editor is saved and the selection and hover outline are cleared
    - Option SwRS-MDOKFSTUDIO-BLOCK-001 (boundary): with nothing open there is nothing to tidy up
@@ -68,9 +66,9 @@ As a writer, I turn edit mode on to change my document in the preview and off to
 #### Path 2: Reopen a document
 
 1. A document is opened in a new preview
-   - SwRS-MDOKFSTUDIO-LIFE-170: each view choice starts from the saved panel state, else the stored workspace value, else its default
+   - SwRS-MDOKFSTUDIO-LIFE-170: the edit mode starts from the saved panel state, else the stored workspace value, else its default
    - Option SwRS-MDOKFSTUDIO-LIFE-170 (refusal): an invalid value is ignored and the next source is used
-2. The preview opens with the view choices last made
+2. The preview opens in the edit mode last chosen
 
 <!-- okf:links:start -->
 ### Links
@@ -81,7 +79,6 @@ As a writer, I turn edit mode on to change my document in the preview and off to
   - [SwRS-MDOKFSTUDIO-BLOCK-001](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-001.md): The Edit button turns edit mode on and off and tidies up on exit
   - [SwRS-MDOKFSTUDIO-BLOCK-012](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-012.md): A read-only preview has no Edit button
   - [SwRS-MDOKFSTUDIO-BLOCK-236](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-236.md): previewEditModeChanged carries a boolean edit mode
-  - [SwRS-MDOKFSTUDIO-BLOCK-257](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-257.md): A block editor in a grid card widens the card and keeps the palette above a readable text box
   - [SwRS-MDOKFSTUDIO-BLOCK-258](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-258.md): A click on a card title or option opens the editor on its own line, the title is inline text and Enter saves a one-line editor
   - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value

@@ -686,7 +686,7 @@ def check_cell_editor_chrome(page: Page, page_name: str, target, original_bounds
         failures.append(Failure(page_name, f"table cell shrank while editing: {original_bounds['height']} -> {info['cellHeight']}"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-123
 def check_cell_end_key(page: Page, page_name: str, cell_input, failures: list[Failure]) -> None:
     """Real End key in a focused table-cell editor: caret to the end, default prevented, no scroll.
 

@@ -7,8 +7,8 @@ description: "When a previewBlockMoveResult names another document, revision or 
   than the page shows, the page SHALL ignore it."
 project: markdown-okf-schema-studio
 scope: block-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,12 +19,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/hostToPage.ts
-- src/page/features/blockMoves.ts
-tested_in_files:
-- test/page/runtimeBlockMoves.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-BLOCK-109
 ---
 
 ## The page applies a move result only for its own render
@@ -71,4 +70,6 @@ When a previewBlockMoveResult names another document, revision or request than t
   - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-109](SwRS-MDOKFSTUDIO-BLOCK-109.md): The up and down arrows of an insert point move its block
 <!-- okf:links:end -->

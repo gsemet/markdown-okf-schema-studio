@@ -9,8 +9,8 @@ description: When the caret is on any line of a pipe table or a simple HTML
   after it, and offer it nowhere else.
 project: markdown-okf-schema-studio
 scope: table-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,12 +19,11 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/tableEditActions.ts
-tested_in_files:
-- test/page/modules/editActions.test.ts
-- test/page/modules/editPalette.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TABLE-122
 ---
 
 ## List table converts the table at the caret to a list-table in one edit
@@ -70,4 +69,6 @@ When the caret is on any line of a pipe table or a simple HTML table in MyST mod
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TABLE-122](SwRS-MDOKFSTUDIO-TABLE-122.md): A table converts between pipe, list-table and HTML forms without loss, or is refused with a reason
 <!-- okf:links:end -->

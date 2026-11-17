@@ -145,7 +145,7 @@ function pressTableButton(label: string, options: { row?: number; column?: numbe
 
 const COMPACT = "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n";
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-003
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
 test("Row above inserts an empty row above the selected one and keeps its text", () => {
   const { save, pending } = pressTableButton("Insert row before selected row", { row: 2, column: 1, typed: "qq" });
   assert.equal(save?.originalText, COMPACT);
@@ -154,7 +154,7 @@ test("Row above inserts an empty row above the selected one and keeps its text",
   assert.equal(pending?.tableColumnIndex, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-003
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
 test("Row above is off in the header row", () => {
   const { disabled, save } = pressTableButton("Insert row before selected row", { row: 0 });
   assert.equal(disabled, true);
@@ -177,7 +177,7 @@ test("Row - removes the selected body row and keeps the editor on the row that t
   assert.equal(pending?.tableColumnIndex, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-004
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
 test("Col left inserts an empty column to the left and leaves the title of the selected column", () => {
   const { save, pending } = pressTableButton("Insert column before selected column", { row: 0, column: 1, typed: "B" });
   assert.equal(save?.originalText, COMPACT);
@@ -208,7 +208,7 @@ test("Col - removes the selected column from every row", () => {
   assert.equal(pending?.tableColumnIndex, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-005
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
 test("a plain {list-table} opens the cell editor and its buttons write a list-table", () => {
   const source = "```{list-table}\n:header-rows: 1\n\n* - A\n  - B\n* - x\n  - y\n```\n";
   const harness = createRuntimeHarness();
@@ -227,7 +227,7 @@ test("a plain {list-table} opens the cell editor and its buttons write a list-ta
   assert.equal(converted?.disabled, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-005
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
 test("the cell editor of a plain {list-table} converts it back to a pipe table", () => {
   const source = "```{list-table}\n:header-rows: 1\n\n* - A\n  - B\n* - x\n  - y\n```\n";
   const harness = createRuntimeHarness();
@@ -305,7 +305,7 @@ const convertButton = (harness: ReturnType<typeof createRuntimeHarness>) =>
   harness.createdElements.filter((element) =>
     element.getAttribute("aria-label") === "Convert to list-table").at(-1);
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-070
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("CR038: the table toolbar converts the pipe table to a list-table in one final save", () => {
   const harness = createRuntimeHarness();
   openPipeTableCellEditor(harness);
@@ -722,7 +722,7 @@ test("table editing switches cells without losing changes and finalizes before l
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-123
 test("Tab and Shift+Tab move between table cells, wrapping across rows", () => {
   const harness = createRuntimeHarness();
   const { cells, input } = openTableCellEditorForTab(harness);
@@ -795,7 +795,7 @@ function openWideTableForReveal(editorWidth = 220, start?: [number, number]) {
   return { harness, table, editor, tab, ...opened };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
 test("Tab to a cell right of a wide table's box scrolls the box by the smallest amount plus 16 px", () => {
   const { harness, table, editor, tab, cells } = openWideTableForReveal();
   const pageScroll = harness.windowState.scrollY;
@@ -810,7 +810,7 @@ test("Tab to a cell right of a wide table's box scrolls the box by the smallest 
   assert.equal(harness.windowState.scrollY, pageScroll);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
 test("Tab across the row wrap and Shift+Tab to a cell left of the box align the cell start 16 px inside", () => {
   const { harness, table, editor, tab, cells } = openWideTableForReveal();
   const pageScroll = harness.windowState.scrollY;
@@ -830,7 +830,7 @@ test("Tab across the row wrap and Shift+Tab to a cell left of the box align the 
   assert.equal(harness.windowState.scrollY, pageScroll);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
 test("a cell already inside the table box does not scroll it; a target wider than the box is aligned on its start", () => {
   const visible = openWideTableForReveal();
   visible.table.scrollLeft = 30;
@@ -845,7 +845,7 @@ test("a cell already inside the table box does not scroll it; a target wider tha
   assert.equal(wide.table.scrollLeft, 650 - (50 + 16));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
 test("a layout pass that narrows the table box brings the open cell editor back inside it", () => {
   const opened = openWideTableForReveal();
   // Cell 150..350, editor 150..370: 20 px past the 50..350 box, so the open scrolled it 36 px.
@@ -859,7 +859,7 @@ test("a layout pass that narrows the table box brings the open cell editor back 
   assert.equal(opened.table.scrollLeft, 36 + 334 - (310 - 16));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
 test("a click on a partly hidden cell and an editor opening in a hidden cell scroll the table box to it", () => {
   const clicked = openWideTableForReveal();
   clicked.table.scrollLeft = 400;
@@ -1388,7 +1388,7 @@ test("a click on a cell of a table the cell editor cannot read opens the raw edi
     false, "the cell has its rendered content back");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-118
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
 test("a table cell editor that opens after the find bar took the focus leaves it in the find field", () => {
   const harness = createRuntimeHarness({ trackFocus: true });
   const table = new RuntimeElement({
@@ -1426,7 +1426,7 @@ test("a table cell editor that opens after the find bar took the focus leaves it
   assert.equal(input.focusOptions, undefined, "the cell input was not focused");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-118
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
 test("a table cell editor that opens with the focus still on the page takes the focus", () => {
   const harness = createRuntimeHarness({ trackFocus: true });
   const input = openTableCellEditor(harness);
@@ -1443,7 +1443,7 @@ function shownText(cell: RuntimeElement): string {
   return parts(cell);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-125
 test("Tab from a typed cell leaves that cell showing its new text, in a row that was empty", () => {
   const harness = createRuntimeHarness();
   const { cells, input } = openTableCellEditorForTab(harness);
@@ -1457,7 +1457,7 @@ test("Tab from a typed cell leaves that cell showing its new text, in a row that
   assert.equal(harness.messages.some((message) => message.final === true), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-125
 test("Tab and Shift+Tab leave a cell with changed text showing the change, not the old rendering", () => {
   const harness = createRuntimeHarness();
   const { cells, input } = openTableCellEditorForTab(harness);
@@ -1476,7 +1476,7 @@ test("Tab and Shift+Tab leave a cell with changed text showing the change, not t
   assert.equal(shownText(cells[1][1]).includes("stale"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-123
 for (const { key, tabs, from, atStart } of [
   { key: "ArrowRight", tabs: 0, from: [1, 0], atStart: false },
   { key: "ArrowDown", tabs: 0, from: [1, 0], atStart: false },

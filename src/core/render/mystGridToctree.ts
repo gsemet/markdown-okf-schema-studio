@@ -87,7 +87,7 @@ const CLOSING_FENCE = /^[ \t]*(?:`{3,}|~{3,}|:{3,})[ \t]*$/u;
  * would shift every line number inside the grid, so the body is cut from the source text; `value`
  * is only the fallback when the fences cannot be located.
  */
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-260
 function directiveBody(node: GridNode, source: GridSource): GridSource {
   const start = node.position?.start?.line;
   const end = node.position?.end?.line;
@@ -154,7 +154,7 @@ function stripToColumn(text: string, column: number, target: number): { text: st
  * multiples of 4 columns. A line without a level's prefix, such as a blank line or a lazy
  * continuation, loses only what it has. Lines whose opener has no container are returned unchanged.
  */
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-260
 function stripContainerPrefix(lines: string[]): string[] {
   const levels: ContainerLevel[] = [];
   let rest = lines[0];
@@ -333,7 +333,7 @@ function inlineContent(text: string, parse: GridParse): GridNode[] {
     : [{ type: "text", value: text }];
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-260
 /**
  * The properties that map a click on a one-line card part (the title, a `:header:` or `:footer:`
  * option) to its own source line, the editor's range. `data-single-line` tells the editor the line
@@ -354,7 +354,7 @@ function optionLine(text: string, parse: GridParse, line: number | undefined): G
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-100
-// @implements_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-260
 function buildCard(node: GridNode, source: GridSource, parse: GridParse, depth: number, standalone = false): void {
   const raw = directiveBody(node, source);
   const { options, indexes, body } = splitOptions(raw.lines);

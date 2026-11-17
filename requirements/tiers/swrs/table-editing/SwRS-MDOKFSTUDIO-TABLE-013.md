@@ -4,10 +4,11 @@ id: SwRS-MDOKFSTUDIO-TABLE-013
 uuid: 66db5b79-9e94-439d-ada6-2016694ef2f1
 title: A cell edit saves the whole table and moves between cells without
   reopening
-description: When the writer types in a cell text box, the extension SHALL
-  remember each change in the table model so that the autosave carries the whole
-  serialised table and not only the edited cell, and keep that model and the
-  same edit session when the editor moves to another cell of the table.
+description: "When the writer types in a cell text box and then moves the editor to
+  another cell of the table, the extension SHALL keep every change made in any cell,
+  so that the autosave carries the whole serialised table and not only the edited
+  cell, and keep the same edit session, so that moving between cells does not reopen
+  the editor and the whole session is one undo step."
 project: markdown-okf-schema-studio
 scope: table-editing
 req_lifecycle: proposed
@@ -33,7 +34,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer types in a cell text box, the extension SHALL remember each change in the table model so that the autosave carries the whole serialised table and not only the edited cell, and keep that model and the same edit session when the editor moves to another cell of the table.
+When the writer types in a cell text box and then moves the editor to another cell of the table, the extension SHALL keep every change made in any cell, so that the autosave carries the whole serialised table and not only the edited cell, and keep the same edit session, so that moving between cells does not reopen the editor and the whole session is one undo step.
 
 ### Scenario (nominal): Typing in one cell
 - GIVEN a two-column table with two body rows and the editor in the first body cell

@@ -189,8 +189,8 @@ async function activeHandle(page: Page, selector: string): Promise<boolean> {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-001
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-070
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-080
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 /** The pipe table becomes a list-table with every cell, stays in view, and comes back as a pipe table. */
 async function scenarioConversionRoundTrip(page: Page): Promise<void> {
   await withTable(page, "tablemoves-convert", PIPE, async (document) => {

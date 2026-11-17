@@ -6,7 +6,8 @@ title: "The host holds an open block edit and ends it when the block changes"
 description: "When a block editor saves for the first time, the host SHALL hold an
   edit lock for that block, and release it, running the page work that waited for
   it, when the final save is applied, the page reports the close of the editor or
-  a reload, or the block changes in the document."
+  a reload, or the block changes in the document; a change inside the open block ends
+  the edit with an error and keeps the text the writer typed."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -15,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-006
-- StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-TRUST-052
@@ -41,7 +41,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a block editor saves for the first time, the host SHALL hold an edit lock for that block, and release it, running the page work that waited for it, when the final save is applied, the page reports the close of the editor or a reload, or the block changes in the document.
+When a block editor saves for the first time, the host SHALL hold an edit lock for that block, and release it, running the page work that waited for it, when the final save is applied, the page reports the close of the editor or a reload, or the block changes in the document; a change inside the open block ends the edit with an error and keeps the text the writer typed.
 
 ### Scenario (nominal): First and later saves
 
@@ -117,7 +117,7 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 - SwRS-MDOKFSTUDIO-TABLE-119: the cell editor that an outside change closes
 - SwRS-MDOKFSTUDIO-BLOCK-193: the page updates that wait for the lock
 - SwRS-MDOKFSTUDIO-BLOCK-216: a first save that does not match is refused
-- SwRS-MDOKFSTUDIO-BLOCK-244: the accepted shape of previewEditClosed
+- SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewEditClosed
 
 ### Verification notes
 
@@ -136,7 +136,6 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
-  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs

@@ -121,9 +121,8 @@ When the writer presses Escape in a cell editor outside an IME composition, the 
 - THEN the edit is cancelled
 
 ### Related requirements
-- SwRS-MDOKFSTUDIO-TABLE-035: Tab in the last cell adds the row whose reopened editor carries the mark, and the last cell shows the hint Tab: new row.
+- SwRS-MDOKFSTUDIO-TABLE-123: Tab in the last cell adds the row whose reopened editor carries the mark, and the last cell shows the hint Tab: new row.
 - SwRS-MDOKFSTUDIO-TABLE-013: one edit session across cells; the cells left keep their text.
-- SwRS-MDOKFSTUDIO-TABLE-035: the cell left shows the text just typed, which Escape in the next cell keeps.
 - SwRS-MDOKFSTUDIO-BLOCK-053: the block editor equivalent of the cancel; the cell has its own listener.
 
 ### Verification notes

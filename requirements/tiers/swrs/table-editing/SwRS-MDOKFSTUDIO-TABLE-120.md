@@ -15,7 +15,8 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-TABLE-012
+- StRS-MDOKFSTUDIO-TABLE-001
+depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -93,5 +94,5 @@ When the writer pastes into a cell text box a text that holds a tab, the extensi
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
 <!-- okf:links:end -->

@@ -17,8 +17,8 @@ description: When the writer clicks the title of a grid card or of a card, with
   name Enter, Esc and Cmd or Ctrl+Enter after the line number.
 project: markdown-okf-schema-studio
 scope: block-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -26,22 +26,12 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/preview/styles/editModeStyles.ts
-- src/core/render/mystGridToctree.ts
-- src/core/security/html-sanitizer.ts
-- src/page/features/blockEditor.ts
-- src/page/features/blockSourceEditor.ts
-tested_in_files:
-- test/core/render/gridCardTitleSourceLine.test.ts
-- test/integration/realInput/markers.ts
-- test/integration/realInput/qa210Replays.ts
-- test/page/linkEditModeClick.test.ts
-- test/page/runtimeCardOptionEnter.test.ts
-- test/security/html-policy.test.ts
-- test/visual/cardsTabsScenarios.ts
-- test/visual/gridCardEditingScenarios.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-BLOCK-260
+- SwRS-MDOKFSTUDIO-BLOCK-261
 ---
 
 ## A click on a card title or option opens the editor on its own line, the title is inline text and Enter saves a one-line editor
@@ -120,4 +110,7 @@ In an editor opened on such a title or option line, plain Enter SHALL save and c
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-260](SwRS-MDOKFSTUDIO-BLOCK-260.md): A card title or option opens on its own line
+  - [SwRS-MDOKFSTUDIO-BLOCK-261](SwRS-MDOKFSTUDIO-BLOCK-261.md): A one-line editor commits on Enter and ignores Tab
 <!-- okf:links:end -->

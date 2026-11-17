@@ -25,7 +25,7 @@ function convert(source: string, target: "list-table" | "pipe") {
   return result;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-080
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("a pipe table becomes a list-table with one header row", () => {
   assert.deepEqual(convert(PIPE, "list-table"), { ok: true, text: LIST });
 });
@@ -91,7 +91,7 @@ test("a list-table cell with a pipe is escaped in the pipe table", () => {
   assert.deepEqual(convert(source, "pipe"), { ok: true, text: "| h |\n| --- |\n| a\\|b |" });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-076
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("a list-table that would lose content is refused with a reason and nothing is produced", () => {
   const cases: [string, RegExp][] = [
     ["```{list-table}\n:header-rows: 1\n\n* - a\n    more\n  - b\n```", /several lines|block/iu],

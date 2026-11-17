@@ -108,7 +108,7 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TABLE-055: the row and column buttons of the bar.
-- SwRS-MDOKFSTUDIO-TABLE-035: the cell moves that update the status.
+- SwRS-MDOKFSTUDIO-TABLE-123: the cell moves that update the status.
 
 ### Verification notes
 

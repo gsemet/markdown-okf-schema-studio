@@ -16,7 +16,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-016
-- StRS-MDOKFSTUDIO-BLOCK-006
 - StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
@@ -99,7 +98,7 @@ A cut never leaves three line breaks in a row and never merges two paragraphs.
 - SwRS-MDOKFSTUDIO-BLOCK-166: copy shares the selection and the clipboard path
 - SwRS-MDOKFSTUDIO-BLOCK-124: ranges that do not match the document, and the frontmatter, are refused
 - SwRS-MDOKFSTUDIO-BLOCK-127: an included block is never cut
-- SwRS-MDOKFSTUDIO-BLOCK-242: the accepted shape of previewBlocksCut
+- SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewBlocksCut
 
 ### Verification notes
 
@@ -116,7 +115,6 @@ A cut never leaves three line breaks in a row and never merges two paragraphs.
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
-  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
   - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes

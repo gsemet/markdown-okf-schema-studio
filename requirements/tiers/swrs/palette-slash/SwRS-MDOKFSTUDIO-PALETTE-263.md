@@ -109,7 +109,7 @@ When the writer types an alternative name after the slash, the extension SHALL l
 
 - Method: test/page/modules/slashMenu.test.ts (scenarios "An alias finds its command" for hyperlink, ul, ol, list, hr, xref, spoiler, table and the first-entry aliases of bold, link, image, code, quote, math, figure, ref, admonition, cite, todo and task; "A command found by an alias runs as its button"); the alias strings other than these are asserted by no test, so the table of the boundary scenario is untested beyond them
 - Method: test/page/modules/editPalette.test.ts (scenario "A command outside its mode or place is not listed", the conversion rows: the slash menu offers the conversion only inside a table of the other form)
-- Criteria: The aliases are those of the registry entries in src/core/palette/paletteActions.ts. The actions themselves are specified in SwRS-MDOKFSTUDIO-TABLE-106, SwRS-MDOKFSTUDIO-TABLE-111, SwRS-MDOKFSTUDIO-TABLE-115, SwRS-MDOKFSTUDIO-TABLE-117, SwRS-MDOKFSTUDIO-TABLE-073 and SwRS-MDOKFSTUDIO-TABLE-074, the Mermaid entry in SwRS-MDOKFSTUDIO-DIAG-017 and the TODO entry by the review annotation requirements.
+- Criteria: The aliases are those of the registry entries in src/core/palette/paletteActions.ts. The actions themselves are specified in SwRS-MDOKFSTUDIO-TABLE-106, SwRS-MDOKFSTUDIO-TABLE-111, SwRS-MDOKFSTUDIO-TABLE-115, SwRS-MDOKFSTUDIO-TABLE-117, SwRS-MDOKFSTUDIO-TABLE-122 and SwRS-MDOKFSTUDIO-TABLE-122, the Mermaid entry in SwRS-MDOKFSTUDIO-DIAG-017 and the TODO entry by the review annotation requirements.
 
 <!-- okf:links:start -->
 ### Links

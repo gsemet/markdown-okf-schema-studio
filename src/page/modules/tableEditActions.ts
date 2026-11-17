@@ -159,8 +159,8 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
     return pipe ? { start: pipe.start, end: pipe.end, text: value.slice(pipe.start, pipe.end) } : undefined;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-073
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-074
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-122
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-122
   /** The conversion of the table at the caret to `target`, or the reason it cannot be done. */
   function convertTableAtCaret(
     ctx: EditActionContext, target: "pipe" | "list-table",

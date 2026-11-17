@@ -1020,8 +1020,8 @@ function openTableConversion(value: string, caret: number) {
   return { palette, root: palette.element as unknown as FakeElement, textbox, notices, edits };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-073
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-074
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("CR038: List table shows with the caret in a pipe table, Pipe table with it in a list-table", () => {
   const pipe = openTableConversion("| a | b |\n| --- | --- |\n| 1 | 2 |", 3);
   assert.equal(button(pipe.root, "listTable").getAttribute("hidden"), null);

@@ -312,7 +312,7 @@ test("the table bar position follows a window resize and stops once the editor i
   assert.equal(shiftOf(), resized, "nothing is recomputed once the editor is closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-070
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("a cell change after a refused conversion drops the prepared list-table and saves the pipe table", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness);
@@ -336,7 +336,7 @@ test("a cell change after a refused conversion drops the prepared list-table and
   assert.equal(saves(plain).at(-1)!.editedText, next.editedText);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-070
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("the List table button converts the table after a line break was pasted into the cell", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness);

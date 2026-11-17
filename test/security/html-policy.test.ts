@@ -189,7 +189,7 @@ test("keeps the included-block marker next to the source mapping", () => {
   assert.match(result.html, /data-sphinx-source-line="3"[^>]*data-sphinx-source-end-line="4"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-258
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
 test("keeps the single-line marker of a one-line card part next to the source mapping", () => {
   const result = rewriteSphinxHtml(
     '<html><body><main><div class="myst-grid-card-option" data-line="4" data-end-line="4" data-single-line="true">H</div></main></body></html>',

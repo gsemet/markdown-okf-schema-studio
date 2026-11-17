@@ -18,11 +18,17 @@ user_need: As a writer, I move through a table with the keyboard, cell by cell,
   and add a row by pressing Tab in the last cell; I use the keys I know in a
   cell and they edit the cell, not the page or the source document.
 derived_by:
+- SwRS-MDOKFSTUDIO-BLOCK-003
+- SwRS-MDOKFSTUDIO-BLOCK-069
 - SwRS-MDOKFSTUDIO-TABLE-035
 - SwRS-MDOKFSTUDIO-TABLE-044
 - SwRS-MDOKFSTUDIO-TABLE-045
 - SwRS-MDOKFSTUDIO-TABLE-046
 - SwRS-MDOKFSTUDIO-TABLE-047
+- SwRS-MDOKFSTUDIO-TABLE-123
+- SwRS-MDOKFSTUDIO-TABLE-124
+- SwRS-MDOKFSTUDIO-TABLE-125
+- SwRS-MDOKFSTUDIO-TABLE-126
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -51,9 +57,9 @@ As a writer, I move through a table with the keyboard, cell by cell, and add a r
 #### Path 1: Move through the cells with the keyboard
 
 1. A cell editor is open
-   - SwRS-MDOKFSTUDIO-TABLE-035: the writer presses Tab, Shift+Tab or an arrow key at the edge of the text and the editor moves to the next, previous or neighbouring cell
-   - Option SwRS-MDOKFSTUDIO-TABLE-035 (nominal): Tab in the last cell adds a row
-   - Option SwRS-MDOKFSTUDIO-TABLE-035 (refusal): the final save cannot be posted
+   - SwRS-MDOKFSTUDIO-TABLE-123: the writer presses Tab, Shift+Tab or an arrow key at the edge of the text and the editor moves to the next, previous or neighbouring cell
+   - Option SwRS-MDOKFSTUDIO-TABLE-124 (nominal): Tab in the last cell adds a row
+   - Option SwRS-MDOKFSTUDIO-TABLE-124 (refusal): the final save cannot be posted
 2. The editor is in the neighbouring cell
 
 <!-- okf:links:start -->
@@ -62,9 +68,15 @@ As a writer, I move through a table with the keyboard, cell by cell, and add a r
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-003](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-003.md): Edit-mode text box follows VS Code undo, redo, select-all and delete-line key bindings
+  - [SwRS-MDOKFSTUDIO-BLOCK-069](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-069.md): Marker keys wrap a selection; Home, End, select-all and undo stay in the text box
   - [SwRS-MDOKFSTUDIO-TABLE-035](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-035.md): Tab and the arrow keys move through the table cells
   - [SwRS-MDOKFSTUDIO-TABLE-044](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-044.md): Typing a marker character over a selection in a cell wraps it as one undoable step
   - [SwRS-MDOKFSTUDIO-TABLE-045](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-045.md): Undo and redo shortcuts stay in the cell text box
   - [SwRS-MDOKFSTUDIO-TABLE-046](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-046.md): A key the cell editor handled does not reach VS Code
   - [SwRS-MDOKFSTUDIO-TABLE-047](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-047.md): Select all in the cell text box selects only the box text
+  - [SwRS-MDOKFSTUDIO-TABLE-123](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-123.md): Tab and the arrow keys move between table cells
+  - [SwRS-MDOKFSTUDIO-TABLE-124](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-124.md): Tab in the last cell adds a row and shows the hint
+  - [SwRS-MDOKFSTUDIO-TABLE-125](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-125.md): The cell left shows its typed text rendered
+  - [SwRS-MDOKFSTUDIO-TABLE-126](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-126.md): The cell editor is revealed in the table's scroll box
 <!-- okf:links:end -->

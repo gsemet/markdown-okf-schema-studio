@@ -179,7 +179,7 @@ test("a row inserted into a CRLF table keeps CRLF line endings", () => {
   assert.equal(output.replace(/\r\n/gu, "").includes("\n"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-102
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
 test("rows without outer pipes stay parseable when an edge cell is emptied", () => {
   const tools = createMarkdownTableTools();
   const source = "a | b\n--- | ---\nc | d";
@@ -400,7 +400,7 @@ test("a column operation keeps the padding, indentation and outer pipes of every
   assert.equal(tools.parse(tools.serialize(bare))?.rows[0]?.length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-102
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
 test("an unescaped pipe inside a code span splits the cell as the preview does", () => {
   const tools = createMarkdownTableTools();
   assert.deepEqual(tools.parse("| a | b |\n| --- | --- |\n| x | `y` |")?.rows[2], ["x", "`y`"]);
@@ -461,7 +461,7 @@ test("a row move takes the tail along and a new row after a tailed row has no ta
   assert.doesNotMatch(tools.serialize(inserted), /\^row-a/u, "a deleted row takes its tail");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-076
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
 test("converting a pipe table whose row has a tail is refused, nothing changes", () => {
   const tools = createMarkdownTableTools();
   const result = tools.convertTable(TAILED(" ^row-a"), "list-table");

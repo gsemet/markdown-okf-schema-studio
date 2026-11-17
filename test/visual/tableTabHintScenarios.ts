@@ -18,7 +18,7 @@ const BAR_ROOM = 300;
 
 export const TABLE_TAB_HINT_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-124
     id: "table-editing/v30-cell-tab-hint-light-900",
     fixture: "08-okf-schema",
     theme: "light",
@@ -32,7 +32,7 @@ export const TABLE_TAB_HINT_SCENARIOS: ScenarioDefinition[] = [
       + "the editor and the pane, and Done and Cancel stay fully in view (the `open` step keeps the opened editor).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-124
     id: "table-editing/v31-cell-tab-hint-dark-360",
     fixture: "08-okf-schema",
     theme: "dark",

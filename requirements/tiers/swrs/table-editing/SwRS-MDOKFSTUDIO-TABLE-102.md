@@ -9,8 +9,8 @@ description: When a table row is split into cells for editing, the extension
   pipe, also one inside a code span, as the preview does.
 project: markdown-okf-schema-studio
 scope: table-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,11 +19,11 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/modules/markdownTable.ts
-tested_in_files:
-- test/page/modules/markdownTable.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TABLE-094
 ---
 
 ## Edge pipes are optional and only an escaped pipe stays in its cell
@@ -78,4 +78,6 @@ When a table row is split into cells for editing, the extension SHALL accept row
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TABLE-094](SwRS-MDOKFSTUDIO-TABLE-094.md): Editing one cell changes exactly one line of the source
 <!-- okf:links:end -->

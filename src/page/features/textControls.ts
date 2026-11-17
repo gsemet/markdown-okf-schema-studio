@@ -31,7 +31,7 @@ export function installTextControls(rt: PageRuntime): TextControls {
   const { textEditing, editActions } = rt.tools;
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-079
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-123
   function boundaryNavigation(control: TextControl, event: KeyboardEvent): ReturnType<TextControls["boundaryNavigation"]> {
     if (event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return undefined;
     if (control.selectionStart !== control.selectionEnd) return undefined;
@@ -296,7 +296,7 @@ export function installTextControls(rt: PageRuntime): TextControls {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-255
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-118
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-255
   /** A text field outside the editor took the focus after the editor opened. */
   function focusMovedToAnotherField(edit: { element: HTMLElement; focusAtOpen?: Element | null }): boolean {
     const active = document.activeElement;

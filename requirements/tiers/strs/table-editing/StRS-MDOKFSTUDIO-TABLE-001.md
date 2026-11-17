@@ -31,6 +31,7 @@ user_need: As a writer, I click a table cell in edit mode and edit its Markdown
 derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-205
 - SwRS-MDOKFSTUDIO-BLOCK-228
+- SwRS-MDOKFSTUDIO-BLOCK-255
 - SwRS-MDOKFSTUDIO-TABLE-001
 - SwRS-MDOKFSTUDIO-TABLE-006
 - SwRS-MDOKFSTUDIO-TABLE-013
@@ -41,6 +42,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-030
 - SwRS-MDOKFSTUDIO-TABLE-034
 - SwRS-MDOKFSTUDIO-TABLE-119
+- SwRS-MDOKFSTUDIO-TABLE-120
 - SwRS-MDOKFSTUDIO-TABLE-121
 default_owner_email: gaetan@xeberon.net
 ---
@@ -111,6 +113,7 @@ As a writer, I click a table cell in edit mode and edit its Markdown right where
 - Derived by:
   - [SwRS-MDOKFSTUDIO-BLOCK-205](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-205.md): Open editors are saved before the page hides or leaves the document
   - [SwRS-MDOKFSTUDIO-BLOCK-228](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-228.md): Opening, saving and closing an editor keep the reading position
+  - [SwRS-MDOKFSTUDIO-BLOCK-255](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-255.md): A block editor that opens late leaves the focus in a field that took it
   - [SwRS-MDOKFSTUDIO-TABLE-001](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-001.md): A click on a pipe table cell opens a cell editor in place
   - [SwRS-MDOKFSTUDIO-TABLE-006](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-006.md): The cell text box wraps and fits its text in the block editor font
   - [SwRS-MDOKFSTUDIO-TABLE-013](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-013.md): A cell edit saves the whole table and moves between cells without reopening
@@ -121,5 +124,6 @@ As a writer, I click a table cell in edit mode and edit its Markdown right where
   - [SwRS-MDOKFSTUDIO-TABLE-030](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-030.md): Following a link or pressing Back or Next saves an open cell first
   - [SwRS-MDOKFSTUDIO-TABLE-034](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-034.md): A host refusal is shown in the cell and keeps the typed text
   - [SwRS-MDOKFSTUDIO-TABLE-119](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-119.md): An outside change of the table under an open cell editor closes the editor and shows the buffer
+  - [SwRS-MDOKFSTUDIO-TABLE-120](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-120.md): A spreadsheet paste into a table cell fills the cells from that cell
   - [SwRS-MDOKFSTUDIO-TABLE-121](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-121.md): A pipe table inside a quote or an admonition is edited cell by cell, its container prefix kept
 <!-- okf:links:end -->

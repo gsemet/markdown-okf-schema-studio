@@ -21,10 +21,13 @@ user_need: "As a writer, I type Markdown in the block editor and the keys do wha
   by pressing an arrow key at the edge of the text, without the mouse."
 derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-003
+- SwRS-MDOKFSTUDIO-BLOCK-004
 - SwRS-MDOKFSTUDIO-BLOCK-061
 - SwRS-MDOKFSTUDIO-BLOCK-069
 - SwRS-MDOKFSTUDIO-BLOCK-077
 - SwRS-MDOKFSTUDIO-BLOCK-079
+- SwRS-MDOKFSTUDIO-BLOCK-254
+- SwRS-MDOKFSTUDIO-BLOCK-261
 - SwRS-MDOKFSTUDIO-LIFE-173
 default_owner_email: gaetan@xeberon.net
 ---
@@ -75,9 +78,12 @@ As a writer, I type Markdown in the block editor and the keys do what I expect: 
 
 - Derived by:
   - [SwRS-MDOKFSTUDIO-BLOCK-003](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-003.md): Edit-mode text box follows VS Code undo, redo, select-all and delete-line key bindings
+  - [SwRS-MDOKFSTUDIO-BLOCK-004](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-004.md): Arrow keys, Enter and Escape drive block editing without the mouse
   - [SwRS-MDOKFSTUDIO-BLOCK-061](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-061.md): Tab, Shift+Tab and Enter indent and continue lists, quotes and fences
   - [SwRS-MDOKFSTUDIO-BLOCK-069](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-069.md): Marker keys wrap a selection; Home, End, select-all and undo stay in the text box
   - [SwRS-MDOKFSTUDIO-BLOCK-077](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-077.md): Keys no editor handled still reach VS Code
   - [SwRS-MDOKFSTUDIO-BLOCK-079](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-079.md): Arrow keys at the edges open the previous or next block
+  - [SwRS-MDOKFSTUDIO-BLOCK-254](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-254.md): Right and Left move the block selection down and up the structure
+  - [SwRS-MDOKFSTUDIO-BLOCK-261](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-261.md): A one-line editor commits on Enter and ignores Tab
   - [SwRS-MDOKFSTUDIO-LIFE-173](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-173.md): Save key saves the previewed document
 <!-- okf:links:end -->

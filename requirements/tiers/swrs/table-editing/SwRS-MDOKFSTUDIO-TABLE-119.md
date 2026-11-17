@@ -67,7 +67,7 @@ When the document changes outside the preview (an undo, a redo, a revert of the 
 
 - SwRS-MDOKFSTUDIO-BLOCK-193: the render that waits while an inline editor is open, and its exception
 - SwRS-MDOKFSTUDIO-BLOCK-191: the host edit that a conflicting change releases
-- SwRS-MDOKFSTUDIO-TABLE-035: the cell left shows the text just typed
+- SwRS-MDOKFSTUDIO-TABLE-123: the cell left shows the text just typed
 
 ### Verification notes
 

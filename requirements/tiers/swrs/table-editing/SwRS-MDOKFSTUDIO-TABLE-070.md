@@ -8,8 +8,8 @@ description: When the writer presses List table in the table bar, the extension
   {list-table} directive in one final save.
 project: markdown-okf-schema-studio
 scope: table-editing
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,14 +19,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/page/features/tableCellEditor.ts
-tested_in_files:
-- test/integration/tableMoves.ts
-- test/page/fmtableReqTable.requirements.test.ts
-- test/page/runtimeTableCellEditor.test.ts
-- test/page/runtimeTableRowTail.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TABLE-122
 ---
 
 ## The List table button converts the edited table in one final save
@@ -86,4 +83,6 @@ When the writer presses List table in the table bar, the extension SHALL post th
   - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TABLE-122](SwRS-MDOKFSTUDIO-TABLE-122.md): A table converts between pipe, list-table and HTML forms without loss, or is refused with a reason
 <!-- okf:links:end -->

@@ -15,7 +15,8 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-BLOCK-016
+- StRS-MDOKFSTUDIO-BLOCK-008
+depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -89,5 +90,5 @@ Table-cell editors keep their own Escape and Cmd/Ctrl+Enter and do not select a 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+  - [StRS-MDOKFSTUDIO-BLOCK-008](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-008.md): A writer types and moves between blocks with text editor keys
 <!-- okf:links:end -->

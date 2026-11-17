@@ -91,7 +91,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
     staleRetry = undefined;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-129
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
   // The host held an older render than the one the move was made on. Send the move again, once,
   // from the blocks of the render that is in (now, or when it arrives).
   function scheduleStaleRetry(): boolean {

@@ -17,7 +17,6 @@ user_need: As a reviewer, I find a discussion on its text after the author
   edited the document around it, and I keep my comments when the author renames
   the document.
 derived_by:
-- SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-REVIEW-094
 - SwRS-MDOKFSTUDIO-REVIEW-100
 - SwRS-MDOKFSTUDIO-REVIEW-101
@@ -25,6 +24,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-119
 - SwRS-MDOKFSTUDIO-REVIEW-125
 - SwRS-MDOKFSTUDIO-REVIEW-219
+depends_on:
+- SwRS-MDOKFSTUDIO-BLOCK-041
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -71,7 +72,6 @@ As a reviewer, I find a discussion on its text after the author edited the docum
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-REVIEW-094](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-094.md): Edits move the stored lines of a thread in memory
   - [SwRS-MDOKFSTUDIO-REVIEW-100](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-100.md): A thread follows its quote in the plain text, narrowed by its context
   - [SwRS-MDOKFSTUDIO-REVIEW-101](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-101.md): A thread whose quote is gone or ambiguous is orphaned and keeps its lines
@@ -79,4 +79,6 @@ As a reviewer, I find a discussion on its text after the author edited the docum
   - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only
   - [SwRS-MDOKFSTUDIO-REVIEW-125](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-125.md): A renamed document takes its review comments file along
   - [SwRS-MDOKFSTUDIO-REVIEW-219](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-219.md): An orphaned thread whose quote returns is placed again
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 <!-- okf:links:end -->

@@ -133,7 +133,7 @@ export async function scenarioUndoUnderCellEditorRendersTable(page: Page): Promi
  * tool, Tab, Escape, then File: Revert File from the source. The buffer equals the disk, a cell
  * shows `alpha` and none shows `alpha X`, and the paragraph shows the external text.
  * @tests_req SwRS-MDOKFSTUDIO-LIFE-069
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-125
  * @tests_req SwRS-MDOKFSTUDIO-TABLE-119
  */
 export async function scenarioRevertAfterExternalWriteRendersCell(page: Page): Promise<void> {

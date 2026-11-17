@@ -32,13 +32,13 @@ function render(text: string): string {
   return root.children.map(html).join("");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-125
 test("inline marks become elements and the previous content is replaced", () => {
   assert.equal(render("a **b** *c* ~~d~~ `e`"), "a <strong>b</strong> <em>c</em> <del>d</del> <code>e</code>");
   assert.equal(render("__b__ _c_"), "<strong>b</strong> <em>c</em>");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-125
 test("a link keeps its href only for https, http, mailto, fragment and relative targets", () => {
   for (const href of ["https://a.b/c", "http://a.b", "mailto:x@y.z", "#part", "/abs/path", "./rel", "../up"]) {
     assert.equal(render(`[t](${href})`), `<a[${href}]>t</a>`, href);
@@ -48,14 +48,14 @@ test("a link keeps its href only for https, http, mailto, fragment and relative 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-125
 test("backslash escapes give the literal character and <br> gives a line break", () => {
   assert.equal(render("\\*not\\* \\_x\\_ \\\\"), "*not* _x_ \\");
   assert.equal(render("a\\qb"), "a\\qb");
   assert.equal(render("a<br>b<BR/>c<br />d"), "a<br>b<br>c<br>d");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-125
 test("markup characters inside words or around spaces stay plain text", () => {
   assert.equal(render("snake_case_name"), "snake_case_name");
   assert.equal(render("2 * 3 * 4"), "2 * 3 * 4");
@@ -65,7 +65,7 @@ test("markup characters inside words or around spaces stay plain text", () => {
   assert.equal(render("(_em_)"), "(<em>em</em>)");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-125
 test("HTML in the text is never parsed", () => {
   assert.equal(render("<img src=x onerror=alert(1)>"), "<img src=x onerror=alert(1)>");
 });

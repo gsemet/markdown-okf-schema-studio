@@ -38,6 +38,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-102
 - SwRS-MDOKFSTUDIO-BLOCK-127
 - SwRS-MDOKFSTUDIO-BLOCK-255
+- SwRS-MDOKFSTUDIO-BLOCK-257
+- SwRS-MDOKFSTUDIO-BLOCK-260
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -99,4 +101,6 @@ As a writer, I click a paragraph, heading, list, admonition, code block or image
   - [SwRS-MDOKFSTUDIO-BLOCK-102](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-102.md): An empty body offers one Start writing button
   - [SwRS-MDOKFSTUDIO-BLOCK-127](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-127.md): An included block is never moved, cut, copied, selected or pasted after
   - [SwRS-MDOKFSTUDIO-BLOCK-255](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-255.md): A block editor that opens late leaves the focus in a field that took it
+  - [SwRS-MDOKFSTUDIO-BLOCK-257](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-257.md): A block editor in a grid card widens the card and keeps the palette above a readable text box
+  - [SwRS-MDOKFSTUDIO-BLOCK-260](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-260.md): A card title or option opens on its own line
 <!-- okf:links:end -->

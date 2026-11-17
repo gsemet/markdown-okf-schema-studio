@@ -37,7 +37,7 @@ const HINT = "[data-sphinx-preview-table-cell-hint]";
  * still empty, removes it so the buffer equals the one before the Tab; one undo from the source
  * gives the empty row back (the removal is its own undo step), a second one undoes the Tab.
  * @tests_req SwRS-MDOKFSTUDIO-TABLE-025
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-035
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-124
  */
 export async function scenarioTableTabRow(page: Page): Promise<void> {
   await withDocument("realinput-table-tab-row", TABLE_TAB_ROW_DOCUMENT, async (document) => {

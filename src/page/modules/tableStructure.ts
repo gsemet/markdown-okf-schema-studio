@@ -15,7 +15,7 @@ interface TableStructureDeps {
 const HEADER_ROWS_ONE = /^:header-rows:[ \t]+1[ \t]*$/u;
 
 export function createTableStructureTools({ parse, convertTable, serializePipe }: TableStructureDeps) {
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-003
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
   /**
    * Inserts an empty body row above the body row at rendered index `renderedRowIndex` (the header
    * has no row above it). Returns the rendered index of the new row, or undefined when refused.
@@ -30,7 +30,7 @@ export function createTableStructureTools({ parse, convertTable, serializePipe }
     return renderedRowIndex;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-004
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
   /** Inserts an empty column to the left of `columnIndex`; returns the index of the new column. */
   function insertColumnBefore(model: MarkdownTableModel, columnIndex: number): number {
     const insertAt = Math.max(0, Math.min(columnIndex, model.rows[0].length));
@@ -39,7 +39,7 @@ export function createTableStructureTools({ parse, convertTable, serializePipe }
     return insertAt;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-005
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
   /**
    * The grid of the plain `{list-table}` `source` as a table model whose `serialize` writes a
    * list-table again (the source itself while the grid is untouched): one header row, one-line
