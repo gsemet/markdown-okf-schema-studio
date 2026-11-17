@@ -12,19 +12,17 @@ scope: layout-width
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-17T22:42:16+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-17T22:42:16+01:00'
 origin: native
 tier: StRS
 derives_from: []
 user_need: As a reader, I never have to scroll the whole page sideways to read a
   document, whatever its content, theme or the size of the pane; I reach every
   column of a wide table without the page moving, I can tell there is more to
-  scroll to, and short identifiers stay readable. As a maintainer, I can run
-  machine layout checks on any preview and trust that they flag real layout
-  defects and stay quiet on pages where they do not apply.
+  scroll to, and short identifiers stay readable.
 derived_by:
 - SwRS-MDOKFSTUDIO-LAYOUT-001
 - SwRS-MDOKFSTUDIO-LAYOUT-032
@@ -45,7 +43,7 @@ When a document holds wide content, long words or long URLs, the Studio SHALL ke
 
 ### Preserved stakeholder intent
 
-As a reader, I never have to scroll the whole page sideways to read a document, whatever its content, theme or the size of the pane; I reach every column of a wide table without the page moving, I can tell there is more to scroll to, and short identifiers stay readable. As a maintainer, I can run machine layout checks on any preview and trust that they flag real layout defects and stay quiet on pages where they do not apply.
+As a reader, I never have to scroll the whole page sideways to read a document, whatever its content, theme or the size of the pane; I reach every column of a wide table without the page moving, I can tell there is more to scroll to, and short identifiers stay readable.
 
 ### Rationale and constraints
 
@@ -55,10 +53,27 @@ As a reader, I never have to scroll the whole page sideways to read a document, 
 - A table wider than the pane scrolls inside its own box (maximum width 100% of the column, horizontal scroll), for example a service-level table at 460 px and a sixteen-column table at 900 px, both reaching their far-right column.
 - The shading of overflowing edges and the single-line effect on short identifiers (one word of at most 24 characters, such as `nw-02` or `North`) apply only while the table overflows by more than 1 px, stop when the table fits, and never apply to the properties table.
 - In Auto width a table wider than the column breaks out of it instead; that case belongs to the width-modes use case.
-- The layout checks are tooling and have no user-visible effect; they report four ids: `overlay-covers-text`, `overlay-clipped`, `identifier-split` and `status-two-lines`.
-- Each layout check is not applicable, hence passing, when the page has no matching DOM; `identifier-split` flags only a cell whose own text node wraps over several lines.
-- Known issue: this is a page-wide promise that no documentation states; it is only locked by visual checks (no sideways scroll) and the wrapping unit test.
-- Known issue: the layout-check behaviour is undocumented outside its unit test.
+
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Rendered
+    Rendered --> Measured: each block is measured
+    Measured --> Scrolling: a table wider than the box
+    Measured --> AsIs: a table that fits
+    Measured --> Wrapped: a long word or a long URL
+    Scrolling: Scrolls in its own box with shaded edges
+    AsIs: Left as it is
+    Wrapped: The text wraps
+    Scrolling --> NoOverflow
+    AsIs --> NoOverflow
+    Wrapped --> NoOverflow
+    NoOverflow: No sideways scroll of the page, within 1 px
+    NoOverflow --> [*]
+```
+
+Every branch ends with a page that does not scroll sideways.
 
 ### Main paths
 
