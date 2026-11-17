@@ -92,6 +92,7 @@ test("T21c: the rule button is three dashes, not the lines of centred text", () 
   assert.doesNotMatch(markup, /M8 7h8/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
 test("T21: the palette buttons show the real shortcut in their tooltip", () => {
   const harness = createRuntimeHarness();
   openBlockEditorWithSource(harness);

@@ -33,7 +33,7 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/edits/frontmatterEdit.test.ts
-- test/core/protocol/pageStateMessages.test.ts
+- test/core/protocol/pageToHost.test.ts
 - test/integration/previewEditing.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

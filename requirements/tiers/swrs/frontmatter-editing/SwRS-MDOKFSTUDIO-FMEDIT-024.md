@@ -29,6 +29,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/edits/frontmatterEdit.test.ts
 - test/core/frontmatter/frontmatterPreservation.test.ts
+- test/integration/previewEditing.test.ts
 - test/page/runtimeEditorFlush.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/visual/scenarioDefinitions2.ts

@@ -23,7 +23,9 @@ implemented_in_files:
 - src/page/modules/editActions.ts
 - src/page/modules/inlineEditActions.ts
 tested_in_files:
+- test/integration/realInput/blockKeys.ts
 - test/page/modules/editActions.test.ts
+- test/page/runtimeEditPalette.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

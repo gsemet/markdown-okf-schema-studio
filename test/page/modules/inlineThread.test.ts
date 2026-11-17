@@ -82,6 +82,7 @@ test("an open thread gets a reply box and a Delete button once, and apply is ide
   assert.equal(part(body, "data-okf-thread-delete").textContent, "Delete thread");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-171
 test("a page with the thread controls off shows the messages without controls", () => {
   const { root, threads } = setup({ enabled: false });
   const { body } = thread(root);
@@ -89,6 +90,7 @@ test("a page with the thread controls off shows the messages without controls", 
   assert.equal(body.children.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-171
 test("Reply sends the trimmed text with the source lines and clears the box on success", () => {
   const { root, threads, asked, answer } = setup();
   const { body } = thread(root);
@@ -103,6 +105,7 @@ test("Reply sends the trimmed text with the source lines and clears the box on s
   assert.equal(field(body).value, "");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-171
 test("an empty reply is not sent, and a refusal keeps the text and says why", () => {
   const { root, threads, asked, answer } = setup();
   const { body } = thread(root);
@@ -118,6 +121,7 @@ test("an empty reply is not sent, and a refusal keeps the text and says why", ()
   assert.equal(status.textContent, "The thread is no longer in the source.");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-171
 test("Delete thread asks the host with the source lines only", () => {
   const { root, threads, asked } = setup();
   const { body } = thread(root);
@@ -126,6 +130,7 @@ test("Delete thread asks the host with the source lines only", () => {
   assert.deepEqual(JSON.parse(JSON.stringify(asked)), [{ type: "previewThreadDelete", payload: { line: 5, endLine: 9 } }]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-171
 test("Cmd or Ctrl+Enter in the box replies, and keys in the box never reach the page", () => {
   const { root, threads, asked } = setup();
   const { body } = thread(root);
@@ -139,6 +144,7 @@ test("Cmd or Ctrl+Enter in the box replies, and keys in the box never reach the 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-171
 test("an open edit blocks the change with its reason, and a thread without lines is not sent", () => {
   const blocked = setup({ blocked: "Save or cancel the open edit first." });
   const first = thread(blocked.root);

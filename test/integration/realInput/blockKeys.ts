@@ -136,6 +136,7 @@ export async function scenarioReviewComments(page: Page, evidence: Evidence): Pr
  * The toolbar Comments button hides every review mark: the former highlight is plain text, out of
  * the Tab order, and a real click on it edits its block (edit mode) instead of opening the popover.
  */
+// @tests_req StRS-MDOKFSTUDIO-REVIEW-012
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
 export async function scenarioHiddenReviewMarks(page: Page): Promise<void> {
   const text = "# Review\n\nThe second paragraph has needle text here.\n";
@@ -215,6 +216,38 @@ export async function scenarioHiddenReviewMarks(page: Page): Promise<void> {
   } finally {
     fixture.dispose();
   }
+}
+
+/**
+ * StRS review-annotations REVIEW-012: the TODO action of the edition palette wraps each line of the
+ * block in a TODO comment, one undo restores the lines, and the committed source holds the comment.
+ */
+// @tests_req StRS-MDOKFSTUDIO-REVIEW-012
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
+export async function scenarioTodoToggle(page: Page): Promise<void> {
+  await withSmokeDocument("realinput-todo", async (document) => {
+    await openSidePreview(document);
+    await waitForRender(document);
+    await setEditMode(page, true);
+    const area = "[data-sphinx-preview-block-editor] textarea";
+    const value = (): Promise<string> => withCurrentFrame(page, (frame) => frame.locator(area).inputValue());
+    const original = "First paragraph line one\ncontinues on line two.";
+    const wrapped = "<!-- TODO: First paragraph line one -->\n<!-- TODO: continues on line two. -->";
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "First paragraph" }).click());
+    await waitForEditor(page, area);
+    await press(page, MOD + "+a");
+    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='todo']").click());
+    await waitFor("the TODO comment around each line", async () => await value() === wrapped);
+    await press(page, MOD + "+z");
+    await waitFor("one undo to restore the lines", async () => await value() === original);
+    await press(page, MOD + "+a");
+    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='todo']").click());
+    await waitFor("the TODO comment again", async () => await value() === wrapped);
+    await press(page, MOD + "+Enter");
+    await waitFor("the source to hold the TODO comment around the lines", () =>
+      bufferText(document) === SMOKE.replace(original, wrapped));
+    await leaveEditModeOff();
+  });
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-047

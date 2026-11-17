@@ -309,6 +309,7 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
   } else {
     rt.textControls.focusTextControlAtLastContent(control);
   }
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-003
   if (options && options.toggleBoolean && fieldType === "checkbox" && schemaFound) {
     control.checked = value !== true;
     if (checkboxValueLabel) checkboxValueLabel.textContent = String(control.checked);

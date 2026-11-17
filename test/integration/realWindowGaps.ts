@@ -97,7 +97,7 @@ async function waitForGitRepository(uri: vscode.Uri): Promise<void> {
     api.getRepository(uri)?.state.HEAD?.commit !== undefined, 30_000);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req StRS-MDOKFSTUDIO-REVIEW-018
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
 /**

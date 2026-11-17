@@ -10,6 +10,7 @@ import type { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073
 test("a malformed frontmatter link request is refused with its own reason", async () => {
   const document = {
     id: "file:///notes/doc.md",

@@ -28,7 +28,7 @@ implemented_in_files:
 - src/page/features/pageInput.ts
 - src/page/features/textControls.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/frontmatterFields.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeEditorFlush.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts

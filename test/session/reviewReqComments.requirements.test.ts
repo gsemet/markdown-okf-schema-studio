@@ -289,6 +289,18 @@ test("a comments file that names another document stays where it is, without a w
   assert.match(own.files.get(w("moved.comments.json"))!, /"document": "moved\.md"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-125
+test("a renamed document takes its comments file along and names itself in it", async () => {
+  const s = setup();
+  s.files.set(w("move-me.comments.json"), sidecarOf("move-me.md", [thread("t1", 1)]));
+  s.files.set(w("moved.md"), "x\n");
+  await s.controller.moveSidecars([{ oldPath: w("move-me.md"), newPath: w("moved.md"), local: true }]);
+  assert.deepEqual(s.renames, [[w("move-me.comments.json"), w("moved.comments.json")]]);
+  assert.match(s.files.get(w("moved.comments.json"))!, /"document": "moved\.md"/u);
+  assert.match(s.files.get(w("moved.comments.json"))!, /"id": "t1"/u);
+  assert.deepEqual(s.warnings, []);
+});
+
 test("a folder, a comments file itself and a file that is not local move no comments file", async () => {
   const s = setup();
   s.files.set(w("dir.comments.json"), sidecarOf("dir", [thread("t1", 1)]));

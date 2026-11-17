@@ -22,6 +22,7 @@ implemented_in_files:
 - src/core/preview/styles/commentStyles.ts
 - src/page/modules/commentThreads.ts
 tested_in_files:
+- test/core/preview/commentStyles.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/page/modules/commentThreads.test.ts
 default_owner_email: gaetan@xeberon.net

@@ -27,6 +27,7 @@ implemented_in_files:
 - src/node-services/schemaFiles.ts
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
+- test/integration/previewEditing.test.ts
 - test/node-services/schemaFiles.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

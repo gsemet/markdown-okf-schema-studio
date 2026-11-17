@@ -182,6 +182,7 @@ test("T43: the result carries the written text and its hash (the host ignores th
   assert.equal(result.hash, hashText(result.text));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
 test("T44: setResolved resolves and reopens the named thread only, without touching the input", () => {
   const base = addThread([], { threadId: "t1", commentId: "c1", anchor, author: "A", body: "x", now: NOW })!;
   const two = addThread(base, { threadId: "t2", commentId: "c2", anchor, author: "A", body: "y", now: NOW })!;
@@ -195,6 +196,7 @@ test("T44: setResolved resolves and reopens the named thread only, without touch
   assert.deepEqual(parseSidecar(serializeSidecar({ document: "a.md", threads: resolved })).errors, []);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
 test("T44: deleteThread removes the named thread only; the last one leaves an empty list", () => {
   const base = addThread([], { threadId: "t1", commentId: "c1", anchor, author: "A", body: "x", now: NOW })!;
   const two = addThread(base, { threadId: "t2", commentId: "c2", anchor, author: "A", body: "y", now: NOW })!;

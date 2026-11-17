@@ -41,7 +41,6 @@ import { isSafeOkfColor } from "../../../src/core/security/spanColors";
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-148
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-149
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
 
 const registry = createEditActions([], createMarkdownTableTools());
 
@@ -171,12 +170,12 @@ const todoCases: [string, string][] = [
   ["ab[c\nd]ef", "[<!-- TODO: abc -->\n<!-- TODO: def -->]"],
 ];
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
 for (const [input, expected] of todoCases) {
-  test("editActions todo " + JSON.stringify(input), () => {
-    assert.equal(run("todo", input), expected);
-  });
+  test("editActions todo " + JSON.stringify(input), () => assert.equal(run("todo", input), expected));
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
 test("the todo toggle is its own inverse", () => {
   const original = "- one\n- two";
   const wrapped = run("todo", "[" + original + "]")!;
@@ -267,6 +266,7 @@ test("a selection cutting into a marker run on one side produces no edit", () =>
   assert.equal(run("italic", "*[fo]o*"), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
 test("a line containing --> is never wrapped in a TODO comment", () => {
   assert.equal(run("todo", "a |--> b"), undefined);
   assert.equal(

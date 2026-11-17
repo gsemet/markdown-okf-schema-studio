@@ -48,6 +48,7 @@ function analyze(root: string, sourceText: string): FrontmatterResult {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+// @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
 test("frontmatter that is a list or an empty block gives the not-a-mapping error row and one error", () => {
   const root = temporaryRoot();
   for (const source of ["---\n- a\n- b\n---\n\nBody.\n", "---\n---\n\nBody.\n"]) {

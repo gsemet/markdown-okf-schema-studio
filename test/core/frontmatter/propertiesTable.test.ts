@@ -301,6 +301,7 @@ test("renders boolean values as read-only checkboxes in preview mode", () => {
   assert.match(markup, /<span data-okf-value-display><input type="checkbox" class="okf-value-checkbox" aria-label="disabled" aria-disabled="true" tabindex="-1"><span class="okf-boolean-value">false<\/span><\/span>/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
 test("caps long list previews and reports omitted items", () => {
   const omitted = 5;
   const value = Array.from({ length: MAX_LIST_ITEMS + omitted }, (_, index) => `item-${index + 1}`);
@@ -346,6 +347,7 @@ test("does not match a list link by array index without a field path", () => {
   assert.doesNotMatch(markup, /okf-frontmatter-link|data-okf-link-code="E10"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
 test("renders list items with hyphen markers", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [fieldWith({ name: "files", value: ["one"], valueKind: "list", fieldType: "list" })],
@@ -365,7 +367,6 @@ test("maps the injected properties section to the frontmatter source", () => {
   assert.match(markup, /data-sphinx-preview-document="file:\/\/\/active\.md"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
 test("error rows carry the red underline class and hover tooltip", () => {
   const markup = renderPropertiesTable(resultWith({
@@ -581,6 +582,7 @@ test("schema-matched tables add a third description column", () => {
 });
 
 test("renders empty lists without a phantom preview item", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
   const markup = renderPropertiesTable(resultWith({
     fields: [fieldWith({
       name: "derives_from",
@@ -611,6 +613,7 @@ test("marks schema-nullable fields in row metadata", () => {
 });
 
 test("escapes list preview items without truncating short lists", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
   const markup = renderPropertiesTable(resultWith({
     fields: [fieldWith({
       name: "links",
@@ -692,6 +695,7 @@ test("schema declarations do not appear as description annotations", () => {
   assert.doesNotMatch(markup, /array of string · required|boolean · must be false/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
 test("name cells carry a size-bounded Obsidian-style type icon", () => {
   const markup = renderPropertiesTable(resultWith({
     orderMode: "schema",

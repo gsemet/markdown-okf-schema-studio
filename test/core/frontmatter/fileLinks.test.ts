@@ -22,6 +22,7 @@ function inspect(frontmatter: Record<string, unknown>, schema: Record<string, un
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
 test("link annotations read target fields and exact marker lines afresh", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-details-"));
   const target = path.join(root, "target.md");
@@ -49,6 +50,7 @@ test("link annotations read target fields and exact marker lines afresh", () => 
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
 test("link display options reject invalid metadata", () => {
   for (const annotation of [
     { tooltip_shows_fields: "description" },
@@ -85,6 +87,7 @@ test("oneOf annotations are collected only when exactly one branch matches", () 
   assert.equal(unique[0].status, "pending");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
 test("conditional, patternProperties, and additionalProperties schemas are traversed", () => {
   const schema: Record<string, unknown> = {
     type: "object",

@@ -26,6 +26,7 @@ implemented_in_files:
 - src/core/render/mystBlockTransforms.ts
 - src/core/security/html-sanitizer.ts
 tested_in_files:
+- test/core/preview/commentStyles.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/security/html-policy.test.ts
 - test/visual/scenarioDefinitions2.ts

@@ -52,6 +52,7 @@ test("T42: malformed JSON and wrong shapes give errors and no threads", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
 test("T42: one invalid thread rejects the whole file", () => {
   const bad = [
     thread({ id: "" }), thread({ resolved: "no" }), thread({ createdAt: "yesterday" }),
@@ -71,6 +72,7 @@ test("T42: one invalid thread rejects the whole file", () => {
   assert.ok(parseSidecar(file([thread(), thread()])).errors.length > 0, "duplicate thread ids");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
 test("T42: limits on size, threads, comments and string length", () => {
   const many = Array.from({ length: MAX_THREADS + 1 }, (_, index) => thread({ id: `t${index}` }));
   assert.ok(parseSidecar(file(many)).errors.length > 0);
