@@ -371,6 +371,7 @@ test("T28: a frontmatter-only document gets one Start writing point", () => {
   assert.equal(points[0].childElements[0].textContent, "Start writing");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-102
 test("T28: a failed render offers no Start writing point", () => {
   const harness = createRuntimeHarness({
     emptyBody: true,

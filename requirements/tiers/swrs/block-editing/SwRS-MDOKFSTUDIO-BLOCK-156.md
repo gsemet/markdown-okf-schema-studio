@@ -27,7 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/mapping/blockMove.test.ts
 - test/integration/blockMove.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/blockKeys.ts
 - test/page/runtimeBlockSelection.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

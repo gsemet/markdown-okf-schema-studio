@@ -244,7 +244,6 @@ test("P11: the menu lists exactly the actions of the palette for each mode", () 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-085
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-106
 test("P11: the table cell palette lists only the actions allowed in a cell", () => {
   const h = setup("myst", "", "cell");
   const entries = h.palette.menuEntries();

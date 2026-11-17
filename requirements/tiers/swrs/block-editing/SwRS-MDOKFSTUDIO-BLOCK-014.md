@@ -39,7 +39,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/core/render/includeMapping.test.ts
 - test/integration/previewEditing.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/editorWidgets.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/linkEditModeClick.test.ts
 - test/page/runtimeBlockEditor.test.ts

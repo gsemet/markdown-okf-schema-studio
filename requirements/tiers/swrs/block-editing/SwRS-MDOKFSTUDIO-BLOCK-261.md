@@ -24,7 +24,6 @@ implemented_in_files:
 - src/page/features/blockEditor.ts
 - src/page/features/blockSourceEditor.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
 - test/integration/realInput/qa210Replays.ts
 - test/page/runtimeCardOptionEnter.test.ts
 - test/visual/cardsTabsScenarios.ts

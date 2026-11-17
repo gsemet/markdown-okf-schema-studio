@@ -4,10 +4,6 @@ import { test } from "node:test";
 import { createEditActions } from "../../../src/page/modules/editActions";
 import { createMarkdownTableTools } from "../../../src/page/modules/markdownTable";
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-106
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-115
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-117
-
 const registry = createEditActions([], createMarkdownTableTools());
 
 const LIST_TABLE = ":::{list-table}\n* - a\n  - b\n:::";
@@ -22,6 +18,7 @@ function applyTo(id: string, value: string, caret: number, arg?: string): string
   return edit ? value.slice(0, edit.start) + edit.text + value.slice(edit.end) : undefined;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-106
 test("Table with the caret in a pipe table, a list-table or an HTML table goes after it", () => {
   for (const [table, marker] of [[PIPE_TABLE, "1 |"], [LIST_TABLE, "- a"], [HTML_TABLE, "<td>"]]) {
     const source = "intro\n\n" + table + "\n\nafter";
@@ -32,6 +29,8 @@ test("Table with the caret in a pipe table, a list-table or an HTML table goes a
   assert.equal(applyTo("table", atEnd, atEnd.length, "1x1"), atEnd + "\n\n| Column 1 |\n| --- |");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-115
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-117
 test("HTML table and Table with caption in a list-table or HTML table insert after it", () => {
   for (const table of [LIST_TABLE, HTML_TABLE]) {
     const source = table + "\n\nafter";

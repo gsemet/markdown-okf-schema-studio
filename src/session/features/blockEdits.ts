@@ -117,13 +117,13 @@ export class BlockEditController {
     router.on("previewEditCancel", (message, preview) => this.handleEditCancel(preview, message));
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
   /** Answers a block edit message with an error the page's editor shows. */
   public postEditSourceError(
     preview: PreviewSession,
     message: BlockEditMessage,
     error: string,
   ): void {
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
     if (message.flush === true) {
       const where = message.line !== undefined && message.endLine !== undefined
         ? `the block at lines ${message.line}-${message.endLine}`
@@ -157,7 +157,6 @@ export class BlockEditController {
     return refusal ?? { document, start: offsets.start, end: offsets.end };
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-094
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
   private handleEditOpen(preview: PreviewSession, message: PageMessageOf<"previewEditOpen">): void {

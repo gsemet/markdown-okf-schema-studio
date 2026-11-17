@@ -16,7 +16,6 @@ import {
  */
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-001
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-013
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-055
 test("table cell editing exposes row and column operations and saves the edited table", () => {
   const harness = createRuntimeHarness();
@@ -633,7 +632,7 @@ test("a later layout change that pushes the toolbar above the reading offset is 
   assert.equal(harness.windowState.scrollY, 300 - 45);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-034
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-013
 test("table editing switches cells without losing changes and finalizes before leaving the table", () => {
   const harness = createRuntimeHarness();
   const table = new RuntimeElement({
@@ -703,6 +702,7 @@ test("table editing switches cells without losing changes and finalizes before l
   click(harness.mappings[2]);
   assert.equal(harness.messages.at(-1)?.final, true);
   assert.equal(harness.getWebviewState().pendingBlockNavigation !== undefined, true);
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-034
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",

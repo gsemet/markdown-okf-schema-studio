@@ -31,7 +31,7 @@ implemented_in_files:
 - src/page/modules/selectAllKey.ts
 - src/page/modules/textEditing.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/textEditing.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/modules/editActions.test.ts
 - test/page/modules/editorKeys.test.ts

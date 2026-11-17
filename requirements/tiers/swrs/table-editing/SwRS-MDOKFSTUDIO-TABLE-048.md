@@ -27,7 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/fmtableReq.requirements.test.ts
 - test/core/preview/previewStyles.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/editorWidgets.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/visual/capture_edit_checks.py
 - test/visual/scenarioDefinitions2.ts

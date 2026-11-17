@@ -28,7 +28,7 @@ implemented_in_files:
 - src/page/features/scrollCore.ts
 - src/session/features/scrollSync.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/editorWidgets.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeScroll.test.ts

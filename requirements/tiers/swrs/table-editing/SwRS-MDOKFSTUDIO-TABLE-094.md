@@ -26,7 +26,7 @@ derived_by: []
 implemented_in_files:
 - src/page/modules/markdownTable.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/blockKeys.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/modules/markdownTablePreservation.test.ts
 default_owner_email: gaetan@xeberon.net

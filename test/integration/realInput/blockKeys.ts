@@ -217,6 +217,7 @@ export async function scenarioHiddenReviewMarks(page: Page): Promise<void> {
   }
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
 export async function scenarioCtrlEnterCommit(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-s2", async (document) => {
     await openSidePreview(document);
@@ -241,7 +242,11 @@ export async function scenarioCtrlEnterCommit(page: Page, evidence: Evidence): P
   });
 }
 
-/** T37: Alt+Up/Down on a focused block, and Cmd/Ctrl+Alt+Up/Down inside its text box. */
+/**
+ * T37: Alt+Up/Down on a focused block, and Cmd/Ctrl+Alt+Up/Down inside its text box.
+ * @tests_req StRS-MDOKFSTUDIO-BLOCK-014
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+ */
 export async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Promise<void> {
   const document3 = (order: string[]): string =>
     ["# Move keys", "", ...order.flatMap((name) => [name.includes(" ") ? name : name + " paragraph.", ""])].join("\n");
@@ -302,7 +307,10 @@ export async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Pro
   });
 }
 
-/** T39: Shift+click across three blocks, Shift+Up shrinks, Escape clears; CR 157: Right and Escape walk into and out of a table; nothing is edited. */
+/**
+ * T39: Shift+click across three blocks, Shift+Up shrinks, Escape clears; CR 157: Right and Escape walk into and out of a table; nothing is edited.
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+ */
 export async function scenarioBlockSelection(page: Page, evidence: Evidence): Promise<void> {
   const text = ["# Selection", "", "Alpha paragraph.", "", "Beta paragraph.", "", "Gamma paragraph.", "",
     "| Head one | Head two |", "| --- | --- |", "| cell a | cell b |", ""].join("\n");
@@ -351,7 +359,10 @@ export async function scenarioBlockSelection(page: Page, evidence: Evidence): Pr
   });
 }
 
-/** T41: select two blocks, Alt+Up/Down moves the span, the selection follows */
+/**
+ * T41: select two blocks, Alt+Up/Down moves the span, the selection follows
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-156
+ */
 export async function scenarioBlockMoveSelection(page: Page, evidence: Evidence): Promise<void> {
   const document4 = (order: string[]): string =>
     ["# Move span", "", ...order.flatMap((name) => [name + " paragraph.", ""])].join("\n");
@@ -389,6 +400,8 @@ export async function scenarioBlockMoveSelection(page: Page, evidence: Evidence)
   });
 }
 
+// @tests_req StRS-MDOKFSTUDIO-BLOCK-008
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
 export async function scenarioArrowNavigation(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-s3", async (document) => {
     await openSidePreview(document);
@@ -442,7 +455,11 @@ export async function scenarioTableCellEnter(page: Page, evidence: Evidence): Pr
   });
 }
 
-/** RI-T35: Cmd/Ctrl+B in a table cell bolds the selection and Enter saves the cell. */
+/**
+ * RI-T35: Cmd/Ctrl+B in a table cell bolds the selection and Enter saves the cell.
+ * @tests_req StRS-MDOKFSTUDIO-TABLE-012
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-085
+ */
 export async function scenarioTableCellBold(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t35", async (document) => {
     await openSidePreview(document);
@@ -472,7 +489,11 @@ export async function scenarioTableCellBold(page: Page, evidence: Evidence): Pro
   });
 }
 
-/** RI-T04: one cell edit changes exactly one source line, in a padded and in a compact table. */
+/**
+ * RI-T04: one cell edit changes exactly one source line, in a padded and in a compact table.
+ * @tests_req StRS-MDOKFSTUDIO-TABLE-014
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-094
+ */
 export async function scenarioTableMinimalDiff(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t04", TABLE_DOCUMENT, async (document) => {
     await openSidePreview(document);

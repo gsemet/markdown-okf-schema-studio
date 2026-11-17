@@ -28,7 +28,7 @@ implemented_in_files:
 - src/page/features/pageInput.ts
 - src/page/features/tableCellEditor.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/editorWidgets.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/page/runtimeTableCellEditor.test.ts

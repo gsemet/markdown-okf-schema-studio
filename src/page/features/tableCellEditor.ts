@@ -262,8 +262,6 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-091
   function renderTableCellEditor(edit: BlockEdit): void {
     const { blockEditor, textControls } = rt;
     const { hostRequests } = rt.parts;
@@ -403,6 +401,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       });
       if (!blockEditor.postBlockEditSave(true)) blockEditor.clearPendingBlockNavigation();
     };
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
     addAction("Insert row before selected row", tableActionIcons.addRowAbove, "Row above", () => structural(() => {
       const row = tableTools.insertRowBefore(edit.tableModel!, edit.tableRowIndex!);
       if (row !== undefined) edit.tableRowIndex = row;
@@ -414,6 +413,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       const nextRow = tableTools.deleteRow(edit.tableModel!, edit.tableRowIndex!);
       if (nextRow !== undefined) edit.tableRowIndex = nextRow;
     }), edit.tableRowIndex === 0 || edit.tableModel!.rows.length <= 3, "row");
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
     addAction("Insert column before selected column", tableActionIcons.addColumnBefore, "Col left", () => structural(() => {
       edit.tableColumnIndex = tableTools.insertColumnBefore(edit.tableModel!, edit.tableColumnIndex!);
     }), false, "column");

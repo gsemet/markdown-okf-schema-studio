@@ -26,7 +26,7 @@ implemented_in_files:
 - src/page/features/insertPoints.ts
 tested_in_files:
 - test/core/preview/blockReq.requirements.test.ts
-- test/integration/realInput/markers.ts
+- test/integration/realInput/renderPatching.ts
 - test/page/runtimeBlockMoves.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net

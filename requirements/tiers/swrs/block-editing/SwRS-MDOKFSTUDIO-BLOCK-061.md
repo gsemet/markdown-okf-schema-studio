@@ -21,7 +21,7 @@ derived_by: []
 implemented_in_files:
 - src/page/modules/textEditing.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/editorWidgets.ts
 - test/page/modules/textEditing.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/visual/optionListScenarios.ts

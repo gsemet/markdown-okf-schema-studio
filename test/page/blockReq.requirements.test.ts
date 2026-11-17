@@ -451,6 +451,7 @@ test("a refresh asked from the page over an open block editor shows a message an
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("a refused open leaves the frame without a text box and records the error", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);

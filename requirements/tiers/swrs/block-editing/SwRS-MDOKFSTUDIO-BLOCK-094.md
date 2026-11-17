@@ -23,7 +23,6 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/mapping/insertion.ts
-- src/session/features/blockEdits.ts
 tested_in_files:
 - test/core/mapping/insertion.test.ts
 - test/integration/previewEditing.test.ts

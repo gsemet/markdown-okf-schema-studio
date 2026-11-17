@@ -39,6 +39,7 @@ async function shownCells(page: Page): Promise<string[]> {
  * Tab, then Escape in the next cell: the buffer line and the shown cell both keep the text of the
  * cell left. Checked for Tab, then for a click on another cell.
  * @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+ * @tests_req StRS-MDOKFSTUDIO-TABLE-001
  */
 export async function scenarioTableEscapeKeepsCellsLeft(page: Page): Promise<void> {
   await withDocument("realinput-table-escape", TABLE_ESCAPE_DOCUMENT, async (document) => {

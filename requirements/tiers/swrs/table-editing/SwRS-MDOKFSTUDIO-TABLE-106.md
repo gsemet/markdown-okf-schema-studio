@@ -27,7 +27,6 @@ implemented_in_files:
 - src/page/modules/tableEditActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
-- test/page/modules/slashMenu.test.ts
 - test/page/modules/tableInsertAfterTable.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

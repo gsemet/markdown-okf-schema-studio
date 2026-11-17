@@ -1,30 +1,6 @@
 // Companion of: test/integration/realInput/run.ts
 // Requirement markers for the real-input scenarios in this folder (run.ts and its scenario files).
 // Each marker names a requirement the real-window scenarios check.
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-003
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-006
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-008
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-011
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-014
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-025
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-026
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-087
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-009
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
@@ -35,16 +11,9 @@
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-232
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-242
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-238
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-018
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-123
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-048
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-085
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
 // @tests_req SwRS-MDOKFSTUDIO-THEME-001
 // @tests_req SwRS-MDOKFSTUDIO-THEME-016
 // @tests_req SwRS-MDOKFSTUDIO-THEME-025
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-001
 // @tests_req StRS-MDOKFSTUDIO-DIAG-001
 // @tests_req StRS-MDOKFSTUDIO-FMEDIT-001
 // @tests_req StRS-MDOKFSTUDIO-FMEDIT-005
@@ -55,10 +24,5 @@
 // @tests_req StRS-MDOKFSTUDIO-PALETTE-005
 // @tests_req StRS-MDOKFSTUDIO-PALETTE-007
 // @tests_req StRS-MDOKFSTUDIO-PALETTE-015
-// @tests_req StRS-MDOKFSTUDIO-TABLE-001
-// @tests_req StRS-MDOKFSTUDIO-TABLE-006
-// @tests_req StRS-MDOKFSTUDIO-TABLE-008
-// @tests_req StRS-MDOKFSTUDIO-TABLE-012
-// @tests_req StRS-MDOKFSTUDIO-TABLE-011
 // @tests_req StRS-MDOKFSTUDIO-THEME-002
 export {};

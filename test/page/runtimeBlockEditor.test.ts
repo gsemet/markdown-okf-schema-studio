@@ -362,7 +362,6 @@ test("edit mode loads raw Markdown and saves changes when the block loses focus"
   assert.equal(save?.endLine, 52);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
 test("edit mode hover marks the whole list that a click would edit", () => {
   for (const editMode of [true, false]) {

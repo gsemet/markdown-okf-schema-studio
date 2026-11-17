@@ -42,21 +42,18 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     return model;
   };
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-034
   const receiveBlockEditSource: BlockSourceEditor["receiveBlockEditSource"] = (message) => {
     if (rt.tableRowMove.receiveSource(message)) return;
     const edit = state.activeBlockEdit;
     if (!edit || message.editId !== edit.editId) return;
     const { blockEditor, editorChrome, textControls } = rt;
     const { hostRequests, pasteImage, pasteHtml, pasteUrl } = rt.parts;
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
     if (typeof message.error === "string") {
+      // @implements_req SwRS-MDOKFSTUDIO-TABLE-034
       blockEditor.clearPendingBlockNavigation();
       state.pendingBlockSelection = undefined;
       edit.finishing = false;
@@ -100,6 +97,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
         : originalText.endsWith(String.fromCharCode(13))
           ? String.fromCharCode(13)
           : "";
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
     if (edit.selectedCell) {
       const model = tableTools.parse(originalText) ?? tableTools.parseListTable(originalText)
         ?? containedTableModel(edit, originalText);
@@ -134,6 +132,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     textarea.setAttribute("autocorrect", "off");
     textarea.setAttribute("autocapitalize", "off");
     textarea.setAttribute("autocomplete", "off");
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
     if (edit.insertAfterLine !== undefined) {
       textarea.setAttribute("placeholder", 'Type Markdown, for example "## Heading" or "- item"');
     }
@@ -146,6 +145,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       textarea.style.height = "auto";
       textarea.style.height = textarea.scrollHeight + "px";
     };
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
     const hint = blockEditor.blockEditHint(edit);
     const actions = document.createElement("div");
     actions.className = "sphinx-preview-block-editor-actions";
