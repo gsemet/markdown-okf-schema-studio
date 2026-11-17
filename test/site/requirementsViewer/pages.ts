@@ -88,11 +88,17 @@ export function useCasePage(model: ViewerModel, useCase: Requirement): PageSpec 
     : '<h2>How it is split</h2>\n<p class="hint">The paths of this use case are not written yet, so there is no map: its behaviours are listed below.</p>';
   const retired = retiredBehavioursOf(model, useCase.id).map((behaviour) =>
     `<div class="brow retired"><span class="id">${e(shortId(behaviour.id))}</span><span class="t">${e(behaviour.title)} ${retiredNote(model, dir, behaviour)}</span><span class="m"></span><span class="m"></span></div>`);
+  const svg = model.diagrams.get(useCase.id);
+  const diagram = svg === undefined
+    ? ""
+    : `<h2>Use case diagram</h2>
+<figure class="ucd" role="img" aria-label="Use case diagram of ${e(useCase.title)}">${svg}</figure>
+`;
   const body = `
 <p class="eyebrow"><span class="sw" style="background:${e(area.colour)}"></span>Use case ${e(shortId(useCase.id))}</p>
 <h1>${e(useCase.title)}</h1>
 <blockquote class="need">${e(useCase.userNeed)}</blockquote>
-${map}
+${diagram}${map}
 <h2>Behaviours of this use case</h2>
 <div class="blist">${behaviours.map((behaviour) => behaviourRow(model, dir, behaviour, onMap)).join("")}${retired.join("")}</div>
 `;

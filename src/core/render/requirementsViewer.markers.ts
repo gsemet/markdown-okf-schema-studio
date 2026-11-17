@@ -9,4 +9,5 @@
 // @implements_req SwRS-MDOKFSTUDIO-CORE-083 — retiredBehavioursOf
 // @implements_req SwRS-MDOKFSTUDIO-CORE-084 — searchIndex
 // @implements_req SwRS-MDOKFSTUDIO-CORE-085 — levelCards
+// @implements_req SwRS-MDOKFSTUDIO-CORE-087 — renderUseCaseDiagrams
 export {};

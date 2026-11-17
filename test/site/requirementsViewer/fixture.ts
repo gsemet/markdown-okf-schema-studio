@@ -2,7 +2,18 @@ import { EXAMPLE_SWRS_ID } from "./model";
 
 /** A small okfreq report for the viewer tests: two areas, a use case with Main paths, a retired SwRS. */
 
-export const MAIN_PATHS = `### Main paths
+export const DIAGRAM_SOURCE = "sequenceDiagram\n  participant W as Writer\n  participant P as Preview\n  W->>P: types\n  P-->>W: shows";
+
+/** A `### Use case diagram` section, as an authored StRS carries it just before Main paths. */
+export const DIAGRAM_SECTION = `### Use case diagram
+
+\`\`\`mermaid
+${DIAGRAM_SOURCE}
+\`\`\`
+
+`;
+
+export const MAIN_PATHS =`### Main paths
 
 #### Path 1: Do it
 
@@ -76,7 +87,7 @@ export function fixtureReport(overrides: { generatedAt?: string } = {}): string 
     totals: { combined_coverage_percent: 75 },
     scopes: { gfm: { combined_coverage_percent: 80 } },
     requirements: [
-      requirement("StRS-X-001", "StRS", "gfm", { text: `## T\n\n${MAIN_PATHS}\n<!-- okf:links:start -->\n`, userNeed: "As a writer, I do <b>a</b> thing." }),
+      requirement("StRS-X-001", "StRS", "gfm", { text: `## T\n\n${DIAGRAM_SECTION}${MAIN_PATHS}\n<!-- okf:links:start -->\n`, userNeed: "As a writer, I do <b>a</b> thing." }),
       requirement("StRS-X-002", "StRS", "myst", { lifecycle: "superseded", supersededBy: ["StRS-X-001"] }),
       requirement("StRS-X-003", "StRS", "gfm"),
       requirement("SwRS-X-010", "SwRS", "gfm", { text: SCENARIO("nominal", "Start") }),

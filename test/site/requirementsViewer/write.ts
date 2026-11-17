@@ -6,6 +6,7 @@ import { SITE_URL, escapeHtml, writeCardPictures } from "../socialCard";
 import { levelCards } from "./cards";
 import { homePage } from "./home";
 import { REQUIREMENTS_REPORT_PATH, currentCommit, loadRequirementsModel, type ViewerModel } from "./model";
+import { renderUseCaseDiagrams, type UseCaseDiagram } from "./useCaseDiagram";
 import { areaPage, behaviourPage, useCasePage } from "./pages";
 import { searchIndexScript } from "./searchIndex";
 import { viewerDocument, type PageFooter, type PageSpec } from "./shell";
@@ -54,8 +55,14 @@ export function redirectDocument(): string {
  * Writes the pages, the search index, the stylesheet (the shared site stylesheet then viewer.css), the script and the redirect.
  * A missing or broken report writes the home with a notice and the redirect only; it never throws.
  */
-export function writeViewerPages(siteRoot: string, reportPath: string, root: string): ViewerModel | undefined {
+export function writeViewerPages(
+  siteRoot: string,
+  reportPath: string,
+  root: string,
+  diagrams: ReadonlyMap<string, UseCaseDiagram> = new Map(),
+): ViewerModel | undefined {
   const model = loadRequirementsModel(reportPath, currentCommit(root));
+  if (model) for (const [id, svg] of diagrams) model.diagrams.set(id, svg);
   const footer: PageFooter = { sha: model?.sha ?? currentCommit(root), generatedAt: model?.generatedAt ?? "" };
   const folder = path.join(siteRoot, VIEWER_DIR);
   fs.mkdirSync(folder, { recursive: true });
@@ -69,8 +76,16 @@ export function writeViewerPages(siteRoot: string, reportPath: string, root: str
   return model;
 }
 
-/** The viewer and its four level pictures `requirements/og/<level>.png`. */
+/** The viewer and its four level pictures `requirements/og/<level>.png`; the use case diagrams are drawn first, once. */
 export async function writeRequirementsViewer(siteRoot: string, reportPath: string, root: string): Promise<void> {
-  writeViewerPages(siteRoot, reportPath, root);
+  const sources = new Map<string, string>();
+  const files = new Map<string, string>();
+  for (const requirement of loadRequirementsModel(reportPath)?.active ?? []) {
+    if (requirement.diagram === undefined) continue;
+    sources.set(requirement.id, requirement.diagram);
+    files.set(requirement.id, requirement.file);
+  }
+  const diagrams = await renderUseCaseDiagrams(sources, undefined, files);
+  writeViewerPages(siteRoot, reportPath, root, diagrams);
   await writeCardPictures(path.join(siteRoot, VIEWER_DIR), levelCards());
 }

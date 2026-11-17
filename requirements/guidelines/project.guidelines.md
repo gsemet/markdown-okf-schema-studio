@@ -70,11 +70,40 @@ step by step, each step backed by the SwRS that moves the user to the next state
 - Paths state what the extension does today, like the rest of the requirement; a step never
   describes behaviour that no cited SwRS specifies.
 - The section is authored text: it sits after the last authored section of the StRS (usually
-  `### Rationale and constraints`) and before the generated `<!-- okf:links:start -->` block.
+  `### Rationale and constraints`) and before the generated `<!-- okf:links:start -->` block. When
+  the StRS also carries a `### Use case diagram` (next section), the diagram comes just before
+  Main paths, so Main paths is the last authored section.
 - `just requirements-lint` runs `scripts/check_main_paths.py`, which verifies the cited SwRS only
   (not the wording of states, the kind in brackets or the shape of the list). Its last line is
   `main paths: <n> StRS checked, <m> SwRS citations, all valid`, where `<n>` counts the StRS that
   have a section.
+
+## Use case diagram of a StRS
+
+A StRS may carry a small diagram that a reader sees at once: who takes part and what happens. The
+same Mermaid text is drawn by GitHub on the Markdown file and, at site build time, on the use case
+page of the requirements site.
+
+- The section is an authored `### Use case diagram` heading holding exactly one
+  ```` ```mermaid ```` fence and nothing else but an optional one-line caption sentence.
+- It sits after the last authored section (usually `### Rationale and constraints`) and before
+  `### Main paths`; never inside nor after Main paths, because `test/site/requirementsViewer/mainPaths.ts`
+  and `scripts/check_main_paths.py` end that section at the next `### ` heading.
+- The kind is chosen per StRS by what explains it best: `sequenceDiagram` by default (the writer,
+  the preview, VS Code, the file); `flowchart` with one node per role when several roles take part
+  (an actors diagram); `stateDiagram-v2` for a mode (edit on or off).
+- The section is optional in this release of the rule; a later change makes it mandatory for every
+  in-force StRS, with a check.
+- The diagram speaks of actors (the writer, the preview, VS Code, the file), never of SwRS: no
+  SwRS ID in a diagram, so it does not compete with the Main paths map.
+- PlantUML is not allowed: GitHub does not render it.
+- `okfreq` validates the section with no error. GitHub rendering of the fence: not yet checked on
+  GitHub (the pull request that adds this rule checks it on a branch preview, and this line states
+  the result once checked). GitHub's Mermaid version may differ from the site's `mermaid ^12.2.0`,
+  so a diagram can look different, or fail, on one side only.
+- On the site the diagram is drawn once, in the cream colours of the site (the site has no dark
+  mode); a fence that Mermaid cannot draw fails the site build with the StRS id and Mermaid's
+  message.
 
 ## During a change
 

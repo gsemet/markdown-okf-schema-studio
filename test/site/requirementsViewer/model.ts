@@ -4,6 +4,7 @@ import * as path from "node:path";
 
 import { GROUPS } from "../../shared/e2eGroups";
 import { parseMainPaths, type MainPath } from "./mainPaths";
+import { parseUseCaseDiagram, type UseCaseDiagram } from "./useCaseDiagram";
 
 /** Lifecycles that leave a requirement out of the active count; they are counted separately. */
 const RETIRED_LIFECYCLES: ReadonlySet<string> = new Set(["superseded", "deprecated", "archived"]);
@@ -45,6 +46,8 @@ export interface Requirement {
   readonly scenarios: readonly Scenario[];
   readonly knownIssues: readonly string[];
   readonly stakeholderValidated: boolean;
+  /** The Mermaid source of the `### Use case diagram` section of an active StRS that has one. */
+  readonly diagram?: string;
 }
 
 export interface Area {
@@ -118,6 +121,8 @@ export interface ViewerModel {
   readonly retired: readonly Requirement[];
   /** The main paths of each active StRS that has the section. */
   readonly paths: ReadonlyMap<string, readonly MainPath[]>;
+  /** The drawing (SVG) of the use case diagram of each active StRS that has one; empty after parsing, the writer fills it. */
+  readonly diagrams: Map<string, UseCaseDiagram>;
   /** The commit of the build, for the links to the repository. */
   readonly sha: string;
 }
@@ -175,6 +180,11 @@ export function parseScenarios(raw: string): Scenario[] {
 /** The `- Known issue:` lines of a requirement file. */
 export function parseKnownIssues(raw: string): string[] {
   return (raw.match(/^\s*-\s+Known issue:.*$/gmu) ?? []).map((line) => line.replace(/^\s*-\s+/u, "").trim());
+}
+
+function diagramOf(body: string): { diagram?: string } {
+  const diagram = parseUseCaseDiagram(body);
+  return diagram === undefined ? {} : { diagram };
 }
 
 function exampleFrom(requirement: Requirement, dependsOn: readonly string[]): ExampleSwrs {
@@ -283,6 +293,7 @@ export function parseRequirementsReport(raw: string, sha = "main"): ViewerModel 
       scenarios: parseScenarios(body),
       knownIssues: notes,
       stakeholderValidated: validated,
+      ...(active && tier === "StRS" ? diagramOf(body) : {}),
     };
     requirements.push(requirement);
     dependsOn.set(requirement.id, textList(frontmatter.depends_on));
@@ -360,6 +371,7 @@ export function parseRequirementsReport(raw: string, sha = "main"): ViewerModel 
     active,
     retired: requirements.filter((requirement) => !requirement.active),
     paths,
+    diagrams: new Map(),
     sha,
   };
 }

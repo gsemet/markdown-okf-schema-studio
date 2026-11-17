@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { fixtureReport } from "./fixture";
+import { DIAGRAM_SOURCE, fixtureReport } from "./fixture";
 import { EXAMPLE_SWRS_ID, behavioursOf, parseKnownIssues, parseRequirementsReport, parseScenarios, replacementsOf } from "./model";
 
 function model() {
@@ -49,6 +49,7 @@ test("the model counts the figures of active requirements and the areas", () => 
 
 test("the model reads scenarios, files, parents, paths and known issues", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-082
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087
   const m = model();
   const go = m.byId.get("SwRS-X-011")!;
   assert.deepEqual(go.scenarios.map((s) => [s.kind, s.name]), [["nominal", "Go on"], ["boundary", "Go on twice"]]);
@@ -59,6 +60,10 @@ test("the model reads scenarios, files, parents, paths and known issues", () => 
   assert.equal(m.byId.get("SwRS-X-013")?.exempt, true);
   assert.deepEqual(behavioursOf(m, "StRS-X-003").map((r) => r.id), [EXAMPLE_SWRS_ID, "SwRS-X-013", "SwRS-X-014"]);
   assert.deepEqual([...m.paths.keys()], ["StRS-X-001"]);
+  assert.equal(m.byId.get("StRS-X-001")?.diagram, DIAGRAM_SOURCE, "the diagram before Main paths is read and Main paths still parse");
+  assert.equal(m.byId.get("StRS-X-003")?.diagram, undefined);
+  assert.equal(m.byId.get("StRS-X-002")?.diagram, undefined, "a retired StRS has no diagram");
+  assert.equal(m.diagrams.size, 0, "the writer fills the drawings, not the parser");
   assert.equal(m.paths.get("StRS-X-001")?.[0]?.steps.length, 3);
   assert.equal(m.example?.id, EXAMPLE_SWRS_ID);
   assert.deepEqual(parseScenarios("### Scenario: no kind\n\n- GIVEN a\n- WHEN b\n- THEN c\n")[0]?.kind, "nominal");

@@ -130,3 +130,19 @@ test("without JavaScript the search and Play controls are hidden", () => {
     assert.ok(!rule.includes("hist"), "the CSS-only History toggle stays");
   }
 });
+
+test("the use case diagram sits under the user need and before the map, and without one the page is unchanged", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087
+  const model = load();
+  const useCase = model.byId.get("StRS-X-001")!;
+  const before = useCasePage(model, useCase).body;
+  assert.ok(!before.includes("ucd") && !before.includes("Use case diagram"), "no drawing, no figure");
+  model.diagrams.set("StRS-X-001", '<svg id="ucd-x-001"><text>drawn</text></svg>');
+  const after = useCasePage(model, useCase).body;
+  const figure = '<h2>Use case diagram</h2>\n<figure class="ucd" role="img" aria-label="Use case diagram of Title of StRS-X-001"><svg id="ucd-x-001"><text>drawn</text></svg></figure>\n';
+  assert.ok(after.includes(figure));
+  assert.ok(after.indexOf("</blockquote>") < after.indexOf('<figure class="ucd"'));
+  assert.ok(after.indexOf('<figure class="ucd"') < after.indexOf("<h2>How it is split</h2>"));
+  assert.equal(after.replace(figure, ""), before, "the rest of the body is byte-identical");
+  assert.ok(!after.includes("<script") && !after.includes("prefers-color-scheme"));
+});
