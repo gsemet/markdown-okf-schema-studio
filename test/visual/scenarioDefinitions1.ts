@@ -51,6 +51,7 @@ import { TABLE_GRID_PASTE_SCENARIOS } from "./tableGridPasteScenarios";
 import { TABLE_IN_CONTAINER_SCENARIOS } from "./tableInContainerScenarios";
 import { FRONTMATTER_CLICK_SCENARIOS } from "./frontmatterClickScenarios";
 import { LABEL_RENAME_SCENARIOS } from "./labelRenameScenarios";
+import { MATH_SCENARIOS } from "./mathScenarios";
 import { TABLE_ROW_COLOUR_SCENARIOS } from "./tableRowColourScenarios";
 import { TABLE_TAB_HINT_SCENARIOS } from "./tableTabHintScenarios";
 
@@ -209,7 +210,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "far-right Audit column. The page itself must not widen.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-MYST-001
+    // @tests_req StRS-MDOKFSTUDIO-MYST-015
     // @tests_req SwRS-MDOKFSTUDIO-MYST-001
     id: "admonitions-dark-full",
     fixture: "02-admonition-gallery",
@@ -498,6 +499,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...TABLE_IN_CONTAINER_SCENARIOS,
   ...FRONTMATTER_CLICK_SCENARIOS,
   ...LABEL_RENAME_SCENARIOS,
+  ...MATH_SCENARIOS,
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",
@@ -699,6 +701,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "unregistered grammar that must degrade to plain monospace text.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-CODE-001
     // @tests_req SwRS-MDOKFSTUDIO-CODE-008
     id: "diff-dark-preview",
     fixture: "06-syntax-highlighting",
@@ -1365,6 +1368,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     { name: "cream", theme: "dark", mode: "cream" },
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((variant, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-MYST-005
     // @tests_req SwRS-MDOKFSTUDIO-MYST-096
     id: `myst/v${37 + index}-unclosed-directives-${variant.name}-900`,
     fixture: "64-unclosed-directives",
@@ -1381,6 +1385,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     { name: "cream", theme: "dark", mode: "cream" },
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((variant, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-MYST-005
     // @tests_req SwRS-MDOKFSTUDIO-MYST-096
     id: `myst/v${39 + index}-unclosed-fence-mid-document-${variant.name}-900`,
     fixture: "65-unclosed-fence-mid-document",

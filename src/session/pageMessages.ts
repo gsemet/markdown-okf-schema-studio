@@ -133,7 +133,7 @@ export class PageMessageDispatcher {
     }
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-027
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-021
   /**
    * A checkbox toggle the validator rejected is still answered (when it names its box and render),
    * so the box on the page never stays busy.
@@ -179,7 +179,6 @@ export class PageMessageDispatcher {
     );
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-MYST-038
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-065
   /**
    * A request of the render gate sent from an older render is answered with the out-of-date reason

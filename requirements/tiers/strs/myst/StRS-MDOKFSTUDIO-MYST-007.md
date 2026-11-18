@@ -62,6 +62,29 @@ As a Sphinx author, I want to learn about unsupported syntax before building so 
 - The configuration file is read as text and never executed.
 - The banner can be closed and does not block editing; it also appears in Restricted Mode.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor A as Sphinx author
+    participant P as Preview page
+    participant H as Extension host
+    A->>P: opens a document that uses MyST syntax
+    H->>H: reads the nearest conf.py as text, never running it
+    alt conf.py does not enable an extension the document uses
+        H-->>P: one warning per missing extension, at its first use
+        P-->>A: a one-line banner with the count, Open Problems and Close
+        opt a trusted workspace
+            H-->>A: the warnings in the Problems view
+        end
+        A->>P: clicks Open Problems
+        P->>H: asks to open the Problems view
+        H-->>A: the Problems view opens
+    else the enabled extensions are not certain
+        P-->>A: no warning
+    end
+```
+
 ### Main paths
 
 #### Path 1: Missing extensions are reported

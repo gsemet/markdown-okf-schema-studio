@@ -246,6 +246,7 @@ test("an unhighlighted block without a code element copies the pre text", () => 
   assert.deepEqual(t.posted, ["plain text"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019
 test("mousedown on the button is prevented so an open editor keeps focus", () => {
   const t = harness();
   const { code } = t.makePre("a", 100);
@@ -253,6 +254,7 @@ test("mousedown on the button is prevented so an open editor keeps focus", () =>
   assert.equal(t.button().fire("mousedown").prevented, 1);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017
 test("blocks being edited, in a block editor, or holding a diagram are skipped", () => {
   const t = harness();
   const editing = t.makePre("a", 100);
@@ -362,6 +364,7 @@ for (const shape of SHAPES) {
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019
 test("in edit mode the button click copies and neither opens nor commits an editor", () => {
   const t = harness();
   const { pre, code } = t.makePre("copy me\n", 100);
@@ -458,7 +461,7 @@ test("the button says Copied only after the host answers ok, and shows the refus
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-026
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019
 test("a click the user made carries the gesture flag, a dispatched click does not", () => {
   const t = harness();
   const { code } = t.makePre("a\n", 100);
@@ -485,4 +488,30 @@ test("P-08: scroll events within one frame place the button once, for the positi
   assert.equal(t.button().styles.get("top"), "306px");
   t.scrollEvent();
   assert.equal(t.pendingFrames(), 1, "the next scroll asks for a new frame");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+test("a second click within 1.5 s restarts the Copied confirmation from its own answer", () => {
+  const saved = reply;
+  try {
+    reply = undefined; // hold the answers
+    const t = harness();
+    const { code } = t.makePre("x\n", 100);
+    t.over(code);
+    t.button().fire("click");
+    held.at(-1)!({ ok: true });
+    assert.equal(t.button().getAttribute("aria-label"), "Copied");
+    assert.equal(t.timers.length, 1);
+
+    t.button().fire("click");
+    assert.equal(t.timers.length, 0, "the second click stops the first confirmation");
+    assert.equal(t.button().getAttribute("aria-label"), "Copy code", "nothing is claimed before the second answer");
+    held.at(-1)!({ ok: true });
+    assert.equal(t.button().getAttribute("aria-label"), "Copied");
+    assert.deepEqual(t.timers.map((timer) => timer.delay), [1500], "1.5 s from the second confirmation");
+    t.timers[0].callback();
+    assert.equal(t.button().getAttribute("aria-label"), "Copy code");
+  } finally {
+    reply = saved;
+  }
 });

@@ -78,7 +78,7 @@ function isCheckboxMarker(line: string, index: number, value: string, labels: Re
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-GFM-016
-// @implements_req SwRS-MDOKFSTUDIO-GFM-039
+// @implements_req SwRS-MDOKFSTUDIO-GFM-040
 /**
  * Replaces checkbox markers with placeholders, keeping every line break so parser line numbers
  * stay valid. `firstLine` is the one-based document line of the first line of `markdown`.

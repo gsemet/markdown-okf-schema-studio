@@ -52,7 +52,7 @@ When a `{numref}` or `{ref}` points to a figure or table without a caption, the 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Constructs the preview cannot build stay visible and labelled
 - Superseded by:
   - [SwRS-MDOKFSTUDIO-MYST-019](../myst/SwRS-MDOKFSTUDIO-MYST-019.md): Reference roles link to in-page targets
 <!-- okf:links:end -->

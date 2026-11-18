@@ -9,8 +9,8 @@ description: When a copy request carries text that is not a string or is longer
   copied.
 project: markdown-okf-schema-studio
 scope: code-blocks
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -22,14 +22,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-- src/session/features/hostRequests.ts
-tested_in_files:
-- test/core/protocol/pageToHost.test.ts
-- test/page/modules/codeCopy.test.ts
-- test/session/renderReq.codeCopy.requirements.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-CODE-019
 ---
 
 ## An invalid, oversized or gestureless copy request is refused
@@ -101,4 +98,6 @@ A request is answered by `editId` (see SwRS-MDOKFSTUDIO-TRUST-090). The shape ch
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-019](SwRS-MDOKFSTUDIO-CODE-019.md): The copy button copies the raw code and confirms it
 <!-- okf:links:end -->

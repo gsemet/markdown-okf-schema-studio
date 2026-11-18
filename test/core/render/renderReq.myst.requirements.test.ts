@@ -49,6 +49,7 @@ test("a toctree shows at most 500 entries and all of them when there are 500", a
   assert.equal(exact.length, 500);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057
 test("a toctree with :reversed: flips the entry order and keeps the written order otherwise", async () => {
   const names = ["alpha", "beta", "gamma"];
   assert.deepEqual(toctreeLabels((await renderMyst(toctree(names, ":reversed:"), context({}))).html), ["gamma", "beta", "alpha"]);

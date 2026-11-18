@@ -15,14 +15,13 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-001
+- StRS-MDOKFSTUDIO-MYST-018
 depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/render/mystBlockTransforms.ts
-- src/core/render/mystRenderer.ts
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
@@ -80,7 +79,7 @@ When a document holds a term followed by `: Definition` lines or an inline `{sub
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+  - [StRS-MDOKFSTUDIO-MYST-018](../../strs/myst/StRS-MDOKFSTUDIO-MYST-018.md): Definition lists and inline roles are typeset in the preview
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-MYST-018](SwRS-MDOKFSTUDIO-MYST-018.md): Inline roles sub, sup, abbr and kbd render
   - [SwRS-MDOKFSTUDIO-MYST-095](SwRS-MDOKFSTUDIO-MYST-095.md): Doc and download roles render as plain links

@@ -74,7 +74,7 @@ export interface RadioCharacterEdit {
   readonly replacement: "x" | " ";
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-GFM-039
+// @implements_req SwRS-MDOKFSTUDIO-GFM-041
 /**
  * The edits that select `target` among `group`: the target becomes `(x)` and every other selected
  * option `( )`. An option already in its state is left as written (`(X)` stays `(X)`), so a click on

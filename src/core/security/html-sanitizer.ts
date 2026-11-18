@@ -489,7 +489,7 @@ function rewriteNode(
     setAttr(node, "dir", "auto");
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-040
   // A mapped block is a tab stop unless it already says otherwise (a radio group's list is not).
   if (
     attr(node, "data-sphinx-source-file")

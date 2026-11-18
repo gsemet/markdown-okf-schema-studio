@@ -147,10 +147,7 @@ async function readBlocks(page: Page): Promise<{ titles: string[]; card: string[
   }));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001
-// @tests_req SwRS-MDOKFSTUDIO-MYST-100
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req StRS-MDOKFSTUDIO-MYST-016
 /** myst-blocks: version titles, the card and the tab set render in read and edit mode. */
 export async function scenarioMystBlocks(page: Page): Promise<void> {
   await logSideBarState(page, "myst-blocks");
@@ -182,13 +179,16 @@ export async function scenarioMystBlocks(page: Page): Promise<void> {
         await setPreviewMode(page, mode);
         if (shots !== undefined) await shoot(page, path.join(shots, `read-${name}.png`));
         const blocks = await readBlocks(page);
+        // @tests_req SwRS-MDOKFSTUDIO-MYST-001
         if (JSON.stringify(blocks.titles) !== JSON.stringify(["Added in version 0.47", "Changed in version 0.50", "Deprecated since version 1.0"])) {
           failures.push(`${name}: version titles ${JSON.stringify(blocks.titles)}`);
         }
+        // @tests_req SwRS-MDOKFSTUDIO-MYST-100
         const parts = blocks.card.map((part) => part.split(":")[0].replace("myst-grid-card-", ""));
         if (JSON.stringify(parts) !== JSON.stringify(["header", "title", "body", "footer"])) {
           failures.push(`${name}: card parts ${JSON.stringify(blocks.card)}`);
         }
+        // @tests_req SwRS-MDOKFSTUDIO-MYST-098
         if (JSON.stringify(blocks.tabs) !== JSON.stringify(["Python", "Node", "Shell"])) {
           failures.push(`${name}: tabs ${JSON.stringify(blocks.tabs)}`);
         }
@@ -202,6 +202,7 @@ export async function scenarioMystBlocks(page: Page): Promise<void> {
       }
       assert.deepEqual(failures, [], "version titles, the card and the tab set render in read mode");
 
+      // @tests_req SwRS-MDOKFSTUDIO-MYST-099
       // The keyboard: a click selects a tab, then arrows, Home and End move the selection and the focus.
       await setEditMode(page, false);
       await withCurrentFrame(page, (frame) => frame.locator(".myst-tab", { hasText: "Shell" }).click());

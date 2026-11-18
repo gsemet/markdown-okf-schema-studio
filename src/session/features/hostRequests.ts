@@ -151,7 +151,7 @@ export class HostRequestController {
     return scanBibKeys(documentPath, this.manager.host);
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-CODE-026
+  // @implements_req SwRS-MDOKFSTUDIO-CODE-019
   /** Writes the code to the clipboard, then answers whether it was copied (always answers). */
   private handleCopyText(preview: PreviewSession, message: PageMessageOf<"previewCopyText">): PromiseLike<void> | undefined {
     // The flag only blocks clicks dispatched by a script; a script cannot post the message itself

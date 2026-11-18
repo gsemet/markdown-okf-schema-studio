@@ -51,6 +51,7 @@ test("bare URLs in list items and table cells are links", async () => {
   ]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-001
 test("code, links, autolinks, math, emails and non-URLs stay as they are", async () => {
   const source = [
     "Code `https://example.com/code` here.",
@@ -76,6 +77,7 @@ test("code, links, autolinks, math, emails and non-URLs stay as they are", async
   assert.match(html, /user@example\.com/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-001
 test("javascript-looking and other non-http text is never linkified", async () => {
   const { html } = await renderMyst("javascript:alert(1) and data:text/html,x and ftp://example.com and vbscript:x\n");
   assert.deepEqual(anchors(html), []);
@@ -117,6 +119,7 @@ test("the source text sent to the editor keeps the raw URL", async () => {
   assert.match(result.html, /<p [^>]*data-line="1"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-001
 test("pathological URLs render in linear time", async () => {
   const closing = "https://a.b/" + ")".repeat(50_000);
   let started = Date.now();

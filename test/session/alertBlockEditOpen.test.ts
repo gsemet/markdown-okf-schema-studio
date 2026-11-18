@@ -139,7 +139,6 @@ const TWO_PARAGRAPH_ALERT = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("a click on either paragraph of a two-paragraph alert opens the whole alert, marker line to last quoted line", async () => {
   for (const text of ["The first paragraph of the note.", "The second paragraph of the note."]) {
@@ -169,7 +168,6 @@ const CONSECUTIVE_ALERTS = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("each of several consecutive alerts opens only its own lines", async () => {
   const expected: Array<[string, number, number]> = [
@@ -197,7 +195,6 @@ const ALERT_IN_LIST_ITEM = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("an alert inside a list item opens on its own indented lines, the list item indentation included", async () => {
   const opened = await openByClick(ALERT_IN_LIST_ITEM, "Its second paragraph.");
@@ -217,7 +214,6 @@ const LIST_IN_ALERT = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("a click on a list item inside an alert opens the whole alert", async () => {
   const opened = await openByClick(LIST_IN_ALERT, "second item");
@@ -225,7 +221,7 @@ test("a click on a list item inside an alert opens the whole alert", async () =>
   assert.equal(opened.originalText, LIST_IN_ALERT);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("a click on the paragraph of the second alert of the layout fixture opens that whole alert", async () => {
   const source = fs.readFileSync(LAYOUT_FIXTURE, "utf8");
   const opened = await openByClick(source, "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,\nadipisci velit, sed quia non numquam eius modi tempora incidunt.");

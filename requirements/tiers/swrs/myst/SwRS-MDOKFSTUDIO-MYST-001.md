@@ -14,7 +14,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-001
+- StRS-MDOKFSTUDIO-MYST-015
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -155,7 +155,7 @@ A GitHub alert (`> [!NOTE]`, `> **Note**`) is not an untitled admonition here: i
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+  - [StRS-MDOKFSTUDIO-MYST-015](../../strs/myst/StRS-MDOKFSTUDIO-MYST-015.md): Admonitions and context tags read as distinct callouts
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CORE-061](../rendering-core/SwRS-MDOKFSTUDIO-CORE-061.md): Render version admonitions
   - [SwRS-MDOKFSTUDIO-MYST-002](SwRS-MDOKFSTUDIO-MYST-002.md): Admonitions take an accent colour and badge by kind

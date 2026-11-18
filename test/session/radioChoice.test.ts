@@ -6,7 +6,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { MALFORMED_TOGGLE, RADIO_GONE, READ_ONLY_FILE } from "../../src/core/edits/sourceEdits";
+import { CHECKBOX_GONE, MALFORMED_TOGGLE, RADIO_GONE, READ_ONLY_FILE } from "../../src/core/edits/sourceEdits";
 import { applyTextEdits, type TextEdit } from "../../src/core/edits/textEdit";
 import { isPageToHostMessage, type PageToHostMessage } from "../../src/core/protocol/pageToHost";
 import { createMessageRouter } from "../../src/core/protocol/router";
@@ -28,9 +28,10 @@ function choice(extra: Record<string, unknown> = {}): Record<string, unknown> {
 
 /**
  * `applyWritesNothing` models a document VS Code will not change (`files.readonlyInclude`): the apply
- * resolves true and the text stays as it was. Otherwise the apply changes the text, as VS Code does.
+ * resolves true and the text stays as it was. `applyFails` models a host that refuses the edit (the
+ * apply resolves false) or fails with an error. Otherwise the apply changes the text, as VS Code does.
  */
-function controller(options: { text?: string; blockEditOpen?: boolean; applyWritesNothing?: boolean } = {}) {
+function controller(options: { text?: string; blockEditOpen?: boolean; applyWritesNothing?: boolean; applyFails?: "refuse" | Error } = {}) {
   const applied: Array<{ edits: readonly TextEdit[]; options: unknown }> = [];
   const document = { id: DOCUMENT, revision: 4, path: "/ws/plan.md", text: options.text ?? TEXT, getText: () => document.text };
   const posted: Array<Record<string, unknown>> = [];
@@ -39,6 +40,8 @@ function controller(options: { text?: string; blockEditOpen?: boolean; applyWrit
       documents: {
         applyEdits: (_document: unknown, edits: readonly TextEdit[], applyOptions: unknown) => {
           applied.push({ edits, options: applyOptions });
+          if (options.applyFails === "refuse") return Promise.resolve(false);
+          if (options.applyFails) return Promise.reject(options.applyFails);
           if (!options.applyWritesNothing) {
             document.text = applyTextEdits(document.text, edits);
             document.revision += 1;
@@ -70,7 +73,7 @@ function controller(options: { text?: string; blockEditOpen?: boolean; applyWrit
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("a radio choice is applied as one undo step that changes the old and the new option", async () => {
   const host = controller();
   await host.run(choice());
@@ -82,7 +85,7 @@ test("a radio choice is applied as one undo step that changes the old and the ne
     [["previewCheckboxResult", "checkbox-9-1", true]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("a choice of the selected option applies nothing and is answered as saved", async () => {
   const host = controller();
   await host.run(choice({ line: 3, endLine: 3 }));
@@ -90,7 +93,7 @@ test("a choice of the selected option applies nothing and is answered as saved",
   assert.equal(host.posted[0].saved, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("a choice whose group moved, or that races an open editor, is refused and changes nothing", async () => {
   const moved = controller({ text: TEXT.replace("- ( ) leave", "leave") });
   await moved.run(choice());
@@ -103,7 +106,7 @@ test("a choice whose group moved, or that races an open editor, is refused and c
   assert.equal(editing.posted[0].error, "Save or cancel the open Markdown edit before choosing an option.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("a forged choice that names the options of two groups is refused and changes nothing", async () => {
   const text = `${TEXT}\nTests:\n\n- (x) unit\n- ( ) e2e\n`;
   const host = controller({ text });
@@ -143,8 +146,8 @@ function dispatcher(options: { restrictedReads?: boolean } = {}) {
   return { session, answers, handled, dispatcher: new PageMessageDispatcher(manager as unknown as PreviewManager, router as never) };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
-// @tests_req SwRS-MDOKFSTUDIO-GFM-027
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021
 test("a malformed radio group is answered as not understood, and a restricted-reads preview takes the choice", () => {
   const gate = dispatcher();
   const malformed = [
@@ -172,7 +175,7 @@ test("a malformed radio group is answered as not understood, and a restricted-re
   assert.deepEqual(restricted.handled, ["previewCheckboxToggle"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("a choice whose apply resolves but leaves the document unchanged (a read-only file) is answered with an error, not as saved", async () => {
   const host = controller({ applyWritesNothing: true });
   await host.run(choice());
@@ -183,7 +186,7 @@ test("a choice whose apply resolves but leaves the document unchanged (a read-on
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-021
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("on a file VS Code keeps read-only, a choice and a plain checkbox toggle are answered with the read-only reason", async () => {
   const radio = controller({ applyWritesNothing: true });
   await radio.run(choice());
@@ -199,4 +202,30 @@ test("on a file VS Code keeps read-only, a choice and a plain checkbox toggle ar
   const writable = controller({ text });
   await writable.run(choice({ line: 3, endLine: 3, column: 2, checked: true, radioGroup: undefined }));
   assert.deepEqual(writable.posted.map((answer) => answer.saved), [true], "a toggle that writes is saved");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+test("the host refuses a checkbox toggle whose marker is gone, that races an open editor, or that VS Code cannot apply", async () => {
+  const text = "Tasks:\n\n- [ ] write the fix\n";
+  const toggle = choice({ line: 3, endLine: 3, column: 2, checked: true, radioGroup: undefined });
+
+  const gone = controller({ text: "Tasks:\n\n- write the fix\n" });
+  await gone.run(toggle);
+  assert.deepEqual(gone.applied, []);
+  assert.deepEqual(gone.posted.map((answer) => answer.error), [CHECKBOX_GONE]);
+
+  const editing = controller({ text, blockEditOpen: true });
+  await editing.run(toggle);
+  assert.deepEqual(editing.applied, []);
+  assert.deepEqual(editing.posted.map((answer) => answer.error), ["Save or cancel the open Markdown edit before toggling a checkbox."]);
+
+  const refused = controller({ text, applyFails: "refuse" });
+  await refused.run(toggle);
+  assert.equal(refused.applied.length, 1, "the toggle was sent to VS Code");
+  assert.deepEqual(refused.posted.map((answer) => answer.error), ["VS Code could not apply the checkbox edit."]);
+
+  const failing = controller({ text, applyFails: new Error("The file is dirty on disk.") });
+  await failing.run(toggle);
+  assert.deepEqual(failing.posted.map((answer) => answer.error), ["The file is dirty on disk."], "the edit error is the reason");
+  assert.ok(failing.posted.every((answer) => answer.saved !== true));
 });

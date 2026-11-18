@@ -66,7 +66,7 @@ export function planCheckboxToggle(text: string, line: number, column: number, c
 /** The one-character edits that move the `x` of a radio group, or no edit when nothing changes. */
 export type RadioSelectPlan = EditRefusal | { unchanged: true } | { edits: TextEdit[] };
 
-// @implements_req SwRS-MDOKFSTUDIO-GFM-039
+// @implements_req SwRS-MDOKFSTUDIO-GFM-041
 /**
  * Selects the radio option at 1-based `line`, zero-based `column` (its opening parenthesis) among
  * the options of `group`: the option becomes `(x)` and every other selected option `( )`. Each line

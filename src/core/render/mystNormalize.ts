@@ -207,7 +207,7 @@ const NODE_RULES: readonly NodeRule[] = [
     },
   },
   {
-    // @implements_req SwRS-MDOKFSTUDIO-CODE-005
+    // @implements_req SwRS-MDOKFSTUDIO-CODE-039
     // @implements_req SwRS-MDOKFSTUDIO-CODE-014
     name: "code block options",
     kinds: ["code"],
@@ -526,7 +526,6 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
       index = -1;
     }
   }
-  // @implements_req SwRS-MDOKFSTUDIO-MYST-098
   if (line !== undefined && BLOCK_TYPES.has(node.type) && node.data?.noSourceLine !== true) {
     mergeProperties(node, sourcePositionProperties(node, line));
   }

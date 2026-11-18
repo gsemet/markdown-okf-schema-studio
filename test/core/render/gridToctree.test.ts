@@ -85,6 +85,7 @@ test("the grid breakpoints inherit the last given column count", async () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100
 test("a grid-item-card renders header, body, footer and a stretched link", async () => {
   const { dom } = await render(GRID);
   const card = findElement(dom, (element) => hasClass(element, "myst-grid-card"));
@@ -110,6 +111,7 @@ test("a card title is the argument and a card without link or parts has only a b
   assert.match(textContent(card), /Only body\./u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053
 test("a grid also works with backtick fences, and grids nest inside items with colon fences", async () => {
   const source = [
     "```{grid} 1 2 2 2",
@@ -133,6 +135,7 @@ test("grid content keeps source lines for scroll sync", async () => {
   assert.match(html, /class="myst-grid"[^>]*data-line="3"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053
 test("the grid stylesheet collapses to one column in a narrow pane", () => {
   assert.match(PREVIEW_THEME_CSS, /\.myst-grid\s*\{[^}]*container-type:\s*inline-size/u);
   assert.match(PREVIEW_THEME_CSS, /@container \(min-width: \d+px\)\s*\{[^@]*\.myst-grid-row\.myst-grid-md-2/u);
@@ -173,6 +176,7 @@ test("a toctree lists links labelled by the target H1, the file name or an expli
   assert.doesNotMatch(html, /not available outside a full build/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057
 test("a hidden toctree shows no list", async () => {
   const { dom } = await render("```{toctree}\n:hidden:\n:caption: Secret\n\nintro\n```\n", DOCS);
   const nav = findElement(dom, (element) => hasClass(element, "myst-toctree"));
@@ -182,6 +186,7 @@ test("a hidden toctree shows no list", async () => {
   assert.doesNotMatch(textContent(nav), /Secret|Introduction/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057
 test("a glob entry lists the matching documents sorted", async () => {
   const { dom } = await render("```{toctree}\n:glob:\n\nchap/*\n```\n", DOCS);
   const links = findElements(dom, (element) => element.tagName === "a" && attribute(element, "href")?.startsWith("chap/") === true);
@@ -189,6 +194,7 @@ test("a glob entry lists the matching documents sorted", async () => {
   assert.deepEqual(links.map((link) => attribute(link, "href")), ["chap/a.md", "chap/b.md"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057
 test("a missing target is shown with the warning style and no link", async () => {
   const { dom } = await render("```{toctree}\n\nintro\nghost\n```\n", DOCS);
   const missing = findElements(dom, (element) => hasClass(element, "myst-toctree-missing"));
@@ -244,4 +250,22 @@ test("listGlobDocuments returns the sorted matching Markdown documents below the
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053
+test("grids nest up to 8 levels; a ninth level stays an unexpanded directive placeholder", async () => {
+  const levels = 10;
+  const fence = (level: number): string => "`".repeat(4 + levels - level);
+  const source = [
+    ...Array.from({ length: levels }, (_, level) => [`${fence(level)}{grid} 2`, ""]).flat(),
+    "Deepest text.",
+    "",
+    ...Array.from({ length: levels }, (_, index) => [fence(levels - 1 - index), ""]).flat(),
+  ].join("\n");
+  const { dom } = await render(source);
+  assert.equal(findElements(dom, (element) => hasClass(element, "myst-grid")).length, 8, "8 levels expand");
+  const placeholders = findElements(dom, (element) => hasClass(element, "myst-unresolved"));
+  assert.equal(placeholders.length, 1, "the ninth level is one placeholder");
+  assert.equal(attribute(placeholders[0], "data-line"), "17", "the placeholder keeps its source line");
+  assert.match(textContent(placeholders[0]), /\{grid\} 2[\s\S]*Deepest text\./u, "its source stays readable");
 });

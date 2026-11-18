@@ -5,10 +5,11 @@ uuid: 90675ebe-7c19-40bb-af92-107409d27763
 title: A reader reads highlighted, numbered and diff code
 description: When a writer previews a document with a fenced code block, a diff
   or patch block or a MyST code directive, the Studio SHALL show the code
-  literally, with syntax highlighting that follows the VS Code theme for a
-  supported language, distinct treatments for added and deleted lines of a diff,
-  and the line numbers, emphasized lines, file name and caption that a directive
-  sets.
+  literally, with syntax highlighting in the Dark+ colours (Light+ when the dark
+  code background setting is off) for a supported language, line numbers on a
+  block of two lines or more when the line numbers setting is on, distinct
+  treatments for added and deleted lines of a diff, and the line numbers,
+  emphasized lines, file name and caption that a directive sets.
 project: markdown-okf-schema-studio
 scope: code-blocks
 req_lifecycle: proposed
@@ -56,7 +57,7 @@ supersedes:
 
 ### Normative behavior
 
-When a writer previews a document with a fenced code block, a diff or patch block or a MyST code directive, the Studio SHALL show the code literally, with syntax highlighting that follows the VS Code theme for a supported language, distinct treatments for added and deleted lines of a diff, and the line numbers, emphasized lines, file name and caption that a directive sets.
+When a writer previews a document with a fenced code block, a diff or patch block or a MyST code directive, the Studio SHALL show the code literally, with syntax highlighting in the Dark+ colours (Light+ when the dark code background setting is off) for a supported language, line numbers on a block of two lines or more when the line numbers setting is on, distinct treatments for added and deleted lines of a diff, and the line numbers, emphasized lines, file name and caption that a directive sets.
 
 ### Preserved stakeholder intent
 
@@ -64,9 +65,33 @@ Writers need code samples to read as they would in published documentation, in t
 
 ### Rationale and constraints
 
-- Unsupported languages stay plain monospace text; the shared language list is not documented in docs/user/editing.md.
+- Unsupported languages stay plain monospace text.
+- Highlighting does not follow the VS Code theme: code uses the Dark+ colours in every preview theme, or the Light+ colours when the dark code background setting is off.
 - A diff is a visualization only: no comparison and no per-line navigation. The literal markers stay in the text.
-- Line numbers, emphasized lines, file names and captions apply to MyST code directives; plain fences are covered by the highlighted code samples.
+- Plain fences of two lines or more are numbered when the line numbers setting is on, which is the default. A MyST code directive also sets its start line, emphasized lines, file name and caption.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor R as Reader
+    participant P as Preview page
+    R->>P: opens a document with a fenced code block, a diff block or a code directive
+    alt a code block in a supported language
+        P-->>R: the code in the Dark+ colours, or Light+ when the dark code background is off
+    else an unknown or absent language
+        P-->>R: the code as plain monospace text
+    end
+    opt two lines or more, with the line numbers setting on
+        P-->>R: the lines are numbered
+    end
+    opt a diff or patch block
+        P-->>R: added and deleted lines marked in a full-width panel, markers kept
+    end
+    opt a code directive
+        P-->>R: its start line, emphasized lines, file name and caption
+    end
+```
 
 ### Main paths
 
@@ -99,7 +124,7 @@ Writers need code samples to read as they would in published documentation, in t
   - [SwRS-MDOKFSTUDIO-CODE-004](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-004.md): Leave unknown-language code as plain text
   - [SwRS-MDOKFSTUDIO-CODE-005](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-005.md): Numbered, emphasized and diff blocks are wrapped into lines
   - [SwRS-MDOKFSTUDIO-CODE-006](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-006.md): Show special characters once in highlighted code
-  - [SwRS-MDOKFSTUDIO-CODE-007](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-007.md): Code blocks use one font scale, the theme colours and scroll long lines
+  - [SwRS-MDOKFSTUDIO-CODE-007](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-007.md): Code blocks use one font scale, one box and scroll long lines
   - [SwRS-MDOKFSTUDIO-CODE-008](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-008.md): Diff blocks show additions and deletions
   - [SwRS-MDOKFSTUDIO-CODE-009](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-009.md): Colour diff file header lines like ordinary lines
   - [SwRS-MDOKFSTUDIO-CODE-010](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-010.md): Use system colours for diff lines in forced-colours mode
@@ -115,7 +140,7 @@ Writers need code samples to read as they would in published documentation, in t
   - [SwRS-MDOKFSTUDIO-CODE-036](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-036.md): Show diff blocks as a full-width square panel
   - [SwRS-MDOKFSTUDIO-CODE-037](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-037.md): Fall back to escaped text lines when a grammar fails
   - [SwRS-MDOKFSTUDIO-CODE-038](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-038.md): Colour YAML code text with the link colour in the forced white and cream themes
-  - [SwRS-MDOKFSTUDIO-CODE-039](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-039.md): Code blocks of two lines or more are numbered by a setting, never in the copied text
+  - [SwRS-MDOKFSTUDIO-CODE-039](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-039.md): Code lines are numbered and emphasized
   - [SwRS-MDOKFSTUDIO-CODE-040](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-040.md): Code blocks sit on a dark Dark+ background in every preview theme by a setting
   - [SwRS-MDOKFSTUDIO-CORE-028](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and block quotes are typeset readably
   - [SwRS-MDOKFSTUDIO-CORE-089](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-089.md): Inline code is a readable tinted pill in text, links, tables and forced themes

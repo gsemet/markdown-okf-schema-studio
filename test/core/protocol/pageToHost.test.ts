@@ -44,7 +44,7 @@ test("the shipped registry rejects an unregistered type", () => {
   assert.equal(isRegisteredPreviewMessage(valid), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-026
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019
 test("previewCopyText needs an edit id and a string; the 1 MB limit is the host's to answer", () => {
   const copy = { type: "previewCopyText", documentId: "doc", revision: 1, requestId: 1, editId: "e", text: "code", userGesture: true };
   assert.equal(isRegisteredPreviewMessage(copy), true);
@@ -139,7 +139,7 @@ test("previewPaletteModeChanged accepts only strict, gfm, myst or full", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-038
-// @tests_req SwRS-MDOKFSTUDIO-MYST-051
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045
 test("previewLabelRename validates the line and both label names", () => {
   const rename = {
     type: "previewLabelRename", documentId: "doc", revision: 1, requestId: 1, editId: "e",
@@ -428,6 +428,7 @@ test("previewPlantUmlInclude accepts an edit id of 100 characters and a from of 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-086
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081
 test("CR 050: the warning banner messages are registered with a bounded key", () => {
   const envelope = { documentId: "file:///chapter.md", revision: 3, requestId: 7 };
   assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewShowProblems" }), true);

@@ -23,7 +23,7 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-193
   // @implements_req SwRS-MDOKFSTUDIO-GFM-021
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-041
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-069
   const applyContentPatch: ContentPatch["applyContentPatch"] = (message) => {
     const main = document.getElementById?.("sphinx-myst-preview-content");

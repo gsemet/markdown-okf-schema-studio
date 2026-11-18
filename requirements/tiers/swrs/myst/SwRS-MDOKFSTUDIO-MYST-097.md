@@ -17,7 +17,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-005
+- StRS-MDOKFSTUDIO-CORE-001
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -28,7 +28,7 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## EARS Expression
+## Code fences and front matter are read the same way everywhere
 
 ### Normative behavior
 
@@ -65,5 +65,5 @@ When the extension reads a Markdown source to render it, to anchor a review comm
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
 <!-- okf:links:end -->

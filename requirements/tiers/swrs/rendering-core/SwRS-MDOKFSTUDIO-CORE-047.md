@@ -54,7 +54,7 @@ When a document holds a `{cite}` role, the extension SHALL render an unresolved 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
-  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Constructs the preview cannot build stay visible and labelled
 - Superseded by:
   - [SwRS-MDOKFSTUDIO-CORE-022](SwRS-MDOKFSTUDIO-CORE-022.md): Build-dependent constructs show an inert placeholder with a warning
 <!-- okf:links:end -->

@@ -17,9 +17,7 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-depends_on:
-- SwRS-MDOKFSTUDIO-TRUST-052
-- SwRS-MDOKFSTUDIO-TRUST-065
+depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -75,23 +73,8 @@ When a live preview shows a document with extension warnings in a trusted worksp
 - WHEN the watcher fires
 - THEN nothing re-renders
 
-### Scenario (nominal): The warning banner opens the Problems view
-Message type previewShowProblems (page to host): the envelope fields only (documentId, revision, requestId), no further field. See SwRS-MDOKFSTUDIO-TRUST-052 for the envelope and SwRS-MDOKFSTUDIO-TRUST-065 for the document gate.
-- GIVEN a preview showing a document with warnings
-- WHEN the page posts previewShowProblems for the shown document
-- THEN the host opens the Problems view; opening it edits nothing, so an untrusted preview is allowed
-
-### Scenario (refusal): A malformed or mismatched previewShowProblems is ignored
-| Input | Outcome |
-| --- | --- |
-| previewShowProblems without the envelope | not a registered message; ignored, no handler runs |
-| previewShowProblems whose documentId is not the shown document | dropped by the document gate; the Problems view is not opened |
-
 ### Verification notes
 - Method: test/integration/mystDiagnostics.test.ts (suite run() and runUntrusted(): entries, underline, clamp, untrusted, replacement and removal, conf.py watcher and ignored paths)
-- Method: test/core/protocol/pageToHost.test.ts (previewShowProblems registered; the envelope is required)
-- Method: test/session/trustReq.requirements.test.ts (previewShowProblems handled for the shown document and dropped for another one)
-- Method: test/page/modules/warningBanner.test.ts (the banner posts previewShowProblems with the envelope)
 - Criteria: Entries are tied to a live preview. The event order of a conf.py change before or after the open does not matter. The controller has no unit test of its own (integration only).
 
 <!-- okf:links:start -->
@@ -101,9 +84,6 @@ Message type previewShowProblems (page to host): the envelope fields only (docum
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
-- Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
-  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-MYST-079](SwRS-MDOKFSTUDIO-MYST-079.md): Problems entries are replaced and removed
   - [SwRS-MDOKFSTUDIO-MYST-080](SwRS-MDOKFSTUDIO-MYST-080.md): conf.py changes update the previews they govern

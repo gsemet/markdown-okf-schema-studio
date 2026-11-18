@@ -5,7 +5,8 @@ uuid: f7c2af3c-c6f3-4fd8-bd4f-f42a097d548d
 title: A writer toggles task checkboxes from the preview
 description: When a writer clicks a checkbox in the preview, the Studio SHALL
   change only that checkbox in the source as one undoable step, or refuse with a
-  reason when the preview is stale or the file is read-only in VS Code.
+  reason when the preview is stale or the file is read-only in VS Code, each
+  refusal returning the box to its previous state.
 project: markdown-okf-schema-studio
 scope: gfm
 req_lifecycle: proposed
@@ -33,7 +34,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-GFM-027
 - SwRS-MDOKFSTUDIO-GFM-028
 - SwRS-MDOKFSTUDIO-GFM-039
-- SwRS-MDOKFSTUDIO-TRUST-005
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -41,7 +41,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer clicks a checkbox in the preview, the Studio SHALL change only that checkbox in the source as one undoable step, or refuse with a reason when the preview is stale or the file is read-only in VS Code.
+When a writer clicks a checkbox in the preview, the Studio SHALL change only that checkbox in the source as one undoable step, or refuse with a reason when the preview is stale or the file is read-only in VS Code, each refusal returning the box to its previous state.
 
 ### Preserved stakeholder intent
 
@@ -50,6 +50,25 @@ Writers and reviewers expect to tick a task checkbox without opening an editor, 
 ### Rationale and constraints
 
 - A toggle is refused while an edit is open, when the preview is out of date, and for a file that VS Code holds read-only; the box then returns to its previous state.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant P as Preview page
+    participant H as Extension host
+    W->>P: clicks a task checkbox
+    P->>H: asks to toggle that checkbox
+    alt the preview is current, no edit is open and the file is writable
+        H->>H: changes only the character between the brackets, as one undo step
+        H-->>P: saved
+        P-->>W: the box keeps its new state and the preview refreshes once
+    else an edit is open, the preview is stale or the file is read-only
+        H-->>P: refused, with its reason
+        P-->>W: the box returns to its previous state and the reason shows next to it
+    end
+```
 
 ### Main paths
 
@@ -65,16 +84,6 @@ Writers and reviewers expect to tick a task checkbox without opening an editor, 
 3. The source holds [x] for the task
    - SwRS-MDOKFSTUDIO-BLOCK-058: the edit is one undo step and the preview refreshes once
 4. The checkbox is shown ticked
-
-#### Path 2: Choose a radio option
-
-1. A list holds consecutive items that start with '( )' or '(x)'
-   - SwRS-MDOKFSTUDIO-GFM-039: the page renders them as one radio group
-   - Option SwRS-MDOKFSTUDIO-GFM-039 (boundary): only consecutive items form a group
-2. The items are shown as a radio group
-   - SwRS-MDOKFSTUDIO-GFM-039: a click on an unselected option writes '(x)' on it and '( )' on the previous one, as one undo step
-   - Option SwRS-MDOKFSTUDIO-GFM-039 (refusal): an open editor or a refused choice writes nothing
-3. The chosen option is selected
 
 <!-- okf:links:start -->
 ### Links
@@ -96,7 +105,6 @@ Writers and reviewers expect to tick a task checkbox without opening an editor, 
   - [SwRS-MDOKFSTUDIO-GFM-027](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-027.md): The host validates checkbox toggle messages
   - [SwRS-MDOKFSTUDIO-GFM-028](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-028.md): Content patches clear pending toggles
   - [SwRS-MDOKFSTUDIO-GFM-039](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-039.md): Radio choice lists render as a radio group and a click moves the selection in the source
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply

@@ -39,7 +39,7 @@ test("the leading word of the fence label, lower-cased, selects the grammar; an 
   assert.match(rendered, /<code class="language-,"[^>]*>x = 1\n<\/code>/u, "the block stays plain");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-005
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039
 test("numbered, emphasized and diff blocks are wrapped into lines, and an unknown language gets no shiki class", () => {
   const numbered = highlightCodeBlocks(
     block('class="language-wobblescript" data-myst-line-numbers="true"', "one\ntwo\n"),
@@ -74,6 +74,7 @@ test("inline code is never highlighted; only pre and code pairs are processed", 
   assert.doesNotMatch(html.slice(0, inline.length), /shiki|sd-/u, "the inline code has no token spans");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001
 test("a block the highlighter cannot process falls back to escaped lines when wrapped and to the original otherwise", () => {
   // A language that is registered but whose grammar throws is simulated by forcing the grammar call to fail.
   const highlighter = getHighlighter();
@@ -96,6 +97,7 @@ test("a block the highlighter cannot process falls back to escaped lines when wr
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001
 test("a markdown fence shows its table, link and inner fence as literal text", async () => {
   const source = [
     "| a | b |",

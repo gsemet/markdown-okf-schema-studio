@@ -229,7 +229,6 @@ function classifyDiffLines(lines: readonly string[]): DiffLineKind[] {
   });
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-CODE-005
 // @implements_req SwRS-MDOKFSTUDIO-CODE-039
 /**
  * One block span per line. Each line keeps its own newline, so the text of the block is the source

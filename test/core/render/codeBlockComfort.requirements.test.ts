@@ -75,7 +75,7 @@ test("a MyST code-block numbers and emphasizes lines whatever the setting says: 
   assert.deepEqual(lines.map((line) => hasClass(line, "myst-code-line-emphasized")), [false, true, false]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040
 test("the page policy allows neither WebAssembly nor inline styles, and the highlighted markup needs neither", async () => {
   const policy = createContentSecurityPolicy("vscode-webview:", "nonce");
   assert.doesNotMatch(policy, /wasm-unsafe-eval|unsafe-eval|unsafe-inline/u);
@@ -84,7 +84,7 @@ test("the page policy allows neither WebAssembly nor inline styles, and the high
   assert.doesNotMatch(html, /style=/u, "a token carries a colour class, never a style attribute");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040
 test("the highlighter runs without WebAssembly (strict CSP) and writes no inline style", () => {
   const module = path.resolve(__dirname, "../../../src/core/render/highlight.js");
   const script = `

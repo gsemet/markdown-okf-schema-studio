@@ -87,7 +87,7 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-041
   /**
    * The page guards of every toggle: a valid source position, no toggle of the
    * control still waiting, no open editor. A refused click is prevented (the browser undoes it).
@@ -112,7 +112,7 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-041
   /**
    * The press on a radio option, before the browser moves the focus: with an editor open, the
    * focus stays in it (no blur, so no commit, and the caret is kept). The click that follows is
@@ -182,7 +182,7 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
     }
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-041
   /**
    * Selects a radio option: the page shows it at once and asks the host to move the `x` of the group.
    * The only selected option is left alone (nothing to write); with two selected options in the
@@ -223,7 +223,7 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
     return step === 0 ? undefined : options[(index + step + options.length) % options.length];
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-041
   /** The keys of a focused radio option: the arrows only move the focus, Space and Enter select. */
   function handleRadioKey(event: KeyboardEvent): void {
     const radio = event.target instanceof Element ? event.target.closest(RADIO_SELECTOR) : undefined;
@@ -244,7 +244,7 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
     (next as HTMLElement).focus?.();
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-041
   function keepRadioFocus(): (() => void) | undefined {
     const active = document.activeElement;
     const radio = active instanceof Element ? active.closest(RADIO_SELECTOR) : null;

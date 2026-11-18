@@ -91,7 +91,7 @@ const isFindReplaceItem = (item: unknown): boolean => {
 /** Most options one radio group request names. */
 const MAX_RADIO_GROUP_OPTIONS = 256;
 
-// @implements_req SwRS-MDOKFSTUDIO-GFM-039
+// @implements_req SwRS-MDOKFSTUDIO-GFM-041
 /**
  * The options of a radio choice: 2 to 256 distinct source positions, the clicked one among them,
  * and a request that selects (never clears) the clicked option.
@@ -232,13 +232,13 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-016
   previewFrontmatterSave: stateMessage("previewFrontmatterSave", (message) => message.frontmatterAction === "remove"
     || Object.prototype.hasOwnProperty.call(message, "fieldValue")),
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-027
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-021
   previewCheckboxToggle: stateMessage("previewCheckboxToggle", (message) => Number.isSafeInteger(message.column)
     && (message.column as number) >= 0
     && typeof message.checked === "boolean"
     && message.line === message.endLine
     && (message.radioGroup === undefined || isRadioGroup(message))),
-  // @implements_req SwRS-MDOKFSTUDIO-CODE-026
+  // @implements_req SwRS-MDOKFSTUDIO-CODE-019
   // Raw code of a code block, copied to the clipboard by the host.
   // The size limit is the host's to answer (`previewCopyTextResult`); the shape check only keeps
   // a message of absurd size out of the host.
@@ -261,7 +261,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
   // The palette mode select of the edition palette: strict, GFM or MyST buttons (workspace state).
   previewPaletteModeChanged: (message) => isOneOf(message.mode, PALETTE_MODES),
-  // @implements_req SwRS-MDOKFSTUDIO-MYST-051
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-045
   // Rename of a MyST label from its anchor icon: the source line of `(oldName)=` and both names.
   previewLabelRename: (message) => isSourceLine(message.line)
     && isValidLabelName(message.oldName) && isValidLabelName(message.newName),

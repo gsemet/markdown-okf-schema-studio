@@ -16,7 +16,7 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
-- StRS-MDOKFSTUDIO-MYST-001
+- StRS-MDOKFSTUDIO-MYST-017
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -90,7 +90,7 @@ When a document contains a raw HTML table, the extension SHALL rebuild it from a
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
-  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+  - [StRS-MDOKFSTUDIO-MYST-017](../../strs/myst/StRS-MDOKFSTUDIO-MYST-017.md): Figures and tables show as the source sizes and shapes them
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CORE-056](../rendering-core/SwRS-MDOKFSTUDIO-CORE-056.md): Rebuild raw HTML tables from an allow-list
   - [SwRS-MDOKFSTUDIO-GFM-032](SwRS-MDOKFSTUDIO-GFM-032.md): Raw table styles keep a sanitized subset

@@ -69,6 +69,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-089
 - SwRS-MDOKFSTUDIO-GFM-029
 - SwRS-MDOKFSTUDIO-LIFE-094
+- SwRS-MDOKFSTUDIO-MYST-097
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-CORE-004
@@ -180,6 +181,7 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-CORE-089](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-089.md): Inline code is a readable tinted pill in text, links, tables and forced themes
   - [SwRS-MDOKFSTUDIO-GFM-029](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
   - [SwRS-MDOKFSTUDIO-LIFE-094](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-094.md): Blocks changed by another tool glow briefly
+  - [SwRS-MDOKFSTUDIO-MYST-097](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-097.md): Code fences and front matter are read the same way everywhere
 - Supersedes:
   - [StRS-MDOKFSTUDIO-CORE-004](StRS-MDOKFSTUDIO-CORE-004.md): Read text in any script and direction
 <!-- okf:links:end -->

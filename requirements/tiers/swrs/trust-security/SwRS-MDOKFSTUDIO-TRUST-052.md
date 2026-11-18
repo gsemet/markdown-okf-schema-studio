@@ -96,11 +96,11 @@ When the host receives a value from the page, it SHALL hand it to a handler only
 | previewEditOpen with editId e1, line 3 and endLine 5 | accepted |
 | the same message with endLine 2 | refused (endLine is not before line) |
 | the same message without editId | refused (editId is non-empty) |
-| previewEditSave, previewEditCancel or previewCheckboxToggle with the same shape | the same outcome (see SwRS-MDOKFSTUDIO-GFM-027 for the extra checkbox fields) |
+| previewEditSave, previewEditCancel or previewCheckboxToggle with the same shape | the same outcome (see SwRS-MDOKFSTUDIO-GFM-021 for the extra checkbox fields) |
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-GFM-027: the host validates checkbox toggle messages (line equal to endLine, a non-negative integer column and a boolean state)
+- SwRS-MDOKFSTUDIO-GFM-021: the host validates checkbox toggle messages (line equal to endLine, a non-negative integer column and a boolean state)
 
 ### Verification notes
 

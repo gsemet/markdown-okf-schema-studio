@@ -320,7 +320,7 @@ test("keeps deferred relative navigation inert and host-routable", () => {
   assert.match(result.html, /href="#"[^>]+data-sphinx-preview-navigation="chapter-two\.md"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("a mapped block that already carries a tabindex keeps it, so a radio group list stays out of the Tab order", () => {
   const result = rewriteSphinxHtml(
     '<html><body><ul role="radiogroup" tabindex="-1" data-sphinx-source-file="/workspace/active.md" data-sphinx-source-line="3" data-sphinx-preview-block="list">'
@@ -448,7 +448,7 @@ test("table styles share the colour grammar and refuse every injection shape", (
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-034
-test("span style keeps only hex and rgb colour and background-color as data attributes", () => {
+test("span style keeps only named, hex, rgb and hsl colour and background-color as data attributes", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
   const policy = new ResourcePolicy([{ label: "output", directory: output }]);

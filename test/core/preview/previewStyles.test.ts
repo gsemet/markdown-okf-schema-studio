@@ -378,7 +378,7 @@ test("MyST table alignment and notebook output placeholders are styled", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-007
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039
 test("MyST numbered and emphasized code lines are styled", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -1449,4 +1449,31 @@ test("CR147: the side-by-side cards are two columns, switch off with the page at
   assert.match(css, /\[data-okf-sbs-word="removed"\] \{[^}]*text-decoration: line-through;/u);
   assert.match(css, /\[data-okf-sbs-word="added"\] \{[^}]*text-decoration: underline;/u);
   assert.match(css, /html\[data-okf-incoming-changes="false"\] \[data-sphinx-preview-sbs-toggle\] \{\s*display: none;/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-007
+test("code blocks use one font scale, one box, and scroll a long line only when it does not fit", () => {
+  const rule = (selector: string): string => {
+    const start = PREVIEW_THEME_CSS.indexOf(`\n${selector} {`);
+    assert.ok(start >= 0, `the rule ${selector} exists`);
+    return PREVIEW_THEME_CSS.slice(start, PREVIEW_THEME_CSS.indexOf("}", start));
+  };
+  assert.match(rule("#sphinx-myst-preview-content :where(code, pre, samp, kbd)"), /font-size: 0\.92em;/u);
+  const block = rule("#sphinx-myst-preview-content pre");
+  for (const declaration of [
+    "border: 1px solid var(--sphinx-preview-border);",
+    "border-radius: 4px;",
+    "background: var(--studio-textCodeBlock-background",
+    "color: var(--studio-editor-foreground, inherit);",
+    "overflow-x: auto;",
+  ]) {
+    assert.ok(block.includes(declaration), `the block declares ${declaration}`);
+  }
+  const code = rule("#sphinx-myst-preview-content pre > code");
+  for (const declaration of ["padding: 0;", "border: 0;", "background: none;", "font-size: 1em;"]) {
+    assert.ok(code.includes(declaration), `the inner code has no box of its own: ${declaration}`);
+  }
+  // A block nested in a directive keeps the same box: its own rule changes only the spacing and wrapping.
+  const nested = rule("#sphinx-myst-preview-content .myst-directive pre");
+  assert.doesNotMatch(nested, /border|background|font-size|color/u);
 });

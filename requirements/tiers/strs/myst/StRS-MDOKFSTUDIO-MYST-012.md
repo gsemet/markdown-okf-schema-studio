@@ -40,6 +40,22 @@ As a writer, I want to see the document tree I declared so that I can catch miss
 
 - Documents that do not exist are marked, not silently dropped.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant P as Preview page
+    W->>P: writes a table of contents directive
+    loop each document it names
+        alt the document exists
+            P-->>W: a link labelled by its title, first heading or file name
+        else the document is missing
+            P-->>W: warned text without a link
+        end
+    end
+```
+
 ### Main paths
 
 #### Path 1: A table of contents

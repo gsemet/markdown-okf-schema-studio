@@ -231,6 +231,15 @@ test("a label before a heading keeps one element with the id and adds the icon i
   assert.equal(textContent(heading).trim(), "Heading");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019
+test("a reference to a labelled heading shows the heading text, without the anchor icon", async () => {
+  const { html } = await renderPalette("(intro)=\n# Getting started\n\nSee {ref}`intro`.");
+  const links = findElements(html, (element) => element.tagName === "a" && attribute(element, "href") === "#intro");
+  assert.equal(links.length, 1);
+  assert.equal(textContent(links[0]).trim(), "Getting started");
+  assert.equal(findElements(links[0], (element) => hasClass(element, "okf-anchor")).length, 0, "the link holds no anchor icon");
+});
+
 test("a label before a list or at the end of the document renders its own anchor row", async () => {
   const { html } = await renderPalette("(items)=\n- a\n- b\n\n(last)=");
   const anchors = findElements(html, (element) => hasClass(element, "okf-anchor"));

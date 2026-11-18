@@ -10,8 +10,8 @@ description: When the host receives a previewCheckboxToggle message, the
   refusal.
 project: markdown-okf-schema-studio
 scope: gfm
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -24,14 +24,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-- src/session/pageMessages.ts
-tested_in_files:
-- test/core/protocol/pageStateMessages.test.ts
-- test/session/checkboxRefusal.test.ts
-- test/session/radioChoice.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-GFM-021
 ---
 
 ## The host validates checkbox toggle messages
@@ -92,4 +89,6 @@ When the host receives a previewCheckboxToggle message, the extension SHALL acce
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-021](SwRS-MDOKFSTUDIO-GFM-021.md): Clicking a checkbox toggles one source character
 <!-- okf:links:end -->

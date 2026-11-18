@@ -70,6 +70,8 @@ test("an edit that is its own undo step goes through the visible editor, with un
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("an own undo step without a visible editor, and a plain edit, go through a workspace edit", async () => {
   const { store, document, window, editor, workspaceEdits, editorEdits } = setup();
   const view = store.of(document as never);

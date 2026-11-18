@@ -18,6 +18,7 @@ test("colours tokens for a registered grammar", () => {
   assert.match(html, /<span class="sd-b5cea8 sl-08764d">1<\/span>/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001
 test("resolves the fence label through aliases", () => {
   const html = highlightCodeBlocks('<pre><code class="language-py">x = "value"\n</code></pre>');
   assert.match(html, /<span class="sd-ce9178 sl-a31515">"value"<\/span>/u);
@@ -86,7 +87,7 @@ test("renders diff and patch fences with signed-line treatments", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-005
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039
 test("wraps numbered lines without breaking multiline highlighted spans", () => {
   const html = highlightCodeBlocks(
     '<pre><code class="language-python" data-myst-line-numbers="true"'
@@ -101,6 +102,7 @@ test("wraps numbered lines without breaking multiline highlighted spans", () => 
   assert.equal((html.match(/<\/span>/gu) ?? []).length, (html.match(/<span\b/gu) ?? []).length);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001
 test("leaves an unregistered grammar as plain text", () => {
   const source = '<pre><code class="language-wobblescript">depot :: promote\n</code></pre>';
   assert.equal(highlightCodeBlocks(source), source);

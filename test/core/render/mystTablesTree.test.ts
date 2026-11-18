@@ -4,7 +4,6 @@ import { test } from "node:test";
 import { renderMyst } from "../../../src/core/render/mystRenderer";
 import { needsHtmlTablePass } from "../../../src/core/render/mystTables";
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-008
 test("a pipe table gets its source lines from the syntax tree, with no second parse of the HTML", async () => {
   // A parse and serialize of the written HTML would rewrite `-->` as `--&gt;`.
   const { html } = await renderMyst("a --> b\n\n| x | y |\n|---|---|\n| 1 | 2 |\n");
@@ -13,7 +12,6 @@ test("a pipe table gets its source lines from the syntax tree, with no second pa
   assert.match(html, /<table data-line="3" data-end-line="5">/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-008
 test("aligned columns and list-tables still go through the HTML pass", async () => {
   const aligned = await renderMyst("| x | y |\n|:--|--:|\n| 1 | 2 |\n");
   assert.match(aligned.html, /<th align="left">x<\/th>/u);
@@ -25,7 +23,6 @@ test("aligned columns and list-tables still go through the HTML pass", async () 
   assert.doesNotMatch(listTable.html, /<p data-line/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-008
 test("only list-tables, raw HTML tables and aligned columns need the HTML pass", () => {
   assert.equal(needsHtmlTablePass([]), false);
   assert.equal(needsHtmlTablePass([undefined, { columns: [undefined, undefined], sourceLine: 1 }]), false);

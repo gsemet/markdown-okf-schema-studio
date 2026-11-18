@@ -9,4 +9,9 @@
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-001 — #sphinx-myst-preview-content .myst-mermaid-diagram
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-023 — #sphinx-myst-preview-content .myst-plantuml-diagram
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-032 — #sphinx-myst-preview-content .myst-plantuml-error
+// @implements_req SwRS-MDOKFSTUDIO-CODE-007 — font-size: 0.92em
+// @implements_req SwRS-MDOKFSTUDIO-CODE-008 — #sphinx-myst-preview-content .myst-diff-line-addition
+// @implements_req SwRS-MDOKFSTUDIO-CODE-014 — #sphinx-myst-preview-content .myst-code-filename
+// @implements_req SwRS-MDOKFSTUDIO-MYST-098 — #sphinx-myst-preview-content .myst-tab-set
+// @implements_req SwRS-MDOKFSTUDIO-MYST-100 — #sphinx-myst-preview-content .myst-card
 export {};

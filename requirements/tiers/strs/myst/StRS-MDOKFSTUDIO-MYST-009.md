@@ -6,7 +6,8 @@ title: A writer sees, links and renames labels safely
 description: When a document defines a label or links to a heading, figure,
   table, equation or label with a reference role, the Studio SHALL show an
   anchor icon next to the label target and a link whose target is visible, and
-  apply a rename from the anchor as one undoable edit or explain why it refuses.
+  apply a rename from the anchor as one undoable edit that tells the writer how
+  many references still use the old name, or explain why it refuses.
 project: markdown-okf-schema-studio
 scope: myst
 req_lifecycle: proposed
@@ -39,8 +40,6 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-051
 - SwRS-MDOKFSTUDIO-MYST-090
 - SwRS-MDOKFSTUDIO-MYST-094
-- SwRS-MDOKFSTUDIO-TRUST-005
-- SwRS-MDOKFSTUDIO-TRUST-065
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-MYST-004
@@ -51,7 +50,7 @@ supersedes:
 
 ### Normative behavior
 
-When a document defines a label or links to a heading, figure, table, equation or label with a reference role, the Studio SHALL show an anchor icon next to the label target and a link whose target is visible, and apply a rename from the anchor as one undoable edit or explain why it refuses.
+When a document defines a label or links to a heading, figure, table, equation or label with a reference role, the Studio SHALL show an anchor icon next to the label target and a link whose target is visible, and apply a rename from the anchor as one undoable edit that tells the writer how many references still use the old name, or explain why it refuses.
 
 ### Preserved stakeholder intent
 
@@ -62,6 +61,28 @@ Writers want to see where each cross-reference points so that they can spot brok
 - The anchor is shown only for labels that exist in the document.
 - Targets that cannot be resolved without a project build are shown as written rather than hidden.
 - A refused rename tells the writer why and leaves the document unchanged.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant P as Preview page
+    participant H as Extension host
+    W->>P: writes a label and a reference role to it
+    P-->>W: a faint anchor icon at the label target
+    P-->>W: an in-page link that shows the target text or the given text
+    W->>P: in edit mode, clicks the anchor icon and types a new name
+    P->>H: asks to rename the label
+    alt the label is still on its line and no edit is open
+        H->>H: changes only the label text, as one undo step
+        H-->>P: renamed, with the count of references that still use the old name
+        P-->>W: the new name and the count
+    else a stale, malformed or blocked rename
+        H-->>P: refused, with its reason
+        P-->>W: the reason, and the document is unchanged
+    end
+```
 
 ### Main paths
 
@@ -82,8 +103,8 @@ Writers want to see where each cross-reference points so that they can spot brok
    - Option SwRS-MDOKFSTUDIO-MYST-038 (refusal): an invalid name is not sent
    - Option SwRS-MDOKFSTUDIO-BLOCK-041 (nominal): an open block editor makes the label rename refused with its reason
 2. The Rename label popover is open
-   - SwRS-MDOKFSTUDIO-MYST-051: the page posts the rename with a source line, two valid names and the current render, and the host answers with the same edit id
-   - Option SwRS-MDOKFSTUDIO-MYST-051 (refusal): a malformed or stale message
+   - SwRS-MDOKFSTUDIO-MYST-045: the page posts the rename with a source line, two valid names and the current render, and the host answers with the same edit id
+   - Option SwRS-MDOKFSTUDIO-MYST-045 (refusal): a malformed or stale message
 3. The host holds a valid rename
    - SwRS-MDOKFSTUDIO-MYST-045: the host changes only the `(old)=` text of the stated line, as one undo step
    - Option SwRS-MDOKFSTUDIO-MYST-045 (refusal): a line that is no longer `(old)=` changes nothing
@@ -114,8 +135,6 @@ Writers want to see where each cross-reference points so that they can spot brok
   - [SwRS-MDOKFSTUDIO-MYST-051](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-051.md): The label rename message is validated and answered
   - [SwRS-MDOKFSTUDIO-MYST-090](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-090.md): The rename field closes itself after 5 seconds
   - [SwRS-MDOKFSTUDIO-MYST-094](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-094.md): A label starting with underscore, dot or hyphen cannot be renamed
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
-  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 - Supersedes:

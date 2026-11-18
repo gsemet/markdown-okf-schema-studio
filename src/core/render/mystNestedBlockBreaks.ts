@@ -41,7 +41,7 @@ function rewrite(node: MystNode): void {
   node.children = children;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-MYST-101
+// @implements_req SwRS-MDOKFSTUDIO-MYST-096
 /** Turns every `+++` line below a root child into text; the root's own breaks stay. */
 export function textifyNestedBlockBreaks(root: MystNode): void {
   for (const child of root.children ?? []) rewrite(child);

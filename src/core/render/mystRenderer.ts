@@ -542,8 +542,6 @@ const HTML_PASSES: ReadonlyArray<{ readonly name: string; readonly run: (html: s
 
 // @implements_req SwRS-MDOKFSTUDIO-CORE-001
 // @implements_req SwRS-MDOKFSTUDIO-CORE-071
-// @implements_req SwRS-MDOKFSTUDIO-GFM-008
-// @implements_req SwRS-MDOKFSTUDIO-MYST-017
 /**
  * Renders one Markdown buffer to HTML entirely in-process.
  *

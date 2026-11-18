@@ -726,11 +726,6 @@ ${gridColumnCss()}
 }
 `;
 
-// @implements_req SwRS-MDOKFSTUDIO-MYST-100
-// @implements_req SwRS-MDOKFSTUDIO-MYST-098
-// @implements_req SwRS-MDOKFSTUDIO-CODE-007
-// @implements_req SwRS-MDOKFSTUDIO-CODE-008
-// @implements_req SwRS-MDOKFSTUDIO-CODE-014
 /**
  * Rendered blocks: inline images, label anchors, figures, admonitions, code and highlighting,
  * diagrams, tables, project-only placeholders, grids, toctrees and math.

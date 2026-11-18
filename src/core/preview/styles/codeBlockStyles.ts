@@ -15,8 +15,6 @@ const LIGHT_SCOPES = [
   `${DARK_OFF}[data-sphinx-preview-theme-mode="current"] body:is(.vscode-light, .vscode-high-contrast-light) ${CONTENT} code.shiki`,
 ];
 
-// @implements_req SwRS-MDOKFSTUDIO-CODE-001
-// @implements_req SwRS-MDOKFSTUDIO-CODE-005
 // @implements_req SwRS-MDOKFSTUDIO-CODE-039
 // @implements_req SwRS-MDOKFSTUDIO-CODE-040
 /**

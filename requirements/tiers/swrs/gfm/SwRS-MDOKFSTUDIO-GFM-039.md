@@ -11,8 +11,8 @@ description: When a list holds at least two consecutive items that start with '(
   one undo step.
 project: markdown-okf-schema-studio
 scope: gfm
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -27,25 +27,12 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/edits/sourceEdits.ts
-- src/core/protocol/pageToHost.ts
-- src/core/render/checkboxMarkers.ts
-- src/core/render/radioGroups.ts
-- src/core/render/radioMarkers.ts
-- src/core/security/html-sanitizer.ts
-- src/page/features/checkboxes.ts
-- src/page/features/contentPatch.ts
-- src/session/features/sourceEdits.ts
-tested_in_files:
-- test/core/edits/radioSelect.test.ts
-- test/core/render/radioGroups.test.ts
-- test/integration/radioChoice.test.ts
-- test/page/runtimeRadioGroups.test.ts
-- test/security/html-policy.test.ts
-- test/session/radioChoice.test.ts
-- test/visual/radioPlanScenarios.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-GFM-040
+- SwRS-MDOKFSTUDIO-GFM-041
 ---
 
 ## Radio choice lists render as a radio group and a click moves the selection in the source
@@ -131,4 +118,7 @@ The choice takes the path of the checkbox toggle (SwRS-MDOKFSTUDIO-GFM-021): the
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-040](SwRS-MDOKFSTUDIO-GFM-040.md): A radio choice list renders as a radio group
+  - [SwRS-MDOKFSTUDIO-GFM-041](SwRS-MDOKFSTUDIO-GFM-041.md): Choosing an option moves the (x)
 <!-- okf:links:end -->

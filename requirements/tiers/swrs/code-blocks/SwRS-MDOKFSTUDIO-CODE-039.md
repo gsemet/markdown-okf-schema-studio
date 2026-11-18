@@ -2,13 +2,13 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-CODE-039
 uuid: aec194c7-4660-4df1-a161-b71c787d1eef
-title: Code blocks of two lines or more are numbered by a setting, never in the
-  copied text
+title: Code lines are numbered and emphasized
 description: When a code block of two lines or more is shown and the setting
   preview.codeBlocks.lineNumbers is on, the extension SHALL number its lines
   with generated content that neither the copy button nor a selection picks up,
   and SHALL number a MyST code block with the linenos or lineno-start option
-  whatever the setting says.
+  from its start value whatever the setting says, emphasizing the lines listed
+  in its emphasize-lines option.
 project: markdown-okf-schema-studio
 scope: code-blocks
 req_lifecycle: proposed
@@ -24,22 +24,29 @@ implemented_in_files:
 - src/core/configuration/settingsRegistry.ts
 - src/core/preview/styles/codeBlockStyles.ts
 - src/core/render/highlight.ts
+- src/core/render/mystNormalize.ts
 - src/page/pageSettings.ts
 tested_in_files:
 - test/core/preview/codeBlockStyles.test.ts
+- test/core/preview/previewStyles.test.ts
 - test/core/render/codeBlockComfort.requirements.test.ts
+- test/core/render/highlight.test.ts
+- test/core/render/mystFeatures.test.ts
+- test/core/render/renderReq.codeBlocks.requirements.test.ts
 - test/page/modules/codeCopy.test.ts
 - test/page/pageSettings.test.ts
 - test/security/package-contract.test.ts
 - test/visual/codeBlockComfortScenarios.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-005
 ---
 
-## Code blocks of two lines or more are numbered by a setting, never in the copied text
+## Code lines are numbered and emphasized
 
 ### Normative behavior
 
-When a code block of two lines or more is shown and the setting preview.codeBlocks.lineNumbers is on, the extension SHALL number its lines with generated content that neither the copy button nor a selection picks up, and SHALL number a MyST code block with the linenos or lineno-start option whatever the setting says.
+When a code block of two lines or more is shown and the setting preview.codeBlocks.lineNumbers is on, the extension SHALL number its lines with generated content that neither the copy button nor a selection picks up, and SHALL number a MyST code block with the linenos or lineno-start option from its start value whatever the setting says, emphasizing the lines listed in its emphasize-lines option.
 
 ### Scenario (nominal): A block of two lines or more is numbered
 
@@ -67,14 +74,28 @@ When a code block of two lines or more is shown and the setting preview.codeBloc
 - WHEN the preview renders it with the setting off
 - THEN its lines are numbered from 10 whatever the setting says and the second line is emphasized
 
+### Scenario (nominal): A MyST code directive numbers and emphasizes lines
+
+- GIVEN a `{code}`, `{code-block}` or `{code-cell}` with `:linenos:`, `:lineno-start: 10` and `:emphasize-lines: 2`
+- WHEN the preview renders it
+- THEN lines are numbered from 10 and the second line is emphasized
+
+### Scenario (refusal): Invalid directive values fall back
+
+- GIVEN a directive with `:lineno-start: abc` and `:emphasize-lines: 2,x`
+- WHEN the preview renders it
+- THEN numbering starts at 1 and the invalid emphasis entry is ignored
+
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-CODE-005: wraps numbered, emphasized and diff blocks into lines
+- SwRS-MDOKFSTUDIO-CODE-001: highlights fenced code and shows its text literally
 - SwRS-MDOKFSTUDIO-CODE-019: copies the raw code of a block
 - SwRS-MDOKFSTUDIO-CODE-040: draws code blocks on the dark background
 
 ### Verification notes
 
+- Internal: each line of a numbered, emphasized or diff block, and of every block of two lines or more, is wrapped in its own line element that ends with its own newline, so the text of the block is the source text; a block in an unknown language is wrapped too and keeps no `shiki` class, a diff block keeps its highlight class (test/core/render/renderReq.codeBlocks.requirements.test.ts, test/core/render/highlight.test.ts: numbered and emphasized lines without broken multiline spans).
+- Method: test/core/render/mystFeatures.test.ts (MyST directive numbering, start value, emphasis and invalid values)
 - Method: test/core/render/codeBlockComfort.requirements.test.ts (wrapping and automatic marker by block size and language, text of a wrapped block, MyST options in the markup)
 - Method: test/core/preview/codeBlockStyles.test.ts (numbers as generated, unselectable content, gated by the setting attribute, MyST option rules not gated)
 - Method: test/page/modules/codeCopy.test.ts (copied text of automatically numbered blocks), test/page/pageSettings.test.ts (setting attribute) and test/security/package-contract.test.ts (setting schema)
@@ -87,4 +108,6 @@ When a code block of two lines or more is shown and the setting preview.codeBloc
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-005](SwRS-MDOKFSTUDIO-CODE-005.md): Numbered, emphasized and diff blocks are wrapped into lines
 <!-- okf:links:end -->

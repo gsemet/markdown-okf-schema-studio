@@ -218,7 +218,7 @@ function variantsOf(base: Record<string, unknown>): Record<string, unknown>[] {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
-// @tests_req SwRS-MDOKFSTUDIO-GFM-027
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
