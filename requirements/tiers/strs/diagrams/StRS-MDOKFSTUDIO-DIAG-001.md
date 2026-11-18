@@ -14,10 +14,10 @@ scope: diagrams
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-17T19:27:51+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-17T19:27:51+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -69,22 +69,37 @@ Writers expect a Mermaid diagram written in a fence or a directive to appear as 
 
 ### Rationale and constraints
 
-- Reading: a `mermaid` fence and a `{mermaid}` directive both produce the diagram; the source is kept in a collapsed "Diagram source" disclosure and the picture is labelled "Mermaid diagram".
-- The picture is drawn at its natural size, never enlarged, and scaled down to the content width with no minimum scale and no zoom. Known issue: a wide diagram can end up with small labels. In the auto width mode a wide diagram may use the wider column; that rule is owned by the width mode. Known issue: a PlantUML figure qualifies through the generic figure selector of the width mode, not through an entry of its own.
-- While a diagram is edited in the preview it is hidden until the editor closes. Known issue: there is no live preview of the diagram being edited.
-- The renderer is loaded only when the document holds a Mermaid diagram, from the extension bundle and under the page's Content Security Policy; appearing or disappearing Mermaid reloads the whole page instead of patching it in place.
-- The picture is inert: scripts and links inside the diagram do nothing. Page tools leave diagrams alone: no code copy button is added and no review quote is wrapped inside a diagram.
-- Known issue: a diagram with empty text is skipped and left blank, with no message.
-- Theme: node, text, border, line and background colours come from the preview theme variables; the diagrams are drawn again when the theme mode changes (dark, white, cream, light), labels kept.
-- When a theme variable is missing or is a CSS system colour keyword such as `Canvas`, built-in fallback colours are used and the diagram stays readable. Edge labels keep a contrast of at least 4.5:1 in the dark, light and fallback themes.
-- A theme change that leaves the colours as they were draws nothing again. Evidence for the redraw is limited to dark, white and cream in the visual check; light and custom VS Code themes rely on the same observer.
-- Typing: unchanged diagrams stay drawn after a content patch and new or changed ones are drawn after it. A diagram whose node was replaced but whose source and theme colours are the same reuses the earlier drawing; the 64 most recent drawings are kept.
-- Diagrams are drawn one pass at a time in document order, and a late result for a theme that was replaced meanwhile is dropped.
-- Failure: the message reads "Unable to render Mermaid diagram. Its source remains available below." and sits above the diagram; a collapsed "Show the parser error" section holds the parser's reason as plain text, never HTML; the message uses the theme error colour.
-- However many times the theme changes, the invalid diagram keeps exactly one message and one details section; the earlier one is replaced.
-- Known issue: a failed Mermaid diagram posts no diagnostic to the status line or the Problems list, because the drawing happens in the page.
-- Insert: the "Mermaid" button (GitHub group of the edition palette, tooltip "Mermaid diagram") and the "/Mermaid" slash entry (aliases diagram, chart, graph, flowchart) insert a fenced `mermaid` flowchart set apart after the selection, with its first label "Start" selected.
-- Only the GFM palette mode offers it: not Strict, not MyST, and no `{mermaid}` directive button exists.
+- Reading: a `mermaid` fence and a `{mermaid}` directive both produce the diagram, with its source in a collapsed "Diagram source" disclosure. The picture is drawn at its natural size, never enlarged, and scaled down to the content width.
+- The renderer is loaded only when the document holds a Mermaid diagram, from the extension bundle and under the page's Content Security Policy.
+- The picture is inert: scripts and links inside the diagram do nothing. Page tools leave diagrams alone, and a diagram being edited in the preview is hidden until the editor closes.
+- Theme: the colours come from the preview theme variables and the diagrams are drawn again when the theme mode changes; when a variable is missing a built-in fallback keeps the diagram readable.
+- Typing: unchanged diagrams stay drawn after a content patch and only new or changed ones are drawn.
+- Failure: one message says the diagram could not be drawn and a collapsed section holds the parser's reason as plain text, never HTML; the source stays available.
+- Insert: the "Mermaid" button and the "/Mermaid" slash entry insert a starter flowchart fence, in the GFM palette mode only.
+- Message strings, limits and known issues are in the SwRS of each behaviour.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant E as Editor
+    participant P as Preview page
+    participant M as Mermaid renderer
+    W->>E: picks Mermaid in the palette or the slash menu
+    E-->>W: starter flowchart fence
+    W->>P: previews the document
+    P->>M: draw the fence in the theme colours
+    alt valid syntax
+        M-->>P: picture sized to the content width
+        P-->>W: picture with its source one click away
+    else invalid syntax
+        M-->>P: parser reason
+        P-->>W: message with the reason on demand, source kept
+    end
+    W->>P: changes the theme
+    P->>M: draw again in the new colours
+```
 
 ### Main paths
 
