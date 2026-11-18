@@ -11,10 +11,10 @@ scope: rendering-core
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-17T19:27:51+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-17T19:27:51+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -89,13 +89,32 @@ Writers need to read their Markdown as formatted text, at any length, while they
 - Covers headings, lists, quotes, inline code, images and long documents. The rendering is the same in every palette mode.
 - Covers Japanese, Chinese, Korean, Hebrew and Arabic text and long unbreakable words such as long URLs, which wrap inside the preview column instead of scrolling sideways.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant E as VS Code editor
+    participant H as Extension host
+    participant P as Preview page
+    W->>E: types in the Markdown file
+    E->>H: the buffer changes
+    H->>H: cancel the older render and render the unsaved text
+    H->>P: sanitized update
+    P->>P: patch the changed blocks
+    P-->>W: the preview shows the blocks
+    Note over E,P: another tool, an undo or a redo changes the text
+    E->>H: the text changes
+    H->>P: update
+    P-->>W: the changed blocks glow briefly
+```
+
 ### Main paths
 
 #### Path 1: Edit and see the preview follow
 
 1. A Markdown file is open beside its preview
    - SwRS-MDOKFSTUDIO-CORE-001: the buffer changes and the extension renders the unsaved text completely
-   - Option SwRS-MDOKFSTUDIO-CORE-001 (refusal): the render is refused when trust is required
 2. The preview shows the unsaved text
    - SwRS-MDOKFSTUDIO-LIFE-094: another tool, an undo or a redo changes the text and the updated blocks glow briefly
 3. The updated blocks glow briefly
