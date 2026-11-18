@@ -13,10 +13,10 @@ scope: block-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-18T10:55:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-18T10:55:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -64,10 +64,39 @@ As a writer, I click a paragraph, heading, list, admonition, code block or image
 - A click on a list item edits the list that holds it; a click on a comment chip, an open thread or a properties table cell keeps its own action.
 - An outline shows which element a click would edit, and Enter or Space on a focused block does the same as a click.
 - In reading mode the same click reveals the source line instead of editing.
-- Included blocks are never selected, moved, copied, cut or pasted next to; the refusals are listed under the use case about refused edits.
+- Included blocks are never selected, moved, copied, cut or pasted next to.
 - The rendered block stays hidden while its editor is open and comes back when the editor closes.
 - The text box has no spell check or auto-correction, grows with its text and uses a monospace font.
-- The editor of the first block of a document stays clear of the floating toolbar; the spacing values and the clearance rules are specified under layout and width, and this use case covers which editors count as the first-block editor.
+- The editor of the first block of a document stays clear of the floating toolbar.
+
+### Use case diagram
+
+Clicking a block in edit mode and editing its Markdown in place.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Preview
+    participant VSCode as VS Code
+    participant File
+    Writer->>Preview: clicks a rendered block in edit mode
+    Preview-->>Writer: frame in place of the block, line range and keys
+    Preview->>VSCode: open the lines of the block
+    alt block from an included file
+        VSCode->>File: reads the include directive of the edited document
+    else block of the edited document
+        VSCode->>File: reads the lines of the block
+    end
+    VSCode-->>Preview: raw Markdown of the block
+    Preview-->>Writer: text box with the caret at the clicked word
+    alt Done
+        Writer->>Preview: Done
+        Preview->>VSCode: save the text
+    else Cancel
+        Writer->>Preview: Cancel
+        Preview-->>Writer: the rendered block comes back unchanged
+    end
+```
 
 ### Main paths
 
