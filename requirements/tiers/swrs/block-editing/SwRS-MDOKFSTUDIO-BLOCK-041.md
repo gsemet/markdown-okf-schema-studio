@@ -15,9 +15,6 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-003
-- StRS-MDOKFSTUDIO-FMEDIT-001
-- StRS-MDOKFSTUDIO-GFM-003
-- StRS-MDOKFSTUDIO-MYST-009
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -161,9 +158,6 @@ The page refuses with the open editor's status line unless the row says otherwis
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
-  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
-  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
-  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-FMEDIT-002](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-002.md): A field editor does not open while another editor is open
   - [SwRS-MDOKFSTUDIO-FMEDIT-058](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-058.md): Refresh is blocked while a field editor is open

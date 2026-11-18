@@ -18,7 +18,6 @@ user_need: As a writer, I swap a block or a selected run of blocks with its
   neighbour with one click on an arrow or one key press, also while I edit the
   block, keep typing at the same place, and can undo it with one undo.
 derived_by:
-- SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-BLOCK-109
 - SwRS-MDOKFSTUDIO-BLOCK-117
 - SwRS-MDOKFSTUDIO-BLOCK-124
@@ -32,6 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-065
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
+- SwRS-MDOKFSTUDIO-BLOCK-058
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -112,7 +112,6 @@ sequenceDiagram
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
   - [SwRS-MDOKFSTUDIO-BLOCK-109](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-109.md): The up and down arrows of an insert point move its block
   - [SwRS-MDOKFSTUDIO-BLOCK-117](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-117.md): The host swaps two blocks in one edit and keeps their separators
   - [SwRS-MDOKFSTUDIO-BLOCK-124](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-124.md): Moves and clipboard edits are refused for ranges that do not match the document
@@ -126,4 +125,5 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
 <!-- okf:links:end -->
