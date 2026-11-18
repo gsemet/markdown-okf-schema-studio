@@ -13,13 +13,16 @@ scope: diagrams
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-17T19:27:51+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-17T19:27:51+01:00'
 origin: native
 tier: StRS
 derives_from: []
+depends_on:
+- SwRS-MDOKFSTUDIO-DIAG-009
+- SwRS-MDOKFSTUDIO-DIAG-129
 user_need: As a writer, I get PlantUML pictures right after installing the
   extension, also in Restricted Mode, and learn why a diagram has no picture and
   what to change instead of seeing a blank block.
@@ -75,18 +78,31 @@ Writers expect PlantUML to work from the first preview, without Java, Graphviz, 
 
 ### Rationale and constraints
 
-- Reading: `plantuml` fences and `{plantuml}` or `{uml}` directives with a body produce a diagram labelled "PlantUML diagram", with the source in a collapsed "Diagram source" disclosure. The `@startuml` wrapper is the writer's; the extension adds none.
-- The default engine is bundled and runs in the preview page: it starts no process, reads no executable or JAR, sends nothing over the network, and works in Restricted Mode. Its script is loaded only when the page has a PlantUML diagram and runs under the unchanged Content Security Policy.
-- Pictures use light text on a dark preview and dark text on a light one, decided from the page background; a switch between light and dark draws every diagram again. The picture is inert and is centred and contained in the content width.
-- The bundled `!theme` library and the OpenIconic `<&icon>` sprites work offline. Known issue: class-like diagrams use PlantUML's own Smetana layout instead of Graphviz, so some layouts differ from the JAR output.
-- The engine ships pinned to an exact version of `@plantuml/core` (versions before 1.2026.6 are GPL) and its licence is packaged with it. An engine upgrade can change drawing output.
-- Typing: bundled-engine pictures are kept by source, include base and light/dark variant (64 most recent); results with a refused include, or with an unsupported directive in an included file, are not kept and are asked again next time. Known issue: a plain engine failure (for example a syntax error) is kept until the source or the variant changes. The engine draws one diagram at a time, and a render superseded by a newer one of the same element does not overwrite it.
-- After a content patch only the diagrams without a render state are drawn. Known issue: the page-side event wiring and the 64-entry eviction have no unit test; only the visual campaign covers them.
-- Failure: a diagram using `!includeurl`, `!include https://...`, a `!include` of a standard-library name in angle brackets, `!includedef`, `!import` or `!theme ... from` shows one message naming the directive and its line, and the JAR option hint. The engine does not run. The directive is matched at line start only; one placed after text on a line falls under the generic failure message.
-- The engine's loaders refuse standard-library bundles, optional scripts such as emoji, a `!theme` read from a folder, any local file when no host is connected, and a URL or library directive inside an included file; nothing is fetched. An emoji refusal appears as the generic failure message.
-- When the engine fails (syntax error or exception) the diagram reads "The built-in PlantUML engine could not render this diagram: followed by the reason", the reason as plain text without a Java-style class prefix, with the JAR option hint, no picture, and the source kept. Known issue: no diagnostic reaches the status line; only the picture area shows the message.
-- A source longer than 1 MiB is refused before the engine runs with "The PlantUML source exceeds the 1 MiB preview limit."
-- Known issue: a diagram with empty source is skipped and left blank.
+- Reading: `plantuml` fences and `{plantuml}` or `{uml}` directives produce a diagram, with the source in a collapsed "Diagram source" disclosure. The `@startuml` wrapper is the writer's.
+- The default engine is bundled and runs in the preview page: it starts no process, reads no executable or JAR, sends nothing over the network, and works in Restricted Mode. Its script is loaded only when the page has a PlantUML diagram, under the unchanged Content Security Policy.
+- Pictures follow the light or dark variant of the preview, are inert and stay inside the content width.
+- The engine is pinned to an exact version of `@plantuml/core`, because earlier versions are GPL, and its licence is packaged with it.
+- Typing: unchanged diagrams are kept and not drawn again; a result that was refused, or superseded by a newer render, is never shown in place of it.
+- Failure: a refused directive (URL, library, `theme ... from`) shows one message naming the directive and its line, and a failed or oversized source shows its cause; both give the JAR option hint, no picture, and keep the source.
+- Limits, exact messages and known issues are in the SwRS of each behaviour.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant P as Preview page
+    participant G as Built-in PlantUML engine
+    W->>P: previews a document with a PlantUML fence
+    P->>G: draw it, with no Java and no network
+    alt drawn
+        G-->>P: picture in the light or dark variant
+        P-->>W: picture
+    else refused or failed
+        G-->>P: cause
+        P-->>W: message with the cause and the JAR option, source kept
+    end
+```
 
 ### Main paths
 
@@ -144,6 +160,9 @@ Writers expect PlantUML to work from the first preview, without Java, Graphviz, 
   - [SwRS-MDOKFSTUDIO-DIAG-112](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-112.md): Unsupported directives never reach the engine or the host
   - [SwRS-MDOKFSTUDIO-DIAG-115](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-115.md): A theme switch between light and dark redraws built-in diagrams
   - [SwRS-MDOKFSTUDIO-DIAG-119](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-119.md): PlantUML pictures are centred
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-009](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-009.md): Diagrams are drawn once per source and theme and late results are dropped
+  - [SwRS-MDOKFSTUDIO-DIAG-129](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-129.md): A diagram renderer script loads only when the page holds a figure of its engine
 - Supersedes:
   - [StRS-MDOKFSTUDIO-DIAG-008](StRS-MDOKFSTUDIO-DIAG-008.md): Understand why a bundled PlantUML diagram is not drawn
   - [StRS-MDOKFSTUDIO-DIAG-010](StRS-MDOKFSTUDIO-DIAG-010.md): Keep PlantUML pictures in place while typing
