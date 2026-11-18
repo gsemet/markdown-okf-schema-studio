@@ -13,13 +13,15 @@ scope: block-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-18T10:55:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-18T10:55:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
+depends_on:
+- SwRS-MDOKFSTUDIO-BLOCK-041
 user_need: As a writer, I trust that every change I make from the preview lands
   on the lines I meant, reverts with one undo and keeps the line endings of my
   document, or is refused with a reason, never landing on the wrong text; I am
@@ -84,7 +86,30 @@ As a writer, I trust that every change I make from the preview lands on the line
 - A change is never half-applied.
 - The text a writer typed stays in the editor when a save is refused.
 - Autosaves of one session merge into one undo step in a text editor that shows the file; moves, cuts and pastes use explicit undo stops.
-- Known issue (deduced from the code, not run): a multi-line block of a CRLF document may have its second save refused (see SwRS-MDOKFSTUDIO-BLOCK-234).
+
+### Use case diagram
+
+An edit from the preview reaching the file, or refused with a reason.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Preview
+    participant VSCode as VS Code
+    participant File
+    Writer->>Preview: saves a block, moves, cuts or pastes blocks
+    Preview->>VSCode: change with the shown revision and line ranges
+    alt stale revision, ranges off, included block or other edit open
+        VSCode-->>Preview: refusal with a reason
+        Preview-->>Writer: reason shown, typed text and clipboard kept
+    else change fits the current text
+        VSCode->>File: one edit, line endings kept, one undo step
+        VSCode-->>Preview: one render of the changed file
+    else VS Code does not apply the edit
+        VSCode-->>Preview: VS Code could not apply, with the reason
+        Preview-->>Writer: reason shown, file unchanged
+    end
+```
 
 ### Main paths
 
@@ -147,4 +172,6 @@ As a writer, I trust that every change I make from the preview lands on the line
   - [SwRS-MDOKFSTUDIO-TRUST-059](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
   - [SwRS-MDOKFSTUDIO-TRUST-064](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-064.md): Flush and editor watch messages are addressed by their own id
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 <!-- okf:links:end -->
