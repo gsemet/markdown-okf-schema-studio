@@ -23,6 +23,7 @@ implemented_in_files:
 - src/page/modules/headingFold.ts
 tested_in_files:
 - test/page/modules/headingFold.test.ts
+- test/visual/capture_toolbar_checks.py
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -51,11 +52,10 @@ When the browser find reaches text inside a folded section, or the page navigate
 
 ### Verification notes
 
-### Verification notes
-
 - Method: test/page/modules/headingFold.test.ts (reveal unfolds the sections around a block and leaves the others folded, returns false when nothing was folded; the beforematch event unfolds the section).
 - Criteria: after the reveal no block between the opened heading and the target carries data-okf-folded.
-- Boundary: the browser find and the scroll to the target are not driven in a unit test; the real-window run of CR 143 covers a table-of-contents jump.
+- Method: test/visual/capture_toolbar_checks.py, check_find_opens_folded_section on toolbar-navigation/v06 to v21 (The browser find opens the section: with every section folded, a text fragment #:~:text= on a phrase of a hidden block runs Chromium's own find-in-page, which fires beforematch; the block loses data-okf-folded and hidden, its heading is open and the block is in view).
+- Boundary: Playwright cannot type into the browser's find bar (Cmd/Ctrl+F) and window.find() fires no beforematch, so the text fragment stands for it; the fixture has one section, so which sections stay folded is the unit test's; the real-window run of CR 143 covers a table-of-contents jump.
 
 <!-- okf:links:start -->
 ### Links

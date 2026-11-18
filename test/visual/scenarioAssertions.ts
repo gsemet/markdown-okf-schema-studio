@@ -725,6 +725,7 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
     ...viewport,
     scroll: { kind: "top" as const },
     ...(state === "collapsed" ? { toolbarState: "collapsed" as const } : {}),
+    toolbarPlaceChecks: true,
     description: `Floating toolbar, ${state}, ${mode ?? theme} theme, ${viewport.width} px pane: row 1 Refresh, `
       + "Edit, Export and the collapse button; row 2 Anchor, Theme, Back, Next; row 3 Width, Fold, Zoom -, Zoom +; row 4 TOC, Side-by-side, Diff, Comments. "
       + (state === "collapsed" ? "Rows 2 to 4 are hidden." : "No row overlaps the text or another row."),

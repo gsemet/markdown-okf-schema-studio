@@ -1,5 +1,23 @@
 # Update Log
 
+## 2026-11-18
+
+### Garden the requirements of toolbar-navigation and lifecycle-sync (CR 346, round 4)
+
+- Tested, verification notes updated: SwRS-TOOLBAR-001 (all 16 tooltips equal to their titles, the tooltip on
+  keyboard focus, the 12 px and 14 px offsets and the text covered by the toolbar), 054 (the render gate of
+  previewHistoryGo, and Back and Next follow only the current render), 090 (a malformed escape is blocked as
+  undecodable), 094 (a relative link below the second root opens), 120 (the initial state, and a pairing of
+  another document, revision or request is ignored), 030 (Scroll to the end), 006 (the browser find opens a
+  folded section, driven by a text fragment; the duplicated "Verification notes" heading is removed). No
+  normative change.
+- Changed: the TOOLBAR-129 and 130 markers of `propertiesStyles.ts` each sit on its own part of the
+  reduced-motion rule (the tooltip selectors, the rows rule); `PREVIEW_THEME_CSS` is byte-identical.
+- Tests: `test/core/preview/toolbarReq.requirements.test.ts`, `test/page/toolbarReq.runtime.requirements.test.ts`,
+  `test/session/toolbarReq.requirements.test.ts`, `test/session/previewNavigator.test.ts`,
+  `test/core/navigation/previewNavigation.test.ts`, `test/visual/capture_toolbar_checks.py` (scenarios
+  toolbar-navigation/v03 and v06 to v21).
+
 ## 2026-11-17
 
 ### Garden the requirements of toolbar-navigation and lifecycle-sync (CR 346, round 1)

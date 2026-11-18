@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/modules/toolbarReq.requirements.test.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_page_checks.py
+- test/visual/capture_toolbar_checks.py
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -69,7 +70,7 @@ When the band changes its height or the page updates it after a layout change, t
 ### Verification notes
 - Method: test/page/modules/toolbarReq.requirements.test.ts (Deep allowance and Width changes: the reading offset only grows for a width and starts again when the width changes).
 - Method: test/page/runtimeScroll.test.ts (Layout changes with the band and Same heading: caps sticky heading convergence at three passes).
-- Method: test/visual/capture_page_checks.py (Random scrolling stress run through stress_sticky_heading_scroll on scenario toolbar-navigation/v03-sticky-depth-3-oscillation-dark-900; Scroll to the end is not measured separately).
+- Method: test/visual/capture_page_checks.py (Random scrolling stress run through stress_sticky_heading_scroll on scenario toolbar-navigation/v03-sticky-depth-3-oscillation-dark-900; Scroll to the end through check_scroll_at_end in test/visual/capture_toolbar_checks.py on the same scenario: at the end, 20 wheel steps down leave the page at the end and the band makes no scrollTo call).
 - Criteria: readingOffset = max(policy offset for the depth, largest band height at this width, visible band bottom); no more than three measure passes per update; lateCorrections <= 2 and |after - before| <= 2.
 
 <!-- okf:links:start -->
