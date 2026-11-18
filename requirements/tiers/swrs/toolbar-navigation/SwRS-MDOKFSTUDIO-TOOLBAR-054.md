@@ -37,6 +37,7 @@ tested_in_files:
 - test/core/protocol/pageToHost.test.ts
 - test/integration/previewHistory.test.ts
 - test/page/runtimePageControls.test.ts
+- test/page/toolbarReq.runtime.requirements.test.ts
 - test/session/toolbarReq.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
@@ -110,7 +111,7 @@ When the page starts, the page receives a history state for its render or the re
 - Method: test/integration/previewHistory.test.ts (State enables: history.posted states).
 - Method: test/visual/scenarioDefinitions2.ts (State enables: scenario toolbar-navigation/v30-back-enabled-after-anchor-light-900, Back enabled and Next disabled).
 - Method: test/session/toolbarReq.requirements.test.ts (Nowhere to go: Back with nowhere to go only posts the history state again; Document cannot be opened: a Back or Next that cannot open its document shows a warning).
-- Method: test/page/runtimePageControls.test.ts (a previewHistoryState of another document version is ignored; the other document and request rows are by code only) and test/core/protocol/pageToHost.test.ts (previewHistoryGo accepts only back or forward); the render gate of previewHistoryGo (pageMessages.ts) is untested.
+- Method: test/page/runtimePageControls.test.ts (a previewHistoryState of another document version is ignored) and test/core/protocol/pageToHost.test.ts (previewHistoryGo accepts only back or forward); test/session/toolbarReq.requirements.test.ts (A history state of another render: a previewHistoryGo that names another document, revision or request is refused by the render gate, posts nothing and leaves the history where it is; the current render's move goes back).
 - Criteria: both buttons are disabled before the first previewHistoryState; disabled = (value !== true); exactly one message per press with the right direction; postHistoryState is called and no document is opened; host.ui.showWarning is called with the text and the error message.
 
 <!-- okf:links:start -->

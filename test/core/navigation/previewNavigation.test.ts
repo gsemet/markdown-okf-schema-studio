@@ -59,6 +59,17 @@ test("a link path is decoded once: a literal percent is reachable, an escaped pe
   assert.equal(classifyPreviewReference("%5Csecret").kind, "blocked");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+test("a link with a malformed escape is blocked as undecodable, like a decoded backslash or NUL", () => {
+  for (const request of ["a%zz.md", "docs/%E0%A4%A.md", "%5Csecret", "%00.md"]) {
+    assert.deepEqual(
+      classifyPreviewReference(request),
+      { kind: "blocked", reason: "The navigation target could not be decoded safely." },
+      request,
+    );
+  }
+});
+
 test("a MyST (label)= line is the target of its fragment, but not inside a fence", () => {
   const source = "```md\n(shown)=\n```\n\n(intro)=\nA paragraph.\n\n(a.b:c_d-1)=\n- item\n";
   assert.deepEqual(markdownFragmentRange(source, "#intro"), { startLine: 5, endLine: 5 });

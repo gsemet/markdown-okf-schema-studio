@@ -35,10 +35,12 @@ implemented_in_files:
 - src/page/features/anchorMode.ts
 - src/session/features/scrollSync.ts
 tested_in_files:
+- test/core/preview/toolbarReq.requirements.test.ts
 - test/core/protocol/pageStateMessages.test.ts
 - test/integration/previewEditing.test.ts
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeScroll.test.ts
+- test/page/toolbarReq.runtime.requirements.test.ts
 - test/session/toolbarReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -132,9 +134,10 @@ When the reader presses the enabled Anchor button, or the page learns whether a 
 - Method: test/page/runtimeScroll.test.ts (the mode and the button: restores saved editor anchoring when the configured preference changed)
 - Method: test/integration/previewEditing.test.ts (the switch, previewAnchorModeChanged false, then true)
 - Method: test/session/toolbarReq.requirements.test.ts (turning the mode on and off: turning the anchor mode on aligns the preview with the text editor)
-- Method: the initial state is untested (markup of the toolbar)
+- Method: test/core/preview/toolbarReq.requirements.test.ts (Initial state: the Anchor button of the markup is in the off mode, aria-pressed false, with the off title, and not disabled)
 - Criteria: disabled = (pairedTextEditor === false); the three attributes follow the mode; syncEditorToPreview runs for the mode on only.
-- Method: test/page/runtimePageControls.test.ts (T38 a paired preview keeps the anchor button enabled, and a foreign previewPairing is ignored; the own-document case is T38 an unpaired preview disables the anchor button and a previewPairing message re-enables it; the other version and request rows are by code only)
+- Method: test/page/runtimePageControls.test.ts (T38 a paired preview keeps the anchor button enabled, and a foreign previewPairing is ignored; the own-document case is T38 an unpaired preview disables the anchor button and a previewPairing message re-enables it)
+- Method: test/page/toolbarReq.runtime.requirements.test.ts (Foreign document and Own document: a pairing of another document, revision or request leaves the button as it is, both ways; a pairing of the page's own render disables it with the off title, then enables it again)
 - Criteria: The host-message filter drops messages whose identifiers differ.
 - Method: test/core/protocol/pageStateMessages.test.ts (both scenarios: the page-state validators accept exactly what the frozen validator accepted)
 - Criteria: typeof anchorToEditor === boolean.

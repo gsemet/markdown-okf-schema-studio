@@ -28,8 +28,10 @@ implemented_in_files:
 - src/core/preview/styles/pageChromeStyles.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
+- test/core/preview/toolbarReq.requirements.test.ts
 - test/visual/capture_final_checks.py
 - test/visual/capture_layout_checks.py
+- test/visual/capture_toolbar_checks.py
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -91,9 +93,11 @@ anchor rather than moving left by half the label width.
 
 ### Verification notes
 - Method: test/core/preview/previewStyles.test.ts, `toolbar tooltips stay opaque and anchored even on disabled controls` checks that disabled-button opacity applies only to the SVG and that the shared tooltip visibility rule adds no translation.
-- Method: test/core/preview/previewStyles.test.ts (Writable preview: the preview toolbar has four rows of four buttons, with Export to HTML after Edit in the main row, and the Tab order of the 16 buttons; Every button has a tooltip: it counts 16 data-tooltip attributes and compares the title and tooltip pair of the Refresh, Anchor and Edit buttons and the start of the Theme button, equality for all 16 buttons is not asserted; Tooltip: the tooltip rule takes its content from data-tooltip, hidden by default and visible on hover and focus-visible; Scrolling: position fixed and z-index 1100 of the toolbar; the 12 px and 14 px offsets and the covering of scrolled text are untested).
+- Method: test/core/preview/previewStyles.test.ts (Writable preview: the preview toolbar has four rows of four buttons, with Export to HTML after Edit in the main row, and the Tab order of the 16 buttons; Every button has a tooltip: it counts 16 data-tooltip attributes and compares the title and tooltip pair of the Refresh, Anchor and Edit buttons and the start of the Theme button; Tooltip: the tooltip rule takes its content from data-tooltip, hidden by default and visible on hover and focus-visible; Scrolling: position fixed and z-index 1100 of the toolbar).
+- Method: test/core/preview/toolbarReq.requirements.test.ts (Every button has a tooltip: each of the 16 buttons has data-tooltip equal to its title, also where the aria-label differs; Tooltip on keyboard focus: one rule shows the bubble for hover and focus-visible, and no focus rule has colours of its own; Scrolling: the toolbar rule is position fixed, 12 px from the top, 14 px from the end, z-index 1100).
 - Method: test/visual/capture_layout_checks.py (Visual order on toolbar-navigation/v06 to v21: row names, button counts, Tab order, expanded width equal to the collapsed width when row 1 is full and at most 134 px; the Export to HTML control of the main row; Rows stay inside the pane through check_preview_toolbar_rows: rows, overlap, left edge, zoom 70 and 200; the 16 scenarios differ only in theme, width and collapse state; the 460 px width is covered by the sticky band scenarios only).
-- Method: test/visual/capture_final_checks.py (Every button has a tooltip: label per control; Tooltip on hover through check_tooltip_contrast, run on every visual scenario, which hovers the Refresh button; the keyboard case follows from the shared CSS rule and is not measured).
+- Method: test/visual/capture_final_checks.py (Every button has a tooltip: label per control; Tooltip on hover through check_tooltip_contrast, run on every visual scenario, which hovers the Refresh button; the keyboard case follows from the shared CSS rule).
+- Method: test/visual/capture_toolbar_checks.py, check_toolbar_place_and_focus on toolbar-navigation/v06 to v21 (Every button has a tooltip: data-tooltip equals title on the 16 live buttons; Tooltip on keyboard focus: Shift+Tab from Edit reaches Refresh with focus-visible, and its bubble shows "Refresh preview" visible at opacity 1 in the colours of the hover bubble; Scrolling: the toolbar box is 12 px from the top and 14 px from the end of the pane at the top and after a scroll, and at a 360 px width a line of text scrolled under the toolbar is under its box for the pointer, the toolbar on top).
 - Criteria: The markup holds 16 buttons in four rows with the listed controls; the visual probe reports the same rows and Tab order; every button has data-tooltip equal to title; ::after content is attr(data-tooltip) with visibility visible and opacity 1 on hover and focus-visible; contrast ratio >= 4.5, content not none, opacity not 0; no two rows overlap (0.5 px tolerance), left is 0 or more and right is at most the pane width at both zoom limits; the toolbar is position fixed, 12 px from the top and 14 px from the end, with z-index 1100.
 
 <!-- okf:links:start -->

@@ -123,6 +123,8 @@ export interface Scenario {
   previewThemeMode?: "white" | "cream" | "dark";
   /** P8: leave the floating toolbar collapsed (rows 2 to 4 hidden) for the checks and the capture. */
   toolbarState?: "collapsed";
+  /** Check the toolbar's place, the text it covers, its tooltip on keyboard focus and the browser find in a folded section. */
+  toolbarPlaceChecks?: boolean;
   stickyHeadingDepth?: number;
   expectedStickyHeadings?: string;
   expectedContentWidth?: number;

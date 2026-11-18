@@ -46,6 +46,34 @@ test("searches every workspace root and blocks cross-root wikilink ambiguity", a
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-094
+test("a relative link that resolves below the second folder of the workspace opens", async () => {
+  const parent = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "studio-second-root-")));
+  try {
+    const firstRoot = path.join(parent, "first");
+    const secondRoot = path.join(parent, "second");
+    fs.mkdirSync(firstRoot);
+    fs.mkdirSync(secondRoot);
+    const source = path.join(firstRoot, "active.md");
+    const target = path.join(secondRoot, "target.md");
+    fs.writeFileSync(source, "# Active\n");
+    fs.writeFileSync(target, "# Target\n");
+    const discover = async (): Promise<string[]> => [];
+    // The link leaves the folder of the active file: with that folder only it is outside the workspace.
+    assert.deepEqual(
+      await resolvePreviewNavigation("../second/target.md#part", source, firstRoot, discover, "the workspace", [firstRoot]),
+      { kind: "blocked", reason: "The navigation target is outside the workspace." },
+    );
+    // Each root is tried before the link is blocked: below the second folder it opens.
+    assert.deepEqual(
+      await resolvePreviewNavigation("../second/target.md#part", source, firstRoot, discover, "the workspace", [firstRoot, secondRoot]),
+      { kind: "local", path: target, suffix: "#part" },
+    );
+  } finally {
+    fs.rmSync(parent, { recursive: true, force: true });
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-098
 test("discovers bare wikilinks before accepting an active-root sibling", async () => {
   const firstRoot = fs.mkdtempSync(path.join(os.tmpdir(), "studio-bare-wiki-a-"));

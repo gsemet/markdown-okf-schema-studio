@@ -405,6 +405,30 @@ test("Back with nowhere to go only posts the history state again", async () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+test("a previewHistoryGo that names another render is refused by the render gate", async () => {
+  const f = fixture();
+  try {
+    const other = path.join(f.root, "other.md");
+    fs.writeFileSync(other, "# Other\n");
+    const history = f.manager.history.historyOf(f.preview);
+    history.push({ uri: pathToFileURL(other).toString(), line: 1 });
+    history.push({ uri: f.preview.documentUri, line: 1 });
+    for (const stale of [{ revision: 0 }, { requestId: 0 }, { documentId: "file:///elsewhere.md" }]) {
+      await f.send("previewHistoryGo", { direction: "back", ...stale });
+    }
+    assert.deepEqual(f.posted, [], "no state is posted for another render");
+    assert.equal(f.shown.length, 0, "no document is opened");
+    assert.equal(history.snapshot().index, 1, "the history does not move");
+    // The same move from the current render is accepted.
+    await f.send("previewHistoryGo", { direction: "back" });
+    assert.equal(f.shown.length, 1);
+    assert.equal(history.snapshot().index, 0);
+  } finally {
+    f.cleanup();
+  }
+});
+
 test("a Back or Next that cannot open its document shows a warning", async () => {
   const f = fixture();
   try {

@@ -69,7 +69,7 @@ When a relative Markdown link is followed, the extension SHALL open its target o
 
 ### Verification notes
 
-- Method: test/session/previewNavigator.test.ts (nominal row 1: classifies anchors, external links, and workspace-local files; refusal outside every root: blocks unsafe anchors, schemes, and paths, ../secret.md blocked; the second-root relative case is untested, the wikilink test searches every root)
+- Method: test/session/previewNavigator.test.ts (nominal row 1: classifies anchors, external links, and workspace-local files; refusal outside every root: blocks unsafe anchors, schemes, and paths, ../secret.md blocked; a relative link that resolves below the second folder of the workspace opens, and is blocked when that folder is not a root; the wikilink test searches every root)
 - Method: test/session/toolbarReq.requirements.test.ts (nominal symlink inside, refusal symbolic link out: a symbolic link out of the workspace is blocked; refusal missing or not a regular file: a target that is missing or not a regular file is blocked)
 - Method: the integration test test/integration/previewEditing.test.ts (bundle_target symlink) covers the frontmatter path, which answers outside the workspace
 - Criteria: The check compares the lexical path with each root, then the real path of the target with the real path of the root; the kind of the target must be file.

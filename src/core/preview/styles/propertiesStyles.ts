@@ -1,11 +1,19 @@
+/*
+ * The reduced-motion rule of the toolbar motion (pageChromeStyles) is one rule written from two
+ * parts, one per behaviour; PROPERTIES_CSS joins them where the rule stands, inside the
+ * prefers-reduced-motion block at the end of the motion section.
+ */
+
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-129
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
-/** Reduced motion turns off the toolbar motion: the tooltip slide-in and the unroll of rows 2 to 4. */
-const TOOLBAR_REDUCED_MOTION_CSS = `  /* The toolbar motion of pageChromeStyles: the tooltip slide-in and the unroll of rows 2 to 4. */
+/** Reduced motion, tooltips: the bubbles of the toolbar, the table menu and the edit bar slide in no more. */
+const TOOLTIP_REDUCED_MOTION_SELECTORS = `  /* The toolbar motion of pageChromeStyles: the tooltip slide-in and the unroll of rows 2 to 4. */
   [data-sphinx-preview-toolbar] button[data-tooltip]::after,
   .sphinx-preview-table-menu button[data-tooltip]::after,
-  .sphinx-preview-edit-palette > button[data-tooltip]::after,
-  [data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating] {
+  .sphinx-preview-edit-palette > button[data-tooltip]::after,`;
+
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+/** Reduced motion, toolbar rows: rows 2 to 4 unroll no more; the body is shared with the tooltips above. */
+const ROWS_REDUCED_MOTION_RULE = `  [data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating] {
     animation: none !important;
     transition: none !important;
   }`;
@@ -553,6 +561,7 @@ html[data-sphinx-preview-theme-switching="true"] body * {
     transition: none !important;
   }
 
-${TOOLBAR_REDUCED_MOTION_CSS}
+${TOOLTIP_REDUCED_MOTION_SELECTORS}
+${ROWS_REDUCED_MOTION_RULE}
 }
 `;
