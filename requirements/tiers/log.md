@@ -124,25 +124,35 @@
   - SwRS-PALETTE-010 and SwRS-THEME-013 to SwRS-LIFE-169; SwRS-LAYOUT-018 to SwRS-LAYOUT-011.
 - Split out: the scroll-follow scenario of PALETTE-021 became PALETTE-279 (derived from StRS-PALETTE-005), the rule
   icon of PALETTE-002 became PALETTE-280 (derived from StRS-PALETTE-019).
-- Reparented: the SwRS that derived from StRS-PALETTE-001 now derive from 019, 020 or 021 (or from StRS-PALETTE-002,
-  007, 013, 015 or 018 where they belong there); PALETTE-114 derives from StRS-REVIEW-015 and PALETTE-275 from
-  StRS-PALETTE-015; TABLE-085 and TABLE-111, CORE-028, TRUST-001, 005, 006 and 065 moved to the palette StRS they
-  serve. SwRS-LIFE-169 and LIFE-170 are cited by StRS LAYOUT-003, PALETTE-002, THEME-004 and THEME-011 through
-  `depends_on`. Main paths that cited a superseded SwRS now cite the merged one.
-- Changed text: StRS PALETTE-002 (four nested modes), PALETTE-005 (one use case), PALETTE-018 (Explorer drops, pasted
-  URL), LAYOUT-004 and THEME-002 (history removed); a `### Use case diagram` on all 15 in-force StRS of the scope.
+- Reparented: the in-force SwRS that derived from StRS-PALETTE-001 now derive from 019, 020 or 021 (PALETTE-039 and
+  052 keep StRS-PALETTE-015 too), or only from the other parent they already had (StRS-PALETTE-002, 005, 007, 013,
+  015 or 018); PALETTE-114 derives from StRS-REVIEW-015, PALETTE-275 from StRS-PALETTE-015, and PALETTE-115 from
+  StRS-PALETTE-020 only (it no longer derives from StRS-PALETTE-005); the deprecated PALETTE-086 keeps
+  StRS-PALETTE-001. Other SwRS only drop a palette or theme parent and keep their other parents: TABLE-085 drops
+  StRS-PALETTE-015, TABLE-111 drops StRS-PALETTE-001, CORE-028 drops StRS-THEME-002, TRUST-001 drops
+  StRS-PALETTE-002, TRUST-005 and TRUST-065 drop StRS-PALETTE-007 and 013, TRUST-006 drops StRS-THEME-011, and
+  PALETTE-192, 196 and 203 drop StRS-PALETTE-013. SwRS-LIFE-169 and LIFE-170 no longer derive from StRS LAYOUT-003,
+  PALETTE-002, THEME-004 and THEME-011, which cite them through `depends_on`. Main paths that cited a superseded SwRS
+  now cite the merged one.
+- Changed text: StRS PALETTE-002 (four nested modes), PALETTE-005 (title reworded, "visible" becomes "in reach"),
+  PALETTE-018 (Explorer drops, pasted URL), LAYOUT-004 (history removed) and THEME-002 (the clause on recording the
+  reduced-motion preference removed); a `### Use case diagram` added on all 15 in-force StRS of the three scopes.
 - Rewritten in place (same ID, text corrected): SwRS-THEME-034, PALETTE-275, LAYOUT-023, LAYOUT-044, THEME-001,
   LAYOUT-022, LAYOUT-011, LAYOUT-001, LAYOUT-002 (verification notes), THEME-016 and THEME-043 (verification
-  notes); the SwRS that took merged text: PALETTE-001, 002, 021, 127 and 238; the LAYOUT-001 scenarios moved to the
-  SwRS that own them. Verification notes and known issues of LAYOUT-002, 011, 022, 023, THEME-016 and THEME-043 name
-  the new unit tests.
+  notes); the SwRS that took merged text: PALETTE-001, 127 and 238, LIFE-169 and LAYOUT-011; PALETTE-002 and 021 lost
+  the text split out to PALETTE-280 and 279. The table scenarios of LAYOUT-023 moved to LAYOUT-044; the Margin
+  wide-table scenario of LAYOUT-022 and the narrow-table part of a LAYOUT-001 scenario now point to LAYOUT-032; the
+  machine geometry checks scenario of LAYOUT-001 was removed (test infrastructure, not a requirement) and the
+  unknown-mode refusal of THEME-001 was removed (LIFE-170 owns it). Verification notes and known issues of
+  LAYOUT-002, 011, 022, 023, THEME-016 and THEME-043 name the new unit tests.
 - Edited in place, no wording change (the `implemented_in_files` and `tested_in_files` lists follow the moved
-  markers): SwRS-LAYOUT-002, 032, 043 and THEME-016, 025, 031, 043; SwRS-LAYOUT-018 is superseded by LAYOUT-011.
+  markers): SwRS-LAYOUT-032, 043, LIFE-049, PALETTE-069, 078, 148, 232 and THEME-025, 031.
 - New unit tests: `test/core/preview/layoutThemeStyles.test.ts`, `test/page/widthModeScenarios.test.ts`, and cases in
   `previewConfiguration`, `firstClearance` and `runtimePageControls` tests.
-- Approved StRS: the owner agreed in advance (CR-345 `02-answers.md`) to the corrections of StRS-LAYOUT-001,
-  StRS-LAYOUT-003 and the diagram of StRS-PALETTE-015; their `approved_by` and `approved_at` are set again and the
-  Driver records the re-approval.
+- Approved StRS: the owner agreed in advance (CR-345 `02-answers.md`, garden-Q1) to the text corrections of
+  StRS-LAYOUT-001 and StRS-LAYOUT-003; StRS-PALETTE-015 only gets a diagram and generated links, which need no
+  re-approval (garden-Q2). The `approved_at` and `verified.at` of the three are set to 2026-11-17 (`approved_by`
+  unchanged) and the Driver records the re-approval.
 - Checks run: `just requirements-update`, `just requirements-lint`, `just check-markers` and
   `okfreq validate --check-links`.
 
