@@ -19,7 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by:
-- SwRS-MDOKFSTUDIO-GFM-029
+- SwRS-MDOKFSTUDIO-CORE-071
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -54,5 +54,5 @@ When inline text contains a kbd element without attributes, the extension SHALL 
 - Derives from:
   - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-GFM-029](SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
+  - [SwRS-MDOKFSTUDIO-CORE-071](../rendering-core/SwRS-MDOKFSTUDIO-CORE-071.md): README-style HTML renders like GitHub and shows its tag in edit mode
 <!-- okf:links:end -->

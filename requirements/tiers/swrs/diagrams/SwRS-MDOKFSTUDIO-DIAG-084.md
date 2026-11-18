@@ -2,20 +2,21 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-084
 uuid: 777fec0c-2d08-4697-abf5-7cef2c87162e
-title: The JAR pipeline runs java or plantuml once per diagram on stdin
-description: When useJar is true in a trusted workspace, the extension SHALL
-  render each PlantUML diagram by starting its own process in the workspace
-  folder, java with the arguments -jar, the resolved JAR path, -pipe and -tsvg
-  when jarPath is not empty and the plantuml command with -pipe and -tsvg
-  otherwise, each process running with the PlantUML security profile ALLOWLIST
-  with the workspace folder as its allowlist path and with an image size limit
-  of 4096, refusing, before any process starts, a diagram with an include
-  directive whose file (or whose nested include) leaves the workspace folder, by
-  parent segments, an absolute path, a sibling folder sharing the folder-name
-  prefix or a symbolic link, or is computed by a function or variable, and
-  showing a message instead of the picture, writing the diagram text to its
-  standard input and taking as the picture the output from the first svg start
-  tag to the last svg end tag.
+title: 'The JAR pipeline runs java or plantuml once per diagram on stdin, at most
+  2 at once'
+description: 'When useJar is true in a trusted workspace, the extension SHALL render
+  each PlantUML diagram by starting its own process in the workspace folder, at most
+  2 at once, and return the pictures in document order, running java with the arguments
+  -jar, the resolved JAR path, -pipe and -tsvg when jarPath is not empty and the plantuml
+  command with -pipe and -tsvg otherwise, each process under the PlantUML security
+  profile ALLOWLIST with the workspace folder as its allowlist path and an image size
+  limit of 4096, writing the diagram text to its standard input and taking as the
+  picture the output from the first svg start tag to the last svg end tag. Before
+  any process starts, the extension SHALL refuse a diagram with an include directive
+  whose file (or whose nested include) leaves the workspace folder, by parent segments,
+  an absolute path, a sibling folder sharing the folder-name prefix or a symbolic
+  link, or is computed by a function or variable, and show a message instead of the
+  picture.'
 project: markdown-okf-schema-studio
 scope: diagrams
 req_lifecycle: proposed
@@ -48,11 +49,13 @@ supersedes:
 - SwRS-MDOKFSTUDIO-DIAG-120
 ---
 
-## The JAR pipeline runs java or plantuml once per diagram on stdin
+## The JAR pipeline runs java or plantuml once per diagram on stdin, at most 2 at once
 
 ### Normative behavior
 
-When useJar is true in a trusted workspace, the extension SHALL render each PlantUML diagram by starting its own process in the workspace folder, java with the arguments -jar, the resolved JAR path, -pipe and -tsvg when jarPath is not empty and the plantuml command with -pipe and -tsvg otherwise, each process running with the PlantUML security profile ALLOWLIST with the workspace folder as its allowlist path and with an image size limit of 4096, refusing, before any process starts, a diagram with an include directive whose file (or whose nested include) leaves the workspace folder, by parent segments, an absolute path, a sibling folder sharing the folder-name prefix or a symbolic link, or is computed by a function or variable, and showing a message instead of the picture, writing the diagram text to its standard input and taking as the picture the output from the first svg start tag to the last svg end tag.
+When useJar is true in a trusted workspace, the extension SHALL render each PlantUML diagram by starting its own process in the workspace folder, at most 2 at once, and return the pictures in document order, running java with the arguments -jar, the resolved JAR path, -pipe and -tsvg when jarPath is not empty and the plantuml command with -pipe and -tsvg otherwise, each process under the PlantUML security profile ALLOWLIST with the workspace folder as its allowlist path and an image size limit of 4096, writing the diagram text to its standard input and taking as the picture the output from the first svg start tag to the last svg end tag.
+
+Before any process starts, the extension SHALL refuse a diagram with an include directive whose file (or whose nested include) leaves the workspace folder, by parent segments, an absolute path, a sibling folder sharing the folder-name prefix or a symbolic link, or is computed by a function or variable, and show a message instead of the picture.
 
 ### Scenario (nominal): JAR configured
 - GIVEN useJar true, a trusted workspace and an existing JAR path
@@ -96,20 +99,20 @@ When useJar is true in a trusted workspace, the extension SHALL render each Plan
 - THEN no process is started for that diagram, which shows a message that the include is outside the workspace folder (or is computed and cannot be checked), and a warning is reported
 - AND includes inside the folder, URLs and standard-library names are passed to the process unchanged
 
-### Scenario (boundary): One process per diagram
-- GIVEN three PlantUML diagrams
-- WHEN the preview is rendered
-- THEN three processes are started before any finishes
+### Scenario (boundary): One process per diagram, at most 2 at once
 
-- GIVEN a document without PlantUML diagrams
-- WHEN the preview is rendered
-- THEN no process starts and the result is empty
+| Input | Outcome |
+| --- | --- |
+| three PlantUML diagrams in one page | three processes in all, never more than 2 at once; the third starts when one of the first two finishes |
+| five diagrams in one page | never more than 2 processes run together and all 5 are rendered |
+| diagrams that finish in another order than the page order | the pictures come back in document order |
+| a document without PlantUML diagrams | no process starts and the result is empty |
 
 ### Known issues
 
+- Known issue: the test `the JAR pipeline starts one process per diagram before any of them finishes` in test/core/render/diagReq.jar.requirements.test.ts passes only through its 30 s timeout (30016 ms measured) and does not check the limit of 2; this change request replaces it.
 - Known issue: The JAR and PATH pipeline asks for no dark variant, so its picture is the same in the light and dark preview.
 - Known issue: The renderer has an executablePath option that no setting feeds; only visual fixtures pass it, so users cannot change the command name.
-- Known issue: Many diagrams start many JVMs at once.
 
 ### Related requirements
 
@@ -117,14 +120,16 @@ When useJar is true in a trusted workspace, the extension SHALL render each Plan
 - SwRS-MDOKFSTUDIO-DIAG-105: how the results replace the diagrams of the render
 - SwRS-MDOKFSTUDIO-DIAG-089: how a failure is reported
 - SwRS-MDOKFSTUDIO-DIAG-097: the bounds of a JAR render
+- SwRS-MDOKFSTUDIO-DIAG-009: an earlier successful render of the same diagram is reused
 
 ### Verification notes
 - Method: test/core/render/plantUmlRenderer.test.ts `the JAR and the PATH command run under the allowlist security profile with a size limit` and `java is taken from JAVA_HOME ...` (environment and arguments of the started process; a relative JAVA_HOME is ignored). Observed by hand with PlantUML 1.2026.8: with this configuration alone an include of a file inside the workspace folder is read, an absolute include of an unrelated outside file is refused, but a path that climbs out through parent segments and an absolute path into a sibling folder whose name starts with the workspace folder name are read; the extension refuses those before the JAR runs. The size limit 4096 equals the PlantUML default and is pinned, not tightened. The PATH command receives the environment only, so it honours the profile only with a recent PlantUML.
 - Method: test/core/render/plantUmlJarIncludes.test.ts (parent-segment and absolute sibling-prefix includes, symlink, nested and computed includes are refused with no process started; inside includes pass). Containment compares path segments after realpath. Verification of the JAR itself: with PlantUML 1.2026.8 its own ALLOWLIST check alone reads those two paths, which is why the extension checks first.
 - Method: test/core/render/plantUmlRenderer.test.ts (renders PlantUML through the configured external JAR and injects an image: JAR configured, relative path, stdin and working directory, SVG span; uses the PATH executable when no JAR is configured and reports missing commands: PATH command, command missing; decodes a multibyte character split across stdout chunks: split characters).
 - Method: test/core/configuration/plantUmlConfiguration.test.ts (reads and trims the configured PlantUML JAR path; uses an empty path for non-string configuration values: boundary rows for padding and non-string).
-- Method: test/core/render/diagReq.jar.requirements.test.ts (`the JAR pipeline starts one process per diagram before any of them finishes`: one process per diagram).
-- Criteria: The spawned command and arguments match; the picture equals the SVG span; trim and empty fallback hold; the resolved path equals the workspace folder joined with the setting; input on stdin and cwd is the workspace folder; process count equals diagram count. The blank-path row and the empty-document case are checked only through these tests, with no test of their own.
+- Method: test/core/render/plantUmlCache.test.ts `at most two PlantUML processes run at once` (the limit of 2 and the queue).
+- Method: test/core/render/diagReq.jar.requirements.test.ts (`the JAR pipeline starts one process per diagram before any of them finishes`: one process per diagram; to be replaced, see the known issue).
+- Criteria: The spawned command and arguments match; the picture equals the SVG span; trim and empty fallback hold; the resolved path equals the workspace folder joined with the setting; input on stdin and cwd is the workspace folder; process count equals diagram count and never exceeds 2 at once; results are in document order. The blank-path row and the empty-document case are checked only through these tests, with no test of their own.
 
 <!-- okf:links:start -->
 ### Links

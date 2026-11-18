@@ -55,5 +55,5 @@ When the white or cream theme is forced, the extension SHALL colour YAML code te
 - Derives from:
   - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-CORE-028](../rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and inline code are typeset readably
+  - [SwRS-MDOKFSTUDIO-CORE-028](../rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and block quotes are typeset readably
 <!-- okf:links:end -->

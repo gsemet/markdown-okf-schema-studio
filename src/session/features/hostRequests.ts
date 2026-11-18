@@ -115,7 +115,7 @@ export class HostRequestController {
   /** Registers the handlers of the host requests. */
   public register(router: PageMessageRouter): void {
     const { host } = this.manager;
-    // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
     // Copies the raw code of a code block. It does not edit anything.
     router.on("previewCopyText", (message, preview) => this.handleCopyText(preview, message));
     router.on("previewListTargets", (message, preview) => this.handleListTargets(preview, message));

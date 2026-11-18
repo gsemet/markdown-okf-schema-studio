@@ -48,6 +48,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-DIAG-021
 - SwRS-MDOKFSTUDIO-DIAG-022
 - SwRS-MDOKFSTUDIO-DIAG-116
+- SwRS-MDOKFSTUDIO-DIAG-129
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-DIAG-002
@@ -122,7 +123,7 @@ Writers expect a Mermaid diagram written in a fence or a directive to appear as 
   - [SwRS-MDOKFSTUDIO-DIAG-006](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-006.md): Mermaid diagrams are drawn again when the theme changes
   - [SwRS-MDOKFSTUDIO-DIAG-007](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-007.md): Mermaid falls back to built-in colours
   - [SwRS-MDOKFSTUDIO-DIAG-008](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-008.md): Mermaid edge labels stay readable
-  - [SwRS-MDOKFSTUDIO-DIAG-009](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-009.md): Mermaid diagrams are drawn once and late results are dropped
+  - [SwRS-MDOKFSTUDIO-DIAG-009](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-009.md): Diagrams are drawn once per source and theme and late results are dropped
   - [SwRS-MDOKFSTUDIO-DIAG-010](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-010.md): The Mermaid drawing cache keeps 64 drawings
   - [SwRS-MDOKFSTUDIO-DIAG-011](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-011.md): A content patch draws only Mermaid diagrams not yet drawn
   - [SwRS-MDOKFSTUDIO-DIAG-012](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-012.md): Mermaid draw passes run one at a time
@@ -137,6 +138,7 @@ Writers expect a Mermaid diagram written in a fence or a directive to appear as 
   - [SwRS-MDOKFSTUDIO-DIAG-021](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-021.md): Diagrams can use the wider column in Auto width
   - [SwRS-MDOKFSTUDIO-DIAG-022](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-022.md): A diagram under edit is hidden
   - [SwRS-MDOKFSTUDIO-DIAG-116](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-116.md): A late Mermaid error for a replaced key is not shown
+  - [SwRS-MDOKFSTUDIO-DIAG-129](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-129.md): A diagram renderer script loads only when the page holds a figure of its engine
 - Supersedes:
   - [StRS-MDOKFSTUDIO-DIAG-002](StRS-MDOKFSTUDIO-DIAG-002.md): Mermaid diagrams follow the preview theme
   - [StRS-MDOKFSTUDIO-DIAG-003](StRS-MDOKFSTUDIO-DIAG-003.md): Mermaid diagrams stay in place while typing

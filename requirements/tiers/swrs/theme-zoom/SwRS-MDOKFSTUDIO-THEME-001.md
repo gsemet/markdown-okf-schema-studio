@@ -18,7 +18,7 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
-- SwRS-MDOKFSTUDIO-TRUST-006
+- SwRS-MDOKFSTUDIO-TRUST-005
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -104,5 +104,5 @@ When the reader presses the Theme button, the extension SHALL switch the preview
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
   - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
 <!-- okf:links:end -->

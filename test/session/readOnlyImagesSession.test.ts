@@ -95,6 +95,7 @@ async function show(): Promise<{ html: string; roots: readonly string[]; toolbar
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
 test("Restricted Mode: an image of the workspace folder outside the document folder is shown and its folder is a webview root", async () => {
   const { html, roots } = await show();
   assert.ok(html.includes(`src="webview://${path.join(sandbox, "ws", "images", "x.png")}"`), html);

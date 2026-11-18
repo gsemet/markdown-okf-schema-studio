@@ -16,6 +16,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
+depends_on:
+- SwRS-MDOKFSTUDIO-DIAG-129
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -63,13 +65,6 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - WHEN the preview is rendered
 - THEN a figure with an empty diagram element is still produced, the page draws nothing in it and shows no message
 
-### Scenario (nominal): The renderer script loads only with a Mermaid figure
-
-| Rendered content | Outcome |
-| --- | --- |
-| Contains a figure of class myst-mermaid-figure | The preview page HTML holds one script tag with the page nonce, the bundle URL of mermaidPreview.js and the attribute data-sphinx-preview-mermaid |
-| Contains a PlantUML figure but no Mermaid figure | The preview page HTML holds no Mermaid script tag |
-
 ### Scenario (nominal): Valid flowchart is drawn as a picture
 
 - GIVEN a valid Mermaid flowchart
@@ -107,7 +102,6 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 ### Known issues
 
 - Known issue: The page skips a Mermaid diagram whose text is empty and leaves it blank, with no diagnostic (no test covers it).
-- Known issue: Appearing or disappearing Mermaid changes the shell key, so the whole page reloads instead of being patched in place.
 - Known issue: No test asserts that the Content Security Policy lets the Mermaid bundle run; only a real VS Code run would show such a regression.
 - Known issue: Scripts and links inside the SVG are inert because the picture is an image with a data URI and Mermaid runs at the strict security level; this is not documented.
 - Known issue: mermaidPreview.ts has no unit test.
@@ -115,23 +109,19 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - Known issue: There is no live preview of the diagram while it is edited (absent from docs/known-limitations.md).
 - Known issue: A theme change still redraws a hidden Mermaid diagram because the theme observer draws every diagram.
 
-### Scenario (nominal): The renderer loads the diagram types it needs
-- GIVEN a document with a Mermaid figure
-- WHEN the page loads the renderer
-- THEN the script tag is `type="module"` and its entry file is small
-- AND each diagram type and the layout engine are chunks fetched when a diagram needs them
+### Related requirements
+
+- SwRS-MDOKFSTUDIO-DIAG-129: the renderer script loads only when the page holds a Mermaid figure, and loads the diagram types it needs
+- SwRS-MDOKFSTUDIO-DIAG-009: a diagram is drawn once per source and theme
 
 ### Verification notes
 
 - Method: test/core/render/mystFeatures.test.ts (fence and directive, empty diagram: rendered HTML structure)
 - Method: test/visual/scenarioDefinitions1.ts (visual scenarios diagrams v01 to v03: fence and directive, loaded picture, picture not enlarged)
-- Method: test/core/preview/contentPatch.test.ts (renderer script loads only with a Mermaid figure, shell key)
-- Method: test/integration/projectFeatures.test.ts (script tag and bundle folder resource root exist)
 - Method: test/core/preview/previewStyles.test.ts (picture width against the content column)
 - Method: test/page/diagReq.diagramEdit.requirements.test.ts (a diagram block is hidden while its editor is open and shown again when it closes)
 - Method: line-break tags and the drawn picture have no unit test of the browser entry point mermaidPreview.ts (untested apart from the visual scenarios)
-- Criteria: Both syntaxes give the same figure structure; an empty fence gives an empty diagram element; the script tag appears only with a Mermaid figure; a loaded image replaces the text and carries the rendered state; the stylesheet contains the containment rules and the picture is never larger than its natural size; the block is hidden only while its editor is open.
-- Method: test/build/bundleSplit.test.ts (the renderer entry is small and the rest is split into chunks)
+- Criteria: Both syntaxes give the same figure structure; an empty fence gives an empty diagram element; a loaded image replaces the text and carries the rendered state; the stylesheet contains the containment rules and the picture is never larger than its natural size; the block is hidden only while its editor is open.
 - Method: test/page/mermaidLabelFit.test.ts (headless Chromium: the shown SVG opened as a document of its own, every label's text inside its box; the in-page measure of the real-window check agrees with it)
 - Method: test/page/modules/mermaidPreviewEntry.test.ts (Mermaid measures in the styled measure element, removed after the drawing)
 - Method: test/integration/realInput/previewWindow.ts (real VS Code window: every label of the demo flowchart fits its box as the image draws it)
@@ -143,6 +133,8 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-129](SwRS-MDOKFSTUDIO-DIAG-129.md): A diagram renderer script loads only when the page holds a figure of its engine
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-DIAG-002](SwRS-MDOKFSTUDIO-DIAG-002.md): The Mermaid renderer loads only when a Mermaid figure exists
   - [SwRS-MDOKFSTUDIO-DIAG-003](SwRS-MDOKFSTUDIO-DIAG-003.md): Mermaid diagrams are drawn as inert pictures

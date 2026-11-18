@@ -97,7 +97,7 @@ async function renderPalette(markdown: string) {
   return { html: parseHtml(result.html), raw: result.html };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-029
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071
 test("a collapsible section inserted by the edition palette renders as details with a summary", async () => {
   const { html } = await renderPalette(paletteInsert("details", "Intro", 5));
   const details = findElement(html, isTag("details"));

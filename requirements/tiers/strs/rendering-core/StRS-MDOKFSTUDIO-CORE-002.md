@@ -4,8 +4,9 @@ id: StRS-MDOKFSTUDIO-CORE-002
 uuid: dcc2b09c-7859-4a0c-adc1-2d60efe92d71
 title: A writer composes a document from included files
 description: When a document includes other Markdown files, the Studio SHALL
-  show the included content in place and let the writer edit it from the include
-  location.
+  show the included content in place, keep a block that comes from an included
+  file out of the copy, cut and paste edits of the including document, and
+  report an include it cannot read.
 project: markdown-okf-schema-studio
 scope: rendering-core
 req_lifecycle: proposed
@@ -13,8 +14,8 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
-user_need: Writers need to build a document from several files and still edit it
-  from the right place.
+user_need: Writers need to build a document from several files and still edit
+  each file in its own place.
 derived_by:
 - SwRS-MDOKFSTUDIO-CORE-012
 - SwRS-MDOKFSTUDIO-CORE-013
@@ -32,15 +33,16 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a document includes other Markdown files, the Studio SHALL show the included content in place and let the writer edit it from the include location.
+When a document includes other Markdown files, the Studio SHALL show the included content in place, keep a block that comes from an included file out of the copy, cut and paste edits of the including document, and report an include it cannot read.
 
 ### Preserved stakeholder intent
 
-Writers need to build a document from several files and still edit it from the right place.
+Writers need to build a document from several files and still edit each file in its own place.
 
 ### Rationale and constraints
 
-- An include is read only from the document folder or the workspace root; refused includes are reported (see the use case about content the preview cannot render).
+- Included content is shown in the including document but is edited in its own file: the editor never targets host lines for a block that comes from an include, so that block cannot be copied, cut or pasted next to (the refusal says so). A writer who wants to change it opens the included file.
+- An include is read only from the folders the allowed-roots rule grants (see the use case about content the preview cannot render); depth, cycles, count and size are bounded, and a refused or missing include stays a placeholder with a warning.
 
 ### Main paths
 

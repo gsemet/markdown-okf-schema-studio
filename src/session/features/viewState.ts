@@ -23,7 +23,7 @@ export class ViewStateController {
   public register(router: PageMessageRouter): void {
     const { manager } = this;
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
-    // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-214
     // A view preference only changes how the preview looks (workspace state, no document edit); the
     // value is validated by the protocol.

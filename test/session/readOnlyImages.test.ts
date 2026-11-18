@@ -76,6 +76,7 @@ async function page(text: string, documentDirectory: string, root = documentDire
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
 test("a restricted-reads preview shows an image with spaces in its name, next to the document or in a subfolder", async () => {
   const docs = path.join(home, "docs");
   const html = await page(
@@ -89,6 +90,7 @@ test("a restricted-reads preview shows an image with spaces in its name, next to
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
 test("a restricted-reads preview of a document in the home folder shows the images of its own folder only", async () => {
   const html = await page("![a](home.png)\n\n![b](other/b.png)\n\n![c](.ssh/c.png)\n", home);
   assert.ok(html.includes(path.join(home, "home.png")));
@@ -97,6 +99,7 @@ test("a restricted-reads preview of a document in the home folder shows the imag
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
 test("a restricted-reads preview refuses an image outside the document folder when the workspace root is the home folder", async () => {
   const docs = path.join(home, "docs");
   const html = await page("![a](../other/b.png)\n\n![b](../home.png)\n\n![c](.hidden/a.png)\n", docs, home);
@@ -106,6 +109,7 @@ test("a restricted-reads preview refuses an image outside the document folder wh
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
 test("a restricted-reads preview reaches the images of the workspace root, not its includes or other files", async () => {
   const guide = path.join(sandbox, "ws", "docs", "guide");
   fs.mkdirSync(guide, { recursive: true });
@@ -127,6 +131,7 @@ test("a restricted-reads preview reaches the images of the workspace root, not i
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
 test("the policy of a restricted-reads preview serves an image of the workspace root and nothing else there", () => {
   const ws = path.join(sandbox, "ws");
   const guide = path.join(ws, "docs", "guide");
@@ -145,6 +150,7 @@ test("the policy of a restricted-reads preview serves an image of the workspace 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
 test("a link named .png that leads to another kind of file is not served from the workspace root", (context) => {
   const ws = path.join(sandbox, "ws");
   const guide = path.join(ws, "docs");
@@ -166,6 +172,7 @@ test("a link named .png that leads to another kind of file is not served from th
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
 test("a restricted-reads preview still refuses an include in the home folder", async () => {
   fs.writeFileSync(path.join(home, "part.md"), `${SECRET}\n`);
   const inHome = await page("```{include} part.md\n```\n", home);

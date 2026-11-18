@@ -7,8 +7,8 @@ description: When the page receives previewLinkTargets, it SHALL accept it only
   if its targets are an array and it names the render of the page.
 project: markdown-okf-schema-studio
 scope: trust-security
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -19,12 +19,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/hostToPage.ts
-tested_in_files:
-- test/core/protocol/hostToPage.test.ts
-- test/page/runtimeContentPatch.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TRUST-059
 ---
 
 ## A link targets message needs an array of the current render
@@ -70,5 +69,7 @@ When the page receives previewLinkTargets, it SHALL accept it only if its target
   - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
   - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
 - Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Superseded by:
   - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
 <!-- okf:links:end -->

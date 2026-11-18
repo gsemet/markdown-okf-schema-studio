@@ -55,5 +55,5 @@ When a newer edit arrives during a render, the extension SHALL cancel that rende
 - Derives from:
   - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-CORE-001](SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer completely, in process
+  - [SwRS-MDOKFSTUDIO-CORE-001](SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer in process and keeps the newest edit
 <!-- okf:links:end -->

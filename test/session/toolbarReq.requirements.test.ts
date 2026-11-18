@@ -175,7 +175,7 @@ function showOther(preview: PreviewSession, id: string): void {
   preview.stage = { ...preview.stage!, activeDocumentIdentity: id } as never;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-006
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 test("a preview with restricted reads stores a view preference like any other", async () => {
   const f = fixture({ restrictedReads: true });
   try {

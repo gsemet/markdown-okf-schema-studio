@@ -8,6 +8,7 @@ import { READ_ONLY_IMAGES_ASSERTIONS, WIDE, type ScenarioDefinition } from "./sc
 
 export const READ_ONLY_IMAGES_SCENARIOS: ScenarioDefinition[] = [{
   // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+  // @tests_req SwRS-MDOKFSTUDIO-TRUST-091
   id: "trust-security/v04-read-only-images-light-900",
   fixture: "77-read-only-images",
   theme: "light",

@@ -263,7 +263,7 @@ export function buildPreviewWebviewHtml(
     && rewritten.html.includes('class="myst-plantuml-figure"')
     ? assets.bundleUri("plantumlPreview.js")
     : undefined;
-  // @implements_req SwRS-MDOKFSTUDIO-DIAG-124
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-129
   const chartRendererUri = rewritten.html.includes('class="myst-vega-figure"')
     ? assets.bundleUri("vegaPreview.js")
     : undefined;

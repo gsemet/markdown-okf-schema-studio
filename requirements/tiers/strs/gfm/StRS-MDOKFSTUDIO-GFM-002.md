@@ -29,6 +29,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-045
 - SwRS-MDOKFSTUDIO-CORE-056
 - SwRS-MDOKFSTUDIO-CORE-062
+- SwRS-MDOKFSTUDIO-CORE-071
 - SwRS-MDOKFSTUDIO-GFM-001
 - SwRS-MDOKFSTUDIO-GFM-002
 - SwRS-MDOKFSTUDIO-GFM-003
@@ -109,6 +110,7 @@ Writers expect a pasted address to be clickable as on GitHub, without code sampl
   - [SwRS-MDOKFSTUDIO-CORE-045](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-045.md): Expand alerts in included files and context tags
   - [SwRS-MDOKFSTUDIO-CORE-056](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-056.md): Rebuild raw HTML tables from an allow-list
   - [SwRS-MDOKFSTUDIO-CORE-062](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-062.md): Render details and kbd blocks
+  - [SwRS-MDOKFSTUDIO-CORE-071](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-071.md): README-style HTML renders like GitHub and shows its tag in edit mode
   - [SwRS-MDOKFSTUDIO-GFM-001](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-001.md): Bare URLs become safe links
   - [SwRS-MDOKFSTUDIO-GFM-002](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-002.md): Trailing punctuation stays outside bare URLs
   - [SwRS-MDOKFSTUDIO-GFM-003](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-003.md): Text with a meaning is not autolinked

@@ -86,7 +86,7 @@ export function plantUmlCacheSizeForTests(): number {
   return svgCache.size;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-097
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-009
 function cacheKey(
   source: string,
   command: string,
@@ -126,6 +126,7 @@ function cacheStore(key: string, svg: string): void {
 let activeRenders = 0;
 const renderWaiters: Array<() => void> = [];
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-084
 // Returns undefined when a slot was taken at once, so the process starts in the same tick.
 function acquireRenderSlot(signal: AbortSignal | undefined): Promise<void> | undefined {
   if (activeRenders < PLANTUML_MAX_CONCURRENT_RENDERS) {

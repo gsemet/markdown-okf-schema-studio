@@ -160,6 +160,7 @@ export function isBroadRestrictedRoot(directory: string): boolean {
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-031
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-091
 /**
  * The policy of one preview. `restrictedReads` (no workspace folder, or Restricted Mode) narrows it: an
  * include or other resource comes from the document folder only and never from a broad one (see

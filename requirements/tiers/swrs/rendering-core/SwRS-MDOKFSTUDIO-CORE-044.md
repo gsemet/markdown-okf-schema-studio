@@ -21,7 +21,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by:
-- SwRS-MDOKFSTUDIO-GFM-029
+- SwRS-MDOKFSTUDIO-CORE-071
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -57,5 +57,5 @@ When a document holds a raw HTML block outside the supported subset (tables, det
   - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
   - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-GFM-029](../gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
+  - [SwRS-MDOKFSTUDIO-CORE-071](SwRS-MDOKFSTUDIO-CORE-071.md): README-style HTML renders like GitHub and shows its tag in edit mode
 <!-- okf:links:end -->

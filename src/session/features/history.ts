@@ -27,7 +27,7 @@ export class HistoryController {
 
   /** Registers the handler of Back / Next. */
   public register(router: PageMessageRouter): void {
-    // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
     // Back / Next walk the navigation history of the panel. Only navigation, no document edit.
     router.on("previewHistoryGo", (message, preview) => this.go(preview, message.direction));
   }

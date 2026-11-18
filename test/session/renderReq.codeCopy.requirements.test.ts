@@ -75,7 +75,7 @@ test("an oversized text is refused with a reason and a failing clipboard is answ
   assert.deepEqual([t.posted[2]?.ok, t.posted[2]?.reason], [false, "Could not copy."]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-006
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 test("a read-only preview still writes the requested code to the clipboard and edits nothing", async () => {
   const t = setup({ restrictedReads: true });
   await t.dispatcher.handle(t.preview, t.copy());

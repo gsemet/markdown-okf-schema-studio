@@ -3,11 +3,10 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-123
 uuid: 3dbcc9ea-705d-4727-8eb6-2e8d6d4aa09c
 title: Charts are drawn as themed SVG pictures with errors in place
-description: When the page draws a Vega-Lite or Vega chart, it SHALL replace the
-  specification text with one SVG image whose background, text, axis and mark
-  colours follow the preview theme, draw an unchanged chart again only when its
-  source, data or theme changed, and show the error message in place of the
-  chart when the specification is invalid.
+description: 'When the page draws a Vega-Lite or Vega chart, it SHALL replace the
+  specification text with one SVG image whose background, text, axis and mark colours
+  follow the preview theme, and show the error message in place of the chart when
+  the specification is invalid.'
 project: MDOKFSTUDIO
 scope: diagrams
 req_lifecycle: proposed
@@ -16,6 +15,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
+depends_on:
+- SwRS-MDOKFSTUDIO-DIAG-009
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,7 +35,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the page draws a Vega-Lite or Vega chart, it SHALL replace the specification text with one SVG image whose background, text, axis and mark colours follow the preview theme, draw an unchanged chart again only when its source, data or theme changed, and show the error message in place of the chart when the specification is invalid.
+When the page draws a Vega-Lite or Vega chart, it SHALL replace the specification text with one SVG image whose background, text, axis and mark colours follow the preview theme and show the error message in place of the chart when the specification is invalid.
 
 ### Scenario (nominal): A chart is drawn as a themed picture
 
@@ -46,7 +47,7 @@ When the page draws a Vega-Lite or Vega chart, it SHALL replace the specificatio
 
 - GIVEN charts drawn in the light theme
 - WHEN the page background and foreground change to a dark theme
-- THEN each chart is drawn again with the new colours; a chart whose source, data and theme are unchanged is not drawn again by a content update
+- THEN each chart is drawn again with the new colours
 
 ### Scenario (refusal): An invalid specification
 
@@ -58,7 +59,10 @@ When the page draws a Vega-Lite or Vega chart, it SHALL replace the specificatio
 | --- | --- |
 | JSON or YAML specification | the same chart |
 | an image mark with a url | refused with a message; data:image pictures are drawn |
-| a drawing that a newer theme replaced while it ran | cached, not shown |
+
+### Related requirements
+
+- SwRS-MDOKFSTUDIO-DIAG-009: an unchanged chart is not drawn again, and a drawing that a newer theme replaced while it ran is cached and not shown
 
 ### Verification notes
 
@@ -74,4 +78,6 @@ When the page draws a Vega-Lite or Vega chart, it SHALL replace the specificatio
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-DIAG-015](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-015.md): A writer reads charts and drawings in the page
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-009](SwRS-MDOKFSTUDIO-DIAG-009.md): Diagrams are drawn once per source and theme and late results are dropped
 <!-- okf:links:end -->

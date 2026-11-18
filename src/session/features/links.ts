@@ -63,7 +63,7 @@ export class LinkController {
 
   /** Registers the handlers of link requests and link discovery. */
   public register(router: PageMessageRouter): void {
-    // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
     router.on("previewLinkDiscover", (message, preview) => {
       fireAndForget(this.manager.host.logger, this.handleDiscovery(preview, message), "handleDiscovery");
     });

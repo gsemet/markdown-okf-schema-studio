@@ -78,7 +78,7 @@ Writers need to know what the preview leaves out, so that a gap is never mistake
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-CORE-001](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer completely, in process
+  - [SwRS-MDOKFSTUDIO-CORE-001](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer in process and keeps the newest edit
   - [SwRS-MDOKFSTUDIO-CORE-008](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-008.md): Images fit the column, sit on the line and survive a missing file
   - [SwRS-MDOKFSTUDIO-CORE-009](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-009.md): Keep an image whose file is missing
   - [SwRS-MDOKFSTUDIO-CORE-012](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-012.md): An include is expanded in place and mapped to its directive

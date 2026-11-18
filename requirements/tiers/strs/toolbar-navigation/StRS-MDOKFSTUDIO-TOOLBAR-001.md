@@ -31,6 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-013
 - SwRS-MDOKFSTUDIO-TOOLBAR-129
 - SwRS-MDOKFSTUDIO-TOOLBAR-130
+- SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-006
 default_owner_email: gaetan@xeberon.net
 ---
@@ -97,6 +98,7 @@ stateDiagram-v2
   - [SwRS-MDOKFSTUDIO-TOOLBAR-013](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-013.md): The host accepts only a known view preference with a valid value
   - [SwRS-MDOKFSTUDIO-TOOLBAR-129](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-129.md): Toolbar, edit bar and table menu tooltips slide in from the left
   - [SwRS-MDOKFSTUDIO-TOOLBAR-130](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-130.md): The toolbar rows unroll as one block and a load hint shows them
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace

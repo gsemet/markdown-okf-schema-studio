@@ -11,7 +11,7 @@ function rule(selectorPattern: string): string {
 
 const INLINE_CODE = rule(String.raw`#sphinx-myst-preview-content :not\(pre\) > code`);
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-028
+// @tests_req SwRS-MDOKFSTUDIO-CORE-089
 test("inline code is a subtle tinted pill derived from the text colour", () => {
   assert.match(INLINE_CODE, /background: color-mix\(in srgb, currentColor (\d+)%, transparent\)/u);
   const tint = Number(/background: color-mix\(in srgb, currentColor (\d+)%/u.exec(INLINE_CODE)?.[1]);

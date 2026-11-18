@@ -46,7 +46,7 @@ As a reader or writer, I rely on what the preview page asks of the extension bei
 
 ### Rationale and constraints
 
-- What an invalid request causes is specified by the rendering-core record for ignored messages.
+- What an invalid request causes (a value that is not a registered message is ignored without a visible change) is specified in SwRS-MDOKFSTUDIO-TRUST-052.
 - The bounds of each request kind are specified with the feature that sends it, except the fields every message and every state message share.
 - An answer is addressed by the document, the revision and the render request, or by an identifier of its own.
 - A save or cancel from an older page is answered with an error instead of being dropped (block-editing and frontmatter-editing scopes).
@@ -68,8 +68,8 @@ As a reader or writer, I rely on what the preview page asks of the extension bei
 1. The page receives a message from the host
    - SwRS-MDOKFSTUDIO-TRUST-059: the page treats it as a host message only if its type is registered and it is addressed to the page
 2. The page accepts a host message
-   - SwRS-MDOKFSTUDIO-TRUST-061: a content patch within its bounds is accepted
-   - Option SwRS-MDOKFSTUDIO-TRUST-061 (refusal): a patch out of bounds is not accepted
+   - SwRS-MDOKFSTUDIO-TRUST-059: a content patch within its bounds is accepted
+   - Option SwRS-MDOKFSTUDIO-TRUST-059 (refusal): a patch out of bounds is not accepted
 3. The content patch is accepted
 
 <!-- okf:links:start -->

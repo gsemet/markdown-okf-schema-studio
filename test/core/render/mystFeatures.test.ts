@@ -34,7 +34,7 @@ test("wikilinks render as lazy note targets without changing code or existing li
   assert.match(result.html, /\[\[Fenced\]\]/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-001
+// @tests_req SwRS-MDOKFSTUDIO-CORE-088
 test("the in-process renderer preserves the active-file MyST feature contract", async () => {
   const document = fixtureDocument("feature-contract.md");
   const result = await renderPreviewDocument({

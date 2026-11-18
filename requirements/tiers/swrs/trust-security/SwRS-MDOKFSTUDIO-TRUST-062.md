@@ -7,8 +7,8 @@ description: When the page receives previewPropertiesTable, it SHALL accept it
   only if its markup is a string.
 project: markdown-okf-schema-studio
 scope: trust-security
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -18,11 +18,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/hostToPage.ts
-tested_in_files:
-- test/core/protocol/hostToPage.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TRUST-059
 ---
 
 ## A properties table message needs string markup
@@ -56,5 +56,7 @@ When the page receives previewPropertiesTable, it SHALL accept it only if its ma
 - Derives from:
   - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
 - Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Superseded by:
   - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
 <!-- okf:links:end -->
