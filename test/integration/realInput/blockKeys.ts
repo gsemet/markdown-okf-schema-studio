@@ -469,7 +469,7 @@ export async function scenarioTableCellEnter(page: Page, evidence: Evidence): Pr
 
 /**
  * RI-T35: Cmd/Ctrl+B in a table cell bolds the selection and Enter saves the cell.
- * @tests_req StRS-MDOKFSTUDIO-TABLE-012
+ * @tests_req StRS-MDOKFSTUDIO-TABLE-015
  * @tests_req SwRS-MDOKFSTUDIO-TABLE-085
  */
 export async function scenarioTableCellBold(page: Page, evidence: Evidence): Promise<void> {

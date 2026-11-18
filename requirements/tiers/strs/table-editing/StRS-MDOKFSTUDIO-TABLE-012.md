@@ -10,13 +10,13 @@ description: When a writer applies bold, italic, a link, a colour or another
   the table at the caret.
 project: markdown-okf-schema-studio
 scope: table-editing
-req_lifecycle: approved
-status: stable
+req_lifecycle: superseded
+status: deprecated
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-18T10:55:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-18T10:55:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -24,16 +24,11 @@ user_need: As a writer, I format text in a cell from the bar or with a shortcut
   and the table keeps its shape; I insert a table of the size I want, align a
   column, give the table a caption or turn it into an HTML table without typing
   the Markdown by hand.
-derived_by:
-- SwRS-MDOKFSTUDIO-PALETTE-031
-- SwRS-MDOKFSTUDIO-TABLE-018
-- SwRS-MDOKFSTUDIO-TABLE-085
-- SwRS-MDOKFSTUDIO-TABLE-091
-- SwRS-MDOKFSTUDIO-TABLE-106
-- SwRS-MDOKFSTUDIO-TABLE-111
-- SwRS-MDOKFSTUDIO-TABLE-115
-- SwRS-MDOKFSTUDIO-TABLE-117
+derived_by: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- StRS-MDOKFSTUDIO-TABLE-015
+- StRS-MDOKFSTUDIO-TABLE-016
 ---
 
 ## Tables and cell text are formatted, inserted, aligned and captioned
@@ -56,42 +51,12 @@ As a writer, I format text in a cell from the bar or with a shortcut and the tab
 - Column alignment (GFM and MyST) rewrites only the delimiter cell of the caret's column; Table with caption (MyST) wraps the pipe table at the caret in a `{table}` directive.
 - The size chooser popover and the palette buttons and slash entries themselves belong to the palette-slash scope.
 
-### Main paths
-
-#### Path 1: Format the text of a cell
-
-1. A cell editor is open
-   - SwRS-MDOKFSTUDIO-TABLE-085: the writer presses a button of the Cell formatting group of the table bar and it applies to the cell text
-   - Option SwRS-MDOKFSTUDIO-TABLE-085 (refusal): a block-only shortcut does nothing in the cell
-   - Option SwRS-MDOKFSTUDIO-TABLE-085 (nominal): the slash menu of a cell offers the commands allowed in a cell
-2. The cell text is formatted
-   - SwRS-MDOKFSTUDIO-TABLE-018: the writer presses Enter or Done and the cell is committed
-   - Option SwRS-MDOKFSTUDIO-TABLE-091 (nominal): pipes of link text and URL inserted from the bar are written as \|
-3. The cell is saved with its formatted text
-
-#### Path 2: Insert a table and shape it
-
-1. A block text box is open in edit mode
-   - SwRS-MDOKFSTUDIO-TABLE-106: the writer runs Table with a size of R x C and a pipe table is inserted after the end of the selection
-   - Option SwRS-MDOKFSTUDIO-TABLE-106 (refusal): a missing, malformed or out-of-range size
-2. A pipe table is in the text
-   - SwRS-MDOKFSTUDIO-TABLE-111: the writer runs Column alignment and only the delimiter cell of the caret's column is rewritten
-   - Option SwRS-MDOKFSTUDIO-TABLE-115 (nominal): Table with caption wraps the pipe table in a table directive
-   - Option SwRS-MDOKFSTUDIO-TABLE-117 (nominal): HTML table replaces the pipe table with an HTML table
-3. The column is aligned
-
 <!-- okf:links:start -->
 ### Links
 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
-- Derived by:
-  - [SwRS-MDOKFSTUDIO-PALETTE-031](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
-  - [SwRS-MDOKFSTUDIO-TABLE-018](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-018.md): Enter, Done, leaving the cell or a click elsewhere commits the cell
-  - [SwRS-MDOKFSTUDIO-TABLE-085](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-085.md): The table bar's cell group formats the cell text
-  - [SwRS-MDOKFSTUDIO-TABLE-091](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-091.md): Pipes in cell text are escaped and line breaks become spaces
-  - [SwRS-MDOKFSTUDIO-TABLE-106](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-106.md): The Table action inserts a pipe table of the chosen size on its own lines
-  - [SwRS-MDOKFSTUDIO-TABLE-111](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-111.md): Column alignment sets the colons of the caret's column
-  - [SwRS-MDOKFSTUDIO-TABLE-115](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-115.md): Table with caption wraps the table at the caret in a table directive
-  - [SwRS-MDOKFSTUDIO-TABLE-117](../../swrs/table-editing/SwRS-MDOKFSTUDIO-TABLE-117.md): HTML table converts or inserts an HTML table
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-TABLE-015](StRS-MDOKFSTUDIO-TABLE-015.md): A writer formats the text of a table cell
+  - [StRS-MDOKFSTUDIO-TABLE-016](StRS-MDOKFSTUDIO-TABLE-016.md): A writer inserts and shapes a table from the palette
 <!-- okf:links:end -->

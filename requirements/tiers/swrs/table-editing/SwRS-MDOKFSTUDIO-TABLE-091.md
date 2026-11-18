@@ -14,7 +14,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-TABLE-012
+- StRS-MDOKFSTUDIO-TABLE-015
 depends_on:
 - SwRS-MDOKFSTUDIO-TABLE-102
 annotation_exemption: false
@@ -84,7 +84,7 @@ When the writer types text into a table cell or inserts text into a cell from th
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+  - [StRS-MDOKFSTUDIO-TABLE-015](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-015.md): A writer formats the text of a table cell
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TABLE-102](SwRS-MDOKFSTUDIO-TABLE-102.md): Edge pipes are optional and only an escaped pipe stays in its cell
 <!-- okf:links:end -->

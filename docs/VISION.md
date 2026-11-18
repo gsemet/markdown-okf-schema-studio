@@ -97,5 +97,5 @@ any significant change needs the owner's explicit agreement.
 | Diagrams and charts (Mermaid, Vega-Lite, PlantUML without setup) | StRS-MDOKFSTUDIO-DIAG-001, StRS-MDOKFSTUDIO-DIAG-006 |
 | Annotation: review threads in a side JSON file, TODO notes and discussions in the source | StRS-MDOKFSTUDIO-REVIEW-001, StRS-MDOKFSTUDIO-REVIEW-003, StRS-MDOKFSTUDIO-REVIEW-012, StRS-MDOKFSTUDIO-REVIEW-015 |
 | Editing in small raw blocks, exact edits, slash menu | StRS-MDOKFSTUDIO-BLOCK-003, StRS-MDOKFSTUDIO-BLOCK-025, StRS-MDOKFSTUDIO-PALETTE-015 |
-| Tables | StRS-MDOKFSTUDIO-TABLE-001, StRS-MDOKFSTUDIO-TABLE-012 |
+| Tables | StRS-MDOKFSTUDIO-TABLE-001, StRS-MDOKFSTUDIO-TABLE-015, StRS-MDOKFSTUDIO-TABLE-016 |
 | Reading width and wide content | StRS-MDOKFSTUDIO-LAYOUT-001, StRS-MDOKFSTUDIO-LAYOUT-003 |

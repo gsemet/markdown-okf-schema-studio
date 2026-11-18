@@ -14,7 +14,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-TABLE-012
+- StRS-MDOKFSTUDIO-TABLE-016
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -66,5 +66,5 @@ When the writer runs Table with caption, the extension SHALL wrap the pipe table
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+  - [StRS-MDOKFSTUDIO-TABLE-016](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-016.md): A writer inserts and shapes a table from the palette
 <!-- okf:links:end -->
