@@ -14,10 +14,10 @@ scope: table-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-18T10:55:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-18T10:55:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -65,22 +65,46 @@ As a writer, I click a table cell in edit mode and edit its Markdown right where
 
 - The editor shows the raw Markdown of the cell, for example `**y**`, not the rendered text.
 - Only a well-formed pipe table opens a cell editor; any other table source (a `{list-table}`, an HTML table, a `{table}` directive block, a malformed delimiter row) opens the whole block in the raw Markdown editor instead.
-- A bare `http://`, `https://` or `www.` URL typed in a table cell renders as a link in the read view; that rendering is specified by SwRS-MDOKFSTUDIO-GFM-001 and not restated here.
-- Wide tables that scroll inside their own box are specified by the layout-width scope (SwRS-MDOKFSTUDIO-LAYOUT-032).
 - Every save carries the whole table, not only the edited cell.
-- The writer keeps one editing session for all the cells visited in one table, so the whole session is one undo step in the document (the host side belongs to the block-editing scope).
+- The writer keeps one editing session for all the cells visited in one table, so the whole session is one undo step in the document.
 - After a save, the table is put back at the same place on screen.
 - A cell editor never stays open without the focus: leaving the text box for anything outside the cell editor, its Done and Cancel buttons and the table bar commits the cell.
 - A click on a block outside the table saves the cell first and opens the other block afterwards.
 - A cell cannot contain a line break typed by keyboard: Enter always finishes the cell.
 - Escape works wherever the focus is while a cell editor is open, but not during an input-method (IME) composition.
 - Nothing is saved after a cancel, and a later loss of focus changes nothing.
-- Restoring the table after an autosave is the same host behaviour as for block editors (see SwRS-MDOKFSTUDIO-BLOCK-053).
-- The text is saved before the navigation; the host side belongs to the block-editing scope (see SwRS-MDOKFSTUDIO-BLOCK-205).
+- The text is saved before the navigation.
 - Turning edit mode off while a cell is open saves the cell like Done.
 - When the page is hidden or closed, typing that is still waiting to be saved is sent at once; the editor is not closed because the page is going away.
-- The causes of a refusal (stale revision, changed text, a file that VS Code holds read-only) are host-side and belong to the block-editing and trust-security scopes; edit mode is available whatever the trust, so the cell editor opens in Restricted Mode and for a standalone file.
+- Edit mode is available whatever the trust, so the cell editor opens in Restricted Mode and for a standalone file.
 - The refusal message is shown in the status line of the editor: in the table bar once the cell text box exists, and in the cell editor while the source is loading; the navigation that waited for the save does not carry on.
+
+### Use case diagram
+
+Editing a table cell in place, moving between cells and finishing.
+
+```mermaid
+sequenceDiagram
+    actor Writer
+    participant Cell as Cell editor
+    participant VSCode as VS Code
+    participant File
+    Writer->>Cell: clicks a cell of a pipe table in edit mode
+    Cell-->>Writer: raw Markdown of the cell, the table keeps its layout
+    Writer->>Cell: types
+    Cell->>VSCode: autosave of the whole table
+    VSCode->>File: the table with the typed text
+    Writer->>Cell: Tab moves to the next cell, the change kept
+    alt Enter, Done or a click away
+        Cell->>VSCode: commit of the cell
+        VSCode->>File: final text of the table
+    else Escape or Cancel
+        Cell-->>Writer: the cell goes back to what it was
+    else save refused
+        VSCode-->>Cell: reason
+        Cell-->>Writer: reason in the table bar, typed text kept
+    end
+```
 
 ### Main paths
 
