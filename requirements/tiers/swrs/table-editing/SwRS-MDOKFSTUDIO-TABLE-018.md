@@ -16,7 +16,7 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-001
-- StRS-MDOKFSTUDIO-TABLE-012
+- StRS-MDOKFSTUDIO-TABLE-015
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
 annotation_exemption: false
@@ -116,7 +116,7 @@ When the writer presses Enter in the cell text box, with or without Cmd, Ctrl or
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
-  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+  - [StRS-MDOKFSTUDIO-TABLE-015](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-015.md): A writer formats the text of a table cell
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
 <!-- okf:links:end -->

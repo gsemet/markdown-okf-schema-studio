@@ -14,7 +14,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-TABLE-012
+- StRS-MDOKFSTUDIO-TABLE-015
 - StRS-MDOKFSTUDIO-PALETTE-015
 depends_on: []
 annotation_exemption: false
@@ -97,6 +97,6 @@ When a cell editor is open, the extension SHALL add to the table bar, after a se
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+  - [StRS-MDOKFSTUDIO-TABLE-015](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-015.md): A writer formats the text of a table cell
   - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
 <!-- okf:links:end -->

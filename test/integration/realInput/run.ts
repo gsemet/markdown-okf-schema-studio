@@ -41,6 +41,7 @@ import {
 } from "../../shared/tocLoop";
 import { setWorkbenchPage, takeFailureFocusDump } from "./common";
 import { scenarioAlertTypePickProbe } from "./alertPickProbe";
+import { scenarioTableInsertFromSlash } from "./tableInsertSlash";
 import { installWorkbenchFocusTrace, withFocusDumpOnFailure, workbenchFocusDump } from "../../shared/workbenchFocusDump";
 import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioHiddenReviewMarks, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
 import { scenarioEnterCommitsTextField, scenarioEscapeCancels, scenarioFrontmatterStructuralMinimalPatch, scenarioFrontmatterValueMinimalPatch, scenarioLinkPanel, scenarioLinkPanelPrefill, scenarioPalette, scenarioShortcuts, scenarioSlashMenu, scenarioTypingUndoGrouping, scenarioUndoStaysInEditor } from "./textEditing";
@@ -245,6 +246,7 @@ export async function run(): Promise<void> {
     await scenarioArrowNavigation(page, evidence);
     await scenarioTableCellEnter(page, evidence);
     await scenarioTableCellBold(page, evidence);
+    await scenarioTableInsertFromSlash(page);
     await scenarioTableMinimalDiff(page, evidence);
     await scenarioOpenWithEditor(page, evidence);
     await scenarioFrontmatterValueMinimalPatch(page, evidence);
