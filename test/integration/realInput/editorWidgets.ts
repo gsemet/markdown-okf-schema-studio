@@ -765,6 +765,7 @@ export async function scenarioEditAffordances(page: Page, evidence: Evidence): P
  * RI-T16: turning edit mode on keeps the reading layout of paragraphs that are not being edited.
  * @tests_req StRS-MDOKFSTUDIO-BLOCK-001
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
+ * @tests_req SwRS-MDOKFSTUDIO-LIFE-172
  */
 export async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): Promise<void> {
   const WORDS = "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike november";
@@ -830,12 +831,13 @@ export async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): 
       `only the clicked block (line ${firstLine}) became an editor; reading lines ${JSON.stringify(Object.keys(reading))}, `
       + `visible after the click ${JSON.stringify(Object.keys(clicked))}`);
     await escapeBlockEditor(page, "the block editor to close after Escape");
-    // Reopen: closing the preview and opening a new one finds the edit mode last chosen.
+    // Reopen: a fresh panel starts in preview mode, whatever edit mode was last chosen (LIFE-172).
     await closeAllEditors();
     await openSidePreview(source);
     await waitForRender(source);
-    await waitFor("edit mode to still be on in the reopened preview", () => withCurrentFrame(page, async (frame) =>
-      await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode") === "on"));
+    const reopened = await withCurrentFrame(page, (frame) =>
+      frame.locator("html").getAttribute("data-sphinx-preview-edit-mode"));
+    assert.equal(reopened, "off", "a fresh preview starts in preview mode (SwRS-MDOKFSTUDIO-LIFE-172)");
   });
 }
 
