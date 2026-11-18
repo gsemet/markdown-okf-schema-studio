@@ -144,6 +144,7 @@ function layersAndAreas(model: ViewerModel): string {
 export const HOME_DESCRIPTION = "Every feature of Studio written down as use cases, behaviours, code and tests, each linked to the next.";
 
 /** The home page. Without a model (no report) it says so and shows no figure and no area. */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-069
 export function homePage(model: ViewerModel | undefined, root: string): PageSpec {
   const missing = `<h2>The figures</h2><p class="req-missing">The requirements report was not generated, so there are no figures or areas to show. Run <code>just requirements-report</code> and rebuild the site.</p>`;
   const body = `

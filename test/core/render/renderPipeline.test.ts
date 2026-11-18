@@ -78,6 +78,7 @@ test("renderer failures preserve the stage and original failure message", async 
   });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-001
 test("cancellation while rendering rejects a late successful result", async (context) => {
   context.after(resetRenderHooksForTests);
   let finish: ((value: { html: string }) => void) | undefined;

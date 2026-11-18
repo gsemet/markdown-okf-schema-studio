@@ -286,6 +286,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
           rt.selection.selectBlocksTo(target);
           return;
         }
+        // @implements_req SwRS-MDOKFSTUDIO-DIAG-127
         if (state.editMode) {
           event.preventDefault?.();
           const eventTarget = elementOf(event)!;

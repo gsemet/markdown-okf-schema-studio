@@ -104,7 +104,7 @@ The list holds the elements and attributes the supported rendering needs: the HT
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-GFM-029: raw HTML outside the subset is dropped
+- SwRS-MDOKFSTUDIO-CORE-071: raw HTML outside the subset is dropped
 - SwRS-MDOKFSTUDIO-GFM-031: raw HTML tables are rebuilt from an allow-list and keep a sanitised subset of styles
 - SwRS-MDOKFSTUDIO-GFM-034: colour spans keep safe colours only, and a removed span style records a diagnostic
 - SwRS-MDOKFSTUDIO-LAYOUT-023: the auto width rules also rewrite attributes

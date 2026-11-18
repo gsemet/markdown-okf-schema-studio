@@ -21,8 +21,8 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/commentStyles.ts
-- src/core/preview/styles/contentBlockStyles.ts
+- src/core/preview/styles/commentStyles.markers.ts
+- src/core/preview/styles/contentBlockStyles.markers.ts
 - src/core/render/mystBlockTransforms.ts
 - src/core/security/html-sanitizer.ts
 tested_in_files:

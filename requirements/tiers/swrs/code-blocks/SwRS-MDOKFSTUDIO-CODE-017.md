@@ -122,7 +122,7 @@ When the pointer is over a code block of the preview content, or the block holds
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-CODE-019: copies the raw code of the block and confirms it
-- SwRS-MDOKFSTUDIO-TRUST-006: a preview with restricted reads keeps copying (see SwRS-MDOKFSTUDIO-TRUST-006)
+- SwRS-MDOKFSTUDIO-TRUST-005: a preview with restricted reads keeps copying (see SwRS-MDOKFSTUDIO-TRUST-005)
 
 ### Verification notes
 

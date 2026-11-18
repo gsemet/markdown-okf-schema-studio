@@ -60,6 +60,7 @@ interface Outcome {
  * Draws each source (StRS id to Mermaid text) as an SVG with one headless Chromium, started only when
  * there is a source. A fence that Mermaid cannot draw rejects with the StRS id, its file and Mermaid's message.
  */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-087
 export async function renderUseCaseDiagrams(
   sources: ReadonlyMap<string, string>,
   theme: DiagramTheme = CREAM_DIAGRAM_THEME,

@@ -21,7 +21,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/render/siteTheme.markers.ts
+- test/site/siteTheme.ts
 tested_in_files:
 - test/site/requirementsViewer/pages.test.ts
 - test/site/requirementsViewer/write.test.ts

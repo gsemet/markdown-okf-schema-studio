@@ -71,7 +71,8 @@ stateDiagram-v2
     StalePage: Last good page stays, diagnostics listed
     ErrorPage: Error page with the failure message
 ```
-A state diagram, kept simple: the site and GitHub draw it, Node could not check it.
+
+What the writer sees after each render: the page of a good render, the error page when the first render fails, and the last good page with its diagnostics when a later render fails; the next edit renders again.
 
 ### Main paths
 

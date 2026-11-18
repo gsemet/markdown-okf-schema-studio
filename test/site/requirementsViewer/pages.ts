@@ -29,6 +29,7 @@ function stripLead(need: string): string {
 
 // ---------------------------------------------------------------- area
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-080
 export function areaPage(model: ViewerModel, area: Area): PageSpec {
   const dir = areaDir(area.id);
   const cases = model.active.filter((requirement) => requirement.tier === "StRS" && requirement.scope === area.id);
@@ -170,6 +171,7 @@ function fileList(model: ViewerModel, files: readonly string[], tests: boolean):
   return `<ul class="files">${items.join("")}</ul>`;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-082
 export function behaviourPage(model: ViewerModel, behaviour: Requirement): PageSpec {
   const dir = requirementDir(behaviour);
   const area = areaOf(model, behaviour.scope);

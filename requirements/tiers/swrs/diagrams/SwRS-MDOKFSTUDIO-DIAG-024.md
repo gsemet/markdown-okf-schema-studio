@@ -24,7 +24,6 @@ implemented_in_files:
 - src/core/configuration/plantUmlConfiguration.ts
 - src/core/configuration/settingsRegistry.ts
 - src/core/render/renderPipeline.ts
-- src/page/modules/plantumlPreview.ts
 - src/session/features/plantUml.ts
 - src/session/hostEvents.ts
 tested_in_files:

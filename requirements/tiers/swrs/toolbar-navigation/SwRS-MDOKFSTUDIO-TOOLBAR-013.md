@@ -67,7 +67,7 @@ When a previewViewPreferenceChanged message reaches the host, the extension SHAL
 ### Verification notes
 
 - Method: test/core/protocol/pageToHost.test.ts (nominal, zoom, refusal: previewViewPreferenceChanged validates the value per preference; the own-key rows are by code only)
-- Criteria: Booleans pass for the four switches; only the integers 70 to 200 pass for the zoom; isOneOf(value, margin, auto, full) for the width mode; every other value or name fails. The envelope and the render gate are those of the page messages (see SwRS-MDOKFSTUDIO-TRUST-052 and SwRS-MDOKFSTUDIO-TRUST-065); a preview with restricted reads keeps the preference like any other (see SwRS-MDOKFSTUDIO-TRUST-006).
+- Criteria: Booleans pass for the four switches; only the integers 70 to 200 pass for the zoom; isOneOf(value, margin, auto, full) for the width mode; every other value or name fails. The envelope and the render gate are those of the page messages (see SwRS-MDOKFSTUDIO-TRUST-052 and SwRS-MDOKFSTUDIO-TRUST-065); a preview with restricted reads keeps the preference like any other (see SwRS-MDOKFSTUDIO-TRUST-005).
 
 <!-- okf:links:start -->
 ### Links

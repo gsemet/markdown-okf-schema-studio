@@ -20,7 +20,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/tableStyles.ts
+- src/core/preview/styles/tableStyles.markers.ts
 tested_in_files:
 - test/visual/capture_table_row_colours.py
 - test/visual/tableRowColourScenarios.ts

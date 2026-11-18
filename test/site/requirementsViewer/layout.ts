@@ -148,6 +148,7 @@ function describe(requirement: Requirement | undefined, via: PathTransition): st
 }
 
 /** The map as an SVG: states are circles, behaviours the lines between them, every line a link. */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-081
 export function metroSvg(model: ViewerModel, paths: readonly MainPath[], fromDir: string): string {
   const { states, edges } = buildGraph(paths);
   const nodes = [...states.values(), ...edges.filter((edge) => edge.option).map((edge) => edge.b)];

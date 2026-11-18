@@ -12,7 +12,7 @@
  * callback (see `plantumlFileRequests.ts`), and draws again on `studio:plantuml-includes-changed`.
  */
 import { renderToString } from "@plantuml/core";
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-024
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
 // Bundled `!theme` definitions and OpenIconic sprites: registered as globals, nothing is fetched.
 import "@plantuml/core/themes.js";
 import "@plantuml/core/openiconic.js";
@@ -26,7 +26,7 @@ import {
 } from "./plantumlDiagram";
 import { PLANTUML_FILE_REQUEST_EVENT, PLANTUML_INCLUDES_CHANGED_EVENT, type PlantUmlFileRequestDetail } from "./plantumlFileRequests";
 
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-032
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-046
 const askHost: PlantUmlFileHost = (request) => new Promise<PlantUmlFileAnswer>((resolve) => {
   const detail: PlantUmlFileRequestDetail = { request, accepted: false, respond: resolve };
   document.dispatchEvent(new CustomEvent(PLANTUML_FILE_REQUEST_EVENT, { detail }));

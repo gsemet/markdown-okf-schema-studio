@@ -607,7 +607,6 @@ html[data-sphinx-preview-edit-mode="on"] .sphinx-preview-table-menu:has(+ [data-
 }
 `;
 
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
 /**
  * Edit mode: scroll anchoring, editable blocks, insert points and move buttons, the block and table
  * cell editors and the table menu.

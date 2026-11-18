@@ -19,7 +19,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/render/mystTightness.markers.ts
+- scripts/myst-patches.mjs
 tested_in_files:
 - test/build/mystSourcePatches.test.ts
 default_owner_email: gaetan@xeberon.net

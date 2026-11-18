@@ -48,7 +48,7 @@ When the page receives a content patch with a malformed status line or with more
 
 ### Archived
 
-Covered by SwRS-MDOKFSTUDIO-TRUST-061 (a content patch must stay within its bounds); the code attribute of each status line is kept by SwRS-MDOKFSTUDIO-LIFE-087.
+Covered by SwRS-MDOKFSTUDIO-TRUST-059 (a content patch must stay within its bounds); the code attribute of each status line is kept by SwRS-MDOKFSTUDIO-LIFE-087.
 
 <!-- okf:links:start -->
 ### Links

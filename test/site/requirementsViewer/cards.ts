@@ -35,6 +35,7 @@ export function levelCardBody(level: Level): string {
 }
 
 /** The four cards, named like the pictures `requirements/og/<level>.png`. */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-085
 export function levelCards(): { name: Level; html: string }[] {
   return (Object.keys(LEVELS) as Level[]).map((level) => ({ name: level, html: cardDocument(levelCardBody(level)) }));
 }

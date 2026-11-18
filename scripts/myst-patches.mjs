@@ -40,6 +40,7 @@ function patchImport(source) {
   return source.includes(IMPORT_CORRECTED) ? source : undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-070
 function patchTightness(source) {
   if (source.includes(TIGHTNESS_HEAD) && source.includes(TIGHTNESS_CALL)) {
     return source.replace(TIGHTNESS_HEAD, TIGHTNESS_PATCHED_HEAD).replace(TIGHTNESS_CALL, TIGHTNESS_PATCHED_CALL);

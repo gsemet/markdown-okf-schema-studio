@@ -94,7 +94,7 @@ When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, h
 - SwRS-MDOKFSTUDIO-TOOLBAR-090: a link is an anchor (at least one character after the hash and no space, hash or question mark), external, local or blocked; other schemes are blocked
 - SwRS-MDOKFSTUDIO-TOOLBAR-094: a relative link must stay below a workspace root
 - SwRS-MDOKFSTUDIO-TRUST-036: the other removals of the sanitizer
-- SwRS-MDOKFSTUDIO-GFM-029: raw HTML outside the subset is dropped
+- SwRS-MDOKFSTUDIO-CORE-071: raw HTML outside the subset is dropped
 
 ### Verification notes
 

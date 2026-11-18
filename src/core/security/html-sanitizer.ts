@@ -265,14 +265,7 @@ function walkChildren(
   }
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-CORE-008
-// @implements_req SwRS-MDOKFSTUDIO-CORE-041
 // @implements_req SwRS-MDOKFSTUDIO-GFM-016
-// @implements_req SwRS-MDOKFSTUDIO-GFM-034
-// @implements_req SwRS-MDOKFSTUDIO-TRUST-011
-// @implements_req SwRS-MDOKFSTUDIO-TRUST-025
-// @implements_req SwRS-MDOKFSTUDIO-TRUST-036
-// @implements_req SwRS-MDOKFSTUDIO-TRUST-042
 function rewriteNode(
   node: HtmlNode,
   removed: Set<HtmlNode>,
@@ -281,12 +274,14 @@ function rewriteNode(
   tableStyles: Map<string, string>,
 ): boolean {
   const tagName = (node.tagName ?? node.nodeName).toLowerCase();
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-036
   if (REMOVED_ELEMENTS.has(tagName)) {
     removeNode(removed, node);
     addDiagnostic(diagnostics, "blocked-active-element", `Removed <${tagName}> from preview output.`);
     return false;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
   if (tagName === "link") {
     removeNode(removed, node);
     const isStylesheet = attr(node, "rel")?.value.toLowerCase().split(/\s+/u).includes("stylesheet");
@@ -310,6 +305,7 @@ function rewriteNode(
     return false;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-011
   if (tagName === "script") {
     // No document script reaches the preview. The host adds its own scripts after sanitizing.
     removeNode(removed, node);
@@ -327,6 +323,7 @@ function rewriteNode(
     return false;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-CORE-008
   if (tagName === "img" && !attr(node, "alt")) {
     setAttr(node, "alt", "");
   }
@@ -360,6 +357,7 @@ function rewriteNode(
       }
       continue;
     }
+    // @implements_req SwRS-MDOKFSTUDIO-CORE-041
     if (name === "dir") {
       const direction = attribute.value.trim().toLowerCase();
       if (SAFE_DIR_VALUES.has(direction)) {
@@ -378,6 +376,7 @@ function rewriteNode(
       }
       continue;
     }
+    // @implements_req SwRS-MDOKFSTUDIO-GFM-034
     if (name === "data-okf-color" || name === "data-okf-background") {
       if (tagName !== "span" || !isSafeOkfColor(attribute.value)) {
         removeAttr(node, attribute.name);
@@ -407,6 +406,7 @@ function rewriteNode(
       }
       continue;
     }
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-036
     if (name.startsWith("on") || name === "srcdoc" || name === "style") {
       removeAttr(node, attribute.name);
       addDiagnostic(diagnostics, "blocked-event-attribute", `Removed unsafe ${attribute.name} attribute.`);
@@ -426,6 +426,7 @@ function rewriteNode(
       continue;
     }
 
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-025
     if (name === "srcset") {
       const rewritten = rewriteSrcset(attribute.value, (request) => {
         const resolved = context.resolveResource(request, context.outputRoot);
@@ -440,6 +441,7 @@ function rewriteNode(
       continue;
     }
 
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-025
     if (RESOURCE_ATTRIBUTES.has(name)) {
       const resolved = context.resolveResource(attribute.value, context.outputRoot);
       if (resolved) {
@@ -451,6 +453,7 @@ function rewriteNode(
       continue;
     }
 
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
     if (name === "href" || name === "xlink:href") {
       const originalRequest = attribute.value;
       const link = context.resolveNavigation(originalRequest, context.outputRoot);
@@ -481,6 +484,7 @@ function rewriteNode(
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-CORE-041
   if (AUTO_DIRECTION_ELEMENTS.has(tagName) && !attr(node, "dir")) {
     setAttr(node, "dir", "auto");
   }

@@ -16,12 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-007
-annotation_exemption: true
-exemption_reason: Implemented in scripts/version.py, which is outside the
-  scanned source directories; verified by test_release.py and
-  test_plugin_manifests.py.
+annotation_exemption: false
+exemption_reason:
 derived_by: []
-implemented_in_files: []
+implemented_in_files:
+- scripts/version.py
 tested_in_files:
 - test/build/test_plugin_manifests.py
 - test/build/test_release.py

@@ -22,6 +22,8 @@ scopes:
       - src
       - sphinx
       - skills
+      - scripts
+      - test/site
     test_dirs:
       - test
       - sphinx/tests

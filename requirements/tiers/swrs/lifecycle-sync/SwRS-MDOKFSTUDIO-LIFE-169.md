@@ -172,7 +172,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-LIFE-170: the start of a new page from the saved, stored or default value of each choice, with its rounding.
-- SwRS-MDOKFSTUDIO-TRUST-006: a preview with restricted reads keeps the viewing choices (theme, zoom, width, table of contents, comments, incoming changes).
+- SwRS-MDOKFSTUDIO-TRUST-005: a preview with restricted reads keeps the viewing choices (theme, zoom, width, table of contents, comments, incoming changes).
 
 ### Verification notes
 

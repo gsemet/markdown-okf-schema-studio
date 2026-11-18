@@ -22,8 +22,8 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/contentBlockStyles.ts
-- src/core/preview/styles/contentLayoutStyles.ts
+- src/core/preview/styles/contentBlockStyles.markers.ts
+- src/core/preview/styles/contentLayoutStyles.markers.ts
 tested_in_files:
 - test/core/preview/creamTheme.test.ts
 - test/core/preview/previewStyles.test.ts

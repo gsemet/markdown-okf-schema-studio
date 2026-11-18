@@ -18,7 +18,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/render/svgPictures.ts
+- src/page/features/pageInput.ts
 tested_in_files:
 - test/visual/svgPictureScenarios.ts
 default_owner_email: gaetan@xeberon.net

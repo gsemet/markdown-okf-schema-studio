@@ -27,6 +27,7 @@ implemented_in_files:
 - src/page/modules/hostRequests.ts
 - src/page/modules/plantumlDiagram.ts
 - src/page/modules/plantumlFileRequests.ts
+- src/page/modules/plantumlPreview.ts
 tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
 - test/page/modules/plantumlFileRequests.test.ts

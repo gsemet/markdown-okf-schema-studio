@@ -394,6 +394,7 @@ export function behavioursOf(model: ViewerModel, id: string): Requirement[] {
 }
 
 /** Retired requirements of one tier that derive from `id` (SwRS) or sit in the scope `id` (StRS). */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-083
 export function retiredBehavioursOf(model: ViewerModel, id: string): Requirement[] {
   return model.retired.filter((requirement) => requirement.tier === "SwRS" && requirement.derivesFrom.includes(id));
 }
