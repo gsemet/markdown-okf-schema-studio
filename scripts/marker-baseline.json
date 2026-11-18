@@ -11,7 +11,6 @@
     "src/core/security/html-sanitizer.ts": 8,
     "src/page/features/contentPatch.ts": 4,
     "src/page/modules/editPalette.ts": 17,
-    "src/session/features/links.ts": 5,
     "src/session/features/sourceEdits.ts": 4,
     "src/session/webview.ts": 5,
     "test/core/preview/previewStyles.test.ts": 4,
