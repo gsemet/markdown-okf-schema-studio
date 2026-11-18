@@ -809,9 +809,12 @@ export async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): 
     assert.ok(Math.abs(after.top - before.top) <= 2,
       "third paragraph top moved from " + before.top + " to " + after.top);
     // Hover and click do not reflow: the other paragraphs keep their height, only the clicked block becomes an editor.
+    // The block editor keeps the clicked paragraph in the DOM, hidden (data-sphinx-preview-editing, display: none),
+    // so only the paragraphs not being edited are measured.
     const heights = (): Promise<Record<string, number>> => withCurrentFrame(page, (frame) =>
-      frame.locator("p[data-sphinx-source-line]").evaluateAll((elements) => Object.fromEntries(elements.map((element) =>
-        [element.getAttribute("data-sphinx-source-line") ?? "", element.getBoundingClientRect().height]))));
+      frame.locator("p[data-sphinx-source-line]:not([data-sphinx-preview-editing=\"true\"])").evaluateAll((elements) =>
+        Object.fromEntries(elements.map((element) =>
+          [element.getAttribute("data-sphinx-source-line") ?? "", element.getBoundingClientRect().height]))));
     const reading = await heights();
     await withCurrentFrame(page, (frame) => frame.locator("p[data-sphinx-source-line]").nth(1).hover());
     const hovered = await heights();
@@ -822,7 +825,10 @@ export async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): 
     for (const [line, height] of Object.entries(clicked)) {
       assert.ok(Math.abs(height - (reading[line] ?? Number.NaN)) <= 2, `paragraph at line ${line} changed height from ${reading[line]} to ${height}`);
     }
-    assert.equal(Object.keys(clicked).length, Object.keys(reading).length - 1, "only the clicked block became an editor");
+    const firstLine = Object.keys(reading)[0];
+    assert.deepEqual(Object.keys(clicked), Object.keys(reading).filter((line) => line !== firstLine),
+      `only the clicked block (line ${firstLine}) became an editor; reading lines ${JSON.stringify(Object.keys(reading))}, `
+      + `visible after the click ${JSON.stringify(Object.keys(clicked))}`);
     await escapeBlockEditor(page, "the block editor to close after Escape");
     // Reopen: closing the preview and opening a new one finds the edit mode last chosen.
     await closeAllEditors();
