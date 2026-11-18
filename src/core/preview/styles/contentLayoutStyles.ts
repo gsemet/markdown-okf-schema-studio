@@ -361,8 +361,6 @@ const FOLD_CHEVRON_CSS = `/* CR 143: folding. The chevron hangs in the left marg
   min-height: 0 !important;
 }`;
 
-// @implements_req SwRS-MDOKFSTUDIO-CORE-028
-// @implements_req SwRS-MDOKFSTUDIO-CORE-034
 /**
  * The toolbar toggle icons, the TOC column, the width modes and the content typography (wrapping,
  * paragraphs, lists, checkboxes).

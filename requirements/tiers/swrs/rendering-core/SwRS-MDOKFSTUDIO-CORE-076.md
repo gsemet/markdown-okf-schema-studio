@@ -15,13 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-007
-annotation_exemption: true
-exemption_reason: Declarative CI workflow configuration and build scripts
-  (scripts/version.py, scripts/select_e2e_run.py, scripts/e2e-campaign.mjs),
-  outside the scanned source directories; verified by test_workflows.py,
-  test_release.py, test_select_e2e_run.py and e2eCampaign.test.ts.
+annotation_exemption: false
+exemption_reason:
 derived_by: []
-implemented_in_files: []
+implemented_in_files:
+- scripts/e2e-campaign.mjs
+- scripts/select_e2e_run.py
+- scripts/version.py
 tested_in_files:
 - test/build/test_release.py
 - test/build/test_select_e2e_run.py

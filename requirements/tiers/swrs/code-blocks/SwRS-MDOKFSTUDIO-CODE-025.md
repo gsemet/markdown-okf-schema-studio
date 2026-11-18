@@ -15,7 +15,7 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-004
 annotation_exemption: true
-exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-006; no marker expected."
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-005; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

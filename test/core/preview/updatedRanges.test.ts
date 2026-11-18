@@ -41,6 +41,7 @@ test("CR 139: a change is typing only with a recent keystroke and a cursor on it
   assert.equal(isTypingChange(typed, [], 0), false, "no editor shows the document");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
 test("CR 139: a change touches a selection when the changed lines meet it", () => {
   const replaced = [{ startLine: 10, endLine: 12, text: "x" }];
   assert.equal(touchesSelection(replaced, [{ startLine: 11, endLine: 11 }]), true, "inside the replaced lines");
@@ -54,6 +55,7 @@ test("CR 139: a change touches a selection when the changed lines meet it", () =
   assert.equal(touchesSelection([], [{ startLine: 0, endLine: 0 }]), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
 test("CR 046: the patch that first shows an outside change carries its changed lines", () => {
   assert.deepEqual(
     updatedRangesForPatch({ sourceText: BEFORE, version: 4 }, { sourceText: AFTER, version: 5 }, 5),
@@ -61,6 +63,7 @@ test("CR 046: the patch that first shows an outside change carries its changed l
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
 test("CR 046: no glow without an outside change in the versions the patch moves across", () => {
   const previous = { sourceText: BEFORE, version: 4 };
   const next = { sourceText: AFTER, version: 6 };
@@ -70,6 +73,7 @@ test("CR 046: no glow without an outside change in the versions the patch moves 
   assert.deepEqual(updatedRangesForPatch(previous, next, 6), [{ start: 3, end: 3 }]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
 test("CR 046: a change spread over too many places glows nowhere", () => {
   const lines = Array.from({ length: 2 * (MAX_UPDATED_RANGES + 1) }, (_, index) => "line " + index);
   const edited = lines.map((line, index) => (index % 2 === 0 ? line + " edited" : line));

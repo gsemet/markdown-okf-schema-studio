@@ -81,7 +81,7 @@ When the reader presses the Theme button, the extension SHALL switch the preview
 
 - SwRS-MDOKFSTUDIO-LIFE-169: the host stores the mode a press of the button chooses (previewThemeModeChanged, see SwRS-MDOKFSTUDIO-THEME-013).
 - SwRS-MDOKFSTUDIO-LIFE-170: a new page starts from the stored mode, then the saved state, then the default; it also owns the refusal of a theme mode the page does not know.
-- SwRS-MDOKFSTUDIO-TRUST-006: a preview with restricted reads keeps the Theme button.
+- SwRS-MDOKFSTUDIO-TRUST-005: a preview with restricted reads keeps the Theme button.
 - SwRS-MDOKFSTUDIO-THEME-016: the colours of Current mode.
 - SwRS-MDOKFSTUDIO-THEME-025: the colours of the forced modes.
 

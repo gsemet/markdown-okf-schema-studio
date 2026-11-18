@@ -21,7 +21,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/render/requirementsViewer.markers.ts
+- test/site/requirementsViewer/home.ts
 tested_in_files:
 - test/site/requirementsViewer/home.test.ts
 - test/site/requirementsViewer/model.test.ts

@@ -27,7 +27,7 @@ implemented_in_files:
 - src/page/modules/mermaidCache.ts
 - src/page/modules/mermaidPreview.ts
 tested_in_files:
-- test/integration/realInput/markers.ts
+- test/integration/realInput/renderPatching.ts
 - test/page/modules/mermaidCache.test.ts
 - test/page/modules/mermaidPreviewEntry.test.ts
 - test/page/rendererBridge.test.ts
@@ -107,16 +107,18 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 - Known issue: The listener in mermaidPreview.ts that draws after a content patch is covered only by the real VS Code scenario.
 - Known issue: Diagrams inside one pass are started together and document order only fixes their element ids.
 - Known issue: The JAR cache holds up to 64 diagrams in memory and is not cleared when a file read by an include directive changes, so such diagrams are simply never cached.
-- Known issue: The race protection of the draw passes and the guards against late results (picture and error) exist only in mermaidPreview.ts and are untested.
+- Known issue: The guard against a late error for a replaced key (the first row of that scenario) has no test; draw passes one at a time, the late picture and the error of the current key are tested in test/page/modules/mermaidPreviewEntry.test.ts.
 
 ### Verification notes
 
 - Method: test/page/modules/mermaidCache.test.ts (unchanged diagram after a node replacement, changed source or theme: same source and theme give no second run, a different source or theme gives a new run)
 - Method: test/page/rendererBridge.test.ts (page events reach the diagram renderers: a content patch draws only new diagrams)
-- Method: test/integration/realInput/markers.ts (real VS Code scenario RI-T34 in test/integration/realInput/renderPatching.ts: a Mermaid diagram is drawn again in the same frame)
+- Method: real VS Code scenario RI-T34 in test/integration/realInput/renderPatching.ts (a Mermaid diagram is drawn again in the same frame)
 - Method: test/core/render/plantUmlCache.test.ts `a second render of the same source starts no process` (the JAR pipeline reuses an earlier render)
 - Method: test/page/modules/plantumlDiagram.test.ts (a PlantUML patch draws only new diagrams, a superseded render does not overwrite a newer one)
-- Method: draw passes one at a time, late picture and late error have no test (browser entry point mermaidPreview.ts; to be covered by a unit test of the queue)
+- Method: test/page/modules/mermaidPreviewEntry.test.ts `Mermaid draw passes run one at a time, in the order they were requested` (draw passes one at a time)
+- Method: test/page/modules/mermaidPreviewEntry.test.ts `a Mermaid drawing finished for an earlier theme never replaces the picture of the current one` (a late picture for a replaced key is not shown)
+- Method: test/page/modules/mermaidPreviewEntry.test.ts `a failed Mermaid drawing shows one error for the current key and sets the error state` (a late error, the row of the current key)
 - Criteria: Same source and theme give no second run; a different source or theme gives a new run; only diagrams without a render state are drawn after a patch; passes never overlap; only the current key's result reaches the node; the JAR pipeline starts no process for an unchanged diagram text.
 
 <!-- okf:links:start -->

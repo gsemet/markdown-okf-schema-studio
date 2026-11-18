@@ -52,7 +52,7 @@ When the extension builds the page of a document, it SHALL have the sanitizer re
 - SwRS-MDOKFSTUDIO-TRUST-036: the sanitizer removes active content and keeps the rest
 
 ### Verification notes
-- Method: test/security/html-policy.test.ts (reduced previews remove external scripts while retaining contained media; trusted previews also remove scripts and the nonce attribute of the document) checks the scenarios. The host wiring in src/session/features/rendering.ts still passes the negated restricted-reads flag, which the sanitizer now ignores. The renderer already drops raw HTML scripts (SwRS-MDOKFSTUDIO-GFM-029), so this removal is a second wall.
+- Method: test/security/html-policy.test.ts (reduced previews remove external scripts while retaining contained media; trusted previews also remove scripts and the nonce attribute of the document) checks the scenarios. The host wiring in src/session/features/rendering.ts still passes the negated restricted-reads flag, which the sanitizer now ignores. The renderer already drops raw HTML scripts (SwRS-MDOKFSTUDIO-CORE-071), so this removal is a second wall.
 - Criteria: The page holds no script element written by the document, in any mode; the diagnostic blocked-script or blocked-inline-script is recorded; no nonce attribute written by the document remains.
 
 <!-- okf:links:start -->

@@ -55,6 +55,7 @@ export const SITE_ROOT_CSS = `:root{color-scheme:light;${Object.entries(SITE_TOK
  * The shared stylesheet: tokens, base rules and the site header. Serif for what is read, sans for
  * labels, mono for identifiers. The viewer's `viewer.css` and the main pages' own rules follow it.
  */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-086
 export const SITE_CSS = `${SITE_ROOT_CSS}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}

@@ -47,7 +47,7 @@ When a content patch names the wrong current identifiers or carries malformed fi
 
 ### Archived
 
-Covered by SwRS-MDOKFSTUDIO-TRUST-060 and SwRS-MDOKFSTUDIO-TRUST-061 (a patch must be addressed to the page and stay within its bounds).
+Covered by SwRS-MDOKFSTUDIO-TRUST-060 and SwRS-MDOKFSTUDIO-TRUST-059 (a patch must be addressed to the page and stay within its bounds).
 
 <!-- okf:links:start -->
 ### Links

@@ -154,7 +154,6 @@ function textOf(element: SvgElement, tagName: string): string | undefined {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-125
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-127
 /** Turns the code nodes of language `svg` into pictures (see the module comment). */
 function renderSvgNodes(node: MystNode, state: { count: number }, diagnostics: RenderDiagnostic[]): void {
   if (node.type === "code" && node.lang?.toLowerCase() === "svg") {

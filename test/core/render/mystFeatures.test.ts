@@ -168,6 +168,7 @@ test("MyST code directives number and emphasize lines relative to their start", 
   assert.equal(result.diagnostics.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022
 test("MyST code-cell directives render numbered input without claiming execution", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -882,6 +883,7 @@ test("table directives render trusted workspace-local HTML includes", async () =
   assert.equal(result.diagnostics.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022
 test("Jupyter table output embeds show a project-build placeholder", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -921,6 +923,7 @@ test("block elements carry the source line the editor scrolls against", async ()
   assert.match(result.html, /<table data-line="9" data-end-line="11">/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("multiline blocks retain their full mapped source range", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument("First line\ncontinued line\n\nSecond block.\n"),
@@ -1141,6 +1144,7 @@ test("standard HTML and inline or fenced XML stay outside context grouping", asy
   assert.equal(result.diagnostics.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("block source ranges stay absolute when leading frontmatter is stripped", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument("---\ntype: finding\nstatus: draft\n---\n# Heading\n\nFirst line\ncontinued line\n"),
@@ -1267,6 +1271,7 @@ test("tilde pairs render as struck-through text only in prose", async () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("a lone raw <img> block is a mapped block with a source line", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument("Before.\n\n<img src=\"img.png\" alt=\"c\">\n\nAfter.\n"),

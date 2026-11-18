@@ -23,6 +23,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- scripts/page-bundle.mjs
 - src/core/render/mathRenderer.ts
 - src/core/render/mystInlineTransforms.ts
 tested_in_files:

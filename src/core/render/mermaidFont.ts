@@ -1,4 +1,3 @@
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
 /**
  * The one font Mermaid diagrams measure and draw their labels with.
  *
@@ -12,6 +11,7 @@
  *
  * A system font stack only, no web font: an SVG image cannot load the page's fonts.
  */
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
 export const MERMAID_FONT_FAMILY = '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Ubuntu, "Helvetica Neue", Arial, sans-serif';
 
 /** Mermaid's own default label size, written out so both sides use it. */

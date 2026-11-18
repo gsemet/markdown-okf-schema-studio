@@ -22,6 +22,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- scripts/page-bundle.mjs
 - src/core/preview/styles/codeBlockStyles.ts
 - src/core/render/highlight.ts
 - src/core/render/mystRenderer.ts

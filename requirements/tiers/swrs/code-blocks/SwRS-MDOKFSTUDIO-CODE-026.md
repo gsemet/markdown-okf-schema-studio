@@ -78,7 +78,7 @@ A request is answered by `editId` (see SwRS-MDOKFSTUDIO-TRUST-090). The shape ch
 
 - GIVEN a `previewCopyText` message that passes the shape check
 - WHEN its document version or render request is stale, or the preview has restricted reads
-- THEN a stale message is still copied and answered, because the copy is gated by the document only (see SwRS-MDOKFSTUDIO-TRUST-065), and a preview with restricted reads still writes the text and edits nothing (see SwRS-MDOKFSTUDIO-TRUST-006)
+- THEN a stale message is still copied and answered, because the copy is gated by the document only (see SwRS-MDOKFSTUDIO-TRUST-065), and a preview with restricted reads still writes the text and edits nothing (see SwRS-MDOKFSTUDIO-TRUST-005)
 
 ### Related requirements
 

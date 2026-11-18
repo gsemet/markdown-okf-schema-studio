@@ -188,7 +188,7 @@ A run holds bold when it has two or more asterisks and italic when its length is
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-GFM-029: the rendering of a kbd element.
+- SwRS-MDOKFSTUDIO-CORE-071: the rendering of a kbd element.
 
 ### Verification notes
 

@@ -18,7 +18,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/render/requirementsViewer.markers.ts
+- test/site/requirementsViewer/searchIndex.ts
 tested_in_files:
 - test/site/requirementsViewer/pages.test.ts
 - test/site/requirementsViewer/search.test.ts

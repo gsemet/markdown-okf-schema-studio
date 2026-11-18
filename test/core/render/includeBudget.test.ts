@@ -91,6 +91,7 @@ function fanOutFiles(depth: number, fan: number): Record<string, string> {
   return files;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013
 test("include fan-out stops at the budget with one diagnostic", async () => {
   const reads: string[] = [];
   const files = fanOutFiles(5, 10);
@@ -103,6 +104,7 @@ test("include fan-out stops at the budget with one diagnostic", async () => {
   assert.match(result.html, /myst-unresolved/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-012
 test("an include repeated many times is read once per render", async () => {
   const reads: string[] = [];
   const files: Record<string, string> = {

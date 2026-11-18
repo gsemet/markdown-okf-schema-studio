@@ -3,10 +3,9 @@
   "limit": 3,
   "blocks": {
     "src/core/preview/styles/codeBlockStyles.ts": 4,
-    "src/core/preview/styles/contentBlockStyles.ts": 12,
+    "src/core/preview/styles/contentBlockStyles.ts": 5,
     "src/core/render/mystRenderer.ts": 4,
     "src/core/render/renderPipeline.ts": 4,
-    "src/core/security/html-sanitizer.ts": 8,
     "src/page/features/contentPatch.ts": 4,
     "src/session/features/sourceEdits.ts": 4,
     "src/session/webview.ts": 5,
@@ -34,7 +33,5 @@
     "test/visual/scenarioDefinitions1.ts": 4,
     "test/visual/scenarioDefinitions2.ts": 4
   },
-  "unnamedCompanionLines": {
-    "test/integration/realInput/markers.ts": 2
-  }
+  "unnamedCompanionLines": {}
 }

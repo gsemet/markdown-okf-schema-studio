@@ -142,6 +142,7 @@ test("a GitHub alert in an included file or in a grouped context tag renders as 
   assert.match(textContent(note), /Grouped alert\./u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-012
 test("an include with :literal:, an empty argument or an other option stays a placeholder; :class: expands", async () => {
   const files = { [`${root}/part.md`]: "Included-text.\n" };
   const expanded = async (directive: string): Promise<boolean> =>

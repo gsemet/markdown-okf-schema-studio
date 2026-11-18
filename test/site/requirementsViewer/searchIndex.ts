@@ -22,6 +22,7 @@ function fromViewer(folder: string): string {
 }
 
 /** The entries of the search sheet: areas, use cases, behaviours, then the files that carry them. */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-084
 export function searchIndex(model: ViewerModel): SearchItem[] {
   const items: SearchItem[] = [];
   for (const area of model.areas) items.push({ k: "Area", t: area.title, s: `${area.id} ${area.description}`, h: fromViewer(areaDir(area.id)) });

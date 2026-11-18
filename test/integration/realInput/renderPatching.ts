@@ -343,6 +343,7 @@ export async function scenarioContentPatchedInPlace(page: Page, evidence: Eviden
     assert.equal(await frame.locator("[data-sphinx-preview-status]").count(), 1, "one status region");
     assert.equal(await frame.locator("[data-sphinx-preview-status]").getAttribute("data-sphinx-preview-status"),
       "success");
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-009
     await waitFor("the Mermaid diagram drawn again in the same frame", async () =>
       await frame.locator(".myst-mermaid-diagram img.myst-mermaid-image").count() === 1);
     assert.equal(await frame.locator(".myst-mermaid-error").count(), 0, "no diagram error");

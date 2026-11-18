@@ -22,9 +22,8 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/contentBlockStyles.ts
+- src/core/preview/styles/contentBlockStyles.markers.ts
 - src/page/modules/plantumlDiagram.ts
-- src/page/modules/plantumlPreview.ts
 tested_in_files:
 - test/core/preview/diagReq.styles.requirements.test.ts
 - test/page/modules/plantumlDiagram.test.ts

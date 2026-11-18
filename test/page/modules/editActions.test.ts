@@ -4,7 +4,6 @@ import { PALETTE_ACTION_IDS, PALETTE_ACTIONS } from "../../../src/core/palette/p
 import { createEditActions } from "../../../src/page/modules/editActions";
 import { createMarkdownTableTools } from "../../../src/page/modules/markdownTable";
 import { isSafeOkfColor } from "../../../src/core/security/spanColors";
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-017
 
 const registry = createEditActions([], createMarkdownTableTools());
 
@@ -850,6 +849,7 @@ test("T26: footnote with named labels counts only numbers and inserts after a se
 });
 
 test("T26: mermaid inserts a flowchart fence set apart, first label selected", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-DIAG-017
   const out = applyTo("mermaid", "Intro\n\nOutro", [5, 5])!;
   assert.equal(out.value, "Intro\n\n```mermaid\nflowchart TD\n  A[Start] --> B[End]\n```\n\nOutro");
   assert.equal(out.value.slice(...out.selection), "Start");

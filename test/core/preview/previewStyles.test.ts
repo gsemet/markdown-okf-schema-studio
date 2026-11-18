@@ -55,6 +55,7 @@ test("list insertion lines show the drop boundary without moving the rows", () =
   assert.match(PREVIEW_THEME_CSS, /\[data-okf-list-drop="after"\]::after \{\s*bottom: -0\.1em;/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028
 test("the top heading keeps the stock preview rule underneath it", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -761,6 +762,7 @@ test("the table bar draws one rule per group and the cell group carries its own 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032
+// @tests_req SwRS-MDOKFSTUDIO-CORE-034
 test("overflowing content tables keep short cells whole and show scroll shadows", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -1245,6 +1247,7 @@ test("CR 046: prefers-reduced-motion: reduce turns off every animation and trans
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050
 test("CR 046: the motion layer is short and never animates layout or the table bar's transform", () => {
   const rules = cssRules(PREVIEW_THEME_CSS).filter(([selector]) =>
     /data-sphinx-preview-(?:motion|theme-switching|edit-closed|updated)/u.test(selector));

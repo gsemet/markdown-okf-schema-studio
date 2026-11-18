@@ -378,6 +378,7 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
           "rgb(255, 255, 255)");
         assert.equal(await frame.locator(".admonition.tip").count(), 1);
         assert.equal(await frame.locator(".admonition.warning").count(), 1);
+        // @tests_req StRS-MDOKFSTUDIO-DIAG-001
         await waitFor("the demo Mermaid and SVG images to load", async () => {
           const diagram = frame.locator("img.myst-mermaid-image");
           const svg = frame.locator('img[alt="Fleet operating loop: plan, dispatch, observe, and correct."]');

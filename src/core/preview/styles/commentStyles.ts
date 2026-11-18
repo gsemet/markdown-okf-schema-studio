@@ -683,7 +683,6 @@ const COMMENT_IMAGE_CSS = `#sphinx-myst-preview-content img {
 }
 `;
 
-// @implements_req SwRS-MDOKFSTUDIO-CORE-008
 /**
  * Comments: comment and TODO chips, inline threads, incoming-change marks, review comment popovers,
  * the orphaned comments box and the toolbar and setting toggles that hide them.

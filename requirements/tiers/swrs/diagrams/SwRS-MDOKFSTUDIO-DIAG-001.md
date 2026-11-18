@@ -22,8 +22,9 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/contentBlockStyles.ts
-- src/core/preview/styles/editModeStyles.ts
+- scripts/page-bundle.mjs
+- src/core/preview/styles/contentBlockStyles.markers.ts
+- src/core/preview/styles/editModeStyles.markers.ts
 - src/core/render/mermaidFont.ts
 - src/core/render/mystNormalize.ts
 - src/page/modules/mermaidPreview.ts
