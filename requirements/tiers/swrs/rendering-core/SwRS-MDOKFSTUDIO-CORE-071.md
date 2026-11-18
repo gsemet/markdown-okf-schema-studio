@@ -53,7 +53,7 @@ When a document holds README-style HTML (div and p with align, br, img with widt
 
 ### Scenario (nominal): README header
 
-- GIVEN a document whose first block is `<div align="center">`, then after a blank line an `<img src width height alt>`, a Markdown heading and a Markdown badge row, then `</div>`
+- GIVEN a document whose first block is `div align="center"`, then after a blank line an `img src width height alt`, a Markdown heading and a Markdown badge row, then `</div>`
 - WHEN the document is rendered
 - THEN the preview holds one `div` with `align="center"` whose content is the image at its width and height, the heading and the badge row, each Markdown block rendered as Markdown
 
@@ -61,12 +61,12 @@ When a document holds README-style HTML (div and p with align, br, img with widt
 
 | Source | Rendered as |
 | --- | --- |
-| `<p align="center">` | a `p` with `align` center (also left, right, justify) |
+| `p align="center"` | a `p` with `align` center (also left, right, justify) |
 | `<br>`, `<sub>`, `<sup>`, `<kbd>` | the same element |
-| `<a href><img></a>` | a link around the image |
-| `<picture>` with `<source media="(prefers-color-scheme: dark)" srcset>` and a fallback `<img>` | the dark image in a dark preview, the fallback image otherwise, following the preview theme and not the system |
-| `<details>` (optionally `open`) with a plain `<summary>`, in one block or as a head block, the Markdown between and a closing `</details>` block | a collapsible section, open when the attribute is set, with the summary as its title and the body rendered; an empty summary reads Details |
-| a `<summary>` holding markup | not recognised |
+| `a href` around `img` | a link around the image |
+| `picture` with `source media="(prefers-color-scheme: dark)" srcset` and a fallback `img` | the dark image in a dark preview, the fallback image otherwise, following the preview theme and not the system |
+| `details` (optionally `open`) with a plain `summary`, in one block or as a head block, the Markdown between and a closing `</details>` block | a collapsible section, open when the attribute is set, with the summary as its title and the body rendered; an empty summary reads Details |
+| a `summary` holding markup | not recognised |
 
 ### Scenario (nominal): The allow-list of tags
 
@@ -80,7 +80,7 @@ When a document holds README-style HTML (div and p with align, br, img with widt
 
 - GIVEN edit mode is on
 - WHEN a `div`, `p` or `picture` block is rendered
-- THEN it is shown as an admonition-like block titled with its literal opening tag in code font, for example `<div align="center">` (shortened with an ellipsis when long), and a click on it edits the raw source lines of the block only; read mode shows no frame and no title
+- THEN it is shown as an admonition-like block titled with its literal opening tag in code font, for example `div align="center"` (shortened with an ellipsis when long), and a click on it edits the raw source lines of the block only; read mode shows no frame and no title
 
 ### Scenario (nominal): Kbd renders as a key cap
 
@@ -98,7 +98,7 @@ When a document holds README-style HTML (div and p with align, br, img with widt
 
 ### Scenario (refusal): Nothing active survives
 
-- GIVEN raw HTML with `<script>`, `<iframe>`, an `onclick` or `onerror` attribute, a `style` or `class` attribute, a `javascript:` link or an unknown element
+- GIVEN raw HTML with `script`, `iframe`, an `onclick` or `onerror` attribute, a `style` or `class` attribute, a `javascript:` link or an unknown element
 - WHEN the document is rendered
 - THEN the script, iframe and unknown elements are dropped (with their content for script, style and iframe) and no event handler, style, class or script URL reaches the page; the sanitizer allows no attribute it did not already allow
 

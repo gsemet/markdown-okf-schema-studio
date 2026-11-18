@@ -84,11 +84,8 @@ When a chain of includes reaches the 8th level, an include repeats a file alread
 
 | Input | Outcome |
 | --- | --- |
-| an include of `../../secret.md` outside the roots | the file is not read and a warning with its value is listed |
+| an include that the allowed-roots rule (SwRS-MDOKFSTUDIO-TRUST-025) refuses: `../../secret.md` outside the roots, an absolute path, an undecodable path, a symlink that escapes its root | the file is not read and a warning naming the request is listed |
 | an include with an `https:` URL | the URL is not fetched and a warning is listed |
-| an include with an absolute path | the file is not read and a warning naming the request is listed |
-| an include with an undecodable path | the file is not read and a warning naming the request is listed |
-| an include with a symlink that escapes its root | the file is not read and a warning naming the request is listed |
 
 ### Scenario (refusal): Warn about a missing included file
 

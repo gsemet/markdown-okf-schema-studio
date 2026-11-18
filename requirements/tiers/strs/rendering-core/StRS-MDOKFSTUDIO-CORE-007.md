@@ -39,6 +39,21 @@ A maintainer ships a version only after the heavy CI run of the commit is green,
 - CI tags the version change only after the green heavy run of that commit.
 - A version without its reviewed release notes does not ship.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor M as Maintainer
+    participant R as Repository
+    participant C as CI
+    M->>R: version commit, every manifest at one version
+    R->>C: heavy run on the version commit
+    C-->>R: green
+    C->>R: tag the version
+    M->>R: reviews the release notes
+    R-->>M: the version ships with its release notes
+```
+
 ### Main paths
 
 #### Path 1: Ship a version

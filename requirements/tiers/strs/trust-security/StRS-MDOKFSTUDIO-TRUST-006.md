@@ -49,6 +49,21 @@ As a reader, and as a reviewer of an untrusted repository, I open any Markdown f
 - Only a small subset of raw HTML is rendered at all (rendering-core and gfm scopes); this record covers what the page-building step does to the HTML that remains.
 - The step removes known dangerous elements and attributes and rewrites links and resource addresses; it does not keep a short list of allowed elements.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor R as Reader
+    participant H as Extension host
+    participant S as Sanitizer
+    participant P as Preview page
+    R->>H: opens a document with scripts and unsafe HTML
+    H->>S: raw HTML of the document
+    S-->>H: scripts, frames, forms and event handlers removed
+    H->>P: inert page under a strict content policy
+    P-->>R: the document shows with no foreign code and no network load
+```
+
 ### Main paths
 
 #### Path 1: Preview a document that carries scripts and unsafe HTML

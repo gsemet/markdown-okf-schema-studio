@@ -176,6 +176,43 @@
 - Checks run: `just requirements-update`, `just requirements-lint`, `just check-markers` and
   `okfreq validate --check-links`.
 
+### Gardening of rendering-core, diagrams and trust-security (CR-347)
+
+- Added (proposed): StRS-MDOKFSTUDIO-DIAG-015 (charts and drawings), CORE-006 (writing skill), CORE-007 (release) and
+  CORE-008 (published site); SwRS-MDOKFSTUDIO-CORE-088 (CommonMark, palette-mode and long-document scenarios split from
+  CORE-001), CORE-089 (inline code split from CORE-028), DIAG-129 (the renderer-script rule, written once), TRUST-091
+  (restricted-reads images split from TRUST-002) and TRUST-092 (the package bundle split from TRUST-074).
+- Superseded, old to new:
+  - SwRS-TRUST-006 to TRUST-005 (the 13 `depends_on` links and CODE-025 now point to TRUST-005);
+  - SwRS-GFM-029 to CORE-071, and GFM-030, GFM-033, CORE-044 and CORE-062, which pointed to GFM-029, to CORE-071;
+  - SwRS-TRUST-061, 062, 063 and 064 to TRUST-059 (payload table added; TRUST-059 also derives StRS TOOLBAR-011 and
+    BLOCK-006).
+- Merged, not superseded: the "drawn once" rule of the diagram engines now sits in DIAG-009 (engine-agnostic);
+  DIAG-039 and DIAG-123 keep their own behaviour and cite DIAG-009, and DIAG-097 lost its cache text. DIAG-039 and DIAG-123 were not
+  superseded as first planned, because they hold other behaviour (PlantUML key and queue; the chart picture).
+- Split: CORE-001 (to CORE-088), CORE-028 (to CORE-089), DIAG-001 (renderer-script rule to DIAG-129, cited by DIAG-001,
+  DIAG-023 and DIAG-124 through `depends_on`), TRUST-002 (to TRUST-091), TRUST-074 (icon stays; bundle to TRUST-092).
+- Reparented: DIAG-121 to 127 now derive from StRS DIAG-015; CORE-073 and 074 from CORE-006; CORE-075, 076 and 078 from
+  CORE-007; CORE-069 and 080 to 086 from CORE-008. Dropped as parents: TRUST-052 (CORE-001), REVIEW-017 and 038
+  (DIAG-001, DIAG-006), DIAG-001 SwRS (DIAG-006), TRUST-074/075 (DIAG-006), TRUST-065 and 090 (DIAG-009), LIFE-026
+  (TRUST-001), CORE-041 (TRUST-006), LIFE-062 (TRUST-004), BLOCK-238, FMEDIT-054 and GFM-027 (TRUST-009). StRS DIAG-006
+  and DIAG-015 list DIAG-009 and DIAG-129 under `depends_on`; the refusal rows of CORE-013, DIAG-054 and DIAG-122
+  cite the allowed-roots rule TRUST-025.
+- Decisions: DIAG-061 keeps its own include depth rule (`MAX_INCLUDE_DEPTH`, `PLANTUML_INCLUDE_MAX_DEPTH`) instead of
+  citing CORE-013. TRUST-086 (only parent StRS TRUST-009) and DIAG-050 (only parent StRS DIAG-009) keep their single
+  parent, so the planned drop did not apply. StRS CORE-002 is reworded to what the code does: included content is
+  shown in place and edited in its own file (the old text promised editing from the include location, which the code
+  never allowed); the owner is asked in the pull request.
+- Changed text: StRS DIAG-007 (at most 2 processes at once), DIAG-009, TRUST-009, TRUST-012, TRUST-014; CORE-070
+  rewritten as an observable outcome; W002 cleared on CORE-071, 076, 078, 080 and 085 (placeholders written without
+  angle brackets); a `### Use case diagram` on the 17 in-force StRS of the scope (CORE-003 is a state diagram, kept
+  simple and not checked in Node).
+- Approved StRS: the owner agreed in advance (garden-Q1) to the corrections of StRS CORE-001 (refusal option removed
+  from Main path 1), DIAG-001 and DIAG-006 (rationale trimmed to the need, constraints and Main paths); their
+  `approved_by` and `approved_at` are set again (2026-11-17, +01:00) and the Driver records the re-approval, one commit
+  per StRS.
+- Not in this change yet: the marker moves (spec section 5) and the new tests (sections 6 and 7).
+
 ### Use case diagram on each StRS page
 
 - Added: SwRS-MDOKFSTUDIO-CORE-087 (proposed, derived from StRS-MDOKFSTUDIO-TRUST-014): the site requirements

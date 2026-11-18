@@ -42,6 +42,26 @@ As a reader, I preview a Markdown file from anywhere on my disk and see the imag
 - The frontmatter schema is not searched for such a file (frontmatter-schema scope).
 - A missing file is a different outcome from a refused one: it is shown as a missing image or a warning by the rendering scopes.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant P as Preview page
+    participant H as Extension host
+    participant F as Local image
+    W->>P: previews a document with a local image
+    P->>H: ask for the image
+    alt relative path inside the allowed roots
+        H->>F: check an existing regular file
+        H-->>P: address of the file
+        P-->>W: image shown
+    else outside the roots or not a regular file
+        H-->>P: refusal with a code
+        P-->>W: no image
+    end
+```
+
 ### Main paths
 
 #### Path 1: Load a local image

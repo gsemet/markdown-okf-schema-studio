@@ -43,6 +43,20 @@ A reviewer browses use cases, behaviours, coverage and the e2e gallery on GitHub
 - Retired requirements stay reachable behind a History section.
 - Every page and picture of the site keeps one look.
 
+### Use case diagram
+
+```mermaid
+flowchart LR
+    V[Reviewer] -->|opens| H[Site home]
+    H --> A[Area page]
+    A --> U[Use case page with its map]
+    U --> B[Behaviour page]
+    V -->|searches| X[Search index]
+    X --> U
+    X --> B
+    B -.->|retired ones| Y[History]
+```
+
 ### Main paths
 
 #### Path 1: Find a use case and read it

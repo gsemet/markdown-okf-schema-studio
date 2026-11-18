@@ -51,6 +51,27 @@ As a reader or writer, I rely on what the preview page asks of the extension bei
 - An answer is addressed by the document, the revision and the render request, or by an identifier of its own.
 - A save or cancel from an older page is answered with an error instead of being dropped (block-editing and frontmatter-editing scopes).
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    participant P as Preview page
+    participant H as Extension host
+    P->>H: message
+    alt registered type with a valid envelope
+        H->>H: match the render or document the host holds
+        H-->>P: handled, or answered as out of date
+    else anything else
+        H-->>P: ignored without a visible change
+    end
+    H->>P: content patch
+    alt registered type, addressed to the page, within bounds
+        P->>P: patch accepted
+    else out of bounds
+        P->>P: patch not accepted
+    end
+```
+
 ### Main paths
 
 #### Path 1: The page asks the host to act

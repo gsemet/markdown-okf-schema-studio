@@ -37,6 +37,18 @@ A writer working with a coding agent installs the Studio plugin in the agent hos
 - The skill is self-contained and its examples are checked by the preview pipeline.
 - The plugin manifests stay out of the extension package.
 
+### Use case diagram
+
+```mermaid
+flowchart LR
+    W[Writer] -->|installs the plugin| H[Agent host]
+    H -->|resolves to the one skill folder| S[Writing skill]
+    A[Coding agent] -->|reads| S
+    A -->|writes| D[Markdown document]
+    D -->|rendered by| P[Studio preview]
+    W -->|reads| P
+```
+
 ### Main paths
 
 #### Path 1: Install the skill and write Markdown

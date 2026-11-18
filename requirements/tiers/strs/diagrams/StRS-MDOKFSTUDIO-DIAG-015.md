@@ -13,6 +13,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+depends_on:
+- SwRS-MDOKFSTUDIO-DIAG-009
+- SwRS-MDOKFSTUDIO-DIAG-129
 user_need: A writer puts a chart or a drawing in the document and sees it in the
   page, with nothing executed or fetched.
 derived_by:
@@ -42,6 +45,29 @@ A writer puts a Vega-Lite or Vega chart fence (inline data, or a CSV file next t
 - A chart data file is read under the rules of the include directive (document folder or workspace, size bound).
 - An SVG is rebuilt from an allow-list; nothing that runs script or loads a resource survives.
 - The charts and pictures take their colours from the preview theme, in every palette mode.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant P as Preview page
+    participant F as Local data file
+    participant C as Chart runtime
+    W->>P: previews a Vega-Lite or Vega fence
+    P->>F: read the data from the allowed folders
+    alt data read
+        P->>C: draw in the page colours
+        C-->>P: themed picture
+        P-->>W: chart with its source section
+    else remote url or refused
+        P-->>W: message in place of the chart
+    end
+    W->>P: previews an svg fence
+    P-->>W: drawing rebuilt from an allow-list, in the theme colours
+    W->>P: clicks the picture in edit mode
+    P-->>W: the source editor opens
+```
 
 ### Main paths
 
@@ -77,4 +103,7 @@ A writer puts a Vega-Lite or Vega chart fence (inline data, or a CSV file next t
   - [SwRS-MDOKFSTUDIO-DIAG-125](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-125.md): SVG blocks are drawn inline after the sanitizer rebuilt them
   - [SwRS-MDOKFSTUDIO-DIAG-126](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-126.md): A picture takes its colours from the preview theme
   - [SwRS-MDOKFSTUDIO-DIAG-127](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-127.md): A click on a picture opens its source editor
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-009](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-009.md): Diagrams are drawn once per source and theme and late results are dropped
+  - [SwRS-MDOKFSTUDIO-DIAG-129](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-129.md): A diagram renderer script loads only when the page holds a figure of its engine
 <!-- okf:links:end -->

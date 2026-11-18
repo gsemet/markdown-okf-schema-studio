@@ -99,6 +99,27 @@ Writers and security-minded teams expect to choose between a safe bundled engine
 - Error text from a process is capped at 64 KiB with "[stderr truncated at 64 KiB]".
 - Cancelling a render (a newer render stage, the preview closing) sends SIGTERM to the whole process group on POSIX, falling back to the direct child; an exited child is not signalled. A render that sees close, error and timeout together settles once. Known issue: Windows, which has no process group, is untested.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant S as Settings
+    participant P as Preview page
+    participant H as Extension host
+    participant J as Java or plantuml process
+    W->>S: sets useJar to true
+    P->>H: diagrams to draw
+    H->>J: one process per diagram, at most 2 at once
+    alt result within 30 seconds
+        J-->>H: SVG
+        H->>P: results in document order
+    else past 30 seconds or jarPath missing
+        H->>P: message on the diagram
+    end
+    P-->>W: each diagram shows its picture or its message
+```
+
 ### Main paths
 
 #### Path 1: Draw with an own JAR
