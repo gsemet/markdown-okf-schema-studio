@@ -59,8 +59,9 @@ When the host receives a previewPlantUmlInclude message, it SHALL accept it only
 | editId a non-empty string of at most 100 characters | accepted; the host answers with previewPlantUmlIncludeResult carrying the same editId (see SwRS-MDOKFSTUDIO-TRUST-090) |
 
 ### Verification notes
-- Method: test/core/protocol/pageToHost.test.ts `previewPlantUmlInclude carries a bounded file name, the including file id or null, and an edit id` (all scenarios; the 100-character bound of the edit id and a from of 4097 characters are not asserted there).
-- Criteria: Boundaries 4096 and 4097 behave as stated.
+- Method: test/core/protocol/pageToHost.test.ts `previewPlantUmlInclude carries a bounded file name, the including file id or null, and an edit id` (all scenarios).
+- Method: test/core/protocol/pageToHost.test.ts `previewPlantUmlInclude accepts an edit id of 100 characters and a from of 4096; one character more is refused` (bounds of the fields: the edit id of 100 and 101 characters, a from of 4096 and 4097 characters).
+- Criteria: Boundaries 4096 and 4097 (name and from) and 100 and 101 (edit id) behave as stated.
 
 <!-- okf:links:start -->
 ### Links

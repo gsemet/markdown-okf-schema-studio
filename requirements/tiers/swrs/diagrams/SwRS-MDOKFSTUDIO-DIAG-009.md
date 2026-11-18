@@ -28,6 +28,7 @@ implemented_in_files:
 - src/page/modules/mermaidPreview.ts
 tested_in_files:
 - test/integration/realInput/renderPatching.ts
+- test/page/modules/diagReq.pageDiagrams.requirements.test.ts
 - test/page/modules/mermaidCache.test.ts
 - test/page/modules/mermaidPreviewEntry.test.ts
 - test/page/rendererBridge.test.ts
@@ -107,7 +108,7 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 - Known issue: The listener in mermaidPreview.ts that draws after a content patch is covered only by the real VS Code scenario.
 - Known issue: Diagrams inside one pass are started together and document order only fixes their element ids.
 - Known issue: The JAR cache holds up to 64 diagrams in memory and is not cleared when a file read by an include directive changes, so such diagrams are simply never cached.
-- Known issue: The guard against a late error for a replaced key (the first row of that scenario) has no test; draw passes one at a time, the late picture and the error of the current key are tested in test/page/modules/mermaidPreviewEntry.test.ts.
+- Known issue: In mermaidPreview.ts the guard against a late error for a replaced key cannot be reached: draw passes run one at a time and a pass plans each node once, so no node changes key while its drawing runs. The row is tested on the built-in PlantUML engine, whose renders of one element are superseded by a newer one.
 
 ### Verification notes
 
@@ -119,6 +120,8 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 - Method: test/page/modules/mermaidPreviewEntry.test.ts `Mermaid draw passes run one at a time, in the order they were requested` (draw passes one at a time)
 - Method: test/page/modules/mermaidPreviewEntry.test.ts `a Mermaid drawing finished for an earlier theme never replaces the picture of the current one` (a late picture for a replaced key is not shown)
 - Method: test/page/modules/mermaidPreviewEntry.test.ts `a failed Mermaid drawing shows one error for the current key and sets the error state` (a late error, the row of the current key)
+- Method: test/page/modules/diagReq.pageDiagrams.requirements.test.ts `a PlantUML drawing that fails after a newer render took the element shows no error` (a late error, the row of the replaced key: no error message and no error state, then the newer picture is shown)
+- Method: test/page/modules/diagReq.pageDiagrams.requirements.test.ts `a theme attribute change that leaves the Mermaid colours as they were draws nothing` (changed source or theme: an attribute change with the same colours draws nothing)
 - Criteria: Same source and theme give no second run; a different source or theme gives a new run; only diagrams without a render state are drawn after a patch; passes never overlap; only the current key's result reaches the node; the JAR pipeline starts no process for an unchanged diagram text.
 
 <!-- okf:links:start -->

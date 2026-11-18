@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files:
 - src/page/features/pageInput.ts
 tested_in_files:
+- test/page/diagReq.svgClick.requirements.test.ts
 - test/visual/svgPictureScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -46,6 +47,7 @@ When the writer clicks an svg picture in edit mode, the preview SHALL open the s
 
 - Method: test/core/render/svgRendering.test.ts (the lines of the figure)
 - Method: the visual scenario diagrams/v22 (a click opens the source editor)
+- Method: test/page/diagReq.svgClick.requirements.test.ts (in edit mode a click on an svg picture asks the host for the source of the block that holds it; in reading mode a click on an svg picture opens no editor) runs the click handler of src/page/features/pageInput.ts in the runtime harness: a click on the svg inside a mapped figure posts previewEditOpen with the first and last line of the figure, and in reading mode only previewReveal.
 - Criteria: A picture is edited like any other mapped block.
 
 <!-- okf:links:start -->

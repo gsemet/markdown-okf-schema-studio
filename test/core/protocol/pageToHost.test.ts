@@ -418,6 +418,15 @@ test("previewPlantUmlInclude carries a bounded file name, the including file id 
   assert.equal(isRegisteredPreviewMessage({ ...base, editId: undefined }), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-050
+test("previewPlantUmlInclude accepts an edit id of 100 characters and a from of 4096; one character more is refused", () => {
+  const base = { type: "previewPlantUmlInclude", documentId: "doc", revision: 1, requestId: 1, editId: "plantuml-1", path: "styles/common.puml", from: null };
+  assert.equal(isRegisteredPreviewMessage({ ...base, editId: "e".repeat(100) }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, editId: "e".repeat(101) }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, from: "/" + "f".repeat(4095) }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, from: "/" + "f".repeat(4096) }), false);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-086
 test("CR 050: the warning banner messages are registered with a bounded key", () => {
   const envelope = { documentId: "file:///chapter.md", revision: 3, requestId: 7 };

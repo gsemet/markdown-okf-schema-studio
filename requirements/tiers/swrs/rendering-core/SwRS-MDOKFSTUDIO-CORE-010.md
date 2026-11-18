@@ -24,6 +24,7 @@ implemented_in_files:
 - src/core/render/mystInlineTransforms.ts
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
+- test/core/render/renderReq.coreRows.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-CORE-011
@@ -55,9 +56,14 @@ When a document holds `[[Note]]`, `[[Folder/Note#Heading|Label]]` or `[[#Section
 | `[[Note]]` inside an existing link, an image, math or raw HTML | it is not converted to a wikilink |
 | an `![[Note]]` embed | it is not converted to a link |
 
+### Known issues
+
+- Known issue: Only a raw HTML block, or a raw HTML node itself, is left unconverted. The text between two inline HTML tags, as in `<span>[[Note]]</span>` inside a paragraph, is plain text to the parser and is converted to a wikilink.
+
 ### Verification notes
 
-- Method: Unit test "wikilinks render as lazy note targets without changing code or existing links" in test/core/render/mystFeatures.test.ts (nominal, boundary label, refusal inline code and embed; the existing link, image, math and raw HTML cases are named by the test title only)
+- Method: Unit test "wikilinks render as lazy note targets without changing code or existing links" in test/core/render/mystFeatures.test.ts (nominal, boundary label, refusal inline code and embed)
+- Method: Unit test "wikilink syntax inside a link, an image, math, raw HTML or an embed is not converted" in test/core/render/renderReq.coreRows.requirements.test.ts (refusal: existing link, image, math, an HTML block and an embed; the inline HTML case of the known issue)
 - Criteria: Each wikilink form yields the expected link target and text. Wikilinks are converted only in plain text.
 
 <!-- okf:links:start -->

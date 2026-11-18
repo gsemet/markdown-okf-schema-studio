@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/modules/mermaidPreview.ts
 tested_in_files:
 - test/core/preview/themeTokens.test.ts
+- test/page/modules/diagReq.pageDiagrams.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -81,17 +82,18 @@ The built-in fallbacks are #f0f0f0, #1f1f1f, #808080 and #ffffff. The font is no
 
 ### Known issues
 
-- Known issue: The visual check covers dark, white and cream and only node fills; border and secondary colours have no check.
+- Known issue: The visual check covers dark, white and cream and only node fills; the border, secondary and tertiary colours are checked only as the values given to Mermaid, not in the drawn picture.
 - Known issue: The redraw evidence covers dark, white and cream; the light mode relies on the same observer.
 - Known issue: The fallback colours are fixed colours of a light palette.
-- Known issue: No unit test covers the fallback logic.
 - Known issue: Edge label readability is checked by the visual campaign only; no unit test.
 
 ### Verification notes
 
 - Method: test/core/preview/themeTokens.test.ts (colours come from the theme variables: every token the Mermaid theme reads is in the token map)
 - Method: test/visual/scenarioDefinitions1.ts (diagrams v01: node fills equal the code block background in dark, white, cream and the original mode, and the theme switch check keeps the label count; v03: theme fallback draws a loaded picture; v01 to v03: edge label count against the source and contrast ratio)
-- Criteria: Node fills follow --studio-textCodeBlock-background in every checked theme mode; node fills follow the theme after each switch and the label count is unchanged; the picture loads and is readable with no host colour variable; label count equals the source and every ratio is at least 4.5. The unchanged-colours case and the border and secondary colours are untested.
+- Method: test/page/modules/diagReq.pageDiagrams.requirements.test.ts `the Mermaid border, secondary and tertiary colours come from their theme variables, with fixed fallbacks` (the theme values given to Mermaid: border, secondary and tertiary colours from their variables; with empty variables or the keyword CANVAS, the fallbacks #f0f0f0, #1f1f1f, #808080 and #ffffff)
+- Method: test/page/modules/diagReq.pageDiagrams.requirements.test.ts `a theme attribute change that leaves the Mermaid colours as they were draws nothing` (the theme colours stay the same: Mermaid is neither run nor initialised again and the same picture stays)
+- Criteria: Node fills follow --studio-textCodeBlock-background in every checked theme mode; node fills follow the theme after each switch and the label count is unchanged; the picture loads and is readable with no host colour variable; label count equals the source and every ratio is at least 4.5; the border, secondary and tertiary colours given to Mermaid equal their variables or their fallbacks; an attribute change with unchanged colours draws nothing.
 
 <!-- okf:links:start -->
 ### Links

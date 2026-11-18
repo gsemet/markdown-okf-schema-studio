@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/security/html-policy.test.ts
 - test/security/resource-policy.test.ts
+- test/security/trustReq.pageBuild.requirements.test.ts
 - test/security/trustReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -115,9 +116,10 @@ When the extension resolves a resource reference of a page, it SHALL give the pa
 
 ### Verification notes
 
-- Method: Unit test test/security/resource-policy.test.ts (canonicalizes local resources and rejects hostile paths; resolves parent-relative figure references through an ancestor root; still blocks references escaping the workspace root; rewrites srcset candidates without allowing data or script URLs) covers the accepted references, the refusals for data:, javascript:, vscode:// and file://, the parent-step refusal in both spellings (%2e%2e%2f decodes to a parent path and is then refused by the root rule), the escaping symbolic link and the lookup that ignores the query and fragment. The absolute path and double-slash cases, the malformed, NUL, backslash and five-round cases, the symbolic link that stays inside, the appended suffix (resourceReferenceSuffix in src/session/webview.ts) and the blocked-srcset diagnostic are untested.
+- Method: Unit test test/security/resource-policy.test.ts (canonicalizes local resources and rejects hostile paths; resolves parent-relative figure references through an ancestor root; still blocks references escaping the workspace root; rewrites srcset candidates without allowing data or script URLs) covers the accepted references, the refusals for data:, javascript:, vscode:// and file://, the parent-step refusal in both spellings (%2e%2e%2f decodes to a parent path and is then refused by the root rule), the escaping symbolic link and the lookup that ignores the query and fragment. The absolute path and double-slash cases, the malformed, NUL, backslash and five-round cases, the symbolic link that stays inside, and the appended suffix (resourceReferenceSuffix in src/session/webview.ts) are untested.
 - Method: Unit test test/security/trustReq.requirements.test.ts (a resource must be an existing regular file; a resource root that does not exist is dropped with the diagnostic missing-root) covers the existing file, the missing file, the directory with its candidate path, the missing root and the second root.
 - Method: Unit test test/security/html-policy.test.ts (resolves parent-relative figure images through the workspace root; strips figure images that escape even the workspace root; rewrites local resources and removes active HTML content) covers the parent-relative figure, the removed src with blocked-resource, the local image, video and poster rewrite and the mixed srcset.
+- Method: Unit test test/security/trustReq.pageBuild.requirements.test.ts (a srcset whose candidates are all refused is removed and records blocked-srcset) covers the srcset with no safe candidate, removed with one blocked-srcset diagnostic, and a mixed srcset that keeps only its local candidate, built with buildPreviewWebviewHtml in src/session/webview.ts.
 - Criteria: Containment is tested on the resolved path with path.relative against each root; the real path of the file is returned. The refusal is recorded as a diagnostic of the policy. A Windows drive path with a forward slash starts with a scheme and is refused as blocked-resource-scheme; one with a backslash is refused as invalid-resource-path. createPreviewResourcePolicy builds two roots: the folder of the document and the resource root. The suffix is the text from the first query or fragment mark of the trimmed reference. No src, poster or data attribute keeps a value the policy refused, and the rewritten srcset holds only webview addresses.
 
 <!-- okf:links:start -->

@@ -98,7 +98,6 @@ When the JAR pipeline cannot draw a PlantUML diagram, the extension SHALL show o
 - Known issue: The visual scenarios call renderPlantUmlDiagrams with an unlikely executablePath and not through useJar; the absolute executable path case is reachable only that way.
 - Known issue: The message asks the user to set jarPath but not to also turn useJar on.
 - Known issue: The missing java hint tells the user to set jarPath although it is already set; nothing names Java, and a missing Graphviz is neither checked nor reported.
-- Known issue: The signal wording is untested.
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-DIAG-024: the useJar and jarPath settings that choose the JAR pipeline.
@@ -106,11 +105,13 @@ When the JAR pipeline cannot draw a PlantUML diagram, the extension SHALL show o
 - SwRS-MDOKFSTUDIO-DIAG-097: the bounds that also end a JAR render with a message.
 
 ### Verification notes
-- Method: test/core/render/plantUmlRenderer.test.ts (uses the PATH executable when no JAR is configured and reports missing commands; missing JAR, missing command, absolute executable path, Restricted Mode with the untrusted case; returns diagnostics for PlantUML process failures and malformed output: exit code, no output, no SVG, unterminated SVG; the signal wording is untested).
+- Method: test/core/render/plantUmlRenderer.test.ts (uses the PATH executable when no JAR is configured and reports missing commands; missing JAR, missing command, absolute executable path, Restricted Mode with the untrusted case; returns diagnostics for PlantUML process failures and malformed output: exit code, no output, no SVG, unterminated SVG).
 - Method: test/core/render/diagReq.jar.requirements.test.ts `a jarPath naming a directory is refused on every diagram before any process starts`, `a missing java is reported like a missing command; other spawn errors keep their text`, `a spawn call that throws is reported on the diagram like any other failure` (directory and file, missing java, other spawn error, spawn throws).
+- Method: test/core/render/diagReq.jar.requirements.test.ts `a JAR process that ends on a signal names the signal, with its error output or the no-diagnostic text` (the signal row: PlantUML exited with signal SIGTERM followed by the error output or PlantUML returned no diagnostic., state error, one warning per diagram).
 - Method: test/core/render/plantUmlEngine.test.ts (useJar keeps the external pipeline; the built-in engine is not swapped in behind the user's back; Restricted Mode).
 - Method: test/session/diagReq.plantuml.requirements.test.ts `each failing JAR diagram is also a plantuml-render warning with the document path` (warning per failure, no warning on success).
 - Method: test/visual/scenarioDefinitions1.ts, visual scenarios diagrams v06 and v07 (missing command on the PATH, absolute executable path).
+- Known gap: Windows, which has no process group, stays untested for the stop of the JAR process; it is a known issue of SwRS-MDOKFSTUDIO-DIAG-097 and SwRS-MDOKFSTUDIO-DIAG-101.
 - Criteria: Exact message and state, no process for a refused path or a disabled workspace, one message per diagram, and one warning per failure.
 
 <!-- okf:links:start -->

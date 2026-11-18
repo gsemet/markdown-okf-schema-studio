@@ -63,10 +63,11 @@ test("rewrites local resources and removes active HTML content", () => {
   assert.match(result.html, /href="#"[^>]+data-sphinx-preview-navigation="chapter\.html"/u);
   assert.match(result.html, /data-sphinx-preview-navigation="javascript:alert\(1\)"/u);
   assert.match(result.html, /srcset=\"webview:\/\/image\.png 1x\"/);
-  assert.ok(
-    result.diagnostics.some((entry) =>
-      entry.code === "blocked-inline-script" || entry.code === "blocked-svg-content",
-    ),
+  // The SVG script and the foreignObject each record their real code (there is no blocked-svg-content).
+  assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-inline-script"));
+  assert.deepEqual(
+    result.diagnostics.filter((entry) => entry.code === "blocked-active-element").map((entry) => entry.message),
+    ["Removed <foreignobject> from preview output.", "Removed <iframe> from preview output."],
   );
 });
 

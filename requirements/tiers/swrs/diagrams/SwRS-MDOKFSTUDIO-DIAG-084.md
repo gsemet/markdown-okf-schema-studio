@@ -110,7 +110,6 @@ Before any process starts, the extension SHALL refuse a diagram with an include 
 
 ### Known issues
 
-- Known issue: the test `the JAR pipeline starts one process per diagram before any of them finishes` in test/core/render/diagReq.jar.requirements.test.ts passes only through its 30 s timeout (30016 ms measured) and does not check the limit of 2; this change request replaces it.
 - Known issue: The JAR and PATH pipeline asks for no dark variant, so its picture is the same in the light and dark preview.
 - Known issue: The renderer has an executablePath option that no setting feeds; only visual fixtures pass it, so users cannot change the command name.
 
@@ -128,8 +127,8 @@ Before any process starts, the extension SHALL refuse a diagram with an include 
 - Method: test/core/render/plantUmlRenderer.test.ts (renders PlantUML through the configured external JAR and injects an image: JAR configured, relative path, stdin and working directory, SVG span; uses the PATH executable when no JAR is configured and reports missing commands: PATH command, command missing; decodes a multibyte character split across stdout chunks: split characters).
 - Method: test/core/configuration/plantUmlConfiguration.test.ts (reads and trims the configured PlantUML JAR path; uses an empty path for non-string configuration values: boundary rows for padding and non-string).
 - Method: test/core/render/plantUmlCache.test.ts `at most two PlantUML processes run at once` (the limit of 2 and the queue).
-- Method: test/core/render/diagReq.jar.requirements.test.ts (`the JAR pipeline starts one process per diagram before any of them finishes`: one process per diagram; to be replaced, see the known issue).
-- Criteria: The spawned command and arguments match; the picture equals the SVG span; trim and empty fallback hold; the resolved path equals the workspace folder joined with the setting; input on stdin and cwd is the workspace folder; process count equals diagram count and never exceeds 2 at once; results are in document order. The blank-path row and the empty-document case are checked only through these tests, with no test of their own.
+- Method: test/core/render/diagReq.jar.requirements.test.ts `the JAR pipeline runs one process per diagram, at most 2 at once, results in document order` (three diagrams and a scripted spawner: 2 processes start, the third starts only when one finishes, 3 processes in all, the pictures come back in document order although they finish in another order; runs in a few milliseconds; the same test checks that a document without PlantUML starts no process).
+- Criteria: The spawned command and arguments match; the picture equals the SVG span; trim and empty fallback hold; the resolved path equals the workspace folder joined with the setting; input on stdin and cwd is the workspace folder; process count equals diagram count and never exceeds 2 at once; results are in document order. The blank-path row is checked only through these tests, with no test of its own.
 
 <!-- okf:links:start -->
 ### Links

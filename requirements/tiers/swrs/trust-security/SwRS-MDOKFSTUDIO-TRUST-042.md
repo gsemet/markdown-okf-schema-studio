@@ -30,6 +30,7 @@ implemented_in_files:
 tested_in_files:
 - test/host/trustReq.requirements.test.ts
 - test/security/html-policy.test.ts
+- test/security/trustReq.pageBuild.requirements.test.ts
 - test/security/trustReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -89,6 +90,10 @@ When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, h
 - WHEN the preview renders
 - THEN the status area lists the render diagnostic
 
+### Known issues
+
+- Known issue: the HTML parser gives xlink:href the local name href, so the rule for href also gives both SVG links (the blocked one and the allowed one) the data-sphinx-preview-navigation attribute with their address; the SwRS keeps that attribute for anchor and external links (checked in test/security/trustReq.pageBuild.requirements.test.ts).
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-090: a link is an anchor (at least one character after the hash and no space, hash or question mark), external, local or blocked; other schemes are blocked
@@ -99,8 +104,9 @@ When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, h
 ### Verification notes
 
 - Method: Unit test test/security/trustReq.requirements.test.ts (an anchor or external link keeps its address and the original request; each removal or rewrite is recorded with its code, message and value) covers the anchor and external links, built with buildPreviewWebviewHtml in src/session/webview.ts, which classifies the reference with classifyPreviewReference, and the diagnostics returned for the iframe and the refused image, which updatePreview in src/session/features/rendering.ts stores on the record of the page (the record itself is not reachable in a unit test).
-- Method: Unit test test/security/html-policy.test.ts (keeps deferred relative navigation inert and host-routable; rewrites local resources and removes active HTML content) covers the relative link, javascript: and the stylesheet rewrite. The wiki case, the bad anchor, the xlink:href cases, the diagnostic code blocked-navigation, the removal of a stylesheet and the host diagnostic are untested. The policy method resolveNavigation is covered by test/security/resource-policy.test.ts (allows only explicit navigation schemes).
+- Method: Unit test test/security/html-policy.test.ts (keeps deferred relative navigation inert and host-routable; rewrites local resources and removes active HTML content) covers the relative link, javascript: and the stylesheet rewrite. The host diagnostic is untested. The policy method resolveNavigation is covered by test/security/resource-policy.test.ts (allows only explicit navigation schemes).
 - Method: Host harness test test/host/trustReq.requirements.test.ts (the status area lists render diagnostics and nothing the sanitizer or the policy removed) runs the extension host harness over a document with an image outside the roots and a missing include, and reads the status area of the assigned page (updatePreview in src/session/features/rendering.ts passes only the render diagnostics).
+- Method: Unit test test/security/trustReq.pageBuild.requirements.test.ts (a wiki link is routed by the host, a bad anchor and javascript: lose their href with blocked-navigation; an xlink:href the link rules block is removed, one they allow keeps its address; a linked stylesheet is removed: inside the roots it is ignored, outside it is refused, each with blocked-stylesheet) covers the wiki case, the bad anchor, the xlink:href cases, the code blocked-navigation with its message and value, and the two stylesheet removals with their messages.
 - Criteria: An anchor or external link has the data-sphinx-preview-navigation attribute. A relative or wiki link never navigates by itself; the host follows it after checking it again. No sanitized link holds a blocked address in an href, and no link element of the sanitized page points outside the roots. Every removal or rewrite adds one entry with a code, a message and, where there is one, a value; the status area lists render diagnostics only and the security diagnostics stay on the record of the page.
 
 <!-- okf:links:start -->

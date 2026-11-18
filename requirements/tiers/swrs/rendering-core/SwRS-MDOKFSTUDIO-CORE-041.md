@@ -23,6 +23,7 @@ derived_by: []
 implemented_in_files:
 - src/core/security/html-sanitizer.ts
 tested_in_files:
+- test/page/coreReq.direction.requirements.test.ts
 - test/security/html-policy.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -52,7 +53,8 @@ When a paragraph, heading, list item, block quote or table cell holds text, the 
 | a paragraph with dir evil | the attribute is gone and the diagnostic blocked-dir is recorded |
 
 ### Verification notes
-- Method: test/security/html-policy.test.ts, test "emits dir=auto on block elements and keeps only ltr, rtl and auto" (all scenarios; the alignment itself follows from dir auto and is not measured by a named test)
+- Method: test/security/html-policy.test.ts, test "emits dir=auto on block elements and keeps only ltr, rtl and auto" (block elements without a dir attribute, author dir attribute)
+- Method: test/page/coreReq.direction.requirements.test.ts, test "a Hebrew paragraph ends at the right edge of the column and an English one starts at the left" (text direction of a paragraph, measured in Chromium on the built preview page; skipped where no Chromium starts)
 - Criteria: Every dir attribute of the sanitized page is ltr, rtl or auto; the diagnostic blocked-dir is recorded for an unknown value; the right-to-left text of a paragraph aligns to the right without a dir attribute written by the author.
 
 <!-- okf:links:start -->

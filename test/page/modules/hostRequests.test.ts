@@ -69,3 +69,35 @@ test("a list request never suspends the blur", () => {
   requests.ask("previewListTargets", {}, {}, () => undefined);
   assert.equal(requests.isDialogOpen(), false);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+test("with no timeout given, a list request waits 6 seconds and a dialog request 10 minutes", () => {
+  const { requests, timers } = setup();
+  requests.ask("previewListTargets", {}, {}, () => undefined);
+  requests.ask("previewPickImage", {}, { dialog: true }, () => undefined);
+  assert.deepEqual(timers.map((timer) => timer.at), [6000, 600000]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+test("an answer that comes after the timeout is not taken and calls nothing again", () => {
+  const { requests, timers } = setup();
+  const results: Array<Record<string, unknown>> = [];
+  requests.ask("previewListTargets", {}, {}, (result) => results.push(result as Record<string, unknown>));
+  timers[0]!.run();
+  assert.deepEqual(results, [{ ok: false, reason: "The editor did not answer. Try again." }]);
+  assert.equal(requests.receive({ type: "previewListTargetsResult", editId: "host-1", ok: true }), false);
+  assert.equal(results.length, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+test("after cancelAll no callback runs, for an answer or for a timer", () => {
+  const { requests, timers } = setup();
+  let calls = 0;
+  requests.ask("previewListTargets", {}, {}, () => { calls += 1; });
+  const timer = timers[0]!;
+  requests.cancelAll();
+  assert.equal(timers.length, 0, "the timer is cleared");
+  assert.equal(requests.receive({ type: "previewListTargetsResult", editId: "host-1", ok: true }), false);
+  timer.run();
+  assert.equal(calls, 0);
+});

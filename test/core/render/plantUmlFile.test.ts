@@ -172,3 +172,27 @@ test("with useJar the JAR receives the text of the {uml} file", async () => {
     resetPlantUmlProcessSpawnerForTests();
   }
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-068
+test("a diagram file larger than 5 MiB is refused with a message and one warning; a file of exactly 5 MiB is read", async () => {
+  const { workspaceRoot, docs } = workspace();
+  const limit = 5 * 1024 * 1024;
+  const body = (size: number): string => `@startuml\n${"'".repeat(size - "@startuml\n@enduml\n".length)}\n@enduml\n`.slice(0, size);
+  fs.writeFileSync(path.join(docs, "diagrams", "big.puml"), body(limit + 1));
+  fs.writeFileSync(path.join(docs, "diagrams", "exact.puml"), body(limit));
+  const text = "```{uml} diagrams/big.puml\n```\n\n```{uml} diagrams/exact.puml\n```\n";
+  const result = await renderPreviewDocument({
+    document: previewDocument(path.join(docs, "page.md"), text),
+    workspaceRoot,
+    requestId: 1,
+    isWorkspaceTrusted: () => true,
+    plantUmlEngine: "builtin",
+  });
+  const html = parseHtml(result.html);
+  assert.deepEqual(fileErrors(html), ["PlantUML file diagrams/big.puml is larger than the 5 MiB preview limit."]);
+  assert.equal(diagrams(html).length, 1, "only the file within the limit becomes a diagram");
+  assert.equal(attribute(diagrams(html)[0]!, "data-plantuml-file"), "diagrams/exact.puml");
+  const warnings = result.diagnostics.filter((diagnostic) => /larger than the 5 MiB/u.test(diagnostic.message));
+  assert.equal(warnings.length, 1);
+  assert.equal(warnings[0]?.line, 1);
+});
