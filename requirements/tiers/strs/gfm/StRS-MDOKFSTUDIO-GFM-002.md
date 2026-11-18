@@ -13,10 +13,10 @@ scope: gfm
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-12T12:30:00+01:00'
+approved_at: '2026-11-18T18:51:15+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-12T12:30:00+01:00'
+  at: '2026-11-18T18:51:15+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -24,7 +24,6 @@ user_need: As a writer, I see GitHub Flavored Markdown the way GitHub shows it,
   with working links and the raw HTML that GitHub documents rely on, and nothing
   unsafe is rendered.
 derived_by:
-- SwRS-MDOKFSTUDIO-CORE-012
 - SwRS-MDOKFSTUDIO-CORE-044
 - SwRS-MDOKFSTUDIO-CORE-045
 - SwRS-MDOKFSTUDIO-CORE-056
@@ -75,7 +74,31 @@ Writers expect a pasted address to be clickable as on GitHub, without code sampl
 
 - Applies to documents using LF or CRLF line endings; alerts inside code fences stay literal.
 - Only http(s) and www addresses become links; code, existing links and unsafe schemes stay plain text, trailing sentence punctuation stays outside the link, and editing a paragraph still shows the raw URL text.
-- Scripts, styles, frames and other active content are removed; only hex and rgb colours are kept on coloured text.
+- Scripts, styles, frames and other active content are removed; only named, hex, rgb/rgba and hsl/hsla colours are kept on coloured text.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant P as Preview page
+    W->>P: writes GitHub Flavored Markdown, in an LF or a CRLF file
+    alt a bare http(s) or www address in prose
+        P-->>W: a link, trailing punctuation kept outside
+    else an address in code, in a link or with another scheme
+        P-->>W: plain text
+    end
+    opt strikethrough, footnotes or a pipe table
+        P-->>W: struck text, footnotes and the table with its column alignment, as on GitHub
+    end
+    opt a block quote that starts with a GitHub alert marker
+        P-->>W: an admonition of that type
+    end
+    opt raw HTML details, keyboard keys, tables or coloured spans
+        P-->>W: the allowed subset, with only safe colours
+        P-->>W: scripts, styles, frames and unsafe schemes are dropped
+    end
+```
 
 ### Main paths
 
@@ -105,7 +128,6 @@ Writers expect a pasted address to be clickable as on GitHub, without code sampl
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-CORE-012](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-012.md): An include is expanded in place and mapped to its directive
   - [SwRS-MDOKFSTUDIO-CORE-044](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-044.md): Drop unsupported raw HTML
   - [SwRS-MDOKFSTUDIO-CORE-045](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-045.md): Expand alerts in included files and context tags
   - [SwRS-MDOKFSTUDIO-CORE-056](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-056.md): Rebuild raw HTML tables from an allow-list
