@@ -210,15 +210,12 @@ export class LinkController {
     }
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-073
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-059
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-077
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
-  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-117
   private async handleLink(preview: PreviewSession, request: string): Promise<void> {
     const { manager } = this;
     const { host } = manager;
     // The page posted the save of its open editor before this link: apply it before anything else.
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
     await manager.edits.settleHostEdits(preview);
     const stage = preview.stage;
     if (!stage || !manager.matchesCurrent(preview, {
@@ -238,10 +235,13 @@ export class LinkController {
     }
     if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
     if (navigation.kind === "blocked") {
+      // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-073
       fireAndForget(host.logger, host.ui.showWarning(`Markdown OKF-Schema Studio could not follow the link: ${navigation.reason}`), "showWarning");
       return;
     }
     if (navigation.kind === "anchor") {
+      // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-117
+      // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-059
       const activeDocument = preview.document && preview.document.id === preview.documentUri
         ? preview.document
         : undefined;
