@@ -117,6 +117,85 @@ async function runPreviewSmoke(): Promise<void> {
   }
 }
 
+// @tests_req StRS-MDOKFSTUDIO-TRUST-006
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-011
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+/**
+ * A reader opens a document with hostile HTML (an inline script, `on*` attributes, an iframe, an
+ * object and a `javascript:` link) in the unsaved buffer of preview.md: the page shows the document,
+ * runs only the scripts of the Studio (each with a source and the page nonce), keeps no event
+ * handler, frame or object, and carries the deny-by-default content security policy with that nonce.
+ */
+async function runHostilePreview(): Promise<void> {
+  const extensionRoot = path.resolve(__dirname, "../../..");
+  const fixturePath = path.join(extensionRoot, "test", "integration", "fixtures", "preview.md");
+  const document = await vscode.workspace.openTextDocument(vscode.Uri.file(fixturePath));
+  const originalSource = document.getText();
+  const marker = "Hostile document marker";
+  const hostile = [
+    "# Hostile document", "", `${marker}.`, "",
+    "<script>window.hostileRan = true;</script>", "",
+    "<img src=\"local-missing.png\" onerror=\"window.hostileRan = true\" alt=\"Hostile image\">", "",
+    "<iframe src=\"https://example.invalid/frame\"></iframe>", "",
+    "<object data=\"https://example.invalid/object\"></object>", "",
+    "<a href=\"javascript:alert(1)\" onclick=\"window.hostileRan = true\">Hostile link</a>", "",
+  ].join("\n");
+  await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(document.uri, new vscode.Range(document.positionAt(0), document.positionAt(originalSource.length)), hostile);
+  assert.equal(await vscode.workspace.applyEdit(edit), true);
+  try {
+    await vscode.commands.executeCommand(COMMAND_ID);
+    const deadline = Date.now() + 20_000;
+    let preview = getActivePreviewForTests();
+    while (!(preview?.phase === "ready" && preview.html.includes(marker)) && Date.now() < deadline) {
+      await new Promise<void>((resolve) => setTimeout(resolve, 50));
+      preview = getActivePreviewForTests();
+    }
+    assert.ok(preview?.phase === "ready" && preview.html.includes(marker), "the hostile document was not shown");
+    const page = parseHtml(preview.html);
+    // The deny-by-default policy and its one-time nonce.
+    const policyMeta = findElements(page, (element) =>
+      element.tagName === "meta" && attribute(element, "http-equiv") === "Content-Security-Policy");
+    assert.equal(policyMeta.length, 1, "the page carries one content security policy");
+    const policy = attribute(policyMeta[0], "content") ?? "";
+    for (const directive of ["default-src 'none'", "connect-src 'none'", "frame-src 'none'", "object-src 'none'"]) {
+      assert.ok(policy.includes(directive), `the policy lacks ${directive}`);
+    }
+    assert.doesNotMatch(policy, /unsafe-inline|unsafe-eval|(?:^|\s)\*(?:\s|;|$)/u);
+    const nonce = /'nonce-([^']+)'/u.exec(policy)?.[1];
+    assert.ok(nonce, "the policy carries a nonce");
+    // The page runs only the scripts of the Studio: each loads a file and carries the nonce.
+    const scripts = findElements(page, (element) => element.tagName === "script");
+    assert.ok(scripts.length > 0);
+    for (const script of scripts) {
+      if (attribute(script, "type") === "application/json") continue;
+      assert.equal(attribute(script, "nonce"), nonce, "a script runs without the page nonce");
+      assert.ok(attribute(script, "src"), "an inline script reached the page");
+    }
+    // No event handler, frame, object or javascript: link is left.
+    const handlers = findElements(page, (element) => element.attrs.some((entry) => /^on/iu.test(entry.name)));
+    assert.deepEqual(handlers.map((element) => element.tagName), [], "an on* attribute reached the page");
+    assert.deepEqual(
+      findElements(page, (element) => ["iframe", "object", "embed", "frame"].includes(element.tagName)).map((element) => element.tagName),
+      [],
+      "a frame or an object reached the page",
+    );
+    assert.ok(
+      !findElements(page, (element) => element.tagName === "a").some((element) => /^\s*javascript:/iu.test(attribute(element, "href") ?? "")),
+      "a javascript: link reached the page",
+    );
+    const networkReferences = findElements(page, (element) => element.attrs.some((entry) =>
+      ["src", "data", "href", "srcset", "poster"].includes(entry.name) && entry.value.includes("example.invalid")));
+    assert.deepEqual(networkReferences.map((element) => element.tagName), [], "the page loads from a network address");
+  } finally {
+    disposeActivePreviewForTests();
+    const restore = new vscode.WorkspaceEdit();
+    restore.replace(document.uri, new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length)), originalSource);
+    await vscode.workspace.applyEdit(restore);
+  }
+}
+
 /** A real-input scenario selected by STUDIO_REAL_INPUT_SCENARIO, or the whole real-input campaign. */
 async function runRealInputScenario(): Promise<void> {
   const scenario = process.env.STUDIO_REAL_INPUT_SCENARIO;
@@ -178,6 +257,7 @@ async function runTrustedSuite(): Promise<void> {
   const onlyRealInput = process.env.STUDIO_REAL_INPUT_SCENARIO !== undefined;
   if (!onlyRealInput) {
     await step("project-features", runProjectFeatures);
+    await step("hostile-html", runHostilePreview);
     await step("stock-coexistence", runStockCoexistence);
   }
   try {

@@ -22,6 +22,7 @@ implemented_in_files:
 - src/core/security/html-sanitizer.ts
 - src/session/features/rendering.ts
 tested_in_files:
+- test/integration/trusted-suite.ts
 - test/security/html-policy.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

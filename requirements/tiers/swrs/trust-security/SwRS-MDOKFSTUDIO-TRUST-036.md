@@ -27,6 +27,7 @@ implemented_in_files:
 - src/core/security/html-sanitizer.ts
 - src/core/security/svgSanitizer.ts
 tested_in_files:
+- test/integration/trusted-suite.ts
 - test/security/html-policy.test.ts
 - test/security/svgSanitizer.test.ts
 - test/security/trustReq.pageBuild.requirements.test.ts
