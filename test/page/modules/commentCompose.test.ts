@@ -10,6 +10,7 @@ function setup(options: { busy?: () => boolean } = {}) {
   const document = new FakeDocument();
   let selection: any;
   const timers = new Map<number, () => void>();
+  const delays: number[] = [];
   let nextTimer = 1;
   const window: any = {
     innerWidth: 800, innerHeight: 600, getSelection: () => selection,
@@ -17,6 +18,7 @@ function setup(options: { busy?: () => boolean } = {}) {
     setTimeout: (callback: () => void, delay: number) => {
       // Refresh timers run at once; the 15 s answer timer waits for the test.
       if (delay === 0) { callback(); return 0; }
+      delays.push(delay);
       timers.set(nextTimer, callback);
       return nextTimer++;
     },
@@ -47,7 +49,7 @@ function setup(options: { busy?: () => boolean } = {}) {
   const box = () => document.querySelector("[data-okf-comment-compose]");
   const click = (target: FakeElement) => document.fire("click", { target });
   const fireTimers = () => { for (const [id, callback] of [...timers]) { timers.delete(id); callback(); } };
-  return { fireTimers, timers, document, compose, posted, select, button, box, click, clear: () => { selection = undefined; document.fire("selectionchange"); } };
+  return { fireTimers, timers, delays, document, compose, posted, select, button, box, click, clear: () => { selection = undefined; document.fire("selectionchange"); } };
 }
 
 const textOf = (element: FakeElement) => element.childNodes[0] as FakeText;
@@ -305,4 +307,12 @@ test("T43 r2: results of other kinds, or without a pending save, are ignored", (
   click(save());
   assert.equal(compose.result({ kind: "reply", threadId: "t", ok: true }), false);
   assert.ok(box());
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+test("a comment save waits 15 seconds for the host's answer", () => {
+  const { click, save, delays, posted } = openAndType();
+  click(save());
+  assert.equal(posted.length, 1);
+  assert.deepEqual(delays, [15000]);
 });

@@ -25,6 +25,7 @@ implemented_in_files:
 - src/page/features/themeMode.ts
 - src/page/modules/motion.ts
 tested_in_files:
+- test/core/preview/coreReq.styles.requirements.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/page/diagReq.themeZoom.requirements.test.ts
 - test/page/modules/motion.test.ts
@@ -83,7 +84,8 @@ When the preview shows an editor, a bar, a menu, a closed editor or a theme chan
 
 ### Verification notes
 - Method: test/page/modules/motion.test.ts, tests "CR 046: editors and menus appear softly only after a pointer or key press, never after a patch" (soft appearance after the first input, after a content patch, closed editor), "CR 046: a theme switch transitions the colours once, until the body background has changed" (theme change), "CR 046: with prefers-reduced-motion: reduce nothing is marked to move" (reduced motion)
-- Method: test/core/preview/previewStyles.test.ts, tests "CR 046: prefers-reduced-motion: reduce turns off every animation and transition of the motion layer" (reduced motion; the palette, popover and slash menu selectors are listed in the reduced-motion rule) and "CR 046: the motion layer is short and never animates layout or the table bar's transform" (palette, popovers and slash menu); the 3 px offset is not asserted
+- Method: test/core/preview/previewStyles.test.ts, tests "CR 046: prefers-reduced-motion: reduce turns off every animation and transition of the motion layer" (reduced motion; the palette, popover and slash menu selectors are listed in the reduced-motion rule) and "CR 046: the motion layer is short and never animates layout or the table bar's transform" (palette, popovers and slash menu)
+- Method: test/core/preview/coreReq.styles.requirements.test.ts, test "a popover or the slash menu starts transparent 3 px above its place and fades in over 120 ms" (palette, popovers and slash menu: the 3 px offset, the transparent start and the fast motion time)
 - Method: test/page/diagReq.themeZoom.requirements.test.ts, test "the page root records whether the system prefers reduced motion" (reduced-motion attribute)
 - Criteria: Motion styles are disabled under the preference; the motion attribute is removed by a content patch and set again by input; one colour transition per switch; the fade class is applied on close; the palette rules are in propertiesStyles.ts under html[data-sphinx-preview-motion=on] with a starting-style of opacity 0 and, for the popovers and the slash menu, translate 0 -3px.
 

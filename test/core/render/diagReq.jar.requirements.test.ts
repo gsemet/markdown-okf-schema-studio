@@ -101,26 +101,48 @@ test("JAR results come back in document order with the source line of their diag
   assert.deepEqual(single.diagrams.map((item) => [item.status, item.line]), [["rendered", 21]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
-test("the JAR pipeline starts one process per diagram before any of them finishes", async () => {
-  const { root, jarPath } = workspace();
-  const pending: FakeChild[] = [];
-  const spawner = scriptSpawner((_input, child) => {
-    pending.push(child);
-    if (pending.length === 3) {
-      assert.equal(spawner.spawned(), 3, "all processes exist before the first one answers");
-      for (const item of pending) {
-        item.stdout.emit("data", svgFor("x"));
-        item.emit("close", 0, null);
-      }
-    }
-  });
-  const html = figure("a", 1) + figure("b", 2) + figure("c", 3);
+const settle = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
 
-  const result = await renderPlantUmlDiagrams(html, { jarPath, workspaceRoot: root, trusted: true });
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+test("the JAR pipeline runs one process per diagram, at most 2 at once, results in document order", async () => {
+  const { root, jarPath } = workspace();
+  clearPlantUmlCacheForTests();
+  const running = new Map<string, FakeChild>();
+  const started: string[] = [];
+  let peak = 0;
+  const spawner = scriptSpawner((input, child) => {
+    running.set(input, child);
+    started.push(input);
+    peak = Math.max(peak, running.size);
+  });
+  const finish = (name: string): void => {
+    const child = running.get(name);
+    assert.ok(child, `a process runs for ${name}`);
+    running.delete(name);
+    child.stdout.emit("data", svgFor(name));
+    child.emit("close", 0, null);
+  };
+  const html = figure("a", 1) + figure("b", 2) + figure("c", 3);
+  const begin = Date.now();
+
+  const rendering = renderPlantUmlDiagrams(html, { jarPath, workspaceRoot: root, trusted: true });
+  await settle();
+  assert.deepEqual(started, ["a", "b"], "the third diagram waits while 2 processes run");
+  finish("b");
+  await settle();
+  assert.deepEqual(started, ["a", "b", "c"], "the third diagram starts when one process finishes");
+  finish("c");
+  finish("a");
+  const result = await rendering;
 
   assert.equal(spawner.spawned(), 3);
-  assert.equal(result.diagrams.length, 3);
+  assert.equal(peak, 2);
+  assert.deepEqual(result.diagrams.map((item) => [item.line, item.svg]), [
+    [1, svgFor("a")],
+    [2, svgFor("b")],
+    [3, svgFor("c")],
+  ]);
+  assert.ok(Date.now() - begin < 1000, "no wait on the 30 s process timeout");
 
   const none = scriptSpawner(() => assert.fail("no process may start"));
   const empty = await renderPlantUmlDiagrams("<p>text</p>", { jarPath, workspaceRoot: root, trusted: true });
@@ -291,4 +313,28 @@ test("a jarPath naming a directory is refused on every diagram before any proces
   ]);
   assert.equal(result.diagnostics.length, 2);
   assert.equal(spawner.spawned(), 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+test("a JAR process that ends on a signal names the signal, with its error output or the no-diagnostic text", async () => {
+  const { root, jarPath } = workspace();
+  clearPlantUmlCacheForTests();
+  scriptSpawner((input, child) => {
+    process.nextTick(() => {
+      if (input === "noisy") {
+        child.stderr.emit("data", "Out of memory");
+      }
+      child.emit("close", null, "SIGTERM");
+    });
+  });
+  const result = await renderPlantUmlDiagrams(figure("noisy", 1) + figure("silent", 2), {
+    jarPath,
+    workspaceRoot: root,
+    trusted: true,
+  });
+  assert.deepEqual(result.diagrams, [
+    { status: "error", message: "PlantUML exited with signal SIGTERM: Out of memory", line: 1 },
+    { status: "error", message: "PlantUML exited with signal SIGTERM: PlantUML returned no diagnostic.", line: 2 },
+  ]);
+  assert.equal(result.diagnostics.length, 2, "one warning per failing diagram");
 });

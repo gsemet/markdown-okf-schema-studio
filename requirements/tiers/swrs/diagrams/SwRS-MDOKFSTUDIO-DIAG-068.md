@@ -105,7 +105,6 @@ A diagram that comes from an included document or from a {uml} file resolves its
 ### Known issues
 
 - Known issue: Directive options such as :caption: are accepted but not shown.
-- Known issue: The too-large message is written in code but no test triggers it.
 
 ### Related requirements
 
@@ -115,7 +114,8 @@ A diagram that comes from an included document or from a {uml} file resolves its
 
 ### Verification notes
 
-- Method: test/core/render/plantUmlFile.test.ts (`{uml} path.puml and a body-less {plantuml} path.puml render the file, name it and depend on it`: file diagram, options only, dependency; a missing diagram file shows a clear message, is reported and is watched for its creation: missing file; a diagram file outside the bounds is refused like an {include}: outside folders and absolute path; a {uml} directive with neither a file nor a body says so: empty directives; in an included document, {uml} resolves next to it and inline diagrams take it as their include base: include base; with useJar the JAR receives the text of the {uml} file). The too-large row is untested.
+- Method: test/core/render/plantUmlFile.test.ts (`{uml} path.puml and a body-less {plantuml} path.puml render the file, name it and depend on it`: file diagram, options only, dependency; a missing diagram file shows a clear message, is reported and is watched for its creation: missing file; a diagram file outside the bounds is refused like an {include}: outside folders and absolute path; a {uml} directive with neither a file nor a body says so: empty directives; in an included document, {uml} resolves next to it and inline diagrams take it as their include base: include base; with useJar the JAR receives the text of the {uml} file).
+- Method: test/core/render/plantUmlFile.test.ts `a diagram file larger than 5 MiB is refused with a message and one warning; a file of exactly 5 MiB is read` (files that are not read: the too-large row, with its boundary).
 - Method: test/core/render/diagReq.pipeline.requirements.test.ts (`after the include budget is exhausted every remaining diagram file shows the budget message, with one warning`: budget scenario).
 - Method: test/page/modules/plantumlDiagram.test.ts (the top-level includes of a {uml} diagram file resolve next to that file: include base scenario).
 - Method: test/visual/scenarioDefinitions2.ts (visual scenarios diagrams v13 and v14: two pictures, no network, file diagram scenario).

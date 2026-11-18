@@ -32,6 +32,7 @@ tested_in_files:
 - test/core/preview/contentPatch.test.ts
 - test/page/runtimeScroll.test.ts
 - test/security/html-policy.test.ts
+- test/security/trustReq.pageBuild.requirements.test.ts
 - test/security/trustReq.requirements.test.ts
 - test/session/previewRuntimeFile.test.ts
 default_owner_email: gaetan@xeberon.net
@@ -80,7 +81,8 @@ When the extension builds a page, it SHALL draw a nonce of 18 random bytes encod
 
 ### Verification notes
 - Method: test/security/trustReq.requirements.test.ts (each nonce is 18 random bytes as 24 base64url characters, fresh for every page) checks the Fresh nonce of 18 bytes scenario with createNonce in src/core/security/csp.ts and that two status pages carry different nonces.
-- Method: test/session/previewRuntimeFile.test.ts (PERF-11: a rendered page loads the runtime as a bundle file and carries its context as inert JSON; PERF-11: the static stylesheet is a bundle file) and test/security/html-policy.test.ts (rewrites sanitized table styles into a nonce-bearing stylesheet) check the Elements that carry the nonce scenario; test/integration/trusted-suite.ts (nonce present) checks it on the rendered page. The Mermaid and PlantUML renderer scripts and the maths style are untested.
+- Method: test/session/previewRuntimeFile.test.ts (PERF-11: a rendered page loads the runtime as a bundle file and carries its context as inert JSON; PERF-11: the static stylesheet is a bundle file) and test/security/html-policy.test.ts (rewrites sanitized table styles into a nonce-bearing stylesheet) check the Elements that carry the nonce scenario; test/integration/trusted-suite.ts (nonce present) checks it on the rendered page.
+- Method: test/security/trustReq.pageBuild.requirements.test.ts (the Mermaid and PlantUML scripts and the maths style carry the page nonce) renders a document with a Mermaid block, a PlantUML block and a maths block through renderPreviewDocument and builds its page: the two renderer scripts, every style element and every non-JSON script carry the page nonce.
 - Method: test/page/runtimeScroll.test.ts (the boot context cannot terminate its containing script element) checks the hostile path row of the Boot context as inert JSON scenario; the round trip row is deduced from the code, not run.
 - Method: test/core/preview/contentPatch.test.ts (T34: the record of a patched page carries the nonce of the loaded page and keeps its shell; T34: two renders of one document type have equal shell keys despite other text, nonces and identifiers; T34: reuseNonce swaps every occurrence, in the policy tokens and in the attributes) checks the Content patch keeps the nonce scenario. The call sites of freshNonceRecord in src/session/features/rendering.ts and src/session/pageMessages.ts, which the Patched record scenario relies on, are untested.
 - Criteria: createNonce returns the base64url text of randomBytes(18). Every executable script and every style element of a rendered page has a nonce attribute equal to the page nonce. serializeRuntimeContext output holds no raw less-than sign. reuseNonce replaces the nonce of the new render by the loaded one in the record. A document loaded from a patched record never reuses the nonce of an earlier document.

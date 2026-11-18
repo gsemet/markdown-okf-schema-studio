@@ -98,7 +98,6 @@ When the host serves an include file, or refuses one that does not exist inside 
 
 ### Known issues
 
-- Known issue: Canonical-path remembering in the controller has no test.
 - Known issue: The watcher event to notifyIncludesChanged and the deferral while editing have no session test.
 
 ### Related requirements
@@ -109,11 +108,12 @@ When the host serves an include file, or refuses one that does not exist inside 
 
 ### Verification notes
 
-- Method: test/core/render/plantUmlIncludes.test.ts (the include watch remembers a bounded set of files: bound scenario; a missing file is refused and watched: remembered and outside-the-folders scenarios; the controller step that remembers the canonical path is untested).
+- Method: test/core/render/plantUmlIncludes.test.ts (the include watch remembers a bounded set of files: bound scenario; a missing file is refused and watched: remembered and outside-the-folders scenarios).
 - Method: test/page/modules/plantumlDiagram.test.ts (after an included file changed, the diagrams that read files are drawn again from the host: redraw scenario, including the diagram without includes).
 - Method: test/page/pageMessages.test.ts (host message acceptance, shape of previewPlantUmlIncludesChanged and addressing by document); the host event path, the deferral while editing and the sending of the message have no session test.
 - Method: test/session/diagReq.plantuml.requirements.test.ts (`the include watch is emptied when the preview follows another document`: document switch row).
 - Method: test/session/diagReq.plantuml.requirements.test.ts (`an include request is refused for the Java engine and for a file id the host never issued`: refusal scenario).
+- Method: test/session/diagReq.plantuml.requirements.test.ts `the host remembers the canonical path of a served include and of a missing one, and nothing for a refused one` (served and missing file remembered by the canonical path the manager gives; outside the folders: nothing remembered).
 - Criteria: Only served and allowed-missing paths are watched; watched changes notify the page once the editor is closed; only diagrams that read files are redrawn; size never exceeds 1024; no stale watch survives a switch.
 
 <!-- okf:links:start -->

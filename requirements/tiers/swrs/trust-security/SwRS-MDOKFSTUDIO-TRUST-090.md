@@ -42,6 +42,8 @@ tested_in_files:
 - test/integration/imagePicker.test.ts
 - test/integration/inlineThread.test.ts
 - test/integration/mystPickers.test.ts
+- test/page/modules/commentCompose.test.ts
+- test/page/modules/commentThreads.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/hostRequests.test.ts
 - test/page/modules/paletteReq.requirements.test.ts
@@ -163,7 +165,7 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 
 ### Verification notes
 
-- Method: test/page/modules/hostRequests.test.ts (matching by edit id and result type, answered once, timeout with the readable error with an explicit 6000, dialog requests keep the blur suspended, the pending table is emptied; the default timeouts 6 seconds and 10 minutes, the late answer after a timeout, and that no callback runs after the cancel are untested)
+- Method: test/page/modules/hostRequests.test.ts (matching by edit id and result type, answered once, timeout with the readable error with an explicit 6000, dialog requests keep the blur suspended, the pending table is emptied, the default timeouts of 6 seconds for a list and 10 minutes for a dialog, an answer after the timeout is not taken and calls nothing, and no callback runs after cancelAll, all with fake timers)
 - Method: test/core/protocol/pageToHost.test.ts (edit id of 1 to 100 characters on the list, pick, paste, thread and include requests)
 - Method: test/page/modules/plantumlFileRequests.test.ts (include request and answer, refusal, stale and repeated answers, timeout reason)
 - Method: test/page/modules/editPalette.test.ts (late list answer after the popover closed is ignored; an empty list or a host error is said in the popover)
@@ -172,8 +174,9 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 - Method: test/session/diagReq.plantuml.requirements.test.ts (an include request is answered once with the edit id, a file or a refusal)
 - Method: test/integration/mystPickers.test.ts, test/integration/imagePicker.test.ts, test/integration/imagePaste.test.ts (host answers with the request identity, labels, keys and refusal reasons of the pickers and the paste)
 - Method: test/integration/inlineThread.test.ts (thread reply and delete results with the edit id, only for the success and the lines refusals)
-- Method: test/integration/commentWrite.test.ts (previewCommentResult of reply to an unknown thread, delete of an unknown thread, create with an old version); the 15 second page timeout of the comment actions is untested
+- Method: test/integration/commentWrite.test.ts (previewCommentResult of reply to an unknown thread, delete of an unknown thread, create with an old version)
 - Method: test/core/protocol/hostToPage.test.ts (sample previewThreadReplyResult)
+- Method: test/page/modules/commentCompose.test.ts and test/page/modules/commentThreads.test.ts (the comment save, the thread reply and the resolve each start a 15 second answer timer, with fake timers)
 - Criteria: the protocol validator rejects an edit id that is empty, longer than 100 characters or not a string (isHostRequest in src/core/protocol/pageToHost.ts); each request gets one answer that repeats its edit id with the request type followed by Result, or a failure result after its timeout; the 30 second and 10 second values are passed by the block editor and are not asserted by a test.
 
 <!-- okf:links:start -->

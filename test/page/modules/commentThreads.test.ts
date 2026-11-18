@@ -469,10 +469,11 @@ test("T43: a reply over 10000 characters is cut by the box and refused by the pa
 function setupWithActions() {
   const document = new FakeDocument();
   const timers = new Map<number, () => void>();
+  const delays: number[] = [];
   let nextTimer = 1;
   const window = {
     innerWidth: 800, innerHeight: 600,
-    setTimeout: (callback: () => void) => { timers.set(nextTimer, callback); return nextTimer++; },
+    setTimeout: (callback: () => void, delay: number) => { delays.push(delay); timers.set(nextTimer, callback); return nextTimer++; },
     clearTimeout: (id: number) => { timers.delete(id); },
   };
   const calls: Array<[string, ...unknown[]]> = [];
@@ -484,7 +485,7 @@ function setupWithActions() {
   provideGlobalElement(FakeElement);
   const comments = installCommentThreads(document as never, window as never, hooks as never);
   const fireTimers = () => { for (const [id, callback] of [...timers]) { timers.delete(id); callback(); } };
-  return { document, comments, calls, fireTimers };
+  return { document, comments, calls, fireTimers, delays };
 }
 
 const press = (document: FakeDocument, selector: string) => {
@@ -909,4 +910,20 @@ test("comments hidden: an open popover closes and does not come back with the th
     comments.visibilityChanged();
     assert.equal(document.querySelector("[data-okf-comment-popover]"), null, `${name}=${on}: Show opens nothing by itself`);
   }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+test("a thread reply and a resolve (the path of delete too) each wait 15 seconds for the host's answer", () => {
+  const { document, comments, calls, delays } = setupWithActions();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  const input = popoverOf(document).querySelector("textarea")!;
+  (input as any).value = "Later";
+  document.fire("click", { target: sendButton(document) });
+  assert.equal(comments.result({ kind: "reply", threadId: "t1", ok: true }), true);
+  press(document, "[data-okf-comment-resolve]");
+  assert.deepEqual(calls.map((call) => call[0]), ["reply", "resolve"]);
+  const answerDelays = delays.filter((delay) => delay > 0);
+  assert.deepEqual(answerDelays, [15000, 15000], "one 15 s answer timer per sent action");
 });

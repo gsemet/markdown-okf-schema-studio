@@ -275,3 +275,52 @@ test("an include request is refused for the Java engine and for a file id the ho
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-053
+test("the host remembers the canonical path of a served include and of a missing one, and nothing for a refused one", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "diag-req-watch-"));
+  try {
+    const real = fs.realpathSync(root);
+    const documentPath = path.join(real, "doc.md");
+    fs.writeFileSync(path.join(real, "part.puml"), "@startuml\nA -> B\n@enduml\n");
+    const includeWatch = new PlantUmlIncludeWatch();
+    const preview = {
+      workspaceRoot: real,
+      plantUml: { includeWatch, issuedIds: new PlantUmlIncludeWatch() },
+      plantUmlEngineSettings: { useJar: false },
+      postToPage: () => Promise.resolve(true),
+    } as unknown as PreviewSession;
+    const requests = Object.assign(Object.create(HostRequestController.prototype) as HostRequestController, {
+      manager: { host: { logger: createMemoryLogger() } },
+    });
+    const canonicalized: string[] = [];
+    const manager = {
+      host: { logger: createMemoryLogger(), workspace: { trusted: true } },
+      activePathOf: () => documentPath,
+      // The step under test: every watched path goes through the manager's canonical form.
+      canonicalPath: (value: string) => {
+        canonicalized.push(value);
+        return `canonical:${value}`;
+      },
+      requests,
+    };
+    let handler: ((message: unknown, preview: PreviewSession) => void) | undefined;
+    new PlantUmlController(manager as never).register({ on: (_type: string, callback: typeof handler) => { handler = callback; } } as never);
+    const request = (name: string, editId: string): Record<string, unknown> => ({
+      type: "previewPlantUmlInclude", documentId: DOCUMENT, revision: 4, requestId: 9, path: name, from: null, editId,
+    });
+
+    handler!(request("part.puml", "edit-1"), preview);
+    handler!(request("later.puml", "edit-2"), preview);
+    assert.deepEqual(canonicalized, [path.join(real, "part.puml"), path.join(real, "later.puml")]);
+    assert.equal(includeWatch.has(`canonical:${path.join(real, "part.puml")}`), true, "the served file, by its canonical path");
+    assert.equal(includeWatch.has(`canonical:${path.join(real, "later.puml")}`), true, "the missing candidate, for its creation");
+    assert.equal(includeWatch.size, 2);
+
+    handler!(request("../../outside.puml", "edit-3"), preview);
+    assert.equal(includeWatch.size, 2, "nothing is remembered for a file outside the folders");
+    assert.equal(canonicalized.length, 2);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});

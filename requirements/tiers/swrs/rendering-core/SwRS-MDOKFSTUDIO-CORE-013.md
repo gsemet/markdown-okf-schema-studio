@@ -34,6 +34,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/contentCaches.test.ts
 - test/core/render/includeBudget.test.ts
+- test/core/render/renderReq.coreRows.requirements.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 - test/integration/projectFeatures.test.ts
 - test/security/resource-policy.test.ts
@@ -113,7 +114,8 @@ When a chain of includes reaches the 8th level, an include repeats a file alread
 ### Verification notes
 
 - Method: Unit test "include expansion output is unchanged for ordinary documents" in test/core/render/includeBudget.test.ts (nominal depth, refusal cycle)
-- Method: Unit test "include fan-out stops at the budget with one diagnostic" in test/core/render/includeBudget.test.ts (boundary budget; the 10 Mi characters row is untested by a named case)
+- Method: Unit test "include fan-out stops at the budget with one diagnostic" in test/core/render/includeBudget.test.ts (boundary budget, 2000 expansions)
+- Method: Unit test "10 Mi characters of included text expand; the next include is a placeholder with one budget warning" in test/core/render/renderReq.coreRows.requirements.test.ts (boundary budget, the 10 Mi characters row: exactly 10 Mi characters expand with no warning, the next includes stay placeholders with one warning)
 - Method: Unit test "an included file over 5 MiB stays a placeholder and a file of exactly 5 MiB is expanded" in test/core/render/renderReq.renderingCore.requirements.test.ts (boundary oversize rows)
 - Method: Unit test "an include that cannot be read is left unresolved" in test/security/trustReq.requirements.test.ts (boundary unreadable file)
 - Method: Unit test "canonicalizes local resources and rejects hostile paths" in test/security/resource-policy.test.ts (refusal outside the roots, URL scheme, absolute path, undecodable path, symlink)

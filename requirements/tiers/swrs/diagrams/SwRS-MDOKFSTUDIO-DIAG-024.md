@@ -33,6 +33,7 @@ tested_in_files:
 - test/core/render/plantUmlEngine.test.ts
 - test/security/package-contract.test.ts
 - test/session/diagReq.settings.requirements.test.ts
+- test/session/diagReq.webview.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -107,7 +108,7 @@ When PlantUML diagrams are drawn, the extension SHALL select the built-in engine
 - Known issue: PlantUmlController.engineFor has no host-level test.
 - Known issue: When the renderer is called without an engine option it defaults to the JAR pipeline; only the VS Code session passes the built-in engine.
 - Known issue: Smetana layouts can differ from the JAR output produced with Graphviz.
-- Known issue: Untested: the bundled themes and sprites are registered by imports in plantumlPreview.ts.
+- Known issue: The bundled themes and sprites are checked as imports of plantumlPreview.ts only; no test draws a diagram that uses them.
 - Known issue: The description of useJar still says the JAR is needed for !include files, although local includes now work in the built-in engine (the description is stale).
 
 ### Related requirements
@@ -123,8 +124,8 @@ When PlantUML diagrams are drawn, the extension SHALL select the built-in engine
 - Method: test/session/diagReq.settings.requirements.test.ts (a PlantUML setting change reads the settings again and renders the open document again; an unrelated setting does nothing)
 - Method: test/security/package-contract.test.ts (settings contributed with an explanation: type, default, unique order, description limit, category)
 - Method: test/core/configuration/settingsRegistry.test.ts (category title and order)
-- Method: untested: no test draws a themed or icon diagram or a class diagram without Graphviz (the scenario "The built-in engine needs nothing outside the extension" is to be checked by a visual scenario)
-- Criteria: Only the boolean true leaves the built-in engine; jar-untrusted never becomes builtin; no spawn call and an empty host result in both trust states; the path takes effect only when useJar becomes true; only the three configured sections trigger a render; type, default, order, description limit, category title and order match the manifest.
+- Method: test/session/diagReq.webview.requirements.test.ts `the built-in engine is bundled into the extension's page script and the page loads nothing from outside for it` (the built-in engine needs nothing outside the extension, contract part: the page entry imports @plantuml/core with its themes and OpenIconic icons and no Graphviz, esbuild inlines them into out/bundle/plantumlPreview.js, and the page built for the built-in engine takes every script from the extension under connect-src 'none'). No test draws a themed or icon diagram or a class diagram without Graphviz; that drawing is left to a visual scenario.
+- Criteria: Only the boolean true leaves the built-in engine; jar-untrusted never becomes builtin; no spawn call and an empty host result in both trust states; the engine, its themes and icons are inlined in the extension's page script and the page allows no fetch; the path takes effect only when useJar becomes true; only the three configured sections trigger a render; type, default, order, description limit, category title and order match the manifest.
 
 <!-- okf:links:start -->
 ### Links
