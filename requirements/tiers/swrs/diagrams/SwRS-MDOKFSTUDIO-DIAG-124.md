@@ -2,11 +2,10 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-124
 uuid: 17299267-0a7c-4c3b-924c-02b78d3ade83
-title: The chart runtime loads only with a chart and needs no eval
-description: When the rendered content contains a chart figure, the extension
-  SHALL add the chart runtime script to the page, and the runtime SHALL evaluate
-  chart expressions with the Vega interpreter so that the page content security
-  policy keeps no unsafe-eval and no network access.
+title: Chart expressions are evaluated without eval under an unchanged policy
+description: 'When a page holds a chart figure, the chart runtime SHALL evaluate chart
+  expressions with the Vega interpreter so that the page content security policy keeps
+  no unsafe-eval and no network access.'
 project: MDOKFSTUDIO
 scope: diagrams
 req_lifecycle: proposed
@@ -15,12 +14,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
+depends_on:
+- SwRS-MDOKFSTUDIO-DIAG-129
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/page/modules/vegaChart.ts
-- src/session/webview.ts
 tested_in_files:
 - test/core/preview/contentPatch.test.ts
 - test/page/chartCsp.test.ts
@@ -30,17 +30,11 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## The chart runtime loads only with a chart and needs no eval
+## Chart expressions are evaluated without eval under an unchanged policy
 
 ### Normative behavior
 
-When the rendered content contains a chart figure, the extension SHALL add the chart runtime script to the page, and the runtime SHALL evaluate chart expressions with the Vega interpreter so that the page content security policy keeps no unsafe-eval and no network access.
-
-### Scenario (nominal): The runtime is added only with a chart
-
-- GIVEN rendered content with a chart figure, and another page with only a Mermaid figure
-- WHEN the page is built
-- THEN the first page carries one script with the page nonce, the attribute data-sphinx-preview-vega and the source vegaPreview.js of the extension bundle, once however many charts the page holds, and the second page carries none; a page with both loads both runtimes, and a chart appearing in or leaving a page is a different page shell
+When a page holds a chart figure, the chart runtime SHALL evaluate chart expressions with the Vega interpreter so that the page content security policy keeps no unsafe-eval and no network access.
 
 ### Scenario (nominal): No eval and no network
 
@@ -54,13 +48,16 @@ When the rendered content contains a chart figure, the extension SHALL add the c
 - WHEN it is compared with a page without charts
 - THEN the directives are the same
 
+### Related requirements
+
+- SwRS-MDOKFSTUDIO-DIAG-129: the chart runtime script loads only when the page holds a chart
+
 ### Verification notes
 
-- Method: test/session/diagReq.chart.requirements.test.ts (the script is added once with the nonce and only with a chart, the policy of a chart page)
-- Method: test/core/preview/contentPatch.test.ts (the shell key differs when a chart appears or disappears)
+- Method: test/session/diagReq.chart.requirements.test.ts (the policy of a chart page)
 - Method: test/page/chartCsp.test.ts (headless Chromium, the real page builder and policy: two charts drawn, no violation, the control that the policy refuses code from strings)
 - Method: test/page/modules/vegaChart.test.ts (charts with expressions draw with eval and new Function refused)
-- Criteria: The chart runtime loads only on a page with a chart, and charts draw under a policy without eval and without network.
+- Criteria: Charts draw under a policy without eval and without network.
 
 <!-- okf:links:start -->
 ### Links
@@ -69,4 +66,6 @@ When the rendered content contains a chart figure, the extension SHALL add the c
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-DIAG-015](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-015.md): A writer reads charts and drawings in the page
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-129](SwRS-MDOKFSTUDIO-DIAG-129.md): A diagram renderer script loads only when the page holds a figure of its engine
 <!-- okf:links:end -->

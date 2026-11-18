@@ -20,7 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by:
-- SwRS-MDOKFSTUDIO-TRUST-006
+- SwRS-MDOKFSTUDIO-TRUST-005
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -55,5 +55,5 @@ When a preview is read-only because the workspace is untrusted or the file is st
 - Derives from:
   - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
 <!-- okf:links:end -->

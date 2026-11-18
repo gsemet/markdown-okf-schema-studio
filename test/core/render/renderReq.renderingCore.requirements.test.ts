@@ -106,7 +106,7 @@ test("an included file over 5 MiB stays a placeholder and a file of exactly 5 Mi
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-001
+// @tests_req SwRS-MDOKFSTUDIO-CORE-088
 test("the rendered HTML is the same whatever the palette mode: the render takes no mode", async () => {
   const markdown = "# Title\n\n> [!NOTE]\n> Alert.\n\n- [ ] task\n\n$x^2$ and ~~gone~~ and :::{note}\n";
   const outputs: string[] = [];
@@ -161,7 +161,7 @@ test("an include with :literal:, an empty argument or an other option stays a pl
   assert.ok(empty.diagnostics.some((entry) => entry.severity === "warning" && entry.line === 3), "a warning on the directive line");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-029
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071
 test("raw HTML outside the supported subset is dropped and a kbd element is kept", async () => {
   const dropped = await renderMyst('<iframe src="https://example.com/x"></iframe>\n\nAfter.\n');
   assert.doesNotMatch(dropped.html, /iframe/u);

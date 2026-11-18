@@ -85,13 +85,11 @@ Writers and security-minded teams expect to choose between a safe bundled engine
 - Choice: the JAR option is off by default. Only a real `true` selects the JAR pipeline; a non-boolean value never starts a process. In an untrusted workspace the option still routes to the JAR pipeline, which refuses without starting a process.
 - The JAR path option is used only when the JAR option is on and is kept, ignored, while it is off.
 - Changing any PlantUML setting re-reads the settings of every open preview and renders the open document again, without reopening the preview.
-- Both settings are explained in the Settings UI, in a "PlantUML" category (order 5), each with a unique order and a description of its effect.
 - Known issue: when the renderer is called without an engine option it defaults to the JAR pipeline; only the VS Code session passes the bundled engine.
 - Rendering: with the JAR option on in a trusted workspace, a diagram is rendered by `java -jar <jar> -pipe -tsvg` when the JAR path is set, or by `plantuml -pipe -tsvg` when it is empty. The source goes in on standard input in the workspace folder and the SVG is taken from the output; log lines around it are ignored.
-- The JAR path is trimmed, and a relative path is resolved from the workspace folder; a non-string value reads as empty.
-- With several diagrams, one process is started per diagram in parallel; each result is matched to its diagram in document order, and one failure does not affect the others.
+- With several diagrams, one process is started per diagram and at most 2 run at once (PLANTUML_MAX_CONCURRENT_RENDERS = 2, queued by acquireRenderSlot); each result is matched to its diagram in document order, and one failure does not affect the others.
 - Results reach the open preview in place when ready: pictures with a rendered state, failures as a red message paragraph plus a status-line warning with code `plantuml-render`. A save, a PlantUML result or a link update waits for an open block edit to finish.
-- Known issue: the executable path option of the renderer is fed by no setting; only visual fixtures pass it. The success visual scenario fails when `plantuml` is not on the PATH, and many diagrams mean many JVMs at once.
+- Known issue: the executable path option of the renderer is fed by no setting; only visual fixtures pass it. The success visual scenario fails when `plantuml` is not on the PATH.
 - Blocked or failed: in Restricted Mode with the JAR option on, no process starts: every PlantUML diagram shows "PlantUML preview is disabled in an untrusted workspace." with one warning each. The bundled engine is not swapped in silently.
 - A JAR path that does not exist shows "The PlantUML JAR could not be found: followed by the path"; a directory shows "The PlantUML JAR path is not a file: followed by the path"; no process starts. The diagram state is `error`.
 - A missing `plantuml` command shows `PlantUML executable "plantuml" was not found on PATH. Set markdownOkfSchemaStudio.plantuml.jarPath to a valid JAR path.` with the source kept and the state `unavailable`. Known issue: a missing Java gives the same wording about the executable "java", which does not name Java or Graphviz and misleads when the JAR path is already set; a missing Graphviz is neither checked nor reported.
@@ -109,7 +107,7 @@ Writers and security-minded teams expect to choose between a safe bundled engine
    - SwRS-MDOKFSTUDIO-DIAG-024: the writer sets useJar to true and the JAR pipeline is selected
    - Option SwRS-MDOKFSTUDIO-DIAG-024 (refusal): a value that is not the boolean true keeps the built-in engine
 2. The JAR pipeline is selected
-   - SwRS-MDOKFSTUDIO-DIAG-084: java or the plantuml command runs once per diagram
+   - SwRS-MDOKFSTUDIO-DIAG-084: java or the plantuml command runs once per diagram, at most 2 at once
    - Option SwRS-MDOKFSTUDIO-DIAG-089 (refusal): a jarPath that does not exist shows a message on the diagram
    - Option SwRS-MDOKFSTUDIO-DIAG-097 (refusal): a render that runs past 30 seconds stops with a message
 3. The JAR has drawn the diagrams of the render
@@ -135,7 +133,7 @@ Writers and security-minded teams expect to choose between a safe bundled engine
   - [SwRS-MDOKFSTUDIO-DIAG-077](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-077.md): The jarPath setting is contributed with an explanation
   - [SwRS-MDOKFSTUDIO-DIAG-078](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-078.md): The PlantUML settings form their own category
   - [SwRS-MDOKFSTUDIO-DIAG-082](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-082.md): PlantUML messages use the error style
-  - [SwRS-MDOKFSTUDIO-DIAG-084](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-084.md): The JAR pipeline runs java or plantuml once per diagram on stdin
+  - [SwRS-MDOKFSTUDIO-DIAG-084](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-084.md): The JAR pipeline runs java or plantuml once per diagram on stdin, at most 2 at once
   - [SwRS-MDOKFSTUDIO-DIAG-085](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-085.md): Without a JAR the plantuml command is run
   - [SwRS-MDOKFSTUDIO-DIAG-086](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-086.md): The JAR pipeline takes the SVG from the process output
   - [SwRS-MDOKFSTUDIO-DIAG-087](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-087.md): jarPath is read as a trimmed string
@@ -148,7 +146,7 @@ Writers and security-minded teams expect to choose between a safe bundled engine
   - [SwRS-MDOKFSTUDIO-DIAG-094](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-094.md): A failing PlantUML process shows its exit and error output
   - [SwRS-MDOKFSTUDIO-DIAG-095](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-095.md): Output without an SVG is reported
   - [SwRS-MDOKFSTUDIO-DIAG-096](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-096.md): A process that cannot be spawned is reported
-  - [SwRS-MDOKFSTUDIO-DIAG-097](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-097.md): A JAR render is bounded in input, output, time, process lifetime and concurrency
+  - [SwRS-MDOKFSTUDIO-DIAG-097](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-097.md): A JAR render is bounded in input, output, time and process lifetime
   - [SwRS-MDOKFSTUDIO-DIAG-098](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-098.md): The JAR pipeline refuses a source over 1 MiB
   - [SwRS-MDOKFSTUDIO-DIAG-099](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-099.md): The JAR pipeline stops an output over 8 MiB
   - [SwRS-MDOKFSTUDIO-DIAG-100](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-100.md): A JAR render stops after 30 seconds

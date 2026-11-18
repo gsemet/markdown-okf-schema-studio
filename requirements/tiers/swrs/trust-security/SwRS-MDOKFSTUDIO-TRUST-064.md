@@ -8,8 +8,8 @@ description: When the page receives previewFlushEdit or previewEditorWatch, it
   whatever the document the message names.
 project: markdown-okf-schema-studio
 scope: trust-security
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -21,12 +21,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/hostToPage.ts
-tested_in_files:
-- test/core/protocol/hostToPage.test.ts
-- test/page/runtimeBlockEditor.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-TRUST-059
 ---
 
 ## Flush and editor watch messages are addressed by their own id
@@ -70,5 +69,7 @@ When the page receives previewFlushEdit or previewEditorWatch, it SHALL accept i
   - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
   - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
 - Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+- Superseded by:
   - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
 <!-- okf:links:end -->

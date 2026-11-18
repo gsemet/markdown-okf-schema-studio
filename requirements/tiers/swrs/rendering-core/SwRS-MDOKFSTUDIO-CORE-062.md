@@ -20,7 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by:
-- SwRS-MDOKFSTUDIO-GFM-029
+- SwRS-MDOKFSTUDIO-CORE-071
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -56,5 +56,5 @@ When a document holds a raw details block (with an optional open state and a sum
 - Derives from:
   - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-GFM-029](../gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
+  - [SwRS-MDOKFSTUDIO-CORE-071](SwRS-MDOKFSTUDIO-CORE-071.md): README-style HTML renders like GitHub and shows its tag in edit mode
 <!-- okf:links:end -->

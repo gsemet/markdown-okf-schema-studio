@@ -10,8 +10,8 @@ description: When a document contains raw HTML, the extension SHALL render a raw
   cap, and omit raw HTML outside the supported subset from the rendering.
 project: markdown-okf-schema-studio
 scope: gfm
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -21,19 +21,12 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/render/mystBlockTransforms.ts
-- src/core/render/mystRenderer.ts
-tested_in_files:
-- test/core/render/mystPaletteRendering.test.ts
-- test/core/render/renderReq.gfm.requirements.test.ts
-- test/core/render/renderReq.renderingCore.requirements.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
-supersedes:
-- SwRS-MDOKFSTUDIO-CORE-044
-- SwRS-MDOKFSTUDIO-CORE-062
-- SwRS-MDOKFSTUDIO-GFM-030
-- SwRS-MDOKFSTUDIO-GFM-033
+supersedes: []
+superseded_by:
+- SwRS-MDOKFSTUDIO-CORE-071
 ---
 
 ## A small raw HTML subset renders and the rest is dropped
@@ -97,9 +90,6 @@ The supported subset also holds raw HTML tables (see SwRS-MDOKFSTUDIO-GFM-031), 
 - Derives from:
   - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
   - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
-- Supersedes:
-  - [SwRS-MDOKFSTUDIO-CORE-044](../rendering-core/SwRS-MDOKFSTUDIO-CORE-044.md): Drop unsupported raw HTML
-  - [SwRS-MDOKFSTUDIO-CORE-062](../rendering-core/SwRS-MDOKFSTUDIO-CORE-062.md): Render details and kbd blocks
-  - [SwRS-MDOKFSTUDIO-GFM-030](SwRS-MDOKFSTUDIO-GFM-030.md): Raw kbd renders as a key cap
-  - [SwRS-MDOKFSTUDIO-GFM-033](SwRS-MDOKFSTUDIO-GFM-033.md): Unsupported raw HTML is dropped
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-071](../rendering-core/SwRS-MDOKFSTUDIO-CORE-071.md): README-style HTML renders like GitHub and shows its tag in edit mode
 <!-- okf:links:end -->

@@ -31,6 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-174
 - SwRS-MDOKFSTUDIO-PALETTE-178
 - SwRS-MDOKFSTUDIO-PALETTE-183
+- SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-006
 - SwRS-MDOKFSTUDIO-TRUST-090
 default_owner_email: gaetan@xeberon.net
@@ -118,6 +119,7 @@ The list is bounded and says when it was cut.
   - [SwRS-MDOKFSTUDIO-PALETTE-174](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-174.md): The host drops a request that does not name the render it holds
   - [SwRS-MDOKFSTUDIO-PALETTE-178](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-178.md): The host lists the label targets of the document
   - [SwRS-MDOKFSTUDIO-PALETTE-183](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-183.md): The host scans nearby bibliography files for citation keys within bounds
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
   - [SwRS-MDOKFSTUDIO-TRUST-090](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
 <!-- okf:links:end -->

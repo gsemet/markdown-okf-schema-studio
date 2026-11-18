@@ -65,6 +65,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-072
 - SwRS-MDOKFSTUDIO-CORE-077
 - SwRS-MDOKFSTUDIO-CORE-079
+- SwRS-MDOKFSTUDIO-CORE-088
+- SwRS-MDOKFSTUDIO-CORE-089
 - SwRS-MDOKFSTUDIO-GFM-029
 - SwRS-MDOKFSTUDIO-LIFE-094
 default_owner_email: gaetan@xeberon.net
@@ -111,7 +113,7 @@ Writers need to read their Markdown as formatted text, at any length, while they
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-CORE-001](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer completely, in process
+  - [SwRS-MDOKFSTUDIO-CORE-001](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer in process and keeps the newest edit
   - [SwRS-MDOKFSTUDIO-CORE-002](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-002.md): Render the CommonMark blocks
   - [SwRS-MDOKFSTUDIO-CORE-003](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-003.md): Every rendered block maps to its absolute source lines
   - [SwRS-MDOKFSTUDIO-CORE-004](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-004.md): Map a multi-line block to its end line
@@ -124,7 +126,7 @@ Writers need to read their Markdown as formatted text, at any length, while they
   - [SwRS-MDOKFSTUDIO-CORE-020](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-020.md): Render read-only in an untrusted workspace
   - [SwRS-MDOKFSTUDIO-CORE-021](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-021.md): Refuse the render when trust is required
   - [SwRS-MDOKFSTUDIO-CORE-027](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-027.md): Warm the render engine at activation
-  - [SwRS-MDOKFSTUDIO-CORE-028](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and inline code are typeset readably
+  - [SwRS-MDOKFSTUDIO-CORE-028](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and block quotes are typeset readably
   - [SwRS-MDOKFSTUDIO-CORE-029](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-029.md): Style headings
   - [SwRS-MDOKFSTUDIO-CORE-030](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-030.md): Tighten list spacing
   - [SwRS-MDOKFSTUDIO-CORE-031](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-031.md): Style inline code as a pill
@@ -150,11 +152,13 @@ Writers need to read their Markdown as formatted text, at any length, while they
   - [SwRS-MDOKFSTUDIO-CORE-065](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-065.md): Place inline images on the text line
   - [SwRS-MDOKFSTUDIO-CORE-066](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-066.md): Ignore invalid page messages
   - [SwRS-MDOKFSTUDIO-CORE-068](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-068.md): Disable soft appearance after a content patch
-  - [SwRS-MDOKFSTUDIO-CORE-070](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-070.md): A parse splits the source into lines once, whatever the number of directives
+  - [SwRS-MDOKFSTUDIO-CORE-070](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-070.md): Parsing a document with many directives stays fast and keeps the blank lines around each directive
   - [SwRS-MDOKFSTUDIO-CORE-071](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-071.md): README-style HTML renders like GitHub and shows its tag in edit mode
   - [SwRS-MDOKFSTUDIO-CORE-072](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-072.md): A \[TOC\] marker or a contents directive renders the table of contents
   - [SwRS-MDOKFSTUDIO-CORE-077](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-077.md): A table tints its heading, its even rows and the hovered row
   - [SwRS-MDOKFSTUDIO-CORE-079](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-079.md): Inline code shows a front matter value of the document
+  - [SwRS-MDOKFSTUDIO-CORE-088](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-088.md): CommonMark constructs render the same in every palette mode and in a long document
+  - [SwRS-MDOKFSTUDIO-CORE-089](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-089.md): Inline code is a readable tinted pill in text, links, tables and forced themes
   - [SwRS-MDOKFSTUDIO-GFM-029](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
   - [SwRS-MDOKFSTUDIO-LIFE-094](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-094.md): Blocks changed by another tool glow briefly
 - Supersedes:

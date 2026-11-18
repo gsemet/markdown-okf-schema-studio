@@ -57,5 +57,5 @@ Production always passes `allowUntrusted: true`, so this refusal is a guard; the
 - Derives from:
   - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-CORE-001](SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer completely, in process
+  - [SwRS-MDOKFSTUDIO-CORE-001](SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer in process and keeps the newest edit
 <!-- okf:links:end -->

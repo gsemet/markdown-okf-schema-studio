@@ -16,6 +16,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
+depends_on:
+- SwRS-MDOKFSTUDIO-TRUST-025
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -62,6 +64,10 @@ When a Vega-Lite or Vega chart names a relative data url, the extension SHALL re
 | a format type of topojson or another unknown type | refused with a message naming the format |
 | a csv or tsv file | the first record names the columns; numbers and true or false are typed |
 
+### Related requirements
+
+- SwRS-MDOKFSTUDIO-TRUST-025: the allowed-roots rule, which the chart data files follow
+
 ### Verification notes
 
 - Method: test/core/render/chartRendering.test.ts (a relative file is read, a remote url is not, a file outside the folders, a missing file and an absolute path are refused, Restricted Mode)
@@ -77,4 +83,6 @@ When a Vega-Lite or Vega chart names a relative data url, the extension SHALL re
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-DIAG-015](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-015.md): A writer reads charts and drawings in the page
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-025](../trust-security/SwRS-MDOKFSTUDIO-TRUST-025.md): A resource reference resolves only to an existing file inside a root
 <!-- okf:links:end -->

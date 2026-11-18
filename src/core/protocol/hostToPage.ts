@@ -375,7 +375,7 @@ export function createHostMessageFilter(): HostMessageFilter {
   const PATCH_STATUSES = ["pending", "success", "stale", "error", "missing-source", "recovery"];
   const MAX_PATCH_CONTENT_LENGTH = 20 * 1024 * 1024;
   const MAX_PATCH_DIAGNOSTICS = 500;
-  // @implements_req SwRS-MDOKFSTUDIO-TRUST-061
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
   const isValidContentPatch = (message: Readonly<Record<string, unknown>>): boolean => {
     const next = message.next as Record<string, unknown> | undefined;
     if (!next || typeof next !== "object"
@@ -412,7 +412,7 @@ export function createHostMessageFilter(): HostMessageFilter {
   const ownId: HostMessageRule = { addressing: "own-id" };
   const rules: { readonly [T in HostToPageType]: HostMessageRule } = {
     previewPendingOverlay: render,
-    // @implements_req SwRS-MDOKFSTUDIO-TRUST-062
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
     previewPropertiesTable: { addressing: "render", isValid: (message) => typeof message.markup === "string" },
     previewContentPatch: { addressing: "render", isValid: isValidContentPatch },
     previewFrontmatterResult: render,
@@ -438,7 +438,7 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewPasteHtmlResult: ownId,
     previewPlantUmlIncludeResult: ownId,
     sourceScroll: render,
-    // @implements_req SwRS-MDOKFSTUDIO-TRUST-063
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
     previewLinkTargets: { addressing: "render", isValid: (message) => Array.isArray(message.targets) },
     previewHistoryState: render,
     previewShowComments: render,
@@ -446,7 +446,7 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewBaselineDiff: { addressing: "render", isValid: isValidBaselineDiff },
     previewComments: render,
     previewCommentResult: render,
-    // @implements_req SwRS-MDOKFSTUDIO-TRUST-064
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
     // The host is about to switch document: the flush id is the match.
     previewFlushEdit: { addressing: "own-id", isValid: (message) => typeof message.flushId === "string" },
     navigateAnchor: render,

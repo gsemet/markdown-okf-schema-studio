@@ -18,6 +18,7 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-007
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-050
+- SwRS-MDOKFSTUDIO-TRUST-025
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -87,6 +88,7 @@ The folders an include may read follow the trust of the workspace.
 
 ### Related requirements
 
+- SwRS-MDOKFSTUDIO-TRUST-025: the allowed-roots rule, which the served include files follow
 - SwRS-MDOKFSTUDIO-DIAG-050: the include request the host accepts before it resolves it
 - SwRS-MDOKFSTUDIO-DIAG-046: how a refusal reaches the diagram
 - SwRS-MDOKFSTUDIO-DIAG-053: the paths this resolver reports are watched there
@@ -106,6 +108,7 @@ The folders an include may read follow the trust of the workspace.
   - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
 - Depends on:
   - [SwRS-MDOKFSTUDIO-DIAG-050](SwRS-MDOKFSTUDIO-DIAG-050.md): The host accepts only well-formed include requests
+  - [SwRS-MDOKFSTUDIO-TRUST-025](../trust-security/SwRS-MDOKFSTUDIO-TRUST-025.md): A resource reference resolves only to an existing file inside a root
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-DIAG-055](SwRS-MDOKFSTUDIO-DIAG-055.md): A forged relative from is refused
   - [SwRS-MDOKFSTUDIO-DIAG-056](SwRS-MDOKFSTUDIO-DIAG-056.md): Includes resolve next to the including file

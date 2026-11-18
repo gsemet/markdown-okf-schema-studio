@@ -55,5 +55,5 @@ When the extension is built, it SHALL produce out/bundle/plantumlPreview.js from
 - Derives from:
   - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-TRUST-074](../trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package ships its icon and its bundle
+  - [SwRS-MDOKFSTUDIO-TRUST-074](../trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package declares its 256 pixel PNG icon
 <!-- okf:links:end -->

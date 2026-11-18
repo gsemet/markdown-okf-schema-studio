@@ -815,7 +815,7 @@ test("T34: the patch removes the pending overlay and the link tooltip", () => {
   assert.equal(link.getAttribute("title"), "target", "the link title was restored");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-061
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
 test("CR 050: a patch keeps the code of each status line and refuses a malformed one", () => {
   const harness = createRuntimeHarness({ previewStatus: "success" });
   harness.dispatchMessage(patchMessage({
@@ -1035,7 +1035,7 @@ test("T34: links of the new content keep known target hints and discover new tar
   assert.equal(typed.getAttribute("title"), "/ws/Typed.md");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-063
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
 // Moved from test/webview/linkNavigation.test.ts ("discovery hints ignore stale renders and never
 // replace the original target"): the page's host message filter matches previewLinkTargets to the
 // render it shows before the router hands it to the link navigation.

@@ -23,6 +23,7 @@ derives_from:
 - StRS-MDOKFSTUDIO-TRUST-006
 depends_on:
 - SwRS-MDOKFSTUDIO-CORE-012
+- SwRS-MDOKFSTUDIO-TRUST-025
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -109,6 +110,7 @@ When a chain of includes reaches the 8th level, an include repeats a file alread
 
 ### Related requirements
 
+- SwRS-MDOKFSTUDIO-TRUST-025: the allowed-roots rule (a resource resolves only to an existing file inside a root), which this requirement applies to includes
 - SwRS-MDOKFSTUDIO-CORE-012: an include is expanded in place
 
 ### Verification notes
@@ -133,6 +135,7 @@ When a chain of includes reaches the 8th level, an include repeats a file alread
   - [StRS-MDOKFSTUDIO-TRUST-006](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-006.md): The preview runs no foreign code and unsafe HTML is made inert
 - Depends on:
   - [SwRS-MDOKFSTUDIO-CORE-012](SwRS-MDOKFSTUDIO-CORE-012.md): An include is expanded in place and mapped to its directive
+  - [SwRS-MDOKFSTUDIO-TRUST-025](../trust-security/SwRS-MDOKFSTUDIO-TRUST-025.md): A resource reference resolves only to an existing file inside a root
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CORE-016](SwRS-MDOKFSTUDIO-CORE-016.md): Limit the include budget per render
   - [SwRS-MDOKFSTUDIO-CORE-018](SwRS-MDOKFSTUDIO-CORE-018.md): Refuse includes outside the allowed roots

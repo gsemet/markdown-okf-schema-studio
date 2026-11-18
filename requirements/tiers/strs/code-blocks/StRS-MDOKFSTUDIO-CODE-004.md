@@ -31,6 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CODE-033
 - SwRS-MDOKFSTUDIO-CODE-034
 - SwRS-MDOKFSTUDIO-CODE-035
+- SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-006
 - SwRS-MDOKFSTUDIO-TRUST-065
 default_owner_email: gaetan@xeberon.net
@@ -85,6 +86,7 @@ Readers need to reuse code samples without selecting text by hand, even in Restr
   - [SwRS-MDOKFSTUDIO-CODE-033](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-033.md): Reposition the copy button on window resize
   - [SwRS-MDOKFSTUDIO-CODE-034](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-034.md): Keep the copy button clear of the sticky band and toolbar
   - [SwRS-MDOKFSTUDIO-CODE-035](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-035.md): Reset the Copied state when another block is hovered
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 <!-- okf:links:end -->

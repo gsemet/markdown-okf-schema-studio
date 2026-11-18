@@ -108,7 +108,7 @@ stateDiagram-v2
   - [SwRS-MDOKFSTUDIO-BLOCK-241](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-241.md): previewBlocksCopy needs a line range
   - [SwRS-MDOKFSTUDIO-BLOCK-242](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-242.md): previewBlocksCut needs a line range and an optional pin
   - [SwRS-MDOKFSTUDIO-BLOCK-243](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-243.md): previewBlocksPaste needs a line to paste after
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes

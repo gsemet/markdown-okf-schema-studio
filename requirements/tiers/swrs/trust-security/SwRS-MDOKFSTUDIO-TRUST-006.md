@@ -8,8 +8,8 @@ description: When a preview with restricted reads sends a page message that is
   answers it as it does for a preview with full reads.
 project: markdown-okf-schema-studio
 scope: trust-security
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -25,21 +25,12 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/session/features/history.ts
-- src/session/features/hostRequests.ts
-- src/session/features/links.ts
-- src/session/features/viewState.ts
-- src/session/pageMessages.ts
-tested_in_files:
-- test/integration/untrusted-suite.ts
-- test/session/diagReq.viewState.requirements.test.ts
-- test/session/paletteReq.requirements.test.ts
-- test/session/renderReq.codeCopy.requirements.test.ts
-- test/session/toolbarReq.requirements.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
-supersedes:
-- SwRS-MDOKFSTUDIO-CODE-025
+supersedes: []
+superseded_by:
+- SwRS-MDOKFSTUDIO-TRUST-005
 ---
 
 ## A preview with restricted reads keeps every viewing action
@@ -103,8 +94,8 @@ A preview has restricted reads because the workspace is untrusted or the file is
   - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
   - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
+  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-001](SwRS-MDOKFSTUDIO-TRUST-001.md): A document is editable whatever the trust; only its reads are restricted
-- Supersedes:
-  - [SwRS-MDOKFSTUDIO-CODE-025](../code-blocks/SwRS-MDOKFSTUDIO-CODE-025.md): Allow copying in read-only previews
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
 <!-- okf:links:end -->

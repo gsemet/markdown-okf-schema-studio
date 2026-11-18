@@ -113,7 +113,7 @@ function rawDetailsNode(
   return node;
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-GFM-029
+// @implements_req SwRS-MDOKFSTUDIO-CORE-071
 /**
  * Renders the raw HTML a Markdown author writes for a collapsible section and a keyboard key.
  * `<details>` (optionally `open`, with a plain `<summary>`) becomes a details element: either a

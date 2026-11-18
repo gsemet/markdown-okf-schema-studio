@@ -228,7 +228,7 @@ test("a label request for a stale preview is answered with the out-of-date error
   assert.deepEqual((current.items as Array<{ value: string }>).map((item) => item.value), ["intro", "next"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-006
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 test("the label list is answered in a preview with restricted reads, the citation list is refused", async () => {
   const restrictedReads = setup({ restrictedReads: true });
   const labels = await restrictedReads.ask("previewListTargets");

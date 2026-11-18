@@ -87,10 +87,7 @@ test("each rule matches the identity it names, and only that", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-061
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-062
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-063
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-064
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
 test("the payload checks refuse what the page used to refuse", () => {
   const refused: Array<[HostToPageType, Record<string, unknown>]> = [

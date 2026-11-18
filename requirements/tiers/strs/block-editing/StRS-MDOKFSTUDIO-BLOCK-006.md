@@ -32,6 +32,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-245
 - SwRS-MDOKFSTUDIO-BLOCK-256
 - SwRS-MDOKFSTUDIO-TRUST-005
+- SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-TRUST-064
 - SwRS-MDOKFSTUDIO-TRUST-065
 depends_on:
@@ -136,7 +137,8 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-BLOCK-244](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-244.md): previewEditClosed carries the id of the closed editor
   - [SwRS-MDOKFSTUDIO-BLOCK-245](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-245.md): previewEditFlushed carries the flush id and a flag
   - [SwRS-MDOKFSTUDIO-BLOCK-256](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-256.md): The host refuses a block edit whose first line is blank
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
   - [SwRS-MDOKFSTUDIO-TRUST-064](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-064.md): Flush and editor watch messages are addressed by their own id
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Depends on:

@@ -365,7 +365,7 @@ test("CR 144: Cmd/Ctrl+F runs the find command on the focused preview only", () 
   assert.match(bindings[0].when, /!editorTextFocus/u, "the text editor keeps its own find");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-074
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-092
 test("CR 135: the VSIX leaves out source maps, internal docs, agent files and the Python project file", () => {
   const ignore = fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8")
     .split(/\r?\n/u).map((line) => line.trim());

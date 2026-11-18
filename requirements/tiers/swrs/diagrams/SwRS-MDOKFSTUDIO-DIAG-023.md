@@ -16,6 +16,9 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-006
+depends_on:
+- SwRS-MDOKFSTUDIO-DIAG-129
+- SwRS-MDOKFSTUDIO-DIAG-009
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -60,13 +63,11 @@ When a document contains a plantuml fence, or a {plantuml} or {uml} directive wi
 - WHEN the preview is rendered
 - THEN the diagram text is exactly the body; the extension adds no wrapper
 
-### Scenario (nominal): The built-in engine script loads only when needed
+### Scenario (boundary): The JAR pipeline loads no built-in engine script
 
-| Engine and content | Outcome |
-| --- | --- |
-| The built-in engine and content with a PlantUML figure | The page HTML holds one script tag with the page nonce, the bundle URL of plantumlPreview.js and the attribute data-sphinx-preview-plantuml |
-| The built-in engine without a PlantUML figure | The page holds no built-in engine script |
-| The JAR pipeline with a PlantUML figure | The page holds no built-in engine script |
+- GIVEN the JAR pipeline and content with a PlantUML figure
+- WHEN the page is built
+- THEN the page holds no built-in engine script (the script of the built-in engine follows SwRS-MDOKFSTUDIO-DIAG-129)
 
 ### Scenario (nominal): A valid diagram is drawn as a picture
 
@@ -109,11 +110,11 @@ When a document contains a plantuml fence, or a {plantuml} or {uml} directive wi
 ### Verification notes
 
 - Method: test/core/render/mystFeatures.test.ts (three forms, text kept as written: rendered HTML structure)
-- Method: test/session/diagReq.webview.requirements.test.ts (the built-in PlantUML script is added once with the page nonce, only for the built-in engine and a figure)
+- Method: test/session/diagReq.webview.requirements.test.ts (the built-in PlantUML script is absent with the JAR pipeline)
 - Method: test/page/modules/plantumlDiagram.test.ts (valid diagram drawn as a picture with a fake engine, light or dark rendering: luminance below 0.18 selects dark, transparent selects light)
 - Method: test/visual/scenarioDefinitions2.ts (visual scenarios diagrams v10 and v11: picture drawn, SVG with a script, the variant change redraws all diagrams)
 - Method: test/core/preview/diagReq.styles.requirements.test.ts (a PlantUML picture is scaled down to the column and never set to a fixed width; a PlantUML picture is a block centred with automatic inline margins; the PlantUML source disclosure has the rules of the Mermaid one)
-- Criteria: Every form gives the same figure structure and the text is unchanged; the script tag follows the engine and the figure; a data-URI image with the rendered state replaces the text; luminance below 0.18 selects dark; max-width 100 percent, height auto, centred, and the disclosure rules equal the Mermaid ones. The dark-to-light theme observer has no unit test.
+- Criteria: Every form gives the same figure structure and the text is unchanged; a data-URI image with the rendered state replaces the text; luminance below 0.18 selects dark; max-width 100 percent, height auto, centred, and the disclosure rules equal the Mermaid ones. The dark-to-light theme observer has no unit test.
 
 <!-- okf:links:start -->
 ### Links
@@ -122,6 +123,9 @@ When a document contains a plantuml fence, or a {plantuml} or {uml} directive wi
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-129](SwRS-MDOKFSTUDIO-DIAG-129.md): A diagram renderer script loads only when the page holds a figure of its engine
+  - [SwRS-MDOKFSTUDIO-DIAG-009](SwRS-MDOKFSTUDIO-DIAG-009.md): Diagrams are drawn once per source and theme and late results are dropped
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-DIAG-028](SwRS-MDOKFSTUDIO-DIAG-028.md): The built-in PlantUML script loads only when needed
   - [SwRS-MDOKFSTUDIO-DIAG-029](SwRS-MDOKFSTUDIO-DIAG-029.md): Built-in PlantUML diagrams are drawn as inert pictures

@@ -73,7 +73,7 @@ A writer puts a Vega-Lite or Vega chart fence (inline data, or a CSV file next t
   - [SwRS-MDOKFSTUDIO-DIAG-121](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-121.md): Vega-Lite and Vega fences become chart figures
   - [SwRS-MDOKFSTUDIO-DIAG-122](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-122.md): Chart data files are read through the resource policy
   - [SwRS-MDOKFSTUDIO-DIAG-123](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-123.md): Charts are drawn as themed SVG pictures with errors in place
-  - [SwRS-MDOKFSTUDIO-DIAG-124](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-124.md): The chart runtime loads only with a chart and needs no eval
+  - [SwRS-MDOKFSTUDIO-DIAG-124](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-124.md): Chart expressions are evaluated without eval under an unchanged policy
   - [SwRS-MDOKFSTUDIO-DIAG-125](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-125.md): SVG blocks are drawn inline after the sanitizer rebuilt them
   - [SwRS-MDOKFSTUDIO-DIAG-126](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-126.md): A picture takes its colours from the preview theme
   - [SwRS-MDOKFSTUDIO-DIAG-127](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-127.md): A click on a picture opens its source editor

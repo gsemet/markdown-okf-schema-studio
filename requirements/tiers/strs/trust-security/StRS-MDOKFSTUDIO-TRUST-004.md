@@ -21,6 +21,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-002
 - SwRS-MDOKFSTUDIO-TRUST-007
 - SwRS-MDOKFSTUDIO-TRUST-025
+- SwRS-MDOKFSTUDIO-TRUST-091
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -59,7 +60,8 @@ As a reader, I preview a Markdown file from anywhere on my disk and see the imag
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-TRUST-002](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-002.md): A preview with restricted reads reads no include, shows images only, and reads no home folder or dot-directory
+  - [SwRS-MDOKFSTUDIO-TRUST-002](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-002.md): A preview with restricted reads reads includes and resources from the folder of its document only, and no home folder or dot-directory
   - [SwRS-MDOKFSTUDIO-TRUST-007](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-007.md): A page loads local files only from its resource roots
   - [SwRS-MDOKFSTUDIO-TRUST-025](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-025.md): A resource reference resolves only to an existing file inside a root
+  - [SwRS-MDOKFSTUDIO-TRUST-091](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-091.md): A restricted-reads preview shows the images of its folders
 <!-- okf:links:end -->

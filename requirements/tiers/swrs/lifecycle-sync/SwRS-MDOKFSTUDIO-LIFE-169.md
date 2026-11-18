@@ -18,7 +18,7 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-001
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-170
-- SwRS-MDOKFSTUDIO-TRUST-006
+- SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
 annotation_exemption: false
@@ -201,7 +201,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
   - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
 - Depends on:
   - [SwRS-MDOKFSTUDIO-LIFE-170](SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
-  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:

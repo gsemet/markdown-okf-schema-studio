@@ -45,6 +45,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CODE-039
 - SwRS-MDOKFSTUDIO-CODE-040
 - SwRS-MDOKFSTUDIO-CORE-028
+- SwRS-MDOKFSTUDIO-CORE-089
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - StRS-MDOKFSTUDIO-CODE-002
@@ -116,7 +117,8 @@ Writers need code samples to read as they would in published documentation, in t
   - [SwRS-MDOKFSTUDIO-CODE-038](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-038.md): Colour YAML code text with the link colour in the forced white and cream themes
   - [SwRS-MDOKFSTUDIO-CODE-039](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-039.md): Code blocks of two lines or more are numbered by a setting, never in the copied text
   - [SwRS-MDOKFSTUDIO-CODE-040](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-040.md): Code blocks sit on a dark Dark+ background in every preview theme by a setting
-  - [SwRS-MDOKFSTUDIO-CORE-028](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and inline code are typeset readably
+  - [SwRS-MDOKFSTUDIO-CORE-028](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and block quotes are typeset readably
+  - [SwRS-MDOKFSTUDIO-CORE-089](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-089.md): Inline code is a readable tinted pill in text, links, tables and forced themes
 - Supersedes:
   - [StRS-MDOKFSTUDIO-CODE-002](StRS-MDOKFSTUDIO-CODE-002.md): Read diffs as additions and deletions
   - [StRS-MDOKFSTUDIO-CODE-003](StRS-MDOKFSTUDIO-CODE-003.md): Read numbered, emphasized and captioned listings

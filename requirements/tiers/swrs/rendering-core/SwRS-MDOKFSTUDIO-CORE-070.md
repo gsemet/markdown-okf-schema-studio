@@ -2,13 +2,11 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-CORE-070
 uuid: 286ca83a-9254-4659-83d8-a75f973da50b
-title: A parse splits the source into lines once, whatever the number of
-  directives
-description: When a document is parsed, the MyST parser SHALL split the source
-  text into lines once per parse and reuse the lines for every directive fence,
-  so that the parse time does not grow with the number of directives times the
-  size of the document, and the tightness of each directive (blank lines before
-  and after it) SHALL stay unchanged.
+title: Parsing a document with many directives stays fast and keeps the blank
+  lines around each directive
+description: 'When a document is parsed, the MyST parser SHALL take a time that does
+  not grow with the number of directives times the size of the document, and the blank
+  lines before and after each directive (its tightness) SHALL stay unchanged.'
 project: markdown-okf-schema-studio
 scope: rendering-core
 req_lifecycle: proposed
@@ -27,17 +25,18 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## A parse splits the source into lines once, whatever the number of directives
+## Parsing a document with many directives stays fast and keeps the blank lines around each directive
 
 ### Normative behavior
 
-When a document is parsed, the MyST parser SHALL split the source text into lines once per parse and reuse the lines for every directive fence, so that the parse time does not grow with the number of directives times the size of the document, and the tightness of each directive (blank lines before and after it) SHALL stay unchanged.
+When a document is parsed, the MyST parser SHALL take a time that does not grow with the number of directives times the size of the document, and the blank lines before and after each directive (its tightness) SHALL stay unchanged.
 
-### Scenario (nominal): One split for a document with several directives
+### Scenario (nominal): The parse time does not grow with the directives
 
-- GIVEN a document with five directive fences, some with a blank line before, after, both or neither
+- GIVEN a document with five directive fences, some with a blank line before, after, both or neither, and a long document with many directive fences
 - WHEN it is parsed with markdown-it-myst patched in memory (the esbuild bundle plugin, or the Node load hook of Node-run code)
-- THEN the source is split into lines once, and each directive reports the same tightness as the unpatched package: false, "before", "after" or true
+- THEN each directive reports the same tightness as the unpatched package: false, "before", "after" or true
+- AND the parse cost does not grow with the number of directives times the size of the document: the test counts the splits of the source into lines, which is one for the parse instead of one per directive fence
 
 ### Scenario (boundary): The packages on disk stay untouched
 
@@ -53,8 +52,7 @@ When a document is parsed, the MyST parser SHALL split the source text into line
 
 ### Known issues
 
-- Known issue: the in-memory patch (scripts/myst-patches.mjs) is needed until the upstream package splits the source once per parse;
-  the pull request text is prepared and not yet sent.
+- Known issue: the in-memory patch (scripts/myst-patches.mjs) is needed until the upstream package splits the source once per parse; the pull request text is prepared and not yet sent.
 
 ### Verification notes
 

@@ -2,12 +2,14 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-TRUST-005
 uuid: 5e4cdfef-45cc-4199-be05-a4feed623017
-title: The host handles the write requests of every preview, whatever the trust
-description: When the host receives a write request from a preview for the
-  render it holds, the extension SHALL handle it as for a trusted workspace, in
-  Restricted Mode and for a standalone file too, and refuse it only for a reason
-  that does not depend on trust or because it needs a read that Restricted Mode
-  narrows.
+title: 'The host handles the page messages of every preview, whatever the trust'
+description: 'When the host receives a page message from a preview, the extension
+  SHALL handle it as for a trusted workspace, whether the preview belongs to a trusted
+  workspace, to Restricted Mode or to a standalone file, and SHALL refuse a write
+  request only for a reason that does not depend on trust (an older render, an open
+  edit, a document that is not a saved file, a file VS Code holds read-only, a malformed
+  request) or because it needs a read that Restricted Mode narrows (the citation list).
+  A refusal names its real cause and changes nothing.'
 project: markdown-okf-schema-studio
 scope: trust-security
 req_lifecycle: proposed
@@ -23,6 +25,11 @@ derives_from:
 - StRS-MDOKFSTUDIO-GFM-003
 - StRS-MDOKFSTUDIO-MYST-009
 - StRS-MDOKFSTUDIO-PALETTE-018
+- StRS-MDOKFSTUDIO-CODE-004
+- StRS-MDOKFSTUDIO-PALETTE-013
+- StRS-MDOKFSTUDIO-TOOLBAR-001
+- StRS-MDOKFSTUDIO-TOOLBAR-009
+- StRS-MDOKFSTUDIO-TOOLBAR-011
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
 annotation_exemption: false
@@ -31,8 +38,11 @@ derived_by: []
 implemented_in_files:
 - src/session/features/blockEdits.ts
 - src/session/features/comments.ts
+- src/session/features/history.ts
 - src/session/features/hostRequests.ts
+- src/session/features/links.ts
 - src/session/features/sourceEdits.ts
+- src/session/features/viewState.ts
 - src/session/pageMessages.ts
 tested_in_files:
 - test/host/fmtableReq.requirements.test.ts
@@ -44,23 +54,28 @@ tested_in_files:
 - test/integration/untrusted-suite.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/checkboxRefusal.test.ts
+- test/session/diagReq.viewState.requirements.test.ts
 - test/session/dropFiles.requirements.test.ts
 - test/session/paletteReq.requirements.test.ts
+- test/session/renderReq.codeCopy.requirements.test.ts
 - test/session/renderReq.labelRename.requirements.test.ts
 - test/session/reviewReqComments.requirements.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
+- test/session/toolbarReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
+- SwRS-MDOKFSTUDIO-CODE-025
 - SwRS-MDOKFSTUDIO-FMEDIT-051
 - SwRS-MDOKFSTUDIO-GFM-026
 - SwRS-MDOKFSTUDIO-MYST-042
+- SwRS-MDOKFSTUDIO-TRUST-006
 ---
 
-## The host handles the write requests of every preview, whatever the trust
+## The host handles the page messages of every preview, whatever the trust
 
 ### Normative behavior
 
-When the host receives a write request from a preview for the render it holds, the extension SHALL handle it as for a trusted workspace, whether the preview belongs to a trusted workspace, to Restricted Mode or to a standalone file, and SHALL refuse it only for a reason that does not depend on trust (an older render, an open edit, a document that is not a saved file, a file VS Code holds read-only, a malformed request) or because it needs a read that Restricted Mode narrows (the citation list). A refusal names its real cause and changes nothing.
+When the host receives a page message from a preview, the extension SHALL handle it as for a trusted workspace, whether the preview belongs to a trusted workspace, to Restricted Mode or to a standalone file, and SHALL refuse a write request only for a reason that does not depend on trust (an older render, an open edit, a document that is not a saved file, a file VS Code holds read-only, a malformed request) or because it needs a read that Restricted Mode narrows (the citation list). A refusal names its real cause and changes nothing.
 
 ### Scenario (nominal): Every write request type is handled
 
@@ -84,6 +99,27 @@ When the host receives a write request from a preview for the render it holds, t
 | previewPasteImage | the image is saved next to the document; for a standalone file the folder of the document is the root, for a document in a workspace folder that folder is |
 | previewPaletteModeChanged, previewEditModeChanged | the choice is stored for the workspace |
 
+### Scenario (nominal): Viewing actions of a preview with restricted reads
+
+A preview has restricted reads because the workspace is untrusted or the file is standalone. Each action below reaches its handler and has the outcome of the row.
+
+| Action (page message) | Outcome in a preview with restricted reads |
+| --- | --- |
+| Theme button (previewThemeModeChanged) | the mode is stored for the workspace, no error is shown |
+| Zoom in (zoom preference of previewViewPreferenceChanged) | the zoom is stored for the workspace and applied to the next page |
+| Table of contents button (previewViewPreferenceChanged) | the host stores the toc preference |
+| Back and Next (previewHistoryGo) | the previous or next document opens, for a file outside the workspace with a history of two places |
+| Follow a link to a sibling Markdown file (previewLink) | the file opens |
+| Ask about a visible relative link (previewLinkDiscover) | the host answers with the target or the reason |
+| Copy code (previewCopyText) | the requested code text is on the clipboard and the document is unchanged |
+| Label list (previewListTargets) | answered from the document text, as with full reads |
+
+### Scenario (nominal): The dispatcher stops no request for trust
+
+- GIVEN a preview with restricted reads
+- WHEN the page sends previewEditOpen, previewViewPreferenceChanged, previewHistoryGo, previewLink or previewLinkDiscover
+- THEN each reaches the handler of its type; a theme message stays accepted while an edit request is handled (see SwRS-MDOKFSTUDIO-TRUST-005)
+
 ### Scenario (refusal): The citation list needs a trusted workspace folder
 
 - GIVEN a preview with restricted reads
@@ -106,6 +142,7 @@ When the host receives a write request from a preview for the render it holds, t
 | --- | --- |
 | A preview with restricted reads switches document | A previewFlushEdit is posted, like for any preview |
 | A document is saved and the only preview of it has restricted reads | The moved lines are written to the review comments file |
+| previewThemeModeChanged or a zoom change with the old revision after a newer render | Dropped by the render gate, as for a preview with full reads |
 
 ### Related requirements
 
@@ -121,7 +158,9 @@ When the host receives a write request from a preview for the render it holds, t
 - Method: test/session/reviewReqComments.requirements.test.ts (a comment of a standalone file or in Restricted Mode is written next to the document, and the moved lines are written when the document is saved; comment and host-side rows).
 - Method: test/session/paletteReq.requirements.test.ts (the document picker opens; the image picker of a standalone file accepts an image of the document folder and refuses one elsewhere; an image paste is saved next to a standalone file and in Restricted Mode; the citation list is refused with its reason and no file is read).
 - Method: test/integration/untrusted-suite.ts, blockMove.test.ts, blockClipboard.test.ts and commentWrite.test.ts (runUntrusted) and test/integration/standalone-suite.ts run the same requests in a real Restricted Mode window and for a standalone file; they run in the real-window jobs only and were compiled but not run on the author's machine.
-- Criteria: no handler checks the trust or the missing workspace folder before it edits; PageMessageDispatcher stops no edit request for restricted reads; the citation handler is the only one that answers a trust reason; the paste root is the workspace folder, or the folder of the document when no workspace folder holds it.
+- Method: test/session/renderReq.codeCopy.requirements.test.ts (Copy code row, untrusted and standalone); test/session/diagReq.viewState.requirements.test.ts (`a restricted-reads preview stores a theme choice; its edit requests reach the handlers`, `a preview with restricted reads stores a zoom change, and a message of an older render is dropped`); test/session/toolbarReq.requirements.test.ts (the toc preference, Back and Next, a link to a sibling Markdown file, the link discovery); test/session/paletteReq.requirements.test.ts (`the label list is answered in a preview with restricted reads, the citation list is refused`).
+- Untested: view preferences from a preview with restricted reads at host level in the integration suite (the toc row is checked by a unit test only).
+- Criteria: the dispatcher stops no message type for restricted reads; the label list handler reads only the document text of the render and touches no file; no handler checks the trust or the missing workspace folder before it edits; PageMessageDispatcher stops no edit request for restricted reads; the citation handler is the only one that answers a trust reason; the paste root is the workspace folder, or the folder of the document when no workspace folder holds it.
 
 <!-- okf:links:start -->
 ### Links
@@ -137,10 +176,17 @@ When the host receives a write request from a preview for the render it holds, t
   - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
   - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
   - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
+  - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers its collapsed state
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-065](SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-025](../code-blocks/SwRS-MDOKFSTUDIO-CODE-025.md): Allow copying in read-only previews
   - [SwRS-MDOKFSTUDIO-FMEDIT-051](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-051.md): A save in an untrusted workspace is refused
   - [SwRS-MDOKFSTUDIO-GFM-026](../gfm/SwRS-MDOKFSTUDIO-GFM-026.md): Read-only previews disable checkboxes
   - [SwRS-MDOKFSTUDIO-MYST-042](../myst/SwRS-MDOKFSTUDIO-MYST-042.md): The host refuses a rename in an untrusted or read-only preview
+  - [SwRS-MDOKFSTUDIO-TRUST-006](SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 <!-- okf:links:end -->

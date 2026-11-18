@@ -118,5 +118,5 @@ Text on the clipboard always wins; every other branch ends in one undoable edit.
   - [SwRS-MDOKFSTUDIO-PALETTE-217](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-217.md): Pasted HTML becomes the matching Markdown
   - [SwRS-MDOKFSTUDIO-PALETTE-229](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-229.md): Pasted HTML never brings active content
   - [SwRS-MDOKFSTUDIO-PALETTE-264](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-264.md): A pasted URL becomes a link, an autolink or an image in the block text box
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
 <!-- okf:links:end -->

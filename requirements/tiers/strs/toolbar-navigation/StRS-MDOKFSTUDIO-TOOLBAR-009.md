@@ -29,6 +29,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-070
 - SwRS-MDOKFSTUDIO-TOOLBAR-071
 - SwRS-MDOKFSTUDIO-TOOLBAR-072
+- SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-006
 default_owner_email: gaetan@xeberon.net
 ---
@@ -103,5 +104,6 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-TOOLBAR-070](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-070.md): Back and Next save an open editor first
   - [SwRS-MDOKFSTUDIO-TOOLBAR-071](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-071.md): A link to another file saves an open editor first
   - [SwRS-MDOKFSTUDIO-TOOLBAR-072](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-072.md): An anchor of the same page keeps the editor open
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
 <!-- okf:links:end -->

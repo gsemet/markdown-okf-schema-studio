@@ -18,8 +18,8 @@ user_need: As a maintainer, I install on the pinned Node.js version from the
   are in the package.
 derived_by:
 - SwRS-MDOKFSTUDIO-CORE-087
-- SwRS-MDOKFSTUDIO-TRUST-074
 - SwRS-MDOKFSTUDIO-TRUST-075
+- SwRS-MDOKFSTUDIO-TRUST-092
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -37,6 +37,7 @@ As a maintainer, I install on the pinned Node.js version from the official regis
 
 - The built-in PlantUML engine is an exact dependency version because earlier versions carry a copyleft licence.
 - The built-in PlantUML engine and the page runtime are files of the bundle folder, not inline code.
+- The package keeps the folder out/bundle, with the built-in engine bundle and its licence, and leaves out only build leftovers (SwRS-MDOKFSTUDIO-TRUST-092); the pinned dependencies are SwRS-MDOKFSTUDIO-TRUST-075.
 
 <!-- okf:links:start -->
 ### Links
@@ -45,6 +46,6 @@ As a maintainer, I install on the pinned Node.js version from the official regis
 
 - Derived by:
   - [SwRS-MDOKFSTUDIO-CORE-087](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-087.md): The site requirements viewer shows the use case diagram of a StRS
-  - [SwRS-MDOKFSTUDIO-TRUST-074](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package ships its icon and its bundle
   - [SwRS-MDOKFSTUDIO-TRUST-075](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-075.md): The extension is built from pinned, official dependencies
+  - [SwRS-MDOKFSTUDIO-TRUST-092](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-092.md): The package keeps the built-in engine bundle in the VSIX
 <!-- okf:links:end -->

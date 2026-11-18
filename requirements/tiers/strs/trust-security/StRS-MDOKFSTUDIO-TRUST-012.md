@@ -35,6 +35,7 @@ As a reader, I see messages that speak of the preview, not of the tools that bui
 ### Rationale and constraints
 
 - The opt-in behaviour of the Studio, which leaves the built-in Markdown preview untouched, is specified in the lifecycle-sync scope.
+- Messages to the reader speak of the preview and the Studio, not of the build tool, and the package shows one icon: images/logo.png, a 256 by 256 pixel PNG (SwRS-MDOKFSTUDIO-TRUST-074).
 
 <!-- okf:links:start -->
 ### Links
@@ -43,5 +44,5 @@ As a reader, I see messages that speak of the preview, not of the tools that bui
 
 - Derived by:
   - [SwRS-MDOKFSTUDIO-TRUST-070](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-070.md): Visible text speaks of the product, not of its build tool
-  - [SwRS-MDOKFSTUDIO-TRUST-074](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package ships its icon and its bundle
+  - [SwRS-MDOKFSTUDIO-TRUST-074](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package declares its 256 pixel PNG icon
 <!-- okf:links:end -->

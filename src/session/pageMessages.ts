@@ -256,7 +256,7 @@ export class PageMessageDispatcher {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
-  // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
   /**
    * The gate of the page-state family. Before the render check, a ready report can show that the
    * webview reloaded an older document, or that it works through a chain of content patches. A stale

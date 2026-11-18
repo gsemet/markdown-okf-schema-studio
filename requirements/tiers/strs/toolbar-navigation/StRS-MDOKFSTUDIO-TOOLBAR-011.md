@@ -31,8 +31,10 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-102
 - SwRS-MDOKFSTUDIO-TOOLBAR-113
 - SwRS-MDOKFSTUDIO-TOOLBAR-117
+- SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-006
 - SwRS-MDOKFSTUDIO-TRUST-007
+- SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-TRUST-063
 - SwRS-MDOKFSTUDIO-TRUST-065
 default_owner_email: gaetan@xeberon.net
@@ -116,8 +118,10 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-TOOLBAR-102](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-102.md): A link fragment selects a source line, block id, label, heading or field
   - [SwRS-MDOKFSTUDIO-TOOLBAR-113](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-113.md): A link message needs a request, else it is ignored or refused
   - [SwRS-MDOKFSTUDIO-TOOLBAR-117](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-117.md): An in-page anchor scrolls the page to its target at the reading line
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
   - [SwRS-MDOKFSTUDIO-TRUST-007](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-007.md): A page loads local files only from its resource roots
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
   - [SwRS-MDOKFSTUDIO-TRUST-063](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-063.md): A link targets message needs an array of the current render
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 <!-- okf:links:end -->

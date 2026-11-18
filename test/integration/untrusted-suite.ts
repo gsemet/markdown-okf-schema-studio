@@ -87,7 +87,7 @@ async function runCaptures(): Promise<void> {
 // @tests_req StRS-MDOKFSTUDIO-TRUST-001
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-006
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 export async function run(): Promise<void> {
   // Heartbeat and timeout dumps of the hang watchdog (stepWatchdog.ts).
   await withSuiteWatchdog("untrusted-suite", runUntrustedSuite);

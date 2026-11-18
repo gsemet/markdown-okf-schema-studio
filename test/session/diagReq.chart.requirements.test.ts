@@ -25,7 +25,7 @@ const MERMAID = '<figure class="myst-mermaid-figure"><div class="myst-mermaid-di
 const build = (content: string) =>
   buildPreviewWebviewHtml(page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, [], "builtin").html;
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-124
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-129
 test("the chart runtime script is added once with the page nonce, only when the content holds a chart", () => {
   const html = build(CHART + CHART);
   const tags = html.match(/<script[^>]*data-sphinx-preview-vega[^>]*><\/script>/gu) ?? [];
