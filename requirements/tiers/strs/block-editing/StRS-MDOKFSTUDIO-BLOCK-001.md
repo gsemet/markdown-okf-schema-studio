@@ -57,11 +57,10 @@ The preview is in reading mode or in edit mode, and the writer or the saved choi
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Reading: new preview, edit mode last off
-    [*] --> Editing: new preview, edit mode last on
+    [*] --> Reading: new preview, any edit mode last chosen
+    [*] --> Editing: reload of the same document, edit mode on
     Reading --> Editing: writer clicks Edit, layout unchanged
     Editing --> Reading: writer clicks Edit, open editor saved
-    Editing --> Editing: choice remembered for the workspace
 ```
 
 ### Main paths
