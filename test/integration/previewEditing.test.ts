@@ -1002,12 +1002,15 @@ async function stepSchemaOrderAndBadge(ctx: EditingContext): Promise<void> {
   const originalText = document.getText();
   const brokenText = originalText.replace("\ncount: 2\n", "\ncount: two\n");
   assert.notEqual(brokenText, originalText, "the fixture holds the count field the test breaks");
+  // The outside edit targets the active, settled preview, as in stepSchemaProblem.
+  await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+  await waitForCurrentPreview(document);
   const requestBefore = currentContext(document).requestId;
   assert.equal(await vscode.workspace.applyEdit(replaceDocument(document, brokenText)), true);
   try {
-    await waitFor("the count field to carry its schema violation", () =>
-      /<tr class="[^"]*okf-error[^"]*" data-okf-field="count"/u.test(getActivePreviewForTests()?.html ?? ""));
-    await waitForCurrentPreview(document, requestBefore);
+    await withPreviewEvidence(document, () => waitForCurrentPreview(document, requestBefore));
+    await withPreviewEvidence(document, () => waitFor("the count field to carry its schema violation", () =>
+      countRowHasError(getActivePreviewForTests()?.html ?? "") === true));
     const frame = await previewFrame(page);
     const badge = frame.locator("[data-okf-badge]");
     assert.ok(Number(await badge.getAttribute("data-okf-errors")) > 0, "the badge counts the errors");
@@ -1022,9 +1025,35 @@ async function stepSchemaOrderAndBadge(ctx: EditingContext): Promise<void> {
     );
   } finally {
     assert.equal(await vscode.workspace.applyEdit(replaceDocument(document, originalText)), true);
-    await waitFor("the count field to be valid again", () =>
-      !/<tr class="[^"]*okf-error[^"]*" data-okf-field="count"/u.test(getActivePreviewForTests()?.html ?? ""));
-    await waitForCurrentPreview(document);
+    await withPreviewEvidence(document, () => waitFor("the count field to be valid again", () =>
+      countRowHasError(getActivePreviewForTests()?.html ?? "") === false));
+    await withPreviewEvidence(document, () => waitForCurrentPreview(document));
+  }
+}
+
+/** The opening tag of the `count` row of the properties table, whatever its attribute order. */
+function countRowTag(html: string): string | undefined {
+  return html.match(/<tr\b[^>]*\bdata-okf-field="count"[^>]*>/u)?.[0];
+}
+
+/** Whether the `count` row carries the error class; undefined when the html has no `count` row. */
+function countRowHasError(html: string): boolean | undefined {
+  const tag = countRowTag(html);
+  return tag === undefined ? undefined : /\bclass="[^"]*\bokf-error\b/u.test(tag);
+}
+
+/** Runs a wait; on failure, rethrows it with the active preview's phase, versions and `count` row tag. */
+async function withPreviewEvidence(document: vscode.TextDocument, wait: () => Promise<void>): Promise<void> {
+  try {
+    await wait();
+  } catch (error) {
+    const preview = getActivePreviewForTests();
+    const evidence = preview
+      ? `phase=${preview.phase} documentVersion=${String(preview.documentVersion)} document.version=${document.version}`
+        + ` requestId=${String(preview.requestId)} sameDocument=${String(preview.documentUri === document.uri.toString())}`
+        + ` countRow=${countRowTag(preview.html) ?? "no count row"}`
+      : "no active preview";
+    throw new Error(`${error instanceof Error ? error.message : String(error)} [${evidence}]`);
   }
 }
 
