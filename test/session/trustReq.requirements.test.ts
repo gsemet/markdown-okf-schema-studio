@@ -128,6 +128,7 @@ test("a label rename from an older render is answered with the stale-line refusa
   assert.equal(posted.length, 1);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081
 test("a document-gated page message must name the shown document", () => {
   const { dispatcher, session, handled, state } = harness();
   const banner = { type: "previewWarningBannerClosed", key: "ab-0123abcd", revision: 1, requestId: 1 };

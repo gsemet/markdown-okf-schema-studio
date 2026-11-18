@@ -118,7 +118,6 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
     return Number.isFinite(firstLine) ? { line: firstLine, endLine: lastLine } : undefined;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-009
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
   // The lines of a mapped GitHub alert of the same file and document as `reference`: from its
   // marker line to its last quoted line.

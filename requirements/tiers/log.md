@@ -22,6 +22,55 @@
 
 ## 2026-11-18
 
+### Garden myst, code-blocks, gfm
+
+- Mapping (old to new, the text and tests kept, the old id superseded): SwRS CODE-005 into CODE-001 and
+  CODE-039 (line wrapping goes with numbering and emphasis); CODE-026 into CODE-019 (the copy request
+  bounds); GFM-027 into GFM-021 (the checkbox toggle message); GFM-039 into GFM-040 and GFM-041; MYST-051
+  into MYST-045 (the rename message and its answer); MYST-101 into MYST-096. Every old ID is replaced in
+  the markers, the `depends_on` lists, the Main paths and the citation lines of CODE-001, CODE-008,
+  CODE-014, CODE-039, MYST-038, MYST-045, BLOCK-041, TRUST-052 and TRUST-055; CODE-019 and GFM-021,
+  which received the scenarios, drop their citation of the old ID.
+- Added: StRS-GFM-005 (a writer picks one option of a radio choice list) with SwRS GFM-040 (a radio
+  choice list renders as a radio group) and GFM-041 (choosing an option moves the (x)); SwRS MYST-102
+  (dollar prices stay text and keep their emphasis), from StRS-MYST-006; StRS MYST-015 (admonitions and
+  context tags), 016 (grids, cards, tabs), 017 (figures, tables) and 018 (definition lists, roles), which
+  replace StRS-MYST-001 (Q2, superseded; its Main paths now point to the four).
+- Reparented (`derives_from`): MYST-001, 006 and 013 to StRS-MYST-015; MYST-053, 098, 099 and 100 to
+  StRS-MYST-016; MYST-031, 063 and GFM-031 to StRS-MYST-017; MYST-017 to StRS-MYST-018; MYST-097 to
+  StRS-CORE-001 (Q3); MYST-019 keeps only StRS-MYST-009, and MYST-097 leaves StRS-MYST-005. The shared
+  rules are cited by `depends_on` (garden-Q3): GFM-009 on CORE-003; MYST-031 on TRUST-025; MYST-036 and
+  038 on MYST-097; CODE-017, CODE-019, GFM-021, MYST-045 and MYST-081 on the TRUST envelope and gate rules
+  they use, and MYST-078, which no longer handles the banner message, drops TRUST-052 and TRUST-065;
+  TRUST-005, TRUST-065 and CORE-012 no longer derive from StRS of these scopes.
+- StRS text: GFM-002's rationale is corrected (the kept colours are named, hex, rgb/rgba and hsl/hsla)
+  and re-approved by gaetan@xeberon.net on 2026-11-18 (Q1); CODE-001 says the code uses the Dark+ colours
+  (Light+ when the dark code background is off) and that plain fences are numbered by the setting;
+  GFM-003 loses its radio path (now StRS-GFM-005) and says each refusal returns the box; MYST-009 says a
+  rename tells how many references still use the old name; MYST-005 is retitled "Constructs the preview
+  cannot build stay visible and labelled" (Q5). A `### Use case diagram` (sequence, no SwRS IDs) is added to
+  CODE-001, CODE-004, GFM-002, GFM-003, MYST-005, 006, 007, 009 and 012, and written with the new GFM-005
+  and MYST-015 to 018; an added diagram needs no re-approval (garden-Q2).
+- SwRS text: CODE-007 and CODE-039 retitled; the token-colour scenarios of CODE-001 and CODE-007 moved
+  to CODE-040; MYST-100 is retitled to cover a card in a grid or alone and takes the card scenarios of
+  MYST-053; MYST-078 drops its two banner scenarios, and MYST-081, which already opened the Problems
+  view, takes the malformed or mismatched message; the dollar-price scenarios of MYST-024 moved to
+  MYST-102; the cache and lazy-load scenarios of CODE-001 and MYST-024 became verification notes (Q4), as
+  did the table source lines of GFM-008, the gallery scenarios of MYST-006 and the read-once target of
+  MYST-057. Format drift fixed on the SwRS MYST-096 to MYST-100: the first H2 of MYST-096 and MYST-097 is
+  the title, and the scenario tables of MYST-098, MYST-099 and MYST-100 are named scenario blocks.
+- Placements: the alert-body click of GFM-009 lives in BLOCK-014, which already held it (Q6), and its
+  markers moved there; the table palette action stays in MYST-063, since no PALETTE SwRS fits (Q7, to the
+  owner). MYST-019's `{numref}` scenario ("shows its number, Figure 1") contradicts the code and
+  renderReq.myst, which keep a numref as an inert placeholder: left as is and reported, no test added.
+- Tests added: CODE-007 (one font scale, one box, the scroll rule), CODE-019 (a second click restarts),
+  GFM-008 (a reference without a definition), GFM-021 (the host refusals), MYST-019 (a reference to a
+  heading shows its text), MYST-024 (the KaTeX bundle missing, and the visual scenario
+  myst/v47-maths-offline-light-900, which also checks MYST-102's dollar prices), MYST-053 (a ninth grid
+  level stays a placeholder); StRS markers on scenarios for CODE-001, GFM-005, MYST-005, 006, 009 and 015
+  to 018. The existing host test of an edit with no visible editor (documents.test.ts) is now marked
+  GFM-021 and GFM-041.
+
 ### Garden the requirements of toolbar-navigation and lifecycle-sync (CR 346, round 4)
 
 - Tested, verification notes updated: SwRS-TOOLBAR-001 (all 16 tooltips equal to their titles, the tooltip on

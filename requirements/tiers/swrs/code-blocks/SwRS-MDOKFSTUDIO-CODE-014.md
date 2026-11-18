@@ -20,7 +20,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/contentBlockStyles.ts
+- src/core/preview/styles/contentBlockStyles.markers.ts
 - src/core/render/highlight.ts
 - src/core/render/mystNormalize.ts
 tested_in_files:
@@ -76,7 +76,7 @@ When a MyST code directive sets `:filename:` or `:caption:`, the extension SHALL
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-CODE-005: numbers and emphasizes the lines of a code directive
+- SwRS-MDOKFSTUDIO-CODE-039: numbers and emphasizes the lines of a code directive
 
 ### Verification notes
 

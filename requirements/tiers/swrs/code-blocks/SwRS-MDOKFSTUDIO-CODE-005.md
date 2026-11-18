@@ -10,8 +10,8 @@ description: When a numbered, emphasized or diff block is shown, the extension
   listed lines relative to it and show each special character once.
 project: markdown-okf-schema-studio
 scope: code-blocks
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,18 +20,15 @@ depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/preview/styles/codeBlockStyles.ts
-- src/core/render/highlight.ts
-- src/core/render/mystNormalize.ts
-tested_in_files:
-- test/core/render/highlight.test.ts
-- test/core/render/mystFeatures.test.ts
-- test/core/render/renderReq.codeBlocks.requirements.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-CODE-006
 - SwRS-MDOKFSTUDIO-CODE-011
+superseded_by:
+- SwRS-MDOKFSTUDIO-CODE-039
+- SwRS-MDOKFSTUDIO-CODE-001
 ---
 
 ## Numbered, emphasized and diff blocks are wrapped into lines
@@ -101,6 +98,9 @@ When a numbered, emphasized or diff block is shown, the extension SHALL wrap it 
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-039](SwRS-MDOKFSTUDIO-CODE-039.md): Code lines are numbered and emphasized
+  - [SwRS-MDOKFSTUDIO-CODE-001](SwRS-MDOKFSTUDIO-CODE-001.md): Fenced code in a supported language is highlighted, other code stays literal
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CODE-006](SwRS-MDOKFSTUDIO-CODE-006.md): Show special characters once in highlighted code
   - [SwRS-MDOKFSTUDIO-CODE-011](SwRS-MDOKFSTUDIO-CODE-011.md): Number and emphasize lines of MyST code directives

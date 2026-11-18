@@ -31,9 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CODE-033
 - SwRS-MDOKFSTUDIO-CODE-034
 - SwRS-MDOKFSTUDIO-CODE-035
-- SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-006
-- SwRS-MDOKFSTUDIO-TRUST-065
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -51,6 +49,30 @@ Readers need to reuse code samples without selecting text by hand, even in Restr
 
 - Not available for blocks being edited or for diagram sources; the button is revealed by pointing or by keyboard focus on the block, and Enter or Space on it copies.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor R as Reader
+    participant P as Preview page
+    participant H as Extension host
+    R->>P: points at or tabs to a code block
+    alt a block being edited or a diagram source
+        P-->>R: no Copy code button
+    else any other code block
+        P-->>R: the Copy code button at its top-right corner
+        R->>P: clicks Copy code, or presses Enter or Space on it
+        P->>H: asks to copy the exact code of the block
+        alt the host writes the clipboard
+            H-->>P: copied
+            P-->>R: the button reads Copied
+        else the request is too large or the clipboard fails
+            H-->>P: refused, with its reason
+            P-->>R: the button shows the reason, never Copied
+        end
+    end
+```
+
 ### Main paths
 
 #### Path 1: Copy a code sample
@@ -61,7 +83,7 @@ Readers need to reuse code samples without selecting text by hand, even in Restr
 2. The Copy code button is shown
    - SwRS-MDOKFSTUDIO-CODE-019: the click puts the code lines on the clipboard and the button reads Copied
    - Option SwRS-MDOKFSTUDIO-CODE-019 (refusal): the button never claims a copy that did not happen
-   - Option SwRS-MDOKFSTUDIO-CODE-026 (refusal): an oversized or non-string copy request is refused
+   - Option SwRS-MDOKFSTUDIO-CODE-019 (refusal): an oversized or non-string copy request is refused
 3. The code is on the clipboard and the button reads Copied
 
 <!-- okf:links:start -->
@@ -86,7 +108,5 @@ Readers need to reuse code samples without selecting text by hand, even in Restr
   - [SwRS-MDOKFSTUDIO-CODE-033](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-033.md): Reposition the copy button on window resize
   - [SwRS-MDOKFSTUDIO-CODE-034](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-034.md): Keep the copy button clear of the sticky band and toolbar
   - [SwRS-MDOKFSTUDIO-CODE-035](../../swrs/code-blocks/SwRS-MDOKFSTUDIO-CODE-035.md): Reset the Copied state when another block is hovered
-  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A preview with restricted reads keeps every viewing action
-  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 <!-- okf:links:end -->

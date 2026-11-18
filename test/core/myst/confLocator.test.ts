@@ -26,6 +26,7 @@ test("the nearest conf.py wins and the enabled set comes from it", (context) => 
   assert.deepEqual([...enabled ?? []], ["deflist"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066
 test("no conf.py, no myst_parser or an uncertain conf.py give no set", (context) => {
   const { root, docs, clean } = workspace();
   context.after(clean);
@@ -47,6 +48,7 @@ test("myst_nb counts like myst_parser", (context) => {
   assert.deepEqual([...enabled ?? []], []);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066
 test("a conf.py above the workspace root is not used", (context) => {
   const { root, docs, clean } = workspace();
   context.after(clean);
@@ -89,6 +91,7 @@ test("typing does not touch the disk: results are cached until the interval or a
   assert.equal(locator.enabledMystExtensions(document, root), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066
 test("D29: a single conf.py in a common folder of the root is the fallback", (context) => {
   const { root, clean } = workspace();
   context.after(clean);
@@ -127,6 +130,7 @@ test("D29: an ancestor conf.py wins over a fallback, and invalidation covers the
   assert.deepEqual([...locator.enabledMystExtensions(document, root) ?? []], ["dollarmath"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066
 test("D29: a document outside the workspace folder does not get the fallback", (context) => {
   const { root, clean } = workspace();
   context.after(clean);

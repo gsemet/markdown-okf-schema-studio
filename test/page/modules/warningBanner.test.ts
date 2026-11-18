@@ -106,6 +106,7 @@ test("CR 050: the page shows one banner for the myst-extension lines, after the 
   assert.equal(bannersOf(document).length, 1, "an update with the same set keeps the one banner");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081
 test("CR 050: no banner for other warnings or another status", () => {
   for (const [status, code] of [["success", "myst-diagnostic"], ["stale", "myst-extension"], ["error", "myst-extension"]]) {
     const { document } = page(status, [[DOLLAR, code]]);
@@ -115,6 +116,7 @@ test("CR 050: no banner for other warnings or another status", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081
 test("CR 050: Open Problems asks the host to open the Problems view", () => {
   const { document } = page("success", [[DOLLAR, "myst-extension"]]);
   const { banner, messages } = install(document);
@@ -123,6 +125,7 @@ test("CR 050: Open Problems asks the host to open the Problems view", () => {
   assert.deepEqual(messages, [{ type: "previewShowProblems", documentId: "file:///chapter.md", revision: 4, requestId: 9 }]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081
 test("CR 050: closing removes the banner, tells the host the key and keeps it closed until the set changes", () => {
   const { document, region } = page("success", [[DOLLAR, "myst-extension"], [COLON, "myst-extension"]]);
   const { banner, messages, context } = install(document);
@@ -147,6 +150,7 @@ test("CR 050: the key closed in an earlier load of the document keeps the banner
   assert.equal(bannersOf(document).length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081
 test("CR 050: in Restricted Mode the banner has no Problems button and lists the warnings in its tooltip", () => {
   const { document } = page("success", [[DOLLAR, "myst-extension"], [COLON, "myst-extension"]]);
   const { banner } = install(document, { warningsInProblems: false });

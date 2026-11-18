@@ -16,6 +16,9 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
+depends_on:
+- SwRS-MDOKFSTUDIO-TRUST-052
+- SwRS-MDOKFSTUDIO-TRUST-065
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -27,9 +30,10 @@ implemented_in_files:
 - src/session/workspaceChoices.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
-- test/integration/mystDiagnostics.test.ts
+- test/core/protocol/pageToHost.test.ts
 - test/page/modules/warningBanner.test.ts
 - test/session/commentAuthorResource.test.ts
+- test/session/trustReq.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -70,7 +74,13 @@ When a render succeeds with conf.py warnings, the extension SHALL show a one-lin
 | A trusted preview | The host's Problems view opens |
 | An untrusted preview (a message already sent) | The host accepts `previewShowProblems` since it edits nothing; in Restricted Mode the banner itself has no Open Problems button |
 
-The message carries only the envelope and passes the document gate.
+The message type previewShowProblems (page to host) carries the envelope fields only (documentId, revision, requestId), no further field, and passes the document gate (SwRS-MDOKFSTUDIO-TRUST-052 for the envelope, SwRS-MDOKFSTUDIO-TRUST-065 for the gate).
+
+### Scenario (refusal): A malformed or mismatched previewShowProblems is ignored
+| Input | Outcome |
+| --- | --- |
+| previewShowProblems without the envelope | not a registered message; ignored, no handler runs |
+| previewShowProblems whose documentId is not the shown document | dropped by the document gate; the Problems view is not opened |
 
 ### Scenario (nominal): Closing dismisses the banner for that document
 - GIVEN the banner shown
@@ -101,9 +111,10 @@ The warnings stay in the status region in every case.
 
 ### Verification notes
 - Method: test/page/modules/warningBanner.test.ts ("CR 050: the banner text is short and counts the warnings": nominal; "CR 050: Open Problems asks the host to open the Problems view": Open Problems; "CR 050: closing removes the banner, tells the host the key and keeps it closed until the set changes": closing; "CR 050: the key names the warning set, whatever the order and the line of each warning": warning set; "CR 050: in Restricted Mode the banner has no Problems button and lists the warnings in its tooltip": Restricted Mode)
+- Method: test/core/protocol/pageToHost.test.ts (previewShowProblems registered; the envelope is required)
+- Method: test/session/trustReq.requirements.test.ts (previewShowProblems handled for the shown document and dropped for another one)
 - Method: test/core/preview/previewStyles.test.ts ("the warning banner keeps clear of the four-button-wide toolbar, expanded or collapsed": the 156 px reserve and no collapsed override)
 - Method: test/session/commentAuthorResource.test.ts ("the closed warning banners of a session are bounded to the most recent documents": bounded memory)
-- Method: test/integration/mystDiagnostics.test.ts (run(): Restricted Mode publishes no warning to the Problems view)
 - Method: test/visual/scenarioDefinitions2.ts (`myst/v${number}-conf-warning-banner-${mode ?? theme}-900`: nominal and layout in light, dark, cream and 460 px)
 - Criteria: The visual family covers the layout checks only visually; the standalone variant has no assertion; other statuses showing the full list have no named test (untested).
 
@@ -114,6 +125,9 @@ The warnings stay in the status region in every case.
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-MYST-082](SwRS-MDOKFSTUDIO-MYST-082.md): The banner takes no layout room
   - [SwRS-MDOKFSTUDIO-MYST-083](SwRS-MDOKFSTUDIO-MYST-083.md): Open Problems opens the Problems view

@@ -22,12 +22,10 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/render/mystEngine.ts
-- src/core/render/mystRenderer.ts
 - src/core/render/mystTables.ts
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
-- test/core/render/mystTablesTree.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-GFM-014
@@ -76,17 +74,11 @@ When prose contains ~~text~~, a footnote reference with its definition, or a GFM
 - WHEN the preview is rendered
 - THEN no alignment is applied
 
-### Scenario (boundary): Source lines of a table without a second parse
-
-- GIVEN a pipe table with plain '---' columns, next to a paragraph with the text 'a --> b'
-- WHEN the preview is rendered
-- THEN the table carries its data-line and data-end-line from the syntax tree and the paragraph text reaches the page as the writer wrote it; only aligned columns, list-tables and raw HTML tables are completed on the written HTML
-
 ### Verification notes
 
-- Method: test/core/render/mystFeatures.test.ts (all six scenarios: unit tests on the render pipeline output).
+- Method: test/core/render/mystFeatures.test.ts (all six scenarios: unit tests on the render pipeline output; a reference without a definition: "a footnote reference with no definition invents no footnote text and the render succeeds").
 - Method: test/core/render/mystPaletteRendering.test.ts (footnote and pipe table scenarios: unit tests on the render pipeline output).
-- Method: test/core/render/mystTablesTree.test.ts (Source lines of a table without a second parse): "a pipe table gets its source lines from the syntax tree, with no second parse of the HTML", "aligned columns and list-tables still go through the HTML pass", "only list-tables, raw HTML tables and aligned columns need the HTML pass".
+- Internal (tables): a pipe table with plain '---' columns gets its data-line and data-end-line from the syntax tree, with no second parse of the HTML, and a paragraph 'a --> b' next to it reaches the page as written; only aligned columns, list-tables and raw HTML tables are completed on the written HTML: test/core/render/mystTablesTree.test.ts.
 - Criteria: Strikethrough elements exist only for double-tilde prose pairs; footnote reference and definition elements are present for defined notes; alignment appears on all cells of aligned columns only.
 
 <!-- okf:links:start -->

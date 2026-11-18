@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/pageSettings.ts
 tested_in_files:
 - test/core/preview/codeBlockStyles.test.ts
+- test/core/render/codeBlockComfort.requirements.test.ts
 - test/page/pageSettings.test.ts
 - test/security/package-contract.test.ts
 - test/visual/codeBlockComfortScenarios.ts
@@ -43,6 +44,18 @@ When a code block is shown and the setting preview.codeBlocks.darkBackground is 
 - GIVEN a document with Python, YAML and shell blocks and the preview in the cream, the white or the dark theme
 - WHEN the preview renders it with the setting on (the default)
 - THEN each block has the Dark+ editor background (`#1e1e1e`) and default text colour (`#d4d4d4`) and its tokens use the Dark+ colours
+
+### Scenario (nominal): Tokens of a supported language are coloured
+
+- GIVEN a document with a fenced `rust` block and a `python` block, in any VS Code theme
+- WHEN the preview renders the document
+- THEN keywords, strings, numbers, additions, titles, attributes, deletions and comments of each block get the token colours of the VS Code editor (comments in green with Dark+), written as colour classes (`sd-` followed by the hex colour) that a stylesheet rule defines, never as an inline style
+
+### Scenario (boundary): The colours do not depend on the VS Code theme
+
+- GIVEN a VS Code theme that defines no chart colours
+- WHEN the preview renders a highlighted block
+- THEN the token colours are the same fixed colours, because the stylesheet carries them
 
 ### Scenario (boundary): The setting off keeps the theme background
 
@@ -67,12 +80,13 @@ When a code block is shown and the setting preview.codeBlocks.darkBackground is 
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-CODE-001: highlights fenced code
+- SwRS-MDOKFSTUDIO-CODE-001: highlights fenced code with the grammar of its language
 - SwRS-MDOKFSTUDIO-CODE-007: styles the block box, font scale and the forced themes
 - SwRS-MDOKFSTUDIO-CODE-039: numbers the lines of a block
 
 ### Verification notes
 
+- Method: test/core/render/highlight.test.ts (tokens of each bundled language written as colour classes, no inline style)
 - Method: test/core/preview/codeBlockStyles.test.ts (background rules gated by the setting attribute, Light+ scopes, contrast of every palette colour, a colour rule for every class written)
 - Method: test/core/render/codeBlockComfort.requirements.test.ts (no WebAssembly, no inline style, strict policy), test/page/pageSettings.test.ts (setting attribute) and test/security/package-contract.test.ts (setting schema)
 - Method: visual capture of the code blocks in the cream, white and dark themes (reports of CR 131)

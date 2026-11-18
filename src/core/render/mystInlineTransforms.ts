@@ -365,7 +365,7 @@ function protectedRegionEnd(source: string, index: number): number | undefined {
 }
 
 /** Masks only dollar delimiters that the MyST dollarmath rules reject. */
-// @implements_req SwRS-MDOKFSTUDIO-MYST-024
+// @implements_req SwRS-MDOKFSTUDIO-MYST-102
 export function prepareDollarAmounts(source: string): string {
   if (!source.includes("$")) return source;
   let prepared = "";
@@ -415,7 +415,7 @@ function restoreDollarValue(value: unknown): unknown {
 }
 
 /** Restores the dollar placeholders in every parsed node value before HTML writing. */
-// @implements_req SwRS-MDOKFSTUDIO-MYST-024
+// @implements_req SwRS-MDOKFSTUDIO-MYST-102
 export function restoreDollarPlaceholders(node: MystNode): void {
   const record = node as unknown as Record<string, unknown>;
   for (const key of Object.keys(record)) {
@@ -424,7 +424,7 @@ export function restoreDollarPlaceholders(node: MystNode): void {
   node.children?.forEach(restoreDollarPlaceholders);
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-MYST-024
+// @implements_req SwRS-MDOKFSTUDIO-MYST-102
 /**
  * Gives dollar amounts back to the text, as markdown-it dollarmath does: the parser reads the text
  * between $5 and $6 as inline maths, but a $...$ span is maths only when the opening $ is

@@ -15,7 +15,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-001
+- StRS-MDOKFSTUDIO-MYST-015
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -77,29 +77,11 @@ When an admonition directive contains another directive, the extension SHALL ren
 | `:class: dropdown` with `:open: true` | open |
 | `:open: true` without `:class: dropdown` | collapsible section, open |
 
-### Scenario (nominal): Admonition gallery keeps one title line per panel without sideways scroll
-
-- GIVEN the admonition gallery document in dark and light themes at 900 px
-- WHEN the preview renders
-- THEN each admonition has exactly one title line, a source line and a panel colour distinct from the page, the paragraph after it keeps the body text colour and the page does not scroll sideways
-
-### Scenario (boundary): Admonition gallery in a narrow pane
-
-- GIVEN the same gallery at 460 px, scrolled to a titled block or to the end
-- WHEN the preview renders
-- THEN the same assertions hold and the scrolled-to block stays inside the frame
-
-### Scenario (nominal): The MyST gallery renders without sideways scroll
-
-- GIVEN the MyST gallery document in dark and in light theme at 900 px
-- WHEN the preview renders
-- THEN a reference link, a closed dropdown, a definition list, sub and superscript, a kbd key, an abbreviation, a footnote and typeset inline math are present and the page does not overflow horizontally
-
 ### Verification notes
 
 - Method: test/core/render/mystFeatures.test.ts (nesting and fence length: "nested backtick and colon delimiters preserve their enclosing Markdown"; mapped block: "MyST admonitions retain the directive range through the closing fence"; dropdown: "dropdown admonitions render as openable details with a summary")
-- Method: test/visual/scenarioDefinitions1.ts (admonition gallery, both scenarios: visual scenario admonitions-dark-titled)
-- Method: test/visual/scenarioDefinitions2.ts (MyST gallery: visual scenario `myst/v${20 + index}-myst-gallery-full-${theme}-900`)
+- Method: test/visual/scenarioDefinitions1.ts (admonition gallery, visual scenario admonitions-dark-titled: in dark and light themes at 900 px each admonition has exactly one title line, a source line and a panel colour distinct from the page, the paragraph after it keeps the body text colour and the page does not scroll sideways; at 460 px, scrolled to a titled block or to the end, the same holds and the scrolled-to block stays inside the frame)
+- Method: test/visual/scenarioDefinitions2.ts (MyST gallery, visual scenario `myst/v${20 + index}-myst-gallery-full-${theme}-900`: in dark and light themes a reference link, a closed dropdown, a definition list, sub and superscript, a kbd key, an abbreviation, a footnote and typeset inline math are present and the page does not overflow horizontally)
 - Criteria: The inner panel is a descendant of the outer panel; the fence length decides which fence closes the directive; data-line and data-end-line match the directive's source lines; the toggle is the native details element; the visual families (one for each gallery, two themes) pass the shared checks.
 
 <!-- okf:links:start -->
@@ -108,7 +90,7 @@ When an admonition directive contains another directive, the extension SHALL ren
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+  - [StRS-MDOKFSTUDIO-MYST-015](../../strs/myst/StRS-MDOKFSTUDIO-MYST-015.md): Admonitions and context tags read as distinct callouts
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-MYST-003](SwRS-MDOKFSTUDIO-MYST-003.md): Admonition galleries keep one title line per panel without sideways scroll
   - [SwRS-MDOKFSTUDIO-MYST-007](SwRS-MDOKFSTUDIO-MYST-007.md): A longer outer fence keeps inner fences as literal code

@@ -18,6 +18,7 @@ derives_from:
 - StRS-MDOKFSTUDIO-CODE-004
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
+- SwRS-MDOKFSTUDIO-TRUST-065
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -142,6 +143,7 @@ When the pointer is over a code block of the preview content, or the block holds
   - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
 - Depends on:
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CODE-018](SwRS-MDOKFSTUDIO-CODE-018.md): Hide the copy button below 30 px of visible block
   - [SwRS-MDOKFSTUDIO-CODE-022](SwRS-MDOKFSTUDIO-CODE-022.md): Offer no copy button for edited blocks, editors, diagram sources and blocks outside the content

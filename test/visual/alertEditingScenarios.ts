@@ -12,7 +12,6 @@ const OPENED_RANGES = "(window.visualMessages || []).filter((message) => message
 
 export const ALERT_EDITING_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-GFM-009
     // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
     id: "gfm/v09-alert-body-opens-whole-alert-dark-900",
     fixture: "71-gfm-alert-editing",

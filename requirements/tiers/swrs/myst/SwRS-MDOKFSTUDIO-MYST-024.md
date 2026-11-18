@@ -7,8 +7,7 @@ description: When a document holds `$...$`, `$$...$$`, the `{math}` role or
   directive, or an align-style environment inside `$$` or `{math}`, the
   extension SHALL typeset it as maths with KaTeX from the extension bundle
   without network or inline styles, keep a formula that cannot be parsed
-  readable, refuse active content, preserve dollar prices as text without
-  breaking surrounding emphasis, and scroll a long display equation inside its
+  readable, refuse active content, and scroll a long display equation inside its
   own box.
 project: markdown-okf-schema-studio
 scope: myst
@@ -25,14 +24,13 @@ derived_by: []
 implemented_in_files:
 - scripts/page-bundle.mjs
 - src/core/render/mathRenderer.ts
-- src/core/render/mystInlineTransforms.ts
 tested_in_files:
 - test/build/bundleSplit.test.ts
 - test/core/render/contentCaches.test.ts
 - test/core/render/mathRenderer.test.ts
 - test/core/render/mystPaletteRendering.test.ts
+- test/visual/mathScenarios.ts
 - test/visual/scenarioDefinitions1.ts
-- test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-MYST-025
@@ -113,40 +111,19 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 - WHEN the preview renders and the scroll lands
 - THEN the equation box has overflow-x auto, the page has no horizontal overflow and the equation block stays in the frame
 
-### Scenario (boundary): Dollar amounts in a sentence stay text
+### Related requirements
 
-- GIVEN sentences with `$19 base subscription ... ($200)`, `$5 and $6` and `$100–$380`, and a real `$x$` span
-- WHEN the preview renders
-- THEN each price sentence stays text with its dollar signs and holds no typeset span, and only the real span is typeset as maths, following the Sphinx rule that an opening `$` is not followed by whitespace and a closing `$` neither follows whitespace nor precedes a digit
-
-### Scenario (boundary): Bold dollar prices preserve emphasis
-
-- GIVEN `**$671** cache reads + **$402** 5-min cache writes + **$85** 1-h cache writes + **$216** output`
-- WHEN the preview renders
-- THEN the four prices are text inside four strong spans, the dollar signs are retained, and no literal `**` markers appear
-
-### Scenario (boundary): A formula that did not change is not typeset again
-
-- GIVEN a valid formula and one KaTeX rejects, both typeset in an earlier render
-- WHEN the preview renders the document again
-- THEN both give the same markup without a new KaTeX run, the rejected one keeps its wavy underline and tooltip, and the memory kept for this is bounded (2000 formulas, about 2 million characters)
-
-### Scenario (nominal): KaTeX loads on the first equation
-- GIVEN the packaged extension bundle
-- WHEN the extension starts and a document without an equation is rendered
-- THEN KaTeX is not loaded: it is a separate file, `lazy/katex.js`, read on the first equation
-- AND the extension host bundle `extension.js` holds no KaTeX code
+- SwRS-MDOKFSTUDIO-MYST-102: dollar prices stay text and keep their emphasis
 
 ### Verification notes
 
 - Method: test/core/render/mystPaletteRendering.test.ts (inline and display maths: "inline, display and aligned math from the palette typeset with KaTeX")
-- Method: test/core/render/mathRenderer.test.ts (offline and missing bundle: "typesets inline and display math with local assets and CSP-compatible styles"; unparsable formulas: "invalid LaTeX stays readable without breaking valid equations"; active content: "math cannot inject trusted HTML commands or external links"; Sphinx delimiters: "supports Sphinx math delimiters and leaves ordinary text and code alone")
-- Method: test/core/render/mathRenderer.test.ts (dollar amounts: "dollar amounts stay text while a real dollar span is maths"; emphasis: "bold dollar prices do not consume the surrounding emphasis markers")
-- Method: test/visual/scenarioDefinitions2.ts (dollar amounts: visual scenarios myst/v35 and myst/v36, fixture 55-dollar-prices, with three real math spans and four bold prices)
+- Method: test/core/render/mathRenderer.test.ts (offline: "typesets inline and display math with local assets and CSP-compatible styles"; missing bundle: "when the KaTeX bundle is missing, equations stay as their raw TeX text"; unparsable formulas: "invalid LaTeX stays readable without breaking valid equations"; active content: "math cannot inject trusted HTML commands or external links"; Sphinx delimiters: "supports Sphinx math delimiters and leaves ordinary text and code alone")
 - Method: test/visual/scenarioDefinitions1.ts (long display equations: visual scenario chapter-dark-half)
-- Method: test/core/render/contentCaches.test.ts (a formula and a rejected formula run KaTeX once across two renders)
+- Method: test/visual/mathScenarios.ts (offline typesetting of an inline and a display formula, and an unparsable formula kept as its source: visual scenario myst/v47-maths-offline-light-900)
 - Criteria: Typesetting runs on the host-rendered page and makes no external request; failure is local to the formula; trust is off and the bounds maxExpand 1000 and maxSize 100 are set; typesetting is idempotent; overflow is local.
-- Method: test/build/bundleSplit.test.ts (KaTeX is outside extension.js and in lazy/katex.js; the split bundle typesets an equation)
+- Internal (cache): a valid formula and one KaTeX rejects, typeset in an earlier render, give the same markup without a new KaTeX run, the rejected one keeps its wavy underline and tooltip, and the memory kept for this is bounded (2000 formulas, about 2 million characters): test/core/render/contentCaches.test.ts.
+- Internal (bundle): KaTeX is a separate file, `lazy/katex.js`, read on the first equation; a document without an equation does not load it and `extension.js` holds no KaTeX code: test/build/bundleSplit.test.ts (the split bundle typesets an equation).
 
 <!-- okf:links:start -->
 ### Links

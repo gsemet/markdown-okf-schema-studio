@@ -207,8 +207,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     editActivationScroll: true,
     mathRenderingChecks: true,
     description:
-      "A centered paragraph keeps its scroll position when its editor loads asynchronously, "
-      + "without transient jumps or delayed anchor corrections.",
+      "A centered paragraph keeps its scroll position when its editor loads asynchronously, without transient jumps or delayed anchor corrections.",
   },
   {
     id: "preview-edit-activation-scroll-narrow",
@@ -548,7 +547,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   ...RELEASE_SHOWCASE_SCENARIOS,
   {
-    // @tests_req StRS-MDOKFSTUDIO-MYST-001
+    // @tests_req StRS-MDOKFSTUDIO-MYST-016
     id: "myst/v34-readme-showcase-edit-cream-1000",
     fixture: "54-readme-showcase",
     theme: "light",
@@ -696,7 +695,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["dark", undefined],
     ["dark", "cream"],
   ] as const).map(([theme, mode]) => ({
-    // @tests_req StRS-MDOKFSTUDIO-MYST-001
+    // @tests_req StRS-MDOKFSTUDIO-MYST-017
     // @tests_req StRS-MDOKFSTUDIO-MYST-009
     // @tests_req SwRS-MDOKFSTUDIO-MYST-036
     id: `figure-anchors-${theme}-${mode ?? "theme"}`,
@@ -796,6 +795,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Every GFM construct on one page (five alerts, strikethrough, footnotes, task list, aligned table, raw HTML table and details, colour span, autolink), ${theme}, ${width} px pane.`,
   })),
   ...(["dark", "light"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-MYST-018
     // @tests_req SwRS-MDOKFSTUDIO-MYST-006
     // @tests_req SwRS-MDOKFSTUDIO-MYST-001
     id: `myst/v${20 + index}-myst-gallery-full-${theme}-900`,
@@ -1369,7 +1369,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Coloured spans in a raw HTML table (a named colour, hsl(), a hex colour on an rgba() background, and a var()/url() value that is dropped), ${theme}, 900 px pane.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-024
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-102
     id: `myst/v${35 + index}-dollar-prices-full-${theme}-900`,
     fixture: "55-dollar-prices",
     theme,

@@ -33,7 +33,7 @@ function previewReady(): boolean {
   return preview?.phase === "ready" && preview.status === "success";
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-081
+// @tests_req SwRS-MDOKFSTUDIO-MYST-078
 /** Without a preview there are no entries; in an untrusted workspace there never are. */
 export async function runUntrusted(): Promise<void> {
   const document = await vscode.workspace.openTextDocument(vscode.Uri.file(docPath));

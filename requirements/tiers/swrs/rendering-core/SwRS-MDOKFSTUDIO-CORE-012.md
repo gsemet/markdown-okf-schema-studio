@@ -17,8 +17,6 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-002
 - StRS-MDOKFSTUDIO-CORE-003
-- StRS-MDOKFSTUDIO-MYST-001
-- StRS-MDOKFSTUDIO-GFM-002
 depends_on: []
 annotation_exemption: false
 exemption_reason:
@@ -113,8 +111,6 @@ When a trusted document holds an `{include}` directive for a Markdown file insid
 - Derives from:
   - [StRS-MDOKFSTUDIO-CORE-002](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-002.md): A writer composes a document from included files
   - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
-  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
-  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CORE-014](SwRS-MDOKFSTUDIO-CORE-014.md): Keep unsupported include forms as placeholders
   - [SwRS-MDOKFSTUDIO-CORE-015](SwRS-MDOKFSTUDIO-CORE-015.md): Map included blocks to the include directive

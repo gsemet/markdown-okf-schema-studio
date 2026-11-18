@@ -31,7 +31,7 @@ function groups(html: string): string[][] {
   return [...byGroup.values()];
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("a list of radio items renders as one labelled radio group with a roving tab stop", async () => {
   const source = [
     "Fix direction:",
@@ -62,7 +62,7 @@ test("a list of radio items renders as one labelled radio group with a roving ta
   assert.doesNotMatch(html, /\( \)|\(x\)/u, "the markers are replaced by the controls");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("a lone radio item stays plain text", async () => {
   for (const source of ["- ( ) only option\n", "- (x) only option\n", "Intro\n\n- (x) only option\n- plain item\n"]) {
     const { html } = await renderMyst(source);
@@ -72,7 +72,7 @@ test("a lone radio item stays plain text", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("the marker is ( ), (x) or (X) followed by a space or a tab, at the start of a list item", async () => {
   const { html } = await renderMyst("- (X) upper\n- ( )\ttab\n- (x)glued\n- (y) other\n");
   assert.deepEqual(groups(html), [["1:2:x*", "2:2: "]]);
@@ -85,7 +85,7 @@ test("the marker is ( ), (x) or (X) followed by a space or a tab, at the start o
   assert.deepEqual(groups(ordered.html), [["1:3: ", "2:3:x*"]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("a blank line, a heading, another list or a non-radio item ends a group", async () => {
   const blank = await renderMyst("- ( ) a\n- (x) b\n\n- ( ) c\n- ( ) d\n");
   assert.deepEqual(groups(blank.html), [["1:2: ", "2:2:x*"], ["4:2: *", "5:2: "]]);
@@ -97,7 +97,7 @@ test("a blank line, a heading, another list or a non-radio item ends a group", a
   assert.deepEqual(groups(plainItem.html), [["1:2: *", "2:2: "], ["4:2:x*", "5:2: ", "6:2: "]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("in a list that mixes task items and radio items each item keeps its kind", async () => {
   const source = "Plan:\n\n- [ ] write the spec\n- ( ) option one\n- (x) option two\n- [x] review\n";
   const { html } = await renderMyst(source);
@@ -112,7 +112,7 @@ test("in a list that mixes task items and radio items each item keeps its kind",
   assert.equal(attribute(group, "aria-labelledby"), undefined, "the paragraph above labels only a group that starts the list");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("a group without a selection and a group with two selections render as written", async () => {
   const none = await renderMyst("- ( ) a\n- ( ) b\n- ( ) c\n");
   assert.deepEqual(groups(none.html), [["1:2: *", "2:2: ", "3:2: "]]);
@@ -120,7 +120,7 @@ test("a group without a selection and a group with two selections render as writ
   assert.deepEqual(groups(two.html), [["1:2: ", "2:2:x*", "3:2:x"]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("a nested list forms its own group, labelled by its parent item", async () => {
   const source = "- (x) outer one\n  - ( ) inner one\n  - (x) inner two\n- ( ) outer two\n";
   const { html } = await renderMyst(source);
@@ -132,7 +132,7 @@ test("a nested list forms its own group, labelled by its parent item", async () 
   assert.match(textContent(label!), /outer one/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("radio markers stay literal in code and keep exact columns in quotes, CRLF files and after frontmatter", async () => {
   const code = await renderMyst("```text\n- ( ) a\n- (x) b\n```\n\n`- ( ) inline`\n");
   assert.deepEqual(radios(code.html), []);
@@ -143,7 +143,7 @@ test("radio markers stay literal in code and keep exact columns in quotes, CRLF 
   assert.doesNotMatch(quoted.html + code.html, /[\uE000-\uE01F]/u, "no placeholder may leak into the output");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("the webview sanitizer keeps the radio roles, states and source attributes", async () => {
   const { html } = await renderMyst("Choose:\n\n- (x) keep\n- ( ) drop\n");
   const rewritten = rewriteSphinxHtml(html, {
@@ -158,7 +158,7 @@ test("the webview sanitizer keeps the radio roles, states and source attributes"
   assert.ok(group && attribute(group, "aria-labelledby"), "the sanitizer keeps the group and its label");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("in the mapped webview HTML the selected option is the group's only tab stop: its list, items and option paragraphs are out of the Tab order", async () => {
   const source = [
     "Fix direction:",
@@ -195,7 +195,7 @@ test("in the mapped webview HTML the selected option is the group's only tab sto
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040
 test("in a list that mixes task items and options, and in a nested group, the option items and paragraphs are out of the Tab order", async () => {
   const source = [
     "Plan:",

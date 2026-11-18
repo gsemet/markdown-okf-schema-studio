@@ -85,7 +85,7 @@ export class SourceEditController {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-GFM-021
-  // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-041
   /**
    * Toggles one `[ ]`/`[x]` marker with a single-character edit, or selects a radio option with at
    * most one edit per option of its group; either way one undo step.
@@ -117,7 +117,7 @@ export class SourceEditController {
     return this.apply(document, "edits" in toggle ? toggle.edits : [toggle.edit]).then((applied) => {
       // A read-only file rejects with its reason (see `applyWrittenEdits`).
       // @implements_req SwRS-MDOKFSTUDIO-GFM-021
-      // @implements_req SwRS-MDOKFSTUDIO-GFM-039
+      // @implements_req SwRS-MDOKFSTUDIO-GFM-041
       this.postCheckboxResult(preview, message, applied
         ? { saved: true }
         : { error: "VS Code could not apply the checkbox edit." });
@@ -126,7 +126,7 @@ export class SourceEditController {
     });
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-MYST-051
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-045
   private postLabelRenameResult(
     preview: PreviewSession,
     message: PageMessageOf<"previewLabelRename">,

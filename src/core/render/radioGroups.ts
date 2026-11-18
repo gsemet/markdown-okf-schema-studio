@@ -144,7 +144,7 @@ function convertRun(list: MystNode, run: RadioOption[], before: MystNode | undef
   ];
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-GFM-039
+// @implements_req SwRS-MDOKFSTUDIO-GFM-040
 /**
  * Turns every run of at least two radio items of a list into a radio group. `sourceLines` are the
  * lines of the whole document, frontmatter included, as the markers count them.

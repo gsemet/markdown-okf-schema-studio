@@ -9,8 +9,8 @@ description: When a document holds a +++ line inside a container (a MyST
   of the document stays a block break.
 project: MDOKFSTUDIO
 scope: myst
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -18,11 +18,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/render/mystNestedBlockBreaks.ts
-tested_in_files:
-- test/core/render/blockBreakInContainer.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-MYST-096
 ---
 
 ## A +++ line inside a container renders as text
@@ -67,4 +67,6 @@ A `+++` line that splits a `{card}` or `{grid-item-card}` body into body and foo
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-096](SwRS-MDOKFSTUDIO-MYST-096.md): A directive the parser cannot build shows its source and the render continues
 <!-- okf:links:end -->

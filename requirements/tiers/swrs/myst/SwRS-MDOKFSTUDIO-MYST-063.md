@@ -14,7 +14,7 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-001
+- StRS-MDOKFSTUDIO-MYST-017
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -101,7 +101,7 @@ When a document holds a `{list-table}`, `{csv-table}` or `{table}` directive, th
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+  - [StRS-MDOKFSTUDIO-MYST-017](../../strs/myst/StRS-MDOKFSTUDIO-MYST-017.md): Figures and tables show as the source sizes and shapes them
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CORE-057](../rendering-core/SwRS-MDOKFSTUDIO-CORE-057.md): Render list-table headers, widths and alignment
   - [SwRS-MDOKFSTUDIO-CORE-058](../rendering-core/SwRS-MDOKFSTUDIO-CORE-058.md): Edit a list-table as one block

@@ -55,5 +55,5 @@ When a fenced code block is shown, the extension SHALL use the editor foreground
 - Derives from:
   - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
 - Superseded by:
-  - [SwRS-MDOKFSTUDIO-CODE-007](SwRS-MDOKFSTUDIO-CODE-007.md): Code blocks use one font scale, the theme colours and scroll long lines
+  - [SwRS-MDOKFSTUDIO-CODE-007](SwRS-MDOKFSTUDIO-CODE-007.md): Code blocks use one font scale, one box and scroll long lines
 <!-- okf:links:end -->

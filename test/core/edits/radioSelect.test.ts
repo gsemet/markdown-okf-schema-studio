@@ -26,7 +26,7 @@ function changedLines(before: string, after: string): number[] {
   return left.flatMap((line, index) => (line === right[index] ? [] : [index + 1]));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("selecting an option writes (x) on it and ( ) on the old one: two characters on two lines", () => {
   const plan = planRadioSelect(PLAN, 5, 2, GROUP);
   assert.ok("edits" in plan, JSON.stringify(plan));
@@ -37,14 +37,14 @@ test("selecting an option writes (x) on it and ( ) on the old one: two character
   assert.deepEqual(changedLines(PLAN, after), [3, 5]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("selecting the only selected option writes nothing", () => {
   assert.deepEqual(planRadioSelect(PLAN, 3, 2, GROUP), { unchanged: true });
   const upper = PLAN.replace("(x)", "(X)");
   assert.deepEqual(planRadioSelect(upper, 3, 2, GROUP), { unchanged: true }, "(X) is already selected");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("with two selected options, a choice normalises the group in one plan", () => {
   const two = PLAN.replace("- ( ) Leave", "- (X) Leave");
   const onSelected = planRadioSelect(two, 5, 2, GROUP);
@@ -57,7 +57,7 @@ test("with two selected options, a choice normalises the group in one plan", () 
   assert.deepEqual(changedLines(two, after), [3, 4, 5], "both old selections are cleared");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("a group with no selection gets one (x), and CRLF files keep their offsets", () => {
   const crlf = "- ( ) a\r\n- ( ) b\r\n";
   const plan = planRadioSelect(crlf, 2, 2, [{ line: 1, column: 2 }, { line: 2, column: 2 }]);
@@ -65,7 +65,7 @@ test("a group with no selection gets one (x), and CRLF files keep their offsets"
   assert.equal(applyTextEdits(crlf, plan.edits), "- ( ) a\r\n- (x) b\r\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("a group whose markers moved, an unknown target or a repeated option is refused", () => {
   const moved = PLAN.replace("- ( ) Leave", "Leave");
   assert.deepEqual(planRadioSelect(moved, 4, 2, GROUP), { refused: RADIO_GONE });
@@ -76,7 +76,7 @@ test("a group whose markers moved, an unknown target or a repeated option is ref
     "a line that is not a radio item");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("a radio marker starts a list item and is followed by a space or a tab", () => {
   assert.equal(radioMarkerColumn("- ( ) a"), 2);
   assert.equal(radioMarkerColumn("  * (x) a"), 4);
@@ -95,7 +95,7 @@ test("a radio marker starts a list item and is followed by a space or a tab", ()
   assert.match(prepared.text, /See \(x\) here\./u, "a marker in prose is not a radio marker");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("positions that are not one group of consecutive radio items of one list are refused", () => {
   const two = "Approach:\n\n- (x) one\n- ( ) two\n\nTests:\n\n- (x) unit\n- ( ) e2e\n";
   const forged = [{ line: 3, column: 2 }, { line: 4, column: 2 }, { line: 8, column: 2 }, { line: 9, column: 2 }];
@@ -116,7 +116,7 @@ test("positions that are not one group of consecutive radio items of one list ar
     { refused: RADIO_GONE }, "options of two nesting levels");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-039
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041
 test("one group is accepted across nested lists, lazy lines, quotes and two-digit ordered markers", () => {
   const nested = "- (x) outer one\n  - ( ) inner one\n  - (x) inner two\n- ( ) outer two\n";
   const outer = planRadioSelect(nested, 4, 2, [{ line: 1, column: 2 }, { line: 4, column: 2 }]);

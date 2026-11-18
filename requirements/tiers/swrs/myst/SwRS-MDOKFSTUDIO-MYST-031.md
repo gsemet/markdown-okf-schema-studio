@@ -14,8 +14,9 @@ status: stable
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-001
-depends_on: []
+- StRS-MDOKFSTUDIO-MYST-017
+depends_on:
+- SwRS-MDOKFSTUDIO-TRUST-025
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -111,7 +112,9 @@ The figure still renders when its width is dropped.
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+  - [StRS-MDOKFSTUDIO-MYST-017](../../strs/myst/StRS-MDOKFSTUDIO-MYST-017.md): Figures and tables show as the source sizes and shapes them
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-025](../trust-security/SwRS-MDOKFSTUDIO-TRUST-025.md): A resource reference resolves only to an existing file inside a root
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CORE-059](../rendering-core/SwRS-MDOKFSTUDIO-CORE-059.md): Use a figure body as its caption
   - [SwRS-MDOKFSTUDIO-CORE-063](../rendering-core/SwRS-MDOKFSTUDIO-CORE-063.md): Keep figure width and alignment

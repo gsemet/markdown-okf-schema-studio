@@ -53,7 +53,7 @@ When a document holds a notebook output reference such as `#tbl:` or an unexecut
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Constructs the preview cannot build stay visible and labelled
 - Superseded by:
   - [SwRS-MDOKFSTUDIO-CORE-022](../rendering-core/SwRS-MDOKFSTUDIO-CORE-022.md): Build-dependent constructs show an inert placeholder with a warning
 <!-- okf:links:end -->

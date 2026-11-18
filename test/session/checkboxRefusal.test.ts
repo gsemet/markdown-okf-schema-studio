@@ -56,7 +56,7 @@ const toggle = (extra: Record<string, unknown> = {}): Record<string, unknown> =>
   editId: "c1", line: 3, endLine: 3, column: 2, checked: true, ...extra,
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-027
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021
 test("a malformed checkbox toggle is answered, so the box never stays busy", () => {
   const { dispatcher, session, answers, handled } = harness();
   for (const bad of [{ column: -1 }, { column: 1.5 }, { checked: "yes" }, { endLine: 4 }]) {

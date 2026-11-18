@@ -18,13 +18,13 @@ derives_from:
 - StRS-MDOKFSTUDIO-MYST-009
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
+- SwRS-MDOKFSTUDIO-MYST-097
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/mapping/labelRename.ts
 - src/page/modules/labelRename.ts
-- src/session/pageMessages.ts
 tested_in_files:
 - test/core/mapping/labelRename.test.ts
 - test/core/protocol/pageToHost.test.ts
@@ -127,8 +127,7 @@ Only `{ref}` forms are counted. The field closes itself 5 s after the success me
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-BLOCK-041: an open editor blocks a rename; see it for the refusal reason.
-- SwRS-MDOKFSTUDIO-MYST-045: the host side of the rename.
-- SwRS-MDOKFSTUDIO-MYST-051: the message the field posts and the answer it receives.
+- SwRS-MDOKFSTUDIO-MYST-045: the message the field posts, the answer it receives and the host side of the rename.
 
 ### Verification notes
 - Method: test/page/modules/labelRename.test.ts ("a click on the anchor in edit mode opens a prefilled, selected field before the block handlers": click opens and edit mode off; "Enter posts one rename with the label line; Escape cancels": Enter and Escape; "an invalid or unchanged name is not sent": invalid names and unchanged name; "the result shows how many {ref} uses of the old name remain": remaining uses, progress and refusal)
@@ -150,6 +149,7 @@ Only `{ref}` forms are counted. The field closes itself 5 s after the success me
   - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
 - Depends on:
   - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-MYST-097](SwRS-MDOKFSTUDIO-MYST-097.md): Code fences and front matter are read the same way everywhere
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-MYST-039](SwRS-MDOKFSTUDIO-MYST-039.md): Enter sends the label rename and an unchanged name sends nothing
   - [SwRS-MDOKFSTUDIO-MYST-040](SwRS-MDOKFSTUDIO-MYST-040.md): Escape or an outside press closes the rename field

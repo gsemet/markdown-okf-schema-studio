@@ -22,6 +22,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-027
 - SwRS-MDOKFSTUDIO-MYST-028
 - SwRS-MDOKFSTUDIO-MYST-029
+- SwRS-MDOKFSTUDIO-MYST-102
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -38,6 +39,20 @@ As a writer, I want formulas rendered offline and failures left legible so that 
 ### Rationale and constraints
 
 - Works with no network; an invalid formula is shown as its source text, not dropped.
+
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant P as Preview page
+    W->>P: writes inline, display or aligned maths, with no network
+    alt a formula KaTeX can parse
+        P-->>W: the formula typeset with the bundled KaTeX
+    else an invalid formula
+        P-->>W: the formula source, readable and marked as an error
+    end
+```
 
 ### Main paths
 
@@ -60,4 +75,5 @@ As a writer, I want formulas rendered offline and failures left legible so that 
   - [SwRS-MDOKFSTUDIO-MYST-027](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-027.md): Maths cannot run active content
   - [SwRS-MDOKFSTUDIO-MYST-028](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-028.md): Sphinx-style math delimiters are typeset
   - [SwRS-MDOKFSTUDIO-MYST-029](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-029.md): Long display equations scroll inside their box
+  - [SwRS-MDOKFSTUDIO-MYST-102](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-102.md): Dollar prices stay text and keep their emphasis
 <!-- okf:links:end -->

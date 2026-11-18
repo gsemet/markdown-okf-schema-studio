@@ -10,7 +10,8 @@ description: When a document holds a directive or fence the parser cannot build
   render the raw source lines of that construct as a code block and render the
   rest of the document, instead of failing the render. A fence left open before
   a later heading shows only its opening line, with a warning, and the rest of
-  the document renders.
+  the document renders. A +++ line inside a container renders as text, and only
+  a +++ line at the root of the document stays a block break.
 project: markdown-okf-schema-studio
 scope: myst
 req_lifecycle: proposed
@@ -24,19 +25,23 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/render/mystDirectiveErrors.ts
+- src/core/render/mystNestedBlockBreaks.ts
 - src/core/render/mystUnclosedFences.ts
 tested_in_files:
 - test/core/render/alertSourceLines.test.ts
+- test/core/render/blockBreakInContainer.test.ts
 - test/core/render/renderReq.syntaxErrors.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-101
 ---
 
-## EARS Expression
+## A directive the parser cannot build shows its source and the render continues
 
 ### Normative behavior
 
-When a document holds a directive or fence the parser cannot build (an unclosed or empty backtick or colon fence such as a list-table or table without its body, also nested in another directive), the extension SHALL render the raw source lines of that construct as a code block and render the rest of the document, instead of failing the render. When an opening fence (backticks or colons, with or without a directive name) has no closing fence and a heading follows it, the extension SHALL render only the opening line as a code block, report a warning ("unclosed fence") on that line, and render the lines after it as ordinary document content.
+When a document holds a directive or fence the parser cannot build (an unclosed or empty backtick or colon fence such as a list-table or table without its body, also nested in another directive), the extension SHALL render the raw source lines of that construct as a code block and render the rest of the document, instead of failing the render. When an opening fence (backticks or colons, with or without a directive name) has no closing fence and a heading follows it, the extension SHALL render only the opening line as a code block, report a warning ("unclosed fence") on that line, and render the lines after it as ordinary document content. When a document holds a +++ line inside a container (a MyST directive, a quote, a list item or an alert), the extension SHALL render the line as text and keep rendering the document; only a +++ line at the root of the document stays a block break.
 
 ### Scenario (nominal): An unclosed or empty directive shows its source
 The parser reports a directive without its required body as an error the HTML writer cannot emit; the construct is shown as written instead.
@@ -64,9 +69,23 @@ Markdown runs an unclosed fence to the end of the file; the preview departs from
 | A closed fence, or a fence unclosed to the end of the file with no heading after it | unchanged: a plain code block runs to the end of the file, a directive without body is shown as the code block of its lines |
 | A directive error with no usable position (for example one from an included file) | the code block holds the opening fence rebuilt from the directive name and arguments |
 
+### Scenario (boundary): A +++ line inside a container renders as text
+- GIVEN a `:::{note}` directive whose body holds a line `+++` between the paragraphs "a" and "b"
+- WHEN the preview renders
+- THEN the note shows the paragraphs "a", "+++" and "b", and the document renders
+
+| Input | Outcome |
+| --- | --- |
+| `+++` or `+++ {"a": 1}` in a directive body | a paragraph holding the line as text |
+| `> +++` (a quote) and `- +++` (a list item) | a paragraph holding `+++` in the quote or the item |
+| `+++` last in an alert, or a `- +++` item after an alert | a paragraph holding `+++` |
+| a `+++` line at the root of the document, after a blank line | it stays a block break and shows no text |
+| a `+++` line that splits a `{card}` or `{grid-item-card}` body into body and footer | keeps that role (see SwRS-MDOKFSTUDIO-MYST-100) |
+
 ### Verification notes
 - Method: test/core/render/renderReq.syntaxErrors.requirements.test.ts (unclosed backtick and colon directives, options without body, nested directive, empty directive at the end of the file, labels, frontmatter and CRLF, the fixture, the rebuilt opening line); the visual scenarios myst/v37 and myst/v38 render the fixture test/visual/fixtures/64-unclosed-directives.md; the unclosed-fence tests of the same file (backtick, colon, plain and nested fences in the middle of a document, two open fences, closed fence, frontmatter and CRLF lines) and the visual scenarios myst/v39 and myst/v40 render test/visual/fixtures/65-unclosed-fence-mid-document.md.
 - Method: test/core/render/alertSourceLines.test.ts (an unclosed fence after a GitHub alert: the warning and the opening line shown as code carry the fence's own line).
+- Method: test/core/render/blockBreakInContainer.test.ts (one render per `+++` input, and the root-level break).
 - Criteria: the render never fails; each broken construct is one code block of its own lines; the rest of the document renders.
 - Known issue: only a fence left open before a heading reports a diagnostic; a directive shown raw for another reason (no body, or open to the end of the file with no heading after it) has no hint.
 
@@ -76,5 +95,7 @@ Markdown runs an unclosed fence to the end of the file; the preview departs from
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Constructs the preview cannot build stay visible and labelled
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-101](SwRS-MDOKFSTUDIO-MYST-101.md): A +++ line inside a container renders as text
 <!-- okf:links:end -->

@@ -105,7 +105,6 @@ test("advanceFence tracks one fence at a time, with colon fences on request", ()
   assert.equal(advanceFence(":::{note}", undefined, true), ":::");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-097
 test("escapeHtml and escapeRegExp", () => {
   assert.equal(escapeHtml(`<a href="x">&</a>`), "&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;");
   assert.equal(escapeHtml(`"a"`, false), `"a"`);

@@ -60,7 +60,7 @@ test("a copy request only needs the document; a stale version or render request 
   assert.equal(t.posted.length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-026
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019
 test("an oversized text is refused with a reason and a failing clipboard is answered as not copied", async () => {
   const t = setup({ restrictedReads: false });
   await t.dispatcher.handle(t.preview, { ...t.copy(), text: "x".repeat(MAX_COPY + 1) });
@@ -83,7 +83,7 @@ test("a read-only preview still writes the requested code to the clipboard and e
   assert.deepEqual(t.edits, [], "no edit request was processed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-026
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019
 test("a copy request without a user gesture is refused and writes nothing", async () => {
   const t = setup({ restrictedReads: false });
   await t.dispatcher.handle(t.preview, { ...t.copy(), userGesture: false } as PageToHostMessage);

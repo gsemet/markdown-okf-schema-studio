@@ -8,8 +8,8 @@ description: "When the page posts previewLabelRename, the extension SHALL accept
   previewLabelRenameResult with the same edit id."
 project: markdown-okf-schema-studio
 scope: myst
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -22,13 +22,11 @@ depends_on:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/core/protocol/pageToHost.ts
-- src/session/features/sourceEdits.ts
-tested_in_files:
-- test/core/protocol/pageToHost.test.ts
-- test/integration/labelRename.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-MYST-045
 ---
 
 ## The label rename message is validated and answered
@@ -80,4 +78,6 @@ When the page posts previewLabelRename, the extension SHALL accept it only with 
   - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
   - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-045](SwRS-MDOKFSTUDIO-MYST-045.md): The host renames only the label text in one undo step
 <!-- okf:links:end -->

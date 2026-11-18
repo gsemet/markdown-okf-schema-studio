@@ -17,7 +17,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
-depends_on: []
+depends_on:
+- SwRS-MDOKFSTUDIO-CORE-003
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -26,7 +27,6 @@ implemented_in_files:
 - src/core/render/mystGithubAlerts.ts
 - src/core/render/mystNormalize.ts
 - src/core/syntax/blockQuoteRange.ts
-- src/page/features/mappedBlocks.ts
 tested_in_files:
 - test/core/render/alertInsideColonContainer.test.ts
 - test/core/render/alertLazyContinuation.test.ts
@@ -37,7 +37,6 @@ tested_in_files:
 - test/core/render/mystPaletteRendering.test.ts
 - test/integration/realInput/qa210Replays.ts
 - test/session/alertBlockEditOpen.test.ts
-- test/visual/alertEditingScenarios.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-GFM-010
@@ -132,7 +131,8 @@ meaning inside the admonition, where GitHub shows it as paragraph text.
 
 The alert is rewritten into an admonition of more lines before parsing; the source lines of the
 blocks (`data-line`, `data-end-line`, which the block editor opens, saves, cuts and moves) are
-still the lines of the file as written.
+still the lines of the file as written; the rule is that of SwRS-MDOKFSTUDIO-CORE-003, and the
+rows below are its alert cases.
 
 | Input | Outcome |
 | --- | --- |
@@ -143,20 +143,6 @@ still the lines of the file as written.
 | an alert after a frontmatter block, inside a list item, a grid card, a tab item or between context tags (also kept as one raw HTML block) | the same, counted in the whole file |
 | an unclosed fence after an alert | the warning and the opening line shown as code carry the line of the fence |
 | alert markers inside a fenced code block | they stay literal and later lines are unchanged |
-
-### Scenario (nominal): A click in the body of an alert opens the whole alert
-
-The admonition of a rewritten alert carries `data-okf-github-alert="true"`. In edit mode, a click
-(or Enter or Space) on a block in its body opens one block editor on the whole alert, from the
-marker line to the alert's last line (quoted or lazy), like a click on its title (SwRS-MDOKFSTUDIO-BLOCK-014).
-
-| Clicked block in edit mode | Lines of previewEditOpen and text of the editor |
-| --- | --- |
-| either paragraph of a `> [!NOTE]` alert of two paragraphs (lines 7 to 10, after a frontmatter block) | lines 7 to 10, the marker line and every quoted line |
-| the body of one of several consecutive alerts (`[!NOTE]`, a titled `[!TIP]` of two paragraphs, a `> **Warning**` bold marker, `[!CAUTION]`) | the lines of that alert only, never those of the alert before or after it |
-| the second paragraph of an alert indented in a list item | the lines of the alert only, with the indentation of the list item; a click on another item of the list still opens the whole list |
-| an item of a list inside an alert | the lines of the whole alert |
-| an alert in a tab item | no change: the tab item is the mapped block (SwRS-MDOKFSTUDIO-MYST-098) |
 
 ### Scenario (boundary): Alerts inside a colon container
 
@@ -184,12 +170,11 @@ its own, and a container nested in another must use a shorter fence than the out
 - Method: test/core/render/mystPaletteRendering.test.ts (an alert written by the edition palette renders as an admonition of the chosen type: unit test on the render pipeline output).
 - Method: test/core/render/crlfAlerts.test.ts (fence scenario and CRLF scenario: unit tests on the render pipeline output).
 - Method: test/core/render/alertSourceLines.test.ts (every block keeps the lines of the document: unit tests on the `data-line` and `data-end-line` of the rendered blocks, including a README-shaped synthetic fixture with an important alert then a note alert, an alert ending on a lazy line and an alert followed by a list item).
-- Method: test/session/alertBlockEditOpen.test.ts (the host answers `previewEditOpen` for the paragraph of the second alert of that README with that paragraph's lines, through the real `PreviewManager`; the click in the body of an alert: the rendered and sanitized page is read by `createMappedBlocks(...).editingElementFor`, the range is posted to the real `PreviewManager` and the answer is the whole alert, for the two-paragraph, consecutive, list-item and list-in-alert rows).
-- Method: visual scenario gfm/v09-alert-body-opens-whole-alert-dark-900 in test/visual/alertEditingScenarios.ts (a real click on the second paragraph of a two-paragraph note: one `previewEditOpen` for lines 5 to 8, the editor holds the whole alert and the alerts after it stay rendered). The tab item row is not asserted for the click.
+- Method: test/session/alertBlockEditOpen.test.ts (the host answers `previewEditOpen` for the paragraph of the second alert of that README with that paragraph's lines, through the real `PreviewManager`). The click in the body of an alert is a scenario of SwRS-MDOKFSTUDIO-BLOCK-014.
 - Method: test/core/render/alertLazyContinuation.test.ts (the admonition ends where its block quote ends: `> [!NOTE]`, `> a`, `b` gives one admonition on lines 1 to 3 whose paragraph holds `b`; a table of the inside and outside rows (list markers, lazy setext underlines, delimiter rows and MyST block breaks, tables, HTML blocks), one test per row, checked against GitHub's rendering; a lazy setext underline or delimiter row adds no heading, title or table; a lazy line of an alert in a list item and of a CRLF alert: unit tests on the rendered admonitions, their titles, their text and their `data-line` and `data-end-line`).
 - Method: test/core/render/alertInsideColonContainer.test.ts (alerts inside a card, a tab item and a nested grid card, and a `::::{grid}` of cards inside an alert with either head, one note holding both cards and `After.` outside it, no code block, the lines of the note, grid and cards, and the plain alert still expanding to `:::{note}`: unit tests on the rendered structure and on the `data-line` and `data-end-line` of the blocks).
 - Method: test/core/render/alertTitle.test.ts (the first body line never becomes the title: a heading or a lone bold first line, a titled alert, a legacy bold marker and an alert between context tags keep their title and their body; the committed GitHub HTML in test/core/render/alert-fixtures/ (`heading-first-line.github.html`, `bold-first-line.github.html`) has the same title and body order as Studio; a MyST admonition still takes its title from a leading heading: unit tests on the rendered admonitions, no network call).
-- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default, never the first body line; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains the quoted lines and the lazy continuation lines of its block quote, and nothing after a blank line or a line that starts a block; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written; a click in the body of a mapped alert posts the alert's own range, never a paragraph's or the enclosing list's; an alert inside a colon container is a backtick directive whose fence is longer than any backtick fence of its body, so neither the body nor its closing line ends the container; an alert outside a colon container whose body holds a colon container is a colon-fence admonition whose fence is longer than every colon fence of its body, so the container stays inside it and the text after the alert stays outside.
+- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default, never the first body line; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains the quoted lines and the lazy continuation lines of its block quote, and nothing after a blank line or a line that starts a block; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written; an alert inside a colon container is a backtick directive whose fence is longer than any backtick fence of its body, so neither the body nor its closing line ends the container; an alert outside a colon container whose body holds a colon container is a colon-fence admonition whose fence is longer than every colon fence of its body, so the container stays inside it and the text after the alert stays outside.
 
 <!-- okf:links:start -->
 ### Links
@@ -198,6 +183,8 @@ its own, and a container nested in another must use a shorter fence than the out
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-CORE-003](../rendering-core/SwRS-MDOKFSTUDIO-CORE-003.md): Every rendered block maps to its absolute source lines
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-GFM-010](SwRS-MDOKFSTUDIO-GFM-010.md): Alert marker text becomes the title
   - [SwRS-MDOKFSTUDIO-GFM-011](SwRS-MDOKFSTUDIO-GFM-011.md): Legacy bold markers render as admonitions

@@ -20,7 +20,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/preview/styles/contentBlockStyles.ts
+- src/core/preview/styles/contentBlockStyles.markers.ts
 - src/core/render/highlight.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
@@ -86,7 +86,7 @@ A two-file diff has two deletion and two addition lines; `patch` blocks are mark
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-CODE-005: wraps diff blocks into lines
+- SwRS-MDOKFSTUDIO-CODE-039: wraps diff blocks into lines
 - SwRS-MDOKFSTUDIO-CODE-007: colours addition and deletion tokens from the VS Code theme
 
 ### Verification notes

@@ -5,10 +5,10 @@ uuid: 04e0c14a-7c6b-46b8-ba68-bc39a96757d3
 title: Fenced code in a supported language is highlighted, other code stays
   literal
 description: When a document contains a fenced code block, the extension SHALL
-  colour the keywords, strings, numbers and comments of a block in a supported
-  language with the VS Code Dark+ token colours, select the grammar from the
+  highlight a block in a supported language with the grammar selected from the
   fence label, and leave a block of an unknown or absent language, inline code
-  and the text of every code block as literal text.
+  and the text of every code block as literal text, each special character shown
+  once.
 project: markdown-okf-schema-studio
 scope: code-blocks
 req_lifecycle: proposed
@@ -23,13 +23,11 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - scripts/page-bundle.mjs
-- src/core/preview/styles/codeBlockStyles.ts
 - src/core/render/highlight.ts
 - src/core/render/mystRenderer.ts
 tested_in_files:
 - test/build/bundleSplit.test.ts
 - test/core/preview/codeBlockStyles.test.ts
-- test/core/render/codeBlockComfort.requirements.test.ts
 - test/core/render/contentCaches.test.ts
 - test/core/render/highlight.test.ts
 - test/core/render/renderReq.codeBlocks.requirements.test.ts
@@ -39,6 +37,7 @@ supersedes:
 - SwRS-MDOKFSTUDIO-CODE-002
 - SwRS-MDOKFSTUDIO-CODE-003
 - SwRS-MDOKFSTUDIO-CODE-004
+- SwRS-MDOKFSTUDIO-CODE-005
 - SwRS-MDOKFSTUDIO-CODE-030
 - SwRS-MDOKFSTUDIO-CODE-031
 - SwRS-MDOKFSTUDIO-CODE-037
@@ -48,13 +47,13 @@ supersedes:
 
 ### Normative behavior
 
-When a document contains a fenced code block, the extension SHALL colour the keywords, strings, numbers and comments of a block in a supported language with the VS Code Dark+ token colours, select the grammar from the fence label, and leave a block of an unknown or absent language, inline code and the text of every code block as literal text.
+When a document contains a fenced code block, the extension SHALL highlight a block in a supported language with the grammar selected from the fence label, and leave a block of an unknown or absent language, inline code and the text of every code block as literal text, each special character shown once.
 
-### Scenario (nominal): Tokens of a supported language are coloured
+### Scenario (nominal): A supported language is highlighted by its grammar
 
 - GIVEN a document with a fenced `rust` block and a `python` block
 - WHEN the preview renders the document
-- THEN keywords, strings, numbers and comments of each block get the Dark+ token colours of the VS Code editor, written as colour classes and never as an inline style, by the Shiki TextMate grammars on the JavaScript regular expression engine (no WebAssembly)
+- THEN the keywords, strings, numbers and comments of each block are split into token spans by the Shiki TextMate grammar of its language, and the block gets the `shiki` class; the colours of the tokens are those of SwRS-MDOKFSTUDIO-CODE-040
 
 ### Scenario (boundary): The fence label selects the grammar
 
@@ -97,32 +96,32 @@ When a document contains a fenced code block, the extension SHALL colour the key
 - WHEN the preview renders it
 - THEN a block that is wrapped into lines shows the escaped source text in wrapped lines, and an unwrapped block is returned unchanged
 
-### Scenario (boundary): A block that did not change is not highlighted again
+### Scenario (nominal): Special characters are shown once
 
-- GIVEN a fenced block that was highlighted in an earlier render, and the same block after an edit
-- WHEN the preview renders the document again
-- THEN the unchanged block gets the same markup without a new grammar run, the edited block is highlighted again, and the memory kept for this is bounded (400 blocks, about 4 million characters)
+- GIVEN a highlighted block containing `a < b && c` and `&#60;`
+- WHEN the preview renders it
+- THEN the page shows `a < b && c` and `<` exactly once each, with no double escaping
+
+### Scenario (boundary): An unknown named reference is kept as written
+
+- GIVEN a highlighted block containing an unknown named reference such as `&bogus;`
+- WHEN the preview renders it
+- THEN the text is shown as written, not altered
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-CODE-005: wraps numbered, emphasized and diff blocks into lines
 - SwRS-MDOKFSTUDIO-CODE-008: marks the lines of `diff` and `patch` blocks
-
-### Scenario (nominal): The highlighter loads on the first code block
-- GIVEN the packaged extension bundle
-- WHEN a document without a code block is rendered
-- THEN Shiki and its grammars are not loaded: they are a separate file, `lazy/highlight.js`, read on the first code block
-- AND the extension host bundle `extension.js` holds no grammar
+- SwRS-MDOKFSTUDIO-CODE-039: numbers and emphasizes the lines of a block
+- SwRS-MDOKFSTUDIO-CODE-040: sets the token colours
 
 ### Verification notes
 
-- Method: test/core/render/highlight.test.ts (tokens of each bundled language, alias `py`, no inline style, unknown language left unchanged, plain output equals the input block)
-- Method: test/core/render/codeBlockComfort.requirements.test.ts (no WebAssembly, strict page policy)
-- Method: test/core/render/renderReq.codeBlocks.requirements.test.ts (label case and leading word, inline code not highlighted, literal fence text, shorter backtick line, failing grammar fallback with a throwing grammar stub)
+- Method: test/core/render/highlight.test.ts (tokens of each bundled language, alias `py`, unknown language left unchanged, plain output equals the input block, special characters shown once, unknown named reference)
+- Method: test/core/render/renderReq.codeBlocks.requirements.test.ts (label case and leading word, inline code not highlighted, literal fence text, shorter backtick line, failing grammar fallback with a throwing grammar stub, special characters shown once)
 - Method: test/visual/scenarioDefinitions1.ts (highlighting family, unknown-language scenario, source-fragment scenarios)
-- Method: test/core/render/contentCaches.test.ts (an unchanged block runs no grammar the second time, an edited block does; the bound of the cache)
-- Criteria: token spans exist for each token class of the supported grammars; an empty block yields an empty block; an unlisted label, an empty leading word and an absent label yield none and no `shiki` class; only pre/code pairs are processed; rendered code text equals the source text; the fallback output is escaped wrapped text for wrapped blocks and the original block otherwise
-- Method: test/build/bundleSplit.test.ts (the grammars are outside extension.js and in lazy/highlight.js; the split bundle highlights a block)
+- Internal (cache): a block that did not change is not highlighted again; the unchanged block gets the same markup without a new grammar run, the edited block is highlighted again, and the memory kept for this is bounded (400 blocks, about 4 million characters): test/core/render/contentCaches.test.ts.
+- Internal (bundle): Shiki and its grammars are a separate file, `lazy/highlight.js`, read on the first code block, and `extension.js` holds no grammar: test/build/bundleSplit.test.ts (the split bundle highlights a block).
+- Criteria: token spans exist for each token class of the supported grammars; an empty block yields an empty block; an unlisted label, an empty leading word and an absent label yield none and no `shiki` class; only pre/code pairs are processed; rendered code text equals the source text; no `&amp;amp;` appears in the output; the fallback output is escaped wrapped text for wrapped blocks and the original block otherwise
 
 <!-- okf:links:start -->
 ### Links
@@ -135,6 +134,7 @@ When a document contains a fenced code block, the extension SHALL colour the key
   - [SwRS-MDOKFSTUDIO-CODE-002](SwRS-MDOKFSTUDIO-CODE-002.md): Resolve common fence labels to a supported grammar
   - [SwRS-MDOKFSTUDIO-CODE-003](SwRS-MDOKFSTUDIO-CODE-003.md): Read the fence label case-insensitively up to its first separator
   - [SwRS-MDOKFSTUDIO-CODE-004](SwRS-MDOKFSTUDIO-CODE-004.md): Leave unknown-language code as plain text
+  - [SwRS-MDOKFSTUDIO-CODE-005](SwRS-MDOKFSTUDIO-CODE-005.md): Numbered, emphasized and diff blocks are wrapped into lines
   - [SwRS-MDOKFSTUDIO-CODE-030](SwRS-MDOKFSTUDIO-CODE-030.md): Never highlight inline code
   - [SwRS-MDOKFSTUDIO-CODE-031](SwRS-MDOKFSTUDIO-CODE-031.md): Show fenced code text literally
   - [SwRS-MDOKFSTUDIO-CODE-037](SwRS-MDOKFSTUDIO-CODE-037.md): Fall back to escaped text lines when a grammar fails

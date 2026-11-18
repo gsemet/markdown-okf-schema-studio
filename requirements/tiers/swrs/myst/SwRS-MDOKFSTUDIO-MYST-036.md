@@ -16,7 +16,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-009
-depends_on: []
+depends_on:
+- SwRS-MDOKFSTUDIO-MYST-097
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -73,6 +74,8 @@ When a document holds a `(name)=` label, the extension SHALL show a faint anchor
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-MYST-097](SwRS-MDOKFSTUDIO-MYST-097.md): Code fences and front matter are read the same way everywhere
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-MYST-037](SwRS-MDOKFSTUDIO-MYST-037.md): The anchor icon is not a mapped block and carries its source line
 <!-- okf:links:end -->

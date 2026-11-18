@@ -35,7 +35,6 @@ async function openPreview(document: vscode.TextDocument): Promise<NonNullable<R
 // @tests_req StRS-MDOKFSTUDIO-MYST-009
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065
 // @tests_req SwRS-MDOKFSTUDIO-MYST-045
-// @tests_req SwRS-MDOKFSTUDIO-MYST-051
 /** Renaming a label from its anchor icon: one edit of the label line, one undo, stale lines refused. */
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);

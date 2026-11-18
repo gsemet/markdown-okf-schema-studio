@@ -134,7 +134,7 @@ test("references to captionless figures and tables stay readable", async () => {
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-005
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039
 // @tests_req SwRS-MDOKFSTUDIO-CODE-014
 test("MyST code directives number and emphasize lines relative to their start", async () => {
   const result = await renderPreviewDocument({
@@ -287,6 +287,7 @@ test("Sphinx version admonitions render generated titles and Markdown bodies", a
   assert.equal(result.diagnostics.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("custom admonition titles preserve inline Markdown and their class", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -511,6 +512,7 @@ test("all named MyST admonitions receive their documented default title", async 
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("a leading bold paragraph or heading supplies the MyST admonition title", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -540,6 +542,7 @@ test("a leading bold paragraph or heading supplies the MyST admonition title", a
   assert.match(textContent(danger), /Body after the heading\./u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("Quarto callout classes render as semantic MyST admonitions", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -561,6 +564,8 @@ test("Quarto callout classes render as semantic MyST admonitions", async () => {
   assert.match(textContent(callout), /This is a Quarto callout\./u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006
 test("dropdown admonitions render as openable details with a summary", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -591,6 +596,7 @@ test("dropdown admonitions render as openable details with a summary", async () 
   assert.notEqual(attribute(openOnly, "open"), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-063
 test("MyST GFM and directive tables preserve captions, headers, and alignment", async () => {
   const source = [
     "| left | center | right |",
@@ -716,6 +722,7 @@ test("CR038: a list-table renders its title, header rows, widths and alignment a
   assert.equal(findElements(plain, isTag("col")).length, 0, "no widths, no columns");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-063
 test("CR038: :header-rows: decides how many rows are header cells", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument([
@@ -733,6 +740,7 @@ test("CR038: :header-rows: decides how many rows are header cells", async () => 
   assert.deepEqual(findElements(body, isTag("td")).map((cell) => textContent(cell).trim()), ["b1", "b2"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-063
 test("CR038: list-table widths that do not match the columns or are not numbers are ignored", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument([
@@ -777,6 +785,7 @@ test("raw HTML tables preserve complex cell spans without active content", async
   assert.doesNotMatch(result.html, /<script|unsafe\(\)/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-031
 test("raw HTML table cell styles are preserved as safe preview metadata", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -940,6 +949,7 @@ test("multiline blocks retain their full mapped source range", async () => {
   assert.equal(attribute(paragraph, "data-end-line"), "2");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006
 test("MyST admonitions retain the directive range through the closing fence", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -1000,6 +1010,7 @@ test("standalone hyphenated context tags render as mapped Markdown admonitions",
   assert.doesNotMatch(result.html, /<fullcycle-model-allocation>/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("simple and snake_case context tags preserve adjacent fences and source ranges", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -1040,6 +1051,7 @@ test("simple and snake_case context tags preserve adjacent fences and source ran
   assert.equal(result.diagnostics.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("nested context tags preserve each wrapper range", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -1069,6 +1081,7 @@ test("nested context tags preserve each wrapper range", async () => {
   assert.equal(attribute(contexts[1]!, "data-end-line"), "9");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("unsupported context boundaries stay literal and fenced XML stays code", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -1103,6 +1116,7 @@ test("unsupported context boundaries stay literal and fenced XML stays code", as
   assert.doesNotMatch(result.html, /<attribute-context data-mode=/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("standard HTML and inline or fenced XML stay outside context grouping", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -1307,4 +1321,22 @@ test("a table inserted by the edition palette renders as a table with its header
   const rows = findElements(tables[0], isTag("tr"));
   assert.equal(rows.length, 3, "the header row and two empty rows");
   assert.equal(findElements(rows[2], isTag("td")).length, 4);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-GFM-008
+test("a footnote reference with no definition invents no footnote text and the render succeeds", async () => {
+  const result = await renderPreviewDocument({
+    document: inlineDocument("A claim[^2] stays readable.\n\nThe next paragraph.\n"),
+    workspaceRoot,
+    requestId: 1,
+    isWorkspaceTrusted: () => true,
+  });
+  const html = parseHtml(result.html);
+  assert.equal(findElements(html, (element) => element.tagName === "li"
+    && (attribute(element, "id") ?? "").startsWith("user-content-fn-")).length, 0, "no footnote definition");
+  assert.equal(findElements(html, (element) => element.tagName === "a"
+    && (attribute(element, "href") ?? "").includes("fn-2")).length, 0, "no footnote link");
+  const paragraphs = findElements(html, isTag("p")).map((element) => textContent(element));
+  assert.ok(paragraphs.some((text) => text.includes("A claim") && text.includes("stays readable.")), "the sentence renders");
+  assert.ok(paragraphs.includes("The next paragraph."), "the render goes on after the reference");
 });

@@ -111,7 +111,7 @@ When a document holds a construct that only a full project build can resolve (an
 
 - Derives from:
   - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
-  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Constructs the preview cannot build stay visible and labelled
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-CORE-023](SwRS-MDOKFSTUDIO-CORE-023.md): List a warning for an unavailable directive
   - [SwRS-MDOKFSTUDIO-CORE-036](SwRS-MDOKFSTUDIO-CORE-036.md): Style placeholders as inert
