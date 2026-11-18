@@ -14,11 +14,12 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+depends_on:
+- SwRS-MDOKFSTUDIO-BLOCK-041
 user_need: As a writer, I want to see where each cross-reference points, reuse
   each label and rename it safely, so that cross-references are easy and
   references do not silently break.
 derived_by:
-- SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-MYST-019
 - SwRS-MDOKFSTUDIO-MYST-036
 - SwRS-MDOKFSTUDIO-MYST-037
@@ -94,7 +95,6 @@ Writers want to see where each cross-reference points so that they can spot brok
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
   - [SwRS-MDOKFSTUDIO-MYST-019](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-019.md): Reference roles link to in-page targets
   - [SwRS-MDOKFSTUDIO-MYST-036](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-036.md): Labels show an anchor icon on the next block
   - [SwRS-MDOKFSTUDIO-MYST-037](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-037.md): The anchor icon is not a mapped block and carries its source line
@@ -116,6 +116,8 @@ Writers want to see where each cross-reference points so that they can spot brok
   - [SwRS-MDOKFSTUDIO-MYST-094](../../swrs/myst/SwRS-MDOKFSTUDIO-MYST-094.md): A label starting with underscore, dot or hyphen cannot be renamed
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
 - Supersedes:
   - [StRS-MDOKFSTUDIO-MYST-004](StRS-MDOKFSTUDIO-MYST-004.md): Reference roles show where a link goes
   - [StRS-MDOKFSTUDIO-MYST-010](StRS-MDOKFSTUDIO-MYST-010.md): A label can be renamed safely from its anchor

@@ -13,11 +13,12 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+depends_on:
+- SwRS-MDOKFSTUDIO-BLOCK-041
+- SwRS-MDOKFSTUDIO-BLOCK-058
 user_need: As a writer or reviewer, I tick task checkboxes directly in the
   preview and the source changes by exactly that character.
 derived_by:
-- SwRS-MDOKFSTUDIO-BLOCK-041
-- SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-GFM-016
 - SwRS-MDOKFSTUDIO-GFM-017
 - SwRS-MDOKFSTUDIO-GFM-018
@@ -81,8 +82,6 @@ Writers and reviewers expect to tick a task checkbox without opening an editor, 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
-  - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
   - [SwRS-MDOKFSTUDIO-GFM-016](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-016.md): Task list markers render as checkboxes with their source position
   - [SwRS-MDOKFSTUDIO-GFM-017](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-017.md): Task-list checkboxes sit in the bullet gutter
   - [SwRS-MDOKFSTUDIO-GFM-018](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-018.md): Checkbox markers stay literal where they have another meaning
@@ -98,4 +97,7 @@ Writers and reviewers expect to tick a task checkbox without opening an editor, 
   - [SwRS-MDOKFSTUDIO-GFM-028](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-028.md): Content patches clear pending toggles
   - [SwRS-MDOKFSTUDIO-GFM-039](../../swrs/gfm/SwRS-MDOKFSTUDIO-GFM-039.md): Radio choice lists render as a radio group and a click moves the selection in the source
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the write requests of every preview, whatever the trust
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
 <!-- okf:links:end -->
