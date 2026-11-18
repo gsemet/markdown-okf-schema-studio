@@ -8,10 +8,7 @@ import { isSafeOkfColor } from "../../../src/core/security/spanColors";
 
 const registry = createEditActions([], createMarkdownTableTools());
 
-/**
- * `[` and `]` mark a selection, `|` a caret; the result is shown in the same notation, or
- * `undefined` when the action returns no edit.
- */
+/** `[` `]` mark a selection, `|` a caret; the result uses the same notation, or `undefined` for no edit. */
 function run(id: string, input: string, arg?: string): string | undefined {
   const caret = input.indexOf("|");
   let start: number;
