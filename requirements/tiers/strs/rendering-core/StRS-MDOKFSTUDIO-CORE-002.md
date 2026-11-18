@@ -44,6 +44,26 @@ Writers need to build a document from several files and still edit each file in 
 - Included content is shown in the including document but is edited in its own file: the editor never targets host lines for a block that comes from an include, so that block cannot be copied, cut or pasted next to (the refusal says so). A writer who wants to change it opens the included file.
 - An include is read only from the folders the allowed-roots rule grants (see the use case about content the preview cannot render); depth, cycles, count and size are bounded, and a refused or missing include stays a placeholder with a warning.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant H as Extension host
+    participant F as Included file
+    participant P as Preview page
+    W->>H: writes an include directive in the document
+    H->>F: read the included Markdown file
+    alt supported form, inside the allowed root, no cycle
+        F-->>H: Markdown text
+        H->>P: included blocks in place of the directive
+    else refused or unsupported
+        H->>P: a placeholder in place of the directive
+    end
+    P-->>W: shows the included content in place
+    W->>F: edits the content in its own file
+```
+
 ### Main paths
 
 #### Path 1: Show an included file in place

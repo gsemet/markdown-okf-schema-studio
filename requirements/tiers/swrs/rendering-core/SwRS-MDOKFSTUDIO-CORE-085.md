@@ -35,7 +35,7 @@ When a maintainer builds the Pages site, the build SHALL write one social pictur
 
 - GIVEN a page of each of the four levels
 - WHEN the page is written
-- THEN it carries its own og:title, an absolute og:url, an og:image of requirements/og/<level>.png at 1200 x 630 and the summary_large_image card
+- THEN it carries its own og:title, an absolute og:url, an og:image of requirements/og/{level}.png at 1200 x 630 and the summary_large_image card
 
 ### Scenario (refusal): No browser
 

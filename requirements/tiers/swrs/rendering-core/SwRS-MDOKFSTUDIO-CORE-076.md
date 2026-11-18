@@ -45,7 +45,7 @@ Every push to main SHALL run the heavy jobs (`integration` and `stress`); when t
 ### Scenario (nominal): Re-run of the failed jobs of a version change
 
 - GIVEN a version-change push run whose `integration` job failed on attempt 1 ("Release not tagged") and whose `visual` job passed
-- WHEN the failed jobs are re-run (`gh run rerun <run-id> --failed`) and pass on attempt 2, hours after attempt 1
+- WHEN the failed jobs are re-run (`gh run rerun {run-id} --failed`) and pass on attempt 2, hours after attempt 1
 - THEN `report` merges `e2e-visual-attempt-1` (the `visual` output kept from attempt 1) with `e2e-integration-attempt-2`, its stages are accepted as one campaign because both carry the run id pinned by the workflow, `tag-release` tags the commit, and `pages` builds the site from `studio-reports-attempt-2`
 
 ### Scenario (boundary): Artifact names and attempts
@@ -57,7 +57,7 @@ Every push to main SHALL run the heavy jobs (`integration` and `stress`); when t
 | only `stress` was re-run | `report` is not re-run; Pages uses `studio-reports-attempt-1` |
 | `integration` is skipped | `report` downloads no integration artifact and reports the real VS Code stage as skipped |
 | the calling run passes `reports_from_caller` without a `reports_artifact` | Pages warns and runs the suite (an empty name would download every artifact) |
-| a failed visual manifest lists `{page, detail}` failures | `report` prints each as `<page>: <detail>`, joined with `; `, never `[object Object]`; string failures print as they are; `error` of the manifest keeps its priority |
+| a failed visual manifest lists `{page, detail}` failures | `report` prints each as `{page}: {detail}`, joined with `; `, never `[object Object]`; string failures print as they are; `error` of the manifest keeps its priority |
 | the visual and integration stages started two hours apart or more | `report` fails, unless both campaigns carry the same run id pinned by `STUDIO_E2E_RUN_ID` (`pinnedRunId`) |
 
 ### Scenario (nominal): Push to main without a version change

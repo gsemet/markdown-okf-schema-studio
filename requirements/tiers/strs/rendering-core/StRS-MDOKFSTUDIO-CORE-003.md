@@ -56,6 +56,23 @@ Writers need to know what the preview leaves out, so that a gap is never mistake
 - When a render fails, the last good page stays visible and is marked as outdated, or an error page shows the failure message.
 - A newer edit supersedes a render in progress; the previous page stays visible until a new one is ready.
 
+### Use case diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Rendering
+    Rendering --> GoodPage: render succeeds
+    Rendering --> ErrorPage: first render fails
+    Rendering --> StalePage: a later render fails
+    GoodPage --> Rendering: new edit
+    StalePage --> Rendering: new edit
+    ErrorPage --> Rendering: new edit
+    GoodPage: Good page
+    StalePage: Last good page stays, diagnostics listed
+    ErrorPage: Error page with the failure message
+```
+A state diagram, kept simple: the site and GitHub draw it, Node could not check it.
+
 ### Main paths
 
 #### Path 1: A render fails after a good one

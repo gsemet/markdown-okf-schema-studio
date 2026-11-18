@@ -42,7 +42,7 @@ The repository check SHALL fail when the package version has no valid notes file
 
 - GIVEN a tag vX.Y.Z whose commit holds its notes folder
 - WHEN the **Release VSIX** workflow runs
-- THEN the notes are prepared before the Marketplace publication, the GitHub release body is the file with each image pointing to `releases/download/vX.Y.Z/<file>`, and the images are attached to the release next to the VSIX
+- THEN the notes are prepared before the Marketplace publication, the GitHub release body is the file with each image pointing to `releases/download/vX.Y.Z/{file}`, and the images are attached to the release next to the VSIX
 
 ### Scenario (boundary): Notes that block the check or the release
 

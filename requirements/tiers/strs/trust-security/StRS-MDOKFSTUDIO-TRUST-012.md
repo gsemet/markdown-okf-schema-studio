@@ -37,6 +37,16 @@ As a reader, I see messages that speak of the preview, not of the tools that bui
 - The opt-in behaviour of the Studio, which leaves the built-in Markdown preview untouched, is specified in the lifecycle-sync scope.
 - Messages to the reader speak of the preview and the Studio, not of the build tool, and the package shows one icon: images/logo.png, a 256 by 256 pixel PNG (SwRS-MDOKFSTUDIO-TRUST-074).
 
+### Use case diagram
+
+```mermaid
+flowchart LR
+    R[Reader] -->|reads| M[Messages of the preview]
+    R -->|looks at| X[Extensions view]
+    M --> S[Speak of the product, never of the build tool]
+    X --> I[The Studio own icon]
+```
+
 <!-- okf:links:start -->
 ### Links
 

@@ -51,7 +51,7 @@ When the JAR pipeline renders a diagram text that an earlier successful render a
 
 - GIVEN a Mermaid diagram already drawn, then a content update that replaces its node with the same source under the same theme
 - WHEN the page draws the new node
-- THEN the earlier picture is shown and Mermaid is not run
+- THEN the earlier picture is shown and Mermaid is not run; the page keeps the 64 most recent Mermaid drawings, by source and theme colours
 
 ### Scenario (boundary): Changed source or theme
 

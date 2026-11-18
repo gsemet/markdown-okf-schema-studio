@@ -77,6 +77,29 @@ Writers who split diagrams into files expect the preview to assemble them, follo
 - PUML files: `{uml} path.puml` and a body-less `{plantuml} path.puml` draw the diagram stored in that file; its text is the diagram and the expandable source. The file is a render dependency: editing it re-renders the preview. With the JAR option the JAR receives the file text.
 - A file that cannot be read is replaced by a message and one warning in the status line: not found (and watched, so the diagram appears once the file is created), outside the workspace (or the document's folder in Restricted Mode), an absolute path or URL ("must be a relative path"), or too large. An include cycle is an engine-side include message and posts no status-line warning. Known issue: the "budget exhausted" message is not triggered by any test in this scope; the "too large" messages are.
 
+### Use case diagram
+
+```mermaid
+sequenceDiagram
+    actor W as Writer
+    participant P as Preview page
+    participant H as Extension host
+    participant F as Local file
+    P->>H: ask for the included file
+    alt allowed and no cycle
+        H->>F: read
+        F-->>H: file text
+        H-->>P: file text
+        P-->>W: assembled picture
+    else refused
+        H-->>P: reason
+        P-->>W: message on the diagram
+    end
+    W->>F: changes the included file
+    F-->>H: change on disk
+    H->>P: draw again the diagrams that read files
+```
+
 ### Main paths
 
 #### Path 1: Include a local file in a diagram

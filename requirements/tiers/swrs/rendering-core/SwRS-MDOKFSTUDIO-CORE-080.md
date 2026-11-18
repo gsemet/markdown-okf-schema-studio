@@ -37,7 +37,7 @@ When a maintainer builds the Pages site from the okfreq report, the build SHALL 
 
 - GIVEN a report with an active area holding 2 active use cases and 1 superseded one
 - WHEN the site is built
-- THEN requirements/ holds the home with the 3 layers and the areas, requirements/<area>/ lists the 2 use cases, requirements/<area>/<StRS>/ exists for each active use case and no folder exists for the superseded one; every link is relative and resolves from every depth
+- THEN requirements/ holds the home with the 3 layers and the areas, requirements/{area}/ lists the 2 use cases, requirements/{area}/{StRS}/ exists for each active use case and no folder exists for the superseded one; every link is relative and resolves from every depth
 
 ### Scenario (refusal): Retired use case
 

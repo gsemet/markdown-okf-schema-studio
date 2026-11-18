@@ -45,6 +45,16 @@ As a writer, I open a document in Restricted Mode, or a file from outside my wor
 - A feature that needs trust, such as PlantUML with Java or the citation list, is disabled with its reason; there is no banner.
 - The viewing actions (zoom, theme, links, code copy) are specified in the theme and zoom, toolbar and navigation, and code block scopes.
 
+### Use case diagram
+
+```mermaid
+flowchart LR
+    T[Trusted writer] --> E[Editable document]
+    R[Writer in Restricted Mode or on a standalone file] --> E
+    E --> S[Edits written to the document]
+    R -.->|feature that needs trust| X[Disabled with its reason]
+```
+
 ### Main paths
 
 #### Path 1: Edit in an untrusted workspace

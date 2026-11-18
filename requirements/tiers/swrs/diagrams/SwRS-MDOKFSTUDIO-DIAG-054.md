@@ -82,9 +82,8 @@ The folders an include may read follow the trust of the workspace.
 | Input | Outcome |
 | --- | --- |
 | File that does not exist in the document's folder | refused with the reason PlantUML file not found followed by the name, and the candidate path is reported for watching |
-| Path outside the allowed folders | refused with the outside-folders reason and no path is reported for watching |
+| Path outside the allowed folders (the rule of SwRS-MDOKFSTUDIO-TRUST-025), including a symbolic link in the document's folder that points outside the workspace, judged by its real path | refused with the outside-folders reason and no path is reported for watching |
 | Include file larger than 5 MiB | refused with the reason that the file is larger than the 5 MiB preview limit |
-| Symbolic link in the document's folder that points outside the workspace | refused with the outside-folders reason (links are judged by their real path) |
 
 ### Related requirements
 

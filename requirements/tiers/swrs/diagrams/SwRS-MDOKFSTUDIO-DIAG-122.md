@@ -54,7 +54,7 @@ When a Vega-Lite or Vega chart names a relative data url, the extension SHALL re
 
 ### Scenario (refusal): A file outside the folders, missing, too large or of another format
 
-- GIVEN a data url that leaves the workspace (or the document folder in Restricted Mode), names a missing file, an absolute path or a file larger than 5 MiB, or names a format other than csv, tsv or json
+- GIVEN a data url that the allowed-roots rule (SwRS-MDOKFSTUDIO-TRUST-025) refuses, names a missing file, an absolute path or a file larger than 5 MiB, or names a format other than csv, tsv or json
 - WHEN the preview renders
 - THEN no file text is handed to the page, a warning diagnostic names the refusal, and the chart shows the same message in place of the chart
 

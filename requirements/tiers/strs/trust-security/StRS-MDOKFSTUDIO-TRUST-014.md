@@ -39,6 +39,16 @@ As a maintainer, I install on the pinned Node.js version from the official regis
 - The built-in PlantUML engine and the page runtime are files of the bundle folder, not inline code.
 - The package keeps the folder out/bundle, with the built-in engine bundle and its licence, and leaves out only build leftovers (SwRS-MDOKFSTUDIO-TRUST-092); the pinned dependencies are SwRS-MDOKFSTUDIO-TRUST-075.
 
+### Use case diagram
+
+```mermaid
+flowchart LR
+    M[Maintainer] -->|installs on the pinned Node.js| N[Official registry]
+    N --> B[Build from pinned dependencies]
+    B -->|packages| K[Extension package]
+    K --> O[Bundles the preview loads]
+```
+
 <!-- okf:links:start -->
 ### Links
 
