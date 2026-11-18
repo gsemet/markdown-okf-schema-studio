@@ -1068,15 +1068,21 @@ async function stepSchemaProblem(ctx: EditingContext): Promise<void> {
   const found = getActivePreviewForTests()?.html ?? "";
   assert.match(found, /data-okf-schema-found="true"/u, "the typed document finds its schema");
   assert.match(found, /data-okf-field="status"[^]*?data-okf-enums=/u, "the schema fields render with their declarations");
+  // A YAML syntax error of a schema is a known unreported issue (SwRS-MDOKFSTUDIO-FMSCHEMA-023), so
+  // the broken schema is a JSON5 file; .yaml outranks .json5, so the YAML schema is moved aside.
+  // Renaming and adding an entry move the schema directory's time, so the refresh lists it again.
   const schemaPath = path.join(directory, "_schema", "finding.schema.yaml");
-  const schemaText = fs.readFileSync(schemaPath, "utf8");
-  fs.writeFileSync(schemaPath, "type: [\n", "utf8");
+  const asidePath = `${schemaPath}.aside`;
+  const json5Path = path.join(directory, "_schema", "finding.schema.json5");
+  fs.renameSync(schemaPath, asidePath);
+  fs.writeFileSync(json5Path, "{ type: 'object', properties: ", "utf8");
   try {
     await vscode.commands.executeCommand(REFRESH_COMMAND_ID);
     await waitFor("the schema problem to be reported", () =>
       /Schema could not be parsed/u.test(getActivePreviewForTests()?.html ?? ""), 10_000);
   } finally {
-    fs.writeFileSync(schemaPath, schemaText, "utf8");
+    fs.rmSync(json5Path, { force: true });
+    fs.renameSync(asidePath, schemaPath);
     await vscode.commands.executeCommand(REFRESH_COMMAND_ID);
     await waitFor("the schema to be found again", () =>
       /data-okf-schema-found="true"/u.test(getActivePreviewForTests()?.html ?? "")
