@@ -46,6 +46,9 @@ test("the viewer is written under requirements/ with its assets, index and redir
       assert.ok(fs.existsSync(path.join(site, file)), file);
     }
     assert.ok(!fs.existsSync(path.join(site, "requirements", "myst", "StRS-X-002")));
+    // @tests_req StRS-MDOKFSTUDIO-CORE-008
+    // A reviewer reads the site written from a report: its home, an area, a use case and its
+    // behaviours, without building anything.
     const home = fs.readFileSync(path.join(site, "requirements", "index.html"), "utf8");
     // The dark mode was removed: the home has no dark rule and no data-theme, and still links its stylesheet.
     assert.ok(!home.includes("prefers-color-scheme: dark") && !home.includes("data-theme") && home.includes('href="viewer.css"'));

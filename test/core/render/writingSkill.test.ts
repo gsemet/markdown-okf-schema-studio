@@ -129,6 +129,7 @@ test("the writing skill is a self-contained folder of the expected shape", () =>
   }
 });
 
+// @tests_req StRS-MDOKFSTUDIO-CORE-006
 // @tests_req SwRS-MDOKFSTUDIO-CORE-073
 test("every example of the writing skill renders without a diagnostic or an unresolved directive", async () => {
   const examples = skillSources().flatMap((file) => examplesOf(file).map((example) => ({ file: path.basename(file), example })));

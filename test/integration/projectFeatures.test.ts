@@ -55,15 +55,18 @@ export async function run(): Promise<void> {
   const dirtyMarker = "Unsaved feature contract marker";
   const mermaidSource = "```mermaid\ngraph LR\n  input --> output\n```\n\n"
     + "```{mermaid}\ngraph LR\n  start --> finish\n```";
+  // A Markdown file of the same folder, included in place (included-section.md).
+  const includeSource = "```{include} included-section.md\n```";
 
   try {
     await vscode.window.showTextDocument(featureDocument, vscode.ViewColumn.One);
     assert.equal(
       await vscode.workspace.applyEdit(
-        replaceDocument(featureDocument, `${originalFeatureSource}\n\n${mermaidSource}\n\n${dirtyMarker}\n`),
+        replaceDocument(featureDocument, `${originalFeatureSource}\n\n${mermaidSource}\n\n${includeSource}\n\n${dirtyMarker}\n`),
       ),
       true,
     );
+    const includeLine = featureDocument.positionAt(featureDocument.getText().indexOf(includeSource)).line + 1;
     await vscode.commands.executeCommand(COMMAND_ID);
     await waitFor("the unsaved feature-contract render", () => {
       const preview = getActivePreviewForTests();
@@ -131,8 +134,24 @@ export async function run(): Promise<void> {
     assert.match(rendered.html, /<style[^>]+nonce="[^"]+"[^>]+data-sphinx-preview-accessibility/iu);
     assert.doesNotMatch(rendered.html, /sphinx-myst-liveview-accessibility\.css/u);
     assert.doesNotMatch(rendered.html, /unsafe-inline|default-src \*/iu);
-    assert.doesNotMatch(rendered.html, /:::\{|```\{include\}/u);
 
+    // @tests_req StRS-MDOKFSTUDIO-CORE-002
+    // A writer composes a document from an included file: the included content is shown in place
+    // of the directive, mapped to the directive lines, and the directive itself is not shown.
+    assert.doesNotMatch(rendered.html, /:::\{|```\{include\}/u);
+    const includedHeading = findElement(html, (element) =>
+      element.tagName === "h2" && /Included section/u.test(textContent(element)));
+    assert.ok(includedHeading, "the included Markdown file was not shown in place");
+    assert.equal(attribute(includedHeading, "data-sphinx-preview-included"), "true");
+    assert.equal(attribute(includedHeading, "data-line"), String(includeLine), "an included block maps to the directive line");
+    assert.match(textContent(html), /This paragraph comes from an included Markdown file\./u);
+    assert.ok(
+      !rendered.diagnostics.some((diagnostic) => diagnostic.value === "included-section.md"),
+      "the readable include produced a diagnostic",
+    );
+
+    // @tests_req StRS-MDOKFSTUDIO-CORE-002
+    // An include the preview cannot read stays a placeholder and is reported.
     await vscode.window.showTextDocument(missingDocument, vscode.ViewColumn.One);
     await waitFor("the missing-input diagnostic render", () => {
       const preview = getActivePreviewForTests();

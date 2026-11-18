@@ -25,6 +25,7 @@ implemented_in_files:
 - src/core/security/html-sanitizer.ts
 - src/core/security/resource-policy.ts
 tested_in_files:
+- test/integration/untrusted-suite.ts
 - test/security/html-policy.test.ts
 - test/security/resource-policy.test.ts
 - test/security/trustReq.pageBuild.requirements.test.ts

@@ -118,7 +118,8 @@ export async function run(): Promise<void> {
     assert.deepEqual([result?.ok, result?.kind], [true, "create"]);
     assert.ok(readThreads(sidecarPath).some((thread: any) => thread.comments[0].body === "Sent with an old version"),
       "a create with an old documentVersion must still be written");
-    // A wrong document id is still dropped.
+    // @tests_req StRS-MDOKFSTUDIO-TRUST-009
+    // A request meant for another document never lands in this one: it is dropped and nothing is written.
     let before = fs.readFileSync(sidecarPath, "utf8");
     await sendPreviewMessageForTests({
       type: "previewCommentCreate", documentId: "file:///elsewhere.md", revision: preview.documentVersion,

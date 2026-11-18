@@ -75,9 +75,14 @@ export async function run(): Promise<void> {
       }
     };
 
-    // Refused: a stale version, ranges that overlap or are unordered, the frontmatter, text
-    // between the blocks (the comment), and a block that opens an include directive.
+    // @tests_req StRS-MDOKFSTUDIO-TRUST-009
+    // A move the page sends about an older version of the document is never applied to the
+    // current one: the request is checked first and the document stays as it is.
     await move(7, 7, 9, 10, "down", document.version - 1);
+    assert.equal(document.getText(), original, "a move about an older version was applied to the current document");
+
+    // Refused: ranges that overlap or are unordered, the frontmatter, text between the blocks (the
+    // comment), and a block that opens an include directive.
     await move(7, 7, 7, 7, "down");
     await move(9, 10, 7, 7, "down");
     await move(1, 3, 5, 5, "down");

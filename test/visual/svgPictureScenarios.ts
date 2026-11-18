@@ -37,6 +37,7 @@ const PICTURE_ASSERTIONS: ContentAssertion[] = [
 
 export const SVG_PICTURE_SCENARIOS: ScenarioDefinition[] = [
   ...THEMES.map(([version, mode, theme, label]) => ({
+    // @tests_req StRS-MDOKFSTUDIO-DIAG-015
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-125
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-126
     id: `diagrams/${version}-svg-picture-${mode}-900`,
@@ -50,6 +51,7 @@ export const SVG_PICTURE_SCENARIOS: ScenarioDefinition[] = [
       + "in the theme's colours, with an unknown variable in the text colour.",
   })),
   {
+    // @tests_req StRS-MDOKFSTUDIO-DIAG-015
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-127
     id: "diagrams/v22-svg-picture-edit-light-900",
     fixture: "82-svg-picture",
