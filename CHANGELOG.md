@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.9.3 - 2026-11-19
+
 - Committing a block edit in edit mode shows the result at once on long documents: the preview no
   longer waits for the typing pause before applying it, and the table handles are placed in the next
   frame instead of during the page update.
