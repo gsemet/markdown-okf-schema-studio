@@ -577,7 +577,9 @@ export function installTableRowMove(rt: PageRuntime): TableRowMove {
       }
     });
     if (entries.length > 0) {
-      position();
+      // In the next frame, with the page's other layout work: a patch of a page of many tables does
+      // not lay it out again for the handles (issue 423). The frame runs before the next paint.
+      schedulePosition();
       if (!observing && content && typeof ResizeObserver !== "undefined") {
         observing = true;
         new ResizeObserver(schedulePosition).observe(content);

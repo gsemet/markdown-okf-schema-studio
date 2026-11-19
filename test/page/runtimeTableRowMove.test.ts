@@ -67,6 +67,8 @@ test("edit mode shows a handle on each body row of a pipe table and not on the h
   const harness = createRuntimeHarness();
   const { table, cells } = pipeTable(harness);
   harness.editModeButton.dispatch("click");
+  assert.equal(handleOf(cells[1]!)!.style.getPropertyValue("top"), "", "placed in the next frame, not during the click (issue 423)");
+  harness.flushFrames();
   assert.equal(handleOf(cells[0]!), undefined);
   for (const cell of cells.slice(1)) {
     const handle = handleOf(cell);
@@ -338,6 +340,7 @@ test("edit mode shows a handle above each column of a pipe table, outside its ce
   const harness = createRuntimeHarness();
   const { table, rows, cells } = pipeTable(harness);
   harness.editModeButton.dispatch("click");
+  harness.flushFrames();
   for (const index of [0, 1]) {
     const handle = columnHandle(index);
     assert.ok(handle, "a column has a handle");
@@ -689,6 +692,7 @@ test("the handles of a table that breaks out of the column follow its real edges
   const harness = createRuntimeHarness();
   const { table, cells, rows } = breakoutTable(harness);
   harness.editModeButton.dispatch("click");
+  harness.flushFrames();
   const margin = handleOf(cells[1]!)!;
   assert.equal(margin.style.getPropertyValue("left"), "146px", "in the column: at the table's left edge");
   // The width mode breaks the table out after the handles were placed (as after a row move render).

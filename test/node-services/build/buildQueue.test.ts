@@ -251,6 +251,43 @@ test("adapts the debounce to twice the last build time, within its bounds", asyn
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+test("an immediate request skips the adaptive wait, and still lets a running build finish", async (context) => {
+  context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
+  const started: number[] = [];
+  const queue = new BuildQueue<TestDocument, string>({
+    debounceMs: 40,
+    maxDebounceMs: 1000,
+    revisionOf: (queued) => queued.version,
+    build: (request) => {
+      started.push(request.requestId);
+      return new Promise((resolve) => setTimeout(() => resolve(`r${request.requestId}`), 300));
+    },
+  });
+  context.after(() => queue.dispose());
+  const first = queue.request(document(1, "first"));
+  context.mock.timers.tick(40);
+  context.mock.timers.tick(300);
+  assert.equal((await first).status, "ready");
+  assert.equal(queue.currentDebounceMs(), 600);
+  // A typed edit waits 600 ms; the commit that follows starts at once and supersedes it.
+  const typed = queue.request(document(2, "typed"));
+  context.mock.timers.tick(100);
+  const committed = queue.request(document(3, "committed"), { immediate: true });
+  assert.equal((await typed).status, "superseded");
+  context.mock.timers.tick(0);
+  assert.deepEqual(started, [1, 3]);
+  // A commit during a build waits for it, then starts without the 600 ms wait.
+  const later = queue.refresh(document(4, "later"), { immediate: true });
+  context.mock.timers.tick(0);
+  assert.deepEqual(started, [1, 3]);
+  context.mock.timers.tick(300);
+  assert.equal((await committed).status, "ready");
+  assert.deepEqual(started, [1, 3, 4]);
+  context.mock.timers.tick(300);
+  assert.equal((await later).status, "ready");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
 test("aborts a build that overruns twice the last build time once a newer edit is due", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
   const signals = new Map<number, AbortSignal>();

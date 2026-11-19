@@ -7,7 +7,7 @@
  * (`pageDocument.ts`).
  */
 
-import type { BuildQueueState } from "../../core/render/buildQueue";
+import type { BuildQueueState, BuildRequestOptions } from "../../core/render/buildQueue";
 import {
   DEFAULT_PREVIEW_CONFIGURATION,
   PREVIEW_STARTUP_SETTING_KEYS,
@@ -450,10 +450,11 @@ export class RenderingController extends PageDocumentController {
     this.assignWebviewHtml(preview, preview.webview.html);
   }
 
-  /** Renders `document` again (after the debounce), or shows the missing source. */
+  /** Renders `document` again (after the debounce, or at once with `immediate`), or shows the missing source. */
   public refreshPreviewDocument(
     preview: PreviewSession,
     document: HostDocument,
+    options: BuildRequestOptions = {},
   ): Promise<unknown> {
     if (!isDocumentEligible(document) || !this.manager.sourceAvailable(preview)) {
       this.setMissingSource(preview);
@@ -463,7 +464,7 @@ export class RenderingController extends PageDocumentController {
     if (this.deferWhileHidden(preview)) {
       return Promise.resolve({ status: "canceled" });
     }
-    return preview.queue.refresh(document);
+    return preview.queue.refresh(document, options);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-039

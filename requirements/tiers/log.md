@@ -2,6 +2,14 @@
 
 ## 2026-11-19
 
+### Commit round trip of edit mode on large documents (issue 423)
+
+- Changed: SwRS-LIFE-039 renders at once after a block edit is committed, instead of after the
+  adaptive pause of up to 1 s (normative change; a running render still finishes first), with a new
+  row in its pause scenario. SwRS-TABLE-002 gets a verification note: the table handles are placed in
+  the next frame, not while the page is patched. No other normative change.
+- Tests: `test/node-services/build/buildQueue.test.ts`, `test/page/runtimeTableRowMove.test.ts`.
+
 ### Edit mode on large documents (issue 420)
 
 - Changed: SwRS-LAYOUT-023 gets the row "An editor opens or closes on a top-level block that cannot break
