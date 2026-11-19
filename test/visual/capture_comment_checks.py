@@ -919,7 +919,7 @@ def check_code_copy_keyboard(page: Page, scenario: dict, failures: list[Failure]
 
 
 def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) -> None:
-  """T15: hover outline on a list, then a framed paragraph editor with hint and buttons."""
+  """T15: hover outline on a list item, then a framed paragraph editor with hint and buttons."""
   if not scenario.get("editAffordances"):
     return
   page_name = scenario["page"]
@@ -932,10 +932,10 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
   hovered = page.locator('main [data-sphinx-preview-edit-hover="true"]')
   if hovered.count() != 1:
     failures.append(Failure(page_name, f"hovering a list item marked {hovered.count()} elements, expected 1"))
-  elif hovered.evaluate("element => element.tagName") != "UL":
-    failures.append(Failure(page_name, "hover did not mark the whole list"))
+  elif hovered.evaluate("element => element.tagName") != "LI":
+    failures.append(Failure(page_name, "hover did not mark the list item a click would edit"))
   elif hovered.evaluate("element => getComputedStyle(element).outlineStyle") != "dashed":
-    failures.append(Failure(page_name, "hovered list has no dashed outline"))
+    failures.append(Failure(page_name, "hovered list item has no dashed outline"))
   save_step(page, scenario, "hover", caret="hide")
 
   paragraph = page.locator("main > p[data-sphinx-source-line]").first

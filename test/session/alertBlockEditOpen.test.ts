@@ -205,7 +205,10 @@ test("an alert inside a list item opens on its own indented lines, the list item
   assert.equal(opened.originalText,
     "  > [!WARNING]\n  > The warning inside the list item.\n  >\n  > Its second paragraph.\n");
   const item = await openByClick(ALERT_IN_LIST_ITEM, "The last list item.");
-  assert.deepEqual([item.line, item.endLine], [1, 8], "a click on another item still opens the whole list");
+  // A click on a list item opens that item only (it opened the whole list, 1 to 8, before list
+  // items were edited one by one).
+  assert.deepEqual([item.line, item.endLine], [8, 8], "a click on another item opens that item only");
+  assert.equal(item.originalText, "- The last list item.\n");
 });
 
 const LIST_IN_ALERT = [

@@ -1,8 +1,36 @@
+import { readPreviewBootSettings } from "../../core/configuration/previewConfiguration";
+
+/**
+ * The list items the TOC never lists: the generated `[TOC]` list, the footnotes, the lists in a
+ * table cell and those in a hidden element (a tab panel not shown).
+ */
+const LIST_ITEM_EXCLUDED = "nav.okf-toc, section.footnotes, table, [hidden]";
+
+/** The most characters of a list item's first line the TOC shows; a longer line ends with "…". */
+export const LIST_ITEM_TEXT_LIMIT = 80;
+
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+/**
+ * The TOC text of a list item: the first line of its first paragraph (or of its own text in a
+ * tight list), white space collapsed, cut to {@link LIST_ITEM_TEXT_LIMIT} characters.
+ */
+function listItemText(item: Element): string {
+  const first = item.children?.[0];
+  const source = first && first.tagName.toUpperCase() === "P" ? first : item;
+  const line = ((source.textContent ?? "").trimStart().split("\n")[0] ?? "").replace(/\s+/gu, " ").trim();
+  const characters = Array.from(line);
+  return characters.length > LIST_ITEM_TEXT_LIMIT
+    ? characters.slice(0, LIST_ITEM_TEXT_LIMIT - 1).join("").trimEnd() + "\u2026"
+    : line;
+}
+
 export interface TocColumnContext {
   documentId: string;
   revision: number;
   requestId: number;
   initialViewPreferences?: { toc?: boolean };
+  /** The `preview.listItemsInToc` boot setting, read with the page defaults. */
+  listItemsInToc?: unknown;
 }
 
 /**
@@ -42,6 +70,8 @@ export function installTocColumn(
 } {
   const contentId = "sphinx-myst-preview-content";
   const headingSelector = "h1, h2, h3, h4";
+  // `preview.listItemsInToc`, read once: a change reloads the page (a startup setting).
+  const listItems = readPreviewBootSettings(context).listItemsInToc;
   const excluded = "[data-okf-properties], .admonition, div[class*=\"admonition-\"], "
     + "[data-sphinx-preview-block-editor], [data-sphinx-preview-sticky-headings]";
   const button = document.querySelector("[data-sphinx-preview-toc-toggle]");
@@ -57,7 +87,8 @@ export function installTocColumn(
   document.body.appendChild(nav);
   // The rail is built the first time the TOC is open, so a page that never opens it has none.
   let rail: HTMLElement | undefined;
-  let ticks: HTMLElement[] = [];
+  // One slot per entry, so that an entry's index finds its tick; a list item has none.
+  let ticks: Array<HTMLElement | undefined> = [];
   let overlayOpen = false;
   let pointerInside = false;
   let focusInside = false;
@@ -170,6 +201,8 @@ export function installTocColumn(
     level: number;
     text: string;
     key: string;
+    /** A list item, not a heading: it gets no rail tick. */
+    listItem?: boolean;
     item: HTMLElement;
     target: HTMLElement;
     twisty?: HTMLElement;
@@ -186,20 +219,41 @@ export function installTocColumn(
       : [],
   );
 
+  type Found = { heading: Element; level: number; text: string; key: string; listItem?: boolean };
+
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-040
-  const collect = (): Array<{ heading: Element; level: number; text: string; key: string }> => {
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+  // With `preview.listItemsInToc` on, an item of a top-level list (a list that is not inside
+  // another list item) is listed by its first line, cut to LIST_ITEM_TEXT_LIMIT characters, one
+  // level below the heading before it (level 1 before any heading). An item whose first line has
+  // no letter or digit has no wording to show and is not listed.
+  const collect = (): Found[] => {
     const content = document.getElementById(contentId);
-    const found: Array<{ heading: Element; level: number; text: string; key: string }> = [];
+    const found: Found[] = [];
     const seen = new Map<string, number>();
-    for (const heading of Array.from(content?.querySelectorAll(headingSelector) ?? [])) {
-      if (heading.closest?.(excluded)) continue;
-      const text = headingText(heading);
-      if (!text) continue;
-      const level = Number(heading.tagName.slice(1));
+    const selector = listItems ? headingSelector + ", li" : headingSelector;
+    let headingLevel = 0;
+    for (const element of Array.from(content?.querySelectorAll(selector) ?? [])) {
+      if (element.closest?.(excluded)) continue;
+      let level: number;
+      let text: string;
+      let listItem = false;
+      if (element.tagName.toUpperCase() === "LI") {
+        if (element.parentElement?.closest?.("li") || element.closest?.(LIST_ITEM_EXCLUDED)) continue;
+        text = listItemText(element);
+        if (!/[\p{L}\p{N}]/u.test(text)) continue;
+        level = headingLevel + 1;
+        listItem = true;
+      } else {
+        text = headingText(element);
+        if (!text) continue;
+        level = Number(element.tagName.slice(1));
+        headingLevel = level;
+      }
       const base = level + "|" + text;
       const occurrence = seen.get(base) ?? 0;
       seen.set(base, occurrence + 1);
-      found.push({ heading, level, text, key: base + "|" + occurrence });
+      found.push({ heading: element, level, text, key: base + "|" + occurrence, ...(listItem ? { listItem } : {}) });
     }
     return found;
   };
@@ -222,6 +276,15 @@ export function installTocColumn(
     else if (box.top < area.top) nav.scrollTop -= area.top - box.top;
   };
 
+  // The tick of entry `index`: a list item has none, so it shows the tick of its section.
+  const tickFor = (index: number): HTMLElement | undefined => {
+    for (let at = index; at >= 0; at -= 1) {
+      const tick = ticks[at];
+      if (tick) return tick;
+    }
+    return undefined;
+  };
+
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-045
   // Marks the entry of the section at the reading line from the cached tops; no layout read.
   const track = (force = false): void => {
@@ -235,14 +298,16 @@ export function installTocColumn(
     }
     const next = current < 0 ? -1 : represent[current];
     if (next === shown && current === tickShown && !force) return;
-    if (tickShown >= 0 && ticks[tickShown]) {
-      ticks[tickShown].removeAttribute("aria-current");
-      ticks[tickShown].removeAttribute("data-sphinx-preview-toc-tick-current");
+    const previousTick = tickShown >= 0 ? tickFor(tickShown) : undefined;
+    if (previousTick) {
+      previousTick.removeAttribute("aria-current");
+      previousTick.removeAttribute("data-sphinx-preview-toc-tick-current");
     }
     tickShown = current;
-    if (current >= 0 && ticks[current]) {
-      ticks[current].setAttribute("aria-current", "location");
-      ticks[current].setAttribute("data-sphinx-preview-toc-tick-current", "");
+    const currentTick = current >= 0 ? tickFor(current) : undefined;
+    if (currentTick) {
+      currentTick.setAttribute("aria-current", "location");
+      currentTick.setAttribute("data-sphinx-preview-toc-tick-current", "");
     }
     if (shown >= 0 && entries[shown]) {
       entries[shown].target.removeAttribute("aria-current");
@@ -277,7 +342,7 @@ export function installTocColumn(
     dirty = false;
     const found = collect();
     list?.remove();
-    for (const tick of ticks) tick.remove();
+    for (const tick of ticks) tick?.remove();
     ticks = [];
     tickShown = -1;
     const next = document.createElement("ol");
@@ -295,10 +360,14 @@ export function installTocColumn(
       item.setAttribute("data-sphinx-preview-toc-entry", "");
       item.setAttribute("data-level", String(entry.level));
       item.style.setProperty("--sphinx-preview-toc-depth", String(entry.level - shallowest));
+      // A list item is always a leaf: a heading that follows it, even a deeper one, belongs to
+      // the heading before the entry.
       let parent = entries.length - 1;
-      while (parent >= 0 && entries[parent].level >= entry.level) parent = entries[parent].parent;
+      while (parent >= 0 && (entries[parent].level >= entry.level || entries[parent].listItem)) {
+        parent = entries[parent].parent;
+      }
       const key = entry.key;
-      const hasChildren = (found[position + 1]?.level ?? 0) > entry.level;
+      const hasChildren = !entry.listItem && (found[position + 1]?.level ?? 0) > entry.level;
       let twisty: HTMLElement | undefined;
       if (hasChildren) {
         twisty = document.createElement("button");
@@ -334,16 +403,22 @@ export function installTocColumn(
         const live = collect().find((candidate) => candidate.key === entry.key);
         scrollToHeading(live ? live.heading : entry.heading);
       };
-      const tick = document.createElement("button");
-      tick.setAttribute("type", "button");
-      tick.setAttribute("data-sphinx-preview-toc-tick", "");
-      tick.setAttribute("data-level", String(entry.level));
-      tick.setAttribute("aria-label", entry.text);
-      tick.setAttribute("title", entry.text);
-      tick.style.setProperty("--sphinx-preview-toc-depth", String(entry.level - shallowest));
-      tick.addEventListener("click", goTo);
-      ensureRail().appendChild(tick);
-      ticks.push(tick);
+      if (entry.listItem) {
+        // The rail shows the sections only: hundreds of list items would hide them.
+        item.setAttribute("data-sphinx-preview-toc-list-item", "");
+        ticks.push(undefined);
+      } else {
+        const tick = document.createElement("button");
+        tick.setAttribute("type", "button");
+        tick.setAttribute("data-sphinx-preview-toc-tick", "");
+        tick.setAttribute("data-level", String(entry.level));
+        tick.setAttribute("aria-label", entry.text);
+        tick.setAttribute("title", entry.text);
+        tick.style.setProperty("--sphinx-preview-toc-depth", String(entry.level - shallowest));
+        tick.addEventListener("click", goTo);
+        ensureRail().appendChild(tick);
+        ticks.push(tick);
+      }
       entries.push({ ...entry, item, target, twisty, parent, top: 0 });
       next.appendChild(item);
     }

@@ -1203,3 +1203,48 @@ test("T34: when a patch of a chain is rejected, the later ones are ignored and n
 
 
 // Editor keyboard bugs (hotkey-editing backlog): wrapped-line Up/Down, undo, wrapping markers.
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("a click on the first item of a list while another editor holds changes opens that item, not the list, once the save is rendered", () => {
+  const harness = createRuntimeHarness();
+  // A list at line 60 with two items, 60 to 61 and 62 to 63: the list, its first item and the
+  // item's paragraph all start on line 60.
+  const mapped = (tag: string, line: number, endLine: number): RuntimeElement => {
+    const element = new RuntimeElement({
+      "data-sphinx-preview-document": "file:///active.md",
+      "data-sphinx-source-end-line": String(endLine),
+      "data-sphinx-source-file": "/workspace/active.md",
+      "data-sphinx-source-line": String(line),
+    }, harness.windowState, line * 10, 20, tag);
+    harness.mappings.push(element);
+    return element;
+  };
+  const list = mapped("ul", 60, 63);
+  const first = mapped("li", 60, 61);
+  const paragraph = mapped("p", 60, 61);
+  first.appendChild(paragraph);
+  list.appendChild(first);
+  const second = mapped("li", 62, 63);
+  second.appendChild(mapped("p", 62, 63));
+  list.appendChild(second);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: noop });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "Current block\n",
+  });
+  const textarea = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
+  textarea.value = "Current block, changed\n";
+  textarea.dispatch("input");
+  textarea.dispatch("blur");
+  harness.dispatchDocument("click", { target: paragraph, preventDefault: noop });
+  const before = harness.messages.length;
+  harness.dispatchMessage(patchMessage());
+  const open = messagesAfter(harness, before).filter((message) => message.type === "previewEditOpen");
+  assert.equal(open.length, 1);
+  assert.deepEqual([open[0]!.line, open[0]!.endLine], [60, 61], "the first item, not the list that starts on its line");
+});

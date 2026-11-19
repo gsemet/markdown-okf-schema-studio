@@ -230,6 +230,15 @@ export const PREVIEW_SETTINGS = {
     markdownDescription: "Shows line numbers on code blocks of two lines or more. The numbers are never copied: neither the copy button nor a selection picks them up. **On** (default): such blocks are numbered. **Off**: no numbers. A MyST `{code-block}` with `:linenos:` or `:lineno-start:` is always numbered, whatever this setting says.",
     order: 24,
   }, asStored, bootFlag(true)),
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+  /** The table of contents also lists the items of top-level lists under their heading. */
+  listItemsInToc: startupSetting<boolean>({
+    type: "boolean",
+    scope: "resource",
+    default: false,
+    markdownDescription: "Lists list items in the table of contents, for documents that write each requirement, rule or record as a list item. **On**: the table of contents also shows each item of a top-level list (not a list inside another item) by its first line, cut to about 80 characters, one level below the heading before it. **Off** (default): the table of contents lists the headings only.",
+    order: 25,
+  }, asStored, bootFlag(false)),
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-214
   /** Mark blocks changed since the last commit with a green bar (T16). */
   showIncomingChanges: setting<boolean>({

@@ -126,7 +126,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
   }
 
   function openMappedEditor(target: HTMLElement, eventTarget: Element, initialCaretPosition: CaretPosition = "end",
-    reveal = false): void {
+    reveal = false, exact = false): void {
     if (eventTarget.closest?.("[data-okf-properties]")) return;
     rt.selection.clearBlockSelection();
     rt.selection.rememberSelectionAnchor(target);
@@ -145,7 +145,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
       rt.blockEditor.rememberPendingBlockNavigation(target, initialCaretPosition, selectedCell ?? undefined);
       if (!rt.blockEditor.postBlockEditSave(true)) {
         rt.blockEditor.clearPendingBlockNavigation();
-        openMappedEditor(target, eventTarget, initialCaretPosition, reveal);
+        openMappedEditor(target, eventTarget, initialCaretPosition, reveal, exact);
       }
       return;
     }
@@ -158,7 +158,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
       rt.blockEditor.rememberPendingBlockNavigation(target, initialCaretPosition, selectedCell ?? undefined);
       if (!edit.finishing && !rt.blockEditor.postBlockEditSave(true)) {
         rt.blockEditor.clearPendingBlockNavigation();
-        if (!state.activeBlockEdit) openMappedEditor(target, eventTarget, initialCaretPosition, reveal);
+        if (!state.activeBlockEdit) openMappedEditor(target, eventTarget, initialCaretPosition, reveal, exact);
       }
       return;
     }
@@ -168,7 +168,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
       return;
     }
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
-    const editing = rt.blocks.editingElementFor(target);
+    const editing = rt.blocks.editingElementFor(target, { exact });
     rt.blockEditor.openBlockEditor(editing.element, undefined, editing.sourceRange, initialCaretPosition);
   }
 
@@ -179,15 +179,23 @@ export function installEditMode(rt: PageRuntime): EditMode {
     // @implements_req SwRS-MDOKFSTUDIO-TABLE-121
     // The top-level blocks first, then the blocks inside them: a table inside a quote or an
     // admonition is a mapped block of its own.
-    const isPending = (element: HTMLElement): boolean =>
+    // A list item and its list (or its first paragraph) start on the same line: the block of the
+    // pending tag wins, and the first block of the line is the fallback (the edit may have changed
+    // the tag, a paragraph turned into a heading).
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+    const isPending = (element: HTMLElement, sameTag: boolean): boolean =>
       Boolean(pending.blockId && element.getAttribute("data-sphinx-preview-block") === pending.blockId)
-      || (!pending.blockId && Number(element.getAttribute("data-sphinx-source-line")) === sourceLine);
-    const queue = [...rt.blocks.topLevelMappedBlocks()];
-    let target: HTMLElement | undefined;
-    for (let block = queue.shift(); block && !target; block = queue.shift()) {
-      if (isPending(block)) target = block;
-      else queue.push(...rt.blocks.mappedChildren(block));
-    }
+      || (!pending.blockId && Number(element.getAttribute("data-sphinx-source-line")) === sourceLine
+        && (!sameTag || !pending.tagName || element.tagName === pending.tagName));
+    const find = (sameTag: boolean): HTMLElement | undefined => {
+      const queue = [...rt.blocks.topLevelMappedBlocks()];
+      for (let block = queue.shift(); block; block = queue.shift()) {
+        if (isPending(block, sameTag)) return block;
+        queue.push(...rt.blocks.mappedChildren(block));
+      }
+      return undefined;
+    };
+    const target = find(true) ?? find(false);
     rt.blockEditor.clearPendingBlockNavigation();
     if (!target) return;
     const then = pending.thenMove;

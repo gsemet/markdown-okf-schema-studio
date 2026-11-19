@@ -4,11 +4,12 @@ id: SwRS-MDOKFSTUDIO-BLOCK-017
 uuid: aabfd76c-2a9d-4ae1-83cf-131c3a68620a
 title: "The hover outline shows what a click would edit"
 description: "While edit mode is on, the page SHALL outline with a dashed line the
-  element that a click at the pointer or focus would edit: the whole list for a list
-  item, the cell for a table cell, the code block for a fence and else the mapped
-  block, and the preview shows the text cursor over every element that carries a source
-  file and line and over the links whose plain click opens the block editor, while
-  every other link keeps the pointer cursor and gets no outline."
+  element that a click at the pointer or focus would edit: the item for a list item,
+  the whole list for the list itself, the cell for a table cell, the code block for
+  a fence and else the mapped block, and the preview shows the text cursor over every
+  element that carries a source file and line and over the links whose plain click
+  opens the block editor, while every other link keeps the pointer cursor and gets
+  no outline."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -39,26 +40,27 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-While edit mode is on, the page SHALL outline with a dashed line the element that a click at the pointer or focus would edit: the whole list for a list item, the cell for a table cell, the code block for a fence and else the mapped block, and the preview shows the text cursor over every element that carries a source file and line and over the links whose plain click opens the block editor, while every other link keeps the pointer cursor and gets no outline.
+While edit mode is on, the page SHALL outline with a dashed line the element that a click at the pointer or focus would edit: the item for a list item, the whole list for the list itself, the cell for a table cell, the code block for a fence and else the mapped block, and the preview shows the text cursor over every element that carries a source file and line and over the links whose plain click opens the block editor, while every other link keeps the pointer cursor and gets no outline.
 
 ### Scenario (nominal): Hovering a list item
 
 - GIVEN edit mode on and a list with an item under the pointer
 - WHEN the pointer moves over the item
-- THEN exactly one element, the list, carries data-sphinx-preview-edit-hover
+- THEN exactly one element, the item (the nearest one, for an item of a nested list), carries data-sphinx-preview-edit-hover
 
 ### Scenario (nominal): The outlined element per target
 
 | Pointer or focus on | Outlined element |
 | --- | --- |
-| a list item | the whole list |
+| a list item | the item; for an item of a nested list, the nested item |
+| the list itself, outside its items | the whole list |
 | a table cell | the cell |
 | a fence | the code block |
 | any other mapped block | the mapped block |
 
 ### Scenario (boundary): Pointer or focus leaves
 
-- GIVEN the list is outlined
+- GIVEN a list item is outlined
 - WHEN the pointer leaves it or the focus leaves the item
 - THEN no element carries the attribute
 
@@ -98,7 +100,7 @@ Only the links whose plain click opens the block editor (SwRS-MDOKFSTUDIO-BLOCK-
 
 ### Verification notes
 
-- Method: test/page/runtimeBlockEditor.test.ts (`edit mode hover marks the whole list that a click would edit`: hovering a list item and pointer or focus leaves).
+- Method: test/page/runtimeBlockEditor.test.ts (`edit mode hover marks the list item that a click would edit`: hovering a list item and pointer or focus leaves) and test/page/blockReq.requirements.test.ts (`a list item is outlined and opened on its own lines, the list itself outlines and opens the whole list`: the list rows of the outlined element table).
 - Method: test/integration/realInput/editorWidgets.ts (scenarioEditAffordances, screenshot block-editing/r12: hovering a list item and the outlined element per target); visual scenarios block-editing/v06, v07 and v08 share the same assertions.
 - Method: test/page/blockReq.requirements.test.ts (`hovering a link inside a paragraph outlines the paragraph, like the text around it`: link inside a paragraph row).
 - Method: test/page/blockReq.requirements.test.ts (`the hover outline skips the properties table and an open editor, and outlines a block inside a link`: targets that are not outlined and the block inside a link row).

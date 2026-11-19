@@ -256,3 +256,64 @@ test("CR 157: the structural keys leave an open editor and modifier chords alone
   harness.dispatchDocument("keydown", key("ArrowRight", { altKey: true }));
   assert.deepEqual(focusedCells(cells), ["0,0"]);
 });
+
+// A list at line 80 with two items: the first (lines 80 to 82) holds two paragraphs, the second
+// (lines 84 and 85) one paragraph.
+function listPage() {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const list = mapped(harness, 80, 85, 800, "ul");
+  const first = mapped(harness, 80, 83, 800, "li");
+  const second = mapped(harness, 84, 85, 840, "li");
+  const paragraphs = [mapped(harness, 80, 80, 800, "p"), mapped(harness, 82, 82, 820, "p"), mapped(harness, 84, 85, 840, "p")];
+  first.appendChild(paragraphs[0]);
+  first.appendChild(paragraphs[1]);
+  second.appendChild(paragraphs[2]);
+  list.appendChild(first);
+  list.appendChild(second);
+  return { harness, list, first, second, paragraphs };
+}
+
+function opened(harness: RuntimeHarness, before: number): number[][] {
+  return harness.messages.slice(before)
+    .filter((message) => message.type === "previewEditOpen")
+    .map((message) => [Number(message.line), Number(message.endLine)]);
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("Right walks a list down to its items and their blocks, Enter edits the selected level, Left goes back up", () => {
+  const { harness, list, first, second, paragraphs } = listPage();
+  selectBlock(harness, 80);
+  assert.equal(list.getAttribute(SELECTED), "true");
+  press(harness, "ArrowRight");
+  assert.equal(first.getAttribute(SELECTED), "true", "Right on the list selects its first item");
+  press(harness, "ArrowDown");
+  assert.equal(second.getAttribute(SELECTED), "true");
+  press(harness, "ArrowUp");
+  let before = harness.messages.length;
+  press(harness, "Enter");
+  assert.deepEqual(opened(harness, before), [[80, 83]], "Enter on an item edits that item");
+
+  const again = listPage();
+  selectBlock(again.harness, 80);
+  press(again.harness, "ArrowRight");
+  press(again.harness, "ArrowRight");
+  press(again.harness, "ArrowDown");
+  assert.equal(again.paragraphs[1].getAttribute(SELECTED), "true", "Right on an item selects its first block");
+  before = again.harness.messages.length;
+  press(again.harness, "Enter");
+  assert.deepEqual(opened(again.harness, before), [[82, 83]], "Enter on a block of an item edits that block only, up to the end of the item");
+  assert.equal(paragraphs.length, 3);
+
+  const up = listPage();
+  selectBlock(up.harness, 80);
+  press(up.harness, "ArrowRight");
+  press(up.harness, "ArrowRight");
+  press(up.harness, "ArrowLeft");
+  assert.equal(up.first.getAttribute(SELECTED), "true", "Left goes back to the item");
+  press(up.harness, "ArrowLeft");
+  assert.equal(up.list.getAttribute(SELECTED), "true", "and then to the list");
+  before = up.harness.messages.length;
+  press(up.harness, "Enter");
+  assert.deepEqual(opened(up.harness, before), [[80, 85]], "Enter on the selected list edits the whole list");
+});

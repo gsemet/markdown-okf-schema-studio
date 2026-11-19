@@ -1447,3 +1447,9 @@ test("CR147: the side-by-side cards are two columns, switch off with the page at
   assert.match(css, /\[data-okf-sbs-word="added"\] \{[^}]*text-decoration: underline;/u);
   assert.match(css, /html\[data-okf-incoming-changes="false"\] \[data-sphinx-preview-sbs-toggle\] \{\s*display: none;/u);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("the editor of an ordered list item counts as that item, so the next items keep their numbers", () => {
+  assert.match(PREVIEW_THEME_CSS,
+    /ol > li\[data-sphinx-preview-editing="true"\] \+ \.sphinx-preview-block-editor,\s*ol > li\[data-sphinx-preview-editing="true"\] \+ \.sphinx-preview-block-editor-host \{\s*counter-increment: list-item;/u);
+});

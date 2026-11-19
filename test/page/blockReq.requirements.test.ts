@@ -701,3 +701,66 @@ test("the paste chord on the insert point of an included block shows a notice an
   assert.equal(pastes.length, 1);
   assert.equal(pastes[0]!.insertAfterLine, 1);
 });
+
+/** A mapped element of the active document, lines `line` to `endLine`. */
+function mappedElement(harness: RuntimeHarness, tagName: string, line: number, endLine: number): RuntimeElement {
+  return new RuntimeElement({
+    "data-sphinx-preview-document": "file:///active.md",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": String(line),
+    "data-sphinx-source-end-line": String(endLine),
+  }, harness.windowState, 0, 20, tagName);
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("a list item is outlined and opened on its own lines, the list itself outlines and opens the whole list", () => {
+  const harness = createRuntimeHarness();
+  turnEditModeOn(harness);
+  // Lines 5 to 13: an item on 5 to 9 (first line, paragraph, code block), a blank line, then a
+  // second item.
+  const list = mappedElement(harness, "ul", 5, 13);
+  const first = mappedElement(harness, "li", 5, 10);
+  const firstLine = mappedElement(harness, "p", 5, 5);
+  const body = mappedElement(harness, "p", 7, 7);
+  const code = mappedElement(harness, "code", 9, 9);
+  first.appendChild(firstLine);
+  first.appendChild(body);
+  first.appendChild(code);
+  const second = mappedElement(harness, "li", 11, 13);
+  const secondText = mappedElement(harness, "p", 11, 13);
+  second.appendChild(secondText);
+  list.appendChild(first);
+  list.appendChild(second);
+
+  harness.dispatchDocument("mouseover", { target: body });
+  assert.equal(first.getAttribute("data-sphinx-preview-edit-hover"), "true", "the item is outlined");
+  assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null, "the list is not");
+  harness.dispatchDocument("mouseover", { target: secondText });
+  assert.equal(second.getAttribute("data-sphinx-preview-edit-hover"), "true", "the hover moves to the second item");
+  assert.equal(first.getAttribute("data-sphinx-preview-edit-hover"), null);
+  harness.dispatchDocument("mouseover", { target: list });
+  assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), "true", "the list itself outlines the whole list");
+
+  const before = harness.messages.length;
+  harness.dispatchDocument("click", { target: code, preventDefault: () => undefined });
+  const opens = postsOf(harness, "previewEditOpen", before);
+  assert.equal(opens.length, 1);
+  assert.deepEqual([opens[0]!.line, opens[0]!.endLine], [5, 10], "the item's lines, the blank line before the next item included");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("a click on the list itself, outside its items, opens the whole list", () => {
+  const harness = createRuntimeHarness();
+  turnEditModeOn(harness);
+  const list = mappedElement(harness, "ul", 5, 9);
+  for (const [line, endLine] of [[5, 6], [7, 9]] as const) {
+    const item = mappedElement(harness, "li", line, endLine);
+    item.appendChild(mappedElement(harness, "p", line, endLine));
+    list.appendChild(item);
+  }
+  const before = harness.messages.length;
+  harness.dispatchDocument("click", { target: list, preventDefault: () => undefined });
+  const opens = postsOf(harness, "previewEditOpen", before);
+  assert.deepEqual([opens[0]!.line, opens[0]!.endLine], [5, 9], "the whole list, not its first item");
+});

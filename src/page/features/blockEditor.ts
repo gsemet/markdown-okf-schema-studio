@@ -139,6 +139,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       ...(thenMove ? { thenMove } : {}),
       blockId: target.getAttribute("data-sphinx-preview-block") || undefined,
       sourceLine: Number(target.getAttribute("data-sphinx-source-line")),
+      tagName: target.tagName,
       caretPosition: typeof caretPosition === "string" ? caretPosition : "end",
       ...(selectedCell ? {
         tableRowIndex: (selectedCell.parentElement as HTMLTableRowElement).rowIndex,
@@ -158,9 +159,20 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     });
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
   function adjacentMappedBlock(edit: BlockEdit, step: number): HTMLElement | undefined {
+    // The editor of a list item steps to the item before or after it in its list, then past the list.
+    if (edit.target.tagName === "LI") {
+      const sideways = (element: Element): Element | null =>
+        step < 0 ? element.previousElementSibling : element.nextElementSibling;
+      let sibling = sideways(edit.target);
+      while (sibling && sibling.tagName !== "LI") sibling = sideways(sibling);
+      if (sibling) return sibling as HTMLElement;
+    }
     const blocks = rt.blocks.topLevelMappedBlocks();
-    const index = blocks.indexOf(edit.target);
+    let top: HTMLElement | null = edit.target;
+    while (top && !blocks.includes(top)) top = top.parentElement;
+    const index = top ? blocks.indexOf(top) : -1;
     if (index < 0) return undefined;
     // The properties table has its own editor: stepping onto it would only close this one.
     for (let next = index + step; next >= 0 && next < blocks.length; next += step) {
@@ -263,7 +275,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     // Nothing above the document's first block: the frame gets room before the top edge.
     if (!selectedCell && !rt.blocks.propertiesSection()
       && (target.className?.split?.(" ").includes("sphinx-preview-insert-point--first")
-        || rt.blocks.topLevelMappedBlocks()[0] === target)) {
+        || rt.blocks.topLevelMappedBlocks()[0] === target
+        || (target.tagName === "LI" && rt.blocks.topLevelMappedBlocks()[0]?.querySelector?.("li") === target))) {
       element.className += " sphinx-preview-block-editor--first";
     }
     element.setAttribute("data-sphinx-preview-block-editor", "true");

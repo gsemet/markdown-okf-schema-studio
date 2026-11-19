@@ -363,7 +363,9 @@ test("edit mode loads raw Markdown and saves changes when the block loses focus"
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
-test("edit mode hover marks the whole list that a click would edit", () => {
+// A list item is edited on its own, so the hover marks the item, not the list (it marked the whole
+// list before list items were edited one by one).
+test("edit mode hover marks the list item that a click would edit", () => {
   for (const editMode of [true, false]) {
     const harness = createRuntimeHarness();
     if (editMode) harness.editModeButton.dispatch("click");
@@ -381,18 +383,18 @@ test("edit mode hover marks the whole list that a click would edit", () => {
     }, harness.windowState, 0, 20, "li");
     list.appendChild(item);
     harness.dispatchDocument("mouseover", { target: item });
-    assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), editMode ? "true" : null);
-    assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), null);
+    assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), editMode ? "true" : null);
+    assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null);
     if (editMode) {
       harness.dispatchDocument("mouseout", { target: item, relatedTarget: undefined });
-      assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null);
+      assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), null);
       harness.dispatchDocument("focusin", { target: item });
-      assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), "true");
+      assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), "true");
       harness.dispatchDocument("focusout", { target: item });
-      assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null);
+      assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), null);
       harness.dispatchDocument("mouseover", { target: item });
       harness.editModeButton.dispatch("click");
-      assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null);
+      assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), null);
     }
   }
 });
@@ -1395,4 +1397,50 @@ test("CR 312: Cmd+S and Ctrl+S in the block text box are left to VS Code (not st
     assert.equal(stopped, 0, "the key keeps travelling to VS Code");
   }
   assert.equal(harness.messages.length, before, "the page posts nothing by itself");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("the arrows at the edge of a list item editor go to the next or previous item, then past the list", () => {
+  // The default page has blocks at lines 1, 50 and 100; a list at line 60 holds two items, 60 to 61
+  // and 62 to 63.
+  const open = (clicked: number, key: "ArrowDown" | "ArrowUp") => {
+    const harness = createRuntimeHarness();
+    const mapped = (tag: string, line: number, endLine: number): RuntimeElement => {
+      const element = new RuntimeElement({
+        "data-sphinx-preview-document": "file:///active.md",
+        "data-sphinx-source-end-line": String(endLine),
+        "data-sphinx-source-file": "/workspace/active.md",
+        "data-sphinx-source-line": String(line),
+      }, harness.windowState, line * 10, 20, tag);
+      harness.mappings.push(element);
+      return element;
+    };
+    const list = mapped("ul", 60, 63);
+    const items = [mapped("li", 60, 61), mapped("li", 62, 63)];
+    for (const item of items) {
+      item.siblingsFromParent = true;
+      const paragraph = mapped("p", Number(item.getAttribute("data-sphinx-source-line")), Number(item.getAttribute("data-sphinx-source-end-line")));
+      item.appendChild(paragraph);
+      list.appendChild(item);
+    }
+    harness.editModeButton.dispatch("click");
+    harness.dispatchDocument("click", { target: items[clicked]!.childElements[0], preventDefault: () => undefined });
+    const request = harness.messages.at(-1);
+    assert.deepEqual([request?.line, request?.endLine], [items[clicked]!.getAttribute("data-sphinx-source-line"), items[clicked]!.getAttribute("data-sphinx-source-end-line")].map(Number));
+    harness.dispatchMessage({
+      type: "previewEditSource", documentId: "file:///active.md", revision: 7, requestId: 11,
+      editId: request?.editId, originalText: "- An item\n",
+    });
+    const textarea = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
+    const position = key === "ArrowDown" ? textarea.value.length : 0;
+    textarea.setSelectionRange(position, position);
+    let prevented = false;
+    textarea.dispatch("keydown", { key, preventDefault: () => { prevented = true; } });
+    const next = harness.messages.at(-1);
+    return { prevented, type: next?.type, line: next?.line };
+  };
+  assert.deepEqual(open(0, "ArrowDown"), { prevented: true, type: "previewEditOpen", line: 62 }, "down to the next item");
+  assert.deepEqual(open(1, "ArrowUp"), { prevented: true, type: "previewEditOpen", line: 60 }, "up to the previous item");
+  assert.deepEqual(open(1, "ArrowDown"), { prevented: true, type: "previewEditOpen", line: 100 }, "down past the list");
+  assert.deepEqual(open(0, "ArrowUp"), { prevented: true, type: "previewEditOpen", line: 50 }, "up past the list");
 });

@@ -172,6 +172,11 @@ export class RuntimeElement {
       if (selector === "button, input, textarea, select, a, span, p") {
         return ["BUTTON", "INPUT", "TEXTAREA", "SELECT", "A", "SPAN", "P"].includes(element.tagName);
       }
+      // MAPPINGS_SELECTOR: the mapped blocks inside an element (the lines of a list or an item).
+      if (selector === "[data-sphinx-source-file][data-sphinx-source-line]") {
+        return element.getAttribute("data-sphinx-source-file") !== null
+          && element.getAttribute("data-sphinx-source-line") !== null;
+      }
       if (selector === "table, figure, img, pre, .myst-mermaid-diagram") {
         return ["TABLE", "FIGURE", "IMG", "PRE"].includes(element.tagName)
           || element.className.split(" ").includes("myst-mermaid-diagram");
@@ -244,6 +249,7 @@ export class RuntimeElement {
         || (selector === "[data-okf-row-handle]" && current.getAttribute("data-okf-row-handle") !== null)
         || (selector === "[data-okf-col-handle]" && current.getAttribute("data-okf-col-handle") !== null)
         || (selector === "ul, ol" && ["UL", "OL"].includes(current.tagName))
+        || (selector === "li" && current.tagName === "LI")
         || (selector === "[data-sphinx-preview-block-editor]"
           && current.getAttribute("data-sphinx-preview-block-editor") !== null)
         || (selector === "pre" && current.tagName === "PRE")
@@ -354,8 +360,22 @@ export class RuntimeElement {
   /** Opt-in: `nextElementSibling` answers with the last element inserted after this one. */
   public siblingsFollowInsertions = false;
 
+  /** Opt-in: the element siblings are read from the parent's children (the items of a list). */
+  public siblingsFromParent = false;
+
   public get nextElementSibling(): RuntimeElement | null {
+    if (this.siblingsFromParent) return this.siblingAt(1);
     return this.siblingsFollowInsertions ? (this.insertedElements.at(-1) ?? null) : null;
+  }
+
+  public get previousElementSibling(): RuntimeElement | null {
+    return this.siblingsFromParent ? this.siblingAt(-1) : null;
+  }
+
+  private siblingAt(step: number): RuntimeElement | null {
+    const siblings = this.parentElement?.childElements ?? [];
+    const index = siblings.indexOf(this);
+    return index >= 0 ? siblings[index + step] ?? null : null;
   }
 
   public insertAdjacentElement(_position: string, element: RuntimeElement): RuntimeElement {

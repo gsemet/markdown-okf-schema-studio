@@ -7,6 +7,7 @@ import {
   readPreviewConfiguration,
 } from "../../../src/core/configuration/previewConfiguration";
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
 test("reads independent studio preview settings without stock configuration keys", () => {
   const values = new Map<string, boolean | number>([
     ["scrollPreviewWithEditor", false],
@@ -17,6 +18,7 @@ test("reads independent studio preview settings without stock configuration keys
     ["showComments", false],
     ["showIncomingChanges", false],
     ["codeBlocks.darkBackground", false],
+    ["listItemsInToc", true],
   ]);
   const sections: string[] = [];
   const configuration = readPreviewConfiguration({
@@ -36,6 +38,7 @@ test("reads independent studio preview settings without stock configuration keys
     showComments: false,
     "codeBlocks.darkBackground": false,
     "codeBlocks.lineNumbers": true,
+    listItemsInToc: true,
     showIncomingChanges: false,
   });
   assert.deepEqual(new Set(sections), new Set([
@@ -48,6 +51,7 @@ test("reads independent studio preview settings without stock configuration keys
     "showComments",
     "codeBlocks.darkBackground",
     "codeBlocks.lineNumbers",
+    "listItemsInToc",
     "showIncomingChanges",
   ]));
   assert.match(PREVIEW_CONFIGURATION_SECTION, /^markdownOkfSchemaStudio\.preview$/u);
@@ -61,6 +65,7 @@ test("reads independent studio preview settings without stock configuration keys
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.showIncomingChanges, true);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION["codeBlocks.darkBackground"], true);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION["codeBlocks.lineNumbers"], true);
+  assert.equal(DEFAULT_PREVIEW_CONFIGURATION.listItemsInToc, false);
 });
 
 test("comment chips are shown by default and can be turned off", () => {
