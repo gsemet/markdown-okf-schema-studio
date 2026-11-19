@@ -580,6 +580,76 @@ interface MachineCheck {
 
 const geometryChecksSource = fs.readFileSync(path.join(extensionRoot, "test", "shared", "geometry-checks.js"), "utf8");
 
+/** Bound of the capture's wait for the toolbar tooltips to hide (they have `transition: none`). */
+const TOOLTIP_HIDE_TIMEOUT_MS = 10_000;
+
+/** One toolbar button whose `::after` tooltip is shown, as {@link shownToolbarTooltips} reads it. */
+interface ShownTooltip {
+  tooltip: string;
+  hover: boolean;
+  focusVisible: boolean;
+  content: string;
+  visibility: string;
+  opacity: string;
+}
+
+/**
+ * Page-side probe (runs in the webview): the toolbar buttons whose `::after` tooltip is shown,
+ * i.e. its `content` is neither `none` nor `normal`, its `visibility` is not `hidden` and its
+ * opacity is not 0. Self-contained, since Playwright serialises it into the page.
+ */
+function shownToolbarTooltips(): ShownTooltip[] {
+  return Array.from(document.querySelectorAll("[data-sphinx-preview-toolbar] button[data-tooltip]"))
+    .flatMap((element) => {
+      const tooltip = getComputedStyle(element, "::after");
+      const hidden = tooltip.content === "none" || tooltip.content === "normal" || tooltip.visibility === "hidden"
+        || Number(tooltip.opacity) === 0;
+      return hidden ? [] : [{
+        tooltip: element.getAttribute("data-tooltip") ?? "",
+        hover: element.matches(":hover"),
+        focusVisible: element.matches(":focus-visible"),
+        content: tooltip.content,
+        visibility: tooltip.visibility,
+        opacity: tooltip.opacity,
+      }];
+    });
+}
+
+/**
+ * Waits up to {@link TOOLTIP_HIDE_TIMEOUT_MS} for no toolbar tooltip to be shown. On a timeout it
+ * reads the probe once more and fails with one line naming each tooltip still shown; if that read
+ * itself fails (frame gone), the original timeout error is rethrown unchanged.
+ */
+async function waitForToolbarTooltipsHidden(frame: Frame, id: string): Promise<void> {
+  try {
+    await frame.waitForFunction(`(${shownToolbarTooltips.toString()})().length === 0`, undefined, {
+      timeout: TOOLTIP_HIDE_TIMEOUT_MS,
+    });
+  } catch (error) {
+    if (!(error instanceof Error) || error.name !== "TimeoutError") throw error;
+    let shown: ShownTooltip[];
+    try {
+      shown = await frame.evaluate(shownToolbarTooltips);
+    } catch {
+      throw error;
+    }
+    if (shown.length === 0) {
+      throw new Error(`capture ${id}: toolbar tooltips hid only after the ${TOOLTIP_HIDE_TIMEOUT_MS} ms wait timed out`, {
+        cause: error,
+      });
+    }
+    // JSON.stringify quotes and escapes page text, so a newline in it cannot break the line.
+    const yesNo = (value: boolean): string => (value ? "yes" : "no");
+    const oneLine = (value: string): string => value.replace(/\s+/gu, " ");
+    const details = shown.map((item) => `${JSON.stringify(item.tooltip)} (hover: ${yesNo(item.hover)}, `
+      + `focus-visible: ${yesNo(item.focusVisible)}, ::after content ${JSON.stringify(item.content)}, `
+      + `visibility ${oneLine(item.visibility)}, opacity ${oneLine(item.opacity)})`);
+    throw new Error(`capture ${id}: toolbar tooltip still shown after ${TOOLTIP_HIDE_TIMEOUT_MS} ms: ${details.join("; ")}`, {
+      cause: error,
+    });
+  }
+}
+
 export interface Evidence {
   directory: string;
   /** `id` is a `<group>/rNN-<slug>` id of the capture registry; unknown ids throw. */
@@ -602,7 +672,9 @@ export function createEvidence(label: EvidenceLabel): Evidence {
      * registers the capture in the run manifest. Call it only after the scenario's last action: it
      * scrolls the webview to the top, moves the pointer to the bottom-left corner of the frame and
      * blurs the toolbar buttons. Mid-scenario calls would disturb the scroll anchor, hover states
-     * and anything below the first screen.
+     * and anything below the first screen. It then waits up to 10 s for the toolbar tooltips to
+     * hide and, if one stays shown, fails with the button's tooltip text and its hover and focus
+     * state.
      */
     async capture(
       page: Page,
@@ -619,12 +691,7 @@ export function createEvidence(label: EvidenceLabel): Evidence {
       await page.mouse.move(frameBounds.x + 4, frameBounds.y + frameBounds.height - 4);
       await frame.locator("[data-sphinx-preview-toolbar] button").evaluateAll((buttons) =>
         buttons.forEach((button) => (button as HTMLButtonElement).blur()));
-      await frame.waitForFunction(() => Array.from(document.querySelectorAll("[data-sphinx-preview-toolbar] button[data-tooltip]"))
-        .every((element) => {
-          const tooltip = getComputedStyle(element, "::after");
-          return tooltip.content === "none" || tooltip.content === "normal" || tooltip.visibility === "hidden"
-            || Number(tooltip.opacity) === 0;
-        }));
+      await waitForToolbarTooltipsHidden(frame, id);
       const editMode = await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode");
       const excerpt = bufferExcerpt();
       const checkOptions = options?.checks ?? {};
