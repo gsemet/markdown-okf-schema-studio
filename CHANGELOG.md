@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Committing a block edit in edit mode shows the result at once on long documents: the preview no
+  longer waits for the typing pause before applying it, and the table handles are placed in the next
+  frame instead of during the page update.
+
 ## 1.9.2 - 2026-11-19
 
 - The install docs name Windsurf next to VSCodium and Cursor, give VS Code 1.95 as the minimum, and say the
