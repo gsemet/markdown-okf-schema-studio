@@ -83,6 +83,7 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 | --- | --- |
 | Auto mode with a wide table and the window is resized | The table is measured again and is marked wide with its breakout |
 | A content patch, an image load, a toolbar collapse, a table-of-contents toggle or a change of the edited element | The wide elements are measured again |
+| An editor opens or closes on a top-level block that cannot break out (a paragraph, a heading, a list) | Nothing is measured again: no verdict can change |
 
 ### Scenario (nominal): Re-measure keeps the sideways scroll
 - GIVEN Auto mode and a wide table that the reader scrolled sideways
@@ -98,10 +99,10 @@ Five resizes, image loads or content-size changes before the next animation fram
 - Known issue: Only top-level blocks, or the paragraph holding only an image, break out.
 - Known issue: No visual scenario combines the open table-of-contents column with Auto; the TOC case is a unit test only, and the TOC column itself belongs to the toolbar requirements.
 - Known issue: The re-measure after a content patch, an image load and a table-of-contents toggle has no unit test (the content patch test builds the runtime but asserts nothing about width).
-- Known issue: An element entering source edit loses its mark through a mutation observer; the unit test covers the start-up and resize path.
 
 ### Verification notes
 - Method: test/page/runtimePageControls.test.ts (wide table and oversized block, column off the centre, table-of-contents column, elements kept in the column, resize): unit tests T10 only elements wider than the column are flagged; T10b a wide element is centred on the available area; T10b a narrow element is not flagged; T10b with the TOC open the available area, its centre and the cap exclude the TOC column (the reserve is published by the CSS for panes of 760 px and more); T10b a wide table gets its fractional max-content width rounded up, so no cell wraps; T10b a table with row handles keeps their room left of it when it breaks out; T10b a layout pass in Auto keeps the sideways scroll of a wide table (re-measure keeps the sideways scroll); T10 the saved width mode applies at startup and an edited element keeps the column. The relative-size path is verified by inspection of widthMode.ts; the stabilizeLayout, content patch and toolbar callbacks are verified by inspection.
+- Method: test/page/tableBreakout.test.ts (measured again when the layout changes, in a real browser): `an editor opened on a paragraph does not measure the tables again; one opened on a table does`.
 - Method: test/page/runtimeScroll.test.ts (Several triggers in one frame): unit test `P-08: layout triggers within one frame measure the page once`.
 - Method: test/page/diagReq.layout.requirements.test.ts (author pixel width and a gain of 1 px): unit test `Auto measures an image from the width its author wrote, and ignores a gain of 1 px or less`.
 - Method: test/visual/capture_layout_checks.py (wide table and oversized block): visual checks with a minimum margin of 15 px from the pane edge, and visual scenario v84 (table uncapped and rounded up).

@@ -1310,3 +1310,20 @@ test("Option turns the line into an option item and back as one undo step each",
   assert.equal(textarea.value, "- pick one");
   assert.equal(calls.length, 2);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+test("the key release of a typed key does not measure the caret again; a caret move does", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Second paragraph!";
+  textarea.setSelectionRange(17, 17);
+  textarea.dispatch("input");
+  // The caret is measured with a mirror of the text box, which reads the box itself.
+  const afterInput = textarea.rectReadCount;
+  assert.ok(afterInput > 0, "typing measures the caret");
+  textarea.dispatch("keyup", { key: "!" });
+  assert.equal(textarea.rectReadCount, afterInput, "same text, caret and scroll: no second measure");
+  textarea.setSelectionRange(3, 3);
+  textarea.dispatch("keyup", { key: "ArrowLeft" });
+  assert.ok(textarea.rectReadCount > afterInput, "a caret move measures again");
+});

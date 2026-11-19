@@ -392,19 +392,23 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-032
   // Keeps short identifiers whole in a table that scrolls sideways and flags the overflow so the
   // stylesheet can draw edge shadows. Attributes are written only when the value changes, so the
-  // ResizeObserver never loops.
+  // ResizeObserver never loops. All the cells are marked first, then every table is measured, then
+  // the flags are written, so a page of many tables lays out once, not once per table (issue 420).
   function markWideTables(): void {
-    document.querySelectorAll("#sphinx-myst-preview-content table").forEach((table) => {
-      if (table.closest("[data-okf-properties]")) return;
+    const tables = Array.from(document.querySelectorAll("#sphinx-myst-preview-content table"))
+      .filter((table) => !table.closest("[data-okf-properties]"));
+    tables.forEach((table) => {
       table.querySelectorAll("th, td").forEach((cell) => {
         if (cell.getAttribute("data-sphinx-short-cell") !== null) return;
         if (/^\S{1,24}$/u.test((cell.textContent ?? "").trim())) {
           cell.setAttribute("data-sphinx-short-cell", "true");
         }
       });
-      const overflowing = table.scrollWidth > table.clientWidth + 1;
-      if (overflowing !== (table.getAttribute("data-sphinx-table-overflow") === "true")) {
-        if (overflowing) table.setAttribute("data-sphinx-table-overflow", "true");
+    });
+    const overflowing = tables.map((table) => table.scrollWidth > table.clientWidth + 1);
+    tables.forEach((table, index) => {
+      if (overflowing[index] !== (table.getAttribute("data-sphinx-table-overflow") === "true")) {
+        if (overflowing[index]) table.setAttribute("data-sphinx-table-overflow", "true");
         else table.removeAttribute("data-sphinx-table-overflow");
       }
     });

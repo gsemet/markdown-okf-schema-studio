@@ -329,6 +329,16 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       edit.closeFigurePanel?.(false);
       edit.closeCodeBlockPanel?.(false);
     });
+    // Measuring the caret lays out the whole page. A typed key reveals it on `input`, then again on
+    // its `keyup`: the second reveal is skipped when the text, the selection and the scroll are
+    // still those of the first (issue 420).
+    let revealedAt = "";
+    const caretState = (): string => [textarea.value.length, textarea.selectionStart, textarea.selectionEnd,
+      window.scrollY, window.innerHeight].join(":");
+    const revealCaret = (): void => {
+      editorChrome.revealCaretBelowPalette(edit, textarea);
+      revealedAt = caretState();
+    };
     // @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
     let wasTall = false;
     textarea.addEventListener("input", (event) => {
@@ -345,14 +355,14 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       edit.closeFigurePanel?.(false);
       edit.closeCodeBlockPanel?.(false);
       palette.updateAvailability();
-      editorChrome.revealCaretBelowPalette(edit, textarea);
+      revealCaret();
       edit.slashMenu?.handleInput(event as InputEvent);
     });
     // The colour-code swatch follows the caret: arrows and selections end in a key or mouse release.
     for (const kind of ["keyup", "mouseup", "select"]) {
       textarea.addEventListener(kind, () => {
         palette.updateAvailability();
-        editorChrome.revealCaretBelowPalette(edit, textarea);
+        if (caretState() !== revealedAt) revealCaret();
         edit.slashMenu?.sync();
       });
     }

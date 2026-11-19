@@ -434,3 +434,35 @@ test("Auto gives the column width to a table edited as source, or holding anothe
     assert.equal((await layoutPass(page)).wide, false, `${themeId}: a table edited as source keeps the column width`);
   });
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("an editor opened on a paragraph does not measure the tables again; one opened on a table does", async (t) => {
+  await withPage(t, "A paragraph above the table.\n\n" + caseOf("two columns: long code paths"), async (page, themeId) => {
+    assert.equal((await layoutPass(page)).wide, true, `${themeId}: the table breaks out before any edit`);
+    // Each measure marks the measured tables with data-sphinx-preview-measuring, then unmarks them.
+    const measuresAfterEditing = (selector: string): Promise<number> => page.evaluate(async (target) => {
+      let marks = 0;
+      const observer = new MutationObserver((records) => {
+        marks += records.length;
+      });
+      observer.observe(document.getElementById("sphinx-myst-preview-content")!, {
+        attributes: true, attributeFilter: ["data-sphinx-preview-measuring"], subtree: true,
+      });
+      document.querySelector(target)!.setAttribute("data-sphinx-preview-editing", "true");
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      observer.disconnect();
+      document.querySelector(target)!.removeAttribute("data-sphinx-preview-editing");
+      return marks;
+    }, selector);
+    assert.equal(await measuresAfterEditing("#sphinx-myst-preview-content > p"), 0,
+      `${themeId}: a paragraph editor leaves the table verdicts as they are`);
+    // An editor on the table itself gives it the column width at once, with no other layout trigger.
+    const wideWhileEdited = await page.evaluate(async () => {
+      const table = document.querySelector("#sphinx-myst-preview-content > table, #sphinx-myst-preview-content > figure")!;
+      table.setAttribute("data-sphinx-preview-editing", "true");
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      return table.hasAttribute("data-sphinx-preview-wide");
+    });
+    assert.equal(wideWhileEdited, false, `${themeId}: a table editor takes the breakout back`);
+  });
+});
