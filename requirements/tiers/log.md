@@ -1,5 +1,17 @@
 # Update Log
 
+## 2026-11-19
+
+### Edit mode on large documents (issue 420)
+
+- Changed: SwRS-LAYOUT-023 gets the row "An editor opens or closes on a top-level block that cannot break
+  out: nothing is measured again" in its re-measure scenario; its known issue about the untested
+  mutation observer is removed (now tested in a real browser). SwRS-PALETTE-021 and SwRS-TABLE-002 get a
+  verification line each (no second caret measure on a key release; one table box read per handle
+  placement pass). No normative change.
+- Tests: `test/page/tableBreakout.test.ts`, `test/page/runtimeEditPalette.test.ts`,
+  `test/page/runtimeTableRowMove.test.ts`.
+
 ## 2026-11-18
 
 ### Garden the requirements of toolbar-navigation and lifecycle-sync (CR 346, round 4)

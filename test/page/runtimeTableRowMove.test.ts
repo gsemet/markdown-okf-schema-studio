@@ -748,3 +748,20 @@ test("Alt+Left on a column handle moves the column of a table whose row has a bl
   assert.equal(saves.length, 1);
   assert.equal(saves[0]?.editedText, "| H2 | H1 |\n| --- | --- |\n| 1 | a | ^row-a\n| 2 | b |\n| 3 | c |\n");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+test("placing the handles reads the box of a table once per pass, not once per handle", () => {
+  const harness = createRuntimeHarness();
+  const { table } = pipeTable(harness, 12);
+  harness.editModeButton.dispatch("click");
+  const handles = harness.createdElements.filter((element) => (element.getAttribute("data-okf-row-handle") !== null
+    || element.getAttribute("data-okf-col-handle") !== null) && !element.parentElement?.removed);
+  assert.equal(handles.length, 14, "12 row handles and 2 column handles");
+  table.rectReadCount = 0;
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  // Each pass reads it twice (the push left, then the handles); the resize runs a few passes.
+  assert.ok(table.rectReadCount > 0, "the handles were placed again");
+  assert.ok(table.rectReadCount < handles.length,
+    `${table.rectReadCount} reads of the table box for ${handles.length} handles`);
+});

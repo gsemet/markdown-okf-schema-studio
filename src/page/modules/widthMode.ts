@@ -386,7 +386,18 @@ export function installWidthMode(
   if (typeof MutationObserver !== "undefined") {
     const content = document.getElementById(contentId);
     if (content) {
-      new MutationObserver(update).observe(content, {
+      // Only a top-level block that can break out changes the verdict when its editor opens or
+      // closes: a paragraph editor no longer measures every table of the page (issue 420).
+      const canBreakOut = (node: Node): boolean => {
+        let top = node as Element | null;
+        while (top && top.parentElement !== content) top = top.parentElement;
+        if (!top) return false;
+        if (top.matches?.("table, figure, img, pre, .myst-mermaid-diagram") ?? true) return true;
+        return top.tagName === "P" && Boolean(top.querySelector?.("img"));
+      };
+      new MutationObserver((records) => {
+        if (records.some((record) => canBreakOut(record.target))) update();
+      }).observe(content, {
         attributes: true,
         attributeFilter: ["data-sphinx-preview-editing"],
         subtree: true,

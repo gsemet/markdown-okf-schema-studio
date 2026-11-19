@@ -486,6 +486,8 @@ export function installTableRowMove(rt: PageRuntime): TableRowMove {
   // pushed right (an attribute the stylesheet reads), so the handle never leaves the pane. A table
   // that is hidden (it is being edited as raw Markdown) shows no handle. Absolute page coordinates:
   // the layer sits at the page origin.
+  // Every box is read before any handle is written, so a page of many tables lays out twice (once
+  // for the push, once for the handles) instead of once per handle (issue 420).
   function position(): void {
     positionFrame = false;
     const scrollX = window.scrollX || 0;
@@ -493,11 +495,21 @@ export function installTableRowMove(rt: PageRuntime): TableRowMove {
     const tables = new Set(entries.filter((entry) => entry.axis === "row").map((entry) => entry.table));
     tables.forEach((table) => {
       if (table.getAttribute("data-okf-row-shift") !== null) table.removeAttribute("data-okf-row-shift");
-      if (table.getBoundingClientRect().left < HANDLE_SPACE) table.setAttribute("data-okf-row-shift", "true");
     });
-    entries.forEach(({ handle, axis, index, element, table }) => {
-      const tableBox = table.getBoundingClientRect();
+    const pushed = Array.from(tables).filter((table) => table.getBoundingClientRect().left < HANDLE_SPACE);
+    pushed.forEach((table) => table.setAttribute("data-okf-row-shift", "true"));
+    const tableBoxes = new Map<HTMLTableElement, DOMRect>();
+    const boxes = entries.map(({ axis, index, element, table }) => {
+      let tableBox = tableBoxes.get(table);
+      if (!tableBox) {
+        tableBox = table.getBoundingClientRect();
+        tableBoxes.set(table, tableBox);
+      }
       const box = (axis === "column" ? cellOf(table.rows[0], index) : element)?.getBoundingClientRect();
+      return { tableBox, box };
+    });
+    entries.forEach(({ handle, axis }, at) => {
+      const { tableBox, box } = boxes[at]!;
       const hidden = !box || tableBox.height === 0;
       handle.style.setProperty("display", hidden ? "none" : "");
       if (!box) return;
