@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- In edit mode, a click on a list item edits that item only, instead of the whole list; a click on
+  the list itself, outside its items, still edits the whole list. From the keyboard, Right goes
+  from a selected list to its items and from an item to its blocks, Left goes back up, and Enter
+  edits the selected list, item or block.
+- A new setting, `markdownOkfSchemaStudio.preview.listItemsInToc` (off by default), also lists the
+  items of top-level lists in the table of contents, by their first line, under the heading before
+  them: documents that write each requirement as a list item get a usable outline.
+
 ## 1.9.3 - 2026-11-19
 
 - Committing a block edit in edit mode shows the result at once on long documents: the preview no

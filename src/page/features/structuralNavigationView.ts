@@ -155,7 +155,8 @@ export function installStructuralNavigationView(rt: PageRuntime, host: Structura
         const node = resolve(root, from.path);
         if (!node) return false;
         const cell = from.cell ? rowsOf(tableOf(node.element) ?? node.element)[from.cell.row]?.[from.cell.column] : undefined;
-        rt.editMode.openMappedEditor(node.element, cell ?? node.element);
+        // `exact`: a block inside a list item opens on its own, not the whole item.
+        rt.editMode.openMappedEditor(node.element, cell ?? node.element, undefined, undefined, true);
         return true;
       }
       const key = KEYS[event.key];

@@ -19,6 +19,34 @@
 - Sources: `.github/workflows/ci.yml`.
 - Tests: `test/build/test_workflows.py`.
 
+### A click on a list item edits that item; list items can be listed in the TOC
+
+- Changed: SwRS-MDOKFSTUDIO-BLOCK-014 (a click on a list item opens that item only, on the range
+  the renderer gives the item; the list itself, outside its items, opens the whole list; the arrows
+  at the edge of an item editor go to the sibling item; an ordered list keeps its numbers while an
+  item is edited; known issue: Cmd+Alt+Up/Down does nothing in an item editor) and
+  SwRS-MDOKFSTUDIO-BLOCK-017 (the hover outlines the item, the list itself outlines the whole list).
+- Changed: SwRS-MDOKFSTUDIO-BLOCK-254 (ArrowRight goes from a selected list to its first item and
+  from an item to its first block, ArrowLeft back up; Enter opens the selected list, item or block
+  of an item on its own lines).
+- Added: SwRS-MDOKFSTUDIO-TOOLBAR-138 (proposed; with the new setting `preview.listItemsInToc`, off
+  by default, the TOC column lists the items of top-level lists by their first line cut to 80
+  characters, one level below the heading before them, as leaves without a rail tick; the `[TOC]`
+  list, the footnotes, table cells and hidden tab panels are left out). Changed:
+  SwRS-MDOKFSTUDIO-TOOLBAR-040 (related requirement only).
+- Why: in documents that write each requirement as a list item, a chapter is one long list, so a
+  click on one requirement opened every requirement of the chapter, and the TOC showed the
+  headings only. The owner chose this behaviour for every list (PR 404): a click edits one item,
+  the keyboard walks list, item and blocks like the inner blocks of an admonition, and the TOC
+  option is opt-in.
+- Tests: `test/session/listItemEditOpen.test.ts`, `test/page/blockReq.requirements.test.ts`,
+  `test/page/runtimeStructuralNavigation.test.ts`, `test/page/runtimeBlockEditor.test.ts` (the hover
+  now marks the item; the arrows at the edge of an item editor), `test/page/runtimeContentPatch.test.ts`,
+  `test/core/preview/previewStyles.test.ts`, `test/session/alertBlockEditOpen.test.ts` (the other item opens on its own
+  line), `test/page/modules/tocColumn.test.ts`, the configuration tests, the visual checks of
+  block-editing/v06 and v12 (renamed `v12-list-item-opens-item-dark-460`) and the real-window hover
+  of block-editing/r12.
+
 ## 2026-11-19
 
 ### Commit round trip of edit mode on large documents (issue 423)

@@ -142,6 +142,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.preview.codeBlocks.darkBackground",
       "markdownOkfSchemaStudio.preview.codeBlocks.lineNumbers",
       "markdownOkfSchemaStudio.preview.incrementalUpdates",
+      "markdownOkfSchemaStudio.preview.listItemsInToc",
       "markdownOkfSchemaStudio.preview.markEditorSelection",
       "markdownOkfSchemaStudio.preview.maxContentWidth",
       "markdownOkfSchemaStudio.preview.scrollEditorWithPreview",

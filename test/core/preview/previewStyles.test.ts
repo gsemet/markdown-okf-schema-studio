@@ -1477,3 +1477,9 @@ test("code blocks use one font scale, one box, and scroll a long line only when 
   const nested = rule("#sphinx-myst-preview-content .myst-directive pre");
   assert.doesNotMatch(nested, /border|background|font-size|color/u);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("the editor of an ordered list item counts as that item, so the next items keep their numbers", () => {
+  assert.match(PREVIEW_THEME_CSS,
+    /ol > li\[data-sphinx-preview-editing="true"\] \+ \.sphinx-preview-block-editor,\s*ol > li\[data-sphinx-preview-editing="true"\] \+ \.sphinx-preview-block-editor-host \{\s*counter-increment: list-item;/u);
+});

@@ -5,10 +5,11 @@ uuid: b68037d3-fe4d-4b5c-93c4-f89c9d6df6ae
 title: Right and Left move the block selection down and up the structure
 description: When edit mode is on and no editor is open, the page SHALL move the
   keyboard selection one level down with ArrowRight (a table to its first cell,
-  an admonition, card or tab to its first inner block, the whole page to its
-  first block) and one level up with ArrowLeft or Escape, move a selected table
-  cell with the four arrow keys without wrapping, and open the cell editor with
-  Enter.
+  an admonition, card or tab to its first inner block, a list to its first item,
+  a list item to its first inner block, the whole page to its first block) and
+  one level up with ArrowLeft or Escape, move a selected table cell with the
+  four arrow keys without wrapping, and open with Enter the editor of the
+  selected cell, list item or block of a list item.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -31,6 +32,7 @@ tested_in_files:
 - test/integration/realInput/blockKeys.ts
 - test/page/modules/structuralCursor.test.ts
 - test/page/runtimeStructuralNavigation.test.ts
+- test/session/listItemEditOpen.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -39,7 +41,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When edit mode is on and no editor is open, the page SHALL move the keyboard selection one level down with ArrowRight (a table to its first cell, an admonition, card or tab to its first inner block, the whole page to its first block) and one level up with ArrowLeft or Escape, move a selected table cell with the four arrow keys without wrapping, and open the cell editor with Enter.
+When edit mode is on and no editor is open, the page SHALL move the keyboard selection one level down with ArrowRight (a table to its first cell, an admonition, card or tab to its first inner block, a list to its first item, a list item to its first inner block, the whole page to its first block) and one level up with ArrowLeft or Escape, move a selected table cell with the four arrow keys without wrapping, and open with Enter the editor of the selected cell, list item or block of a list item.
 
 ### Scenario (nominal): Right goes down, Left and Escape go up
 
@@ -64,6 +66,14 @@ When edit mode is on and no editor is open, the page SHALL move the keyboard sel
 
 Escape returns the selection to the table block. Enter opens the cell editor through the same path as a click on the cell, and the cell highlight goes away.
 
+### Scenario (nominal): Walking a list
+
+- GIVEN edit mode on, no editor open and a list selected by the keyboard, whose first item (lines 80 to 83, line 83 blank) holds two paragraphs (lines 80 and 82) and whose second item holds one paragraph (lines 84 and 85)
+- WHEN the writer presses ArrowRight, then Enter; or ArrowRight twice, ArrowDown, then Enter; or ArrowRight twice, ArrowLeft twice, then Enter
+- THEN ArrowRight selects the first item and Enter opens it on lines 80 to 83; ArrowRight on the item selects its first paragraph, ArrowDown the second, and Enter opens that paragraph only, on lines 82 to 83 (a block mapped to one line reaches the line before the next block of the item, or the end of the item, so a paragraph of a tight item keeps all its wrapped lines); ArrowLeft goes back to the item, then to the list, and Enter on the list opens the whole list, lines 80 to 85
+
+A click on a list item opens the item, not the block under the click (SwRS-MDOKFSTUDIO-BLOCK-014): only the keyboard reaches a block inside an item.
+
 ### Scenario (refusal): Keys that belong to other controls
 
 | Input | Outcome |
@@ -75,9 +85,10 @@ Escape returns the selection to the table block. Enter opens the cell editor thr
 
 - Method: test/page/modules/structuralCursor.test.ts, unit tests of the model (down, up, grid moves with edge stops and column clamping, whole-document start, unknown positions).
 - Method: test/page/runtimeStructuralNavigation.test.ts, unit tests `CR 157: ...` over the page script: Right into the first cell, cell-to-cell arrows with edge stops, Escape back to the table, Enter opening the cell editor, Right into an admonition, Left and Escape up, Right on the whole page, leaves and top level, keys left alone.
+- Method: test/page/runtimeStructuralNavigation.test.ts (`Right walks a list down to its items and their blocks, Enter edits the selected level, Left goes back up`: list scenario) and test/session/listItemEditOpen.test.ts (`from the keyboard, an item opens on its lines and a block inside it opens on its own lines`: the ranges on Markdown rendered like the preview, the tight item paragraph).
 - Method: test/visual/scenarioDefinitions1.ts, visual scenarios block-editing/v20 (light) and v21 (dark): Down then Right leaves the first header cell outlined, with no editor open.
 - Method: test/integration/realInput/blockKeys.ts, real VS Code window: Right into the first cell and Escape back to the table block.
-- Criteria: The structural listener of features/blockSelectionView.ts runs before the plain-key listener and the page input; the model is modules/structuralCursor.ts.
+- Criteria: The structural listener of features/blockSelectionView.ts runs before the plain-key listener and the page input; the model is modules/structuralCursor.ts; Enter on an inner block calls `openMappedEditor` with `exact`, so `editingElementFor` (src/page/features/mappedBlocks.ts) gives a block inside a list item its own range (sourceRangeForInnerBlock) instead of the item's.
 
 <!-- okf:links:start -->
 ### Links

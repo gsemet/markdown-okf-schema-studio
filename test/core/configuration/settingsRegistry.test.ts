@@ -59,6 +59,7 @@ test("a setting with nothing stored reads as its schema default", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
 test("the page gets the scroll, reveal, sticky band and comment chip settings in its boot context", () => {
   assert.deepEqual(bootSettingKeys(PREVIEW_SETTINGS), [
     "scrollPreviewWithEditor",
@@ -68,6 +69,7 @@ test("the page gets the scroll, reveal, sticky band and comment chip settings in
     "showComments",
     "codeBlocks.darkBackground",
     "codeBlocks.lineNumbers",
+    "listItemsInToc",
   ]);
   assert.deepEqual(PREVIEW_STARTUP_SETTING_KEYS, [
     "scrollPreviewWithEditor",
@@ -76,6 +78,7 @@ test("the page gets the scroll, reveal, sticky band and comment chip settings in
     "stickyHeadingDepth",
     "codeBlocks.darkBackground",
     "codeBlocks.lineNumbers",
+    "listItemsInToc",
   ]);
   assert.deepEqual(bootSettingKeys(PREVIEW_SETTINGS, "live"), ["showComments"]);
 });
@@ -93,9 +96,11 @@ test("the host writes the boot settings as configured, in table order", () => {
     showComments: true,
     "codeBlocks.darkBackground": true,
     "codeBlocks.lineNumbers": true,
+    listItemsInToc: false,
   }));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
 test("the page reads missing or odd boot entries with the page defaults", () => {
   assert.deepEqual(readPreviewBootSettings({}), {
     scrollPreviewWithEditor: true,
@@ -105,6 +110,7 @@ test("the page reads missing or odd boot entries with the page defaults", () => 
     showComments: true,
     "codeBlocks.darkBackground": true,
     "codeBlocks.lineNumbers": true,
+    listItemsInToc: false,
   });
   assert.deepEqual(readPreviewBootSettings({
     scrollPreviewWithEditor: "no",
@@ -114,6 +120,7 @@ test("the page reads missing or odd boot entries with the page defaults", () => 
     showComments: false,
     "codeBlocks.darkBackground": "no",
     "codeBlocks.lineNumbers": false,
+    listItemsInToc: "yes",
   }), {
     scrollPreviewWithEditor: true,
     scrollEditorWithPreview: false,
@@ -122,6 +129,7 @@ test("the page reads missing or odd boot entries with the page defaults", () => 
     showComments: false,
     "codeBlocks.darkBackground": true,
     "codeBlocks.lineNumbers": false,
+    listItemsInToc: false,
   });
 });
 

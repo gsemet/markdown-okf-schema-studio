@@ -77,7 +77,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     editMode: true,
     editTarget: "list",
     description:
-      "Clicking one item opens the complete list, including a wrapped continuation line, in the editor.",
+      "Clicking one item opens that item only, including its wrapped continuation line, in the editor.",
   },
   {
     id: "edit-table-wide-end-dark",

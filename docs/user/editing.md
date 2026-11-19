@@ -42,6 +42,10 @@ environments),
 - **Inline editing:** click a rendered block to edit its source Markdown. Save with Done
   or Cmd/Ctrl+Enter; Cancel or Escape restores the original block. Tables and frontmatter support
   keyboard navigation, row creation, and focused field editing.
+  A click on a list item edits that item only; a click on the list itself, outside its items,
+  edits the whole list. From the keyboard, select the list, press Right to go to its items and
+  Right again to go to the blocks of an item, Left to go back up, and Enter to edit the selected
+  list, item or block.
   The "+" bar under a body block also has up and down arrows that swap the block above the bar
   with its neighbour in one undo step; blocks from an included file are not moved.
   The "+" bar and its arrows show on one block at a time: the one that moved last, by keyboard

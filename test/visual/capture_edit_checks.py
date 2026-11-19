@@ -1037,19 +1037,17 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
         if not source.startswith("```{warning}") or not source.rstrip().endswith("```"):
           failures.append(Failure(page_name, "admonition editor does not contain both fences"))
       elif edit_target == "list":
-        expected_lines = [
-          "- Method: automated CLI tests over fixed knowledge-base fixtures.",
-          "- Criteria: repeated operations are stable and failed operations leave authored",
-          "  fixture content intact.",
-        ]
+        # A click on a list item opens that item only, its wrapped continuation line included.
+        expected_lines = ["- Criteria: repeated operations are stable and failed operations leave authored",
+                          "  fixture content intact."]
         if editor.input_value().splitlines() != expected_lines:
-          failures.append(Failure(page_name, "list editor does not contain every item and continuation line"))
-        mapped_list = page.locator('main ul[data-sphinx-preview-editing="true"]')
-        if mapped_list.count() != 1 or mapped_list.is_visible():
-          failures.append(Failure(page_name, "editing one list item did not replace the whole list"))
+          failures.append(Failure(page_name, "list item editor does not contain the item and its continuation line"))
+        mapped_item = page.locator('main ul > li[data-sphinx-preview-editing="true"]')
+        if mapped_item.count() != 1 or mapped_item.is_visible() or page.locator('main ul[data-sphinx-preview-editing="true"]').count():
+          failures.append(Failure(page_name, "editing one list item did not replace that item alone"))
         elif not editor.evaluate("""element => (element.closest('.sphinx-preview-block-editor-host') ?? element.parentElement)
-          ?.previousElementSibling?.matches('ul[data-sphinx-preview-editing="true"]') === true"""):
-          failures.append(Failure(page_name, "list editor is not positioned after the hidden whole list"))
+          ?.previousElementSibling?.matches('li[data-sphinx-preview-editing="true"]') === true"""):
+          failures.append(Failure(page_name, "list item editor is not positioned after the hidden item"))
         elif editor.evaluate("""element => element.scrollHeight > element.clientHeight + 1
           || element.scrollWidth > element.clientWidth + 1
           || element.scrollTop > 0 || element.scrollLeft > 0"""):

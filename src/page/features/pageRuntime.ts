@@ -245,6 +245,11 @@ export interface PendingBlockNavigation {
   thenMove?: { direction: "up" | "down"; caretOffset: number };
   blockId?: string;
   sourceLine: number;
+  /**
+   * The tag of the block to reopen: a list item and its list (or its first paragraph) start on the
+   * same line, so the line alone does not name it.
+   */
+  tagName?: string;
   caretPosition: CaretPosition;
   tableRowIndex?: number;
   tableColumnIndex?: number;
@@ -398,8 +403,15 @@ export interface MappedBlocks {
   bodyBlockAtLine(line: number): HTMLElement | undefined;
   /** The properties section (frontmatter table), if the page shows one. */
   propertiesSection(): HTMLElement | null | undefined;
-  /** The element an edit of `target` opens on: its whole list, with the list's source range. */
-  editingElementFor(target: HTMLElement): { element: HTMLElement; sourceRange: { line: number; endLine: number } | undefined };
+  /**
+   * The element an edit of `target` opens on, with its source range: the nearest GitHub alert or
+   * admonition, else the list item that holds `target` (the whole list for the list itself), else
+   * `target`. With `exact` (the keyboard), a block inside a list item opens on its own.
+   */
+  editingElementFor(
+    target: HTMLElement,
+    options?: { exact?: boolean },
+  ): { element: HTMLElement; sourceRange: { line: number; endLine: number } | undefined };
   /** True when the page shows a rendered preview (not a status page). */
   hasRenderedPreview(): boolean;
 }
@@ -641,7 +653,17 @@ export interface TableRowMove {
 export interface EditMode {
   applyEditMode(enabled: boolean): void;
   setEditHover(element: Element | undefined): void;
-  openMappedEditor(target: HTMLElement, eventTarget: Element, initialCaretPosition?: CaretPosition, reveal?: boolean): void;
+  /**
+   * Opens the editor of `target` (see `MappedBlocks.editingElementFor`); `exact` opens a block
+   * inside a list item on its own (keyboard navigation), not the whole item.
+   */
+  openMappedEditor(
+    target: HTMLElement,
+    eventTarget: Element,
+    initialCaretPosition?: CaretPosition,
+    reveal?: boolean,
+    exact?: boolean,
+  ): void;
   clickCaretContext(target: HTMLElement, eventTarget: Element, x: number, y: number): CaretPoint | undefined;
   resumePendingBlockNavigation(): void;
   /** The edit mode toggle of the toolbar. */
