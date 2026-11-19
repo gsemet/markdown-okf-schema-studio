@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { installTocColumn } from "../../../src/page/modules/tocColumn";
+import { installTocColumn, LIST_ITEM_TEXT_LIMIT } from "../../../src/page/modules/tocColumn";
 
 type Handler = (event: any) => void;
 
@@ -11,6 +11,7 @@ class FakeElement {
   styles = new Map<string, string>();
   children: FakeElement[] = [];
   parent: FakeElement | undefined;
+  get parentElement(): FakeElement | null { return this.parent ?? null; }
   ownText: string | null = null;
   rect = { top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0 };
   constructor(public tagName: string, public classes: string[] = []) {}
@@ -32,6 +33,8 @@ class FakeElement {
   remove() { if (this.parent) this.parent.children = this.parent.children.filter((c) => c !== this); this.parent = undefined; }
   getBoundingClientRect() { return this.rect; }
   matches(token: string): boolean {
+    const dot = token.indexOf(".");
+    if (dot > 0) return this.matches(token.slice(0, dot)) && this.matches(token.slice(dot));
     if (token.startsWith(".")) return this.classes.includes(token.slice(1));
     if (token.startsWith("[")) return this.attrs.has(token.slice(1, -1));
     return this.tagName.toLowerCase() === token;
@@ -77,7 +80,7 @@ function heading(tag: string, text: string, ...extra: FakeElement[]): FakeElemen
   return element;
 }
 
-function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?: boolean } = {}) {
+function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?: boolean; listItemsInToc?: boolean } = {}) {
   const content = new FakeElement("div");
   content.attrs.set("id", "sphinx-myst-preview-content");
   const body = new FakeElement("body");
@@ -123,7 +126,10 @@ function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?:
       getState: () => state,
       setState: (next: unknown) => { state = next as Record<string, unknown>; },
     },
-    { documentId: "doc", revision: 1, requestId: 2, initialViewPreferences: { toc: options.toc } },
+    {
+      documentId: "doc", revision: 1, requestId: 2, initialViewPreferences: { toc: options.toc },
+      ...(options.listItemsInToc === undefined ? {} : { listItemsInToc: options.listItemsInToc }),
+    },
     (target) => scrolled.push(target as never),
     () => { changes += 1; },
     () => 40,
@@ -593,4 +599,148 @@ test("closing the TOC closes the overlay and an entry click in the overlay close
   rail().fire("mouseenter");
   button.fire("click");
   assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
+});
+
+/** A list item whose first paragraph reads `header`, then a second paragraph. */
+function listItem(header: string, attributes: Record<string, string> = {}): FakeElement {
+  const item = new FakeElement("li");
+  for (const [name, value] of Object.entries(attributes)) item.attrs.set(name, value);
+  const first = new FakeElement("p");
+  first.ownText = header;
+  const body = new FakeElement("p");
+  body.ownText = "The system shall brake within 200 ms.";
+  item.appendChild(first);
+  item.appendChild(body);
+  return item;
+}
+
+const LONG_LINE = "A requirement whose first line is much longer than the table of contents can show on one line of text";
+
+/** A chapter of list items under two headings, with a nested list and items without wording. */
+function listChapter(content: FakeElement): void {
+  const before = new FakeElement("ul");
+  before.appendChild(listItem("Before any heading"));
+  content.appendChild(before);
+  content.appendChild(heading("h1", "Braking"));
+  const list = new FakeElement("ul");
+  const first = list.appendChild(listItem("[SRS_0001] Brake on demand"));
+  const nested = new FakeElement("ul");
+  nested.appendChild(listItem("a nested item"));
+  first.appendChild(nested);
+  list.appendChild(listItem("-"));
+  list.appendChild(listItem(LONG_LINE));
+  content.appendChild(list);
+  content.appendChild(heading("h2", "Release"));
+  const second = new FakeElement("ol");
+  second.appendChild(listItem("Release   on demand"));
+  content.appendChild(second);
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+test("with listItemsInToc on, top-level list items are listed one level below their heading, without a tick", () => {
+  const { content, toc, flush, entries, ticks, scrolled } = setup({ toc: true, listItemsInToc: true });
+  listChapter(content);
+  toc.refresh();
+  flush();
+  const cut = Array.from(LONG_LINE).slice(0, LIST_ITEM_TEXT_LIMIT - 1).join("").trimEnd() + "\u2026";
+  assert.deepEqual(entries().map((entry) => entry.textContent), [
+    "Before any heading",
+    "Braking",
+    "[SRS_0001] Brake on demand",
+    cut,
+    "Release",
+    "Release on demand",
+  ], "a nested item and an item without a letter or digit are left out; a long first line is cut");
+  assert.equal(Array.from(cut).length, LIST_ITEM_TEXT_LIMIT);
+  assert.deepEqual(entries().map((entry) => entry.parent!.getAttribute("data-level")), ["1", "1", "2", "2", "2", "3"]);
+  assert.deepEqual(ticks().map((tick) => tick.getAttribute("aria-label")), ["Braking", "Release"]);
+  assert.equal(entries()[2].parent!.hasAttribute("data-sphinx-preview-toc-list-item"), true);
+  entries()[2].fire("click");
+  assert.equal(scrolled.at(-1)?.tagName, "li", "a click goes to the item");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+test("a list item is a leaf: a deeper heading after it belongs to the heading before the item", () => {
+  const { content, toc, flush, entries, twisties } = setup({ toc: true, listItemsInToc: true });
+  const before = new FakeElement("ul");
+  before.appendChild(listItem("Before any heading"));
+  content.appendChild(before);
+  content.appendChild(heading("h2", "Overview"));
+  content.appendChild(heading("h1", "Top"));
+  const list = new FakeElement("ul");
+  list.appendChild(listItem("First"));
+  list.appendChild(listItem("Second"));
+  content.appendChild(list);
+  content.appendChild(heading("h3", "Deep"));
+  toc.refresh();
+  flush();
+  const hasTwisty = (entry: FakeElement) => entry.parent!.all("button").some((button) => button.attrs.has("data-sphinx-preview-toc-twisty"));
+  assert.deepEqual(entries().map((entry) => [entry.textContent, hasTwisty(entry)]), [
+    ["Before any heading", false],
+    ["Overview", false],
+    ["Top", true],
+    ["First", false],
+    ["Second", false],
+    ["Deep", false],
+  ], "no item gets a twisty; Top folds its items and Deep");
+  assert.equal(twisties().length, 1);
+  twisties()[0]!.fire("click");
+  assert.deepEqual(entries().map(hiddenOf), [false, false, false, true, true, true]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+test("the generated [TOC] list, footnotes, table cells and hidden panels are not listed", () => {
+  const { content, toc, flush, entries } = setup({ toc: true, listItemsInToc: true });
+  content.appendChild(heading("h1", "Top"));
+  const wrap = (tag: string, attributes: Record<string, string>, classes: string[] = []): FakeElement => {
+    const container = new FakeElement(tag, classes);
+    for (const [name, value] of Object.entries(attributes)) container.attrs.set(name, value);
+    const list = new FakeElement("ul");
+    list.appendChild(listItem("Inside " + tag));
+    container.appendChild(list);
+    return content.appendChild(container);
+  };
+  wrap("nav", {}, ["okf-toc"]);
+  wrap("section", {}, ["footnotes"]);
+  wrap("table", {});
+  wrap("div", { hidden: "" });
+  const kept = new FakeElement("ul");
+  kept.appendChild(listItem("A document item"));
+  content.appendChild(kept);
+  toc.refresh();
+  flush();
+  assert.deepEqual(entries().map((entry) => entry.textContent), ["Top", "A document item"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+test("with listItemsInToc off or absent, the default, the TOC lists the headings only", () => {
+  for (const options of [{ toc: true, listItemsInToc: false }, { toc: true }]) {
+    const { content, toc, flush, entries } = setup(options);
+    listChapter(content);
+    toc.refresh();
+    flush();
+    assert.deepEqual(entries().map((entry) => entry.textContent), ["Braking", "Release"]);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+test("at a list item, the TOC marks the item and the rail marks the tick of its section", () => {
+  const { content, toc, window, flush, entries, ticks } = setup({ toc: true, listItemsInToc: true });
+  content.appendChild(heading("h1", "Braking"));
+  const list = new FakeElement("ul");
+  list.appendChild(listItem("Brake on demand"));
+  content.appendChild(list);
+  content.appendChild(heading("h2", "Release"));
+  const tops = new Map<string, number>([["Braking", 100], ["Brake on demand", 300], ["Release", 900]]);
+  for (const element of content.all("h1, h2, li")) {
+    const label = element.tagName === "li" ? element.children[0]!.textContent : element.textContent;
+    element.rect = { ...element.rect, top: tops.get(label) ?? 5000 };
+  }
+  toc.refresh();
+  flush();
+  window.scrollY = 300; // reading line at 340: after the item (300), before Release (900)
+  toc.track();
+  assert.deepEqual(entries().map((entry) => entry.getAttribute("aria-current")), [null, "location", null]);
+  assert.deepEqual(ticks().map((tick) => tick.hasAttribute("data-sphinx-preview-toc-tick-current")), [true, false]);
 });

@@ -15,6 +15,9 @@ narrow and covers little of the page:
 The Table of contents toolbar button shows the outline of the whole document next to the preview. A
 `[TOC]` line (or `[[_TOC_]]`, or a `{contents}` directive) in the text (inserted by the Table of contents button of the edition palette or by
 `/toc`) renders the same headings as a list inside the document itself.
+With `preview.listItemsInToc` on (off by default), the table of contents button also lists the
+items of top-level lists under their heading; the `[TOC]` list in the document keeps the headings
+only. See [Settings](settings.md).
 
 The **Side-by-side** toggle turns each block changed since the last Git commit into a small diff
 card: the block as it was at the last commit on the left, as it is now on the right, both rendered,

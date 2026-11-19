@@ -731,14 +731,17 @@ export async function scenarioEditAffordances(page: Page, evidence: Evidence): P
     await openSidePreview(source);
     await waitForRender(source);
     await setEditMode(page, true);
-    await withCurrentFrame(page, (frame) => frame.locator("li", { hasText: "inner a" }).first().hover());
-    await waitFor("the hovered list to carry the outline attribute", async () => {
+    await withCurrentFrame(page, (frame) => frame.locator("ul ul > li", { hasText: "inner a" }).first().hover());
+    // A list item is edited on its own: the hover outlines the nested item, not its list.
+    await waitFor("the hovered nested item to carry the outline attribute", async () => {
       const current = await findCurrentFrame(page);
-      return current !== undefined
-        && await current.locator("ul[data-sphinx-preview-edit-hover='true']").count() === 1;
+      const outlined = current?.locator("[data-sphinx-preview-edit-hover='true']");
+      return outlined !== undefined
+        && await outlined.count() === 1
+        && await outlined.first().evaluate((element) => element.tagName === "LI" && element.textContent?.trim() === "inner a");
     });
     await captureAfter(evidence, page, "block-editing/r12-edit-hover",
-      "Edit mode on; hovering the nested item outlines the list a click would edit.");
+      "Edit mode on; hovering the nested item outlines that item, the block a click would edit.");
 
     await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Alpha paragraph." }).click());
     await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");

@@ -81,6 +81,10 @@ When the column is built, the extension SHALL list the headings h1 to h4 of the 
 - WHEN the first is folded
 - THEN only the first is folded, because the key holds the occurrence number
 
+### Related requirements
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-138: with `preview.listItemsInToc` on (off by default), the column also lists the items of top-level lists, one level below their heading.
+
 ### Verification notes
 - Method: test/page/modules/tocColumn.test.ts (Four levels and Indent, text and excluded headings: the entries list h1 to h4 with their level and without the permalink glyph, headings in properties, admonitions, block editors and the sticky band are left out, a comment chip and its hidden body stay out of the entry label and a TODO word chip stays in; No headings: an empty document shows No headings; Landmark: the TOC is off by default and the page is marked closed, asserting the aria-label; Fold and Twisty by entry: only parent entries get a twisty with aria-expanded, collapsing a parent hides its descendants, collapsing a middle parent hides only its own subtree; the twisty name switches between Fold and Unfold; Folded sections are remembered and Same text twice: a rebuild keeps it collapsed and a repeated heading text is told apart by its occurrence). The shallowest-level indent, the empty-text skip and the case of only excluded headings are untested.
 - Method: test/page/runtimePageControls.test.ts (Folded sections are remembered: T13, a state snapshot keeps the TOC visibility and the folded sections).

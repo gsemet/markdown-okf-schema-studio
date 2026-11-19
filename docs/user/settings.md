@@ -43,6 +43,12 @@ width;
   more. The numbers are never copied, neither by the copy button nor by a selection. A MyST
   `{code-block}` with `:linenos:` or `:lineno-start:` is numbered whatever this setting says, and
   `:emphasize-lines:` highlights the listed lines.
+- `preview.listItemsInToc` (default off): the table of contents also lists the items of top-level
+  lists (not a list inside another item), by their first line cut to about 80 characters, one
+  level below the heading before them. Turn it on for documents that write each requirement, rule
+  or record as a list item, such as [MarkSpec](https://driftsys.github.io/markspec/)
+  specifications, where the requirements have no headings of their own. An item whose first line
+  has no letter or digit is left out; the rail of a narrow pane keeps one tick per heading only.
 - `preview.scrollPreviewWithEditor` (default on): editor scrolling moves the preview; the toolbar
   anchor button overrides it per panel.
 - `preview.scrollEditorWithPreview` (default on): preview scrolling and clicks reveal the source.

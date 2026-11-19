@@ -34,9 +34,18 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content .myst-grid
 `;
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-017
-/** The dashed hover outline of what a click would edit. */
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+/**
+ * The dashed hover outline of what a click would edit, and the hidden block under an editor; the
+ * editor of an item of an ordered list counts as that item, so the next items keep their numbers.
+ */
 const EDIT_HOVER_OUTLINE_CSS = `[data-sphinx-preview-editing="true"] {
   display: none !important;
+}
+
+ol > li[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor,
+ol > li[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host {
+  counter-increment: list-item;
 }
 
 html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-edit-hover="true"] {

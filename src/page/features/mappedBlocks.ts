@@ -91,15 +91,20 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
   function sourceRangeForList(list: Element, reference: Element): { line: number; endLine: number } | undefined {
-    const sourceFile = reference.getAttribute("data-sphinx-source-file");
-    const documentId = reference.getAttribute("data-sphinx-preview-document");
     const mappedElements: Element[] = [];
     if (list.getAttribute("data-sphinx-source-line") !== null) mappedElements.push(list);
     mappedElements.push(...list.querySelectorAll(MAPPINGS_SELECTOR));
+    return spanOf(mappedElements, reference);
+  }
 
+  // The first and last line of the `elements` mapped to the same source file and document as
+  // `reference`.
+  function spanOf(elements: Element[], reference: Element): { line: number; endLine: number } | undefined {
+    const sourceFile = reference.getAttribute("data-sphinx-source-file");
+    const documentId = reference.getAttribute("data-sphinx-preview-document");
     let firstLine = Number.POSITIVE_INFINITY;
     let lastLine = 0;
-    for (const element of mappedElements) {
+    for (const element of elements) {
       if (
         element.getAttribute("data-sphinx-source-file") !== sourceFile
         || element.getAttribute("data-sphinx-preview-document") !== documentId
@@ -132,7 +137,30 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
     return { line, endLine };
   }
 
-  function editingElementFor(target: HTMLElement): ReturnType<MappedBlocks["editingElementFor"]> {
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+  // The lines of a list item: the range the renderer gives the item (from its first line to the
+  // line before the next item, so a blank line that separates two items belongs to the first,
+  // as it belongs to the list), widened to the mapped blocks inside it.
+  function sourceRangeForItem(item: Element, reference: Element): { line: number; endLine: number } | undefined {
+    return spanOf([item, ...item.querySelectorAll(MAPPINGS_SELECTOR)], reference);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-254
+  // The lines of a block inside a list item, edited on its own from the keyboard. The paragraph of
+  // a tight item is mapped to its first line only: a block mapped to one line reaches the line
+  // before the next mapped block of the item, or the end of the item.
+  function sourceRangeForInnerBlock(block: Element, item: Element): { line: number; endLine: number } | undefined {
+    const span = spanOf([block], block);
+    if (!span || span.endLine > span.line) return span;
+    const itemEnd = Number(item.getAttribute("data-sphinx-source-end-line"));
+    const next = mappedChildren(item).map((child) => Number(child.getAttribute("data-sphinx-source-line")))
+      .filter((line) => line > span.line)
+      .sort((left, right) => left - right)[0];
+    const limit = next !== undefined ? next - 1 : itemEnd;
+    return Number.isSafeInteger(limit) && limit > span.endLine ? { line: span.line, endLine: limit } : span;
+  }
+
+  function editingElementFor(target: HTMLElement, options: { exact?: boolean } = {}): ReturnType<MappedBlocks["editingElementFor"]> {
     // A block in the body of a GitHub alert or of a MyST admonition (a paragraph, a list) edits the
     // whole alert or directive, like a click on its title; the nearest one wins, and one inside a
     // list item edits that block, not the list.
@@ -147,8 +175,20 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
       const sourceRange = sourceRangeForAlert(alert, target);
       if (sourceRange) return { element: alert, sourceRange };
     }
+    // A click in a list item edits that item; a click on the list itself (outside its items)
+    // edits the whole list. From the keyboard (`exact`), a block inside an item edits that block.
     const list = target.closest?.<HTMLElement>("ul, ol");
     if (list) {
+      const item = target.closest?.<HTMLElement>("li");
+      if (item && item.parentElement === list) {
+        if (options.exact && target !== item) {
+          const sourceRange = sourceRangeForInnerBlock(target, item);
+          if (sourceRange) return { element: target, sourceRange };
+        } else {
+          const sourceRange = sourceRangeForItem(item, target);
+          if (sourceRange) return { element: item, sourceRange };
+        }
+      }
       const sourceRange = sourceRangeForList(list, target);
       if (sourceRange) return { element: list, sourceRange };
     }

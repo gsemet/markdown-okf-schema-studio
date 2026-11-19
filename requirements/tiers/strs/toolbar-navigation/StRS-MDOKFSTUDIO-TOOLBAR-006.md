@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-040
 - SwRS-MDOKFSTUDIO-TOOLBAR-045
 - SwRS-MDOKFSTUDIO-TOOLBAR-133
+- SwRS-MDOKFSTUDIO-TOOLBAR-138
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -99,4 +100,5 @@ stateDiagram-v2
   - [SwRS-MDOKFSTUDIO-TOOLBAR-040](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-040.md): The column lists the h1 to h4 headings with folding
   - [SwRS-MDOKFSTUDIO-TOOLBAR-045](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-045.md): The column marks the section being read and jumps on click
   - [SwRS-MDOKFSTUDIO-TOOLBAR-133](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-133.md): The narrow-pane rail keeps the text and the other Escape handlers clear
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-138](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-138.md): The column lists the items of top-level lists when a setting asks
 <!-- okf:links:end -->
