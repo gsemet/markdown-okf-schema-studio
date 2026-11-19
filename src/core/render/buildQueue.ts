@@ -15,6 +15,11 @@ export interface BuildRequest<TDocument extends QueueDocument> {
   document: TDocument;
 }
 
+export interface BuildRequestOptions {
+  /** Start without the wait: a running build still finishes first (see `startPending`). */
+  immediate?: boolean;
+}
+
 export type BuildPhase =
   | "idle"
   | "debouncing"
@@ -178,7 +183,14 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
-  public request(document: TDocument): Promise<BuildQueueOutcome<TResult, TDocument>> {
+  /**
+   * Queues a build of `document` after the adaptive wait, or at once with `immediate` (a single
+   * edit the writer is waiting to see, not a keystroke of a burst).
+   */
+  public request(
+    document: TDocument,
+    options: BuildRequestOptions = {},
+  ): Promise<BuildQueueOutcome<TResult, TDocument>> {
     const request: BuildRequest<TDocument> = {
       requestId: ++this.requestCounter,
       documentVersion: this.revisionOf(document),
@@ -204,12 +216,15 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
       this.timer = setTimeout(() => {
         this.timer = undefined;
         this.startPending();
-      }, this.currentDebounceMs());
+      }, options.immediate ? 0 : this.currentDebounceMs());
     });
   }
 
-  public refresh(document: TDocument): Promise<BuildQueueOutcome<TResult, TDocument>> {
-    return this.request(document);
+  public refresh(
+    document: TDocument,
+    options: BuildRequestOptions = {},
+  ): Promise<BuildQueueOutcome<TResult, TDocument>> {
+    return this.request(document, options);
   }
 
   public cancel(): void {

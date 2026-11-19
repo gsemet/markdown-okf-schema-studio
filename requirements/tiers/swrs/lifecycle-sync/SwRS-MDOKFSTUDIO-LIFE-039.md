@@ -6,12 +6,13 @@ title: Typing renders the new text after a short pause, without writing files
 description: When the text of a document changes, saved or not, the extension
   SHALL queue a render of the new text in every preview that shows that
   document, start it after a pause of 40 ms or of twice the last render time
-  when that is longer (at most 1 s), let a running render finish first unless it
-  has run more than 1 s and more than twice the wall-clock time of the last
-  render when the newer render is due (then abort it), without writing to the
-  shown file or to any build output folder of the workspace; a preview whose
-  panel is hidden SHALL not render until the panel is shown, and previews of the
-  same document, revision and render options SHALL share one render.
+  when that is longer (at most 1 s), or at once after a block edit is committed,
+  let a running render finish first unless it has run more than 1 s and more
+  than twice the wall-clock time of the last render when the newer render is due
+  (then abort it), without writing to the shown file or to any build output
+  folder of the workspace; a preview whose panel is hidden SHALL not render
+  until the panel is shown, and previews of the same document, revision and
+  render options SHALL share one render.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -29,6 +30,7 @@ derived_by: []
 implemented_in_files:
 - src/core/render/buildQueue.ts
 - src/core/render/renderPipeline.ts
+- src/session/features/blockEdits.ts
 - src/session/features/rendering.ts
 - src/session/hostEvents.ts
 - src/session/previewManager.ts
@@ -51,7 +53,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the text of a document changes, saved or not, the extension SHALL queue a render of the new text in every preview that shows that document, start it after a pause of 40 ms or of twice the last render time when that is longer (at most 1 s), let a running render finish first unless it has run more than 1 s and more than twice the wall-clock time of the last render when the newer render is due (then abort it), without writing to the shown file or to any build output folder of the workspace. A preview whose panel is hidden SHALL not render until the panel is shown, and previews of the same document, revision and render options SHALL share one render.
+When the text of a document changes, saved or not, the extension SHALL queue a render of the new text in every preview that shows that document, start it after a pause of 40 ms or of twice the last render time when that is longer (at most 1 s), or at once after a block edit is committed, let a running render finish first unless it has run more than 1 s and more than twice the wall-clock time of the last render when the newer render is due (then abort it), without writing to the shown file or to any build output folder of the workspace. A preview whose panel is hidden SHALL not render until the panel is shown, and previews of the same document, revision and render options SHALL share one render.
 
 ### Scenario (nominal): Unsaved edit
 
@@ -74,6 +76,7 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 | the last render took 300 ms | the next render starts 600 ms after the last change, not 40 ms |
 | the last render took under 10 ms | the next render starts 40 ms after the last change |
 | the last render took 3 s | the next render starts 1 s after the last change (the upper bound) |
+| the last render took 300 ms and the writer commits a block edit (the editor closes on an applied edit) | the render starts at once, without the 600 ms pause; a running render still finishes first |
 
 ### Scenario (boundary): Edits during a render
 
@@ -121,7 +124,7 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 - Method: test/integration/dirtySnapshots.test.ts (unsaved edit: the initial dirty snapshot, the normal edited snapshot; edits during a render: the newest snapshot result; rendering writes nothing: asserts fileHash(fixturePath) and treeHash(_build) before and after the whole scenario).
 - Method: test/host/previewTiming.test.ts "edits inside the 40 ms render debounce reach the page once, as the last text" (burst).
 - Method: test/node-services/build/buildQueue.test.ts "debounces pending edits and cancels them without invoking the builder", "lets an in-flight build finish and starts the newest queued edit right after" and "still renders a build whose buffer already moved on, and cleans up on dispose" (cancelled, edits during a render). The queue's own default of 120 ms is not used by the product.
-- Method: test/node-services/build/buildQueue.test.ts "adapts the debounce to twice the last build time, within its bounds" "aborts a build that overruns twice the last build time once a newer edit is due" and "never aborts a build of a small document whose wall time exceeds its reported render time" (mocked clock: the second build starts at 600 ms, not 40 ms; with the bound of the wait at 200 ms instead of 1 s, the overrunning build's signal aborts at 250 ms, not before; a 60 ms build whose render reports 2 ms is not aborted when a newer edit is due at 40 ms). The 1 s upper bound has no test of its own.
+- Method: test/node-services/build/buildQueue.test.ts "adapts the debounce to twice the last build time, within its bounds" "aborts a build that overruns twice the last build time once a newer edit is due" and "never aborts a build of a small document whose wall time exceeds its reported render time" (mocked clock: the second build starts at 600 ms, not 40 ms; with the bound of the wait at 200 ms instead of 1 s, the overrunning build's signal aborts at 250 ms, not before; a 60 ms build whose render reports 2 ms is not aborted when a newer edit is due at 40 ms). The 1 s upper bound has no test of its own. "an immediate request skips the adaptive wait, and still lets a running build finish" (mocked clock: a commit after a 300 ms build starts at 0 ms, supersedes the typed edit waiting 600 ms, and waits for a running build); the wiring in completeActiveBlockEdit has no test of its own (issue 423).
 - Method: test/core/state/editLock.test.ts "a save of an unchanged open buffer needs no render (PERF-06)" and "a save of the already rendered buffer is skipped (PERF-06), any other state renders" cover the decision of the save rows; the wiring in refreshReferencedPath has no integration test.
 - Method: test/core/protocol/pageStateMessages.test.ts (the previewReady message accepted and refused) and test/core/state/editLock.test.ts "a previewReady with another requestId releases the lock (STAB-02)" and "previewReady without a lock releases nothing".
 - Method: the source gone scenario is checked in test/host/lifeReq.requirements.test.ts (a change event of a file that is gone shows Preview source missing).

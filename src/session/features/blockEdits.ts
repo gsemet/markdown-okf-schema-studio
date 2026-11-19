@@ -294,6 +294,7 @@ export class BlockEditController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
   private completeActiveBlockEdit(preview: PreviewSession, edit: ActiveBlockEdit): void {
     if (preview.edits.active !== edit) {
       return;
@@ -309,7 +310,8 @@ export class BlockEditController {
     }
     this.releaseActiveBlockEdit(preview, refreshes);
     if (refreshes && preview.document) {
-      fireAndForget(this.manager.host.logger, this.manager.rendering.refreshPreviewDocument(preview, preview.document), "refreshPreviewDocument");
+      // The writer closed the editor and waits for the block: no typing pause to wait for (LIFE-039).
+      fireAndForget(this.manager.host.logger, this.manager.rendering.refreshPreviewDocument(preview, preview.document, { immediate: true }), "refreshPreviewDocument");
     }
   }
 
