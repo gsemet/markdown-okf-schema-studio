@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.9.2 - 2026-11-19
+
 - The install docs name Windsurf next to VSCodium and Cursor, give VS Code 1.95 as the minimum, and say the
   Agents window is a VS Code feature.
 - Edit mode is lighter on long documents with many tables: placing the row and column handles, flagging
