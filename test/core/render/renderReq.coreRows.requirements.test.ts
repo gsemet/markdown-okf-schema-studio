@@ -56,8 +56,11 @@ test("wikilink syntax inside a link, an image, math, raw HTML or an embed is not
   assert.deepEqual(hrefs.filter((href) => href?.startsWith("wiki:")), ["wiki:Plain"], "only plain text is converted");
   assert.ok(hrefs.includes("target.md"), "the existing link keeps its own target");
   assert.doesNotMatch(result.html, /wiki:(InLink|InImage|InMath|InRawBlock|Embedded)/u);
+});
 
-  // Known issue: the text between two inline HTML tags is plain text to the parser, so it is converted.
+// @tests_req SwRS-MDOKFSTUDIO-CORE-010
+test("a wikilink in the text between two inline HTML tags is converted like any text", async () => {
+  // "Raw HTML" is the block or the tag itself; the text between two inline tags is plain text.
   const inline = await render("Before <span>[[InRawInline]]</span> after.\n");
   assert.match(inline.html, /href="wiki:InRawInline"/u);
 });

@@ -9,6 +9,8 @@
 - A new setting, `markdownOkfSchemaStudio.preview.listItemsInToc` (off by default), also lists the
   items of top-level lists in the table of contents, by their first line, under the heading before
   them: documents that write each requirement as a list item get a usable outline.
+- When a render fails without a message, the preview now shows "The render failed." (or "The latest
+  render failed." over the kept page) instead of "undefined" or an empty message.
 
 ## 1.9.3 - 2026-11-19
 

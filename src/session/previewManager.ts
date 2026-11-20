@@ -30,7 +30,7 @@ import { HostRequestController } from "./features/hostRequests";
 import { IncomingChangesController } from "./features/incomingChanges";
 import { LinkController } from "./features/links";
 import { PlantUmlController } from "./features/plantUml";
-import { RenderingController } from "./features/rendering";
+import { failureMessage, RenderingController } from "./features/rendering";
 import { ScrollSyncController } from "./features/scrollSync";
 import { SourceEditController } from "./features/sourceEdits";
 import { ViewStateController } from "./features/viewState";
@@ -421,7 +421,8 @@ export class PreviewManager {
     }
     const outcome = await session.queue.request(document);
     if (outcome.status === "failed" && this.live.has(session) && !session.stage) {
-      this.rendering.setStatus(session, "error", outcome.error instanceof Error ? outcome.error.message : "The render failed.");
+      // @implements_req SwRS-MDOKFSTUDIO-CORE-025
+      this.rendering.setStatus(session, "error", failureMessage(outcome.error, "The render failed."));
     }
   }
 

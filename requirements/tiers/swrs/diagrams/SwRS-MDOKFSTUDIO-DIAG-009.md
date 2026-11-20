@@ -7,10 +7,11 @@ description: 'When the page needs a Mermaid diagram, a PlantUML diagram drawn by
   built-in engine or a chart, the extension SHALL draw only the diagrams whose source
   or theme colours changed or that were never drawn, show an earlier drawing of the
   same source and theme colours without running the engine again, run the Mermaid
-  and PlantUML draw passes one at a time, and drop a result that arrives for a key
-  the node no longer has. When the JAR pipeline renders a diagram text that an earlier
-  successful render already drew, the extension SHALL reuse that SVG without starting
-  a process.'
+  and PlantUML draw passes one at a time (so a later Mermaid theme is drawn only after
+  the running pass ends), and, for a PlantUML diagram or a chart, drop a result that
+  arrives for a key the node no longer has. When the JAR pipeline renders a diagram
+  text that an earlier successful render already drew, the extension SHALL reuse that
+  SVG without starting a process.'
 project: markdown-okf-schema-studio
 scope: diagrams
 req_lifecycle: proposed
@@ -44,7 +45,7 @@ supersedes:
 
 ### Normative behavior
 
-When the page needs a Mermaid diagram, a PlantUML diagram drawn by the built-in engine or a chart, the extension SHALL draw only the diagrams whose source or theme colours changed or that were never drawn, show an earlier drawing of the same source and theme colours without running the engine again, run the Mermaid and PlantUML draw passes one at a time, and drop a result that arrives for a key the node no longer has.
+When the page needs a Mermaid diagram, a PlantUML diagram drawn by the built-in engine or a chart, the extension SHALL draw only the diagrams whose source or theme colours changed or that were never drawn, show an earlier drawing of the same source and theme colours without running the engine again, run the Mermaid and PlantUML draw passes one at a time (so a later Mermaid theme is drawn only after the running pass ends), and, for a PlantUML diagram or a chart, drop a result that arrives for a key the node no longer has.
 
 When the JAR pipeline renders a diagram text that an earlier successful render already drew, the extension SHALL reuse that SVG without starting a process.
 
@@ -82,8 +83,8 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 
 | Situation | Outcome |
 | --- | --- |
-| A diagram is being drawn for the dark theme, the theme changes to cream, and the dark drawing finishes after the cream pass was planned | The dark drawing is stored in the cache and the node shows only the cream drawing |
-| A drawing finishes while its key is still the node's key | It is shown |
+| A Mermaid diagram is being drawn for the dark theme and the theme changes to cream | The cream pass starts only after the dark pass ends (passes run one at a time, so no Mermaid result arrives for a replaced key); the dark drawing is stored in the cache and shown, then the cream drawing replaces it |
+| A Mermaid drawing finishes while its key is still the node's key | It is shown |
 | A PlantUML diagram is drawn, a theme switch starts a second render of the element, and the first finishes after the second | Only the second render's picture is shown; the first result is dropped and the element is unchanged |
 | A chart is drawn, a newer theme replaces it while it runs | The result is cached and not shown |
 
@@ -91,8 +92,8 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 
 | Situation | Outcome |
 | --- | --- |
-| A drawing fails after the node was planned for another key | No error message is shown for the replaced key |
-| A drawing fails for the node's current key | The error message is shown and the state is error |
+| A PlantUML drawing fails after a newer render took the element | No error message is shown for the replaced key |
+| A Mermaid drawing fails for the node's current key | The error message is shown and the state is error |
 
 ### Scenario (nominal): The JAR pipeline reuses an earlier render
 
@@ -108,7 +109,6 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 - Known issue: The listener in mermaidPreview.ts that draws after a content patch is covered only by the real VS Code scenario.
 - Known issue: Diagrams inside one pass are started together and document order only fixes their element ids.
 - Known issue: The JAR cache holds up to 64 diagrams in memory and is not cleared when a file read by an include directive changes, so such diagrams are simply never cached.
-- Known issue: In mermaidPreview.ts the guard against a late error for a replaced key cannot be reached: draw passes run one at a time and a pass plans each node once, so no node changes key while its drawing runs. The row is tested on the built-in PlantUML engine, whose renders of one element are superseded by a newer one.
 
 ### Verification notes
 
@@ -118,11 +118,11 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 - Method: test/core/render/plantUmlCache.test.ts `a second render of the same source starts no process` (the JAR pipeline reuses an earlier render)
 - Method: test/page/modules/plantumlDiagram.test.ts (a PlantUML patch draws only new diagrams, a superseded render does not overwrite a newer one)
 - Method: test/page/modules/mermaidPreviewEntry.test.ts `Mermaid draw passes run one at a time, in the order they were requested` (draw passes one at a time)
-- Method: test/page/modules/mermaidPreviewEntry.test.ts `a Mermaid drawing finished for an earlier theme never replaces the picture of the current one` (a late picture for a replaced key is not shown)
+- Method: test/page/modules/mermaidPreviewEntry.test.ts `a Mermaid theme change during a drawing is drawn after that drawing ends` (a later theme is drawn only after the running pass ends; the replaced-key rule is tested on PlantUML and charts)
 - Method: test/page/modules/mermaidPreviewEntry.test.ts `a failed Mermaid drawing shows one error for the current key and sets the error state` (a late error, the row of the current key)
-- Method: test/page/modules/diagReq.pageDiagrams.requirements.test.ts `a PlantUML drawing that fails after a newer render took the element shows no error` (a late error, the row of the replaced key: no error message and no error state, then the newer picture is shown)
+- Method: test/page/modules/diagReq.pageDiagrams.requirements.test.ts `a PlantUML drawing that fails after a newer render took the element shows no error` (a late error, the PlantUML row of the replaced key: no error message and no error state, then the newer picture is shown)
 - Method: test/page/modules/diagReq.pageDiagrams.requirements.test.ts `a theme attribute change that leaves the Mermaid colours as they were draws nothing` (changed source or theme: an attribute change with the same colours draws nothing)
-- Criteria: Same source and theme give no second run; a different source or theme gives a new run; only diagrams without a render state are drawn after a patch; passes never overlap; only the current key's result reaches the node; the JAR pipeline starts no process for an unchanged diagram text.
+- Criteria: Same source and theme give no second run; a different source or theme gives a new run; only diagrams without a render state are drawn after a patch; passes never overlap; a later Mermaid theme is drawn only after the running pass ends; for PlantUML and charts only the current key's result reaches the node; the JAR pipeline starts no process for an unchanged diagram text.
 
 <!-- okf:links:start -->
 ### Links

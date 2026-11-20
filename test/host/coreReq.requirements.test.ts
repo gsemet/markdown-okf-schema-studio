@@ -10,6 +10,7 @@ import {
   captured,
   COMMAND_ID,
   fake,
+  REFRESH_COMMAND_ID,
   setRenderOverrideForTests,
   startStudio,
   writeFile,
@@ -44,15 +45,39 @@ test("a first render that throws shows the error page with its message", async (
   assert.doesNotMatch(html, /Body text\./u);
 });
 
+for (const [label, failure] of [["undefined", undefined], ["null", null], ["an Error with an empty message", new Error("")]] as const) {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-025
+  test(`a first render that throws ${label} shows the fallback 'The render failed.'`, async (t) => {
+    const studio = start(t);
+    const html = await openFailingFirstRender(studio, failure);
+    assert.match(html, /Preview unavailable/u);
+    assert.match(html, /data-sphinx-preview-status-message>The render failed\.</u);
+    assert.doesNotMatch(html, /undefined|null/u, "the thrown value is not shown as text");
+  });
+}
+
 // @tests_req SwRS-MDOKFSTUDIO-CORE-025
-test("a first render that throws a value without a message shows the error page with that value as text", async (t) => {
+test("a failure with a text but no Error keeps that text", async (t) => {
   const studio = start(t);
-  const html = await openFailingFirstRender(studio, undefined);
-  assert.match(html, /Preview unavailable/u);
-  // Known issue: the render pipeline wraps every failure in an Error whose message is the thrown
-  // value as text, so the page reads "undefined" and never the fallback "The render failed.".
-  assert.match(html, /data-sphinx-preview-status-message>undefined</u);
-  assert.doesNotMatch(html, /The render failed\./u);
+  const html = await openFailingFirstRender(studio, "plain text failure");
+  assert.match(html, /data-sphinx-preview-status-message>plain text failure</u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025
+test("a later render that fails without a message keeps the old page stale with 'The latest render failed.'", async (t) => {
+  const studio = start(t);
+  await studio.openSide(writeFile("# Good page\n\nGood body.\n"));
+  await studio.advance(100);
+  const panel = fake.controls.panels.at(-1)!;
+  setRenderOverrideForTests(() => Promise.reject(undefined));
+  const done = studio.runCommand(REFRESH_COMMAND_ID);
+  await studio.advance(300);
+  await done;
+  await studio.until(() => studio.manager.active?.status === "stale", "the stale status");
+  const html = panel.htmlAssignments.at(-1) ?? "";
+  assert.match(html, /Good body\./u, "the earlier page stays");
+  assert.match(html, /data-sphinx-preview-status-message>The latest render failed\.</u);
+  assert.doesNotMatch(html, /undefined/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-043

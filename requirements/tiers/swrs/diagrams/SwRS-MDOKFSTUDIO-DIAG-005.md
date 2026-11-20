@@ -39,17 +39,17 @@ When the page draws a Mermaid diagram, the extension SHALL take its colours from
 
 ### Scenario (nominal): Colours come from the theme variables
 
-| Part of the picture | Source |
-| --- | --- |
-| Node fill | --studio-textCodeBlock-background |
-| Text and line colours | --studio-editor-foreground |
-| Border colour | --sphinx-preview-border |
-| Secondary and tertiary colours | --studio-textBlockQuote-background and --studio-editor-background |
-| Diagram background | transparent |
+| Part of the picture | Source | Checked |
+| --- | --- | --- |
+| Node fill | --studio-textCodeBlock-background | in the drawn picture (the node fill of the visual fixture) |
+| Diagram background | transparent | in the drawn picture |
+| Text and line colours | --studio-editor-foreground | as the value given to Mermaid |
+| Border colour | --sphinx-preview-border | as the value given to Mermaid |
+| Secondary and tertiary colours | --studio-textBlockQuote-background and --studio-editor-background | as the value given to Mermaid |
 
 - GIVEN a dark preview theme that defines those variables
 - WHEN the page draws a Mermaid diagram
-- THEN each part of the picture takes its value from the variable in the table, the node fill equals --studio-textCodeBlock-background and the picture background is transparent
+- THEN each part takes its value from the variable in the table: the drawn node fill equals --studio-textCodeBlock-background and the picture background is transparent, and the other colours are the values given to Mermaid (the Mermaid base theme uses the secondary and tertiary colours only for clusters and for the derived edge-label background, which the visual fixture does not draw as such, and its nodes carry their own border)
 
 ### Scenario (nominal): The theme changes
 
@@ -82,7 +82,6 @@ The built-in fallbacks are #f0f0f0, #1f1f1f, #808080 and #ffffff. The font is no
 
 ### Known issues
 
-- Known issue: The visual check covers dark, white and cream and only node fills; the border, secondary and tertiary colours are checked only as the values given to Mermaid, not in the drawn picture.
 - Known issue: The redraw evidence covers dark, white and cream; the light mode relies on the same observer.
 - Known issue: The fallback colours are fixed colours of a light palette.
 - Known issue: Edge label readability is checked by the visual campaign only; no unit test.

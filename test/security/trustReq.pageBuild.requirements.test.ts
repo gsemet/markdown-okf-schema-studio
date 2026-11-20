@@ -94,7 +94,7 @@ test("a wiki link is routed by the host, a bad anchor and javascript: lose their
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-042
-test("an xlink:href the link rules block is removed; one they allow keeps its address", () => {
+test("an SVG xlink:href is treated like an HTML link: blocked loses its address, allowed keeps it, both keep the request for the host", () => {
   const built = build(
     '<svg><a xlink:href="javascript:alert(2)"><text>blocked</text></a><a xlink:href="#section"><text>allowed</text></a></svg>',
   );
@@ -104,8 +104,8 @@ test("an xlink:href the link rules block is removed; one they allow keeps its ad
   const allowed = /<a[^>]*><text>allowed/u.exec(built.html)?.[0] ?? "";
   assert.match(allowed, /xlink:href="#section"/u, "the allowed address is kept");
   assert.equal(codes(built.diagnostics, "blocked-navigation"), 1);
-  // Known issue: the HTML parser names the attribute href (with the xlink prefix), so both links
-  // also get the navigation attribute that the SwRS keeps for href.
+  // The HTML parser names the attribute href (with the xlink prefix), so both links get the
+  // navigation attribute like an HTML link, and the host routes the click.
   assert.match(blocked, /data-sphinx-preview-navigation="javascript:alert\(2\)"/u);
   assert.match(allowed, /data-sphinx-preview-navigation="#section"/u);
 });
