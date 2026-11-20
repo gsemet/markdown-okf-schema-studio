@@ -5,7 +5,8 @@
  * cases are the ones the owner reviewed; the page is the real preview (render pipeline, stylesheet,
  * page runtime), the column is 688 px wide (720 px minus the two 16 px gutters of the review).
  * The page draws its text in the pinned KaTeX fonts (`pinnedFont.ts`), not in the machine's own
- * fonts, so the widths and the verdicts are the same on every machine. Skipped, with a message, when no Chromium can start here.
+ * fonts, so the widths and the verdicts are the same on every machine; a face that does not load
+ * fails the test (the browser is closed). Skipped, with a message, when no Chromium can start here.
  */
 import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
@@ -126,7 +127,13 @@ interface Opened {
   close(): Promise<void>;
 }
 
-async function openPage(markdown: string, themeId: string): Promise<Opened | undefined> {
+/** For the regression test only: the fonts folder, and a look at the browser once it is launched. */
+interface OpenOptions {
+  readonly fonts?: string;
+  readonly launched?: (browser: Browser) => void;
+}
+
+async function openPage(markdown: string, themeId: string, options: OpenOptions = {}): Promise<Opened | undefined> {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "table-breakout-")));
   const workspace = path.join(root, "workspace");
   fs.mkdirSync(workspace, { recursive: true });
@@ -164,20 +171,27 @@ async function openPage(markdown: string, themeId: string): Promise<Opened | und
   } catch {
     return undefined;
   }
-  const page = await browser.newPage({ viewport: { width: PANE, height: 1400 }, deviceScaleFactor: 1 });
-  await page.addInitScript(() => {
-    (window as unknown as { acquireVsCodeApi: () => unknown }).acquireVsCodeApi = () => ({
-      getState: () => ({}), setState: () => undefined, postMessage: () => undefined,
+  options.launched?.(browser);
+  // A step that fails after the launch closes the browser, or its process keeps the test run alive.
+  try {
+    const page = await browser.newPage({ viewport: { width: PANE, height: 1400 }, deviceScaleFactor: 1 });
+    await page.addInitScript(() => {
+      (window as unknown as { acquireVsCodeApi: () => unknown }).acquireVsCodeApi = () => ({
+        getState: () => ({}), setState: () => undefined, postMessage: () => undefined,
+      });
     });
-  });
-  await page.goto(pathToFileURL(pagePath).href);
-  const theme = THEMES.find((candidate) => candidate.id === themeId)!;
-  await page.evaluate((variables) => {
-    for (const [name, value] of Object.entries(variables)) document.body.style.setProperty(name, value);
-  }, theme.variables);
-  await pinTestFonts(page);
-  await page.waitForFunction(() => document.documentElement.getAttribute("data-sphinx-preview-width") === "auto");
-  return { browser, page, close: async () => { await browser.close(); } };
+    await page.goto(pathToFileURL(pagePath).href);
+    const theme = THEMES.find((candidate) => candidate.id === themeId)!;
+    await page.evaluate((variables) => {
+      for (const [name, value] of Object.entries(variables)) document.body.style.setProperty(name, value);
+    }, theme.variables);
+    await pinTestFonts(page, options.fonts);
+    await page.waitForFunction(() => document.documentElement.getAttribute("data-sphinx-preview-width") === "auto");
+    return { browser, page, close: async () => { await browser.close(); } };
+  } catch (error) {
+    await browser.close().catch(() => undefined);
+    throw error;
+  }
 }
 
 interface Measured {
@@ -477,4 +491,32 @@ test("an editor opened on a paragraph does not measure the tables again; one ope
     });
     assert.equal(wideWhileEdited, false, `${themeId}: a table editor takes the breakout back`);
   });
+});
+
+test("A pinned font that does not load fails the test and closes the browser", async (t) => {
+  const fonts = fs.mkdtempSync(path.join(os.tmpdir(), "table-breakout-bad-fonts-"));
+  for (const file of ["KaTeX_SansSerif-Regular.woff2", "KaTeX_SansSerif-Bold.woff2", "KaTeX_Typewriter-Regular.woff2"]) {
+    fs.writeFileSync(path.join(fonts, file), "not a font");
+  }
+  const kept: { browser?: Browser } = {};
+  try {
+    let opened: Opened | undefined;
+    try {
+      opened = await openPage(documentOf(CASES.slice(0, 1)), "light", { fonts, launched: (browser) => { kept.browser = browser; } });
+    } catch (error) {
+      assert.match((error as Error).message, /the pinned test font did not load: KaTeX_/u, "the font's error fails the test");
+      assert.ok(kept.browser, "the browser was launched before the font failed");
+      assert.equal(kept.browser.isConnected(), false, "openPage closed the browser when the font did not load");
+      return;
+    }
+    if (!opened) {
+      t.skip("no Chromium can start here (run `just dev` to install it)");
+      return;
+    }
+    await opened.close();
+    assert.fail("a font folder that holds no font was accepted");
+  } finally {
+    if (kept.browser?.isConnected()) await kept.browser.close();
+    fs.rmSync(fonts, { recursive: true, force: true });
+  }
 });
