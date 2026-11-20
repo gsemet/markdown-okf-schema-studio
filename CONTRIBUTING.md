@@ -278,7 +278,10 @@ On a pull request, CI runs only the simulated tests, which make up the required 
 `ci-static` (on Linux, and again on Windows in the `static-windows` job), `ci-visual`
 (Playwright/Chromium against a mock host, then the table breakout width tests, run with
 `STUDIO_REQUIRE_CHROMIUM=1` so that a Chromium that cannot start fails them; the `static` jobs
-have no Chromium and skip those tests; their report is under `out/reports/breakout/`) and `just ci-report visual`, which reports the real VS Code
+have no Chromium and skip those tests; their report is under `out/reports/breakout/`; the tests
+assert the widths and the owner's verdicts on Windows, the reference, and are report-only on
+Linux CI: they print the widths and the verdicts and name each difference from Windows, and
+never fail on one) and `just ci-report visual`, which reports the real VS Code
 stage as skipped. The real VS Code window jobs (`ci-integration` and the
 `stress` repetitions) are heavy, so they run on every push to `main` and never on a pull request.
 On a branch, start them with

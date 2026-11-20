@@ -10,6 +10,12 @@
  * unless STUDIO_REQUIRE_CHROMIUM=1: the `visual` CI job runs these tests on Linux with it, and a
  * Chromium that cannot start then fails them with the launch error. The measured widths are printed
  * with `t.diagnostic`, so every run of that job logs them.
+ *
+ * Windows is the reference: there the verdicts and the widths are asserted. Off Windows (the Linux
+ * CI job) the same checks are report-only: they print every difference from the Windows reference
+ * with `t.diagnostic` and never fail (CI run 44719229037 measured other widths on Linux, and the
+ * owner decided, order O-80, to report them rather than assert them). A Chromium that cannot start
+ * still fails with STUDIO_REQUIRE_CHROMIUM=1 on every platform.
  */
 import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
@@ -33,6 +39,54 @@ const RUN_THEMES = process.env.STUDIO_TABLE_THEME ? [process.env.STUDIO_TABLE_TH
 const COLUMN = 688;
 const GUTTER = 78;
 const PANE = 1100;
+
+/**
+ * Windows is the reference of the widths and the verdicts: they are asserted there and only reported
+ * elsewhere. STUDIO_BREAKOUT_REPORT_ONLY=1 forces the report-only mode (to try it on Windows).
+ */
+const ASSERT_WIDTHS = process.platform === "win32" && process.env.STUDIO_BREAKOUT_REPORT_ONLY !== "1";
+
+/** Windows widths and verdicts (`<width>W` breaks out, `<width>s` stays), as the owner reviewed them. */
+const WINDOWS_CASES = "688s 688s 688s 688s 1068W 735W 748W 338s 537s 719W 894W 824W";
+const WINDOWS_UNSHRINKABLE = "1068W 972W 1068W";
+const WINDOWS_TICK_MATRIX = { open: 719, narrower: 568 };
+
+interface Reporter {
+  diagnostic(message: string): void;
+}
+
+/** Runs width and verdict checks: asserted on the reference platform, only reported (never failed) elsewhere. */
+function verify(t: Reporter, label: string, checks: () => void): void {
+  if (ASSERT_WIDTHS) {
+    checks();
+    return;
+  }
+  try {
+    checks();
+  } catch (error) {
+    t.diagnostic(`differs from the Windows reference (report only, ${label}): ${(error as Error).message}`);
+  }
+}
+
+/** Names each measured entry that differs from the Windows reference list. */
+function reportDifferences(t: Reporter, label: string, measured: string[], reference: string): void {
+  const expected = reference.split(" ");
+  const different = measured.flatMap((entry, index) => (entry === expected[index]
+    ? [] : [`#${index + 1} ${entry} (Windows ${expected[index]})`]));
+  t.diagnostic(different.length === 0
+    ? `${label}: same as the Windows reference`
+    : `${label}: differs from the Windows reference${ASSERT_WIDTHS ? "" : " (report only)"}: ${different.join(", ")}`);
+}
+
+/** A precondition of a cell-edit test (the table breaks out, or fits): asserted on the reference platform; elsewhere false and reported when it does not hold. */
+function precondition(t: Reporter, holds: boolean, message: string): boolean {
+  if (ASSERT_WIDTHS) {
+    assert.ok(holds, message);
+    return true;
+  }
+  if (!holds) t.diagnostic(`precondition not met, rest of the test skipped (report only): ${message}`);
+  return holds;
+}
 
 const code = (text: string): string => `\`${text}\``;
 const row = (...cells: string[]): string => `| ${cells.join(" | ")} |`;
@@ -277,7 +331,9 @@ test("Auto keeps a table in the column when its minimum widths fit and breaks it
     }
     try {
       const measured = await measureTables(opened.page);
-      t.diagnostic(`${themeId} cases ${measured.map((entry) => `${entry.width}${entry.wide ? "W" : "s"}`).join(" ")}`);
+      const caseWidths = measured.map((entry) => `${entry.width}${entry.wide ? "W" : "s"}`);
+      t.diagnostic(`${themeId} cases ${caseWidths.join(" ")}`);
+      reportDifferences(t, `${themeId} cases`, caseWidths, WINDOWS_CASES);
       await shootCases(opened.page, themeId, "table-case");
       const pin = await opened.page.evaluate((sans) => ({
         cell: getComputedStyle(document.querySelector("#sphinx-myst-preview-content td")!).fontFamily,
@@ -291,11 +347,13 @@ test("Auto keeps a table in the column when its minimum widths fit and breaks it
       CASES.forEach((entry, index) => {
         const { wide, width, column } = measured[index]!;
         assert.equal(column, COLUMN, "the column is 688 px wide");
-        assert.equal(wide, !entry.stays,
-          `${themeId} case ${index + 1} (${entry.title}) ${entry.stays ? "stays in the column" : "breaks out"}: wide ${wide}, width ${width}`);
-        if (entry.stays) assert.ok(width <= column + 1, `${themeId} case ${index + 1} fits the column: ${width} px`);
-        else assert.ok(width > column + 1 && measured[index]!.pageOverflow <= 0,
-          `${themeId} case ${index + 1} takes more than the column without scrolling the page: ${width} px`);
+        verify(t, `${themeId} case ${index + 1}`, () => {
+          assert.equal(wide, !entry.stays,
+            `${themeId} case ${index + 1} (${entry.title}) ${entry.stays ? "stays in the column" : "breaks out"}: wide ${wide}, width ${width}`);
+          if (entry.stays) assert.ok(width <= column + 1, `${themeId} case ${index + 1} fits the column: ${width} px`);
+          else assert.ok(width > column + 1 && measured[index]!.pageOverflow <= 0,
+            `${themeId} case ${index + 1} takes more than the column without scrolling the page: ${width} px`);
+        });
       });
       // Leaving Auto removes the rule: no token cell and no breakout stay behind in Full width.
       assert.ok(await opened.page.locator("[data-sphinx-preview-token]").count() > 0, "Auto marks the token cells");
@@ -318,11 +376,15 @@ test("Auto breaks a table out when a cell holds content that cannot shrink", asy
     }
     try {
       const measured = await measureTables(opened.page);
-      t.diagnostic(`${themeId} unshrinkable cells ${measured.map((entry) => `${entry.width}${entry.wide ? "W" : "s"}`).join(" ")}`);
+      const cellWidths = measured.map((entry) => `${entry.width}${entry.wide ? "W" : "s"}`);
+      t.diagnostic(`${themeId} unshrinkable cells ${cellWidths.join(" ")}`);
+      reportDifferences(t, `${themeId} unshrinkable cells`, cellWidths, WINDOWS_UNSHRINKABLE);
       await shootCases(opened.page, themeId, "table-unshrinkable");
       assert.equal(measured.length, UNSHRINKABLE.length, "every case renders one top-level table");
       UNSHRINKABLE.forEach((entry, index) => {
-        assert.equal(measured[index]!.wide, true, `${entry.title} breaks the table out (width ${measured[index]!.width} px)`);
+        verify(t, `${themeId} unshrinkable ${index + 1}`, () => {
+          assert.equal(measured[index]!.wide, true, `${entry.title} breaks the table out (width ${measured[index]!.width} px)`);
+        });
       });
     } finally {
       await opened.close();
@@ -418,7 +480,7 @@ test("Auto keeps the breakout of a table while a cell is edited, in every cell i
   // The tick matrix grows by 70 to 270 px when the 300 px minimum of the selected cell is measured.
   await withPage(t, caseOf("ten columns: tick matrix"), async (page, themeId) => {
     const before = await layoutPass(page);
-    assert.equal(before.wide, true, `${themeId}: the table breaks out before any edit`);
+    if (!precondition(t, before.wide, `${themeId}: the table breaks out before any edit (width ${before.width} px)`)) return;
     for (const index of [0, 11, 14, 23, 3, 0]) {
       await openCellEditor(page, index);
       const during = await layoutPass(page);
@@ -433,7 +495,7 @@ test("Auto keeps the breakout of a table while a cell is edited, in every cell i
 test("Auto keeps a table that fits the column in the column while a cell is edited", async (t) => {
   await withPage(t, caseOf("eight columns: numbers"), async (page, themeId) => {
     const before = await layoutPass(page);
-    assert.equal(before.wide, false, `${themeId}: the table fits the column before any edit`);
+    if (!precondition(t, !before.wide, `${themeId}: the table fits the column before any edit (width ${before.width} px)`)) return;
     for (const index of [0, 9, 17]) {
       await openCellEditor(page, index);
       const during = await layoutPass(page);
@@ -448,21 +510,27 @@ test("Auto measures a table again on a real resize while a cell is edited", asyn
     await layoutPass(page);
     await openCellEditor(page, 0);
     const open = await layoutPass(page);
-    assert.equal(open.wide, true, `${themeId}: wide with the editor open`);
-    // The pane must be narrower than the table's natural width: 719 px in the pinned font
-    // (`pinnedFont.ts`), the same on every machine (measured on Windows); 600 px is below it.
+    if (!precondition(t, open.wide, `${themeId}: wide with the editor open (width ${open.width} px)`)) return;
+    // The pane must be narrower than the table's natural width in the pinned font (`pinnedFont.ts`):
+    // open 719 px on Windows, 721 px on Linux (CI run 44719229037), narrower 568 px on both;
+    // 600 px is below the open width.
     await page.setViewportSize({ width: 600, height: 1400 });
     const narrower = await layoutPass(page);
     t.diagnostic(`${themeId} tick matrix open ${open.width} narrower ${narrower.width}`);
-    assert.ok(narrower.width < open.width, `${themeId}: the breakout follows the pane (${open.width} then ${narrower.width} px)`);
-    assert.ok(narrower.width <= 600, `${themeId}: the table fits the narrower pane`);
+    t.diagnostic(`${themeId} tick matrix: Windows reference open ${WINDOWS_TICK_MATRIX.open} narrower ${WINDOWS_TICK_MATRIX.narrower}${
+      open.width === WINDOWS_TICK_MATRIX.open && narrower.width === WINDOWS_TICK_MATRIX.narrower
+        ? ", same" : ", differs (report only off Windows)"}`);
+    verify(t, `${themeId} tick matrix`, () => {
+      assert.ok(narrower.width < open.width, `${themeId}: the breakout follows the pane (${open.width} then ${narrower.width} px)`);
+      assert.ok(narrower.width <= 600, `${themeId}: the table fits the narrower pane`);
+    });
   });
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
 test("Auto gives the column width to a table edited as source, or holding another editor field", async (t) => {
   await withPage(t, caseOf("two columns: long code paths"), async (page, themeId) => {
-    assert.equal((await layoutPass(page)).wide, true, `${themeId}: the table breaks out before any edit`);
+    if (!precondition(t, (await layoutPass(page)).wide, `${themeId}: the table breaks out before any edit`)) return;
     // A field that is not a cell editor: a textarea in the table, outside any cell editor frame.
     await page.evaluate(() => {
       const field = document.createElement("textarea");
@@ -483,7 +551,7 @@ test("Auto gives the column width to a table edited as source, or holding anothe
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
 test("an editor opened on a paragraph does not measure the tables again; one opened on a table does", async (t) => {
   await withPage(t, "A paragraph above the table.\n\n" + caseOf("two columns: long code paths"), async (page, themeId) => {
-    assert.equal((await layoutPass(page)).wide, true, `${themeId}: the table breaks out before any edit`);
+    if (!precondition(t, (await layoutPass(page)).wide, `${themeId}: the table breaks out before any edit`)) return;
     // Each measure marks the measured tables with data-sphinx-preview-measuring, then unmarks them.
     const measuresAfterEditing = (selector: string): Promise<number> => page.evaluate(async (target) => {
       let marks = 0;
