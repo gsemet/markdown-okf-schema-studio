@@ -195,6 +195,13 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
     return { element: target, sourceRange: undefined };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-262
+  // The lines of a list on its own, even inside an alert or an admonition: the list is mapped to
+  // its source file, so it is its own reference.
+  function listRange(list: Element): { line: number; endLine: number } | undefined {
+    return sourceRangeForList(list, list);
+  }
+
   function hasRenderedPreview(): boolean {
     const status = document.querySelector?.("[data-sphinx-preview-status]")
       ?.getAttribute?.("data-sphinx-preview-status");
@@ -210,6 +217,7 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
     bodyBlockAtLine,
     propertiesSection,
     editingElementFor,
+    listRange,
     hasRenderedPreview,
   };
 }

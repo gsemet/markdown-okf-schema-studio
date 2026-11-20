@@ -49,6 +49,7 @@ import { FIND_WIDE_TABLE_SCENARIOS } from "./findWideTableScenarios";
 import { STICKY_LONG_TITLE_SCENARIOS } from "./stickyLongTitleScenarios";
 import { TABLE_GRID_PASTE_SCENARIOS } from "./tableGridPasteScenarios";
 import { TABLE_IN_CONTAINER_SCENARIOS } from "./tableInContainerScenarios";
+import { LIST_ITEM_HANDLE_SCENARIOS } from "./listItemHandleScenarios";
 import { FRONTMATTER_CLICK_SCENARIOS } from "./frontmatterClickScenarios";
 import { LABEL_RENAME_SCENARIOS } from "./labelRenameScenarios";
 import { MATH_SCENARIOS } from "./mathScenarios";
@@ -497,6 +498,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...TABLE_TAB_HINT_SCENARIOS,
   ...TABLE_GRID_PASTE_SCENARIOS,
   ...TABLE_IN_CONTAINER_SCENARIOS,
+  ...LIST_ITEM_HANDLE_SCENARIOS,
   ...FRONTMATTER_CLICK_SCENARIOS,
   ...LABEL_RENAME_SCENARIOS,
   ...MATH_SCENARIOS,

@@ -46,6 +46,10 @@ environments),
   edits the whole list. From the keyboard, select the list, press Right to go to its items and
   Right again to go to the blocks of an item, Left to go back up, and Enter to edit the selected
   list, item or block.
+  In edit mode each list item also has a handle on its left, as table rows do: drag it among its
+  sibling items, or focus it and press Alt+Up or Alt+Down. The item moves with its sub-items, and an
+  ordered list keeps its numbers in order. Inside an alert or an admonition, the handles sit left of
+  the box.
   The "+" bar under a body block also has up and down arrows that swap the block above the bar
   with its neighbour in one undo step; blocks from an included file are not moved.
   The "+" bar and its arrows show on one block at a time: the one that moved last, by keyboard

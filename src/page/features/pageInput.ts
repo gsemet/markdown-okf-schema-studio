@@ -257,9 +257,11 @@ export function installPageInput(rt: PageRuntime): PageInput {
         const extendsSelection = state.editMode && event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey;
         if (state.editMode && !extendsSelection) rt.selection.clearBlockSelection();
         if (event.target instanceof Element && event.target.closest(".sphinx-preview-insert-point")) return;
-        // A row or column handle only moves its row or column: a click on it opens no editor.
+        // A row, column or list item handle only moves what it is for: a click on it opens no editor.
+        // @implements_req SwRS-MDOKFSTUDIO-BLOCK-262
         if (event.target instanceof Element
-          && (event.target.closest("[data-okf-row-handle]") || event.target.closest("[data-okf-col-handle]"))) return;
+          && (event.target.closest("[data-okf-row-handle]") || event.target.closest("[data-okf-col-handle]")
+            || event.target.closest("[data-okf-list-item-handle]"))) return;
         // A chip is reserved for expanding its comment; the rest of the block edits.
         if (event.target instanceof Element && event.target.closest(".okf-chip")) return;
         // @implements_req SwRS-MDOKFSTUDIO-MYST-098

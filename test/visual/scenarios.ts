@@ -165,6 +165,8 @@ export interface Scenario {
   tableGridPasteChecks?: boolean;
   /** CR 291: a cell of a table inside a quote, an alert or a MyST admonition opens the cell editor and the table bar. */
   tableInContainerChecks?: "quote" | "note";
+  /** CR 432: the list item handles sit left of their list or outermost container, on the first line; `push` in a narrow pane; `drag` held then dropped. */
+  listItemHandleChecks?: "place" | "push" | "drag";
   /** CR 281: with the unchanged title editor open, one click on the priority value below it opens priority. */
   frontmatterClickChecks?: boolean;
   /** CR 290: the Rename label field of a table label opens above the icon and covers no cell. */

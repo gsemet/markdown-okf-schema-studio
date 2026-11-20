@@ -14,6 +14,7 @@ import { run as runPasteUrl } from "../pasteUrl.test";
 import { scenarioFindInPreview } from "../findInPreview.test";
 import { scenarioLinkedTargetSave } from "../linkedTargetSave";
 import { scenarioTableMoves } from "../tableMoves";
+import { scenarioListItemMoves } from "../listItemMoves";
 import {
   connectWorkbench,
   createEvidence,
@@ -216,6 +217,7 @@ export async function run(): Promise<void> {
       probe: () => scenarioPerformanceProbe(page),
       "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
       "table-moves": () => scenarioTableMoves(page),
+      "list-item-moves": () => scenarioListItemMoves(page),
       "wide-table-tab": () => scenarioWideTableTab(page, evidence),
       "table-stale-render": async () => {
         await scenarioUndoUnderCellEditorRendersTable(page);
@@ -305,6 +307,7 @@ export async function run(): Promise<void> {
     await scenarioUndoRestoresCommentMark(page);
     await scenarioTableStructure(page);
     await scenarioTableMoves(page);
+    await scenarioListItemMoves(page);
     await scenarioBooleanOneClick(page, evidence);
     await scenarioListEditorClickAndKeys(page, evidence);
     await scenarioListLinkCompletion(page, evidence);

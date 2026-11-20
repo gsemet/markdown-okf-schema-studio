@@ -625,6 +625,50 @@ html[data-sphinx-preview-edit-mode="on"] .sphinx-preview-table-menu:has(+ [data-
 }
 `;
 
+/** Handles of list items. */
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-262
+const LIST_ITEM_HANDLES_CSS = `/* The handles of list items: the mark of the list editor just left of the list, or of the outermost
+   alert, quote or admonition around it, on the item's first line. They live in a layer of their own
+   at the page origin; the runtime sets each handle's left and top. A list or container with no room
+   on its left is pushed right by the width of a handle (no max-content width: a list or a container
+   keeps its block width). */
+html[data-sphinx-preview-edit-mode="on"] [data-okf-list-handle-layer] {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 0;
+  height: 0;
+  z-index: 2;
+}
+
+html[data-sphinx-preview-edit-mode="on"] [data-okf-list-handle-layer] .okf-list-item-handle {
+  position: absolute;
+  margin: 0;
+  transform: translate(-100%, -50%);
+}
+
+/* The dots of the mark hang down and right from their centre: lift them so they centre on the line. */
+html[data-sphinx-preview-edit-mode="on"] [data-okf-list-handle-layer] .okf-list-item-handle::before {
+  transform: translate(-2.5px, -5px);
+}
+
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content [data-okf-list-shift="true"] {
+  max-width: calc(100% - 2.2em);
+  margin-inline-start: 2.2em;
+}
+
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content li[data-okf-list-item-dragging="true"] {
+  opacity: 0.45;
+}
+
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content li[data-okf-list-item-drop="before"] {
+  box-shadow: inset 0 2px 0 var(--studio-focusBorder, Highlight);
+}
+
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content li[data-okf-list-item-drop="after"] {
+  box-shadow: inset 0 -2px 0 var(--studio-focusBorder, Highlight);
+}
+`;
+
 /**
  * Edit mode: scroll anchoring, editable blocks, insert points and move buttons, the block and table
  * cell editors and the table menu.
@@ -647,4 +691,5 @@ export const EDIT_MODE_CSS = [
   TABLE_MENU_STUCK_CSS,
   TABLE_MENU_BUTTONS_CSS,
   TABLE_HANDLES_CSS,
+  LIST_ITEM_HANDLES_CSS,
 ].join("");

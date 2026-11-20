@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-139
 - SwRS-MDOKFSTUDIO-BLOCK-156
 - SwRS-MDOKFSTUDIO-BLOCK-240
+- SwRS-MDOKFSTUDIO-BLOCK-262
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
 depends_on:
@@ -49,6 +50,8 @@ Writers expect keyboard users to reorder blocks as easily as mouse users.
 
 Writers expect to move a group of blocks as easily as one.
 
+Writers expect to reorder the items of a list as they reorder the rows of a table: an item of any list, inside an alert or an admonition too, moves among its sibling items by a handle on its left, shown in edit mode, by a drag or by Alt+Up or Alt+Down, with its sub-items and blocks, in one edit.
+
 As a writer, I swap a block or a selected run of blocks with its neighbour with one click on an arrow or one key press, also while I edit the block, keep typing at the same place, and can undo it with one undo.
 
 ### Rationale and constraints
@@ -58,6 +61,7 @@ As a writer, I swap a block or a selected run of blocks with its neighbour with 
 - The chord in the text box is Cmd+Alt on macOS and Ctrl+Alt elsewhere; plain Option or Alt with an arrow keeps word navigation.
 - A repeated key does not move the block twice.
 - The selection stays on the moved blocks after the move, also if the preview reloads meanwhile.
+- A list item moves only among its sibling items, with its sub-items and blocks; an ordered list keeps its numbers in order, and a list in a quote, an alert or an admonition keeps its prefix on every line.
 
 ### Use case diagram
 
@@ -106,6 +110,15 @@ sequenceDiagram
    - SwRS-MDOKFSTUDIO-BLOCK-058: the swap is one undo step and the preview renders once
 4. The block is at its new place and one undo reverts the move
 
+#### Path 3: Move a list item
+
+1. Edit mode is on and a list has two items or more
+   - SwRS-MDOKFSTUDIO-BLOCK-262: the writer drags the handle of an item onto a sibling, or presses Alt+Up or Alt+Down on it, and the page saves the list's lines with the item moved
+   - Option SwRS-MDOKFSTUDIO-BLOCK-262 (refusal): a drop in place or over another list, an open editor or an unreadable source moves nothing
+2. The list's lines are saved with the item at its new place
+   - SwRS-MDOKFSTUDIO-BLOCK-058: the save is one undo step and the preview renders once
+3. The item is at its new place, the numbers of an ordered list in order, and one undo reverts the move
+
 <!-- okf:links:start -->
 ### Links
 
@@ -121,6 +134,7 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-BLOCK-139](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-139.md): The chord is Cmd+Alt on macOS and Ctrl+Alt elsewhere
   - [SwRS-MDOKFSTUDIO-BLOCK-156](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-156.md): A block selection moves as a whole
   - [SwRS-MDOKFSTUDIO-BLOCK-240](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-240.md): previewBlockMove needs both ranges and a direction
+  - [SwRS-MDOKFSTUDIO-BLOCK-262](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-262.md): List item handle reorders an item among its siblings in edit mode
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
 - Depends on:

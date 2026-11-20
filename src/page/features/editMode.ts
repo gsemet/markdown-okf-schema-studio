@@ -28,6 +28,10 @@ export function installEditMode(rt: PageRuntime): EditMode {
   // The element whose outline shows what a click at this node would edit, or undefined.
   function editHoverTarget(node: EventTarget | null): Element | undefined {
     if (!state.editMode || !(node instanceof Element)) return undefined;
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-262
+    // A list item handle outlines the item it moves.
+    const handledItem = rt.listItemMove?.itemOf(node);
+    if (handledItem) return handledItem;
     if (node.closest("[data-okf-properties]") || node.closest("[data-sphinx-preview-block-editor]")
       || node.closest(".myst-tab-list")) {
       return undefined;
@@ -75,6 +79,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
     rt.frontmatter.setFrontmatterEditCells(enabled);
     syncLinkFollowHints(document, enabled);
     rt.tableRowMove.refresh();
+    rt.listItemMove.refresh();
     rt.insertPoints.refreshInsertPoints();
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-008
     // The side-by-side diff is a read-mode view: its button is disabled and its cards go in edit mode.

@@ -11,6 +11,10 @@
   them: documents that write each requirement as a list item get a usable outline.
 - When a render fails without a message, the preview now shows "The render failed." (or "The latest
   render failed." over the kept page) instead of "undefined" or an empty message.
+- In edit mode, each list item has a handle on its left, as table rows do: drag it among its
+  sibling items, or focus it and press Alt+Up or Alt+Down, to move the item with its sub-items in
+  one edit; an ordered list keeps its numbers in order, and the lists of alerts and admonitions get
+  their handles left of the box.
 
 ## 1.9.3 - 2026-11-19
 

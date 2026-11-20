@@ -34,6 +34,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Insertion editor**: block editor opened from an insert point or from "Start writing".
 - **Link panel**: two-field Text/URL panel under the palette, opened by the Link button or Cmd/Ctrl+K (`src/page/modules/linkPanel.ts`).
 - **List item editor**: block editor opened on one list item, on the lines the renderer gives the item, by a click on the item or Enter on the item selected with Right from its list (`editingElementFor` in `src/page/features/mappedBlocks.ts`); the list itself opens the whole list.
+- **List item handle**: handle shown in edit mode left of each item of a list of two items or more (left of the outermost alert, quote or admonition that holds the list); a drag onto a sibling item or Alt+Up/Alt+Down on it moves the item with its sub-items among its siblings in one edit (`installListItemMove` in `src/page/features/listItemMove.ts`, `moveListItem` in `src/page/modules/listItemMove.ts`).
 - **Mapped block**: rendered element carrying its source location (`[data-sphinx-source-file][data-sphinx-source-line]`).
 - **Margin mode (planned)**: layout mode that uses the page margins for side content.
 - **Message gate**: host rule that matches a page message to the preview before its handler runs (`render`, `comment`, `document`, `own-id`, `page-state`; `PAGE_MESSAGE_GATES` in `src/session/pageMessages.ts`).

@@ -33,6 +33,7 @@ import { registerHostHandlers } from "./features/hostHandlers";
 import { installInsertPoints } from "./features/insertPoints";
 import { linkActivationEdits } from "./features/linkEditing";
 import { installLinkTooltip } from "./features/linkTooltip";
+import { installListItemMove } from "./features/listItemMove";
 import { createMappedBlocks } from "./features/mappedBlocks";
 import { bindEditModeCaptureClicks, installPageInput } from "./features/pageInput";
 import type { PageRuntime, PageRuntimeState, PaletteMode, RuntimeSavedState } from "./features/pageRuntime";
@@ -295,6 +296,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     keepReadingLine();
   }, () => {
     rt.tableRowMove?.reposition();
+    rt.listItemMove?.reposition();
     rt.tableCellEditor?.revealOpenCell();
   });
   // The TOC column changes the available width: re-measure Auto and keep the reading line.
@@ -412,6 +414,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.fileDrop = installFileDrop(rt);
   rt.blockMoves = installBlockMoves(rt);
   rt.tableRowMove = installTableRowMove(rt);
+  rt.listItemMove = installListItemMove(rt);
   rt.editMode = installEditMode(rt);
   rt.contentPatch = installContentPatch(rt);
   rt.input = installPageInput(rt);

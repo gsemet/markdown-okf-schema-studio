@@ -739,7 +739,13 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "myst/v45-tab-panel-edit-dark-900": "In the dark theme at 900 px in edit mode, a click on the paragraph of the shown Node tab panel opens exactly one Markdown editor holding the whole tab item, with its opening line, :selected: option and body.",
   "myst/v46-label-rename-above-table-light-290": "In the light theme at 290 px in edit mode, a click on the anchor icon of a labelled table opens the Rename label field above the icon, fully inside the pane, and no cell of the table below is covered by it.",
   "myst/v47-maths-offline-light-900": "In the light theme at 900 px, an inline and a display formula are typeset with the local KaTeX bundle, the display formula in its own block, no other text is typeset, the dollar prices of a sentence stay plain text, and a formula with an unknown command stays readable as its source, marked as a maths error and holding no typeset maths.",
-  "block-editing/v35-card-header-enter-commits-line-cream-900": "In edit mode in the cream preview at 900 px, a click on the header of a standalone card, End, a typed \" Q\" and Enter send one final save of the :header: line alone, so the document keeps :footer: right after the header line with no blank line between them, and the text box gets no newline."
+  "block-editing/v35-card-header-enter-commits-line-cream-900": "In edit mode in the cream preview at 900 px, a click on the header of a standalone card, End, a typed \" Q\" and Enter send one final save of the :header: line alone, so the document keeps :footer: right after the header line with no blank line between them, and the text box gets no newline.",
+  "block-editing/v36-list-item-handles-light-900": "In edit mode in the light preview at 900 px, each of the 15 items of the bullet, ordered, nested, task, GitHub alert and nested admonition lists has a handle that ends left of its list, or of the outermost alert or admonition that holds it, inside the pane and centred within 2 px on the item's first line.",
+  "block-editing/v37-list-item-handles-dark-900": "In edit mode in the dark preview at 900 px, each of the 15 items of the bullet, ordered, nested, task, GitHub alert and nested admonition lists has a handle that ends left of its list, or of the outermost alert or admonition that holds it, inside the pane and centred within 2 px on the item's first line.",
+  "block-editing/v38-list-item-handles-cream-900": "In edit mode in the cream preview at 900 px, each of the 15 items of the bullet, ordered, nested, task, GitHub alert and nested admonition lists has a handle that ends left of its list, or of the outermost alert or admonition that holds it, inside the pane and centred within 2 px on the item's first line.",
+  "block-editing/v39-list-item-handles-pushed-light-360": "In edit mode in the light theme at 360 px, where the lists have no room on their left, at least one block is pushed right and each of the 15 list item handles ends left of its list or outermost container, inside the pane and centred within 2 px on the item's first line.",
+  "block-editing/v40-list-item-drag-light-900": "In edit mode in the light theme at 900 px, a real mouse drag of the handle of the first bullet item held over the lower half of the third marks the first item as dragged and the third with a drop line after it, and the release sends one save of the list in the order second, third, first and opens no block editor.",
+  "block-editing/v41-list-item-drag-dark-900": "In edit mode in the dark theme at 900 px, a real mouse drag of the handle of the first bullet item held over the lower half of the third marks the first item as dragged and the third with a drop line after it, and the release sends one save of the list in the order second, third, first and opens no block editor."
 };
 
 /**
@@ -913,6 +919,8 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "table-editing/v32-grid-paste-light-900": ["pasted"],
   "table-editing/v33-cell-editor-in-quote-light-900": ["open"],
   "table-editing/v34-cell-editor-in-note-dark-900": ["open"],
+  "block-editing/v40-list-item-drag-light-900": ["drag"],
+  "block-editing/v41-list-item-drag-dark-900": ["drag"],
 };
 
 /**

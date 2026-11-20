@@ -27,6 +27,25 @@
   `test/host/coreReq.requirements.test.ts`, `test/page/modules/mermaidPreviewEntry.test.ts`,
   `test/security/trustReq.pageBuild.requirements.test.ts`.
 
+### List item handles
+
+- Added: SwRS-MDOKFSTUDIO-BLOCK-262 (proposed, derives from StRS-MDOKFSTUDIO-BLOCK-014): in edit
+  mode a handle left of each list item moves it among its siblings by a drag or Alt+Up or Alt+Down,
+  with its sub-items and blocks, as one edit; ordered lists keep their numbers; lists in quotes,
+  alerts and admonitions keep their prefixes and show their handles outside the outermost box.
+- Changed: StRS-MDOKFSTUDIO-BLOCK-014 (proposed): the list items in its intent and constraints, and
+  a main path "Move a list item" citing SwRS-MDOKFSTUDIO-BLOCK-262.
+- Sources: `src/page/features/listItemMove.ts`, `src/page/modules/listItemMove.ts`,
+  `src/page/features/mappedBlocks.ts`, `src/page/features/editMode.ts`,
+  `src/page/features/pageInput.ts`, `src/core/preview/styles/editModeStyles.ts`.
+- Tests: `test/page/modules/listItemMove.test.ts`, `test/page/runtimeListItemMove.test.ts`,
+  `test/session/listItemRange.test.ts`, `test/core/preview/listItemHandleStyles.test.ts`,
+  `test/integration/listItemMoves.ts`, `test/visual/listItemHandleScenarios.ts`,
+  `test/visual/capture_list_item_handles.py`.
+- Commands: `just requirements-update` (1 index updated, then 0), `just check-markers` (406
+  in-force SwRS marked), `just requirements-lint` (0 changes, main paths: 92 StRS checked, 581 SwRS
+  citations, all valid; use case diagrams: 93 StRS checked, all parse).
+
 ### Use case diagrams parsed at the requirements lint (CR-429)
 
 - Added: SwRS-MDOKFSTUDIO-CORE-090 (proposed, derives from StRS-MDOKFSTUDIO-TRUST-014): the
