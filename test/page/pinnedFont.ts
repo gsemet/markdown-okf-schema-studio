@@ -25,9 +25,12 @@ const FACES: ReadonlyArray<{ family: string; file: string; weight: string }> = [
   { family: PINNED_MONO_FAMILY, file: "KaTeX_Typewriter-Regular.woff2", weight: "normal" },
 ];
 
-/** Loads the pinned faces in `page` and points the theme's font variables to them; throws when a face does not load. */
-export async function pinTestFonts(page: Page): Promise<void> {
-  const faces = FACES.map((face) => ({ ...face, bytes: fs.readFileSync(path.join(FONTS, face.file)).toString("base64") }));
+/**
+ * Loads the pinned faces from `fonts` in `page` and points the theme's font variables to them;
+ * throws when a face does not load, which fails the test (the browser is closed).
+ */
+export async function pinTestFonts(page: Page, fonts: string = FONTS): Promise<void> {
+  const faces = FACES.map((face) => ({ ...face, bytes: fs.readFileSync(path.join(fonts, face.file)).toString("base64") }));
   const failed = await page.evaluate(async ({ items, sans, mono }) => {
     const failures: string[] = [];
     for (const item of items) {
@@ -52,5 +55,5 @@ export async function pinTestFonts(page: Page): Promise<void> {
     }
     return failures;
   }, { items: faces, sans: PINNED_SANS_FAMILY, mono: PINNED_MONO_FAMILY });
-  if (failed.length > 0) throw new Error(`the pinned test font did not load: ${failed.join(", ")} from ${FONTS}`);
+  if (failed.length > 0) throw new Error(`the pinned test font did not load: ${failed.join(", ")} from ${fonts}`);
 }

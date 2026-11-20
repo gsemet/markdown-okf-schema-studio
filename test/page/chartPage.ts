@@ -90,10 +90,13 @@ export async function openChartPage(markdown: string, files: Record<string, stri
 /**
  * Opens `document` in headless Chromium with one diagram runtime bundled as the extension bundles
  * it: the Vega chart runtime, or the Mermaid runtime (an ES module with chunks, which Chromium
- * loads from file:// only with file access allowed). Undefined when no browser can start.
+ * loads from file:// only with file access allowed). Undefined when no browser can start; a setup
+ * step that fails after the launch closes the browser and throws. `launched` (tests only) sees the
+ * browser once it is launched.
  */
 export async function openPreviewPage(
   markdown: string, files: Record<string, string>, themeId: string, mode: string | undefined, runtime: "vega" | "mermaid",
+  options: { readonly launched?: (browser: Browser) => void } = {},
 ): Promise<ChartPage | undefined> {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "chart-page-")));
   const workspace = path.join(root, "workspace");
@@ -150,31 +153,38 @@ export async function openPreviewPage(
   } catch {
     return undefined;
   }
-  const page = await browser.newPage({ viewport: { width: 900, height: 1300 }, deviceScaleFactor: 1 });
-  const problems: string[] = [];
-  page.on("console", (message) => {
-    if (message.type() === "error") problems.push(`console: ${message.text()}`);
-  });
-  page.on("pageerror", (error) => problems.push(`pageerror: ${error.message}`));
-  await page.addInitScript(() => {
-    document.addEventListener("securitypolicyviolation", (event) => {
-      (window as unknown as { __violations: string[] }).__violations.push(`${event.violatedDirective}: ${event.blockedURI}`);
+  options.launched?.(browser);
+  // A step that fails after the launch closes the browser, or its process keeps the test run alive.
+  try {
+    const page = await browser.newPage({ viewport: { width: 900, height: 1300 }, deviceScaleFactor: 1 });
+    const problems: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") problems.push(`console: ${message.text()}`);
     });
-    (window as unknown as { __violations: string[] }).__violations = [];
-  });
-  await page.goto(pathToFileURL(pagePath).href);
-  const theme = THEMES.find((candidate) => candidate.id === themeId)!;
-  await page.evaluate(({ variables, themeMode }) => {
-    if (themeMode) document.documentElement.setAttribute("data-sphinx-preview-theme-mode", themeMode);
-    for (const [name, value] of Object.entries(variables)) document.body.style.setProperty(name, value);
-  }, { variables: theme.variables, themeMode: mode });
-  return {
-    browser,
-    page,
-    csp: /<meta http-equiv="Content-Security-Policy" content="([^"]*)"/u.exec(built.html)?.[1] ?? "",
-    problems,
-    close: async () => { await browser.close(); },
-  };
+    page.on("pageerror", (error) => problems.push(`pageerror: ${error.message}`));
+    await page.addInitScript(() => {
+      document.addEventListener("securitypolicyviolation", (event) => {
+        (window as unknown as { __violations: string[] }).__violations.push(`${event.violatedDirective}: ${event.blockedURI}`);
+      });
+      (window as unknown as { __violations: string[] }).__violations = [];
+    });
+    await page.goto(pathToFileURL(pagePath).href);
+    const theme = THEMES.find((candidate) => candidate.id === themeId)!;
+    await page.evaluate(({ variables, themeMode }) => {
+      if (themeMode) document.documentElement.setAttribute("data-sphinx-preview-theme-mode", themeMode);
+      for (const [name, value] of Object.entries(variables)) document.body.style.setProperty(name, value);
+    }, { variables: theme.variables, themeMode: mode });
+    return {
+      browser,
+      page,
+      csp: /<meta http-equiv="Content-Security-Policy" content="([^"]*)"/u.exec(built.html)?.[1] ?? "",
+      problems,
+      close: async () => { await browser.close(); },
+    };
+  } catch (error) {
+    await browser.close().catch(() => undefined);
+    throw error;
+  }
 }
 
 /** The same document without the chart that fails (the screenshots of the README and the docs). */

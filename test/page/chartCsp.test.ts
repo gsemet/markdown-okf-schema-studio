@@ -7,7 +7,9 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { CHART_DATA, CHART_DOCUMENT, openChartPage } from "./chartPage";
+import type { Browser } from "playwright-core";
+
+import { CHART_DATA, CHART_DOCUMENT, openChartPage, openPreviewPage } from "./chartPage";
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-121
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-122
@@ -85,5 +87,30 @@ test("a theme change draws the charts again in the colours of the new theme", as
     assert.match(await svg(), /#f4f4f4/iu, "the axis text takes the new foreground");
   } finally {
     await opened.close();
+  }
+});
+
+test("Opening a chart page closes the browser when its setup fails", async (t) => {
+  const kept: { browser?: Browser } = {};
+  try {
+    let opened: Awaited<ReturnType<typeof openPreviewPage>>;
+    try {
+      // A theme that does not exist fails the setup after the launch, the new page and the goto.
+      opened = await openPreviewPage(CHART_DOCUMENT, { "data/series.csv": CHART_DATA }, "no-such-theme", undefined, "vega", {
+        launched: (browser) => { kept.browser = browser; },
+      });
+    } catch {
+      assert.ok(kept.browser, "the browser was launched before the setup failed");
+      assert.equal(kept.browser.isConnected(), false, "openPreviewPage closed the browser when its setup failed");
+      return;
+    }
+    if (!opened) {
+      t.skip("no Chromium can start here (run `just dev` to install it)");
+      return;
+    }
+    await opened.close();
+    assert.fail("a theme that does not exist was accepted");
+  } finally {
+    if (kept.browser?.isConnected()) await kept.browser.close();
   }
 });
