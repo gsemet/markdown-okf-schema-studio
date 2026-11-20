@@ -5,6 +5,7 @@ from __future__ import annotations
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 
 from capture_support import Failure, TABLE_BAR_STYLE_JS, save_step, table_bar_flow_failure
+from capture_list_numbers import check_ordered_item_keeps_numbers
 from capture_table_cell_room import check_cell_clamped_to_pane
 from capture_table_escape import check_cell_escape_keeps_cells_left
 
@@ -847,6 +848,8 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
     original_cell_html = target.inner_html() if edit_target == "table-cell" else None
     clicked_word = None
     click_offset = None
+    if edit_target == "list":  # Its ordered list first: the item editor closes before the click below.
+      check_ordered_item_keeps_numbers(page, page_name, failures)
     if edit_target in {"title", "paragraph", "admonition", "list"}:
       target.scroll_into_view_if_needed()
       # The centre of the block, unless the floating toolbar covers it (a 460 px pane): then the
@@ -1010,9 +1013,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       editor = page.locator(".sphinx-preview-block-editor textarea")
       if editor.count() != 1 or not editor.is_visible():
         failures.append(Failure(page_name, f"clicking {edit_target} did not open its Markdown editor"))
-      elif page.locator(
-        '[aria-label="Save Markdown block"], [aria-label="Cancel Markdown edit"]'
-      ).count():
+      elif page.locator('[aria-label="Save Markdown block"], [aria-label="Cancel Markdown edit"]').count():
         failures.append(Failure(page_name, "raw block editor still exposes Save or Cancel buttons"))
       elif editor.evaluate("element => getComputedStyle(element.parentElement).borderTopWidth") != "1px":
         failures.append(Failure(page_name, "raw block editor has no visible surrounding frame"))
