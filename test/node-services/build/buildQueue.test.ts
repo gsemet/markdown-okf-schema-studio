@@ -21,6 +21,11 @@ function document(version: number, text: string): TestDocument {
   };
 }
 
+function busyWaitRealMs(ms: number): void {
+  const end = performance.now() + ms;
+  while (performance.now() < end) { /* a busy host */ }
+}
+
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-039
 test("lets an in-flight build finish and starts the newest queued edit right after", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout"] });
@@ -62,15 +67,20 @@ test("lets an in-flight build finish and starts the newest queued edit right aft
 // @tests_req SwRS-MDOKFSTUDIO-CORE-025
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-049
 test("retains a successful result as stale after a failed newer build", async (context) => {
-  context.mock.timers.enable({ apis: ["setTimeout"] });
+  // The queue's adaptive wait reads Date.now(); the test's debounce runs on the mocked clock.
+  context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
   const pending = new Map<number, { resolve: (value: string) => void; reject: (error: Error) => void }>();
   const states: string[] = [];
   const queue = new BuildQueue<TestDocument, string>({
     debounceMs: 0,
     revisionOf: (queued) => queued.version,
-    build: async (request) => new Promise((resolve, reject) => {
-      pending.set(request.requestId, { resolve, reject });
-    }),
+    build: async (request) => {
+      // A busy host: the build takes 15 ms of real time, which the queue's mocked clock must not see.
+      busyWaitRealMs(15);
+      return new Promise((resolve, reject) => {
+        pending.set(request.requestId, { resolve, reject });
+      });
+    },
     onState: (state) => states.push(`${state.phase}:${state.stale}`),
   });
   context.after(() => queue.dispose());
@@ -91,17 +101,21 @@ test("retains a successful result as stale after a failed newer build", async (c
 });
 
 test("still renders a build whose buffer already moved on, and cleans up on dispose", async (context) => {
-  context.mock.timers.enable({ apis: ["setTimeout"] });
+  context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
   const active = document(1, "first");
   const resolvers = new Map<number, (value: string) => void>();
   let aborted = false;
   const queue = new BuildQueue<TestDocument, string>({
     debounceMs: 0,
     revisionOf: (queued) => queued.version,
-    build: async (request, signal) => new Promise((resolve) => {
-      resolvers.set(request.requestId, resolve);
-      signal.addEventListener("abort", () => { aborted = true; }, { once: true });
-    }),
+    build: async (request, signal) => {
+      // A busy host: the build takes 15 ms of real time, which the queue's mocked clock must not see.
+      busyWaitRealMs(15);
+      return new Promise((resolve) => {
+        resolvers.set(request.requestId, resolve);
+        signal.addEventListener("abort", () => { aborted = true; }, { once: true });
+      });
+    },
   });
   context.after(() => queue.dispose());
   const request = queue.request(active);
