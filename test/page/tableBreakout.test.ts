@@ -4,7 +4,8 @@
  * prose column keeps about 20 characters) and breaks out to its natural width otherwise. The twelve
  * cases are the ones the owner reviewed; the page is the real preview (render pipeline, stylesheet,
  * page runtime), the column is 688 px wide (720 px minus the two 16 px gutters of the review).
- * Skipped, with a message, when no Chromium can start here.
+ * The page draws its text in the pinned KaTeX fonts (`pinnedFont.ts`), not in the machine's own
+ * fonts, so the widths and the verdicts are the same on every machine. Skipped, with a message, when no Chromium can start here.
  */
 import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
@@ -20,6 +21,7 @@ import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 import { THEMES } from "../visual/themes";
+import { PINNED_MONO_FAMILY, PINNED_SANS_FAMILY, pinTestFonts } from "./pinnedFont";
 import { pageRuntimeScript } from "./runtimeHarness";
 
 /** Both themes; STUDIO_TABLE_THEME picks one (the review pictures of a failing run). */
@@ -60,8 +62,8 @@ const CASES: Array<{ title: string; stays: boolean; markdown: string[] }> = [
   { title: "four columns: prose in every column", stays: false, markdown: table(["Problem", "Cause", "Fix", "Risk"], [
     [lorem(10), lorem(14), lorem(12), lorem(9)], [lorem(13), lorem(8), lorem(16), lorem(11)],
   ]) },
-  // Cases 6 and 12: the longest token is wide enough to break out with any monospace font, since
-  // Consolas (Windows) is narrower than the DejaVu Sans Mono fallback of Linux.
+  // Cases 6 and 12: the longest token, in the pinned monospace font, is wider than the column on
+  // its own, so the table breaks out.
   { title: "two columns: long code paths", stays: false, markdown: table(["File", "Role"], [
     [code("src/page/features/blockEditing/editorPlacement.ts"), "Places the block editor and its palette."],
     [code("test/integration/realInput/scenarios/blockEditing/gridCardEditorBlur.ts"), "Real-window scenario for the blur bug."],
@@ -85,9 +87,10 @@ const CASES: Array<{ title: string; stays: boolean; markdown: string[] }> = [
       ["Built-in preview", "✓", "–", "–", "–", "–", "–", "✓", "–", "✓"],
       ["Obsidian", "✓", "–", "–", "✓", "–", "–", "✓", "–", "–"],
     ]) },
+  // Its text was lengthened so that it also breaks out in the pinned fonts.
   { title: "six columns: mixed, medium text", stays: false, markdown: table(["Requirement", "Tier", "Status", "Owner", "Test", "Rationale"], [
-    ["BLOCK-047", "SwRS", "approved", "Studio", code("blockBlur.test.ts"), "Window blur commits and closes the editor; no data loss."],
-    ["TOOLBAR-009", "SwRS", "proposed", "Studio", code("findShortcut.test.ts"), "Cmd/Ctrl+F opens the find bar from any editing field."],
+    ["BLOCK-047", "SwRS", "approved", "Platform", code("blockEditorWindowBlur.test.ts"), "Window blur commits and closes the editor; no data loss."],
+    ["TOOLBAR-009", "SwRS", "proposed", "Platform", code("toolbarFindShortcut.test.ts"), "Cmd/Ctrl+F opens the find bar from any editing field."],
   ]) },
   { title: "three columns: inline code identifiers", stays: false, markdown: table(["Setting", "Default", "Effect"], [
     [code("markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks"), code("false"), "Lets a frontmatter link point outside the workspace."],
@@ -172,6 +175,7 @@ async function openPage(markdown: string, themeId: string): Promise<Opened | und
   await page.evaluate((variables) => {
     for (const [name, value] of Object.entries(variables)) document.body.style.setProperty(name, value);
   }, theme.variables);
+  await pinTestFonts(page);
   await page.waitForFunction(() => document.documentElement.getAttribute("data-sphinx-preview-width") === "auto");
   return { browser, page, close: async () => { await browser.close(); } };
 }
@@ -244,6 +248,14 @@ test("Auto keeps a table in the column when its minimum widths fit and breaks it
     try {
       const measured = await measureTables(opened.page);
       await shootCases(opened.page, themeId, "table-case");
+      const pin = await opened.page.evaluate((sans) => ({
+        cell: getComputedStyle(document.querySelector("#sphinx-myst-preview-content td")!).fontFamily,
+        code: getComputedStyle(document.querySelector("#sphinx-myst-preview-content td code")!).fontFamily,
+        loaded: document.fonts.check(`14px "${sans}"`),
+      }), PINNED_SANS_FAMILY);
+      const first = (family: string): string => family.split(",")[0]!.trim().replace(/^["']|["']$/gu, "");
+      assert.ok(first(pin.cell) === PINNED_SANS_FAMILY && first(pin.code) === PINNED_MONO_FAMILY && pin.loaded,
+        `${themeId}: the page draws in the pinned fonts (cell ${pin.cell}, code ${pin.code}, loaded ${pin.loaded})`);
       assert.equal(measured.length, CASES.length, "every case renders one top-level table");
       CASES.forEach((entry, index) => {
         const { wide, width, column } = measured[index]!;
@@ -405,8 +417,8 @@ test("Auto measures a table again on a real resize while a cell is edited", asyn
     await openCellEditor(page, 0);
     const open = await layoutPass(page);
     assert.equal(open.wide, true, `${themeId}: wide with the editor open`);
-    // The pane must be narrower than the table's natural width, which depends on the font
-    // (705 to 797 px across platforms); 600 px is below it everywhere.
+    // The pane must be narrower than the table's natural width: 719 px in the pinned font
+    // (`pinnedFont.ts`), the same on every machine; 600 px is below it.
     await page.setViewportSize({ width: 600, height: 1400 });
     const narrower = await layoutPass(page);
     assert.ok(narrower.width < open.width, `${themeId}: the breakout follows the pane (${open.width} then ${narrower.width} px)`);
