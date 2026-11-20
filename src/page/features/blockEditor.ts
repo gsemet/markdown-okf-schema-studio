@@ -6,6 +6,7 @@
  * `./blockSourceEditor.ts`); the cell editor in `./tableCellEditor.ts`.
  */
 
+import { matchLineEndings } from "../../core/edits/lineEndings";
 import { clearCellEditorRoom } from "../modules/cellEditorRoom";
 import { tableRankIn } from "../modules/tableInContainer";
 import { AUTOSAVE_DELAY_MS, isApplePlatform } from "../pageSettings";
@@ -159,6 +160,16 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     });
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-263
+  /**
+   * The text of the text box as the source writes it: the box returns LF for every line break, the
+   * source may use CR LF (or both), and a text the writer left as it was must equal the source.
+   */
+  function textBoxText(textarea: { value: string }, edit: BlockEdit): string {
+    const text = textarea.value + (edit.trailingLineEnding || "");
+    return typeof edit.originalText === "string" ? matchLineEndings(text, edit.originalText) : text;
+  }
+
   /** The top-level mapped block that holds `element` (itself when it is one). */
   function topLevelBlockOf(element: HTMLElement): HTMLElement | undefined {
     const blocks = rt.blocks.topLevelMappedBlocks();
@@ -211,7 +222,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     const target = edited.tagName === "LI" ? topLevelBlockOf(edited) : edited;
     if (!target || !rt.blockMoves.bodyBlockNeighbour(target, direction)) return true;
     const offset = Number.isSafeInteger(control.selectionStart) ? control.selectionStart as number : 0;
-    const editedText = edit.textarea.value + (edit.trailingLineEnding || "");
+    const editedText = textBoxText(edit.textarea, edit);
     if (editedText === edit.originalText && !edit.hasAutosavedChange) {
       // Nothing to save: close (the host drops the edit) and move at once.
       closeBlockEdit(true);
@@ -379,7 +390,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       ? edit.convertedText
       : edit.tableModel
       ? rt.tools.tableTools.serialize(edit.tableModel)
-      : edit.textarea!.value + (edit.trailingLineEnding || "");
+      : textBoxText(edit.textarea!, edit);
     if (final && editedText === edit.originalText && !edit.hasAutosavedChange) {
       closeBlockEdit();
       return false;

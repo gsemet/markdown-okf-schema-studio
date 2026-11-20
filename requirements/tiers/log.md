@@ -2,6 +2,21 @@
 
 ## 2026-11-20
 
+### A block editor never stays on "Saving Markdown…" (CR-436)
+
+- Added: SwRS-MDOKFSTUDIO-BLOCK-263 (proposed, derives from StRS-MDOKFSTUDIO-BLOCK-006): the page
+  puts the text of the text box in the line endings of the source block before it compares or posts
+  it (an unchanged CR LF block posts nothing and closes), and the host answers every final save that
+  ends with nothing to render with `previewEditSource` `done`, which closes the editor.
+- Changed: SwRS-MDOKFSTUDIO-BLOCK-234 (proposed): a block with mixed line endings now keeps the
+  endings of the lines an edit leaves alone (the row said the text box content was written as it
+  is); a verification note. The rest of the requirement is unchanged.
+- Sources: `src/core/edits/lineEndings.ts`, `src/page/features/blockEditor.ts`,
+  `src/page/features/blockSourceEditor.ts`, `src/session/features/blockEdits.ts`,
+  `src/core/protocol/hostToPage.ts`.
+- Tests: `test/page/runtimeBlockEditorLineEndings.test.ts`, `test/host/editLineEndings.test.ts`,
+  `test/core/edits/matchLineEndings.test.ts`, `test/integration/realInput/lineEndingLeave.ts`.
+
 ### Line-ending fixtures and byte-preservation tests (CR-435)
 
 - Changed: SwRS-MDOKFSTUDIO-BLOCK-234: new scenario "A save on a real CRLF, LF or mixed file changes the block only", tested on real fixture files (test/fixtures/markdown-line-endings/) kept byte for byte by `-text` rules in .gitattributes. No behaviour change.

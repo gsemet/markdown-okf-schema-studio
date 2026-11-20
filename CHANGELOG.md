@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The block editor of a file with CR LF line endings no longer stays stuck on "Saving Markdown..."
+  after you leave it without a change; a block you edit keeps the line endings of its file.
+
 ## 1.10.0 - 2026-11-20
 
 - In edit mode, a click on a list item edits that item only, instead of the whole list; a click on

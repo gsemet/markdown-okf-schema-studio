@@ -50,6 +50,16 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     if (!edit || message.editId !== edit.editId) return;
     const { blockEditor, editorChrome, textControls } = rt;
     const { hostRequests, pasteImage, pasteHtml, pasteUrl } = rt.parts;
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-263
+    // The host ended the final save without a change to show (the text was the source's): the
+    // editor closes, then a pending move to another block goes on, as after a patch.
+    if (message.done === true) {
+      if (edit.finishing) {
+        blockEditor.closeBlockEdit(false);
+        rt.editMode.resumePendingBlockNavigation();
+      }
+      return;
+    }
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
     if (typeof message.error === "string") {
       // @implements_req SwRS-MDOKFSTUDIO-TABLE-034

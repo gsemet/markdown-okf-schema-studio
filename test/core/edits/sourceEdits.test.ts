@@ -19,8 +19,8 @@ import {
   readThreadLines,
   THREAD_GONE,
   THREAD_REPLY_REFUSED,
-  withLineEndingOf,
 } from "../../../src/core/edits/sourceEdits";
+import { matchLineEndings } from "../../../src/core/edits/lineEndings";
 import { applyTextEdits, type TextEdit } from "../../../src/core/edits/textEdit";
 
 function applied(text: string, plan: { edit: TextEdit } | { refused: string } | { unchanged: true }): string {
@@ -187,7 +187,7 @@ for (const [name, eol] of [["LF", "\n"], ["CRLF", "\r\n"], ["CR", "\r"]] as cons
     const blockStart = document.indexOf("- a");
     const saved = `- a${eol}- b`;
     // The text box returns LF for every line break.
-    const edited = withLineEndingOf("- a\n- b\n- c", saved);
+    const edited = matchLineEndings("- a\n- b\n- c", saved);
     assert.equal(edited, `- a${eol}- b${eol}- c`);
     const edit = planBlockTextEdit(blockStart, saved, edited);
     assert.ok(edit);
@@ -199,15 +199,16 @@ for (const [name, eol] of [["LF", "\n"], ["CRLF", "\r\n"], ["CR", "\r"]] as cons
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
-test("a block text with no line break or mixed line endings is left as the text box returned it", () => {
-  assert.equal(withLineEndingOf("a\nb", "single line"), "a\nb");
-  assert.equal(withLineEndingOf("a\nb", "single line", "x\ny\nz"), "a\nb");
-  assert.equal(withLineEndingOf("a\nb", "a\r\nb\nc"), "a\nb");
+test("a block text with no line break is left as the text box returned it, and a mixed one keeps the endings of the lines left alone", () => {
+  assert.equal(matchLineEndings("a\nb", "single line"), "a\nb");
+  assert.equal(matchLineEndings("a\nb", "single line", "x\ny\nz"), "a\nb");
+  // Was "a\nb" (mixed endings written as the text box returned them); the first line is left alone and keeps its CR LF.
+  assert.equal(matchLineEndings("a\nb", "a\r\nb\nc"), "a\r\nb");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
 test("a single-line block takes the line ending of the document", () => {
-  assert.equal(withLineEndingOf("abc\ndef", "abc", "one\r\nabc\r\ntwo"), "abc\r\ndef");
-  assert.equal(withLineEndingOf("abc\ndef", "abc", "one\rabc\rtwo"), "abc\rdef");
-  assert.equal(withLineEndingOf("abc\ndef", "abc", "one\r\nabc\ntwo"), "abc\ndef");
+  assert.equal(matchLineEndings("abc\ndef", "abc", "one\r\nabc\r\ntwo"), "abc\r\ndef");
+  assert.equal(matchLineEndings("abc\ndef", "abc", "one\rabc\rtwo"), "abc\rdef");
+  assert.equal(matchLineEndings("abc\ndef", "abc", "one\r\nabc\ntwo"), "abc\ndef");
 });
