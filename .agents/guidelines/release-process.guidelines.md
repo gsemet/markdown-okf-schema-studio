@@ -177,8 +177,29 @@ the body never differs from what is committed.
 
 ## Release notes
 
-Write for a user of the extension, from the changelog lines: no CR numbers, no requirement IDs,
-no internal terms (agent roles, change request numbers, rounds). Structure, in this order:
+Write for a user of the extension, from the changelog lines. The notes show what the release
+brings to the user, in pictures first; what the release is stays in the folded sections.
+
+### Writing
+
+Write like a maintainer telling a colleague what changed. Use short, complete sentences, plain
+verbs, and "you". Write for the user: no ticket numbers, no requirement IDs, no internal terms
+(agent roles, change request numbers, rounds), no implementation.
+
+- Each highlight is a heading that says what you can now do, then a picture, then at most two
+  sentences.
+- When the change replaces a behaviour you can see, the picture puts the before and the after side
+  by side in one image, and the text does not describe the before again.
+- When the picture shows the whole change, write no text under it.
+- Name a setting as a setting: "the setting `markdownOkfSchemaStudio.…`", with its default value and
+  where to turn it on (the VS Code settings).
+
+Never use: "Before:" or "Now:" labels; invented scenes; punchy fragments; praise words (seamless,
+powerful, effortless, easily); a closing "why it matters" line.
+
+### Structure
+
+In this order:
 
 1. **Header**, centred:
    - `<h1 align="center">Markdown OKF-Schema Studio X.Y</h1>`;
@@ -193,22 +214,25 @@ no internal terms (agent roles, change request numbers, rounds). Structure, in t
    · `[Install from Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio)`
    · Read the guide · Full changelog (`blob/vX.Y.Z/CHANGELOG.md`) · 1.0 showcase. Then a `---`
    rule.
-3. **Two to four highlight sections**, `## <emoji> <what the reader can now do>`. Each one says
-   what changes for the reader in a short paragraph; adds a short Markdown example when the
-   feature is a syntax; shows one picture, or a light and dark pair in a two-column table with a
-   caption row; and ends with one sentence on why it matters.
-4. **`## 🛠 Smoother editing`**: the smaller visible changes, one bullet each, with a bold lead.
-5. **Folded sections**: `<details><summary><b>🐞 All fixes</b></summary>` with the remaining
-   fixes, one line each, and `<details><summary><b>🛠 For contributors</b></summary>` with the
-   tooling changes and any known issue.
+3. **Two to four highlight sections**, `## <emoji> <what you can now do>`, each with one picture
+   and at most two sentences, following "Writing". A new syntax may add a short Markdown example
+   under the picture.
+4. **`## 🛠 Smoother editing`**: the smaller visible changes, one line per bullet, with a bold lead.
+5. **Folded sections**:
+   - `<details><summary><b>🐞 All fixes</b></summary>` with the remaining fixes, one line each;
+   - `<details><summary><b>🔎 Details</b></summary>` with how things work: keyboard, defaults,
+     limits;
+   - `<details><summary><b>🛠 For contributors</b></summary>` with the tooling changes and any
+     known issue.
 
 Keyboard keys use `<kbd>`. Every changelog line of the release appears once, in a highlight, in
-"Smoother editing" or in "All fixes".
+"Smoother editing" or in a folded section.
 
 ### Images
 
 Images sit directly in the notes folder, next to `release-notes.md`, and the notes link them by file
-name. An image at an absolute URL or in a subfolder fails the check: a release must depend on no
+name. The joined before | after image of a highlight is one file, made from the Verifier's before
+and after captures of the merged changes, with any tool; the version PR says which. An image at an absolute URL or in a subfolder fails the check: a release must depend on no
 branch. The release attaches them as assets and points the links to
 `https://github.com/gsemet/markdown-okf-schema-studio/releases/download/vX.Y.Z/<file>`.
 
@@ -232,7 +256,8 @@ followed by an `Image:` line with the file name of its picture when it has one. 
 3. **The install link**: one sentence (install or update, free, MIT), and the Marketplace URL
    (`https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio`).
 
-Tone: organic. No "excited to announce", "game changer", "supercharge" or other launch words; at
+Tone: organic. No "excited to announce", "game changer", "supercharge" or other launch words, and
+none of the banned forms of "Writing" in the release notes; at
 most two emoji in the whole thread; no hashtag list (one is fine when it is the natural word).
 Read each post aloud: it should sound like a person, not a press release.
 
