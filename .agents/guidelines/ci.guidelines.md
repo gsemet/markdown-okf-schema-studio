@@ -82,8 +82,9 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     stays advisory except on a version change (rule 14). The run's own conclusion stays green with
     a red advisory `stress`: read the result of each job.
     On a branch, they run on demand:
-    `gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery
-    and site). To loop one flaky scenario many times, use
+    `gh workflow run ci.yml --ref <branch> -f heavy=true` (the gallery and site artifact,
+    `studio-site-attempt-<n>`, are built too when `integration` and `report` succeed; `-f gallery=false`
+    skips them, for example in a stress loop). To loop one flaky scenario many times, use
     `-f heavy=true -f stress_repeat=60 -f stress_scenarios=alert-dropdown` (narrow the scenarios
     above about 220 scenario runs per window, rounds times scenarios; the deadline is computed, capped at 24 min). Run them before merging a change to the extension host, the webview or the
     real-window tests, and run `npm run test:integration` locally (one VS Code window at a time).
