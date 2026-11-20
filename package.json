@@ -432,6 +432,7 @@
     "test:reload": "npm run compile && npm run bundle && node out/test/integration/run-tests.js --reload-only",
     "test:browser": "npm run test:visual",
     "visual:render": "npm run compile && npm run bundle && node --import ./scripts/register-myst-patches.mjs out/test/visual/renderFixtures.js",
+    "test:breakout": "node scripts/node-test.mjs breakout out/test/page/tableBreakout.test.js",
     "test:visual": "npm run visual:render && uv run --no-sync --group docs python test/visual/capture.py",
     "gallery:generate": "npm run compile && node scripts/generate-gallery.mjs",
     "site:gallery": "npm run gallery:generate",
