@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.10.0 - 2026-11-20
+
 - In edit mode, a click on a list item edits that item only, instead of the whole list; a click on
   the list itself, outside its items, still edits the whole list. From the keyboard, Enter on an
   item or on a block inside an item, reached with Right as before, now edits that item or that
