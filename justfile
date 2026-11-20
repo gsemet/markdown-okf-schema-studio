@@ -165,12 +165,13 @@ check: format compile check-min-vscode check-boundaries check-limits check-expor
 audit:
     {{ npm }} audit --omit=dev --audit-level=high
 
-# Validate the okfreq requirements bundle: schemas, links, navigation and generated coverage.
+# Validate the okfreq requirements bundle: schemas, links, navigation, generated coverage, the Main paths citations and the use case diagrams.
 requirements-lint:
     {{ okfreq }} validate requirements --check-links --project-root .
     {{ okfreq }} lint requirements --check --check-links --project-root .
     {{ okfreq }} update-coverage requirements --check
     uv run --no-sync --group requirements python scripts/check_main_paths.py requirements
+    {{ npm }} run check:diagrams
 
 # Refresh generated coverage fields, OKF fields (status, verified, Links) and navigation after adding requirements or markers.
 requirements-update:

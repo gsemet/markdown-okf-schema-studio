@@ -2,6 +2,15 @@
 
 ## 2026-11-20
 
+### Use case diagrams parsed at the requirements lint (CR-429)
+
+- Added: SwRS-MDOKFSTUDIO-CORE-090 (proposed, derives from StRS-MDOKFSTUDIO-TRUST-014): the
+  requirements lint parses the use case diagram of every StRS with the project's Mermaid and fails
+  naming the file, the line, the StRS id and Mermaid's message for each diagram that does not parse.
+- Sources: `scripts/check-use-case-diagrams.mjs`, `package.json` (`check:diagrams`), `justfile`
+  (`requirements-lint`).
+- Tests: `test/build/checkUseCaseDiagrams.test.ts`.
+
 ### Gallery and site on a heavy CI dispatch (CR-350)
 
 - Changed: SwRS-MDOKFSTUDIO-CORE-076 says a heavy dispatch builds the gallery and the site unless

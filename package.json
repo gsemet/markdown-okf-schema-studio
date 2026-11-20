@@ -408,6 +408,7 @@
     "check:markers": "node scripts/check-marker-companions.mjs",
     "check:exports": "node scripts/check-unused-exports.mjs",
     "check:settings": "node scripts/generate-settings.mjs --check",
+    "check:diagrams": "node scripts/check-use-case-diagrams.mjs requirements",
     "generate:settings": "node scripts/generate-settings.mjs",
     "watch": "tsc -watch -p .",
     "test": "npm run compile && npm run test:unit && npm run test:contracts && npm run test:security",
