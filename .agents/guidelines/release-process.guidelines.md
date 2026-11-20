@@ -178,7 +178,8 @@ the body never differs from what is committed.
 ## Release notes
 
 Write for a user of the extension, from the changelog lines. The notes show what the release
-brings to the user, in pictures first; what the release is stays in the folded sections.
+brings to the user in a few highlights, each with its picture; what the release is stays in the
+folded sections.
 
 ### Writing
 
@@ -186,11 +187,18 @@ Write like a maintainer telling a colleague what changed. Use short, complete se
 verbs, and "you". Write for the user: no ticket numbers, no requirement IDs, no internal terms
 (agent roles, change request numbers, rounds), no implementation.
 
-- Each highlight is a heading that says what you can now do, then a picture, then at most two
-  sentences.
+- Each highlight is a heading that says what you can now do, then at most two sentences, then the
+  picture. Nothing comes under the picture, except the short Markdown example of a new syntax.
 - When the change replaces a behaviour you can see, the picture puts the before and the after side
   by side in one image, and the text does not describe the before again.
-- When the picture shows the whole change, write no text under it.
+- Each picture is cropped to the part of the screen where the change happens: no toolbar, no empty
+  margin, no unrelated content around it (for a change in a list, no floating toolbar or
+  frontmatter table).
+- A joined before | after image crops both halves to the same region at the same scale.
+- A capture of a gesture (a drag, a hover) keeps the element and what the gesture acts on, not the
+  blocks around it (the list and its handles, not the alerts below it).
+- When the picture shows the whole change, the highlight has no sentence: its heading, then the
+  picture.
 - Name a setting as a setting: "the setting `markdownOkfSchemaStudio.…`", with its default value and
   where to turn it on (the VS Code settings).
 
@@ -214,9 +222,9 @@ In this order:
    · `[Install from Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio)`
    · Read the guide · Full changelog (`blob/vX.Y.Z/CHANGELOG.md`) · 1.0 showcase. Then a `---`
    rule.
-3. **Two to four highlight sections**, `## <emoji> <what you can now do>`, each with one picture
-   and at most two sentences, following "Writing". A new syntax may add a short Markdown example
-   under the picture.
+3. **Two to four highlight sections**, `## <emoji> <what you can now do>`, each with at most
+   two sentences, then one picture cropped on the change, following "Writing". A new syntax may add
+   a short Markdown example under the picture.
 4. **`## 🛠 Smoother editing`**: the smaller visible changes, one line per bullet, with a bold lead.
 5. **Folded sections**:
    - `<details><summary><b>🐞 All fixes</b></summary>` with the remaining fixes, one line each;
@@ -232,7 +240,8 @@ Keyboard keys use `<kbd>`. Every changelog line of the release appears once, in 
 
 Images sit directly in the notes folder, next to `release-notes.md`, and the notes link them by file
 name. The joined before | after image of a highlight is one file, made from the Verifier's before
-and after captures of the merged changes, with any tool; the version PR says which. An image at an absolute URL or in a subfolder fails the check: a release must depend on no
+and after captures of the merged changes, with any tool; the version PR says which. The captures are cropped as "Writing" says (same region,
+same scale for both halves) before they are joined. An image at an absolute URL or in a subfolder fails the check: a release must depend on no
 branch. The release attaches them as assets and points the links to
 `https://github.com/gsemet/markdown-okf-schema-studio/releases/download/vX.Y.Z/<file>`.
 
