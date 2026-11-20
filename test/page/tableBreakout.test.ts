@@ -6,7 +6,10 @@
  * page runtime), the column is 688 px wide (720 px minus the two 16 px gutters of the review).
  * The page draws its text in the pinned KaTeX fonts (`pinnedFont.ts`), not in the machine's own
  * fonts, so the widths and the verdicts are the same on every machine; a face that does not load
- * fails the test (the browser is closed). Skipped, with a message, when no Chromium can start here.
+ * fails the test (the browser is closed). Skipped, with a message, when no Chromium can start here,
+ * unless STUDIO_REQUIRE_CHROMIUM=1: the `visual` CI job runs these tests on Linux with it, and a
+ * Chromium that cannot start then fails them with the launch error. The measured widths are printed
+ * with `t.diagnostic`, so every run of that job logs them.
  */
 import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
@@ -127,6 +130,18 @@ interface Opened {
   close(): Promise<void>;
 }
 
+/** The error of the last Chromium launch that failed, kept for the message of a required Chromium. */
+let launchError: unknown;
+
+/** No Chromium can start: skips the test, or fails it with the launch error when STUDIO_REQUIRE_CHROMIUM=1. */
+function chromiumUnavailable(t: { skip(message: string): void }): void {
+  if (process.env.STUDIO_REQUIRE_CHROMIUM === "1") {
+    throw new Error(`Chromium is required (STUDIO_REQUIRE_CHROMIUM=1) and cannot start: ${
+      launchError instanceof Error ? launchError.message : String(launchError)}`);
+  }
+  t.skip("no Chromium can start here (run `just dev` to install it)");
+}
+
 /** For the regression test only: the fonts folder, and a look at the browser once it is launched. */
 interface OpenOptions {
   readonly fonts?: string;
@@ -168,7 +183,8 @@ async function openPage(markdown: string, themeId: string, options: OpenOptions 
   let browser: Browser;
   try {
     browser = await chromium.launch();
-  } catch {
+  } catch (error) {
+    launchError = error;
     return undefined;
   }
   options.launched?.(browser);
@@ -256,11 +272,12 @@ test("Auto keeps a table in the column when its minimum widths fit and breaks it
   for (const themeId of RUN_THEMES) {
     const opened = await openPage(documentOf(CASES), themeId);
     if (!opened) {
-      t.skip("no Chromium can start here (run `just dev` to install it)");
+      chromiumUnavailable(t);
       return;
     }
     try {
       const measured = await measureTables(opened.page);
+      t.diagnostic(`${themeId} cases ${measured.map((entry) => `${entry.width}${entry.wide ? "W" : "s"}`).join(" ")}`);
       await shootCases(opened.page, themeId, "table-case");
       const pin = await opened.page.evaluate((sans) => ({
         cell: getComputedStyle(document.querySelector("#sphinx-myst-preview-content td")!).fontFamily,
@@ -296,11 +313,12 @@ test("Auto breaks a table out when a cell holds content that cannot shrink", asy
   for (const themeId of RUN_THEMES) {
     const opened = await openPage(documentOf(UNSHRINKABLE), themeId);
     if (!opened) {
-      t.skip("no Chromium can start here (run `just dev` to install it)");
+      chromiumUnavailable(t);
       return;
     }
     try {
       const measured = await measureTables(opened.page);
+      t.diagnostic(`${themeId} unshrinkable cells ${measured.map((entry) => `${entry.width}${entry.wide ? "W" : "s"}`).join(" ")}`);
       await shootCases(opened.page, themeId, "table-unshrinkable");
       assert.equal(measured.length, UNSHRINKABLE.length, "every case renders one top-level table");
       UNSHRINKABLE.forEach((entry, index) => {
@@ -377,14 +395,14 @@ async function openCellEditor(page: Page, index: number): Promise<void> {
 }
 
 async function withPage(
-  t: { skip(message: string): void },
+  t: { skip(message: string): void; diagnostic(message: string): void },
   markdown: string,
   body: (page: Page, themeId: string) => Promise<void>,
 ): Promise<void> {
   for (const themeId of RUN_THEMES) {
     const opened = await openPage(markdown, themeId);
     if (!opened) {
-      t.skip("no Chromium can start here (run `just dev` to install it)");
+      chromiumUnavailable(t);
       return;
     }
     try {
@@ -432,9 +450,10 @@ test("Auto measures a table again on a real resize while a cell is edited", asyn
     const open = await layoutPass(page);
     assert.equal(open.wide, true, `${themeId}: wide with the editor open`);
     // The pane must be narrower than the table's natural width: 719 px in the pinned font
-    // (`pinnedFont.ts`), the same on every machine; 600 px is below it.
+    // (`pinnedFont.ts`), the same on every machine (measured on Windows); 600 px is below it.
     await page.setViewportSize({ width: 600, height: 1400 });
     const narrower = await layoutPass(page);
+    t.diagnostic(`${themeId} tick matrix open ${open.width} narrower ${narrower.width}`);
     assert.ok(narrower.width < open.width, `${themeId}: the breakout follows the pane (${open.width} then ${narrower.width} px)`);
     assert.ok(narrower.width <= 600, `${themeId}: the table fits the narrower pane`);
   });

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import re
 from pathlib import Path
@@ -286,6 +287,16 @@ def test_preflight_skips_only_the_stages_that_need_linux_or_macos_on_windows() -
     skip = recipe.index('"{{ os() }}" == "windows"')
     assert static < skip < recipe.index("just ci-visual")
     assert 'exit "$failures"' in recipe[skip:recipe.index("just ci-visual")]
+
+
+def test_ci_visual_runs_the_table_breakout_width_tests_with_chromium_required() -> None:
+    justfile = (ROOT / "justfile").read_text()
+    recipe = justfile.split("\nci-visual:")[1].split("\n\n")[0]
+    visual = recipe.index("run test:visual")
+    breakout = recipe.index("STUDIO_REQUIRE_CHROMIUM=1 {{ npm }} run test:breakout")
+    assert visual < breakout < recipe.index("ci-visual: passed")
+    scripts = json.loads((ROOT / "package.json").read_text())["scripts"]
+    assert scripts["test:breakout"].endswith("out/test/page/tableBreakout.test.js")
 
 
 def _locked_screen_run(tmp_path: Path, *arguments: str) -> "subprocess.CompletedProcess[str]":

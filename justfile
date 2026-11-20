@@ -279,12 +279,17 @@ ci-static:
         exit 1
     fi
 
-# CI job "visual": the visual end-to-end stage, reports under out/reports/e2e.
+# CI job "visual": the visual end-to-end stage, reports under out/reports/e2e, then the table
+# breakout width tests in Chromium (which must start: STUDIO_REQUIRE_CHROMIUM=1), report under
+# out/reports/breakout/. Both run even when the first fails, so one run reports both.
 ci-visual:
     #!/usr/bin/env bash
     set -uo pipefail
     eval "$(node scripts/e2e-campaign.mjs begin visual)"
-    if {{ npm }} run test:visual; then
+    failed=0
+    {{ npm }} run test:visual || failed=1
+    STUDIO_REQUIRE_CHROMIUM=1 {{ npm }} run test:breakout || failed=1
+    if [ "$failed" = 0 ]; then
         echo "ci-visual: passed"
     else
         echo "ci-visual: FAILED" >&2

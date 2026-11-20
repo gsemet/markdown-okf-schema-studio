@@ -276,7 +276,9 @@ review index and `out/reports/e2e/e2e-manifest.json`; it fails when a stage mani
 failed) and `just ci-gallery` (gallery and site from the existing outputs, no E2E re-run).
 On a pull request, CI runs only the simulated tests, which make up the required `checks` job:
 `ci-static` (on Linux, and again on Windows in the `static-windows` job), `ci-visual`
-(Playwright/Chromium against a mock host) and `just ci-report visual`, which reports the real VS Code
+(Playwright/Chromium against a mock host, then the table breakout width tests, run with
+`STUDIO_REQUIRE_CHROMIUM=1` so that a Chromium that cannot start fails them; the `static` jobs
+have no Chromium and skip those tests; their report is under `out/reports/breakout/`) and `just ci-report visual`, which reports the real VS Code
 stage as skipped. The real VS Code window jobs (`ci-integration` and the
 `stress` repetitions) are heavy, so they run on every push to `main` and never on a pull request.
 On a branch, start them with
