@@ -112,6 +112,13 @@ environments),
   cell editor as a click does; the selected cell is outlined and announced. Up and Down on an inner
   block move to its neighbours inside the same parent. Left at the top level does nothing, and
   Escape at the top level clears the selection as before.
+  A list has three levels: the list, its items, and the blocks inside an item. Right goes from a
+  selected list to its first item and from an item to its first block, Left goes back up, and Enter
+  edits the selected list, item or block. In the editor of an item, Down at the end and Up at the
+  start open the next or previous item of the list, then the block after or before the list; the
+  editor of a block inside an admonition keeps these keys at its edges. In the editor of an item,
+  Cmd+Alt+Up/Down (Ctrl+Alt elsewhere) saves the item and moves the whole list, whose editor then
+  opens.
   Block selection: Shift+click selects the blocks between the last clicked block and the one you
   click, Shift+Up/Down extends or shrinks the selection, Escape or a click clears it.
   With a selection, Cmd/Ctrl+C copies its exact Markdown, Cmd/Ctrl+X cuts it (one undo step), and

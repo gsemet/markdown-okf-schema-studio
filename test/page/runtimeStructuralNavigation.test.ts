@@ -317,3 +317,51 @@ test("Right walks a list down to its items and their blocks, Enter edits the sel
   press(up.harness, "Enter");
   assert.deepEqual(opened(up.harness, before), [[80, 85]], "Enter on the selected list edits the whole list");
 });
+
+/** Opens the selected block's editor with Enter, puts the caret at the `edge` and presses `arrow`. */
+function arrowAtEdge(harness: RuntimeHarness, arrow: "ArrowUp" | "ArrowDown"): { prevented: boolean; opened: number[][] } {
+  press(harness, "Enter");
+  harness.dispatchMessage({
+    type: "previewEditSource", documentId: "file:///active.md", revision: 7, requestId: 11,
+    editId: harness.messages.at(-1)?.editId, originalText: "Inner text\n",
+  });
+  const textarea = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
+  const position = arrow === "ArrowDown" ? textarea.value.length : 0;
+  textarea.setSelectionRange(position, position);
+  const before = harness.messages.length;
+  let prevented = false;
+  textarea.dispatch("keydown", { key: arrow, preventDefault: () => { prevented = true; } });
+  return { prevented, opened: opened(harness, before) };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
+test("the arrow at the edge of an admonition inner block editor stays with the text box", () => {
+  for (const [arrow, line] of [["ArrowUp", 71], ["ArrowDown", 73]] as const) {
+    const { harness } = page();
+    selectBlock(harness, 70);
+    press(harness, "ArrowRight");
+    if (line === 73) press(harness, "ArrowDown");
+    assert.deepEqual(selectedLines(harness), [line]);
+    assert.deepEqual(arrowAtEdge(harness, arrow), { prevented: false, opened: [] }, arrow + " on the inner block at line " + line);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
+test("the arrow at the edge of a block inside a list item goes to the sibling item, then past the list", () => {
+  const down = listPage();
+  [down.first, down.second].forEach((item) => { item.siblingsFromParent = true; });
+  selectBlock(down.harness, 80);
+  press(down.harness, "ArrowRight");
+  press(down.harness, "ArrowRight");
+  press(down.harness, "ArrowDown");
+  assert.deepEqual(arrowAtEdge(down.harness, "ArrowDown"), { prevented: true, opened: [[84, 85]] }, "to the next item");
+
+  const past = listPage();
+  [past.first, past.second].forEach((item) => { item.siblingsFromParent = true; });
+  selectBlock(past.harness, 80);
+  press(past.harness, "ArrowRight");
+  press(past.harness, "ArrowDown");
+  press(past.harness, "ArrowRight");
+  assert.equal(past.paragraphs[2].getAttribute(SELECTED), "true");
+  assert.deepEqual(arrowAtEdge(past.harness, "ArrowDown"), { prevented: true, opened: [[100, 100]] }, "past the list");
+});

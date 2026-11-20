@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/blockReq.requirements.test.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
+- test/page/runtimeStructuralNavigation.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-FMEDIT-062
@@ -72,6 +73,15 @@ When a writer presses an arrow key with the caret at an edge of the text box of 
 | The editor of the first body block under a properties table (a document with frontmatter), ArrowUp on its first line | The properties table is stepped over, no editor opens on it and the editor stays open |
 | The editor of a block between two body blocks, ArrowUp | The previous body block opens |
 
+### Scenario (nominal): Items of a list and inner blocks
+
+| Input | Outcome |
+| --- | --- |
+| ArrowDown at the end or ArrowUp at the start of a list item editor | The editor of the next or previous item of the same list opens |
+| ArrowDown at the end of the last item's editor, or ArrowUp at the start of the first item's editor | The editor of the next or previous top-level block, past the list, opens |
+| ArrowDown at the end of the editor of a block inside a list item (opened from the keyboard, SwRS-MDOKFSTUDIO-BLOCK-254) | The editor of the next item of that list opens; past the last item, the next top-level block opens |
+| ArrowUp or ArrowDown at the edge of the editor of an inner block of an admonition or of another container that is not a list item | The key stays with the text box and the editor stays open |
+
 ### Scenario (nominal): The block to open next is remembered in the webview state
 - GIVEN an arrow navigation whose save is in flight
 - WHEN the page state is read
@@ -91,7 +101,8 @@ When a writer presses an arrow key with the caret at an edge of the text box of 
 - Method: test/integration/realInput/markers.ts (real-input scenario scenarioArrowNavigation, screenshot block-editing/r03); visual scenario block-editing/v03
 - Method: test/page/blockReq.requirements.test.ts (modifiers or a selection stay in the text box; navigation stops at the first and at the last block)
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (ArrowUp at the start of the first body block does not step onto the properties table)
-- Criteria: boundaryNavigation answers step -1 with caret position end only on the first visual line and step 1 with caret position start only on the last visual line, and returns undefined when a modifier is held or the selection is not collapsed; adjacentMappedBlock returns undefined at the ends and ignores elements marked data-okf-properties; state.pendingBlockNavigation and the saved webview state hold the same entry until resumePendingBlockNavigation clears it. The remembering is exercised by the arrow unit tests; the survival of a real reload is untested.
+- Method: test/page/runtimeBlockEditor.test.ts (`the arrows at the edge of a list item editor go to the next or previous item, then past the list`: the two list item rows) and test/page/runtimeStructuralNavigation.test.ts (`the arrow at the edge of a block inside a list item goes to the sibling item, then past the list`: the inner block of an item row; `the arrow at the edge of an admonition inner block editor stays with the text box`: the admonition row). The page runs in the fake DOM of the page runtime; no real-window scenario covers the list rows.
+- Criteria: boundaryNavigation answers step -1 with caret position end only on the first visual line and step 1 with caret position start only on the last visual line, and returns undefined when a modifier is held or the selection is not collapsed; adjacentMappedBlock returns undefined at the ends and ignores elements marked data-okf-properties; for an LI target, or a target whose parent is an LI, adjacentMappedBlock returns the previous or next LI sibling of that item, else the block after or before the top-level block that holds the item; for every other target it steps from blocks.indexOf(target) among the top-level blocks, and an inner block that is not one returns undefined; state.pendingBlockNavigation and the saved webview state hold the same entry until resumePendingBlockNavigation clears it. The remembering is exercised by the arrow unit tests; the survival of a real reload is untested.
 
 <!-- okf:links:start -->
 ### Links

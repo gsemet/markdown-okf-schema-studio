@@ -68,7 +68,7 @@ When a writer clicks the Edit button of a preview, the page SHALL switch edit mo
 | Given edit mode on and | When edit mode is turned off | Then |
 | --- | --- | --- |
 | two blocks selected | the writer clicks the Edit button | no block carries data-sphinx-preview-block-selected and the selection announcer is empty |
-| the pointer over a list item, so the whole list is outlined | the writer clicks the Edit button | the list no longer carries data-sphinx-preview-edit-hover |
+| the pointer over a list item, so the item is outlined (the list is outlined only when the pointer is on it outside its items) | the writer clicks the Edit button | the item no longer carries data-sphinx-preview-edit-hover |
 | the rename field of an anchor icon open | the writer clicks the Edit button | the field is closed and no previewLabelRename message is posted |
 
 ### Scenario (boundary): Nothing to tidy up
@@ -104,7 +104,7 @@ When a writer clicks the Edit button of a preview, the page SHALL switch edit mo
 - Method: test/page/runtimePageControls.test.ts (`T38: toggling edit mode posts previewEditModeChanged` clicks the button twice and asserts the two messages; scenarios edit mode turned on and off, the first message only). The tooltip and aria-pressed values are not asserted by a test. The order of previewEditModeChanged against the final save follows from the code order in bindButton (post, then applyEditMode) and is not asserted by a test.
 - Method: test/integration/realInput/textEditing.ts (scenarioEscapeCancels keeps the typed text when edit mode is turned off: leaving edit mode with an open block editor; scenarioEditModeNoReflow, screenshot block-editing/r14: both reflow scenarios, plus the hover and click no-reflow step and the step that closes the preview and reopens it to see the preview start in preview mode; these two steps run in the real window only). No unit test covers the editor that is still waiting for its source.
 - Method: test/page/runtimeBlockSelection.test.ts (`T39: a content patch and leaving edit mode clear the selection`: selection row of the tidy-up table).
-- Method: test/page/runtimeBlockEditor.test.ts (`edit mode hover marks the whole list that a click would edit` toggles edit mode with an outlined list and checks both modes: hover outline row and the reading mode row of the nothing-to-tidy table).
+- Method: test/page/runtimeBlockEditor.test.ts (`edit mode hover marks the list item that a click would edit` toggles edit mode with an outlined list item and checks both modes: hover outline row and the reading mode row of the nothing-to-tidy table).
 - Method: test/page/blockReq.requirements.test.ts (`turning edit mode off closes the label rename field and posts no rename`: rename field row).
 - Method: visual scenarios block-editing/v04 and block-editing/v17 click the Edit button; block-editing/v04 also checks that rendered paragraphs hide their source line breaks.
 - Criteria: The edit mode attributes and the button state follow every click; the tooltip text is the one set in applyEditMode; the message carries documentId, revision, requestId and a boolean editMode and precedes any block save caused by leaving edit mode; a loaded editor produces exactly one final save and an editor without a loaded source produces no message; the selection model is inactive, no element is marked selected, data-sphinx-preview-edit-hover is absent and applyEditMode calls labelRename.close() before it applies the new state; the line count of a rendered paragraph is the same in both modes.
