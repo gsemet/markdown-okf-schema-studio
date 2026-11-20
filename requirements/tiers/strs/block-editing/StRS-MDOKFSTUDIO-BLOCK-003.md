@@ -13,10 +13,10 @@ scope: block-editing
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-18T10:55:00+01:00'
+approved_at: '2026-11-20T09:41:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-18T10:55:00+01:00'
+  at: '2026-11-20T09:41:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -61,7 +61,7 @@ As a writer, I click a paragraph, heading, list, admonition, code block or image
 
 ### Rationale and constraints
 
-- A click on a list item edits the list that holds it; a click on a comment chip, an open thread or a properties table cell keeps its own action.
+- A click on a list item edits that item; a click on the list itself, outside its items, edits the whole list; a click on a comment chip, an open thread or a properties table cell keeps its own action.
 - An outline shows which element a click would edit, and Enter or Space on a focused block does the same as a click.
 - In reading mode the same click reveals the source line instead of editing.
 - Included blocks are never selected, moved, copied, cut or pasted next to.
