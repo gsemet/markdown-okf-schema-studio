@@ -57,7 +57,7 @@ When a document uses `{ref}` to a heading, figure, table, equation or `(name)=` 
 ### Verification notes
 
 - Method: test/core/render/mystPaletteRendering.test.ts (nominal: "a reference to a labelled heading shows the heading text, without the anchor icon"; explicit text and paragraph labels: "a label before a paragraph renders an anchor icon span that is the link target")
-- Method: test/core/render/mystFeatures.test.ts (captions decide the link text: "figure references render figures whose body supplies the caption" and "references to captionless figures and tables stay readable", which checks `{ref}` only; the `{numref}` case is untested)
+- Method: test/core/render/mystFeatures.test.ts (captions decide the link text: "figure references render figures whose body supplies the caption" and "references to captionless figures and tables stay readable" for `{ref}`, and "a numref to a captionless figure or table shows its number" for `{numref}`)
 - Criteria: A captionless figure or table shows the key for `{ref}` and its number for `{numref}`; no reference link is empty; a missing label raises no warning.
 
 <!-- okf:links:start -->

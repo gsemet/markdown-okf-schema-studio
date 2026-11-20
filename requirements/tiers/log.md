@@ -21,6 +21,15 @@
 - Tests: `test/integration/pasteUrl.test.ts`, `test/integration/checkboxToggle.test.ts`,
   `test/integration/previewEditing.test.ts`, `test/build/integrationEditModeRestore.test.ts`.
 
+### Numref to a captionless figure or table, tested (CR-430)
+
+- Changed: SwRS-MDOKFSTUDIO-MYST-019 verification notes only. The contradiction reported on 2026-11-18
+  (garden myst, code-blocks, gfm: the `{numref}` scenario against an inert placeholder) was a numref to a
+  heading label: the placeholder it showed is the one SwRS MYST-017 documents for that case, and it was
+  read as if the numref targeted a captionless figure. A numref to a captionless figure or table already
+  shows its number (Figure 1, Table 1), and is now tested. No normative change and no code change.
+- Tests: `test/core/render/mystFeatures.test.ts`.
+
 ### Gallery and site on a heavy CI dispatch (CR-350)
 
 - Changed: SwRS-MDOKFSTUDIO-CORE-076 says a heavy dispatch builds the gallery and the site unless

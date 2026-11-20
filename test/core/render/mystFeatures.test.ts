@@ -108,6 +108,7 @@ test("figure references render figures whose body supplies the caption", async (
   assert.equal(result.diagnostics.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019
 test("references to captionless figures and tables stay readable", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -131,6 +132,46 @@ test("references to captionless figures and tables stay readable", async () => {
 
   assert.deepEqual(links.map((link) => attribute(link, "href")), ["#fig-empty", "#tbl-empty"]);
   assert.deepEqual(links.map(textContent), ["fig-empty", "tbl-empty"]);
+  assert.equal(result.diagnostics.length, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019
+test("a numref to a captionless figure or table shows its number", async () => {
+  const result = await renderPreviewDocument({
+    document: inlineDocument(
+      "See {ref}`fig-empty`, {numref}`fig-empty`, {ref}`tbl-empty` and {numref}`tbl-empty`.\n\n"
+      + "```{figure} image.svg\n"
+      + ":name: fig-empty\n"
+      + "```\n\n"
+      + ":::{table}\n"
+      + ":label: tbl-empty\n\n"
+      + "| A |\n"
+      + "| --- |\n"
+      + "| 1 |\n"
+      + ":::\n",
+    ),
+    workspaceRoot,
+    requestId: 4,
+    isWorkspaceTrusted: () => true,
+  });
+
+  const html = parseHtml(result.html);
+  const links = findElements(html, (element) => element.tagName === "a");
+
+  assert.deepEqual(links.map((link) => attribute(link, "href")), [
+    "#fig-empty",
+    "#fig-empty",
+    "#tbl-empty",
+    "#tbl-empty",
+  ]);
+  assert.deepEqual(links.map(textContent), ["fig-empty", "Figure 1", "tbl-empty", "Table 1"]);
+  assert.ok(links.every((link) => textContent(link).trim() !== ""), "a reference link is empty");
+  assert.equal(
+    findElement(html, (element) => element.tagName === "span"
+      && (attribute(element, "class") ?? "").includes("unhandled")),
+    undefined,
+    "a numref stayed an inert placeholder",
+  );
   assert.equal(result.diagnostics.length, 0);
 });
 
