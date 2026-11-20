@@ -77,7 +77,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     editMode: true,
     editTarget: "list",
     description:
-      "Clicking one item opens that item only, including its wrapped continuation line, in the editor.",
+      "Clicking one item opens that item only, with its wrapped line; an edited ordered item leaves the next numbers as they were.",
   },
   {
     id: "edit-table-wide-end-dark",

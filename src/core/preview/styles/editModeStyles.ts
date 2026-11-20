@@ -36,16 +36,25 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content .myst-grid
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-017
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
 /**
- * The dashed hover outline of what a click would edit, and the hidden block under an editor; the
- * editor of an item of an ordered list counts as that item, so the next items keep their numbers.
+ * The dashed hover outline of what a click would edit, and the hidden block under an editor. An
+ * edited item of an ordered list is collapsed, not removed from the layout: an element with
+ * `display: none` leaves the list's numbering (Chromium numbers the items itself and ignores a
+ * `counter-increment: list-item` on the editor), so the next items would lose one; collapsed and
+ * invisible, it still counts, and the next items keep their source numbers.
  */
 const EDIT_HOVER_OUTLINE_CSS = `[data-sphinx-preview-editing="true"] {
   display: none !important;
 }
 
-ol > li[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor,
-ol > li[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host {
-  counter-increment: list-item;
+ol > li[data-sphinx-preview-editing="true"] {
+  display: list-item !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin-block: 0 !important;
+  padding-block: 0 !important;
+  border-block-width: 0 !important;
+  overflow: hidden !important;
 }
 
 html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-edit-hover="true"] {
