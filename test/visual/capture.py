@@ -117,7 +117,7 @@ from capture_find_wide_table import check_find_hit_in_wide_table
 from capture_table_tab_hint import check_table_tab_hint
 from capture_table_grid_paste import check_table_grid_paste
 from capture_table_in_container import check_table_in_container
-from capture_list_item_handles import check_list_item_handles
+from capture_list_item_handles import check_list_item_drag_held, check_list_item_handles
 from capture_final_checks import (
   check_content_assertions,
   check_content_contracts,
@@ -342,6 +342,8 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                       if scenario.get('frontmatterLinkState'):
                         trace.run("check_deferred_frontmatter_links_final", lambda: check_deferred_frontmatter_links(page, scenario, failures))
                       result["finalState"] = trace.run("check_final_frame", lambda: check_final_frame(page, scenario, failures))
+                      # A list item drag held for the capture is still down, with its marks, as the PNG is taken.
+                      trace.run("check_list_item_drag_held", lambda: check_list_item_drag_held(page, scenario, failures))
                     except Exception as error:
                         if isinstance(error, PlaywrightTimeoutError) and not timed_out:
                             timed_out = True

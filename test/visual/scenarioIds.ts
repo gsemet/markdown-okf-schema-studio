@@ -744,8 +744,8 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "block-editing/v37-list-item-handles-dark-900": "In edit mode in the dark preview at 900 px, each of the 15 items of the bullet, ordered, nested, task, GitHub alert and nested admonition lists has a handle that ends left of its list, or of the outermost alert or admonition that holds it, inside the pane and centred within 2 px on the item's first line.",
   "block-editing/v38-list-item-handles-cream-900": "In edit mode in the cream preview at 900 px, each of the 15 items of the bullet, ordered, nested, task, GitHub alert and nested admonition lists has a handle that ends left of its list, or of the outermost alert or admonition that holds it, inside the pane and centred within 2 px on the item's first line.",
   "block-editing/v39-list-item-handles-pushed-light-360": "In edit mode in the light theme at 360 px, where the lists have no room on their left, at least one block is pushed right and each of the 15 list item handles ends left of its list or outermost container, inside the pane and centred within 2 px on the item's first line.",
-  "block-editing/v40-list-item-drag-light-900": "In edit mode in the light theme at 900 px, a real mouse drag of the handle of the first bullet item held over the lower half of the third marks the first item as dragged and the third with a drop line after it, and the release sends one save of the list in the order second, third, first and opens no block editor.",
-  "block-editing/v41-list-item-drag-dark-900": "In edit mode in the dark theme at 900 px, a real mouse drag of the handle of the first bullet item held over the lower half of the third marks the first item as dragged and the third with a drop line after it, and the release sends one save of the list in the order second, third, first and opens no block editor."
+  "block-editing/v40-list-item-drag-light-900": "In edit mode in the light theme at 900 px, a real mouse drag of the handle of the first bullet item over the lower half of the third, released, sends one save of the list in the order second, third, first and opens no block editor; once the host renders that order, a second drag of the new first item held over the third is still down at capture, with the first item dimmed and the drop line after the third.",
+  "block-editing/v41-list-item-drag-dark-900": "In edit mode in the dark theme at 900 px, a real mouse drag of the handle of the first bullet item over the lower half of the third, released, sends one save of the list in the order second, third, first and opens no block editor; once the host renders that order, a second drag of the new first item held over the third is still down at capture, with the first item dimmed and the drop line after the third."
 };
 
 /**
@@ -919,8 +919,6 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "table-editing/v32-grid-paste-light-900": ["pasted"],
   "table-editing/v33-cell-editor-in-quote-light-900": ["open"],
   "table-editing/v34-cell-editor-in-note-dark-900": ["open"],
-  "block-editing/v40-list-item-drag-light-900": ["drag"],
-  "block-editing/v41-list-item-drag-dark-900": ["drag"],
 };
 
 /**

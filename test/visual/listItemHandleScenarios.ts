@@ -53,7 +53,8 @@ export const LIST_ITEM_HANDLE_SCENARIOS: ScenarioDefinition[] = [
     editMode: true,
     listItemHandleChecks: "drag" as const,
     description: `${theme === "light" ? "Light" : "Dark"} theme, 900 px pane, edit mode: a real mouse drag of the `
-      + "first bullet item held over the lower half of the third dims the dragged item and draws the drop line "
-      + "below the third (the `drag` step); the release saves the list once in the new order, with no editor.",
+      + "first bullet item released over the lower half of the third saves the list once in the new order, with "
+      + "no editor; once the host renders it, a second drag held down for the capture dims the dragged item and "
+      + "draws the drop line below the third.",
   })),
 ];
