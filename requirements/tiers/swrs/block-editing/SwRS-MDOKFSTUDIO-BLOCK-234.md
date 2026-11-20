@@ -28,11 +28,13 @@ implemented_in_files:
 - src/page/features/blockEditor.ts
 - src/page/modules/markdownTable.ts
 tested_in_files:
+- test/core/edits/lineEndingPreservation.test.ts
 - test/core/edits/sourceEdits.test.ts
 - test/core/edits/textEdit.test.ts
 - test/integration/realInput/qa210Replays.ts
 - test/page/modules/markdownTable.test.ts
 - test/session/blockReq.requirements.test.ts
+- test/session/lineEndingSave.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -69,6 +71,13 @@ When the extension plans or writes back a preview edit, it SHALL treat LF, CR LF
 | the same table with one cell edited, then written back | the line endings are unchanged |
 | a CRLF table without a trailing line ending | the absence of the final line ending is kept |
 
+### Scenario (nominal): A save on a real CRLF, LF or mixed file changes the block only
+| Input | Outcome |
+| --- | --- |
+| A paragraph or a list saved in a document read from a file with CR LF line endings (with or without a final line break), LF line endings, or both | Every byte outside the block is the one of the file; the block keeps its own line ending |
+| Any of these saves in a CR LF file | No bare LF is added |
+| Any of these saves in an LF file | No CR is added |
+
 ### Scenario (boundary): Counting lines
 
 | Input | Outcome |
@@ -87,6 +96,7 @@ When the extension plans or writes back a preview edit, it SHALL treat LF, CR LF
 - Method: Unit tests `a multi-line block edited in a LF|CRLF|CR document keeps ... inside the block` and `a block text with no line break or mixed line endings ...` in test/core/edits/sourceEdits.test.ts (A multi-line block keeps its line ending when saved; withLineEndingOf and planBlockTextEdit, the host calls both before each write; not run in a real window).
 - Method: Visual scenarios block-editing/v01 and v02 in test/visual/scenarioDefinitions1.ts (A save restores the trailing line ending of the block: the autosave sends the exact text with its newline); test/page/runtimeBlockEditor.test.ts has no CRLF test and no test opens an inline editor on a CRLF block, so the CR LF and CR rows of that scenario are untested.
 - Method: Unit tests `a row inserted into a CRLF table keeps CRLF line endings` in test/page/modules/markdownTable.test.ts and `round trip preserves the source: crlf` in test/page/modules/markdownTablePreservation.test.ts (A CRLF table keeps its line endings).
+- Method: Unit tests in test/core/edits/lineEndingPreservation.test.ts and controller tests in test/session/lineEndingSave.test.ts read the real fixtures of test/fixtures/markdown-line-endings/ (`document.lf.md`, `document.crlf.md`, `no-final-newline.crlf.md`, `document.mixed.md`) as raw bytes, save a paragraph and a list, and compare every byte outside the block (A save on a real CRLF, LF or mixed file changes the block only). test/build/lineEndingFixtures.test.ts guards the fixtures: `**/*.crlf.md` and `**/*.mixed.md` carry `-text` in .gitattributes so a checkout never converts them, the CRLF ones hold CR LF only, the mixed ones both, and no other tracked Markdown file holds a CR.
 - Criteria: start, end and text answer the same line for the same index; the appended ending is the one detected on the original text; no bare line feed in the output of a CRLF table.
 
 <!-- okf:links:start -->

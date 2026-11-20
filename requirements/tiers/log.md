@@ -2,6 +2,10 @@
 
 ## 2026-11-20
 
+### Line-ending fixtures and byte-preservation tests (CR-435)
+
+- Changed: SwRS-MDOKFSTUDIO-BLOCK-234: new scenario "A save on a real CRLF, LF or mixed file changes the block only", tested on real fixture files (test/fixtures/markdown-line-endings/) kept byte for byte by `-text` rules in .gitattributes. No behaviour change.
+
 ### Five code and SwRS mismatches of CR-347 settled (CR-431)
 
 - Changed: SwRS-MDOKFSTUDIO-CORE-010: the code is right. "Raw HTML" is an HTML block or an HTML tag

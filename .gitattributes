@@ -1,6 +1,12 @@
 # Normalize text files and store binary assets in Git LFS.
 * text=auto eol=lf
 
+# Studio keeps the line endings of every file it edits (a CRLF file stays CRLF, an LF file stays LF),
+# so the fixtures that hold CRLF or mixed endings must reach every checkout byte for byte: no
+# conversion in either direction, whatever core.autocrlf says.
+**/*.crlf.md -text
+**/*.mixed.md -text
+
 # Files explicitly marked for LFS.
 *.lfs.* filter=lfs diff=lfs merge=lfs -text
 
