@@ -357,7 +357,7 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
     await shoot("dark-find");
 
     // Leave the window as found: the bar closed (nothing replaced), and edit mode off again when it
-    // was not on before, the host remembering it, so the next stress scenario starts as usual.
+    // was not on before, so the next stress scenario starts as usual.
     await page.keyboard.press("Escape");
     await settle("the bar to close", async () => !(await bar(await liveFrame(page)).isVisible()));
     assert.equal(notes.getText(), SOURCE, "the replace typed in the dark preview was not applied");
@@ -365,7 +365,6 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
       await (await liveFrame(page)).locator("[data-sphinx-preview-edit-toggle]").click();
       await settle("edit mode off", async () =>
         await (await liveFrame(page)).locator("html").getAttribute("data-sphinx-preview-edit-mode") === "off");
-      await settle("the workspace to remember edit mode off", () => storedEditModeForTests() !== true);
     }
   } finally {
     disposeActivePreviewForTests();

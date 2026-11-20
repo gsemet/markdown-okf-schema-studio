@@ -120,6 +120,10 @@ When the host writes an edit of the source document for the preview, it SHALL ma
 - Method: the checkbox failure, label rename failure and label rename undo cases are untested
 - Criteria: applyEdits is called without ownUndoStep for block text edits and with ownUndoStep true for a move, a cut, a paste, a checkbox toggle, a label rename and a thread change (editor.edit with undo stops before and after); completeActiveBlockEdit refreshes only when hasAppliedEdit is true and the document revision differs from the stage; every failure branch posts the reason of the table, finalRequested is false after a failed block save and releaseHostEditKeepingEditor runs after the changed-under-host error
 
+### Known issues
+
+- Known issue (CR 425): in the real-window suite, `checkbox-toggle` hung twice for 180 s right after `stock-coexistence` (CI runs 44651927198 and 44694304978). The dumps prove that the host was alive (heartbeat to the end), that the step stopped in its frame lookup or the failure report of that lookup, and that the preview was rendered and visible with a single webview frame left. They do not prove which Playwright call never returned, nor on which frame; a transient frame still detaching from the predecessor's teardown is the supported lead, not a proven cause. Ruled out: a Studio webview that never loads, a lasting leftover preview frame, a blocked host event loop. The step now uses the bounded lookup of the suite harness (a stuck call fails in about 10 s and is named), so the next failure names the call.
+
 <!-- okf:links:start -->
 ### Links
 

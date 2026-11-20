@@ -5,7 +5,7 @@ import { pathToFileURL } from "node:url";
 import * as vscode from "vscode";
 import type { Page } from "playwright-core";
 
-import { disposeActivePreviewForTests, storedEditModeForTests, storeWorkspaceChoicesForTests } from "./extensionApi";
+import { disposeActivePreviewForTests, storeWorkspaceChoicesForTests } from "./extensionApi";
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
@@ -133,9 +133,8 @@ export async function run(): Promise<void> {
     await currentPreviewFrame(page);
     if (tag !== "before") assert.deepEqual(failures, [], failures.join("\n"));
     else console.log(`drop-files BEFORE state (not failing): ${JSON.stringify(failures)}`);
-    // CR 152: leave edit mode off for the next scenario (the workspace remembers it).
+    // CR 152: leave this page's edit mode off for the next scenario.
     await setEditMode(page, false);
-    await waitFor("the workspace to remember edit mode off", () => storedEditModeForTests() !== true);
   } finally {
     disposeActivePreviewForTests();
     await pinStoredWorkspaceChoices();
