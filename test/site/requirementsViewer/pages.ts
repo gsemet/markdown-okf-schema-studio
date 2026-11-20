@@ -149,16 +149,29 @@ function whereSection(model: ViewerModel, dir: string, behaviour: Requirement): 
   return blocks.join("\n");
 }
 
-function scenarioColumns(scenario: Scenario): string {
+function scenarioColumns(lines: readonly string[]): string {
   const columns: Record<"GIVEN" | "WHEN" | "THEN", string[]> = { GIVEN: [], WHEN: [], THEN: [] };
   let last: "GIVEN" | "WHEN" | "THEN" = "GIVEN";
-  for (const line of scenario.steps) {
+  for (const line of lines) {
     const word = line.split(" ", 1)[0] ?? "";
     if (word === "GIVEN" || word === "WHEN" || word === "THEN") last = word;
     columns[last].push(line.replace(/^(?:GIVEN|WHEN|THEN|AND)\s+/u, ""));
   }
   return (Object.entries(columns) as [string, string[]][]).map(([key, lines]) =>
     `<div><b>${key.charAt(0)}${key.slice(1).toLowerCase()}</b>${lines.map(e).join("<br>")}</div>`).join("");
+}
+
+/** The body of a scenario card: its steps, tables and notes in source order, or a line saying the source holds nothing. */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-082
+export function scenarioBody(scenario: Scenario): string {
+  if (scenario.blocks.length === 0) return '<p class="hint">No text under this scenario in the source.</p>';
+  return scenario.blocks.map((block) => {
+    if (block.type === "steps") return `<div class="gwt">${scenarioColumns(block.lines)}</div>`;
+    if (block.type === "note") return `<p class="scn-note">${e(block.text)}</p>`;
+    const head = block.header.map((cell) => `<th>${e(cell)}</th>`).join("");
+    const rows = block.rows.map((row) => `<tr>${row.map((cell) => `<td>${e(cell)}</td>`).join("")}</tr>`).join("");
+    return `<div class="scn-table"><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  }).join("");
 }
 
 function fileList(model: ViewerModel, files: readonly string[], tests: boolean): string {
@@ -178,7 +191,7 @@ export function behaviourPage(model: ViewerModel, behaviour: Requirement): PageS
   const parent = behaviour.derivesFrom.map((id) => model.byId.get(id)).find((candidate) => candidate?.active && candidate.tier === "StRS");
   const rule = e(behaviour.description).replace(/\bSHALL(?: NOT)?\b/gu, (match) => `<strong>${match}</strong>`);
   const scenarios = behaviour.scenarios.map((scenario) =>
-    `<details class="scn"><summary><span class="k ${kindClass(scenario.kind)}">${e(scenario.kind)}</span>${e(scenario.name)}</summary><div class="gwt">${scenarioColumns(scenario)}</div></details>`).join("")
+    `<details class="scn"><summary><span class="k ${kindClass(scenario.kind)}">${e(scenario.kind)}</span>${e(scenario.name)}</summary>${scenarioBody(scenario)}</details>`).join("")
     || '<p class="hint">Stated as one rule, without scenarios.</p>';
   const exempt = behaviour.exempt ? `<p class="exempt">Exempt from code and test markers${behaviour.exemptionReason ? `: ${e(behaviour.exemptionReason)}` : "."}</p>` : "";
   const known = behaviour.knownIssues.length > 0

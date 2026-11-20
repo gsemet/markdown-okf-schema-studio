@@ -123,6 +123,12 @@ svg.metro{display:block;width:100%;height:auto}
 .gwt{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
 .gwt div{padding:10px 14px;font-size:14px;border-right:1px solid var(--line)}
 .gwt div:last-child{border-right:0}
+.scn-table{border-top:1px solid var(--line);overflow-x:auto}
+.scn-table table{width:100%;border-collapse:collapse;font-size:14px}
+.scn-table th{font:600 11px var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--soft);text-align:left}
+.scn-table th,.scn-table td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.scn-table tr:last-child td{border-bottom:0}
+.scn-note{padding:10px 14px;margin:0;font-size:14px;border-top:1px solid var(--line)}
 .gwt b{display:block;font:600 11px var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--soft);margin-bottom:2px}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 .files{list-style:none;margin:0;padding:0}

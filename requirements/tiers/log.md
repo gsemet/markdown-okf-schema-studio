@@ -2,6 +2,16 @@
 
 ## 2026-11-21
 
+### The requirements viewer shows table scenarios, not empty columns (CR-440)
+
+- Changed: SwRS-MDOKFSTUDIO-CORE-082 (proposed): two new scenarios (a table scenario shows its table;
+  a scenario with steps, a note and a table shows them in source order) and verification notes. The
+  normative sentence is unchanged; no other requirement file changes.
+- Sources: `test/site/requirementsViewer/model.ts`, `test/site/requirementsViewer/pages.ts`,
+  `test/site/requirementsViewer/viewer.css`, `test/site/requirementsViewer/home.ts`.
+- Tests: `test/site/requirementsViewer/model.test.ts`, `test/site/requirementsViewer/pages.test.ts`,
+  `test/site/requirementsViewer/home.test.ts`, `test/site/requirementsViewer/bundle.test.ts`.
+
 ### Empty blocks leave no blank lines, and a Delete block button (CR-439)
 
 - Added: SwRS-MDOKFSTUDIO-BLOCK-264 (proposed): an emptied top-level block or list item is deleted

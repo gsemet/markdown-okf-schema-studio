@@ -146,3 +146,24 @@ test("the use case diagram sits under the user need and before the map, and with
   assert.equal(after.replace(figure, ""), before, "the rest of the body is byte-identical");
   assert.ok(!after.includes("<script") && !after.includes("prefers-color-scheme"));
 });
+
+test("a table scenario shows its table and a mixed scenario shows steps, note and table in order", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
+  const model = load();
+  const page = behaviourPage(model, model.byId.get("SwRS-X-014")!).body;
+  const [tableCard = "", mixedCard = ""] = page.split('<details class="scn">').slice(1);
+  assert.ok(tableCard.includes("<table>") && tableCard.includes("<th>Input</th><th>Outcome</th>"));
+  assert.equal(tableCard.match(/<tr>/gu)?.length, 3, "one header row and one row per source row");
+  assert.ok(tableCard.includes("<td>`a | b`</td>"), "the escaped pipe is one cell");
+  assert.ok(tableCard.includes("<td>&lt;b&gt; &amp;lt;</td>") && !tableCard.includes("<b>"), "decoded once, then escaped");
+  assert.ok(!tableCard.includes('class="gwt"'), "no empty Given / When / Then columns");
+  const gwt = mixedCard.indexOf('<div class="gwt">');
+  const note = mixedCard.indexOf('<p class="scn-note">A note line');
+  const bullet = mixedCard.indexOf('<p class="scn-note">A bullet note');
+  const table = mixedCard.indexOf('<div class="scn-table">');
+  assert.ok(gwt >= 0 && gwt < note && note < bullet && bullet < table, "steps, note, bullet, table in source order");
+  assert.ok(mixedCard.includes("<th>Given</th><th>When</th><th>Then</th>"), "a Given | When | Then table stays a table");
+  const list = behaviourPage(model, model.byId.get("SwRS-X-011")!).body;
+  assert.ok(list.includes('<div class="gwt">') && list.includes("<b>Given</b>") && list.includes("<b>When</b>") && list.includes("<b>Then</b>"));
+  assert.ok(!list.includes("<table>"));
+});
