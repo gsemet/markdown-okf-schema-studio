@@ -11,6 +11,16 @@
   (`requirements-lint`).
 - Tests: `test/build/checkUseCaseDiagrams.test.ts`.
 
+### Real-window test flakes (CR-425)
+
+- Changed: SwRS-MDOKFSTUDIO-PALETTE-264 Method no longer says the paste-url scenario waits until the
+  workspace remembers edit mode off (the wait was a race in the test and is gone from paste-url,
+  drop-files and find-in-preview). SwRS-MDOKFSTUDIO-BLOCK-058 gains a Known issue: the
+  `checkbox-toggle` hang after `stock-coexistence`, what the CI dumps prove and do not.
+- Sources: none (test-only change).
+- Tests: `test/integration/pasteUrl.test.ts`, `test/integration/checkboxToggle.test.ts`,
+  `test/integration/previewEditing.test.ts`, `test/build/integrationEditModeRestore.test.ts`.
+
 ### Gallery and site on a heavy CI dispatch (CR-350)
 
 - Changed: SwRS-MDOKFSTUDIO-CORE-076 says a heavy dispatch builds the gallery and the site unless

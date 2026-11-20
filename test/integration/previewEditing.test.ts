@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { chromium, type Browser, type Page } from "playwright-core";
+import { chromium, type Browser, type Frame, type Page } from "playwright-core";
 import * as vscode from "vscode";
 
 import {
@@ -980,6 +980,61 @@ async function stepEditLock(ctx: EditingContext): Promise<void> {
   }
 }
 
+/** The page-side key of the issue highlight recorder: see `watchIssueHighlights`. */
+const ISSUE_HIGHLIGHT_WATCH = "__issueHighlightWatch";
+
+/**
+ * Starts recording, in the preview page, every cell that receives `data-okf-issue-highlight` (the page
+ * sets it on the badge press, focuses the cell first and removes the attribute after 1.5 s), with the
+ * row of the cell and the row holding the focus at that moment.
+ */
+async function watchIssueHighlights(frame: Frame): Promise<void> {
+  await frame.evaluate((key) => {
+    const rowOf = (element: Element | null): string | null =>
+      element?.closest("tr[data-okf-field]")?.getAttribute("data-okf-field") ?? null;
+    const record: { field: string | null; activeField: string | null }[] = [];
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        const cell = mutation.target as Element;
+        if (mutation.oldValue === "true" || cell.getAttribute("data-okf-issue-highlight") !== "true") continue;
+        record.push({ field: rowOf(cell), activeField: rowOf(document.activeElement) });
+      }
+    });
+    observer.observe(document, {
+      subtree: true, attributes: true, attributeFilter: ["data-okf-issue-highlight"], attributeOldValue: true,
+    });
+    (window as unknown as Record<string, unknown>)[key] = { record, observer };
+  }, ISSUE_HIGHLIGHT_WATCH);
+}
+
+/**
+ * Reads the recorder (mutations not yet delivered included), stops it, and adds what a failure needs:
+ * the focused element and the rows marked with an issue.
+ */
+async function readIssueHighlights(frame: Frame): Promise<{
+  record: { field: string | null; activeField: string | null }[]; active: string; errorRows: string[];
+}> {
+  return frame.evaluate((key) => {
+    const watch = (window as unknown as Record<string, {
+      record: { field: string | null; activeField: string | null }[]; observer: MutationObserver;
+    }>)[key];
+    if (watch === undefined) return { record: [], active: "no recorder (the page was replaced)", errorRows: [] };
+    const rowOf = (element: Element | null): string | null =>
+      element?.closest("tr[data-okf-field]")?.getAttribute("data-okf-field") ?? null;
+    const pending = watch.observer.takeRecords().filter((mutation) =>
+      mutation.oldValue !== "true" && (mutation.target as Element).getAttribute("data-okf-issue-highlight") === "true")
+      .map((mutation) => ({ field: rowOf(mutation.target as Element), activeField: rowOf(document.activeElement) }));
+    watch.observer.disconnect();
+    const active = document.activeElement;
+    return {
+      record: [...watch.record, ...pending],
+      active: active === null ? "none" : `${active.tagName.toLowerCase()} in row ${rowOf(active)}`,
+      errorRows: [...document.querySelectorAll("tr[data-okf-field].okf-error")]
+        .map((row) => row.getAttribute("data-okf-field") ?? "?"),
+    };
+  }, ISSUE_HIGHLIGHT_WATCH);
+}
+
 /** The table lists the schema fields in schema order; the badge counts the issues and a press focuses the first row with one. */
 // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-010
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
@@ -1015,14 +1070,18 @@ async function stepSchemaOrderAndBadge(ctx: EditingContext): Promise<void> {
     const badge = frame.locator("[data-okf-badge]");
     assert.ok(Number(await badge.getAttribute("data-okf-errors")) > 0, "the badge counts the errors");
     assert.match(await badge.getAttribute("aria-label") ?? "", /first frontmatter issue/iu);
+    // The page clears the highlight 1.5 s after the press: a read after the click can come too late on a
+    // slow runner. A recorder installed before the click keeps the cell the press highlighted.
+    await watchIssueHighlights(frame);
     await badge.click();
-    const highlighted = frame.locator('tr[data-okf-field] [data-okf-issue-highlight="true"]');
-    assert.equal(await highlighted.count(), 1, "the badge press highlights one cell");
-    assert.equal(
-      await highlighted.evaluate((cell) => cell.closest("tr")?.getAttribute("data-okf-field")),
-      "count",
-      "the badge press goes to the first row with an issue",
-    );
+    await frame.waitForFunction((key) =>
+      (window as unknown as Record<string, { record: unknown[] }>)[key]!.record.length > 0,
+    ISSUE_HIGHLIGHT_WATCH, { timeout: 10_000 }).catch(async (error: unknown) => {
+      throw new Error(`${String(error)} page: ${JSON.stringify(await readIssueHighlights(frame))}`);
+    });
+    const { record } = await readIssueHighlights(frame);
+    assert.equal(record.length, 1, "the badge press highlights one cell");
+    assert.equal(record[0]!.field, "count", "the badge press goes to the first row with an issue");
   } finally {
     assert.equal(await vscode.workspace.applyEdit(replaceDocument(document, originalText)), true);
     await withPreviewEvidence(document, () => waitFor("the count field to be valid again", () =>

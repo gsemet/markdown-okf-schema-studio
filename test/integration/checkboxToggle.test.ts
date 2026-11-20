@@ -7,7 +7,6 @@ import * as vscode from "vscode";
 import {
   COMMAND_ID,
   disposeActivePreviewForTests,
-  getActivePreviewForTests,
 } from "./extensionApi";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { RealWindowEvidence } from "./evidence";
@@ -15,53 +14,11 @@ import { setViewport } from "./realWindowViewport";
 import { traceDocumentChanges, waitForActiveSourceEditor, windowFocusReport } from "./windowFocus";
 import { markProgress } from "../shared/hangWatchdog";
 import { bounded } from "./stepWatchdog";
+import { currentPreviewFrame, waitFor, waitForRender } from "./realInput/harness";
 
-async function waitFor(description: string, predicate: () => boolean | Promise<boolean>, timeoutMs = 10_000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (await predicate()) return;
-    await new Promise<void>((resolve) => setTimeout(resolve, 25));
-  }
-  throw new Error(`Timed out waiting for ${description}.`);
-}
-
-async function waitForRender(document: vscode.TextDocument): Promise<void> {
-  await waitFor("the preview to render the current document version", () => {
-    const preview = getActivePreviewForTests();
-    return preview?.documentUri === document.uri.toString()
-      && preview.phase === "ready"
-      && preview.documentVersion === document.version
-      && preview.html.includes("myst-checkbox");
-  });
-}
-
-/** The visible webview frame showing exactly the host's current render. */
-async function currentPreviewFrame(page: Page): Promise<Frame> {
-  let result: Frame | undefined;
-  await waitFor("the rendered Studio webview", async () => {
-    const preview = getActivePreviewForTests();
-    for (const frame of page.frames()) {
-      try {
-        if (await frame.locator("#sphinx-myst-preview-content").count() === 0) continue;
-        if (!await (await frame.frameElement()).isVisible()) continue;
-        const root = frame.locator("html");
-        if (await root.getAttribute("data-sphinx-preview-document-version") !== String(preview?.documentVersion)) continue;
-        if (await root.getAttribute("data-sphinx-preview-request-id") !== String(preview?.requestId)) continue;
-        result = frame;
-        return true;
-      } catch (error) {
-        if (!/frame.*detach|execution context was destroyed/iu.test(String(error))) throw error;
-      }
-    }
-    return false;
-  }).catch(async (error: unknown) => {
-    const preview = getActivePreviewForTests();
-    throw new Error(`${String(error)} Expected preview: ${JSON.stringify({
-      documentUri: preview?.documentUri, version: preview?.documentVersion, requestId: preview?.requestId,
-    })}; ${await windowFocusReport(page)}`);
-  });
-  assert.ok(result);
-  return result;
+/** The harness render wait, with the condition this scenario needs: the checkboxes are rendered. */
+async function waitForCheckboxRender(document: vscode.TextDocument): Promise<void> {
+  await waitForRender(document, (html) => html.includes("myst-checkbox"));
 }
 
 function checkboxAtLine(frame: Frame, line: number): Locator {
@@ -149,7 +106,8 @@ export async function run(): Promise<void> {
     await bounded("waitForActiveSourceEditor of tasks.md", waitForActiveSourceEditor(document));
     await bounded(`${COMMAND_ID} on tasks.md`, vscode.commands.executeCommand(COMMAND_ID));
     markProgress("waiting for the first checkbox render");
-    await waitForRender(document);
+    await waitForCheckboxRender(document);
+    markProgress("looking for the first checkbox frame");
     let frame = await currentPreviewFrame(page);
     markProgress("first checkbox capture");
 
@@ -166,7 +124,8 @@ export async function run(): Promise<void> {
     await checkboxAtLine(frame, 3).click();
     const checkedSource = source.replace("- [ ] Write", "- [x] Write");
     await waitFor("the task checkbox to reach the source buffer", () => document.getText() === checkedSource);
-    await waitForRender(document);
+    await waitForCheckboxRender(document);
+    markProgress("looking for the current preview frame");
     frame = await currentPreviewFrame(page);
     assert.equal(await checkboxAtLine(frame, 3).isChecked(), true);
     assert.equal(await frame.locator("[data-sphinx-preview-block-editor]").count(), 0);
@@ -192,7 +151,8 @@ export async function run(): Promise<void> {
     } finally {
       undoTrace.dispose();
     }
-    await waitForRender(document);
+    await waitForCheckboxRender(document);
+    markProgress("looking for the current preview frame");
     frame = await currentPreviewFrame(page);
     assert.equal(await checkboxAtLine(frame, 3).isChecked(), false);
 
@@ -205,7 +165,8 @@ export async function run(): Promise<void> {
     await checkboxAtLine(frame, 8).click();
     const cellSource = source.replace("| Unit tests | [ ] |", "| Unit tests | [x] |");
     await waitFor("the table cell checkbox to reach the source buffer", () => document.getText() === cellSource);
-    await waitForRender(document);
+    await waitForCheckboxRender(document);
+    markProgress("looking for the current preview frame");
     frame = await currentPreviewFrame(page);
     assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode"), "on");
     assert.equal(await checkboxAtLine(frame, 8).isChecked(), true);

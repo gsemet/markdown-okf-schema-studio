@@ -5,9 +5,12 @@ import { type Page } from "playwright-core";
 
 import {
   hostStressPlan,
+  STRESS_ON_DEMAND_SCENARIOS,
   STRESS_SCENARIOS_BY_HOST,
 } from "../../shared/stressPlan";
 import { run as runCheckboxToggle } from "../checkboxToggle.test";
+import { run as runDropFiles } from "../dropFiles.test";
+import { run as runPasteUrl } from "../pasteUrl.test";
 import { scenarioFindInPreview } from "../findInPreview.test";
 import { scenarioLinkedTargetSave } from "../linkedTargetSave";
 import { scenarioTableMoves } from "../tableMoves";
@@ -95,13 +98,18 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   // A step of the trusted suite with its own CDP connection and evidence: it ignores the page and
   // evidence of the round and closes its own connection, so each round is the step as CI runs it.
   "checkbox-toggle": async () => runCheckboxToggle(),
+  // CR 425: on demand only (STRESS_ON_DEMAND_SCENARIOS), not in the default plan; both open their own
+  // CDP connection like checkbox-toggle.
+  "paste-url": async () => runPasteUrl(),
+  "drop-files": async () => runDropFiles(),
   // "wide-table-tab" is out of the stress table: its LASTCELL click was unstable (under investigation).
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */
 async function runStress(page: Page): Promise<void> {
-  assert.deepEqual(Object.keys(STRESS_SCENARIOS), STRESS_SCENARIOS_BY_HOST.trusted,
-    "the stress table of the trusted window is the list in test/shared/stressPlan.ts");
+  assert.deepEqual(Object.keys(STRESS_SCENARIOS),
+    [...STRESS_SCENARIOS_BY_HOST.trusted, ...STRESS_ON_DEMAND_SCENARIOS],
+    "the stress table of the trusted window is the lists in test/shared/stressPlan.ts");
   const plan = hostStressPlan(process.env, "trusted", 10);
   if (plan === undefined) {
     console.log("stress: no scenario of the trusted window was asked for");

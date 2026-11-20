@@ -84,6 +84,15 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
 };
 
 /**
+ * CR 425: steps of the trusted window that `STUDIO_STRESS_SCENARIOS` may name (a proof dispatch,
+ * for example `-f stress_scenarios=paste-url,drop-files,checkbox-toggle`) but the default plan does
+ * not run: with them the default 12 rounds would pass the deadline margin that
+ * test/build/hangWatchdog.test.ts keeps (about 3.9 s per scenario run, heavy run 44709272650).
+ * They are the key list of the real-input stress table after the default names.
+ */
+export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = ["paste-url", "drop-files"];
+
+/**
  * The plan of one window. `STUDIO_STRESS_SCENARIOS` may name scenarios of either window (unknown
  * names fail in both); the window keeps the ones it runs. `undefined`: nothing to run here.
  */
@@ -93,8 +102,11 @@ export function hostStressPlan(
   defaultRepeat = 10,
 ): StressPlan | undefined {
   const all = [...STRESS_SCENARIOS_BY_HOST.trusted, ...STRESS_SCENARIOS_BY_HOST.untrusted];
-  const plan = stressPlan(environment, all, defaultRepeat);
-  const own = STRESS_SCENARIOS_BY_HOST[host];
+  const named = (environment.STUDIO_STRESS_SCENARIOS ?? "").trim() !== "";
+  const plan = stressPlan(environment, named ? [...all, ...STRESS_ON_DEMAND_SCENARIOS] : all, defaultRepeat);
+  const own = host === "trusted"
+    ? [...STRESS_SCENARIOS_BY_HOST.trusted, ...STRESS_ON_DEMAND_SCENARIOS]
+    : STRESS_SCENARIOS_BY_HOST[host];
   const scenarios = plan.scenarios.filter((name) => own.includes(name));
   return scenarios.length === 0 ? undefined : { repeat: plan.repeat, scenarios };
 }

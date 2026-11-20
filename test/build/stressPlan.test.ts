@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { hostStressPlan, MAX_STRESS_REPEAT, STRESS_SCENARIOS_BY_HOST, stressPlan } from "../shared/stressPlan";
+import { hostStressPlan, MAX_STRESS_REPEAT, STRESS_ON_DEMAND_SCENARIOS, STRESS_SCENARIOS_BY_HOST, stressPlan } from "../shared/stressPlan";
 
 const AVAILABLE = ["table-tab", "list-editor", "flush-frontmatter-typed"];
 
@@ -56,4 +56,14 @@ test("find in preview (cream and dark, with replace) runs in the trusted window'
   assert.ok(STRESS_SCENARIOS_BY_HOST.trusted.includes("find-in-preview"));
   assert.deepEqual(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "find-in-preview" }, "trusted")?.scenarios, ["find-in-preview"]);
   assert.equal(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "find-in-preview" }, "untrusted"), undefined);
+});
+
+test("CR 425: paste-url and drop-files run on demand in the trusted window, never in the default plan", () => {
+  for (const name of STRESS_ON_DEMAND_SCENARIOS) {
+    assert.ok(!STRESS_SCENARIOS_BY_HOST.trusted.includes(name), name);
+    assert.ok(!hostStressPlan({}, "trusted")?.scenarios.includes(name), name);
+  }
+  const named = { STUDIO_STRESS_SCENARIOS: "paste-url,drop-files,checkbox-toggle" };
+  assert.deepEqual(hostStressPlan(named, "trusted")?.scenarios, ["paste-url", "drop-files", "checkbox-toggle"]);
+  assert.equal(hostStressPlan(named, "untrusted"), undefined);
 });

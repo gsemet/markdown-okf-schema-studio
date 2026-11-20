@@ -8,10 +8,10 @@ const INTEGRATION = path.join(ROOT, "test", "integration");
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
 /**
- * CR 152: the workspace remembers the edit mode for the next preview, and the real-window scenarios
- * run one after the other in the same window. A scenario that turns edit mode on and leaves it on
- * makes the next one open its preview in edit mode: its `setEditMode(page, true)` then clicks
- * nothing, the page never takes the keyboard focus and its arrow keys go to the workbench
+ * CR 152: the real-window scenarios run one after the other in the same window. A scenario that
+ * turns edit mode on and leaves it on leaves the next one a page already in edit mode: its
+ * `setEditMode(page, true)` then clicks nothing, the page never takes the keyboard focus and its
+ * arrow keys go to the workbench
  * (windowSwitchKeys.test.ts after pasteUrl.test.ts). Each top-level scenario that turns it on turns
  * it off again.
  */
