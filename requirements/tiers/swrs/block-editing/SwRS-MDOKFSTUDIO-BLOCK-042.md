@@ -30,6 +30,7 @@ tested_in_files:
 - test/core/edits/sourceEdits.test.ts
 - test/core/mapping/textDiff.test.ts
 - test/page/runtimeBlockEditor.test.ts
+- test/page/runtimeBlockEditorLineEndings.test.ts
 - test/session/blockReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

@@ -4,7 +4,8 @@
  * STAB-06), and the flush of the page's open editors before the host switches document (CR 025).
  */
 
-import { READ_ONLY_FILE, planBlockTextEdit, withLineEndingOf } from "../../core/edits/sourceEdits";
+import { matchLineEndings } from "../../core/edits/lineEndings";
+import { READ_ONLY_FILE, planBlockTextEdit } from "../../core/edits/sourceEdits";
 import type { HostDocument } from "../../host-api/documentStore";
 import { checkBlockLines, type BlockRangeRefusal } from "../../core/mapping/blockRange";
 import { sourceRangeForLines } from "../../core/mapping/sourceMapping";
@@ -309,6 +310,19 @@ export class BlockEditController {
       pin.minVersion = Math.max(pin.minVersion, preview.document.revision);
     }
     this.releaseActiveBlockEdit(preview, refreshes);
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-263
+    // A final save always gets an answer: with no render to follow (nothing written, the revision already rendered, or the source unavailable), the page's editor is told it is done. A cancel needs none: the page
+    // closed that editor when it posted it.
+    if (!refreshes && !edit.cancelRequested) {
+      fireAndForget(this.manager.host.logger, preview.postToPage({
+        type: "previewEditSource",
+        documentId: edit.lastMessage.documentId,
+        revision: edit.lastMessage.revision,
+        requestId: edit.lastMessage.requestId,
+        editId: edit.editId,
+        done: true,
+      }), "postToPage");
+    }
     if (refreshes && preview.document) {
       // The writer closed the editor and waits for the block: no typing pause to wait for (LIFE-039).
       fireAndForget(this.manager.host.logger, this.manager.rendering.refreshPreviewDocument(preview, preview.document, { immediate: true }), "refreshPreviewDocument");
@@ -323,7 +337,7 @@ export class BlockEditController {
     }
     const editedText = edit.pendingText === undefined
       ? undefined
-      : withLineEndingOf(edit.pendingText, edit.lastSavedText, preview.document?.getText());
+      : matchLineEndings(edit.pendingText, edit.lastSavedText, preview.document?.getText(), true);
     if (editedText === undefined || editedText === edit.lastSavedText) {
       edit.pendingText = undefined;
       if (edit.finalRequested) {

@@ -22,7 +22,9 @@ test("a restricted-reads preview opens, saves and cancels a block like a writabl
   await restricted.send("previewEditSave", { ...SECOND, editedText: "Changed.\n" });
   assert.ok(restricted.document.getText().includes("Changed."), "Restricted Mode and a standalone file edit the document");
   assert.equal(restricted.applyCalls.length, 1);
-  assert.deepEqual(restricted.of("previewEditSource").map((answer) => answer.error), [undefined]);
+  // The open's answer, then the `done` of the final save (this fixture renders nothing after the write): no error.
+  assert.deepEqual(restricted.of("previewEditSource").map((answer) => answer.error), [undefined, undefined]);
+  assert.deepEqual(restricted.of("previewEditSource").map((answer) => answer.done), [undefined, true]);
 
   const writable = fixture();
   await writable.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
@@ -468,4 +470,47 @@ test("a cancelled session that autosaved restores the original text as an ordina
   await run.send("previewEditCancel", { editId: "e1", line: 5, endLine: 5 });
   assert.equal(run.document.getText(), MARKDOWN, "the original text is back");
   assert.equal(run.applyCalls.length, before + 1, "the restore is one ordinary edit");
+});
+
+/** The autosave of the second paragraph, then the final save of the same text (nothing more to write). */
+async function autosaveThenFinal(
+  edit: ReturnType<typeof fixture>,
+  between: () => void,
+): Promise<void> {
+  await edit.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
+  await edit.send("previewEditSave", { ...SECOND, editedText: "Changed.\n", final: false });
+  assert.ok(edit.document.getText().includes("Changed."), "the autosave was written");
+  between();
+  await edit.send("previewEditSave", { ...SECOND, editedText: "Changed.\n", final: true });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+test("a final save after an autosave, writing nothing, with the source unavailable is answered by done", async () => {
+  const edit = fixture();
+  edit.manager.sourceAvailable = () => false;
+  await autosaveThenFinal(edit, () => undefined);
+  assert.equal(edit.applyCalls.length, 1, "the final save wrote nothing");
+  assert.deepEqual(edit.of("previewEditSource").map((answer) => answer.done), [undefined, true]);
+  assert.equal(edit.of("previewEditSource")[1]!.editId, "e1");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+test("a final save after an autosave, writing nothing, with its revision already rendered is answered by done", async () => {
+  const edit = fixture();
+  edit.manager.sourceAvailable = () => true;
+  await autosaveThenFinal(edit, () => {
+    edit.preview.stage = { ...edit.preview.stage!, activeDocumentRevision: edit.document.revision };
+  });
+  assert.equal(edit.applyCalls.length, 1, "the final save wrote nothing");
+  assert.deepEqual(edit.of("previewEditSource").map((answer) => answer.done), [undefined, true]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+test("a cancel after an autosave gets no done", async () => {
+  const edit = fixture();
+  edit.manager.sourceAvailable = () => false;
+  await edit.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
+  await edit.send("previewEditSave", { ...SECOND, editedText: "Changed.\n", final: false });
+  await edit.send("previewEditCancel", { editId: "e1" });
+  assert.deepEqual(edit.of("previewEditSource").map((answer) => answer.done), [undefined]);
 });

@@ -81,10 +81,14 @@ export interface PreviewFrontmatterResultMessage extends RenderMessage<"previewF
   error?: string;
 }
 
-/** The answer to a block-edit message: the source text to edit, or the error the editor shows. */
+/**
+ * The answer to a block-edit message: the source text to edit, the error the editor shows, or
+ * `done` (the final save ended with nothing to render: the editor closes).
+ */
 export interface PreviewEditSourceMessage extends RenderMessage<"previewEditSource"> {
   editId: string;
   error?: string;
+  done?: true;
   line?: number;
   endLine?: number;
   originalText?: string;

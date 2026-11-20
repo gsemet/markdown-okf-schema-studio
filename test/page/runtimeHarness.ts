@@ -89,7 +89,15 @@ export class RuntimeElement {
   public className = "";
   public textContent = "";
   public innerHTML = "";
-  public value = "";
+  private textValue = "";
+  // A text area returns every line break as LF, whatever it was given (the HTML value
+  // normalisation): the harness does the same, so a CR LF source shows what a browser shows.
+  public get value(): string {
+    return this.textValue;
+  }
+  public set value(next: string) {
+    this.textValue = this.tagName === "TEXTAREA" ? next.replace(/\r\n|\r/gu, "\n") : next;
+  }
   public selectionStart = 0;
   public selectionEnd = 0;
   public type = "";

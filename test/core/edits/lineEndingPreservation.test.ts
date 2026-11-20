@@ -6,7 +6,8 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { planBlockTextEdit, withLineEndingOf } from "../../../src/core/edits/sourceEdits";
+import { matchLineEndings } from "../../../src/core/edits/lineEndings";
+import { planBlockTextEdit } from "../../../src/core/edits/sourceEdits";
 import { applyTextEdits } from "../../../src/core/edits/textEdit";
 import { blockAt, LINE_ENDING_FIXTURE_NAMES, readLineEndingFixture } from "../../shared/lineEndingFixtures";
 
@@ -17,7 +18,7 @@ const LIST = { line: 10, endLine: 11, editedText: "- one\n- two\n- three\n" };
 /** What the host writes for a save: the text box returns LF, the block keeps its own ending. */
 function saved(text: string, block: { line: number; endLine: number; editedText: string }): { start: number; end: number; after: string } {
   const original = blockAt(text, block.line, block.endLine);
-  const written = withLineEndingOf(block.editedText, original.text, text);
+  const written = matchLineEndings(block.editedText, original.text, text);
   const edit = planBlockTextEdit(original.start, original.text, written);
   assert.ok(edit, "the block changed, so there is an edit");
   return { start: original.start, end: original.start + original.text.length, after: applyTextEdits(text, [edit]) };

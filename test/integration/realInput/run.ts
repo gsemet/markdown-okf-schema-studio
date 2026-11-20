@@ -15,6 +15,7 @@ import { scenarioFindInPreview } from "../findInPreview.test";
 import { scenarioLinkedTargetSave } from "../linkedTargetSave";
 import { scenarioTableMoves } from "../tableMoves";
 import { scenarioListItemMoves } from "../listItemMoves";
+import { scenarioLineEndingLeave } from "./lineEndingLeave";
 import {
   connectWorkbench,
   createEvidence,
@@ -218,6 +219,7 @@ export async function run(): Promise<void> {
       "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
       "table-moves": () => scenarioTableMoves(page),
       "list-item-moves": () => scenarioListItemMoves(page),
+      "line-ending-leave": () => scenarioLineEndingLeave(page),
       "wide-table-tab": () => scenarioWideTableTab(page, evidence),
       "table-stale-render": async () => {
         await scenarioUndoUnderCellEditorRendersTable(page);
@@ -308,6 +310,8 @@ export async function run(): Promise<void> {
     await scenarioTableStructure(page);
     await scenarioTableMoves(page);
     await scenarioListItemMoves(page);
+    // CR 436: an editor left without a change never stays on "Saving Markdown…", CR LF or LF file.
+    await scenarioLineEndingLeave(page);
     await scenarioBooleanOneClick(page, evidence);
     await scenarioListEditorClickAndKeys(page, evidence);
     await scenarioListLinkCompletion(page, evidence);
