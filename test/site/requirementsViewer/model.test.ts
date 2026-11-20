@@ -69,3 +69,25 @@ test("the model reads scenarios, files, parents, paths and known issues", () => 
   assert.deepEqual(parseScenarios("### Scenario: no kind\n\n- GIVEN a\n- WHEN b\n- THEN c\n")[0]?.kind, "nominal");
   assert.deepEqual(parseKnownIssues("- Known issue (CR 1): not counted\n- Known issue: counted\n"), ["Known issue: counted"]);
 });
+
+test("the model reads table scenarios, notes and mixed scenarios in source order", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
+  const m = model();
+  const [table, mixed] = m.byId.get("SwRS-X-014")!.scenarios;
+  assert.deepEqual(table?.blocks.map((b) => b.type), ["table"]);
+  assert.deepEqual(table?.blocks[0], {
+    type: "table",
+    header: ["Input", "Outcome"],
+    rows: [["`a | b`", "kept"], ["<b> &lt;", "decoded once"]],
+  }, "the separator line is skipped, the escaped pipe is a pipe, the entities decode once");
+  assert.deepEqual(table?.steps, []);
+  assert.deepEqual(mixed?.blocks.map((b) => b.type), ["steps", "note", "note", "table"]);
+  assert.deepEqual(mixed?.blocks[0], { type: "steps", lines: ["GIVEN a box", 'WHEN it is "x"', "THEN it flips"] });
+  assert.deepEqual(mixed?.steps, ["GIVEN a box", 'WHEN it is "x"', "THEN it flips"]);
+  assert.deepEqual(mixed?.blocks[1], { type: "note", text: 'A note line "x" under the steps.' });
+  assert.deepEqual(mixed?.blocks[2], { type: "note", text: "A bullet note" });
+  assert.deepEqual(mixed?.blocks[3], { type: "table", header: ["Given", "When", "Then"], rows: [["a", "b", "c"]] });
+  const list = m.byId.get("SwRS-X-011")!.scenarios[0]!;
+  assert.equal(list.blocks.length, 1);
+  assert.deepEqual(list.blocks[0], { type: "steps", lines: [...list.steps] });
+});

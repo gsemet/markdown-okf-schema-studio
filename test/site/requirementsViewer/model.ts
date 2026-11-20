@@ -16,11 +16,19 @@ export const EXAMPLE_SWRS_ID = "SwRS-MDOKFSTUDIO-GFM-021";
 const AREA_COLOURS = ["#c2410c", "#be185d", "#7c3aed", "#4338ca", "#1d4ed8", "#0369a1", "#0f766e", "#047857",
   "#4d7c0f", "#a16207", "#b45309", "#b91c1c", "#9333ea", "#0e7490", "#475569", "#9d174d"];
 
+/** One piece of a scenario section, in source order. */
+export type ScenarioBlock =
+  | { readonly type: "steps"; readonly lines: string[] }
+  | { readonly type: "table"; readonly header: string[]; readonly rows: string[][] }
+  | { readonly type: "note"; readonly text: string };
+
 export interface Scenario {
   readonly kind: string;
   readonly name: string;
-  /** The GIVEN, WHEN, THEN and AND lines, in order. */
+  /** The GIVEN, WHEN, THEN and AND lines, in order (decoded). */
   readonly steps: readonly string[];
+  /** The content of the section in source order: runs of steps, tables and notes. */
+  readonly blocks: readonly ScenarioBlock[];
 }
 
 export interface Requirement {
@@ -154,15 +162,41 @@ function bodyOf(raw: string): string {
   return raw.split("<!-- okf:links:start -->")[0] ?? "";
 }
 
-/** The `### Scenario (kind): name` sections of a requirement file with their GIVEN / WHEN / THEN / AND lines. */
+/** The four entities GitHub shows as characters, decoded in one pass (`&amp;lt;` becomes `&lt;`). */
+function decodeEntities(text: string): string {
+  const characters: Record<string, string> = { lt: "<", gt: ">", amp: "&", quot: '"' };
+  return text.replace(/&(lt|gt|amp|quot);/gu, (_match, name: string) => characters[name] ?? "");
+}
+
+/** The cells of a table line: split on pipes that are not escaped, trimmed, `\|` read as `|`. */
+function tableCells(line: string): string[] {
+  let inner = line.trim();
+  if (inner.startsWith("|")) inner = inner.slice(1);
+  if (inner.endsWith("|") && !inner.endsWith("\\|")) inner = inner.slice(0, -1);
+  return inner.split(/(?<!\\)\|/u).map((cell) => decodeEntities(cell.trim().replace(/\\\|/gu, "|")));
+}
+
+/**
+ * The `### Scenario (kind): name` sections of a requirement file: the GIVEN / WHEN / THEN / AND lines,
+ * and the content in source order as steps, tables and notes, with the basic entities decoded.
+ */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-082
 export function parseScenarios(raw: string): Scenario[] {
-  const scenarios: { kind: string; name: string; steps: string[] }[] = [];
-  let current: { kind: string; name: string; steps: string[] } | undefined;
+  const scenarios: { kind: string; name: string; steps: string[]; blocks: ScenarioBlock[] }[] = [];
+  let current: (typeof scenarios)[number] | undefined;
+  /** What an indented line continues: the last step, the last note, or nothing. */
+  let last: "step" | "note" | undefined;
+  /** True while consecutive prose lines still join the last note. */
+  let prose = false;
+  let table: { header: string[]; rows: string[][] } | undefined;
   for (const line of bodyOf(raw).split("\n")) {
     const heading = /^###\s+Scenario(?:\s*\(([^)]*)\))?\s*:\s*(.*?)\s*$/u.exec(line);
     if (heading) {
-      current = { kind: (heading[1] ?? "").trim() || "nominal", name: heading[2] ?? "", steps: [] };
+      current = { kind: (heading[1] ?? "").trim() || "nominal", name: heading[2] ?? "", steps: [], blocks: [] };
       scenarios.push(current);
+      last = undefined;
+      prose = false;
+      table = undefined;
       continue;
     }
     if (/^#{1,3}\s/u.test(line)) {
@@ -170,9 +204,55 @@ export function parseScenarios(raw: string): Scenario[] {
       continue;
     }
     if (!current) continue;
+    const blocks = current.blocks;
+    const tail = blocks[blocks.length - 1];
+    if (/^\s*\|/u.test(line)) {
+      const cells = tableCells(line);
+      if (table && tail?.type === "table") {
+        if (!(tail.rows.length === 0 && cells.every((cell) => /^:?-+:?$/u.test(cell)))) tail.rows.push(cells);
+      } else {
+        table = { header: cells, rows: [] };
+        blocks.push({ type: "table", ...table });
+      }
+      last = undefined;
+      prose = false;
+      continue;
+    }
+    table = undefined;
     const step = /^\s*-\s+((?:GIVEN|WHEN|THEN|AND)\b.*?)\s*$/u.exec(line);
-    if (step) current.steps.push(step[1] ?? "");
-    else if (/^\s{2,}\S/u.test(line) && current.steps.length > 0) current.steps[current.steps.length - 1] += ` ${line.trim()}`;
+    if (step) {
+      const text = decodeEntities(step[1] ?? "");
+      current.steps.push(text);
+      if (tail?.type === "steps") tail.lines.push(text);
+      else blocks.push({ type: "steps", lines: [text] });
+      last = "step";
+      prose = false;
+      continue;
+    }
+    if (/^\s{2,}\S/u.test(line) && last) {
+      const more = decodeEntities(line.trim());
+      if (last === "step" && tail?.type === "steps") {
+        tail.lines[tail.lines.length - 1] += ` ${more}`;
+        current.steps[current.steps.length - 1] += ` ${more}`;
+      } else if (last === "note" && tail?.type === "note") blocks[blocks.length - 1] = { type: "note", text: `${tail.text} ${more}` };
+      continue;
+    }
+    if (line.trim() === "") {
+      prose = false;
+      continue;
+    }
+    const bullet = /^\s*[-*]\s+(.*?)\s*$/u.exec(line);
+    if (bullet) {
+      blocks.push({ type: "note", text: decodeEntities(bullet[1] ?? "") });
+      last = "note";
+      prose = false;
+    } else if (prose && tail?.type === "note") {
+      blocks[blocks.length - 1] = { type: "note", text: `${tail.text} ${decodeEntities(line.trim())}` };
+    } else {
+      blocks.push({ type: "note", text: decodeEntities(line.trim()) });
+      last = "note";
+      prose = true;
+    }
   }
   return scenarios;
 }

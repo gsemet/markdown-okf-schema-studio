@@ -28,6 +28,30 @@ export const MAIN_PATHS =`### Main paths
 const SCENARIO = (kind: string, name: string): string =>
   `### Scenario (${kind}): ${name}\n\n- GIVEN a box\n- WHEN it is <clicked>\n- THEN it flips\n  and stays\n\n`;
 
+/** SwRS-X-014: a table scenario, and a scenario mixing steps, a note, a bullet and a table. */
+const TABLE_SCENARIOS_TEXT = [
+  "### Scenario (nominal): Table only",
+  "",
+  "| Input | Outcome |",
+  "| --- | --- |",
+  "| `a \\| b` | kept |",
+  "| &lt;b&gt; &amp;lt; | decoded once |",
+  "",
+  "### Scenario (boundary): Steps, note and table",
+  "",
+  "- GIVEN a box",
+  "- WHEN it is &quot;x&quot;",
+  "- THEN it flips",
+  "",
+  "A note line &quot;x&quot; under the steps.",
+  "- A bullet note",
+  "",
+  "| Given | When | Then |",
+  "| :--- | :---: | ---: |",
+  "| a | b | c |",
+  "",
+].join("\n");
+
 export interface FixtureOptions {
   readonly lifecycleKey?: "req_lifecycle" | "lifecycle";
   readonly lifecycle?: string;
@@ -94,7 +118,7 @@ export function fixtureReport(overrides: { generatedAt?: string } = {}): string 
       requirement("SwRS-X-011", "SwRS", "gfm", { implemented: false, text: SCENARIO("nominal", "Go on") + SCENARIO("boundary", "Go on twice") + KNOWN_ISSUES_TEXT }),
       requirement("SwRS-X-012", "SwRS", "gfm", { text: SCENARIO("refusal", "Refused") + SCENARIO("nominal", "Not refused") }),
       requirement("SwRS-X-013", "SwRS", "myst", { exempt: true, target: false, derivesFrom: ["StRS-X-001", "StRS-X-003"], implementedIn: [], testedIn: [] }),
-      requirement("SwRS-X-014", "SwRS", "gfm", { derivesFrom: ["StRS-X-003"], lifecycleKey: "lifecycle" }),
+      requirement("SwRS-X-014", "SwRS", "gfm", { derivesFrom: ["StRS-X-003"], lifecycleKey: "lifecycle", text: TABLE_SCENARIOS_TEXT }),
       requirement("SwRS-X-015", "SwRS", "gfm", { lifecycle: "superseded", supersededBy: ["SwRS-X-014"], derivesFrom: ["StRS-X-003"], text: KNOWN_ISSUES_TEXT }),
       requirement("SwRS-X-016", "SwRS", "gfm", { lifecycle: "archived", derivesFrom: ["StRS-X-003"] }),
       requirement(EXAMPLE_SWRS_ID, "SwRS", "gfm", { derivesFrom: ["StRS-X-003"], text: SCENARIO("nominal", "Toggle <b>") }),

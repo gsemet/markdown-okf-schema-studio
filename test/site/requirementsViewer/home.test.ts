@@ -25,6 +25,7 @@ test("home: layers, areas, sections and figures", () => {
   for (const heading of ["What the requirements are", "Why we keep them", "How it works", "A real example", "What keeps it in sync", "The figures", "Retired requirements"]) {
     assert.ok(body.includes(heading), heading);
   }
+  assert.ok(body.includes("given, when, then, or a table"));
   assert.ok(body.includes("<svg") && body.includes("@implements_req") && body.includes("@tests_req"));
   assert.ok(body.includes("<strong>80%</strong><span>implemented (4 of 5)"));
   assert.ok(body.includes("<strong>100%</strong><span>tested (5 of 5)"));

@@ -152,7 +152,7 @@ export function homePage(model: ViewerModel | undefined, root: string): PageSpec
 <p class="lead">Every feature of Studio is written down at three levels, each one linked to the next.</p>
 ${model ? layersAndAreas(model) : ""}
 <h2>What the requirements are</h2>
-<p class="hint">A <strong>StRS</strong> is a use case: something a writer, reviewer or maintainer can do and see in VS Code. A <strong>SwRS</strong> is one observable behaviour of the extension, written with its scenarios (given, when, then); a rule many behaviours share is written once and cited by the others. They say what Studio does today, never what we would like it to do.</p>
+<p class="hint">A <strong>StRS</strong> is a use case: something a writer, reviewer or maintainer can do and see in VS Code. A <strong>SwRS</strong> is one observable behaviour of the extension, written with its scenarios (given, when, then, or a table); a rule many behaviours share is written once and cited by the others. They say what Studio does today, never what we would like it to do.</p>
 <h2>Why we keep them</h2>
 <p class="hint">The documented behaviour stays equal to the code, a behaviour that looks wrong is written down as a known issue, we know which test checks which behaviour, and a change is reviewed against the requirement, the code and the test together.</p>
 <h2>How it works</h2>
