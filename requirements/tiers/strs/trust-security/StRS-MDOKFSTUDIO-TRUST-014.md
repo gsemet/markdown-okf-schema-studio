@@ -18,6 +18,7 @@ user_need: As a maintainer, I install on the pinned Node.js version from the
   are in the package.
 derived_by:
 - SwRS-MDOKFSTUDIO-CORE-087
+- SwRS-MDOKFSTUDIO-CORE-090
 - SwRS-MDOKFSTUDIO-TRUST-075
 - SwRS-MDOKFSTUDIO-TRUST-092
 default_owner_email: gaetan@xeberon.net
@@ -56,6 +57,7 @@ flowchart LR
 
 - Derived by:
   - [SwRS-MDOKFSTUDIO-CORE-087](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-087.md): The site requirements viewer shows the use case diagram of a StRS
+  - [SwRS-MDOKFSTUDIO-CORE-090](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-090.md): The requirements lint parses every use case diagram
   - [SwRS-MDOKFSTUDIO-TRUST-075](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-075.md): The extension is built from pinned, official dependencies
   - [SwRS-MDOKFSTUDIO-TRUST-092](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-092.md): The package keeps the built-in engine bundle in the VSIX
 <!-- okf:links:end -->

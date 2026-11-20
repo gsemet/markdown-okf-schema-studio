@@ -103,6 +103,16 @@ page of the requirements site.
   ^12.2.0`, and shows the figure in an iframe with pan, zoom and copy buttons. The layout and the
   text match the site and no label was cut. The two renderers can still differ, so a diagram can
   look different, or fail, on one side only.
+- `just requirements-lint` runs `scripts/check-use-case-diagrams.mjs`, which parses every use case
+  diagram with the project's Mermaid (the same extraction as the site) and fails on any parse error
+  with `<path>:<line>: <StRS id>: ...` followed by Mermaid's message. Its last line is
+  `use case diagrams: <n> StRS checked, all parse (Mermaid <version>)`. It parses and does not
+  draw: a diagram that parses but cannot be drawn still fails only the site build.
+- Ids Mermaid reserves (a participant used in a message, a node or a state with one of these names
+  does not parse; the check catches others too):
+  - `sequenceDiagram` (any case): `box`, `end`, `alt`, `opt`, `loop`, `par`, `and`, `else`, `rect`, `critical`, `break`, `option`, `note`, `activate`, `deactivate`, `participant`, `actor`, `create`, `destroy`, `title`, `autonumber`, `over`
+  - `flowchart` (lower case): `end`, `subgraph`, `graph`, `style`, `class`, `click`
+  - `stateDiagram-v2`: `state`, `note`
 - On the site the diagram is drawn once, in the cream colours of the site (the site has no dark
   mode); a fence that Mermaid cannot draw fails the site build with the StRS id and Mermaid's
   message.
