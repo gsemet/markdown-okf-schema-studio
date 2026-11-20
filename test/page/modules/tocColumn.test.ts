@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { installTocColumn, LIST_ITEM_TEXT_LIMIT } from "../../../src/page/modules/tocColumn";
+import { renderMappedPage, type MappedElement } from "../../session/mappedHtmlDom";
 
 type Handler = (event: any) => void;
 
@@ -654,7 +655,7 @@ test("with listItemsInToc on, top-level list items are listed one level below th
   assert.equal(Array.from(cut).length, LIST_ITEM_TEXT_LIMIT);
   assert.deepEqual(entries().map((entry) => entry.parent!.getAttribute("data-level")), ["1", "1", "2", "2", "2", "3"]);
   assert.deepEqual(ticks().map((tick) => tick.getAttribute("aria-label")), ["Braking", "Release"]);
-  assert.equal(entries()[2].parent!.hasAttribute("data-sphinx-preview-toc-list-item"), true);
+  assert.equal(entries()[2].parent!.all("button").length, 1, "the row of an item holds its entry button only, no twisty");
   entries()[2].fire("click");
   assert.equal(scrolled.at(-1)?.tagName, "li", "a click goes to the item");
 });
@@ -710,6 +711,43 @@ test("the generated [TOC] list, footnotes, table cells and hidden panels are not
   toc.refresh();
   flush();
   assert.deepEqual(entries().map((entry) => entry.textContent), ["Top", "A document item"]);
+});
+
+/** The fake copy of an element of a rendered page: its tag, classes, attributes, text and children. */
+function fakeOf(element: MappedElement): FakeElement {
+  const copy = new FakeElement(element.tagName.toLowerCase(), (element.getAttribute("class") ?? "").split(/\s+/u).filter(Boolean));
+  for (const name of ["hidden", "id"]) {
+    const value = element.getAttribute(name);
+    if (value !== null) copy.attrs.set(name, value);
+  }
+  for (const child of element.children) copy.appendChild(fakeOf(child));
+  // The text of the element itself, children included: the fake reads no text node.
+  copy.ownText = element.textContent;
+  return copy;
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+test("on a rendered page, the items of the [TOC] list, of the footnotes and of a table cell are not listed", async () => {
+  const source = [
+    "# Top", "", "[TOC]", "", "## Second", "",
+    "- A document item[^1]", "- Another item", "",
+    "| A | B |", "| --- | --- |", "| <ul><li>cell item</li></ul> | x |", "",
+    "[^1]: A footnote.", "",
+  ].join("\n");
+  const page = await renderMappedPage(source, "/w/spec.md", "file:///w/spec.md");
+  const main = page.document.querySelector("main")!;
+  assert.ok(main.querySelector("nav.okf-toc") && main.querySelector("section.footnotes") && main.querySelector("table"),
+    "the renderer emits the markup the exclusions name");
+  const { content, toc, flush, entries } = setup({ toc: true, listItemsInToc: true });
+  for (const child of main.children) content.appendChild(fakeOf(child));
+  toc.refresh();
+  flush();
+  // The footnote reference of the first item is part of its first line, as on the page. The
+  // hidden "Footnotes" heading of the footnotes section is a heading (SwRS-MDOKFSTUDIO-TOOLBAR-040),
+  // not a list item, so it is left out of this check.
+  const listed = entries().map((entry) => entry.textContent).filter((text) => text !== "Footnotes");
+  assert.deepEqual(listed, ["Top", "Second", "A document item1", "Another item"],
+    "the headings and the items of the document's own list only");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138

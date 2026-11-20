@@ -1399,7 +1399,7 @@ test("CR 312: Cmd+S and Ctrl+S in the block text box are left to VS Code (not st
   assert.equal(harness.messages.length, before, "the page posts nothing by itself");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
 test("the arrows at the edge of a list item editor go to the next or previous item, then past the list", () => {
   // The default page has blocks at lines 1, 50 and 100; a list at line 60 holds two items, 60 to 61
   // and 62 to 63.

@@ -159,20 +159,32 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     });
   };
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+  /** The top-level mapped block that holds `element` (itself when it is one). */
+  function topLevelBlockOf(element: HTMLElement): HTMLElement | undefined {
+    const blocks = rt.blocks.topLevelMappedBlocks();
+    let top: HTMLElement | null = element;
+    while (top && !blocks.includes(top)) top = top.parentElement;
+    return top ?? undefined;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-079
   function adjacentMappedBlock(edit: BlockEdit, step: number): HTMLElement | undefined {
-    // The editor of a list item steps to the item before or after it in its list, then past the list.
-    if (edit.target.tagName === "LI") {
+    const blocks = rt.blocks.topLevelMappedBlocks();
+    let from: HTMLElement | undefined = edit.target;
+    // The editor of a list item, or of a block inside one, steps to the item before or after that
+    // item in its list, then past the top-level block that holds the list. Every other editor
+    // steps between top-level blocks only, and an inner block leaves the key to the text box.
+    const item = edit.target.tagName === "LI" ? edit.target
+      : edit.target.parentElement?.tagName === "LI" ? edit.target.parentElement : undefined;
+    if (item) {
       const sideways = (element: Element): Element | null =>
         step < 0 ? element.previousElementSibling : element.nextElementSibling;
-      let sibling = sideways(edit.target);
+      let sibling = sideways(item);
       while (sibling && sibling.tagName !== "LI") sibling = sideways(sibling);
       if (sibling) return sibling as HTMLElement;
+      from = topLevelBlockOf(item);
     }
-    const blocks = rt.blocks.topLevelMappedBlocks();
-    let top: HTMLElement | null = edit.target;
-    while (top && !blocks.includes(top)) top = top.parentElement;
-    const index = top ? blocks.indexOf(top) : -1;
+    const index = from ? blocks.indexOf(from) : -1;
     if (index < 0) return undefined;
     // The properties table has its own editor: stepping onto it would only close this one.
     for (let next = index + step; next >= 0 && next < blocks.length; next += step) {
@@ -193,15 +205,18 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     const edit = state.activeBlockEdit;
     if (!edit || edit.finishing || event.repeat || rt.blockMoves.inFlight()) return true;
     if (edit.selectedCell || edit.insertAfterLine !== undefined || control !== edit.textarea) return true;
-    const target = edit.target;
-    if (!rt.blockMoves.bodyBlockNeighbour(target, direction)) return true;
+    const edited = edit.target;
+    // The editor of a list item moves the whole list that holds it, as the list's editor did
+    // before items were edited one by one; the editor reopens on the moved list.
+    const target = edited.tagName === "LI" ? topLevelBlockOf(edited) : edited;
+    if (!target || !rt.blockMoves.bodyBlockNeighbour(target, direction)) return true;
     const offset = Number.isSafeInteger(control.selectionStart) ? control.selectionStart as number : 0;
     const editedText = edit.textarea.value + (edit.trailingLineEnding || "");
     if (editedText === edit.originalText && !edit.hasAutosavedChange) {
       // Nothing to save: close (the host drops the edit) and move at once.
       closeBlockEdit(true);
       if (!rt.blockMoves.requestBlockMove(target, direction, "edit", offset)) {
-        rt.editMode.openMappedEditor(target, target, { offset }, false);
+        rt.editMode.openMappedEditor(edited, edited, { offset }, false);
       }
       return true;
     }
@@ -209,7 +224,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     if (!postBlockEditSave(true)) {
       clearPendingBlockNavigation();
       if (!rt.blockMoves.requestBlockMove(target, direction, "edit", offset)) {
-        rt.editMode.openMappedEditor(target, target, { offset }, false);
+        rt.editMode.openMappedEditor(edited, edited, { offset }, false);
       }
     }
     return true;

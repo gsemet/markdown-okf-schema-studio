@@ -405,7 +405,6 @@ export function installTocColumn(
       };
       if (entry.listItem) {
         // The rail shows the sections only: hundreds of list items would hide them.
-        item.setAttribute("data-sphinx-preview-toc-list-item", "");
         ticks.push(undefined);
       } else {
         const tick = document.createElement("button");

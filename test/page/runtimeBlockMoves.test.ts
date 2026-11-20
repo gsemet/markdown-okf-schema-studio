@@ -303,6 +303,62 @@ test("T37: on macOS the chord is Cmd+Alt, and Ctrl+Alt does nothing special", ()
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+test("T37: the chord in a list item editor saves the item, then moves the whole list", () => {
+  // The default page has blocks at lines 1, 50 and 100; a list at line 60 holds two items, 60 to 61
+  // and 62 to 63. The item editor moves the list that holds it, as the list's editor did.
+  const openItem = (harness: ReturnType<typeof createRuntimeHarness>): RuntimeElement => {
+    const mapped = (tag: string, line: number, endLine: number): RuntimeElement => {
+      const element = new RuntimeElement({
+        "data-sphinx-preview-document": "file:///active.md",
+        "data-sphinx-source-end-line": String(endLine),
+        "data-sphinx-source-file": "/workspace/active.md",
+        "data-sphinx-source-line": String(line),
+      }, harness.windowState, line * 10, 20, tag);
+      harness.mappings.push(element);
+      return element;
+    };
+    const list = mapped("ul", 60, 63);
+    for (const [line, endLine] of [[60, 61], [62, 63]] as const) {
+      const item = mapped("li", line, endLine);
+      item.siblingsFromParent = true;
+      item.appendChild(mapped("p", line, endLine));
+      list.appendChild(item);
+    }
+    harness.dispatchDocument("click", { target: list.childElements[1]!.childElements[0], preventDefault: () => undefined });
+    const request = harness.messages.at(-1);
+    assert.deepEqual([request?.type, request?.line, request?.endLine], ["previewEditOpen", 62, 63], "the item editor opens");
+    harness.dispatchMessage({
+      type: "previewEditSource", ...MOVE_IDENTIFIERS, editId: request?.editId, originalText: "- Second item\n",
+    });
+    return harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
+  };
+
+  const changed = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openItem(changed);
+  textarea.value = "- Second item, changed\n";
+  textarea.dispatch("input");
+  textarea.setSelectionRange(4, 4);
+  const before = changed.messages.length;
+  let prevented = false;
+  textarea.dispatch("keydown", altKey("ArrowDown", { ctrlKey: true, preventDefault: () => { prevented = true; } }));
+  assert.equal(prevented, true, "the chord is consumed");
+  const save = changed.messages.slice(before).find((message) => message.type === "previewEditSave");
+  assert.deepEqual([save?.final, save?.line, save?.endLine], [true, 62, 63], "the item is saved first");
+  assert.deepEqual(moveMessages(changed, before), [], "the move waits for the saved render");
+  changed.dispatchMessage(patchMessage());
+  const moves = moveMessages(changed, before);
+  assert.deepEqual(moves.map((move) => [move.line, move.neighbourLine, move.direction]), [[60, 100, "down"]],
+    "the whole list, from its first line, moves past the next top-level block");
+
+  const unchanged = createRuntimeHarness({ savedState: { editMode: true } });
+  const untouched = openItem(unchanged);
+  const start = unchanged.messages.length;
+  untouched.dispatch("keydown", altKey("ArrowUp", { ctrlKey: true }));
+  assert.deepEqual(moveMessages(unchanged, start).map((move) => [move.line, move.neighbourLine, move.direction]),
+    [[60, 50, "up"]], "nothing to save: the whole list moves at once");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
 test("T37: AltGr with an arrow in the text box is no move chord", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
