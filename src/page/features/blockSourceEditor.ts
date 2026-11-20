@@ -45,6 +45,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   const receiveBlockEditSource: BlockSourceEditor["receiveBlockEditSource"] = (message) => {
     if (rt.tableRowMove.receiveSource(message)) return;
+    if (rt.listItemMove.receiveSource(message)) return;
     const edit = state.activeBlockEdit;
     if (!edit || message.editId !== edit.editId) return;
     const { blockEditor, editorChrome, textControls } = rt;

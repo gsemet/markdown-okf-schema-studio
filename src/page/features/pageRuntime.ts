@@ -412,6 +412,8 @@ export interface MappedBlocks {
     target: HTMLElement,
     options?: { exact?: boolean },
   ): { element: HTMLElement; sourceRange: { line: number; endLine: number } | undefined };
+  /** The lines of the list itself (not of its container), from its mapped elements. */
+  listRange(list: Element): { line: number; endLine: number } | undefined;
   /** True when the page shows a rendered preview (not a status page). */
   hasRenderedPreview(): boolean;
 }
@@ -649,6 +651,18 @@ export interface TableRowMove {
   receiveSource(message: PreviewEditSourceMessage): boolean;
 }
 
+/** The handles of list items and their moves among their sibling items (`features/listItemMove.ts`). */
+export interface ListItemMove {
+  /** Rebuilds the handles: one per item of a list of two items or more in edit mode, none otherwise. */
+  refresh(): void;
+  /** Places the handles again on the boxes the lists have now (a breakout or a render moved them). */
+  reposition(): void;
+  /** Takes the list source a move asked for; false when the message is not for a move. */
+  receiveSource(message: PreviewEditSourceMessage): boolean;
+  /** The list item a handle moves, when `node` is in a list item handle (its edit outline). */
+  itemOf(node: Element): Element | undefined;
+}
+
 /** Edit mode, the edit hover, and opening the editor of a clicked block (`features/editMode.ts`). */
 export interface EditMode {
   applyEditMode(enabled: boolean): void;
@@ -719,6 +733,7 @@ export interface PageRuntime {
   fileDrop: FileDrop;
   blockMoves: BlockMoves;
   tableRowMove: TableRowMove;
+  listItemMove: ListItemMove;
   editMode: EditMode;
   contentPatch: ContentPatch;
   input: PageInput;

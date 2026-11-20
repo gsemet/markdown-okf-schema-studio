@@ -248,6 +248,12 @@ export class RuntimeElement {
         || (selector === "table" && current.tagName === "TABLE")
         || (selector === "[data-okf-row-handle]" && current.getAttribute("data-okf-row-handle") !== null)
         || (selector === "[data-okf-col-handle]" && current.getAttribute("data-okf-col-handle") !== null)
+        || (selector === "[data-okf-list-item-handle]" && current.getAttribute("data-okf-list-item-handle") !== null)
+        // The containers whose box the handles of a list inside them stay out of (features/listItemMove.ts).
+        || (selector === "[data-okf-github-alert], aside.admonition, details.admonition, blockquote"
+          && (current.getAttribute("data-okf-github-alert") !== null || current.tagName === "BLOCKQUOTE"
+            || (["ASIDE", "DETAILS"].includes(current.tagName)
+              && (current.getAttribute("class") ?? current.className).split(" ").includes("admonition"))))
         || (selector === "ul, ol" && ["UL", "OL"].includes(current.tagName))
         || (selector === "li" && current.tagName === "LI")
         || (selector === "[data-sphinx-preview-block-editor]"
@@ -462,6 +468,8 @@ export interface RuntimeHarness {
   readonly documentElement: RuntimeElement;
   readonly createdElements: RuntimeElement[];
   readonly contentTables: RuntimeElement[];
+  /** The lists of the content, as `#sphinx-myst-preview-content ul, ...ol` finds them. */
+  readonly contentLists: RuntimeElement[];
   /** The status region the page was loaded with (null when the harness has none). */
   readonly statusRegion: RuntimeElement | null;
   /** The links of the content, as `a[data-sphinx-preview-navigation]` finds them. */
@@ -771,6 +779,7 @@ export function createRuntimeHarness(configuration: Partial<{
     : null;
   const createdElements: RuntimeElement[] = [];
   const contentTables: RuntimeElement[] = [];
+  const contentLists: RuntimeElement[] = [];
   const contentLinks: RuntimeElement[] = [];
   const details: RuntimeElement[] = [];
   const observedLinks: RuntimeElement[] = [];
@@ -967,6 +976,7 @@ export function createRuntimeHarness(configuration: Partial<{
         : selector === "[data-okf-frontmatter-toggle]" ? [frontmatterToggleButton]
         : selector === ".okf-info-row th[colspan]" ? []
         : selector === "#sphinx-myst-preview-content table" ? [frontmatterTable, ...contentTables]
+        : selector === "#sphinx-myst-preview-content ul, #sphinx-myst-preview-content ol" ? contentLists
         : selector === "[data-okf-edit-cell]" ? (currentProperties === frontmatterProperties
           ? [frontmatterNameCell, frontmatterValueCell]
           : currentProperties?.childElements ?? [])
@@ -1073,6 +1083,7 @@ export function createRuntimeHarness(configuration: Partial<{
     documentElement,
     createdElements,
     contentTables,
+    contentLists,
     statusRegion: statusElement,
     contentLinks,
     details,

@@ -32,7 +32,11 @@ function splitLines(text: string): SourceLine[] {
   return lines;
 }
 
-function prefixOf(text: string): string {
+/**
+ * The quote prefix of a line (`> `, `> > `, `>`; each `>` with up to three spaces before it), or ""
+ * for a line outside a quote. Shared with the list item moves (`listItemMove.ts`).
+ */
+export function quotePrefixOf(text: string): string {
   return QUOTE_PREFIX.exec(text)?.[0] ?? "";
 }
 
@@ -56,10 +60,10 @@ function findRuns(lines: SourceLine[]): Run[] {
   let index = 0;
   while (index < lines.length - 1) {
     const head = lines[index]!.text;
-    const headPrefix = prefixOf(head);
+    const headPrefix = quotePrefixOf(head);
     const headRest = head.slice(headPrefix.length);
     const delimiter = lines[index + 1]!.text;
-    const delimiterPrefix = prefixOf(delimiter);
+    const delimiterPrefix = quotePrefixOf(delimiter);
     const delimiterRest = delimiter.slice(delimiterPrefix.length);
     if (!headRest.includes("|") || !DELIMITER_ROW.test(delimiterRest) || !delimiterRest.includes("|")) {
       index += 1;
@@ -69,7 +73,7 @@ function findRuns(lines: SourceLine[]): Run[] {
     let end = index + 2;
     while (end < lines.length) {
       const row = lines[end]!.text;
-      const rowPrefix = prefixOf(row);
+      const rowPrefix = quotePrefixOf(row);
       const rowRest = row.slice(rowPrefix.length);
       // A line without a pipe ends the table: a blank line, a paragraph, the closing fence of a directive.
       if (!rowRest.includes("|")) break;
