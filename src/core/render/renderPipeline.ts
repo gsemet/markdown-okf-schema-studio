@@ -322,8 +322,10 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
       stage.dispose();
       throw new RenderCanceledError();
     }
+    // A thrown value with no message (undefined, null) gives an empty message, so the host shows its
+    // fallback; a thrown string or object keeps its text.
     throw new RenderError(
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : error === undefined || error === null ? "" : String(error),
       stage,
       diagnostics,
     );

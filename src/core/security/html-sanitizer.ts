@@ -454,6 +454,8 @@ function rewriteNode(
     }
 
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
+    // parse5 reports `xlink:href` of an SVG link with the local name `href`, so an SVG link is handled
+    // exactly like an HTML link here; the `xlink:href` comparisons are kept as defence.
     if (name === "href" || name === "xlink:href") {
       const originalRequest = attribute.value;
       const link = context.resolveNavigation(originalRequest, context.outputRoot);

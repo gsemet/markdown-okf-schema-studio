@@ -126,14 +126,16 @@ test("Mermaid draw passes run one at a time, in the order they were requested", 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-009
-test("a Mermaid drawing finished for an earlier theme never replaces the picture of the current one", async () => {
+test("a Mermaid theme change during a drawing is drawn after that drawing ends", async () => {
   const { page, diagrams } = openPage(["graph TD; A-->B"]);
   await page.run.settle();
   page.theme.background = "#202020";
   page.run.observers.forEach((notify) => notify());
+  assert.equal(page.calls.length, 1, "the new theme is not drawn while the first pass runs");
   page.calls[0]!.resolve({ svg: "<svg>old theme</svg>" });
   await page.run.settle();
   assert.equal(page.calls.length, 2, "the new theme is drawn after the first pass");
+  assert.match(decodeURIComponent(shown(diagrams[0]!)!), /old theme/u, "the first drawing is shown until the new one ends");
   page.calls[1]!.resolve({ svg: "<svg>new theme</svg>" });
   await page.run.settle();
   assert.match(decodeURIComponent(shown(diagrams[0]!)!), /new theme/u);

@@ -91,6 +91,12 @@ export function pagePolicyRoot(
   return preview.restrictedReads ? preview.workspaceFolder?.path ?? preview.workspaceRoot : preview.workspaceRoot;
 }
 
+/** The message of a failure, or `fallback` when it carries none (an empty message counts as none). */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-025
+export function failureMessage(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message !== "" ? error.message : fallback;
+}
+
 /** Renders, page documents, content patches, status and the pending overlay. */
 export class RenderingController extends PageDocumentController {
   /** Registers the handler of the page's ready report. */
@@ -411,7 +417,7 @@ export class RenderingController extends PageDocumentController {
       this.setStatus(
         preview,
         "stale",
-        error instanceof Error ? error.message : "The latest render failed.",
+        failureMessage(error, "The latest render failed."),
         diagnostics,
       );
       return;
@@ -419,7 +425,7 @@ export class RenderingController extends PageDocumentController {
     this.setStatus(
       preview,
       "error",
-      error instanceof Error ? error.message : "The render failed.",
+      failureMessage(error, "The render failed."),
       diagnostics,
     );
   }

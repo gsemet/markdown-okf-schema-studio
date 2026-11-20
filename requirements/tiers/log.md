@@ -2,6 +2,31 @@
 
 ## 2026-11-20
 
+### Five code and SwRS mismatches of CR-347 settled (CR-431)
+
+- Changed: SwRS-MDOKFSTUDIO-CORE-010: the code is right. "Raw HTML" is an HTML block or an HTML tag
+  itself; text between two inline tags is converted like any text (new row in the refusal table;
+  known issue removed; normative sentence unchanged).
+- Changed: SwRS-MDOKFSTUDIO-CORE-025: the SwRS is right, the code was wrong. A failed render with no
+  message (undefined, null, an Error with an empty message) now shows "The render failed." (error
+  page) or "The latest render failed." (stale page) instead of "undefined"; a thrown string keeps
+  its text. Known issue removed.
+- Changed: SwRS-MDOKFSTUDIO-DIAG-005: the picture claim covers what the visual fixture draws (node
+  fill, transparent background); the border, secondary and tertiary colours are checked as the
+  values given to Mermaid. First known issue removed.
+- Changed: SwRS-MDOKFSTUDIO-DIAG-009: Mermaid passes run one at a time, so a later theme is drawn
+  only after the running pass ends; the replaced-key rule is stated for PlantUML and charts (normative
+  change). The two Mermaid guards stay as defence, with a comment. Unreachable-guard known issue removed.
+- Changed: SwRS-MDOKFSTUDIO-TRUST-042: an SVG `xlink:href` is treated like an HTML link (blocked: no
+  href and the request in `data-sphinx-preview-navigation`; allowed: address kept and the attribute
+  set, the host routes the click). Known issue removed; no behaviour change.
+- Sources: `src/core/render/renderPipeline.ts`, `src/session/features/rendering.ts`,
+  `src/session/previewManager.ts`, `src/page/modules/mermaidPreview.ts`,
+  `src/core/security/html-sanitizer.ts` (comments only).
+- Tests: `test/core/render/renderReq.coreRows.requirements.test.ts`,
+  `test/host/coreReq.requirements.test.ts`, `test/page/modules/mermaidPreviewEntry.test.ts`,
+  `test/security/trustReq.pageBuild.requirements.test.ts`.
+
 ### Use case diagrams parsed at the requirements lint (CR-429)
 
 - Added: SwRS-MDOKFSTUDIO-CORE-090 (proposed, derives from StRS-MDOKFSTUDIO-TRUST-014): the

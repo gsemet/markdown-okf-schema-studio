@@ -134,10 +134,12 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
         const rendered = await mermaid.render(id, source, measure);
         const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(normalizeSvgForDataImage(rendered.svg))}`;
         drawings.store(key, src);
-        // A later pass (a newer theme) may have planned this node while Mermaid drew: the drawing
-        // stays in the cache, but only the drawing of the node's current key is shown.
+        // Defence only: passes run one at a time on `renderQueue` and a pass plans each node once, so
+        // the node's key cannot change while Mermaid draws. If passes ever ran in parallel, the
+        // drawing would stay in the cache and only the drawing of the node's current key be shown.
         if (drawnKeys.get(diagram) === key) showImage(diagram, src);
       } catch (err) {
+        // Defence only, as above: the key cannot change while Mermaid draws.
         if (drawnKeys.get(diagram) !== key) return;
         showMermaidError(diagram, err instanceof Error ? err.message : String(err));
         diagram.dataset.renderState = "error";

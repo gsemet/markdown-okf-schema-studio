@@ -23,6 +23,7 @@ derived_by: []
 implemented_in_files:
 - src/core/preview/previewStatus.ts
 - src/session/features/rendering.ts
+- src/session/previewManager.ts
 tested_in_files:
 - test/core/render/renderPipeline.test.ts
 - test/host/coreReq.requirements.test.ts
@@ -59,15 +60,11 @@ When a render fails with an exception or yields diagnostics, the extension SHALL
 - WHEN the failure occurs
 - THEN an error page ("Preview unavailable") shows the message ("The render failed." when the failure carries no message)
 
-### Known issues
-
-- Known issue: The render pipeline wraps every failure in an error whose message is the thrown value as text, so a first render that fails without a message shows that text (for example "undefined") instead of "The render failed.".
-
 ### Verification notes
 - Method: test/core/render/renderPipeline.test.ts, test "the render pipeline retains buffer identity and attaches source diagnostics" (diagnostics listed)
 - Method: test/page/runtimeContentPatch.test.ts, test "T34: the patch rebuilds the status region from plain text" (diagnostics listed with file, line, message and severity; no diagnostics)
 - Method: test/node-services/build/buildQueue.test.ts, test "retains a successful result as stale after a failed newer build" (failure after a good render)
-- Method: test/host/coreReq.requirements.test.ts, tests "a first render that throws shows the error page with its message" and "a first render that throws a value without a message shows the error page with that value as text" (failure of the first render, and the known issue)
+- Method: test/host/coreReq.requirements.test.ts, tests "a first render that throws shows the error page with its message", "a first render that throws undefined|null|an Error with an empty message shows the fallback 'The render failed.'", "a failure with a text but no Error keeps that text" (failure of the first render) and "a later render that fails without a message keeps the old page stale with 'The latest render failed.'" (failure after a good render, with no message)
 - Criteria: Each listed item shows file, line, message and severity; a failed render never blanks a good page; with none it shows an error page.
 
 <!-- okf:links:start -->
