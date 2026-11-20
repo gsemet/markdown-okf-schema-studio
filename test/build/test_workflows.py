@@ -186,8 +186,6 @@ def test_every_job_after_a_skippable_job_opts_out_of_the_implicit_success() -> N
     jobs = _ci_jobs()
     for name in sorted(_after_a_skippable_job(jobs)):
         condition = str(jobs[name].get("if", ""))
-        if "inputs.heavy" in condition:
-            continue  # runs only when the heavy ancestors ran, so nothing above it is skipped
         assert _opts_out_of_skip(condition), f"{name}: needs a skippable job but has no !cancelled()"
         if name in REPORTS_WHATEVER_HAPPENED:
             continue
@@ -578,6 +576,32 @@ def test_heavy_jobs_run_on_every_push_to_main_and_on_a_heavy_dispatch(name: str)
     assert _run_if(condition, _context("workflow_dispatch", heavy=True))
     assert not _run_if(condition, _context("pull_request"))
     assert not _run_if(condition, _context("workflow_dispatch", heavy=False))
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_gallery_runs_on_a_heavy_dispatch_when_integration_and_report_passed() -> None:
+    import yaml
+
+    job = _ci_jobs()["gallery"]
+    assert set(_needs(job)) == {"integration", "report"}
+    gallery_input = yaml.safe_load(CI.read_text())[True]["workflow_dispatch"]["inputs"]["gallery"]
+    assert gallery_input["type"] == "boolean"
+    assert gallery_input["default"] is True
+
+    def runs(event: str = "workflow_dispatch", *, heavy: bool = True, gallery: bool = True,
+             integration: str = "success", report: str = "success") -> bool:
+        values = _context(event, heavy=heavy, integration=integration, report=report)
+        values["inputs.gallery"] = gallery
+        return bool(_run_if(job["if"], values))
+
+    assert runs()
+    assert not runs(integration="failure")
+    assert not runs(report="failure")
+    assert not runs(report="skipped")
+    assert not runs(heavy=False)
+    assert not runs(gallery=False)
+    assert not runs("pull_request")
+    assert not runs("push")
 
 
 XVFB_SCREEN = "2600x1440x24"

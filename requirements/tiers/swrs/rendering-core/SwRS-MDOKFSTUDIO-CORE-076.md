@@ -34,7 +34,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-Every push to main SHALL run the heavy jobs (`integration` and `stress`); when the push changes the package version, the CI workflow SHALL tag the commit only when they both succeed; a push without a version change SHALL still run the tag step and create no tag. When `checks` or a heavy job of a version change does not succeed, the workflow SHALL say why in the job summary. The Pages site of a tag SHALL reuse the end-to-end reports of that green heavy run. After "Re-run failed jobs" on that run, every job and the Pages site SHALL use the artifacts of the newest attempt of each producing job, never an older attempt's artifact of the same name.
+Every push to main SHALL run the heavy jobs (`integration` and `stress`); when the push changes the package version, the CI workflow SHALL tag the commit only when they both succeed; a push without a version change SHALL still run the tag step and create no tag. When `checks` or a heavy job of a version change does not succeed, the workflow SHALL say why in the job summary. The Pages site of a tag SHALL reuse the end-to-end reports of that green heavy run. After "Re-run failed jobs" on that run, every job and the Pages site SHALL use the artifacts of the newest attempt of each producing job, never an older attempt's artifact of the same name. A heavy dispatch SHALL build the gallery and the site unless `gallery` is false, and only when `integration` and `report` succeed.
 
 ### Scenario (nominal): Version change on main with a green heavy run
 
@@ -77,6 +77,8 @@ Every push to main SHALL run the heavy jobs (`integration` and `stress`); when t
 | the run is cancelled | `tag-release`, `release` and `pages` are skipped, no summary is written |
 | `tag-release` output an empty tag | `release` and `pages` are skipped |
 | the event is not a push to `refs/heads/main` | `release-check` and `tag-release` are skipped; the heavy jobs run only on a dispatch with `heavy` |
+| a dispatch with `heavy` (and `gallery` not false) whose `integration` and `report` succeed | `gallery` runs and uploads the gallery and site as `studio-site-attempt-<n>` |
+| a dispatch with `heavy` whose `integration` or `report` did not succeed, or with `gallery` false | `gallery` is skipped |
 
 ### Scenario (boundary): Reports of a later Pages deploy
 

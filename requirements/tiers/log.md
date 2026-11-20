@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-11-20
+
+### Gallery and site on a heavy CI dispatch (CR-350)
+
+- Changed: SwRS-MDOKFSTUDIO-CORE-076 says a heavy dispatch builds the gallery and the site unless
+  `gallery` is false, and only when `integration` and `report` succeed (one Normative sentence, two
+  rows in the failure and other events scenario).
+- Sources: `.github/workflows/ci.yml`.
+- Tests: `test/build/test_workflows.py`.
+
 ## 2026-11-19
 
 ### Commit round trip of edit mode on large documents (issue 423)

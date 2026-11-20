@@ -280,8 +280,9 @@ On a pull request, CI runs only the simulated tests, which make up the required 
 stage as skipped. The real VS Code window jobs (`ci-integration` and the
 `stress` repetitions) are heavy, so they run on every push to `main` and never on a pull request.
 On a branch, start them with
-`gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery and site
-artifact), or with "Run workflow" in the Actions tab. Run them, or `npm run test:integration`
+`gh workflow run ci.yml --ref <branch> -f heavy=true` (the gallery and site artifact,
+`studio-site-attempt-<n>`, are built too when `integration` and `report` succeed; `-f gallery=false`
+skips them, for example in a stress loop), or with "Run workflow" in the Actions tab. Run them, or `npm run test:integration`
 locally, before merging a change to the extension host, the webview or the real-window tests.
 On a push to `main` that changes the package version (a release), the `release-check` job detects
 the change, and the release is tagged only when both heavy jobs succeed (see "Releases" below).

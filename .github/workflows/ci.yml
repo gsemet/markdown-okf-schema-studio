@@ -27,9 +27,9 @@ on:
         type: string
         default: "0"
       gallery:
-        description: Also build the gallery and the site from the end-to-end reports (needs heavy)
+        description: Build the gallery and the site from the end-to-end reports (heavy only; false skips it)
         type: boolean
-        default: false
+        default: true
       stress_repeat:
         description: Stress rounds per window, 1 to 100 (heavy only; empty means 12). Above about 220 scenario runs per window (rounds times scenarios), narrow stress_scenarios or the run exceeds the time limits
         type: string
@@ -437,9 +437,12 @@ jobs:
           if-no-files-found: warn
 
   gallery:
-    needs: report
-    # The gallery and its README images need the real-window captures of the heavy jobs.
-    if: github.event_name == 'workflow_dispatch' && inputs.gallery && inputs.heavy
+    needs: [integration, report]
+    # The gallery and its README images need the real-window captures of the heavy jobs. It runs
+    # on a heavy dispatch unless `gallery` is false, and only when integration and report
+    # succeeded. `!cancelled()`: release-check, an ancestor through report, is skipped outside a
+    # push to main, and a plain `if` would inherit the implicit success() that is then false.
+    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.heavy && inputs.gallery && needs.integration.result == 'success' && needs.report.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
