@@ -37,7 +37,7 @@ def apply_scroll(page: Page, scroll: dict) -> str:
         page.evaluate(
             """(extra) => {
               const main = document.getElementById('sphinx-myst-preview-content');
-              const last = main.lastElementChild;
+              const last = [...main.children].filter((child) => !child.hasAttribute('data-okf-blank-runs')).pop();
               if (last) { last.scrollIntoView({ block: 'end' }); window.scrollBy(0, 40 + extra); }
             }""",
             int(scroll.get("extra", 0)),

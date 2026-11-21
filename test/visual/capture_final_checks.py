@@ -383,7 +383,7 @@ def check_final_frame(page: Page, scenario: dict, failures: list[Failure]) -> di
             if check["id"] in scenario.get("machineChecks", []) and check["applicable"] and not check["pass"]:
                 failures.append(Failure(scenario["page"], f"machine check {check['id']}: {check['detail']}"))
     if scenario["scroll"]["kind"] == "bottom":
-      last = page.locator('#sphinx-myst-preview-content > :last-child').bounding_box()
+      last = page.locator('#sphinx-myst-preview-content > :not([data-okf-blank-runs])').last.bounding_box()
       if not last or last["y"] + last["height"] > scenario["height"] - 30 or last["y"] + last["height"] <= 0:
         failures.append(Failure(scenario["page"], f"last content or bottom padding is missing from final frame: {last}"))
     if scenario["scroll"]["kind"] == "selector" and not (scenario.get("editMode") or scenario.get("editActivationScroll")):
