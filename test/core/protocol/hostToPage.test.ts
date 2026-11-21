@@ -36,6 +36,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewPlantUmlIncludeResult: { editId: "h", ok: true, id: "/a.puml", text: "" },
   sourceScroll: { line: 4 },
   previewRevealLine: { line: 30 },
+  previewLineMarkerClear: {},
   previewLinkTargets: { targets: [] },
   previewHistoryState: { canBack: true, canForward: false },
   previewShowComments: { showComments: true },
@@ -133,6 +134,24 @@ test("previewRevealLine needs a 1-based safe integer line and addresses its rend
     assert.equal(send({ line }), false, String(line));
   }
   assert.equal(filter.accepts({ type: "previewRevealLine", ...page, requestId: 99, line: 3 }, page), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+test("previewRevealLine accepts the two scroll modes or none and refuses any other value", () => {
+  const send = (extra: Record<string, unknown>): boolean =>
+    filter.accepts({ type: "previewRevealLine", ...page, line: 4, ...extra }, page);
+  assert.equal(send({}), true);
+  assert.equal(send({ scroll: "reading-line" }), true);
+  assert.equal(send({ scroll: "if-off-screen" }), true);
+  for (const scroll of ["smooth", "", "IF-OFF-SCREEN", 1, null, true, {}]) {
+    assert.equal(send({ scroll }), false, String(scroll));
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+test("previewLineMarkerClear is accepted with the render envelope only", () => {
+  assert.equal(filter.accepts({ type: "previewLineMarkerClear", ...page }, page), true);
+  assert.equal(filter.accepts({ type: "previewLineMarkerClear", ...page, requestId: 99 }, page), false);
 });
 
 test("values that are not host messages are refused", () => {

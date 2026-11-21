@@ -246,6 +246,7 @@ export class HostEvents {
       return;
     }
     const outside = this.noteOutsideChange(event);
+    this.clearLineMarkersOf(event);
     this.manager.scroll.shiftAnchorsForEdits(event);
     this.manager.comments.shiftForEdits(event);
     this.refreshPreview(event.document, event.changes.map((change) => ({
@@ -253,6 +254,21 @@ export class HostEvents {
       rangeLength: change.length,
       text: change.text,
     })), outside);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-189
+  /**
+   * An edit of the document the side preview marks removes the marker: from the text editor the page
+   * is told to clear it; an edit the page itself applied already removed it there (the page clears
+   * the marker when it posts an edit), so the host only forgets it.
+   */
+  private clearLineMarkersOf(event: DocumentChange): void {
+    const pageEdit = this.manager.host.documents.isApplying(event.document.id);
+    for (const session of this.manager.sessions()) {
+      if (!session.followsActiveEditor || session.scroll.markedLine?.documentId !== event.document.id) continue;
+      if (pageEdit) session.scroll.markedLine = undefined;
+      else this.manager.scroll.clearLineMarker(session, event.document.id);
+    }
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-094
@@ -462,6 +478,23 @@ export class HostEvents {
       return;
     }
     this.manager.switchAfterFlush(session, document);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-187
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-188
+  /**
+   * A text editor jumped to a 1-based line of a Markdown document. Only the side preview that
+   * follows the editor marks it; the line waits on the session for the page that shows that
+   * document (the jump and the switch of document arrive in either order). With scroll sync on the
+   * editor leads and the page scrolls only when the line is off screen; with it off the page scrolls
+   * the line to the reading line.
+   */
+  public onEditorJumped(documentId: string, line: number): void {
+    const session = this.manager.latest((candidate) => candidate.followsActiveEditor);
+    if (!session || session.disposed) {
+      return;
+    }
+    this.manager.scroll.requestJumpMarker(session, documentId, line);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-100

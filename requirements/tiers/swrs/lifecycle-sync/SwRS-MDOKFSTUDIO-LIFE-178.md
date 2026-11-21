@@ -9,7 +9,10 @@ description: When the host asks the page to reveal a source line, the page SHALL
   heading band, unfold a folded heading section or a closed details block that
   holds it, and draw an arrow in the left margin and a light band at the exact
   line of a paragraph or a code block, at the top of the enclosing block for any
-  other block, and at the nearest block for a line outside every block.
+  other block, and at the nearest block for a line outside every block. When the
+  request asks for the if-off-screen scroll, the page SHALL scroll only when the
+  line is not already on screen below the sticky heading band, and SHALL always
+  draw the marker.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -37,7 +40,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the host asks the page to reveal a source line, the page SHALL scroll silently so that the line sits at the reading line below the sticky heading band, unfold a folded heading section or a closed details block that holds it, and draw an arrow in the left margin and a light band at the exact line of a paragraph or a code block, at the top of the enclosing block for any other block, and at the nearest block for a line outside every block.
+When the host asks the page to reveal a source line, the page SHALL scroll silently so that the line sits at the reading line below the sticky heading band, unfold a folded heading section or a closed details block that holds it, and draw an arrow in the left margin and a light band at the exact line of a paragraph or a code block, at the top of the enclosing block for any other block, and at the nearest block for a line outside every block. When the request asks for the if-off-screen scroll, the page SHALL scroll only when the line is not already on screen below the sticky heading band, and SHALL always draw the marker.
 
 ### Scenario (nominal): Reveal a code line
 
@@ -54,6 +57,8 @@ When the host asks the page to reveal a source line, the page SHALL scroll silen
 | a line of a table, list or quote | the marker sits at the top of the enclosing block |
 | a line outside every block | the marker takes the nearest block |
 | a page with no mapped block | nothing is drawn |
+| a request with the if-off-screen scroll, the line on screen | the marker is drawn and the page does not move (the sticky band is respected) |
+| a request with the if-off-screen scroll, the line off screen | the page scrolls the line to the reading line, as the default scroll does |
 
 ### Verification notes
 

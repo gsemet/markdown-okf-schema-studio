@@ -35,6 +35,34 @@ at a line opens Studio at that line, and an arrow in the margin marks it. The ar
 your next click, keystroke or scroll. A file that is already shown in Studio is revealed at the
 line, in the group where it is, instead of opening a second tab.
 
+### With the side preview open
+
+When the side preview is open next to a text editor, a jump keeps the text editor (see below), takes
+it to the line, and the side preview shows the same arrow on that line. It switches to the file first
+when the jump goes to another Markdown file. The arrow stays while you scroll or move the cursor, and
+goes when you type in that file or when the preview switches to another file. Moving the cursor with
+the arrow keys or a click never draws it.
+
+With **Scroll preview with editor** on, the editor leads: the preview scrolls only when the line is
+not already on screen. With it off, the preview scrolls the line to the reading line. A link or
+Back and Next followed in the side preview mark their target line the same way. A Studio tab beside
+the text editor marks nothing on a jump.
+
+Which moves count as a jump depends on the kind VS Code gives them. The real-window trial J1
+recorded these kinds in VS Code on Linux:
+
+| Move | Recorded by J1 | Marks the side preview |
+| --- | --- | --- |
+| Search click (`vscode.open` with a selection) | a command move with one selection | yes |
+| `cursorDown`, `cursorBottom`, Select All (`selectAll`) | no selection change | no |
+| A selection set through the API (as VSCodeVim does) | no selection change | no |
+| Go Back | no selection change | no |
+| Quick Open `file.md:40`, Go to Line, Problems, a link | not driven (reached by the same open with a selection) | yes, as the search click |
+| Go to Symbol, Find next (F3), Go to next problem (F8) | not driven | yes if VS Code reports them as a command, not verified |
+| A click, Page Down, typing, undo, Ctrl+D, Format Document | not driven | no, by design (not a command move) |
+
+Only the first four rows were recorded; the others follow from the design.
+
 Two settings under **Opening Files** (see [Settings](settings.md)) decide what opens in Studio:
 
 - `open.searchResultsInStudio` (default on): a search result or a jump to a line opens Studio.

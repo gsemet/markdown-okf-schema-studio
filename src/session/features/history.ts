@@ -122,6 +122,9 @@ export class HistoryController {
       if (navigatesInStudio(host, preview, document.path)) {
         await host.navigation.showDocumentInStudio(target.uri, lineIndex + 1);
       } else {
+        // @implements_req SwRS-MDOKFSTUDIO-LIFE-191
+        // The side preview that follows the editor marks the target line itself (see links.ts).
+        if (preview.followsActiveEditor) this.manager.scroll.requestJumpMarker(preview, target.uri, lineIndex + 1);
         await host.navigation.showDocument(target.uri, lineSelection(document, lineIndex, lineIndex));
       }
     } catch (error) {

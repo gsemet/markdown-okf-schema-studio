@@ -20,6 +20,11 @@ function reveal(harness: RuntimeHarness, line: number): void {
   harness.flushFrames();
 }
 
+function revealWith(harness: RuntimeHarness, line: number, scroll: string): void {
+  harness.dispatchMessage({ type: "previewRevealLine", ...IDS, line, scroll });
+  harness.flushFrames();
+}
+
 function overlays(harness: RuntimeHarness): RuntimeElement[] {
   return harness.createdElements.filter((element) => element.className === "sphinx-preview-line-marker" && !element.removed);
 }
@@ -297,9 +302,72 @@ test("a line under a folded heading unfolds the section first, then the marker i
     },
   } as unknown as PageRuntime;
   const marker = installLineMarker(rt);
-  marker.reveal(50);
+  marker.reveal(50, "reading-line");
   assert.deepEqual(unfolds, [block], "the heading section around the block was unfolded");
   assert.equal(folded, false);
   assert.deepEqual(revealed, [500]);
   assert.equal(created.filter((element) => element.className === "sphinx-preview-line-marker" && !element.removed).length, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+test("if-off-screen draws the marker and leaves the page where it is when the line is on screen", () => {
+  const harness = createRuntimeHarness({ viewportHeight: 900 });
+  const before = harness.messages.length;
+  revealWith(harness, 50, "if-off-screen");
+  assert.equal(overlays(harness).length, 1);
+  assert.equal(top(overlays(harness)[0]), "500px");
+  assert.equal(harness.windowState.scrollY, 0, "the page did not move");
+  harness.flushTimers();
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewScroll"), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+test("if-off-screen scrolls the line to the reading line when it is off screen, as reading-line does", () => {
+  const harness = createRuntimeHarness();
+  const before = harness.messages.length;
+  revealWith(harness, 100, "if-off-screen");
+  assert.equal(overlays(harness).length, 1);
+  const reference = createRuntimeHarness();
+  reveal(reference, 100);
+  assert.equal(harness.windowState.scrollY, reference.windowState.scrollY);
+  assert.ok(harness.windowState.scrollY > 0);
+  harness.flushTimers();
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewScroll"), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+test("a message with no scroll field scrolls to the reading line like reading-line", () => {
+  const absent = createRuntimeHarness();
+  reveal(absent, 100);
+  const explicit = createRuntimeHarness();
+  revealWith(explicit, 100, "reading-line");
+  assert.equal(absent.windowState.scrollY, explicit.windowState.scrollY);
+  assert.ok(absent.windowState.scrollY > 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+test("if-off-screen unfolds a closed details block holding the line in both modes", () => {
+  for (const scroll of ["reading-line", "if-off-screen"]) {
+    const harness = createRuntimeHarness({ viewportHeight: 900 });
+    const details = new RuntimeElement({}, harness.windowState, 400, 40, "details");
+    const closed = details as RuntimeElement & { open: boolean };
+    closed.open = false;
+    details.appendChild(harness.mappings[1]!);
+    revealWith(harness, 50, scroll);
+    assert.equal(closed.open, true, scroll);
+    assert.equal(overlays(harness).length, 1, scroll);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+test("previewLineMarkerClear removes the marker and a later reveal draws it again", () => {
+  const harness = createRuntimeHarness();
+  reveal(harness, 50);
+  assert.equal(overlays(harness).length, 1);
+  harness.dispatchMessage({ type: "previewLineMarkerClear", ...IDS });
+  harness.flushFrames();
+  assert.equal(overlays(harness).length, 0);
+  assert.equal(harness.mappings[1]!.getAttribute("aria-current"), null);
+  reveal(harness, 50);
+  assert.equal(overlays(harness).length, 1);
 });

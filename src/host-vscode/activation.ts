@@ -29,7 +29,8 @@ import { createVscodeHost, type VscodeHost } from "./vscodeHost";
 import { fireAndForget } from "../host-api/logger";
 import { migrateEditorAssociation } from "../session/associationMigration";
 import { FeatureIntroductions } from "../session/featureIntroductions";
-import { StudioClosedTabs, StudioLineRequests, StudioOpenedTextEditors } from "./openInStudio";
+import { startEditorJumps, type EditorJumps } from "./editorJumps";
+import { StudioClosedTabs, StudioLineRequests, StudioOpenedTextEditors, StudioSelections } from "./openInStudio";
 import { startOpeningWatcher } from "./openingWatcher";
 import { trackStudioActivation } from "./studioPlacement";
 
@@ -72,6 +73,10 @@ export class StudioActivation {
   /** The text editors Studio opened itself: the opening watcher never replaces them. */
   public readonly openedByStudio = new StudioOpenedTextEditors();
   public readonly lineRequests = new StudioLineRequests();
+  /** The selections Studio itself makes in a text editor: the jump signal does not read them as jumps. */
+  public readonly studioSelections = new StudioSelections();
+  /** The jumps of the text editors, set by {@link start}. */
+  public editorJumps: EditorJumps | undefined;
   /** The Studio tabs closed a moment ago: a text tab opening right after is a deliberate "Reopen as Text". */
   public readonly closedStudioTabs = new StudioClosedTabs();
   /** The extension context of this activation, set by {@link start}. */
@@ -80,7 +85,7 @@ export class StudioActivation {
   private started = false;
 
   public constructor(public readonly extensionUri: vscode.Uri) {
-    this.host = createVscodeHost(this.openedByStudio, this.lineRequests);
+    this.host = createVscodeHost(this.openedByStudio, this.lineRequests, this.studioSelections);
     this.groups = createVscodePanelGroups(PANEL_VIEW_TYPE, (column) => this.manager.hasLivePanelIn(column));
     this.manager = new PreviewManager(this.host, this.groups);
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-181
@@ -88,7 +93,9 @@ export class StudioActivation {
     this.lineRequests.bindLiveSessions((uri, line) => {
       const live = [...this.manager.sessions()]
         .filter((candidate) => !candidate.followsActiveEditor && candidate.documentUri === uri);
-      for (const session of live) this.manager.scroll.requestRevealLine(session, line);
+      for (const session of live) {
+        this.manager.scroll.requestRevealLine(session, line, { documentId: uri, scroll: "reading-line" });
+      }
       return live.length > 0;
     });
   }
@@ -118,7 +125,13 @@ export class StudioActivation {
       introductions,
     });
     fireAndForget(host.logger, migration, "Migrating the editor association");
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-187
+    // The only reader of the selection event for jumps: the side preview marker and the opening watcher read it.
+    const editorJumps = startEditorJumps({ selections: this.studioSelections });
+    this.editorJumps = editorJumps;
     context.subscriptions.push(
+      editorJumps,
+      editorJumps.onJump((jump) => manager.events.onEditorJumped(jump.uri.toString(), jump.line)),
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-176
       vscode.commands.registerCommand(SHOW_INTRODUCTIONS_COMMAND_ID, async () => {
         await introductions.resetAll();
@@ -138,6 +151,7 @@ export class StudioActivation {
         openedByStudio: this.openedByStudio,
         closedStudioTabs: this.closedStudioTabs,
         lineRequests: this.lineRequests,
+        editorJumps,
         sidePreviewFollowsActiveEditor: () => manager.latest((preview) => preview.followsActiveEditor) !== undefined,
         ready: migration.then(() => undefined, () => undefined),
       }),
@@ -281,6 +295,8 @@ export class StudioActivation {
     const line = manager.latest((preview) => !preview.followsActiveEditor && preview.documentUri === documentUri)
       ?.state?.sourceLine;
     this.openedByStudio.record(documentUri);
+    // Studio's own selection: a jump to this very line is not one (the opening watcher keeps the tab as it is).
+    this.studioSelections.expect(documentUri, line === undefined ? 0 : line - 1, "no-mark");
     try {
       const document = await vscode.workspace.openTextDocument(input.uri);
       const at = new vscode.Position(line === undefined ? 0 : line - 1, 0);
@@ -448,7 +464,9 @@ export class StudioActivation {
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-181
       // Opened at a line (a search result, a link): the session posts it once the page is ready.
       const requestedLine = this.lineRequests.takePending(textDocument.uri.toString());
-      if (requestedLine !== undefined) manager.scroll.requestRevealLine(preview, requestedLine);
+      if (requestedLine !== undefined) {
+        manager.scroll.requestRevealLine(preview, requestedLine, { documentId: document.id, scroll: "reading-line" });
+      }
       manager.startRender(preview, document);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

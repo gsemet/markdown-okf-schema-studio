@@ -51,7 +51,7 @@ When a Markdown text tab opens, the opening policy SHALL keep it when it is not 
 | a tab present at start, or a jump into a tab already open | keep |
 | a text editor Studio opened, or a plain opening reopened as text | keep |
 | a jump right after a Studio tab of the file closed (VS Code closes a preview Studio tab first) | not a reopening as text: Studio at the line |
-| a jump while a side preview follows the active editor | keep (a plain opening goes on) |
+| a jump while a side preview follows the active editor | keep (a plain opening goes on); the side preview marks the line (SwRS-MDOKFSTUDIO-LIFE-187) |
 | Open Markdown files in Studio on | Studio at the line, or Studio for a plain opening |
 | only Open search results in Studio on, a line | Studio at the line |
 | a plain opening with only Open search results in Studio on | keep |

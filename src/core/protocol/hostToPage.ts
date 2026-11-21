@@ -186,7 +186,18 @@ export interface SourceScrollMessage extends RenderMessage<"sourceScroll"> {
  */
 export interface PreviewRevealLineMessage extends RenderMessage<"previewRevealLine"> {
   line: number;
+  /**
+   * Whether the page scrolls: `"reading-line"` (absent too) always scrolls the line to the reading
+   * line; `"if-off-screen"` scrolls only when the line is not on screen below the sticky headings.
+   */
+  scroll?: RevealScroll;
 }
+
+/** How the page scrolls for a revealed line. */
+export type RevealScroll = "reading-line" | "if-off-screen";
+
+/** The host asks the page to remove its line marker (the marked document was edited from the text editor). */
+export interface PreviewLineMarkerClearMessage extends RenderMessage<"previewLineMarkerClear"> {}
 
 /** The targets of the links the page discovered (answer to `previewLinkDiscover`). */
 export interface PreviewLinkTargetsMessage extends RenderMessage<"previewLinkTargets"> {
@@ -327,6 +338,7 @@ export type HostToPageMessage =
   | HostRequestResultMessage
   | SourceScrollMessage
   | PreviewRevealLineMessage
+  | PreviewLineMarkerClearMessage
   | PreviewLinkTargetsMessage
   | PreviewHistoryStateMessage
   | PreviewShowCommentsMessage
@@ -454,8 +466,11 @@ export function createHostMessageFilter(): HostMessageFilter {
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-181
     previewRevealLine: {
       addressing: "render",
-      isValid: (message) => typeof message.line === "number" && Number.isSafeInteger(message.line) && message.line >= 1,
+      isValid: (message) => typeof message.line === "number" && Number.isSafeInteger(message.line) && message.line >= 1
+        && (message.scroll === undefined || message.scroll === "reading-line" || message.scroll === "if-off-screen"),
     },
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-189
+    previewLineMarkerClear: render,
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
     previewLinkTargets: { addressing: "render", isValid: (message) => Array.isArray(message.targets) },
     previewHistoryState: render,

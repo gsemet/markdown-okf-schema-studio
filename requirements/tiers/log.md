@@ -2,6 +2,12 @@
 
 ## 2026-11-21
 
+### Side preview jump marker (CR-456)
+
+- Added (proposed): SwRS-MDOKFSTUDIO-LIFE-186 (the host tells a jump from a cursor move: a Command selection with one range that Studio did not ask for), LIFE-187 (the side preview that follows the editor marks the line of a jump, keyed by document, within 5 seconds, visible page only), LIFE-188 (the scroll of a jump follows the anchor setting: if-off-screen or reading line), LIFE-189 (the marker goes on an edit from the text editor or a switch of file), LIFE-190 (a cursor move never marks), LIFE-191 (a link or Back and Next followed in the side preview marks its target line).
+- Changed (all `proposed`): SwRS-MDOKFSTUDIO-LIFE-178 (the reveal takes an optional scroll mode; if-off-screen scrolls only when the line is off screen), LIFE-181 (the requested line belongs to a document and an age, is posted only to a visible page showing that document within the window, and takes the anchor except in if-off-screen mode), LIFE-184 (the rule 6 row says the side preview marks the line), LIFE-185 (the watcher reads jumps from the host jump signal; behaviour unchanged), StRS-MDOKFSTUDIO-LIFE-023 (a main path: with the side preview open the text editor goes to the line and the side preview marks it).
+- Reason: one definition of a jump for the opening watcher and the side preview; the real-window trial J1 (VS Code on Linux) recorded only the search click as a command move with one selection; cursorDown, cursorBottom, selectAll, an API selection and Go Back gave no selection change, and Go to Symbol, F3 and F8 were not driven (docs table updated).
+
 ### Side preview next to a text diff (CR-455)
 
 - Changed: SwRS-MDOKFSTUDIO-LIFE-003 (Open Preview to Side works from a text diff: the real file of the diff is previewed, no text editor opens, the editor-title button is offered on the text diff editor, a staged diff uses the working-tree file as a stand-in); SwRS-MDOKFSTUDIO-LIFE-026 (a text diff that becomes active switches the following preview to its real file); SwRS-MDOKFSTUDIO-LIFE-100 (the diff side of the file scheme scrolls the preview, the git or virtual side never does); SwRS-MDOKFSTUDIO-LIFE-108 (a reveal from the preview targets the diff's file side only).
