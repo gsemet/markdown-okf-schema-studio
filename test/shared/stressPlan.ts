@@ -97,9 +97,11 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
 /**
  * Steps of the trusted window that `STUDIO_STRESS_SCENARIOS` may name but the default plan does not
  * run, because the default rounds would pass the deadline margin that test/build/hangWatchdog.test.ts
- * keeps. Empty today. They are the key list of the real-input stress table after the default names.
+ * keeps. They are the key list of the real-input stress table after the default names.
+ * CR 453: "table-insert-slash" (RI-T45) failed once on heavy CI; it is proved by its own dispatches
+ * (`STUDIO_STRESS_SCENARIOS=table-insert-slash`), never in the default plan (owner, t45-Q2).
  */
-export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = [];
+export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = ["table-insert-slash"];
 
 /**
  * The plan of one window. `STUDIO_STRESS_SCENARIOS` may name scenarios of either window (unknown
