@@ -747,7 +747,10 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "block-editing/v40-list-item-drag-light-900": "In edit mode in the light theme at 900 px, a real mouse drag of the handle of the first bullet item over the lower half of the third, released, sends one save of the list in the order second, third, first and opens no block editor; once the host renders that order, a second drag of the new first item held over the third is still down at capture, with the first item dimmed and the drop line after the third.",
   "block-editing/v41-list-item-drag-dark-900": "In edit mode in the dark theme at 900 px, a real mouse drag of the handle of the first bullet item over the lower half of the third, released, sends one save of the list in the order second, third, first and opens no block editor; once the host renders that order, a second drag of the new first item held over the third is still down at capture, with the first item dimmed and the drop line after the third.",
   "block-editing/v42-delete-block-bar-light-900": "In edit mode in the light preview at 900 px, hovering the middle paragraph shows the bar with four buttons in order, Insert a block here, Move block up, Move block down and Delete block (a multiplication sign), all fully opaque, with the Delete block button touching the down arrow.",
-  "block-editing/v43-delete-block-bar-status-dark-900": "In edit mode in the dark preview at 900 px, a refused move of the middle paragraph shows its reason in the move status beside the bar, starting right of the Delete block button, which stays shown with the other three buttons."
+  "block-editing/v43-delete-block-bar-status-dark-900": "In edit mode in the dark preview at 900 px, a refused move of the middle paragraph shows its reason in the move status beside the bar, starting right of the Delete block button, which stays shown with the other three buttons.",
+  "block-editing/v44-blank-lines-block-light-900": "In edit mode in the light preview at 900 px, three blank lines between two paragraphs show as one dashed blank-lines block between them, at least 16 px high, as wide as the content column, drawing the label Blank lines (3) with CSS only (no text content), with its Delete block button not yet shown.",
+  "block-editing/v45-blank-lines-block-selected-dark-900": "In edit mode in the dark preview at 900 px, pressing Down from the selected first paragraph selects the blank-lines block between the two paragraphs, and its Delete block button is fully opaque at the block's left edge.",
+  "block-editing/v46-blank-lines-block-reading-light-900": "In reading mode in the light preview at 900 px, the same file with three blank lines between two paragraphs shows no blank-lines block."
 };
 
 /**
@@ -923,6 +926,9 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "table-editing/v34-cell-editor-in-note-dark-900": ["open"],
   "block-editing/v42-delete-block-bar-light-900": ["hover"],
   "block-editing/v43-delete-block-bar-status-dark-900": ["bar"],
+  "block-editing/v44-blank-lines-block-light-900": ["bar"],
+  "block-editing/v45-blank-lines-block-selected-dark-900": ["selected"],
+  "block-editing/v46-blank-lines-block-reading-light-900": ["top"],
 };
 
 /**

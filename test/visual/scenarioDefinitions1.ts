@@ -51,6 +51,7 @@ import { TABLE_GRID_PASTE_SCENARIOS } from "./tableGridPasteScenarios";
 import { TABLE_IN_CONTAINER_SCENARIOS } from "./tableInContainerScenarios";
 import { LIST_ITEM_HANDLE_SCENARIOS } from "./listItemHandleScenarios";
 import { DELETE_BLOCK_BAR_SCENARIOS } from "./deleteBlockBarScenarios";
+import { BLANK_LINES_BLOCK_SCENARIOS } from "./blankLinesBlockScenarios";
 import { FRONTMATTER_CLICK_SCENARIOS } from "./frontmatterClickScenarios";
 import { LABEL_RENAME_SCENARIOS } from "./labelRenameScenarios";
 import { MATH_SCENARIOS } from "./mathScenarios";
@@ -501,6 +502,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...TABLE_IN_CONTAINER_SCENARIOS,
   ...LIST_ITEM_HANDLE_SCENARIOS,
   ...DELETE_BLOCK_BAR_SCENARIOS,
+  ...BLANK_LINES_BLOCK_SCENARIOS,
   ...FRONTMATTER_CLICK_SCENARIOS,
   ...LABEL_RENAME_SCENARIOS,
   ...MATH_SCENARIOS,

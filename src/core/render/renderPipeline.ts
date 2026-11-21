@@ -251,7 +251,7 @@ export async function renderPreviewSource(input: SourceRenderInput): Promise<Sou
  * pairs (empty when there is none). It is the last element of the content: the page reads it only there,
  * so authored content cannot forge a run.
  */
-function blankRunsMarker(text: string): string {
+export function blankRunsMarker(text: string): string {
   const value = blankRuns(text).map((run) => `${run.line}-${run.endLine}`).join(" ");
   return `<div hidden data-okf-blank-runs="${value}"></div>`;
 }

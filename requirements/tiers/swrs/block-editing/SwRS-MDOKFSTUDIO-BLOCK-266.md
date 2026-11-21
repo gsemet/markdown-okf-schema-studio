@@ -33,6 +33,8 @@ tested_in_files:
 - test/core/mapping/blankRuns.test.ts
 - test/core/render/blankRunsList.test.ts
 - test/page/runtimeBlankLines.test.ts
+- test/visual/blankLinesBlockScenarios.ts
+- test/visual/capture_blank_lines_block.py
 default_owner_email: gaetan@xeberon.net
 ---
 

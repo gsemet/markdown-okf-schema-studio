@@ -26,6 +26,7 @@ implemented_in_files:
 - src/core/mapping/insertion.ts
 - src/page/features/blankLines.ts
 - src/page/features/blockSelectionView.ts
+- src/page/features/contentPatch.ts
 - src/session/features/blockEdits.ts
 tested_in_files:
 - test/core/mapping/blockRange.test.ts
