@@ -140,6 +140,8 @@ export async function run(): Promise<void> {
     await waitFor("the side preview switched to b.md", () => previewOf(file("b.md")), 30_000);
 
     // T6: a staged-like diff (no file side): the working-tree file is previewed, and no scroll follows the diff.
+    // Start clean: the earlier diff tab and side preview must not take the new diff's slot.
+    await closeAllEditors();
     await openDiff(virtualOf(file("c.md"), "head"), virtualOf(file("c.md"), "index"));
     await vscode.commands.executeCommand(COMMAND_ID);
     await waitFor("the side preview of the working-tree file c.md", () => previewOf(file("c.md")), 30_000);
