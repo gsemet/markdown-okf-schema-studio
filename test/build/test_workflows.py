@@ -299,6 +299,33 @@ def test_ci_visual_runs_the_table_breakout_width_tests_with_chromium_required() 
     assert scripts["test:breakout"].endswith("out/test/page/tableBreakout.test.js")
 
 
+def test_ci_viewer_graph_is_its_own_target_and_preflight_runs_it_after_visual() -> None:
+    justfile = (ROOT / "justfile").read_text()
+    recipe = justfile.split("\nci-viewer-graph:")[1].split("\n\n")[0]
+    report = recipe.index("just requirements-report-json")
+    test = recipe.index("STUDIO_REQUIRE_CHROMIUM=1 STUDIO_REQUIRE_REQUIREMENTS_REPORT=1 {{ npm }} run test:viewer-graph")
+    assert report < test < recipe.index("ci-viewer-graph: passed") < recipe.index("ci-viewer-graph: FAILED")
+    json_recipe = justfile.split("\nrequirements-report-json:")[1].split("\n\n")[0]
+    assert "--output-json" in json_recipe and "--output-summary-md" not in json_recipe
+    assert "status" not in json_recipe
+    visual = justfile.split("\nci-visual:")[1].split("\n\n")[0]
+    assert "viewer-graph" not in visual and "requirements-report" not in visual
+    preflight = justfile.split("\npreflight: ")[1].split("\n\n")[0]
+    assert preflight.index("just ci-visual") < preflight.index("just ci-viewer-graph") < preflight.index("just ci-integration")
+
+
+def test_the_viewer_graph_job_has_its_own_time_budget_and_gates_the_checks() -> None:
+    jobs = _ci_jobs()
+    job = jobs["viewer-graph"]
+    assert job["timeout-minutes"] == 15
+    runs = [s["run"] for s in job["steps"] if "run" in s]
+    assert "just ci-viewer-graph" in runs
+    assert "just ci-visual" not in runs
+    assert _uploads(jobs)["viewer-graph"] == ["reports-viewer-graph" + ATTEMPT_SUFFIX]
+    assert "viewer-graph" in _needs(jobs["checks"])
+    assert "just ci-viewer-graph" not in [s.get("run") for s in jobs["visual"]["steps"]]
+
+
 def _locked_screen_run(tmp_path: Path, *arguments: str) -> "subprocess.CompletedProcess[str]":
     import subprocess
 

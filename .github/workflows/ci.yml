@@ -147,8 +147,8 @@ jobs:
       - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
-      # Only the jobs "visual" and "gallery" install Ubuntu packages (just dev-ci visual); "visual"
-      # keeps their archives in a cache (gallery only restores it) so a slow mirror cannot stall
+      # Only the jobs "visual", "viewer-graph" and "gallery" install Ubuntu packages (just dev-ci visual); "visual"
+      # keeps their archives in a cache (the others only restore it) so a slow mirror cannot stall
       # them. The key changes only when the package set changes.
       # The key names the runner image (ImageOS, for example ubuntu24), so a new image release
       # starts its own archive set. ImageOS is a runner variable, which the env context does not
@@ -180,6 +180,54 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: e2e-visual-attempt-${{ github.run_attempt }}
+          path: out/reports/
+          if-no-files-found: warn
+
+  # The use case map overlap tests in Chromium: its own job, so that the visual job keeps its time
+  # budget. Nothing consumes its reports, so it announces no artifact.
+  viewer-graph:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+      - name: Fetch Git LFS objects
+        run: git lfs pull
+      - name: Verify Git LFS objects
+        run: git lfs fsck
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
+        with:
+          just-version: 1.58.0
+      # Like "gallery", this job only restores the Ubuntu package archives that the visual job saves.
+      # The key names the runner image (ImageOS, for example ubuntu24), so a new image release
+      # starts its own archive set. ImageOS is a runner variable, which the env context does not
+      # see until it is written to GITHUB_ENV.
+      - name: Name the runner image for the package cache
+        run: echo "RUNNER_IMAGE_OS=${ImageOS:-unknown}" >> "$GITHUB_ENV"
+      - name: Restore Ubuntu package archives
+        id: apt-archives
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .cache/apt-archives
+          key: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}
+          restore-keys: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}-
+      - run: just dev-ci visual
+      - run: just ci-viewer-graph
+      - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: reports-viewer-graph-attempt-${{ github.run_attempt }}
           path: out/reports/
           if-no-files-found: warn
 
@@ -494,7 +542,7 @@ jobs:
   # the integration stage, and on a version change tag-release requires both heavy jobs (CI rules
   # 13 and 14).
   checks:
-    needs: [static, static-windows, visual, report]
+    needs: [static, static-windows, visual, viewer-graph, report]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:

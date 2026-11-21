@@ -68,7 +68,7 @@ The map is drawn at its natural size, never upscaled to the page: it keeps at le
 
 ### Verification notes
 
-- Method: Unit tests "a use case with paths draws the map, the phone list and the walk count", "the line above the map names the paths and what they share" and "a full ID is the text of every link to a requirement" in test/site/requirementsViewer/pages.test.ts, the tests of buildMetroMap and metroSvg in test/site/requirementsViewer/metroMap.test.ts, and the parser tests in mainPaths.test.ts; Chromium tests in test/site/requirementsViewer/metroMap.browser.test.ts (run by `just ci-visual`, in pinned fonts) on six frozen use cases and on every use case of the requirements report, with a capture of each frozen map at 1280 px and 800 px in out/reports/requirements-viewer-graph/.
+- Method: Unit tests "a use case with paths draws the map, the phone list and the walk count", "the line above the map names the paths and what they share" and "a full ID is the text of every link to a requirement" in test/site/requirementsViewer/pages.test.ts, the tests of buildMetroMap and metroSvg in test/site/requirementsViewer/metroMap.test.ts, and the parser tests in mainPaths.test.ts; Chromium tests in test/site/requirementsViewer/metroMap.browser.test.ts (run by `just ci-viewer-graph`, in pinned fonts) on six frozen use cases and on every use case of the requirements report, with a capture of each frozen map at 1280 px and 800 px in out/reports/requirements-viewer-graph/.
 - Criteria: The states, the transitions and the walk count match the hand-computed fixtures; one node per shared state and one stroke per path on a shared step; no text or pill overlaps another in any real use case at both widths.
 
 <!-- okf:links:start -->

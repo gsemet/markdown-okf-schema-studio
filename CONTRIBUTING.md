@@ -271,7 +271,7 @@ permission.
 
 CI runs the same stages as parallel jobs, each calling one target after `just dev-ci`:
 `just ci-static` (justfile format, `check`, `audit`, `sphinx-check`), `just ci-visual`,
-`just ci-integration`, then `just ci-report` (merges the visual and integration outputs into the
+`just ci-viewer-graph`, `just ci-integration`, then `just ci-report` (merges the visual and integration outputs into the
 review index and `out/reports/e2e/e2e-manifest.json`; it fails when a stage manifest is missing or
 failed) and `just ci-gallery` (gallery and site from the existing outputs, no E2E re-run).
 On a pull request, CI runs only the simulated tests, which make up the required `checks` job:
@@ -281,7 +281,7 @@ On a pull request, CI runs only the simulated tests, which make up the required 
 have no Chromium and skip those tests; their report is under `out/reports/breakout/`; the tests
 assert the widths and the owner's verdicts on Windows, the reference, and are report-only on
 Linux CI: they print the widths and the verdicts and name each difference from Windows, and
-never fail on one; then the use case map tests, which write the requirements report and check in
+never fail on one), `ci-viewer-graph` (the use case map tests, in a job of their own so that `visual` keeps its time budget: they write the JSON requirements report and check in
 Chromium, in pinned fonts, that no text or pill of any use case map overlaps another at 1280 px and
 at 800 px, with captures of six frozen maps under `out/reports/requirements-viewer-graph/`) and
 `just ci-report visual`, which reports the real VS Code
@@ -302,7 +302,7 @@ step timeout 35). `toc_delay_ms` (0 to 2000) injects a random pause around the e
 after a host theme change. Failed rounds are counted, not fatal, and the job is red if any failed;
 `out/reports/e2e/toc-loop-summary.json` is rewritten after each round.
 `just preflight` calls these targets in sequence. Each stage records its own start time and they share
-a run id, so `just ci-visual`, `just ci-integration` and `just ci-report` also work one by one; `just
+a run id, so `just ci-visual`, `just ci-viewer-graph`, `just ci-integration` and `just ci-report` also work one by one; `just
 clean` starts a fresh campaign. `just dev-ci` is for CI machines only: `npm ci` replaces
 `node_modules`.
 
