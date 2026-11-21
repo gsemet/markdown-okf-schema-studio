@@ -23,6 +23,7 @@ import { parsePreviewPanelState } from "../core/state/previewState";
 import { resetRenderHooksForTests } from "../core/render/renderPipeline";
 import { createVscodePanelGroups, type VscodePanelGroups } from "./groupLock";
 import { createVscodePreviewPanel, type VscodePreviewPanel } from "./previewPanel";
+import { activeDiffInput, isDiffSide, realFileOfDiff, realSideOfDiff } from "./diffRealFile";
 import { startKeystrokeTracking } from "./keystrokes";
 import { createVscodeHost, type VscodeHost } from "./vscodeHost";
 import { fireAndForget } from "../host-api/logger";
@@ -182,6 +183,11 @@ export class StudioActivation {
       host.settings.onDidChange((event) => manager.events.onSettingsChanged(event)),
       vscode.window.onDidChangeActiveTextEditor((editor) =>
         manager.events.onActiveEditorChanged(editor ? host.editorOf(editor) : undefined)),
+      vscode.window.tabGroups.onDidChangeTabs((event) => {
+        if ([...event.opened, ...event.changed].some((tab) => tab.isActive && tab.input instanceof vscode.TabInputTextDiff)) {
+          this.followActiveDiff();
+        }
+      }),
       vscode.window.onDidChangeVisibleTextEditors(() => manager.events.onVisibleEditorsChanged()),
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-094
       startKeystrokeTracking(),
@@ -312,13 +318,49 @@ export class StudioActivation {
     }
   }
 
+  /** The text document of a diff's real file, read without showing it in an editor; undefined when it cannot be read. */
+  private async openDiffFileDocument(uri: vscode.Uri | undefined): Promise<vscode.TextDocument | undefined> {
+    if (!uri) return undefined;
+    try {
+      return await vscode.workspace.openTextDocument(uri);
+    } catch {
+      return undefined;
+    }
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-026
+  /**
+   * The active tab became a text diff: the side preview follows the diff's real file (a side that is
+   * an eligible file; never the working-tree stand-in). The active text editor of a diff may be a
+   * side that is not a file, so the active editor event alone does not see it.
+   */
+  private followActiveDiff(): void {
+    const { host, manager } = this;
+    const diff = activeDiffInput();
+    if (!diff || !manager.latest((candidate) => candidate.followsActiveEditor)) return;
+    const side = realSideOfDiff(diff, vscode.window.activeTextEditor?.document.uri);
+    if (!side) return;
+    void this.openDiffFileDocument(side).then((textDocument) => {
+      if (textDocument) manager.events.onActiveDocumentChanged(host.documents.of(textDocument));
+    });
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-CORE-043
   /** The open-preview command: the side preview of the active (or given) Markdown file. */
   public async openPreview(uri?: unknown): Promise<void> {
     const { host, manager } = this;
     // Menus pass the resource URI; the palette and keybinding pass nothing. Ignore other arguments.
+    // A text diff is the active tab and the command comes without a URI or from the title button
+    // (a URI of one of its sides): the diff's real file is previewed, and no text editor opens.
+    const diff = activeDiffInput();
+    const fromDiff = diff !== undefined && (uri === undefined || (uri instanceof vscode.Uri && isDiffSide(diff, uri)));
+    let diffFile: Awaited<ReturnType<typeof realFileOfDiff>>;
+    if (diff && fromDiff) {
+      diffFile = await realFileOfDiff(diff, vscode.window.activeTextEditor?.document.uri);
+    }
     if (
-      uri instanceof vscode.Uri
+      !fromDiff
+      && uri instanceof vscode.Uri
       && uri.scheme === "file"
       && vscode.window.activeTextEditor?.document.uri.toString() !== uri.toString()
     ) {
@@ -336,7 +378,10 @@ export class StudioActivation {
         return;
       }
     }
-    const textDocument = vscode.window.activeTextEditor?.document ?? (await this.openStudioTabDocument());
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-003
+    const textDocument = fromDiff
+      ? await this.openDiffFileDocument(diffFile?.uri)
+      : vscode.window.activeTextEditor?.document ?? (await this.openStudioTabDocument());
     const document = textDocument ? host.documents.of(textDocument) : undefined;
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-003
     if (!document || document.path === undefined || !isDocumentEligible(document)) {

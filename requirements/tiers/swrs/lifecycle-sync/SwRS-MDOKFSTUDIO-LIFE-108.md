@@ -28,6 +28,7 @@ implemented_in_files:
 - src/session/features/scrollSync.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
+- test/host/diffPreview.requirements.test.ts
 - test/integration/scroll-sync-suite.ts
 - test/integration/sourceMapping.test.ts
 - test/page/pageSettings.test.ts
@@ -42,7 +43,7 @@ supersedes:
 
 ### Normative behavior
 
-When the reader scrolls the preview to another source line or activates a rendered block outside edit mode, the extension SHALL reveal that source line in the visible text editor that shows the preview's file, as the settings allow, and leave every editor unmoved when no visible text editor shows that file or the report names another file.
+When the reader scrolls the preview to another source line or activates a rendered block outside edit mode, the extension SHALL reveal that source line in the visible text editor that shows the preview's file (in a text diff, its side of the file scheme only), as the settings allow, and leave every editor unmoved when no visible text editor shows that file or the report names another file.
 
 ### Scenario (nominal): Scrolling posts the new top line
 - GIVEN anchor mode and scrollEditorWithPreview on and the reader scrolling from line 10 to line 14.6
@@ -73,6 +74,13 @@ When the reader scrolls the preview to another source line or activates a render
 | Enter on a focused paragraph in reading mode | the page posts previewReveal with activation keyboard and the host reveals the line |
 | Space on a focused rendered block outside edit mode | the page posts previewReveal with activation keyboard for that block's source line |
 | Enter with the focus in a button, an input, a link or the Description toggle | no reveal is posted |
+
+### Scenario (boundary): A text diff shows the file
+
+| Input | Outcome |
+| --- | --- |
+| a diff whose original side is a git or virtual document at the path of the file and whose modified side is the file | the line is revealed in the modified side only |
+| a diff with no side of the file scheme | no editor moves |
 
 ### Scenario (refusal): No text editor shows the file
 - GIVEN a preview with no visible text editor of its file
@@ -120,6 +128,7 @@ When the reader scrolls the preview to another source line or activates a render
 
 ### Verification notes
 - Method: test/integration/scroll-sync-suite.ts (scenarios 1 and 5: source follows preview, solo scenarios, scrolling must not edit the document)
+- Method: test/host/diffPreview.requirements.test.ts (A text diff shows the file: a previewReveal reveals the file side and never the git side that shares its path).
 - Method: test/page/runtimeScroll.test.ts (scenarios 1, 3 and 4: "disabling editor anchoring stops preview-to-editor scrolling"; "executes source and preview synchronization across layout changes" dispatches the click and asserts previewReveal with line 50 and activation click, and dispatches Enter and asserts previewReveal with activation keyboard; the exclusion list of buttons, inputs, links, chips and insertion controls is untested, checked by reading the keydown handler of bindClicks in src/page/features/pageInput.ts)
 - Method: test/integration/sourceMapping.test.ts (scenarios 2 and 3: previewScroll line 1 reveals line 1 and lastRevealedSourceLine equals the message line, click activation reveals line 2; the caret is not moved because revealRange does not change the selection, deduced from the code)
 - Method: test/session/lifeReq.requirements.test.ts (scenarios 6 and 7: "a reveal that names another source file moves nothing" and "a revealed line is clamped between the first and the last line of the document", by reading revealFromPage and revealEditorLine, Math.max(0, Math.min(lineCount - 1, line - 1)))

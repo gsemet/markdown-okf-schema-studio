@@ -14,8 +14,6 @@
  * ran, since it writes them.
  */
 
-import * as path from "node:path";
-
 import * as vscode from "vscode";
 
 import { DEFAULT_SEARCH_RESULTS_IN_STUDIO, settingSection } from "../core/configuration/settingsRegistry";
@@ -23,6 +21,7 @@ import { STUDIO_EDITOR_VIEW_TYPE } from "../core/configuration/editorAssociation
 import { openingDecision, type OpenedTabKind } from "../core/navigation/openingPolicy";
 import type { Logger } from "../host-api/logger";
 import type { Settings } from "../host-api/settings";
+import { isEligibleUri } from "./diffRealFile";
 import type { StudioClosedTabs, StudioLineRequests, StudioOpenedTextEditors } from "./openInStudio";
 import { putStudioInPlace } from "./studioPlacement";
 
@@ -50,11 +49,6 @@ function tabKindOf(input: unknown): OpenedTabKind {
   if (input instanceof vscode.TabInputTextDiff) return "diff";
   if (input instanceof vscode.TabInputCustom) return "custom";
   return "other";
-}
-
-/** True for a saved `file:` document with the `.md` extension. */
-function isEligibleUri(uri: vscode.Uri): boolean {
-  return uri.scheme === "file" && path.extname(uri.fsPath).toLowerCase() === ".md";
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-185

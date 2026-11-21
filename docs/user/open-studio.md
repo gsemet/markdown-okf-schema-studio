@@ -17,7 +17,10 @@ Use **Open With...** on a Markdown tab and select **Markdown OKF-Schema Studio**
 [![Studio opened as the custom editor for a Markdown file](../../images/readme/open-with-editor.png)](../../images/readme/open-with-editor.png)
 
 For a side-by-side source and preview, select the book icon in the editor title bar or run
-**Markdown OKF-Schema Studio: Open Preview to Side** from the Command Palette.
+**Markdown OKF-Schema Studio: Open Preview to Side** from the Command Palette. The button and the command
+also work from a text diff (a Git diff, a file compare, the search and replace preview): the preview shows
+the real file of the diff, whichever side holds the cursor, and opens no extra editor. With a diff that has
+no file on either side (a staged change) it shows the working-tree file, without scroll sync.
 
 | Editor title action | Source and preview |
 | --- | --- |
@@ -40,7 +43,7 @@ Two settings under **Opening Files** (see [Settings](settings.md)) decide what o
   `*.md` that older versions asked for: the first time, Studio moves that entry to this setting.
 
 To read the raw text on purpose, run **Markdown OKF-Schema Studio: Open as Text** (or **Reopen
-Editor With... > Text Editor**). That text editor stays text. A diff stays a text diff.
+Editor With... > Text Editor**). That text editor stays text. A diff stays a text diff, and its side preview shows the real file.
 
 Studio shows the text editor for a moment before it replaces it, so a first opening can flash the
 raw text. See [Known Limitations](../known-limitations.md#opening-files) for what is not covered.

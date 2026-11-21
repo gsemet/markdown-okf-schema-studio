@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The side preview now works next to a text diff: the book button appears in the diff's title bar, Open
+  Preview to Side previews the real file whichever side holds the cursor and opens no extra editor, the
+  preview follows a diff that becomes active, and scrolling the file's side of the diff scrolls the preview.
 - The requirements pages on the website name every requirement by its full ID (for example
   `StRS-MDOKFSTUDIO-BLOCK-003`) in the page heading, the browser tab, the shared link title, the
   breadcrumb and the previous and next links. The search finds a requirement from its full ID, its

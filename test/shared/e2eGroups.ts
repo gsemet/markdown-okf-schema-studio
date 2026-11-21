@@ -88,6 +88,7 @@ export const INTEGRATION_TESTS: readonly IntegrationTestRow[] = [
   { file: "test/integration/genericMarkdown.test.ts", group: "frontmatter-schema", locks: "Generic (non-OKF) YAML frontmatter rendered and saved in the custom editor" },
   { file: "test/integration/dirtySnapshots.test.ts", group: "lifecycle-sync", locks: "Unsaved buffer snapshots render (no disk read), versions ordered" },
   { file: "test/integration/sourceMapping.test.ts", group: "lifecycle-sync", locks: "Rendered blocks map to source lines (admonition containers included)" },
+  { file: "test/integration/diffPreview.test.ts", group: "lifecycle-sync", locks: "The side preview next to a text diff: the title button is offered on a diff of a Markdown file, the command previews the real file and opens no text editor, the preview follows a diff that becomes active and scrolls with its real file's side (side by side and inline), and a diff with no file side previews the working-tree file and moves no scroll" },
   { file: "test/integration/lifecycle.test.ts", group: "lifecycle-sync", locks: "Panel title, no re-render without change, menu URI argument, non-Uri ignored, source dir cleanup on dispose" },
   { file: "test/integration/mystDiagnostics.test.ts", group: "myst", locks: "conf.py-driven MyST extension warnings in Problems; unrelated conf.py ignored; cleared on close; none when untrusted" },
   { file: "test/integration/serializer.test.ts", group: "lifecycle-sync", locks: "Panel restore after reload: missing-source page, two restored panels, newest follows" },

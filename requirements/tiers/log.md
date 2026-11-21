@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+### Side preview next to a text diff (CR-455)
+
+- Changed: SwRS-MDOKFSTUDIO-LIFE-003 (Open Preview to Side works from a text diff: the real file of the diff is previewed, no text editor opens, the editor-title button is offered on the text diff editor, a staged diff uses the working-tree file as a stand-in); SwRS-MDOKFSTUDIO-LIFE-026 (a text diff that becomes active switches the following preview to its real file); SwRS-MDOKFSTUDIO-LIFE-100 (the diff side of the file scheme scrolls the preview, the git or virtual side never does); SwRS-MDOKFSTUDIO-LIFE-108 (a reveal from the preview targets the diff's file side only).
+
 ### Requirements viewer full IDs and ID search (CR-458)
 
 - Added: SwRS-MDOKFSTUDIO-CORE-092 (the search finds a requirement by its full ID, short ID or bare number, in any case and with or without leading zeros; the ID matches come first and Enter opens the first) and SwRS-MDOKFSTUDIO-CORE-093 (every requirement of a use case or behaviour page is named by its full ID: eyebrow, tab title, share title, crumbs, pager name and links), both proposed and deriving from StRS-MDOKFSTUDIO-CORE-008.
