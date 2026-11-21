@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+### Change bar tooltip (CR-463)
+
+- Added (proposed): SwRS-MDOKFSTUDIO-REVIEW-220 (hovering a green change bar itself shows a tooltip in the page's tooltip style, Changed lines 12–14 since last commit or Changed line 12 since last commit, from the source lines of the block that meet the changed ranges; nothing over the block away from the bar, with the bars hidden by the Diff button, or in edit mode). Derives from StRS-MDOKFSTUDIO-REVIEW-017 (a new option in its path 1); relates to REVIEW-207 and REVIEW-214. Round 2: added (proposed) SwRS-MDOKFSTUDIO-REVIEW-221 (a red removed-lines marker between the blocks around lines removed with nothing in their place, tooltip Removed lines 12–14 since last commit, hidden with Diff off and in edit mode) and SwRS-MDOKFSTUDIO-REVIEW-222 (a click on a bar or marker shows the side-by-side diff card of that block only, a second click or Escape closes it; the page asks the host for the baseline once). Both derive from StRS-MDOKFSTUDIO-REVIEW-017; REVIEW-220 relates to them. The tooltip bubble moved above the bar so it no longer covers the first line. No existing SwRS changed.
+
 ### Line marker precision (CR-457)
 
 - Added (proposed): SwRS-MDOKFSTUDIO-LIFE-192 (the line marker marks the table row of the line, the header row for the delimiter line), LIFE-193 (the line marker shows the hidden tabs that hold the line, outermost first, the way a click does, and marks the exact line), LIFE-194 (the line marker marks the front matter property row of the line and expands a collapsed properties table for a property line only).

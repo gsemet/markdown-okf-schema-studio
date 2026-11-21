@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { installIncomingChanges } from "../../../src/page/modules/incomingChanges";
+import { changedLinesLabel, installIncomingChanges, removedLinesLabel, type ChangeTarget } from "../../../src/page/modules/incomingChanges";
 
 class FakeElement {
   attrs = new Map<string, string>();
@@ -205,4 +205,108 @@ test("CR 155: a range on line 1 with no row marked marks the whole properties ta
   table.append(new FakeElement("tr", { "data-okf-line": "2", "data-okf-end-line": "2" }));
   marks.setRanges([{ start: 1, end: 1 }]);
   assert.deepEqual(marked(), [table]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-220
+test("CR 463: each bar carries the changed lines of its block as its tooltip", () => {
+  class Box extends FakeElement {
+    style = { setProperty() {} };
+    hidden = false;
+    tagName = "";
+    appendChild<T extends FakeElement>(child: T): T { return this.append(child); }
+    getBoundingClientRect() { return { top: 10, height: 20 }; }
+  }
+  const html = new Box("html");
+  const body = html.append(new Box("body"));
+  const one = body.append(new Box("p", { "data-line": "12" }));
+  const several = body.append(new Box("pre", { "data-line": "20", "data-end-line": "30" }));
+  const all = (): FakeElement[] => [one, several];
+  const document = {
+    documentElement: html,
+    body,
+    defaultView: undefined,
+    createElement: (name: string) => new Box(name),
+    querySelectorAll: () => all(),
+  };
+  const marks = installIncomingChanges(document as never);
+  // A range wider than the block is cut to the block; two ranges in one block span from the first to the last line they changed.
+  marks.setRanges([{ start: 10, end: 13 }, { start: 22, end: 23 }, { start: 27, end: 40 }]);
+  const layer = body.children.find((child) => child.hasAttribute("data-sphinx-preview-change-layer")) as Box;
+  assert.deepEqual(layer.children.map((bar) => bar.getAttribute("data-tooltip")), [
+    "Changed line 12 since last commit",
+    "Changed lines 22\u201330 since last commit",
+  ]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-220
+test("CR 463: changedLinesLabel uses the singular for one line and an en dash for a range", () => {
+  assert.equal(changedLinesLabel([{ start: 5, end: 5 }], 1, 9), "Changed line 5 since last commit");
+  assert.equal(changedLinesLabel([{ start: 12, end: 14 }], 12, 14), "Changed lines 12\u201314 since last commit");
+  assert.equal(changedLinesLabel([{ start: 1, end: 3 }, { start: 8, end: 9 }], 2, 8), "Changed lines 2\u20138 since last commit");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221
+test("CR 463: removedLinesLabel names the lines at the last commit, singular for one, with an en dash for a run", () => {
+  assert.equal(removedLinesLabel({ baseStart: 12, baseEnd: 12, start: 12 }), "Removed line 12 since last commit");
+  assert.equal(removedLinesLabel({ baseStart: 12, baseEnd: 14, start: 12 }), "Removed lines 12–14 since last commit");
+});
+
+/** A page of two blocks (lines 1 and 5) with a layer that records its click listener. */
+function pageWithLayer(onActivate: (target: ChangeTarget) => void) {
+  class Box extends FakeElement {
+    style = { props: new Map<string, string>(), setProperty(name: string, value: string) { this.props.set(name, value); }, removeProperty(name: string) { this.props.delete(name); } };
+    hidden = false;
+    listeners = new Map<string, (event: unknown) => void>();
+    constructor(name: string, attrs: Record<string, string> = {}, public box = { top: 0, height: 0, bottom: 0 }) { super(name, attrs); }
+    appendChild<T extends FakeElement>(child: T): T { return this.append(child); }
+    addEventListener(type: string, listener: (event: unknown) => void) { this.listeners.set(type, listener); }
+    getBoundingClientRect() { return this.box; }
+    override closest(selector: string) { return selector.includes("change-layer") ? this : null; }
+  }
+  const html = new Box("html");
+  const body = html.append(new Box("body"));
+  const first = body.append(new Box("p", { "data-line": "1" }, { top: 10, height: 20, bottom: 30 }));
+  const second = body.append(new Box("p", { "data-line": "5" }, { top: 100, height: 20, bottom: 120 }));
+  const all = (): FakeElement[] => [first, second];
+  const document = { documentElement: html, body, defaultView: undefined, createElement: (name: string) => new Box(name), querySelectorAll: () => all() };
+  const marks = installIncomingChanges(document as never, onActivate);
+  const layer = () => body.children.find((child) => child.hasAttribute("data-sphinx-preview-change-layer")) as Box;
+  return { html, marks, layer, first, second };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221
+test("CR 463: a removal between two blocks gets a marker above the next block with the removed lines as tooltip", () => {
+  const page = pageWithLayer(() => undefined);
+  page.marks.setRanges([{ start: 1, end: 1 }], [{ baseStart: 3, baseEnd: 4, start: 5 }]);
+  const bars = page.layer().children as unknown as Array<FakeElement & { style: { props: Map<string, string> } }>;
+  const marker = bars.find((bar) => bar.hasAttribute("data-removed"))!;
+  assert.ok(marker, "a marker is drawn");
+  assert.equal(marker.getAttribute("data-tooltip"), "Removed lines 3–4 since last commit");
+  // Just above the block of line 5 (top 100), in the gap between the blocks.
+  assert.equal(marker.style.props.get("top"), "86px");
+  const bar = bars.find((candidate) => !candidate.hasAttribute("data-removed"))!;
+  assert.equal(bar.getAttribute("data-tooltip"), "Changed line 1 since last commit");
+  // Malformed removals are ignored.
+  page.marks.setRanges([], [{ baseStart: 4, baseEnd: 3, start: 5 }, null, { baseStart: 1, baseEnd: 1 }]);
+  assert.equal(page.layer().children.filter((candidate) => candidate.hasAttribute("data-removed") && !(candidate as never as { hidden: boolean }).hidden).length, 0);
+  // A removal at the end of the page sits below the last block.
+  page.marks.setRanges([], [{ baseStart: 9, baseEnd: 9, start: 9 }]);
+  const end = page.layer().children.find((candidate) => candidate.hasAttribute("data-removed")) as unknown as { style: { props: Map<string, string> }; getAttribute(name: string): string | null };
+  assert.equal(end.style.props.get("top"), "122px");
+  assert.equal(end.getAttribute("data-tooltip"), "Removed line 9 since last commit");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+test("CR 463: a click on a bar or a marker passes its target on, except in edit mode", () => {
+  const clicked: ChangeTarget[] = [];
+  const page = pageWithLayer((target) => clicked.push(target));
+  page.marks.setRanges([{ start: 1, end: 1 }], [{ baseStart: 3, baseEnd: 3, start: 5 }]);
+  const children = page.layer().children as unknown as Array<FakeElement>;
+  const click = page.layer().listeners.get("click")!;
+  click({ target: children.find((bar) => !bar.hasAttribute("data-removed")) });
+  click({ target: children.find((bar) => bar.hasAttribute("data-removed")) });
+  assert.deepEqual(clicked, [{ element: page.first }, { removed: { baseStart: 3, baseEnd: 3, start: 5 } }]);
+  page.html.setAttribute("data-sphinx-preview-edit-mode", "on");
+  click({ target: children[0] });
+  assert.equal(clicked.length, 2, "edit mode takes the click away");
 });

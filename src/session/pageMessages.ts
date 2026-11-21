@@ -65,6 +65,7 @@ export const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGa
   previewHistoryGo: "render",
   previewViewPreferenceChanged: "render",
   previewSideBySideChanged: "render",
+  previewBaselineRequested: "render",
   previewPaletteModeChanged: "render",
   previewLabelRename: "render",
   previewThreadReply: "render",

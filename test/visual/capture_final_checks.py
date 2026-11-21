@@ -506,6 +506,9 @@ def check_tooltip_contrast(page: Page, scenario: dict, failures: list[Failure]) 
     # A drag held down for the capture keeps the pointer button pressed: no hover (and no tooltip) then.
     if any(action.get("hold") for action in scenario.get("pageActions") or []):
         return
+    # CR 463: the pointer stays on a change bar, so its tooltip is in the capture.
+    if any("data-sphinx-preview-change-layer" in str(action.get("hover")) for action in scenario.get("pageActions") or []):
+        return
     if scenario.get("listItemHandleChecks") == "drag":
         return
     button = page.locator('[data-sphinx-preview-refresh]')

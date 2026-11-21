@@ -42,6 +42,10 @@ export class DomElement extends DomNode {
   constructor(public tagName: string) { super(); }
 
   get children(): DomElement[] { return this.childNodes.filter((node): node is DomElement => node instanceof DomElement); }
+  get previousElementSibling(): DomElement | null {
+    const list = this.parentNode?.children ?? [];
+    return list[list.indexOf(this) - 1] ?? null;
+  }
   get nextElementSibling(): DomElement | null {
     const list = this.parentNode?.children ?? [];
     return list[list.indexOf(this) + 1] ?? null;
@@ -88,6 +92,10 @@ export class DomElement extends DomNode {
     return old;
   }
 
+  contains(other: DomElement): boolean {
+    for (let node: DomElement | null = other; node; node = node.parentElement) if (node === this) return true;
+    return false;
+  }
   matches(selector: string): boolean {
     return selector.split(",").some((part) => {
       const compound = parseCompound(part.trim());
@@ -180,6 +188,10 @@ export class DomDocument {
   }
   createTextNode(text: string): DomText { return new DomText(text); }
   createDocumentFragment(): DomFragment { return new DomFragment(); }
+  listeners: ((event: { key: string }) => void)[] = [];
+  addEventListener(_type: string, listener: (event: { key: string }) => void): void { this.listeners.push(listener); }
+  /** A key pressed on the page (the module listens to Escape). */
+  pressKey(key: string): void { for (const listener of this.listeners) listener({ key }); }
   getElementById(id: string): DomElement | null { return this.body.descendants().find((element) => element.getAttribute("id") === id) ?? null; }
   querySelector(selector: string): DomElement | null { return this.body.querySelector(selector); }
   /** Text nodes of `root` in document order (the module asks for `NodeFilter.SHOW_TEXT`, 4). */

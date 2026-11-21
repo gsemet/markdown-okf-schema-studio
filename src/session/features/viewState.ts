@@ -39,6 +39,11 @@ export class ViewStateController {
     router.on("previewSideBySideChanged", (message, preview) => {
       manager.incoming.setSideBySide(preview, message.on);
     });
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-222
+    // A click on a change bar or a removed-lines marker asks for the HEAD rendering, once.
+    router.on("previewBaselineRequested", (_message, preview) => {
+      manager.incoming.requestBaseline(preview);
+    });
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
     // The palette mode is a workspace choice like the edit mode: it changes buttons only, never the
     // rendering, so it is saved from the page whatever the trust.

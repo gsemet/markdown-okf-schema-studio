@@ -1444,8 +1444,8 @@ test("CR147: the toolbar offers a Side-by-side button in the review row after th
 test("CR147: the side-by-side cards are two columns, switch off with the page attribute and never show in edit mode", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /\[data-okf-sbs-card\] \{[^}]*display: grid;[^}]*grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\);/u);
-  assert.match(css, /html\[data-sphinx-preview-sbs="off"\] \[data-okf-sbs-card\],\s*html\[data-sphinx-preview-edit-mode="on"\] \[data-okf-sbs-card\] \{\s*display: none;/u);
-  assert.match(css, /html\[data-sphinx-preview-sbs="on"\]:not\(\[data-sphinx-preview-edit-mode="on"\]\) \[data-okf-sbs-replaced\] \{\s*display: none;/u);
+  assert.match(css, /html\[data-sphinx-preview-sbs="off"\] \[data-okf-sbs-card\]:not\(\[data-okf-sbs-single\]\),\s*html\[data-sphinx-preview-edit-mode="on"\] \[data-okf-sbs-card\] \{\s*display: none;/u);
+  assert.match(css, /html\[data-sphinx-preview-sbs="on"\]:not\(\[data-sphinx-preview-edit-mode="on"\]\) \[data-okf-sbs-replaced\],\s*html:not\(\[data-sphinx-preview-edit-mode="on"\]\) \[data-okf-sbs-replaced="single"\] \{\s*display: none;/u);
   assert.match(css, /\[data-okf-sbs-word="removed"\] \{[^}]*text-decoration: line-through;/u);
   assert.match(css, /\[data-okf-sbs-word="added"\] \{[^}]*text-decoration: underline;/u);
   assert.match(css, /html\[data-okf-incoming-changes="false"\] \[data-sphinx-preview-sbs-toggle\] \{\s*display: none;/u);

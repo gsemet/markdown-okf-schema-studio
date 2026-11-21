@@ -265,3 +265,115 @@ test("CR234: two blocks inside one hunk do not share a last-commit block: the cl
     ["added", "", "A new paragraph"],
   ]);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+test("CR463: a click on a block's bar asks for the baseline and shows the card of that block only; a second click closes it", () => {
+  const opened = open();
+  opened.module.toggleSingle({ element: opened.element("changed") as unknown as Element });
+  assert.equal(opened.posted.length, 1);
+  assert.equal((opened.posted[0] as { type: string }).type, "previewBaselineRequested");
+  sendBaseline(opened);
+  // The card of the clicked block, and the paragraph removed in the same hunk; the added block has none.
+  const views = cardViews(opened);
+  assert.deepEqual(views.map((view) => view.kind), ["changed", "removed"]);
+  assert.equal(views[0].left, "The quick red fox");
+  assert.equal(views[0].right, "The quick brown fox");
+  assert.deepEqual(views[0].leftWords, ["red"]);
+  assert.equal(opened.cards().every((card) => card.hasAttribute("data-okf-sbs-single")), true, "the CSS keeps a single card while the global diff is off");
+  assert.equal(opened.element("changed").getAttribute("data-okf-sbs-replaced"), "single");
+  assert.equal(opened.document.documentElement.getAttribute("data-sphinx-preview-sbs"), "off");
+  assert.equal(opened.element("added").hasAttribute("data-okf-sbs-replaced"), false);
+  // A second click on the same bar closes the card and leaves the block as it was.
+  opened.module.toggleSingle({ element: opened.element("changed") as unknown as Element });
+  assert.equal(opened.cards().length, 0);
+  assert.equal(opened.element("changed").hasAttribute("data-okf-sbs-replaced"), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+test("CR463: Escape closes the single card, edit mode takes the click away, and the Side-by-side button still shows every card", () => {
+  const opened = open();
+  opened.module.toggleSingle({ element: opened.element("changed") as unknown as Element });
+  sendBaseline(opened);
+  assert.equal(opened.cards().length, 2);
+  opened.document.pressKey("Escape");
+  assert.equal(opened.cards().length, 0, "Escape closes the card");
+  // Edit mode: no card, and no request to the host.
+  setEditMode(opened, true);
+  const before = opened.posted.length;
+  opened.module.toggleSingle({ element: opened.element("changed") as unknown as Element });
+  assert.equal(opened.posted.length, before);
+  assert.equal(opened.cards().length, 0);
+  setEditMode(opened, false);
+  // The global button keeps working: every changed block gets its card.
+  toggle(opened);
+  sendBaseline(opened);
+  assert.equal(opened.cards().length, 3);
+  assert.equal(opened.element("changed").getAttribute("data-okf-sbs-replaced"), "");
+  // A single click has nothing to add while every card shows.
+  const posted = opened.posted.length;
+  opened.module.toggleSingle({ element: opened.element("changed") as unknown as Element });
+  assert.equal(opened.posted.length, posted);
+  assert.equal(opened.cards().length, 3);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+test("CR463: a click on a removed-lines marker shows the removed card of that hunk, in place", () => {
+  const base = ["Alpha", "", "Gone paragraph", "", "Omega", ""].join("\n");
+  const current = ["Alpha", "", "Omega", ""].join("\n");
+  const hunks = lineHunks(base, current);
+  const removed = hunks.find((hunk) => hunk.end < hunk.start)!;
+  assert.ok(removed, "a removal hunk exists");
+  const opened = open('<main id="sphinx-myst-preview-content"><p data-line="1">Alpha</p><p data-line="3" id="omega">Omega</p></main>');
+  const marker = { removed: { start: removed.start, baseStart: removed.baseStart, baseEnd: removed.baseEnd } };
+  opened.module.toggleSingle(marker);
+  opened.module.setBaseline({
+    html: '<p data-line="1">Alpha</p><p data-line="3">Gone paragraph</p><p data-line="5">Omega</p>',
+    hunks,
+    revision: 7,
+  });
+  const views = cardViews(opened);
+  assert.equal(views.length, 1);
+  assert.equal(views[0].kind, "removed");
+  assert.equal(views[0].left, "Gone paragraph");
+  assert.equal(views[0].right, "");
+  assert.equal(opened.cards()[0].nextElementSibling?.getAttribute("id"), "omega", "the card sits where the lines were");
+  opened.module.toggleSingle(marker);
+  assert.equal(opened.cards().length, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+test("CR463: after a content change with the diff off, the next click on the same bar opens its card at once", () => {
+  const document = new DomDocument(PAGE_HTML);
+  document.documentElement.setAttribute("data-sphinx-preview-sbs", "off");
+  const posted: unknown[] = [];
+  const context = { documentId: "file:///a.md", revision: 7, requestId: 1 };
+  const module = installSideBySide(document as unknown as Document, { postMessage: (message: unknown) => posted.push(message) }, context, () => undefined);
+  const target = { element: document.getElementById("changed") as unknown as Element };
+  module.toggleSingle(target);
+  module.setBaseline({ html: BASELINE_HTML, hunks: lineHunks(BASE_TEXT, CURRENT_TEXT), revision: 7 });
+  assert.equal(document.body.querySelectorAll("[data-okf-sbs-card]").length, 2);
+  // The page content changes (a new revision): the card goes, and so does the open state.
+  context.revision = 8;
+  module.apply();
+  assert.equal(document.body.querySelectorAll("[data-okf-sbs-card]").length, 0);
+  // The next click is an open, not a close: it asks the host again and shows the card on the answer.
+  const before = posted.length;
+  module.toggleSingle(target);
+  assert.equal(posted.length, before + 1);
+  module.setBaseline({ html: BASELINE_HTML, hunks: lineHunks(BASE_TEXT, CURRENT_TEXT), revision: 8 });
+  assert.equal(document.body.querySelectorAll("[data-okf-sbs-card]").length, 2);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+test("CR463: a click on a bar whose card is not showing opens it again instead of closing nothing", () => {
+  const opened = open();
+  const target = { element: opened.element("changed") as unknown as Element };
+  opened.module.toggleSingle(target);
+  // No baseline answered yet: nothing shows, so the bar is not open.
+  assert.equal(opened.cards().length, 0);
+  const before = opened.posted.length;
+  opened.module.toggleSingle(target);
+  assert.equal(opened.posted.length, before + 1, "the second click asks the host again");
+  sendBaseline(opened);
+  assert.equal(opened.cards().length, 2);
+});
