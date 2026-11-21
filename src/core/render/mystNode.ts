@@ -63,6 +63,23 @@ export function mergeProperties(node: MystNode, properties: Record<string, unkno
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-178
+/**
+ * The marker line attributes (`data-okf-marker-line`, `data-okf-marker-end-line`) of a node, from its
+ * position: a source line for the line marker only, never a mapped block (no click, no scroll sync).
+ */
+export function markerLineProperties(node: MystNode): Record<string, number> {
+  const start = node.position?.start?.line;
+  if (start === undefined) {
+    return {};
+  }
+  const end = node.position?.end?.line;
+  return {
+    "data-okf-marker-line": start,
+    ...(end !== undefined && end > start ? { "data-okf-marker-end-line": end } : {}),
+  };
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-CORE-003
 /** The source line attributes (`data-line`, `data-end-line`) of a block that starts at `line`. */
 export function sourcePositionProperties(node: MystNode, line?: number): Record<string, number | string> {
@@ -70,9 +87,13 @@ export function sourcePositionProperties(node: MystNode, line?: number): Record<
     return {};
   }
   const endLine = node.position?.end?.line;
-  // A block under a tab item is edited with the item, so it carries no source line of its own.
+  // A block under a tab item is edited with the item, so it carries no source line of its own:
+  // only the marker lines, which no click, scroll sync or change bar reads.
   if (node.data?.noSourceLine === true) {
-    return node.data.included === true ? { "data-sphinx-preview-included": "true" } : {};
+    return {
+      ...(node.data.included === true ? { "data-sphinx-preview-included": "true" } : {}),
+      ...markerLineProperties(node),
+    };
   }
   return {
     "data-line": line,

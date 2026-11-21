@@ -9,6 +9,8 @@ import { parseFragment, serialize } from "parse5";
 import { sanitizeTableStyle } from "../security/html-sanitizer";
 import {
   containsRawTable,
+  markerLineProperties,
+  mergeProperties,
   type MystNode,
   normalizeTableAlignment,
   type RawHtmlNode,
@@ -40,6 +42,11 @@ export interface TableAlignmentSpec {
   listTable?: boolean;
   /** A table of a raw HTML block: it exists only in the written HTML, not in the syntax tree. */
   raw?: boolean;
+  /** A pipe table: the source line of each row (`data-okf-marker-line`), the header row first. */
+  rowLines?: number[];
+  /** A pipe table inside a container (quote, alert, directive body, list item): its own marker lines. */
+  markerLine?: number;
+  markerEndLine?: number;
 }
 
 function countRawTables(node: RawHtmlNode): number {
@@ -113,7 +120,24 @@ export function normalizeRawHtmlTable(node: MystNode, line?: number): void {
   node.type = "rawHtmlTableBlock";
 }
 
-function tableAlignmentSpec(node: MystNode): TableAlignmentSpec {
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-192
+/**
+ * The marker lines of a pipe table: its rows' lines, and its own pair when it sits
+ * in a container. None for a `{list-table}` and a table of a captioned `{table}` directive (the top
+ * of the block stays the marker's place there).
+ */
+function markerSpec(node: MystNode, nested: boolean, captioned: boolean): Partial<TableAlignmentSpec> {
+  if (node.data?.listTable === true || captioned) return {};
+  const rowLines = (node.children ?? []).map((row) => row.position?.start?.line);
+  const own = nested ? markerLineProperties(node) : {};
+  return {
+    ...(rowLines.length > 0 && rowLines.every((line): line is number => line !== undefined) ? { rowLines } : {}),
+    ...(typeof own["data-okf-marker-line"] === "number" ? { markerLine: own["data-okf-marker-line"] } : {}),
+    ...(typeof own["data-okf-marker-end-line"] === "number" ? { markerEndLine: own["data-okf-marker-end-line"] } : {}),
+  };
+}
+
+function tableAlignmentSpec(node: MystNode, nested = false, captioned = false): TableAlignmentSpec {
   const headerCells = node.children?.[0]?.children ?? [];
   return {
     table: normalizeTableAlignment(node.align),
@@ -132,11 +156,17 @@ function tableAlignmentSpec(node: MystNode): TableAlignmentSpec {
         headerRows: node.data.headerRows as number | undefined,
       }
       : {}),
+    ...markerSpec(node, nested, captioned),
   };
 }
 
 /** Records, in document order, the alignment spec of every table (undefined for a plain one). */
-export function collectTableAlignments(node: MystNode, output: Array<TableAlignmentSpec | undefined>): void {
+export function collectTableAlignments(
+  node: MystNode,
+  output: Array<TableAlignmentSpec | undefined>,
+  nested = false,
+  captioned = false,
+): void {
   if (node.type === "rawHtmlTableBlock") {
     const fragment = parseFragment(node.value ?? "") as unknown as RawHtmlNode;
     const tableAlignment = normalizeTableAlignment(node.data?.mystTableAlignment);
@@ -147,10 +177,11 @@ export function collectTableAlignments(node: MystNode, output: Array<TableAlignm
     return;
   }
   if (node.type === "table") {
-    output.push(tableAlignmentSpec(node));
+    output.push(tableAlignmentSpec(node, nested, captioned));
   }
+  const inCaption = captioned || (node.type === "container" && node.kind === "table");
   for (const child of node.children ?? []) {
-    collectTableAlignments(child, output);
+    collectTableAlignments(child, output, nested || node.type !== "root", inCaption);
   }
 }
 
@@ -259,20 +290,27 @@ export function needsHtmlTablePass(alignments: ReadonlyArray<TableAlignmentSpec 
  * emits them and the HTML needs no second parse. The writer's table handler replaces `data` of a
  * table node, so the properties are merged in when it does (the setter below).
  */
-export function applyTableAlignmentsToTree(node: MystNode): void {
+export function applyTableAlignmentsToTree(node: MystNode, nested = false, captioned = false): void {
   if (node.type === "table") {
-    const spec = tableAlignmentSpec(node);
+    const spec = tableAlignmentSpec(node, nested, captioned);
     const properties: Record<string, unknown> = {
       ...(spec.table ? { align: spec.table } : {}),
       ...(spec.sourceLine !== undefined ? { "data-line": spec.sourceLine } : {}),
       ...(spec.sourceEndLine !== undefined ? { "data-end-line": spec.sourceEndLine } : {}),
+      ...(spec.markerLine !== undefined ? { "data-okf-marker-line": spec.markerLine } : {}),
+      ...(spec.markerEndLine !== undefined ? { "data-okf-marker-end-line": spec.markerEndLine } : {}),
     };
     if (Object.keys(properties).length > 0) {
       mergePropertiesAfterWriterReset(node, properties);
     }
+    (node.children ?? []).forEach((row, index) => {
+      const line = spec.rowLines?.[index];
+      if (line !== undefined) mergeProperties(row, { "data-okf-marker-line": line });
+    });
   }
+  const inCaption = captioned || (node.type === "container" && node.kind === "table");
   for (const child of node.children ?? []) {
-    applyTableAlignmentsToTree(child);
+    applyTableAlignmentsToTree(child, nested || node.type !== "root", inCaption);
   }
 }
 
@@ -299,7 +337,7 @@ export function applyTableAlignments(
 ): string {
   if (!alignments.some((alignment) =>
     alignment && (alignment.table || alignment.columns.some(Boolean) || alignment.sourceLine !== undefined
-      || alignment.listTable === true))) {
+      || alignment.listTable === true || alignment.rowLines !== undefined || alignment.markerLine !== undefined))) {
     return html;
   }
 
@@ -319,6 +357,12 @@ export function applyTableAlignments(
       if (alignment?.sourceEndLine !== undefined) {
         setHtmlAttribute(node, "data-end-line", String(alignment.sourceEndLine));
       }
+      if (alignment?.markerLine !== undefined) {
+        setHtmlAttribute(node, "data-okf-marker-line", String(alignment.markerLine));
+      }
+      if (alignment?.markerEndLine !== undefined) {
+        setHtmlAttribute(node, "data-okf-marker-end-line", String(alignment.markerEndLine));
+      }
       if (alignment?.listTable === true) {
         stripSourceLines(node);
         if (alignment.headerRows !== undefined) setHeaderRows(node, alignment.headerRows);
@@ -336,6 +380,10 @@ export function applyTableAlignments(
         }
       };
       collectRows(node);
+      rows.forEach((row, index) => {
+        const rowLine = alignment?.rowLines?.[index];
+        if (rowLine !== undefined) setHtmlAttribute(row, "data-okf-marker-line", String(rowLine));
+      });
       for (const row of rows) {
         const cells = (row.childNodes ?? []).filter((child) =>
           ["th", "td"].includes(child.tagName?.toLowerCase() ?? ""));

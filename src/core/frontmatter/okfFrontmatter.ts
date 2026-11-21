@@ -19,7 +19,7 @@ import {
   inspectFrontmatterLinks,
   filenameStemSuggestions,
 } from "./fileLinks";
-import { frontmatterFieldLines } from "./frontmatterChanges";
+import { frontmatterEndLine, frontmatterFieldLines } from "./frontmatterChanges";
 import { extractFrontmatter, extractFrontmatterShared, stripJson5Comments } from "./frontmatterParse";
 import {
   defaultValueOf,
@@ -317,7 +317,13 @@ export function analyzeFrontmatter(options: FrontmatterOptions): FrontmatterResu
     return sourceLines ? { ...field, sourceLines } : field;
   });
   // Without a matched schema every key is allowed.
-  return { ...result, fields, additionalPropertiesAllowed: result.additionalPropertiesAllowed ?? true };
+  const endLine = result.present ? frontmatterEndLine(options.sourceText) : undefined;
+  return {
+    ...result,
+    fields,
+    additionalPropertiesAllowed: result.additionalPropertiesAllowed ?? true,
+    ...(endLine === undefined ? {} : { endLine }),
+  };
 }
 
 function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult {

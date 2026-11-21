@@ -61,6 +61,14 @@ function sourceProperties(node: GridNode): Record<string, number> {
   return { "data-line": line, ...(end !== undefined && end >= line ? { "data-end-line": end } : {}) };
 }
 
+/** The marker lines (`data-okf-marker-line`, `data-okf-marker-end-line`) of a node: the line marker's own source lines. */
+function markerProperties(node: GridNode): Record<string, number> {
+  const line = node.position?.start?.line;
+  const end = node.position?.end?.line;
+  if (line === undefined) return {};
+  return { "data-okf-marker-line": line, ...(end !== undefined && end > line ? { "data-okf-marker-end-line": end } : {}) };
+}
+
 function element(
   tagName: string,
   className: string,
@@ -459,8 +467,9 @@ function tabLabel(node: GridNode, parse: GridParse, index: number): string {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-098
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-178
 /**
- * Drops the source line attributes under a tab item, so that only the item itself is a mapped block
+ * Drops the source line attributes under a tab item (and writes their marker lines), so that only the item itself is a mapped block
  * (a table, code block, grid, card or nested tab set in the item is no block of its own). The node
  * positions stay, for the stages that read them. A comment or thread keeps its own lines, as the
  * review actions (reply, delete) and the comment anchors need them.
@@ -475,6 +484,8 @@ function unmapPlainBlocks(nodes: readonly GridNode[]): void {
       delete properties["data-line"];
       delete properties["data-end-line"];
       delete properties["data-single-line"];
+      // The line marker still needs the lines (whole-file positions, offset by parseBody).
+      Object.assign(properties, markerProperties(node));
     }
     node.data = { ...(node.data ?? {}), noSourceLine: true };
     unmapPlainBlocks(node.children ?? []);

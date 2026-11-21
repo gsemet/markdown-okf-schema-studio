@@ -14,6 +14,7 @@ import {
   type MystNode,
   normalizeTableAlignment,
   setHast,
+  markerLineProperties,
   sourcePositionProperties,
   takeAdmonitionTitle,
 } from "./mystNode";
@@ -526,8 +527,11 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
       index = -1;
     }
   }
-  if (line !== undefined && BLOCK_TYPES.has(node.type) && node.data?.noSourceLine !== true) {
-    mergeProperties(node, sourcePositionProperties(node, line));
+  if (line !== undefined && BLOCK_TYPES.has(node.type)) {
+    // A block under a tab item carries its marker lines only (MYST-098: a click edits the item).
+    mergeProperties(node, node.data?.noSourceLine === true
+      ? markerLineProperties(node)
+      : sourcePositionProperties(node, line));
   }
 }
 

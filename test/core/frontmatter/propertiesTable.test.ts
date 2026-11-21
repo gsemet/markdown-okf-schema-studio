@@ -905,6 +905,26 @@ test("CR 155: with source mapping every field row carries the source lines of it
   assert.doesNotMatch(renderPropertiesTable(result, true), /data-okf-line/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+test("with source mapping the properties section carries the closing fence line, in LF and CRLF text", () => {
+  const endLineOf = (sourceText: string, mapped = true): string | undefined => {
+    const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
+      sourceText,
+      filePath: "/workspace/doc.md",
+      strictAdditionalProperties: false,
+    });
+    const mapping = { documentId: "file:///workspace/doc.md", activeSourceFile: "/workspace/doc.md" };
+    const markup = renderPropertiesTable(result, true, mapped ? mapping : undefined);
+    return /data-okf-frontmatter-end-line="(\d+)"/u.exec(markup)?.[1];
+  };
+  assert.equal(endLineOf("---\ntitle: A\n---\n\n# Body\n"), "3");
+  assert.equal(endLineOf("---\ntitle: A\ntags:\n  - a\n  - b\nowner: T\n---\n\n# Body\n"), "7");
+  assert.equal(endLineOf("---\r\ntitle: A\r\ntags:\r\n  - a\r\n---\r\n\r\n# Body\r\n"), "5");
+  assert.equal(endLineOf("---\ntitle: A\n---"), "3");
+  assert.equal(endLineOf("---\ntitle: A\n---\n\n# Body\n", false), undefined);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
 test("the properties header carries one keyboard-reachable toggle that collapses the table, expanded by default", () => {
   const markup = renderPropertiesTable(resultWith({ schemaFound: true }), true);
