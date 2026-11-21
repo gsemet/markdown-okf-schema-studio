@@ -352,6 +352,52 @@ def test_ci_integration_and_stress_stop_on_a_locked_screen(
     assert not (tmp_path / "out").exists()
 
 
+def _just_run(tmp_path: Path, *arguments: str) -> "subprocess.CompletedProcess[str]":
+    import subprocess
+
+    return subprocess.run(
+        ["just", "--justfile", str(ROOT / "justfile"), "--working-directory", str(tmp_path), *arguments],
+        capture_output=True,
+        text=True,
+    )
+
+
+def _git_config_longpaths(repository: Path) -> str:
+    import subprocess
+
+    return subprocess.run(
+        ["git", "-C", str(repository), "config", "--local", "--get", "core.longpaths"],
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def test_dev_lists_the_long_paths_step_first_on_windows_only(tmp_path: Path) -> None:
+    result = _just_run(tmp_path, "--dry-run", "dev")
+    assert result.returncode == 0
+    # `--dry-run` prints the commands to stderr.
+    if os.name == "nt":
+        assert "git config core.longpaths true" in result.stderr
+        assert result.stderr.index("git config core.longpaths true") < result.stderr.index("fnm install")
+    else:
+        assert "git config" not in result.stderr
+
+
+def test_the_long_paths_step_sets_the_config_of_a_git_repository_on_windows_only(tmp_path: Path) -> None:
+    import subprocess
+
+    subprocess.run(["git", "init", "--quiet", str(tmp_path)], check=True)
+    result = _just_run(tmp_path, "_git-long-paths")
+    assert result.returncode == 0, result.stderr
+    assert _git_config_longpaths(tmp_path) == ("true" if os.name == "nt" else "")
+
+
+def test_the_long_paths_step_does_nothing_outside_a_git_work_tree(tmp_path: Path) -> None:
+    result = _just_run(tmp_path, "_git-long-paths")
+    assert result.returncode == 0, result.stderr
+    assert not (tmp_path / ".git").exists()
+
+
 def test_preflight_skips_report_and_gallery_when_the_screen_is_locked() -> None:
     justfile = (ROOT / "justfile").read_text()
     recipe = justfile.split("\npreflight: ")[1].split("\n\n")[0]

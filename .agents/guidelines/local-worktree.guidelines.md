@@ -19,6 +19,10 @@ group included), so `uv run --no-sync --group requirements okfreq` still runs CI
 worktree does not symlink `node_modules`, because `npm ci` would replace the main checkout's
 `node_modules` through the symlink.
 
+On Windows, `just dev` sets `core.longpaths` in the repository's shared config, so once it has run
+in the main checkout, `git worktree add` and a checkout of the base (`origin/main`) do not fail on
+long paths.
+
 ## App-window tests
 
 Two changes never run app-window tests locally at the same time; CI runs the full gate. On macOS
