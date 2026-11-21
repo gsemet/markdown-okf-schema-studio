@@ -55,9 +55,19 @@ export interface ParsedSidecar {
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:\d{2})$/u;
 
 /** True for an ISO 8601 date-time with a time zone that names a real instant. */
- function isIsoDate(value: unknown): value is string {
+function isIsoDate(value: unknown): value is string {
   return typeof value === "string" && value.length <= 40 && ISO_DATE.test(value)
-    && !Number.isNaN(Date.parse(value));
+    && isRealCalendarDay(value) && !Number.isNaN(Date.parse(value));
+}
+
+/** True when the day of a `YYYY-MM-DD...` text exists in its month (leap years included): Date.parse rolls 02-30 over to March. */
+function isRealCalendarDay(value: string): boolean {
+  const year = Number(value.slice(0, 4));
+  const month = Number(value.slice(5, 7));
+  const day = Number(value.slice(8, 10));
+  const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  const daysInMonth = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];
+  return daysInMonth !== undefined && day >= 1 && day <= daysInMonth;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

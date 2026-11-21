@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+### Impossible comment date refused (CR-459)
+
+- Changed: SwRS-MDOKFSTUDIO-REVIEW-004 (a creation date naming a day that does not exist in its month, such as 2026-02-30, or 2026-02-29 in a non-leap year, rejects the whole sidecar like any other bad date); the parser used to accept it because Date.parse rolls the day over. No new StRS.
+
 ### Side preview jump marker (CR-456)
 
 - Added (proposed): SwRS-MDOKFSTUDIO-LIFE-186 (the host tells a jump from a cursor move: a Command selection with one range that Studio did not ask for), LIFE-187 (the side preview that follows the editor marks the line of a jump, keyed by document, within 5 seconds, visible page only), LIFE-188 (the scroll of a jump follows the anchor setting: if-off-screen or reading line), LIFE-189 (the marker goes on an edit from the text editor or a switch of file), LIFE-190 (a cursor move never marks), LIFE-191 (a link or Back and Next followed in the side preview marks its target line).

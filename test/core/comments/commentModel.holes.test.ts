@@ -46,6 +46,10 @@ test("a comment date is an ISO 8601 date-time with a zone, to the minute or fine
     "2026-10-21T10:00:00.123456789Z",
     "2026-10-21T10:00:00+02:00",
     "2026-10-21T10:00-05:30",
+    "2024-02-29T10:00:00Z",
+    "2000-02-29T10:00:00Z",
+    "2026-04-30T10:00:00Z",
+    "2026-12-31T23:59Z",
   ]) assert.deepEqual(dateErrors(good), [], good);
   for (const bad of [
     "2026-10-21T10:00:00",
@@ -61,6 +65,12 @@ test("a comment date is an ISO 8601 date-time with a zone, to the minute or fine
     "2026-10-21 10:00:00Z",
     "26-10-21T10:00:00Z",
     "2026-13-01T10:00:00Z",
+    "2026-02-30T10:00:00Z",
+    "2026-02-29T10:00:00Z",
+    "1900-02-29T10:00:00Z",
+    "2026-04-31T10:00:00Z",
+    "2026-00-10T10:00:00Z",
+    "2026-10-00T10:00:00Z",
     "",
   ]) assert.ok(dateErrors(bad).length > 0, bad);
   assert.ok(errorsOf(file([thread({ createdAt: 20261021 })])).length > 0);
