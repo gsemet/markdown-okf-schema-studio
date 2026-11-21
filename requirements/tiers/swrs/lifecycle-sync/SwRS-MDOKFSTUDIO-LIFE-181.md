@@ -36,13 +36,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a Studio session holds a requested line, the session SHALL post the previewRevealLine message to its page once the page is ready and only once, SHALL post it at once when the page is already ready, and the requested line SHALL win over the reading place the tab restores for its document.
 
-### Scenario (nominal)
+### Scenario (nominal): Nominal case
 
 - GIVEN a Studio tab opening for a file at line 42, whose page is not ready
 - WHEN the page reports ready
 - THEN previewRevealLine with line 42 is posted once and becomes the anchor of the next render, so the line wins over the restored reading place
 
-### Scenario (boundary)
+### Scenario (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |

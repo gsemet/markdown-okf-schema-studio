@@ -34,13 +34,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the host puts Studio in place for a file, it SHALL reveal the Studio tab of that file in the text tab's group when there is one, SHALL reveal the most recently active Studio tab of another group for a jump, and SHALL open a new Studio tab in the text tab's group for a plain opening or when the file has no Studio tab yet.
 
-### Scenario (nominal)
+### Scenario (nominal): Nominal case
 
 - GIVEN a text tab of a file and a Studio tab of the same file in the same group
 - WHEN the host puts Studio in place for the file
 - THEN the Studio tab is revealed, no new tab opens, and the text tab is closed
 
-### Scenario (boundary)
+### Scenario (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |
