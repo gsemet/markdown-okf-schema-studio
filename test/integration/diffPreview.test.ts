@@ -11,8 +11,6 @@ const LONG = Array.from({ length: 140 }, (_, index) => `Line ${index + 1}: fille
 
 const textTabs = (): vscode.Tab[] => vscode.window.tabGroups.all.flatMap((group) => group.tabs)
   .filter((tab) => tab.input instanceof vscode.TabInputText);
-const diffTabs = (): vscode.Tab[] => vscode.window.tabGroups.all.flatMap((group) => group.tabs)
-  .filter((tab) => tab.input instanceof vscode.TabInputTextDiff);
 
 /**
  * A virtual document at the path of a file, as a `git:` side or the replace preview's "after
@@ -22,9 +20,14 @@ const diffTabs = (): vscode.Tab[] => vscode.window.tabGroups.all.flatMap((group)
 const virtualOf = (file: string, side = "left"): vscode.Uri => vscode.Uri.file(file).with({ scheme: SCHEME, query: side });
 
 async function openDiff(original: vscode.Uri, modified: vscode.Uri): Promise<void> {
-  const before = diffTabs().length;
   await vscode.commands.executeCommand("vscode.diff", original, modified, "Diff under test");
-  await waitFor("the diff editor", () => diffTabs().length === before + 1);
+  // A new diff may replace the open one in its group (a preview tab): wait for it to be the active tab, not for a count.
+  await waitFor("the requested diff to be the active tab", () => vscode.window.tabGroups.all.some((group) => {
+    const input = group.activeTab?.input;
+    return input instanceof vscode.TabInputTextDiff
+      && input.original.toString() === original.toString()
+      && input.modified.toString() === modified.toString();
+  }));
   await waitFor("a text editor of the diff to be active", () => vscode.window.activeTextEditor !== undefined);
 }
 
