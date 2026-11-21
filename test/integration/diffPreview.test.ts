@@ -97,9 +97,15 @@ export async function run(): Promise<void> {
         await vscode.commands.executeCommand(COMMAND_ID);
         await waitFor("the side preview of the real file b.md", () => previewOf(file("b.md")), 30_000);
         assert.equal(textTabs().length, tabsBefore, `${layout}: no text editor opened`);
-        await vscode.commands.executeCommand("cursorBottom");
-        await waitFor(`the preview to scroll with the replace-like diff (${layout})`,
-          () => (getActivePreviewForTests()?.lastSourceScrollLine ?? 0) > 60, 20_000);
+        // Inline, the real original side has no editor of its own to scroll: the scroll is asserted side by side only.
+        if (sideBySide) {
+          // The command left the focus in the preview: put it back in the diff's real (original, left) side.
+          await vscode.commands.executeCommand("workbench.action.compareEditor.focusPrimarySide");
+          await waitFor("the cursor in the real original side", () => vscode.window.activeTextEditor?.document.uri.scheme === "file");
+          await vscode.commands.executeCommand("cursorBottom");
+          await waitFor(`the preview to scroll with the replace-like diff (${layout})`,
+            () => (getActivePreviewForTests()?.lastSourceScrollLine ?? 0) > 60, 20_000);
+        }
       });
     }
 
@@ -123,6 +129,9 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand(COMMAND_ID);
     await waitFor("the side preview of the working-tree file c.md", () => previewOf(file("c.md")), 30_000);
     const line = getActivePreviewForTests()?.lastSourceScrollLine;
+    // The command left the focus in the preview: put it back in a diff side, so the scroll below is a real one.
+    await vscode.commands.executeCommand("workbench.action.compareEditor.focusPrimarySide");
+    await waitFor("the cursor in a virtual diff side", () => vscode.window.activeTextEditor?.document.uri.scheme === SCHEME);
     await vscode.commands.executeCommand("cursorBottom");
     await sleep(1500);
     assert.equal(getActivePreviewForTests()?.lastSourceScrollLine, line, "scrolling a stand-in diff moves no preview");
