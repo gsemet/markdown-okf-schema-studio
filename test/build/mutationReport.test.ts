@@ -20,7 +20,10 @@ type Pure = {
   scoreOf(counts: Record<string, number>): number | undefined;
   subFolderOf(file: string): string;
   holeRanges(report: { mutants: Mutant[] }): string[];
-  labelHoles(mutants: Mutant[], kills: Map<string, string[]>): { label: string; killedBy: string[] }[];
+  labelHoles(mutants: Mutant[], kills: Map<string, string[]>, timeouts?: Set<string>): { label: string; killedBy: string[]; otherTimeout: boolean }[];
+  otherLayerTimeouts(mutants: Mutant[], holeKeys: Set<string>): Set<string>;
+  isJudgeable(testName: string, sampled: Set<string>): boolean;
+  splitBySample(entries: (string | { name: string })[], sampled: Set<string>): { judged: unknown[]; outside: unknown[] };
   classifyTests(
     ran: string[],
     mutants: Mutant[],
@@ -112,4 +115,46 @@ test("the SwRS of a test come from the marker block above it or inside its body,
   ]);
   const map = pure.swrsByTest({ "core/x/a.test.ts": source }, { "core/x/a.markers.ts": "// @tests_req SwRS-X-A-003 — second\n" });
   assert.deepEqual([...(map.get("core/x/a.test.js::second") ?? [])], ["SwRS-X-A-003"]);
+});
+
+test("a hole that only timed out in another layer stays unkilled and says so", async () => {
+  const pure = await load();
+  const read = pure.normalizeReport(report);
+  const holes = new Set([read.mutants[2].key, read.mutants[3].key]);
+  const timedOut = pure.otherLayerTimeouts([{ ...read.mutants[2], status: "Timeout" }, { ...read.mutants[3], status: "Killed" }], holes);
+  assert.deepEqual([...timedOut], [read.mutants[2].key]);
+  const labels = pure.labelHoles(read.mutants, new Map(), timedOut);
+  assert.deepEqual(labels.map((hole) => [hole.label, hole.otherTimeout]), [["no test kills it", true], ["no test kills it", false]]);
+});
+
+test("with a sample, only tests of a file named after a sampled source file are judged", async () => {
+  const pure = await load();
+  const sampled = new Set(["src/core/x/a.ts", "src/core/x/deep/b.ts"]);
+  assert.equal(pure.isJudgeable("core/x/a.test.js::one", sampled), true);
+  assert.equal(pure.isJudgeable("core/x/deep/b.test.js::one > two", sampled), true);
+  assert.equal(pure.isJudgeable("core/x/c.test.js::one", sampled), false);
+  assert.equal(pure.isJudgeable("core/x/a.requirements.test.js::one", sampled), true);
+  assert.equal(pure.isJudgeable("core/y/a.test.js::one", sampled), false);
+  assert.equal(pure.isJudgeable("page/a.test.js::one", sampled), false);
+  const split = pure.splitBySample([{ name: "core/x/a.test.js::one" }, "core/y/a.test.js::two"], sampled);
+  assert.equal(split.judged.length, 1);
+  assert.equal(split.outside.length, 1);
+});
+
+test("a zero-kill test that only shares load-time coverage with its file is not judged", async () => {
+  const pure = await load();
+  const names = ["core/x/a.test.js::one", "core/x/a.test.js::two", "core/x/b.test.js::solo"];
+  const mutants = [
+    // Load-time mutant: credited to every test of a.test.js, killed by none.
+    { ...mutant("1", "Survived", ["0", "1"]), key: "m1" },
+    // Reached by "one" only and killed by nobody: a real zero-kill.
+    { ...mutant("2", "Survived", ["0"]), key: "m2" },
+    { ...mutant("3", "Survived", ["2"]), key: "m3" },
+  ];
+  const named = mutants.map((m) => ({ ...m, coveredBy: m.coveredBy.map((id) => names[Number(id)]), killedBy: [] as string[], file: "src/core/x/a.ts", start: { line: 1, column: 1 } }));
+  const classes = pure.classifyTests(names, named as never);
+  assert.deepEqual(classes.zeroKill.map((t) => t.name), ["core/x/a.test.js::one", "core/x/b.test.js::solo"]);
+  const loadOnly = pure.classifyTests(names, named.slice(0, 1) as never);
+  assert.deepEqual(loadOnly.notJudged.map((t) => t.name), ["core/x/a.test.js::one", "core/x/a.test.js::two"]);
+  assert.deepEqual(loadOnly.zeroKill, []);
 });

@@ -21,6 +21,11 @@ export function renderSummary(summary) {
   out.push(`Generated ${summary.generated}. Phases: core${summary.phases.others ? ", others" : " (the others phase did not run)"}.`, "");
   out.push(`Mutants: ${statuses(summary.mutants)}. Tests that ran: ${summary.tests}.`, "");
 
+  const sample = summary.sample;
+  if (sample?.partial) {
+    out.push("## Sample", "", `This is a sample: ${sample.files.length} of ${sample.sourceFiles} files of src/core were mutated, so every reading below is "on the sample". Tests that only load sampled modules are not judged: a test is listed as zero-kill or redundant only when its test file is named after a sampled source file of the same sub-folder. Tests left out of the judgement: ${sample.outsideSample.zeroKill} zero-kill, ${sample.outsideSample.redundant} redundant, ${sample.outsideSample.reachesNothing} reaching no sampled mutant.`, "");
+    out.push(table(["sampled file", "mutants"], sample.files.map((f) => [f.file, f.mutants])));
+  }
   out.push("## Score per sub-folder of src/core", "");
   out.push(table(["folder", "score", "killed", "survived", "no coverage", "timeout", "compile error", "ignored", "holes only another layer kills", "score with other layers"],
     summary.folders.map((f) => [f.folder, pct(f.score), f.counts.Killed ?? 0, f.counts.Survived ?? 0, f.counts.NoCoverage ?? 0, f.counts.Timeout ?? 0, f.counts.CompileError ?? 0, f.counts.Ignored ?? 0, f.onlyOtherLayer, pct(f.scoreWithOtherLayers)])));
@@ -39,7 +44,7 @@ export function renderSummary(summary) {
 
   out.push("## Holes", "", "Mutants no test of src/core kills (survived or no coverage), labelled by the others phase.", "");
   out.push(table(["file", "line", "mutator", "replacement", "status", "label", "killed by"],
-    summary.holes.map((h) => [h.file, `${h.line}:${h.column}`, h.mutator, h.replacement.slice(0, 60), h.status, h.label, h.killedBy.join("; ")])));
+    summary.holes.map((h) => [h.file, `${h.line}:${h.column}`, h.mutator, h.replacement.slice(0, 60), h.status, h.label, h.killedBy.join("; ") || (h.otherTimeout ? "timed out in another layer (not counted as a kill)" : "")])));
 
   out.push("## Test files left out", "");
   out.push(Object.keys(summary.testFilesLeftOut).length === 0 ? `None: all ${summary.testFilesRun.length} test files ran.\n` : table(["file", "reason"], Object.entries(summary.testFilesLeftOut)));

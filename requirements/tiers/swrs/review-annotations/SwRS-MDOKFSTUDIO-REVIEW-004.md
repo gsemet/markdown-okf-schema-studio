@@ -27,6 +27,7 @@ implemented_in_files:
 - src/session/features/comments.ts
 tested_in_files:
 - test/core/comments/commentEditing.test.ts
+- test/core/comments/commentModel.holes.test.ts
 - test/core/comments/commentModel.test.ts
 - test/integration/commentWrite.test.ts
 - test/integration/reviewComments.test.ts

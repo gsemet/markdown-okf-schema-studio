@@ -27,6 +27,7 @@ implemented_in_files:
 - src/session/features/history.ts
 - src/session/features/links.ts
 tested_in_files:
+- test/core/state/navigationHistory.holes.test.ts
 - test/core/state/navigationHistory.test.ts
 - test/integration/previewHistory.test.ts
 - test/page/runtimeScroll.test.ts

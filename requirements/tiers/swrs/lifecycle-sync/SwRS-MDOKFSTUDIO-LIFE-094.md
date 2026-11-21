@@ -28,6 +28,7 @@ implemented_in_files:
 - src/session/features/pageDocument.ts
 - src/session/hostEvents.ts
 tested_in_files:
+- test/core/preview/updatedRanges.holes.test.ts
 - test/core/preview/updatedRanges.test.ts
 - test/integration/updateGlow.test.ts
 - test/page/modules/motion.test.ts

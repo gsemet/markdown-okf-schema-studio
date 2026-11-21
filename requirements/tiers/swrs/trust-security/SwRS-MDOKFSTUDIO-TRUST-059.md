@@ -33,6 +33,7 @@ implemented_in_files:
 - src/core/protocol/hostToPage.ts
 - src/page/hostTransport.ts
 tested_in_files:
+- test/core/protocol/hostToPage.holes.test.ts
 - test/core/protocol/hostToPage.test.ts
 - test/page/hostMessages.test.ts
 - test/page/runtimeBlockEditor.test.ts

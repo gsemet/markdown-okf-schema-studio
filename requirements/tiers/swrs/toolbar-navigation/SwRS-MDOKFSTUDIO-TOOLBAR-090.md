@@ -26,6 +26,7 @@ implemented_in_files:
 - src/core/security/resource-policy.ts
 - src/host-vscode/vscodeHost.ts
 tested_in_files:
+- test/core/navigation/previewNavigation.holes.test.ts
 - test/core/navigation/previewNavigation.test.ts
 - test/host-vscode/openExternal.test.ts
 - test/session/previewNavigator.test.ts

@@ -27,6 +27,7 @@ implemented_in_files:
 - src/page/features/scrollCore.ts
 - src/session/features/scrollSync.ts
 tested_in_files:
+- test/core/scroll/anchorPolicy.holes.test.ts
 - test/core/scroll/anchorPolicy.test.ts
 - test/integration/scroll-sync-suite.ts
 - test/integration/sourceMapping.test.ts

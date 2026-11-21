@@ -93,8 +93,12 @@ function withOther(entry) {
   return counts;
 }
 
-/** Holes (survived, no coverage) with their label, from the core mutants and the others-phase kills (key -> killer names). */
-export function labelHoles(coreMutants, otherKills) {
+/**
+ * Holes (survived, no coverage) with their label, from the core mutants and the others-phase kills (key -> killer names).
+ * `otherTimeouts` (keys) are holes whose mutant made a test of another layer time out: not counted as a kill
+ * (no test is named, and a hang can be load), so the label stays "no test kills it" with `otherTimeout` set.
+ */
+export function labelHoles(coreMutants, otherKills, otherTimeouts = new Set()) {
   return coreMutants
     .filter((mutant) => HOLE.has(mutant.status))
     .map((mutant) => {
@@ -108,6 +112,7 @@ export function labelHoles(coreMutants, otherKills) {
         status: mutant.status,
         label: killers ? "killed only by another layer" : "no test kills it",
         killedBy: killers ?? [],
+        otherTimeout: !killers && otherTimeouts.has(mutant.key),
       };
     })
     .sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line || a.column - b.column);
@@ -122,12 +127,46 @@ export function otherLayerKills(othersMutants, holeKeys) {
   return kills;
 }
 
+/** For the others report: keys of the holes that only timed out in the tests of another layer. */
+export function otherLayerTimeouts(othersMutants, holeKeys) {
+  return new Set(othersMutants.filter((mutant) => holeKeys.has(mutant.key) && mutant.status === "Timeout").map((mutant) => mutant.key));
+}
+
+/**
+ * Sample fairness: with a sample of files, a test is judged (zero-kill, redundant) only when its test
+ * file is named after a sampled source file of the same sub-folder (`core/<folder>/<base>.test.js`
+ * for `src/core/<folder>/<base>.ts`). Any other test merely loads sampled modules, so what it kills
+ * of the sample says nothing about it. `sampledFiles` are the mutated source files.
+ *
+ * The base name is the part of the test file name before its first dot, so `a.test.js`,
+ * `a.requirements.test.js` and `a.holes.test.js` all belong to `a.ts`; a test file whose name does
+ * not start with a source file's base name (for example `crossFile.test.js`) is never judged.
+ */
+export function isJudgeable(testName, sampledFiles) {
+  const file = testName.split("::")[0].replace(/\\/gu, "/");
+  const parts = file.split("/");
+  if (parts[0] !== "core" || parts.length < 3) return false;
+  const base = parts.at(-1).split(".")[0];
+  const source = `src/core/${parts.slice(1, -1).join("/")}/${base}.ts`;
+  return sampledFiles.has(source);
+}
+
+/** Splits entries (strings or objects with `name`) into those a sample judges fairly and the others. */
+export function splitBySample(entries, sampledFiles) {
+  const judged = [];
+  const outside = [];
+  for (const entry of entries) (isJudgeable(typeof entry === "string" ? entry : entry.name, sampledFiles) ? judged : outside).push(entry);
+  return { judged, outside };
+}
+
 /**
  * Test classes from the core phase. `ranTests` is every test name of the dry run. A test is:
  * - a killer when it is in some `killedBy`;
  * - zero-kill when it reaches a Killed, Survived or Timeout mutant and kills none;
  * - not judged when it reaches mutants, none of them Killed, Survived or NoCoverage (all Ignored,
- *   Timeout or CompileError);
+ *   Timeout or CompileError), or when it is zero-kill by load-time coverage only: every mutant it
+ *   reaches is also credited to every test of its file (a mutant reached while the file loads is
+ *   credited to each test of that file, mt-Q9), so its zero kills proves nothing;
  * - reaching nothing when no mutant lists it in `coveredBy`.
  */
 export function classifyTests(ranTests, mutants) {
@@ -142,6 +181,17 @@ export function classifyTests(ranTests, mutants) {
     }
     if (mutant.status === "Killed") for (const name of mutant.killedBy) kills.set(name, [...(kills.get(name) ?? []), mutant]);
   }
+  const testsOfFile = new Map();
+  for (const name of ranTests) {
+    const file = name.split("::")[0];
+    testsOfFile.set(file, [...(testsOfFile.get(file) ?? []), name]);
+  }
+  const reachedMutants = new Map();
+  for (const mutant of mutants) for (const name of mutant.coveredBy) reachedMutants.set(name, [...(reachedMutants.get(name) ?? []), mutant]);
+  const loadTimeOnly = (name) => {
+    const siblings = testsOfFile.get(name.split("::")[0]) ?? [];
+    return siblings.length > 1 && (reachedMutants.get(name) ?? []).every((mutant) => siblings.every((sibling) => mutant.coveredBy.includes(sibling)));
+  };
   const zeroKill = [];
   const notJudged = [];
   const reachesNothing = [];
@@ -152,6 +202,10 @@ export function classifyTests(ranTests, mutants) {
     } else if (kills.has(name)) {
       continue;
     } else if (["Killed", "Survived"].some((status) => entry.statuses[status]) || entry.statuses.Timeout && !onlyTimeout(entry)) {
+      if (loadTimeOnly(name)) {
+        notJudged.push({ name, reached: entry.statuses, reason: "load-time coverage only: every mutant it reaches is also credited to every test of its file, so zero kills proves nothing (extends mt-Q11)" });
+        continue;
+      }
       zeroKill.push({ name, reached: entry.statuses });
     } else {
       notJudged.push({ name, reached: entry.statuses, reason: notJudgedReason(entry) });

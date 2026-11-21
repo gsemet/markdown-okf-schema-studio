@@ -21,6 +21,7 @@ derived_by: []
 implemented_in_files:
 - src/core/paste/htmlToMarkdown.ts
 tested_in_files:
+- test/core/paste/htmlToMarkdown.holes.test.ts
 - test/core/paste/htmlToMarkdown.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

@@ -32,6 +32,7 @@ implemented_in_files:
 - src/core/mapping/pastedImage.ts
 - src/session/features/hostRequests.ts
 tested_in_files:
+- test/core/mapping/pastedImage.holes.test.ts
 - test/core/mapping/pastedImage.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/integration/imagePaste.test.ts
