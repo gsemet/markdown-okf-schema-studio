@@ -13,7 +13,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-import { classifyTests, folderScores, holeRanges, labelHoles, normalizeReport, otherLayerKills, redundantTests, swrsByTest, swrsScores } from "./mutation/report-pure.mjs";
+import { classifyTests, folderScores, holeRanges, labelHoles, normalizeReport, otherLayerKills, otherLayerTimeouts, redundantTests, splitBySample, swrsByTest, swrsScores } from "./mutation/report-pure.mjs";
 import { renderSummary } from "./mutation/report-render.mjs";
 
 const root = process.cwd();
@@ -45,6 +45,7 @@ const othersJson = readJson(path.join(dir, "others/mutation.json"));
 const holes = new Set(core.mutants.filter((mutant) => ["Survived", "NoCoverage"].includes(mutant.status)).map((mutant) => mutant.key));
 const others = othersJson ? normalizeReport(othersJson) : undefined;
 const otherKills = others ? otherLayerKills(others.mutants, holes) : new Map();
+const otherTimeouts = others ? otherLayerTimeouts(others.mutants, holes) : new Set();
 
 const sources = {};
 const companions = {};
@@ -59,6 +60,17 @@ const classes = classifyTests(ranTests, core.mutants);
 const redundancy = redundantTests(classes.kills);
 const manifest = (phase) => readJson(path.join(dir, phase, "test-files.json"));
 const coreManifest = manifest("core");
+// The sample: the files that were mutated, with their mutant counts. With a sample (fewer files than
+// src/core holds), only tests of a test file named after a sampled file are judged (report-pure.mjs).
+const sampleCounts = new Map();
+for (const mutant of core.mutants) sampleCounts.set(mutant.file, (sampleCounts.get(mutant.file) ?? 0) + 1);
+const sampledFiles = new Set(sampleCounts.keys());
+const coreSources = listFiles(path.join(root, "src/core"), (name) => name.endsWith(".ts") && !name.endsWith(".d.ts"));
+const partial = sampledFiles.size < coreSources.length;
+const judge = (entries) => (partial ? splitBySample(entries, sampledFiles) : { judged: entries, outside: [] });
+const zeroKill = judge(classes.zeroKill);
+const redundant = judge(redundancy.redundant);
+const reaches = judge(classes.reachesNothing);
 const mutantCounts = {};
 for (const mutant of core.mutants) mutantCounts[mutant.status] = (mutantCounts[mutant.status] ?? 0) + 1;
 
@@ -69,12 +81,18 @@ const summary = {
   folders: folderScores(core.mutants, otherKills),
   swrs: swrsScores(core.mutants, mapping, ranTests),
   tests: ranTests.length,
-  zeroKill: classes.zeroKill,
+  sample: {
+    partial,
+    sourceFiles: coreSources.length,
+    files: [...sampleCounts].map(([file, mutants]) => ({ file, mutants })).sort((a, b) => a.file.localeCompare(b.file)),
+    outsideSample: { zeroKill: zeroKill.outside.length, redundant: redundant.outside.length, reachesNothing: reaches.outside.length },
+  },
+  zeroKill: zeroKill.judged,
   notJudged: classes.notJudged,
-  reachesNothing: classes.reachesNothing,
+  reachesNothing: reaches.judged,
   keepers: redundancy.keepers.length,
-  redundant: redundancy.redundant,
-  holes: labelHoles(core.mutants, otherKills),
+  redundant: redundant.judged,
+  holes: labelHoles(core.mutants, otherKills, otherTimeouts),
   testFilesRun: coreManifest?.included ?? [],
   testFilesLeftOut: coreManifest?.leftOut ?? {},
 };

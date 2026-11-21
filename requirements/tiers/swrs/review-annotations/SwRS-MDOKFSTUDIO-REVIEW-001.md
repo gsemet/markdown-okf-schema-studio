@@ -24,6 +24,7 @@ implemented_in_files:
 - src/core/comments/commentModel.ts
 - src/page/modules/commentThreadData.ts
 tested_in_files:
+- test/core/comments/commentModel.holes.test.ts
 - test/core/comments/commentModel.test.ts
 - test/integration/reviewComments.test.ts
 - test/page/modules/commentThreads.test.ts

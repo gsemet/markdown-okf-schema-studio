@@ -28,6 +28,7 @@ implemented_in_files:
 - src/session/features/blockEdits.ts
 tested_in_files:
 - test/core/edits/sourceEdits.test.ts
+- test/core/mapping/textDiff.holes.test.ts
 - test/core/mapping/textDiff.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockEditorLineEndings.test.ts

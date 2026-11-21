@@ -24,6 +24,7 @@ derived_by: []
 implemented_in_files:
 - src/core/frontmatter/fileLinkAnnotations.ts
 tested_in_files:
+- test/core/frontmatter/fileLinks.holes.test.ts
 - test/core/frontmatter/fileLinks.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 default_owner_email: gaetan@xeberon.net

@@ -28,6 +28,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/propertiesTable.test.ts
+- test/core/frontmatter/schemaValidator.holes.test.ts
 - test/integration/previewEditing.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net

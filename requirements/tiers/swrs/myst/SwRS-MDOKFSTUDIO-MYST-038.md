@@ -26,6 +26,7 @@ implemented_in_files:
 - src/core/mapping/labelRename.ts
 - src/page/modules/labelRename.ts
 tested_in_files:
+- test/core/mapping/labelRename.holes.test.ts
 - test/core/mapping/labelRename.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/integration/realInput/labelRenameAboveTable.ts

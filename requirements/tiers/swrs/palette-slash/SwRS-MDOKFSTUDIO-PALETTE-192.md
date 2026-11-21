@@ -30,6 +30,7 @@ derived_by: []
 implemented_in_files:
 - src/session/features/hostRequests.ts
 tested_in_files:
+- test/core/mapping/imageReference.holes.test.ts
 - test/core/mapping/imageReference.test.ts
 - test/integration/imagePicker.test.ts
 - test/session/paletteReq.requirements.test.ts

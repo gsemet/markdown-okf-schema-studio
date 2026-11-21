@@ -23,6 +23,7 @@ derived_by: []
 implemented_in_files:
 - src/core/navigation/previewNavigation.ts
 tested_in_files:
+- test/core/navigation/previewNavigation.holes.test.ts
 - test/core/navigation/previewNavigation.test.ts
 - test/session/links.test.ts
 default_owner_email: gaetan@xeberon.net

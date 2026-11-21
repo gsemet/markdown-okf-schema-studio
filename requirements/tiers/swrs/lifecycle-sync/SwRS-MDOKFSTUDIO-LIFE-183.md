@@ -23,6 +23,7 @@ implemented_in_files:
 - src/core/navigation/openingPolicy.ts
 - src/host-vscode/studioPlacement.ts
 tested_in_files:
+- test/core/navigation/openingPolicy.holes.test.ts
 - test/core/navigation/openingPolicy.test.ts
 - test/host/putStudioInPlace.test.ts
 default_owner_email: gaetan@xeberon.net

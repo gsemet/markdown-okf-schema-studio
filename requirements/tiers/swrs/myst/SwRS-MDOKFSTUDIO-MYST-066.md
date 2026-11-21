@@ -25,6 +25,7 @@ implemented_in_files:
 - src/core/myst/confLocator.ts
 - src/core/myst/confParser.ts
 tested_in_files:
+- test/core/myst/confLocator.holes.test.ts
 - test/core/myst/confLocator.test.ts
 - test/core/myst/confParser.test.ts
 default_owner_email: gaetan@xeberon.net

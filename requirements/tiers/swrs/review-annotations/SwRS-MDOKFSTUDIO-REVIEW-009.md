@@ -46,6 +46,7 @@ tested_in_files:
 - test/core/mapping/lineHunks.test.ts
 - test/core/mapping/wordDiff.test.ts
 - test/core/preview/previewStyles.test.ts
+- test/core/protocol/hostToPage.holes.test.ts
 - test/core/protocol/hostToPage.test.ts
 - test/integration/realWindowGaps.ts
 - test/page/runtimePageControls.test.ts

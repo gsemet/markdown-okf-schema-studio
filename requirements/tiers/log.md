@@ -20,6 +20,10 @@
 
 - Changed: no SwRS. The `paste-url` and `drop-files` real-window steps run in every default round of `just ci-stress`, which defaults to 11 rounds of 21 scenarios instead of 12 of 19; their fixed 700 ms and 400 ms pauses became waits on a state the page reports, and each prints a failure trace in the CI log. The reds seen on CI (runs 44647675614, 44690391950, 44715893690) were the stored edit mode wait that e05f0b51 removed, and about 20 heavy runs since then never failed at either step.
 
+### Mutation campaign on src/core: tests for the holes (CR-450, round 3)
+
+- Changed (tests only, no requirement text): SwRS-MDOKFSTUDIO-BLOCK-042, FMEDIT-043, FMSCHEMA-046, FMSCHEMA-055, FMSCHEMA-067, FMSCHEMA-084, LIFE-094, LIFE-119, LIFE-183, MYST-038, MYST-045, MYST-066, PALETTE-192, PALETTE-196, PALETTE-217, PALETTE-229, REVIEW-001, REVIEW-004, REVIEW-009, REVIEW-167, REVIEW-186, TOOLBAR-059, TOOLBAR-090, TOOLBAR-102 and TRUST-059 gained tests (19 `*.holes.test.ts` files in `test/core`) that kill surviving mutants of their modules.
+
 ### Open Studio at a searched line: real VS Code trials and known limits (CR-445, round 4)
 
 - Changed: SwRS-MDOKFSTUDIO-LIFE-185 (the jump is a selection change of kind Command, trial T2; the wait for the editor ends after 3 s or on close; the activation opening is never replaced, trial T11 not automated); SwRS-MDOKFSTUDIO-LIFE-184 (rule 5 keeps a plain opening reopened as text; a jump right after a Studio tab closed is a jump, trial T13; known limits T4 and T3d).

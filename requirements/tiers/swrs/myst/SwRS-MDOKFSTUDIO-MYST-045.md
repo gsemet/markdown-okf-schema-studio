@@ -35,6 +35,7 @@ implemented_in_files:
 - src/session/features/sourceEdits.ts
 tested_in_files:
 - test/core/edits/sourceEdits.test.ts
+- test/core/mapping/labelRename.holes.test.ts
 - test/core/mapping/labelRename.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/integration/labelRename.test.ts

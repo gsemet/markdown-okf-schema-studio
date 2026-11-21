@@ -31,9 +31,11 @@ implemented_in_files:
 - src/node-services/linkedTargetWatch.ts
 - src/page/features/linkTooltip.ts
 tested_in_files:
+- test/core/frontmatter/fileLinks.holes.test.ts
 - test/core/frontmatter/fileLinks.test.ts
 - test/core/frontmatter/frontmatterFence.test.ts
 - test/core/frontmatter/propertiesTable.test.ts
+- test/core/navigation/previewNavigation.holes.test.ts
 - test/core/navigation/previewNavigation.test.ts
 - test/host-memory/memoryHostSession.test.ts
 - test/integration/previewEditing.test.ts
