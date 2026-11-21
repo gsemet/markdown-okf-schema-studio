@@ -59,3 +59,11 @@ export async function setViewport(page: Page, size: PixelSize): Promise<void> {
   console.log(problem);
   if (viewportGuardIsStrict()) throw new Error(problem);
 }
+
+/**
+ * The viewport the real-input run emulates on its own page (run.ts). A scenario that opens a second
+ * CDP connection must emulate this size, never another: Chromium drops the second client's
+ * device-metrics override when it disconnects, and a different size left a window whose input
+ * routing no longer matched the renderer layout (CR-454).
+ */
+export const RUN_VIEWPORT: PixelSize = { width: 1400, height: 900 };
