@@ -2,7 +2,8 @@
  * The line marker (CR 445): the page opened at a searched line draws an arrow in the left margin and
  * a light band across the column on that line, in the light and the dark theme, and in edit mode
  * the marker covers no handle. The host message is `previewRevealLine`, the one a Studio tab
- * receives when it opens at a search result or at a link's target line.
+ * receives when it opens at a search result or at a link's target line. The harness delivers it as a
+ * `hostMessage` page action, after its pre-checks (a check that edits the source would clear the marker).
  */
 
 import { WIDE } from "./scenarioAssertions";
@@ -11,7 +12,7 @@ import type { ContentAssertion } from "./scenarios";
 
 const FIXTURE = "91-line-marker";
 const MARKER = ".sphinx-preview-line-marker";
-const reveal = (line: number) => ({ render: { hostMessages: [{ delayMs: 50, data: { type: "previewRevealLine", line } }] } });
+const reveal = (line: number) => ({ pageActions: [{ hostMessage: { type: "previewRevealLine", line } }] });
 
 /** Line 22 of the fixture is `value_15 = 15`, inside the long numbered code block. */
 const CODE_LINE_ASSERTIONS: ContentAssertion[] = [
@@ -53,10 +54,14 @@ const IN_VIEWPORT: ContentAssertion = {
   expr: "(() => { const box = document.querySelector('.sphinx-preview-line-marker').getBoundingClientRect(); return box.top >= 0 && box.bottom <= window.innerHeight; })()",
 };
 
-/** Line 5 is the third source line of a soft-wrapped paragraph: the renderer maps the block. */
+/** Line 5 is the third source line of a soft-wrapped paragraph: the marker uses the measured top of that wrapped line, not of the block. */
 const SOFT_WRAP_ASSERTIONS: ContentAssertion[] = [
   { message: "one marker is drawn", selector: MARKER, count: 1 },
-  blockTopAssertion("the marker sits on the top of the wrapped paragraph", "document.querySelector(\"p[aria-current='location']\")"),
+  {
+    message: "the marker sits on the third source line of the wrapped paragraph, not at the paragraph top",
+    selector: MARKER,
+    expr: "(() => { const marker = document.querySelector('.sphinx-preview-line-marker').getBoundingClientRect(); const paragraph = document.querySelector(\"p[aria-current='location']\").getBoundingClientRect(); const walker = document.createTreeWalker(document.querySelector(\"p[aria-current='location']\"), NodeFilter.SHOW_TEXT); let node = walker.nextNode(); while (node && !node.textContent.includes('The third source line')) node = walker.nextNode(); if (!node) return false; const range = document.createRange(); const start = node.textContent.indexOf('The third source line'); range.setStart(node, start); range.setEnd(node, start + 1); const line = range.getBoundingClientRect(); return Math.abs(marker.top - line.top) <= 3 && Math.abs(marker.top - paragraph.top) > 10; })()",
+  },
   { message: "the paragraph is announced as the current location", selector: "p[aria-current='location']", count: 1 },
   IN_VIEWPORT,
 ];
@@ -85,7 +90,7 @@ const HIGH_CONTRAST_ASSERTIONS: ContentAssertion[] = [
   {
     message: "in forced colours the band is transparent and the arrow keeps a visible system colour",
     selector: MARKER,
-    expr: "(() => { const marker = getComputedStyle(document.querySelector('.sphinx-preview-line-marker')); const arrow = getComputedStyle(document.querySelector('.sphinx-preview-line-marker-arrow')); return marker.backgroundColor === 'rgba(0, 0, 0, 0)' && arrow.borderInlineStartColor !== 'rgba(0, 0, 0, 0)' && arrow.borderInlineStartColor !== 'transparent'; })()",
+    expr: "(() => { const marker = getComputedStyle(document.querySelector('.sphinx-preview-line-marker')); const arrow = getComputedStyle(document.querySelector('.sphinx-preview-line-marker-arrow')); return (/, 0\\)$/.test(marker.backgroundColor) || marker.backgroundColor === 'transparent') && arrow.borderInlineStartColor !== 'rgba(0, 0, 0, 0)' && arrow.borderInlineStartColor !== 'transparent'; })()",
   },
 ];
 
@@ -127,7 +132,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     ...reveal(5),
     contentAssertions: SOFT_WRAP_ASSERTIONS,
     description: "Light theme, 900 px pane: the page asked to show the third source line of a soft-wrapped paragraph "
-      + "marks the top of that paragraph's block with the arrow and the band, inside the viewport.",
+      + "marks that wrapped line (not the top of the paragraph) with the arrow and the band, inside the viewport.",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
@@ -148,8 +153,10 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     ...WIDE,
     scroll: { kind: "top" as const },
     // The reader folds the section first; the request comes later and opens it.
-    pageActions: [{ click: "h2:has-text('Folded section') [data-okf-fold-toggle]", waitMs: 300 }],
-    render: { hostMessages: [{ delayMs: 2500, data: { type: "previewRevealLine", line: 54 } }] },
+    pageActions: [
+      { click: "h2:has-text('Folded section') [data-okf-fold-toggle]", waitMs: 300 },
+      { hostMessage: { type: "previewRevealLine", line: 54 } },
+    ],
     contentAssertions: FOLDED_ASSERTIONS,
     description: "Light theme, 900 px pane: a line under a heading the reader folded opens that section, then the "
       + "marker is drawn on the line.",
@@ -161,7 +168,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     theme: "dark",
     ...WIDE,
     scroll: { kind: "top" as const },
-    ...reveal(59),
+    ...reveal(61),
     contentAssertions: DROPDOWN_ASSERTIONS,
     description: "Dark theme, 900 px pane: a line inside a dropdown that starts closed opens the dropdown, then the "
       + "marker is drawn on the line.",

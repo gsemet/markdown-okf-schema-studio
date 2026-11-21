@@ -609,7 +609,7 @@ def check_forced_dark_theme(page: Page, scenario: dict, failures: list[Failure])
 
 
 def check_page_actions(page: Page, scenario: dict, failures: list[Failure]) -> None:
-    """The scenario's `pageActions`: real clicks and hovers on the page, in order, before the content assertions."""
+    """The scenario's `pageActions`: real clicks and hovers, and host messages (`hostMessage`), in order, before the content assertions."""
     for action in scenario.get("pageActions") or []:
         if "drag" in action:
             source = page.locator(action["drag"]).first
@@ -628,6 +628,21 @@ def check_page_actions(page: Page, scenario: dict, failures: list[Failure]) -> N
             if not action.get("hold"):
                 page.mouse.up()
             page.wait_for_timeout(action.get("waitMs", 200))
+            continue
+        if "hostMessage" in action:
+            # A message of the host, delivered with the document context the page expects, after every pre-check
+            # (a check that edits the source would clear a marker requested earlier).
+            page.evaluate(
+                """(data) => {
+                  const root = document.documentElement;
+                  window.dispatchEvent(new MessageEvent("message", { data: { ...data,
+                    documentId: root.getAttribute("data-sphinx-preview-document-id"),
+                    revision: Number(root.getAttribute("data-sphinx-preview-document-version")),
+                    requestId: Number(root.getAttribute("data-sphinx-preview-request-id")) } }));
+                }""",
+                action["hostMessage"],
+            )
+            page.wait_for_timeout(action.get("waitMs", 300))
             continue
         if "press" in action:
             page.keyboard.press(action["press"])

@@ -258,7 +258,8 @@ PAGE_CHECKS = """
     }
     const panel = getComputedStyle(block).backgroundColor;
     const page = getComputedStyle(document.body).backgroundColor;
-    if (Math.abs(luminance(panel) - luminance(page)) < __MIN_CONTRAST__) {
+    // Forced colours remove every panel fill by design: the fill contrast is not checked there.
+    if (!matchMedia('(forced-colors: active)').matches && Math.abs(luminance(panel) - luminance(page)) < __MIN_CONTRAST__) {
       failures.push(`admonition "${block.className}" background is indistinguishable from the page`);
     }
   }

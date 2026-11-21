@@ -55,6 +55,8 @@ More text of the folded section, with the searched words in it.
 
 ## Closed dropdown
 
-:::{dropdown} Closed by default
+:::{admonition} Closed by default
+:class: dropdown
+
 The searched line is inside this dropdown, which starts closed.
 :::

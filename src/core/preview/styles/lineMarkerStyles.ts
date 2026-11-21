@@ -34,9 +34,10 @@ export const LINE_MARKER_CSS = `
 }
 
 /* Edit mode: the list item handle and the row handle sit just left of the text (1.5em wide, above
-   the marker), so the arrow moves one handle further left and never meets them. */
+   the marker), so the arrow moves one handle (and a 6px margin) further left and never meets them.
+   In a narrow pane (gutter 16px) the max(1px, ...) clamp still applies. */
 html[data-sphinx-preview-edit-mode="on"] .sphinx-preview-line-marker-arrow {
-  inset-inline-start: max(1px, calc(var(--sphinx-preview-content-gutter, 16px) - 13px - 1.5em));
+  inset-inline-start: max(1px, calc(var(--sphinx-preview-content-gutter, 16px) - 13px - 1.5em - 6px));
 }
 
 @media (forced-colors: active) {

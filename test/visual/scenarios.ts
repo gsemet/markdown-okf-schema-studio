@@ -60,6 +60,8 @@ export interface ContentAssertion {
 export type PageAction =
   | { click: string; modifiers?: string[]; waitMs?: number }
   | { hover: string; waitMs?: number }
+  /** Delivers `hostMessage` to the page as the host would (with the document context), then waits `waitMs` (default 300). */
+  | { hostMessage: Record<string, unknown>; waitMs?: number }
   /** Presses a keyboard key (Playwright name, such as "ArrowDown") on the page, with no element focused by the script. */
   | { press: string; waitMs?: number }
   /** Picks the option `value` in the `<select>` matching `select`. */
