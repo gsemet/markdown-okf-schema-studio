@@ -403,6 +403,15 @@ export function createFakeVscode(options: FakeVscodeOptions) {
   /** The active tab when it is a custom editor (set by a test); undefined otherwise. */
   let activeCustomTab: { uri: Uri; viewType: string } | undefined;
 
+  /** The tabs the extension closed, and the options it passed to `showTextDocument`, for a test to read. */
+  const closedTabs: unknown[] = [];
+  const shownTextOptions: unknown[] = [];
+  /** The settings a test sets: `values["<section>.<key>"] = { globalValue, workspaceValue }`; `updates` records each write. */
+  const configuration = {
+    values: new Map<string, { globalValue?: unknown; workspaceValue?: unknown }>(),
+    updates: [] as Array<{ section: string; key: string; value: unknown; target: number }>,
+  };
+
   const window = {
     activeTextEditor: undefined as ReturnType<typeof editorFor> | undefined,
     visibleTextEditors: [] as Array<ReturnType<typeof editorFor>>,
@@ -429,7 +438,10 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       },
       onDidChangeTabGroups: events.changeTabGroups.event,
       onDidChangeTabs: events.changeTabs.event,
-      close: (): Promise<boolean> => Promise.resolve(true),
+      close: (tab: unknown): Promise<boolean> => {
+        closedTabs.push(tab);
+        return Promise.resolve(true);
+      },
     }, "tabGroups"),
     createWebviewPanel: (viewType: string, title: string, column: unknown): FakeWebviewPanel => {
       const panel = new FakeWebviewPanel(viewType, title);
@@ -437,7 +449,8 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       panels.push(panel);
       return strict(panel, "WebviewPanel");
     },
-    showTextDocument: (document: FakeTextDocument) => {
+    showTextDocument: (document: FakeTextDocument, options?: unknown) => {
+      shownTextOptions.push(options);
       const editor = editorFor(document);
       window.activeTextEditor = editor;
       window.visibleTextEditors = [editor];
@@ -474,11 +487,14 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     getWorkspaceFolder: (uri: Uri) => (
       uri.fsPath === folderUri.fsPath || uri.fsPath.startsWith(folderUri.fsPath + path.sep) ? workspaceFolder : undefined
     ),
-    getConfiguration: () => ({
+    getConfiguration: (section?: string) => ({
       get: <T>(_key: string, defaultValue?: T): T | undefined => defaultValue,
       has: (): boolean => false,
-      inspect: (): undefined => undefined,
-      update: (): Promise<void> => Promise.resolve(),
+      inspect: (key: string) => configuration.values.get(`${section}.${key}`),
+      update: (key: string, value: unknown, target: number): Promise<void> => {
+        configuration.updates.push({ section: String(section), key, value, target });
+        return Promise.resolve();
+      },
     }),
     openTextDocument: (uri: Uri) => {
       const existing = textDocuments.find((document) => document.uri.fsPath === uri.fsPath);
@@ -565,6 +581,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     TabInputWebview,
     TabInputText,
     TabInputCustom,
+    ConfigurationTarget: { Global: 1, Workspace: 2, WorkspaceFolder: 3 },
     Diagnostic: class {
       public source?: string;
       public code?: unknown;
@@ -651,6 +668,9 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       targetsDeletedByRename,
       events,
       showDocument,
+      closedTabs,
+      shownTextOptions,
+      configuration,
       /** Makes a custom editor tab of `filePath` the active tab (no text editor is active then). */
       activateCustomEditorTab: (filePath: string | undefined, viewType = "markdown-okf-schema-studio.editor"): void => {
         activeCustomTab = filePath === undefined ? undefined : { uri: Uri.file(filePath), viewType };

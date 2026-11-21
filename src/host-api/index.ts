@@ -20,6 +20,7 @@ import type { PreviewRenderer } from "./previewRenderer";
 import type { ProcessRunner } from "./processRunner";
 import type { RenderQueues } from "./renderQueues";
 import type { Settings } from "./settings";
+import type { SettingScopes } from "./settingScopes";
 import type { TextEditors } from "./textEditors";
 import type { VcsInfo } from "./vcsInfo";
 import type { Watcher } from "./watcher";
@@ -54,6 +55,7 @@ export type { PanelGroups, PreviewPanel } from "./previewPanel";
 export type { PreviewRenderer } from "./previewRenderer";
 export type { ProcessOptions, ProcessResult, ProcessRunner } from "./processRunner";
 export type { Settings, SettingsChange, SettingsSection } from "./settings";
+export type { SettingScope, SettingScopes } from "./settingScopes";
 export type { PairedEditor, RevealPosition, TextEditors } from "./textEditors";
 export type { HeadText, VcsInfo } from "./vcsInfo";
 export type { FileWatcher, Watcher } from "./watcher";
@@ -76,6 +78,8 @@ export interface HostServices {
   /** Direct watches of linked target files. */
   readonly linkedTargets: LinkedTargetWatcher;
   readonly settings: Settings;
+  /** Writes a setting in the user or the workspace scope (the migration only); none: nothing is migrated. */
+  readonly settingScopes?: SettingScopes;
   readonly workspace: WorkspaceInfo;
   readonly ui: HostUi;
   readonly vcs: VcsInfo;

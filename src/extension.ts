@@ -25,6 +25,7 @@ export {
   previewGroupUnlocksSettledForTests,
   resetPreviewThemeModeForTests,
   sendPreviewMessageForTests,
+  servicesStartedForTests,
   storedEditModeForTests,
   storeWorkspaceChoicesForTests,
   stubExportDialogsForTests,

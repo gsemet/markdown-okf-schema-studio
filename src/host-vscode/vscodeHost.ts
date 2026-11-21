@@ -20,6 +20,7 @@ import type { HostServices } from "../host-api/index";
 import type { ColorTheme } from "../host-api/colorTheme";
 import type { Navigation } from "../host-api/navigation";
 import type { Settings } from "../host-api/settings";
+import type { SettingScope, SettingScopes } from "../host-api/settingScopes";
 import type { PairedEditor, TextEditors } from "../host-api/textEditors";
 import type { VcsInfo } from "../host-api/vcsInfo";
 import type { FileWatcher, Watcher } from "../host-api/watcher";
@@ -33,6 +34,7 @@ import { createWorkerRenderer } from "../node-services/renderWorker";
 import { nodeSchemaFiles } from "../node-services/schemaFiles";
 import { lastKeystrokeAt } from "./keystrokes";
 import { createVscodeDocumentStore, type VscodeDocumentStore } from "./documents";
+import { StudioOpenedTextEditors } from "./openInStudio";
 
 /** The VS Code host's ports, with the VS Code-only parts of its document store and its assets. */
 export interface VscodeHost extends HostServices {
@@ -144,6 +146,31 @@ function createVscodeSettings(): Settings {
   };
 }
 
+/** The only settings the extension writes: its own, and the editor associations it migrates. */
+function isWritableSetting(section: string, key: string): boolean {
+  return (section === "workbench" && key === "editorAssociations")
+    || section === "markdownOkfSchemaStudio" || section.startsWith("markdownOkfSchemaStudio.");
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-175
+/** The one place that writes a setting (VS Code `ConfigurationTarget`); every other key is refused. */
+export function createVscodeSettingScopes(): SettingScopes {
+  const target = (scope: SettingScope): vscode.ConfigurationTarget =>
+    scope === "user" ? vscode.ConfigurationTarget.Global : vscode.ConfigurationTarget.Workspace;
+  return {
+    inspect(section, key) {
+      const inspected = vscode.workspace.getConfiguration(section).inspect(key);
+      return { user: inspected?.globalValue, workspace: inspected?.workspaceValue };
+    },
+    write(section, key, value, scope) {
+      if (!isWritableSetting(section, key)) {
+        return Promise.reject(new Error(`The extension never writes the setting ${section}.${key}.`));
+      }
+      return Promise.resolve(vscode.workspace.getConfiguration(section).update(key, value, target(scope)));
+    },
+  };
+}
+
 function createVscodeUi(logger: Logger): HostUi {
   return {
     showInformation: (message) => vscode.window.showInformationMessage(message),
@@ -252,10 +279,11 @@ function createVscodeWatcher(): Watcher {
 /** The only schemes handed to the operating system. */
 const EXTERNAL_URI_SCHEMES: ReadonlySet<string> = new Set(["http", "https", "mailto"]);
 
-function createVscodeNavigation(): Navigation {
+function createVscodeNavigation(openedByStudio: StudioOpenedTextEditors): Navigation {
   return {
     async showDocument(documentId, selection) {
       const targetUri = vscode.Uri.parse(documentId);
+      openedByStudio.record(targetUri.toString());
       const existingGroup = vscode.window.tabGroups.all.find((group) => group.tabs.some((tab) =>
         tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === targetUri.fsPath));
       await vscode.commands.executeCommand("vscode.open", targetUri, {
@@ -346,8 +374,8 @@ function createVscodeLogger(): Logger {
   };
 }
 
-/** Creates the VS Code host. */
-export function createVscodeHost(): VscodeHost {
+/** Creates the VS Code host; its text editor openings are recorded in `openedByStudio`. */
+export function createVscodeHost(openedByStudio = new StudioOpenedTextEditors()): VscodeHost {
   const documents = createVscodeDocumentStore();
   const logger = createVscodeLogger();
   return {
@@ -368,6 +396,7 @@ export function createVscodeHost(): VscodeHost {
     renderQueues: nodeRenderQueues,
     linkedTargets: nodeLinkedTargetWatcher,
     settings: createVscodeSettings(),
+    settingScopes: createVscodeSettingScopes(),
     workspace: createVscodeWorkspaceInfo(),
     ui: createVscodeUi(logger),
     vcs: createVscodeVcsInfo(),
@@ -375,7 +404,7 @@ export function createVscodeHost(): VscodeHost {
     logger,
     watcher: createVscodeWatcher(),
     processes: createNodeProcessRunner(),
-    navigation: createVscodeNavigation(),
+    navigation: createVscodeNavigation(openedByStudio),
     editors: createVscodeEditors(documents),
     theme: createVscodeTheme(),
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-004

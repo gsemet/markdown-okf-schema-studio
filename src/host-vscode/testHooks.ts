@@ -190,6 +190,11 @@ export function getActivePreviewForTests():
   };
 }
 
+/** True once the first Studio preview started the engine warm-up, the watchers and the diagnostics. */
+export function servicesStartedForTests(): boolean {
+  return current?.servicesStarted ?? false;
+}
+
 /** The edit mode the workspace remembers for the next preview (`undefined`: never stored). */
 export function storedEditModeForTests(): boolean | undefined {
   const stored = current?.manager.choices.editMode;
