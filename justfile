@@ -512,3 +512,13 @@ release-check:
     {{ npm }} test
     just sphinx-check
     {{ npm }} run package
+
+# Mutation campaign on src/core (CR-450, not part of check or preflight; hours on the whole of src/core): compile, TS 7 checker self-test (stops on failure), core phase, others phase (holes only), report in out/reports/mutation/summary.md. Optional sample: comma-separated globs of src/core files (or env STUDIO_MUTATION_FILES).
+mutation-core sample="":
+    {{ npm }} run compile
+    fnm exec -- node scripts/mutation/ts7-checker.mjs --self-test
+    rm -f out/reports/mutation/core/hole-ranges.json
+    STUDIO_MUTATION_FILES="${STUDIO_MUTATION_FILES:-{{ sample }}}" fnm exec -- node node_modules/@stryker-mutator/core/bin/stryker.js run scripts/stryker.config.mjs
+    fnm exec -- node scripts/mutation-report.mjs --others-ranges
+    if [ "$(fnm exec -- node -p 'require("./out/reports/mutation/core/hole-ranges.json").length')" != "0" ]; then STUDIO_MUTATION_FILES="${STUDIO_MUTATION_FILES:-{{ sample }}}" fnm exec -- node node_modules/@stryker-mutator/core/bin/stryker.js run scripts/stryker.others.config.mjs; else echo "mutation-core: no hole, others phase skipped"; rm -rf out/reports/mutation/others; fi
+    fnm exec -- node scripts/mutation-report.mjs
