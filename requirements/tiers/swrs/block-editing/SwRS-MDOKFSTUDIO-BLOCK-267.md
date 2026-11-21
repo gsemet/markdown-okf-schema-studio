@@ -1,0 +1,61 @@
+---
+type: SwRS
+id: SwRS-MDOKFSTUDIO-BLOCK-267
+uuid: c9aca100-242f-4db3-996f-3b6d96ac404c
+title: A blank-lines block takes the arrows, Enter and a click
+description: When the writer reaches a blank-lines block with Up or Down,
+  presses Enter on it or clicks it, the extension SHALL select it, or open an
+  insertion editor in its place, remove it on Delete or Backspace only when it
+  is selected, and keep it out of every block selection range, move and
+  clipboard copy or cut.
+project: markdown-okf-schema-studio
+scope: block-editing
+req_lifecycle: proposed
+status: stable
+origin: native
+tier: SwRS
+derives_from:
+- StRS-MDOKFSTUDIO-BLOCK-011
+- StRS-MDOKFSTUDIO-BLOCK-025
+annotation_exemption: false
+exemption_reason:
+derived_by: []
+implemented_in_files:
+- src/page/features/blockSelectionView.ts
+tested_in_files: []
+default_owner_email: gaetan@xeberon.net
+---
+
+## A blank-lines block takes the arrows, Enter and a click
+
+### Normative behavior
+
+When the writer reaches a blank-lines block with Up or Down, presses Enter on it or clicks it, the extension SHALL select it, or open an insertion editor in its place, remove it on Delete or Backspace only when it is selected, and keep it out of every block selection range, move and clipboard copy or cut.
+
+### Scenario: Arrows, Enter and a click
+
+- GIVEN edit mode on and a blank-lines block between two blocks
+- WHEN the writer presses Down from the block above, presses Enter on the blank-lines block, or clicks it
+- THEN it is selected, and Enter or a click opens an insertion editor in its place
+
+### Scenario: Delete needs the selection
+
+- GIVEN a blank-lines block that is only focused, and one that is selected
+- WHEN the writer presses Delete or Backspace
+- THEN nothing happens for the focused one and previewBlankRunDelete is posted for the selected one
+- AND the block is never part of a block selection range, a move, or a copy or cut
+
+### Verification notes
+
+- Method: test/page/runtimeBlankLines.test.ts (keys, click, selection, ranges, copy and cut).
+- Criteria: a blank-lines block has no data-sphinx-source-line, so the block commands never see it.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-011](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-011.md): A writer adds blocks and starts an empty document from the preview
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+<!-- okf:links:end -->

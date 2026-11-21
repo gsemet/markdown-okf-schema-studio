@@ -66,6 +66,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
         line: edit.line,
         endLine: edit.endLine,
         ...(edit.insertAfterLine !== undefined ? { insertAfterLine: edit.insertAfterLine } : {}),
+        ...(edit.replaceBlankRun ? { replaceBlankRun: edit.replaceBlankRun } : {}),
       });
     }
     // @implements_req SwRS-MDOKFSTUDIO-TABLE-064
@@ -309,6 +310,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       ?? Number(target.getAttribute("data-sphinx-source-end-line") || line);
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-102
     const insertAfterLine = sourceRange?.insertAfterLine;
+    const replaceBlankRun = sourceRange?.replaceBlankRun;
     const rowIndex = (selectedCell?.parentElement as HTMLTableRowElement | null | undefined)?.rowIndex;
     const columnIndex = selectedCell?.cellIndex;
     if (!Number.isSafeInteger(line) || line < 1 || !Number.isSafeInteger(endLine) || endLine < line) return;
@@ -366,6 +368,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       line,
       endLine,
       ...(insertAfterLine !== undefined ? { insertAfterLine } : {}),
+      ...(replaceBlankRun ? { replaceBlankRun } : {}),
       ...(selectedCell ? { selectedCell, renderedCellContent, tableRowIndex: rowIndex, tableColumnIndex: columnIndex } : {}),
       initialCaretPosition,
       // @implements_req SwRS-MDOKFSTUDIO-BLOCK-261
@@ -390,6 +393,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       line,
       endLine,
       ...(insertAfterLine !== undefined ? { insertAfterLine } : {}),
+      ...(replaceBlankRun ? { replaceBlankRun } : {}),
       // @implements_req SwRS-MDOKFSTUDIO-TABLE-119
       // The host follows the table of an open cell editor, to show the buffer after an outside change.
       ...(selectedCell ? { cellEditor: true as const } : {}),
@@ -440,6 +444,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       editedText,
       final,
       ...(edit.insertAfterLine !== undefined ? { insertAfterLine: edit.insertAfterLine } : {}),
+      ...(edit.replaceBlankRun ? { replaceBlankRun: edit.replaceBlankRun } : {}),
       ...(final && edit.deleteWhenEmpty && editedText.trim() === "" ? { deleteWhenEmpty: true as const } : {}),
       ...pin,
       ...(state.flushingEditors ? { flush: true } : {}),

@@ -81,6 +81,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
     rt.tableRowMove.refresh();
     rt.listItemMove.refresh();
     rt.insertPoints.refreshInsertPoints();
+    rt.blankLines.refresh();
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-008
     // The side-by-side diff is a read-mode view: its button is disabled and its cards go in edit mode.
     rt.parts?.sideBySide?.sync();

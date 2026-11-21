@@ -493,3 +493,42 @@ test("previewRefresh carries the reading state as optional fields and refuses th
   assert.equal(ok({ column: 1 }), false);
   assert.equal(ok({ fieldValueFormat: "yaml" }), false);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("CR-444: a blank run in a block edit or a paste needs two lines and the insertion point above it", () => {
+  const base = { documentId: "doc", revision: 1, requestId: 1 };
+  const run = { line: 4, endLine: 6 };
+  for (const type of ["previewEditOpen", "previewEditSave", "previewEditCancel"]) {
+    const edit = {
+      ...base, type, editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: run,
+      originalText: "", editedText: "x",
+    };
+    assert.equal(isRegisteredPreviewMessage(edit), true, type);
+    for (const patch of [
+      { replaceBlankRun: { line: 4, endLine: 4 } }, { replaceBlankRun: { line: 0, endLine: 6 } },
+      { replaceBlankRun: { line: 4 } }, { replaceBlankRun: "4-6" }, { insertAfterLine: 4 },
+      { insertAfterLine: undefined },
+    ]) {
+      assert.equal(isRegisteredPreviewMessage({ ...edit, ...patch }), false, `${type} ${JSON.stringify(patch)}`);
+    }
+  }
+  const paste = { ...base, type: "previewBlocksPaste", insertAfterLine: 3, replaceBlankRun: run };
+  assert.equal(isRegisteredPreviewMessage(paste), true);
+  for (const patch of [{ replaceBlankRun: { line: 4, endLine: 4 } }, { insertAfterLine: 4 }, { replaceBlankRun: 5 }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...paste, ...patch }), false, JSON.stringify(patch));
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+test("CR-444: previewBlankRunDelete validates two or more lines and the optional pin", () => {
+  const base = { documentId: "doc", revision: 1, requestId: 1, type: "previewBlankRunDelete" };
+  const message = { ...base, line: 4, endLine: 6, pinViewportTop: 10 };
+  assert.equal(isRegisteredPreviewMessage(message), true);
+  assert.equal(isRegisteredPreviewMessage({ ...message, pinViewportTop: undefined }), true);
+  for (const patch of [
+    { line: 0 }, { endLine: 4 }, { endLine: 3 }, { endLine: 1.5 }, { line: undefined }, { endLine: "6" },
+    { pinViewportTop: 200000 },
+  ]) {
+    assert.equal(isRegisteredPreviewMessage({ ...message, ...patch }), false, JSON.stringify(patch));
+  }
+});

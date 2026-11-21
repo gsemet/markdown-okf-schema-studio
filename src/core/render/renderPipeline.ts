@@ -1,5 +1,6 @@
 import * as path from "node:path";
 
+import { blankRuns } from "../mapping/blankRuns";
 import { listGlobDocuments } from "./documentGlob";
 import { loadEngine } from "./mystEngine";
 import { renderMyst, RenderDiagnostic } from "./mystRenderer";
@@ -236,7 +237,23 @@ export async function renderPreviewSource(input: SourceRenderInput): Promise<Sou
   for (const diagnostic of rendered.diagnostics) {
     diagnostics.push({ ...diagnostic, code: diagnostic.code === "myst-extension" ? diagnostic.code : "myst-diagnostic", file: input.documentPath });
   }
-  return { html: rendered.html, diagnostics, dependencies: rendered.dependencies, renderMs: performance.now() - started };
+  return {
+    html: rendered.html + blankRunsMarker(input.text),
+    diagnostics,
+    dependencies: rendered.dependencies,
+    renderMs: performance.now() - started,
+  };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
+/**
+ * The hidden element that tells the page where the blank runs of the document are, as `line-endLine`
+ * pairs (empty when there is none). It is the last element of the content: the page reads it only there,
+ * so authored content cannot forge a run.
+ */
+function blankRunsMarker(text: string): string {
+  const value = blankRuns(text).map((run) => `${run.line}-${run.endLine}`).join(" ");
+  return `<div hidden data-okf-blank-runs="${value}"></div>`;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-CORE-001

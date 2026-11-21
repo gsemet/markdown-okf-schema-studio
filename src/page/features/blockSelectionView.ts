@@ -81,7 +81,9 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
   // old one; every other reason to clear drops it too.
   function clearBlockSelection(keepPending = false): void {
     if (!keepPending) state.pendingBlockSelection = undefined;
-    if (!blockSelection.isActive() && selectionElements.length === 0) return;
+    const hadBlank = rt.blankLines.selected() !== undefined;
+    if (hadBlank) rt.blankLines.select(undefined);
+    if (!blockSelection.isActive() && selectionElements.length === 0 && !hadBlank) return;
     blockSelection.clear();
     renderBlockSelection([]);
   }
@@ -111,6 +113,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
   function selectBlocksNow(anchor: SelectionAnchor | undefined, targetIndex: number, scroll = true): void {
     const blocks = syncSelectionModel();
     if (!(targetIndex >= 0 && targetIndex < blocks.length)) return;
+    rt.blankLines.select(undefined);
     if (!blockSelection.isActive()) {
       const known = anchor && anchor.count === blocks.length && anchor.index < blocks.length;
       blockSelection.setAnchor(known ? anchor.index : targetIndex);
@@ -195,12 +198,33 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     return true;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
+  /** Sends the delete of a blank run; the block that follows it (else the one above) gets the selection. */
+  function requestDeleteBlankLines(block: HTMLElement): boolean {
+    const run = rt.blankLines.runOf(block);
+    if (!run || !state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return false;
+    if (blocksFlight || deleteWaitsForRender()) return false;
+    const blocks = syncSelectionModel();
+    postBlocksMessage("previewBlankRunDelete", { line: run.line, endLine: run.endLine }, block);
+    state.pendingBlockSelection = {
+      anchor: undefined,
+      targetIndex: blocks.filter((entry) => rt.blocks.blockRange(entry).line < run.line).length,
+      count: blocks.length,
+      quiet: true,
+      afterDelete: true,
+      at: Date.now(),
+    };
+    return true;
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
   /**
    * The one dispatch of Delete and Backspace: the selected blocks go. Nothing without a block
    * selection, and nothing while the structural cursor is below the top level.
    */
   function deleteSelection(): boolean {
+    const blank = rt.blankLines.selected();
+    if (blank) return requestDeleteBlankLines(blank);
     if (!blockSelection.isActive() || structural.isBelowTopLevel()) return false;
     const blocks = syncSelectionModel();
     const range = blockSelection.range();
@@ -261,11 +285,69 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     return (visible ?? usable[0])?.index ?? -1;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
+  // A blank-lines block is the current stop: only the blank-lines blocks and the body blocks, by line.
+  function selectBlank(block: HTMLElement): void {
+    if (blockSelection.isActive()) {
+      blockSelection.clear();
+      renderBlockSelection([]);
+    }
+    rt.blankLines.select(block);
+    ensureSelectionStatus().textContent = "Blank lines selected";
+    document.documentElement?.setAttribute?.("data-sphinx-preview-actions-owner", "keyboard");
+  }
+
+  interface Stop {
+    block: HTMLElement;
+    index: number;
+    blank: boolean;
+    line: number;
+    endLine: number;
+  }
+
+  function stops(blocks: HTMLElement[]): Stop[] {
+    const list: Stop[] = blocks.map((block, index) => ({ block, index, blank: false, ...rt.blocks.blockRange(block) }))
+      .filter((stop) => !rt.blocks.isIncludedBlock(stop.block));
+    rt.blankLines.blocks().forEach((block) => {
+      const run = rt.blankLines.runOf(block);
+      if (run) list.push({ block, index: -1, blank: true, ...run });
+    });
+    return list.sort((a, b) => a.line - b.line);
+  }
+
+  /** The stop next to `from` (a blank-lines block, or the free end of the block selection). */
+  function neighbourStop(blocks: HTMLElement[], delta: number, from: HTMLElement | undefined): Stop | undefined {
+    const all = stops(blocks);
+    let current: { line: number; endLine: number } | undefined;
+    if (from) current = rt.blankLines.runOf(from);
+    else if (blockSelection.isActive()) {
+      const free = blockSelection.startIndex === blockSelection.anchorIndex ? blockSelection.endIndex! : blockSelection.startIndex!;
+      current = blocks[free] ? rt.blocks.blockRange(blocks[free]) : undefined;
+    }
+    if (!current) return undefined;
+    const { line, endLine } = current;
+    return delta > 0 ? all.find((stop) => stop.line > endLine) : [...all].reverse().find((stop) => stop.line < line);
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-267
   // Plain Up / Down: without a selection the block nearest the top of the viewport is selected; with
   // one, the selection collapses onto the neighbour of its free end (skipping included blocks).
-  function stepSelection(delta: number): void {
+  function stepSelection(delta: number, fromBlank?: HTMLElement): void {
     const blocks = syncSelectionModel();
+    const blank = fromBlank ?? rt.blankLines.selected();
+    if (blank || (blockSelection.isActive() && rt.blankLines.blocks().length > 0)) {
+      const next = neighbourStop(blocks, delta, blank);
+      if (!next) return;
+      if (next.blank) {
+        selectBlank(next.block);
+        return;
+      }
+      blockSelection.clear();
+      selectBlocksNow(undefined, next.index);
+      rememberSelectionAnchor(blocks[next.index]);
+      return;
+    }
     if (blocks.length === 0) return;
     let target: number;
     if (blockSelection.isActive()) {
@@ -324,12 +406,14 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
    * editor open, on a block, the edit-mode toggle or the page itself. `focused` is the top-level
    * block the key target sits in. Undefined when the key is not ours.
    */
-  function plainKeyTarget(event: KeyboardEvent): { focused: HTMLElement | undefined } | undefined {
+  function plainKeyTarget(event: KeyboardEvent): { focused: HTMLElement | undefined; blank?: HTMLElement } | undefined {
     if (!state.editMode || event.isComposing || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return undefined;
     if (state.activeBlockEdit || state.activeFrontmatterEdit || event.defaultPrevented) return undefined;
     const target = event.target;
     const toggle = target instanceof Element && target === rt.editModeButton;
     if (!toggle && ownsKeys(target, "[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]", true)) return undefined;
+    const blank = rt.blankLines.blockOfTarget(target);
+    if (blank) return { focused: undefined, blank };
     const focused = target instanceof Element ? rt.insertPoints.blockOfTarget(target) : undefined;
     if (!toggle && !focused && !isPageTarget(target)) return undefined;
     return { focused };
@@ -374,16 +458,17 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     },
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-169
     requestDeleteBlock,
+    requestDeleteBlankLines,
     receiveBlocksResult(message) {
       if (blocksFlight) window.clearTimeout(blocksFlight.timer);
       blocksFlight = undefined;
       if (message.ok === true) {
         if (message.op === "copy") showSelectionNotice("Copied as Markdown");
         // A delete keeps its selection until the render: the patch selects the block that took the place.
-        else if (message.op !== "delete") clearBlockSelection();
+        else if (message.op !== "delete" && message.op !== "delete-blank-lines") clearBlockSelection();
         return;
       }
-      if (message.op === "delete" && state.pendingBlockSelection?.afterDelete) state.pendingBlockSelection = undefined;
+      if ((message.op === "delete" || message.op === "delete-blank-lines") && state.pendingBlockSelection?.afterDelete) state.pendingBlockSelection = undefined;
       if (typeof message.reason === "string") showSelectionNotice(message.reason);
     },
     bindKeys() {
@@ -396,6 +481,22 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         if (state.activeBlockEdit || state.activeFrontmatterEdit) return;
         const target = event.target;
         if (ownsKeys(target, "[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]", true)) return;
+        const blank = blockSelection.isActive() ? undefined
+          : rt.blankLines.blockOfTarget(target) ?? rt.blankLines.selected();
+        if (blank) {
+          // A blank-lines block never joins a selection: Shift+Arrow starts one on its neighbour.
+          const blocks = syncSelectionModel();
+          event.preventDefault?.();
+          event.stopPropagation?.();
+          const next = neighbourStop(blocks, event.key === "ArrowUp" ? -1 : 1, blank);
+          if (!next || next.blank) return;
+          rt.blankLines.select(undefined);
+          blockSelection.extendBy(0, next.index);
+          renderBlockSelection(blocks);
+          rememberSelectionAnchor(blocks[next.index]);
+          focusSelectionEnd(blocks);
+          return;
+        }
         const focused = target instanceof Element ? rt.insertPoints.blockOfTarget(target) : undefined;
         // With a selection the keys are ours only on a block, an insertion bar or the page itself:
         // toolbar buttons and menus keep their arrow keys.
@@ -433,13 +534,22 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       document.addEventListener("keydown", (event) => {
         const keyed = plainKeyTarget(event);
         if (!keyed) return;
-        const { focused } = keyed;
+        const { focused, blank } = keyed;
         const arrow = event.key === "ArrowUp" || event.key === "ArrowDown";
         if (!arrow && event.key !== "Enter") return;
         if (arrow) {
           event.preventDefault?.();
           event.stopPropagation?.();
-          stepSelection(event.key === "ArrowUp" ? -1 : 1);
+          stepSelection(event.key === "ArrowUp" ? -1 : 1, blank);
+          return;
+        }
+        // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
+        const opening = blank ?? (focused ? undefined : rt.blankLines.selected());
+        if (opening) {
+          if (event.target instanceof Element && event.target.closest("button")) return;
+          event.preventDefault?.();
+          event.stopPropagation?.();
+          rt.blankLines.open(opening);
           return;
         }
         if (focused || !blockSelection.isActive()) return;
@@ -456,7 +566,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       document.addEventListener("visibilitychange", restoreBlockSelection);
 
       document.addEventListener("keydown", (event) => {
-        if (event.key !== "Escape" || !blockSelection.isActive()) return;
+        if (event.key !== "Escape" || (!blockSelection.isActive() && !rt.blankLines.selected())) return;
         if (ownsKeys(event.target, "[data-sphinx-preview-block-editor], [data-okf-frontmatter-editor]", false)) return;
         event.preventDefault?.();
         clearBlockSelection();
@@ -475,11 +585,21 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         const blocks = syncSelectionModel();
         const range = blockSelection.isActive() ? blockSelection.range() : undefined;
         const point = target instanceof Element ? target.closest(".sphinx-preview-insert-point") : null;
+        const blank = range ? undefined : rt.blankLines.blockOfTarget(target) ?? rt.blankLines.selected();
+        const blankRun = blank ? rt.blankLines.runOf(blank) : undefined;
         if (key !== "v" && !range) return;
-        if (key === "v" && !range && !point) return;
+        if (key === "v" && !range && !point && !blankRun) return;
         event.preventDefault?.();
         event.stopPropagation?.();
         if (blocksFlight) return;
+        if (key === "v" && blank && blankRun) {
+          // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
+          postBlocksMessage("previewBlocksPaste", {
+            insertAfterLine: blankRun.line - 1,
+            replaceBlankRun: { line: blankRun.line, endLine: blankRun.endLine },
+          }, blank);
+          return;
+        }
         if (key === "c" && range) {
           postBlocksMessage("previewBlocksCopy", { line: range.line, endLine: range.endLine });
         } else if (key === "x" && range) {
@@ -509,10 +629,10 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Delete" && event.key !== "Backspace") return;
         const keyed = plainKeyTarget(event);
-        if (!keyed || !blockSelection.isActive()) return;
+        if (!keyed || (!blockSelection.isActive() && !rt.blankLines.selected())) return;
         const target = event.target;
         if (target instanceof Element && target.closest("button, a, summary, .sphinx-preview-insert-point")) return;
-        if (keyed.focused) {
+        if (keyed.focused && blockSelection.isActive()) {
           const blocks = syncSelectionModel();
           if (!blockSelection.indices().some((index) => blocks[index] === keyed.focused)) return;
         }

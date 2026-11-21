@@ -37,7 +37,7 @@ const REMOVED_CLASSES = [
 const REMOVED_BY_ATTRIBUTE = [
   "data-sphinx-preview-block-editor", "data-sphinx-preview-block-editor-host", "data-sphinx-preview-edit-status",
   "data-okf-row-handle", "data-okf-col-handle", "data-okf-frontmatter-editor", "data-okf-frontmatter-menu",
-  "data-okf-fold-toggle", "data-okf-comment-kind",
+  "data-okf-fold-toggle", "data-okf-comment-kind", "data-okf-blank-runs", "data-okf-blank-lines",
 ];
 
 /** The comment attributes that only mark text or a block (the text stays; the element goes only if it is a wrapper). */

@@ -121,6 +121,13 @@ const PALETTE_MODES = ["strict", "gfm", "myst", "full"] as const;
 
 type PageStateType = PageStateMessageUnion["type"];
 
+/** A blank run of the message: two or more lines, so `endLine` is above `line`. */
+const isBlankRunFields = (value: unknown): boolean => {
+  if (typeof value !== "object" || value === null) return false;
+  const run = value as { line?: unknown; endLine?: unknown };
+  return isSourceLine(run.line) && isSourceLine(run.endLine) && (run.endLine as number) > (run.line as number);
+};
+
 const BLOCK_EDIT_TYPES: readonly PageStateType[] = ["previewEditOpen", "previewEditSave", "previewEditCancel"];
 
 const EDIT_REQUEST_TYPES: readonly PageStateType[] = [
@@ -156,6 +163,9 @@ function hasValidStateFields(message: Readonly<Record<string, unknown>>, type: P
     && (message.insertAfterLine === undefined
       || (BLOCK_EDIT_TYPES.includes(type)
         && Number.isSafeInteger(message.insertAfterLine) && (message.insertAfterLine as number) >= 0))
+    && (message.replaceBlankRun === undefined
+      || (BLOCK_EDIT_TYPES.includes(type) && isBlankRunFields(message.replaceBlankRun)
+        && message.insertAfterLine === (message.replaceBlankRun as { line: number }).line - 1))
     && (message.cellEditor === undefined || (type === "previewEditOpen" && message.cellEditor === true))
     && (message.blockEditOpen === undefined
       || (type === "previewReady" && typeof message.blockEditOpen === "boolean"))
@@ -303,9 +313,16 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
   previewBlocksDelete: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
     && isPinViewportTop(message.pinViewportTop),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
+  previewBlankRunDelete: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
+    && (message.endLine as number) > (message.line as number)
+    && isPinViewportTop(message.pinViewportTop),
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewBlocksPaste: (message) => Number.isSafeInteger(message.insertAfterLine)
     && (message.insertAfterLine as number) >= 0
+    && (message.replaceBlankRun === undefined
+      || (isBlankRunFields(message.replaceBlankRun)
+        && message.insertAfterLine === (message.replaceBlankRun as { line: number }).line - 1))
     && (message.pinLine === undefined || isSourceLine(message.pinLine))
     && isPinViewportTop(message.pinViewportTop),
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-004

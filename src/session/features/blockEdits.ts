@@ -7,9 +7,9 @@
 import { matchLineEndings } from "../../core/edits/lineEndings";
 import { READ_ONLY_FILE, planBlockTextEdit, planEmptiedBlockRemoval } from "../../core/edits/sourceEdits";
 import type { HostDocument } from "../../host-api/documentStore";
-import { checkBlockLines, type BlockRangeRefusal } from "../../core/mapping/blockRange";
+import { checkBlankRun, checkBlockLines, type BlockRangeRefusal } from "../../core/mapping/blockRange";
 import { sourceRangeForLines } from "../../core/mapping/sourceMapping";
-import { insertionText, planInsertion, type InsertionPlan } from "../../core/mapping/insertion";
+import { insertionText, planBlankRunInsertion, planInsertion, type InsertionPlan } from "../../core/mapping/insertion";
 import { FLUSH_WAIT_MS, flushRefusalMessage, waitForAnswer, waitForSettled } from "../../core/preview/flushWait";
 import type { BlockEditMessage, PageMessageOf } from "../../core/protocol/pageToHost";
 import type { Revision } from "../../core/protocol/revision";
@@ -37,6 +37,11 @@ export interface ActiveBlockEdit {
   /** Set for block insertions: where and how the new block is written. */
   insertion?: InsertionPlan;
   insertAfterLine?: number;
+  /**
+   * Set for a block written in place of a blank run: the run's lines and the text they held. The page
+   * never sees it (its `originalText` stays empty). An emptied editor and a cancel put this text back.
+   */
+  blankRunRegion?: { line: number; endLine: number; text: string };
   finalRequested: boolean;
   /** The final save asked to delete the block when its text is only whitespace (a top-level block or list item). */
   deleteWhenEmpty?: boolean;
@@ -172,7 +177,11 @@ export class BlockEditController {
       if (!document
         || message.line === undefined
         || message.endLine === undefined
-        || !planInsertion(document.getText(), message.insertAfterLine)) {
+        || (message.replaceBlankRun
+          ? checkBlankRun(document.getText(), message.replaceBlankRun.line, message.replaceBlankRun.endLine) !== undefined
+            || message.line !== message.replaceBlankRun.line
+            || message.endLine !== message.replaceBlankRun.endLine
+          : !planInsertion(document.getText(), message.insertAfterLine))) {
         this.postEditSourceError(preview, message, "The preview is stale. Refresh it before editing this block.");
         return;
       }
@@ -422,7 +431,16 @@ export class BlockEditController {
     let edit = preview.edits.active;
     if (!edit && message.insertAfterLine !== undefined) {
       const document = currentPreviewDocument(preview, message);
-      const plan = document ? planInsertion(document.getText(), message.insertAfterLine) : undefined;
+      const run = message.replaceBlankRun;
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
+      // A save that re-creates the edit of a blank run checks the run again against the document.
+      const plan = !document ? undefined
+        : run
+          ? (checkBlankRun(document.getText(), run.line, run.endLine) === undefined
+            && message.line === run.line && message.endLine === run.endLine
+            ? planBlankRunInsertion(document.getText(), run.line, run.endLine)
+            : undefined)
+          : planInsertion(document.getText(), message.insertAfterLine);
       if (!document || !plan || message.originalText === undefined || message.editedText === undefined) {
         this.postEditSourceError(preview, message, "The preview is stale. Reopen the block before saving.");
         return;
@@ -431,6 +449,7 @@ export class BlockEditController {
         this.postEditSourceError(preview, message, "The source block changed while it was being edited.");
         return;
       }
+      const regionText = plan.replace && document ? document.getText().slice(plan.replace.start, plan.replace.end) : "";
       edit = {
         editId: message.editId,
         documentId: message.documentId,
@@ -440,9 +459,10 @@ export class BlockEditController {
         endLine: message.endLine,
         sourceStartOffset: plan.offset,
         originalText: "",
-        lastSavedText: "",
+        lastSavedText: regionText,
         insertion: plan,
         insertAfterLine: message.insertAfterLine,
+        ...(plan.replace && run ? { blankRunRegion: { line: run.line, endLine: run.endLine, text: regionText } } : {}),
         finalRequested: false,
         cancelRequested: false,
         applying: false,
@@ -497,9 +517,12 @@ export class BlockEditController {
       return;
     }
     edit.lastMessage = message;
-    edit.pendingText = edit.insertion
-      ? insertionText(edit.insertion, message.editedText)
-      : message.editedText;
+    // An emptied editor over a blank run puts the run back; the run is the empty state of the block.
+    edit.pendingText = edit.blankRunRegion && message.editedText.trim() === ""
+      ? edit.blankRunRegion.text
+      : edit.insertion
+        ? insertionText(edit.insertion, message.editedText)
+        : message.editedText;
     edit.finalRequested = message.final !== false;
     edit.deleteWhenEmpty = edit.finalRequested && message.deleteWhenEmpty === true && !edit.insertion;
     if (message.final === true) {
@@ -524,7 +547,7 @@ export class BlockEditController {
     edit.lastMessage = message;
     edit.cancelRequested = true;
     edit.finalRequested = true;
-    edit.pendingText = edit.originalText;
+    edit.pendingText = edit.blankRunRegion ? edit.blankRunRegion.text : edit.originalText;
     this.drainActiveBlockEdit(preview, edit);
   }
 

@@ -231,6 +231,81 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 
 `;
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
+/**
+ * The blank-lines block of edit mode (`features/blankLines.ts`): a quiet dashed bar named by its
+ * label, with the Delete block button at its right end. It is hidden while its editor is open, and
+ * the host's list of runs (`data-okf-blank-runs`) never shows.
+ */
+const BLANK_LINES_BLOCK_CSS = `[data-okf-blank-runs] {
+  display: none;
+}
+
+html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-blank-lines {
+  display: none;
+}
+
+.sphinx-preview-blank-lines {
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 1.8em;
+  margin: 0.3em 0;
+  padding: 0 0.6em;
+  border: 1px dashed var(--studio-descriptionForeground, GrayText);
+  border-radius: 4px;
+  color: var(--studio-descriptionForeground, GrayText);
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.sphinx-preview-blank-lines::before {
+  content: attr(data-okf-blank-label);
+}
+
+.sphinx-preview-blank-lines:hover,
+.sphinx-preview-blank-lines:focus-visible {
+  border-style: solid;
+}
+
+.sphinx-preview-blank-lines[data-sphinx-preview-editing="true"] {
+  display: none;
+}
+
+.sphinx-preview-blank-lines button.sphinx-preview-delete {
+  position: absolute;
+  right: 0.3em;
+  top: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 1.4em;
+  height: 1.4em;
+  margin-top: -0.7em;
+  padding: 0;
+  border: 1px solid var(--studio-focusBorder, Highlight);
+  border-radius: 50%;
+  background: var(--studio-button-background, Highlight);
+  color: var(--studio-button-foreground, HighlightText);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.sphinx-preview-blank-lines:hover button.sphinx-preview-delete,
+.sphinx-preview-blank-lines:focus-visible button.sphinx-preview-delete,
+.sphinx-preview-blank-lines[data-sphinx-preview-block-selected="true"] button.sphinx-preview-delete,
+.sphinx-preview-blank-lines button.sphinx-preview-delete:focus-visible {
+  opacity: 1;
+}
+
+`;
+
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
 /** The insert point of an empty document. */
 const START_POINT_CSS = `.sphinx-preview-insert-point--start {
@@ -701,6 +776,7 @@ export const EDIT_MODE_CSS = [
   INSERT_POINT_CSS,
   MOVE_BUTTONS_CSS,
   DELETE_BLOCK_BUTTON_CSS,
+  BLANK_LINES_BLOCK_CSS,
   START_POINT_CSS,
   BLOCK_EDITOR_CSS,
   CELL_EDITOR_CSS,

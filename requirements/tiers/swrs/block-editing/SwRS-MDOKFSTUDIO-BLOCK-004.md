@@ -75,6 +75,12 @@ The selection is the one of SwRS-MDOKFSTUDIO-BLOCK-140: it is outlined in the fo
 
 Table-cell editors keep their own Escape and Cmd/Ctrl+Enter and do not select a block when they close.
 
+### Scenario (nominal): The arrows reach a blank-lines block
+
+- GIVEN edit mode on and a blank-lines block between two blocks
+- WHEN the writer presses Down on the block above
+- THEN the blank-lines block is selected, and the next Down selects the block below it (see SwRS-MDOKFSTUDIO-BLOCK-267)
+
 ### Verification notes
 
 - Method: test/page/runtimeBlockSelection.test.ts, unit tests `CR 120: plain Up and Down select a block, starting at the block nearest the viewport top`, `CR 120: plain Up collapses a block run onto the neighbour of its free end`, `CR 120: plain Up and Down do nothing outside edit mode, in a text box or with a modifier`, `CR 120: Enter opens the editor of the selected block`, `CR 120: Enter with no selection opens nothing`, `CR 120: Escape closes the editor and leaves its block selected for the arrow keys`, `CR 120: Cmd/Ctrl+Enter without changes closes the editor and selects its block` and `CR 120: Cmd/Ctrl+Enter with changes saves, and the block is selected once the patch is in`. The included-block skip and the toggle-button focus rows are untested. CR 129 unit tests `CR 129: plain Up and Down on the focused content root move the block selection`, `CR 129: Shift+Down on the focused content root extends a selection`, `CR 129: the window coming back selects the block nearest the top when nothing was selected`, `CR 129: the window coming back restores the last block the keyboard selected` and `CR 129: the window coming back selects nothing outside edit mode, in an editor or on another control`.

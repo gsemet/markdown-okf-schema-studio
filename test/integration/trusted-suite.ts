@@ -32,6 +32,7 @@ import { run as runCommentWrite } from "./commentWrite.test";
 import { run as runReviewComments } from "./reviewComments.test";
 import { run as runBlockMove } from "./blockMove.test";
 import { run as runBlockClipboard } from "./blockClipboard.test";
+import { run as runBlankLines } from "./blankLines.test";
 import { run as runEmptyBlocks } from "./emptyBlocks.test";
 import { run as runInlineThread } from "./inlineThread.test";
 import { run as runLabelRename } from "./labelRename.test";
@@ -303,6 +304,7 @@ async function runTrustedSuite(): Promise<void> {
     ["block-move", runBlockMove],
     ["block-clipboard", runBlockClipboard],
     ["empty-blocks", runEmptyBlocks],
+    ["blank-lines", runBlankLines],
     ["myst-pickers", runMystPickers],
     ["image-picker", runImagePicker],
     ["image-paste", runImagePaste],

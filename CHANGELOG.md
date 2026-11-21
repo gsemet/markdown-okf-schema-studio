@@ -12,6 +12,10 @@
   deletes it. Emptying a block and pressing Done now removes the block instead of leaving blank
   lines; a new block no longer keeps its leading blank lines, and one inserted after a list gets
   one blank line before it.
+- In edit mode, two or more blank lines between blocks, at the start or at the end of a document
+  now show as a blank-lines block you can reach with the arrow keys, click or press Enter on to
+  write a block in their place, or remove with Delete or its Delete block button, which keeps one
+  blank line.
 
 ## 1.10.0 - 2026-11-20
 

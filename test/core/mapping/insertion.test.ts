@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { insertionText, planInsertion } from "../../../src/core/mapping/insertion";
+import { insertionText, planBlankRunInsertion, planInsertion } from "../../../src/core/mapping/insertion";
 import { extractFrontmatter } from "../../../src/core/frontmatter/okfFrontmatter";
 
 function insert(text: string, afterLine: number, raw: string): string | undefined {
@@ -128,4 +128,29 @@ for (const [name, eol] of [["LF", "\n"], ["CRLF", "\r\n"], ["lone CR", "\r"]] as
 test("an anchor on a non-blank line keeps two line endings before the block", () => {
   assert.equal(planInsertion("A\n\nB\n", 1)?.prefix, "\n\n");
   assert.equal(planInsertion("A\n\nB\n", 2)?.prefix, "\n");
+});
+
+function writeInRun(text: string, line: number, endLine: number, raw: string): string {
+  const plan = planBlankRunInsertion(text, line, endLine);
+  return text.slice(0, plan.replace!.start) + insertionText(plan, raw) + text.slice(plan.replace!.end);
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("a block written in a run takes its place and leaves one blank line on each side", () => {
+  assert.equal(writeInRun("a\n\n\n\nb\n", 2, 4, "X"), "a\n\nX\n\nb\n");
+  assert.equal(writeInRun("\n\na\n", 1, 2, "X"), "X\n\na\n");
+  assert.equal(writeInRun("a\n\n\n", 2, 3, "X"), "a\n\nX\n");
+  assert.equal(writeInRun("a\n\n  ", 2, 3, "X"), "a\n\nX");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("a block written in a run keeps the line ending of the document", () => {
+  assert.equal(writeInRun("a\r\n\r\n\r\nb\r\n", 2, 3, "X\nY"), "a\r\n\r\nX\r\nY\r\n\r\nb\r\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("the plan of a run names the region it replaces", () => {
+  const plan = planBlankRunInsertion("a\n\n\n\nb\n", 2, 4);
+  assert.deepEqual(plan.replace, { start: 1, end: 5 });
+  assert.equal(plan.offset, 1);
 });

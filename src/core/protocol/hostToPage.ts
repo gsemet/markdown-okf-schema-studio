@@ -121,7 +121,7 @@ export interface PreviewBlockMoveResultMessage extends RenderMessage<"previewBlo
 
 /** The answer to a copy, cut or paste of blocks. */
 export interface PreviewBlocksResultMessage extends RenderMessage<"previewBlocksResult"> {
-  op: "copy" | "cut" | "delete" | "paste";
+  op: "copy" | "cut" | "delete" | "paste" | "delete-blank-lines";
   ok: boolean;
   reason?: string;
 }

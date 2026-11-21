@@ -107,6 +107,17 @@ export interface BlockEditFields {
   endLine: number;
   /** Block insertion: the source line after which the new block goes (0 = start of the body). */
   insertAfterLine?: number;
+  /**
+   * Block insertion in place of a blank run: the lines of the run (`line` to `endLine`, two or more blank
+   * lines) the new block replaces. Its `insertAfterLine` is the line above the run.
+   */
+  replaceBlankRun?: BlankRunFields;
+}
+
+/** The lines of a blank run: 1-based, inclusive. */
+export interface BlankRunFields {
+  line: number;
+  endLine: number;
 }
 
 /** The fields of a save that the validator refuses on an open or a cancel. */
@@ -341,9 +352,18 @@ export interface PreviewBlocksDeleteMessage extends PageMessageBase<"previewBloc
   pinViewportTop?: number;
 }
 
+/** Removal of a blank run, from the keyboard or its Delete block button. */
+export interface PreviewBlankRunDeleteMessage extends PageMessageBase<"previewBlankRunDelete"> {
+  line: number;
+  endLine: number;
+  pinViewportTop?: number;
+}
+
 /** Paste of the clipboard as blocks after a source line (0 = start of the body). */
 export interface PreviewBlocksPasteMessage extends PageMessageBase<"previewBlocksPaste"> {
   insertAfterLine: number;
+  /** The blank run the pasted blocks replace (the line above it is `insertAfterLine`). */
+  replaceBlankRun?: BlankRunFields;
   pinLine?: number;
   pinViewportTop?: number;
 }
@@ -447,6 +467,7 @@ export type PageToHostMessage =
   | PreviewBlocksCopyMessage
   | PreviewBlocksCutMessage
   | PreviewBlocksDeleteMessage
+  | PreviewBlankRunDeleteMessage
   | PreviewBlocksPasteMessage
   | PreviewDropFilesMessage
   | PreviewCommentCreateMessage
