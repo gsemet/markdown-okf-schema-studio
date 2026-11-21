@@ -51,7 +51,7 @@ When any part of the review comments file of a shown document is not valid or go
 | A file without a threads list | Error "the sidecar needs a threads array"; no thread is returned |
 
 ### Scenario (refusal): One bad thread rejects the whole file
-- GIVEN a file with one valid thread and a second thread with an empty id, a non-boolean resolved flag, a non-string body, a creation date that is not an ISO 8601 date-time with a zone ("yesterday" or "2026-13-45T99:00:00Z"), no comment, a line of 0, an endLine before its line, or the id of an earlier thread
+- GIVEN a file with one valid thread and a second thread with an empty id, a non-boolean resolved flag, a non-string body, a creation date that is not an ISO 8601 date-time with a zone ("yesterday", "2026-13-45T99:00:00Z" or "2026-02-30T10:00:00Z", a day that does not exist in its month; 2024-02-29 is a real day, 2026-02-29 is not), no comment, a line of 0, an endLine before its line, or the id of an earlier thread
 - WHEN the file is read
 - THEN an error is reported, the whole file is rejected and the valid thread is not returned either
 
@@ -93,6 +93,7 @@ When any part of the review comments file of a shown document is not valid or go
 
 ### Verification notes
 - Method: test/core/comments/commentModel.test.ts: `T42: malformed JSON and wrong shapes give errors and no threads` (wrong shape), `T42: one invalid thread rejects the whole file` (one bad thread), `T42: limits on size, threads, comments and string length` (limits of the file for the parser; the host stub for a file on disk, readSidecar in src/session/features/comments.ts, is untested).
+- Method: test/core/comments/commentModel.holes.test.ts: `a comment date is an ISO 8601 date-time with a zone, to the minute or finer, naming a real instant` (impossible days such as 2026-02-30 and 1900-02-29 are refused, 2024-02-29 is read).
 - Method: test/integration/reviewComments.test.ts asserts that an invalid file posts nothing ("an invalid file posts nothing", first sight). The warning text and the once-only rule are not asserted (untested).
 - Method: test/core/comments/commentEditing.test.ts: `T43: an invalid existing file is never overwritten, and a refusal does not stop the queue`; test/integration/commentWrite.test.ts (invalid {not json is not overwritten and the reason matches not valid) (change while the file is not valid, change when the file is valid).
 - Criteria: Every malformed input gives at least one error and an empty thread list; MAX_THREADS = 1000, MAX_COMMENTS_PER_THREAD = 200 and MAX_STRING_LENGTH = 10000 are accepted and one more is refused; the posted-threads count stays 0 and the warning calls showWarning once per distinct text (code inspection); the file bytes are identical after a refusal and the reason starts with "the comments file is not valid".
