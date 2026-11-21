@@ -178,6 +178,11 @@ requirements-update:
     {{ okfreq }} update-coverage requirements
     {{ okfreq }} lint requirements --prose --check-links --project-root .
 
+# Write only the JSON requirements traceability report (no Markdown summary, no status) under out/reports/requirements.
+requirements-report-json:
+    mkdir -p out/reports/requirements
+    {{ okfreq }} generate-report requirements --output-json out/reports/requirements/requirements-report.json
+
 # Write the requirements traceability report (JSON and Markdown) under out/reports/requirements.
 requirements-report:
     mkdir -p out/reports/requirements
@@ -281,10 +286,7 @@ ci-static:
 
 # CI job "visual": the visual end-to-end stage, reports under out/reports/e2e, then the table
 # breakout width tests in Chromium (which must start: STUDIO_REQUIRE_CHROMIUM=1), report under
-# out/reports/breakout/, then the use case map overlap tests in Chromium (STUDIO_REQUIRE_CHROMIUM=1, with the
-# requirements report, which `just requirements-report` writes), report under out/reports/viewer-graph/, captures under
-# out/reports/requirements-viewer-graph/.
-# All run even when one fails, so one run reports them all.
+# out/reports/breakout/. Both run even when the first fails, so one run reports both.
 ci-visual:
     #!/usr/bin/env bash
     set -uo pipefail
@@ -292,12 +294,23 @@ ci-visual:
     failed=0
     {{ npm }} run test:visual || failed=1
     STUDIO_REQUIRE_CHROMIUM=1 {{ npm }} run test:breakout || failed=1
-    just requirements-report || failed=1
-    STUDIO_REQUIRE_CHROMIUM=1 STUDIO_REQUIRE_REQUIREMENTS_REPORT=1 {{ npm }} run test:viewer-graph || failed=1
     if [ "$failed" = 0 ]; then
         echo "ci-visual: passed"
     else
         echo "ci-visual: FAILED" >&2
+        exit 1
+    fi
+
+# CI job "viewer-graph": compile, write the JSON requirements report, then the use case map overlap tests in
+# Chromium (STUDIO_REQUIRE_CHROMIUM=1, reading that report), report under out/reports/viewer-graph/, captures under
+# out/reports/requirements-viewer-graph/.
+ci-viewer-graph:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    if {{ npm }} run compile && just requirements-report-json && STUDIO_REQUIRE_CHROMIUM=1 STUDIO_REQUIRE_REQUIREMENTS_REPORT=1 {{ npm }} run test:viewer-graph; then
+        echo "ci-viewer-graph: passed"
+    else
+        echo "ci-viewer-graph: FAILED" >&2
         exit 1
     fi
 
@@ -423,13 +436,14 @@ preflight: clean format
     failures=0
     just ci-static || failures=$((failures + 1))
     if [[ "{{ os() }}" == "windows" ]]; then
-        echo "preflight: visual, integration, report and gallery stages skipped on Windows; CI runs them"
+        echo "preflight: visual, viewer-graph, integration, report and gallery stages skipped on Windows; CI runs them"
         exit "$failures"
     fi
     if ! just _require-unlocked-screen preflight >/dev/null 2>&1; then
         echo "preflight: the screen is locked; ci-integration will stop unless it is unlocked before then" >&2
     fi
     just ci-visual || failures=$((failures + 1))
+    just ci-viewer-graph || failures=$((failures + 1))
     just ci-integration
     integration=$?
     if [[ "$integration" -eq 3 ]]; then
