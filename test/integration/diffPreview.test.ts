@@ -29,6 +29,14 @@ async function openDiff(original: vscode.Uri, modified: vscode.Uri): Promise<voi
   await waitFor("a text editor of the diff to be active", () => vscode.window.activeTextEditor !== undefined);
 }
 
+/** Puts the focus back on a diff already open: the Studio command leaves it in the preview. */
+async function refocusDiff(original: vscode.Uri, modified: vscode.Uri): Promise<void> {
+  const group = vscode.window.tabGroups.all.find((candidate) => candidate.tabs.some((tab) => tab.input instanceof vscode.TabInputTextDiff));
+  assert.ok(group, "a diff tab is open");
+  await vscode.commands.executeCommand("vscode.diff", original, modified, "Diff under test", { viewColumn: group.viewColumn, preserveFocus: false });
+  await waitFor("a text editor of the diff to be active", () => vscode.window.activeTextEditor !== undefined);
+}
+
 async function withLayout<T>(sideBySide: boolean, body: () => Promise<T>): Promise<T> {
   const configuration = vscode.workspace.getConfiguration("diffEditor");
   const before = configuration.inspect("renderSideBySide")?.globalValue;
@@ -100,6 +108,7 @@ export async function run(): Promise<void> {
         // Inline, the real original side has no editor of its own to scroll: the scroll is asserted side by side only.
         if (sideBySide) {
           // The command left the focus in the preview: put it back in the diff's real (original, left) side.
+          await refocusDiff(vscode.Uri.file(file("b.md")), virtualOf(file("b.md"), "right"));
           await vscode.commands.executeCommand("workbench.action.compareEditor.focusPrimarySide");
           await waitFor("the cursor in the real original side", () => vscode.window.activeTextEditor?.document.uri.scheme === "file");
           await vscode.commands.executeCommand("cursorBottom");
@@ -130,6 +139,7 @@ export async function run(): Promise<void> {
     await waitFor("the side preview of the working-tree file c.md", () => previewOf(file("c.md")), 30_000);
     const line = getActivePreviewForTests()?.lastSourceScrollLine;
     // The command left the focus in the preview: put it back in a diff side, so the scroll below is a real one.
+    await refocusDiff(virtualOf(file("c.md"), "head"), virtualOf(file("c.md"), "index"));
     await vscode.commands.executeCommand("workbench.action.compareEditor.focusPrimarySide");
     await waitFor("the cursor in a virtual diff side", () => vscode.window.activeTextEditor?.document.uri.scheme === SCHEME);
     await vscode.commands.executeCommand("cursorBottom");
