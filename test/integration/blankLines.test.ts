@@ -36,6 +36,13 @@ const LINES = ["# Title", "", "A", "", "", "", "B", ""];
 // Blank runs inside a list (CR-448): lines 4-6 between two items, lines 10-12 inside the second item.
 const LIST_LINES = ["# Title", "", "- a", "", "", "", "- b", "", "  p1", "", "", "", "  p2", ""];
 
+// Blank runs inside containers (CR-462): lines 4-6 inside a quote, 13-15 inside an admonition in a list item,
+// 22-24 inside a footnote.
+const CONTAINER_LINES = [
+  "# Title", "", "> One", ">", ">", ">", "> Two", "", "- a", "", "  ```{note}", "  One", "", "", "", "  Two", "  ```", "",
+  "Text[^1].", "", "[^1]: First", "", "", "", "    Second", "",
+];
+
 /** Sends a page message the way the page does, for the preview that is current now. */
 function sender(document: vscode.TextDocument, documentUri: string) {
   return (fields: Record<string, unknown>) => sendPreviewMessageForTests({
@@ -78,10 +85,11 @@ async function withFixture(
 }
 
 /**
- * A blank run written in place and removed on a real file in LF and CRLF, between paragraphs and inside a list (CR-448): the run takes one block
+ * A blank run written in place and removed on a real file in LF and CRLF, between paragraphs, inside a list (CR-448) and inside a quote, an admonition and a footnote (CR-462): the run takes one block
  * with one blank line on each side, a delete keeps one blank line, the line endings stay, one undo
  * brings the run back.
  */
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
 export async function run(): Promise<void> {
@@ -163,6 +171,47 @@ export async function run(): Promise<void> {
         `${name}: "- c" is a nested item of the second item`,
       );
       noBareLineBreak(document);
+    });
+
+    const containerOriginal = CONTAINER_LINES.join(eol);
+    const without = (from: number, count: number): string[] =>
+      CONTAINER_LINES.slice(0, from).concat(CONTAINER_LINES.slice(from + count));
+    const replaced = (from: number, text: string[]): string =>
+      CONTAINER_LINES.slice(0, from).concat(text, CONTAINER_LINES.slice(from + 3)).join(eol);
+    const undone = async (document: vscode.TextDocument, label: string): Promise<void> => {
+      noBareLineBreak(document);
+      await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+      await vscode.commands.executeCommand("undo");
+      assert.equal(document.getText(), containerOriginal, `${name}: ${label}, one undo brings the run back`);
+    };
+    const save = (document: vscode.TextDocument, send: ReturnType<typeof sender>, run: Record<string, number>, text: string) =>
+      untilApplied(document, () => send({
+        type: "previewEditSave", editId: "e1", line: run.line, endLine: run.endLine, insertAfterLine: run.line - 1,
+        replaceBlankRun: run, originalText: "", editedText: text, final: false,
+      }));
+
+    await withFixture(`blank-lines-quote-delete-${name}`, eol, CONTAINER_LINES, async (document, send) => {
+      await untilApplied(document, () => send({ type: "previewBlankRunDelete", line: 4, endLine: 6 }));
+      assert.equal(document.getText(), without(4, 2).join(eol), `${name}: quote, one empty line kept`);
+      await undone(document, "quote delete");
+    });
+
+    await withFixture(`blank-lines-quote-write-${name}`, eol, CONTAINER_LINES, async (document, send) => {
+      await save(document, send, { line: 4, endLine: 6 }, "More");
+      assert.equal(document.getText(), replaced(3, [">", "> More", ">"]), `${name}: "More" written in the quote`);
+      await undone(document, "quote write");
+    });
+
+    await withFixture(`blank-lines-admonition-write-${name}`, eol, CONTAINER_LINES, async (document, send) => {
+      await save(document, send, { line: 13, endLine: 15, containerLine: 11 }, "More");
+      assert.equal(document.getText(), replaced(12, ["", "  More", ""]), `${name}: "More" written in the admonition of the item`);
+      await undone(document, "admonition write");
+    });
+
+    await withFixture(`blank-lines-footnote-write-${name}`, eol, CONTAINER_LINES, async (document, send) => {
+      await save(document, send, { line: 22, endLine: 24, containerLine: 21 }, "More");
+      assert.equal(document.getText(), replaced(21, ["", "    More", ""]), `${name}: "More" written in the footnote`);
+      await undone(document, "footnote write");
     });
   }
 }

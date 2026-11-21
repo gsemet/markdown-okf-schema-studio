@@ -40,9 +40,18 @@ export function listItemIndent(text: string, itemLine: number, runLine?: number)
   const frontmatter = matchFrontmatterBlock(text);
   if (frontmatter && itemLine <= splitLines(text.slice(0, frontmatter.length)).length) return undefined;
   const entry = splitLines(text)[itemLine - 1];
-  if (!entry || THEMATIC_BREAK.test(entry.text.trim())) return undefined;
-  const leading = /^[ \t]*/u.exec(entry.text)![0];
-  let rest = entry.text.slice(leading.length);
+  return entry ? listItemIndentOfLine(entry.text) : undefined;
+}
+
+/**
+ * The indents of the list item whose marker is on the line `lineText`, read from column 0.
+ * Undefined when the line has no marker followed by a space, a tab or the end of the line, or when
+ * it is a thematic break.
+ */
+export function listItemIndentOfLine(lineText: string): ListItemIndent | undefined {
+  if (THEMATIC_BREAK.test(lineText.trim())) return undefined;
+  const leading = /^[ \t]*/u.exec(lineText)![0];
+  let rest = lineText.slice(leading.length);
   const leadingColumn = columnAfter(leading, 0);
   let column = leadingColumn;
   let itemColumn = -1;

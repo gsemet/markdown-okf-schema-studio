@@ -3,15 +3,16 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-BLOCK-266
 uuid: 67d10e20-e5f6-4e08-a7b5-6af9441a918d
 title: Edit mode shows each blank run between top-level blocks, between list
-  items or inside a list item as a blank-lines block
+  items or inside a list item or a quote as a blank-lines block
 description: When edit mode is on, the extension SHALL show every run of two or
   more blank lines between top-level blocks, at the start or at the end of the
-  body, between two items of a top-level list or inside a list item, as one
-  blank-lines block placed from the host's run list, inside the list item that
-  holds a run of a list, and show nothing for a single separator, a run inside
-  another block (a fence, a directive, an HTML block, a table, a quote, an alert
-  or an admonition), a run next to a folded block, a folded or included list,
-  reading mode or the export.
+  body, between two items of a top-level list or inside a list item, and every
+  run of two or more empty quote lines of the same depth inside a quote, an
+  alert, an admonition, a definition or a footnote, as one blank-lines block
+  placed from the host's run list, inside the list item that holds a run of a
+  list, and show nothing for a single separator, a run inside another block (a
+  fence, an HTML block or a table), a run next to a folded block, a folded or
+  included list, reading mode or the export.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -25,20 +26,32 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/export/exportContent.ts
 - src/core/mapping/blankRuns.ts
 - src/core/mapping/blockRange.ts
+- src/core/mapping/quoteLine.ts
+- src/core/preview/styles/blankLinesInContainersStyles.ts
 - src/core/preview/styles/editModeStyles.ts
+- src/core/render/mystBlockTransforms.ts
+- src/core/render/mystNormalize.ts
+- src/core/render/mystRenderer.ts
 - src/core/render/renderPipeline.ts
 - src/page/features/blankLines.ts
+- src/page/features/blankRunHosts.ts
 - src/page/features/blockSelectionView.ts
 tested_in_files:
 - test/core/export/htmlExport.test.ts
 - test/core/mapping/blankRuns.test.ts
+- test/core/mapping/quoteBlankRuns.test.ts
+- test/core/protocol/pageToHost.test.ts
 - test/core/render/blankRunsInLists.test.ts
 - test/core/render/blankRunsList.test.ts
+- test/integration/blankLines.test.ts
 - test/page/runtimeBlankLines.test.ts
+- test/page/runtimeBlankLinesContainers.test.ts
 - test/visual/blankLinesBlockScenarios.ts
 - test/visual/capture_blank_lines_block.py
+- test/visual/capture_blank_lines_containers.py
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -46,7 +59,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When edit mode is on, the extension SHALL show every run of two or more blank lines between top-level blocks, at the start or at the end of the body, between two items of a top-level list or inside a list item, as one blank-lines block placed from the host's run list, inside the list item that holds a run of a list, and show nothing for a single separator, a run inside another block (a fence, a directive, an HTML block, a table, a quote, an alert or an admonition), a run next to a folded block, a folded or included list, reading mode or the export.
+When edit mode is on, the extension SHALL show every run of two or more blank lines between top-level blocks, at the start or at the end of the body, between two items of a top-level list or inside a list item, and every run of two or more empty quote lines of the same depth inside a quote, an alert, an admonition, a definition or a footnote, as one blank-lines block placed from the host's run list, inside the list item that holds a run of a list, and show nothing for a single separator, a run inside another block (a fence, an HTML block or a table), a run next to a folded block, a folded or included list, reading mode or the export.
 
 ### Scenario: Runs are shown
 

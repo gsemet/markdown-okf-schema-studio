@@ -124,13 +124,17 @@ type PageStateType = PageStateMessageUnion["type"];
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
 /**
  * A blank run of the message: two or more lines, so `endLine` is above `line`. A run inside a list
- * also names its list item line, a source line above the run.
+ * also names its list item line, a source line above the run; a run inside another container names
+ * the container's line the same way (never both).
  */
 const isBlankRunFields = (value: unknown): boolean => {
   if (typeof value !== "object" || value === null) return false;
-  const run = value as { line?: unknown; endLine?: unknown; itemLine?: unknown };
+  const run = value as { line?: unknown; endLine?: unknown; itemLine?: unknown; containerLine?: unknown };
+  const aboveRun = (field: unknown): boolean =>
+    field === undefined || (isSourceLine(field) && (field as number) < (run.line as number));
   return isSourceLine(run.line) && isSourceLine(run.endLine) && (run.endLine as number) > (run.line as number)
-    && (run.itemLine === undefined || (isSourceLine(run.itemLine) && (run.itemLine as number) < (run.line as number)));
+    && aboveRun(run.itemLine) && aboveRun(run.containerLine)
+    && (run.itemLine === undefined || run.containerLine === undefined);
 };
 
 const BLOCK_EDIT_TYPES: readonly PageStateType[] = ["previewEditOpen", "previewEditSave", "previewEditCancel"];

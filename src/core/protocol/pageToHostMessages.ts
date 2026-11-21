@@ -120,6 +120,12 @@ export interface BlankRunFields {
   endLine: number;
   /** A run inside a list: the first line of the list item that holds it (the host indents to it). */
   itemLine?: number;
+  /**
+   * A run inside a directive, a context-tag panel, a definition or a footnote: the line the host
+   * reads the container's indent from (the opening fence or tag, the marker line, the label line).
+   * Never together with `itemLine`.
+   */
+  containerLine?: number;
 }
 
 /** The fields of a save that the validator refuses on an open or a cancel. */

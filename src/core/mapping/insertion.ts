@@ -1,7 +1,8 @@
 import { sourceLines } from "../edits/textEdit";
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { splitLines } from "./blockMove";
-import { listItemIndent, startsSiblingItem, startsWithListMarker } from "./listItemIndent";
+import { blankRunIndent, startsDefinitionEntry, startsFootnoteDefinition, type RunIndent } from "./blankRunContainer";
+import { startsWithListMarker } from "./listItemIndent";
 
 export interface InsertionPlan {
   /** UTF-16 offset in the document text where the inserted text starts. */
@@ -12,10 +13,11 @@ export interface InsertionPlan {
   /** A blank run's region the inserted text replaces (`offset` is its start); absent otherwise. */
   replace?: { start: number; end: number };
   /**
-   * A blank run inside a list item: the indents of that item, and whether the run is between two
-   * items (the line below is a sibling item), decided once against the document of the plan.
+   * A blank run inside a quote or another container (a list item, a directive, a definition, a
+   * footnote): what each line of the block takes before it, decided once against the document of
+   * the plan. Absent for a plain run at the top level.
    */
-  listIndent?: { item: string; content: string; betweenItems: boolean };
+  indent?: RunIndent;
 }
 
 const lineEndingOf = (text: string): string =>
@@ -27,14 +29,18 @@ const lineEndingOf = (text: string): string =>
  * by `checkBlankRun`). The region runs from the end of line `line - 1` (the start of the text for
  * line 1) to the start of line `endLine + 1`, or to the end of the text for a run at the end. One
  * separator goes before the block (none at the start of the file) and one after it (none at the
- * end, where the document's final line break is kept, or kept absent). With `itemLine` (the line
- * of the list item that holds the run), the plan also carries that item's indents.
+ * end, where the document's final line break is kept, or kept absent). In a quote run each separator
+ * is a copy of the run's first line. With `itemLine` (the line of the list item that holds the run)
+ * or `containerLine` (the line of the directive, panel, definition or footnote that holds it), and
+ * for a quote run, the plan also carries the indent of the block; a container line that does not
+ * hold is ignored here, the callers check it first.
  */
 export function planBlankRunInsertion(
   text: string,
   line: number,
   endLine: number,
   itemLine?: number,
+  containerLine?: number,
 ): InsertionPlan {
   const lines = splitLines(text);
   const lineEnding = lineEndingOf(text);
@@ -43,22 +49,15 @@ export function planBlankRunInsertion(
   const start = line === 1 ? 0 : offsetOfLine(line - 1) - lines[line - 2].eol.length;
   const hasBelow = endLine < lines.length;
   const end = hasBelow ? offsetOfLine(endLine) : text.length;
-  const indents = itemLine === undefined ? undefined : listItemIndent(text, itemLine, line);
+  const indent = blankRunIndent(text, line, endLine, itemLine, containerLine) ?? blankRunIndent(text, line, endLine);
+  const separator = indent?.blank === undefined ? "" : indent.blank;
   return {
     offset: start,
-    prefix: line === 1 ? "" : lineEnding + lineEnding,
-    suffix: hasBelow ? lineEnding + lineEnding : lines[lines.length - 1].eol,
+    prefix: line === 1 ? "" : lineEnding + separator + lineEnding,
+    suffix: hasBelow ? lineEnding + separator + lineEnding : lines[lines.length - 1].eol,
     lineEnding,
     replace: { start, end },
-    ...(indents
-      ? {
-        listIndent: {
-          item: indents.item,
-          content: indents.content,
-          betweenItems: hasBelow && startsSiblingItem(lines[endLine].text, indents.itemColumn),
-        },
-      }
-      : {}),
+    ...(indent && (indent.blank !== undefined || itemLine !== undefined || containerLine !== undefined) ? { indent } : {}),
   };
 }
 
@@ -109,18 +108,28 @@ export function insertionText(plan: InsertionPlan, raw: string): string {
   // Whole blank lines at the start go; the indentation of the first non-blank line stays.
   const block = raw.replace(/^(?:[ \t]*(?:\r\n|\n|\r))+/u, "")
     .replace(/\r\n|\n|\r/gu, plan.lineEnding).replace(/(?:\r\n|\n|\r)+$/u, "");
-  return plan.prefix + (plan.listIndent ? indentedToItem(block, plan) : block) + plan.suffix;
+  return plan.prefix + (plan.indent ? indentedToContainer(block, plan) : block) + plan.suffix;
+}
+
+/** True when the block is a sibling entry of the kind: a list item, a definition entry or a footnote. */
+function isSiblingEntry(kind: NonNullable<RunIndent["sibling"]>["kind"], block: string, lineEnding: string): boolean {
+  if (kind === "item") return startsWithListMarker(block);
+  if (kind === "footnote") return startsFootnoteDefinition(block);
+  return startsDefinitionEntry(block.split(lineEnding));
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
 /**
- * A block written in a run inside a list item takes that item's content indent, or the item's own
- * indent (a sibling item) when the run is between items and the block starts with a list marker.
- * Blank lines of the block get nothing; the writer's own indentation stays after the indent.
+ * A block written in a run inside a container takes the container's indent after its quote part:
+ * the content indent, or the entry's own indent (a sibling) when the run is between two entries and
+ * the block is one (a list item, a definition entry, a footnote). Blank lines of the block become a
+ * copy of the run's first line in a quote run and get nothing otherwise; the writer's own
+ * indentation stays after the indent.
  */
-function indentedToItem(block: string, plan: InsertionPlan): string {
-  const { item, content, betweenItems } = plan.listIndent!;
-  const indent = betweenItems && startsWithListMarker(block) ? item : content;
-  return block.split(plan.lineEnding).map((line) => (/^[ \t]*$/u.test(line) ? line : indent + line))
+function indentedToContainer(block: string, plan: InsertionPlan): string {
+  const { quote, blank, content, sibling } = plan.indent!;
+  const indent = sibling && isSiblingEntry(sibling.kind, block, plan.lineEnding) ? sibling.indent : content;
+  return block.split(plan.lineEnding)
+    .map((line) => (/^[ \t]*$/u.test(line) ? (blank ?? line) : quote + indent + line))
     .join(plan.lineEnding);
 }

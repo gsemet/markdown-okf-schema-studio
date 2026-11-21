@@ -1,16 +1,18 @@
 /**
- * The blank-lines blocks of edit mode: one reachable block for each run of two or more blank lines.
- * The host finds the runs and appends them as the last element of the content
- * (`<div hidden data-okf-blank-runs="L-E L-E">`); the page reads the list only there, so authored
- * content cannot forge a run. The blocks are the page's own elements (never mapped to a source line,
- * so no other feature takes them for a block of the document): they are made here and tracked here.
- * A run inside a block that is not a list, or next to a folded section, gets no block; a run inside
- * a top-level list shows inside the list item that holds it, and keeps that item's first line
- * (`itemLine`) so the host can indent a block typed there.
+ * The blank-lines blocks of edit mode: one reachable block for each run of two or more blank lines
+ * (CommonMark blank lines, or the empty `>` lines of a quote). The host finds the runs and appends
+ * them as the last element of the content (`<div hidden data-okf-blank-runs="L-E L-E">`); the page
+ * reads the list only there, so authored content cannot forge a run. The blocks are the page's own
+ * elements (never mapped to a source line, so no other feature takes them for a block of the
+ * document): they are made here and tracked here. Where a block goes, and which runs show nothing
+ * (a fence, a table, a closed dropdown, a folded section), is decided in `blankRunHosts.ts`: a run
+ * inside a container shows inside it, and keeps the line the host reads the container's indent from
+ * (`itemLine` for a list item, `containerLine` for any other container).
  */
 
 import { createDeleteBlockButton } from "../modules/deleteBlockButton";
-import { MAPPINGS_SELECTOR, type BlankLines, type PageRuntime } from "./pageRuntime";
+import { type BlankLines, type PageRuntime } from "./pageRuntime";
+import { hasClass, locateRun, placeInHost, type Host, type RunLines } from "./blankRunHosts";
 
 const CONTENT_ID = "sphinx-myst-preview-content";
 const RUNS_ATTRIBUTE = "data-okf-blank-runs";
@@ -19,23 +21,19 @@ const INSERT_POINT_CLASS = "sphinx-preview-insert-point";
 const SELECTED_ATTRIBUTE = "data-sphinx-preview-block-selected";
 const RUN_PATTERN = /^([1-9][0-9]{0,8})-([1-9][0-9]{0,8})$/u;
 
-interface Run {
-  line: number;
-  endLine: number;
+interface Run extends RunLines {
   /** A run inside a list: the first line of the list item that holds its block. */
   itemLine?: number;
+  /** A run inside another container: the line the host reads its indent from. */
+  containerLine?: number;
+  /** The top-level block that holds the run, for a run inside a container it holds. */
+  holder?: HTMLElement;
+  /** True for a run shown inside a container (a footnote included). */
+  inside?: true;
 }
 
-/** Where the block of a run goes: inside a list item, after the block above, or nowhere. */
-type Spot = { item: HTMLElement } | { above: HTMLElement | undefined } | undefined;
-
-const holds = (range: Run, run: Run): boolean => range.line < run.line && run.endLine < range.endLine;
-
-const hasClass = (element: Element, name: string): boolean =>
-  String(element.className ?? "").split(" ").includes(name);
-
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
-/** The runs of the host's list, in order; a malformed or overlapping entry is dropped. */
+/** The runs of the host's list, in order; a malformed or overlapping entry is dropped (runs may touch). */
 function parseRuns(value: string | null): Run[] {
   const runs: Run[] = [];
   for (const entry of (value ?? "").split(" ")) {
@@ -43,7 +41,7 @@ function parseRuns(value: string | null): Run[] {
     if (!match) continue;
     const run = { line: Number(match[1]), endLine: Number(match[2]) };
     const last = runs[runs.length - 1];
-    if (run.endLine > run.line && (!last || run.line > last.endLine + 1)) runs.push(run);
+    if (run.endLine > run.line && (!last || run.line > last.endLine)) runs.push(run);
   }
   return runs;
 }
@@ -87,6 +85,7 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
           line: run.line,
           endLine: run.endLine,
           ...(run.itemLine !== undefined ? { itemLine: run.itemLine } : {}),
+          ...(run.containerLine !== undefined ? { containerLine: run.containerLine } : {}),
         },
       },
       "end",
@@ -142,12 +141,6 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
     (point ?? above.closest?.("pre") ?? above).insertAdjacentElement("afterend", block);
   }
 
-  const lineOf = (element: Element): number => {
-    const own = element.getAttribute("data-sphinx-source-line");
-    const line = Number(own ?? element.querySelectorAll(MAPPINGS_SELECTOR)[0]?.getAttribute("data-sphinx-source-line"));
-    return Number.isSafeInteger(line) && line >= 1 ? line : Number.NaN;
-  };
-
   // True while the block is in the content: a content swap detaches the list that held a block
   // inside a list item, but the block keeps its parent, so the chain of parents is followed.
   function inContent(block: HTMLElement): boolean {
@@ -158,42 +151,9 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
     return false;
   }
 
-  // The list item that gets the block of `run`, inside the top-level `list` that holds it: the deepest
-  // holder among the mapped elements of the list, which must all be lists and items.
-  function hostItemOf(list: HTMLElement, run: Run): HTMLElement | undefined {
-    const holders: HTMLElement[] = [list];
-    const walk = (parent: HTMLElement): void => {
-      for (const child of rt.blocks.mappedChildren(parent)) {
-        if (!holds(rt.blocks.blockRange(child), run)) continue;
-        holders.push(child);
-        walk(child);
-      }
-    };
-    walk(list);
-    if (holders.some((holder) => rt.blocks.isIncludedBlock(holder) || !["UL", "OL", "LI"].includes(holder.tagName))) {
-      return undefined;
-    }
-    const deepest = holders[holders.length - 1];
-    if (deepest.tagName === "LI") return deepest;
-    return rt.blocks.mappedChildren(deepest).filter((child) =>
-      child.tagName === "LI" && rt.blocks.blockRange(child).line < run.line).pop();
-  }
-
-  // Puts `block` inside `item`, right after the last child that starts before the run (before the
-  // first one that starts after it when none does, at the end when the item has no mapped child).
-  function placeInItem(block: HTMLElement, item: HTMLElement, run: Run): void {
-    const frame = state.activeBlockEdit?.element;
-    const children = (Array.from(item.children) as HTMLElement[])
-      .filter((child) => !runs.has(child) && child !== frame && !hasClass(child, INSERT_POINT_CLASS));
-    const anchor = children.filter((child) => lineOf(child) < run.line).pop();
-    if (anchor) {
-      if (anchor.nextElementSibling !== block) anchor.insertAdjacentElement("afterend", block);
-      return;
-    }
-    const after = children.find((child) => lineOf(child) > run.endLine);
-    if (after) after.insertAdjacentElement("beforebegin", block);
-    else item.appendChild(block);
-  }
+  // The children of a container that are not the page's own: blank-lines blocks, editor frame, insertion bars.
+  const skipOwn = (child: HTMLElement): boolean =>
+    runs.has(child) || child === state.activeBlockEdit?.element || hasClass(child, INSERT_POINT_CLASS);
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
   function refresh(): void {
@@ -203,53 +163,43 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
       return;
     }
     const blocks = rt.blocks.topLevelMappedBlocks();
-    const isProperties = (block: HTMLElement): boolean => block.getAttribute("data-okf-properties") !== null;
-    const body = blocks.filter((block) => !isProperties(block));
-    const range = (block: HTMLElement): Run => rt.blocks.blockRange(block);
     const kept = new Set<HTMLElement>();
-    const aboveOf = (run: Run): HTMLElement | undefined =>
-      [...body].reverse().find((block) => range(block).line < run.line) ?? blocks.find(isProperties);
-    // Where the block of a run goes. A run held by a top-level list goes into its host item; one held
-    // by any other block, or by a folded list, shows nothing.
-    const spotOf = (run: Run): Spot => {
-      const holder = body.find((block) => holds(range(block), run));
-      if (holder) {
-        if (!["UL", "OL"].includes(holder.tagName) || rt.blocks.isIncludedBlock(holder)
-          || holder.getAttribute("data-okf-folded") != null) return undefined;
-        const item = hostItemOf(holder, run);
-        return item && lineOf(item) < run.line ? { item } : undefined;
-      }
-      const above = aboveOf(run);
-      const below = body.find((block) => range(block).line > run.endLine);
-      return [above, below].some((block) => block?.getAttribute("data-okf-folded") != null) ? undefined : { above };
-    };
-    const put = (block: HTMLElement, spot: NonNullable<Spot>, run: Run): void => {
-      if ("item" in spot) placeInItem(block, spot.item, run);
+    const put = (block: HTMLElement, spot: NonNullable<ReturnType<typeof locateRun>>, run: Run): void => {
+      if ("host" in spot) placeInHost(rt, block, spot.host, run, skipOwn);
       else place(block, spot.above);
     };
+    // A run shown inside a container is attached while the block is in the document: a content swap
+    // detaches the old container, and the block keeps its parent.
     const attached = (block: HTMLElement, run: Run): boolean =>
-      run.itemLine === undefined ? Boolean(block.parentNode) : inContent(block);
+      run.inside ? inContent(block) : Boolean(block.parentNode);
+    const runOfHost = (found: Run, host: Host): Run => ({
+      ...found,
+      inside: true,
+      ...(host.itemLine !== undefined ? { itemLine: host.itemLine } : {}),
+      ...(host.containerLine !== undefined ? { containerLine: host.containerLine } : {}),
+      ...(host.holder ? { holder: host.holder } : {}),
+    });
     if (editing) {
       kept.add(editing as HTMLElement);
       // A swap of the content dropped the block and its editor frame: they go back where the run was.
       const held = runs.get(editing as HTMLElement);
       const frame = state.activeBlockEdit?.element;
       if (held && !attached(editing as HTMLElement, held)) {
-        const spot = spotOf(held);
-        if (spot && "item" in spot) placeInItem(editing as HTMLElement, spot.item, held);
-        else place(editing as HTMLElement, aboveOf(held));
+        const spot = locateRun(rt, held, blocks);
+        if (spot) put(editing as HTMLElement, spot, held);
         if (frame) (editing as HTMLElement).insertAdjacentElement("afterend", frame);
       }
     }
     const existing = new Map<string, HTMLElement>();
-    const keyOf = (run: Run): string => `${run.line}-${run.endLine}-${run.itemLine ?? ""}`;
+    const keyOf = (run: Run): string =>
+      `${run.line}-${run.endLine}-${run.itemLine ?? ""}-${run.containerLine ?? ""}`;
     runs.forEach((run, block) => {
       if (attached(block, run)) existing.set(keyOf(run), block);
     });
     for (const found of readRuns()) {
-      const spot = spotOf(found);
+      const spot = locateRun(rt, found, blocks);
       if (!spot) continue;
-      const run: Run = "item" in spot ? { ...found, itemLine: lineOf(spot.item) } : found;
+      const run: Run = "host" in spot ? runOfHost(found, spot.host) : found;
       const known = existing.get(keyOf(run));
       if (known) {
         kept.add(known);
@@ -272,6 +222,10 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
     if (scroll) block.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     block.focus?.({ preventScroll: true });
   }
+
+  // A dropdown that opens or closes shows or hides the blocks inside it. `toggle` does not bubble, so
+  // the listener is in the capture phase on the content.
+  document.getElementById?.(CONTENT_ID)?.addEventListener("toggle", () => refresh(), true);
 
   return {
     refresh,

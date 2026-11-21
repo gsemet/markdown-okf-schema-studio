@@ -35,6 +35,26 @@ export function normalizeFigureCaptions(node: MystNode): void {
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
+/**
+ * The quote that `{epigraph}`, `{pull-quote}` and `{blockquote}` render has no position of its own:
+ * it takes the one of its directive, so it is mapped from the opening to the closing fence and holds
+ * the blank runs between its paragraphs.
+ */
+export function mapQuoteDirectives(node: MystNode): void {
+  if (node.type === "mystDirective" && node.position?.start?.line !== undefined && node.position.end?.line !== undefined) {
+    for (const container of node.children ?? []) {
+      if (container.type !== "container" || container.kind !== "quote") continue;
+      for (const quote of container.children ?? []) {
+        if (quote.type === "blockquote" && quote.position === undefined) quote.position = node.position;
+      }
+    }
+  }
+  for (const child of node.children ?? []) {
+    mapQuoteDirectives(child);
+  }
+}
+
 function collectCaptionlessTargets(node: MystNode, targets: Set<string>): void {
   if (
     node.type === "container"

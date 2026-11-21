@@ -198,6 +198,18 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     return true;
   }
 
+  /** The index of the block with the smallest line after the run, else of the one with the largest line before it. */
+  function afterRunIndex(blocks: HTMLElement[], run: { line: number; endLine: number }): number {
+    let after = -1;
+    let before = -1;
+    blocks.forEach((entry, index) => {
+      const { line } = rt.blocks.blockRange(entry);
+      if (line > run.endLine && (after < 0 || line < rt.blocks.blockRange(blocks[after]).line)) after = index;
+      if (line < run.line && (before < 0 || line >= rt.blocks.blockRange(blocks[before]).line)) before = index;
+    });
+    return after >= 0 ? after : Math.max(before, 0);
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
   /** Sends the delete of a blank run; the block that follows it (else the one above, or the list that held it) gets the selection. */
   function requestDeleteBlankLines(block: HTMLElement): boolean {
@@ -208,9 +220,9 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     postBlocksMessage("previewBlankRunDelete", { line: run.line, endLine: run.endLine }, block);
     state.pendingBlockSelection = {
       anchor: undefined,
-      // Inside a list the list that held the run is selected; elsewhere the block that follows it.
-      targetIndex: blocks.filter((entry) => rt.blocks.blockRange(entry).line < run.line).length
-        - (run.itemLine !== undefined ? 1 : 0),
+      // A run inside a container selects the top-level block that held it; any other run selects the
+      // block that follows it, else the one before it (found by comparing lines).
+      targetIndex: run.holder && blocks.includes(run.holder) ? blocks.indexOf(run.holder) : afterRunIndex(blocks, run),
       count: blocks.length,
       quiet: true,
       afterDelete: true,
@@ -314,7 +326,8 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       const run = rt.blankLines.runOf(block);
       if (run) list.push({ block, index: -1, blank: true, ...run });
     });
-    return list.sort((a, b) => a.line - b.line);
+    // On equal lines a body block comes before the blank-lines blocks it holds (the sort is stable).
+    return list.sort((a, b) => a.line - b.line || Number(a.blank) - Number(b.blank));
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-267
@@ -324,16 +337,21 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
    * block after it. `skipBlank` passes over the blank-lines blocks.
    */
   function neighbourStop(blocks: HTMLElement[], delta: number, from: HTMLElement | undefined, skipBlank = false): Stop | undefined {
-    const all = stops(blocks).filter((stop) => !skipBlank || !stop.blank);
-    let current: { line: number; endLine: number } | undefined;
-    if (from) current = rt.blankLines.runOf(from);
-    else if (blockSelection.isActive()) {
+    const all = stops(blocks);
+    let currentBlock = from;
+    if (!currentBlock && blockSelection.isActive()) {
       const free = blockSelection.startIndex === blockSelection.anchorIndex ? blockSelection.endIndex! : blockSelection.startIndex!;
-      current = blocks[free] ? rt.blocks.blockRange(blocks[free]) : undefined;
+      currentBlock = blocks[free];
     }
-    if (!current) return undefined;
-    const { line } = current;
-    return delta > 0 ? all.find((stop) => stop.line > line) : [...all].reverse().find((stop) => stop.line < line);
+    if (!currentBlock) return undefined;
+    // By position in the sorted stops, never by line: a container and the blank-lines block that
+    // starts on its first line have the same line.
+    const position = all.findIndex((stop) => stop.block === currentBlock);
+    if (position < 0) return undefined;
+    for (let index = position + delta; index >= 0 && index < all.length; index += delta) {
+      if (!skipBlank || !all[index].blank) return all[index];
+    }
+    return undefined;
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
@@ -607,6 +625,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
               line: blankRun.line,
               endLine: blankRun.endLine,
               ...(blankRun.itemLine !== undefined ? { itemLine: blankRun.itemLine } : {}),
+              ...(blankRun.containerLine !== undefined ? { containerLine: blankRun.containerLine } : {}),
             },
           }, blank);
           return;

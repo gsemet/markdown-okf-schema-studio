@@ -49,12 +49,14 @@ const KEPT_PREVIEW_ATTRIBUTES = new Set([
   "data-sphinx-preview-navigation",
 ]);
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
 const REMOVED_ATTRIBUTES = new Set([
   "contenteditable", "tabindex", "draggable", "spellcheck", "data-line", "data-okf-line", "data-okf-end-line",
   "data-okf-fold", "data-okf-folded", "data-okf-value", "data-okf-value-yaml", "data-okf-enums",
   "data-okf-edit-cell", "data-okf-editable", "data-okf-value-cell", "data-okf-available-keys",
   "data-okf-available-fields", "data-okf-editing", "data-okf-key-editing",
   "data-okf-marker-line", "data-okf-marker-end-line", "data-okf-frontmatter-end-line",
+  "data-okf-definition-line", "data-okf-footnote-line",
 ]);
 
 const REMOVED_ATTRIBUTE_PREFIXES = [

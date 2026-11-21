@@ -11,6 +11,7 @@ import { SVG_PICTURE_CSS } from "./styles/svgPictureStyles";
 import { CONTENT_LAYOUT_CSS } from "./styles/contentLayoutStyles";
 import { EDIT_MODE_CSS } from "./styles/editModeStyles";
 import { EDIT_PALETTE_CSS } from "./styles/editPaletteStyles";
+import { BLANK_LINES_IN_CONTAINERS_CSS } from "./styles/blankLinesInContainersStyles";
 import { GRID_CARD_EDIT_CSS } from "./styles/gridCardEditStyles";
 import { FIND_CSS } from "./styles/findStyles";
 import { HTML_BLOCK_CSS } from "./styles/htmlBlockStyles";
@@ -123,6 +124,7 @@ export const PREVIEW_THEME_CSS =
   + SVG_PICTURE_CSS
   + FRONTMATTER_VALUE_CSS
   + GRID_CARD_EDIT_CSS
+  + BLANK_LINES_IN_CONTAINERS_CSS
   + CODE_BLOCK_CSS
   + PROPERTIES_CSS
   + FIND_CSS

@@ -12,7 +12,11 @@ description: When the writer types a block in a blank-lines block, or pastes in
   indent of the item (CommonMark's content column), or the item's own indent
   when the run is between two items and the first line of the block starts with
   a list marker; the host checks the item line and refuses it as stale when it
-  is not a list item line.
+  is not a list item line. A block written in place of a run inside a quote
+  keeps the quote markers of the run on every line, and one inside a directive,
+  a panel, a definition or a footnote takes the indent of that container; the
+  host checks the container line and refuses it as stale when it is not a line
+  of that shape.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -27,26 +31,35 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/edits/sourceEdits.ts
+- src/core/mapping/blankRunContainer.ts
 - src/core/mapping/blockRange.ts
 - src/core/mapping/insertion.ts
 - src/core/mapping/listItemIndent.ts
+- src/core/mapping/quoteLine.ts
 - src/core/protocol/pageToHost.ts
 - src/page/features/blankLines.ts
+- src/page/features/blankRunHosts.ts
 - src/page/features/blockSelectionView.ts
 - src/page/features/contentPatch.ts
 - src/session/features/blockEdits.ts
 tested_in_files:
+- test/core/edits/blankRunContainerWrite.test.ts
+- test/core/mapping/blankRunContainer.test.ts
 - test/core/mapping/blankRunInList.test.ts
 - test/core/mapping/blockRange.test.ts
 - test/core/mapping/insertion.test.ts
 - test/core/mapping/listItemIndent.test.ts
+- test/core/mapping/quoteBlankRuns.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/integration/blankLines.test.ts
 - test/page/runtimeBlankLines.test.ts
+- test/page/runtimeBlankLinesContainers.test.ts
 - test/session/blankRunHost.test.ts
+- test/session/blankRunInContainerHost.test.ts
 - test/session/blankRunInListHost.test.ts
 - test/visual/blankLinesBlockScenarios.ts
 - test/visual/capture_blank_lines_block.py
+- test/visual/capture_blank_lines_containers.py
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -54,7 +67,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer types a block in a blank-lines block, or pastes in it, the extension SHALL write the block in place of the run with one separator on each side in one text edit, write nothing for an empty Done, restore the run on Cancel, keep the editor open across an autosave re-render, and refuse a stale run. A block written in place of a run inside a list takes the content indent of the item (CommonMark's content column), or the item's own indent when the run is between two items and the first line of the block starts with a list marker; the host checks the item line and refuses it as stale when it is not a list item line.
+When the writer types a block in a blank-lines block, or pastes in it, the extension SHALL write the block in place of the run with one separator on each side in one text edit, write nothing for an empty Done, restore the run on Cancel, keep the editor open across an autosave re-render, and refuse a stale run. A block written in place of a run inside a list takes the content indent of the item (CommonMark's content column), or the item's own indent when the run is between two items and the first line of the block starts with a list marker; the host checks the item line and refuses it as stale when it is not a list item line. A block written in place of a run inside a quote keeps the quote markers of the run on every line, and one inside a directive, a panel, a definition or a footnote takes the indent of that container; the host checks the container line and refuses it as stale when it is not a line of that shape.
 
 ### Scenario: Typing writes the block in place of the run
 

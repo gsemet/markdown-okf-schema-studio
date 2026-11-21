@@ -141,6 +141,18 @@ interface NodeRule {
  */
 const NODE_RULES: readonly NodeRule[] = [
   {
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
+    // A page-only line (never `data-line`, so the `dd` is no mapped block): the page reads it to
+    // place the blank-lines block of a run inside a definition, and to send the marker line.
+    name: "definition line",
+    kinds: ["definitionDescription"],
+    run: (node) => {
+      const line = node.position?.start?.line;
+      if (line !== undefined) mergeProperties(node, { "data-okf-definition-line": line });
+      return false;
+    },
+  },
+  {
     name: "mermaid diagram",
     kinds: ["mermaid", "code"],
     run: (node, { line }) => {

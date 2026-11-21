@@ -355,10 +355,10 @@ export function planBlocksPaste(
   text: string,
   afterLine: number,
   clipboard: string,
-  blankRun?: { line: number; endLine: number; itemLine?: number },
+  blankRun?: { line: number; endLine: number; itemLine?: number; containerLine?: number },
 ): EditRefusal | { edit: TextEdit } {
   const plan = blankRun
-    ? planBlankRunPaste(text, blankRun.line, blankRun.endLine, clipboard, blankRun.itemLine)
+    ? planBlankRunPaste(text, blankRun.line, blankRun.endLine, clipboard, blankRun.itemLine, blankRun.containerLine)
     : planPaste(text, afterLine, clipboard);
   if ("refused" in plan) return { refused: plan.refused };
   return { edit: { start: plan.offset, end: plan.end ?? plan.offset, text: plan.text } };

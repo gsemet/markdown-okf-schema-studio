@@ -1,6 +1,6 @@
 import * as path from "node:path";
 
-import { blankRuns } from "../mapping/blankRuns";
+import { blankRuns, quoteBlankRuns } from "../mapping/blankRuns";
 import { listGlobDocuments } from "./documentGlob";
 import { loadEngine } from "./mystEngine";
 import { renderMyst, RenderDiagnostic } from "./mystRenderer";
@@ -247,12 +247,14 @@ export async function renderPreviewSource(input: SourceRenderInput): Promise<Sou
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
 /**
- * The hidden element that tells the page where the blank runs of the document are, as `line-endLine`
- * pairs (empty when there is none). It is the last element of the content: the page reads it only there,
+ * The hidden element that tells the page where the blank runs of the document are (plain runs and quote
+ * runs, sorted by line), as `line-endLine` pairs (empty when there is none). It is the last element of the content: the page reads it only there,
  * so authored content cannot forge a run.
  */
 export function blankRunsMarker(text: string): string {
-  const value = blankRuns(text).map((run) => `${run.line}-${run.endLine}`).join(" ");
+  const value = [...blankRuns(text), ...quoteBlankRuns(text)]
+    .sort((first, second) => first.line - second.line)
+    .map((run) => `${run.line}-${run.endLine}`).join(" ");
   return `<div hidden data-okf-blank-runs="${value}"></div>`;
 }
 
