@@ -46,7 +46,7 @@ When the reader presses Play path N on a use case map, the viewer SHALL light, i
 
 ### Verification notes
 
-- Method: Browser test "Play path 2 lights its three steps and its four states, and nothing with reduced motion" in test/site/requirementsViewer/metroMap.browser.test.ts, on the frozen use case BLOCK-014 at 1280 px, in Chromium.
+- Method: Browser test "Play path 2 on the frozen BLOCK-014 map lights its three steps and four states, and nothing with reduced motion" in test/site/requirementsViewer/metroMap.browser.test.ts, on the frozen use case BLOCK-014 at 1280 px, in Chromium.
 - Criteria: With motion allowed the lit steps are exactly the three of path 2 and the lit states its four; with reduced motion nothing is lit.
 
 <!-- okf:links:start -->
