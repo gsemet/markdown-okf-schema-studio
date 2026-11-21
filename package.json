@@ -505,6 +505,7 @@
     "qs": ">=6.17.0"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "10.1.1",
     "@types/katex": "^0.16.8",
     "@types/node": "^24.19.2",
     "@types/vscode": "^1.95.0",

@@ -76,6 +76,7 @@ this repository.
   security checks: `just check`
 - Settings schema of `package.json` from the settings registry: `just generate-settings`
 - Python Sphinx source-mapping contract: `just sphinx-check`
+- Mutation campaign on `src/core` (manual, hours, not in `check` or `preflight`): `just mutation-core [SAMPLE]`; see "Mutation testing of src/core" in CONTRIBUTING.md
 - Requirements: `just requirements-lint` (validate), `just requirements-update` (coverage and
   navigation), `just requirements-report` (traceability report in `out/reports/requirements/`)
 - End-to-end tests: `just e2e`; full validation and site generation: `just preflight` (on Windows,

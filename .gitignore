@@ -18,3 +18,4 @@ npm-debug.log*
 /test/integration/fixtures/frontmatter-edit-*/
 /.cache/
 /output/
+/.stryker-tmp/

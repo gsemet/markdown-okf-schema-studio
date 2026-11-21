@@ -352,6 +352,12 @@ The E2E review index is only passed when the visual and integration artifacts sh
 campaign UUID, start time, and command. A failed `review:begin` stops `test:e2e`; stale visual
 manifests cannot certify a later run.
 
+### Mutation testing of src/core
+
+`just mutation-core [SAMPLE]` runs a mutation campaign (StrykerJS 10.1.1, a pinned devDependency) on `src/core` against the `test/core` unit tests. It is a manual campaign, not part of `just check`, `just preflight` or CI: the whole of `src/core` takes hours, so run it in the background and give it a sample, comma-separated globs of `src/core` files (or the environment variable `STUDIO_MUTATION_FILES`), for example `just mutation-core "src/core/find/**/*.ts"`.
+
+The target compiles, runs the checker self-test (it stops there when the TypeScript 7 check cannot work), runs the core phase (`scripts/stryker.config.mjs`), then the others phase (`scripts/stryker.others.config.mjs`: only the holes of the core phase, against the tests of the other layers), then writes `out/reports/mutation/summary.md` and `summary.json` with `scripts/mutation-report.mjs`: score per sub-folder and per SwRS, tests that kill nothing, a greedy set of redundant tests, tests not judged, holes with a label, and test files left out. The Stryker plugins are in `scripts/mutation/`: a `node:test` runner (stable test IDs, per-test coverage), a TypeScript 7 checker through `typescript/unstable/sync` (the stock checker cannot run on TypeScript 7), and an ignorer for message strings. Stryker's sandbox is `.stryker-tmp/` (git-ignored).
+
 ### Preview performance probe
 
 The probe measures the live preview on a large generated chapter (about 99 KB, 80 sections,
