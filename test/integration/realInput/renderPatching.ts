@@ -544,7 +544,7 @@ export async function scenarioInsertBlocksFromPreview(page: Page, evidence: Evid
 
     await withCurrentFrame(page, async (frame) => {
       await frame.locator("h1[data-sphinx-source-line]").first().hover();
-      await frame.locator("h1[data-sphinx-source-line] + .sphinx-preview-insert-point button:not([data-sphinx-move])").click();
+      await frame.locator("h1[data-sphinx-source-line] + .sphinx-preview-insert-point button:not([data-sphinx-move]):not(.sphinx-preview-delete)").click();
     });
     await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
     await typeText(page, "- check logs");
@@ -599,7 +599,7 @@ export async function scenarioInsertAfterFinalFigure(page: Page, evidence: Evide
       await setEditMode(page, true);
       await withCurrentFrame(page, async (frame) => {
         await frame.locator("figure[data-sphinx-source-line]").first().hover();
-        await frame.locator("figure[data-sphinx-source-line] + .sphinx-preview-insert-point button:not([data-sphinx-move])").click();
+        await frame.locator("figure[data-sphinx-source-line] + .sphinx-preview-insert-point button:not([data-sphinx-move]):not(.sphinx-preview-delete)").click();
       });
       await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
       await captureAfter(evidence, page, realInputId("25b-insert-after-figure-" + name),
