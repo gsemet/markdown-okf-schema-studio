@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The requirements pages on the website draw each use case as one joined map, smaller and readable:
+  states shared by several paths are drawn once, each path keeps its own colour, every behaviour
+  shows its full ID, a line above the map says what a path, a situation and a step are, and Play
+  walks the path in its colour.
 - The block editor of a file with CR LF line endings no longer stays stuck on "Saving Markdown..."
   after you leave it without a change; a block you edit keeps the line endings of its file.
 - Each block's bar has a Delete block button (x), and Delete or Backspace on a selected block

@@ -1,7 +1,7 @@
 import { escapeHtml } from "../socialCard";
 import { citedIds, type MainPath, type PathTransition } from "./mainPaths";
 import type { Requirement, Scenario, ViewerModel } from "./model";
-import { pageLink, shortId } from "./urls";
+import { pageLink } from "./urls";
 
 /** Port of the metro layout of prototype 02 (`gen.py`): the graph, the SVG, the phone list and the walk count. */
 
@@ -135,104 +135,338 @@ function wrap(value: string, width: number): string[] {
   return current ? [...lines, current] : lines;
 }
 
-function tspans(x: number, y: number, value: string, width: number, up = false, lineHeight = 15): string {
-  const lines = wrap(value, width);
-  const first = up ? y - (lines.length - 1) * lineHeight : y;
-  return lines.map((line, index) => `<tspan x="${x.toFixed(0)}" y="${(first + index * lineHeight).toFixed(0)}">${escapeHtml(line)}</tspan>`).join("");
-}
-
-const pathColour = (index: number): string => (index === 0 ? "var(--p1)" : "var(--p2)");
-
 function describe(requirement: Requirement | undefined, via: PathTransition): string {
   return requirement ? `${requirement.id}: ${requirement.title}` : `${via.id}: ${via.label}`;
 }
 
-/** The map as an SVG: states are circles, behaviours the lines between them, every line a link. */
+/** A state of the map: drawn once, whatever the number of paths through it. */
+interface MapNode {
+  readonly key: string;
+  col: number;
+  row: number;
+  goal: boolean;
+  readonly paths: Set<number>;
+  readonly options: PathTransition[];
+  /** A line leaves this state down to a lower row, under its circle. */
+  drop: boolean;
+}
+
+/** A behaviour between two states, drawn once with one stroke per path that takes it. */
+interface MapEdge {
+  readonly a: MapNode;
+  readonly b: MapNode;
+  readonly via: PathTransition;
+  readonly paths: number[];
+  /** The step index of this edge on each of its paths. */
+  readonly steps: Map<number, number>;
+  /** Another behaviour joins the same two states: drawn as an arc under the line. */
+  arc: boolean;
+}
+
+interface MetroMap {
+  readonly nodes: MapNode[];
+  readonly edges: MapEdge[];
+  readonly rows: number;
+}
+
+const COLUMN_MIN = 230, PAD_LEFT = 100, NAME_WRAP = 24, CAPTION_WRAP = 34, LINE = 17, CHAR = 6.4, INLINE_ROOM = 460, BEND = 24, LANE = 26;
+/** A pill: two lines (the full ID, then the test count), 6.8 px per character of the longer line, 36 px high. */
+const PILL_CHAR = 6.8, PILL_PAD = 20, PILL_HEIGHT = 36;
+/** The estimates leave this much more room than the pinned fonts take, so a reader's wider fonts still fit. */
+const WIDTH_MARGIN = 1.1, PILL_GAP = 24;
+/** How far a pill reaches beyond the 22 px pill of the first design, above and below its centre line. */
+const GROW = (PILL_HEIGHT - 22) / 2;
+const MAX_PATH_COLOURS = 3;
+
+/**
+ * The joined map: a state shared by paths is one node; path 1 runs on row 0 and each later path puts
+ * the states it does not share on a row of its own, joining and leaving the other rows at the shared ones.
+ */
+export function buildMetroMap(paths: readonly MainPath[]): MetroMap {
+  const nodes = new Map<string, MapNode>();
+  const edges = new Map<string, MapEdge>();
+  let rows = 0;
+  paths.forEach((path, pathIndex) => {
+    let row: number | undefined;
+    path.steps.forEach((step, index) => {
+      let node = nodes.get(step.state);
+      if (!node) {
+        row ??= rows++;
+        node = { key: step.state, col: 0, row, goal: false, paths: new Set(), options: [], drop: false };
+        nodes.set(step.state, node);
+      }
+      node.paths.add(pathIndex);
+      if (index === path.steps.length - 1) node.goal = true;
+      for (const option of step.options) {
+        if (!node.options.some((known) => known.id === option.id && known.kind === option.kind && known.label === option.label)) node.options.push(option);
+      }
+      const before = path.steps[index - 1];
+      const previous = before ? nodes.get(before.state) : undefined;
+      if (previous && before?.via) {
+        const key = `${previous.key}>${node.key}>${before.via.id}`;
+        const edge = edges.get(key) ?? { a: previous, b: node, via: before.via, paths: [], steps: new Map<number, number>(), arc: false };
+        edge.paths.push(pathIndex);
+        edge.steps.set(pathIndex, index - 1);
+        edges.set(key, edge);
+      }
+    });
+  });
+  // Columns: each state one column right of the state before it on every path (longest way from a start).
+  for (let pass = 0; pass < nodes.size + 1; pass += 1) {
+    let moved = false;
+    for (const edge of edges.values()) {
+      if (edge.b.col < edge.a.col + 1) {
+        edge.b.col = edge.a.col + 1;
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  const pairs = new Set<string>();
+  for (const edge of edges.values()) {
+    const pair = `${edge.a.key}>${edge.b.key}`;
+    if (pairs.has(pair)) edge.arc = true;
+    pairs.add(pair);
+    if (edge.a.row < edge.b.row) edge.a.drop = true;
+    if (edge.a.row > edge.b.row) edge.b.drop = true;
+  }
+  // A path that shares nothing goes on the right of an earlier row when it fits in one more column.
+  const all = [...nodes.values()];
+  const maxCol = Math.max(...all.map((node) => node.col));
+  for (let row = 2; row < rows; row += 1) {
+    const here = all.filter((node) => node.row === row);
+    const alone = here.every((node) => node.paths.size === 1) && ![...edges.values()].some((edge) => edge.a.row !== edge.b.row && (edge.a.row === row || edge.b.row === row));
+    if (!alone || here.length === 0) continue;
+    const width = Math.max(...here.map((node) => node.col)) + 1;
+    for (let target = 1; target < row; target += 1) {
+      const used = all.filter((node) => node.row === target);
+      // Right of the row's last state, and right of where its path climbs or drops, with a column of space for the climb.
+      const turns = [...edges.values()].filter((edge) => edge.a.row !== edge.b.row && (edge.a.row === target || edge.b.row === target)).map((edge) => Math.max(edge.a.col, edge.b.col));
+      const shift = Math.max(...used.map((node) => node.col), ...turns) + 1;
+      if (used.length === 0 || shift + width - 1 > maxCol + 1) continue;
+      for (const node of here) {
+        node.row = target;
+        node.col += shift;
+      }
+      break;
+    }
+  }
+  const used = [...new Set(all.map((node) => node.row))].sort((a, b) => a - b);
+  for (const node of all) node.row = used.indexOf(node.row);
+  return { nodes: all, edges: [...edges.values()], rows: used.length };
+}
+
+/** One line of text; `code` spans in monospace, without their backticks. */
+function rich(line: string): string {
+  return line.split("`").map((part, index) => (index % 2 === 1 ? `<tspan class="code">${escapeHtml(part)}</tspan>` : escapeHtml(part))).join("");
+}
+
+function lines(x: number, y: number, value: string, width: number, up = false): string {
+  const wrapped = wrap(value, width);
+  const firstY = up ? y - (wrapped.length - 1) * LINE : y;
+  return wrapped.map((line, index) => `<tspan x="${x.toFixed(0)}" y="${(firstY + index * LINE).toFixed(0)}">${rich(line)}</tspan>`).join("");
+}
+
+export const pathColour = (index: number): string => `var(--p${Math.min(index, MAX_PATH_COLOURS - 1) + 1})`;
+
+function pillWidth(id: string, count: string): number {
+  return Math.max(id.length, count.length) * PILL_CHAR + PILL_PAD;
+}
+
+/** A pill centred on `cy`: the requirement's full ID on its first line, its test count on its second. */
+function pill(left: number, cy: number, id: string, count: string, stroke: string, dashed = false): { svg: string; width: number } {
+  const width = pillWidth(id, count);
+  const x = (left + width / 2).toFixed(0);
+  return {
+    width,
+    svg: `<rect class="pill" x="${left.toFixed(0)}" y="${(cy - PILL_HEIGHT / 2).toFixed(0)}" width="${width.toFixed(0)}" height="${PILL_HEIGHT}" rx="12" stroke="${stroke}"${dashed ? ' stroke-dasharray="4 3"' : ""}/><text class="pt" text-anchor="middle"><tspan x="${x}" y="${(cy - 3).toFixed(0)}">${escapeHtml(id)}</tspan><tspan x="${x}" y="${(cy + 11).toFixed(0)}">${escapeHtml(count)}</tspan></text>`,
+  };
+}
+
+function dots(scenarios: readonly Scenario[], x: number, cy: number, centred: boolean): string {
+  return scenarios.map((scenario, index) => {
+    const cx = centred ? x + (index - (scenarios.length - 1) / 2) * 11 : x + index * 11;
+    return `<circle cx="${cx.toFixed(0)}" cy="${cy.toFixed(0)}" r="4.2" class="${kindClass(scenario.kind)}"/>`;
+  }).join("");
+}
+
+/** The route of an edge: straight on one row; else down (or up) under the state of the upper row, then along the lower row. */
+function route(x1: number, y1: number, x2: number, y2: number, depth: number): { d: string; mx: number; my: number } {
+  if (y1 === y2) {
+    if (depth === 0) return { d: `M${x1},${y1} L${x2},${y2}`, mx: (x1 + x2) / 2, my: y1 };
+    // Another behaviour between the same two states: down just right of the first state, along under the first one's caption, and up just left of the second, so no line crosses a caption.
+    const a = x1 + 10, b = x2 - 10, bottom = y1 + depth, r = 14;
+    return { d: `M${x1},${y1} Q${a},${y1} ${a},${y1 + r} L${a},${bottom - r} Q${a},${bottom} ${a + r},${bottom} L${b - r},${bottom} Q${b},${bottom} ${b},${bottom - r} L${b},${y1 + r} Q${b},${y1} ${x2},${y2}`, mx: (x1 + x2) / 2, my: bottom };
+  }
+  // The vertical runs in a lane left of the upper state, so its outcomes keep the right side.
+  if (y1 < y2) {
+    const lx = x1 - LANE;
+    return { d: `M${x1},${y1} Q${lx},${y1} ${lx},${y1 + LANE} L${lx},${y2 - BEND} Q${lx},${y2} ${lx + BEND},${y2} L${x2},${y2}`, mx: (lx + x2) / 2 + BEND / 2, my: y2 };
+  }
+  const lx = x2 - LANE;
+  return { d: `M${x1},${y1} L${lx - BEND},${y1} Q${lx},${y1} ${lx},${y1 - BEND} L${lx},${y2 + LANE} Q${lx},${y2} ${x2},${y2}`, mx: (x1 + lx) / 2 - BEND / 2, my: y1 };
+}
+
+/**
+ * The map as an SVG at its own size: states are circles drawn once, the paths join and leave them; a behaviour
+ * is a pill on its line, its scenarios dots and its caption under it; other outcomes are listed under their state.
+ */
 // @implements_req SwRS-MDOKFSTUDIO-CORE-081
 export function metroSvg(model: ViewerModel, paths: readonly MainPath[], fromDir: string): string {
-  const { states, edges } = buildGraph(paths);
-  const nodes = [...states.values(), ...edges.filter((edge) => edge.option).map((edge) => edge.b)];
-  const columns = Math.max(...nodes.map((node) => node.col)) + 1;
-  const columnWidth = 220, padX = 90, trackHeight = 165;
-  const minTrack = Math.min(...nodes.map((node) => node.track));
-  const maxTrack = Math.max(...nodes.map((node) => node.track));
-  const top = 70 - minTrack * trackHeight;
-  const width = padX * 2 + (columns - 1) * columnWidth;
-  const height = top + maxTrack * trackHeight + 100;
-  const point = (node: StateNode): [number, number] => [padX + node.col * columnWidth, top + node.track * trackHeight];
-  const out = [`<svg class="metro" viewBox="0 0 ${width.toFixed(0)} ${height.toFixed(0)}" role="group" aria-label="Map of the use case: states joined by behaviours; each behaviour is a link">`];
-  for (const edge of edges) {
-    const [x1, y1] = point(edge.a);
-    const [x2, y2] = point(edge.b);
-    const d = y1 === y2
-      ? `M${x1.toFixed(0)},${y1.toFixed(0)} L${x2.toFixed(0)},${y2.toFixed(0)}`
-      : `M${x1.toFixed(0)},${y1.toFixed(0)} C${(x1 + (x2 - x1) * 0.55).toFixed(0)},${y1.toFixed(0)} ${(x2 - (x2 - x1) * 0.55).toFixed(0)},${y2.toFixed(0)} ${x2.toFixed(0)},${y2.toFixed(0)}`;
-    const requirement = model.byId.get(edge.via.id);
-    const scenarios = scenariosOf(model, edge.via);
-    let mx: number, my: number;
-    if (y1 === y2) {
-      mx = (x1 + x2) / 2;
-      my = y1;
-    } else {
-      const u = edge.option ? 0.72 : 0.5;
-      const c1x = x1 + (x2 - x1) * 0.55, c2x = x2 - (x2 - x1) * 0.55;
-      mx = (1 - u) ** 3 * x1 + 3 * (1 - u) ** 2 * u * c1x + 3 * (1 - u) * u * u * c2x + u ** 3 * x2;
-      my = (1 - u) ** 3 * y1 + 3 * (1 - u) ** 2 * u * y1 + 3 * (1 - u) * u * u * y2 + u ** 3 * y2;
+  const map = buildMetroMap(paths);
+  const mainIds = new Set(map.edges.map((edge) => edge.via.id));
+  const columns = Math.max(...map.nodes.map((node) => node.col)) + 1;
+  const countOf = (id: string): string => testCount(model.byId.get(id)?.testedIn.length ?? 0);
+  // A column keeps 24 px between neighbouring pills, the widest one's estimate raised by the width margin; an outcome pill clears the lane of a climb in the next column.
+  const edgePill = Math.max(0, ...map.edges.map((edge) => pillWidth(edge.via.id, countOf(edge.via.id))));
+  const outcomePill = Math.max(0, ...map.nodes.flatMap((node) => node.options.filter((option) => !mainIds.has(option.id)).map((option) => pillWidth(option.id, countOf(option.id)))));
+  const laneBeside = map.nodes.some((node) => node.options.some((option) => !mainIds.has(option.id)) && map.nodes.some((other) => other.row === node.row && other.col === node.col + 1 && other.drop));
+  const COLUMN = Math.max(COLUMN_MIN, Math.ceil(edgePill * WIDTH_MARGIN) + PILL_GAP, laneBeside ? Math.ceil(outcomePill) + 24 + LANE + 18 : 0);
+  const width = PAD_LEFT * 2 + (columns - 1) * COLUMN;
+  const xOf = (node: MapNode): number => PAD_LEFT + node.col * COLUMN;
+  const lowerRow = (edge: MapEdge): number => Math.max(edge.a.row, edge.b.row);
+  const stemOf = (node: MapNode): number => xOf(node);
+  const wrapOf = (node: MapNode): number => {
+    const blockers = map.nodes.filter((other) => other.row === node.row && other.col > node.col && (other.options.length > 0 || other.drop)).map((other) => other.col);
+    const room = (blockers.length > 0 ? (Math.min(...blockers) - node.col) * COLUMN - 16 - (map.nodes.some((other) => other.row === node.row && other.col === Math.min(...blockers) && other.drop) ? LANE + 14 : 0) : INLINE_ROOM) - (stemOf(node) - xOf(node));
+    return Math.max(16, Math.floor((room - 24) / CHAR));
+  };
+  const roomOf = (node: MapNode): number => (wrapOf(node) * CHAR) + 24;
+  /** Dots of an outcome go under its pill when the row would run past the room of its state. */
+  const dotsBelow = (node: MapNode, option: PathTransition): boolean => {
+    return !mainIds.has(option.id) && scenariosOf(model, option).length > 0 && roomOf(node) > 0;
+  };
+  /** A caption stays clear of the lane where the next state's path goes down. */
+  const captionWrap = (edge: MapEdge): number => (edge.a.row === edge.b.row && !edge.arc && edge.b.drop ? 24 : CAPTION_WRAP);
+  // A second behaviour between the same two states hangs under the first one's caption: its pill depth below the line.
+  const depthOf = new Map<MapEdge, number>();
+  const hanging = new Map<string, number>();
+  for (const edge of map.edges) {
+    if (edge.a.row !== edge.b.row) {
+      depthOf.set(edge, 0);
+      continue;
     }
-    const label = `${shortId(edge.via.id)} · ${testCount(requirement?.testedIn.length ?? 0)}`;
-    const pillWidth = label.length * 7 + 18;
-    const stroke = edge.option ? "var(--alt)" : pathColour(edge.path);
-    const attributes = edge.option ? 'data-option=""' : `data-path="${edge.path}" data-step="${edge.step}"`;
-    const shared = !edge.option && edge.a.paths.size > 1 && edge.b.paths.size > 1;
+    const pair = `${edge.a.key}>${edge.b.key}`;
+    const prior = hanging.get(pair);
+    const depth = prior === undefined ? 0 : prior + 24;
+    depthOf.set(edge, depth);
+    hanging.set(pair, depth + 48 + GROW + (wrap(edge.via.label, captionWrap(edge)).length - 1) * LINE + 4);
+  }
+  const rowY: number[] = [];
+  const optionsTop: number[] = [];
+  let top = 18;
+  for (let row = 0; row < map.rows; row += 1) {
+    const here = map.nodes.filter((node) => node.row === row);
+    const nameLines = Math.max(1, ...here.map((node) => wrap(node.key, NAME_WRAP).length));
+    const captionExtent = Math.max(0, ...map.edges.filter((edge) => lowerRow(edge) === row).map((edge) => (depthOf.get(edge) ?? 0) + 34 + wrap(edge.via.label, captionWrap(edge)).length * LINE));
+    const y = top + nameLines * LINE + 22;
+    rowY.push(y);
+    const captionEnd = captionExtent > 0 ? y + GROW + captionExtent : y + 26;
+    optionsTop.push(captionEnd + 26 + GROW);
+    let bottom = captionEnd;
+    for (const node of here) {
+      const rowsHeight = node.options.reduce((sum, option) => sum + PILL_HEIGHT + (dotsBelow(node, option) ? 16 : 0) + wrap(option.label, wrapOf(node)).length * LINE + 16, 0);
+      if (node.options.length > 0) bottom = Math.max(bottom, captionEnd + GROW + rowsHeight);
+    }
+    top = bottom + 34;
+  }
+  const yOf = (node: MapNode): number => rowY[node.row] ?? 0;
+  const out: string[] = [];
+  let right = 0;
+  // Behaviours: one group per edge, one stroke per path, the pill once.
+  for (const edge of map.edges) {
+    const x1 = xOf(edge.a), x2 = xOf(edge.b), y1 = yOf(edge.a), y2 = yOf(edge.b);
+    const { d, mx, my } = route(x1, y1, x2, y2, depthOf.get(edge) ?? 0);
+    const requirement = model.byId.get(edge.via.id);
     const href = pageLink(model, fromDir, edge.via.id);
     const tag = href ? "a" : "g";
-    const group = [`<${tag} class="tr"${href ? ` href="${href}"` : ""} ${attributes}><title>${escapeHtml(describe(requirement, edge.via))}</title>`];
-    if (shared) group.push(`<path d="${d}" stroke="var(--p2)" stroke-width="13" stroke-linecap="round" fill="none" opacity=".4"/>`);
-    group.push(`<path class="ln" d="${d}" stroke="${stroke}" stroke-width="${edge.option ? 2.5 : 7}" stroke-linecap="round" fill="none"${edge.option ? ' stroke-dasharray="6 6"' : ""}/>`);
-    group.push(`<path class="hit" d="${d}"/>`);
-    group.push(`<g transform="translate(${mx.toFixed(0)},${my.toFixed(0)})"><rect class="pill" x="${(-pillWidth / 2).toFixed(0)}" y="-12" width="${pillWidth}" height="24" rx="12" stroke="${stroke}"/><text class="pt" y="4" text-anchor="middle">${escapeHtml(label)}</text>`);
-    scenarios.forEach((scenario, index) => {
-      group.push(`<circle cx="${((index - (scenarios.length - 1) / 2) * 12).toFixed(0)}" cy="20" r="4.2" class="${kindClass(scenario.kind)}"/>`);
+    const steps = edge.paths.map((path) => ` data-step-${path}="${edge.steps.get(path) ?? 0}"`).join("");
+    const group = [`<${tag} class="tr"${href ? ` href="${href}"` : ""} data-paths="${edge.paths.join(" ")}"${steps}><title>${escapeHtml(describe(requirement, edge.via))}${edge.paths.length > 1 ? ` (paths ${edge.paths.map((path) => path + 1).join(" and ")})` : ""}</title>`];
+    const strokes = edge.paths.length;
+    const strokeWidth = 7;
+    edge.paths.forEach((path, index) => {
+      const offset = (index - (strokes - 1) / 2) * (strokeWidth + 1);
+      const shift = y1 === y2 ? `0,${offset}` : `${offset},${offset}`;
+      group.push(`<path class="ln" d="${d}"${offset ? ` transform="translate(${shift})"` : ""} stroke="${pathColour(path)}" stroke-width="${strokeWidth}" stroke-linecap="round" fill="none"/>`);
     });
-    group.push("</g>");
-    if (!edge.option) {
-      group.push(y1 === y2
-        ? `<text class="verb" text-anchor="middle">${tspans(mx, my - 24, edge.via.label, 30, true)}</text>`
-        : `<text class="verb">${tspans(mx + pillWidth / 2 + 10, my + 4, edge.via.label, 26)}</text>`);
-    }
+    group.push(`<path class="hit" d="${d}"/>`);
+    const count = countOf(edge.via.id);
+    group.push(pill(mx - pillWidth(edge.via.id, count) / 2, my, edge.via.id, count, pathColour(edge.paths[0] ?? 0)).svg);
+    group.push(dots(scenariosOf(model, edge.via), mx, my + PILL_HEIGHT / 2 + 10, true));
+    group.push(`<text class="verb" text-anchor="middle">${lines(mx, my + 48 + GROW, edge.via.label, captionWrap(edge))}</text>`);
     group.push(`</${tag}>`);
     out.push(group.join(""));
   }
-  for (const node of nodes) {
-    const [x, y] = point(node);
-    const cls = `st${node.goal ? " goal" : ""}${node.alt ? " alt" : ""}`;
-    const radius = node.alt ? 7 : node.goal ? 15 : 12;
-    const value = node.alt ? node.label ?? "" : node.key;
-    const label = node.alt && node.track < 0
-      ? `<text text-anchor="middle">${tspans(x, y - 16, value, 30, true)}</text>`
-      : `<text text-anchor="middle">${tspans(x, y + (node.alt ? 24 : 34), value, node.alt ? 30 : 24)}</text>`;
-    out.push(`<g class="${cls}" data-state="${escapeHtml(node.key)}"><circle cx="${x}" cy="${y}" r="${radius}"/>${label}</g>`);
+  // Other outcomes: a list under their state, on a dotted stem beside the line that leaves it downwards, if any.
+  for (const node of map.nodes) {
+    if (node.options.length === 0) continue;
+    const x = xOf(node), y = yOf(node);
+    const stem = stemOf(node);
+    const wrapAt = wrapOf(node);
+    let rowAt = optionsTop[node.row] ?? y;
+    let lastRow = rowAt;
+    const rows: string[] = [];
+    for (const option of node.options) {
+      const requirement = model.byId.get(option.id);
+      const scenarios = scenariosOf(model, option);
+      const href = pageLink(model, fromDir, option.id);
+      const tag = href ? "a" : "g";
+      // Another scenario of a behaviour already on the map needs no second pill: its dots say which.
+      const same = mainIds.has(option.id);
+      const count = countOf(option.id);
+      const drawn = same ? { svg: "", width: 0 } : pill(stem + 24, rowAt, option.id, count, "var(--alt)", true);
+      const below = dotsBelow(node, option);
+      // The id and test count of a behaviour already on the map, in grey text, so every outcome says which it is.
+      const owner = same ? `<text class="oid"><tspan x="${stem + 22}" y="${rowAt - 3}">${escapeHtml(option.id)}</tspan><tspan x="${stem + 22}" y="${rowAt + 11}">${escapeHtml(count)}</tspan></text>` : "";
+      const dotsLeft = below ? stem + 34 : stem + 24 + (owner ? Math.max(option.id.length, count.length) * 6.6 + 8 : 0);
+      const dotsY = below ? rowAt + PILL_HEIGHT / 2 + 9 : rowAt + 4;
+      const captionY = rowAt + 26 + (below ? 16 : 0) + GROW;
+      const caption = wrap(option.label, wrapAt);
+      right = Math.max(right, stem + 24 + Math.max(...caption.map((line) => line.length * CHAR)), dotsLeft + scenarios.length * 11);
+      rows.push(`<${tag} class="tr opt"${href ? ` href="${href}"` : ""} data-option=""><title>${escapeHtml(describe(requirement, option))}</title>`
+        + `<path class="ln" d="M${stem},${rowAt} L${stem + (same ? 18 : 12)},${rowAt}" stroke="var(--alt)" stroke-width="2" stroke-dasharray="3 3" fill="none"/>`
+        + (same ? "" : `<circle class="end" cx="${stem + 16}" cy="${rowAt}" r="4"/>`)
+        + drawn.svg + owner + dots(scenarios, dotsLeft, dotsY, false)
+        + `<text class="verb">${lines(stem + 24, captionY, option.label, wrapAt)}</text></${tag}>`);
+      lastRow = rowAt;
+      rowAt += PILL_HEIGHT + (below ? 16 : 0) + caption.length * LINE + 16;
+    }
+    out.push(`<path d="M${stem},${y + 14} L${stem},${lastRow}" stroke="var(--alt)" stroke-width="2" stroke-dasharray="3 3" fill="none"/>`);
+    out.push(rows.join(""));
   }
-  out.push("</svg>");
-  return out.join("");
+  // States last, over the lines: the circle, its name above it, the goal ring in the colour of its first path.
+  for (const node of map.nodes) {
+    const x = xOf(node), y = yOf(node);
+    const first = Math.min(...node.paths);
+    const ring = node.goal ? ` style="stroke:${pathColour(first)}"` : "";
+    const cls = `st${node.goal ? " goal" : ""}${node.paths.size > 1 ? " join" : ""}`;
+    const others = [...node.paths].filter((path) => path !== first);
+    const tone = node.goal && others.length > 0 ? others.map((path, index) => `<circle cx="${x}" cy="${y}" r="13" class="tone" style="stroke:${pathColour(path)}" stroke-dasharray="${(Math.PI * 26 / (2 * (others.length + 1))).toFixed(1)} ${(Math.PI * 26 / (others.length + 1)).toFixed(1)}" stroke-dashoffset="${(-index * 6).toFixed(0)}"/>`).join("") : "";
+    const starts = paths.map((path, index) => (index > 0 && path.steps[0]?.state === node.key && [...node.paths].some((other) => other < index) ? index : -1)).filter((index) => index > 0);
+    const badges = starts.map((index, at) => `<g class="badge"><circle cx="${x - LANE - at * 20}" cy="${y + 40}" r="9" style="fill:${pathColour(index)};stroke:none"/><text style="fill:var(--paper)" x="${x - LANE - at * 20}" y="${y + 44}" text-anchor="middle">${index + 1}</text></g>`).join("");
+    out.push(`<g class="${cls}" data-state="${escapeHtml(node.key)}"><title>${escapeHtml(node.key)}${node.paths.size > 1 ? ` (paths ${[...node.paths].map((path) => path + 1).join(", ")})` : ""}</title><circle cx="${x}" cy="${y}" r="${node.goal ? 13 : node.paths.size > 1 ? 12 : 10}"${ring}/>${tone}<text text-anchor="middle">${lines(x, y - 22, node.key, NAME_WRAP, true)}</text>${badges}</g>`);
+  }
+  const height = top - 16;
+  const fullWidth = Math.ceil(Math.max(width, right + 16));
+  return `<svg class="metro" width="${fullWidth}" viewBox="0 0 ${fullWidth} ${height}" style="min-width:${Math.round(fullWidth * 0.85)}px" role="group" aria-label="Map of the use case: states joined by behaviours, the paths joining at shared states; each behaviour is a link">${out.join("")}</svg>`;
 }
 
 /** The same map for narrow screens: one vertical line per path. */
 export function metroList(model: ViewerModel, paths: readonly MainPath[], fromDir: string): string {
   const parts = paths.map((path, pathIndex) => {
-    const colour = `style="--pc:var(--${pathIndex === 0 ? "p1" : "p2"})"`;
+    const colour = `style="--pc:${pathColour(pathIndex)}"`;
     const rows = path.steps.map((step, index) => {
       const last = index === path.steps.length - 1;
       const option = (item: PathTransition): string => {
         const href = pageLink(model, fromDir, item.id);
-        return `<${href ? "a" : "span"} class="vopt"${href ? ` href="${href}"` : ""}><b>${escapeHtml(shortId(item.id))}</b> ${escapeHtml(item.label)}</${href ? "a" : "span"}>`;
+        return `<${href ? "a" : "span"} class="vopt"${href ? ` href="${href}"` : ""}><b>${escapeHtml(item.id)}</b> ${escapeHtml(item.label)}</${href ? "a" : "span"}>`;
       };
       let via = "";
       if (step.via) {
         const requirement = model.byId.get(step.via.id);
         const href = pageLink(model, fromDir, step.via.id);
         const tag = href ? "a" : "span";
-        via = `<${tag} class="vvia"${href ? ` href="${href}"` : ""}><b>${escapeHtml(shortId(step.via.id))}</b> · ${testCount(requirement?.testedIn.length ?? 0)} ${scenarioDots(requirement?.scenarios ?? [])}<span>${escapeHtml(step.via.label)}</span></${tag}>`;
+        via = `<${tag} class="vvia"${href ? ` href="${href}"` : ""}><b>${escapeHtml(step.via.id)}</b> · ${testCount(requirement?.testedIn.length ?? 0)} ${scenarioDots(requirement?.scenarios ?? [])}<span>${escapeHtml(step.via.label)}</span></${tag}>`;
       }
       return `<li class="${last ? "goal" : ""}"><span class="vstate">${escapeHtml(step.state)}</span>${step.options.map(option).join("")}${via}</li>`;
     });

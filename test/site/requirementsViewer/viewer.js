@@ -51,12 +51,14 @@
   const tok = document.createElementNS(NS, "circle");
   tok.setAttribute("r", "8"); tok.setAttribute("class", "tok"); tok.style.opacity = 0; svg.appendChild(tok);
   let run = 0;
+  // The token colour is the colour of the path: --p1, --p2, --p3 (the third for every later path), as `pathColour` in layout.ts and the legend classes.
+  // @implements_req SwRS-MDOKFSTUDIO-CORE-091
   async function play(pi) {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const me = ++run;
-    const steps = [...svg.querySelectorAll(`.tr[data-path="${pi}"]`)].sort((a, b) => a.dataset.step - b.dataset.step);
+    const steps = [...svg.querySelectorAll(`.tr[data-paths~="${pi}"]`)].sort((a, b) => a.getAttribute(`data-step-${pi}`) - b.getAttribute(`data-step-${pi}`));
     svg.classList.add("playing"); svg.querySelectorAll(".on").forEach(x => x.classList.remove("on"));
-    tok.style.fill = pi ? "var(--p2)" : "var(--p1)"; tok.style.opacity = 1;
+    tok.style.fill = `var(--p${Math.min(pi, 2) + 1})`; tok.style.opacity = 1;
     for (const tr of steps) {
       if (me !== run) return;
       tr.classList.add("on");
