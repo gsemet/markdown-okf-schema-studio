@@ -161,3 +161,78 @@ test("apply puts the choices back on content that a patch rendered again", () =>
   tabs.apply();
   assert.deepEqual(states(fewer), ["true/0/shown", "false/-1/hidden"]);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+test("reveal shows the tab of a hidden panel without moving the focus and tells onChange; a shown panel changes nothing", () => {
+  const document = new Doc();
+  const built = buildSet(document, "t", ["A", "B", "C"], 0);
+  let changes = 0;
+  const tabs = installTabs(document as never, () => { changes += 1; });
+  assert.equal(tabs.reveal(built.panels[0] as never), false, "a shown panel is already visible");
+  assert.equal(changes, 0);
+  assert.equal(tabs.reveal(built.panels[2] as never), true);
+  assert.deepEqual(states(built), ["false/-1/hidden", "false/-1/hidden", "true/0/shown"]);
+  assert.equal(built.tabs[2].focused, 0, "revealing never takes the focus");
+  assert.equal(changes, 1);
+  assert.equal(tabs.reveal(built.panels[2] as never), false);
+  assert.equal(changes, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+test("reveal of a tab with a sync key makes the other set of the group follow, and a set of another group stays", () => {
+  const document = new Doc();
+  const first = buildSet(document, "a", ["Python", "Node"], 0, "language", ["py", "node"]);
+  const second = buildSet(document, "b", ["Node", "Python"], 1, "language", ["node", "py"]);
+  const other = buildSet(document, "c", ["Python", "Node"], 0, "other", ["py", "node"]);
+  const tabs = installTabs(document as never);
+  assert.equal(tabs.reveal(first.panels[1] as never), true);
+  assert.deepEqual(states(first), ["false/-1/hidden", "true/0/shown"]);
+  assert.deepEqual(states(second), ["true/0/shown", "false/-1/hidden"], "the set of the same group follows");
+  assert.deepEqual(states(other), ["true/0/shown", "false/-1/hidden"], "a set of another group does not");
+  assert.equal(first.tabs[1].focused + second.tabs[0].focused, 0, "no focus moved");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+test("onChange runs once after a click, a key, a sync follow and a reveal, and not when nothing changed", () => {
+  const document = new Doc();
+  const first = buildSet(document, "a", ["Python", "Node"], 0, "language", ["py", "node"]);
+  const second = buildSet(document, "b", ["Node", "Python"], 0, "language", ["node", "py"]);
+  let changes = 0;
+  const tabs = installTabs(document as never, () => { changes += 1; });
+  // A click that changes the set shown by the clicked tab: the follower changes too, one call.
+  first.tabs[1].fire("click");
+  assert.equal(changes, 1);
+  // A click on the shown tab changes nothing.
+  first.tabs[1].fire("click");
+  assert.equal(changes, 1);
+  // A key: the follower follows (sync), one call.
+  key(first.tabs[1], "Home");
+  assert.equal(changes, 2);
+  assert.deepEqual(states(second), ["false/-1/hidden", "true/0/shown"], "the follower shows py");
+  // Only the follower changes: the clicked tab was shown already.
+  second.tabs[0].fire("click");
+  assert.equal(changes, 3);
+  // The node click made the first set follow to node: revealing its py panel changes it again.
+  assert.equal(tabs.reveal(first.panels[0] as never), true);
+  assert.equal(changes, 4);
+  assert.equal(tabs.reveal(first.panels[0] as never), false);
+  assert.equal(changes, 4);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+test("a revealed tab with no sync key stays after apply, and a revealed sync tab is shown by every set of its group (C1)", () => {
+  const document = new Doc();
+  const first = buildSet(document, "a", ["Python", "Node"], 0, "language", ["py", "node"]);
+  const second = buildSet(document, "b", ["Python", "Node", "Plain"], 0, "language", ["py", "node", undefined]);
+  const tabs = installTabs(document as never);
+  first.tabs[0].fire("click");
+  assert.equal(tabs.reveal(second.panels[2] as never), true);
+  tabs.apply();
+  assert.deepEqual(states(second), ["false/-1/hidden", "false/-1/hidden", "true/0/shown"], "the key-less tab stays");
+  assert.deepEqual(states(first), ["true/0/shown", "false/-1/hidden"], "the first set keeps its py tab");
+  assert.equal(tabs.reveal(second.panels[1] as never), true);
+  tabs.apply();
+  assert.deepEqual(states(second), ["false/-1/hidden", "true/0/shown", "false/-1/hidden"]);
+  assert.deepEqual(states(first), ["false/-1/hidden", "true/0/shown"], "every set of the group shows node");
+});

@@ -24,7 +24,7 @@ derived_by: []
 implemented_in_files:
 - src/core/scroll/anchorPolicy.ts
 - src/core/security/html-sanitizer.ts
-- src/page/features/scrollCore.ts
+- src/page/modules/lineTops.ts
 - src/session/features/scrollSync.ts
 tested_in_files:
 - test/core/scroll/anchorPolicy.holes.test.ts

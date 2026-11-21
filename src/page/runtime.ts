@@ -267,7 +267,8 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // Expanding a chip changes the height of the content: keep the reading line like zoom does.
   const chipToggle = installChipToggle(document, vscode, context, keepReadingLine);
   // MyST tab sets: a click or an arrow key on a tab shows its panel.
-  const tabs = installTabs(document);
+  // A tab shown by the keyboard or its sync group re-measures the layout: the line marker places again.
+  const tabs = installTabs(document, () => rt.scroll.stabilizeLayout());
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-134
   // Export to HTML: the button of the toolbar and the command of the palette.
   const exportHtml = installExportSnapshot(document, window, {

@@ -32,8 +32,11 @@ Every image in this guide opens at full size when selected.
 
 A search result, a **Go to Line** in Quick Open (`file.md:40`) or a link that opens a Markdown file
 at a line opens Studio at that line, and an arrow in the margin marks it. The arrow disappears on
-your next click, keystroke or scroll. A file that is already shown in Studio is revealed at the
-line, in the group where it is, instead of opening a second tab.
+your next click in the page, when you start an edit, or when another line is asked; scrolling keeps
+it. In a table the arrow marks the row of the line, in a tab that is not shown Studio shows the tab
+first, and in the front matter it marks the property row (a collapsed properties table opens first).
+A file that is already shown in Studio is revealed at the line, in the group where it is, instead of
+opening a second tab.
 
 ### With the side preview open
 

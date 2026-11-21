@@ -2,6 +2,12 @@
 
 ## 2026-11-21
 
+### Line marker precision (CR-457)
+
+- Added (proposed): SwRS-MDOKFSTUDIO-LIFE-192 (the line marker marks the table row of the line, the header row for the delimiter line), LIFE-193 (the line marker shows the hidden tabs that hold the line, outermost first, the way a click does, and marks the exact line), LIFE-194 (the line marker marks the front matter property row of the line and expands a collapsed properties table for a property line only).
+- Changed (all `proposed`): SwRS-MDOKFSTUDIO-LIFE-178 (the top of the enclosing block no longer covers a pipe table row, a tab item or the front matter; the code rule is "a code block itself"), LIFE-179 (boundary rows: another tab shown, the properties table collapsed by the reader), LIFE-180 (boundary rows: table row, delimiter line, property row and tab-panel line in edit mode), MYST-098 (the content of a tab item carries marker lines; a click still edits the whole item), MYST-099 (the marker selects a tab the way a click does; after a patch each set shows the later of its own and its group's choice), FMSCHEMA-090 (a requested property line expands a collapsed table, any other line leaves it collapsed).
+- Reason: the marker sat at the top of the table, of the whole tab item and of the front matter, and a line in a hidden tab marked a wrong place.
+
 ### Impossible comment date refused (CR-459)
 
 - Changed: SwRS-MDOKFSTUDIO-REVIEW-004 (a creation date naming a day that does not exist in its month, such as 2026-02-30, or 2026-02-29 in a non-leap year, rejects the whole sidecar like any other bad date); the parser used to accept it because Date.parse rolls the day over. No new StRS.

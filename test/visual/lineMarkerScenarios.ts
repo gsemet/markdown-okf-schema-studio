@@ -11,6 +11,7 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 import type { ContentAssertion } from "./scenarios";
 
 const FIXTURE = "91-line-marker";
+const PRECISION = "94-line-marker-precision";
 const MARKER = ".sphinx-preview-line-marker";
 const reveal = (line: number) => ({ pageActions: [{ hostMessage: { type: "previewRevealLine", line } }] });
 
@@ -41,11 +42,11 @@ const EDIT_MODE_ASSERTIONS: ContentAssertion[] = [
   { message: "no block editor opened", selector: "textarea", count: 0 },
 ];
 
-/** The marker sits on the top of the mapped block holding the line. */
-const blockTopAssertion = (message: string, blockExpr: string): ContentAssertion => ({
+/** The marker sits on the top of an element (a block, a properties table). */
+const topAssertion = (message: string, elementExpr: string): ContentAssertion => ({
   message,
   selector: MARKER,
-  expr: `(() => { const marker = document.querySelector('.sphinx-preview-line-marker').getBoundingClientRect(); const block = ${blockExpr}.getBoundingClientRect(); return Math.abs(marker.top - block.top) <= 3; })()`,
+  expr: `(() => { const marker = document.querySelector('.sphinx-preview-line-marker').getBoundingClientRect(); const element = ${elementExpr}.getBoundingClientRect(); return Math.abs(marker.top - element.top) <= 3; })()`,
 });
 
 const IN_VIEWPORT: ContentAssertion = {
@@ -66,9 +67,16 @@ const SOFT_WRAP_ASSERTIONS: ContentAssertion[] = [
   IN_VIEWPORT,
 ];
 
+/** The marker sits on a table row: its top is the row's top (within 3 px) and it is as tall as the row. */
+const rowAssertion = (message: string, rowText: string): ContentAssertion => ({
+  message,
+  selector: MARKER,
+  expr: `(() => { const marker = document.querySelector('.sphinx-preview-line-marker').getBoundingClientRect(); const row = [...document.querySelectorAll('tr')].find((candidate) => candidate.textContent.includes(${JSON.stringify(rowText)})).getBoundingClientRect(); return Math.abs(marker.top - row.top) <= 3 && Math.abs(marker.height - row.height) <= 3; })()`,
+});
+
 const TABLE_ASSERTIONS: ContentAssertion[] = [
   { message: "one marker is drawn", selector: MARKER, count: 1 },
-  blockTopAssertion("the marker sits on the top of the table", "document.querySelector('table')"),
+  rowAssertion("the marker sits on the beta row, within 3 px of its top, not on the top of the table", "beta"),
   { message: "the table is announced as the current location", selector: "table[aria-current='location']", count: 1 },
 ];
 
@@ -105,6 +113,84 @@ const JUMP_ON_SCREEN_ASSERTIONS: ContentAssertion[] = [
   IN_VIEWPORT,
 ];
 
+/** The marker sits on the first line of the text `text` of the page (its measured top, within 3 px). */
+const textLineAssertion = (message: string, text: string): ContentAssertion => ({
+  message,
+  selector: MARKER,
+  expr: `(() => { const marker = document.querySelector('.sphinx-preview-line-marker').getBoundingClientRect(); const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let node = walker.nextNode(); while (node && !node.textContent.includes(${JSON.stringify(text)})) node = walker.nextNode(); if (!node) return false; const range = document.createRange(); const start = node.textContent.indexOf(${JSON.stringify(text)}); range.setStart(node, start); range.setEnd(node, start + 1); const line = range.getBoundingClientRect(); return Math.abs(marker.top - line.top) <= 3; })()`,
+});
+
+const tabShown = (message: string, title: string): ContentAssertion => ({
+  message,
+  selector: `.myst-tab[aria-selected='true']`,
+  expr: `[...document.querySelectorAll(".myst-tab[aria-selected='true']")].some((tab) => tab.textContent.trim() === ${JSON.stringify(title)})`,
+});
+
+const propertyRowAssertion = (message: string, key: string): ContentAssertion => ({
+  message,
+  selector: MARKER,
+  expr: `(() => { const marker = document.querySelector('.sphinx-preview-line-marker').getBoundingClientRect(); const row = [...document.querySelectorAll('tr[data-okf-field]')].find((candidate) => candidate.textContent.includes(${JSON.stringify(key)})).getBoundingClientRect(); return Math.abs(marker.top - row.top) <= 3 && Math.abs(marker.height - row.height) <= 3; })()`,
+});
+
+const ONE_MARKER: ContentAssertion = { message: "one marker is drawn", selector: MARKER, count: 1 };
+
+const DELIMITER_ASSERTIONS: ContentAssertion[] = [
+  ONE_MARKER,
+  rowAssertion("the delimiter line marks the header row of the table", "name"),
+  IN_VIEWPORT,
+];
+const QUOTED_ASSERTIONS: ContentAssertion[] = [
+  ONE_MARKER,
+  rowAssertion("the marker sits on the body row of the table in the quote", "second"),
+  IN_VIEWPORT,
+];
+const NOTE_ASSERTIONS: ContentAssertion[] = [
+  ONE_MARKER,
+  rowAssertion("the marker sits on the row of the table in the note", "south"),
+  IN_VIEWPORT,
+];
+const HIDDEN_WRAPPED_ASSERTIONS: ContentAssertion[] = [
+  ONE_MARKER,
+  tabShown("the second tab was shown first", "Second"),
+  textLineAssertion("the marker sits on the third source line of the wrapped paragraph in that tab", "The third source line"),
+  IN_VIEWPORT,
+];
+const HIDDEN_CODE_ASSERTIONS: ContentAssertion[] = [
+  ONE_MARKER,
+  tabShown("the second tab was shown first", "Second"),
+  {
+    message: "the marker sits on the code line of that tab, as high as one line",
+    selector: MARKER,
+    expr: "(() => { const marker = document.querySelector('.sphinx-preview-line-marker').getBoundingClientRect(); const line = [...document.querySelectorAll('.myst-code-line')].find((span) => span.textContent.includes('second_tab_code')).getBoundingClientRect(); return Math.abs(marker.top - line.top) <= 3 && marker.height <= line.height * 1.6; })()",
+  },
+  IN_VIEWPORT,
+];
+const NESTED_TAB_ASSERTIONS: ContentAssertion[] = [
+  ONE_MARKER,
+  tabShown("the outer second tab was shown", "Second"),
+  tabShown("the inner tab holding the line was shown", "Other"),
+  textLineAssertion("the marker sits on the line of the nested hidden tab", "Nested hidden tab line"),
+  IN_VIEWPORT,
+];
+const LIST_VALUE_ASSERTIONS: ContentAssertion[] = [
+  ONE_MARKER,
+  propertyRowAssertion("a line in the list value marks the row of the tags property", "tags"),
+  IN_VIEWPORT,
+];
+const COMMENT_ASSERTIONS: ContentAssertion[] = [
+  ONE_MARKER,
+  topAssertion("a comment line marks the top of the properties table", "document.querySelector('[data-okf-frontmatter-end-line]')"),
+  IN_VIEWPORT,
+];
+const EDIT_PROPERTY_ASSERTIONS: ContentAssertion[] = [
+  ...EDIT_MODE_ASSERTIONS,
+  propertyRowAssertion("the marker sits on the owner property row", "owner"),
+];
+const EDIT_TAB_ASSERTIONS: ContentAssertion[] = [
+  ...EDIT_MODE_ASSERTIONS,
+  tabShown("the second tab was shown first", "Second"),
+];
+
 export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
   ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
@@ -129,9 +215,9 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     editMode: true,
     ...reveal(43),
-    contentAssertions: EDIT_MODE_ASSERTIONS,
-    description: "Light theme, 900 px pane, edit mode: the page asked to show a table row draws the marker, and its "
-      + "arrow overlaps no table handle, list handle or block action and opens no editor.",
+    contentAssertions: [...EDIT_MODE_ASSERTIONS, rowAssertion("the marker sits on the beta row", "beta")],
+    description: "Light theme, 900 px pane, edit mode: the page asked to show a table row draws the marker on that row, "
+      + "and its arrow overlaps no table row handle, list handle or block action and opens no editor.",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
@@ -154,7 +240,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     ...reveal(43),
     contentAssertions: TABLE_ASSERTIONS,
-    description: "Dark theme, 900 px pane: the page asked to show a row of a table marks the top of the table.",
+    description: "Dark theme, 900 px pane: the page asked to show the second body row of a table marks that row, within 3 px of its top.",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-179
@@ -222,5 +308,117 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     contentAssertions: JUMP_ON_SCREEN_ASSERTIONS,
     description: "Light theme, 900 px pane: a jump to a line that is already on screen, asked with the if-off-screen "
       + "scroll, draws the arrow and the band on that line and leaves the page scrolled where it was.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+    id: "lifecycle-sync/v14-line-marker-delimiter-line-light-900",
+    fixture: PRECISION,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    ...reveal(13),
+    contentAssertions: DELIMITER_ASSERTIONS,
+    description: "Light theme, 900 px pane: the page asked to show the delimiter line of a table marks the header row.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+    id: "lifecycle-sync/v15-line-marker-quoted-table-row-dark-900",
+    fixture: PRECISION,
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    ...reveal(20),
+    contentAssertions: QUOTED_ASSERTIONS,
+    description: "Dark theme, 900 px pane: the page asked to show a body row of a table inside a quote marks that row.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+    id: "lifecycle-sync/v16-line-marker-note-table-row-light-900",
+    fixture: PRECISION,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    ...reveal(26),
+    contentAssertions: NOTE_ASSERTIONS,
+    description: "Light theme, 900 px pane: the page asked to show a row of a table inside a note marks that row.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+    id: "lifecycle-sync/v17-line-marker-hidden-tab-wrapped-line-light-900",
+    fixture: PRECISION,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    ...reveal(36),
+    contentAssertions: HIDDEN_WRAPPED_ASSERTIONS,
+    description: "Light theme, 900 px pane: the third source line of a wrapped paragraph in a tab that is not shown selects the tab, then marks that wrapped line.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+    id: "lifecycle-sync/v18-line-marker-hidden-tab-code-line-dark-900",
+    fixture: PRECISION,
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    ...reveal(39),
+    contentAssertions: HIDDEN_CODE_ASSERTIONS,
+    description: "Dark theme, 900 px pane: a code line in a tab that is not shown selects the tab, then marks that code line.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+    id: "lifecycle-sync/v19-line-marker-nested-hidden-tab-light-900",
+    fixture: PRECISION,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    ...reveal(48),
+    contentAssertions: NESTED_TAB_ASSERTIONS,
+    description: "Light theme, 900 px pane: a line in a tab nested in a tab that is not shown selects the outer then the inner tab and marks the line.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-194
+    id: "lifecycle-sync/v20-line-marker-front-matter-list-value-dark-900",
+    fixture: PRECISION,
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    ...reveal(6),
+    contentAssertions: LIST_VALUE_ASSERTIONS,
+    description: "Dark theme, 900 px pane: a line in the list value of a front matter property marks the row of that property.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-194
+    id: "lifecycle-sync/v21-line-marker-front-matter-comment-light-900",
+    fixture: PRECISION,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    ...reveal(2),
+    contentAssertions: COMMENT_ASSERTIONS,
+    description: "Light theme, 900 px pane: a comment line of the front matter marks the top of the properties table.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180
+    id: "lifecycle-sync/v22-line-marker-edit-mode-property-row-dark-900",
+    fixture: PRECISION,
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    ...reveal(4),
+    contentAssertions: EDIT_PROPERTY_ASSERTIONS,
+    description: "Dark theme, 900 px pane, edit mode: a property row is marked, the arrow meets no control and no editor opens.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180
+    id: "lifecycle-sync/v23-line-marker-edit-mode-tab-panel-dark-900",
+    fixture: PRECISION,
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    ...reveal(36),
+    contentAssertions: EDIT_TAB_ASSERTIONS,
+    description: "Dark theme, 900 px pane, edit mode: a line in a hidden tab panel is marked after its tab is shown, the arrow meets no control and no editor opens.",
   },
 ];

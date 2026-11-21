@@ -23,6 +23,7 @@ implemented_in_files:
 - src/page/features/lineMarker.ts
 tested_in_files:
 - test/page/runtimeLineMarker.test.ts
+- test/page/runtimeLineMarkerPlacement.test.ts
 - test/visual/lineMarkerScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -46,6 +47,8 @@ While a line marker is shown, the page SHALL keep it when the reader scrolls, dr
 | another line requested | the marker moves to the new line |
 | the line is folded away by the reader later | the marker is not drawn until the line shows again |
 | an edit starts (focus in a block or frontmatter editor) | the marker is removed |
+| another tab of the set is shown (keyboard or sync group) | the marker is not drawn until its tab shows again |
+| the reader collapses the properties table | the marker is not drawn, and a later placement never expands the table |
 | a full page reload | the marker is lost (known limit) |
 
 ### Verification notes

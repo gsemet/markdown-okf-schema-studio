@@ -14,13 +14,22 @@ const ARROWS = new Set(["ArrowLeft", "ArrowRight", "Home", "End"]);
 export interface TabsControl {
   /** Puts the remembered selections back on the current content (after a load or a content patch). */
   apply(): void;
+  /**
+   * Shows the tab of `panel` the way a click does (the choice is remembered, the sets of its sync
+   * group follow, the focus does not move). True when the tab shown by a set changed.
+   */
+  reveal(panel: Element): boolean;
 }
 
-export function installTabs(document: TabsDocument): TabsControl {
+// @implements_req SwRS-MDOKFSTUDIO-MYST-099
+/** `onChange` runs after any change of a tab shown by a set: a click, a key, a sync follow, `reveal`. */
+export function installTabs(document: TabsDocument, onChange?: () => void): TabsControl {
   // Which tab (by position) each tab set shows, by the position of the set in the document; and the
-  // sync key last chosen in each sync group.
-  const chosenIndex = new Map<number, number>();
-  const chosenSync = new Map<string, string>();
+  // sync key last chosen in each sync group. Each choice carries a stamp (a counter) so that, after
+  // a content patch, a set shows the later of its own selection and its group's sync choice.
+  const chosenIndex = new Map<number, { index: number; stamp: number }>();
+  const chosenSync = new Map<string, { key: string; stamp: number }>();
+  let stamps = 0;
 
   const tabSets = (): Element[] => Array.from(document.querySelectorAll(".myst-tab-set"));
   // The tabs of a set itself, not those of a tab set nested in one of its panels.
@@ -31,41 +40,54 @@ export function installTabs(document: TabsDocument): TabsControl {
     return id ? document.getElementById(id) : null;
   };
 
-  const show = (set: Element, index: number): void => {
+  // Shows tab `index` of the set; true when another tab was shown before.
+  const show = (set: Element, index: number): boolean => {
+    let changed = false;
     tabsOf(set).forEach((tab, position) => {
       const selected = position === index;
+      if (selected && tab.getAttribute("aria-selected") !== "true") changed = true;
       tab.setAttribute("aria-selected", selected ? "true" : "false");
       tab.setAttribute("tabindex", selected ? "0" : "-1");
       const panel = panelOf(tab);
       if (panel) panel.hidden = !selected;
     });
+    return changed;
   };
 
   const syncKey = (tab: Element): string | null => tab.getAttribute("data-myst-tab-sync");
   const groupOf = (set: Element): string => set.getAttribute("data-myst-tab-group") ?? "tab";
 
   // @implements_req SwRS-MDOKFSTUDIO-MYST-099
-  const select = (tab: HTMLElement, focus: boolean): void => {
+  // Selects `tab` and records the choice; true when the shown tab of any set changed.
+  const choose = (tab: HTMLElement, focus: boolean): boolean => {
     const set = tab.closest(".myst-tab-set");
-    if (!set) return;
+    if (!set) return false;
     const tabs = tabsOf(set);
     const index = tabs.indexOf(tab);
-    if (index < 0) return;
-    show(set, index);
+    if (index < 0) return false;
+    let changed = show(set, index);
     if (focus) tab.focus();
     const sets = tabSets();
-    chosenIndex.set(sets.indexOf(set), index);
+    stamps += 1;
+    chosenIndex.set(sets.indexOf(set), { index, stamp: stamps });
     const key = syncKey(tab);
-    if (key === null) return;
+    if (key === null) return changed;
     const group = groupOf(set);
-    chosenSync.set(group, key);
+    chosenSync.set(group, { key, stamp: stamps });
     sets.forEach((other, position) => {
       if (other === set || groupOf(other) !== group) return;
       const match = tabsOf(other).findIndex((candidate) => syncKey(candidate) === key);
       if (match < 0) return;
-      show(other, match);
-      chosenIndex.set(position, match);
+      if (show(other, match)) changed = true;
+      chosenIndex.set(position, { index: match, stamp: stamps });
     });
+    return changed;
+  };
+
+  const select = (tab: HTMLElement, focus: boolean): boolean => {
+    const changed = choose(tab, focus);
+    if (changed) onChange?.();
+    return changed;
   };
 
   const tabOf = (target: EventTarget | null): HTMLElement | undefined => {
@@ -98,19 +120,29 @@ export function installTabs(document: TabsDocument): TabsControl {
   });
 
   return {
+    // @implements_req SwRS-MDOKFSTUDIO-MYST-099
     apply() {
       const sets = tabSets();
       sets.forEach((set, position) => {
         const tabs = tabsOf(set);
-        const key = chosenSync.get(groupOf(set));
-        const bySync = key === undefined ? -1 : tabs.findIndex((tab) => syncKey(tab) === key);
-        const remembered = chosenIndex.get(position);
-        if (bySync >= 0) show(set, bySync);
-        else if (remembered !== undefined && remembered < tabs.length) show(set, remembered);
+        const sync = chosenSync.get(groupOf(set));
+        const bySync = sync === undefined ? -1 : tabs.findIndex((tab) => syncKey(tab) === sync.key);
+        const own = chosenIndex.get(position);
+        const ownValid = own !== undefined && own.index < tabs.length;
+        // The later of the set's own selection and its group's last sync choice wins.
+        if (bySync >= 0 && (!ownValid || sync!.stamp >= own!.stamp)) show(set, bySync);
+        else if (ownValid) show(set, own!.index);
       });
       for (const position of Array.from(chosenIndex.keys())) {
         if (position >= sets.length) chosenIndex.delete(position);
       }
+    },
+    // @implements_req SwRS-MDOKFSTUDIO-MYST-099
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-193
+    reveal(panel) {
+      const set = panel.closest(".myst-tab-set");
+      const tab = set ? tabsOf(set).find((candidate) => candidate.getAttribute("aria-controls") === panel.getAttribute("id")) : undefined;
+      return tab ? select(tab, false) : false;
     },
   };
 }

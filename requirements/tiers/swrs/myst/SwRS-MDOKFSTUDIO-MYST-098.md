@@ -25,6 +25,7 @@ implemented_in_files:
 - src/page/features/pageInput.ts
 tested_in_files:
 - test/core/render/cardsTabs.test.ts
+- test/core/render/markerLines.test.ts
 - test/integration/mystBlocksWindow.ts
 - test/visual/cardsTabsScenarios.ts
 default_owner_email: gaetan@xeberon.net
@@ -51,6 +52,7 @@ When a document holds a {tab-set} with {tab-item} children, the extension SHALL 
 | `:sync-group: name` on the set | the set carries `data-myst-tab-group`, `tab` when absent |
 | a title with Markdown or a link | the tab label is its plain text |
 | a grid, a card, code or another tab set in an item | rendered in the panel; a nested set keeps its own tabs |
+| the content of a tab item | its blocks carry marker lines (`data-okf-marker-line`, never a mapped block), so the line marker finds a line inside the panel; a click still edits the whole item |
 
 ### Scenario (nominal): In edit mode a tab item is edited on its own lines
 
