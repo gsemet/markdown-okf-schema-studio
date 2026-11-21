@@ -1,6 +1,7 @@
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { insertionText, planBlankRunInsertion, planInsertion } from "./insertion";
 import { splitLines } from "./blockMove";
+import { listItemIndent } from "./listItemIndent";
 
 /** A selected run of top-level blocks: 1-based, inclusive source lines. */
 export interface BlockSpan {
@@ -276,6 +277,7 @@ export function planBlankRunPaste(
   line: number,
   endLine: number,
   raw: string,
+  itemLine?: number,
 ): PastePlan | BlockRangeRefusal {
   const block = pastedBlockText(raw);
   if (block === "") {
@@ -285,6 +287,9 @@ export function planBlankRunPaste(
   if (refusal) {
     return refusal;
   }
-  const plan = planBlankRunInsertion(text, line, endLine);
+  if (itemLine !== undefined && listItemIndent(text, itemLine, line) === undefined) {
+    return { refused: OUT_OF_DATE };
+  }
+  const plan = planBlankRunInsertion(text, line, endLine, itemLine);
   return { offset: plan.offset, text: insertionText(plan, block), end: plan.replace?.end };
 }

@@ -125,7 +125,7 @@ export interface BlockEdit {
   endLine: number;
   insertAfterLine?: number;
   /** The blank run the new block replaces (a block written where the blank-lines block was). */
-  replaceBlankRun?: { line: number; endLine: number };
+  replaceBlankRun?: { line: number; endLine: number; itemLine?: number };
   selectedCell?: HTMLTableCellElement;
   renderedCellContent?: HTMLElement;
   /** The Markdown text the cell editor showed when it opened in the cell, to tell an edited cell. */
@@ -510,7 +510,7 @@ export interface TextControls {
 /** The block editor: open, save, autosave, close, flush (`features/blockEditor.ts`). */
 export interface BlockEditor {
   openBlockEditor(target: HTMLElement, selectedCell: HTMLTableCellElement | undefined,
-    sourceRange: { line: number; endLine: number; insertAfterLine?: number; replaceBlankRun?: { line: number; endLine: number } } | undefined,
+    sourceRange: { line: number; endLine: number; insertAfterLine?: number; replaceBlankRun?: { line: number; endLine: number; itemLine?: number } } | undefined,
     initialCaretPosition?: CaretPosition): void;
   closeBlockEdit(cancel?: boolean): void;
   postEditClosed(editId: string): void;
@@ -631,8 +631,8 @@ export interface BlankLines {
   refresh(): void;
   /** The blocks of the page, in document order. */
   blocks(): HTMLElement[];
-  /** The lines of a block's run. */
-  runOf(block: Element): { line: number; endLine: number } | undefined;
+  /** The lines of a block's run, and for a run inside a list the first line of the list item that holds it. */
+  runOf(block: Element): { line: number; endLine: number; itemLine?: number } | undefined;
   /** The blank-lines block a node is in, if any. */
   blockOfTarget(target: EventTarget | null): HTMLElement | undefined;
   /** The selected block, if any. */

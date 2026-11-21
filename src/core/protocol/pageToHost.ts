@@ -121,11 +121,16 @@ const PALETTE_MODES = ["strict", "gfm", "myst", "full"] as const;
 
 type PageStateType = PageStateMessageUnion["type"];
 
-/** A blank run of the message: two or more lines, so `endLine` is above `line`. */
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
+/**
+ * A blank run of the message: two or more lines, so `endLine` is above `line`. A run inside a list
+ * also names its list item line, a source line above the run.
+ */
 const isBlankRunFields = (value: unknown): boolean => {
   if (typeof value !== "object" || value === null) return false;
-  const run = value as { line?: unknown; endLine?: unknown };
-  return isSourceLine(run.line) && isSourceLine(run.endLine) && (run.endLine as number) > (run.line as number);
+  const run = value as { line?: unknown; endLine?: unknown; itemLine?: unknown };
+  return isSourceLine(run.line) && isSourceLine(run.endLine) && (run.endLine as number) > (run.line as number)
+    && (run.itemLine === undefined || (isSourceLine(run.itemLine) && (run.itemLine as number) < (run.line as number)));
 };
 
 const BLOCK_EDIT_TYPES: readonly PageStateType[] = ["previewEditOpen", "previewEditSave", "previewEditCancel"];

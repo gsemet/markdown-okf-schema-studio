@@ -1,6 +1,7 @@
 import { sourceLines } from "../edits/textEdit";
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { splitLines } from "./blockMove";
+import { listItemIndent, startsSiblingItem, startsWithListMarker } from "./listItemIndent";
 
 export interface InsertionPlan {
   /** UTF-16 offset in the document text where the inserted text starts. */
@@ -10,6 +11,11 @@ export interface InsertionPlan {
   lineEnding: string;
   /** A blank run's region the inserted text replaces (`offset` is its start); absent otherwise. */
   replace?: { start: number; end: number };
+  /**
+   * A blank run inside a list item: the indents of that item, and whether the run is between two
+   * items (the line below is a sibling item), decided once against the document of the plan.
+   */
+  listIndent?: { item: string; content: string; betweenItems: boolean };
 }
 
 const lineEndingOf = (text: string): string =>
@@ -21,9 +27,15 @@ const lineEndingOf = (text: string): string =>
  * by `checkBlankRun`). The region runs from the end of line `line - 1` (the start of the text for
  * line 1) to the start of line `endLine + 1`, or to the end of the text for a run at the end. One
  * separator goes before the block (none at the start of the file) and one after it (none at the
- * end, where the document's final line break is kept, or kept absent).
+ * end, where the document's final line break is kept, or kept absent). With `itemLine` (the line
+ * of the list item that holds the run), the plan also carries that item's indents.
  */
-export function planBlankRunInsertion(text: string, line: number, endLine: number): InsertionPlan {
+export function planBlankRunInsertion(
+  text: string,
+  line: number,
+  endLine: number,
+  itemLine?: number,
+): InsertionPlan {
   const lines = splitLines(text);
   const lineEnding = lineEndingOf(text);
   const offsetOfLine = (count: number): number =>
@@ -31,12 +43,22 @@ export function planBlankRunInsertion(text: string, line: number, endLine: numbe
   const start = line === 1 ? 0 : offsetOfLine(line - 1) - lines[line - 2].eol.length;
   const hasBelow = endLine < lines.length;
   const end = hasBelow ? offsetOfLine(endLine) : text.length;
+  const indents = itemLine === undefined ? undefined : listItemIndent(text, itemLine, line);
   return {
     offset: start,
     prefix: line === 1 ? "" : lineEnding + lineEnding,
     suffix: hasBelow ? lineEnding + lineEnding : lines[lines.length - 1].eol,
     lineEnding,
     replace: { start, end },
+    ...(indents
+      ? {
+        listIndent: {
+          item: indents.item,
+          content: indents.content,
+          betweenItems: hasBelow && startsSiblingItem(lines[endLine].text, indents.itemColumn),
+        },
+      }
+      : {}),
   };
 }
 
@@ -85,8 +107,20 @@ export function insertionText(plan: InsertionPlan, raw: string): string {
     return "";
   }
   // Whole blank lines at the start go; the indentation of the first non-blank line stays.
-  return plan.prefix
-    + raw.replace(/^(?:[ \t]*(?:\r\n|\n|\r))+/u, "")
-      .replace(/\r\n|\n|\r/gu, plan.lineEnding).replace(/(?:\r\n|\n|\r)+$/u, "")
-    + plan.suffix;
+  const block = raw.replace(/^(?:[ \t]*(?:\r\n|\n|\r))+/u, "")
+    .replace(/\r\n|\n|\r/gu, plan.lineEnding).replace(/(?:\r\n|\n|\r)+$/u, "");
+  return plan.prefix + (plan.listIndent ? indentedToItem(block, plan) : block) + plan.suffix;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
+/**
+ * A block written in a run inside a list item takes that item's content indent, or the item's own
+ * indent (a sibling item) when the run is between items and the block starts with a list marker.
+ * Blank lines of the block get nothing; the writer's own indentation stays after the indent.
+ */
+function indentedToItem(block: string, plan: InsertionPlan): string {
+  const { item, content, betweenItems } = plan.listIndent!;
+  const indent = betweenItems && startsWithListMarker(block) ? item : content;
+  return block.split(plan.lineEnding).map((line) => (/^[ \t]*$/u.test(line) ? line : indent + line))
+    .join(plan.lineEnding);
 }

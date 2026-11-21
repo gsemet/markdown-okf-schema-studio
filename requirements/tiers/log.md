@@ -7,6 +7,11 @@
 - Added: SwRS-MDOKFSTUDIO-CORE-092 (the search finds a requirement by its full ID, short ID or bare number, in any case and with or without leading zeros; the ID matches come first and Enter opens the first) and SwRS-MDOKFSTUDIO-CORE-093 (every requirement of a use case or behaviour page is named by its full ID: eyebrow, tab title, share title, crumbs, pager name and links), both proposed and deriving from StRS-MDOKFSTUDIO-CORE-008.
 - Changed: SwRS-MDOKFSTUDIO-CORE-085 (the share title of a use case is `Use case <full ID>: <title>` and of a behaviour `Behaviour <full ID>: <title>`, no longer the title then the ID); SwRS-MDOKFSTUDIO-CORE-084 (a use case or behaviour entry of the search index carries the full ID, shown in its result line).
 
+### Blank-lines blocks inside lists (CR-448)
+
+- Changed: SwRS-MDOKFSTUDIO-BLOCK-266 (a run between two items of a list or inside a list item is shown in the item that holds it; nothing is shown inside a fence, a directive, an HTML block, a table, a quote, an alert, an admonition, or a folded or included list); SwRS-MDOKFSTUDIO-BLOCK-267 (the arrows, Shift+Arrow and a click inside a list); SwRS-MDOKFSTUDIO-BLOCK-268 (a block typed or pasted inside a list takes the content indent, or the item indent for a sibling item; the host refuses an item line that is no list item line); SwRS-MDOKFSTUDIO-BLOCK-269 (a removal inside a list keeps one list and selects it).
+- Reason: CR-444's SwRS said runs inside lists show nothing. No new StRS.
+
 ### Copy, cut and paste on a list followed by blank lines (CR-447)
 
 - Changed: SwRS-MDOKFSTUDIO-BLOCK-166 and SwRS-MDOKFSTUDIO-BLOCK-169 (copy and cut drop the trailing CommonMark blank lines of a range, spaces and tabs only, before they plan; a no-break-space line is still refused); SwRS-MDOKFSTUDIO-BLOCK-174 (paste accepts the blank line that ends a list and inserts after the block, reusing the blank lines already there); SwRS-MDOKFSTUDIO-BLOCK-124 (the refusals of a blank-ended copy or cut and of a blank paste anchor are narrowed to the cases that remain).

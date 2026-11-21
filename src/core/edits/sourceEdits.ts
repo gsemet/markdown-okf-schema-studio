@@ -346,6 +346,7 @@ export function checkBlocksPaste(text: string, afterLine: number): EditRefusal |
     : undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
 /**
  * Inserts the clipboard text `clipboard` as new blocks after `afterLine` (0: start of the body); with
  * `blankRun`, in place of that blank run (the lines above and below keep one separator).
@@ -354,10 +355,10 @@ export function planBlocksPaste(
   text: string,
   afterLine: number,
   clipboard: string,
-  blankRun?: { line: number; endLine: number },
+  blankRun?: { line: number; endLine: number; itemLine?: number },
 ): EditRefusal | { edit: TextEdit } {
   const plan = blankRun
-    ? planBlankRunPaste(text, blankRun.line, blankRun.endLine, clipboard)
+    ? planBlankRunPaste(text, blankRun.line, blankRun.endLine, clipboard, blankRun.itemLine)
     : planPaste(text, afterLine, clipboard);
   if ("refused" in plan) return { refused: plan.refused };
   return { edit: { start: plan.offset, end: plan.end ?? plan.offset, text: plan.text } };

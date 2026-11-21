@@ -759,7 +759,11 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "block-editing/v43-delete-block-bar-status-dark-900": "In edit mode in the dark preview at 900 px, a refused move of the middle paragraph shows its reason in the move status beside the bar, starting right of the Delete block button, which stays shown with the other three buttons.",
   "block-editing/v44-blank-lines-block-light-900": "In edit mode in the light preview at 900 px, three blank lines between two paragraphs show as one dashed blank-lines block between them, at least 16 px high, as wide as the content column, drawing the label Blank lines (3) with CSS only (no text content), with its Delete block button not yet shown.",
   "block-editing/v45-blank-lines-block-selected-dark-900": "In edit mode in the dark preview at 900 px, pressing Down from the selected first paragraph selects the blank-lines block between the two paragraphs, and its Delete block button is fully opaque at the block's left edge.",
-  "block-editing/v46-blank-lines-block-reading-light-900": "In reading mode in the light preview at 900 px, the same file with three blank lines between two paragraphs shows no blank-lines block."
+  "block-editing/v46-blank-lines-block-reading-light-900": "In reading mode in the light preview at 900 px, the same file with three blank lines between two paragraphs shows no blank-lines block.",
+  "block-editing/v47-blank-lines-in-lists-light-900": "In edit mode in the light preview at 900 px, the run of blank lines between the first two list items and the run between the two paragraphs of the second item each show one blank-lines block, a direct child of the item that holds it and as wide as the item's text, and the blank lines of the fence in the third item show none.",
+  "block-editing/v48-blank-lines-in-lists-selected-dark-900": "In edit mode in the dark preview at 900 px, pressing Down twice from the selected title steps onto the list, then selects the blank-lines block of the first item, and its Delete block button is fully opaque at the block's left edge and overlaps no list item handle.",
+  "block-editing/v49-blank-lines-in-lists-reading-light-900": "In reading mode in the light preview at 900 px, the same file with blank lines inside its list shows no blank-lines block.",
+  "block-editing/v50-blank-lines-in-lists-typing-light-900": "In edit mode in the light preview at 900 px, clicking the blank-lines block between the first two items opens the editor inside the first item, and after text is typed and the autosave ran the editor is still open inside an item of the one list."
 };
 
 /**
@@ -938,6 +942,10 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "block-editing/v44-blank-lines-block-light-900": ["bar"],
   "block-editing/v45-blank-lines-block-selected-dark-900": ["selected"],
   "block-editing/v46-blank-lines-block-reading-light-900": ["top"],
+  "block-editing/v47-blank-lines-in-lists-light-900": ["bar"],
+  "block-editing/v48-blank-lines-in-lists-selected-dark-900": ["selected"],
+  "block-editing/v49-blank-lines-in-lists-reading-light-900": ["top"],
+  "block-editing/v50-blank-lines-in-lists-typing-light-900": ["text"],
 };
 
 /**
