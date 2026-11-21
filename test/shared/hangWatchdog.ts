@@ -18,7 +18,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 import { E2E_REPORT_ROOT } from "../reportPaths";
-import { hostStressPlan } from "./stressPlan";
+import { DEFAULT_STRESS_REPEAT, hostStressPlan } from "./stressPlan";
 import { tocLoopDeadlineLine, tocLoopDeadlineMs, tocLoopRounds, tocLoopSteps } from "./tocLoop";
 
 /** How often the extension host rewrites its heartbeat file. */
@@ -81,10 +81,10 @@ export function stressLaunchDeadlineMs(repeat: number, scenarios: number): numbe
 
 /** The stress plan behind the computed deadline: its rounds and the larger window's scenario count. */
 export function stressDeadlinePlan(environment: NodeJS.ProcessEnv = process.env): { repeat: number; scenarios: number } {
-  const trusted = hostStressPlan(environment, "trusted", 10);
-  const untrusted = hostStressPlan(environment, "untrusted", 10);
+  const trusted = hostStressPlan(environment, "trusted", DEFAULT_STRESS_REPEAT);
+  const untrusted = hostStressPlan(environment, "untrusted", DEFAULT_STRESS_REPEAT);
   return {
-    repeat: trusted?.repeat ?? untrusted?.repeat ?? 10,
+    repeat: trusted?.repeat ?? untrusted?.repeat ?? DEFAULT_STRESS_REPEAT,
     scenarios: Math.max(trusted?.scenarios.length ?? 0, untrusted?.scenarios.length ?? 0),
   };
 }

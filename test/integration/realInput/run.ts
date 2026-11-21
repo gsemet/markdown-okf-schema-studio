@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { type Page } from "playwright-core";
 
 import {
+  DEFAULT_STRESS_REPEAT,
   hostStressPlan,
   STRESS_ON_DEMAND_SCENARIOS,
   STRESS_SCENARIOS_BY_HOST,
@@ -100,8 +101,8 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   // A step of the trusted suite with its own CDP connection and evidence: it ignores the page and
   // evidence of the round and closes its own connection, so each round is the step as CI runs it.
   "checkbox-toggle": async () => runCheckboxToggle(),
-  // CR 425: on demand only (STRESS_ON_DEMAND_SCENARIOS), not in the default plan; both open their own
-  // CDP connection like checkbox-toggle.
+  // CR 454: in the default plan after checkbox-toggle; both open their own CDP connection like it. The
+  // key list is the default trusted list, then STRESS_ON_DEMAND_SCENARIOS (empty today).
   "paste-url": async () => runPasteUrl(),
   "drop-files": async () => runDropFiles(),
   // "wide-table-tab" is out of the stress table: its LASTCELL click was unstable (under investigation).
@@ -112,7 +113,7 @@ async function runStress(page: Page): Promise<void> {
   assert.deepEqual(Object.keys(STRESS_SCENARIOS),
     [...STRESS_SCENARIOS_BY_HOST.trusted, ...STRESS_ON_DEMAND_SCENARIOS],
     "the stress table of the trusted window is the lists in test/shared/stressPlan.ts");
-  const plan = hostStressPlan(process.env, "trusted", 10);
+  const plan = hostStressPlan(process.env, "trusted", DEFAULT_STRESS_REPEAT);
   if (plan === undefined) {
     console.log("stress: no scenario of the trusted window was asked for");
     return;

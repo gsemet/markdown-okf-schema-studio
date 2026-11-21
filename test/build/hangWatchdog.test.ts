@@ -29,7 +29,7 @@ import {
   type HangReport,
 } from "../shared/hangWatchdog";
 import { watchLaunch } from "../shared/launchWatchdog";
-import { STRESS_SCENARIOS_BY_HOST } from "../shared/stressPlan";
+import { DEFAULT_STRESS_REPEAT, STRESS_SCENARIOS_BY_HOST } from "../shared/stressPlan";
 import { tocLoopDeadlineMs } from "../shared/tocLoop";
 
 /**
@@ -306,23 +306,23 @@ test("CR 327: a stress launch computes its deadline from its rounds and scenario
   assert.equal(stressLaunchDeadlineMs(12, 17), 1_344_000);
   assert.equal(stressLaunchDeadlineMs(100, 17), STRESS_DEADLINE_CEILING_MS);
   const trusted = STRESS_SCENARIOS_BY_HOST.trusted.length;
-  const stress = { STUDIO_REAL_INPUT_SCENARIO: "stress", STUDIO_STRESS_REPEAT: "12" };
-  assert.equal(launchDeadlineMs(stress), stressLaunchDeadlineMs(12, trusted));
-  assert.equal(launchDeadlineMs({ ...stress, STUDIO_STRESS_SCENARIOS: "untrusted-read-only" }), stressLaunchDeadlineMs(12, 1));
+  const stress = { STUDIO_REAL_INPUT_SCENARIO: "stress", STUDIO_STRESS_REPEAT: String(DEFAULT_STRESS_REPEAT) };
+  assert.equal(launchDeadlineMs(stress), stressLaunchDeadlineMs(DEFAULT_STRESS_REPEAT, trusted));
+  assert.equal(launchDeadlineMs({ ...stress, STUDIO_STRESS_SCENARIOS: "untrusted-read-only" }), stressLaunchDeadlineMs(DEFAULT_STRESS_REPEAT, 1));
   assert.equal(launchDeadlineMs({ ...stress, STUDIO_LAUNCH_TIMEOUT_MS: "5000" }), 5_000);
   assert.throws(() => launchDeadlineMs({ ...stress, STUDIO_STRESS_REPEAT: "0" }), /STUDIO_STRESS_REPEAT/u);
-  // CR 328: 19 scenarios x 12 rounds meet the ceiling, so the default line says it is capped.
+  // CR 454: 21 scenarios x 11 rounds (231 runs) meet the ceiling, so the default line says it is capped.
   assert.equal(stressDeadlineLine(stress),
-    `stress: launch deadline ${stressLaunchDeadlineMs(12, trusted)} ms (12 rounds x ${trusted} scenarios, ceiling ${STRESS_DEADLINE_CEILING_MS} ms)`
-    + (stressLaunchDeadlineMs(12, trusted) === STRESS_DEADLINE_CEILING_MS ? "; capped: narrow STUDIO_STRESS_SCENARIOS or lower the rounds" : ""));
+    `stress: launch deadline ${stressLaunchDeadlineMs(DEFAULT_STRESS_REPEAT, trusted)} ms (${DEFAULT_STRESS_REPEAT} rounds x ${trusted} scenarios, ceiling ${STRESS_DEADLINE_CEILING_MS} ms)`
+    + (stressLaunchDeadlineMs(DEFAULT_STRESS_REPEAT, trusted) === STRESS_DEADLINE_CEILING_MS ? "; capped: narrow STUDIO_STRESS_SCENARIOS or lower the rounds" : ""));
   assert.match(stressDeadlineLine({ ...stress, STUDIO_STRESS_REPEAT: "100" }) ?? "", /; capped: narrow/u);
   assert.equal(stressDeadlineLine({ ...stress, STUDIO_LAUNCH_TIMEOUT_MS: "5000" }), "stress: launch deadline 5000 ms (STUDIO_LAUNCH_TIMEOUT_MS)");
   assert.equal(stressDeadlineLine({}), undefined);
 });
 
 test("CR 327: the default stress plan keeps a third of margin under its deadline", () => {
-  const deadline = launchDeadlineMs({ STUDIO_REAL_INPUT_SCENARIO: "stress", STUDIO_STRESS_REPEAT: "12" });
-  const expected = 30_000 + 12 * STRESS_SCENARIOS_BY_HOST.trusted.length * 3_960;
+  const deadline = launchDeadlineMs({ STUDIO_REAL_INPUT_SCENARIO: "stress", STUDIO_STRESS_REPEAT: String(DEFAULT_STRESS_REPEAT) });
+  const expected = 30_000 + DEFAULT_STRESS_REPEAT * STRESS_SCENARIOS_BY_HOST.trusted.length * 3_960;
   assert.ok(expected <= (deadline * 2) / 3, `expected ${expected} ms vs deadline ${deadline} ms: revisit the default rounds`);
   assert.ok(STRESS_DEADLINE_CEILING_MS <= 30 * 60_000 - 3 * 60_000);
 });

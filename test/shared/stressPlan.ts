@@ -14,10 +14,16 @@ export interface StressPlan {
 
 export const MAX_STRESS_REPEAT = 100;
 
+/**
+ * Rounds of the default stress run: 11 rounds of the 21 trusted scenarios keep the computed launch
+ * deadline under the margin guard of test/build/hangWatchdog.test.ts (12 rounds would not).
+ */
+export const DEFAULT_STRESS_REPEAT = 11;
+
 export function stressPlan(
   environment: { STUDIO_STRESS_REPEAT?: string; STUDIO_STRESS_SCENARIOS?: string },
   available: readonly string[],
-  defaultRepeat = 10,
+  defaultRepeat = DEFAULT_STRESS_REPEAT,
 ): StressPlan {
   const rawRepeat = environment.STUDIO_STRESS_REPEAT?.trim() ?? "";
   const repeat = rawRepeat === "" ? defaultRepeat : Number(rawRepeat);
@@ -78,19 +84,22 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     // while waiting for the first checkbox render).
     "palette",
     "checkbox-toggle",
+    // CR 454: both real-window steps joined the default plan. The paste-url reds on CI (runs
+    // 44647675614, 44690391950, 44715893690) were the stored-mode wait that e05f0b51 removed;
+    // drop-files carried the same wait. Repetition proves the fix holds.
+    "paste-url",
+    "drop-files",
     // "wide-table-tab" is out of the stress plan: its LASTCELL click was unstable on a heavy run.
   ],
   untrusted: ["untrusted-read-only"],
 };
 
 /**
- * CR 425: steps of the trusted window that `STUDIO_STRESS_SCENARIOS` may name (a proof dispatch,
- * for example `-f stress_scenarios=paste-url,drop-files,checkbox-toggle`) but the default plan does
- * not run: with them the default 12 rounds would pass the deadline margin that
- * test/build/hangWatchdog.test.ts keeps (about 3.9 s per scenario run, heavy run 44709272650).
- * They are the key list of the real-input stress table after the default names.
+ * Steps of the trusted window that `STUDIO_STRESS_SCENARIOS` may name but the default plan does not
+ * run, because the default rounds would pass the deadline margin that test/build/hangWatchdog.test.ts
+ * keeps. Empty today. They are the key list of the real-input stress table after the default names.
  */
-export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = ["paste-url", "drop-files"];
+export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = [];
 
 /**
  * The plan of one window. `STUDIO_STRESS_SCENARIOS` may name scenarios of either window (unknown
@@ -99,7 +108,7 @@ export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = ["paste-url", "drop
 export function hostStressPlan(
   environment: { STUDIO_STRESS_REPEAT?: string; STUDIO_STRESS_SCENARIOS?: string },
   host: StressHost,
-  defaultRepeat = 10,
+  defaultRepeat = DEFAULT_STRESS_REPEAT,
 ): StressPlan | undefined {
   const all = [...STRESS_SCENARIOS_BY_HOST.trusted, ...STRESS_SCENARIOS_BY_HOST.untrusted];
   const named = (environment.STUDIO_STRESS_SCENARIOS ?? "").trim() !== "";

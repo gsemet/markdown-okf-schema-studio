@@ -1,14 +1,15 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { hostStressPlan, MAX_STRESS_REPEAT, STRESS_ON_DEMAND_SCENARIOS, STRESS_SCENARIOS_BY_HOST, stressPlan } from "../shared/stressPlan";
+import { DEFAULT_STRESS_REPEAT, hostStressPlan, MAX_STRESS_REPEAT, STRESS_ON_DEMAND_SCENARIOS, STRESS_SCENARIOS_BY_HOST, stressPlan } from "../shared/stressPlan";
 
 const AVAILABLE = ["table-tab", "list-editor", "flush-frontmatter-typed"];
 
 test("CR 041: the stress plan runs every scenario the default number of times", () => {
   assert.deepEqual(stressPlan({}, AVAILABLE, 7), { repeat: 7, scenarios: AVAILABLE });
   assert.deepEqual(stressPlan({ STUDIO_STRESS_REPEAT: " 20 " }, AVAILABLE).repeat, 20);
-  assert.deepEqual(stressPlan({ STUDIO_STRESS_REPEAT: "" }, AVAILABLE).repeat, 10);
+  assert.deepEqual(stressPlan({ STUDIO_STRESS_REPEAT: "" }, AVAILABLE).repeat, DEFAULT_STRESS_REPEAT);
+  assert.equal(DEFAULT_STRESS_REPEAT, 11);
 });
 
 test("CR 041: a scenario filter keeps the given order and drops duplicates", () => {
@@ -30,7 +31,7 @@ test("CR 041: an invalid repeat count or an unknown scenario fails before any wi
 test("CR 043: each window runs only its own stress scenarios, and a filter may name either window", () => {
   const trusted = hostStressPlan({ STUDIO_STRESS_REPEAT: "3" }, "trusted");
   assert.deepEqual(trusted, { repeat: 3, scenarios: [...STRESS_SCENARIOS_BY_HOST.trusted] });
-  assert.deepEqual(hostStressPlan({}, "untrusted"), { repeat: 10, scenarios: ["untrusted-read-only"] });
+  assert.deepEqual(hostStressPlan({}, "untrusted"), { repeat: DEFAULT_STRESS_REPEAT, scenarios: ["untrusted-read-only"] });
   const filter = { STUDIO_STRESS_SCENARIOS: "untrusted-read-only,image-paste" };
   assert.deepEqual(hostStressPlan(filter, "trusted")?.scenarios, ["image-paste"]);
   assert.deepEqual(hostStressPlan(filter, "untrusted")?.scenarios, ["untrusted-read-only"]);
@@ -58,12 +59,16 @@ test("find in preview (cream and dark, with replace) runs in the trusted window'
   assert.equal(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "find-in-preview" }, "untrusted"), undefined);
 });
 
-test("CR 425: paste-url and drop-files run on demand in the trusted window, never in the default plan", () => {
-  for (const name of STRESS_ON_DEMAND_SCENARIOS) {
-    assert.ok(!STRESS_SCENARIOS_BY_HOST.trusted.includes(name), name);
-    assert.ok(!hostStressPlan({}, "trusted")?.scenarios.includes(name), name);
-  }
-  const named = { STUDIO_STRESS_SCENARIOS: "paste-url,drop-files,checkbox-toggle" };
-  assert.deepEqual(hostStressPlan(named, "trusted")?.scenarios, ["paste-url", "drop-files", "checkbox-toggle"]);
-  assert.equal(hostStressPlan(named, "untrusted"), undefined);
+// CR 454 changes the intent of the CR 425 test, at the owner's request: paste-url and drop-files
+// were on demand only, they now run in every default round of the trusted window.
+test("CR 454: paste-url and drop-files run in the default trusted plan, alone when named, never in the untrusted window", () => {
+  const defaults = hostStressPlan({}, "trusted")?.scenarios ?? [];
+  assert.deepEqual(defaults.slice(-2), ["paste-url", "drop-files"]);
+  assert.equal(defaults.length, 21);
+  for (const name of ["paste-url", "drop-files"]) assert.ok(STRESS_SCENARIOS_BY_HOST.trusted.includes(name), name);
+  const alone = { STUDIO_STRESS_SCENARIOS: "paste-url,drop-files" };
+  assert.deepEqual(hostStressPlan(alone, "trusted")?.scenarios, ["paste-url", "drop-files"]);
+  assert.equal(hostStressPlan(alone, "untrusted"), undefined);
+  assert.deepEqual(hostStressPlan({}, "untrusted")?.scenarios, ["untrusted-read-only"]);
+  for (const name of STRESS_ON_DEMAND_SCENARIOS) assert.ok(!defaults.includes(name), name);
 });
