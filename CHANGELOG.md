@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.11.0 - 2026-11-21
+
 - The requirements pages on the website draw each use case as one joined map, smaller and readable:
   states shared by several paths are drawn once, each path keeps its own colour, every behaviour
   shows its full ID, a line above the map says what a path, a situation and a step are, and Play
