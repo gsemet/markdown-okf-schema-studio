@@ -181,6 +181,26 @@ test("the real file's side of a diff scrolls the side preview, and a git side ne
   assert.deepEqual(scrolls(from).map((message) => message.line), [31], "the real file's side moves the preview");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+test("a staged-like diff, with no file side, scrolls no side preview from either side", async (t) => {
+  const studio = start(t);
+  const file = writeFile(Array.from({ length: 80 }, (_, index) => `line ${index}\n`).join("\n"));
+  const { panel } = await studio.openSide(file);
+  await studio.advance(100);
+  const editors = fake.controls.activateDiff({ original: gitUri(file), modified: gitUri(file), activeSide: "modified" });
+  await studio.advance(100);
+  const from = panel.posted.length;
+  for (const editor of [editors.original, editors.modified]) {
+    (editor as unknown as { visibleRanges: unknown[] }).visibleRanges = [new fake.vscode.Range(30, 0, 60, 0)];
+    fake.controls.events.changeVisibleRanges.fire({ textEditor: editor });
+  }
+  assert.deepEqual(
+    panel.posted.slice(from).filter((message) => message.type === "sourceScroll" && message.line !== undefined),
+    [],
+    "neither virtual side moves the working-tree preview",
+  );
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-108
 test("a click in the preview reveals the line in the real file's side of a diff, not in a side that shares its path", async (t) => {
   const studio = start(t);

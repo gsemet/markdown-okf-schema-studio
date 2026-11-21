@@ -31,6 +31,7 @@ tested_in_files:
 - test/host/diffPreview.requirements.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/integration/diffPreview.test.ts
+- test/integration/diffPreviewScroll.test.ts
 - test/integration/lifecycle.test.ts
 - test/security/package-contract.test.ts
 default_owner_email: gaetan@xeberon.net
