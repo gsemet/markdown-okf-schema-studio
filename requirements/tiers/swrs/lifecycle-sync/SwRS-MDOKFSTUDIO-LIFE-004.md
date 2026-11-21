@@ -21,11 +21,13 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/render/renderPipeline.ts
+- src/host-vscode/activation.ts
 - src/host-vscode/vscodeHost.ts
 - src/node-services/renderWorker.ts
 - src/session/sessionFactory.ts
 tested_in_files:
 - test/core/render/renderPipeline.test.ts
+- test/host/openAtLine.test.ts
 - test/node-services/renderWorker.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -60,7 +62,7 @@ When a preview renders a document in the VS Code host, the extension SHALL keep 
 
 ### Verification notes
 
-- Design (moved from the scenarios): the MyST render runs in a worker thread; an abort terminates the thread at once and the next render starts a fresh one; one warm thread starts when the extension activates and loads the MyST engine before the first render; two renders at the same time wait for the thread, no second cold thread starts; an aborted render's thread is replaced by a new one at once; after 5 minutes without render the idle thread stops; a render aborted while its thread still starts keeps that thread for the next render; when no worker can start, or after three deaths in a row, renders run in-process.
+- Design (moved from the scenarios): the MyST render runs in a worker thread; an abort terminates the thread at once and the next render starts a fresh one; one warm thread starts with the first Studio preview (not at activation, which a Markdown file alone triggers) and loads the MyST engine before the first render; two renders at the same time wait for the thread, no second cold thread starts; an aborted render's thread is replaced by a new one at once; after 5 minutes without render the idle thread stops; a render aborted while its thread still starts keeps that thread for the next render; when no worker can start, or after three deaths in a row, renders run in-process.
 - Method: test/node-services/renderWorker.test.ts: "renders in a worker thread, with the output of the in-process render" (deep-equal output, another thread id), "the host thread stays free while a worker renders" (longest gap of a 5 ms interval below half the render time with the worker, above half without), "an abort stops the render at once, and the next render gets a fresh worker", "a render given up before it starts never reaches a worker", "a worker that cannot start falls back to the in-process render", "disposing the renderer cancels the render in flight", "warming starts one thread that the first render then uses".
 - Method: test/core/render/renderPipeline.test.ts "a render whose request was already given up never starts" and "the host's source renderer gets plain data and the signal, and its cancellation stays a cancellation".
 - Method: test/node-services/renderWorker.test.ts with a stub worker script: "a ready worker that dies during a render fails that render; three deaths in a row fall back", "a render waits for the busy worker instead of starting a second thread", "a waiting render that is given up never reaches the worker", "a render aborted while its thread still starts keeps that thread for the next render".

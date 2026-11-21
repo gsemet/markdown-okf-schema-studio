@@ -2,6 +2,13 @@
 
 ## 2026-11-21
 
+### Open Studio at a searched line: settings, migration, introductions, Open as Text, lazy services (CR-445, round 1)
+
+- Added: StRS-MDOKFSTUDIO-LIFE-023 (proposed): a reader opens a Markdown file at a searched line and sees that line marked in Studio.
+- Added: SwRS-MDOKFSTUDIO-LIFE-174 to 177 (proposed, derive from StRS-MDOKFSTUDIO-LIFE-023): the Opening Files settings group and its defaults, the once-per-scope migration of the `*.md` editor association to `open.markdownFilesInStudio`, the feature introductions with Show Feature Introductions Again, and Open as Text with the registry of the text editors Studio opened.
+- Changed: SwRS-MDOKFSTUDIO-LIFE-001 (the Markdown language is the fifth activation event, and activation starts no preview service), SwRS-MDOKFSTUDIO-LIFE-004 and SwRS-MDOKFSTUDIO-CORE-001 (the engine warm-up runs with the first Studio preview), SwRS-MDOKFSTUDIO-LIFE-149 (vscodeHost.ts is the one source that writes a setting), SwRS-MDOKFSTUDIO-LIFE-156 (the group Opening Files, order 6), StRS-MDOKFSTUDIO-LIFE-001 (the default-editor and built-in-settings constraints).
+- Not yet: the marker, the opening policy and the watcher (later rounds of the change) add their own SwRS and extend StRS-MDOKFSTUDIO-LIFE-023.
+
 ### Blank runs show as a reachable blank-lines block (CR-444)
 
 - Added: SwRS-MDOKFSTUDIO-BLOCK-266 (proposed): edit mode shows each blank run as a blank-lines

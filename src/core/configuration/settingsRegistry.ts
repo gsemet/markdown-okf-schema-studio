@@ -345,6 +345,31 @@ export const PLANTUML_SETTINGS = {
   }, (value) => typeof value === "string" ? value.trim() : ""),
 };
 
+/**
+ * Default of `open.searchResultsInStudio`. One constant: the decision to ship it off (the opening
+ * watcher cannot tell a jump from a plain reopening) flips it here and in `just generate-settings`.
+ */
+export const DEFAULT_SEARCH_RESULTS_IN_STUDIO = true;
+
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-174
+/** The `markdownOkfSchemaStudio.open.*` settings: how a Markdown text editor is replaced by the Studio tab. */
+const OPEN_SETTINGS = {
+  /** A Markdown file opened at a line by a jump (search, Quick Open, Problems, link) opens in Studio at that line. */
+  searchResultsInStudio: setting<boolean>({
+    type: "boolean",
+    default: DEFAULT_SEARCH_RESULTS_IN_STUDIO,
+    markdownDescription: "Opens a Markdown file in Studio, at the line, when VS Code jumps to a line of it (a search result, Quick Open `file.md:42`, a problem, a link). **On**: a Markdown file opened in a new text editor at a line is replaced by the Studio tab at that line, marked with an arrow; a plain opening stays a text editor, and a jump stays a text editor while the side preview is open. **Off**: such a jump opens the text editor.",
+    order: 90,
+  }, asStored),
+  /** Every Markdown file opened in a new plain text editor opens in Studio. */
+  markdownFilesInStudio: setting<boolean>({
+    type: "boolean",
+    default: false,
+    markdownDescription: "Opens every Markdown file in Studio. **On**: a Markdown file opened in a new text editor is replaced by the Studio tab, at the line when there is one; diffs, restored tabs and the text editor of \"Open as Text\" stay text. **Off** (default): a plain opening stays a text editor. This setting replaces VS Code's `workbench.editorAssociations` entry for `*.md` that names Studio, which Studio moves here once. Use \"Open as Text\" on a Studio tab to get the raw text.",
+    order: 91,
+  }, asStored),
+};
+
 /** One group of the settings editor: a section of the table with its title and position. */
 export interface SettingCategory {
   /** The section: the middle part of the setting names (`preview`). */
@@ -365,6 +390,7 @@ export const SETTING_CATEGORIES: readonly SettingCategory[] = [
   { section: "frontmatter", title: "Frontmatter", order: 3, settings: FRONTMATTER_SETTINGS },
   { section: "comments", title: "Comments", order: 4, settings: COMMENTS_SETTINGS },
   { section: "plantuml", title: "PlantUML", order: 5, settings: PLANTUML_SETTINGS },
+  { section: "open", title: "Opening Files", order: 6, settings: OPEN_SETTINGS },
 ];
 
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-001

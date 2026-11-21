@@ -5,11 +5,13 @@ uuid: 17d05bcd-1f17-46dd-91d8-0ebe90496ad2
 title: The extension activates only on its own entry points
 description: "When VS Code loads the extension manifest, the extension SHALL declare
   VS Code 1.95 as its lowest supported version and as its only activation events the
-  two Studio commands, the Studio Open With editor and the Studio preview panel serializer,
-  and contribute no command whose identifier starts with markdown. and no language
-  and no grammar, so that the built-in Markdown support is neither activated nor replaced,
-  and declare that it supports the VS Code Agents window, so that VS Code enables
-  it there without a user setting."
+  two Studio commands, the Studio Open With editor, the Studio preview panel serializer
+  and the Markdown language, and start only its registrations and the editor association
+  migration at activation, leaving the preview engine, the watchers and the diagnostics
+  to the first Studio preview, and contribute no command whose identifier starts with
+  markdown. and no language and no grammar, so that the built-in Markdown support
+  is neither activated nor replaced, and declare that it supports the VS Code Agents
+  window, so that VS Code enables it there without a user setting."
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -26,6 +28,7 @@ implemented_in_files:
 - src/extension.ts
 - src/host-vscode/activation.ts
 tested_in_files:
+- test/host/openAtLine.test.ts
 - test/integration/stockCoexistence.test.ts
 - test/security/lifeReq.requirements.test.ts
 - test/security/package-contract.test.ts
@@ -39,7 +42,7 @@ supersedes:
 
 ### Normative behavior
 
-When VS Code loads the extension manifest, the extension SHALL declare VS Code 1.95 as its lowest supported version and as its only activation events the two Studio commands, the Studio Open With editor and the Studio preview panel serializer, and contribute no command whose identifier starts with markdown. and no language and no grammar, so that the built-in Markdown support is neither activated nor replaced, and declare that it supports the VS Code Agents window, so that VS Code enables it there without a user setting.
+When VS Code loads the extension manifest, the extension SHALL declare VS Code 1.95 as its lowest supported version and as its only activation events the two Studio commands, the Studio Open With editor, the Studio preview panel serializer and the Markdown language, and start only its registrations and the editor association migration at activation, leaving the preview engine, the watchers and the diagnostics to the first Studio preview, and contribute no command whose identifier starts with markdown. and no language and no grammar, so that the built-in Markdown support is neither activated nor replaced, and declare that it supports the VS Code Agents window, so that VS Code enables it there without a user setting.
 
 ### Scenario (nominal): A Studio command runs
 
@@ -51,7 +54,7 @@ When VS Code loads the extension manifest, the extension SHALL declare VS Code 1
 
 - GIVEN VS Code started with a Markdown file open in a text editor and no Studio entry point used
 - WHEN the reader only reads and edits the file
-- THEN the extension stays inactive: package.json lists the four activation events and no onLanguage or workspaceContains event (deduced from the manifest, not run)
+- THEN the extension activates through onLanguage:markdown but starts no service: no engine warm-up, no stem-root or conf.py watcher and no diagnostics until the first Studio preview (host test "an activation with no preview starts no service, the first preview starts them once, a second one does not again"); package.json lists the five activation events, onLanguage:markdown is the only language event and there is no workspaceContains event
 
 ### Scenario (boundary): Manifest contract
 
@@ -80,10 +83,10 @@ When VS Code loads the extension manifest, the extension SHALL declare VS Code 1
 
 ### Verification notes
 
-- Method: test/security/lifeReq.requirements.test.ts, unit test "the extension activates only on its commands, its Open With editor and panel restore" (A Studio command runs, A Markdown file alone: reads package.json activationEvents, onCommand for the two commands, onCustomEditor, onWebviewPanel) and "the extension declares VS Code 1.95 as its minimum version" (Manifest contract, engine row and older-VS-Code row: reads package.json).
+- Method: test/security/lifeReq.requirements.test.ts, unit test "the extension activates only on its commands, its Open With editor, panel restore and Markdown files" (A Studio command runs, A Markdown file alone: reads package.json activationEvents, onCommand for the two commands, onCustomEditor, onLanguage:markdown, onWebviewPanel) and "the extension declares VS Code 1.95 as its minimum version" (Manifest contract, engine row and older-VS-Code row: reads package.json).
 - Method: test/security/package-contract.test.ts, unit test "contributes only opt-in Markdown OKF-Schema Studio commands" (Manifest contract: no markdown. identifier, no languages and no grammars key).
 - Method: test/integration/stockCoexistence.test.ts (Manifest contract: the Studio command id is not among the built-in Markdown commands).
-- Criteria: package.json activationEvents holds exactly four entries; engines.vscode equals ^1.95.0; no contributed command id starts with markdown.; contributes.languages and contributes.grammars are undefined.
+- Criteria: package.json activationEvents holds exactly five entries, onLanguage:markdown the only language one; engines.vscode equals ^1.95.0; no contributed command id starts with markdown.; contributes.languages and contributes.grammars are undefined.
 - Method: Unit test "the manifest declares support for the Agents window" in test/security/trustReq.requirements.test.ts, which asserts the declaration in package.json for an extension with a main entry point.
 - Method: Manual demonstration on VS Code 1.144: a VSIX without the declaration is absent from the Agents window, the same VSIX with it is enabled and opens a Markdown file through Open With. Not automated: a test host loads the extension from its development path, which skips the gate.
 - Criteria: package.json declares capabilities.agentsWindow.supported as true.

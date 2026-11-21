@@ -62,8 +62,10 @@ In the VS Code Agents window, only local agent sessions are supported: the previ
 files of a session whose working folder is on this machine. Remote or cloud agent sessions, whose
 folders are not local `file` folders, are not supported.
 
-The stock Markdown preview and its `markdown.*` settings remain separate. Files under `src/` do not
-auto-activate the extension.
+The stock Markdown preview and its `markdown.*` settings remain separate. Opening a Markdown file
+activates the extension, which then starts only its registrations and the editor association
+migration; the preview engine, the watchers and the diagnostics start with the first Studio preview.
+Other files do not activate it.
 
 Fenced `diff` and `patch` blocks are supported as visualization-only rendered code. Their literal
 text and leading `+` or `-` markers are preserved; the preview does not calculate a comparison,

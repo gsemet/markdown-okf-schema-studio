@@ -95,6 +95,12 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       when: "resourceExtname == .md && activeEditor == workbench.editors.files.textFileEditor",
       group: "navigation",
     },
+    // CR-445: Open as Text, in the overflow of the title bar of a Studio tab (no `navigation` group).
+    {
+      command: "markdown-okf-schema-studio.openAsText",
+      when: "activeCustomEditorId == 'markdown-okf-schema-studio.editor'",
+      group: "1_markdown@1",
+    },
   ]);
   assert.deepEqual(packageJson.contributes.menus["explorer/context"], [
     {
@@ -118,10 +124,12 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.ok(Array.isArray(categories), "the settings are contributed as ordered categories");
   assert.deepEqual(
     categories.map((category) => [category.title, category.order]),
-    [["Preview", 1], ["Editing", 2], ["Frontmatter", 3], ["Comments", 4], ["PlantUML", 5]],
+    [["Preview", 1], ["Editing", 2], ["Frontmatter", 3], ["Comments", 4], ["PlantUML", 5], ["Opening Files", 6]],
   );
+  // The "Opening Files" category holds the `open.*` keys (CR-445).
+  const prefixOf = (title: string): string => `markdownOkfSchemaStudio.${title === "Opening Files" ? "open" : title.toLowerCase()}.`;
   for (const category of categories) {
-    const prefix = `markdownOkfSchemaStudio.${category.title.toLowerCase()}.`;
+    const prefix = prefixOf(category.title);
     for (const key of Object.keys(category.properties)) {
       assert.ok(key.startsWith(prefix), `${key} belongs to the ${category.title} category`);
     }
@@ -137,6 +145,8 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.frontmatter.projectRoot",
       "markdownOkfSchemaStudio.frontmatter.propertiesTable",
       "markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties",
+      "markdownOkfSchemaStudio.open.markdownFilesInStudio",
+      "markdownOkfSchemaStudio.open.searchResultsInStudio",
       "markdownOkfSchemaStudio.plantuml.jarPath",
       "markdownOkfSchemaStudio.plantuml.useJar",
       "markdownOkfSchemaStudio.preview.codeBlocks.darkBackground",
@@ -407,4 +417,31 @@ test("CR 312: Cmd/Ctrl+S runs the save command on the side preview and the custo
   assert.deepEqual(packageJson.contributes.keybindings.filter((entry) => entry.command === id), [
     { command: id, key: "ctrl+s", mac: "cmd+s", when: "activeWebviewPanelId == 'markdown-okf-schema-studio.preview' || activeCustomEditorId == 'markdown-okf-schema-studio.editor'" },
   ], "no input or editor focus clause: the key saves from every text box of the page");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177
+test("CR-445: Open as Text is in the palette and the editor title overflow of a Studio tab, and the introductions reset is in the palette", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
+    contributes: {
+      commands: Array<{ command: string; title: string; category?: string }>;
+      menus: Record<string, Array<{ command: string; when?: string; group?: string }>>;
+    };
+  };
+  const studioTab = "activeCustomEditorId == 'markdown-okf-schema-studio.editor'";
+  const asText = "markdown-okf-schema-studio.openAsText";
+  const again = "markdown-okf-schema-studio.showFeatureIntroductionsAgain";
+  assert.deepEqual(packageJson.contributes.commands.filter((entry) => entry.command === asText || entry.command === again)
+    .map((entry) => [entry.command, entry.title, entry.category]), [
+    [asText, "Open as Text", "Markdown OKF-Schema Studio"],
+    [again, "Show Feature Introductions Again", "Markdown OKF-Schema Studio"],
+  ]);
+  assert.deepEqual(packageJson.contributes.menus.commandPalette.filter((entry) => entry.command === asText), [
+    { command: asText, when: studioTab },
+  ]);
+  assert.deepEqual(packageJson.contributes.menus.commandPalette.filter((entry) => entry.command === again), [{ command: again }]);
+  const title = packageJson.contributes.menus["editor/title"]!.filter((entry) => entry.command === asText);
+  assert.equal(title.length, 1);
+  assert.equal(title[0]!.when, studioTab);
+  assert.notEqual(title[0]!.group, "navigation", "an overflow entry, not a toolbar button");
 });

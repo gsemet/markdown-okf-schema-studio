@@ -26,6 +26,9 @@ import { createVscodePreviewPanel, type VscodePreviewPanel } from "./previewPane
 import { startKeystrokeTracking } from "./keystrokes";
 import { createVscodeHost, type VscodeHost } from "./vscodeHost";
 import { fireAndForget } from "../host-api/logger";
+import { migrateEditorAssociation } from "../session/associationMigration";
+import { FeatureIntroductions } from "../session/featureIntroductions";
+import { StudioOpenedTextEditors } from "./openInStudio";
 
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-001
 /** The command that opens the side preview. */
@@ -49,6 +52,10 @@ const FIND_COMMAND_ID = "markdown-okf-schema-studio.find";
 const SAVE_COMMAND_ID = "markdown-okf-schema-studio.saveDocument";
 /** The command that exports the focused preview, or the preview of the active document, as one HTML file. */
 export const EXPORT_HTML_COMMAND_ID = "markdown-okf-schema-studio.exportHtml";
+/** The command that opens the text editor of the active Studio tab's file in place of the tab. */
+export const OPEN_AS_TEXT_COMMAND_ID = "markdown-okf-schema-studio.openAsText";
+/** The command that lets every feature introduction show once more. */
+export const SHOW_INTRODUCTIONS_COMMAND_ID = "markdown-okf-schema-studio.showFeatureIntroductionsAgain";
 /** The view type of the side preview panels (and of their serializer). */
 export const PANEL_VIEW_TYPE = "markdown-okf-schema-studio.preview";
 /** The view type of the custom editor (a fixed preview of one document). */
@@ -59,9 +66,15 @@ export class StudioActivation {
   public readonly host: VscodeHost;
   public readonly groups: VscodePanelGroups;
   public readonly manager: PreviewManager;
+  /** The text editors Studio opened itself: the opening watcher never replaces them. */
+  public readonly openedByStudio = new StudioOpenedTextEditors();
+  /** The extension context of this activation, set by {@link start}. */
+  private context: vscode.ExtensionContext | undefined;
+  /** True once {@link ensureServicesStarted} ran: the engine warm-up, the watchers and the diagnostics. */
+  private started = false;
 
   public constructor(public readonly extensionUri: vscode.Uri) {
-    this.host = createVscodeHost();
+    this.host = createVscodeHost(this.openedByStudio);
     this.groups = createVscodePanelGroups(PANEL_VIEW_TYPE, (column) => this.manager.hasLivePanelIn(column));
     this.manager = new PreviewManager(this.host, this.groups);
   }
@@ -71,26 +84,35 @@ export class StudioActivation {
     return createVscodePreviewPanel(panel, this.host.assets(panel.webview, this.extensionUri), this.extensionUri);
   }
 
-  /** Registers everything the extension contributes; the subscriptions go to `context`. */
+  /**
+   * Registers everything the extension contributes; the subscriptions go to `context`. The preview
+   * engine warm-up, the watchers and the diagnostics wait for the first Studio preview
+   * ({@link ensureServicesStarted}): a Markdown file alone activates the extension too.
+   */
   public start(context: vscode.ExtensionContext): void {
     const { host, manager } = this;
+    this.context = context;
     manager.choices.refreshThreadAuthor(host.workspace.folders()[0]?.id);
-    preloadMystEngine();
-    host.previewRenderer?.warm();
     manager.choices.load(context.workspaceState);
-    for (const folder of host.workspace.folders()) {
-      manager.events.watchStemRoot(folder.path);
-    }
-    const diagnostics = manager.diagnostics.start();
-    // The single conf.py watcher: it also sees the workspace-root fallbacks of decision D29.
-    const confWatcher = host.watcher.watch(undefined, "**/conf.py");
-    const onConfFileEvent = (filePath: string): void => manager.events.onConfFileEvent(filePath);
+    const introductions = new FeatureIntroductions(context.globalState, host.ui, host.logger);
+    fireAndForget(host.logger, migrateEditorAssociation({
+      settingScopes: host.settingScopes,
+      globalState: context.globalState,
+      workspaceState: context.workspaceState,
+      ui: host.ui,
+      logger: host.logger,
+      introductions,
+    }), "Migrating the editor association");
     context.subscriptions.push(
-      diagnostics,
-      confWatcher,
-      confWatcher.onDidChange(onConfFileEvent),
-      confWatcher.onDidCreate(onConfFileEvent),
-      confWatcher.onDidDelete(onConfFileEvent),
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-176
+      vscode.commands.registerCommand(SHOW_INTRODUCTIONS_COMMAND_ID, async () => {
+        await introductions.resetAll();
+        fireAndForget(host.logger, host.ui.showInformation(
+          "Markdown OKF-Schema Studio will show its feature introductions again.",
+        ), "showInformation");
+      }),
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-177
+      vscode.commands.registerCommand(OPEN_AS_TEXT_COMMAND_ID, () => this.openAsText()),
       vscode.workspace.onDidCloseTextDocument((document) => manager.events.onDocumentClosed(document.uri.toString())),
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-003
       vscode.commands.registerCommand(COMMAND_ID, (uri?: unknown) => this.openPreview(uri)),
@@ -154,16 +176,91 @@ export class StudioActivation {
     );
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-004
+  /**
+   * Starts, once, what a Studio preview needs and a Markdown file alone does not: the MyST engine
+   * warm-up, the render worker, the stem-root watchers, the Problems collection and the `conf.py`
+   * watcher. Run by the first preview (the side preview, an Open With tab, a restored panel).
+   */
+  private ensureServicesStarted(): void {
+    const context = this.context;
+    if (this.started || !context) return;
+    this.started = true;
+    const { host, manager } = this;
+    try {
+      preloadMystEngine();
+      host.previewRenderer?.warm();
+      for (const folder of host.workspace.folders()) {
+        manager.events.watchStemRoot(folder.path);
+      }
+      const diagnostics = manager.diagnostics.start();
+      // The single conf.py watcher: it also sees the workspace-root fallbacks of decision D29.
+      const confWatcher = host.watcher.watch(undefined, "**/conf.py");
+      const onConfFileEvent = (filePath: string): void => manager.events.onConfFileEvent(filePath);
+      context.subscriptions.push(
+        diagnostics,
+        confWatcher,
+        confWatcher.onDidChange(onConfFileEvent),
+        confWatcher.onDidCreate(onConfFileEvent),
+        confWatcher.onDidDelete(onConfFileEvent),
+      );
+    } catch (error) {
+      // A service that cannot start is logged; the preview that asked for it still opens and shows its own failure.
+      host.logger.error("Could not start the preview services.", error);
+    }
+  }
+
+  /** True once the first Studio preview started the services (see {@link ensureServicesStarted}). */
+  public get servicesStarted(): boolean {
+    return this.started;
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-143
-  /** Disposes the sessions (not their panels) and what the activation holds. */
+  /** Disposes the sessions (not their panels) and what the activation holds; stops only what was started. */
   public stop(): void {
     const { manager } = this;
     manager.disposeAll(false);
-    manager.diagnostics.stop();
     manager.events.disposeStemRootWatchers();
     manager.choices.unload();
-    this.host.previewRenderer?.dispose();
+    if (this.started) {
+      manager.diagnostics.stop();
+      this.host.previewRenderer?.dispose();
+    }
+    this.started = false;
+    this.context = undefined;
     resetRenderHooksForTests();
+  }
+
+  /** The Open as Text command: the text editor of the active Studio tab's file takes the tab's place. */
+  private async openAsText(): Promise<void> {
+    const { host, manager } = this;
+    const group = vscode.window.tabGroups.activeTabGroup;
+    const tab = group?.activeTab;
+    const input = tab?.input;
+    if (!group || !tab || !(input instanceof vscode.TabInputCustom) || input.viewType !== EDITOR_VIEW_TYPE) {
+      fireAndForget(host.logger, host.ui.showInformation(
+        "Open a Markdown file in Studio to open it as text.",
+      ), "showInformation");
+      return;
+    }
+    const documentUri = input.uri.toString();
+    const line = manager.latest((preview) => !preview.followsActiveEditor && preview.documentUri === documentUri)
+      ?.state?.sourceLine;
+    this.openedByStudio.record(documentUri);
+    try {
+      const document = await vscode.workspace.openTextDocument(input.uri);
+      const at = new vscode.Position(line === undefined ? 0 : line - 1, 0);
+      await vscode.window.showTextDocument(document, {
+        viewColumn: group.viewColumn,
+        preview: false,
+        selection: new vscode.Range(at, at),
+      });
+      await vscode.window.tabGroups.close(tab, true);
+    } catch (error) {
+      fireAndForget(host.logger, host.ui.showError(
+        "Cannot open " + input.uri.fsPath + " as text: " + (error instanceof Error ? error.message : String(error)),
+      ), "showError");
+    }
   }
 
   /** Where to open a file so it does not cover the side preview. */
@@ -198,6 +295,7 @@ export class StudioActivation {
       && vscode.window.activeTextEditor?.document.uri.toString() !== uri.toString()
     ) {
       try {
+        this.openedByStudio.record(uri.toString());
         const opened = await vscode.workspace.openTextDocument(uri);
         const sidePreviewForOpen = manager.latest((candidate) => candidate.followsActiveEditor);
         await vscode.window.showTextDocument(opened, sidePreviewForOpen
@@ -219,6 +317,7 @@ export class StudioActivation {
       ), "showInformation");
       return;
     }
+    this.ensureServicesStarted();
     const workspaceFolder = host.workspace.folderOf(document.path);
     const sidePreview = manager.latest((preview) => preview.followsActiveEditor);
     if (sidePreview) {
@@ -258,6 +357,7 @@ export class StudioActivation {
   /** The custom editor: a fixed preview of one document. */
   public async resolvePreviewEditor(textDocument: vscode.TextDocument, webviewPanel: vscode.WebviewPanel): Promise<void> {
     const { host, manager } = this;
+    this.ensureServicesStarted();
     const panel = this.wrapPanel(webviewPanel);
     const document = host.documents.of(textDocument);
     let preview: ReturnType<PreviewManager["createSession"]> | undefined;
@@ -287,6 +387,7 @@ export class StudioActivation {
   /** A side preview restored with the window: it shows the document its saved state names. */
   public async deserializePreviewPanel(webviewPanel: vscode.WebviewPanel, rawState: unknown): Promise<void> {
     const { host, manager } = this;
+    this.ensureServicesStarted();
     const panel = this.wrapPanel(webviewPanel);
     const restoredState = parsePreviewPanelState(rawState);
     if (!restoredState) {

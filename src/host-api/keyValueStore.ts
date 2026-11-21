@@ -1,5 +1,5 @@
 /**
- * The `KeyValueStore` port: small values the host keeps for the workspace between sessions (the
+ * The `KeyValueStore` port: small values the host keeps for the workspace or the user between sessions (the
  * reader's choices: theme mode, view preferences, edit and palette mode, collapsed descriptions).
  */
 

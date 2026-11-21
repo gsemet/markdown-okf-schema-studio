@@ -17,6 +17,7 @@
     "onCommand:markdown-okf-schema-studio.openPreview",
     "onCommand:markdown-okf-schema-studio.refreshPreview",
     "onCustomEditor:markdown-okf-schema-studio.editor",
+    "onLanguage:markdown",
     "onWebviewPanel:markdown-okf-schema-studio.preview"
   ],
   "categories": [
@@ -116,6 +117,16 @@
         "command": "markdown-okf-schema-studio.exportHtml",
         "title": "Export to HTML",
         "category": "Markdown OKF-Schema Studio"
+      },
+      {
+        "command": "markdown-okf-schema-studio.openAsText",
+        "title": "Open as Text",
+        "category": "Markdown OKF-Schema Studio"
+      },
+      {
+        "command": "markdown-okf-schema-studio.showFeatureIntroductionsAgain",
+        "title": "Show Feature Introductions Again",
+        "category": "Markdown OKF-Schema Studio"
       }
     ],
     "menus": {
@@ -163,6 +174,13 @@
         {
           "command": "markdown-okf-schema-studio.exportHtml",
           "when": "activeWebviewPanelId == 'markdown-okf-schema-studio.preview' || activeCustomEditorId == 'markdown-okf-schema-studio.editor' || editorLangId == markdown"
+        },
+        {
+          "command": "markdown-okf-schema-studio.openAsText",
+          "when": "activeCustomEditorId == 'markdown-okf-schema-studio.editor'"
+        },
+        {
+          "command": "markdown-okf-schema-studio.showFeatureIntroductionsAgain"
         }
       ],
       "editor/title": [
@@ -170,6 +188,11 @@
           "command": "markdown-okf-schema-studio.openPreview",
           "when": "resourceExtname == .md && activeEditor == workbench.editors.files.textFileEditor",
           "group": "navigation"
+        },
+        {
+          "command": "markdown-okf-schema-studio.openAsText",
+          "when": "activeCustomEditorId == 'markdown-okf-schema-studio.editor'",
+          "group": "1_markdown@1"
         }
       ],
       "explorer/context": [
@@ -399,6 +422,24 @@
             "default": "",
             "markdownDescription": "Path to `plantuml.jar`, used only when `#markdownOkfSchemaStudio.plantuml.useJar#` is on. A relative path is resolved from the workspace folder. **Empty**: the `plantuml` command found on your PATH is used.",
             "order": 80
+          }
+        }
+      },
+      {
+        "title": "Opening Files",
+        "order": 6,
+        "properties": {
+          "markdownOkfSchemaStudio.open.searchResultsInStudio": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Opens a Markdown file in Studio, at the line, when VS Code jumps to a line of it (a search result, Quick Open `file.md:42`, a problem, a link). **On**: a Markdown file opened in a new text editor at a line is replaced by the Studio tab at that line, marked with an arrow; a plain opening stays a text editor, and a jump stays a text editor while the side preview is open. **Off**: such a jump opens the text editor.",
+            "order": 90
+          },
+          "markdownOkfSchemaStudio.open.markdownFilesInStudio": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Opens every Markdown file in Studio. **On**: a Markdown file opened in a new text editor is replaced by the Studio tab, at the line when there is one; diffs, restored tabs and the text editor of \"Open as Text\" stay text. **Off** (default): a plain opening stays a text editor. This setting replaces VS Code's `workbench.editorAssociations` entry for `*.md` that names Studio, which Studio moves here once. Use \"Open as Text\" on a Studio tab to get the raw text.",
+            "order": 91
           }
         }
       }

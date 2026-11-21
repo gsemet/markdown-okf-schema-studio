@@ -23,6 +23,7 @@ implemented_in_files:
 - src/host-vscode/activation.ts
 tested_in_files:
 - test/core/configuration/settingsRegistry.test.ts
+- test/host/openAtLine.test.ts
 - test/integration/stockCoexistence.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -59,7 +60,7 @@ While the Studio runs, the extension SHALL open its side preview beside an open 
 
 ### Verification notes
 
-- Method: test/integration/stockCoexistence.test.ts (both open, stock settings snapshot by snapshotStockSettings before and after, native diff). The Studio settings scenario is checked in test/core/configuration/settingsRegistry.test.ts (own prefix, no write to a markdown.* setting, one reader); it is checked by reading the code, where no write to a markdown.* key exists.
+- Method: test/integration/stockCoexistence.test.ts (both open, stock settings snapshot by snapshotStockSettings before and after, native diff). The Studio settings scenario is checked in test/core/configuration/settingsRegistry.test.ts (own prefix, no write to a markdown.* setting, one reader); it is checked by reading the code, where no write to a markdown.* key exists; since CR-445 the one source that writes a setting is src/host-vscode/vscodeHost.ts, for the Studio settings and workbench.editorAssociations only (test/core/configuration/settingsRegistry.test.ts, writers assertion; test/host/openAtLine.test.ts, the writer refuses a markdown.preview key).
 - Criteria: the two snapshots are equal, the stock custom editor tab count does not drop and the diff tab opens.
 
 <!-- okf:links:start -->

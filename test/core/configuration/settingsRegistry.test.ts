@@ -12,6 +12,7 @@ import {
 import {
   bootSettingKeys,
   contributedConfiguration,
+  DEFAULT_SEARCH_RESULTS_IN_STUDIO,
   PREVIEW_SETTINGS,
   readSettings,
   SETTING_CATEGORIES,
@@ -37,7 +38,7 @@ test("the generated settings schema is the package.json one, byte for byte", () 
 test("categories keep their titles and order, and settings are sorted by their order", () => {
   const configuration = contributedConfiguration();
   assert.deepEqual(configuration.map((category) => [category.title, category.order]), [
-    ["Preview", 1], ["Editing", 2], ["Frontmatter", 3], ["Comments", 4], ["PlantUML", 5],
+    ["Preview", 1], ["Editing", 2], ["Frontmatter", 3], ["Comments", 4], ["PlantUML", 5], ["Opening Files", 6],
   ]);
   for (const category of configuration) {
     const orders = Object.values(category.properties).map((schema) => schema.order);
@@ -152,11 +153,28 @@ test("the Studio settings live under their own prefix, and no source writes a se
     assert.ok(key.startsWith("markdownOkfSchemaStudio."), `${key} is a Studio setting, not a markdown.* one`);
   }
   const readers: string[] = [];
+  const writers: string[] = [];
   for (const file of sourceFiles(path.join(projectRoot, "src"))) {
     const text = fs.readFileSync(file, "utf8");
-    assert.ok(!/ConfigurationTarget/u.test(text), `${path.relative(projectRoot, file)} writes no setting`);
+    // CR-445: the editor association migration writes settings, through the one writer of vscodeHost.ts.
+    if (/ConfigurationTarget/u.test(text)) writers.push(path.relative(projectRoot, file).split(path.sep).join("/"));
     if (/getConfiguration\(/u.test(text)) readers.push(path.relative(projectRoot, file).split(path.sep).join("/"));
     assert.ok(!/["'`]markdown\.(preview|styles)/u.test(text), `${path.relative(projectRoot, file)} names no markdown.preview key`);
   }
   assert.deepEqual(readers, ["src/host-vscode/vscodeHost.ts"], "settings are reached through one reader, by section name");
+  assert.deepEqual(writers, ["src/host-vscode/vscodeHost.ts"], "settings are written through one writer, by section name");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-174
+test("the Opening Files settings are two booleans: the search results one on by default, the every-file one off", () => {
+  const open = SETTING_CATEGORIES.find((category) => category.section === "open");
+  assert.ok(open, "an `open` section exists");
+  assert.equal(settingSection("open"), "markdownOkfSchemaStudio.open");
+  assert.deepEqual(settingDefaults(open.settings), { searchResultsInStudio: DEFAULT_SEARCH_RESULTS_IN_STUDIO, markdownFilesInStudio: false });
+  assert.equal(DEFAULT_SEARCH_RESULTS_IN_STUDIO, true);
+  const properties = contributedConfiguration().find((category) => category.title === "Opening Files")!.properties;
+  assert.deepEqual(Object.keys(properties), [
+    "markdownOkfSchemaStudio.open.searchResultsInStudio",
+    "markdownOkfSchemaStudio.open.markdownFilesInStudio",
+  ]);
 });
