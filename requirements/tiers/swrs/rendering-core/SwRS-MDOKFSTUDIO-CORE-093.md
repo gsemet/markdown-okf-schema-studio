@@ -21,6 +21,7 @@ derived_by: []
 implemented_in_files:
 - test/site/requirementsViewer/pages.ts
 tested_in_files:
+- test/site/requirementsViewer/cards.test.ts
 - test/site/requirementsViewer/idLayout.browser.test.ts
 - test/site/requirementsViewer/pages.test.ts
 default_owner_email: gaetan@xeberon.net

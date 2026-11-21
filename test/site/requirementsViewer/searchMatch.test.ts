@@ -36,6 +36,7 @@ function indexOf(extra: number): unknown[] {
     titled(swrs("MYST", "014"), "SwRS", "myst", "Behaviour fourteen of MyST", own),
     titled(swrs("GFM", "140"), "SwRS", "gfm", "Behaviour one hundred forty", own),
     titled(swrs("GFM", "020"), "SwRS", "gfm", "Handles 14 items", own),
+    titled(swrs("GFM", "114"), "SwRS", "gfm", "Behaviour one hundred fourteen", own),
   ];
   for (let n = 1; n <= extra; n += 1) requirements.push(titled(swrs(`EXTRA${n}`, "014"), "SwRS", `extra${n}`, `Extra ${n}`, own));
   const report = JSON.stringify({ generated_at: "2026-11-21T10:00:00+00:00", totals: {}, scopes: {}, requirements });
@@ -115,12 +116,28 @@ test("a bare number lists every requirement numbered 14 first, then the text hit
   // @tests_req SwRS-MDOKFSTUDIO-CORE-092
   const page = load();
   const idMatches = [strs("GFM", "014"), swrs("GFM", "014"), swrs("MYST", "014")];
-  assert.deepEqual(entries(list(page, "14")), [...idMatches, swrs("GFM", "020"), swrs("GFM", "140")], "the text hits follow, in index order (140 and the title that holds 14 are no ID match)");
+  assert.deepEqual(entries(list(page, "14")), [...idMatches, swrs("GFM", "020"), swrs("GFM", "114"), swrs("GFM", "140")], "the text hits follow, in index order (114, 140 and the title that holds 14 are no ID match)");
   assert.deepEqual(entries(list(page, "014")), idMatches, "014 is the same ID match, with no text hit");
   list(page, "7");
   assert.ok(page.results.innerHTML.includes("Type a word, an ID such as SwRS-MDOKFSTUDIO-DIAG-015 or DIAG-015, or a file name."), "one digit shows the hint");
   assert.deepEqual(list(page, "07"), []);
   assert.ok(page.results.innerHTML.includes("Nothing matches"), "07 is a bare number that names no requirement");
+});
+
+test("114 is not an ID match of 14: only a 014 entry is, and 114 is found by its own number", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092
+  const page = load();
+  const exact = [strs("GFM", "014"), swrs("GFM", "014"), swrs("MYST", "014")];
+  for (const query of ["14", "014", "gfm-14", "GFM-014"]) {
+    const lines = list(page, query);
+    const at = lines.indexOf(swrs("GFM", "114"));
+    const ids = entries(lines);
+    assert.deepEqual(ids.slice(0, query.includes("-") ? 2 : 3), exact.slice(0, query.includes("-") ? 2 : 3), query);
+    assert.ok(at < 0 || ids.indexOf(swrs("GFM", "114")) >= (query === "14" ? 3 : 2), `${query}: 114 never ranks as an ID match`);
+  }
+  assert.deepEqual(entries(list(page, "014")), exact, "014 lists no 114");
+  assert.deepEqual(list(page, "114"), ["# Behaviours", swrs("GFM", "114")]);
+  assert.deepEqual(list(page, "gfm-114"), ["# Behaviours", swrs("GFM", "114")]);
 });
 
 test("with more than 30 hits the ID matches are kept and the text hits are cut first", () => {
