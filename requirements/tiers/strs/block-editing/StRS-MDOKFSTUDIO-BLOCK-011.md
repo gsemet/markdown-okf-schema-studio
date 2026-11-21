@@ -23,6 +23,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-094
 - SwRS-MDOKFSTUDIO-BLOCK-102
 - SwRS-MDOKFSTUDIO-BLOCK-253
+- SwRS-MDOKFSTUDIO-BLOCK-264
+- SwRS-MDOKFSTUDIO-BLOCK-265
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -95,4 +97,6 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-BLOCK-094](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-094.md): The host inserts a new block with clean blank lines
   - [SwRS-MDOKFSTUDIO-BLOCK-102](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-102.md): An empty body offers one Start writing button
   - [SwRS-MDOKFSTUDIO-BLOCK-253](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-253.md): Start writing is the keyboard selection of an empty document
+  - [SwRS-MDOKFSTUDIO-BLOCK-264](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-264.md): An emptied top-level block or list item is deleted with its separator when the writer commits it
+  - [SwRS-MDOKFSTUDIO-BLOCK-265](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-265.md): Delete block deletes the blocks of a selection with one separator in one undo step
 <!-- okf:links:end -->

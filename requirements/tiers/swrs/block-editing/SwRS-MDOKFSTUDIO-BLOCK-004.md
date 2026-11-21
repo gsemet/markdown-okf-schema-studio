@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/build/integrationEditModeRestore.test.ts
 - test/integration/windowSwitchKeys.test.ts
+- test/page/runtimeBlockDelete.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
@@ -53,6 +54,8 @@ The selection is the one of SwRS-MDOKFSTUDIO-BLOCK-140: it is outlined in the fo
 | A neighbour that comes from an include | It is skipped |
 | Enter with no selection | Nothing opens |
 | Enter on the page itself (the focus lost to the body) with a selection | The editor of the free end of the selection opens |
+| Delete or Backspace with a block selection | The selected blocks are deleted (SwRS-MDOKFSTUDIO-BLOCK-265) |
+| Delete or Backspace with only a focused block, a focused bar button, a text box, an open editor, or the structural cursor on a cell, a list item or an inner block | Nothing is deleted |
 
 ### Scenario (nominal): Coming back to the window
 

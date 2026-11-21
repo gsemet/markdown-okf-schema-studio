@@ -138,6 +138,11 @@ export interface PreviewEditSaveMessage extends PageStateMessage<"previewEditSav
   /** Final saves: source line and viewport top of the edited element (anchoring rule R7). */
   pinLine?: number;
   pinViewportTop?: number;
+  /**
+   * Final saves of a top-level body block or a list item: an editor text that is only whitespace
+   * deletes the block with its separator instead of writing a placeholder line.
+   */
+  deleteWhenEmpty?: true;
 }
 
 /** The block editor was cancelled. */
@@ -329,6 +334,13 @@ export interface PreviewBlocksCutMessage extends PageMessageBase<"previewBlocksC
   pinViewportTop?: number;
 }
 
+/** Delete of the selected blocks (or of one block, from its Delete block button). */
+export interface PreviewBlocksDeleteMessage extends PageMessageBase<"previewBlocksDelete"> {
+  line: number;
+  endLine: number;
+  pinViewportTop?: number;
+}
+
 /** Paste of the clipboard as blocks after a source line (0 = start of the body). */
 export interface PreviewBlocksPasteMessage extends PageMessageBase<"previewBlocksPaste"> {
   insertAfterLine: number;
@@ -434,6 +446,7 @@ export type PageToHostMessage =
   | PreviewBlockMoveMessage
   | PreviewBlocksCopyMessage
   | PreviewBlocksCutMessage
+  | PreviewBlocksDeleteMessage
   | PreviewBlocksPasteMessage
   | PreviewDropFilesMessage
   | PreviewCommentCreateMessage

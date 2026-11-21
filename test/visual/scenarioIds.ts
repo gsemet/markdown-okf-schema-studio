@@ -745,7 +745,9 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "block-editing/v38-list-item-handles-cream-900": "In edit mode in the cream preview at 900 px, each of the 15 items of the bullet, ordered, nested, task, GitHub alert and nested admonition lists has a handle that ends left of its list, or of the outermost alert or admonition that holds it, inside the pane and centred within 2 px on the item's first line.",
   "block-editing/v39-list-item-handles-pushed-light-360": "In edit mode in the light theme at 360 px, where the lists have no room on their left, at least one block is pushed right and each of the 15 list item handles ends left of its list or outermost container, inside the pane and centred within 2 px on the item's first line.",
   "block-editing/v40-list-item-drag-light-900": "In edit mode in the light theme at 900 px, a real mouse drag of the handle of the first bullet item over the lower half of the third, released, sends one save of the list in the order second, third, first and opens no block editor; once the host renders that order, a second drag of the new first item held over the third is still down at capture, with the first item dimmed and the drop line after the third.",
-  "block-editing/v41-list-item-drag-dark-900": "In edit mode in the dark theme at 900 px, a real mouse drag of the handle of the first bullet item over the lower half of the third, released, sends one save of the list in the order second, third, first and opens no block editor; once the host renders that order, a second drag of the new first item held over the third is still down at capture, with the first item dimmed and the drop line after the third."
+  "block-editing/v41-list-item-drag-dark-900": "In edit mode in the dark theme at 900 px, a real mouse drag of the handle of the first bullet item over the lower half of the third, released, sends one save of the list in the order second, third, first and opens no block editor; once the host renders that order, a second drag of the new first item held over the third is still down at capture, with the first item dimmed and the drop line after the third.",
+  "block-editing/v42-delete-block-bar-light-900": "In edit mode in the light preview at 900 px, hovering the middle paragraph shows the bar with four buttons in order, Insert a block here, Move block up, Move block down and Delete block (a multiplication sign), all fully opaque, with the Delete block button touching the down arrow.",
+  "block-editing/v43-delete-block-bar-status-dark-900": "In edit mode in the dark preview at 900 px, a refused move of the middle paragraph shows its reason in the move status beside the bar, starting right of the Delete block button, which stays shown with the other three buttons."
 };
 
 /**
@@ -919,6 +921,8 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "table-editing/v32-grid-paste-light-900": ["pasted"],
   "table-editing/v33-cell-editor-in-quote-light-900": ["open"],
   "table-editing/v34-cell-editor-in-note-dark-900": ["open"],
+  "block-editing/v42-delete-block-bar-light-900": ["hover"],
+  "block-editing/v43-delete-block-bar-status-dark-900": ["bar"],
 };
 
 /**

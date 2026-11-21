@@ -160,6 +160,8 @@ function hasValidStateFields(message: Readonly<Record<string, unknown>>, type: P
     && (message.blockEditOpen === undefined
       || (type === "previewReady" && typeof message.blockEditOpen === "boolean"))
     && (message.final === undefined || (type === "previewEditSave" && typeof message.final === "boolean"))
+    && (message.deleteWhenEmpty === undefined
+      || (type === "previewEditSave" && message.final === true && message.deleteWhenEmpty === true))
     && (message.fieldValueFormat === undefined || (frontmatter && message.fieldValueFormat === "yaml"))
     && (message.fieldValueStyle === undefined
       || (frontmatter
@@ -297,6 +299,9 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   previewBlocksCopy: (message) => isSourceLine(message.line) && isSourceLine(message.endLine),
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewBlocksCut: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
+    && isPinViewportTop(message.pinViewportTop),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+  previewBlocksDelete: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
     && isPinViewportTop(message.pinViewportTop),
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewBlocksPaste: (message) => Number.isSafeInteger(message.insertAfterLine)

@@ -201,7 +201,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 
 .sphinx-preview-move-status {
   position: absolute;
-  left: 2.8em;
+  left: 4.2em;
   top: -0.9em;
   z-index: 2;
   max-width: 24em;
@@ -211,6 +211,22 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   background: var(--studio-editorWidget-background, Canvas);
   color: var(--studio-editorWidget-foreground, CanvasText);
   font-size: 0.85em;
+}
+
+`;
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+/**
+ * The Delete block button of an insert point (`createDeleteBlockButton`), right of the down arrow
+ * and touching it. The move status sits right of it (`left` above), so the two never overlap.
+ */
+const DELETE_BLOCK_BUTTON_CSS = `/* The delete button: the down arrow ends at 2.6em (1.2em + its 1.4em width). */
+.sphinx-preview-insert-point button.sphinx-preview-delete {
+  left: 2.6em;
+}
+
+html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sphinx-preview-delete {
+  display: none;
 }
 
 `;
@@ -684,6 +700,7 @@ export const EDIT_MODE_CSS = [
   BLOCK_SELECTION_RING_CSS,
   INSERT_POINT_CSS,
   MOVE_BUTTONS_CSS,
+  DELETE_BLOCK_BUTTON_CSS,
   START_POINT_CSS,
   BLOCK_EDITOR_CSS,
   CELL_EDITOR_CSS,

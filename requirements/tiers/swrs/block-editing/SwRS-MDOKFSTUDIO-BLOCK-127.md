@@ -39,6 +39,7 @@ tested_in_files:
 - test/integration/blockMove.test.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/modules/blockSelection.test.ts
+- test/page/runtimeBlockDelete.test.ts
 - test/page/runtimeBlockMoves.test.ts
 - test/page/runtimeBlockSelection.test.ts
 default_owner_email: gaetan@xeberon.net
@@ -86,6 +87,12 @@ When a move, a copy, a cut, a block selection or a paste would involve a block t
 - GIVEN a span that contains an include directive line
 - WHEN the copy or the cut is handled
 - THEN the answer is ok false with "A block that comes from an included file cannot be copied or cut." and the clipboard is untouched
+
+### Scenario (refusal): The host refuses to delete an included block
+
+- GIVEN a span whose first line opens an {include} fence, or the Delete block button of an included block
+- WHEN the delete is handled
+- THEN the host answers ok false with "A block that comes from an included file cannot be deleted.", nothing changes, and the bar of an included block has no Delete block button
 
 ### Scenario (refusal): The page refuses a paste from the insert point of an included block
 

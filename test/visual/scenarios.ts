@@ -167,6 +167,8 @@ export interface Scenario {
   tableInContainerChecks?: "quote" | "note";
   /** CR 432: the list item handles sit left of their list or outermost container, on the first line; `push` in a narrow pane; `drag` held then dropped. */
   listItemHandleChecks?: "place" | "push" | "drag";
+  /** CR-439: the bar of a hovered block shows + up down and Delete block; `status` adds the move status beside it. */
+  deleteBlockBarChecks?: "bar" | "status";
   /** CR 281: with the unchanged title editor open, one click on the priority value below it opens priority. */
   frontmatterClickChecks?: boolean;
   /** CR 290: the Rename label field of a table label opens above the icon and covers no cell. */

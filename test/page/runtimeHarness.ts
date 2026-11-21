@@ -160,6 +160,9 @@ export class RuntimeElement {
     if (selector === "[data-okf-list-item-input]") {
       return this.querySelectorAll(selector)[0] ?? null;
     }
+    if (selector === "button") {
+      return this.childElements.find((child) => child.tagName === "BUTTON") ?? null;
+    }
     return null;
   }
 
@@ -269,6 +272,10 @@ export class RuntimeElement {
         || (selector === "pre" && current.tagName === "PRE")
         || (selector === ".sphinx-preview-insert-point"
           && current.className.split(" ").includes("sphinx-preview-insert-point"))
+        // The targets that keep Delete and Backspace (features/blockSelectionView.ts).
+        || (selector === "button, a, summary, .sphinx-preview-insert-point"
+          && (["BUTTON", "A", "SUMMARY"].includes(current.tagName)
+            || current.className.split(" ").includes("sphinx-preview-insert-point")))
         || (selector === "[data-okf-properties]" && current.getAttribute("data-okf-properties") !== null)
         || ([".okf-comment-body", ".okf-chip", ".okf-anchor"].includes(selector)
           && (current.getAttribute("class") ?? "").split(" ").includes(selector.slice(1)))

@@ -37,6 +37,8 @@ export interface StructuralNavigationView {
    * consumed. Keys that stay with the flat block-to-block selection return false.
    */
   handleKey(event: KeyboardEvent): boolean;
+  /** True when the cursor is on a cell, a list item or an inner block, below the top level. */
+  isBelowTopLevel(): boolean;
 }
 
 /** A block of the page as the model sees it, with the element behind it. */
@@ -145,6 +147,7 @@ export function installStructuralNavigationView(rt: PageRuntime, host: Structura
 
   return {
     reset,
+    isBelowTopLevel: () => cursor !== undefined && (cursor.path.length > 1 || cursor.cell !== undefined),
     handleKey(event) {
       const root = documentNode();
       const from = current(root);

@@ -178,6 +178,28 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     return top ?? undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-264
+  /**
+   * True when the editor's block is a top-level body block (not the properties section) or a list
+   * item of a top-level list: erasing its text and pressing Done deletes it. A block inside a list
+   * item, an alert, a quote, an admonition or another container keeps the placeholder line.
+   */
+  function deletesWhenEmpty(target: HTMLElement, renderedTarget: HTMLElement): boolean {
+    const isBodyBlock = (block: HTMLElement | undefined): boolean => block !== undefined
+      && block.getAttribute("data-okf-properties") === null;
+    const blocks = rt.blocks.topLevelMappedBlocks();
+    if (blocks.includes(target) || blocks.includes(renderedTarget)) {
+      return isBodyBlock(blocks.includes(target) ? target : renderedTarget);
+    }
+    if (target.tagName !== "LI") return false;
+    let parent = target.parentElement;
+    while (parent && !blocks.includes(parent)) {
+      if (!["UL", "OL", "LI"].includes(parent.tagName)) return false;
+      parent = parent.parentElement;
+    }
+    return parent !== null && isBodyBlock(parent) && ["UL", "OL"].includes(parent.tagName);
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-079
   function adjacentMappedBlock(edit: BlockEdit, step: number): HTMLElement | undefined {
     const blocks = rt.blocks.topLevelMappedBlocks();
@@ -353,6 +375,9 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
         : {}),
       // @implements_req SwRS-MDOKFSTUDIO-BLOCK-255
       focusAtOpen: document.activeElement,
+      ...(!selectedCell && insertAfterLine === undefined && deletesWhenEmpty(target, renderedTarget)
+        ? { deleteWhenEmpty: true as const }
+        : {}),
     };
     document.documentElement?.setAttribute?.("data-sphinx-preview-block-editing", "true");
     if (rt.refreshButton) rt.refreshButton.disabled = true;
@@ -415,6 +440,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       editedText,
       final,
       ...(edit.insertAfterLine !== undefined ? { insertAfterLine: edit.insertAfterLine } : {}),
+      ...(final && edit.deleteWhenEmpty && editedText.trim() === "" ? { deleteWhenEmpty: true as const } : {}),
       ...pin,
       ...(state.flushingEditors ? { flush: true } : {}),
       ...rt.scroll.anchorField(),

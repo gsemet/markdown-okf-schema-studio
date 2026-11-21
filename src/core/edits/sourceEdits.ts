@@ -41,6 +41,8 @@ export const THREAD_REPLY_REFUSED = "The reply could not be added to this thread
 export const MOVE_INCLUDED = "A block that comes from an included file cannot be moved.";
 /** Refusal of a copy or cut that touches a block coming from an `{include}`. */
 export const COPY_INCLUDED = "A block that comes from an included file cannot be copied or cut.";
+/** Refusal of a delete that touches a block coming from an `{include}`. */
+export const DELETE_INCLUDED = "A block that comes from an included file cannot be deleted.";
 /** Refusal of a paste next to a block coming from an `{include}`. */
 export const PASTE_NEXT_TO_INCLUDED = "Text cannot be pasted next to a block that comes from an included file.";
 
@@ -239,6 +241,58 @@ export function planBlocksCopyCut(
   const plan = planCut(text, line, endLine);
   if ("refused" in plan) return { refused: plan.refused };
   return { copied, cut: { edit: { start: plan.start, end: plan.end, text: "" }, followingLine: plan.followingLine } };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+/**
+ * Deletes the blocks at `line` to `endLine` with one blank separator (the cut rules of `planCut`),
+ * after the span's trailing blank lines are dropped (a list mapped up to its blank separator).
+ * `followingLine` is set when a block follows and moves up into the place. Refused: what `planCut`
+ * refuses (out of date, frontmatter) and a span that opens an `{include}`.
+ */
+export function planBlocksDelete(
+  text: string,
+  line: number,
+  endLine: number,
+): EditRefusal | { edit: TextEdit; followingLine?: number } {
+  const span = withoutTrailingBlankLines(text, { line, endLine });
+  const plan = planCut(text, span.line, span.endLine);
+  if ("refused" in plan) return { refused: plan.refused };
+  if (linesOpenInclude(sourceLines(text), span.line, span.endLine)) return { refused: DELETE_INCLUDED };
+  return { edit: { start: plan.start, end: plan.end, text: "" }, followingLine: plan.followingLine };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-264
+/**
+ * The one edit that deletes a block whose editor was emptied and committed. The block starts at
+ * `sourceStartOffset` and holds `lastSavedText` now (its autosaved text); `originalText` is what it
+ * held when the editor opened, at lines `line` to `endLine`. The lines go as in {@link planBlocksDelete},
+ * computed on the document with the original text put back, and the edit replaces the region from
+ * the block's start through what the cut removes, so one undo brings the block back. Undefined when
+ * the lines no longer match the block (the caller then writes the text as it is).
+ */
+export function planEmptiedBlockRemoval(
+  text: string,
+  sourceStartOffset: number,
+  lastSavedText: string,
+  originalText: string,
+  line: number,
+  endLine: number,
+): TextEdit | undefined {
+  const savedEnd = sourceStartOffset + lastSavedText.length;
+  if (sourceStartOffset < 0 || savedEnd > text.length) return undefined;
+  const restored = text.slice(0, sourceStartOffset) + originalText + text.slice(savedEnd);
+  const restoredLines = sourceLines(restored);
+  if (!Number.isSafeInteger(line) || line < 1 || line > restoredLines.count
+    || restoredLines.start(line - 1) !== sourceStartOffset) return undefined;
+  const plan = planBlocksDelete(restored, line, endLine);
+  if ("refused" in plan) return undefined;
+  const restoredEnd = sourceStartOffset + originalText.length;
+  const start = Math.min(plan.edit.start, sourceStartOffset);
+  // What the cut leaves of the original text's tail (blank lines it kept) stays in place.
+  const kept = plan.edit.end < restoredEnd ? restored.slice(plan.edit.end, restoredEnd) : "";
+  const end = Math.max(plan.edit.end, restoredEnd) - restoredEnd + savedEnd;
+  return { start, end, text: kept };
 }
 
 /**

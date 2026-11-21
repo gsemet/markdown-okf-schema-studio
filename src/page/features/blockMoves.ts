@@ -7,6 +7,7 @@
  */
 
 import { STALE_REQUEST } from "../../core/protocol/staleRequest";
+import { createDeleteBlockButton } from "../modules/deleteBlockButton";
 import { isApplePlatform } from "../pageSettings";
 import type { BlockMoves, InsertMove, PageRuntime, PendingMoveSelection } from "./pageRuntime";
 
@@ -349,6 +350,13 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
       });
       point.appendChild(button);
     });
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+    // The Delete block button touches the down arrow; an included block has none.
+    if (!rt.blocks.isIncludedBlock(move.block)) {
+      point.appendChild(createDeleteBlockButton(document, () => {
+        rt.selection.requestDeleteBlock(move.block);
+      }));
+    }
   }
 
   return {

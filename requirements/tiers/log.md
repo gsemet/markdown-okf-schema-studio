@@ -1,5 +1,21 @@
 # Update Log
 
+## 2026-11-21
+
+### Empty blocks leave no blank lines, and a Delete block button (CR-439)
+
+- Added: SwRS-MDOKFSTUDIO-BLOCK-264 (proposed): an emptied top-level block or list item is deleted
+  with its separator when the writer commits it, in one edit before an autosave and two after.
+- Added: SwRS-MDOKFSTUDIO-BLOCK-265 (proposed): Delete block (button and Delete or Backspace on a
+  block selection), one edit and one undo step, an included block refused.
+- Changed: SwRS-MDOKFSTUDIO-BLOCK-094 (proposed): leading blank lines of a new block are dropped
+  and an insertion after a blank line writes one separator, not two.
+- Changed: SwRS-MDOKFSTUDIO-BLOCK-127, -004 and -109 (proposed): scenario rows for the delete
+  refusal, the keys, and the button beside the arrows.
+- Sources: `src/core/mapping/insertion.ts`, `src/core/edits/sourceEdits.ts`,
+  `src/session/features/blockEdits.ts`, `src/session/features/sourceEdits.ts`,
+  `src/page/features/blockSelectionView.ts`, `src/page/modules/deleteBlockButton.ts`.
+
 ## 2026-11-20
 
 ### A block editor never stays on "Saving Markdown…" (CR-436)

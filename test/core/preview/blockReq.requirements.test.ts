@@ -88,3 +88,18 @@ test("the block actions of a hovered block yield to the keyboard selection, whic
   assert.equal(ring.length, 1);
   assert.equal(ring[0]!.declarations.get("outline"), "none");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+test("the Delete block button touches the down arrow, the move status never overlaps it, and it hides while editing", () => {
+  const arrow = rulesFor(".sphinx-preview-insert-point button.sphinx-preview-move--down")[0]!;
+  const remove = rulesFor(".sphinx-preview-insert-point button.sphinx-preview-delete")[0]!;
+  const status = rulesFor(".sphinx-preview-move-status")[0]!;
+  const em = (value: string | undefined): number => Number.parseFloat(value ?? "NaN");
+  // The buttons are 1.4em wide: the arrow ends where the delete button starts, the status starts after it.
+  assert.ok(Math.abs(em(remove.declarations.get("left")) - (em(arrow.declarations.get("left")) + 1.4)) < 1e-9);
+  assert.ok(em(status.declarations.get("left")) >= em(remove.declarations.get("left")) + 1.4);
+  const hiding = rulesFor('html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sphinx-preview-delete');
+  assert.equal(hiding.length, 1);
+  assert.equal(hiding[0]!.declarations.get("display"), "none");
+});

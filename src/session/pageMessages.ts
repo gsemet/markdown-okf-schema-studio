@@ -73,6 +73,7 @@ export const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGa
   previewBlockMove: "render",
   previewBlocksCopy: "render",
   previewBlocksCut: "render",
+  previewBlocksDelete: "render",
   previewBlocksPaste: "render",
   previewDropFiles: "render",
   previewListTargets: "render",
@@ -197,12 +198,13 @@ export class PageMessageDispatcher {
         return;
       case "previewBlocksCopy":
       case "previewBlocksCut":
+      case "previewBlocksDelete":
       case "previewBlocksPaste":
       case "previewDropFiles":
         fireAndForget(this.manager.host.logger, preview.postToPage({
           ...identity,
           type: "previewBlocksResult",
-          op: value.type === "previewBlocksCopy" ? "copy" : value.type === "previewBlocksCut" ? "cut" : "paste",
+          op: value.type === "previewBlocksCopy" ? "copy" : value.type === "previewBlocksCut" ? "cut" : value.type === "previewBlocksDelete" ? "delete" : "paste",
           ok: false,
           reason: STALE_REQUEST,
         }), "postToPage");
