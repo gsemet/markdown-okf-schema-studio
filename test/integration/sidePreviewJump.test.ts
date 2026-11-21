@@ -95,17 +95,25 @@ export async function run(): Promise<void> {
     await vscode.window.showTextDocument(vscode.Uri.file(file("doc.md")), { viewColumn: vscode.ViewColumn.One });
     await vscode.commands.executeCommand(COMMAND_ID);
     await waitFor("the side preview of doc.md", () => previewOf(file("doc.md")), 30_000);
-    await openDiff(virtualOf(file("doc.md")), vscode.Uri.file(file("doc.md")));
+    // The diff opens once, with the selection, from this clean state: re-running `vscode.diff` on an open diff
+    // makes VS Code reset the cursor of a side (a second record), which is not what a user's click does.
     const before = recording.records.length;
     const position = new vscode.Position(24, 0);
-    await vscode.commands.executeCommand("vscode.diff", virtualOf(file("doc.md")), vscode.Uri.file(file("doc.md")), "Diff under test",
-      { selection: new vscode.Range(position, position) });
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const diffRecords = recording.records.slice(before);
-    console.log(`J5 diff selection records: ${JSON.stringify(diffRecords.map((entry) => ({ kind: entry.kind, target: entry.target, jump: entry.jump })))}`);
-    if (diffRecords.some((entry) => entry.jump !== undefined)) {
-      await waitFor("the marker on line 25 of the real file", () => markedLine()?.line === 25);
+    await openDiff(virtualOf(file("doc.md")), vscode.Uri.file(file("doc.md")), { selection: new vscode.Range(position, position) });
+    // Wait until the recorder is quiet (no new record for 500 ms), then read what it holds.
+    let seenCount = -1;
+    while (seenCount !== recording.records.length) {
+      seenCount = recording.records.length;
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
+    const diffRecords = recording.records.slice(before);
+    console.log(`J5 diff selection records: ${JSON.stringify(diffRecords.map((entry) => ({ uri: entry.uri, firstLine: entry.firstLine, kind: entry.kind, target: entry.target, jump: entry.jump })))}`);
+    const realUri = vscode.Uri.file(file("doc.md")).toString();
+    const realJumps = diffRecords.filter((entry) => entry.jump?.uri === realUri);
+    assert.ok(realJumps.length >= 1, "a jump on a side of the diff is recorded on the real file");
+    const lastLine = realJumps[realJumps.length - 1]!.jump!.line;
+    await waitFor("the marker on the line of the last jump on the real file", () => markedLine()?.line === lastLine
+      && markedLine()?.documentId === realUri);
 
     // J7: the text editor of a file the side preview does not show stays; the preview switches to it and marks the line.
     await closeAllEditors();

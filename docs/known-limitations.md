@@ -83,8 +83,9 @@ measured on VS Code 1.147.0 on Windows:
 - A Studio tab that is pinned or is a preview tab does not move to a line when a search result or
   Quick Open `file.md:40` targets it: the line and the marker are lost, the Studio tab stays where it is.
 - The side preview marks the line of every move VS Code reports as a command with one selection, not
-  only a search result or a link: Go to Symbol, Find next, Go Back and a cursor moved by another
-  extension (VSCodeVim `j` and `k`) can mark it too, because VS Code does not tell them apart.
+  only a search result or a link: Go to Symbol and Find next can mark it too if VS Code reports
+  them as a command (not verified: the real-window trial recorded no selection change for Go Back or
+  an API selection).
 - Jumping to the very same line within one second of a line Studio itself opens (**Open as Text**, a
   link followed in the side preview) is read as Studio's own selection and marks nothing.
 - A jump on a diff side marks the line of the real file by line number: a diff that adds or removes

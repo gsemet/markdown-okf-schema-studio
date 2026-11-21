@@ -42,7 +42,8 @@ When the reader moves the cursor with the keyboard or the mouse, or the editor r
 | --- | --- |
 | a click, Page Down, Ctrl+End, typing, undo | no marker |
 | a selection change with no kind | no marker |
-| a move that carries Command with one selection (Go to Symbol, F3, Go Back, an API move) | it marks, as a search click does (stated limit) |
+| Go Back, a selection set through the API (J1 recorded no selection change for either) | no marker |
+| a move that carries Command with one selection (Go to Symbol, F3: not driven by J1, not verified) | it marks, as a search click does (stated limit) |
 
 ### Verification notes
 
