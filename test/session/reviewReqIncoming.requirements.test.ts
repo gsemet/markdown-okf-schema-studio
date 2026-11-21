@@ -96,6 +96,7 @@ test("a tracked file posts the 1-based ranges of the shown lines that differ fro
     type: "previewIncomingChanges",
     enabled: true,
     ranges: [{ start: 2, end: 2 }, { start: 4, end: 4 }],
+    removed: [],
     documentId: "file:///w/a.md",
     revision: 7,
     requestId: 3,
@@ -336,4 +337,36 @@ test("CR147: the page message switches the diff on the session", async (t) => {
   handlers.get("previewSideBySideChanged")!({ on: false }, f.preview);
   assert.equal(f.preview.incoming.sideBySide, false);
   assert.equal(f.preview.incoming.baseline, undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221
+test("CR463: lines removed since HEAD with nothing in their place are posted as removed hunks with their lines at HEAD", async (t) => {
+  const f = fixture(t);
+  f.preview.stage.sourceText = "one\nfour\n";
+  f.controller.schedule(f.preview, 0);
+  t.mock.timers.tick(1);
+  await flush();
+  assert.deepEqual(incoming(f)[0]!.ranges, []);
+  assert.deepEqual(incoming(f)[0]!.removed, [{ baseStart: 2, baseEnd: 3, start: 2, end: 1 }]);
+  // The removal alone is a mark showing: it is taken back (an empty list) when the text equals HEAD again.
+  f.preview.stage.sourceText = HEAD;
+  f.controller.schedule(f.preview, 0);
+  t.mock.timers.tick(1);
+  await flush();
+  assert.deepEqual(incoming(f)[1]!.removed, []);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+test("CR463: a click asks for the HEAD rendering once, without the Side-by-side button", async (t) => {
+  const f = sideBySideFixture(t);
+  await f.run();
+  assert.deepEqual(f.baselines(), [], "nothing is rendered until a click asks");
+  f.controller.requestBaseline(f.preview);
+  t.mock.timers.tick(1);
+  await flush();
+  assert.equal(f.baselines().length, 1);
+  assert.deepEqual(f.renders, [HEAD]);
+  // One request, one answer: the next refresh posts no baseline again.
+  await f.run();
+  assert.equal(f.baselines().length, 1);
 });

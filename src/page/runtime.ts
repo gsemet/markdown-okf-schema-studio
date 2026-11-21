@@ -277,7 +277,8 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   });
   applyCodeBlockSettings(document.documentElement, context);
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
-  const incomingChanges = installIncomingChanges(document);
+  // A click on a bar or a removed-lines marker shows the side-by-side card of that block only (CR 463).
+  const incomingChanges = installIncomingChanges(document, (target) => sideBySide.toggleSingle(target));
   // Light motion (CR 046): soft appearance after a user action, the theme colour transition, the
   // fade of a block an editor gives back and the glow of blocks an outside change or an undo updated.
   const motion = installMotion(document, window);

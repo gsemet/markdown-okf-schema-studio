@@ -272,6 +272,9 @@ export interface PreviewSideBySideChangedMessage extends PageMessageBase<"previe
   on: boolean;
 }
 
+/** A click on a change bar or removed-lines marker asks for the HEAD rendering, once (CR 463). */
+export interface PreviewBaselineRequestedMessage extends PageMessageBase<"previewBaselineRequested"> {}
+
 /** The palette mode select of the edition palette (workspace state). */
 export interface PreviewPaletteModeChangedMessage extends PageMessageBase<"previewPaletteModeChanged"> {
   mode: "strict" | "gfm" | "myst" | "full";
@@ -460,6 +463,7 @@ export type PageToHostMessage =
   | PreviewHistoryGoMessage
   | PreviewViewPreferenceChangedMessage
   | PreviewSideBySideChangedMessage
+  | PreviewBaselineRequestedMessage
   | PreviewPaletteModeChangedMessage
   | PreviewLabelRenameMessage
   | PreviewThreadReplyMessage

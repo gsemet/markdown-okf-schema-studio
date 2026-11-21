@@ -27,6 +27,9 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-208
 - SwRS-MDOKFSTUDIO-REVIEW-214
 - SwRS-MDOKFSTUDIO-REVIEW-215
+- SwRS-MDOKFSTUDIO-REVIEW-220
+- SwRS-MDOKFSTUDIO-REVIEW-221
+- SwRS-MDOKFSTUDIO-REVIEW-222
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -77,6 +80,9 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-REVIEW-207 (refusal): a malformed range is ignored
    - Option SwRS-MDOKFSTUDIO-REVIEW-215 (nominal): a changed or added front matter field gets its own change bar
 3. Changed blocks carry a green bar
+   - Option SwRS-MDOKFSTUDIO-REVIEW-220 (nominal): the pointer over a bar shows the changed lines of its block in a tooltip
+   - Option SwRS-MDOKFSTUDIO-REVIEW-221 (nominal): removed lines with nothing in their place get a red marker between the blocks around them, with a Removed lines tooltip
+   - Option SwRS-MDOKFSTUDIO-REVIEW-222 (nominal): a click on a bar or marker shows the side-by-side diff of that block only, a second click or Escape closes it
    - SwRS-MDOKFSTUDIO-REVIEW-214: the reader presses the Diff button and the bars are hidden
 4. The change bars are hidden
 
@@ -96,4 +102,7 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-REVIEW-208](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-208.md): Malformed incoming-change ranges are ignored
   - [SwRS-MDOKFSTUDIO-REVIEW-214](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-214.md): The Diff button and the showIncomingChanges setting hide the change bars
   - [SwRS-MDOKFSTUDIO-REVIEW-215](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-215.md): Changed or added front matter fields get their own change bar
+  - [SwRS-MDOKFSTUDIO-REVIEW-220](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-220.md): A change bar shows the changed lines in a tooltip while the pointer is over it
+  - [SwRS-MDOKFSTUDIO-REVIEW-221](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-221.md): A span of removed lines gets a red marker with a tooltip between the blocks around it
+  - [SwRS-MDOKFSTUDIO-REVIEW-222](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-222.md): A click on a change bar or removed-lines marker opens the side-by-side diff of that block only
 <!-- okf:links:end -->

@@ -204,6 +204,9 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content .okf-comme
 
 `;
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-220
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-221
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-222
 /** Incoming-change marks and the side-by-side diff cards. */
 const COMMENT_INCOMING_CHANGE_CSS = `/* Incoming-change mark: a green bar for each block changed since the last commit. All bars sit in
    one column at the inline start of the page, whatever the indentation of the block, with square
@@ -229,16 +232,87 @@ const COMMENT_INCOMING_CHANGE_CSS = `/* Incoming-change mark: a green bar for ea
   background: var(--studio-editorGutter-addedBackground, #2ea043);
 }
 
+/* Removed-lines marker (CR 463): a red triangle in the same column, between the blocks around the lines
+   removed since the last commit, in the removed colour of the side-by-side diff. The span itself is
+   transparent (a clip would cut its tooltip), the triangle is its ::before. */
+[data-sphinx-preview-change-layer] > span[data-removed] {
+  width: 8px;
+  background: transparent;
+}
+
+[data-sphinx-preview-change-layer] > span[data-removed]::before {
+  position: absolute;
+  inset: 0;
+  background: var(--studio-errorForeground, #f14c4c);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  content: "";
+}
+
+/* Tooltip of a bar or marker (the page's tooltip bubble look, shared rules in pageChromeStyles): shown
+   only while the pointer is over the bar itself, just above its top so it never covers the block's
+   first line (a removed-lines marker has its own place, below). It goes away with the layer (Diff off) and edit mode never shows it. A click on the bar
+   opens the diff card of its block. */
+[data-sphinx-preview-change-layer] > span[data-tooltip] {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+[data-sphinx-preview-change-layer] > span[data-tooltip]::after {
+  position: absolute;
+  inset-block-end: calc(100% + 4px);
+  inset-inline-start: 0;
+  z-index: 1300;
+  width: max-content;
+  padding: 5px 8px;
+  border: 1px solid var(--studio-editorHoverWidget-border, var(--studio-widget-border, currentColor));
+  border-radius: 4px;
+  background: var(--studio-editorHoverWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-editorHoverWidget-foreground, var(--studio-editor-foreground, CanvasText));
+  content: attr(data-tooltip);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The marker sits in the gap between two blocks: its bubble goes beside it, centred on the gap, so that
+   it covers the text of neither the block above nor the block below. */
+[data-sphinx-preview-change-layer] > span[data-removed]::after {
+  inset-block-start: 50%;
+  inset-block-end: auto;
+  inset-inline-start: calc(100% + 6px);
+  margin-block-start: -13px;
+}
+
+[data-sphinx-preview-change-layer] > span[data-tooltip]:hover::after {
+  visibility: visible;
+  opacity: 1;
+  animation: sphinx-preview-tooltip-in var(--sphinx-preview-motion-fast, 120ms) var(--sphinx-preview-motion-ease, ease);
+}
+
+html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-change-layer] > span {
+  pointer-events: none;
+}
+
+html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-change-layer] > span::after {
+  display: none;
+}
+
 /* Side-by-side diff of changed blocks (CR 147). The Side-by-side button turns each block changed since
    the last commit into a card: the block as it was on the left, as it is on the right, the removed and
    added words marked. The page script puts the cards in front of the blocks and hides those; the
    attribute on <html> switches both off at once, and edit mode never shows them. */
-html[data-sphinx-preview-sbs="off"] [data-okf-sbs-card],
+html[data-sphinx-preview-sbs="off"] [data-okf-sbs-card]:not([data-okf-sbs-single]),
 html[data-sphinx-preview-edit-mode="on"] [data-okf-sbs-card] {
   display: none;
 }
 
-html[data-sphinx-preview-sbs="on"]:not([data-sphinx-preview-edit-mode="on"]) [data-okf-sbs-replaced] {
+/* CR 463: a click on a change bar shows the card of that block only, whatever the Side-by-side button. */
+html[data-sphinx-preview-sbs="on"]:not([data-sphinx-preview-edit-mode="on"]) [data-okf-sbs-replaced],
+html:not([data-sphinx-preview-edit-mode="on"]) [data-okf-sbs-replaced="single"] {
   display: none;
 }
 

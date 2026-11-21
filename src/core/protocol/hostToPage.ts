@@ -219,6 +219,11 @@ export interface PreviewShowCommentsMessage extends RenderMessage<"previewShowCo
 export interface PreviewIncomingChangesMessage extends RenderMessage<"previewIncomingChanges"> {
   enabled: boolean;
   ranges: readonly SourceLineRange[];
+  /**
+   * The runs of lines removed since HEAD (CR 463), each a hunk with an empty current side: the page
+   * marks where they were and the tooltip names the base lines `baseStart..baseEnd`.
+   */
+  removed?: readonly BaselineHunk[];
 }
 
 /** One difference with HEAD: base lines `baseStart..baseEnd` became lines `start..end` (empty: end = start - 1). */

@@ -23,13 +23,15 @@ export interface IncomingState {
   enabledPosted: boolean;
   /** The side-by-side diff of changed blocks is on in the page (CR 147). */
   sideBySide: boolean;
+  /** The page asked for the HEAD rendering once (a click on a change bar, CR 463). */
+  baselineWanted: boolean;
   /** The HEAD text last rendered for the side-by-side diff and the page content made from it. */
   baseline?: { text: string; html: string | undefined };
 }
 
 /** A fresh {@link IncomingState}. */
 export function createIncomingState(): IncomingState {
-  return { marksShown: false, enabledPosted: true, sideBySide: false };
+  return { marksShown: false, enabledPosted: true, sideBySide: false, baselineWanted: false };
 }
 
 const INCOMING_CHANGES_DEBOUNCE_MS = 300;
@@ -56,16 +58,21 @@ export class IncomingChangesController {
     const enabled = preview.configuration.showIncomingChanges;
     const state = preview.incoming;
     let ranges: { start: number; end: number }[] = [];
+    let removed: ReturnType<typeof lineHunks> = [];
     const tracked = enabled && host.workspace.trusted && preview.documentUri.startsWith("file:");
     const marksOn = tracked && choices.viewPreferences.incomingChanges;
-    const sideBySide = tracked && state.sideBySide;
+    const sideBySide = tracked && (state.sideBySide || state.baselineWanted);
     let baseline: { html: string; hunks: ReturnType<typeof lineHunks> } | undefined;
     if (marksOn || sideBySide) {
       const documentId = host.documents.idOf(stage.activeDocumentPath);
       const base = await host.vcs.headText(documentId, stage.sourceText.length);
       if (preview.disposed || preview.stage !== stage) return;
       if (base) {
-        if (marksOn) ranges = incomingChangeRanges(base.text, stage.sourceText);
+        if (marksOn) {
+          ranges = incomingChangeRanges(base.text, stage.sourceText);
+          // CR 463: a run of removed lines with no line in its place gets a marker of its own.
+          removed = lineHunks(base.text, stage.sourceText).filter((hunk) => hunk.end < hunk.start);
+        }
         this.watchBaseline(preview, documentId, stage.activeDocumentPath);
         if (sideBySide) {
           const hunks = lineHunks(base.text, stage.sourceText);
@@ -74,7 +81,7 @@ export class IncomingChangesController {
           } else {
             if (state.baseline?.text !== base.text) {
               state.baseline = { text: base.text, html: await this.renderBaseline(this.manager, preview, stage, base.text) };
-              if (preview.disposed || preview.stage !== stage || !state.sideBySide) return;
+              if (preview.disposed || preview.stage !== stage || !(state.sideBySide || state.baselineWanted)) return;
             }
             // A baseline that cannot be rendered is posted empty: the page keeps the green bars.
             if (state.baseline.html !== undefined) baseline = { html: state.baseline.html, hunks };
@@ -82,11 +89,16 @@ export class IncomingChangesController {
         }
       }
     }
-    if (sideBySide) this.postBaseline(preview, stage, baseline ?? { html: "", hunks: [] });
-    if (ranges.length === 0 && !state.marksShown && enabled === state.enabledPosted) {
+    if (sideBySide) {
+      this.postBaseline(preview, stage, baseline ?? { html: "", hunks: [] });
+      // A click asks once: the card shows the baseline it got, and a later change closes the card.
+      state.baselineWanted = false;
+      if (!state.sideBySide) state.baseline = undefined;
+    }
+    if (ranges.length === 0 && removed.length === 0 && !state.marksShown && enabled === state.enabledPosted) {
       return;
     }
-    state.marksShown = ranges.length > 0;
+    state.marksShown = ranges.length > 0 || removed.length > 0;
     state.enabledPosted = enabled;
     preview.probe.incomingPosts += 1;
     preview.probe.lastIncomingChanges = { enabled, ranges };
@@ -94,6 +106,7 @@ export class IncomingChangesController {
       type: "previewIncomingChanges",
       enabled,
       ranges,
+      removed,
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
@@ -125,6 +138,13 @@ export class IncomingChangesController {
     state.sideBySide = on;
     if (!on) state.baseline = undefined;
     else this.schedule(preview, 0);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-222
+  /** The page asks for the HEAD rendering once, to show the diff card of one block or removal. */
+  public requestBaseline(preview: PreviewSession): void {
+    preview.incoming.baselineWanted = true;
+    this.schedule(preview, 0);
   }
 
   /** Posts again when the HEAD commit of the repository changes (commit, checkout, pull). */

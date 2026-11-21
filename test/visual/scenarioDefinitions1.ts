@@ -34,6 +34,8 @@ import { RADIO_PLAN_SCENARIOS } from "./radioPlanScenarios";
 import { REVIEW_MARKS_HIDDEN_SCENARIOS } from "./reviewMarksHiddenScenarios";
 import { GRID_CARD_EDITING_SCENARIOS } from "./gridCardEditingScenarios";
 import { LINK_EDIT_MODE_SCENARIOS } from "./linkEditModeScenarios";
+import { CHANGE_BAR_TOOLTIP_SCENARIOS } from "./changeBarTooltipScenarios";
+import { CHANGE_BAR_CARD_SCENARIOS } from "./changeBarCardScenarios";
 import { FRONTMATTER_CHANGE_BAR_SCENARIOS } from "./frontmatterChangeBarScenarios";
 import { FRONTMATTER_COLLAPSE_SCENARIOS } from "./frontmatterCollapseScenarios";
 import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
@@ -486,6 +488,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...REVIEW_MARKS_HIDDEN_SCENARIOS,
   ...LINE_MARKER_SCENARIOS,
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
+  ...CHANGE_BAR_TOOLTIP_SCENARIOS,
+  ...CHANGE_BAR_CARD_SCENARIOS,
   ...FRONTMATTER_COLLAPSE_SCENARIOS,
   ...TOOLBAR_FLOAT_SCENARIOS,
   ...EXPORT_HTML_SCENARIOS,

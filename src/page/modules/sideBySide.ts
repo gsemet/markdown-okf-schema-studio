@@ -1,8 +1,10 @@
 import { baseSpanOf, spanChanged, type LineHunk, type LineSpan } from "../../core/mapping/lineDiff";
 import { diffSegments, sharedWordRatio } from "../../core/mapping/wordDiff";
+import type { ChangeTarget } from "./incomingChanges";
 
 const CONTENT_ID = "sphinx-myst-preview-content";
 const CARD = "data-okf-sbs-card";
+const CARD_SINGLE = "data-okf-sbs-single";
 const REPLACED = "data-okf-sbs-replaced";
 /** Content the diff never touches: open editors, included files, cards already made. */
 const EXCLUDED = "[data-sphinx-preview-block-editor], [data-sphinx-preview-editing], [data-sphinx-preview-included], [data-okf-sbs-card]";
@@ -189,6 +191,7 @@ export function installSideBySide(
   onLayoutChange: () => void,
 ): {
   setBaseline(message: { html: string; hunks: readonly LineHunk[]; revision: number }): void;
+  toggleSingle(target: ChangeTarget): void;
   apply(): void;
   sync(): void;
   on(): boolean;
@@ -239,15 +242,25 @@ export function installSideBySide(
     return element;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-222
+  // The card of one block or removal, opened by a click on its bar or marker while the global diff is off.
+  let single: ChangeTarget | undefined;
+
   const render = (): void => {
     const main = document.getElementById(CONTENT_ID);
-    if (!on || !main || editing() || !baseline || baseline.revision !== context.revision
+    const only = on ? undefined : single;
+    if ((!on && !only) || !main || editing() || !baseline || baseline.revision !== context.revision
       || baseline.hunks.length === 0) return;
     const { hunks, content } = baseline;
+    // One removal: its hunk only. One block: the cards of the blocks that hold it or lie inside it.
+    const wanted = only && "removed" in only
+      ? hunks.filter((hunk) => hunk.end < hunk.start && hunk.start === only.removed.start && hunk.baseStart === only.removed.baseStart)
+      : hunks;
     const cardOf = new Map<Element, HTMLElement>();
     const changes: Change[] = [];
     const spans: LineSpan[] = [];
-    for (const block of blocksOf(main, (span) => spanChanged(span, hunks))) {
+    for (const block of blocksOf(main, (span) => spanChanged(span, wanted))) {
+      if (only && "element" in only && !block.contains(only.element) && !only.element.contains(block)) continue;
       const span = spanOf(block);
       if (!span) continue;
       spans.push(span);
@@ -285,7 +298,7 @@ export function installSideBySide(
       }
     }
     // Removed blocks come back where they were, unless a changed block holds the removal.
-    for (const hunk of hunks) {
+    for (const hunk of only && "element" in only ? [] : wanted) {
       if (hunk.end >= hunk.start || hunk.baseEnd < hunk.baseStart) continue;
       if (spans.some((span) => span.start < hunk.start && hunk.start <= span.end)) continue;
       const before = blocksOf(content, (other) => other.start <= hunk.baseEnd && other.end >= hunk.baseStart);
@@ -299,13 +312,37 @@ export function installSideBySide(
       else main.appendChild(element);
       cards.push(element);
     }
+    if (only) {
+      // The cards of a single block stay while the global diff is off: the bar shows them and a
+      // second click closes them.
+      cards.forEach((card) => card.setAttribute(CARD_SINGLE, ""));
+      replaced.forEach((block) => block.setAttribute(REPLACED, "single"));
+      if (cards.length === 0) single = undefined;
+    }
   };
 
-  const apply = (): void => {
+  const draw = (): void => {
     const hadCards = clear();
     render();
     if (hadCards || cards.length > 0) onLayoutChange();
   };
+
+  /** The page content changed or the mode switched: a single card was made for text that may be gone. */
+  const apply = (): void => {
+    if (!on) single = undefined;
+    draw();
+  };
+
+  const sameTarget = (first: ChangeTarget, second: ChangeTarget): boolean => "element" in first
+    ? "element" in second && first.element === second.element
+    : "removed" in second && first.removed.start === second.removed.start && first.removed.baseStart === second.removed.baseStart;
+
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-222
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !single) return;
+    single = undefined;
+    draw();
+  });
 
   const label = (): string => editing()
     ? "Side-by-side changes (not available in edit mode)"
@@ -350,7 +387,7 @@ export function installSideBySide(
   return {
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
     setBaseline(message) {
-      if (!on) {
+      if (!on && !single) {
         // A reloaded page starts with the diff off while the host still sends it: tell the host.
         post();
         return;
@@ -358,7 +395,29 @@ export function installSideBySide(
       const template = document.createElement("template");
       template.innerHTML = message.html;
       baseline = { revision: message.revision, hunks: message.hunks, content: template.content };
-      apply();
+      draw();
+      // Nothing differs any more (or the card cannot be made): the click leaves nothing open.
+      if (single && cards.length === 0) single = undefined;
+    },
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-222
+    toggleSingle(target) {
+      if (editing() || on) return;
+      // A bar whose card is not showing (cleared by a content change, or never answered) opens again.
+      if (single && cards.length > 0 && sameTarget(single, target)) {
+        single = undefined;
+        draw();
+        return;
+      }
+      // The baseline of an earlier card may be out of date (a commit): ask the host again.
+      baseline = undefined;
+      single = target;
+      draw();
+      vscode.postMessage({
+        type: "previewBaselineRequested",
+        documentId: context.documentId,
+        revision: context.revision,
+        requestId: context.requestId,
+      });
     },
     apply,
     sync,

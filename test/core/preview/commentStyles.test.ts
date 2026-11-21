@@ -11,9 +11,9 @@ import { COMMENT_CSS } from "../../../src/core/preview/styles/commentStyles";
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-143
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-028
 test("the comment stylesheet joined from its parts equals the former single constant", () => {
-  assert.equal(Buffer.byteLength(COMMENT_CSS, "utf8"), 21977);
+  assert.equal(Buffer.byteLength(COMMENT_CSS, "utf8"), 24826);
   assert.equal(
     createHash("sha256").update(COMMENT_CSS, "utf8").digest("hex"),
-    "138c5ec9b03a6eb3c4950ca77ea2a9a485a586edce4506c787fdac581f71eab6",
+    "762437166e207f8c5840df966f5b4fbd0eff178e2a5cfa70cb9801db8d87a91a",
   );
 });

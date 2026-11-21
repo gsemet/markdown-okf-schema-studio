@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Hovering a green change bar in the side preview now shows a tooltip with the changed source lines of its
+  block (for example "Changed lines 26–28 since last commit"). Lines removed since the last commit get a
+  red marker in the same column, with its own tooltip, and a click on a bar or a marker opens the
+  side-by-side diff of that single block in place (a second click or Escape closes it).
 - The line marker is now exact in tables, tabs and the front matter: it marks the table row of the
   line (the header row for the delimiter line), shows a hidden tab first (a nested one, or one in a
   closed dropdown, too) and marks the exact line inside it, and marks the property row of the front

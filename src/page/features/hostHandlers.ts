@@ -60,7 +60,7 @@ export function registerHostHandlers(rt: PageRuntime): void {
   });
   hostMessages.on("previewIncomingChanges", (message) => {
     parts.incomingChanges.setEnabled(message.enabled !== false);
-    parts.incomingChanges.setRanges(message.ranges);
+    parts.incomingChanges.setRanges(message.ranges, message.removed);
   });
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
   hostMessages.on("previewBaselineDiff", (message) => {
