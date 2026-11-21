@@ -7,7 +7,11 @@ title: A requested line reaches the page once it is ready and wins over the
 description: When a Studio session holds a requested line, the session SHALL
   post the previewRevealLine message to its page once the page is ready and only
   once, SHALL post it at once when the page is already ready, and the requested
-  line SHALL win over the reading place the tab restores for its document.
+  line SHALL win over the reading place the tab restores for its document. The
+  requested line SHALL belong to a document and an age, and the session SHALL
+  post it only to a visible page that shows that document, and only within 5
+  seconds, and the line SHALL take the anchor except in the if-off-screen mode
+  of the side preview that follows the editor.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -34,7 +38,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a Studio session holds a requested line, the session SHALL post the previewRevealLine message to its page once the page is ready and only once, SHALL post it at once when the page is already ready, and the requested line SHALL win over the reading place the tab restores for its document.
+When a Studio session holds a requested line, the session SHALL post the previewRevealLine message to its page once the page is ready and only once, SHALL post it at once when the page is already ready, and the requested line SHALL win over the reading place the tab restores for its document. The requested line SHALL belong to a document and an age, and the session SHALL post it only to a visible page that shows that document, and only within 5 seconds, and the line SHALL take the anchor except in the if-off-screen mode of the side preview that follows the editor.
 
 ### Scenario (nominal): Nominal case
 
@@ -50,6 +54,9 @@ When a Studio session holds a requested line, the session SHALL post the preview
 | a line below 1, not an integer or not a number | the message is refused by the router and nothing moves |
 | a pending line older than 5 seconds | it is dropped |
 | a pending line taken | it is taken once |
+| the page shows another document than the line's | the line waits for the page of its document, or is dropped by a switch to a third one |
+| the page is hidden | the line waits for the page to report ready again |
+| the if-off-screen mode | the line takes no anchor |
 
 ### Verification notes
 

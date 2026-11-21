@@ -94,6 +94,17 @@ const HIGH_CONTRAST_ASSERTIONS: ContentAssertion[] = [
   },
 ];
 
+/** A jump into a line already on screen: the marker is drawn and the page has not scrolled. */
+const JUMP_ON_SCREEN_ASSERTIONS: ContentAssertion[] = [
+  { message: "one marker is drawn", selector: MARKER, count: 1 },
+  {
+    message: "the page stayed at the top: the line was on screen",
+    selector: MARKER,
+    expr: "window.scrollY === 0",
+  },
+  IN_VIEWPORT,
+];
+
 export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
   ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
@@ -198,5 +209,18 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     contentAssertions: HIGH_CONTRAST_ASSERTIONS,
     description: "High contrast (forced colours), 900 px pane: the marker keeps a visible arrow and band lines in the "
       + "system highlight colour, with no fill.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+    id: "lifecycle-sync/v13-line-marker-jump-if-off-screen-light-900",
+    fixture: FIXTURE,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    // A jump into a line the side preview already shows, with scroll sync on: the editor leads, the page stays.
+    pageActions: [{ hostMessage: { type: "previewRevealLine", line: 5, scroll: "if-off-screen" } }],
+    contentAssertions: JUMP_ON_SCREEN_ASSERTIONS,
+    description: "Light theme, 900 px pane: a jump to a line that is already on screen, asked with the if-off-screen "
+      + "scroll, draws the arrow and the band on that line and leaves the page scrolled where it was.",
   },
 ];

@@ -161,6 +161,6 @@ test("a Studio tab opened by Open With takes the pending line of its document", 
   await captured.provider!.resolveCustomTextEditor(document, fake.vscode.window.createWebviewPanel("markdown-okf-schema-studio.editor", "Studio", 1));
   const session = [...studio.activation.manager.sessions()].find((entry) => entry.documentUri === document.uri.toString());
   assert.ok(session, "the session exists");
-  assert.equal(session.scroll.pendingRevealLine, 3);
+  assert.equal(session.scroll.pendingRevealLine?.line, 3, "the line is kept; the field is now an object with its document and age");
   assert.equal(studio.activation.lineRequests.takePending(document.uri.toString()), undefined, "consumed");
 });

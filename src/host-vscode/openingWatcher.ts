@@ -8,7 +8,7 @@
  * the tab opens, before Studio takes its place. VS Code shows the editor with its cursor at 1:1 and
  * applies the selection a few milliseconds later (trial T2): a jump (Quick Open `file:42`,
  * `vscode.open` with a selection, a search result) is the selection change of kind `Command` that
- * follows, while a plain reopening restores the stored view state with a change of no kind. The tabs
+ * follows (read by `editorJumps.ts`), while a plain reopening restores the stored view state with a change of no kind. The tabs
  * open when the watcher starts are recorded at once (synchronously): the tabs VS Code restores with
  * the window are never replaced. The settings are read only after the editor association migration
  * ran, since it writes them.
@@ -22,6 +22,7 @@ import { openingDecision, type OpenedTabKind } from "../core/navigation/openingP
 import type { Logger } from "../host-api/logger";
 import type { Settings } from "../host-api/settings";
 import { isEligibleUri } from "./diffRealFile";
+import type { EditorJumps } from "./editorJumps";
 import type { StudioClosedTabs, StudioLineRequests, StudioOpenedTextEditors } from "./openInStudio";
 import { putStudioInPlace } from "./studioPlacement";
 
@@ -37,6 +38,8 @@ export interface OpeningWatcherDeps {
   readonly openedByStudio: StudioOpenedTextEditors;
   readonly closedStudioTabs: StudioClosedTabs;
   readonly lineRequests: StudioLineRequests;
+  /** The jumps of the text editors. */
+  readonly editorJumps: Pick<EditorJumps, "onJump">;
   /** True while a side preview that follows the active editor is open. */
   readonly sidePreviewFollowsActiveEditor: () => boolean;
   /** Settles when the editor association migration is done: the settings are read after it. */
@@ -72,11 +75,9 @@ export function startOpeningWatcher(deps: OpeningWatcherDeps): vscode.Disposable
   // The selection changes of kind `Command` of the documents whose tab just opened, by document: a jump.
   const jumps = new Map<string, { line: number; at: number }>();
   const jumpWaiters = new Set<() => void>();
-  const watchJumps = vscode.window.onDidChangeTextEditorSelection((event) => {
-    if (event.kind !== vscode.TextEditorSelectionChangeKind.Command) return;
-    const first = event.selections[0];
-    if (!first) return;
-    jumps.set(event.textEditor.document.uri.toString(), { line: first.start.line + 1, at: Date.now() });
+  // The host's jump signal (`editorJumps.ts`) reads the selection changes: one definition of a jump.
+  const watchJumps = deps.editorJumps.onJump((jump) => {
+    jumps.set(jump.uri.toString(), { line: jump.line, at: jump.at });
     [...jumpWaiters].forEach((wake) => wake());
   });
 

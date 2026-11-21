@@ -61,6 +61,11 @@ export class Emitter<T> {
   public get size(): number {
     return this.listeners.size;
   }
+
+  /** As the real emitter: no listener stays. */
+  public dispose(): void {
+    this.listeners.clear();
+  }
 }
 
 /** The URI path of a native path, as `vscode.Uri` writes it: forward slashes, a leading slash before a drive letter. */

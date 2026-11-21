@@ -34,7 +34,7 @@ import { createWorkerRenderer } from "../node-services/renderWorker";
 import { nodeSchemaFiles } from "../node-services/schemaFiles";
 import { lastKeystrokeAt } from "./keystrokes";
 import { createVscodeDocumentStore, type VscodeDocumentStore } from "./documents";
-import { StudioLineRequests, StudioOpenedTextEditors } from "./openInStudio";
+import { StudioLineRequests, StudioOpenedTextEditors, StudioSelections } from "./openInStudio";
 import { putStudioInPlace } from "./studioPlacement";
 
 /** The VS Code host's ports, with the VS Code-only parts of its document store and its assets. */
@@ -280,11 +280,17 @@ function createVscodeWatcher(): Watcher {
 /** The only schemes handed to the operating system. */
 const EXTERNAL_URI_SCHEMES: ReadonlySet<string> = new Set(["http", "https", "mailto"]);
 
-function createVscodeNavigation(openedByStudio: StudioOpenedTextEditors, lineRequests: StudioLineRequests): Navigation {
+function createVscodeNavigation(
+  openedByStudio: StudioOpenedTextEditors,
+  lineRequests: StudioLineRequests,
+  selections: StudioSelections,
+): Navigation {
   return {
     async showDocument(documentId, selection) {
       const targetUri = vscode.Uri.parse(documentId);
       openedByStudio.record(targetUri.toString());
+      // The selection is Studio's own: the session marks the line itself (4.5), the jump signal must not mark it twice.
+      if (selection) selections.expect(targetUri.toString(), selection.start.line, "marked-by-session");
       const existingGroup = vscode.window.tabGroups.all.find((group) => group.tabs.some((tab) =>
         tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === targetUri.fsPath));
       await vscode.commands.executeCommand("vscode.open", targetUri, {
@@ -392,6 +398,7 @@ function createVscodeLogger(): Logger {
 export function createVscodeHost(
   openedByStudio = new StudioOpenedTextEditors(),
   lineRequests = new StudioLineRequests(),
+  selections = new StudioSelections(),
 ): VscodeHost {
   const documents = createVscodeDocumentStore();
   const logger = createVscodeLogger();
@@ -421,7 +428,7 @@ export function createVscodeHost(
     logger,
     watcher: createVscodeWatcher(),
     processes: createNodeProcessRunner(),
-    navigation: createVscodeNavigation(openedByStudio, lineRequests),
+    navigation: createVscodeNavigation(openedByStudio, lineRequests, selections),
     editors: createVscodeEditors(documents),
     theme: createVscodeTheme(),
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-004

@@ -35,6 +35,29 @@ at a line opens Studio at that line, and an arrow in the margin marks it. The ar
 your next click, keystroke or scroll. A file that is already shown in Studio is revealed at the
 line, in the group where it is, instead of opening a second tab.
 
+### With the side preview open
+
+When the side preview is open next to a text editor, a jump keeps the text editor (see below), takes
+it to the line, and the side preview shows the same arrow on that line. It switches to the file first
+when the jump goes to another Markdown file. The arrow stays while you scroll or move the cursor, and
+goes when you type in that file or when the preview switches to another file. Moving the cursor with
+the arrow keys or a click never draws it.
+
+With **Scroll preview with editor** on, the editor leads: the preview scrolls only when the line is
+not already on screen. With it off, the preview scrolls the line to the reading line. A link or
+Back and Next followed in the side preview mark their target line the same way. A Studio tab beside
+the text editor marks nothing on a jump.
+
+Which moves count as a jump depends on the kind VS Code gives them. Expected from the design, to be
+confirmed by J1 (the real-window trial that records the kinds):
+
+| Move | Marks the side preview |
+| --- | --- |
+| Search result, Quick Open `file.md:40`, Go to Line, Problems, a link | yes |
+| Go to Symbol, Find next (F3), Go to next problem (F8), Go Back | yes, if VS Code reports them as a command |
+| Arrow keys, a click, Page Down, Ctrl+End, typing, undo | no |
+| Ctrl+A, Ctrl+D, Format Document | no |
+
 Two settings under **Opening Files** (see [Settings](settings.md)) decide what opens in Studio:
 
 - `open.searchResultsInStudio` (default on): a search result or a jump to a line opens Studio.

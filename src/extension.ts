@@ -23,6 +23,7 @@ export {
   listDocumentTargetsForTests,
   previewGroupFocusMovesForTests,
   previewGroupUnlocksSettledForTests,
+  recordSelectionChangesForTests,
   resetPreviewThemeModeForTests,
   sendPreviewMessageForTests,
   servicesStartedForTests,

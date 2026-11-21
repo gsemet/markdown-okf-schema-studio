@@ -297,6 +297,12 @@ export class LinkController {
       if (navigatesInStudio(host, preview, navigation.path)) {
         await host.navigation.showDocumentInStudio(targetId, selection === undefined ? undefined : selection.start.line + 1);
       } else {
+        // @implements_req SwRS-MDOKFSTUDIO-LIFE-191
+        // The side preview that follows the editor marks the target line itself; the host records the
+        // selection as Studio's own, so the jump signal does not mark it a second time.
+        if (preview.followsActiveEditor && selection !== undefined) {
+          manager.scroll.requestJumpMarker(preview, targetId, selection.start.line + 1);
+        }
         await host.navigation.showDocument(targetId, selection);
       }
     } catch (error) {

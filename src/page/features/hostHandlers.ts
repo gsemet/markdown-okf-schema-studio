@@ -108,7 +108,10 @@ export function registerHostHandlers(rt: PageRuntime): void {
     rt.frontmatter.receiveFrontmatterResult(message);
   });
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-178
-  hostMessages.on("previewRevealLine", (message) => rt.lineMarker.reveal(message.line));
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-188
+  hostMessages.on("previewRevealLine", (message) => rt.lineMarker.reveal(message.line, message.scroll ?? "reading-line"));
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-189
+  hostMessages.on("previewLineMarkerClear", () => rt.lineMarker.clear());
   hostMessages.on("sourceScroll", (message) => {
     rt.scroll.followSourceScroll(message);
   });

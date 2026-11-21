@@ -19,6 +19,7 @@ export const {
   PANEL_VIEW_TYPE,
   previewGroupFocusMovesForTests,
   previewGroupUnlocksSettledForTests,
+  recordSelectionChangesForTests,
   REFRESH_COMMAND_ID,
   resetPreviewThemeModeForTests,
   resetRenderHooksForTests,

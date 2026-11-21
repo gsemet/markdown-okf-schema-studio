@@ -48,6 +48,7 @@ import { run as runDropFiles } from "./dropFiles.test";
 import { run as runWindowSwitchKeys } from "./windowSwitchKeys.test";
 import { run as runRealInput } from "./realInput/run";
 import { run as runDiffPreview } from "./diffPreview.test";
+import { run as runSidePreviewJump } from "./sidePreviewJump.test";
 import { run as runLifecycle } from "./lifecycle.test";
 import { run as runMystDiagnostics } from "./mystDiagnostics.test";
 import { run as runOpenAtLine } from "./openAtLine.test";
@@ -325,6 +326,7 @@ async function runTrustedSuite(): Promise<void> {
     ["dirty-snapshots", runDirtySnapshots],
     ["source-mapping", runSourceMapping],
     ["diff-preview", runDiffPreview],
+    ["side-preview-jump", runSidePreviewJump],
     ["lifecycle", runLifecycle],
     ["myst-diagnostics", runMystDiagnostics],
     ["serializer", runSerializer],
