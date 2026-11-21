@@ -519,6 +519,30 @@ test("CR-444: a blank run in a block edit or a paste needs two lines and the ins
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("CR-448: the item line of a blank run inside a list is a source line above the run", () => {
+  const base = { documentId: "doc", revision: 1, requestId: 1 };
+  const withItem = (itemLine: unknown) => ({ line: 4, endLine: 6, itemLine });
+  for (const type of ["previewEditOpen", "previewEditSave", "previewEditCancel"]) {
+    const edit = {
+      ...base, type, editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: withItem(1),
+      originalText: "", editedText: "x",
+    };
+    assert.equal(isRegisteredPreviewMessage(edit), true, type);
+    assert.equal(isRegisteredPreviewMessage({ ...edit, replaceBlankRun: withItem(3) }), true, `${type} just above`);
+    for (const itemLine of [4, 5, 0, -1, 1.5, "1", null, Number.NaN]) {
+      assert.equal(isRegisteredPreviewMessage({ ...edit, replaceBlankRun: withItem(itemLine) }), false, `${type} ${String(itemLine)}`);
+    }
+  }
+  const paste = { ...base, type: "previewBlocksPaste", insertAfterLine: 3, replaceBlankRun: withItem(2) };
+  assert.equal(isRegisteredPreviewMessage(paste), true);
+  assert.equal(isRegisteredPreviewMessage({ ...paste, replaceBlankRun: withItem(4) }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...paste, replaceBlankRun: withItem(2.5) }), false);
+  const frontmatter = { ...base, type: "previewFrontmatterSave", editId: "e1", fieldName: "status", fieldValue: "ready" };
+  assert.equal(isRegisteredPreviewMessage(frontmatter), true);
+  assert.equal(isRegisteredPreviewMessage({ ...frontmatter, replaceBlankRun: withItem(1) }), false, "a type that takes no run");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
 test("CR-444: previewBlankRunDelete validates two or more lines and the optional pin", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1, type: "previewBlankRunDelete" };

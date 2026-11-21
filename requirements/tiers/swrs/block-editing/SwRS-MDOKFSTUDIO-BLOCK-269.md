@@ -7,7 +7,7 @@ description: When the writer deletes a blank-lines block with Delete, Backspace
   or its Delete block button, the extension SHALL remove the extra blank lines
   of the run and keep one separator in one text edit and one undo step, keep the
   line endings, refuse a stale run next to the block, and select the block that
-  followed the run.
+  followed the run, or the list that held a run inside a list.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -28,11 +28,13 @@ implemented_in_files:
 - src/page/features/blockSelectionView.ts
 - src/session/features/sourceEdits.ts
 tested_in_files:
+- test/core/mapping/blankRunInList.test.ts
 - test/core/mapping/blockRange.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/integration/blankLines.test.ts
 - test/page/runtimeBlankLines.test.ts
 - test/session/blankRunHost.test.ts
+- test/session/blankRunInListHost.test.ts
 - test/visual/blankLinesBlockScenarios.ts
 - test/visual/capture_blank_lines_block.py
 default_owner_email: gaetan@xeberon.net
@@ -42,13 +44,19 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer deletes a blank-lines block with Delete, Backspace or its Delete block button, the extension SHALL remove the extra blank lines of the run and keep one separator in one text edit and one undo step, keep the line endings, refuse a stale run next to the block, and select the block that followed the run.
+When the writer deletes a blank-lines block with Delete, Backspace or its Delete block button, the extension SHALL remove the extra blank lines of the run and keep one separator in one text edit and one undo step, keep the line endings, refuse a stale run next to the block, and select the block that followed the run, or the list that held a run inside a list.
 
 ### Scenario: Removing a run
 
 - GIVEN a selected blank-lines block of three lines
 - WHEN the writer presses Delete or Backspace, or clicks its Delete block button
 - THEN the host keeps one blank line in one text edit and one undo step, answers previewBlocksResult with op delete-blank-lines, and the following block is selected (else the one above, else Start writing)
+
+### Scenario: Removing a run inside a list
+
+- GIVEN a run between two list items, or inside a list item, and its blank-lines block selected
+- WHEN the writer presses Delete or Backspace, or clicks its Delete block button
+- THEN line `line` of the run stays, nothing else changes, the list is still one list, and the selection goes to the list that held the run
 
 ### Scenario: Refusals
 
@@ -59,6 +67,7 @@ When the writer deletes a blank-lines block with Delete, Backspace or its Delete
 ### Verification notes
 
 - Method: test/session/blankRunHost.test.ts (LF, CR LF, end of body, stale, failed, held), test/core/protocol/pageToHost.test.ts (the message).
+- Method: the list cases of test/session/blankRunInListHost.test.ts and test/core/mapping/blankRunInList.test.ts (a removal between items or inside an item), test/page/runtimeBlankLines.test.ts (the selection goes to the list).
 - Criteria: one TextEdit through applyWrittenEdits; the viewport is pinned on the run.
 
 <!-- okf:links:start -->

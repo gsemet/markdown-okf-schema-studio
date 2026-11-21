@@ -7,6 +7,7 @@ import { WIDE } from "./scenarioAssertions";
 import type { ScenarioDefinition } from "./scenarioAssertions";
 
 const FIXTURE = "92-blank-lines-block";
+const LIST_FIXTURE = "93-blank-lines-in-lists";
 
 export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
   {
@@ -45,5 +46,52 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     blankLinesChecks: "reading" as const,
     description: "Light theme, 900 px pane, reading mode of the same file: the two paragraphs have no "
       + "blank-lines block between them (the `top` step).",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    id: "block-editing/v47-blank-lines-in-lists-light-900",
+    fixture: LIST_FIXTURE,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    blankLinesChecks: "list-edit" as const,
+    description: "Light theme, 900 px pane, edit mode: a run of blank lines between two list items and one "
+      + "between two paragraphs of an item each show one blank-lines block inside the item that holds it, as "
+      + "wide as the item's content, and the blank lines of the fence in the third item show none (the `bar` step).",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+    id: "block-editing/v48-blank-lines-in-lists-selected-dark-900",
+    fixture: LIST_FIXTURE,
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    blankLinesChecks: "list-selected" as const,
+    description: "Dark theme, 900 px pane, edit mode: the blank-lines block between two items, reached with the "
+      + "Down arrow, shows its Delete block button at its left edge, clear of the list item handles (the `selected` step).",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    id: "block-editing/v49-blank-lines-in-lists-reading-light-900",
+    fixture: LIST_FIXTURE,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    blankLinesChecks: "list-reading" as const,
+    description: "Light theme, 900 px pane, reading mode of the same file: the list shows no blank-lines block (the `top` step).",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+    id: "block-editing/v50-blank-lines-in-lists-typing-light-900",
+    fixture: LIST_FIXTURE,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    blankLinesChecks: "list-typing" as const,
+    description: "Light theme, 900 px pane, edit mode: the editor of the blank-lines block between two items opens "
+      + "inside the first item, and stays inside an item of the list after text is typed and the autosave ran (the `text` step).",
   },
 ];

@@ -118,6 +118,8 @@ export interface BlockEditFields {
 export interface BlankRunFields {
   line: number;
   endLine: number;
+  /** A run inside a list: the first line of the list item that holds it (the host indents to it). */
+  itemLine?: number;
 }
 
 /** The fields of a save that the validator refuses on an open or a cancel. */

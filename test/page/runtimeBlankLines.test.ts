@@ -385,3 +385,233 @@ test("a forged runs element placed among the blocks and the insertion bars is ig
   assert.equal(blanks.length, 1, "only the host's last element counts");
   assert.ok(insertPointAfterLine(harness, 1).insertedElements.includes(blanks[0]!));
 });
+
+// --- Runs inside lists (CR-448) -------------------------------------------------------------------
+
+interface Shape { tag: string; line: number; end: number; children?: Shape[] }
+
+/** A top-level list of lines 10-30: item A (10-14), item B (15-30) with two paragraphs. */
+const LIST: Shape = {
+  tag: "ul", line: 10, end: 30, children: [
+    { tag: "li", line: 10, end: 14, children: [{ tag: "p", line: 10, end: 10 }] },
+    { tag: "li", line: 15, end: 30, children: [{ tag: "p", line: 15, end: 15 }, { tag: "p", line: 28, end: 28 }] },
+  ],
+};
+
+/** Adds `shape` to the content of the harness as mapped elements. */
+function addShape(harness: RuntimeHarness, shape: Shape, parent: RuntimeElement = harness.previewContent): RuntimeElement {
+  const element = new RuntimeElement({
+    "data-sphinx-preview-document": "file:///active.md",
+    "data-sphinx-source-end-line": String(shape.end),
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": String(shape.line),
+  }, harness.windowState, 100 + shape.line, 40, shape.tag);
+  parent.appendChild(element);
+  harness.mappings.push(element);
+  for (const child of shape.children ?? []) addShape(harness, child, element);
+  return element;
+}
+
+/** A harness in edit mode with `shape` in its content and `runs` as the host's list. */
+function listHarness(runs: string, shape: Shape = LIST): { harness: RuntimeHarness; list: RuntimeElement } {
+  const harness = createRuntimeHarness({ savedState: { editMode: true }, trackFocus: true });
+  const list = addShape(harness, shape);
+  setRuns(harness, runs);
+  harness.editModeButton.dispatch("click");
+  harness.editModeButton.dispatch("click");
+  return { harness, list };
+}
+
+const itemsOf = (list: RuntimeElement): RuntimeElement[] => list.childElements.filter((child) => child.tagName === "LI");
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("a run between two items is shown inside the item above, after its last child, not beside the list", () => {
+  const { harness, list } = listHarness("11-14");
+  const [blank] = blankBlocks(harness);
+  assert.ok(blank, "a blank-lines block");
+  const [itemA, itemB] = itemsOf(list);
+  assert.ok(itemA!.childElements[0]!.insertedElements.includes(blank!), "after the paragraph of the item above");
+  assert.equal(blank!.parentElement, itemA);
+  assert.ok(!list.insertedElements.includes(blank!), "never placed beside the list");
+  assert.equal(itemB!.insertedElements.length, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("a run between two paragraphs of an item is shown inside that item, after the paragraph above", () => {
+  const { harness, list } = listHarness("22-26");
+  const [blank] = blankBlocks(harness);
+  const itemB = itemsOf(list)[1]!;
+  assert.ok(itemB.childElements[0]!.insertedElements.includes(blank!), "after the first paragraph");
+  assert.equal(blank!.parentElement, itemB);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("a run between nested items is shown inside the nested item above", () => {
+  const nested: Shape = {
+    tag: "ul", line: 10, end: 30, children: [{
+      tag: "li", line: 10, end: 30, children: [
+        { tag: "p", line: 10, end: 10 },
+        {
+          tag: "ul", line: 11, end: 29, children: [
+            { tag: "li", line: 11, end: 15, children: [{ tag: "p", line: 11, end: 11 }] },
+            { tag: "li", line: 16, end: 29, children: [{ tag: "p", line: 16, end: 16 }] },
+          ],
+        },
+      ],
+    }],
+  };
+  const { harness, list } = listHarness("13-15", nested);
+  const [blank] = blankBlocks(harness);
+  assert.ok(blank, "a blank-lines block");
+  const inner = list.childElements[0]!.childElements[1]!.childElements[0]!;
+  assert.equal(blank!.parentElement, inner, "inside the nested item above");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("a run inside a fence or inside a list of an admonition shows no blank-lines block", () => {
+  const fence: Shape = {
+    tag: "ul", line: 10, end: 30, children: [
+      { tag: "li", line: 10, end: 30, children: [{ tag: "p", line: 10, end: 10 }, { tag: "pre", line: 12, end: 28 }] },
+    ],
+  };
+  assert.equal(blankBlocks(listHarness("20-23", fence).harness).length, 0, "a fence in an item");
+  const admonition: Shape = {
+    tag: "aside", line: 10, end: 30, children: [
+      { tag: "ul", line: 12, end: 28, children: [{ tag: "li", line: 12, end: 28, children: [{ tag: "p", line: 12, end: 12 }] }] },
+    ],
+  };
+  assert.equal(blankBlocks(listHarness("20-23", admonition).harness).length, 0, "a list in an admonition");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("a folded list shows no blank-lines block, and unfolding shows them", () => {
+  const { harness, list } = listHarness("11-14 22-26");
+  assert.equal(blankBlocks(harness).length, 2);
+  list.setAttribute("data-okf-folded", "");
+  harness.editModeButton.dispatch("click");
+  harness.editModeButton.dispatch("click");
+  assert.equal(blankBlocks(harness).length, 0);
+  list.removeAttribute("data-okf-folded");
+  harness.editModeButton.dispatch("click");
+  harness.editModeButton.dispatch("click");
+  assert.equal(blankBlocks(harness).length, 2);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("a content patch keeps the block of a run inside a list where it was", () => {
+  const { harness } = listHarness("11-14 22-26");
+  const [first, second] = blankBlocks(harness);
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(blankBlocks(harness), [first, second], "the same elements");
+  setRuns(harness, "22-26");
+  harness.dispatchMessage(patchMessage({ revision: 8, requestId: 12, next: { revision: 9, requestId: 13 } }));
+  assert.deepEqual(blankBlocks(harness), [second]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+test("a click on a blank-lines block inside a list sends the item line and opens no list item editor", () => {
+  const { harness } = listHarness("11-14 22-26");
+  const before = harness.messages.length;
+  blankAt(harness, 1).dispatch("click", plainClick());
+  const opened = sent(harness, "previewEditOpen", before);
+  assert.equal(opened.length, 1);
+  assert.deepEqual({ ...(opened[0]!.replaceBlankRun as object) }, { line: 22, endLine: 26, itemLine: 15 });
+  assert.equal(opened[0]!.insertAfterLine, 21);
+  const top = harnessWithRuns();
+  const mark = top.messages.length;
+  blankAt(top, 0).dispatch("click", plainClick());
+  assert.deepEqual({ ...(sent(top, "previewEditOpen", mark)[0]!.replaceBlankRun as object) }, { line: 3, endLine: 6 }, "no itemLine at the top level");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("an editor opened in a list item survives a patch that replaces the list, and Cancel keeps the item line", () => {
+  const { harness, list } = listHarness("11-14 22-26");
+  const blank = blankAt(harness, 0);
+  blank.dispatch("click", plainClick());
+  const openMessage = sent(harness, "previewEditOpen").at(-1)!;
+  harness.dispatchMessage({
+    type: "previewEditSource", documentId: "file:///active.md", revision: 7, requestId: 11,
+    editId: openMessage.editId, originalText: "",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA")!;
+  assert.ok(textarea, "the editor is open");
+  textarea.value = "Typed";
+  textarea.dispatch("input");
+  harness.flushTimers();
+  // The patch swaps the whole list: new elements for the same lines.
+  harness.previewContent.removeChild(list);
+  for (let index = harness.mappings.length - 1; index >= 0; index -= 1) {
+    if (list.contains(harness.mappings[index]!) || harness.mappings[index] === list) harness.mappings.splice(index, 1);
+  }
+  const fresh = addShape(harness, LIST);
+  setRuns(harness, "22-26");
+  harness.dispatchMessage(patchMessage());
+  assert.ok(blankBlocks(harness).includes(blank), "the element is kept");
+  assert.equal(blankBlocks(harness).length, 2, "the editing block and the block of the run that is left");
+  assert.equal(blank.parentElement, itemsOf(fresh)[0], "back in the item of the new list");
+  assert.ok(blank.insertedElements.includes(textarea.parentElement!), "with the editor frame after it");
+  const before = harness.messages.length;
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  const [cancel] = sent(harness, "previewEditCancel", before);
+  assert.ok(cancel, "Cancel posts previewEditCancel");
+  assert.deepEqual({ ...(cancel!.replaceBlankRun as object) }, { line: 11, endLine: 14, itemLine: 10 });
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+test("Arrow Down and Up visit the blank-lines blocks of a list in source order between the blocks", () => {
+  const { harness, list } = listHarness("11-14 22-26");
+  shiftClick(harness, harness.mappings[0]!);
+  const walk = (name: string, target: RuntimeElement): void => {
+    harness.dispatchDocument("keydown", key(name, { target }));
+  };
+  walk("ArrowDown", harness.mappings[0]!);
+  assert.deepEqual(selectedLines(harness), [10], "the list comes first");
+  walk("ArrowDown", list);
+  assert.equal(blankAt(harness, 0).getAttribute(SELECTED), "true");
+  walk("ArrowDown", blankAt(harness, 0));
+  assert.equal(blankAt(harness, 1).getAttribute(SELECTED), "true");
+  walk("ArrowDown", blankAt(harness, 1));
+  assert.deepEqual(selectedLines(harness), [50], "then the block after the list");
+  walk("ArrowUp", harness.mappings.find((block) => block.getAttribute("data-sphinx-source-line") === "50")!);
+  assert.equal(blankAt(harness, 1).getAttribute(SELECTED), "true");
+  walk("ArrowUp", blankAt(harness, 1));
+  assert.equal(blankAt(harness, 0).getAttribute(SELECTED), "true");
+  walk("ArrowUp", blankAt(harness, 0));
+  assert.deepEqual(selectedLines(harness), [10]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+test("Shift+Arrow from a blank-lines block of a list starts the selection on the list or the block after it", () => {
+  const { harness } = listHarness("11-14 22-26");
+  const blank = selectBlank(harness, 0);
+  harness.dispatchDocument("keydown", key("ArrowUp", { target: blank, shiftKey: true }));
+  assert.deepEqual(selectedLines(harness), [10]);
+  const again = selectBlank(harness, 1);
+  harness.dispatchDocument("keydown", key("ArrowDown", { target: again, shiftKey: true }));
+  assert.deepEqual(selectedLines(harness), [50]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("Ctrl+V on a blank-lines block of a list sends the item line with the run", () => {
+  const { harness } = listHarness("11-14 22-26");
+  const blank = selectBlank(harness, 1);
+  const before = harness.messages.length;
+  harness.dispatchDocument("keydown", key("v", { target: blank, ctrlKey: true }));
+  const [paste] = sent(harness, "previewBlocksPaste", before);
+  assert.ok(paste, "a paste request");
+  assert.deepEqual({ ...(paste!.replaceBlankRun as object) }, { line: 22, endLine: 26, itemLine: 15 });
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+test("Delete on a blank-lines block of a list posts the removal, then the list holds the selection", () => {
+  const { harness } = listHarness("11-14 22-26");
+  const blank = selectBlank(harness, 0);
+  const before = harness.messages.length;
+  harness.dispatchDocument("keydown", key("Delete", { target: blank }));
+  const [removal] = sent(harness, "previewBlankRunDelete", before);
+  assert.deepEqual([removal!.line, removal!.endLine], [11, 14]);
+  harness.dispatchMessage({ type: "previewBlocksResult", ...MOVE_IDENTIFIERS, op: "delete-blank-lines", ok: true });
+  setRuns(harness, "22-26");
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), [10], "the list that held the run");
+});

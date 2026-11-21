@@ -199,7 +199,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
-  /** Sends the delete of a blank run; the block that follows it (else the one above) gets the selection. */
+  /** Sends the delete of a blank run; the block that follows it (else the one above, or the list that held it) gets the selection. */
   function requestDeleteBlankLines(block: HTMLElement): boolean {
     const run = rt.blankLines.runOf(block);
     if (!run || !state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return false;
@@ -208,7 +208,9 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     postBlocksMessage("previewBlankRunDelete", { line: run.line, endLine: run.endLine }, block);
     state.pendingBlockSelection = {
       anchor: undefined,
-      targetIndex: blocks.filter((entry) => rt.blocks.blockRange(entry).line < run.line).length,
+      // Inside a list the list that held the run is selected; elsewhere the block that follows it.
+      targetIndex: blocks.filter((entry) => rt.blocks.blockRange(entry).line < run.line).length
+        - (run.itemLine !== undefined ? 1 : 0),
       count: blocks.length,
       quiet: true,
       afterDelete: true,
@@ -315,9 +317,14 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     return list.sort((a, b) => a.line - b.line);
   }
 
-  /** The stop next to `from` (a blank-lines block, or the free end of the block selection). */
-  function neighbourStop(blocks: HTMLElement[], delta: number, from: HTMLElement | undefined): Stop | undefined {
-    const all = stops(blocks);
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-267
+  /**
+   * The stop next to `from` (a blank-lines block, or the free end of the block selection), in the
+   * order of the first lines: a list is followed by the blank-lines blocks inside it, then by the
+   * block after it. `skipBlank` passes over the blank-lines blocks.
+   */
+  function neighbourStop(blocks: HTMLElement[], delta: number, from: HTMLElement | undefined, skipBlank = false): Stop | undefined {
+    const all = stops(blocks).filter((stop) => !skipBlank || !stop.blank);
     let current: { line: number; endLine: number } | undefined;
     if (from) current = rt.blankLines.runOf(from);
     else if (blockSelection.isActive()) {
@@ -325,8 +332,8 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       current = blocks[free] ? rt.blocks.blockRange(blocks[free]) : undefined;
     }
     if (!current) return undefined;
-    const { line, endLine } = current;
-    return delta > 0 ? all.find((stop) => stop.line > endLine) : [...all].reverse().find((stop) => stop.line < line);
+    const { line } = current;
+    return delta > 0 ? all.find((stop) => stop.line > line) : [...all].reverse().find((stop) => stop.line < line);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
@@ -488,8 +495,8 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
           const blocks = syncSelectionModel();
           event.preventDefault?.();
           event.stopPropagation?.();
-          const next = neighbourStop(blocks, event.key === "ArrowUp" ? -1 : 1, blank);
-          if (!next || next.blank) return;
+          const next = neighbourStop(blocks, event.key === "ArrowUp" ? -1 : 1, blank, true);
+          if (!next) return;
           rt.blankLines.select(undefined);
           blockSelection.extendBy(0, next.index);
           renderBlockSelection(blocks);
@@ -596,7 +603,11 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
           // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
           postBlocksMessage("previewBlocksPaste", {
             insertAfterLine: blankRun.line - 1,
-            replaceBlankRun: { line: blankRun.line, endLine: blankRun.endLine },
+            replaceBlankRun: {
+              line: blankRun.line,
+              endLine: blankRun.endLine,
+              ...(blankRun.itemLine !== undefined ? { itemLine: blankRun.itemLine } : {}),
+            },
           }, blank);
           return;
         }

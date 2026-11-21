@@ -7,6 +7,8 @@
   breadcrumb and the previous and next links. The search finds a requirement from its full ID, its
   short ID such as `BLOCK-014` or a bare number such as `14`, in any case and with or without the
   leading zeros, and lists the exact ID matches first.
+- In edit mode, blank lines between two list items or inside a list item now show as a
+  blank-lines block you can select, type in or remove; text typed there stays in the item.
 - Copy, cut and paste on a list followed by blank lines no longer fail with "The preview is out of
   date": the list is copied without the blank lines, a cut leaves one blank line between the blocks
   around it, and a paste after the list gets one blank line on each side.

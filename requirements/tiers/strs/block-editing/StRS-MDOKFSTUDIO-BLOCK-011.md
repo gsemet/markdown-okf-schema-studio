@@ -103,7 +103,7 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-BLOCK-253](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-253.md): Start writing is the keyboard selection of an empty document
   - [SwRS-MDOKFSTUDIO-BLOCK-264](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-264.md): An emptied top-level block or list item is deleted with its separator when the writer commits it
   - [SwRS-MDOKFSTUDIO-BLOCK-265](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-265.md): Delete block deletes the blocks of a selection with one separator in one undo step
-  - [SwRS-MDOKFSTUDIO-BLOCK-266](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-266.md): Edit mode shows each blank run between top-level blocks as a blank-lines block
+  - [SwRS-MDOKFSTUDIO-BLOCK-266](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-266.md): Edit mode shows each blank run between top-level blocks, between list items or inside a list item as a blank-lines block
   - [SwRS-MDOKFSTUDIO-BLOCK-267](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-267.md): A blank-lines block takes the arrows, Enter and a click
   - [SwRS-MDOKFSTUDIO-BLOCK-268](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-268.md): Typing or pasting in a blank-lines block writes the block in place of the run
   - [SwRS-MDOKFSTUDIO-BLOCK-269](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-269.md): Removing a blank-lines block keeps one separator
