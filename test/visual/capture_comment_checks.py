@@ -1056,7 +1056,7 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
     failures.append(Failure(page_name, "Escape did not close the paragraph editor"))
     return
 
-  point = page.locator("main .sphinx-preview-insert-point:not(.sphinx-preview-insert-point--start) button").nth(3)
+  point = page.locator("main .sphinx-preview-insert-point:not(.sphinx-preview-insert-point--start) button:not(.sphinx-preview-delete)").nth(3)
   point.evaluate("element => element.scrollIntoView({ block: 'center' })")
   point.click(force=True)
   pick_and_check("insertion point editor")
