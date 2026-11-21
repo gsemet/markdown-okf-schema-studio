@@ -1,0 +1,209 @@
+/**
+ * The line marker: when the host asks (`previewRevealLine`: Studio opened at a searched line, or at
+ * a link's target line), the page unfolds what hides the line, scrolls it to the reading line
+ * silently, and draws one decorative overlay on it: an arrow in the left margin and a light band
+ * across the content column. The marker stays while the reader scrolls and is placed again after a
+ * layout change or a content patch; it goes on a pointer press, when an edit starts, or when
+ * another line is requested. See styles/lineMarkerStyles.ts for the look.
+ */
+
+import { MAPPINGS_SELECTOR, type LayoutEntry, type PageRuntime } from "./pageRuntime";
+
+/** The marker of a page. */
+export interface LineMarker {
+  /** Places the marker on a 1-based source line, unfolding what hides it and scrolling to it. */
+  reveal(line: number): void;
+  /** Removes the marker. */
+  clear(): void;
+  /** The line the marker is on, or undefined when there is none. */
+  currentLine(): number | undefined;
+}
+
+/** The measured box of a source line, in document coordinates. */
+interface LineBox {
+  top: number;
+  height: number;
+}
+
+const MARKER_CLASS = "sphinx-preview-line-marker";
+const ARROW_CLASS = "sphinx-preview-line-marker-arrow";
+const FALLBACK_LINE_HEIGHT = 22;
+
+/** The page-to-host messages that change the document's source or open an editor on it (the editor
+ * starts an edit, whatever opened it): posting one removes the marker. */
+const SOURCE_EDIT_TYPES: ReadonlySet<string> = new Set([
+  "previewEditSave", "previewFrontmatterSave", "previewCheckboxToggle", "previewLabelRename", "previewFindReplace",
+  "previewBlockMove", "previewBlocksCut", "previewBlocksPaste", "previewDropFiles", "previewPasteImage",
+  "previewPasteHtml", "previewEditOpen",
+]);
+
+/**
+ * The index, among the `spanCount` line spans of a code block whose source ends at `endLine`, of the
+ * span that shows source line `sourceLine`; counted back from the closing fence (the options, the
+ * language and the opening fence come first), so a backtick fence, a tilde fence and a `{code-block}`
+ * with options all map the same way. Undefined for a fence line or a line before the first span.
+ */
+export function codeSpanIndex(spanCount: number, endLine: number, sourceLine: number): number | undefined {
+  const index = spanCount - (endLine - sourceLine);
+  return sourceLine < endLine && index >= 0 && index < spanCount ? index : undefined;
+}
+
+/** True when `message` is a page-to-host message that edits the source (the marker's lifetime, 4.7). */
+export function postsASourceEdit(message: unknown): boolean {
+  const type = typeof message === "object" && message !== null ? (message as { type?: unknown }).type : undefined;
+  return typeof type === "string" && SOURCE_EDIT_TYPES.has(type);
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-178
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-179
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-180
+/** The line marker of a page. */
+export function installLineMarker(rt: PageRuntime): LineMarker {
+  const { document, window, context, state } = rt;
+  let line: number | undefined;
+  let overlay: HTMLElement | undefined;
+  let marked: Element | undefined;
+
+  const lineHeightOf = (element: Element): number => {
+    const parsed = Number.parseFloat(window.getComputedStyle?.(element)?.lineHeight ?? "");
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : FALLBACK_LINE_HEIGHT;
+  };
+
+  // The innermost mapped block holding the line, folded or not (the layout lists visible ones only).
+  function containingBlock(sourceLine: number): HTMLElement | undefined {
+    let best: HTMLElement | undefined;
+    let bestStart = 0;
+    for (const element of Array.from(document.querySelectorAll<HTMLElement>(MAPPINGS_SELECTOR))) {
+      if (element.getAttribute("data-sphinx-preview-document") !== context.documentId) continue;
+      const start = Number(element.getAttribute("data-sphinx-source-line"));
+      const parsedEnd = Number(element.getAttribute("data-sphinx-source-end-line"));
+      const end = Number.isSafeInteger(parsedEnd) && parsedEnd > start ? parsedEnd : start;
+      if (start <= sourceLine && sourceLine <= end && start > bestStart) {
+        best = element;
+        bestStart = start;
+      }
+    }
+    return best;
+  }
+
+  // Unfolds the heading section and the closed dropdowns around the block; true when one opened.
+  function unfold(block: Element): boolean {
+    let changed = rt.parts.headingFold.reveal(block);
+    let details = block.closest("details");
+    while (details) {
+      if (!details.open) {
+        details.open = true;
+        changed = true;
+      }
+      details = details.parentElement?.closest("details") ?? null;
+    }
+    return changed;
+  }
+
+  // The exact line's top and height, else the top of the enclosing block and its first line height.
+  function lineBox(entry: LayoutEntry, sourceLine: number): LineBox {
+    const height = lineHeightOf(entry.element);
+    const fallback = { top: entry.top, height: Math.min(height, entry.height || height) };
+    if (sourceLine <= entry.sourceLine || sourceLine > entry.endLine) return fallback;
+    // A code block: the span of the line, counted back from the closing fence. Only when the block
+    // holds no mapped block of its own (a tab-set or a table around a code block is not a code block).
+    const spans = Array.from(entry.element.querySelectorAll?.(".myst-code-line") ?? []);
+    if (spans.length > 0 && (entry.element.querySelectorAll?.(MAPPINGS_SELECTOR).length ?? 0) === 0) {
+      const index = codeSpanIndex(spans.length, entry.endLine, sourceLine);
+      const rectangle = index === undefined ? undefined : spans[index]?.getBoundingClientRect();
+      return rectangle
+        ? { top: rectangle.top + window.scrollY, height: rectangle.height || height }
+        : fallback;
+    }
+    // A paragraph: the measured tops of its soft-wrapped lines.
+    const top = entry.lineTops?.[sourceLine - entry.sourceLine - 1];
+    return top === undefined ? fallback : { top, height };
+  }
+
+  // `aria-current` is shared with `markSourceLine` (the editor selection mark): each owns its own
+  // marker attribute, and an element keeps `aria-current` while the other still marks it.
+  function mark(element: Element | undefined): void {
+    if (marked && marked !== element) {
+      marked.removeAttribute("data-sphinx-line-marker");
+      if (!marked.getAttribute("data-sphinx-preview-current")) marked.removeAttribute("aria-current");
+    }
+    marked = element;
+    element?.setAttribute("data-sphinx-line-marker", "true");
+    element?.setAttribute("aria-current", "location");
+  }
+
+  function draw(box: LineBox): void {
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = MARKER_CLASS;
+      overlay.setAttribute("aria-hidden", "true");
+      const arrow = document.createElement("span");
+      arrow.className = ARROW_CLASS;
+      overlay.appendChild(arrow);
+    }
+    if (!overlay.parentElement) document.body.appendChild(overlay);
+    const column = document.getElementById("sphinx-myst-preview-content")?.getBoundingClientRect();
+    overlay.style.setProperty("top", `${box.top}px`);
+    overlay.style.setProperty("height", `${box.height}px`);
+    overlay.style.setProperty("left", `${(column?.left ?? 0) + (window.scrollX ?? 0)}px`);
+    overlay.style.setProperty("width", column?.width ? `${column.width}px` : "100%");
+  }
+
+  function hide(): void {
+    overlay?.remove();
+    mark(undefined);
+  }
+
+  // Draws the marker on its line. `unfoldFirst` (a request) opens what hides it; a later placement
+  // never undoes a fold the reader made: the marker is just not drawn while its line is hidden.
+  function place(unfoldFirst: boolean): LineBox | undefined {
+    if (line === undefined) return undefined;
+    const block = containingBlock(line);
+    if (unfoldFirst && block && unfold(block)) rt.scroll.measure();
+    const entry = rt.scroll.entryForLine(line);
+    const hidden = block !== undefined && entry !== undefined
+      && !(entry.sourceLine <= line && line <= entry.endLine);
+    if (!entry || hidden) {
+      hide();
+      return undefined;
+    }
+    const box = lineBox(entry, line);
+    draw(box);
+    mark(entry.element);
+    return box;
+  }
+
+  function clear(): void {
+    line = undefined;
+    hide();
+  }
+
+  const startsAnEdit = (): boolean => Boolean(state.activeBlockEdit || state.activeFrontmatterEdit);
+
+  document.addEventListener("pointerdown", () => {
+    if (line !== undefined) clear();
+  }, true);
+  document.addEventListener("focusin", () => {
+    if (line !== undefined && startsAnEdit()) clear();
+  });
+  rt.bus.on("layoutMeasured", () => {
+    if (line === undefined) return;
+    if (startsAnEdit()) clear();
+    else place(false);
+  });
+  rt.bus.on("contentReplaced", () => {
+    if (line !== undefined) rt.scroll.stabilizeLayout();
+  });
+
+  return {
+    reveal(requested) {
+      line = requested;
+      const box = place(true);
+      if (box) rt.scroll.revealPositionSilently(box.top, requested);
+      // The scroll moved nothing in the document: the box stays right. Measure again on the frame.
+      rt.scroll.stabilizeLayout();
+    },
+    clear,
+    currentLine: () => line,
+  };
+}

@@ -10,7 +10,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import type { HostDocument } from "../../src/host-api/documentStore";
 import type { HostServices } from "../../src/host-api/index";
@@ -31,6 +31,8 @@ interface Fixture {
   readonly preview: PreviewSession;
   readonly posted: Array<Record<string, any>>;
   readonly shown: Array<{ id: string; selection: unknown }>;
+  /** The calls of `showDocumentInStudio`. */
+  readonly studioShown: Array<{ id: string; line: number | undefined }>;
   readonly warnings: string[];
   readonly searches: string[];
   readonly state: { requestId: number; open: (id: string) => Promise<HostDocument>; editors: PairedEditor[] };
@@ -55,18 +57,24 @@ function fileDocument(filePath: string, text = ""): HostDocument {
 }
 
 /** A manager over a temporary folder with `active.md`; the preview has restricted reads when asked. */
-function fixture(options: { restrictedReads?: boolean; followsActiveEditor?: boolean; activeText?: string } = {}): Fixture {
+function fixture(options: {
+  restrictedReads?: boolean;
+  followsActiveEditor?: boolean;
+  activeText?: string;
+  markdownFilesInStudio?: boolean;
+} = {}): Fixture {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "toolbar-req-")));
   const activePath = path.join(root, "active.md");
   fs.writeFileSync(activePath, options.activeText ?? "# Active\n\n## Part\n");
   const posted: Array<Record<string, any>> = [];
   const shown: Array<{ id: string; selection: unknown }> = [];
+  const studioShown: Array<{ id: string; line: number | undefined }> = [];
   const warnings: string[] = [];
   const searches: string[] = [];
   const state = {
     requestId: 1,
     open: (id: string): Promise<HostDocument> => {
-      const target = decodeURIComponent(new URL(id).pathname);
+      const target = fileURLToPath(id);
       return Promise.resolve(fileDocument(target, fs.existsSync(target) ? fs.readFileSync(target, "utf8") : ""));
     },
     editors: [] as PairedEditor[],
@@ -84,7 +92,17 @@ function fixture(options: { restrictedReads?: boolean; followsActiveEditor?: boo
         shown.push({ id, selection });
         return Promise.resolve();
       },
+      showDocumentInStudio: (id: string, line?: number) => {
+        studioShown.push({ id, line });
+        return Promise.resolve();
+      },
       openExternal: () => Promise.resolve(true),
+    },
+    settings: {
+      section: () => ({
+        get: (key: string, fallback: unknown) => key === "markdownFilesInStudio"
+          ? options.markdownFilesInStudio ?? fallback : fallback,
+      }),
     },
     ui: { showWarning: (message: string) => { warnings.push(message); return Promise.resolve(); } },
     workspace: {
@@ -142,7 +160,7 @@ function fixture(options: { restrictedReads?: boolean; followsActiveEditor?: boo
     requestId: preview.stage!.requestId,
   });
   return {
-    root, manager, preview, posted, shown, warnings, searches, state, identity,
+    root, manager, preview, posted, shown, studioShown, warnings, searches, state, identity,
     send: (type, extra = {}) => manager.handlePageMessage(preview, { type, ...identity(), ...extra }),
     cleanup: () => fs.rmSync(root, { recursive: true, force: true }),
   };
@@ -737,6 +755,101 @@ test("turning the anchor mode on aligns the preview with the text editor", async
     assert.equal(scrolls.length, 1);
     assert.equal(scrolls[0].line, 7);
     assert.equal(f.preview.configuration.scrollPreviewWithEditor, true, "the page follows the editor now");
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-182
+test("a link to a Markdown file from a Studio tab opens Studio at the marker line when Markdown files open in Studio", async () => {
+  const f = fixture({ followsActiveEditor: false, markdownFilesInStudio: true });
+  try {
+    fs.writeFileSync(path.join(f.root, "second.md"), ["# Second", "", "## Part", "", "Text", ""].join("\n"));
+    await f.send("previewLink", { request: "second.md#part" });
+    assert.deepEqual(f.studioShown, [{ id: pathToFileURL(path.join(f.root, "second.md")).toString(), line: 3 }]);
+    assert.equal(f.shown.length, 0, "no text editor opens");
+    await f.send("previewLink", { request: "second.md" });
+    assert.deepEqual(f.studioShown.at(-1), { id: pathToFileURL(path.join(f.root, "second.md")).toString(), line: undefined });
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-182
+test("a link keeps opening a text editor for the side preview, a non-Markdown target or the setting off", async () => {
+  const sidePreview = fixture({ followsActiveEditor: true, markdownFilesInStudio: true });
+  const settingOff = fixture({ followsActiveEditor: false, markdownFilesInStudio: false });
+  const studioTab = fixture({ followsActiveEditor: false, markdownFilesInStudio: true });
+  try {
+    for (const f of [sidePreview, settingOff, studioTab]) {
+      fs.writeFileSync(path.join(f.root, "second.md"), ["# Second", ""].join("\n"));
+      fs.writeFileSync(path.join(f.root, "notes.txt"), ["text", ""].join("\n"));
+    }
+    await sidePreview.send("previewLink", { request: "second.md" });
+    await settingOff.send("previewLink", { request: "second.md" });
+    await studioTab.send("previewLink", { request: "notes.txt" });
+    for (const f of [sidePreview, settingOff, studioTab]) {
+      assert.equal(f.shown.length, 1);
+      assert.equal(f.studioShown.length, 0);
+    }
+  } finally {
+    sidePreview.cleanup();
+    settingOff.cleanup();
+    studioTab.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-182
+test("Back to another Markdown document from a Studio tab opens Studio at the stored line; a move inside the document stays a source scroll", async () => {
+  const f = fixture({ followsActiveEditor: false, markdownFilesInStudio: true });
+  try {
+    const other = path.join(f.root, "other.md");
+    fs.writeFileSync(other, ["# Other", "", "line 3", "", "line 5", ""].join("\n"));
+    const history = f.manager.history.historyOf(f.preview);
+    history.push({ uri: pathToFileURL(other).toString(), line: 5 });
+    history.push({ uri: f.preview.documentUri, line: 1 });
+    await f.send("previewHistoryGo", { direction: "back" });
+    assert.deepEqual(f.studioShown, [{ id: pathToFileURL(other).toString(), line: 5 }]);
+    assert.equal(f.shown.length, 0);
+
+    history.push({ uri: f.preview.documentUri, line: 3 });
+    history.push({ uri: f.preview.documentUri, line: 9 });
+    await f.send("previewHistoryGo", { direction: "back" });
+    assert.equal(f.studioShown.length, 1, "a move inside the document opens nothing");
+    assert.ok(f.posted.some((message) => message.type === "sourceScroll" && message.line === 3));
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
+test("a requested line waits for the page to be ready, is posted once and becomes the anchor", () => {
+  const f = fixture({ followsActiveEditor: false });
+  try {
+    f.preview.page.readyRequestId = undefined;
+    f.manager.scroll.requestRevealLine(f.preview, 42);
+    f.manager.scroll.requestRevealLine(f.preview, 0);
+    assert.equal(f.posted.filter((message) => message.type === "previewRevealLine").length, 0, "not before ready");
+    f.manager.scroll.postPendingRevealLine(f.preview);
+    f.manager.scroll.postPendingRevealLine(f.preview);
+    const posted = f.posted.filter((message) => message.type === "previewRevealLine");
+    assert.equal(posted.length, 1, "posted once");
+    assert.equal(posted[0].line, 42);
+    assert.equal(posted[0].requestId, f.preview.stage!.requestId);
+    assert.deepEqual(f.preview.scroll.anchor, { line: 42, owner: "preview", documentId: f.preview.documentUri });
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
+test("a requested line is posted at once when the page is already ready", () => {
+  const f = fixture({ followsActiveEditor: false });
+  try {
+    f.preview.page.readyRequestId = f.preview.stage!.requestId;
+    f.manager.scroll.requestRevealLine(f.preview, 7);
+    assert.deepEqual(f.posted.filter((message) => message.type === "previewRevealLine").map((message) => message.line), [7]);
+    assert.equal(f.preview.scroll.pendingRevealLine, undefined);
   } finally {
     f.cleanup();
   }

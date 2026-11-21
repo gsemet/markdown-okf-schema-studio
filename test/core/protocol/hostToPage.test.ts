@@ -35,6 +35,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewPasteHtmlResult: { editId: "h", ok: true, markdown: "**x**" },
   previewPlantUmlIncludeResult: { editId: "h", ok: true, id: "/a.puml", text: "" },
   sourceScroll: { line: 4 },
+  previewRevealLine: { line: 30 },
   previewLinkTargets: { targets: [] },
   previewHistoryState: { canBack: true, canForward: false },
   previewShowComments: { showComments: true },
@@ -120,6 +121,18 @@ test("the payload checks refuse what the page used to refuse", () => {
     diagnostics: [{ severity: "warning", text: "w", code: "myst.ext" }],
     next: { revision: 8, requestId: 12, initialAnchor: 3.5, initialPin: { line: 2, viewportTop: -4 } },
   }, page), true);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
+test("previewRevealLine needs a 1-based safe integer line and addresses its render", () => {
+  const send = (extra: Record<string, unknown>): boolean =>
+    filter.accepts({ type: "previewRevealLine", ...page, ...extra }, page);
+  assert.equal(send({ line: 1 }), true);
+  assert.equal(send({ line: 30 }), true);
+  for (const line of [0, -3, 2.5, "4", undefined, null, Number.NaN, Number.MAX_SAFE_INTEGER + 2]) {
+    assert.equal(send({ line }), false, String(line));
+  }
+  assert.equal(filter.accepts({ type: "previewRevealLine", ...page, requestId: 99, line: 3 }, page), false);
 });
 
 test("values that are not host messages are refused", () => {

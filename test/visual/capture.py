@@ -316,6 +316,8 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                         # CR 046: no motion in the campaign, so every reading and capture is of a settled
                         # page; check_update_glow turns it back on for its own patch.
                         reduced_motion="reduce",
+                        # CR 445: a high-contrast capture (the browser's forced colours, as Windows high contrast).
+                        **({"forced_colors": "active"} if scenario.get("forcedColors") else {}),
                     )
                     if scenario.get("mathRenderingChecks"):
                         context.set_offline(True)

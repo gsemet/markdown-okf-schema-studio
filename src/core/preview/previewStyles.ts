@@ -18,6 +18,7 @@ import { TOC_CSS } from "./styles/tocStyles";
 import { FRONTMATTER_EDITOR_CSS } from "./styles/frontmatterEditorStyles";
 import { PAGE_CHROME_CSS } from "./styles/pageChromeStyles";
 import { PROPERTIES_CSS } from "./styles/propertiesStyles";
+import { LINE_MARKER_CSS } from "./styles/lineMarkerStyles";
 
 /**
  * Stylesheets injected into every preview webview.
@@ -124,7 +125,8 @@ export const PREVIEW_THEME_CSS =
   + GRID_CARD_EDIT_CSS
   + CODE_BLOCK_CSS
   + PROPERTIES_CSS
-  + FIND_CSS;
+  + FIND_CSS
+  + LINE_MARKER_CSS;
 
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
 /** The per-render rule that sets the content column width (0 lifts the limit). */

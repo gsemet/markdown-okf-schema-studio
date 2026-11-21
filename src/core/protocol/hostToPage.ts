@@ -180,6 +180,14 @@ export interface SourceScrollMessage extends RenderMessage<"sourceScroll"> {
   reveal?: boolean;
 }
 
+/**
+ * Reveal a source line and mark it with the line marker (an arrow and a band), as a search result
+ * or a jump asked. `line` is 1-based; the router refuses anything else.
+ */
+export interface PreviewRevealLineMessage extends RenderMessage<"previewRevealLine"> {
+  line: number;
+}
+
 /** The targets of the links the page discovered (answer to `previewLinkDiscover`). */
 export interface PreviewLinkTargetsMessage extends RenderMessage<"previewLinkTargets"> {
   targets: ReadonlyArray<{ request: string; kind?: string; path?: string; reason?: string }>;
@@ -318,6 +326,7 @@ export type HostToPageMessage =
   | PreviewBlocksResultMessage
   | HostRequestResultMessage
   | SourceScrollMessage
+  | PreviewRevealLineMessage
   | PreviewLinkTargetsMessage
   | PreviewHistoryStateMessage
   | PreviewShowCommentsMessage
@@ -442,6 +451,11 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewPasteHtmlResult: ownId,
     previewPlantUmlIncludeResult: ownId,
     sourceScroll: render,
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-181
+    previewRevealLine: {
+      addressing: "render",
+      isValid: (message) => typeof message.line === "number" && Number.isSafeInteger(message.line) && message.line >= 1,
+    },
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
     previewLinkTargets: { addressing: "render", isValid: (message) => Array.isArray(message.targets) },
     previewHistoryState: render,

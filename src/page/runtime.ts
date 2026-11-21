@@ -39,6 +39,7 @@ import { createMappedBlocks } from "./features/mappedBlocks";
 import { bindEditModeCaptureClicks, installPageInput } from "./features/pageInput";
 import type { PageRuntime, PageRuntimeState, PaletteMode, RuntimeSavedState } from "./features/pageRuntime";
 import { installRendererBridge } from "./features/rendererBridge";
+import { installLineMarker, postsASourceEdit } from "./features/lineMarker";
 import { installScrollCore } from "./features/scrollCore";
 import { installStatusRegion } from "./features/statusRegion";
 import { installStickyHeadings } from "./features/stickyHeadings";
@@ -114,7 +115,16 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // The sticky heading band and the reading offset it reserves (features/stickyHeadings.ts).
   const stickyBand = installStickyHeadings(document, window, anchorPolicy, stickyHeadingDepthOf(context));
   // Messages and the saved state, with the state write throttle of PERF-08 (see pageHost.ts).
-  const pageHost = createPageHost(transport, window);
+  // A page that posts a source edit takes the line marker off (the marker's lifetime, SwRS LIFE-179).
+  const pageHost = createPageHost({
+    getState: () => transport.getState(),
+    setState: (state) => transport.setState(state),
+    onMessage: (listener) => transport.onMessage(listener),
+    postMessage: (message) => {
+      if (postsASourceEdit(message)) rt.lineMarker?.clear();
+      transport.postMessage(message);
+    },
+  }, window);
   const vscode = pageHost.api;
   // Host messages: features register their handlers on this router (see hostMessages.ts).
   const pageHostMessages = createPageHostMessages();
@@ -407,6 +417,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // The features (no listener yet: they are bound below, in order).
   rt.blocks = createMappedBlocks(document, context);
   rt.scroll = installScrollCore(rt);
+  rt.lineMarker = installLineMarker(rt);
   rt.textControls = installTextControls(rt);
   rt.blockEditor = installBlockEditor(rt);
   rt.blockSourceEditor = installBlockSourceEditor(rt);

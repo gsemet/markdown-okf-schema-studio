@@ -123,6 +123,8 @@ export interface Scenario {
   previewThemeMode?: "white" | "cream" | "dark";
   /** P8: leave the floating toolbar collapsed (rows 2 to 4 hidden) for the checks and the capture. */
   toolbarState?: "collapsed";
+  /** CR 445: open the page in the browser's forced colours (a high-contrast capture). */
+  forcedColors?: boolean;
   /** Check the toolbar's place, the text it covers, its tooltip on keyboard focus and the browser find in a folded section. */
   toolbarPlaceChecks?: boolean;
   stickyHeadingDepth?: number;

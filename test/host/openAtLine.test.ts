@@ -10,7 +10,7 @@ import { test, type TestContext } from "node:test";
 import { captured, fake, startStudio, workspaceRoot, writeFile, type Studio } from "./lifeReqHarness";
 import { OPEN_AS_TEXT_COMMAND_ID as OPEN_AS_TEXT, SHOW_INTRODUCTIONS_COMMAND_ID as SHOW_AGAIN } from "../../src/host-vscode/activation";
 import { createVscodeSettingScopes } from "../../src/host-vscode/vscodeHost";
-import { StudioOpenedTextEditors } from "../../src/host-vscode/openInStudio";
+import { StudioLineRequests, StudioOpenedTextEditors } from "../../src/host-vscode/openInStudio";
 import { servicesStartedForTests, setCurrentActivation } from "../../src/host-vscode/testHooks";
 
 
@@ -122,4 +122,45 @@ test("the registry of Studio's text editors remembers a file for a few seconds o
   now += 2;
   assert.equal(registry.has("file:///a.md"), false);
   assert.ok(workspaceRoot.length > 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
+test("the line recorded for a Studio tab about to open is taken once and only inside the window", () => {
+  let now = 1000;
+  const requests = new StudioLineRequests(() => now);
+  requests.recordPending("file:///a.md", 12);
+  assert.equal(requests.takePending("file:///a.md"), 12);
+  assert.equal(requests.takePending("file:///a.md"), undefined, "taken once");
+  requests.recordPending("file:///a.md", 3);
+  now += 60_000;
+  assert.equal(requests.takePending("file:///a.md"), undefined, "outside the window");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
+test("a line goes to a live Studio session first and is recorded as pending when none takes it", () => {
+  const requests = new StudioLineRequests(() => 0);
+  const sent: Array<[string, number]> = [];
+  let taken = true;
+  requests.bindLiveSessions((uri, line) => {
+    sent.push([uri, line]);
+    return taken;
+  });
+  requests.deliver("file:///a.md", 5);
+  assert.deepEqual(sent, [["file:///a.md", 5]]);
+  assert.equal(requests.takePending("file:///a.md"), undefined, "a live session took it");
+  taken = false;
+  requests.deliver("file:///a.md", 9);
+  assert.equal(requests.takePending("file:///a.md"), 9);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
+test("a Studio tab opened by Open With takes the pending line of its document", async (t) => {
+  const studio = start(t);
+  const document = await fake.controls.showDocument(writeFile("# One\n\ntext\n"));
+  studio.activation.lineRequests.recordPending(document.uri.toString(), 3);
+  await captured.provider!.resolveCustomTextEditor(document, fake.vscode.window.createWebviewPanel("markdown-okf-schema-studio.editor", "Studio", 1));
+  const session = [...studio.activation.manager.sessions()].find((entry) => entry.documentUri === document.uri.toString());
+  assert.ok(session, "the session exists");
+  assert.equal(session.scroll.pendingRevealLine, 3);
+  assert.equal(studio.activation.lineRequests.takePending(document.uri.toString()), undefined, "consumed");
 });

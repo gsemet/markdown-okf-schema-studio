@@ -412,6 +412,11 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     updates: [] as Array<{ section: string; key: string; value: unknown; target: number }>,
   };
 
+  /** The Studio tabs a test lays out (`controls.studioTabs`) and the editor group holding the focus. */
+  const studioTabs: Array<{ viewColumn: number; filePath: string; isActive: boolean; kind?: "studio" | "text" | "diff"; isPreview?: boolean }> = [];
+  const activeGroupColumn = { value: 1 };
+  const studioTabObjects = new Map<object, { label: string; input: unknown; readonly isActive: boolean; readonly isPreview: boolean }>();
+
   const window = {
     activeTextEditor: undefined as ReturnType<typeof editorFor> | undefined,
     visibleTextEditors: [] as Array<ReturnType<typeof editorFor>>,
@@ -419,16 +424,36 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     tabGroups: strict({
       get all() {
         const columns = new Set<number>([1, ...panels.filter((panel) => !panel.disposed)
-          .map((panel) => panel.viewColumn ?? 1)]);
+          .map((panel) => panel.viewColumn ?? 1), ...studioTabs.map((tab) => tab.viewColumn)]);
         return [...columns].map((viewColumn) => ({
           viewColumn,
-          isActive: viewColumn === 1,
-          tabs: panels.filter((panel) => !panel.disposed && panel.viewColumn === viewColumn)
-            .map((panel) => ({ label: panel.title, input: new TabInputWebview(panel.viewType), isActive: true })),
+          isActive: viewColumn === activeGroupColumn.value,
+          tabs: [
+            ...panels.filter((panel) => !panel.disposed && panel.viewColumn === viewColumn)
+              .map((panel) => ({ label: panel.title, input: new TabInputWebview(panel.viewType), isActive: true })),
+            ...studioTabs.filter((tab) => tab.viewColumn === viewColumn)
+              .map((tab) => {
+                // One object per tab, as VS Code keeps: an event carries the tab the groups list.
+                let object = studioTabObjects.get(tab);
+                if (!object) {
+                  const uri = Uri.file(tab.filePath);
+                  object = {
+                    label: "Studio",
+                    input: tab.kind === "text" ? new TabInputText(uri)
+                      : tab.kind === "diff" ? new TabInputTextDiff(uri, uri)
+                        : new TabInputCustom(uri, "markdown-okf-schema-studio.editor"),
+                    get isActive() { return tab.isActive; },
+                    get isPreview() { return tab.isPreview ?? false; },
+                  };
+                  studioTabObjects.set(tab, object);
+                }
+                return object;
+              }),
+          ],
         }));
       },
       get activeTabGroup() {
-        const group = this.all[0]!;
+        const group = this.all.find((candidate) => candidate.viewColumn === activeGroupColumn.value) ?? this.all[0]!;
         return {
           ...group,
           activeTab: activeCustomTab
@@ -440,6 +465,9 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       onDidChangeTabs: events.changeTabs.event,
       close: (tab: unknown): Promise<boolean> => {
         closedTabs.push(tab);
+        for (const [entry, object] of studioTabObjects) {
+          if (object === tab) studioTabs.splice(studioTabs.indexOf(entry as (typeof studioTabs)[number]), 1);
+        }
         return Promise.resolve(true);
       },
     }, "tabGroups"),
@@ -488,11 +516,20 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       uri.fsPath === folderUri.fsPath || uri.fsPath.startsWith(folderUri.fsPath + path.sep) ? workspaceFolder : undefined
     ),
     getConfiguration: (section?: string) => ({
-      get: <T>(_key: string, defaultValue?: T): T | undefined => defaultValue,
+      get: <T>(key: string, defaultValue?: T): T | undefined => {
+        const entry = configuration.values.get(`${section}.${key}`);
+        return (entry?.workspaceValue ?? entry?.globalValue ?? defaultValue) as T | undefined;
+      },
       has: (): boolean => false,
       inspect: (key: string) => configuration.values.get(`${section}.${key}`),
       update: (key: string, value: unknown, target: number): Promise<void> => {
         configuration.updates.push({ section: String(section), key, value, target });
+        // A write is visible to the next read, as in VS Code.
+        const path = `${section}.${key}`;
+        const entry = { ...configuration.values.get(path) };
+        if (target === 1) entry.globalValue = value;
+        else entry.workspaceValue = value;
+        configuration.values.set(path, entry);
         return Promise.resolve();
       },
     }),
@@ -567,6 +604,10 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     public constructor(public readonly uri: Uri) {}
   }
 
+  class TabInputTextDiff {
+    public constructor(public readonly original: Uri, public readonly modified: Uri) {}
+  }
+
   const vscode = {
     Uri,
     Position,
@@ -580,6 +621,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     WorkspaceEdit,
     TabInputWebview,
     TabInputText,
+    TabInputTextDiff,
     TabInputCustom,
     ConfigurationTarget: { Global: 1, Workspace: 2, WorkspaceFolder: 3 },
     Diagnostic: class {
@@ -669,6 +711,30 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       events,
       showDocument,
       closedTabs,
+      studioTabs,
+      activeGroupColumn,
+      /**
+       * Opens a tab of `filePath` as the reader does: a text editor (or a diff) tab in group `viewColumn`,
+       * its editor visible with the selection at `line` (1-based; none: the start of the file), and the
+       * tab change event the extension listens to. Returns the tab as the tab groups list it.
+       */
+      openTab: (filePath: string, options: { viewColumn?: number; line?: number; kind?: "text" | "diff"; isPreview?: boolean; fire?: boolean } = {}): unknown => {
+        const entry = { viewColumn: options.viewColumn ?? 1, filePath, isActive: true, kind: options.kind ?? "text" as const, isPreview: options.isPreview ?? false };
+        studioTabs.push(entry);
+        const tab = window.tabGroups.all.flatMap((group) => group.tabs)
+          .find((candidate) => studioTabObjects.get(entry) === candidate)!;
+        const document = textDocuments.find((candidate) => candidate.uri.fsPath === filePath) ?? new FakeTextDocument(Uri.file(filePath), fs.readFileSync(filePath, "utf8"));
+        if (!textDocuments.includes(document)) textDocuments.push(document);
+        if (entry.kind === "text") {
+          const editor = editorFor(document) as unknown as { viewColumn: number; selection: unknown };
+          editor.viewColumn = entry.viewColumn;
+          if (options.line !== undefined) editor.selection = new Selection(new Position(options.line - 1, 0), new Position(options.line - 1, 0));
+          window.visibleTextEditors = [...window.visibleTextEditors, editor as ReturnType<typeof editorFor>];
+          window.activeTextEditor = editor as ReturnType<typeof editorFor>;
+        }
+        if (options.fire !== false) events.changeTabs.fire({ opened: [tab], closed: [], changed: [] });
+        return tab;
+      },
       shownTextOptions,
       configuration,
       /** Makes a custom editor tab of `filePath` the active tab (no text editor is active then). */

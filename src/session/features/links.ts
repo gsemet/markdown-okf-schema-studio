@@ -22,6 +22,7 @@ import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { globLiteral, revisionOfStage } from "../sessionDocuments";
 import { lineSelection } from "./history";
+import { navigatesInStudio } from "./studioNavigation";
 import { fireAndForget } from "../../host-api/logger";
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-079
@@ -293,7 +294,11 @@ export class LinkController {
           manager.history.recordNavigation(preview, { uri: opened.id, line: (selection?.start.line ?? 0) + 1 });
         }
       }
-      await host.navigation.showDocument(targetId, selection);
+      if (navigatesInStudio(host, preview, navigation.path)) {
+        await host.navigation.showDocumentInStudio(targetId, selection === undefined ? undefined : selection.start.line + 1);
+      } else {
+        await host.navigation.showDocument(targetId, selection);
+      }
     } catch (error) {
       fireAndForget(host.logger, host.ui.showWarning(
         `Markdown OKF-Schema Studio could not open ${navigation.path}: ${error instanceof Error ? error.message : String(error)}`,

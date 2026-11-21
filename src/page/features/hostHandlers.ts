@@ -107,6 +107,8 @@ export function registerHostHandlers(rt: PageRuntime): void {
   hostMessages.on("previewFrontmatterResult", (message) => {
     rt.frontmatter.receiveFrontmatterResult(message);
   });
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-178
+  hostMessages.on("previewRevealLine", (message) => rt.lineMarker.reveal(message.line));
   hostMessages.on("sourceScroll", (message) => {
     rt.scroll.followSourceScroll(message);
   });

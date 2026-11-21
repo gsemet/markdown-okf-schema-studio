@@ -147,6 +147,16 @@ const CASES: readonly MessageCase[] = [
     badPayloads: [{ line: 0 }, { line: -3 }, { line: "abc" }, { line: undefined }],
   },
   {
+    type: "previewRevealLine",
+    rule: "render",
+    message: () => ({ type: "previewRevealLine", ...IDS, line: 50 }),
+    probe: (harness) => {
+      harness.flushFrames();
+      return harness.windowState.scrollY;
+    },
+    badPayloads: [{ line: 0 }, { line: -3 }, { line: 1.5 }, { line: "50" }, { line: undefined }],
+  },
+  {
     type: "previewEditSource",
     rule: "render",
     prepare: openBlockEditorRequest,

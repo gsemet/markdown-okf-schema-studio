@@ -2,6 +2,16 @@
 
 ## 2026-11-21
 
+### Open Studio at a searched line: the opening policy and watcher, the marker's rounds (CR-445, round 3)
+
+- Added: SwRS-MDOKFSTUDIO-LIFE-184 (the nine ordered rules of the opening policy) and SwRS-MDOKFSTUDIO-LIFE-185 (the opening watcher: reads the line from the editor selection, waits for the editor association migration, never replaces a tab present at start), both proposed and deriving from StRS-MDOKFSTUDIO-LIFE-023.
+- Changed: SwRS-MDOKFSTUDIO-LIFE-183 (recency of the Studio tabs is the order they became active, not an approximation; a host test); SwRS-MDOKFSTUDIO-LIFE-179 now also covers the marker going when an editor opens; Studio's own navigation starts from the reader's group.
+
+### Open Studio at a searched line: the marker, the placement, Studio's own navigation (CR-445, round 2)
+
+- Added: SwRS-MDOKFSTUDIO-LIFE-178 to 183 (proposed, derive from StRS-MDOKFSTUDIO-LIFE-023): the page marks a requested line with an arrow and a band and scrolls to it silently, the marker stays through scrolls and layout changes and goes on a pointer press, an edit or a new line, in edit mode it covers no handle, a requested line reaches the page once it is ready and wins over the restored reading place, link and history navigation from a Studio tab opens Studio at the target line, and the host reveals the right Studio tab or opens a new one.
+- Changed: StRS-MDOKFSTUDIO-LIFE-023 (main paths 3 and 4: open at a searched line, follow a link inside Studio).
+
 ### Open Studio at a searched line: settings, migration, introductions, Open as Text, lazy services (CR-445, round 1)
 
 - Added: StRS-MDOKFSTUDIO-LIFE-023 (proposed): a reader opens a Markdown file at a searched line and sees that line marked in Studio.
