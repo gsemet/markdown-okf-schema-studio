@@ -8,7 +8,7 @@ import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { test } from "node:test";
+import { mock, test } from "node:test";
 
 import type { HostServices } from "../../src/host-api/index";
 import { nodeHostPorts } from "./nodeHostPorts";
@@ -38,7 +38,13 @@ test("every page message type has one handler of a feature controller", () => {
 
 const noEvent = (): { dispose(): void } => ({ dispose: () => undefined });
 
+/**
+ * The fixture controls time: the queue debounce and overrun timers and the shared-render window run
+ * on node:test fake timers (`setTimeout` and `Date`), so a stalled or loaded machine cannot change
+ * what a test sees. `advance` moves time and lets the promise chains settle; nothing sleeps.
+ */
 function renderFixture() {
+  mock.timers.enable({ apis: ["setTimeout", "Date"] });
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-shared-render-"));
   const file = path.join(root, "a.md");
   fs.writeFileSync(file, "# Title\n\nText.\n");
@@ -97,13 +103,26 @@ function renderFixture() {
     const show = (): void => { panel.visible = true; listeners.forEach((listener) => listener()); };
     return { session, show };
   };
-  const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+  /** Lets the pending promise chains run: a few turns of the event loop, never a timed sleep. */
+  const settle = async (): Promise<void> => {
+    for (let turn = 0; turn < 5; turn += 1) await new Promise<void>((resolve) => setImmediate(resolve));
+  };
+  /** Moves the controlled time by `ms`, then lets the promise chains settle. */
+  const advance = async (ms: number): Promise<void> => {
+    await settle();
+    mock.timers.tick(ms);
+    await settle();
+  };
+  const cleanups: Array<() => void> = [];
+  const onCleanup = (undo: () => void): void => { cleanups.push(undo); };
   const cleanup = (): void => {
+    cleanups.forEach((undo) => undo());
+    mock.timers.reset();
     resetRenderHooksForTests();
     manager.disposeAll(false);
     fs.rmSync(root, { recursive: true, force: true });
   };
-  return { manager, document, newSession, renders, finished, wait, cleanup };
+  return { manager, document, newSession, renders, finished, settle, advance, onCleanup, cleanup };
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-039
@@ -112,10 +131,12 @@ test("two previews of one document and revision share one render, each with its 
   try {
     const a = f.newSession(true);
     const b = f.newSession(true);
-    await Promise.all([
+    const both = Promise.all([
       f.manager.requestDocument(a.session, f.document),
       f.manager.requestDocument(b.session, f.document),
     ]);
+    await f.advance(QUEUE_DEBOUNCE_MS);
+    await both;
     assert.equal(f.renders.length, 1, "one render for both previews");
     assert.equal(f.finished.length, 2, "both previews received a result");
     assert.deepEqual(f.finished.map((entry) => entry.requestId), [1, 1]);
@@ -125,25 +146,64 @@ test("two previews of one document and revision share one render, each with its 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
-test("a page refresh inside the join window renders again instead of joining the shared render", async () => {
+/** The debounce of a preview's queue (`debounceMs` in `src/session/sessionFactory.ts`). */
+const QUEUE_DEBOUNCE_MS = 40;
+/** The longest debounce of a queue (`maxDebounceMs`) and the window a finished render stays joinable. */
+const QUEUE_MAX_DEBOUNCE_MS = 1000;
+const JOIN_WINDOW_MS = 250;
+
+/** Blocks the thread for `ms` of real time, as a loaded machine does (the fake `Date` does not move). */
+function stallThread(ms: number): void {
+  const until = process.hrtime.bigint() + BigInt(ms) * 1_000_000n;
+  while (process.hrtime.bigint() < until) { /* busy wait */ }
+}
+
+/** Two previews of one document: the second joins the render of the first, a page refresh renders again. */
+async function joinWindowScenario(stallMs: number): Promise<void> {
   const f = renderFixture();
   try {
     const a = f.newSession(true);
     const b = f.newSession(true);
-    await f.manager.requestDocument(b.session, f.document);
-    await f.manager.requestDocument(a.session, f.document);
+    const first = f.manager.requestDocument(b.session, f.document);
+    await f.advance(QUEUE_DEBOUNCE_MS);
+    await first;
+    assert.equal(f.renders.length, 1, "the first preview rendered");
+    if (stallMs > 0) {
+      const paths = nodeHostPorts.paths;
+      const sourceExists = paths.sourceExists;
+      let stalled = false;
+      paths.sourceExists = (file: string): boolean => {
+        if (!stalled) { stalled = true; stallThread(stallMs); }
+        return sourceExists.call(paths, file);
+      };
+      f.onCleanup(() => { paths.sourceExists = sourceExists; });
+    }
+    const second = f.manager.requestDocument(a.session, f.document);
+    await f.advance(QUEUE_DEBOUNCE_MS);
+    await second;
     assert.equal(f.renders.length, 1, "the second preview joined the first render");
+    assert.equal(f.manager.sharedRenders.started, 1, "the manager started one render");
     const router = (f.manager as unknown as {
       router: { dispatch(message: unknown, session: unknown): unknown };
     }).router;
     router.dispatch({ type: "previewRefresh" }, a.session);
-    await f.wait(100);
+    await f.advance(QUEUE_DEBOUNCE_MS * 2);
     assert.equal(f.renders.length, 2, "the Refresh button renders again");
   } finally {
     f.cleanup();
   }
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+test("a page refresh inside the join window renders again instead of joining the shared render", async () => {
+  await joinWindowScenario(0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+test("a stalled machine between two requests does not close the join window", async () => {
+  // The stall is longer than the window of real time: only the controlled time decides.
+  await joinWindowScenario(JOIN_WINDOW_MS + 10);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-039
@@ -154,12 +214,18 @@ test("a hidden panel does not render until it is shown, then renders once", asyn
     await f.manager.requestDocument(hidden.session, f.document);
     f.manager.rendering.refreshOpenDocument(hidden.session);
     await f.manager.rendering.refreshPreviewDocument(hidden.session, f.document);
-    await f.wait(150);
+    await f.settle();
     assert.equal(f.renders.length, 0, "no render while the panel is hidden");
+    assert.equal(f.manager.sharedRenders.started, 0, "no shared render started while the panel is hidden");
     assert.equal(hidden.session.renderDirty, true);
+    await f.advance(QUEUE_MAX_DEBOUNCE_MS + JOIN_WINDOW_MS);
+    assert.equal(f.renders.length, 0, "still no render after every timer the queue could arm");
     hidden.show();
-    await f.wait(200);
+    await f.advance(QUEUE_DEBOUNCE_MS);
+    await f.advance(QUEUE_MAX_DEBOUNCE_MS + JOIN_WINDOW_MS);
     assert.equal(f.renders.length, 1, "one render when the panel is shown");
+    assert.equal(f.manager.sharedRenders.started, 1, "the manager started one render");
+    assert.equal(f.finished.length, 1, "the preview received one result");
     assert.equal(hidden.session.renderDirty, false);
   } finally {
     f.cleanup();
