@@ -12,6 +12,10 @@
 
 - Changed: SwRS-MDOKFSTUDIO-LIFE-026 (a scenario and a known limit: the multi-file diff editor and the merge editor are not followed, because the VS Code API gives them no tab input class). Documentation only, no code change.
 
+### Diff scroll tests (CR-460)
+
+- Tests only, no behaviour change: SwRS-MDOKFSTUDIO-LIFE-003 and LIFE-100 gain a real-window test (`test/integration/diffPreviewScroll.test.ts`: inline diff scroll follows; a staged-like diff with no file side previews the working-tree file and moves no scroll) and a host test of the staged-like no-scroll rule. No new SwRS.
+
 ### Impossible comment date refused (CR-459)
 
 - Changed: SwRS-MDOKFSTUDIO-REVIEW-004 (a creation date naming a day that does not exist in its month, such as 2026-02-30, or 2026-02-29 in a non-leap year, rejects the whole sidecar like any other bad date); the parser used to accept it because Date.parse rolls the day over. No new StRS.
