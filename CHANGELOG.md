@@ -4,6 +4,10 @@
 
 - The block editor of a file with CR LF line endings no longer stays stuck on "Saving Markdown..."
   after you leave it without a change; a block you edit keeps the line endings of its file.
+- Each block's bar has a Delete block button (x), and Delete or Backspace on a selected block
+  deletes it. Emptying a block and pressing Done now removes the block instead of leaving blank
+  lines; a new block no longer keeps its leading blank lines, and one inserted after a list gets
+  one blank line before it.
 
 ## 1.10.0 - 2026-11-20
 
