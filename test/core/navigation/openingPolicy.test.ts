@@ -77,8 +77,9 @@ test("rule 4: a text editor Studio opened itself is kept", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-184
-test("rule 5: a text editor reopened as text on purpose is kept", () => {
-  assert.deepEqual(decide({ reopenedAsText: true }), KEEP);
+test("rule 5: a plain opening reopened as text on purpose is kept, a jump is not (VS Code closes a preview Studio tab first)", () => {
+  assert.deepEqual(decide({ reopenedAsText: true }), { kind: "studio-at-line", line: 12 });
+  assert.deepEqual(decide({ reopenedAsText: true, line: undefined }), KEEP);
   assert.deepEqual(decide({ reopenedAsText: true, markdownFilesInStudio: true, line: undefined }), KEEP);
 });
 

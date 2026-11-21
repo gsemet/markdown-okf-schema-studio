@@ -49,6 +49,7 @@ import { run as runWindowSwitchKeys } from "./windowSwitchKeys.test";
 import { run as runRealInput } from "./realInput/run";
 import { run as runLifecycle } from "./lifecycle.test";
 import { run as runMystDiagnostics } from "./mystDiagnostics.test";
+import { run as runOpenAtLine } from "./openAtLine.test";
 import { run as runProjectFeatures } from "./projectFeatures.test";
 import { run as runSerializer } from "./serializer.test";
 import { run as runSourceMapping } from "./sourceMapping.test";
@@ -261,6 +262,7 @@ async function runTrustedSuite(): Promise<void> {
     await step("project-features", runProjectFeatures);
     await step("hostile-html", runHostilePreview);
     await step("stock-coexistence", runStockCoexistence);
+    await step("open-at-line", runOpenAtLine);
   }
   try {
     if (!onlyRealInput) await step("checkbox-toggle", runCheckboxToggle);

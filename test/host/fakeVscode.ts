@@ -381,6 +381,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     changeActiveEditor: new Emitter<unknown>(),
     changeVisibleEditors: new Emitter<unknown>(),
     changeVisibleRanges: new Emitter<unknown>(),
+    changeSelection: new Emitter<unknown>(),
     changeColorTheme: new Emitter<unknown>(),
     renameFiles: new Emitter<unknown>(),
     changeWorkspaceFolders: new Emitter<unknown>(),
@@ -504,7 +505,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     onDidChangeActiveTextEditor: events.changeActiveEditor.event,
     onDidChangeVisibleTextEditors: events.changeVisibleEditors.event,
     onDidChangeTextEditorVisibleRanges: events.changeVisibleRanges.event,
-    onDidChangeTextEditorSelection: new Emitter<unknown>().event,
+    onDidChangeTextEditorSelection: events.changeSelection.event,
     onDidChangeActiveColorTheme: events.changeColorTheme.event,
   };
 
@@ -623,6 +624,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     TabInputText,
     TabInputTextDiff,
     TabInputCustom,
+    TextEditorSelectionChangeKind: { Keyboard: 1, Mouse: 2, Command: 3 },
     ConfigurationTarget: { Global: 1, Workspace: 2, WorkspaceFolder: 3 },
     Diagnostic: class {
       public source?: string;
@@ -718,7 +720,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
        * its editor visible with the selection at `line` (1-based; none: the start of the file), and the
        * tab change event the extension listens to. Returns the tab as the tab groups list it.
        */
-      openTab: (filePath: string, options: { viewColumn?: number; line?: number; kind?: "text" | "diff"; isPreview?: boolean; fire?: boolean } = {}): unknown => {
+      openTab: (filePath: string, options: { viewColumn?: number; line?: number; restoredLine?: number; kind?: "text" | "diff"; isPreview?: boolean; fire?: boolean } = {}): unknown => {
         const entry = { viewColumn: options.viewColumn ?? 1, filePath, isActive: true, kind: options.kind ?? "text" as const, isPreview: options.isPreview ?? false };
         studioTabs.push(entry);
         const tab = window.tabGroups.all.flatMap((group) => group.tabs)
@@ -728,11 +730,20 @@ export function createFakeVscode(options: FakeVscodeOptions) {
         if (entry.kind === "text") {
           const editor = editorFor(document) as unknown as { viewColumn: number; selection: unknown };
           editor.viewColumn = entry.viewColumn;
-          if (options.line !== undefined) editor.selection = new Selection(new Position(options.line - 1, 0), new Position(options.line - 1, 0));
           window.visibleTextEditors = [...window.visibleTextEditors, editor as ReturnType<typeof editorFor>];
           window.activeTextEditor = editor as ReturnType<typeof editorFor>;
         }
         if (options.fire !== false) events.changeTabs.fire({ opened: [tab], closed: [], changed: [] });
+        // VS Code shows the editor at 1:1 and applies the selection a tick later (trial T2): a jump is a
+        // selection change of kind Command, a plain reopening restores the view state with no kind.
+        const applied = options.line ?? options.restoredLine;
+        if (entry.kind === "text" && applied !== undefined) {
+          const selection = new Selection(new Position(applied - 1, 0), new Position(applied - 1, 0));
+          const editor = window.visibleTextEditors[window.visibleTextEditors.length - 1] as unknown as { selection: unknown; selections: unknown[] };
+          editor.selection = selection;
+          editor.selections = [selection];
+          events.changeSelection.fire({ textEditor: editor, selections: [selection], ...(options.line !== undefined ? { kind: 3 } : {}) });
+        }
         return tab;
       },
       shownTextOptions,

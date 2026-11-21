@@ -78,7 +78,7 @@ const KEEP: OpeningDecision = { kind: "keep" };
  * What to do with a newly opened tab, by the first rule that applies: 1. keep anything that is not
  * a text tab; 2. keep what is not an eligible saved `file:` `.md`; 3. keep a tab that is not new,
  * and a tab present at start unless it is the opening that triggered the activation; 4. keep a text
- * editor Studio opened itself; 5. keep a text editor reopened as text on purpose; 6. keep a jump
+ * editor Studio opened itself; 5. keep a plain opening that is a text editor reopened as text on purpose (a jump is not); 6. keep a jump
  * while a side preview that follows the active editor is open; 7. with "Open Markdown files in
  * Studio" on: Studio at the line, or Studio; 8. with "Open search results in Studio" on and a line:
  * Studio at the line; 9. otherwise keep.
@@ -88,7 +88,8 @@ export function openingDecision(facts: OpeningFacts): OpeningDecision {
   if (!facts.eligible) return KEEP;
   if (!facts.isNew || (facts.presentAtStart && !facts.triggeredActivation)) return KEEP;
   if (facts.openedByStudio) return KEEP;
-  if (facts.reopenedAsText) return KEEP;
+  // A jump is never "reopened as text": VS Code closes a preview Studio tab before it opens the text tab of a jump.
+  if (facts.reopenedAsText && facts.line === undefined) return KEEP;
   if (facts.line !== undefined && facts.sidePreviewFollowsActiveEditor) return KEEP;
   if (facts.markdownFilesInStudio) {
     return facts.line === undefined ? { kind: "studio" } : { kind: "studio-at-line", line: facts.line };

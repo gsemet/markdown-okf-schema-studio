@@ -1,7 +1,7 @@
 # Settings
 
-The settings are available under **Markdown OKF-Schema Studio** in VS Code settings, in five
-categories: Preview, Editing, Frontmatter, Comments and PlantUML. A new workspace starts with the
+The settings are available under **Markdown OKF-Schema Studio** in VS Code settings, in six
+categories: Preview, Editing, Frontmatter, Comments, PlantUML and Opening Files. A new workspace starts with the
 cream preview theme, the floating toolbar collapsed to its first row and the GFM palette. The
 theme and the toolbar state are built-in starting points, not settings; the palette follows
 `editing.defaultPaletteMode`. A choice you make in the preview is remembered per workspace.
@@ -91,3 +91,14 @@ apply. Your user settings still count.
   workspaces only). See [PlantUML Diagrams](plantuml.md).
 - `plantuml.jarPath` (default empty): path to `plantuml.jar`, relative to the workspace folder;
   empty uses `plantuml` from PATH. Used only when `plantuml.useJar` is on.
+
+**Opening Files**
+
+- `open.searchResultsInStudio` (default on): a search result, a jump from Quick Open (`file.md:40`)
+  or a link that opens a Markdown file at a line opens Studio at that line, with an arrow marker
+  in the margin. Off keeps these in the text editor.
+- `open.markdownFilesInStudio` (default off): every saved `.md` file you open opens in Studio. On,
+  it also covers jumps whatever `open.searchResultsInStudio` says. The first activation moves an
+  existing `workbench.editorAssociations` entry for `*.md` to this setting. Run **Markdown
+  OKF-Schema Studio: Open as Text** to read the raw text of one file. See
+  [Install and Open Studio](open-studio.md#open-at-a-line).

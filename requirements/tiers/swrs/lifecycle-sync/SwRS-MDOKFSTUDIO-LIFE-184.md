@@ -26,6 +26,7 @@ implemented_in_files:
 - src/core/navigation/openingPolicy.ts
 tested_in_files:
 - test/core/navigation/openingPolicy.test.ts
+- test/integration/openAtLine.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -48,11 +49,17 @@ When a Markdown text tab opens, the opening policy SHALL keep it when it is not 
 | a diff, a custom or any other tab, under either setting | keep |
 | an untitled, git: or non-Markdown document | keep |
 | a tab present at start, or a jump into a tab already open | keep |
-| a text editor Studio opened, or one reopened as text | keep |
+| a text editor Studio opened, or a plain opening reopened as text | keep |
+| a jump right after a Studio tab of the file closed (VS Code closes a preview Studio tab first) | not a reopening as text: Studio at the line |
 | a jump while a side preview follows the active editor | keep (a plain opening goes on) |
 | Open Markdown files in Studio on | Studio at the line, or Studio for a plain opening |
 | only Open search results in Studio on, a line | Studio at the line |
 | a plain opening with only Open search results in Studio on | keep |
+
+### Known limits
+
+- A search result or Quick Open line aimed at a pinned or preview Studio tab of the file loses its line and marker (trial T4, VS Code 1.147.0); the tab stays where it is.
+- Open With > Text Editor is replaced by Studio while Open Markdown files in Studio is on (trial T3d).
 
 ### Verification notes
 

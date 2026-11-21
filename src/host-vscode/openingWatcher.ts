@@ -5,9 +5,13 @@
  * that reads VS Code's tabs for this feature.
  *
  * A custom editor receives no selection, so the line of a jump is read here, from the text editor
- * the tab opens, before Studio takes its place. The tabs open when the watcher starts are recorded
- * at once (synchronously): the tabs VS Code restores with the window are never replaced. The
- * settings are read only after the editor association migration ran, since it writes them.
+ * the tab opens, before Studio takes its place. VS Code shows the editor with its cursor at 1:1 and
+ * applies the selection a few milliseconds later (trial T2): a jump (Quick Open `file:42`,
+ * `vscode.open` with a selection, a search result) is the selection change of kind `Command` that
+ * follows, while a plain reopening restores the stored view state with a change of no kind. The tabs
+ * open when the watcher starts are recorded at once (synchronously): the tabs VS Code restores with
+ * the window are never replaced. The settings are read only after the editor association migration
+ * ran, since it writes them.
  */
 
 import * as path from "node:path";
@@ -21,6 +25,11 @@ import type { Logger } from "../host-api/logger";
 import type { Settings } from "../host-api/settings";
 import type { StudioClosedTabs, StudioLineRequests, StudioOpenedTextEditors } from "./openInStudio";
 import { putStudioInPlace } from "./studioPlacement";
+
+/** How long the watcher waits for the editor of an opening to show before giving the tab up. */
+const EDITOR_SHOWS_TIMEOUT_MS = 3000;
+/** How long, once the editor shows, the watcher waits for the selection change that makes the opening a jump. */
+const JUMP_SETTLE_MS = 200;
 
 /** What the watcher needs from the activation. */
 export interface OpeningWatcherDeps {
@@ -66,15 +75,39 @@ export function startOpeningWatcher(deps: OpeningWatcherDeps): vscode.Disposable
       candidate.document.uri.toString() === key && candidate.viewColumn === viewColumn);
   };
 
-  // The 1-based line of the opening: the selection start of its editor, none at the very start of the file.
-  const lineOf = (editor: vscode.TextEditor): number | undefined => {
-    const start = editor.selection.start;
-    return start.line > 0 || start.character > 0 ? start.line + 1 : undefined;
-  };
+  // The selection changes of kind `Command` of the documents whose tab just opened, by document: a jump.
+  const jumps = new Map<string, { line: number; at: number }>();
+  const jumpWaiters = new Set<() => void>();
+  const watchJumps = vscode.window.onDidChangeTextEditorSelection((event) => {
+    if (event.kind !== vscode.TextEditorSelectionChangeKind.Command) return;
+    const first = event.selections[0];
+    if (!first) return;
+    jumps.set(event.textEditor.document.uri.toString(), { line: first.start.line + 1, at: Date.now() });
+    [...jumpWaiters].forEach((wake) => wake());
+  });
 
-  // Waits for the editor of an opening to show (it may not be visible when its tab opens).
+  // The 1-based line of a jump into `uri`, read once its editor shows (the selection comes a tick later); none for a plain opening.
+  const jumpLineOf = (uri: vscode.Uri, since: number): Promise<number | undefined> =>
+    new Promise((resolve) => {
+      const key = uri.toString();
+      const settle = (): void => {
+        clearTimeout(timer);
+        jumpWaiters.delete(wake);
+        waiting.delete(settle);
+        const jump = jumps.get(key);
+        jumps.delete(key);
+        resolve(jump !== undefined && jump.at >= since ? jump.line : undefined);
+      };
+      const wake = (): void => { if ((jumps.get(key)?.at ?? -1) >= since) settle(); };
+      const timer = setTimeout(settle, JUMP_SETTLE_MS);
+      jumpWaiters.add(wake);
+      waiting.add(settle);
+      wake();
+    });
+
+  // Waits for the editor of an opening to show (it may not be visible when its tab opens); gives up when the tab closes or after a timeout.
   const waiting = new Set<() => void>();
-  const whenEditorShows = (uri: vscode.Uri, viewColumn: number): Promise<vscode.TextEditor | undefined> =>
+  const whenEditorShows = (tab: vscode.Tab, uri: vscode.Uri, viewColumn: number): Promise<vscode.TextEditor | undefined> =>
     new Promise((resolve) => {
       const found = editorOf(uri, viewColumn);
       if (found) {
@@ -82,22 +115,23 @@ export function startOpeningWatcher(deps: OpeningWatcherDeps): vscode.Disposable
         return;
       }
       const listeners: vscode.Disposable[] = [];
-      const finish = (): void => {
-        const editor = editorOf(uri, viewColumn);
-        if (!editor) return;
+      const done = (editor: vscode.TextEditor | undefined): void => {
+        clearTimeout(timer);
         waiting.delete(stop);
         listeners.forEach((listener) => listener.dispose());
         resolve(editor);
       };
-      const stop = (): void => {
-        waiting.delete(stop);
-        listeners.forEach((listener) => listener.dispose());
-        resolve(undefined);
+      const finish = (): void => {
+        const editor = editorOf(uri, viewColumn);
+        if (editor) done(editor);
       };
+      const stop = (): void => done(undefined);
+      const timer = setTimeout(stop, EDITOR_SHOWS_TIMEOUT_MS);
       waiting.add(stop);
       listeners.push(
         vscode.window.onDidChangeVisibleTextEditors(finish),
         vscode.window.onDidChangeActiveTextEditor(finish),
+        vscode.window.tabGroups.onDidChangeTabs(() => { if (!groupOf(tab)) stop(); }),
       );
     });
 
@@ -114,6 +148,7 @@ export function startOpeningWatcher(deps: OpeningWatcherDeps): vscode.Disposable
   async function consider(tab: vscode.Tab): Promise<void> {
     const kind = tabKindOf(tab.input);
     if (kind !== "text" || handled.has(tab)) return;
+    const opened = Date.now();
     const uri = (tab.input as vscode.TabInputText).uri;
     const group = groupOf(tab);
     if (!group) return;
@@ -129,18 +164,23 @@ export function startOpeningWatcher(deps: OpeningWatcherDeps): vscode.Disposable
       openedByStudio: deps.openedByStudio.has(uri.toString()),
       sidePreviewFollowsActiveEditor: deps.sidePreviewFollowsActiveEditor(),
     };
-    if (!facts.eligible || facts.presentAtStart || facts.openedByStudio || facts.reopenedAsText) return;
+    // The policy decides, rule by rule: a tab it keeps whatever the settings, as a jump or not, is not waited for.
+    const keptAs = (line: number | undefined): boolean =>
+      openingDecision({ ...facts, line, searchResultsInStudio: true, markdownFilesInStudio: true }).kind === "keep";
+    if (keptAs(undefined) && keptAs(1)) return;
     handled.add(tab);
     await deps.ready;
     // The tab may have closed or moved while the migration ran.
     const current = groupOf(tab);
     if (!current) return;
-    const editor = await whenEditorShows(uri, current.viewColumn);
+    const editor = await whenEditorShows(tab, uri, current.viewColumn);
     if (!editor || !groupOf(tab)) return;
+    const line = await jumpLineOf(uri, opened);
+    if (!groupOf(tab)) return;
     const open = deps.settings.section(settingSection("open"));
     const decision = openingDecision({
       ...facts,
-      line: lineOf(editor),
+      line,
       searchResultsInStudio: open.get<boolean>("searchResultsInStudio", DEFAULT_SEARCH_RESULTS_IN_STUDIO),
       markdownFilesInStudio: open.get<boolean>("markdownFilesInStudio", false),
     });
@@ -168,6 +208,7 @@ export function startOpeningWatcher(deps: OpeningWatcherDeps): vscode.Disposable
       for (const tab of [...event.opened, ...event.changed]) noteStudioTab(tab);
       for (const tab of event.opened) run(consider(tab));
     }),
+    watchJumps,
     new vscode.Disposable(() => [...waiting].forEach((stop) => stop())),
   );
 }
