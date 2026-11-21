@@ -329,9 +329,9 @@ export function metroSvg(model: ViewerModel, paths: readonly MainPath[], fromDir
   const wrapOf = (node: MapNode): number => {
     const blockers = map.nodes.filter((other) => other.row === node.row && other.col > node.col && (other.options.length > 0 || other.drop)).map((other) => other.col);
     const room = (blockers.length > 0 ? (Math.min(...blockers) - node.col) * COLUMN - 16 - (map.nodes.some((other) => other.row === node.row && other.col === Math.min(...blockers) && other.drop) ? LANE + 14 : 0) : INLINE_ROOM) - (stemOf(node) - xOf(node));
-    return Math.max(16, Math.floor((room - 24) / CHAR));
+    return Math.max(16, Math.floor((room - 24) / (CHAR * WIDTH_MARGIN)));
   };
-  const roomOf = (node: MapNode): number => (wrapOf(node) * CHAR) + 24;
+  const roomOf = (node: MapNode): number => (wrapOf(node) * CHAR * WIDTH_MARGIN) + 24;
   /** Dots of an outcome go under its pill when the row would run past the room of its state. */
   const dotsBelow = (node: MapNode, option: PathTransition): boolean => {
     return !mainIds.has(option.id) && scenariosOf(model, option).length > 0 && roomOf(node) > 0;
@@ -422,7 +422,7 @@ export function metroSvg(model: ViewerModel, paths: readonly MainPath[], fromDir
       const dotsY = below ? rowAt + PILL_HEIGHT / 2 + 9 : rowAt + 4;
       const captionY = rowAt + 26 + (below ? 16 : 0) + GROW;
       const caption = wrap(option.label, wrapAt);
-      right = Math.max(right, stem + 24 + Math.max(...caption.map((line) => line.length * CHAR)), dotsLeft + scenarios.length * 11);
+      right = Math.max(right, stem + 24 + Math.max(...caption.map((line) => line.length * CHAR * WIDTH_MARGIN)), dotsLeft + scenarios.length * 11);
       rows.push(`<${tag} class="tr opt"${href ? ` href="${href}"` : ""} data-option=""><title>${escapeHtml(describe(requirement, option))}</title>`
         + `<path class="ln" d="M${stem},${rowAt} L${stem + (same ? 18 : 12)},${rowAt}" stroke="var(--alt)" stroke-width="2" stroke-dasharray="3 3" fill="none"/>`
         + (same ? "" : `<circle class="end" cx="${stem + 16}" cy="${rowAt}" r="4"/>`)

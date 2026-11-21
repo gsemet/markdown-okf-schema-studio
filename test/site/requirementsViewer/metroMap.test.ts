@@ -178,3 +178,20 @@ test("metroSvg draws a fourth path in the third colour", () => {
   assert.equal(svg.match(/stroke="var\(--p3\)" stroke-width="7"/gu)?.length, 2, "paths 3 and 4");
   assert.ok(!svg.includes("--p4"));
 });
+
+test("metroSvg keeps a 66-character caption inside the map when the text is wider than estimated", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  const model = load();
+  const word = "x".repeat(66);
+  const svg = metroSvg(model, paths(`#### Path 1: Wide
+1. A
+   - SwRS-X-010: go
+   - Option SwRS-X-011: ${word}
+2. B
+`), "requirements/gfm/x");
+  const width = Number(/<svg class="metro" width="(\d+)"/u.exec(svg)?.[1]);
+  const captionStart = Number(/<text class="verb"><tspan x="(\d+)"[^>]*>x{66}</u.exec(svg)?.[1]);
+  assert.ok(captionStart > 0, "the caption is drawn on one line");
+  // Windows measures 6.33 px per character; the box leaves 15 % for the wider text of Linux.
+  assert.ok(width >= captionStart + 66 * 6.33 * 1.15, `width ${width} holds the caption from ${captionStart}`);
+});
