@@ -5,6 +5,9 @@ import * as vscode from "vscode";
 
 import { disposeActivePreviewForTests, storeWorkspaceChoicesForTests } from "./extensionApi";
 import { E2E_REPORT_ROOT } from "../reportPaths";
+import { markProgress } from "../shared/hangWatchdog";
+import { withFailureTrace } from "../shared/realWindowTrace";
+import { scenarioTraceCollector } from "./scenarioTrace";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
 import {
@@ -79,6 +82,7 @@ export async function run(): Promise<void> {
   const workbench = vscode.workspace.getConfiguration("workbench");
   const originalTheme = workbench.inspect<string>("colorTheme")?.workspaceValue;
   const failures: string[] = [];
+  let opened: vscode.TextDocument | undefined;
   const expect = (name: string, actual: unknown, wanted: unknown): void => {
     try {
       assert.deepEqual(actual, wanted);
@@ -91,67 +95,67 @@ export async function run(): Promise<void> {
     await page.screenshot({ path: path.join(shotDirectory, `${tag}-${mode}-${name}.png`) });
   };
   try {
-    await workbench.update("colorTheme", mode === "cream" ? "Default Light Modern" : "Default Dark Modern",
-      vscode.ConfigurationTarget.Workspace);
-    await setViewport(page, { width: 1200, height: 800 });
-    await vscode.commands.executeCommand("workbench.action.closeSidebar");
-    await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
-    const source = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("paste.md")));
-    await openSidePreview(source);
-    await waitForRender(source);
-    await setEditMode(page, true);
-    // The preview may redraw once after the toggle and drop the first click: click until the box stays.
-    await waitFor("the block text box to open", async () => {
-      const open = await withCurrentFrame(page, async (frame) => {
-        if (await frame.locator("[data-sphinx-preview-block-editor] textarea").count() === 1) return true;
-        await frame.locator("p", { hasText: "Read the guide" }).click({ timeout: 2_000 });
-        return false;
-      }).catch(() => false);
-      if (!open) return false;
-      await new Promise<void>((resolve) => setTimeout(resolve, 700));
-      return withCurrentFrame(page, async (frame) => await frame.locator("[data-sphinx-preview-block-editor] textarea").count() === 1)
-        .catch(() => false);
-    }, 30_000);
-    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
-    assert.equal(await readBox(page), "Read the guide for details.\nLogo:  then text.\nHome:  then text.", "the paragraph opens in the text box");
+    await withFailureTrace("paste-url", scenarioTraceCollector(page, () => opened, failures), async () => {
+      await workbench.update("colorTheme", mode === "cream" ? "Default Light Modern" : "Default Dark Modern",
+        vscode.ConfigurationTarget.Workspace);
+      await setViewport(page, { width: 1200, height: 800 });
+      await vscode.commands.executeCommand("workbench.action.closeSidebar");
+      await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
+      const source = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("paste.md")));
+      opened = source;
+      await openSidePreview(source);
+      await waitForRender(source);
+      markProgress("paste-url: preview ready");
+      await setEditMode(page, true);
+      markProgress("paste-url: edit mode on");
+      await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Read the guide" }).click());
+      await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+      markProgress("paste-url: text box open");
+      assert.equal(await readBox(page), "Read the guide for details.\nLogo:  then text.\nHome:  then text.", "the paragraph opens in the text box");
 
-    const base = (await readBox(page))!;
-    const guide = base.indexOf("guide");
-    // 1. A URL over the selected word makes a link.
-    await pasteAt(page, guide, guide + 5, DOCS, MOD + "+v");
-    const linked = base.replace("guide", `[guide](${DOCS})`);
-    expect("link over the selection", await settled(page, linked), linked);
-    await shoot("1-link");
-    // 2. A picture address alone makes an image, where the caret stands (after "Logo: ").
-    const afterLink = linked;
-    const logo = afterLink.indexOf("Logo: ") + 6;
-    await pasteAt(page, logo, logo, LOGO, MOD + "+v");
-    const imaged = afterLink.slice(0, logo) + `![](${LOGO})` + afterLink.slice(logo);
-    expect("image address", await settled(page, imaged), imaged);
-    await shoot("2-image");
-    // 3. A page address alone makes an autolink.
-    const afterImage = imaged;
-    const home = afterImage.indexOf("Home: ") + 6;
-    await pasteAt(page, home, home, HOME, MOD + "+v");
-    const linkedHome = afterImage.slice(0, home) + `<${HOME}>` + afterImage.slice(home);
-    const afterAutolink = (await settled(page, linkedHome))!;
-    expect("autolink", afterAutolink, linkedHome);
-    await shoot("3-autolink");
-    // The autosave wrote the edited span only: the second paragraph and the line breaks are intact.
-    const tail = "\n\nSecond paragraph.\n";
-    try {
-      await waitFor("the autosave", () => source.getText() === afterAutolink + tail, 10_000);
-    } catch (error) {
-      if (tag !== "before") throw new Error(`${String(error)} The buffer holds ${JSON.stringify(source.getText())}.`);
-    }
-    expect("source", source.getText(), afterAutolink + tail);
-    await currentPreviewFrame(page);
-    if (tag !== "before") assert.deepEqual(failures, [], failures.join("\n"));
-    else console.log(`paste-url BEFORE state (not failing): ${JSON.stringify(failures)}`);
-    // CR 152: leave this page's edit mode off for the next scenario: one that starts in edit mode
-    // never clicks the toggle and its page never takes the keyboard focus (windowSwitchKeys.test.ts
-    // timed out on its first ArrowDown).
-    await setEditMode(page, false);
+      const base = (await readBox(page))!;
+      const guide = base.indexOf("guide");
+      markProgress("paste-url: first paste (link)");
+      // 1. A URL over the selected word makes a link.
+      await pasteAt(page, guide, guide + 5, DOCS, MOD + "+v");
+      const linked = base.replace("guide", `[guide](${DOCS})`);
+      expect("link over the selection", await settled(page, linked), linked);
+      await shoot("1-link");
+      markProgress("paste-url: second paste (image)");
+      // 2. A picture address alone makes an image, where the caret stands (after "Logo: ").
+      const afterLink = linked;
+      const logo = afterLink.indexOf("Logo: ") + 6;
+      await pasteAt(page, logo, logo, LOGO, MOD + "+v");
+      const imaged = afterLink.slice(0, logo) + `![](${LOGO})` + afterLink.slice(logo);
+      expect("image address", await settled(page, imaged), imaged);
+      await shoot("2-image");
+      markProgress("paste-url: third paste (autolink)");
+      // 3. A page address alone makes an autolink.
+      const afterImage = imaged;
+      const home = afterImage.indexOf("Home: ") + 6;
+      await pasteAt(page, home, home, HOME, MOD + "+v");
+      const linkedHome = afterImage.slice(0, home) + `<${HOME}>` + afterImage.slice(home);
+      const afterAutolink = (await settled(page, linkedHome))!;
+      expect("autolink", afterAutolink, linkedHome);
+      await shoot("3-autolink");
+      // The autosave wrote the edited span only: the second paragraph and the line breaks are intact.
+      const tail = "\n\nSecond paragraph.\n";
+      markProgress("paste-url: waiting for the autosave");
+      try {
+        await waitFor("the autosave", () => source.getText() === afterAutolink + tail, 10_000);
+      } catch (error) {
+        if (tag !== "before") throw new Error(`${String(error)} The buffer holds ${JSON.stringify(source.getText())}.`);
+      }
+      expect("source", source.getText(), afterAutolink + tail);
+      await currentPreviewFrame(page);
+      if (tag !== "before") assert.deepEqual(failures, [], failures.join("\n"));
+      else console.log(`paste-url BEFORE state (not failing): ${JSON.stringify(failures)}`);
+      // CR 152: leave this page's edit mode off for the next scenario: one that starts in edit mode
+      // never clicks the toggle and its page never takes the keyboard focus (windowSwitchKeys.test.ts
+      // timed out on its first ArrowDown).
+      markProgress("paste-url: edit mode off");
+      await setEditMode(page, false);
+    });
   } finally {
     try {
       await setEditMode(page, false);

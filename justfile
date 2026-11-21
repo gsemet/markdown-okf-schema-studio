@@ -375,10 +375,10 @@ ci-hang-dump:
 # STUDIO_STRESS_REPEAT (the workflow_dispatch input); STUDIO_STRESS_SCENARIOS (comma-separated names)
 # narrows the scenarios. REPEAT must be an integer from 1 to 100. One scenario run costs about 4 s;
 # the launch deadline is computed from the plan (2 min plus 6 s per scenario run, at most 24 min,
-# test/shared/hangWatchdog.ts). The default 12 rounds of all 19 trusted scenarios take about 14 min.
-# Up to about 220 scenario runs per window (rounds times scenarios) fit under the ceiling: 12 rounds
-# of all 19, 60 rounds of 3, 100 rounds of 2. Above that, narrow STUDIO_STRESS_SCENARIOS.
-ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "12"): (_require-unlocked-screen "ci-stress")
+# test/shared/hangWatchdog.ts). The default 11 rounds of all 21 trusted scenarios take about 15 min (231 runs at 3.7 to 4.1 s).
+# Up to about 220 scenario runs per window (rounds times scenarios) fit under the ceiling: 11 rounds
+# of all 21, 60 rounds of 3, 100 rounds of 2. Above that, narrow STUDIO_STRESS_SCENARIOS.
+ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "11"): (_require-unlocked-screen "ci-stress")
     #!/usr/bin/env bash
     set -uo pipefail
     repeat={{ quote(REPEAT) }}

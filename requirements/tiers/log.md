@@ -6,6 +6,10 @@
 
 - Changed: SwRS-MDOKFSTUDIO-BLOCK-166 and SwRS-MDOKFSTUDIO-BLOCK-169 (copy and cut drop the trailing CommonMark blank lines of a range, spaces and tabs only, before they plan; a no-break-space line is still refused); SwRS-MDOKFSTUDIO-BLOCK-174 (paste accepts the blank line that ends a list and inserts after the block, reusing the blank lines already there); SwRS-MDOKFSTUDIO-BLOCK-124 (the refusals of a blank-ended copy or cut and of a blank paste anchor are narrowed to the cases that remain).
 
+### Real-window paste-url and drop-files join the default stress plan (CR-454)
+
+- Changed: no SwRS. The `paste-url` and `drop-files` real-window steps run in every default round of `just ci-stress`, which defaults to 11 rounds of 21 scenarios instead of 12 of 19; their fixed 700 ms and 400 ms pauses became waits on a state the page reports, and each prints a failure trace in the CI log. The reds seen on CI (runs 44647675614, 44690391950, 44715893690) were the stored edit mode wait that e05f0b51 removed, and about 20 heavy runs since then never failed at either step.
+
 ### Open Studio at a searched line: real VS Code trials and known limits (CR-445, round 4)
 
 - Changed: SwRS-MDOKFSTUDIO-LIFE-185 (the jump is a selection change of kind Command, trial T2; the wait for the editor ends after 3 s or on close; the activation opening is never replaced, trial T11 not automated); SwRS-MDOKFSTUDIO-LIFE-184 (rule 5 keeps a plain opening reopened as text; a jump right after a Studio tab closed is a jump, trial T13; known limits T4 and T3d).
