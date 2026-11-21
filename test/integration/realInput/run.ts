@@ -102,9 +102,11 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   // evidence of the round and closes its own connection, so each round is the step as CI runs it.
   "checkbox-toggle": async () => runCheckboxToggle(),
   // CR 454: in the default plan after checkbox-toggle; both open their own CDP connection like it. The
-  // key list is the default trusted list, then STRESS_ON_DEMAND_SCENARIOS (empty today).
+  // key list is the default trusted list, then STRESS_ON_DEMAND_SCENARIOS.
   "paste-url": async () => runPasteUrl(),
   "drop-files": async () => runDropFiles(),
+  // CR 453: on demand only (STRESS_ON_DEMAND_SCENARIOS), after the default names.
+  "table-insert-slash": (page) => scenarioTableInsertFromSlash(page),
   // "wide-table-tab" is out of the stress table: its LASTCELL click was unstable (under investigation).
 };
 
