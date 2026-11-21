@@ -13,11 +13,71 @@ const editorsOfScheme = (scheme: string): vscode.TextEditor[] =>
 
 const firstVisibleLine = (editor: vscode.TextEditor): number => editor.visibleRanges[0]?.start.line ?? 0;
 
-/** Scrolls an editor with `revealRange` (a scroll with no cursor move) and waits for it to show the line. */
-async function scrollEditorTo(editor: vscode.TextEditor, line: number, description: string): Promise<void> {
-  const target = new vscode.Range(line, 0, line, 0);
-  editor.revealRange(target, vscode.TextEditorRevealType.AtTop);
-  await waitFor(description, () => firstVisibleLine(editor) >= line - 5, 20_000);
+/** What the host held when a wait failed (CI rule 12): the editors, the tabs, the layout and the preview's scroll state. */
+function windowState(picked: vscode.TextEditor | undefined, before: ReadonlySet<vscode.TextEditor>, maxFirstLine: number): string {
+  const describeEditor = (editor: vscode.TextEditor): unknown => ({
+    scheme: editor.document.uri.scheme,
+    path: editor.document.uri.fsPath,
+    query: editor.document.uri.query,
+    viewColumn: editor.viewColumn,
+    visibleRanges: editor.visibleRanges.map((range) => `${range.start.line}-${range.end.line}`),
+    picked: editor === picked,
+    existedBeforeTheDiff: before.has(editor),
+  });
+  const preview = getActivePreviewForTests();
+  return JSON.stringify({
+    maxFirstVisibleLineSeen: maxFirstLine,
+    editors: vscode.window.visibleTextEditors.map(describeEditor),
+    activeEditor: vscode.window.activeTextEditor === undefined ? null : describeEditor(vscode.window.activeTextEditor),
+    pickedStillVisible: picked !== undefined && vscode.window.visibleTextEditors.includes(picked),
+    tabGroups: vscode.window.tabGroups.all.map((group) => ({
+      active: group.isActive,
+      tabs: group.tabs.map((tab) => ({
+        input: tab.input === undefined || tab.input === null ? null : (tab.input as object).constructor.name,
+        label: tab.label,
+        active: tab.isActive,
+      })),
+    })),
+    layout: { renderSideBySide: vscode.workspace.getConfiguration("diffEditor").get("renderSideBySide") },
+    preview: preview === undefined ? null : {
+      phase: preview.phase,
+      lastSourceScrollLine: preview.lastSourceScrollLine,
+      lastRevealedSourceLine: preview.lastRevealedSourceLine,
+    },
+  });
+}
+
+/**
+ * Scrolls the active editor with the awaited `revealLine` command (a scroll with no cursor move; a
+ * rejection fails the test with its own error) and waits for `editor`'s own visible range to show the
+ * line. The wait's failure message carries the window state and the highest first visible line seen,
+ * which tells a stale editor (never moved), a host scroll back (moved, then returned) and a reveal
+ * ignored by an editor with no viewport yet (never moved, live editor) apart.
+ */
+async function scrollEditorTo(
+  editor: vscode.TextEditor,
+  line: number,
+  description: string,
+  before: ReadonlySet<vscode.TextEditor>,
+): Promise<void> {
+  await waitFor(`${description}: the editor to be the active one`, () => vscode.window.activeTextEditor === editor);
+  await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: "top" });
+  let maxFirstLine = firstVisibleLine(editor);
+  try {
+    await waitFor(description, () => {
+      maxFirstLine = Math.max(maxFirstLine, firstVisibleLine(editor));
+      return firstVisibleLine(editor) >= line - 5;
+    }, 20_000);
+  } catch (error) {
+    throw new Error(`${error instanceof Error ? error.message : String(error)} State: ${windowState(editor, before, maxFirstLine)}`, { cause: error });
+  }
+}
+
+/** Moves the focus to a side of the open diff (the original side holds the "head" query) and waits for it. */
+async function focusSide(side: vscode.TextEditor): Promise<void> {
+  await vscode.commands.executeCommand(side.document.uri.query === "head"
+    ? "workbench.action.compareEditor.focusSecondarySide"
+    : "workbench.action.compareEditor.focusPrimarySide");
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-003
@@ -28,8 +88,8 @@ async function scrollEditorTo(editor: vscode.TextEditor, line: number, descripti
  * no scroll).
  *
  * D1, inline layout: the diff's one editor is the modified (right) side. When it is the real file
- * (the usual "working tree against HEAD" diff), a scroll of that editor, done by `revealRange` and
- * not by a cursor move, makes the side preview follow.
+ * (the usual "working tree against HEAD" diff), a scroll of that editor, done by the awaited `revealLine`
+ * command and not by a cursor move, makes the side preview follow.
  *
  * D2, staged-like diff (two virtual sides, no `file:` side, as the Git extension shows a staged
  * change or the timeline shows an older version): the command previews the working-tree file and
@@ -61,12 +121,19 @@ export async function run(): Promise<void> {
       await vscode.window.showTextDocument(vscode.Uri.file(file("a.md")), { viewColumn: vscode.ViewColumn.One });
       await vscode.commands.executeCommand(COMMAND_ID);
       await waitFor("the side preview of a.md (inline)", () => previewOf(file("a.md")), 30_000);
+      // The plain editor of a.md has the diff's modified side's URI: it must never be taken for the diff's own editor.
+      const before = new Set(vscode.window.visibleTextEditors);
       await openDiff(virtualOf(file("a.md")), vscode.Uri.file(file("a.md")));
-      await waitFor("the real file's editor of the inline diff", () => editorsOfScheme("file")
-        .some((editor) => editor.document.uri.fsPath === file("a.md")));
-      const real = editorsOfScheme("file").find((editor) => editor.document.uri.fsPath === file("a.md"));
+      const isDiffEditor = (editor: vscode.TextEditor): boolean => !before.has(editor)
+        && editor.document.uri.scheme === "file" && editor.document.uri.fsPath === file("a.md");
+      try {
+        await waitFor("a new editor of the inline diff's real file", () => vscode.window.visibleTextEditors.some(isDiffEditor));
+      } catch (error) {
+        throw new Error(`${error instanceof Error ? error.message : String(error)} State: ${windowState(undefined, before, 0)}`, { cause: error });
+      }
+      const real = vscode.window.visibleTextEditors.find(isDiffEditor);
       assert.ok(real, "inline: the diff shows the real file's editor");
-      await scrollEditorTo(real, 100, "the inline diff's editor to scroll");
+      await scrollEditorTo(real, 100, "the inline diff's editor to scroll", before);
       await waitFor("the preview to follow the inline diff's scroll",
         () => (getActivePreviewForTests()?.lastSourceScrollLine ?? 0) > 60, 20_000);
     });
@@ -78,6 +145,7 @@ export async function run(): Promise<void> {
         // Start clean: an earlier diff tab and side preview must not take the new diff's slot.
         await closeAllEditors();
         const textBefore = textTabs().length;
+        const editorsBefore = new Set(vscode.window.visibleTextEditors);
         await openDiff(virtualOf(file("c.md"), "head"), virtualOf(file("c.md"), "index"));
         await vscode.commands.executeCommand(COMMAND_ID);
         await waitFor(`the side preview of the working-tree file c.md (${layout})`, () => previewOf(file("c.md")), 30_000);
@@ -87,7 +155,8 @@ export async function run(): Promise<void> {
         const sides = editorsOfScheme(SCHEME);
         assert.ok(sides.length >= 1, `${layout}: the staged-like diff shows a virtual editor`);
         for (const side of sides) {
-          await scrollEditorTo(side, 100, `a virtual side of the staged-like diff to scroll (${layout})`);
+          await focusSide(side);
+          await scrollEditorTo(side, 100, `a virtual side of the staged-like diff to scroll (${layout})`, editorsBefore);
         }
         assert.equal(getActivePreviewForTests()?.lastSourceScrollLine, before,
           `${layout}: scrolling a diff with no file side moves no preview`);

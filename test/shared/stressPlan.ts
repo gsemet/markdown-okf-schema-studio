@@ -100,8 +100,12 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
  * keeps. They are the key list of the real-input stress table after the default names.
  * CR 453: "table-insert-slash" (RI-T45) failed once on heavy CI; it is proved by its own dispatches
  * (`STUDIO_STRESS_SCENARIOS=table-insert-slash`), never in the default plan (owner, t45-Q2).
+ * CR 464: "diff-preview-scroll" (D1) timed out in the real window on main (CI runs 44957381296 and
+ * 44958907144, green on 44951690958 attempt 2 with the same code); on demand, because a 22nd default
+ * scenario would pass the deadline margin, it is proved by repetition
+ * (`-f stress_scenarios=diff-preview-scroll`).
  */
-export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = ["table-insert-slash"];
+export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = ["table-insert-slash", "diff-preview-scroll"];
 
 /**
  * The plan of one window. `STUDIO_STRESS_SCENARIOS` may name scenarios of either window (unknown
