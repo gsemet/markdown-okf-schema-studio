@@ -423,12 +423,15 @@ function selectedBlocks(page: Page): Promise<SelectedBlock[]> {
 }
 
 /**
- * Selects the list that ends on two blank lines, in a preview already open in edit mode. Asserts
+ * Opens the side preview of `document` in edit mode and selects the list that ends on two blank lines. Asserts
  * that the page maps the list up to a blank line, so the host plans a range that ends on it.
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
  */
-async function selectListInPreview(page: Page, document: vscode.TextDocument): Promise<void> {
+async function selectListFollowedByBlankLines(page: Page, document: vscode.TextDocument): Promise<void> {
+  await openSidePreview(document);
+  await waitForRender(document);
+  await setEditMode(page, true);
   await withCurrentFrame(page, (frame) => frame.locator("ul", { hasText: "item a" }).click({ modifiers: ["Shift"] }));
   await waitFor("exactly the list to be selected", async () => {
     const blocks = await selectedBlocks(page);
@@ -440,12 +443,10 @@ async function selectListInPreview(page: Page, document: vscode.TextDocument): P
     "the page sends a range whose last line is blank in the document");
 }
 
-/** Opens the side preview of `document` in edit mode and selects the list that ends on two blank lines. */
-async function selectListFollowedByBlankLines(page: Page, document: vscode.TextDocument): Promise<void> {
-  await openSidePreview(document);
-  await waitForRender(document);
-  await setEditMode(page, true);
-  await selectListInPreview(page, document);
+/** The text of the page's selection status line ("" when absent). */
+async function pageStatusText(page: Page): Promise<string> {
+  return withCurrentFrame(page, (frame) => frame.evaluate(() =>
+    window.document.querySelector(".sphinx-preview-selection-status")?.textContent ?? ""));
 }
 
 /** Copy then cut of a list followed by two blank lines: the clipboard holds the list, the cut leaves one separator. */
@@ -459,14 +460,20 @@ async function scenarioCutCopyListBeforeBlankLines(page: Page, evidence: Evidenc
       await waitFor("Cmd or Ctrl+C to copy the list without its blank lines", async () =>
         (await vscode.env.clipboard.readText()) === LIST_MARKDOWN);
       assert.equal(bufferText(document), LIST_BEFORE_BLANK_LINES, "copying changes nothing in the document");
-      // A successful copy clears the block selection: wait for that, then select the list again.
-      await waitFor("the copy to clear the block selection", async () => (await selectedBlocks(page)).length === 0);
-      await selectListInPreview(page, document);
+      // The host writes the clipboard before the page gets the copy result, and the page drops a clipboard
+      // key while that result is pending: wait for the page's notice (it lasts 4 s) before pressing again.
+      // A copy keeps the block selection, so the list is still selected.
+      await waitFor("the page to report the copy", async () => (await pageStatusText(page)) === "Copied as Markdown");
+      assert.equal((await selectedBlocks(page)).length, 1, "a copy keeps the list selected");
       await vscode.env.clipboard.writeText("sentinel");
       await press(page, `${MOD}+X`);
-      await waitFor("Cmd or Ctrl+X to cut the list", async () =>
-        (await vscode.env.clipboard.readText()) === LIST_MARKDOWN
-        && bufferText(document) === ["# Clip", "", "Alpha paragraph.", "", "Omega paragraph.", ""].join("\n"));
+      try {
+        await waitFor("Cmd or Ctrl+X to cut the list", async () =>
+          (await vscode.env.clipboard.readText()) === LIST_MARKDOWN
+          && bufferText(document) === ["# Clip", "", "Alpha paragraph.", "", "Omega paragraph.", ""].join("\n"));
+      } catch (error) {
+        throw new Error(`${String(error)} Page status: "${await pageStatusText(page).catch(() => "unreadable")}".`);
+      }
     } finally {
       await vscode.env.clipboard.writeText(savedClipboard);
     }
