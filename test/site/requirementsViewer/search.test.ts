@@ -24,6 +24,12 @@ test("search index entries: areas, use cases, behaviours, files, retired flagged
   assert.equal(file?.n, 5, "five active behaviours carry the file");
   assert.equal(file?.h, "gfm/SwRS-MDOKFSTUDIO-GFM-021/");
   assert.ok(kinds("File").some((item) => item.t === "test/integration/a.test.ts" && item.s === "test"));
+  for (const item of items.filter((candidate) => candidate.k === "Use case" || candidate.k === "Behaviour")) {
+    assert.ok(item.i !== undefined && /^(?:StRS|SwRS)-/u.test(item.i), `${item.t} carries its full ID`);
+    assert.ok(item.s.startsWith(`${item.i} `), `${item.t}: the result line starts with the full ID`);
+  }
+  assert.equal(items.find((item) => item.h === "gfm/StRS-X-003/" && item.k === "Use case")?.i, "StRS-X-003");
+  assert.ok(items.filter((item) => item.k === "Area" || item.k === "File").every((item) => !("i" in item)), "Area and File entries have no full ID");
   assert.ok(searchIndexScript(model).startsWith("window.SEARCH=[{"));
   assert.equal(searchIndexScript(undefined), "window.SEARCH=[];\n");
 });

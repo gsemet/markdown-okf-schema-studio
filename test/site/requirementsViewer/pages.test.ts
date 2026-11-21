@@ -97,6 +97,7 @@ test("an area page lists its active use cases and keeps retired ones for History
 
 test("behaviour page: files at the commit, test kinds, retired rows and the where section", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-082
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-093
   // @tests_req SwRS-MDOKFSTUDIO-CORE-083
   const model = load();
   const page = behaviourPage(model, model.byId.get("SwRS-X-011")!).body;
@@ -105,7 +106,8 @@ test("behaviour page: files at the commit, test kinds, retired rows and the wher
   assert.ok(page.includes("Step 2 of path 1 in") && page.includes("<strong>SHALL</strong>"));
   assert.ok(page.includes("Known limits (2)"));
   assert.ok(page.includes('<span class="k nom">nominal</span>Go on'));
-  assert.ok(page.includes('<a href="../SwRS-X-010/">← Title of SwRS-X-010</a>'), "the pager links the previous behaviour of the use case");
+  // The pager link names the requirement by its full ID (CR-458, viewer-ids-Q2): the same previous link, now `← <full ID>: <title>`.
+  assert.ok(page.includes('<a href="../SwRS-X-010/">← SwRS-X-010: Title of SwRS-X-010</a>'), "the pager links the previous behaviour of the use case");
   const exempt = behaviourPage(model, model.byId.get("SwRS-X-013")!).body;
   assert.ok(exempt.includes("Exempt from code and test markers: Documentation only"));
   assert.ok(exempt.includes("Part of") && exempt.includes('href="../../gfm/StRS-X-001/"'), "one block per active parent");
@@ -197,4 +199,43 @@ test("a full ID is the text of every link to a requirement", () => {
   const area = areaPage(model, model.areas[0]!).body;
   assert.ok(area.includes(FULL_USE_CASE) && !/>GFM-001</u.test(area));
   for (const html of [useCase, behaviour, retired, area]) assert.ok(!/>(?:GFM|MYST)-\d+</u.test(html), "no short ID as a text");
+});
+
+test("a full ID names a requirement on its page", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-093
+  const model = load(fullIdReport());
+  const useCase = model.byId.get(FULL_USE_CASE)!;
+  const meta = (html: string, property: string): string[] => [...html.matchAll(new RegExp(`<meta (?:property|name)="${property}" content="([^"]*)"`, "gu"))].map((match) => match[1] ?? "");
+  const eyebrowOf = (html: string): string => /<p class="eyebrow">(?:<span[^>]*><\/span>)?([^<]*)<\/p>/u.exec(html)?.[1] ?? "";
+  const ucSpec = useCasePage(model, useCase);
+  const ucHtml = viewerDocument(ucSpec, FOOTER);
+  assert.equal(eyebrowOf(ucSpec.body), `Use case ${FULL_USE_CASE}`);
+  assert.equal(ucSpec.title, `Use case ${FULL_USE_CASE}: ${useCase.title}`);
+  assert.equal(ucSpec.shareTitle, `Use case ${FULL_USE_CASE}: ${useCase.title}`);
+  assert.deepEqual(ucSpec.crumbs.map((crumb) => crumb.text), ["Areas", "GitHub Flavored Markdown", FULL_USE_CASE]);
+  assert.ok(ucHtml.includes(`<title>Use case ${FULL_USE_CASE}: ${useCase.title} | Studio requirements</title>`));
+  assert.deepEqual(meta(ucHtml, "og:title"), [`Use case ${FULL_USE_CASE}: ${useCase.title}`]);
+  assert.deepEqual(meta(ucHtml, "twitter:title"), [`Use case ${FULL_USE_CASE}: ${useCase.title}`]);
+
+  const id = FULL_BEHAVIOUR(102);
+  const behaviour = model.byId.get(id)!;
+  const before = model.byId.get(FULL_BEHAVIOUR(101))!;
+  const after = model.byId.get(FULL_BEHAVIOUR(103))!;
+  const bSpec = behaviourPage(model, behaviour);
+  const bHtml = viewerDocument(bSpec, FOOTER);
+  assert.equal(eyebrowOf(bSpec.body), `Behaviour ${id}`);
+  assert.equal(bSpec.title, `Behaviour ${id}: ${behaviour.title}`);
+  assert.equal(bSpec.shareTitle, `Behaviour ${id}: ${behaviour.title}`);
+  assert.deepEqual(bSpec.crumbs.map((crumb) => crumb.text), ["Areas", "GitHub Flavored Markdown", FULL_USE_CASE, id]);
+  assert.ok(bSpec.body.includes(`aria-label="Behaviours of ${FULL_USE_CASE}"`));
+  assert.ok(bSpec.body.includes(`>← ${before.id}: ${before.title}</a>`), "the previous link");
+  assert.ok(bSpec.body.includes(`>${after.id}: ${after.title} →</a>`), "the next link");
+  assert.deepEqual(meta(bHtml, "og:title"), [`Behaviour ${id}: ${behaviour.title}`]);
+  assert.deepEqual(meta(bHtml, "twitter:title"), [`Behaviour ${id}: ${behaviour.title}`]);
+
+  // No short ID is a text of the whole document, head and breadcrumb included: once the full IDs are taken out, none is left.
+  for (const html of [ucHtml, bHtml]) {
+    const rest = html.replace(/(?:StRS|SwRS)-MDOKFSTUDIO-(?:GFM|MYST)-\d+/gu, "");
+    assert.ok(!/(?:GFM|MYST)-\d+/u.test(rest), "a short ID is left in the document");
+  }
 });

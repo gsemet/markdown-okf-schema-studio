@@ -36,7 +36,7 @@ When a maintainer builds the Pages site, the build SHALL write a search index of
 
 - GIVEN a report with an area, a use case, a behaviour and a retired behaviour
 - WHEN the site is built
-- THEN requirements/search-index.js holds one entry for each of them and one per file, a file entry giving the count of behaviours that carry it, and the retired entry is flagged
+- THEN requirements/search-index.js holds one entry for each of them and one per file, a file entry giving the count of behaviours that carry it, the retired entry is flagged, and the entry of a use case or a behaviour carries the full ID of the requirement, shown in its result line
 
 ### Scenario (boundary): No report
 

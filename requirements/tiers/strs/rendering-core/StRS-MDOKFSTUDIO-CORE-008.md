@@ -25,6 +25,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-085
 - SwRS-MDOKFSTUDIO-CORE-086
 - SwRS-MDOKFSTUDIO-CORE-091
+- SwRS-MDOKFSTUDIO-CORE-092
+- SwRS-MDOKFSTUDIO-CORE-093
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -88,4 +90,6 @@ flowchart LR
   - [SwRS-MDOKFSTUDIO-CORE-085](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-085.md): The site requirements viewer has a social card for each page
   - [SwRS-MDOKFSTUDIO-CORE-086](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-086.md): The published site has one cream look on every page and picture
   - [SwRS-MDOKFSTUDIO-CORE-091](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-091.md): The site requirements viewer plays a path of a use case map
+  - [SwRS-MDOKFSTUDIO-CORE-092](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-092.md): The site requirements viewer finds a requirement by its ID
+  - [SwRS-MDOKFSTUDIO-CORE-093](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-093.md): The site requirements viewer names every requirement by its full ID
 <!-- okf:links:end -->

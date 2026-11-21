@@ -474,7 +474,7 @@
     "test:browser": "npm run test:visual",
     "visual:render": "npm run compile && npm run bundle && node --import ./scripts/register-myst-patches.mjs out/test/visual/renderFixtures.js",
     "test:breakout": "node scripts/node-test.mjs breakout out/test/page/tableBreakout.test.js",
-    "test:viewer-graph": "node scripts/node-test.mjs viewer-graph out/test/site/requirementsViewer/metroMap.browser.test.js",
+    "test:viewer-graph": "node scripts/node-test.mjs viewer-graph out/test/site/requirementsViewer/metroMap.browser.test.js out/test/site/requirementsViewer/idLayout.browser.test.js",
     "test:visual": "npm run visual:render && uv run --no-sync --group docs python test/visual/capture.py",
     "gallery:generate": "npm run compile && node scripts/generate-gallery.mjs",
     "site:gallery": "npm run gallery:generate",

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The requirements pages on the website name every requirement by its full ID (for example
+  `StRS-MDOKFSTUDIO-BLOCK-003`) in the page heading, the browser tab, the shared link title, the
+  breadcrumb and the previous and next links. The search finds a requirement from its full ID, its
+  short ID such as `BLOCK-014` or a bare number such as `14`, in any case and with or without the
+  leading zeros, and lists the exact ID matches first.
 - Copy, cut and paste on a list followed by blank lines no longer fail with "The preview is out of
   date": the list is copied without the blank lines, a cut leaves one blank line between the blocks
   around it, and a paste after the list gets one blank line on each side.

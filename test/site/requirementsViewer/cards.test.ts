@@ -98,13 +98,14 @@ test("the text of a category, a use case and a behaviour is written for sharing"
   assert.equal(category.title, "GitHub Flavored Markdown: use cases and behaviours");
 
   const useCase = html("/StRS-X-001");
-  assert.equal(onlyMeta(useCase, "og:title"), "Title of StRS-X-001 (StRS-X-001)");
+  // The owner's viewer-ids-Q2 supersedes share-cards-Q9: the share title of a use case or a behaviour is `Use case <full ID>: <title>`, no longer `<title> (<full ID>)`.
+  assert.equal(onlyMeta(useCase, "og:title"), "Use case StRS-X-001: Title of StRS-X-001");
   assert.equal(onlyMeta(useCase, "og:description"), "As a writer, I do <b>a</b> thing.");
   assert.ok(useCase.includes('content="As a writer, I do &lt;b&gt;a&lt;/b&gt; thing."'));
   const need = pageOf(pages, "/StRS-X-020");
   assert.ok(need.description.length > 200 && !need.description.endsWith("…"), "a user need is kept whole");
 
-  assert.equal(onlyMeta(html("/SwRS-X-010"), "og:title"), "Title of SwRS-X-010 (SwRS-X-010)");
+  assert.equal(onlyMeta(html("/SwRS-X-010"), "og:title"), "Behaviour SwRS-X-010: Title of SwRS-X-010");
   const rule = onlyMeta(html("/SwRS-X-021"), "og:description");
   assert.ok(rule.length <= 200 && rule.endsWith("…"));
   assert.ok(!rule.includes("`") && !rule.includes("]("));

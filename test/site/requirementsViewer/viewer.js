@@ -15,10 +15,26 @@
   document.getElementById("search-open").onclick = open;
   document.getElementById("search-close").onclick = close;
   box.onclick = e => { if (e.target === box) close(); };
+  // An ID match is a match between the query and the full ID `i` of an entry, by one of two rules: the ID parts (at
+  // least two dash-separated parts equal to the last parts of the ID, in any case, the last one compared as a number,
+  // so `block-14` finds BLOCK-014 and not BLOCK-140), or a bare number (digits only, the number of the ID's last part).
+  // @implements_req SwRS-MDOKFSTUDIO-CORE-092
+  function idMatch(t, id) {
+    if (!id) return false;
+    const have = id.toLowerCase().split("-");
+    if (/^\d+$/.test(t)) return +have[have.length - 1] === +t;
+    const want = t.split("-");
+    if (want.length < 2 || want.length > have.length || !/^\d+$/.test(want[want.length - 1])) return false;
+    const skip = have.length - want.length;
+    return want.every((part, k) => k === want.length - 1 ? +have[skip + k] === +part : have[skip + k] === part);
+  }
   function draw() {
     const t = q.value.trim().toLowerCase();
-    if (t.length < 2) { res.innerHTML = "<p>Type a word, an id such as DIAG-015, or a file name.</p>"; hits = []; return; }
-    hits = (window.SEARCH || []).filter(x => (history.checked || !x.r) && (x.t + " " + x.s).toLowerCase().includes(t)).slice(0, 30);
+    if (t.length < 2) { res.innerHTML = "<p>Type a word, an ID such as SwRS-MDOKFSTUDIO-DIAG-015 or DIAG-015, or a file name.</p>"; hits = []; return; }
+    const shown = (window.SEARCH || []).filter(x => history.checked || !x.r);
+    const byId = shown.filter(x => idMatch(t, x.i));
+    // The ID matches come first, then the text hits, each entry once; the cap counts the ID matches first.
+    hits = byId.concat(shown.filter(x => !byId.includes(x) && (x.t + " " + x.s).toLowerCase().includes(t))).slice(0, 30);
     let html = "", last = "";
     hits.forEach((x, i) => {
       if (x.k !== last) { html += `<h3>${x.k === "File" ? "Files" : x.k + "s"}</h3>`; last = x.k; }

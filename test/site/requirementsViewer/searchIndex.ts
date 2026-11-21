@@ -1,5 +1,5 @@
 import { replacementsOf, type ViewerModel } from "./model";
-import { VIEWER_DIR, areaDir, requirementDir, shortId } from "./urls";
+import { VIEWER_DIR, areaDir, requirementDir } from "./urls";
 
 /** One entry of the search sheet of the viewer. Links are relative to the `requirements/` folder. */
 export interface SearchItem {
@@ -7,8 +7,13 @@ export interface SearchItem {
   readonly k: "Area" | "Use case" | "Behaviour" | "File";
   /** Text shown. */
   readonly t: string;
-  /** Extra text that is searched and shown small. */
+  /** Extra text that is searched and shown small. A use case or behaviour entry starts with its full ID. */
   readonly s: string;
+  /**
+   * The full ID of a use case or behaviour entry, for example `StRS-MDOKFSTUDIO-BLOCK-014`; absent on an
+   * Area or File entry. The page matches an ID typed in the search against it, without parsing `s`.
+   */
+  readonly i?: string;
   /** Link, relative to the `requirements/` folder. */
   readonly h: string;
   /** Behaviours that carry a file, for the File kind. */
@@ -28,12 +33,12 @@ export function searchIndex(model: ViewerModel): SearchItem[] {
   for (const area of model.areas) items.push({ k: "Area", t: area.title, s: `${area.id} ${area.description}`, h: fromViewer(areaDir(area.id)) });
   const entry = (kind: "Use case" | "Behaviour", requirement: ViewerModel["active"][number]): SearchItem => {
     const area = model.areas.find((candidate) => candidate.id === requirement.scope);
-    const label = shortId(requirement.id);
-    const s = kind === "Use case" ? `${label} ${area?.title ?? requirement.scope}` : `${label} ${requirement.scope}`;
-    if (requirement.active) return { k: kind, t: requirement.title, s, h: fromViewer(requirementDir(requirement)) };
+    const i = requirement.id;
+    const s = kind === "Use case" ? `${i} ${area?.title ?? requirement.scope}` : `${i} ${requirement.scope}`;
+    if (requirement.active) return { k: kind, t: requirement.title, s, i, h: fromViewer(requirementDir(requirement)) };
     const replacement = replacementsOf(model, requirement).find((candidate) => candidate.active);
     const h = replacement ? fromViewer(requirementDir(replacement)) : fromViewer(areaDir(requirement.scope));
-    return { k: kind, t: requirement.title, s: `${s} ${requirement.lifecycle}`, h, r: 1 };
+    return { k: kind, t: requirement.title, s: `${s} ${requirement.lifecycle}`, i, h, r: 1 };
   };
   const all = [...model.active, ...model.retired];
   for (const kind of ["Use case", "Behaviour"] as const) {
