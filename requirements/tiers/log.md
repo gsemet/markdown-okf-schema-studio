@@ -2,6 +2,20 @@
 
 ## 2026-11-21
 
+### The use case path graph as a joined map (CR-441)
+
+- Added: SwRS-MDOKFSTUDIO-CORE-091 (proposed, derives from StRS-MDOKFSTUDIO-CORE-008): Play on a use
+  case map walks the steps of the chosen path in the colour of that path, with the dot following
+  the step indexes of that path.
+- Changed: SwRS-MDOKFSTUDIO-CORE-081 (proposed): the map is a joined SVG at its natural size (a
+  shared state drawn once, one stroke per path on a shared step, a pill with the full ID and the
+  test count, a line above the map, a legend, no overlap at 1280 px and 800 px). SwRS-MDOKFSTUDIO-CORE-080,
+  -082 and -083 (proposed): a link to a requirement shows its full ID.
+- Sources: `test/site/requirementsViewer/layout.ts`, `pages.ts`, `viewer.css`, `viewer.js`,
+  `test/site/siteTheme.ts`.
+- Tests: `test/site/requirementsViewer/metroMap.test.ts`, `metroMap.browser.test.ts`,
+  `pages.test.ts`.
+
 ### The requirements viewer shows table scenarios, not empty columns (CR-440)
 
 - Changed: SwRS-MDOKFSTUDIO-CORE-082 (proposed): two new scenarios (a table scenario shows its table;

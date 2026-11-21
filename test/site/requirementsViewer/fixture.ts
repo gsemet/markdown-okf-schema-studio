@@ -125,3 +125,46 @@ export function fixtureReport(overrides: { generatedAt?: string } = {}): string 
     ],
   });
 }
+
+/** The id of the use case and of the behaviours of `fullIdReport`, with the `MDOKFSTUDIO` token of the real ids. */
+export const FULL_USE_CASE = "StRS-MDOKFSTUDIO-GFM-001";
+export const FULL_BEHAVIOUR = (number: number): string => `SwRS-MDOKFSTUDIO-GFM-${number}`;
+
+/** Two paths that share their last two states and one step (102), with one other outcome (103) at the shared state. */
+export const FULL_MAIN_PATHS = `### Main paths
+
+#### Path 1: Open the page, then save
+1. Home
+   - ${FULL_BEHAVIOUR(101)}: the writer opens the page
+2. Middle
+   - ${FULL_BEHAVIOUR(102)}: the writer saves
+   - Option ${FULL_BEHAVIOUR(103)} (refusal): the save is refused
+3. Done
+
+#### Path 2: Jump to the middle, then save
+1. Shortcut
+   - ${FULL_BEHAVIOUR(104)}: the writer jumps
+2. Middle
+   - ${FULL_BEHAVIOUR(102)}: the writer saves
+3. Done
+`;
+
+/**
+ * `fixtureReport` plus a use case with real-looking ids (`MDOKFSTUDIO`): `fixtureReport` ids carry no token, so
+ * they cannot show a full id from a short one. Active: use case GFM-001 (two paths) and behaviours 101 to 104;
+ * retired: use case GFM-002 and behaviour 109, both superseded by an active requirement.
+ */
+export function fullIdReport(): string {
+  const report = JSON.parse(fixtureReport()) as { requirements: unknown[] };
+  const own = { derivesFrom: [FULL_USE_CASE] };
+  report.requirements.push(
+    requirement(FULL_USE_CASE, "StRS", "gfm", { text: `## T\n\n${FULL_MAIN_PATHS}\n<!-- okf:links:start -->\n` }),
+    requirement("StRS-MDOKFSTUDIO-GFM-002", "StRS", "gfm", { lifecycle: "superseded", supersededBy: [FULL_USE_CASE] }),
+    requirement(FULL_BEHAVIOUR(101), "SwRS", "gfm", { ...own, text: SCENARIO("nominal", "Open") }),
+    requirement(FULL_BEHAVIOUR(102), "SwRS", "gfm", { ...own, text: SCENARIO("nominal", "Save") + SCENARIO("boundary", "Save twice") }),
+    requirement(FULL_BEHAVIOUR(103), "SwRS", "gfm", { ...own, text: SCENARIO("refusal", "Refused") }),
+    requirement(FULL_BEHAVIOUR(104), "SwRS", "gfm", { ...own, text: SCENARIO("nominal", "Jump") }),
+    requirement(FULL_BEHAVIOUR(109), "SwRS", "gfm", { ...own, lifecycle: "superseded", supersededBy: [FULL_BEHAVIOUR(101)] }),
+  );
+  return JSON.stringify(report);
+}

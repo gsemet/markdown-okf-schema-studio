@@ -281,7 +281,10 @@ On a pull request, CI runs only the simulated tests, which make up the required 
 have no Chromium and skip those tests; their report is under `out/reports/breakout/`; the tests
 assert the widths and the owner's verdicts on Windows, the reference, and are report-only on
 Linux CI: they print the widths and the verdicts and name each difference from Windows, and
-never fail on one) and `just ci-report visual`, which reports the real VS Code
+never fail on one; then the use case map tests, which write the requirements report and check in
+Chromium, in pinned fonts, that no text or pill of any use case map overlaps another at 1280 px and
+at 800 px, with captures of six frozen maps under `out/reports/requirements-viewer-graph/`) and
+`just ci-report visual`, which reports the real VS Code
 stage as skipped. The real VS Code window jobs (`ci-integration` and the
 `stress` repetitions) are heavy, so they run on every push to `main` and never on a pull request.
 On a branch, start them with

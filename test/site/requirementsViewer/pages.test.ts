@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { fixtureReport, requirement } from "./fixture";
+import { FULL_BEHAVIOUR, FULL_USE_CASE, fixtureReport, fullIdReport, requirement } from "./fixture";
 import { walkCount } from "./layout";
 import { parseRequirementsReport, type ViewerModel } from "./model";
 import { areaPage, behaviourPage, testKind, useCasePage } from "./pages";
@@ -166,4 +166,35 @@ test("a table scenario shows its table and a mixed scenario shows steps, note an
   const list = behaviourPage(model, model.byId.get("SwRS-X-011")!).body;
   assert.ok(list.includes('<div class="gwt">') && list.includes("<b>Given</b>") && list.includes("<b>When</b>") && list.includes("<b>Then</b>"));
   assert.ok(!list.includes("<table>"));
+});
+
+test("the line above the map names the paths and what they share", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  const single = load();
+  const one = useCasePage(single, single.byId.get("StRS-X-001")!).body;
+  assert.ok(one.includes('<p class="mapread">') && one.includes("one <b>path</b>") && one.includes("<b>situation</b>") && one.includes("<b>step</b>"));
+  assert.ok(!one.includes("Where paths meet"), "a single path shares nothing");
+  const model = load(fullIdReport());
+  const two = useCasePage(model, model.byId.get(FULL_USE_CASE)!).body;
+  assert.ok(two.includes("<b>2 paths</b>") && two.includes("Where paths meet, they share the circle or the step."));
+  assert.ok(two.includes("path 2: Jump to the middle, then save"), "the legend names each path with its title");
+  assert.ok(two.includes('<i class="lp1"></i>') && two.includes('<i class="lp2"></i>') && two.includes('<i class="lshared"></i>'));
+});
+
+test("a full ID is the text of every link to a requirement", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-083
+  const model = load(fullIdReport());
+  const useCase = useCasePage(model, model.byId.get(FULL_USE_CASE)!).body;
+  assert.ok(useCase.includes(`<span class="id">${FULL_BEHAVIOUR(102)}</span>`), "the list of behaviours");
+  assert.ok(useCase.includes(FULL_BEHAVIOUR(104)));
+  const behaviour = behaviourPage(model, model.byId.get(FULL_BEHAVIOUR(102))!).body;
+  assert.ok(behaviour.includes(`Step 2 of path 1 in <a`) && behaviour.includes(`>${FULL_USE_CASE}</a>`), "the where section names the use case");
+  assert.ok(useCase.includes(`>${FULL_BEHAVIOUR(101)}</a></span>`), "the replacement of a retired behaviour");
+  const retired = behaviourPage(model, model.byId.get(FULL_BEHAVIOUR(101))!).body;
+  assert.ok(retired.includes(`superseded by <a href="./">${FULL_BEHAVIOUR(101)}</a>`), "the replaced behaviour, on the page of its replacement");
+  const area = areaPage(model, model.areas[0]!).body;
+  assert.ok(area.includes(FULL_USE_CASE) && !/>GFM-001</u.test(area));
+  for (const html of [useCase, behaviour, retired, area]) assert.ok(!/>(?:GFM|MYST)-\d+</u.test(html), "no short ID as a text");
 });

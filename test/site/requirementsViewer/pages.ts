@@ -1,5 +1,5 @@
 import { escapeHtml } from "../socialCard";
-import { kindClass, mapSummary, metroList, metroSvg, plural, scenarioDots, testCount } from "./layout";
+import { kindClass, mapSummary, metroList, metroSvg, pathColour, plural, scenarioDots, testCount } from "./layout";
 import { citedIds, type MainPath } from "./mainPaths";
 import { behavioursOf, replacementsOf, retiredBehavioursOf, type Area, type Requirement, type Scenario, type ViewerModel } from "./model";
 import { VIEWER_DIR, areaDir, blobUrl, dirLink, pageLink, requirementDir, shortId } from "./urls";
@@ -17,7 +17,7 @@ function areaOf(model: ViewerModel, scope: string): Area {
 function retiredNote(model: ViewerModel, fromDir: string, requirement: Requirement): string {
   const replacements = replacementsOf(model, requirement).map((replacement) => {
     const href = pageLink(model, fromDir, replacement.id);
-    return href ? `<a href="${href}">${e(shortId(replacement.id))}</a>` : `<span>${e(shortId(replacement.id))}</span>`;
+    return href ? `<a href="${href}">${e(replacement.id)}</a>` : `<span>${e(replacement.id)}</span>`;
   });
   const by = replacements.length > 0 ? `superseded by ${replacements.join(", ")}` : requirement.lifecycle;
   return `<span class="tag">${e(requirement.lifecycle)}</span> <span class="by">${by}</span> <a class="src" href="${e(blobUrl(model, requirement.file))}">Markdown file</a>`;
@@ -35,10 +35,10 @@ export function areaPage(model: ViewerModel, area: Area): PageSpec {
   const cases = model.active.filter((requirement) => requirement.tier === "StRS" && requirement.scope === area.id);
   const items = cases.map((useCase) => {
     const count = behavioursOf(model, useCase.id).length;
-    return `<li><a class="stop" href="${dirLink(dir, requirementDir(useCase))}"><span class="id">${e(shortId(useCase.id))}</span><span class="t">${e(useCase.title)}</span><span class="need">${e(stripLead(useCase.userNeed))}</span><span class="meta">${plural(count, "behaviour")}</span></a></li>`;
+    return `<li><a class="stop" href="${dirLink(dir, requirementDir(useCase))}"><span class="id">${e(useCase.id)}</span><span class="t">${e(useCase.title)}</span><span class="need">${e(stripLead(useCase.userNeed))}</span><span class="meta">${plural(count, "behaviour")}</span></a></li>`;
   });
   const retired = model.retired.filter((requirement) => requirement.tier === "StRS" && requirement.scope === area.id).map((useCase) =>
-    `<li class="retired"><div class="stop"><span class="id">${e(shortId(useCase.id))}</span><span class="t">${e(useCase.title)}</span><span class="need">${retiredNote(model, dir, useCase)}</span></div></li>`);
+    `<li class="retired"><div class="stop"><span class="id">${e(useCase.id)}</span><span class="t">${e(useCase.title)}</span><span class="need">${retiredNote(model, dir, useCase)}</span></div></li>`);
   const linked = area.linkedPercent === undefined ? "n/a" : `${area.linkedPercent}%`;
   const body = `
 <p class="eyebrow"><span class="sw" style="background:${e(area.colour)}"></span>Area</p>
@@ -61,17 +61,24 @@ ${area.description ? `<p class="lead">${e(area.description)}</p>` : ""}
 
 function behaviourRow(model: ViewerModel, fromDir: string, behaviour: Requirement, onMap: ReadonlySet<string> | undefined): string {
   const tag = onMap && !onMap.has(behaviour.id) ? '<span class="tag">not on the map</span>' : "";
-  return `<a class="brow" href="${pageLink(model, fromDir, behaviour.id) ?? ""}"><span class="id">${e(shortId(behaviour.id))}</span><span class="t">${e(behaviour.title)} ${tag}</span><span class="m">${scenarioDots(behaviour.scenarios)}</span><span class="m">${testCount(behaviour.testedIn.length)}</span></a>`;
+  return `<a class="brow" href="${pageLink(model, fromDir, behaviour.id) ?? ""}"><span class="id">${e(behaviour.id)}</span><span class="t">${e(behaviour.title)} ${tag}</span><span class="m">${scenarioDots(behaviour.scenarios)}</span><span class="m">${testCount(behaviour.testedIn.length)}</span></a>`;
 }
 
 function mapSection(model: ViewerModel, dir: string, paths: readonly MainPath[]): string {
   const summary = mapSummary(model, paths);
   const plays = paths.map((_, index) => `<button class="btn play" type="button" data-play="${index}">Play path ${index + 1}</button>`).join("");
-  const keys = paths.map((_, index) => `<i class="lp${index + 1}"></i>path ${index + 1}`).join(" ");
+  const startsShared = (index: number): boolean => paths.slice(0, index).some((earlier) => earlier.steps.some((step) => step.state === paths[index]?.steps[0]?.state));
+  const keys = paths.map((path, index) => `<span><i class="lp${Math.min(index, 2) + 1}"></i>path ${index + 1}: ${e(path.title)}${startsShared(index) ? `, starts at <b class="pnum" style="background:${pathColour(index)}">${index + 1}</b>` : ""}</span>`).join(" ");
+  const shares = paths.some((path, index) => paths.slice(0, index).some((earlier) => earlier.steps.some((step) => path.steps.some((other) => other.state === step.state))));
+  const ways = paths.length === 1 ? "one <b>path</b> (the coloured line)" : `<b>${paths.length} paths</b>, one per coloured line`;
+  const read = `This use case <span class="soft">(StRS)</span> is reached by ${ways}. A path goes from one <b>situation</b> (circle) to the next; each <b>step</b> (pill) is a behaviour <span class="soft">(SwRS)</span> with its own tests.${shares ? " Where paths meet, they share the circle or the step." : ""}`;
+  const stepKeys = paths.map((path) => new Set(path.steps.map((step, at) => `${step.state}>${step.via?.id ?? ""}>${path.steps[at + 1]?.state ?? ""}`).filter((key) => !key.endsWith(">>"))));
+  const sharesStep = stepKeys.some((keys, index) => stepKeys.slice(0, index).some((earlier) => [...keys].some((key) => earlier.has(key))));
+  const sharedKey = sharesStep ? ` <span><i class="lshared"></i>shared step</span>` : "";
   return `<h2>How it is split</h2>
-<p class="hint">Circles are the states a user goes through; each label between two states is a <b>behaviour</b>, one rule tested on its own, on a thick line for a path and on a dashed line for another outcome at a state.</p>
 <div class="map">
-  <div class="maptools">${plays}<span class="legend">${keys} <i class="lalt"></i>other outcome <span class="dots"><i class="nom"></i></span>nominal <span class="dots"><i class="bnd"></i></span>boundary <span class="dots"><i class="ref"></i></span>refusal scenario</span></div>
+  <p class="mapread">${read}</p>
+  <div class="maptools">${plays}<span class="legend"><span>${keys}${sharedKey} <span><i class="lalt"></i>other outcome</span></span><span class="legend-dots">one dot = one scenario checked: <span class="dots"><i class="nom"></i></span>nominal <span class="dots"><i class="bnd"></i></span>boundary <span class="dots"><i class="ref"></i></span>refusal</span></span></div>
   ${metroSvg(model, paths, dir)}
   ${metroList(model, paths, dir)}
 </div>
@@ -88,7 +95,7 @@ export function useCasePage(model: ViewerModel, useCase: Requirement): PageSpec 
     ? mapSection(model, dir, paths)
     : '<h2>How it is split</h2>\n<p class="hint">The paths of this use case are not written yet, so there is no map: its behaviours are listed below.</p>';
   const retired = retiredBehavioursOf(model, useCase.id).map((behaviour) =>
-    `<div class="brow retired"><span class="id">${e(shortId(behaviour.id))}</span><span class="t">${e(behaviour.title)} ${retiredNote(model, dir, behaviour)}</span><span class="m"></span><span class="m"></span></div>`);
+    `<div class="brow retired"><span class="id">${e(behaviour.id)}</span><span class="t">${e(behaviour.title)} ${retiredNote(model, dir, behaviour)}</span><span class="m"></span><span class="m"></span></div>`);
   const svg = model.diagrams.get(useCase.id);
   const diagram = svg === undefined
     ? ""
@@ -127,11 +134,11 @@ function whereSection(model: ViewerModel, dir: string, behaviour: Requirement): 
   for (const parentId of behaviour.derivesFrom) {
     const parent = model.byId.get(parentId);
     if (!parent?.active) continue;
-    const link = `<a href="${dirLink(dir, requirementDir(parent))}">${e(shortId(parent.id))}</a>`;
+    const link = `<a href="${dirLink(dir, requirementDir(parent))}">${e(parent.id)}</a>`;
     const paths = model.paths.get(parent.id) ?? [];
     let block: string | undefined;
     for (const [pathIndex, path] of paths.entries()) {
-      const colour = `var(--${pathIndex === 0 ? "p1" : "p2"})`;
+      const colour = pathColour(pathIndex);
       const index = path.steps.findIndex((step) => step.via?.id === behaviour.id);
       if (index >= 0) {
         const track = path.steps.map((_, j) => `<span class="${j === index ? "cur" : ""}"><i></i>${j < path.steps.length - 1 ? "<b></b>" : ""}</span>`).join("");
@@ -206,7 +213,7 @@ export function behaviourPage(model: ViewerModel, behaviour: Requirement): PageS
     : "";
   const replaced = model.retired.filter((old) => old.tier === "SwRS" && replacementsOf(model, old).some((candidate) => candidate.id === behaviour.id));
   const replaces = replaced.length > 0
-    ? `<div class="retired"><h2>Replaces</h2><div class="blist">${replaced.map((old) => `<div class="brow retired"><span class="id">${e(shortId(old.id))}</span><span class="t">${e(old.title)} ${retiredNote(model, dir, old)}</span><span class="m"></span><span class="m"></span></div>`).join("")}</div></div>`
+    ? `<div class="retired"><h2>Replaces</h2><div class="blist">${replaced.map((old) => `<div class="brow retired"><span class="id">${e(old.id)}</span><span class="t">${e(old.title)} ${retiredNote(model, dir, old)}</span><span class="m"></span><span class="m"></span></div>`).join("")}</div></div>`
     : "";
   const body = `
 <p class="eyebrow"><span class="sw" style="background:${e(area.colour)}"></span>Behaviour ${e(shortId(behaviour.id))}</p>

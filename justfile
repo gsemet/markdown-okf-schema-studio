@@ -281,7 +281,10 @@ ci-static:
 
 # CI job "visual": the visual end-to-end stage, reports under out/reports/e2e, then the table
 # breakout width tests in Chromium (which must start: STUDIO_REQUIRE_CHROMIUM=1), report under
-# out/reports/breakout/. Both run even when the first fails, so one run reports both.
+# out/reports/breakout/, then the use case map overlap tests in Chromium (STUDIO_REQUIRE_CHROMIUM=1, with the
+# requirements report, which `just requirements-report` writes), report under out/reports/viewer-graph/, captures under
+# out/reports/requirements-viewer-graph/.
+# All run even when one fails, so one run reports them all.
 ci-visual:
     #!/usr/bin/env bash
     set -uo pipefail
@@ -289,6 +292,8 @@ ci-visual:
     failed=0
     {{ npm }} run test:visual || failed=1
     STUDIO_REQUIRE_CHROMIUM=1 {{ npm }} run test:breakout || failed=1
+    just requirements-report || failed=1
+    STUDIO_REQUIRE_CHROMIUM=1 STUDIO_REQUIRE_REQUIREMENTS_REPORT=1 {{ npm }} run test:viewer-graph || failed=1
     if [ "$failed" = 0 ]; then
         echo "ci-visual: passed"
     else

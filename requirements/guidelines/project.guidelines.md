@@ -32,7 +32,7 @@ an entry goes in a `### Topic` sub-heading under its date, never in the date hea
 
 A StRS describes a whole use case: A, then B, then C gives D. Testing every way through it end to
 end is too combinatorial; its SwRS are the options at each state, each tested on its own. A StRS
-may therefore carry a `### Main paths` section that names one or two paths through the use case,
+may therefore carry a `### Main paths` section that names one to three paths through the use case,
 step by step, each step backed by the SwRS that moves the user to the next state.
 
 ```markdown
@@ -61,7 +61,7 @@ step by step, each step backed by the SwRS that moves the user to the next state
 - The last state of a path has no bullet.
 - A SwRS that derives from the StRS and appears in no path is read as "also serves this need"; it
   is not written in the StRS.
-- One or two paths per StRS. A StRS whose SwRS do not form a path has no section.
+- One to three paths per StRS. A StRS whose SwRS do not form a path has no section.
 - Every cited SwRS exists, is active (`req_lifecycle` is `draft`, `proposed` or `approved`, not
   `deprecated` nor `superseded`; a `draft` SwRS may be cited) and has that StRS in its
   `derives_from`, or is listed in that StRS's `depends_on` (a shared rule the use case relies on).
