@@ -25,6 +25,7 @@ implemented_in_files:
 - src/host-vscode/openingWatcher.ts
 tested_in_files:
 - test/host/openingWatcher.test.ts
+- test/integration/openAtLine.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -52,7 +53,7 @@ When a text tab opens, the opening watcher SHALL read its line from the selectio
 
 ### Verification notes
 
-- Method: test/host/openingWatcher.test.ts (the real activation against the fake vscode module). The editor of a restored tab and the trial signals (T2 jump versus reopening, T3 reopened as text, T11 the opening that triggered the activation) are decided by the real VS Code trials of round 4: today the activation opening is never replaced.
+- Method: test/host/openingWatcher.test.ts (the real activation against the fake vscode module). The line is the selection of a change of kind Command (trial T2, VS Code 1.147.0: a jump selects with that kind, a plain reopening restores the cursor with no kind), read within 200 ms after the editor shows; the wait for the editor ends after 3 s or when the tab closes. A text editor reopened as text from a Studio tab is kept when the opening is plain (trial T3c); Open With > Text Editor is replaced (T3d, known limit). The opening that triggered the activation is never replaced, since no signal tells it from a restored tab (trial T11 not run as an automated test): see docs/known-limitations.md.
 - Criteria: each outcome of the tables above holds.
 
 <!-- okf:links:start -->

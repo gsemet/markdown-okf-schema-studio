@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+### Open Studio at a searched line: real VS Code trials and known limits (CR-445, round 4)
+
+- Changed: SwRS-MDOKFSTUDIO-LIFE-185 (the jump is a selection change of kind Command, trial T2; the wait for the editor ends after 3 s or on close; the activation opening is never replaced, trial T11 not automated); SwRS-MDOKFSTUDIO-LIFE-184 (rule 5 keeps a plain opening reopened as text; a jump right after a Studio tab closed is a jump, trial T13; known limits T4 and T3d).
+
 ### Open Studio at a searched line: the opening policy and watcher, the marker's rounds (CR-445, round 3)
 
 - Added: SwRS-MDOKFSTUDIO-LIFE-184 (the nine ordered rules of the opening policy) and SwRS-MDOKFSTUDIO-LIFE-185 (the opening watcher: reads the line from the editor selection, waits for the editor association migration, never replaces a tab present at start), both proposed and deriving from StRS-MDOKFSTUDIO-LIFE-023.

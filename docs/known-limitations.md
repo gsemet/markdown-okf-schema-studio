@@ -71,6 +71,22 @@ Fenced `diff` and `patch` blocks are supported as visualization-only rendered co
 text and leading `+` or `-` markers are preserved; the preview does not calculate a comparison,
 offer per-line navigation, or change the separate native source/version diff experience.
 
+## Opening Files
+
+Studio opens a Markdown file in place of a text editor that VS Code already showed, so what the
+settings `open.searchResultsInStudio` and `open.markdownFilesInStudio` promise has these limits,
+measured on VS Code 1.147.0 on Windows:
+
+- The raw text can flash: a first opening shows the text editor for about 70 ms, then an empty
+  group for about 370 ms, before Studio.
+- A Studio tab that is pinned or is a preview tab does not move to a line when a search result or
+  Quick Open `file.md:40` targets it: the line and the marker are lost, the Studio tab stays where it is.
+- **Open as Text** on a document with unsaved changes asks to save first.
+- **Open With... > Text Editor** is replaced by Studio while `open.markdownFilesInStudio` is on. Use
+  **Open as Text** or **Reopen Editor With... > Text Editor**, which stay text.
+- The first Markdown file you open, the one that activates the extension, can open as text: the
+  watcher cannot tell it from a tab restored with the window. Reopen it, or open any later file.
+
 ## Installation Boundary
 
 The VSIX is installed into a VS Code profile, not into one workspace. The default install command is

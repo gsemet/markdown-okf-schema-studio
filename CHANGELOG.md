@@ -16,6 +16,10 @@
   now show as a blank-lines block you can reach with the arrow keys, click or press Enter on to
   write a block in their place, or remove with Delete or its Delete block button, which keeps one
   blank line.
+- A search result, a Quick Open `file.md:40` or a link to a line opens Studio at that line, with an
+  arrow marker in the margin (setting `open.searchResultsInStudio`, on by default). The new setting
+  `open.markdownFilesInStudio` opens every Markdown file in Studio and replaces the
+  `workbench.editorAssociations` entry; **Open as Text** reads the raw text of one file.
 
 ## 1.10.0 - 2026-11-20
 

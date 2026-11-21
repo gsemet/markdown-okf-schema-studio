@@ -25,6 +25,26 @@ For a side-by-side source and preview, select the book icon in the editor title 
 
 Every image in this guide opens at full size when selected.
 
+## Open at a line
+
+A search result, a **Go to Line** in Quick Open (`file.md:40`) or a link that opens a Markdown file
+at a line opens Studio at that line, and an arrow in the margin marks it. The arrow disappears on
+your next click, keystroke or scroll. A file that is already shown in Studio is revealed at the
+line, in the group where it is, instead of opening a second tab.
+
+Two settings under **Opening Files** (see [Settings](settings.md)) decide what opens in Studio:
+
+- `open.searchResultsInStudio` (default on): a search result or a jump to a line opens Studio.
+- `open.markdownFilesInStudio` (default off): every Markdown file you open opens in Studio, from
+  the Explorer, Quick Open or a link. It replaces the `workbench.editorAssociations` entry for
+  `*.md` that older versions asked for: the first time, Studio moves that entry to this setting.
+
+To read the raw text on purpose, run **Markdown OKF-Schema Studio: Open as Text** (or **Reopen
+Editor With... > Text Editor**). That text editor stays text. A diff stays a text diff.
+
+Studio shows the text editor for a moment before it replaces it, so a first opening can flash the
+raw text. See [Known Limitations](../known-limitations.md#opening-files) for what is not covered.
+
 ## In the Agents window
 
 The Agents window is a VS Code feature. Other editors, such as VSCodium, Cursor and Windsurf, have

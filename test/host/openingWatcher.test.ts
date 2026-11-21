@@ -52,14 +52,14 @@ test("a plain opening stays a text editor by default and becomes a Studio tab wi
   const studio = start(t);
   const file = writeFile("# A\n");
   fake.controls.openTab(file);
-  await studio.settle();
+  await studio.advance(300);
   assert.equal(openWith().length, 0);
   assert.deepEqual(fake.controls.closedTabs, []);
 
   fake.controls.configuration.values.set(MARKDOWN_IN_STUDIO, { globalValue: true });
   const other = writeFile("# B\n");
   const tab = fake.controls.openTab(other);
-  await studio.settle();
+  await studio.advance(300);
   assert.equal(openWith().length, 1);
   assert.deepEqual(fake.controls.closedTabs, [tab]);
   assert.equal(studio.activation.lineRequests.takePending(uriOf(other)), undefined);
@@ -72,6 +72,23 @@ test("a jump with Open search results in Studio off stays a text editor", async 
   fake.controls.openTab(writeFile("# A\n"), { line: 3 });
   await studio.settle();
   assert.equal(openWith().length, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-185
+test("a plain reopening that restores the last cursor (a selection change of no kind) is not a jump", async (t) => {
+  const studio = start(t);
+  const file = writeFile("# A\n");
+  fake.controls.openTab(file, { restoredLine: 30 });
+  await studio.advance(300);
+  assert.equal(openWith().length, 0, "searches only: a restored cursor stays a text editor");
+
+  fake.controls.configuration.values.set(MARKDOWN_IN_STUDIO, { globalValue: true });
+  const other = writeFile("# B\n");
+  const tab = fake.controls.openTab(other, { restoredLine: 12 });
+  await studio.advance(300);
+  assert.equal(openWith().length, 1);
+  assert.deepEqual(fake.controls.closedTabs, [tab]);
+  assert.equal(studio.activation.lineRequests.takePending(uriOf(other)), undefined, "the restored cursor is no line to reveal");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-185
@@ -100,7 +117,7 @@ test("the settings are read after the editor association migration wrote them", 
   // A plain opening right at the start: it counts only once the migration turned the setting on.
   const file = writeFile("# A\n");
   const tab = fake.controls.openTab(file);
-  await studio.settle();
+  await studio.advance(300);
   assert.ok(fake.controls.configuration.updates.some((update) => update.key === "markdownFilesInStudio" && update.value === true),
     "the migration turned Open Markdown files in Studio on");
   assert.equal(openWith().length, 1, "the watcher saw the migrated setting");
@@ -132,8 +149,25 @@ test("a text editor Studio opened itself, and one reopened as text from a Studio
   fake.controls.events.changeTabs.fire({ opened: [], closed: [], changed: [studioTab] });
   fake.controls.studioTabs.splice(fake.controls.studioTabs.indexOf(studioEntry), 1);
   fake.controls.events.changeTabs.fire({ opened: [], closed: [studioTab], changed: [] });
-  fake.controls.openTab(reopened, { line: 6 });
-  await studio.settle();
+  fake.controls.openTab(reopened);
+  await studio.advance(300);
   assert.equal(openWith().length, 0);
   assert.deepEqual(fake.controls.closedTabs, []);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-185
+test("a jump right after a Studio tab of the file closed is a jump, not a reopening as text", async (t) => {
+  const studio = start(t);
+  const file = writeFile("# Jump\n");
+  const studioEntry = { viewColumn: 1, filePath: file, isActive: true };
+  fake.controls.studioTabs.push(studioEntry);
+  const studioTab = fake.vscode.window.tabGroups.all.flatMap((group) => group.tabs).at(-1)!;
+  fake.controls.events.changeTabs.fire({ opened: [], closed: [], changed: [studioTab] });
+  fake.controls.studioTabs.splice(fake.controls.studioTabs.indexOf(studioEntry), 1);
+  fake.controls.events.changeTabs.fire({ opened: [], closed: [studioTab], changed: [] });
+  const tab = fake.controls.openTab(file, { line: 40, isPreview: true });
+  await studio.settle();
+  assert.equal(openWith().length, 1);
+  assert.deepEqual(fake.controls.closedTabs, [tab]);
+  assert.equal(studio.activation.lineRequests.takePending(uriOf(file)), 40);
 });
