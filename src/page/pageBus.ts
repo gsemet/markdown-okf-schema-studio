@@ -44,6 +44,8 @@ export function createPageBus<Events extends PageEventMap>(): PageBus<Events> {
 export interface PageEvents extends PageEventMap {
   /** The rendered content was replaced in place (content patch); its listeners are bound again. */
   contentReplaced: undefined;
+  /** The layout was measured again after a size or content change (the scroll anchor is applied). */
+  layoutMeasured: undefined;
   /** A file a PlantUML diagram includes changed; the diagrams that include it draw again. */
   plantUmlIncludesChanged: undefined;
 }

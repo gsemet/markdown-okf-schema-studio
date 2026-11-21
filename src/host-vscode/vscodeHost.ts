@@ -34,7 +34,8 @@ import { createWorkerRenderer } from "../node-services/renderWorker";
 import { nodeSchemaFiles } from "../node-services/schemaFiles";
 import { lastKeystrokeAt } from "./keystrokes";
 import { createVscodeDocumentStore, type VscodeDocumentStore } from "./documents";
-import { StudioOpenedTextEditors } from "./openInStudio";
+import { StudioLineRequests, StudioOpenedTextEditors } from "./openInStudio";
+import { putStudioInPlace } from "./studioPlacement";
 
 /** The VS Code host's ports, with the VS Code-only parts of its document store and its assets. */
 export interface VscodeHost extends HostServices {
@@ -279,7 +280,7 @@ function createVscodeWatcher(): Watcher {
 /** The only schemes handed to the operating system. */
 const EXTERNAL_URI_SCHEMES: ReadonlySet<string> = new Set(["http", "https", "mailto"]);
 
-function createVscodeNavigation(openedByStudio: StudioOpenedTextEditors): Navigation {
+function createVscodeNavigation(openedByStudio: StudioOpenedTextEditors, lineRequests: StudioLineRequests): Navigation {
   return {
     async showDocument(documentId, selection) {
       const targetUri = vscode.Uri.parse(documentId);
@@ -290,6 +291,19 @@ function createVscodeNavigation(openedByStudio: StudioOpenedTextEditors): Naviga
         viewColumn: existingGroup?.viewColumn ?? vscode.ViewColumn.One,
         preview: false,
         ...(selection ? { selection: toVscodeRange(selection) } : {}),
+      });
+    },
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-182
+    async showDocumentInStudio(documentId, line) {
+      const uri = vscode.Uri.parse(documentId);
+      // Studio's own navigation opens no text editor: nothing is replaced, nothing flashes. It starts
+      // from the group the reader is in: a Studio tab of the file there is revealed, else the most
+      // recently active one of another group, else a new tab opens in this group.
+      await putStudioInPlace(lineRequests, {
+        uri,
+        ...(line === undefined ? {} : { line }),
+        column: vscode.window.tabGroups.activeTabGroup.viewColumn,
+        action: "studio-at-line",
       });
     },
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-090
@@ -375,7 +389,10 @@ function createVscodeLogger(): Logger {
 }
 
 /** Creates the VS Code host; its text editor openings are recorded in `openedByStudio`. */
-export function createVscodeHost(openedByStudio = new StudioOpenedTextEditors()): VscodeHost {
+export function createVscodeHost(
+  openedByStudio = new StudioOpenedTextEditors(),
+  lineRequests = new StudioLineRequests(),
+): VscodeHost {
   const documents = createVscodeDocumentStore();
   const logger = createVscodeLogger();
   return {
@@ -404,7 +421,7 @@ export function createVscodeHost(openedByStudio = new StudioOpenedTextEditors())
     logger,
     watcher: createVscodeWatcher(),
     processes: createNodeProcessRunner(),
-    navigation: createVscodeNavigation(openedByStudio),
+    navigation: createVscodeNavigation(openedByStudio, lineRequests),
     editors: createVscodeEditors(documents),
     theme: createVscodeTheme(),
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-004

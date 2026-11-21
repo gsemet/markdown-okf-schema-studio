@@ -63,8 +63,8 @@ files of a session whose working folder is on this machine. Remote or cloud agen
 folders are not local `file` folders, are not supported.
 
 The stock Markdown preview and its `markdown.*` settings remain separate. Opening a Markdown file
-activates the extension, which then starts only its registrations and the editor association
-migration; the preview engine, the watchers and the diagnostics start with the first Studio preview.
+activates the extension, which then starts only its registrations, the editor association
+migration and the opening watcher; the preview engine, the watchers and the diagnostics start with the first Studio preview.
 Other files do not activate it.
 
 Fenced `diff` and `patch` blocks are supported as visualization-only rendered code. Their literal

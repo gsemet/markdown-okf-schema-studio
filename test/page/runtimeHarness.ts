@@ -192,6 +192,7 @@ export class RuntimeElement {
         return element.getAttribute("data-sphinx-source-file") !== null
           && element.getAttribute("data-sphinx-source-line") !== null;
       }
+      if (selector === ".myst-code-line") return element.className.split(" ").includes("myst-code-line");
       if (selector === "table, figure, img, pre, .myst-mermaid-diagram") {
         return ["TABLE", "FIGURE", "IMG", "PRE"].includes(element.tagName)
           || element.className.split(" ").includes("myst-mermaid-diagram");
@@ -261,6 +262,7 @@ export class RuntimeElement {
         || (selector === "tr[data-okf-field]" && current.tagName === "TR" && current.getAttribute("data-okf-field") !== null)
         || (selector === "td, th" && ["TD", "TH"].includes(current.tagName))
         || (selector === "table" && current.tagName === "TABLE")
+        || (selector === "details" && current.tagName === "DETAILS")
         || (selector === "[data-okf-row-handle]" && current.getAttribute("data-okf-row-handle") !== null)
         || (selector === "[data-okf-col-handle]" && current.getAttribute("data-okf-col-handle") !== null)
         || (selector === "[data-okf-list-item-handle]" && current.getAttribute("data-okf-list-item-handle") !== null)
@@ -310,6 +312,7 @@ export class RuntimeElement {
   public appendChild(child: RuntimeElement): RuntimeElement {
     child.parentElement?.removeChild(child);
     child.parentElement = this;
+    child.removed = false;
     this.childElements.push(child);
     if (this.tagName === "SELECT" && child.selected) this.value = child.value;
     return child;

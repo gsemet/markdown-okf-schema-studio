@@ -538,6 +538,8 @@ export class RenderingController extends PageDocumentController {
     // The webview already applied the anchor passed at render time; only refresh the
     // selection marker so a re-render never triggers a second scroll.
     manager.scroll.markEditorSelectionInPreview(preview);
+    // A Studio tab opened at a line: reveal and mark it (after the restored reading place).
+    manager.scroll.postPendingRevealLine(preview);
     // The page starts with both buttons disabled: tell it what the history of this panel allows.
     manager.history.postHistoryState(preview);
     // A pairing or theme change announced before the page listened did not reach it.

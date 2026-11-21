@@ -35,6 +35,8 @@ export interface ScrollState {
     /** Renders of an older document version (an in-flight autosave build) must not consume the pin. */
     minVersion: number;
   };
+  /** A line the page is asked to reveal and mark once it is ready (Studio opened at a line). */
+  pendingRevealLine?: number;
   lastSourceScrollLine?: number;
   lastRevealedSourceLine?: number;
   /**
@@ -237,6 +239,44 @@ export class ScrollSyncController {
     }
     const firstVisibleLine = this.visibleEditorFor(preview)?.firstVisibleLine;
     return firstVisibleLine !== undefined ? firstVisibleLine + 1 : undefined;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-181
+  /**
+   * Asks the page to reveal and mark a 1-based source line: at once when the page already shows
+   * its render, else when it reports ready (`postPendingRevealLine`).
+   */
+  public requestRevealLine(preview: PreviewSession, line: number): void {
+    if (!Number.isSafeInteger(line) || line < 1) {
+      return;
+    }
+    preview.scroll.pendingRevealLine = line;
+    const stage = preview.stage;
+    if (stage && preview.page.readyRequestId === stage.requestId) {
+      this.postPendingRevealLine(preview);
+    }
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-181
+  /**
+   * Posts the requested line once. The requested line wins over the reading place the page
+   * restored: it also becomes the anchor of the next render of this preview.
+   */
+  public postPendingRevealLine(preview: PreviewSession): void {
+    const line = preview.scroll.pendingRevealLine;
+    const stage = preview.stage;
+    if (line === undefined || preview.disposed || !stage) {
+      return;
+    }
+    preview.scroll.pendingRevealLine = undefined;
+    preview.scroll.anchor = { line, owner: "preview", documentId: preview.documentUri };
+    fireAndForget(this.manager.host.logger, preview.postToPage({
+      type: "previewRevealLine",
+      documentId: stage.activeDocumentIdentity,
+      revision: revisionOfStage(stage),
+      requestId: stage.requestId,
+      line,
+    }), "postToPage");
   }
 
   /** Marks the editor's caret line in the page. */

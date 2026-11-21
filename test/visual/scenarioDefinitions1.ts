@@ -52,6 +52,7 @@ import { TABLE_IN_CONTAINER_SCENARIOS } from "./tableInContainerScenarios";
 import { LIST_ITEM_HANDLE_SCENARIOS } from "./listItemHandleScenarios";
 import { DELETE_BLOCK_BAR_SCENARIOS } from "./deleteBlockBarScenarios";
 import { BLANK_LINES_BLOCK_SCENARIOS } from "./blankLinesBlockScenarios";
+import { LINE_MARKER_SCENARIOS } from "./lineMarkerScenarios";
 import { FRONTMATTER_CLICK_SCENARIOS } from "./frontmatterClickScenarios";
 import { LABEL_RENAME_SCENARIOS } from "./labelRenameScenarios";
 import { MATH_SCENARIOS } from "./mathScenarios";
@@ -483,6 +484,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...ADMONITION_TYPE_PICKER_SCENARIOS,
   ...CARD_GRID_FORM_SCENARIOS,
   ...REVIEW_MARKS_HIDDEN_SCENARIOS,
+  ...LINE_MARKER_SCENARIOS,
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
   ...FRONTMATTER_COLLAPSE_SCENARIOS,
   ...TOOLBAR_FLOAT_SCENARIOS,

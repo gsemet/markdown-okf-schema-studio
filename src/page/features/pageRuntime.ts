@@ -65,6 +65,7 @@ import type { Checkboxes } from "./checkboxes";
 import type { LinkTooltip } from "./linkTooltip";
 import type { StatusRegion } from "./statusRegion";
 import type { StickyHeadings } from "./stickyHeadings";
+import type { LineMarker } from "./lineMarker";
 import type { ThemeMode } from "./themeMode";
 
 /** The palette modes of the block editor (see `PALETTE_MODES`). */
@@ -458,6 +459,10 @@ export interface ScrollCore {
   keepReadingLine(): void;
   /** Puts an element at the reading line, below the sticky heading band. */
   revealElement(target: Element): void;
+  /** The measured block holding a source line (the nearest one when none does). */
+  entryForLine(sourceLine: number): LayoutEntry | undefined;
+  /** Scrolls silently so a document y sits at the reading line; its source line becomes the anchor. */
+  revealPositionSilently(documentY: number, sourceLine: number): void;
   /** `sourceScroll`: the text editor scrolled or its selection moved. */
   followSourceScroll(message: SourceScrollMessage): void;
   /** `navigateAnchor`: a same-page link. */
@@ -761,6 +766,7 @@ export interface PageRuntime {
   parts: PageParts;
   blocks: MappedBlocks;
   scroll: ScrollCore;
+  lineMarker: LineMarker;
   textControls: TextControls;
   blockEditor: BlockEditor;
   blockSourceEditor: BlockSourceEditor;

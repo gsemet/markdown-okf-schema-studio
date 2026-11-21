@@ -150,25 +150,30 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
   function clearMarkedSourceLine(): void {
     document.querySelectorAll(MAPPINGS_SELECTOR).forEach((element) => {
       element.removeAttribute?.("data-sphinx-preview-current");
-      element.removeAttribute?.("aria-current");
+      // The line marker owns `aria-current` on its block while it shows (features/lineMarker.ts).
+      if (!element.getAttribute?.("data-sphinx-line-marker")) element.removeAttribute?.("aria-current");
     });
+  }
+
+  // The block that contains the line (the innermost one when blocks nest); a line between two
+  // blocks, or outside every block, takes the block with the nearest edge.
+  function entryForLine(sourceLine: number): LayoutEntry | undefined {
+    const distance = (entry: LayoutEntry): number =>
+      sourceLine < entry.sourceLine
+        ? entry.sourceLine - sourceLine
+        : Math.max(0, sourceLine - entry.endLine);
+    return layout.reduce<LayoutEntry | undefined>((best, candidate) => {
+      if (!best) return candidate;
+      const gap = distance(candidate) - distance(best);
+      return gap < 0 || (gap === 0 && candidate.sourceLine > best.sourceLine) ? candidate : best;
+    }, undefined);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-128
   function markSourceLine(sourceLine: number): void {
     clearMarkedSourceLine();
     if (!settings.markEditorSelection || !Number.isFinite(sourceLine) || !layout.length) return;
-    // The block that contains the line (the innermost one when blocks nest); a line between two
-    // blocks takes the block with the nearest edge.
-    const distance = (entry: LayoutEntry): number =>
-      sourceLine < entry.sourceLine
-        ? entry.sourceLine - sourceLine
-        : Math.max(0, sourceLine - entry.endLine);
-    const nearest = layout.reduce<LayoutEntry | undefined>((best, candidate) => {
-      if (!best) return candidate;
-      const gap = distance(candidate) - distance(best);
-      return gap < 0 || (gap === 0 && candidate.sourceLine > best.sourceLine) ? candidate : best;
-    }, undefined);
+    const nearest = entryForLine(sourceLine);
     nearest?.element?.setAttribute?.("data-sphinx-preview-current", "true");
     nearest?.element?.setAttribute?.("aria-current", "location");
   }
@@ -441,7 +446,16 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
       rt.parts.stickyBand.updateStickyHeadings();
       rt.parts.tocColumn.remeasure();
       rt.parts.incomingChanges.layout();
+      rt.bus.emit("layoutMeasured", undefined);
     });
+  }
+
+  // Scrolls silently so a document position sits at the reading line, and takes its line as the
+  // anchor (the page does not post `previewScroll`: the request came from the host).
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-178
+  function revealPositionSilently(documentY: number, sourceLine: number): void {
+    programmaticScroll(anchorPolicy.scrollTopForY(documentY, readingOffset(), maxScrollTop()));
+    state.anchor = { line: lineAtScroll(window.scrollY) ?? sourceLine, owner: "preview" };
   }
 
   // Zoom changes layout only: keep the source line at the reading line across it.
@@ -499,6 +513,8 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     markWideTables,
     keepReadingLine,
     revealElement,
+    entryForLine,
+    revealPositionSilently,
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-100
     followSourceScroll(message) {
       markSourceLine(Number(message.selectionLine ?? message.line));
