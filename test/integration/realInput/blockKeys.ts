@@ -410,33 +410,42 @@ const LIST_BEFORE_BLANK_LINES = ["# Clip", "", "Alpha paragraph.", "", "- item a
   .join("\n");
 const LIST_MARKDOWN = "- item a\n- item b";
 
-/**
- * Opens the side preview of `document` in edit mode and selects the list that ends on two blank
- * lines. Asserts that the page maps the list up to a blank line, so the host plans a range that
- * ends on it.
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
- */
-async function selectListFollowedByBlankLines(page: Page, document: vscode.TextDocument): Promise<void> {
-  await openSidePreview(document);
-  await waitForRender(document);
-  await setEditMode(page, true);
-  const selected = (): Promise<{ text: string; line: number; endLine: number }[]> => withCurrentFrame(page, (frame) =>
+type SelectedBlock = { text: string; line: number; endLine: number };
+
+function selectedBlocks(page: Page): Promise<SelectedBlock[]> {
+  return withCurrentFrame(page, (frame) =>
     frame.evaluate(() => Array.from(window.document.querySelectorAll("[data-sphinx-preview-block-selected]"))
       .map((element) => ({
         text: element.textContent ?? "",
         line: Number(element.getAttribute("data-sphinx-source-line")),
         endLine: Number(element.getAttribute("data-sphinx-source-end-line")),
       }))));
+}
+
+/**
+ * Selects the list that ends on two blank lines, in a preview already open in edit mode. Asserts
+ * that the page maps the list up to a blank line, so the host plans a range that ends on it.
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
+ */
+async function selectListInPreview(page: Page, document: vscode.TextDocument): Promise<void> {
   await withCurrentFrame(page, (frame) => frame.locator("ul", { hasText: "item a" }).click({ modifiers: ["Shift"] }));
   await waitFor("exactly the list to be selected", async () => {
-    const blocks = await selected();
+    const blocks = await selectedBlocks(page);
     return blocks.length === 1 && blocks[0].text.includes("item a");
   });
-  const [list] = await selected();
+  const [list] = await selectedBlocks(page);
   assert.ok(list.endLine > list.line, "the list is mapped on several lines");
   assert.equal(document.lineAt(list.endLine - 1).text.trim(), "",
     "the page sends a range whose last line is blank in the document");
+}
+
+/** Opens the side preview of `document` in edit mode and selects the list that ends on two blank lines. */
+async function selectListFollowedByBlankLines(page: Page, document: vscode.TextDocument): Promise<void> {
+  await openSidePreview(document);
+  await waitForRender(document);
+  await setEditMode(page, true);
+  await selectListInPreview(page, document);
 }
 
 /** Copy then cut of a list followed by two blank lines: the clipboard holds the list, the cut leaves one separator. */
@@ -450,6 +459,9 @@ async function scenarioCutCopyListBeforeBlankLines(page: Page, evidence: Evidenc
       await waitFor("Cmd or Ctrl+C to copy the list without its blank lines", async () =>
         (await vscode.env.clipboard.readText()) === LIST_MARKDOWN);
       assert.equal(bufferText(document), LIST_BEFORE_BLANK_LINES, "copying changes nothing in the document");
+      // A successful copy clears the block selection: wait for that, then select the list again.
+      await waitFor("the copy to clear the block selection", async () => (await selectedBlocks(page)).length === 0);
+      await selectListInPreview(page, document);
       await vscode.env.clipboard.writeText("sentinel");
       await press(page, `${MOD}+X`);
       await waitFor("Cmd or Ctrl+X to cut the list", async () =>
