@@ -123,6 +123,8 @@ export interface BlockEdit {
   line: number;
   endLine: number;
   insertAfterLine?: number;
+  /** The blank run the new block replaces (a block written where the blank-lines block was). */
+  replaceBlankRun?: { line: number; endLine: number };
   selectedCell?: HTMLTableCellElement;
   renderedCellContent?: HTMLElement;
   /** The Markdown text the cell editor showed when it opened in the cell, to tell an edited cell. */
@@ -503,7 +505,7 @@ export interface TextControls {
 /** The block editor: open, save, autosave, close, flush (`features/blockEditor.ts`). */
 export interface BlockEditor {
   openBlockEditor(target: HTMLElement, selectedCell: HTMLTableCellElement | undefined,
-    sourceRange: { line: number; endLine: number; insertAfterLine?: number } | undefined,
+    sourceRange: { line: number; endLine: number; insertAfterLine?: number; replaceBlankRun?: { line: number; endLine: number } } | undefined,
     initialCaretPosition?: CaretPosition): void;
   closeBlockEdit(cancel?: boolean): void;
   postEditClosed(editId: string): void;
@@ -610,7 +612,30 @@ export interface BlockSelectionView {
    * False when nothing was sent.
    */
   requestDeleteBlock(block: HTMLElement): boolean;
+  /** Removes the blank run of the blank-lines block `block` (its Delete block button, Delete, Backspace). */
+  requestDeleteBlankLines(block: HTMLElement): boolean;
   bindKeys(): void;
+}
+
+/**
+ * The blank-lines blocks of edit mode (`features/blankLines.ts`): one reachable block for each run of
+ * two or more blank lines, read from the host's list of runs.
+ */
+export interface BlankLines {
+  /** Builds, keeps and removes the blocks after a change of the content, the mode or the folds. */
+  refresh(): void;
+  /** The blocks of the page, in document order. */
+  blocks(): HTMLElement[];
+  /** The lines of a block's run. */
+  runOf(block: Element): { line: number; endLine: number } | undefined;
+  /** The blank-lines block a node is in, if any. */
+  blockOfTarget(target: EventTarget | null): HTMLElement | undefined;
+  /** The selected block, if any. */
+  selected(): HTMLElement | undefined;
+  /** Selects `block` (and focuses it); with undefined, clears the selection. */
+  select(block: HTMLElement | undefined, scroll?: boolean): void;
+  /** Opens the editor that writes a block in place of the run. */
+  open(block: HTMLElement): void;
 }
 
 /** One move of the insertion bar under a body block. */
@@ -744,6 +769,7 @@ export interface PageRuntime {
   frontmatter: FrontmatterEditor;
   selection: BlockSelectionView;
   insertPoints: InsertPoints;
+  blankLines: BlankLines;
   fileDrop: FileDrop;
   blockMoves: BlockMoves;
   tableRowMove: TableRowMove;

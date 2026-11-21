@@ -11,7 +11,7 @@
 
 import { isThreadSource, threadDeleteRange, threadReplyEdit } from "../comments/inlineThread";
 import { opensIncludeDirective, planBlockMove, type BlockLines } from "../mapping/blockMove";
-import { planCut, planPaste, spanText } from "../mapping/blockRange";
+import { planBlankRunPaste, planBlankRunRemoval, planCut, planPaste, spanText } from "../mapping/blockRange";
 import { STALE_REQUEST } from "../protocol/staleRequest";
 import { countRefUses, renameLabelLine } from "../mapping/labelRename";
 import { minimalReplacement } from "../mapping/textDiff";
@@ -325,11 +325,33 @@ export function checkBlocksPaste(text: string, afterLine: number): EditRefusal |
     : undefined;
 }
 
-/** Inserts the clipboard text `clipboard` as new blocks after `afterLine` (0: start of the body). */
-export function planBlocksPaste(text: string, afterLine: number, clipboard: string): EditRefusal | { edit: TextEdit } {
-  const plan = planPaste(text, afterLine, clipboard);
+/**
+ * Inserts the clipboard text `clipboard` as new blocks after `afterLine` (0: start of the body); with
+ * `blankRun`, in place of that blank run (the lines above and below keep one separator).
+ */
+export function planBlocksPaste(
+  text: string,
+  afterLine: number,
+  clipboard: string,
+  blankRun?: { line: number; endLine: number },
+): EditRefusal | { edit: TextEdit } {
+  const plan = blankRun
+    ? planBlankRunPaste(text, blankRun.line, blankRun.endLine, clipboard)
+    : planPaste(text, afterLine, clipboard);
   if ("refused" in plan) return { refused: plan.refused };
-  return { edit: { start: plan.offset, end: plan.offset, text: plan.text } };
+  return { edit: { start: plan.offset, end: plan.end ?? plan.offset, text: plan.text } };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
+/** The one edit that removes a blank run and keeps one separator; `followingLine` as in {@link planBlocksDelete}. */
+export function planBlankRunDelete(
+  text: string,
+  line: number,
+  endLine: number,
+): EditRefusal | { edit: TextEdit; followingLine?: number } {
+  const plan = planBlankRunRemoval(text, line, endLine);
+  if ("refused" in plan) return { refused: plan.refused };
+  return { edit: { start: plan.start, end: plan.end, text: "" }, followingLine: plan.followingLine };
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-042

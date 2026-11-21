@@ -30,6 +30,7 @@ import { installEditorChrome } from "./features/editorChrome";
 import { installFileDrop } from "./features/fileDrop";
 import { installFrontmatterEditor } from "./features/frontmatterEditor";
 import { registerHostHandlers } from "./features/hostHandlers";
+import { installBlankLines } from "./features/blankLines";
 import { installInsertPoints } from "./features/insertPoints";
 import { linkActivationEdits } from "./features/linkEditing";
 import { installLinkTooltip } from "./features/linkTooltip";
@@ -308,7 +309,10 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // Folding of the sections under the headings (modules/headingFold.ts).
   const headingFold = installHeadingFold(document, window, vscode, context, {
     readingLine: () => stickyBand.readingOffset(),
-    onLayoutChange: keepReadingLine,
+    onLayoutChange: () => {
+      keepReadingLine();
+      rt.blankLines?.refresh();
+    },
     busy: () => state.activeBlockEdit !== undefined || state.activeFrontmatterEdit !== undefined,
   });
   // Find and replace in the rendered text (modules/findBar.ts). The mapped blocks tell which source
@@ -411,6 +415,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.frontmatter = installFrontmatterEditor(rt);
   rt.selection = installBlockSelectionView(rt);
   rt.insertPoints = installInsertPoints(rt);
+  rt.blankLines = installBlankLines(rt);
   rt.fileDrop = installFileDrop(rt);
   rt.blockMoves = installBlockMoves(rt);
   rt.tableRowMove = installTableRowMove(rt);

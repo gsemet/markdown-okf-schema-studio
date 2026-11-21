@@ -327,3 +327,15 @@ test("a properties table without a schema keeps its two columns inside the close
   assert.doesNotMatch(body, /Description|okf-description-column/u);
   assert.equal((body.match(/<th>/gu) ?? []).length, 2);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("the host's list of blank runs and a blank-lines block are not exported", () => {
+  const { html } = build(
+    '<p data-sphinx-source-line="1">A</p><div class="sphinx-preview-blank-lines" data-okf-blank-lines="2-4"></div>' +
+      '<p data-sphinx-source-line="5">B</p><div hidden data-okf-blank-runs="2-4"></div>',
+  );
+  const body = bodyOf(html);
+  assert.doesNotMatch(body, /data-okf-blank|sphinx-preview-blank-lines/u);
+  assert.match(body, /A<\/p>/u);
+  assert.match(body, /B<\/p>/u);
+});

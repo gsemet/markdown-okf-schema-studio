@@ -2,6 +2,18 @@
 
 ## 2026-11-21
 
+### Blank runs show as a reachable blank-lines block (CR-444)
+
+- Added: SwRS-MDOKFSTUDIO-BLOCK-266 (proposed): edit mode shows each blank run as a blank-lines
+  block from the host's hidden run list.
+- Added: SwRS-MDOKFSTUDIO-BLOCK-267 (proposed): arrows, Enter and a click reach it; Delete needs
+  the selection; it is out of ranges, moves and clipboard.
+- Added: SwRS-MDOKFSTUDIO-BLOCK-268 (proposed): typing or pasting writes the block in place of the
+  run in one edit; Cancel restores it; a stale run is refused.
+- Added: SwRS-MDOKFSTUDIO-BLOCK-269 (proposed): removing a run keeps one separator.
+- Sources: `src/core/mapping/blankRuns.ts`, `src/page/features/blankLines.ts`,
+  `src/session/features/blockEdits.ts`, `src/session/features/sourceEdits.ts`.
+
 ### Share cards of the requirements viewer: one picture per category (CR-443)
 
 - Changed: SwRS-MDOKFSTUDIO-CORE-085 (proposed): one picture for the index (`areas-card.png`) and one per feature category (`area-<areaId>.png`) instead of one per level; each page has its own share title and a description without inline-code backticks or link syntax (the user need whole, a rule cut at a word at 200 characters); `requirements.html` carries the tags of the index.

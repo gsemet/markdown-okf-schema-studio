@@ -128,6 +128,10 @@ export class RuntimeElement {
     return this.childElements;
   }
 
+  public get parentNode(): RuntimeElement | null {
+    return this.parentElement ?? null;
+  }
+
   public get childElementCount(): number {
     return this.childElements.length;
   }

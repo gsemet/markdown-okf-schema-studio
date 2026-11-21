@@ -67,7 +67,10 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     rt.input.applyFrontmatterVisibility();
     // The insertion points sit next to the properties section; rebuild them when it appeared or
     // went away, unless one of them hosts the open block editor.
-    if (Boolean(existing) !== (markup !== "") && !state.activeBlockEdit) rt.insertPoints.refreshInsertPoints();
+    if (Boolean(existing) !== (markup !== "") && !state.activeBlockEdit) {
+      rt.insertPoints.refreshInsertPoints();
+      rt.blankLines.refresh();
+    }
     rt.scroll.measure();
     rt.scroll.applyAnchor();
   }

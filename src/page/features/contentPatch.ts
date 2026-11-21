@@ -120,6 +120,7 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     parts.firstClearance.update();
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-004
     parts.headingFold.apply();
+    rt.blankLines.refresh();
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-010
     // The matches are searched again in the new content.
     parts.find.refresh();

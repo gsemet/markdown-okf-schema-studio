@@ -11,6 +11,7 @@ import { formatThreadDate } from "../../core/comments/inlineThread";
 import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../../core/configuration/commentsConfiguration";
 import {
   checkBlocksPaste,
+  planBlankRunDelete,
   planBlockMoveEdit,
   planBlocksCopyCut,
   planBlocksDelete,
@@ -41,7 +42,11 @@ import type { PreviewSession } from "../previewSession";
 import { applyWrittenEdits, currentPreviewDocument } from "../sessionDocuments";
 import { fireAndForget } from "../../host-api/logger";
 
-type BlocksOp = "copy" | "cut" | "delete" | "paste";
+type BlocksOp = "copy" | "cut" | "delete" | "paste" | "delete-blank-lines";
+
+type BlocksMessage = PageMessageOf<
+  "previewBlocksCopy" | "previewBlocksCut" | "previewBlocksDelete" | "previewBlankRunDelete" | "previewBlocksPaste" | "previewDropFiles"
+>;
 
 /** The edits the page asks for outside the block editor. */
 export class SourceEditController {
@@ -60,6 +65,7 @@ export class SourceEditController {
     router.on("previewBlocksCopy", (message, preview) => this.handleBlocksCopyCut(preview, message));
     router.on("previewBlocksCut", (message, preview) => this.handleBlocksCopyCut(preview, message));
     router.on("previewBlocksDelete", (message, preview) => this.handleBlocksDelete(preview, message));
+    router.on("previewBlankRunDelete", (message, preview) => this.handleBlankRunDelete(preview, message));
     router.on("previewBlocksPaste", (message, preview) => this.handleBlocksPaste(preview, message));
     router.on("previewDropFiles", (message, preview) => this.handleDropFiles(preview, message));
   }
@@ -374,7 +380,7 @@ export class SourceEditController {
 
   private postBlocksResult(
     preview: PreviewSession,
-    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksDelete" | "previewBlocksPaste" | "previewDropFiles">,
+    message: BlocksMessage,
     op: BlocksOp,
     result: { ok: true } | { ok: false; reason: string },
   ): void {
@@ -391,7 +397,7 @@ export class SourceEditController {
   /** Open-editor and stale-version refusals shared by copy, cut and paste of blocks. */
   private blocksDocument(
     preview: PreviewSession,
-    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksDelete" | "previewBlocksPaste" | "previewDropFiles">,
+    message: BlocksMessage,
     op: BlocksOp,
   ): HostDocument | undefined {
     const refuse = (reason: string): undefined => {
@@ -501,6 +507,44 @@ export class SourceEditController {
     }));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
+  /**
+   * Removal of a blank run: its lines go and one separator stays, in one edit (one undo step). The
+   * block after the run moves up into its place, so the screen is held there. Nothing goes to the clipboard.
+   */
+  private handleBlankRunDelete(
+    preview: PreviewSession,
+    message: PageMessageOf<"previewBlankRunDelete">,
+  ): PromiseLike<void> | undefined {
+    const op: BlocksOp = "delete-blank-lines";
+    const document = this.blocksDocument(preview, message, op);
+    if (!document) {
+      return undefined;
+    }
+    const plan = planBlankRunDelete(document.getText(), message.line, message.endLine);
+    if ("refused" in plan) {
+      this.postBlocksResult(preview, message, op, { ok: false, reason: plan.refused });
+      return undefined;
+    }
+    return this.apply(document, [plan.edit]).then((applied) => {
+      if (!applied) {
+        this.postBlocksResult(preview, message, op, { ok: false, reason: "VS Code could not apply the delete." });
+        return;
+      }
+      if (plan.followingLine !== undefined) {
+        this.manager.scroll.storePendingPin(preview, {
+          documentId: message.documentId,
+          pinLine: message.line,
+          pinViewportTop: message.pinViewportTop,
+        }, document.revision);
+      }
+      this.postBlocksResult(preview, message, op, { ok: true });
+    }).then(undefined, (error: unknown) => this.postBlocksResult(preview, message, op, {
+      ok: false,
+      reason: error instanceof Error ? error.message : String(error),
+    }));
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-174
   /** Paste of clipboard text as new blocks after a block or at the start of the body (T40). */
   private handleBlocksPaste(
@@ -523,7 +567,7 @@ export class SourceEditController {
         refuse("The document changed while pasting. Try again.");
         return undefined;
       }
-      const plan = planBlocksPaste(document.getText(), afterLine, clipboard);
+      const plan = planBlocksPaste(document.getText(), afterLine, clipboard, message.replaceBlankRun);
       if ("refused" in plan) {
         refuse(plan.refused);
         return undefined;

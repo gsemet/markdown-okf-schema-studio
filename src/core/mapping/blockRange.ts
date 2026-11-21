@@ -1,5 +1,5 @@
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
-import { insertionText, planInsertion } from "./insertion";
+import { insertionText, planBlankRunInsertion, planInsertion } from "./insertion";
 import { splitLines } from "./blockMove";
 
 /** A selected run of top-level blocks: 1-based, inclusive source lines. */
@@ -24,6 +24,15 @@ export interface PastePlan {
   /** Offset where `text` is inserted. */
   offset: number;
   text: string;
+  /** End offset of the text `text` replaces (a blank run); absent for a plain insertion. */
+  end?: number;
+}
+
+/** What a blank run's removal deletes: offsets, and the first line (before it) that moves up. */
+export interface BlankRunRemovalPlan {
+  start: number;
+  end: number;
+  followingLine: number | undefined;
 }
 
 const OUT_OF_DATE = "The preview is out of date. Refresh it and try again.";
@@ -31,7 +40,16 @@ const IN_FRONTMATTER = "Blocks of the frontmatter cannot be cut, copied or paste
 
 const isBlank = (text: string): boolean => text.trim() === "";
 
-function frontmatterLineCount(text: string): number {
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
+/**
+ * True for a CommonMark blank line: only spaces and tabs. `trim()` also strips U+00A0, which
+ * renders as a paragraph, so it cannot decide this.
+ */
+export function isCommonMarkBlank(text: string): boolean {
+  return /^[ \t]*$/u.test(text);
+}
+
+export function frontmatterLineCount(text: string): number {
   const frontmatter = matchFrontmatterBlock(text);
   return frontmatter ? splitLines(text.slice(0, frontmatter.length)).length : 0;
 }
@@ -170,4 +188,83 @@ export function planPaste(text: string, afterLine: number, raw: string): PastePl
     return { refused: OUT_OF_DATE };
   }
   return { offset: plan.offset, text: insertionText(plan, block) };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
+/**
+ * Validates a blank run against the text: two or more CommonMark blank lines after the
+ * frontmatter, with a line that is not blank (or the frontmatter, or the start) above and below.
+ */
+export function checkBlankRun(text: string, line: number, endLine: number): BlockRangeRefusal | undefined {
+  if (!Number.isSafeInteger(line) || !Number.isSafeInteger(endLine) || line < 1 || endLine <= line) {
+    return { refused: OUT_OF_DATE };
+  }
+  const lines = splitLines(text);
+  const frontmatterLines = frontmatterLineCount(text);
+  if (endLine > lines.length || line <= frontmatterLines) {
+    return { refused: OUT_OF_DATE };
+  }
+  for (let current = line; current <= endLine; current += 1) {
+    if (!isCommonMarkBlank(lines[current - 1].text)) {
+      return { refused: OUT_OF_DATE };
+    }
+  }
+  const aboveBlank = line > 1 && line - 1 > frontmatterLines && isCommonMarkBlank(lines[line - 2].text);
+  const belowBlank = endLine < lines.length && isCommonMarkBlank(lines[endLine].text);
+  return aboveBlank || belowBlank ? { refused: OUT_OF_DATE } : undefined;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
+/**
+ * Plans the removal of a blank run, keeping one separator: between two blocks (the frontmatter is
+ * one) lines `line + 1`..`endLine` go; at the start of a file without frontmatter, and at the end of
+ * the body, every line of the run goes (the text then ends where the line above ends, with its line
+ * break when the document had a final one). A text of only blank lines becomes empty.
+ */
+export function planBlankRunRemoval(
+  text: string,
+  line: number,
+  endLine: number,
+): BlankRunRemovalPlan | BlockRangeRefusal {
+  const refusal = checkBlankRun(text, line, endLine);
+  if (refusal) {
+    return refusal;
+  }
+  const lines = splitLines(text);
+  const offsetOfLine = (count: number): number =>
+    lines.slice(0, count).reduce((sum, entry) => sum + entry.text.length + entry.eol.length, 0);
+  const followingLine = endLine < lines.length ? endLine + 1 : undefined;
+  if (followingLine !== undefined) {
+    return { start: offsetOfLine(line === 1 ? 0 : line), end: offsetOfLine(endLine), followingLine };
+  }
+  if (line === 1) {
+    return { start: 0, end: text.length, followingLine };
+  }
+  const keepsFinalBreak = lines[lines.length - 1].eol !== "";
+  return {
+    start: offsetOfLine(line - 1) - (keepsFinalBreak ? 0 : lines[line - 2].eol.length),
+    end: text.length,
+    followingLine,
+  };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
+/** Plans a paste in place of a blank run: one separator on each side of the pasted block. */
+export function planBlankRunPaste(
+  text: string,
+  line: number,
+  endLine: number,
+  raw: string,
+): PastePlan | BlockRangeRefusal {
+  const block = pastedBlockText(raw);
+  if (block === "") {
+    return { refused: "The clipboard has no text to paste." };
+  }
+  const refusal = checkBlankRun(text, line, endLine);
+  if (refusal) {
+    return refusal;
+  }
+  const plan = planBlankRunInsertion(text, line, endLine);
+  return { offset: plan.offset, text: insertionText(plan, block), end: plan.replace?.end };
 }

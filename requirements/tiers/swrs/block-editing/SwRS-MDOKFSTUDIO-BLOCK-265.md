@@ -71,6 +71,12 @@ When the writer clicks the Delete block button of a block, or presses Delete or 
 - THEN the document does not change and the refusal is shown next to the selection ("A block that comes from an included file cannot be deleted." for an include)
 - AND after a successful delete the following block is selected, else the block above, else the Start writing button has the focus
 
+### Scenario: A blank-lines block
+
+- GIVEN a selected blank-lines block
+- WHEN the writer presses Delete or Backspace or clicks its Delete block button
+- THEN previewBlankRunDelete removes the extra blank lines and keeps one separator (see SwRS-MDOKFSTUDIO-BLOCK-269)
+
 ### Verification notes
 
 - Method: test/core/edits/sourceEdits.test.ts (`planBlocksDelete`: separators, trailing blank lines, include and frontmatter refusals, CR LF and lone CR).
