@@ -36,13 +36,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a Markdown text tab opens, the opening policy SHALL keep it when it is not a text tab, not an eligible saved file .md, not new, present at start, opened by Studio, reopened as text, or a jump while a side preview follows the active editor, and otherwise SHALL replace it by Studio at the line when Open Markdown files in Studio is on or when Open search results in Studio is on and the opening carries a line, and by Studio with no line for a plain opening when Open Markdown files in Studio is on.
 
-### Scenario (nominal)
+### Scenario (nominal): Nominal case
 
 - GIVEN a new text tab of a saved .md file opening at line 12, Open search results in Studio on and no side preview that follows the active editor
 - WHEN the policy decides
 - THEN the answer is Studio at line 12
 
-### Scenario (boundary)
+### Scenario (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |

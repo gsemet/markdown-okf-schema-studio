@@ -35,13 +35,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader follows a link or a Back or Next move from a Studio Open With tab to a Markdown file and Open Markdown files in Studio is on, the session SHALL ask the host to show that document in a Studio tab at the target line, and in every other case SHALL ask the host to show it in a text editor as before.
 
-### Scenario (nominal)
+### Scenario (nominal): Nominal case
 
 - GIVEN a Studio Open With tab, Open Markdown files in Studio on, a link to second.md#part
 - WHEN the reader follows the link
 - THEN the session asks the host to show second.md in Studio at the first line of the heading Part, and no text editor opens
 
-### Scenario (boundary)
+### Scenario (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |

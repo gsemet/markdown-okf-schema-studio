@@ -35,13 +35,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a text tab opens, the opening watcher SHALL read its line from the selection of its editor, SHALL ask the opening policy after the editor association migration is done, SHALL never replace a tab that was open when the watcher started, and SHALL put Studio in the place of the text tab when the policy says so.
 
-### Scenario (nominal)
+### Scenario (nominal): Nominal case
 
 - GIVEN the extension is active and Open search results in Studio is on
 - WHEN a Markdown file opens in a new text tab with the selection at line 12
 - THEN a Studio tab opens in that group waiting for line 12 and the text tab is closed
 
-### Scenario (boundary)
+### Scenario (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |

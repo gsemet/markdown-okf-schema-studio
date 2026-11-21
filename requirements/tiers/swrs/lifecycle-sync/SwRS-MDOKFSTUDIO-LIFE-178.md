@@ -39,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the host asks the page to reveal a source line, the page SHALL scroll silently so that the line sits at the reading line below the sticky heading band, unfold a folded heading section or a closed details block that holds it, and draw an arrow in the left margin and a light band at the exact line of a paragraph or a code block, at the top of the enclosing block for any other block, and at the nearest block for a line outside every block.
 
-### Scenario (nominal)
+### Scenario (nominal): Reveal a code line
 
 - GIVEN a page with a numbered code block whose line 20 is `value_15 = 15`, in a 900 px pane
 - WHEN the page receives previewRevealLine for line 20
 - THEN one arrow and band are drawn on exactly that code line, the line sits at the reading line and is inside the viewport, its block has aria-current=location, and no previewScroll is posted
 
-### Scenario (boundary)
+### Scenario (boundary): Folded, outside and soft-wrapped lines
 
 | Input | Outcome |
 | --- | --- |

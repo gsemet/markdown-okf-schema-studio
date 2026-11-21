@@ -33,13 +33,13 @@ default_owner_email: gaetan@xeberon.net
 
 In edit mode the page SHALL draw the line marker over neither the list item handles, the table row handles nor the block actions, and SHALL open no block editor on its own because of the marker.
 
-### Scenario (nominal)
+### Scenario (nominal): Nominal case
 
 - GIVEN edit mode on a page with a table, at line 41 (a table row)
 - WHEN the page receives previewRevealLine for line 41
 - THEN the marker is drawn, its arrow overlaps no row, column or list handle and no block action, and no block editor opens
 
-### Scenario (boundary)
+### Scenario (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |
