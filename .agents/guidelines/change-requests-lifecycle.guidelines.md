@@ -105,6 +105,46 @@ These hold whoever runs the steps:
   [pull-request.guidelines.md](pull-request.guidelines.md); with a tracker issue, its body names
   the issue with the tracker's closing keyword. Before opening it, run the requirements check; a gap
   is a new round. The Changelog checkbox is ticked, or says "No user-facing change".
+- **Early heavy CI**: a change request that adds or changes visual, integration or stress scenarios
+  gets the heavy CI after round 1, not at the end. On Windows, `just preflight` runs only the static
+  stage, so visual and real VS Code window failures show up only in CI. The rule applies when the
+  round 1 diff touches `test/visual/`, `test/integration/` or the stress list
+  `test/shared/stressPlan.ts`, or when `03-change-spec.md` asks for such scenarios. Other change
+  requests keep the current steps.
+  - **Early push**: after round 1, whatever the round's review verdict, the change request's own
+    Driver does these steps in order:
+    - Make a checkpoint commit of round 1's state: explicit paths, project commit format.
+    - Rebase on the base, then run the project's fast gate (`just check`) at the rebased head.
+    - Push the branch without the long gate (`just preflight`).
+    - Open the pull request as a draft with a provisional body: the template's sections, with what
+      is not known yet marked as provisional.
+    - In its own command, run `gh workflow run ci.yml --ref <branch> -f heavy=true`.
+  - The requirements check stays before the pull request leaves draft, as the **Pull request**
+    bullet says. `just preflight` stays a long gate before ready. This overrides the chantier
+    Driver card's "gate before the first push" for these change requests.
+  - **Stack**: a change request in a stack follows the same steps. Its own Driver pushes and opens
+    the draft pull request against the base that `take` printed. The stack driver only restacks
+    later, as "Parallel Change Requests Orchestration" says.
+  - **Open-pull-request cap**: the early draft counts in the user's cap of open pull requests
+    (default 4). At the cap, the Driver pushes the branch and dispatches the heavy run without
+    opening the pull request. It opens the pull request when a slot frees up, by the usual steps.
+  - **Reading the run**: find it with
+    `gh run list --workflow ci.yml --branch <branch> --event workflow_dispatch --json databaseId,headSha,status,conclusion`.
+    Check that its `headSha` is the head that was pushed: a run at another head is not this run.
+    For a red job, `gh run view <id> --log-failed` gives the log. The run is input to the next
+    round; it never proves a later head green. A failure goes into the next round as the **CI**
+    bullet says. A red `stress` job is advisory (rule 12 of [ci.guidelines.md](ci.guidelines.md))
+    but still a flake to fix. When round 1 was approved and no round 2 follows, read the run
+    before **Verify**.
+  - **Re-dispatch**: the change request's own Driver dispatches the same command once after
+    round 1, then once after each round that fixes a red `integration` or `stress` job of the
+    early heavy run, after pushing that round. It never dispatches when the last heavy run is
+    green. Rule 13 of [ci.guidelines.md](ci.guidelines.md) asks for a heavy run before merging a
+    change to the extension host, the webview or the real-window tests: that run is the last green
+    heavy run when the head has not changed since it ran. Otherwise dispatch one more run before
+    ready. Each push to the draft pull request still runs the pull request CI as today.
+  - **Unchanged**: the round limit (3, all causes together) still applies. The early push does not
+    make the pull request ready: **Verify** still comes before ready.
 - **CI**: a product or test failure is a new round with the log excerpt. An infra failure (setup,
   network) is re-run once. A failure the change does not touch and that passes on the re-run is a
   flake: name it (test, run id, symptom) in the report and file it in `1-inbox/` unless an item

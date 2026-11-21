@@ -11,8 +11,25 @@ _default:
 format:
     just --unstable --fmt
 
-# Set up Node.js, JavaScript and Python dependencies, and Chromium for tests.
-dev:
+# On Windows, turn on Git long paths for the repository, so a checkout or a new worktree never
+# fails with "Filename too long"; nothing outside a Git work tree.
+[private]
+[windows]
+_git-long-paths:
+    #!/usr/bin/env bash
+    set -eu
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        git config core.longpaths true
+    fi
+
+# Linux and macOS: nothing to do.
+[private]
+[unix]
+_git-long-paths:
+
+# Set up Node.js, JavaScript and Python dependencies, and Chromium for tests; on Windows, also turn
+# on Git long paths (`core.longpaths`) for the repository.
+dev: _git-long-paths
     fnm install
     {{ npm }} ci
     uv sync --group docs --group release --group requirements
