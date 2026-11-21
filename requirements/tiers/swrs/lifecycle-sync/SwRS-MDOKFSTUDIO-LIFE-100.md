@@ -3,11 +3,12 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-LIFE-100
 uuid: 5142b871-d93e-4280-a772-b08dd2486453
 title: Scrolling the text editor scrolls the preview to the same line
-description: When the text editor of a previewed document scrolls while the
-  anchor mode is on, the extension SHALL record the editor's first visible line
-  as the anchor of each preview of that document, owned by the editor, and
-  scroll the preview so that this line sits at its reading line, without
-  reporting that scroll back to the editor.
+description: When the text editor of a previewed document, or the side of a text
+  diff that is that document's file, scrolls while the anchor mode is on, the
+  extension SHALL record the editor's first visible line as the anchor of each
+  preview of that document, owned by the editor, and scroll the preview so that
+  this line sits at its reading line, without reporting that scroll back to the
+  editor.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -28,7 +29,9 @@ implemented_in_files:
 - src/session/hostEvents.ts
 tested_in_files:
 - test/core/scroll/anchorPolicy.test.ts
+- test/host/diffPreview.requirements.test.ts
 - test/host/lifeReq.requirements.test.ts
+- test/integration/diffPreview.test.ts
 - test/integration/scroll-sync-suite.ts
 - test/integration/sourceMapping.test.ts
 - test/page/pageSettings.test.ts
@@ -45,7 +48,7 @@ supersedes:
 
 ### Normative behavior
 
-When the text editor of a previewed document scrolls while the anchor mode is on, the extension SHALL record the editor's first visible line as the anchor of each preview of that document, owned by the editor, and scroll the preview so that this line sits at its reading line, without reporting that scroll back to the editor.
+When the text editor of a previewed document, or the side of a text diff that is that document's file, scrolls while the anchor mode is on, the extension SHALL record the editor's first visible line as the anchor of each preview of that document, owned by the editor, and scroll the preview so that this line sits at its reading line, without reporting that scroll back to the editor.
 
 ### Scenario (nominal): Host records the editor's first visible line
 - GIVEN a side preview of the file and the anchor mode on
@@ -102,6 +105,14 @@ When the text editor of a previewed document scrolls while the anchor mode is on
 | a 4000 line document, the preview and a text editor side by side, anchor mode on; the reader scrolls either pane down and up in reading mode, edit mode or with a block editor open | the other pane follows to the same place |
 | anchor mode off, or no text editor of the file; the reader scrolls either pane | the other pane stays still, the document is not edited and a block editor stays open |
 
+### Scenario (nominal): The side of a text diff
+
+| Input | Outcome |
+| --- | --- |
+| a side preview of a.md and a text diff whose side of the file scheme is a.md, that side scrolls to line 40 | the preview scrolls to line 40, as for a text editor |
+| the other side of the diff (a git or virtual document at the same path) scrolls | the preview does not move |
+| a diff with no side of the file scheme | the preview does not move |
+
 ### Scenario (boundary): Defaults and the setting off
 
 | Input | Outcome |
@@ -119,6 +130,7 @@ When the text editor of a previewed document scrolls while the anchor mode is on
 - Method: test/integration/scroll-sync-suite.ts (12 scenarios, paired and solo, reading, editing and block, anchored and independent: scenarios 2, 4, 6 and 8; source remains still checks the absence of scroll feedback in scenario 4; paired-reading-anchored, paired-editing-anchored and paired-block-anchored check scenario 2; the assertion that scrolling must not edit the document checks scenario 8)
 - Method: test/page/runtimeScroll.test.ts (scenarios 2, 3, 4 and 6: "executes source and preview synchronization across layout changes", "source scrolling rejects stale identities and invalid line numbers", "preview can revisit its last reported line after the source editor scrolls elsewhere")
 - Method: test/integration/sourceMapping.test.ts (scenario 1: lastSourceScrollLine after syncActiveEditorForTests; the off case of scenario 3 is checked by reading syncEditorToPreview)
+- Method: test/host/diffPreview.requirements.test.ts and test/integration/diffPreview.test.ts (The side of a text diff: the git side posts nothing and the file side posts sourceScroll line 31 in the host test; the real window scrolls the diff in both layouts).
 - Method: test/core/scroll/anchorPolicy.test.ts (scenario 5: "ignores editor echoes across re-renders, then yields to the user" and "accepts one centered-reveal echo, then treats further scrolling as the user's"; the guard is keyed by document, not by render)
 - Method: test/host/lifeReq.requirements.test.ts (scenario 7, the change of visible editors: "the host tells each preview whether a text editor shows its file whenever the visible editors change")
 - Method: test/page/runtimeContentPatch.test.ts and test/page/runtimeBundle.test.ts (scenario 7, page side of the ready report: "T33: the startup sequence of effects and messages is stable" and "the bundled runtime file gives the pinned trace of a page session"; the host answer is checked by reading postPageLiveState)

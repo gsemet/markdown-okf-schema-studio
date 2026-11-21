@@ -92,7 +92,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.deepEqual(packageJson.contributes.menus["editor/title"], [
     {
       command: "markdown-okf-schema-studio.openPreview",
-      when: "resourceExtname == .md && activeEditor == workbench.editors.files.textFileEditor",
+      when: "resourceExtname == .md && (activeEditor == workbench.editors.files.textFileEditor || activeEditor == workbench.editors.textDiffEditor)",
       group: "navigation",
     },
     // CR-445: Open as Text, in the overflow of the title bar of a Studio tab (no `navigation` group).

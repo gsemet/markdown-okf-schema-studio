@@ -186,7 +186,7 @@
       "editor/title": [
         {
           "command": "markdown-okf-schema-studio.openPreview",
-          "when": "resourceExtname == .md && activeEditor == workbench.editors.files.textFileEditor",
+          "when": "resourceExtname == .md && (activeEditor == workbench.editors.files.textFileEditor || activeEditor == workbench.editors.textDiffEditor)",
           "group": "navigation"
         },
         {

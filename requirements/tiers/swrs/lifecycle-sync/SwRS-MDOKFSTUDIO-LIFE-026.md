@@ -3,12 +3,13 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-LIFE-026
 uuid: a3e7c206-c4f8-49a4-af34-1dd18792bf2e
 title: The side preview follows the active Markdown editor
-description: When another saved Markdown file becomes the active editor, the
-  extension SHALL switch only the newest side preview that follows the editor to
-  that file, show Preview pending with the message Following the active Markdown
-  editor. until its render ends, apply only the last requested document when the
-  editor changes during the switch, and leave the preview unchanged for any
-  other editor change.
+description: When another saved Markdown file becomes the active editor, or a
+  text diff whose real file is another saved Markdown file becomes the active
+  tab, the extension SHALL switch only the newest side preview that follows the
+  editor to that file, show Preview pending with the message Following the
+  active Markdown editor. until its render ends, apply only the last requested
+  document when the editor changes during the switch, and leave the preview
+  unchanged for any other editor change.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -22,12 +23,15 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/host-vscode/activation.ts
 - src/session/features/scrollSync.ts
 - src/session/hostEvents.ts
 - src/session/previewManager.ts
 tested_in_files:
 - test/core/preview/flushWait.test.ts
+- test/host/diffPreview.requirements.test.ts
 - test/host/lifeReq.requirements.test.ts
+- test/integration/diffPreview.test.ts
 - test/integration/lifecycle.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -36,7 +40,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When another saved Markdown file becomes the active editor, the extension SHALL switch only the newest side preview that follows the editor to that file, show Preview pending with the message Following the active Markdown editor. until its render ends, apply only the last requested document when the editor changes during the switch, and leave the preview unchanged for any other editor change.
+When another saved Markdown file becomes the active editor, or a text diff whose real file is another saved Markdown file becomes the active tab, the extension SHALL switch only the newest side preview that follows the editor to that file, show Preview pending with the message Following the active Markdown editor. until its render ends, apply only the last requested document when the editor changes during the switch, and leave the preview unchanged for any other editor change.
 
 ### Scenario (nominal): Second file
 
@@ -51,6 +55,13 @@ When another saved Markdown file becomes the active editor, the extension SHALL 
 | the active editor changes to the document the preview already shows | nothing changes: no new render and the same requestId |
 | the reader focuses package.json with a side preview of preview-other.md | the preview keeps its document, status and requestId, with no reload (integration test test/integration/lifecycle.test.ts, 750 ms bounded sleep) |
 | the reader returns to the Markdown editor | no new render is needed: the requestId is unchanged |
+
+### Scenario (nominal): A text diff becomes active
+
+- GIVEN a side preview of a.md that follows the editor
+- WHEN a text diff of b.md becomes the active tab (a git diff, a two-file compare or the replace preview), whichever side holds the cursor
+- THEN the preview switches to the real file of the diff, b.md, as for a text editor
+- AND a move of the cursor between the sides of the same diff, a diff with no side of the file scheme (a stand-in) and a diff whose real file is the shown document switch nothing
 
 ### Scenario (boundary): Only the newest following preview switches
 
@@ -99,6 +110,7 @@ When another saved Markdown file becomes the active editor, the extension SHALL 
 ### Verification notes
 
 - Method: test/integration/lifecycle.test.ts (Second file: the second lifecycle render; Editor changes that leave the preview as it was: focuses package.json, sleeps 750 ms and asserts the same requestId, then returns to the Markdown file and asserts no new render; the same-document row is by reading the code).
+- Method: test/host/diffPreview.requirements.test.ts and test/integration/diffPreview.test.ts (A text diff becomes active: a git diff with the cursor in its git side, the replace preview, a focus move, a stand-in).
 - Method: test/integration/sourceMapping.test.ts (Second file: the old stage must not reveal during a switch). The message text Following the active Markdown editor. is checked in test/host/lifeReq.requirements.test.ts ("switching the active file retitles the side preview ...").
 - Method: test/host/lifeReq.requirements.test.ts, unit tests "only the newest following preview switches with the active editor" (Only the newest following preview switches: reads onActiveEditorChanged, manager.latest(followsActiveEditor)), "a document outside the workspace folder gets a new session on the same panel" (Another workspace folder or trust state and Same folder and trust state, or no folder: reads switchDocument in src/session/previewManager.ts) and "a hidden preview that becomes visible catches up with the editor" (A hidden preview that becomes visible: reads createSession becameVisible and ScrollSyncController.restorePreviewState).
 - Method: test/core/preview/flushWait.test.ts, "CR 025: LatestRequest applies only the latest request, so A to B to A ends on A" (Quick switching between documents, first row); the came-back branch (watchPageEditor) has no test at a reasonable cost: it needs a page editor that closes and returns under the real host.

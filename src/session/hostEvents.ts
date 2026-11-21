@@ -443,8 +443,16 @@ export class HostEvents {
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-026
   /** The active editor changed: the side preview follows a Markdown document. */
   public onActiveEditorChanged(editor: PairedEditor | undefined): void {
+    this.onActiveDocumentChanged(editor?.document);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-026
+  /**
+   * The document to follow changed: the real file of the active text diff, or the active editor's
+   * document. The side preview switches to an eligible Markdown document (the same document is a no-op).
+   */
+  public onActiveDocumentChanged(document: HostDocument | undefined): void {
     const session = this.manager.latest((candidate) => candidate.followsActiveEditor);
-    const document = editor?.document;
     if (!session || !session.followsActiveEditor || !document) {
       return;
     }

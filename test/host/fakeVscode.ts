@@ -396,13 +396,19 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     visibleRanges: [new Range(0, 0, 40, 0)],
     viewColumn: 1,
     options: {},
-    revealRange: (): void => undefined,
+    /** The ranges the extension revealed, for a test to read. */
+    revealed: [] as unknown[],
+    revealRange(range: unknown): void {
+      this.revealed.push(range);
+    },
     setDecorations: (): void => undefined,
     edit: (): Promise<boolean> => Promise.resolve(true),
   }, "TextEditor");
 
   /** The active tab when it is a custom editor (set by a test); undefined otherwise. */
   let activeCustomTab: { uri: Uri; viewType: string } | undefined;
+  /** The active tab when it is a text diff (`controls.activateDiff`); undefined otherwise. */
+  let activeDiff: { original: Uri; modified: Uri } | undefined;
 
   /** The tabs the extension closed, and the options it passed to `showTextDocument`, for a test to read. */
   const closedTabs: unknown[] = [];
@@ -457,9 +463,11 @@ export function createFakeVscode(options: FakeVscodeOptions) {
         const group = this.all.find((candidate) => candidate.viewColumn === activeGroupColumn.value) ?? this.all[0]!;
         return {
           ...group,
-          activeTab: activeCustomTab
-            ? { label: "Studio", input: new TabInputCustom(activeCustomTab.uri, activeCustomTab.viewType), isActive: true }
-            : undefined,
+          activeTab: activeDiff
+            ? { label: "Diff", input: new TabInputTextDiff(activeDiff.original, activeDiff.modified), isActive: true }
+            : activeCustomTab
+              ? { label: "Studio", input: new TabInputCustom(activeCustomTab.uri, activeCustomTab.viewType), isActive: true }
+              : undefined,
         };
       },
       onDidChangeTabGroups: events.changeTabGroups.event,
@@ -480,6 +488,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     },
     showTextDocument: (document: FakeTextDocument, options?: unknown) => {
       shownTextOptions.push(options);
+      activeDiff = undefined;
       const editor = editorFor(document);
       window.activeTextEditor = editor;
       window.visibleTextEditors = [editor];
@@ -750,8 +759,34 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       configuration,
       /** Makes a custom editor tab of `filePath` the active tab (no text editor is active then). */
       activateCustomEditorTab: (filePath: string | undefined, viewType = "markdown-okf-schema-studio.editor"): void => {
+        activeDiff = undefined;
         activeCustomTab = filePath === undefined ? undefined : { uri: Uri.file(filePath), viewType };
         if (filePath !== undefined) window.activeTextEditor = undefined;
+      },
+      /**
+       * Makes a text diff the active tab, as VS Code does: both sides become visible editors (a `file:`
+       * side is the real document, any other side a document of its own scheme holding `text`), the
+       * editor of `activeSide` (none: no active text editor) is active, and the extension is told the
+       * active editor and the tab changed. Returns the two editors.
+       */
+      activateDiff: (diff: {
+        original: Uri; modified: Uri; activeSide: "original" | "modified" | "none"; text?: string; fire?: boolean;
+      }): { original: ReturnType<typeof editorFor>; modified: ReturnType<typeof editorFor> } => {
+        const documentOf = (uri: Uri): FakeTextDocument => (uri.scheme === "file"
+          ? textDocuments.find((candidate) => candidate.uri.fsPath === uri.fsPath)
+            ?? (textDocuments.push(new FakeTextDocument(uri, fs.readFileSync(uri.fsPath, "utf8"))), textDocuments.at(-1)!)
+          : new FakeTextDocument(uri, diff.text ?? "virtual text\n"));
+        activeCustomTab = undefined;
+        activeDiff = { original: diff.original, modified: diff.modified };
+        const original = editorFor(documentOf(diff.original));
+        const modified = editorFor(documentOf(diff.modified));
+        window.visibleTextEditors = [original, modified];
+        window.activeTextEditor = diff.activeSide === "none" ? undefined : diff.activeSide === "original" ? original : modified;
+        if (diff.fire !== false) {
+          events.changeActiveEditor.fire(window.activeTextEditor);
+          events.changeTabs.fire({ opened: [], closed: [], changed: [{ isActive: true, input: new TabInputTextDiff(diff.original, diff.modified) }] });
+        }
+        return { original, modified };
       },
       /** Changes the document text as typing would, and tells the extension. */
       changeDocument: (document: FakeTextDocument, text: string): void => {

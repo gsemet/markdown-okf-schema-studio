@@ -113,8 +113,10 @@ export class ScrollSyncController {
       return;
     }
     const documentPath = path.resolve(stage.activeDocumentPath);
+    // The real file's side only: a `git:` side or a virtual document of a diff can share the path
+    // but its id is not a `file:` one (SwRS-MDOKFSTUDIO-LIFE-108).
     const editor = this.manager.host.editors.visible().find(
-      (candidate) => path.resolve(candidate.fsPath) === documentPath,
+      (candidate) => candidate.document.id.startsWith("file:") && path.resolve(candidate.fsPath) === documentPath,
     );
     if (!editor) {
       return;
