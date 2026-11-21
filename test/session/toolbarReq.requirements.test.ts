@@ -18,6 +18,7 @@ import { nodeHostPorts } from "./nodeHostPorts";
 import type { PanelGroups, PreviewPanel } from "../../src/host-api/previewPanel";
 import type { PairedEditor } from "../../src/host-api/textEditors";
 import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
+import { PENDING_LINE_WINDOW_MS } from "../../src/core/navigation/pendingLine";
 import { PreviewManager } from "../../src/session/previewManager";
 import { createPreviewNavigator } from "../../src/session/previewNavigator";
 import { PreviewSession } from "../../src/session/previewSession";
@@ -35,7 +36,7 @@ interface Fixture {
   readonly studioShown: Array<{ id: string; line: number | undefined }>;
   readonly warnings: string[];
   readonly searches: string[];
-  readonly state: { requestId: number; open: (id: string) => Promise<HostDocument>; editors: PairedEditor[] };
+  readonly state: { requestId: number; open: (id: string) => Promise<HostDocument>; editors: PairedEditor[]; applying: Set<string> };
   /** The identity of the render the page shows. */
   identity(): { documentId: string; revision: number; requestId: number };
   send(type: string, extra?: Record<string, unknown>): PromiseLike<void> | undefined;
@@ -78,6 +79,8 @@ function fixture(options: {
       return Promise.resolve(fileDocument(target, fs.existsSync(target) ? fs.readFileSync(target, "utf8") : ""));
     },
     editors: [] as PairedEditor[],
+    /** Documents the page itself is editing (`isApplying`). */
+    applying: new Set<string>(),
   };
   const host = {
     ...nodeHostPorts,
@@ -86,6 +89,7 @@ function fixture(options: {
     documents: {
       idOf: (filePath: string) => pathToFileURL(filePath).toString(),
       open: (id: string) => state.open(id),
+      isApplying: (id: string) => state.applying.has(id),
     },
     navigation: {
       showDocument: (id: string, selection?: unknown) => {
@@ -112,6 +116,9 @@ function fixture(options: {
       },
     },
     editors: { visible: () => state.editors },
+    theme: { kind: "dark" },
+    // The page-ready path starts work this fixture does not serve (the review comments): it only needs a logger.
+    logger: { error: () => undefined },
   } as unknown as HostServices;
   const groups: PanelGroups = { lockNewPanelGroup: () => Promise.resolve(false), release: () => undefined };
   const manager = new PreviewManager(host, groups);
@@ -850,6 +857,329 @@ test("a requested line is posted at once when the page is already ready", () => 
     f.manager.scroll.requestRevealLine(f.preview, 7);
     assert.deepEqual(f.posted.filter((message) => message.type === "previewRevealLine").map((message) => message.line), [7]);
     assert.equal(f.preview.scroll.pendingRevealLine, undefined);
+  } finally {
+    f.cleanup();
+  }
+});
+
+const revealsOf = (f: Fixture): Array<Record<string, any>> => f.posted.filter((message) => message.type === "previewRevealLine");
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+test("a jump into the shown document is posted to the following side preview, and a Studio tab is left alone", () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    f.preview.page.readyRequestId = f.preview.stage!.requestId;
+    f.manager.events.onEditorJumped(f.preview.documentUri, 12);
+    assert.deepEqual(revealsOf(f).map((message) => message.line), [12]);
+  } finally {
+    f.cleanup();
+  }
+  const studio = fixture({ followsActiveEditor: false });
+  try {
+    studio.preview.page.readyRequestId = studio.preview.stage!.requestId;
+    studio.manager.events.onEditorJumped(studio.preview.documentUri, 12);
+    assert.equal(revealsOf(studio).length, 0, "a Studio tab never marks a jump");
+    assert.equal(studio.preview.scroll.pendingRevealLine, undefined);
+  } finally {
+    studio.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+test("a jump that arrives before the switch of document waits for the page of that document", () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    f.preview.page.readyRequestId = f.preview.stage!.requestId;
+    const other = pathToFileURL(path.join(f.root, "other.md")).toString();
+    f.manager.events.onEditorJumped(other, 5);
+    assert.equal(revealsOf(f).length, 0, "the page shows another document");
+    assert.equal(f.preview.scroll.pendingRevealLine?.documentId, other);
+    showOther(f.preview, other);
+    f.manager.scroll.postPendingRevealLine(f.preview);
+    assert.deepEqual(revealsOf(f).map((message) => message.line), [5]);
+    assert.equal(f.preview.scroll.markedLine?.documentId, other);
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+test("the switch of document drops a line requested for another document and the old marker", () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    f.preview.scroll.markedLine = { line: 3, documentId: f.preview.documentUri };
+    f.manager.scroll.requestRevealLine(f.preview, 8, { documentId: "file:///elsewhere.md" });
+    f.manager.scroll.forgetLinesOutside(f.preview, "file:///next.md");
+    assert.equal(f.preview.scroll.markedLine, undefined);
+    assert.equal(f.preview.scroll.pendingRevealLine, undefined);
+    f.manager.scroll.requestRevealLine(f.preview, 8, { documentId: "file:///next.md" });
+    f.manager.scroll.forgetLinesOutside(f.preview, "file:///next.md");
+    const stays = f.preview.scroll.pendingRevealLine as { line: number } | undefined;
+    assert.equal(stays?.line, 8, "a line for the new document stays");
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+test("a line past the window is dropped and a hidden page waits for its ready", () => {
+  const f = fixture({ followsActiveEditor: true });
+  const realNow = Date.now;
+  try {
+    f.preview.page.readyRequestId = f.preview.stage!.requestId;
+    (f.preview.panel as { visible?: boolean }).visible = false;
+    f.manager.events.onEditorJumped(f.preview.documentUri, 4);
+    assert.equal(revealsOf(f).length, 0, "hidden");
+    assert.equal(f.preview.scroll.pendingRevealLine?.line, 4, "kept for the next ready");
+    (f.preview.panel as { visible?: boolean }).visible = true;
+    f.manager.scroll.postPendingRevealLine(f.preview);
+    assert.deepEqual(revealsOf(f).map((message) => message.line), [4]);
+
+    f.preview.page.readyRequestId = undefined;
+    f.manager.scroll.requestRevealLine(f.preview, 6);
+    const at = Date.now();
+    Date.now = () => at + PENDING_LINE_WINDOW_MS + 1;
+    f.manager.scroll.postPendingRevealLine(f.preview);
+    assert.equal(revealsOf(f).length, 1, "too old");
+    assert.equal(f.preview.scroll.pendingRevealLine, undefined);
+  } finally {
+    Date.now = realNow;
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+test("with scroll sync on a jump asks to scroll only if off screen and keeps the anchor; off, it takes the anchor", () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    f.preview.page.readyRequestId = f.preview.stage!.requestId;
+    (f.preview.configuration as { scrollPreviewWithEditor: boolean }).scrollPreviewWithEditor = true;
+    f.manager.events.onEditorJumped(f.preview.documentUri, 12);
+    assert.equal(revealsOf(f)[0].scroll, "if-off-screen");
+    assert.equal(f.preview.scroll.anchor, undefined, "the editor leads");
+    (f.preview.configuration as { scrollPreviewWithEditor: boolean }).scrollPreviewWithEditor = false;
+    f.manager.events.onEditorJumped(f.preview.documentUri, 20);
+    assert.equal(revealsOf(f)[1].scroll, undefined, "reading-line is the default and is not sent");
+    assert.deepEqual(f.preview.scroll.anchor, { line: 20, owner: "preview", documentId: f.preview.documentUri });
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+test("the marker is cleared for its own document only, once", () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    f.preview.page.readyRequestId = f.preview.stage!.requestId;
+    f.manager.events.onEditorJumped(f.preview.documentUri, 3);
+    assert.equal(f.preview.scroll.markedLine?.line, 3);
+    const clears = (): number => f.posted.filter((message) => message.type === "previewLineMarkerClear").length;
+    f.manager.scroll.clearLineMarker(f.preview, "file:///other.md");
+    assert.equal(clears(), 0, "another document");
+    assert.equal(f.preview.scroll.markedLine?.line, 3);
+    f.manager.scroll.clearLineMarker(f.preview, f.preview.documentUri);
+    assert.equal(clears(), 1);
+    assert.equal(f.preview.scroll.markedLine, undefined);
+    f.manager.scroll.clearLineMarker(f.preview, f.preview.documentUri);
+    assert.equal(clears(), 1, "nothing marked, nothing posted");
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+test("a link with a fragment, followed in the following side preview, asks for the marker of its target line", async () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    fs.writeFileSync(path.join(f.root, "other.md"), "# Other\n\n## Part\n");
+    await f.send("previewLink", { request: "other.md#part" });
+    assert.equal(f.shown.length, 1);
+    assert.equal(f.preview.scroll.pendingRevealLine?.documentId, f.shown[0]!.id);
+    assert.equal(f.preview.scroll.pendingRevealLine?.line, 3);
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+test("a link followed from a Studio tab asks for no marker", async () => {
+  const f = fixture({ followsActiveEditor: false });
+  try {
+    fs.writeFileSync(path.join(f.root, "other.md"), "# Other\n\n## Part\n");
+    await f.send("previewLink", { request: "other.md#part" });
+    assert.equal(f.preview.scroll.pendingRevealLine, undefined);
+  } finally {
+    f.cleanup();
+  }
+});
+
+const clearsOf = (f: Fixture): number => f.posted.filter((message) => message.type === "previewLineMarkerClear").length;
+
+function markedFixture(): Fixture {
+  const f = fixture({ followsActiveEditor: true });
+  f.preview.page.readyRequestId = f.preview.stage!.requestId;
+  f.manager.events.onEditorJumped(f.preview.documentUri, 3);
+  assert.equal(f.preview.scroll.markedLine?.line, 3);
+  return f;
+}
+
+const editOf = (f: Fixture, documentId = f.preview.documentUri): never => ({
+  document: { ...f.preview.document!, id: documentId, revision: 2 },
+  changes: [{ start: 0, length: 0, text: "x" }],
+  reason: undefined,
+}) as never;
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+test("a text-editor edit of the marked document clears the marker once", () => {
+  const f = markedFixture();
+  try {
+    f.manager.events.onDocumentChanged(editOf(f));
+    assert.equal(clearsOf(f), 1);
+    assert.equal(f.preview.scroll.markedLine, undefined);
+    f.manager.events.onDocumentChanged(editOf(f));
+    assert.equal(clearsOf(f), 1, "nothing marked any more");
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+test("an edit the page applied only forgets the marker, and a scroll keeps it", () => {
+  const f = markedFixture();
+  try {
+    f.manager.events.onVisibleRangesChanged(editorOf(f.preview, { first: 2, cursor: 6 }));
+    f.manager.events.onVisibleEditorsChanged();
+    assert.equal(clearsOf(f), 0, "a scroll or a cursor move");
+    assert.equal(f.preview.scroll.markedLine?.line, 3);
+    f.state.applying.add(f.preview.documentUri);
+    f.manager.events.onDocumentChanged(editOf(f));
+    assert.equal(clearsOf(f), 0, "the page cleared it itself");
+    assert.equal(f.preview.scroll.markedLine, undefined);
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+test("an edit of another document keeps the marker", () => {
+  const f = markedFixture();
+  try {
+    f.manager.events.onDocumentChanged(editOf(f, "file:///elsewhere.md"));
+    assert.equal(clearsOf(f), 0);
+    assert.equal(f.preview.scroll.markedLine?.line, 3);
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+test("Back or Next to another document from the following side preview requests the target line", async () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    const a = path.join(f.root, "a.md");
+    fs.writeFileSync(a, "# A\n\ntext\n\nmore\n");
+    const aId = pathToFileURL(a).toString();
+    const activeId = f.preview.documentUri;
+    const history = f.manager.history.historyOf(f.preview);
+    history.push({ uri: aId, line: 4 });
+    history.push({ uri: activeId, line: 2 });
+    await f.send("previewHistoryGo", { direction: "back" });
+    assert.equal(f.shown.length, 1);
+    const back = f.preview.scroll.pendingRevealLine;
+    assert.deepEqual({ line: back?.line, documentId: back?.documentId }, { line: 4, documentId: aId });
+    f.preview.scroll.pendingRevealLine = undefined;
+    showOther(f.preview, aId);
+    await f.send("previewHistoryGo", { direction: "forward" });
+    const next = f.preview.scroll.pendingRevealLine as { line: number; documentId: string } | undefined;
+    assert.deepEqual({ line: next?.line, documentId: next?.documentId }, { line: 2, documentId: activeId });
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+test("Back or Next from a Studio tab, or inside the same document, requests no line", async () => {
+  const studio = fixture({ followsActiveEditor: false });
+  try {
+    const a = path.join(studio.root, "a.md");
+    fs.writeFileSync(a, "# A\n\ntext\n");
+    const history = studio.manager.history.historyOf(studio.preview);
+    history.push({ uri: pathToFileURL(a).toString(), line: 2 });
+    history.push({ uri: studio.preview.documentUri, line: 1 });
+    await studio.send("previewHistoryGo", { direction: "back" });
+    assert.equal(studio.shown.length, 1);
+    assert.equal(studio.preview.scroll.pendingRevealLine, undefined);
+  } finally {
+    studio.cleanup();
+  }
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    const history = f.manager.history.historyOf(f.preview);
+    history.push({ uri: f.preview.documentUri, line: 1 });
+    history.push({ uri: f.preview.documentUri, line: 3 });
+    await f.send("previewHistoryGo", { direction: "back" });
+    assert.equal(f.shown.length, 0, "no other document is opened");
+    assert.equal(f.preview.scroll.pendingRevealLine, undefined);
+    await f.send("previewLink", { request: "#part" });
+    assert.equal(f.preview.scroll.pendingRevealLine, undefined, "a plain anchor marks nothing");
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+test("a path link to the same file with a fragment marks the target line; a plain anchor does not", async () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    await f.send("previewLink", { request: "active.md#part" });
+    assert.equal(f.preview.scroll.pendingRevealLine?.documentId, f.preview.documentUri);
+    assert.equal(f.preview.scroll.pendingRevealLine?.line, 3);
+    f.preview.scroll.pendingRevealLine = undefined;
+    await f.send("previewLink", { request: "#part" });
+    assert.equal(f.preview.scroll.pendingRevealLine, undefined);
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+test("a jump before the switch is posted at the page ready of the switched render, not before", async () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    f.preview.page.readyRequestId = f.preview.stage!.requestId;
+    const other = pathToFileURL(path.join(f.root, "other.md")).toString();
+    f.manager.events.onEditorJumped(other, 5);
+    // The switch: another document, a new render whose page is not ready yet.
+    showOther(f.preview, other);
+    f.preview.stage = { ...f.preview.stage!, requestId: 2 } as never;
+    f.manager.scroll.forgetLinesOutside(f.preview, other);
+    assert.equal(revealsOf(f).length, 0, "the render is not ready");
+    await f.send("previewReady", { blockEditOpen: false });
+    const posted = revealsOf(f);
+    assert.deepEqual(posted.map((message) => [message.line, message.requestId, message.documentId]), [[5, 2, other]]);
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+test("with scroll sync on, the first render after the switch anchors on the editor's first visible line and the jump leaves the anchor alone", () => {
+  const f = fixture({ followsActiveEditor: true });
+  try {
+    (f.preview.configuration as { scrollPreviewWithEditor: boolean }).scrollPreviewWithEditor = true;
+    const other = pathToFileURL(path.join(f.root, "other.md")).toString();
+    f.manager.events.onEditorJumped(other, 5);
+    showOther(f.preview, other);
+    f.preview.stage = { ...f.preview.stage!, requestId: 2 } as never;
+    f.state.editors = [{ ...editorOf(f.preview, { first: 6, cursor: 4 }), document: { id: other } as HostDocument }];
+    assert.equal(f.manager.scroll.initialAnchorLine(f.preview), 7, "the editor's first visible line, 1-based");
+    f.preview.page.readyRequestId = 2;
+    f.manager.scroll.postPendingRevealLine(f.preview);
+    const posted = revealsOf(f);
+    assert.equal(posted.length, 1);
+    assert.equal(posted[0].scroll, "if-off-screen");
+    assert.equal(f.preview.scroll.anchor, undefined, "the post does not change the anchor");
+    assert.equal(f.manager.scroll.initialAnchorLine(f.preview), 7);
   } finally {
     f.cleanup();
   }

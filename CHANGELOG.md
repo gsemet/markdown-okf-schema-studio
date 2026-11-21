@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The side preview now marks the target line with the arrow when a jump (a search result, Quick Open
+  `file.md:40`, Go to Line, Problems, a link) takes the text editor to a line, switching to the file
+  first when it is another one. The arrow stays through scrolls and cursor moves and goes when you
+  type in the file or the preview switches to another file; with scroll sync on, the preview scrolls
+  only when the line is off screen. A link followed in the side preview marks its target line too.
 - The side preview now works next to a text diff: the book button appears in the diff's title bar, Open
   Preview to Side previews the real file whichever side holds the cursor and opens no extra editor, the
   preview follows a diff that becomes active, and scrolling the file's side of the diff scrolls the preview.

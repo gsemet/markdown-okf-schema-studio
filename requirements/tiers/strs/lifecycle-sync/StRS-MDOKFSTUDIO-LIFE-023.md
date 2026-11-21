@@ -8,7 +8,8 @@ description: When a reader opens a Markdown file at a line from a search, Quick
   Open, a problem or a link, the Studio SHALL show that file in a Studio tab at
   that line with the line marked, through settings of its own, while leaving
   diffs, text editors asked for on purpose and the side preview workflow as text
-  editors.
+  editors, and with the side preview open the text editor SHALL go to the line
+  and the side preview SHALL mark it.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -33,6 +34,12 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-183
 - SwRS-MDOKFSTUDIO-LIFE-184
 - SwRS-MDOKFSTUDIO-LIFE-185
+- SwRS-MDOKFSTUDIO-LIFE-186
+- SwRS-MDOKFSTUDIO-LIFE-187
+- SwRS-MDOKFSTUDIO-LIFE-188
+- SwRS-MDOKFSTUDIO-LIFE-189
+- SwRS-MDOKFSTUDIO-LIFE-190
+- SwRS-MDOKFSTUDIO-LIFE-191
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -40,7 +47,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a reader opens a Markdown file at a line from a search, Quick Open, a problem or a link, the Studio SHALL show that file in a Studio tab at that line with the line marked, through settings of its own, while leaving diffs, text editors asked for on purpose and the side preview workflow as text editors.
+When a reader opens a Markdown file at a line from a search, Quick Open, a problem or a link, the Studio SHALL show that file in a Studio tab at that line with the line marked, through settings of its own, while leaving diffs, text editors asked for on purpose and the side preview workflow as text editors, and with the side preview open the text editor SHALL go to the line and the side preview SHALL mark it.
 
 ### Preserved stakeholder intent
 
@@ -89,6 +96,18 @@ flowchart LR
    - SwRS-MDOKFSTUDIO-LIFE-182: a link, Back or Next to another Markdown file opens Studio at the target line
    - Option SwRS-MDOKFSTUDIO-LIFE-182 (refusal): the side preview, the setting off or a target that is not Markdown opens a text editor as before
 
+#### Path 5: Jump while the side preview is open
+
+1. A search result, a problem or a link takes a text editor to a line while the side preview follows the editor
+   - SwRS-MDOKFSTUDIO-LIFE-186: the host tells the jump from a cursor move
+   - SwRS-MDOKFSTUDIO-LIFE-187: the side preview that follows the editor marks the line, switching to the file first when it is another one
+   - Option SwRS-MDOKFSTUDIO-LIFE-190 (refusal): a cursor move of the keyboard or the mouse marks nothing
+2. The side preview places the line
+   - SwRS-MDOKFSTUDIO-LIFE-188: the page scrolls as the anchor setting says
+3. The reader reads and edits on
+   - SwRS-MDOKFSTUDIO-LIFE-189: the marker stays through scrolls and goes on an edit of the document or a switch of file
+   - SwRS-MDOKFSTUDIO-LIFE-191: a link or Back or Next followed in the side preview marks its target line the same way
+
 #### Path 2: Move to the Studio settings
 
 1. The reader's user or workspace settings hold the `*.md` association to the Studio editor
@@ -117,4 +136,10 @@ flowchart LR
   - [SwRS-MDOKFSTUDIO-LIFE-183](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-183.md): The host picks the Studio tab to reveal or opens a new one
   - [SwRS-MDOKFSTUDIO-LIFE-184](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-184.md): The opening policy keeps a text editor or replaces it by Studio, by nine ordered rules
   - [SwRS-MDOKFSTUDIO-LIFE-185](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-185.md): The opening watcher reads each new Markdown text tab and puts Studio in its place after the migration
+  - [SwRS-MDOKFSTUDIO-LIFE-186](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-186.md): The host tells a jump from a cursor move
+  - [SwRS-MDOKFSTUDIO-LIFE-187](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-187.md): The side preview that follows the editor marks the line of a jump
+  - [SwRS-MDOKFSTUDIO-LIFE-188](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-188.md): The side preview's scroll on a jump follows the anchor setting
+  - [SwRS-MDOKFSTUDIO-LIFE-189](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-189.md): The line marker of the side preview goes on an edit of the document or a switch of file
+  - [SwRS-MDOKFSTUDIO-LIFE-190](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-190.md): A cursor move never marks the side preview
+  - [SwRS-MDOKFSTUDIO-LIFE-191](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-191.md): Links and Back and Next followed in the side preview mark their target line
 <!-- okf:links:end -->

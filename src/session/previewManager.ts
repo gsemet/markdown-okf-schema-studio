@@ -492,6 +492,10 @@ export class PreviewManager {
     const lockedColumn = session.lockedColumn;
     this.disposeSession(session, false);
     const replacement = this.createSession(panel, document, workspaceFolder, restoredState, followsActiveEditor);
+    // A line requested for this document (a jump) waits for the replacement's page.
+    if (session.scroll.pendingRevealLine?.documentId === document.id) {
+      replacement.scroll.pendingRevealLine = session.scroll.pendingRevealLine;
+    }
     // The panel, and so the locked group, lives on with the replacement.
     replacement.lockedColumn = lockedColumn;
     this.startRender(replacement, document);
@@ -612,6 +616,8 @@ export class PreviewManager {
     session.queue.clearLastGood();
     const previousDocumentUri = session.documentUri;
     session.documentUri = document.id;
+    // The marker belongs to the old document, and so does a line requested for another one.
+    this.scroll.forgetLinesOutside(session, document.id);
     // @implements_req SwRS-MDOKFSTUDIO-DIAG-053
     session.plantUml.includeWatch.clear();
     session.plantUml.issuedIds.clear();

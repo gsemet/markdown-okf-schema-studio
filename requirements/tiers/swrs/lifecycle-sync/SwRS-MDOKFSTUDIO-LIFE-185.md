@@ -53,7 +53,7 @@ When a text tab opens, the opening watcher SHALL read its line from the selectio
 
 ### Verification notes
 
-- Method: test/host/openingWatcher.test.ts (the real activation against the fake vscode module). The line is the selection of a change of kind Command (trial T2, VS Code 1.147.0: a jump selects with that kind, a plain reopening restores the cursor with no kind), read within 200 ms after the editor shows; the wait for the editor ends after 3 s or when the tab closes. A text editor reopened as text from a Studio tab is kept when the opening is plain (trial T3c); Open With > Text Editor is replaced (T3d, known limit). The opening that triggered the activation is never replaced, since no signal tells it from a restored tab (trial T11 not run as an automated test): see docs/known-limitations.md.
+- Method: test/host/openingWatcher.test.ts (the real activation against the fake vscode module). The line comes from the host jump signal (src/host-vscode/editorJumps.ts, SwRS-MDOKFSTUDIO-LIFE-186), not from a listener of the watcher; the behaviour is unchanged. The line is the selection of a change of kind Command (trial T2, VS Code 1.147.0: a jump selects with that kind, a plain reopening restores the cursor with no kind), read within 200 ms after the editor shows; the wait for the editor ends after 3 s or when the tab closes. A text editor reopened as text from a Studio tab is kept when the opening is plain (trial T3c); Open With > Text Editor is replaced (T3d, known limit). The opening that triggered the activation is never replaced, since no signal tells it from a restored tab (trial T11 not run as an automated test): see docs/known-limitations.md.
 - Criteria: each outcome of the tables above holds.
 
 <!-- okf:links:start -->

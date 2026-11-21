@@ -11,6 +11,8 @@ import * as path from "node:path";
 import type { DocumentChange } from "../../host-api/documentStore";
 import type { PairedEditor } from "../../host-api/textEditors";
 import { pageLiveStateMessages } from "../../core/preview/pageLiveState";
+import { PENDING_LINE_WINDOW_MS } from "../../core/navigation/pendingLine";
+import type { RevealScroll } from "../../core/protocol/hostToPage";
 import type { PageIdentity } from "../../core/protocol/envelope";
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import { EditorEchoGuard, shiftLineForEdits, type ScrollAnchor } from "../../core/scroll/anchorPolicy";
@@ -35,8 +37,14 @@ export interface ScrollState {
     /** Renders of an older document version (an in-flight autosave build) must not consume the pin. */
     minVersion: number;
   };
-  /** A line the page is asked to reveal and mark once it is ready (Studio opened at a line). */
-  pendingRevealLine?: number;
+  /**
+   * A line the page is asked to reveal and mark once it is ready (Studio opened at a line, a jump
+   * into the file the side preview shows): it belongs to a document and has an age, and is dropped
+   * past `PENDING_LINE_WINDOW_MS`.
+   */
+  pendingRevealLine?: { line: number; documentId: string; at: number; scroll: RevealScroll };
+  /** The line marker the page shows, posted by `previewRevealLine` (removed when the document is edited or switched). */
+  markedLine?: { line: number; documentId: string };
   lastSourceScrollLine?: number;
   lastRevealedSourceLine?: number;
   /**
@@ -245,40 +253,105 @@ export class ScrollSyncController {
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-181
   /**
-   * Asks the page to reveal and mark a 1-based source line: at once when the page already shows
-   * its render, else when it reports ready (`postPendingRevealLine`).
+   * Asks the page to reveal and mark a 1-based source line of `options.documentId` (the shown
+   * document by default): at once when the page already shows its render of that document, else
+   * when it reports ready (`postPendingRevealLine`).
    */
-  public requestRevealLine(preview: PreviewSession, line: number): void {
+  public requestRevealLine(
+    preview: PreviewSession,
+    line: number,
+    options: { documentId?: string; scroll?: RevealScroll } = {},
+  ): void {
     if (!Number.isSafeInteger(line) || line < 1) {
       return;
     }
-    preview.scroll.pendingRevealLine = line;
+    preview.scroll.pendingRevealLine = {
+      line,
+      documentId: options.documentId ?? preview.documentUri,
+      at: Date.now(),
+      scroll: options.scroll ?? "reading-line",
+    };
     const stage = preview.stage;
     if (stage && preview.page.readyRequestId === stage.requestId) {
       this.postPendingRevealLine(preview);
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-188
+  /**
+   * Asks the side preview that follows the editor to mark a jump's line. The scroll follows the
+   * live anchor setting: with scroll sync on the editor leads (`"if-off-screen"`), with it off the
+   * page scrolls the line to the reading line.
+   */
+  public requestJumpMarker(preview: PreviewSession, documentId: string, line: number): void {
+    this.requestRevealLine(preview, line, {
+      documentId,
+      scroll: preview.configuration.scrollPreviewWithEditor ? "if-off-screen" : "reading-line",
+    });
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-181
   /**
-   * Posts the requested line once. The requested line wins over the reading place the page
-   * restored: it also becomes the anchor of the next render of this preview.
+   * Posts the requested line once, only to a visible page that shows its document, and only inside
+   * the window (a line past it is dropped; one for another document waits for its render, or is
+   * dropped by the switch). The requested line wins over the reading place the page restored: it
+   * also becomes the anchor of the next render, except for the side preview that follows the editor
+   * with scroll sync on (`"if-off-screen"`): the editor leads there.
    */
   public postPendingRevealLine(preview: PreviewSession): void {
-    const line = preview.scroll.pendingRevealLine;
+    const pending = preview.scroll.pendingRevealLine;
     const stage = preview.stage;
-    if (line === undefined || preview.disposed || !stage) {
+    if (pending === undefined || preview.disposed || !stage) {
+      return;
+    }
+    if (Date.now() - pending.at > PENDING_LINE_WINDOW_MS) {
+      preview.scroll.pendingRevealLine = undefined;
+      return;
+    }
+    // Waits: another document is shown, or the page is hidden (it reports ready again when shown).
+    if (pending.documentId !== preview.documentUri
+      || stage.activeDocumentIdentity !== pending.documentId
+      || preview.panel.visible === false) {
       return;
     }
     preview.scroll.pendingRevealLine = undefined;
-    preview.scroll.anchor = { line, owner: "preview", documentId: preview.documentUri };
+    preview.scroll.markedLine = { line: pending.line, documentId: pending.documentId };
+    if (pending.scroll === "reading-line") {
+      preview.scroll.anchor = { line: pending.line, owner: "preview", documentId: preview.documentUri };
+    }
     fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewRevealLine",
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
-      line,
+      line: pending.line,
+      ...(pending.scroll === "reading-line" ? {} : { scroll: pending.scroll }),
     }), "postToPage");
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-189
+  /** Removes the line marker of the page of `documentId`: the text editor edited the marked document. */
+  public clearLineMarker(preview: PreviewSession, documentId: string): void {
+    const marked = preview.scroll.markedLine;
+    const stage = preview.stage;
+    if (!marked || marked.documentId !== documentId || preview.disposed || !stage) {
+      return;
+    }
+    preview.scroll.markedLine = undefined;
+    fireAndForget(this.manager.host.logger, preview.postToPage({
+      type: "previewLineMarkerClear",
+      documentId: stage.activeDocumentIdentity,
+      revision: revisionOfStage(stage),
+      requestId: stage.requestId,
+    }), "postToPage");
+  }
+
+  /** The side preview switched to `documentId`: its marker and the pending lines of other documents go. */
+  public forgetLinesOutside(preview: PreviewSession, documentId: string): void {
+    preview.scroll.markedLine = undefined;
+    if (preview.scroll.pendingRevealLine?.documentId !== documentId) {
+      preview.scroll.pendingRevealLine = undefined;
+    }
   }
 
   /** Marks the editor's caret line in the page. */

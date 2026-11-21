@@ -18,6 +18,7 @@ import { targetChoices, type HostListAnswer } from "../session/features/hostRequ
 import type { PreviewSession } from "../session/previewSession";
 import type { PreviewThemeMode } from "../core/state/previewTheme";
 import type { StudioActivation } from "./activation";
+import type { SelectionRecord } from "./editorJumps";
 import type { VscodePreviewPanel } from "./previewPanel";
 
 /**
@@ -68,6 +69,8 @@ export function getActivePreviewForTests():
     outputDirectory?: string;
     lastSourceScrollLine?: number;
     lastRevealedSourceLine?: number;
+    /** The line marker the page was asked to draw (the jump marker of the side preview), until it is removed. */
+    markedLine?: { line: number; documentId: string };
     sourceLine?: number;
     scrollTop?: number;
     descriptionsCollapsed?: boolean;
@@ -147,6 +150,7 @@ export function getActivePreviewForTests():
     outputDirectory: preview.stage?.outputDirectory,
     lastSourceScrollLine: preview.scroll.lastSourceScrollLine,
     lastRevealedSourceLine: preview.scroll.lastRevealedSourceLine,
+    markedLine: preview.scroll.markedLine,
     sourceLine: preview.state?.sourceLine,
     scrollTop: preview.state?.scrollTop,
     descriptionsCollapsed: preview.state?.descriptionsCollapsed,
@@ -242,6 +246,18 @@ export function holdEditSourcesForTests(): { held(): number; release(): void } {
       for (const post of queue.splice(0)) post();
     },
   };
+}
+
+/**
+ * Records every selection change of the text editors from now on, with the kind VS Code reported,
+ * the selection count, the first line and the jump the host read from it (trial J1). `stop()` ends
+ * the recording. The extension must be active.
+ */
+export function recordSelectionChangesForTests(): { records: readonly SelectionRecord[]; stop(): void } {
+  const records: SelectionRecord[] = [];
+  const jumps = current?.editorJumps;
+  jumps?.recordForTests((record) => records.push(record));
+  return { records, stop: () => jumps?.recordForTests(undefined) };
 }
 
 /** Moves the pages with the active editor, as a scroll of the editor would. */

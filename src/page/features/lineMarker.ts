@@ -7,12 +7,17 @@
  * another line is requested. See styles/lineMarkerStyles.ts for the look.
  */
 
+import type { RevealScroll } from "../../core/protocol/hostToPage";
 import { MAPPINGS_SELECTOR, type LayoutEntry, type PageRuntime } from "./pageRuntime";
 
 /** The marker of a page. */
 export interface LineMarker {
-  /** Places the marker on a 1-based source line, unfolding what hides it and scrolling to it. */
-  reveal(line: number): void;
+  /**
+   * Places the marker on a 1-based source line, unfolding what hides it. `"reading-line"` always
+   * scrolls the line to the reading line; `"if-off-screen"` scrolls only when the line's box is not
+   * on screen below the sticky heading band.
+   */
+  reveal(line: number, scroll: RevealScroll): void;
   /** Removes the marker. */
   clear(): void;
   /** The line the marker is on, or undefined when there is none. */
@@ -61,6 +66,8 @@ export function postsASourceEdit(message: unknown): boolean {
 export function installLineMarker(rt: PageRuntime): LineMarker {
   const { document, window, context, state } = rt;
   let line: number | undefined;
+  // The document the marker belongs to: a page that shows another one draws no marker.
+  let markedDocumentId: string | undefined;
   let overlay: HTMLElement | undefined;
   let marked: Element | undefined;
 
@@ -173,6 +180,12 @@ export function installLineMarker(rt: PageRuntime): LineMarker {
     return box;
   }
 
+  // True when the whole box is inside the viewport, below the sticky heading band.
+  function isOnScreen(box: LineBox): boolean {
+    const top = window.scrollY + rt.parts.stickyBand.readingOffset();
+    return box.top >= top && box.top + box.height <= window.scrollY + window.innerHeight;
+  }
+
   function clear(): void {
     line = undefined;
     hide();
@@ -188,7 +201,7 @@ export function installLineMarker(rt: PageRuntime): LineMarker {
   });
   rt.bus.on("layoutMeasured", () => {
     if (line === undefined) return;
-    if (startsAnEdit()) clear();
+    if (startsAnEdit() || context.documentId !== markedDocumentId) clear();
     else place(false);
   });
   rt.bus.on("contentReplaced", () => {
@@ -196,10 +209,11 @@ export function installLineMarker(rt: PageRuntime): LineMarker {
   });
 
   return {
-    reveal(requested) {
+    reveal(requested, scroll) {
       line = requested;
+      markedDocumentId = context.documentId;
       const box = place(true);
-      if (box) rt.scroll.revealPositionSilently(box.top, requested);
+      if (box && (scroll === "reading-line" || !isOnScreen(box))) rt.scroll.revealPositionSilently(box.top, requested);
       // The scroll moved nothing in the document: the box stays right. Measure again on the frame.
       rt.scroll.stabilizeLayout();
     },

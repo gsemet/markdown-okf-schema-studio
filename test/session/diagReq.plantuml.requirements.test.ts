@@ -133,6 +133,8 @@ test("the include watch is emptied when the preview follows another document", (
     host: { workspace: { folderOf: () => ({ path: "/notes" }), trusted: true } },
     pathOf: () => "/notes/two.md",
     diagnostics: { clear: () => undefined },
+    // The switch forgets the line marker of the old document (CR 456).
+    scroll: { forgetLinesOutside: () => undefined },
     previewTitle: () => "Preview two",
     rendering: { showPending: () => undefined, refreshPreviewDocument: () => Promise.resolve() },
   };
