@@ -6,7 +6,8 @@ title: "Cmd/Ctrl+C copies the exact Markdown of the selected blocks"
 description: "When a writer presses the platform copy chord with blocks selected in
   edit mode and no editor open, the page SHALL post previewBlocksCopy with the first
   and last source line of the selection and take the key from the browser, so that
-  the host puts the exact Markdown of those lines on the clipboard."
+  the host puts the exact Markdown of those lines on the clipboard after the range's
+  trailing blank lines (spaces and tabs only) are dropped."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -22,6 +23,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/edits/sourceEdits.ts
 - src/core/mapping/blockRange.ts
 - src/page/features/blockSelectionView.ts
 - src/session/features/sourceEdits.ts
@@ -37,7 +39,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer presses the platform copy chord with blocks selected in edit mode and no editor open, the page SHALL post previewBlocksCopy with the first and last source line of the selection and take the key from the browser, so that the host puts the exact Markdown of those lines on the clipboard.
+When a writer presses the platform copy chord with blocks selected in edit mode and no editor open, the page SHALL post previewBlocksCopy with the first and last source line of the selection and take the key from the browser, so that the host puts the exact Markdown of those lines on the clipboard after the range's trailing blank lines (spaces and tabs only) are dropped.
 
 ### Scenario (nominal): Ctrl+C or Cmd+C posts the source lines of the selection
 
@@ -51,6 +53,8 @@ When a writer presses the platform copy chord with blocks selected in edit mode 
 | --- | --- |
 | Lines 7 to 10 holding a paragraph, a blank line and a two-item list | The clipboard holds those four lines joined by the document's line breaks, with no trailing line break, and the document is unchanged |
 | A document with CR LF line breaks | The clipboard text keeps CR LF between its lines |
+| A list whose range ends on the blank lines after it (the renderer maps it so), followed by two blank lines | The clipboard holds the list's lines without the blank lines after it, and the document is unchanged |
+| A selection that ends on a line holding only a no-break space | Refused with "The preview is out of date. Refresh it and try again.", and nothing is copied |
 
 ### Scenario (nominal): The page announces the answer
 
@@ -93,8 +97,8 @@ When a writer presses the platform copy chord with blocks selected in edit mode 
 ### Verification notes
 
 - Method: test/page/runtimeBlockSelection.test.ts, unit tests `T40: Ctrl+C and Ctrl+X on a selection post its source lines; the keys are ours` (copy chord); `T40: on macOS the chord is Cmd, and Ctrl alone is ignored` (Ctrl alone on macOS); `T40: a copy answer says so and a cut answer clears the selection` (announcement); `T40: a held key sends one request until the host answers; a refusal is announced` (refusal shown, held key; the five-second timer is not asserted); `T40: without a selection, in reading mode or with Shift/Alt the keys stay native` and `T40: the keys are ignored inside a text box, a field and the property table` (keys stay with the browser).
-- Method: test/core/mapping/blockRange.test.ts, unit test `spanText returns the exact lines without the final line break` (host clipboard text, CR LF); test/core/edits/sourceEdits.test.ts, unit test `copy gives the exact Markdown of the blocks, cut also removes them with one separator` (host copy leaves the document unchanged).
-- Method: test/integration/blockClipboard.test.ts (copy), and real-input scenario scenarioBlockSelection.
+- Method: test/core/mapping/blockRange.test.ts, unit test `spanText returns the exact lines without the final line break` (host clipboard text, CR LF); test/core/edits/sourceEdits.test.ts, unit test `copy gives the exact Markdown of the blocks, cut also removes them with one separator` (host copy leaves the document unchanged); the unit tests `copy and cut of a list in the middle drop the blank lines after it`, `copy and cut of a selection that ends on a list` and `a selection ending on a no-break-space line is refused, not shortened` (trailing blank lines dropped, in LF, CR LF and lone CR; the no-break-space refusal).
+- Method: test/integration/blockClipboard.test.ts (copy), and real-input scenario scenarioBlockSelection (the copy step on a list followed by two blank lines).
 - Criteria: The posted lines are the first line of the first block and the last line of the last block. spanText returns the lines of the span. showSelectionNotice uses a 4000 ms timer. clipboardKey and ownsKeys return nothing for the inputs of the browser scenario. blocksFlight is cleared by the answer or by its timer.
 
 <!-- okf:links:start -->

@@ -402,6 +402,88 @@ export async function scenarioBlockSelection(page: Page, evidence: Evidence): Pr
     await waitForNoBlockEditor(page, "the structural keys open no block editor");
     assert.equal(bufferText(document), text, "selecting changes nothing in the document");
   });
+  await scenarioCutCopyListBeforeBlankLines(page, evidence);
+  await scenarioPasteAfterListBeforeBlankLines(page, evidence);
+}
+
+const LIST_BEFORE_BLANK_LINES = ["# Clip", "", "Alpha paragraph.", "", "- item a", "- item b", "", "", "Omega paragraph.", ""]
+  .join("\n");
+const LIST_MARKDOWN = "- item a\n- item b";
+
+/**
+ * Opens the side preview of `document` in edit mode and selects the list that ends on two blank
+ * lines. Asserts that the page maps the list up to a blank line, so the host plans a range that
+ * ends on it.
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
+ */
+async function selectListFollowedByBlankLines(page: Page, document: vscode.TextDocument): Promise<void> {
+  await openSidePreview(document);
+  await waitForRender(document);
+  await setEditMode(page, true);
+  const selected = (): Promise<{ text: string; line: number; endLine: number }[]> => withCurrentFrame(page, (frame) =>
+    frame.evaluate(() => Array.from(window.document.querySelectorAll("[data-sphinx-preview-block-selected]"))
+      .map((element) => ({
+        text: element.textContent ?? "",
+        line: Number(element.getAttribute("data-sphinx-source-line")),
+        endLine: Number(element.getAttribute("data-sphinx-source-end-line")),
+      }))));
+  await withCurrentFrame(page, (frame) => frame.locator("ul", { hasText: "item a" }).click({ modifiers: ["Shift"] }));
+  await waitFor("exactly the list to be selected", async () => {
+    const blocks = await selected();
+    return blocks.length === 1 && blocks[0].text.includes("item a");
+  });
+  const [list] = await selected();
+  assert.ok(list.endLine > list.line, "the list is mapped on several lines");
+  assert.equal(document.lineAt(list.endLine - 1).text.trim(), "",
+    "the page sends a range whose last line is blank in the document");
+}
+
+/** Copy then cut of a list followed by two blank lines: the clipboard holds the list, the cut leaves one separator. */
+async function scenarioCutCopyListBeforeBlankLines(page: Page, evidence: Evidence): Promise<void> {
+  await withDocument("realinput-cut-list-blank", LIST_BEFORE_BLANK_LINES, async (document) => {
+    await selectListFollowedByBlankLines(page, document);
+    const savedClipboard = await vscode.env.clipboard.readText();
+    try {
+      await vscode.env.clipboard.writeText("sentinel");
+      await press(page, `${MOD}+C`);
+      await waitFor("Cmd or Ctrl+C to copy the list without its blank lines", async () =>
+        (await vscode.env.clipboard.readText()) === LIST_MARKDOWN);
+      assert.equal(bufferText(document), LIST_BEFORE_BLANK_LINES, "copying changes nothing in the document");
+      await vscode.env.clipboard.writeText("sentinel");
+      await press(page, `${MOD}+X`);
+      await waitFor("Cmd or Ctrl+X to cut the list", async () =>
+        (await vscode.env.clipboard.readText()) === LIST_MARKDOWN
+        && bufferText(document) === ["# Clip", "", "Alpha paragraph.", "", "Omega paragraph.", ""].join("\n"));
+    } finally {
+      await vscode.env.clipboard.writeText(savedClipboard);
+    }
+    await waitForRender(document);
+    await captureAfter(evidence, page, "block-editing/r25-cut-list-trailing-blank",
+      "A list followed by two blank lines was copied and cut: the clipboard held the list alone, and the "
+      + "document keeps one blank line between Alpha and Omega.");
+  });
+}
+
+/** Paste after a list followed by two blank lines: one blank line on each side of the new block, none gained. */
+async function scenarioPasteAfterListBeforeBlankLines(page: Page, evidence: Evidence): Promise<void> {
+  await withDocument("realinput-paste-list-blank", LIST_BEFORE_BLANK_LINES, async (document) => {
+    await selectListFollowedByBlankLines(page, document);
+    const savedClipboard = await vscode.env.clipboard.readText();
+    try {
+      await vscode.env.clipboard.writeText("Pasted paragraph.");
+      await press(page, `${MOD}+V`);
+      await waitFor("Cmd or Ctrl+V to paste after the list", () =>
+        bufferText(document) === ["# Clip", "", "Alpha paragraph.", "", "- item a", "- item b", "", "Pasted paragraph.", "",
+          "Omega paragraph.", ""].join("\n"));
+    } finally {
+      await vscode.env.clipboard.writeText(savedClipboard);
+    }
+    await waitForRender(document);
+    await captureAfter(evidence, page, "block-editing/r26-paste-after-list-trailing-blank",
+      "A paragraph was pasted after a list followed by two blank lines: it sits between the list and Omega "
+      + "with one blank line on each side.");
+  });
 }
 
 /**

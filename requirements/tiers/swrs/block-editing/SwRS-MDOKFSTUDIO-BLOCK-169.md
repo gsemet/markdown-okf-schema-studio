@@ -5,9 +5,10 @@ uuid: 9155e6f3-a538-443d-9375-571ff1ef5a82
 title: "Cut removes the selected blocks with one blank separator"
 description: "When a writer cuts selected blocks, the host SHALL put their Markdown
   on the clipboard and delete them together with their blank separator in the line
-  breaks of the document, so that no gap of two blank lines and no glued blocks are
-  left, and answering that nothing was removed when the document changed during the
-  clipboard write."
+  breaks of the document, after the range's trailing blank lines (spaces and tabs
+  only) are dropped, so that no gap of two blank lines and no glued blocks are left,
+  and answering that nothing was removed when the document changed during the clipboard
+  write."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -26,11 +27,14 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/edits/sourceEdits.ts
 - src/core/mapping/blockRange.ts
 - src/page/features/blockSelectionView.ts
 - src/session/features/sourceEdits.ts
 tested_in_files:
+- test/core/edits/sourceEdits.test.ts
 - test/core/mapping/blockRange.test.ts
+- test/integration/realInput/blockKeys.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/session/blockReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
@@ -40,7 +44,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer cuts selected blocks, the host SHALL put their Markdown on the clipboard and delete them together with their blank separator in the line breaks of the document, so that no gap of two blank lines and no glued blocks are left, and answering that nothing was removed when the document changed during the clipboard write.
+When a writer cuts selected blocks, the host SHALL put their Markdown on the clipboard and delete them together with their blank separator in the line breaks of the document, after the range's trailing blank lines (spaces and tabs only) are dropped, so that no gap of two blank lines and no glued blocks are left, and answering that nothing was removed when the document changed during the clipboard write.
 
 ### Scenario (nominal): Middle block
 
@@ -57,6 +61,7 @@ When a writer cuts selected blocks, the host SHALL put their Markdown on the cli
 | The last block of a document with three blocks | The blank line before the last block goes with it |
 | The only block of the body | The body is empty |
 | The last block of a document without a final line break | The document still has no final line break |
+| A list in the middle whose range ends on the two blank lines after it | The clipboard holds the list without the blank lines; the list and the blank lines after it go, and the blocks around it stay one blank line apart, as Delete block leaves them |
 
 A cut never leaves three line breaks in a row and never merges two paragraphs.
 
@@ -103,10 +108,11 @@ A cut never leaves three line breaks in a row and never merges two paragraphs.
 ### Verification notes
 
 - Method: test/core/mapping/blockRange.test.ts (middle block, touching block above, first, last, only block and no final newline, CR LF and LF line breaks: `cutting a middle block removes it with one separator`, `cutting never glues a block to the one after the span`, `a cut never leaves three blank lines in a row`, `cutting the first block leaves no blank line at the top`, `cutting the last block removes the blank line before it`, `cutting the last block of a document without a final newline keeps it without one`, `cutting the only block empties the body`, `cutting keeps CRLF line breaks of what remains`).
-- Method: test/integration/blockClipboard.test.ts (middle block with one undo restoring it, last block).
+- Method: test/core/edits/sourceEdits.test.ts (trailing blank lines of the range dropped before the cut, in LF, CR LF and lone CR: `copy and cut of a list in the middle drop the blank lines after it`, `cut of a list that is the last block`, `copy and cut of a selection that ends on a list`, `a cut gives the text and the following line of Delete block`, `a selection ending on a no-break-space line is refused, not shortened`).
+- Method: test/integration/blockClipboard.test.ts (middle block with one undo restoring it, last block), and real-input scenario scenarioBlockSelection (the cut step on a list followed by two blank lines).
 - Method: test/session/blockReq.requirements.test.ts (pin only when a block follows the span: `a cut stores a pin for the first line of the span only when a block follows it`; changed document: `a cut is refused when the document changed while the clipboard was written`).
 - Method: test/page/runtimeBlockSelection.test.ts (`T40: a copy answer says so and a cut answer clears the selection`; the paste path shares the branch and is not asserted; the refused-cut selection case is not asserted by this test).
-- Criteria: The resulting text has no run of three line breaks and no merged paragraphs; storePendingPin is called only when followingLine is defined; the revision of the document is compared with the one of the request after the write; receiveBlocksResult clears the selection for every answered op except copy.
+- Criteria: The trailing CommonMark blank lines of the range are dropped before spanText and planCut. The resulting text has no run of three line breaks and no merged paragraphs; storePendingPin is called only when followingLine is defined; the revision of the document is compared with the one of the request after the write; receiveBlocksResult clears the selection for every answered op except copy.
 
 <!-- okf:links:start -->
 ### Links

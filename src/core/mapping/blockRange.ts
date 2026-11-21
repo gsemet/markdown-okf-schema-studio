@@ -165,7 +165,14 @@ export function pastedBlockText(raw: string): string {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-174
-/** Plans the insertion of clipboard text as new blocks after `afterLine` (0 = start of the body). */
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-124
+/**
+ * Plans the insertion of clipboard text as new blocks after `afterLine` (0 = start of the body).
+ * An anchor that is a CommonMark blank line under a body line (the blank separator a list is
+ * mapped to) is moved up to the first blank line under that line, so the new block reuses the
+ * blank lines already there. Refused: a blank line with no body line above it or with only the
+ * frontmatter above, and a line holding only a no-break space.
+ */
 export function planPaste(text: string, afterLine: number, raw: string): PastePlan | BlockRangeRefusal {
   const block = pastedBlockText(raw);
   if (block === "") {
@@ -174,16 +181,29 @@ export function planPaste(text: string, afterLine: number, raw: string): PastePl
   if (!Number.isSafeInteger(afterLine) || afterLine < 0) {
     return { refused: OUT_OF_DATE };
   }
+  let anchor = afterLine;
   if (afterLine > 0) {
     const lines = splitLines(text);
-    if (afterLine > lines.length || isBlank(lines[afterLine - 1].text)) {
+    if (afterLine > lines.length) {
       return { refused: OUT_OF_DATE };
     }
-    if (afterLine <= frontmatterLineCount(text)) {
+    if (isBlank(lines[afterLine - 1].text)) {
+      if (!isCommonMarkBlank(lines[afterLine - 1].text)) {
+        return { refused: OUT_OF_DATE };
+      }
+      let above = afterLine - 1;
+      while (above >= 1 && isCommonMarkBlank(lines[above - 1].text)) {
+        above -= 1;
+      }
+      if (above < 1 || above <= frontmatterLineCount(text)) {
+        return { refused: OUT_OF_DATE };
+      }
+      anchor = above + 1;
+    } else if (afterLine <= frontmatterLineCount(text)) {
       return { refused: IN_FRONTMATTER };
     }
   }
-  const plan = planInsertion(text, afterLine);
+  const plan = planInsertion(text, anchor);
   if (!plan) {
     return { refused: OUT_OF_DATE };
   }

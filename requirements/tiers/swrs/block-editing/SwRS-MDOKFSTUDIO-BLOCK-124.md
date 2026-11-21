@@ -29,6 +29,7 @@ implemented_in_files:
 - src/core/mapping/blockMove.ts
 - src/core/mapping/blockRange.ts
 tested_in_files:
+- test/core/edits/sourceEdits.test.ts
 - test/core/mapping/blockMove.test.ts
 - test/core/mapping/blockRange.test.ts
 - test/integration/blockClipboard.test.ts
@@ -57,8 +58,8 @@ When the ranges of a block move, the range of a copy or a cut, or the line of a 
 | --- | --- |
 | A cut of lines 15 to 99 in a shorter document | The answer is ok false with "The preview is out of date. Refresh it and try again." and the document is unchanged |
 | A copy or cut range that is out of bounds or unordered | The same refusal |
-| A cut that starts or ends on a blank line | The same refusal |
-| A paste after a line that does not exist or that is blank | The same refusal |
+| A copy or cut that starts on a blank line, covers blank lines only, or ends on a line holding only a no-break space | The same refusal (spaces-and-tabs lines at the end of a copy or cut range are dropped before the check, see SwRS-MDOKFSTUDIO-BLOCK-166 and SwRS-MDOKFSTUDIO-BLOCK-169) |
+| A paste after a line that does not exist, a line holding only a no-break space, or a blank line with no body line above it (the start of the text, right under the frontmatter) | The same refusal (a blank line that ends a block is accepted, see SwRS-MDOKFSTUDIO-BLOCK-174) |
 
 ### Scenario (refusal): Moves into or out of the frontmatter
 
@@ -100,9 +101,9 @@ When the ranges of a block move, the range of a copy or a cut, or the line of a 
 
 - Method: test/core/mapping/blockMove.test.ts (move ranges, frontmatter, text between: `refuses overlapping, unordered, out-of-range and blank-edged ranges`, `refuses blocks in the frontmatter and a move across it`, `a span next to the frontmatter cannot cross it`, `refuses non-blank text between the blocks`).
 - Method: test/integration/blockMove.test.ts (overlap and blank edge, frontmatter; the text between the blocks is not checked here).
-- Method: test/core/mapping/blockRange.test.ts (copy, cut and paste ranges and the frontmatter: `spanText refuses bad ranges and the frontmatter`, `cut refuses the frontmatter and bad ranges`, `paste refuses an empty clipboard, the frontmatter and stale lines`).
+- Method: test/core/mapping/blockRange.test.ts (copy, cut and paste ranges and the frontmatter: `spanText refuses bad ranges and the frontmatter`, `cut refuses the frontmatter and bad ranges`, `paste refuses an empty clipboard, the frontmatter and stale lines` with its blank-line assertion changed to an accepted paste, `paste still refuses a blank line with no body above it and a no-break-space line`); test/core/edits/sourceEdits.test.ts (`copy and cut still refuse blank-only, blank-first and out-of-range spans`, `a selection ending on a no-break-space line is refused, not shortened`).
 - Method: test/integration/blockClipboard.test.ts (blank line, bounds, frontmatter).
-- Criteria: planBlockMove returns the refusal for each move case; checkSpan and planPaste return the refusal for each clipboard case; the reason text equals the one in the table.
+- Criteria: planBlockMove returns the refusal for each move case; checkSpan and planPaste return the refusal for each clipboard case; the reason text equals the one in the table; the trailing CommonMark blank lines of a copy or cut range are dropped before checkSpan; planPaste moves a CommonMark-blank anchor under a body line before planInsertion.
 
 <!-- okf:links:start -->
 ### Links
