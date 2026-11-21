@@ -7,8 +7,9 @@ import { test } from "node:test";
 import { pageDocument } from "../buildSite";
 import { SITE_URL } from "../socialCard";
 import { fixtureReport } from "./fixture";
-import { viewerDocument } from "./shell";
-import { redirectDocument, writeViewerPages } from "./write";
+import { parseRequirementsReport } from "./model";
+import { shareCard, viewerDocument } from "./shell";
+import { redirectDocument, viewerPages, writeViewerPages } from "./write";
 
 const EXTENSION_ROOT = path.resolve(__dirname, "..", "..", "..", "..");
 
@@ -22,12 +23,27 @@ test("the site navigation links requirements/ from the root and from nested page
   }
 });
 
-test("requirements.html redirects to requirements/", () => {
+function tags(html: string): string[] {
+  return html.match(/<meta (?:property|name)="(?:og|twitter):[^>]*>/gu) ?? [];
+}
+
+test("requirements.html redirects to requirements/ and carries the tags of the index", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-069
-  const html = redirectDocument();
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  const model = parseRequirementsReport(fixtureReport(), "abc123");
+  assert.ok(model);
+  const index = viewerPages(model, "/nonexistent-root")[0];
+  assert.ok(index);
+  const html = redirectDocument(shareCard(index));
   assert.ok(html.includes('<meta http-equiv="refresh" content="0; url=requirements/">'));
   assert.ok(html.includes('<a href="requirements/">'));
   assert.ok(html.includes(`<link rel="canonical" href="${SITE_URL}requirements/">`));
+  assert.ok(html.includes("<title>Requirements | Markdown OKF-Schema Studio</title>"));
+  assert.ok(html.includes(`property="og:image" content="${SITE_URL}requirements/og/areas-card.png"`));
+  assert.ok(html.includes(`property="og:url" content="${SITE_URL}requirements/"`));
+  assert.ok(html.includes('name="twitter:card" content="summary_large_image"'));
+  const page = viewerDocument(index, { sha: "abc", generatedAt: "" });
+  assert.deepEqual(tags(html), tags(page).filter((tag) => !tag.includes('name="description"')));
 });
 
 test("the viewer is written under requirements/ with its assets, index and redirect", () => {
@@ -64,6 +80,7 @@ test("the viewer is written under requirements/ with its assets, index and redir
 test("a missing report writes the home and the redirect only", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-069
   // @tests_req SwRS-MDOKFSTUDIO-CORE-084
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-requirements-"));
   try {
     fs.writeFileSync(path.join(root, "broken.json"), "{");
@@ -73,7 +90,8 @@ test("a missing report writes the home and the redirect only", () => {
       assert.ok(fs.readFileSync(path.join(site, "requirements", "index.html"), "utf8").includes("The requirements report was not generated"));
       assert.deepEqual(fs.readdirSync(path.join(site, "requirements")).sort(), ["index.html", "search-index.js", "viewer.css", "viewer.js"]);
       assert.equal(fs.readFileSync(path.join(site, "requirements", "search-index.js"), "utf8"), "window.SEARCH=[];\n");
-      assert.ok(fs.existsSync(path.join(site, "requirements.html")));
+      const stub = fs.readFileSync(path.join(site, "requirements.html"), "utf8");
+      assert.ok(stub.includes('property="og:image"') && stub.includes('name="twitter:card"'), "the stub carries the tags of the index");
       fs.rmSync(site, { recursive: true, force: true });
     }
   } finally {
@@ -83,7 +101,7 @@ test("a missing report writes the home and the redirect only", () => {
 
 test("the History checkbox sits inside the header landmark", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-069
-  const html = viewerDocument({ dir: "", level: "areas", title: "T", description: "d", body: "<p>x</p>", crumbs: [] }, { sha: "abc", generatedAt: "2026-01-01" });
+  const html = viewerDocument({ dir: "", level: "areas", title: "T", shareTitle: "T", description: "d", body: "<p>x</p>", crumbs: [] }, { sha: "abc", generatedAt: "2026-01-01" });
   const header = html.slice(html.indexOf('<header class="top">'), html.indexOf("</header>"));
   assert.ok(header.includes('id="history"'));
   assert.ok(html.indexOf('id="history"') > html.indexOf("<header"));

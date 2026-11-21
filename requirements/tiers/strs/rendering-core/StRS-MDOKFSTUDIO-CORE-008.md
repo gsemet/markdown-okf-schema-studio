@@ -85,7 +85,7 @@ flowchart LR
   - [SwRS-MDOKFSTUDIO-CORE-082](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-082.md): The site requirements viewer has a page for each behaviour
   - [SwRS-MDOKFSTUDIO-CORE-083](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-083.md): The site requirements viewer keeps retired requirements behind History
   - [SwRS-MDOKFSTUDIO-CORE-084](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-084.md): The site requirements viewer has a search index
-  - [SwRS-MDOKFSTUDIO-CORE-085](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-085.md): The site requirements viewer has a social card for each level
+  - [SwRS-MDOKFSTUDIO-CORE-085](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-085.md): The site requirements viewer has a social card for each page
   - [SwRS-MDOKFSTUDIO-CORE-086](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-086.md): The published site has one cream look on every page and picture
   - [SwRS-MDOKFSTUDIO-CORE-091](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-091.md): The site requirements viewer plays a path of a use case map
 <!-- okf:links:end -->

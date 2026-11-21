@@ -2,6 +2,13 @@
 
 ## 2026-11-21
 
+### Share cards of the requirements viewer: one picture per category (CR-443)
+
+- Changed: SwRS-MDOKFSTUDIO-CORE-085 (proposed): one picture for the index (`areas-card.png`) and one per feature category (`area-<areaId>.png`) instead of one per level; each page has its own share title and a description without inline-code backticks or link syntax (the user need whole, a rule cut at a word at 200 characters); `requirements.html` carries the tags of the index.
+- Changed: SwRS-MDOKFSTUDIO-CORE-086: scenario "A social card" names the index and a category instead of a level.
+- Sources: `test/site/socialCard.ts`, `test/site/requirementsViewer/cards.ts`, `shell.ts`, `pages.ts`, `write.ts`.
+- Tests: `test/site/requirementsViewer/cards.test.ts`, `shareText.test.ts`, `write.test.ts`, `test/site/siteTheme.test.ts`.
+
 ### The use case path graph as a joined map (CR-441)
 
 - Added: SwRS-MDOKFSTUDIO-CORE-091 (proposed, derives from StRS-MDOKFSTUDIO-CORE-008): Play on a use

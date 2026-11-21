@@ -1,7 +1,7 @@
 import { cardDocument, escapeHtml } from "../socialCard";
-import { LEVELS, type Level } from "./shell";
+import type { Area, ViewerModel } from "./model";
 
-/** The four pictures of the viewer, one per level: a headline and the three layers with the level lit. */
+/** The pictures of the viewer: the index card and one card per area (feature category), each a headline and the three layers. */
 
 const LAYERS: readonly { name: string; code: string }[] = [
   { name: "Use case", code: "StRS" },
@@ -15,27 +15,35 @@ const CARD_STYLE = `<style>
 .chain li + li::before { content: ""; position: absolute; left: 50%; top: -22px; width: 3px; height: 22px; background: var(--line); }
 .chain b { display: block; font-size: 30px; font-weight: 600; }
 .chain code { font-size: 18px; }
-.chain li.on { border-color: var(--link); color: var(--ink); box-shadow: 0 0 0 5px rgba(161, 78, 50, .16); }
 .chain.areas li { border-color: var(--link); }
 .headline { font-size: 64px; }
 </style>`;
 
-const HEADLINES: Readonly<Record<Level, string>> = {
-  areas: "Studio requirements",
-  area: "A product area",
-  "use-case": "A use case",
-  behaviour: "A behaviour",
-};
-
-/** Body of the card of a level. */
-export function levelCardBody(level: Level): string {
-  const info = LEVELS[level];
-  const chain = LAYERS.map((layer, index) => `<li${index === info.on ? ' class="on"' : ""}><b>${escapeHtml(layer.name)}</b><code>${escapeHtml(layer.code)}</code></li>`).join("");
-  return `${CARD_STYLE}<div class="text"><p class="eyebrow">${escapeHtml(info.kind)}</p><h1 class="headline">${escapeHtml(HEADLINES[level])}</h1><p class="line">${escapeHtml(info.line)}</p></div><ol class="chain${level === "areas" ? " areas" : ""}">${chain}</ol>`;
+function chainHtml(): string {
+  return LAYERS.map((layer) => `<li><b>${escapeHtml(layer.name)}</b><code>${escapeHtml(layer.code)}</code></li>`).join("");
 }
 
-/** The four cards, named like the pictures `requirements/og/<level>.png`. */
+/** Body of the index card: a headline and the three layers, all outlined. */
+export function levelCardBody(_level: "areas"): string {
+  return `${CARD_STYLE}<div class="text"><p class="eyebrow">Requirements</p><h1 class="headline">Studio requirements</h1><p class="line">Every feature, from use case to test</p></div><ol class="chain areas">${chainHtml()}</ol>`;
+}
+
+/** Body of the card of an area: "Feature category", its title and the three layers, in the colour of the area. */
+export function categoryCardBody(area: Area): string {
+  const colour = escapeHtml(area.colour);
+  const style = `<style>
+.band { background: ${colour}; }
+.eyebrow { color: ${colour}; }
+.chain li { border-color: ${colour}; }
+.headline { font-size: 56px; overflow-wrap: anywhere; }
+</style>`;
+  return `${CARD_STYLE}${style}<div class="text"><p class="eyebrow">Feature category</p><h1 class="headline">${escapeHtml(area.title)}</h1><p class="line">Use cases and behaviours, linked to code and tests</p></div><ol class="chain areas">${chainHtml()}</ol>`;
+}
+
+/** The index card, then one card per area; named like the pictures `requirements/og/<name>.png`. */
 // @implements_req SwRS-MDOKFSTUDIO-CORE-085
-export function levelCards(): { name: Level; html: string }[] {
-  return (Object.keys(LEVELS) as Level[]).map((level) => ({ name: level, html: cardDocument(levelCardBody(level)) }));
+export function viewerCards(model: ViewerModel | undefined): { name: string; html: string }[] {
+  const cards = [{ name: "areas-card", html: cardDocument(levelCardBody("areas")) }];
+  for (const area of model?.areas ?? []) cards.push({ name: `area-${area.id}`, html: cardDocument(categoryCardBody(area)) });
+  return cards;
 }

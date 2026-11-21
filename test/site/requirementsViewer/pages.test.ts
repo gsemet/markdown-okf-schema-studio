@@ -67,7 +67,7 @@ test("a use case with paths draws the map, the phone list and the walk count", (
   assert.ok(page.body.includes("<b>3</b> behaviours") && page.body.includes("<b>5</b> scenarios"));
   assert.ok(page.body.includes('href="../SwRS-X-010/"'), "a transition links to the page of its behaviour");
   assert.ok(page.body.includes('<span class="tag">not on the map</span>'), "SwRS-X-013 is outside the paths");
-  assert.ok(page.description.startsWith("4 ways"));
+  assert.equal(page.description, "As a writer, I do <b>a</b> thing.", "the share text is the user need");
   assert.ok(page.body.includes("do &lt;b&gt;a&lt;/b&gt; thing"), "text from the report is escaped");
 });
 
