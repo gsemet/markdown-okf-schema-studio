@@ -34,6 +34,25 @@ export interface SocialCard {
   imageAlt: string;
 }
 
+/**
+ * A text for sharing: the backticks of inline code removed (the code text kept), `[x](url)` turned
+ * into `x`, every run of whitespace folded into one space. Nothing else changes.
+ */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-085
+export function plainText(text: string): string {
+  return text.replace(/\[([^\]]*)\]\([^)]*\)/gu, "$1").replaceAll("`", "").replace(/\s+/gu, " ").trim();
+}
+
+/** `plainText` cut at the last word that leaves room for `…` when longer than `max`, so at most `max` characters. */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-085
+export function shareDescription(text: string, max = 200): string {
+  const plain = plainText(text);
+  if (plain.length <= max) return plain;
+  const room = plain.slice(0, max - 1);
+  const space = plain.slice(0, max).lastIndexOf(" ");
+  return `${(space > 0 ? plain.slice(0, space) : room).trimEnd()}…`;
+}
+
 export function escapeHtml(value: string): string {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");

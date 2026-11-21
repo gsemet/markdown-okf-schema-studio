@@ -66,6 +66,8 @@ export interface FixtureOptions {
   readonly implementedIn?: string[];
   readonly testedIn?: string[];
   readonly userNeed?: string;
+  /** The frontmatter description (the rule of a behaviour). */
+  readonly description?: string;
 }
 
 export function requirement(id: string, tier: "StRS" | "SwRS", scope: string, options: FixtureOptions = {}): unknown {
@@ -84,7 +86,7 @@ export function requirement(id: string, tier: "StRS" | "SwRS", scope: string, op
       tier,
       scope,
       title: `Title of ${id}`,
-      description: `When x, the extension SHALL do ${id}.`,
+      description: options.description ?? `When x, the extension SHALL do ${id}.`,
       user_need: tier === "StRS" ? (options.userNeed ?? "As a writer, I do a thing.") : undefined,
       [options.lifecycleKey ?? "req_lifecycle"]: options.lifecycle ?? "proposed",
       annotation_exemption: options.exempt ?? false,

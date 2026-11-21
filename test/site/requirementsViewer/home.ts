@@ -166,6 +166,7 @@ ${model ? renderStats(model) : missing}
   return {
     dir: VIEWER_DIR, level: "areas", body,
     title: "Requirements of Markdown OKF-Schema Studio",
+    shareTitle: "Requirements of Markdown OKF-Schema Studio",
     description: HOME_DESCRIPTION,
     crumbs: [{ text: "Areas" }],
   };

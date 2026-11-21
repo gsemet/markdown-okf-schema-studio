@@ -5,13 +5,13 @@ import { test } from "node:test";
 
 import { PAGE_CHROME_CSS } from "../../src/core/preview/styles/pageChromeStyles";
 import { pageDocument } from "./buildSite";
-import { levelCardBody } from "./requirementsViewer/cards";
+import { categoryCardBody, levelCardBody } from "./requirementsViewer/cards";
 import { viewerDocument } from "./requirementsViewer/shell";
 import { cardDocument, simpleCard } from "./socialCard";
 import { SITE_CSS, SITE_ROOT_CSS, SITE_TOKENS, SITE_TOKEN_SOURCES } from "./siteTheme";
 
 const FOOTER = { sha: "abc", generatedAt: "" };
-const VIEWER_PAGE = { dir: "requirements/area/StRS-X-001", level: "use-case", title: "T", description: "d", body: "<p>x</p>", crumbs: [{ text: "Areas", dir: "requirements" }, { text: "Here" }] } as const;
+const VIEWER_PAGE = { dir: "requirements/area/StRS-X-001", level: "use-case", title: "T", shareTitle: "T", description: "d", body: "<p>x</p>", crumbs: [{ text: "Areas", dir: "requirements" }, { text: "Here" }] } as const;
 const FORMER_VALUES = ["#0e6974", "#084b55", "#16242c", "#f7faf9", "#f6f1e7", "#2b2620", "#e5ddce"];
 
 function creamBlock(): Map<string, string> {
@@ -71,7 +71,7 @@ test("the main page stylesheet uses the site tokens and the viewer's typography"
 
 test("the social card documents are cream", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-086
-  for (const html of [cardDocument(simpleCard("Eyebrow", "Headline", "Line")), cardDocument(levelCardBody("use-case"))]) {
+  for (const html of [cardDocument(simpleCard("Eyebrow", "Headline", "Line")), cardDocument(levelCardBody("areas")), cardDocument(categoryCardBody({ id: "myst", title: "MyST syntax", description: "", colour: "#7c3aed", useCases: 1, behaviours: 1, linkedPercent: 100 }))]) {
     assert.ok(html.includes("#f5f1e8"));
     for (const former of [...FORMER_VALUES, "--accent", "rgba(14, 105, 116"]) assert.ok(!html.includes(former), former);
   }

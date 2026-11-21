@@ -50,7 +50,7 @@ When a maintainer builds the Pages site, every page and every social picture SHA
 
 ### Scenario (nominal): A social card
 
-- GIVEN a social picture of a main page or of a level of the viewer
+- GIVEN a social picture of a main page, or of the index or of a category of the viewer
 - WHEN the picture is drawn
 - THEN its page uses the cream tokens, the headline is in the serif font, and none of the former teal values appears
 

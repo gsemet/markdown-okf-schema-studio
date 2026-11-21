@@ -478,8 +478,6 @@ export function metroList(model: ViewerModel, paths: readonly MainPath[], fromDi
 export interface MapSummary {
   /** The sentence under the map, as HTML. */
   readonly html: string;
-  /** The same figures as plain text, for the description of the page. */
-  readonly description: string;
 }
 
 /** The combinatorics of a map: the walks through it against the behaviours and scenarios tested one by one. */
@@ -489,6 +487,5 @@ export function mapSummary(model: ViewerModel, paths: readonly MainPath[]): MapS
   const ways = walkCount(model, paths).toLocaleString("en-US");
   return {
     html: `This map has ${ways} different ways through it in 8 steps or fewer. Instead of testing each one end to end, the <b>${ids.length}</b> behaviours on the map are tested one by one, with <b>${scenarios}</b> scenarios.`,
-    description: `${ways} ways through this use case; its ${ids.length} behaviours are tested one by one, with ${scenarios} scenarios.`,
   };
 }

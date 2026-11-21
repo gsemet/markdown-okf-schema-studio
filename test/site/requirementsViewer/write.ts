@@ -2,14 +2,14 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 import { SITE_CSS } from "../siteTheme";
-import { SITE_URL, escapeHtml, writeCardPictures } from "../socialCard";
-import { levelCards } from "./cards";
+import { SITE_URL, escapeHtml, socialMetaTags, writeCardPictures, type SocialCard } from "../socialCard";
+import { viewerCards } from "./cards";
 import { homePage } from "./home";
 import { REQUIREMENTS_REPORT_PATH, currentCommit, loadRequirementsModel, type ViewerModel } from "./model";
 import { renderUseCaseDiagrams, type UseCaseDiagram } from "./useCaseDiagram";
 import { areaPage, behaviourPage, useCasePage } from "./pages";
 import { searchIndexScript } from "./searchIndex";
-import { viewerDocument, type PageFooter, type PageSpec } from "./shell";
+import { shareCard, viewerDocument, type PageFooter, type PageSpec } from "./shell";
 import { VIEWER_DIR } from "./urls";
 
 export { REQUIREMENTS_REPORT_PATH };
@@ -33,8 +33,9 @@ export function viewerPages(model: ViewerModel | undefined, root: string): PageS
   return pages;
 }
 
-/** The page that sends the old URL `requirements.html` to the folder of the viewer. */
-export function redirectDocument(): string {
+/** The page that sends the old URL `requirements.html` to the folder of the viewer; it carries the tags of the index, since a crawler does not follow the redirect. */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-085
+export function redirectDocument(card: SocialCard): string {
   const target = `${VIEWER_DIR}/`;
   return `<!doctype html>
 <html lang="en">
@@ -43,6 +44,7 @@ export function redirectDocument(): string {
 <title>Requirements | Markdown OKF-Schema Studio</title>
 <meta http-equiv="refresh" content="0; url=${target}">
 <link rel="canonical" href="${escapeHtml(SITE_URL + target)}">
+${socialMetaTags(card)}
 </head>
 <body>
 <p>The requirements moved to <a href="${target}">${target}</a>.</p>
@@ -71,12 +73,13 @@ export function writeViewerPages(
   fs.writeFileSync(path.join(folder, "viewer.css"), `${SITE_CSS}\n${fs.readFileSync(path.join(source, "viewer.css"), "utf8")}`);
   fs.copyFileSync(path.join(source, "viewer.js"), path.join(folder, "viewer.js"));
   fs.writeFileSync(path.join(folder, "search-index.js"), searchIndexScript(model));
-  for (const spec of viewerPages(model, root)) writePage(siteRoot, spec, footer);
-  fs.writeFileSync(path.join(siteRoot, "requirements.html"), redirectDocument());
+  const pages = viewerPages(model, root);
+  for (const spec of pages) writePage(siteRoot, spec, footer);
+  fs.writeFileSync(path.join(siteRoot, "requirements.html"), redirectDocument(shareCard(pages[0] as PageSpec)));
   return model;
 }
 
-/** The viewer and its four level pictures `requirements/og/<level>.png`; the use case diagrams are drawn first, once. */
+/** The viewer, the index picture and one picture per category in `requirements/og/`; the use case diagrams are drawn first, once. */
 export async function writeRequirementsViewer(siteRoot: string, reportPath: string, root: string): Promise<void> {
   const sources = new Map<string, string>();
   const files = new Map<string, string>();
@@ -86,6 +89,6 @@ export async function writeRequirementsViewer(siteRoot: string, reportPath: stri
     files.set(requirement.id, requirement.file);
   }
   const diagrams = await renderUseCaseDiagrams(sources, undefined, files);
-  writeViewerPages(siteRoot, reportPath, root, diagrams);
-  await writeCardPictures(path.join(siteRoot, VIEWER_DIR), levelCards());
+  const model = writeViewerPages(siteRoot, reportPath, root, diagrams);
+  await writeCardPictures(path.join(siteRoot, VIEWER_DIR), viewerCards(model));
 }

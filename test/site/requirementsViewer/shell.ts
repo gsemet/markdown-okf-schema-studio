@@ -2,17 +2,11 @@ import { headTags } from "../siteHead";
 import { siteHeader } from "../siteHeader";
 import { REPOSITORY_URL } from "../siteLinks";
 import { escapeHtml, type SocialCard } from "../socialCard";
+import type { Area } from "./model";
 import { VIEWER_DIR, assetLink, dirLink } from "./urls";
 
-/** The four levels of the viewer; each has one social picture shared by its pages. */
+/** The four levels of the viewer's pages. */
 export type Level = "areas" | "area" | "use-case" | "behaviour";
-
-export const LEVELS: Readonly<Record<Level, { readonly kind: string; readonly line: string; readonly on: number }>> = {
-  areas: { kind: "Requirements", line: "Every feature, from use case to test", on: -1 },
-  area: { kind: "Area", line: "Use cases of one product area", on: 0 },
-  "use-case": { kind: "Use case", line: "What a user does and gets, split into behaviours", on: 0 },
-  behaviour: { kind: "Behaviour", line: "One rule, tested on its own, linked to its code", on: 1 },
-};
 
 export interface Crumb {
   readonly text: string;
@@ -24,9 +18,14 @@ export interface PageSpec {
   /** Folder of the page under the site, for example `requirements/diagrams/StRS-MDOKFSTUDIO-DIAG-001`. */
   readonly dir: string;
   readonly level: Level;
-  /** Title of the page: the tab title and the social title. */
+  /** Title of the page: the tab title only. */
   readonly title: string;
+  /** Title of the social card: og:title and twitter:title. */
+  readonly shareTitle: string;
+  /** Description of the page and of its social card. */
   readonly description: string;
+  /** The area (feature category) of the page; absent on the index. */
+  readonly area?: Area;
   readonly crumbs: readonly Crumb[];
   readonly body: string;
   readonly colour?: string;
@@ -37,15 +36,13 @@ export interface PageFooter {
   readonly generatedAt: string;
 }
 
-export function levelCard(spec: Pick<PageSpec, "dir" | "level" | "title" | "description">): SocialCard {
-  const level = LEVELS[spec.level];
-  return {
-    title: spec.title,
-    description: spec.description,
-    page: `${spec.dir}/`,
-    image: `${VIEWER_DIR}/og/${spec.level}.png`,
-    imageAlt: `${level.kind}: ${level.line}`,
-  };
+/** The social card of a page: its own share title and text, the picture of its area (the index's own picture on the index). */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-085
+export function shareCard(spec: Pick<PageSpec, "dir" | "shareTitle" | "description" | "area">): SocialCard {
+  const base = { title: spec.shareTitle, description: spec.description, page: `${spec.dir}/` };
+  return spec.area
+    ? { ...base, image: `${VIEWER_DIR}/og/area-${spec.area.id}.png`, imageAlt: `Feature category: ${spec.area.title}` }
+    : { ...base, image: `${VIEWER_DIR}/og/areas-card.png`, imageAlt: "Requirements: Every feature, from use case to test" };
 }
 
 /** Without JavaScript, the controls that need it are absent: search and Play. */
@@ -69,7 +66,7 @@ export function viewerDocument(spec: PageSpec, footer: PageFooter): string {
   return `<!doctype html>
 <html lang="en">
 <head>
-${headTags(`${spec.title} | Studio requirements`, page, levelCard(spec))}
+${headTags(`${spec.title} | Studio requirements`, page, shareCard(spec))}
 <link rel="stylesheet" href="${assetLink(spec.dir, "viewer.css")}">
 <noscript><style>${NOSCRIPT_STYLE}</style></noscript>
 </head>

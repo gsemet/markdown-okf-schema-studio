@@ -1,4 +1,4 @@
-import { escapeHtml } from "../socialCard";
+import { escapeHtml, plainText, shareDescription } from "../socialCard";
 import { kindClass, mapSummary, metroList, metroSvg, pathColour, plural, scenarioDots, testCount } from "./layout";
 import { citedIds, type MainPath } from "./mainPaths";
 import { behavioursOf, replacementsOf, retiredBehavioursOf, type Area, type Requirement, type Scenario, type ViewerModel } from "./model";
@@ -50,9 +50,12 @@ ${area.description ? `<p class="lead">${e(area.description)}</p>` : ""}
 <ol class="line">${items.join("")}${retired.join("")}</ol>
 `;
   return {
-    dir, level: "area", colour: area.colour, body,
+    dir, level: "area", colour: area.colour, body, area,
     title: `${area.title}: use cases and behaviours`,
-    description: area.description || `The use cases and behaviours of the ${area.title} area of Studio.`,
+    shareTitle: `${area.title}: a feature category of Markdown OKF-Schema Studio`,
+    description: area.description
+      ? `A feature category of Markdown OKF-Schema Studio: ${plainText(area.description)}`
+      : "A feature category of Markdown OKF-Schema Studio.",
     crumbs: [{ text: "Areas", dir: VIEWER_DIR }, { text: area.title }],
   };
 }
@@ -110,11 +113,10 @@ ${diagram}${map}
 <h2>Behaviours of this use case</h2>
 <div class="blist">${behaviours.map((behaviour) => behaviourRow(model, dir, behaviour, onMap)).join("")}${retired.join("")}</div>
 `;
-  const description = paths
-    ? mapSummary(model, paths).description
-    : `${plural(behaviours.length, "behaviour")} make up this use case of Studio; each is tested on its own.`;
   return {
-    dir, level: "use-case", colour: area.colour, body, description,
+    dir, level: "use-case", colour: area.colour, body, area,
+    shareTitle: `${useCase.title} (${useCase.id})`,
+    description: plainText(useCase.userNeed || useCase.description),
     title: `Use case ${shortId(useCase.id)}: ${useCase.title}`,
     crumbs: [{ text: "Areas", dir: VIEWER_DIR }, { text: area.title, dir: areaDir(area.id) }, { text: shortId(useCase.id) }],
   };
@@ -233,9 +235,10 @@ ${replaces}
 ${pager}
 `;
   return {
-    dir, level: "behaviour", colour: area.colour, body,
+    dir, level: "behaviour", colour: area.colour, body, area,
     title: `Behaviour ${shortId(behaviour.id)}: ${behaviour.title}`,
-    description: behaviour.description.replace(/\s+/gu, " ").slice(0, 200),
+    shareTitle: `${behaviour.title} (${behaviour.id})`,
+    description: shareDescription(behaviour.description),
     crumbs: [
       { text: "Areas", dir: VIEWER_DIR },
       { text: area.title, dir: areaDir(area.id) },
