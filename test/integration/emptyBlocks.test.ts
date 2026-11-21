@@ -40,7 +40,6 @@ function sender(document: vscode.TextDocument, documentUri: string) {
     documentId: documentUri,
     revision: document.version,
     requestId: getActivePreviewForTests()?.requestId,
-    pinViewportTop: 200,
     ...fields,
   });
 }
@@ -86,6 +85,8 @@ export async function run(): Promise<void> {
     const original = LINES.join(eol);
     const expected = ["# Title", "", "Second paragraph.", ""].join(eol);
     const first = { editId: "e1", line: 3, endLine: 3, originalText: `First.${eol}` };
+    // Only a final save may carry a pin, and it carries both fields (the page's pin of the edited element).
+    const pin = { pinLine: 3, pinViewportTop: 200 };
 
     // Delete block: one edit, one undo, the line endings kept.
     await withFixture(`empty-blocks-delete-${name}`, eol, async (document, send) => {
@@ -98,10 +99,15 @@ export async function run(): Promise<void> {
 
     // An erased editor committed after its autosave: two edits, so two undos.
     await withFixture(`empty-blocks-emptied-${name}`, eol, async (document, send) => {
-      await untilApplied(document, () => send({ type: "previewEditSave", ...first, editedText: "", final: false }));
+      // One open editor keeps the render identity it opened with, as the page does: the autosave
+      // changes the document version, not the preview's.
+      const identity = { revision: document.version, requestId: getActivePreviewForTests()?.requestId };
+      await untilApplied(document, () => send({
+        type: "previewEditSave", ...identity, ...first, editedText: "", final: false,
+      }));
       assert.ok(!document.getText().includes("First."), `${name}: the autosave wrote the placeholder line`);
       await untilApplied(document, () => send({
-        type: "previewEditSave", ...first, editedText: "", final: true, deleteWhenEmpty: true,
+        type: "previewEditSave", ...identity, ...first, editedText: "", final: true, deleteWhenEmpty: true, ...pin,
       }));
       assert.equal(document.getText(), expected, `${name}: the emptied block is gone with its separator`);
       assert.doesNotMatch(document.getText(), name === "lf" ? /\n\n\n/u : /\r\n\r\n\r\n/u);
@@ -115,7 +121,7 @@ export async function run(): Promise<void> {
     // An erased editor committed before any autosave: one edit, one undo.
     await withFixture(`empty-blocks-direct-${name}`, eol, async (document, send) => {
       await untilApplied(document, () => send({
-        type: "previewEditSave", ...first, editedText: "", final: true, deleteWhenEmpty: true,
+        type: "previewEditSave", ...first, editedText: "", final: true, deleteWhenEmpty: true, ...pin,
       }));
       assert.equal(document.getText(), expected, `${name}: deleted at once`);
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
