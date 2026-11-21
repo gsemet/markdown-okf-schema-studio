@@ -294,7 +294,7 @@ export function renderPropertiesTable(
   // The table is the first source block: it carries the mapping attributes the sanitizer adds to
   // the rest of the page.
   const sourceLineAttribute = sourceMapping
-    ? ` data-line="1" ${SOURCE_FILE_ATTRIBUTE}="${escapeHtml(sourceMapping.activeSourceFile)}" ${SOURCE_LINE_ATTRIBUTE}="1" ${PREVIEW_DOCUMENT_ATTRIBUTE}="${escapeHtml(sourceMapping.documentId)}" ${PREVIEW_BLOCK_ATTRIBUTE}="source-block-1"`
+    ? ` data-line="1" ${SOURCE_FILE_ATTRIBUTE}="${escapeHtml(sourceMapping.activeSourceFile)}" ${SOURCE_LINE_ATTRIBUTE}="1" ${PREVIEW_DOCUMENT_ATTRIBUTE}="${escapeHtml(sourceMapping.documentId)}" ${PREVIEW_BLOCK_ATTRIBUTE}="source-block-1"${result.endLine === undefined ? "" : ` data-okf-frontmatter-end-line="${result.endLine}"`}`
     : "";
   return `<section${sourceLineAttribute} data-okf-properties data-okf-available-keys="${availableKeys}" data-okf-available-fields="${availableFields}" data-okf-order="${result.orderMode}" data-okf-schema-found="${result.schemaFound}"${result.additionalPropertiesAllowed === false ? ' data-okf-additional-properties="false"' : ""}><div class="okf-properties-title">Frontmatter properties${frontmatterToggle}${badge}</div><table class="okf-properties${withDocs ? " okf-properties-docs" : ""}">${header}<tbody>${rows}${infoRows}</tbody></table>${missingRequired}</section>`;
 }

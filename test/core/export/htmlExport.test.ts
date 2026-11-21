@@ -162,6 +162,18 @@ test("a tab set works without script: radios, labels, and the shown tab is the o
   assert.match(html, /\.myst-tab-radio\[data-export-tab="2"\]:checked ~ \.myst-tab-panel\[data-export-tab="2"\]/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+test("the line marker's attributes (marker lines, front matter end line) are left out of the export", () => {
+  const { html } = build(
+    '<section data-okf-properties data-okf-frontmatter-end-line="4"><table><tr data-okf-marker-line="6">'
+    + '<td>a</td></tr></table></section>'
+    + '<p data-okf-marker-line="9" data-okf-marker-end-line="11">kept text</p>',
+  );
+  const body = bodyOf(html);
+  assert.match(body, /kept text/u);
+  assert.doesNotMatch(body, /data-okf-marker|data-okf-frontmatter-end-line/u);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091
 test("the properties table becomes a closed details with a summary and no editing data", () => {
   const { html } = build(

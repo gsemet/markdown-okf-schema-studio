@@ -31,6 +31,15 @@ function lineAt(text: string, offset: number): number {
   return line;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-178
+/** The line (1-based) of the closing fence of the front matter of `source`; undefined without front matter. */
+export function frontmatterEndLine(source: string): number | undefined {
+  const block = matchFrontmatterBlock(source);
+  if (!block) return undefined;
+  const fenced = source.slice(0, block.length).replace(/\r?\n$/u, "");
+  return fenced.split("\n").length;
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-215
 /**
  * The source lines of each top-level field of the front matter of `source`, in YAML order: from the

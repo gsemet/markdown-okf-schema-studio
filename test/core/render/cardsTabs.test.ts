@@ -207,6 +207,12 @@ test("each tab item and the tab set carry their own source lines for editing", a
   for (const panel of panels) {
     assert.deepEqual(findElements(panel, (element) => element !== panel && attribute(element, "data-line") !== undefined), []);
   }
+  // A click on a paragraph inside an item opens the whole item's editor: the paragraph carries its marker
+  // line (for the line marker only), but the item's panel stays its only mapped block.
+  const paragraph = findElements(panels[1], (element) => element.tagName === "p")[0]!;
+  assert.equal(attribute(paragraph, "data-okf-marker-line"), "11");
+  assert.equal(attribute(paragraph, "data-line"), undefined);
+  assert.deepEqual(lineOf(panels[1]), ["8", "12"]);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-098

@@ -133,6 +133,8 @@ export interface FrontmatterResult {
   linkResults?: FrontmatterLinkResult[];
   /** False only when the matched schema root declares `additionalProperties: false`. */
   additionalPropertiesAllowed?: boolean;
+  /** The line of the closing fence of the front matter (1-based), for the line marker. */
+  endLine?: number;
 }
 
 /** A schema field the document does not set yet, offered by the Add field menu. */
