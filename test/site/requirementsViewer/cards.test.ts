@@ -86,6 +86,7 @@ test("one picture per category, shared by its use cases and behaviours; the inde
 
 test("the text of a category, a use case and a behaviour is written for sharing", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-093
   const raw = JSON.parse(fixtureReport()) as { requirements: unknown[] };
   raw.requirements.push(requirement("StRS-X-020", "StRS", "gfm", { userNeed: `As a writer, ${"I want a very long need. ".repeat(12)}`.trim() }));
   raw.requirements.push(requirement("SwRS-X-021", "SwRS", "gfm", { description: longRule(), derivesFrom: ["StRS-X-020"] }));
