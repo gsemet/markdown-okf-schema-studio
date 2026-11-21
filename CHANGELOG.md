@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Copy, cut and paste on a list followed by blank lines no longer fail with "The preview is out of
+  date": the list is copied without the blank lines, a cut leaves one blank line between the blocks
+  around it, and a paste after the list gets one blank line on each side.
+
 ## 1.11.0 - 2026-11-21
 
 - The requirements pages on the website draw each use case as one joined map, smaller and readable:

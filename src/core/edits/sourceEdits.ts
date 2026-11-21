@@ -11,7 +11,9 @@
 
 import { isThreadSource, threadDeleteRange, threadReplyEdit } from "../comments/inlineThread";
 import { opensIncludeDirective, planBlockMove, type BlockLines } from "../mapping/blockMove";
-import { planBlankRunPaste, planBlankRunRemoval, planCut, planPaste, spanText } from "../mapping/blockRange";
+import {
+  isCommonMarkBlank, planBlankRunPaste, planBlankRunRemoval, planCut, planPaste, spanText,
+} from "../mapping/blockRange";
 import { STALE_REQUEST } from "../protocol/staleRequest";
 import { countRefUses, renameLabelLine } from "../mapping/labelRename";
 import { minimalReplacement } from "../mapping/textDiff";
@@ -192,6 +194,20 @@ function withoutTrailingBlankLines(text: string, block: BlockLines): BlockLines 
   return { line: block.line, endLine };
 }
 
+/**
+ * The range without the CommonMark blank lines at its end (spaces and tabs only). It has the shape
+ * and the guards of {@link withoutTrailingBlankLines}, but copy and cut use it instead: `trim()`
+ * also strips a no-break space, which renders as a paragraph, so a selection that ends on such a
+ * line is never shortened without the writer knowing and is refused by the span check.
+ */
+function withoutTrailingCommonMarkBlankLines(text: string, block: BlockLines): BlockLines {
+  const lines = sourceLines(text);
+  let endLine = block.endLine;
+  if (!Number.isSafeInteger(endLine) || !Number.isSafeInteger(block.line) || endLine > lines.count) return block;
+  while (endLine > block.line && isCommonMarkBlank(lines.text(endLine - 1))) endLine -= 1;
+  return { line: block.line, endLine };
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-117
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-127
 /**
@@ -223,10 +239,14 @@ function linesOpenInclude(lines: SourceLines, line: number, endLine: number): bo
   return false;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-166
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-169
 /**
  * Copy (and for `cut`, removal) of the blocks at `line` to `endLine`: `copied` is their exact
- * Markdown; `cut` deletes them with one blank separator. `followingLine` is set when a block
- * follows the cut one and moves up into its place.
+ * Markdown; `cut` deletes them with one blank separator. The range's trailing CommonMark blank
+ * lines (a list mapped up to its blank separator) are dropped first, for the copied text, the
+ * include check and the cut. `followingLine` is set when a block follows the cut one and moves up
+ * into its place.
  */
 export function planBlocksCopyCut(
   text: string,
@@ -234,11 +254,12 @@ export function planBlocksCopyCut(
   endLine: number,
   op: "copy" | "cut",
 ): EditRefusal | { copied: string; cut?: { edit: TextEdit; followingLine?: number } } {
-  const copied = spanText(text, line, endLine);
+  const span = withoutTrailingCommonMarkBlankLines(text, { line, endLine });
+  const copied = spanText(text, span.line, span.endLine);
   if (typeof copied !== "string") return { refused: copied.refused };
-  if (linesOpenInclude(sourceLines(text), line, endLine)) return { refused: COPY_INCLUDED };
+  if (linesOpenInclude(sourceLines(text), span.line, span.endLine)) return { refused: COPY_INCLUDED };
   if (op === "copy") return { copied };
-  const plan = planCut(text, line, endLine);
+  const plan = planCut(text, span.line, span.endLine);
   if ("refused" in plan) return { refused: plan.refused };
   return { copied, cut: { edit: { start: plan.start, end: plan.end, text: "" }, followingLine: plan.followingLine } };
 }

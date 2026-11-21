@@ -8,8 +8,11 @@ description: "When a writer presses the platform paste chord with blocks selecte
   SHALL insert the clipboard text as new blocks after the selection or the insert
   point, without the blank lines at both ends of the text, in the line breaks of the
   document, with one blank line before and after and without gluing them to their
-  neighbours, and refuse with a reason, changing nothing, when the clipboard has no
-  text or the document changed while it was read."
+  neighbours (a selection or insert point whose last line is the blank line that ends
+  a block, a list mapped to its blank separator, inserts after that block, using the
+  blank lines already there as separators, so no blank line is gained), and refuse
+  with a reason, changing nothing, when the clipboard has no text or the document
+  changed while it was read."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -34,6 +37,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/mapping/blockRange.test.ts
 - test/integration/blockClipboard.test.ts
+- test/integration/realInput/blockKeys.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/session/blockReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
@@ -43,7 +47,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer presses the platform paste chord with blocks selected, or with an insert point focused, in edit mode and with no editor open, the extension SHALL insert the clipboard text as new blocks after the selection or the insert point, without the blank lines at both ends of the text, in the line breaks of the document, with one blank line before and after and without gluing them to their neighbours, and refuse with a reason, changing nothing, when the clipboard has no text or the document changed while it was read.
+When a writer presses the platform paste chord with blocks selected, or with an insert point focused, in edit mode and with no editor open, the extension SHALL insert the clipboard text as new blocks after the selection or the insert point, without the blank lines at both ends of the text, in the line breaks of the document, with one blank line before and after and without gluing them to their neighbours (a selection or insert point whose last line is the blank line that ends a block, a list mapped to its blank separator, inserts after that block, using the blank lines already there as separators, so no blank line is gained), and refuse with a reason, changing nothing, when the clipboard has no text or the document changed while it was read.
 
 ### Scenario (nominal): Paste after a selection
 
@@ -69,6 +73,17 @@ When a writer presses the platform paste chord with blocks selected, or with an 
 - WHEN the paste is applied
 - THEN CR LF is used and the new text is not glued to the following block
 
+### Scenario (nominal): Paste after a list followed by blank lines
+
+Pasting `X`; the page may send the first or the last blank line of a run, and both give the same text.
+
+| Document | `afterLine` | Result |
+| --- | --- | --- |
+| `Para\n\n- a\n- b\n\nNext\n` | 5 | `Para\n\n- a\n- b\n\nX\n\nNext\n` |
+| `Para\n\n- a\n- b\n\n\nNext\n` | 5 | `Para\n\n- a\n- b\n\nX\n\nNext\n` |
+| `Para\n\n- a\n- b\n\n\nNext\n` | 6 | `Para\n\n- a\n- b\n\nX\n\nNext\n` |
+| `Para\n\n- a\n- b\n\n` | 5 | `Para\n\n- a\n- b\n\nX\n` |
+
 ### Scenario (refusal): Empty clipboard
 
 | Input | Outcome |
@@ -83,7 +98,7 @@ When a writer presses the platform paste chord with blocks selected, or with an 
 | A paste whose clipboard read is pending while the document is edited | When the read completes, the answer is ok false with "The document changed while pasting. Try again." and nothing changes |
 | No change during the read | When the read completes, the paste is planned |
 
-A paste after a line that does not exist, that is blank or that lies in the frontmatter, and a paste next to an included block, are refused as stated in SwRS-MDOKFSTUDIO-BLOCK-124 and SwRS-MDOKFSTUDIO-BLOCK-127. An open editor refuses the paste as stated in SwRS-MDOKFSTUDIO-BLOCK-041. A successful paste clears the block selection as stated in SwRS-MDOKFSTUDIO-BLOCK-169.
+A paste after a line that does not exist, a blank line with no body block above it, a line holding only a no-break space, or a line that lies in the frontmatter, and a paste next to an included block, are refused as stated in SwRS-MDOKFSTUDIO-BLOCK-124 and SwRS-MDOKFSTUDIO-BLOCK-127. An open editor refuses the paste as stated in SwRS-MDOKFSTUDIO-BLOCK-041. A successful paste clears the block selection as stated in SwRS-MDOKFSTUDIO-BLOCK-169.
 
 ### Related requirements
 
@@ -94,10 +109,10 @@ A paste after a line that does not exist, that is blank or that lies in the fron
 ### Verification notes
 
 - Method: test/page/runtimeBlockSelection.test.ts (paste after a selection and after a focused insert point: `T40: Ctrl+V pastes after the selection, or after the block of a focused bar`).
-- Method: test/core/mapping/blockRange.test.ts (padded clipboard, CR LF, glued neighbour, start of the body, empty clipboard: `pastedBlockText trims blank lines at both ends and normalises line breaks`, `paste inserts after a block with one blank line on each side`, `paste does not glue the new text to a block that follows without a blank line`, `paste at the start of the body`, `paste keeps CRLF`, `paste refuses an empty clipboard, the frontmatter and stale lines`).
-- Method: test/integration/blockClipboard.test.ts (paste after a selection or insert point, empty clipboard).
+- Method: test/core/mapping/blockRange.test.ts (padded clipboard, CR LF, glued neighbour, start of the body, empty clipboard: `pastedBlockText trims blank lines at both ends and normalises line breaks`, `paste inserts after a block with one blank line on each side`, `paste does not glue the new text to a block that follows without a blank line`, `paste at the start of the body`, `paste keeps CRLF`, `paste refuses an empty clipboard, the frontmatter and stale lines`); the paste after a list's blank separator, with LF and CR LF, and both blank lines of a run giving the same text: `paste after the blank line that ends a list inserts after the list`, `both blank lines of a run after a list give the same pasted text`.
+- Method: test/integration/blockClipboard.test.ts (paste after a selection or insert point, empty clipboard), and real-input scenario scenarioBlockSelection (the paste step on a list followed by two blank lines).
 - Method: test/session/blockReq.requirements.test.ts (`a paste is refused when the document changed while the clipboard was read`).
-- Criteria: The paste line is the end line of the selection or the insert point's line; planPaste output equals the expected text or returns the refusal; the revision is compared after the read.
+- Criteria: The paste line is the end line of the selection or the insert point's line; planPaste output equals the expected text or returns the refusal; a CommonMark-blank anchor is moved up to the first blank line under the nearest body line above it; the revision is compared after the read.
 
 <!-- okf:links:start -->
 ### Links
