@@ -7,7 +7,9 @@ description: When the writer deletes a blank-lines block with Delete, Backspace
   or its Delete block button, the extension SHALL remove the extra blank lines
   of the run and keep one separator in one text edit and one undo step, keep the
   line endings, refuse a stale run next to the block, and select the block that
-  followed the run, or the list that held a run inside a list.
+  followed the run, or the list that held a run inside a list. A run of empty
+  quote lines keeps its first line byte for byte, and the removal keeps the
+  final line break of the text, or its absence.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -30,10 +32,13 @@ implemented_in_files:
 tested_in_files:
 - test/core/mapping/blankRunInList.test.ts
 - test/core/mapping/blockRange.test.ts
+- test/core/mapping/quoteBlankRuns.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/integration/blankLines.test.ts
 - test/page/runtimeBlankLines.test.ts
+- test/page/runtimeBlankLinesContainers.test.ts
 - test/session/blankRunHost.test.ts
+- test/session/blankRunInContainerHost.test.ts
 - test/session/blankRunInListHost.test.ts
 - test/visual/blankLinesBlockScenarios.ts
 - test/visual/capture_blank_lines_block.py
@@ -44,7 +49,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer deletes a blank-lines block with Delete, Backspace or its Delete block button, the extension SHALL remove the extra blank lines of the run and keep one separator in one text edit and one undo step, keep the line endings, refuse a stale run next to the block, and select the block that followed the run, or the list that held a run inside a list.
+When the writer deletes a blank-lines block with Delete, Backspace or its Delete block button, the extension SHALL remove the extra blank lines of the run and keep one separator in one text edit and one undo step, keep the line endings, refuse a stale run next to the block, and select the block that followed the run, or the list that held a run inside a list. A run of empty quote lines keeps its first line byte for byte, and the removal keeps the final line break of the text, or its absence.
 
 ### Scenario: Removing a run
 

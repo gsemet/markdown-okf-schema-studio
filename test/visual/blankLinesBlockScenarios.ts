@@ -8,6 +8,7 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 
 const FIXTURE = "92-blank-lines-block";
 const LIST_FIXTURE = "93-blank-lines-in-lists";
+const CONTAINERS_FIXTURE = "95-blank-lines-in-containers";
 
 export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
   {
@@ -93,5 +94,41 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     blankLinesChecks: "list-typing" as const,
     description: "Light theme, 900 px pane, edit mode: the editor of the blank-lines block between two items opens "
       + "inside the first item, and stays inside an item of the list after text is typed and the autosave ran (the `text` step).",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    id: "block-editing/v51-blank-lines-in-containers-light-900",
+    fixture: CONTAINERS_FIXTURE,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    blankLinesChecks: "containers-edit" as const,
+    description: "Light theme, 900 px pane, edit mode: a run of empty lines in a quote, in an alert, in an admonition, "
+      + "in a context-tag panel, in a definition and in a footnote each show one blank-lines block inside the container "
+      + "that holds it, as wide as its content box, clear of the quote border and the alert icon, with the Delete block "
+      + "button at the block's left edge (the `bar` step).",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    id: "block-editing/v52-blank-lines-in-containers-reading-dark-900",
+    fixture: CONTAINERS_FIXTURE,
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    blankLinesChecks: "containers-reading" as const,
+    description: "Dark theme, 900 px pane, reading mode of the same file: the containers show no blank-lines block (the `top` step).",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+    id: "block-editing/v53-blank-lines-in-containers-typing-light-900",
+    fixture: CONTAINERS_FIXTURE,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    blankLinesChecks: "containers-typing" as const,
+    description: "Light theme, 900 px pane, edit mode: the editor of the blank-lines block of the quote opens inside "
+      + "the quote, and stays inside the one re-rendered quote after text is typed and the autosave ran (the `text` step).",
   },
 ];

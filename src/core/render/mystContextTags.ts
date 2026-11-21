@@ -24,6 +24,12 @@ const UNSUPPORTED_CONTEXT_TAG = new RegExp(
   "u",
 );
 
+/** True for a context tag opening line (`<example>`, without its leading spaces): a name that is not an HTML tag. */
+export function isContextTagOpenLine(trimmed: string): boolean {
+  const opening = CONTEXT_TAG_OPEN.exec(trimmed);
+  return opening !== null && !HTML_TAG_NAMES.has(opening[1]);
+}
+
 function standaloneContextTagValue(node: MystNode): string | undefined {
   if (node.type === "html" && node.value !== undefined && node.value.trim() === node.value) {
     return node.value;

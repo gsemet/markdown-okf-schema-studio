@@ -25,12 +25,14 @@ import {
   expandVersionAdmonitions,
   labelLinkRoles,
   normalizeCaptionlessReferences,
+  mapQuoteDirectives,
   normalizeFigureCaptions,
   normalizeRawDetailsAndKbd,
   shiftSourcePositions,
   wrapBareBlockImages,
 } from "./mystBlockTransforms";
 import { normalizeContextTagContainers, repairGroupedContextTagHtml } from "./mystContextTags";
+import { addFootnoteLines, footnoteLabelLines } from "./mystFootnotes";
 import { showFrontmatterValues } from "./frontmatterValues";
 import { expandRawHtmlElements } from "./mystRawHtml";
 import { expandTocMarkers } from "./mystToc";
@@ -475,6 +477,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
     },
   },
   { name: "figure captions", run: (state) => normalizeFigureCaptions(state.ast) },
+  { name: "quote directive lines", run: (state) => mapQuoteDirectives(state.ast) },
   { name: "caption-less references", run: (state) => normalizeCaptionlessReferences(state.ast) },
   { name: "doc and download labels", run: (state) => labelLinkRoles(state.ast) },
   { name: "version admonitions", run: (state) => expandVersionAdmonitions(state.ast, state.mystParse) },
@@ -538,6 +541,11 @@ const HTML_PASSES: ReadonlyArray<{ readonly name: string; readonly run: (html: s
   { name: "table alignments", run: (html, state) => applyTableAlignments(html, state.tableAlignments) },
   { name: "code highlighting", run: (html) => highlightCodeBlocks(html) },
   { name: "anchor ids", run: (html, state) => resolveAnchorIds(html, state.anchorLabels) },
+  {
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
+    name: "footnote lines",
+    run: (html, state) => addFootnoteLines(html, footnoteLabelLines(state.ast, state.source.split(/\r\n|\r|\n/u))),
+  },
 ];
 
 // @implements_req SwRS-MDOKFSTUDIO-CORE-001

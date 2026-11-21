@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from playwright.sync_api import Page
 
+from capture_blank_lines_containers import check_blank_lines_in_containers
 from capture_support import Failure, save_step
 
 CONTENT = "#sphinx-myst-preview-content"
@@ -46,6 +47,9 @@ def check_blank_lines_block(page: Page, scenario: dict, failures: list[Failure])
   name = scenario["page"]
   if mode.startswith("list-"):
     check_blank_lines_in_lists(page, scenario, failures, mode)
+    return
+  if mode.startswith("containers-"):
+    check_blank_lines_in_containers(page, scenario, failures, mode)
     return
   if mode == "reading":
     state = page.evaluate(READ)

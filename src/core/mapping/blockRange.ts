@@ -1,7 +1,8 @@
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { insertionText, planBlankRunInsertion, planInsertion } from "./insertion";
 import { splitLines } from "./blockMove";
-import { listItemIndent } from "./listItemIndent";
+import { blankRunIndent } from "./blankRunContainer";
+import { emptyQuoteLine, sameQuoteShape } from "./quoteLine";
 
 /** A selected run of top-level blocks: 1-based, inclusive source lines. */
 export interface BlockSpan {
@@ -214,8 +215,10 @@ export function planPaste(text: string, afterLine: number, raw: string): PastePl
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
 /**
- * Validates a blank run against the text: two or more CommonMark blank lines after the
- * frontmatter, with a line that is not blank (or the frontmatter, or the start) above and below.
+ * Validates a blank run against the text. A plain run: two or more CommonMark blank lines after the
+ * frontmatter, with a line that is not blank (or the frontmatter, or the start) above and below. A
+ * quote run: two or more empty quote lines of the same depth and marker columns after the
+ * frontmatter, with no such line above or below.
  */
 export function checkBlankRun(text: string, line: number, endLine: number): BlockRangeRefusal | undefined {
   if (!Number.isSafeInteger(line) || !Number.isSafeInteger(endLine) || line < 1 || endLine <= line) {
@@ -225,6 +228,18 @@ export function checkBlankRun(text: string, line: number, endLine: number): Bloc
   const frontmatterLines = frontmatterLineCount(text);
   if (endLine > lines.length || line <= frontmatterLines) {
     return { refused: OUT_OF_DATE };
+  }
+  const shape = emptyQuoteLine(lines[line - 1].text);
+  if (shape) {
+    const sameShape = (lineText: string | undefined): boolean => {
+      const other = lineText === undefined ? undefined : emptyQuoteLine(lineText);
+      return other !== undefined && sameQuoteShape(shape, other);
+    };
+    for (let current = line + 1; current <= endLine; current += 1) {
+      if (!sameShape(lines[current - 1].text)) return { refused: OUT_OF_DATE };
+    }
+    const aboveSame = line > 1 && line - 1 > frontmatterLines && sameShape(lines[line - 2].text);
+    return aboveSame || sameShape(lines[endLine]?.text) ? { refused: OUT_OF_DATE } : undefined;
   }
   for (let current = line; current <= endLine; current += 1) {
     if (!isCommonMarkBlank(lines[current - 1].text)) {
@@ -241,7 +256,9 @@ export function checkBlankRun(text: string, line: number, endLine: number): Bloc
  * Plans the removal of a blank run, keeping one separator: between two blocks (the frontmatter is
  * one) lines `line + 1`..`endLine` go; at the start of a file without frontmatter, and at the end of
  * the body, every line of the run goes (the text then ends where the line above ends, with its line
- * break when the document had a final one). A text of only blank lines becomes empty.
+ * break when the document had a final one). A text of only blank lines becomes empty. A quote run
+ * always keeps its first line, byte for byte (the empty quote line is the separator): lines
+ * `line + 1`..`endLine` go; at the end of the text the final line break is kept, or kept absent.
  */
 export function planBlankRunRemoval(
   text: string,
@@ -256,6 +273,16 @@ export function planBlankRunRemoval(
   const offsetOfLine = (count: number): number =>
     lines.slice(0, count).reduce((sum, entry) => sum + entry.text.length + entry.eol.length, 0);
   const followingLine = endLine < lines.length ? endLine + 1 : undefined;
+  if (emptyQuoteLine(lines[line - 1].text)) {
+    // A quote run keeps its first line wherever it is: the empty quote line is the separator.
+    if (followingLine !== undefined) return { start: offsetOfLine(line), end: offsetOfLine(endLine), followingLine };
+    const finalBreak = lines[lines.length - 1].eol !== "";
+    return {
+      start: finalBreak ? offsetOfLine(line) : offsetOfLine(line - 1) + lines[line - 1].text.length,
+      end: text.length,
+      followingLine,
+    };
+  }
   if (followingLine !== undefined) {
     return { start: offsetOfLine(line === 1 ? 0 : line), end: offsetOfLine(endLine), followingLine };
   }
@@ -278,6 +305,7 @@ export function planBlankRunPaste(
   endLine: number,
   raw: string,
   itemLine?: number,
+  containerLine?: number,
 ): PastePlan | BlockRangeRefusal {
   const block = pastedBlockText(raw);
   if (block === "") {
@@ -287,9 +315,10 @@ export function planBlankRunPaste(
   if (refusal) {
     return refusal;
   }
-  if (itemLine !== undefined && listItemIndent(text, itemLine, line) === undefined) {
+  if ((itemLine !== undefined || containerLine !== undefined)
+    && blankRunIndent(text, line, endLine, itemLine, containerLine) === undefined) {
     return { refused: OUT_OF_DATE };
   }
-  const plan = planBlankRunInsertion(text, line, endLine, itemLine);
+  const plan = planBlankRunInsertion(text, line, endLine, itemLine, containerLine);
   return { offset: plan.offset, text: insertionText(plan, block), end: plan.replace?.end };
 }

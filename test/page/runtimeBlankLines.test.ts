@@ -468,19 +468,13 @@ test("a run between nested items is shown inside the nested item above", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
-test("a run inside a fence or inside a list of an admonition shows no blank-lines block", () => {
+test("a run inside a fence in a list item shows no blank-lines block", () => {
   const fence: Shape = {
     tag: "ul", line: 10, end: 30, children: [
       { tag: "li", line: 10, end: 30, children: [{ tag: "p", line: 10, end: 10 }, { tag: "pre", line: 12, end: 28 }] },
     ],
   };
   assert.equal(blankBlocks(listHarness("20-23", fence).harness).length, 0, "a fence in an item");
-  const admonition: Shape = {
-    tag: "aside", line: 10, end: 30, children: [
-      { tag: "ul", line: 12, end: 28, children: [{ tag: "li", line: 12, end: 28, children: [{ tag: "p", line: 12, end: 12 }] }] },
-    ],
-  };
-  assert.equal(blankBlocks(listHarness("20-23", admonition).harness).length, 0, "a list in an admonition");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266

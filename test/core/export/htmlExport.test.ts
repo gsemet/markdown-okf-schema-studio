@@ -351,3 +351,13 @@ test("the host's list of blank runs and a blank-lines block are not exported", (
   assert.match(body, /A<\/p>/u);
   assert.match(body, /B<\/p>/u);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("the page-only definition and footnote lines are not exported", () => {
+  const { html } = build(
+    '<dl><dt>T</dt><dd data-okf-definition-line="2">one</dd></dl>'
+      + '<ol><li id="user-content-fn-x" data-okf-footnote-line="9">note</li></ol>',
+  );
+  assert.doesNotMatch(bodyOf(html), /data-okf-(?:definition|footnote)-line/u);
+  assert.match(bodyOf(html), /one<\/dd>/u);
+});
