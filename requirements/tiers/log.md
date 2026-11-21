@@ -8,6 +8,10 @@
 - Changed (all `proposed`): SwRS-MDOKFSTUDIO-LIFE-178 (the top of the enclosing block no longer covers a pipe table row, a tab item or the front matter; the code rule is "a code block itself"), LIFE-179 (boundary rows: another tab shown, the properties table collapsed by the reader), LIFE-180 (boundary rows: table row, delimiter line, property row and tab-panel line in edit mode), MYST-098 (the content of a tab item carries marker lines; a click still edits the whole item), MYST-099 (the marker selects a tab the way a click does; after a patch each set shows the later of its own and its group's choice), FMSCHEMA-090 (a requested property line expands a collapsed table, any other line leaves it collapsed).
 - Reason: the marker sat at the top of the table, of the whole tab item and of the front matter, and a line in a hidden tab marked a wrong place.
 
+### Side preview: multi-file diff and merge editor not followed (CR-461)
+
+- Changed: SwRS-MDOKFSTUDIO-LIFE-026 (a scenario and a known limit: the multi-file diff editor and the merge editor are not followed, because the VS Code API gives them no tab input class). Documentation only, no code change.
+
 ### Impossible comment date refused (CR-459)
 
 - Changed: SwRS-MDOKFSTUDIO-REVIEW-004 (a creation date naming a day that does not exist in its month, such as 2026-02-30, or 2026-02-29 in a non-leap year, rejects the whole sidecar like any other bad date); the parser used to accept it because Date.parse rolls the day over. No new StRS.

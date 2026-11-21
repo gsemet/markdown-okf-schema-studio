@@ -23,7 +23,9 @@ It does not claim:
 - full P01-P24 stock-preview parity;
 - multiple simultaneous MyST previews;
 - live comparison against another document or a rendered diff: the side preview opens next to a text diff (title
-  button, command, following and scroll with the file's side) and shows the real file, never the diff;
+  button, command, following and scroll with the file's side) and shows the real file, never the diff; it does
+  not follow the multi-file diff editor nor the merge editor (3-way merge), because the VS Code API gives them
+  no tab input class: open the file in a text editor or in the single-file diff instead;
 - rendered-block editing or an Obsidian-like editor;
 - book-wide preview, bibliography regeneration, or non-HTML Sphinx builders; or
 - marketplace publication.

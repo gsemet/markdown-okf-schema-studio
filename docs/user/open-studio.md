@@ -20,7 +20,9 @@ For a side-by-side source and preview, select the book icon in the editor title 
 **Markdown OKF-Schema Studio: Open Preview to Side** from the Command Palette. The button and the command
 also work from a text diff (a Git diff, a file compare, the search and replace preview): the preview shows
 the real file of the diff, whichever side holds the cursor, and opens no extra editor. With a diff that has
-no file on either side (a staged change) it shows the working-tree file, without scroll sync.
+no file on either side (a staged change) it shows the working-tree file, without scroll sync. The button, the
+command and the following do not apply to the multi-file diff editor or the merge editor: open the file in a
+normal text editor or in the single-file diff instead.
 
 | Editor title action | Source and preview |
 | --- | --- |
