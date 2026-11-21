@@ -20,8 +20,8 @@ export const textTabs = (): vscode.Tab[] => vscode.window.tabGroups.all.flatMap(
  */
 export const virtualOf = (file: string, side = "left"): vscode.Uri => vscode.Uri.file(file).with({ scheme: SCHEME, query: side });
 
-export async function openDiff(original: vscode.Uri, modified: vscode.Uri): Promise<void> {
-  await vscode.commands.executeCommand("vscode.diff", original, modified, "Diff under test");
+export async function openDiff(original: vscode.Uri, modified: vscode.Uri, options?: { readonly selection?: vscode.Range }): Promise<void> {
+  await vscode.commands.executeCommand("vscode.diff", original, modified, "Diff under test", options);
   // A new diff may replace the open one in its group (a preview tab): wait for it to be the active tab, not for a count.
   await waitFor("the requested diff to be the active tab", () => vscode.window.tabGroups.all.some((group) => {
     const input = group.activeTab?.input;

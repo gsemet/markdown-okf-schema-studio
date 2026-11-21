@@ -48,15 +48,20 @@ not already on screen. With it off, the preview scrolls the line to the reading 
 Back and Next followed in the side preview mark their target line the same way. A Studio tab beside
 the text editor marks nothing on a jump.
 
-Which moves count as a jump depends on the kind VS Code gives them. Expected from the design, to be
-confirmed by J1 (the real-window trial that records the kinds):
+Which moves count as a jump depends on the kind VS Code gives them. The real-window trial J1
+recorded these kinds in VS Code on Linux:
 
-| Move | Marks the side preview |
-| --- | --- |
-| Search result, Quick Open `file.md:40`, Go to Line, Problems, a link | yes |
-| Go to Symbol, Find next (F3), Go to next problem (F8), Go Back | yes, if VS Code reports them as a command |
-| Arrow keys, a click, Page Down, Ctrl+End, typing, undo | no |
-| Ctrl+A, Ctrl+D, Format Document | no |
+| Move | Recorded by J1 | Marks the side preview |
+| --- | --- | --- |
+| Search click (`vscode.open` with a selection) | a command move with one selection | yes |
+| `cursorDown`, `cursorBottom`, Select All (`selectAll`) | no selection change | no |
+| A selection set through the API (as VSCodeVim does) | no selection change | no |
+| Go Back | no selection change | no |
+| Quick Open `file.md:40`, Go to Line, Problems, a link | not driven (reached by the same open with a selection) | yes, as the search click |
+| Go to Symbol, Find next (F3), Go to next problem (F8) | not driven | yes if VS Code reports them as a command, not verified |
+| A click, Page Down, typing, undo, Ctrl+D, Format Document | not driven | no, by design (not a command move) |
+
+Only the first four rows were recorded; the others follow from the design.
 
 Two settings under **Opening Files** (see [Settings](settings.md)) decide what opens in Studio:
 
