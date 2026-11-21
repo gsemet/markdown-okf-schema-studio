@@ -13,6 +13,7 @@ import {
   checkBlocksPaste,
   planBlockMoveEdit,
   planBlocksCopyCut,
+  planBlocksDelete,
   planBlocksPaste,
   planCheckboxToggle,
   planFindReplace,
@@ -40,7 +41,7 @@ import type { PreviewSession } from "../previewSession";
 import { applyWrittenEdits, currentPreviewDocument } from "../sessionDocuments";
 import { fireAndForget } from "../../host-api/logger";
 
-type BlocksOp = "copy" | "cut" | "paste";
+type BlocksOp = "copy" | "cut" | "delete" | "paste";
 
 /** The edits the page asks for outside the block editor. */
 export class SourceEditController {
@@ -58,6 +59,7 @@ export class SourceEditController {
     router.on("previewBlockMove", (message, preview) => this.handleBlockMove(preview, message));
     router.on("previewBlocksCopy", (message, preview) => this.handleBlocksCopyCut(preview, message));
     router.on("previewBlocksCut", (message, preview) => this.handleBlocksCopyCut(preview, message));
+    router.on("previewBlocksDelete", (message, preview) => this.handleBlocksDelete(preview, message));
     router.on("previewBlocksPaste", (message, preview) => this.handleBlocksPaste(preview, message));
     router.on("previewDropFiles", (message, preview) => this.handleDropFiles(preview, message));
   }
@@ -372,7 +374,7 @@ export class SourceEditController {
 
   private postBlocksResult(
     preview: PreviewSession,
-    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksPaste" | "previewDropFiles">,
+    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksDelete" | "previewBlocksPaste" | "previewDropFiles">,
     op: BlocksOp,
     result: { ok: true } | { ok: false; reason: string },
   ): void {
@@ -389,7 +391,7 @@ export class SourceEditController {
   /** Open-editor and stale-version refusals shared by copy, cut and paste of blocks. */
   private blocksDocument(
     preview: PreviewSession,
-    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksPaste" | "previewDropFiles">,
+    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksDelete" | "previewBlocksPaste" | "previewDropFiles">,
     op: BlocksOp,
   ): HostDocument | undefined {
     const refuse = (reason: string): undefined => {
@@ -459,6 +461,44 @@ export class SourceEditController {
         this.postBlocksResult(preview, message, op, { ok: true });
       });
     }).then(undefined, fail);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+  /**
+   * Delete block: the blocks of the lines go with one blank separator in one edit (one undo step),
+   * after the span's trailing blank lines are dropped. Nothing goes to the clipboard.
+   */
+  private handleBlocksDelete(
+    preview: PreviewSession,
+    message: PageMessageOf<"previewBlocksDelete">,
+  ): PromiseLike<void> | undefined {
+    const document = this.blocksDocument(preview, message, "delete");
+    if (!document) {
+      return undefined;
+    }
+    const plan = planBlocksDelete(document.getText(), message.line, message.endLine);
+    if ("refused" in plan) {
+      this.postBlocksResult(preview, message, "delete", { ok: false, reason: plan.refused });
+      return undefined;
+    }
+    return this.apply(document, [plan.edit]).then((applied) => {
+      if (!applied) {
+        this.postBlocksResult(preview, message, "delete", { ok: false, reason: "VS Code could not apply the delete." });
+        return;
+      }
+      if (plan.followingLine !== undefined) {
+        // The block after the deleted ones moves up into their place: hold it at their screen position.
+        this.manager.scroll.storePendingPin(preview, {
+          documentId: message.documentId,
+          pinLine: message.line,
+          pinViewportTop: message.pinViewportTop,
+        }, document.revision);
+      }
+      this.postBlocksResult(preview, message, "delete", { ok: true });
+    }).then(undefined, (error: unknown) => this.postBlocksResult(preview, message, "delete", {
+      ok: false,
+      reason: error instanceof Error ? error.message : String(error),
+    }));
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-174

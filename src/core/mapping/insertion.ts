@@ -38,9 +38,11 @@ export function planInsertion(text: string, afterLine: number): InsertionPlan | 
   }
   const offset = lines.end(anchorLine - 1);
   const following = anchorLine < lines.count ? lines.text(anchorLine) : "";
+  // An anchor line that is blank (a list ending on its blank separator) is already the separator.
+  const anchorBlank = lines.text(anchorLine - 1).trim() === "";
   return {
     offset,
-    prefix: lineEnding + lineEnding,
+    prefix: anchorBlank ? lineEnding : lineEnding + lineEnding,
     suffix: following.trim() !== "" ? lineEnding : "",
     lineEnding,
   };
@@ -51,7 +53,9 @@ export function insertionText(plan: InsertionPlan, raw: string): string {
   if (raw.trim() === "") {
     return "";
   }
+  // Whole blank lines at the start go; the indentation of the first non-blank line stays.
   return plan.prefix
-    + raw.replace(/\r\n|\n|\r/gu, plan.lineEnding).replace(/(?:\r\n|\n|\r)+$/u, "")
+    + raw.replace(/^(?:[ \t]*(?:\r\n|\n|\r))+/u, "")
+      .replace(/\r\n|\n|\r/gu, plan.lineEnding).replace(/(?:\r\n|\n|\r)+$/u, "")
     + plan.suffix;
 }

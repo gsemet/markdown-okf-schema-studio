@@ -55,6 +55,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-245
 - SwRS-MDOKFSTUDIO-BLOCK-252
 - SwRS-MDOKFSTUDIO-BLOCK-259
+- SwRS-MDOKFSTUDIO-BLOCK-264
+- SwRS-MDOKFSTUDIO-BLOCK-265
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-TRUST-064
@@ -168,6 +170,8 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-BLOCK-245](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-245.md): previewEditFlushed carries the flush id and a flag
   - [SwRS-MDOKFSTUDIO-BLOCK-252](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-252.md): Overlapping or out-of-range planned edits leave the document unchanged
   - [SwRS-MDOKFSTUDIO-BLOCK-259](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-259.md): The host ignores a malformed block-editing message and changes nothing
+  - [SwRS-MDOKFSTUDIO-BLOCK-264](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-264.md): An emptied top-level block or list item is deleted with its separator when the writer commits it
+  - [SwRS-MDOKFSTUDIO-BLOCK-265](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-265.md): Delete block deletes the blocks of a selection with one separator in one undo step
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-059](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
   - [SwRS-MDOKFSTUDIO-TRUST-064](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-064.md): Flush and editor watch messages are addressed by their own id

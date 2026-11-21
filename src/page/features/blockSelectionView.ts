@@ -6,7 +6,7 @@
  */
 
 import { isApplePlatform } from "../pageSettings";
-import type { BlockSelectionView, PageRuntime, SelectionAnchor } from "./pageRuntime";
+import type { BlockSelectionView, PageRuntime, PendingBlockSelection, SelectionAnchor } from "./pageRuntime";
 import { installStructuralNavigationView } from "./structuralNavigationView";
 
 /** The selection view of a page. */
@@ -152,8 +152,71 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     const pending = state.pendingBlockSelection;
     state.pendingBlockSelection = undefined;
     if (!pending || !state.editMode || state.activeBlockEdit) return;
-    if (rt.blocks.selectableBlocks().length !== pending.count) return;
+    const count = rt.blocks.selectableBlocks().length;
+    if (pending.afterDelete) {
+      selectAfterDelete(pending, count);
+      return;
+    }
+    if (count !== pending.count) return;
     selectBlocksNow(pending.anchor, pending.targetIndex, pending.quiet !== true);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+  // The block that took the deleted block's place is selected, else the one above; with no block
+  // left the Start writing button gets the focus.
+  function selectAfterDelete(pending: PendingBlockSelection, count: number): void {
+    if (count > pending.count) return;
+    if (count === 0) {
+      const start = rt.insertPoints.points().find((point) =>
+        point.className.split(" ").includes("sphinx-preview-insert-point--start"));
+      start?.querySelector?.<HTMLElement>("button")?.focus?.({ preventScroll: true });
+      return;
+    }
+    selectBlocksNow(undefined, Math.min(pending.targetIndex, count - 1), pending.quiet !== true);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+  /** True while a delete waits for its render: a second one would name lines that moved. */
+  function deleteWaitsForRender(): boolean {
+    const pending = state.pendingBlockSelection;
+    return pending?.afterDelete === true && Date.now() - (pending.at ?? 0) < 5000;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+  /** Sends the delete of the blocks `startIndex`.. (`range`) and remembers where the selection goes. */
+  function postDelete(blocks: HTMLElement[], startIndex: number, range: { line: number; endLine: number }): boolean {
+    if (blocksFlight || deleteWaitsForRender()) return false;
+    const first = blocks[startIndex];
+    postBlocksMessage("previewBlocksDelete", { line: range.line, endLine: range.endLine },
+      first?.closest?.("pre") || first);
+    state.pendingBlockSelection = {
+      anchor: undefined, targetIndex: startIndex, count: blocks.length, quiet: true, afterDelete: true, at: Date.now(),
+    };
+    return true;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+  /**
+   * The one dispatch of Delete and Backspace: the selected blocks go. Nothing without a block
+   * selection, and nothing while the structural cursor is below the top level.
+   */
+  function deleteSelection(): boolean {
+    if (!blockSelection.isActive() || structural.isBelowTopLevel()) return false;
+    const blocks = syncSelectionModel();
+    const range = blockSelection.range();
+    return range !== undefined && postDelete(blocks, blockSelection.startIndex!, range);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+  function requestDeleteBlock(block: HTMLElement): boolean {
+    if (!state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return false;
+    const blocks = syncSelectionModel();
+    if (blockSelection.isActive() && blocks[blockSelection.endIndex!] === block) {
+      const range = blockSelection.range();
+      return range !== undefined && postDelete(blocks, blockSelection.startIndex!, range);
+    }
+    const index = blocks.indexOf(block);
+    return index >= 0 && postDelete(blocks, index, rt.blocks.blockRange(block));
   }
 
   function showSelectionNotice(text: string): void {
@@ -300,17 +363,27 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       const waiting = state.activeBlockEdit === edit
         || (kind === "cancel" && edit.hasAutosavedChange === true);
       if (state.activeBlockEdit !== edit) selectBlocksNow(undefined, index, false);
-      if (waiting) state.pendingBlockSelection = { anchor: undefined, targetIndex: index, count: blocks.length, quiet: true };
+      // An emptied block that the host deletes: the selection goes to the block that took its place.
+      const deleting = kind === "save" && edit.deleteWhenEmpty === true && (edit.lastPostedText ?? "x").trim() === "";
+      if (waiting) {
+        state.pendingBlockSelection = {
+          anchor: undefined, targetIndex: index, count: blocks.length, quiet: true,
+          ...(deleting ? { afterDelete: true, at: Date.now() } : {}),
+        };
+      }
     },
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-169
+    requestDeleteBlock,
     receiveBlocksResult(message) {
       if (blocksFlight) window.clearTimeout(blocksFlight.timer);
       blocksFlight = undefined;
       if (message.ok === true) {
         if (message.op === "copy") showSelectionNotice("Copied as Markdown");
-        else clearBlockSelection();
+        // A delete keeps its selection until the render: the patch selects the block that took the place.
+        else if (message.op !== "delete") clearBlockSelection();
         return;
       }
+      if (message.op === "delete" && state.pendingBlockSelection?.afterDelete) state.pendingBlockSelection = undefined;
       if (typeof message.reason === "string") showSelectionNotice(message.reason);
     },
     bindKeys() {
@@ -426,6 +499,26 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
             ...(anchorBlock ? { pinLine: rt.blocks.blockRange(anchorBlock).line } : {}),
           }, anchorBlock?.closest?.("pre") || anchorBlock);
         }
+      });
+
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
+      // Delete and Backspace delete the selected blocks. Only a block selection owns them: a merely
+      // focused block, a focused button or link, a text box, the properties table and an open editor
+      // keep their keys.
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Delete" && event.key !== "Backspace") return;
+        const keyed = plainKeyTarget(event);
+        if (!keyed || !blockSelection.isActive()) return;
+        const target = event.target;
+        if (target instanceof Element && target.closest("button, a, summary, .sphinx-preview-insert-point")) return;
+        if (keyed.focused) {
+          const blocks = syncSelectionModel();
+          if (!blockSelection.indices().some((index) => blocks[index] === keyed.focused)) return;
+        }
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        deleteSelection();
       });
 
       // Shift+mousedown on a block would extend the browser's text selection under the block

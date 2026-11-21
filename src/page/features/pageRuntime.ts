@@ -145,6 +145,8 @@ export interface BlockEdit {
   singleLine?: boolean;
   /** The element that held the focus when the editor opened (its source was not there yet). */
   focusAtOpen?: Element | null;
+  /** A top-level body block or list item: an emptied text deleted on Done (the final save says so). */
+  deleteWhenEmpty?: true;
   /** The host refused to open this editor: the frame holds the reason and a way out. */
   openRefused?: boolean;
   originalText?: string;
@@ -288,6 +290,13 @@ export interface PendingBlockSelection {
   count: number;
   /** Select without scrolling the page (the block of an editor that closed by keyboard). */
   quiet?: boolean;
+  /**
+   * Set after a delete (or an emptied block committed): `count` is the block count before it and
+   * `targetIndex` the first deleted block. The render shows the block that took its place, else the
+   * one above, else the Start writing button; `at` bounds how long a second delete waits for it.
+   */
+  afterDelete?: boolean;
+  at?: number;
 }
 
 /** What the runtime reads from the saved state of the page at startup. */
@@ -596,6 +605,11 @@ export interface BlockSelectionView {
    */
   finishEditorWithSelection(kind: "cancel" | "save", action: () => void): void;
   receiveBlocksResult(message: PreviewBlocksResultMessage): void;
+  /**
+   * Deletes `block`, or the whole block selection when it ends at `block` (the Delete block button).
+   * False when nothing was sent.
+   */
+  requestDeleteBlock(block: HTMLElement): boolean;
   bindKeys(): void;
 }
 

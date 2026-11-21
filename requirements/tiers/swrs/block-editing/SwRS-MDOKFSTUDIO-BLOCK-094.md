@@ -33,7 +33,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the host writes a new block after a line, it SHALL put one blank line before it and one blank line after it (none after it at the end of the document), in the line endings of the document, and write nothing for an empty or whitespace-only text or for a line that is not in the document.
+When the host writes a new block after a line, it SHALL put one blank line before it and one blank line after it (none after it at the end of the document), in the line endings of the document, (one blank line before it when the line it follows is already blank), drop the leading blank lines of the text, and write nothing for an empty or whitespace-only text or for a line that is not in the document.
 
 ### Scenario (nominal): Between blocks
 - GIVEN a document with two blocks separated by a blank line and a new block inserted after the first
@@ -73,6 +73,14 @@ When the host writes a new block after a line, it SHALL put one blank line befor
 | --- | --- |
 | A new block typed as `Hello\n\n` | The document holds `Hello` followed by the planned separator only |
 | A block typed as `a\n\nb` | The inner blank line is kept |
+| A new block typed as `\n\nHello` (leading blank lines), in LF, CR LF or lone CR | The leading blank lines are dropped and the block starts right after the separator |
+| A new block typed as `  Hello` | The indentation of the first non-blank line is kept |
+
+### Scenario (boundary): An anchor line that is blank
+| Input | Outcome |
+| --- | --- |
+| `- a`, a blank line and `Para`, a block inserted after line 2 (the blank line) | The document is `- a`, a blank line, `New`, a blank line, `Para`: one separator before the block, not two |
+| A block inserted after a non-blank line | The prefix stays two line endings |
 
 ### Scenario (refusal): A line that does not exist
 | Input | Outcome |
@@ -91,7 +99,7 @@ When the host writes a new block after a line, it SHALL put one blank line befor
 - Method: test/core/mapping/insertion.test.ts (between blocks, glued next block, last line with and without a final line break, frontmatter, empty document, CRLF documents, lone-CR documents, whitespace-only text, trailing line breaks, out of range lines); the stale message has no assertion
 - Method: test/integration/previewEditing.test.ts (insertion protocol: autosave, final save, cancel, empty text)
 - Method: real-input scenario scenarioInsertAfterFinalFigure and visual scenarios block-editing/v09 and block-editing/v10 (end of document after a figure or an image)
-- Criteria: prefix is two line endings and suffix one line ending only when the next line holds text; the offset equals the end of the closing fence line after frontmatter; offset 0 with an empty prefix for a first block without frontmatter; the plan's lineEnding is CR LF when the text contains a CR LF pair, else LF when it contains an LF, else CR when it contains a CR; insertionText returns an empty string for whitespace; a final line break is not counted as a following line; no double separator follows the inserted text; planInsertion returns undefined for an out of range line and the host posts the error
+- Criteria: prefix is two line endings (one when the anchor line is blank) and suffix one line ending only when the next line holds text; the offset equals the end of the closing fence line after frontmatter; offset 0 with an empty prefix for a first block without frontmatter; the plan's lineEnding is CR LF when the text contains a CR LF pair, else LF when it contains an LF, else CR when it contains a CR; insertionText returns an empty string for whitespace; a final line break is not counted as a following line; no double separator follows the inserted text; planInsertion returns undefined for an out of range line and the host posts the error
 
 <!-- okf:links:start -->
 ### Links

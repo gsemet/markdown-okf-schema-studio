@@ -73,11 +73,19 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 | An empty document, the Start writing bar | It holds only that button, a single control and no move buttons |
 | A document with only frontmatter, the Start writing point | It holds a single control and no move buttons |
 
+### Scenario (boundary): The Delete block button follows the arrows
+
+| Input | Outcome |
+| --- | --- |
+| The bar of a body block | A Delete block button sits right after the down arrow, touching it (SwRS-MDOKFSTUDIO-BLOCK-265) |
+| The bar of an included block | No Delete block button |
+| The move status of a refused move | It sits to the right of the Delete block button and never overlaps it |
+
 ### Scenario (boundary): The arrows are hidden while a block editor is open
 
 | Input | Outcome |
 | --- | --- |
-| A block editor is open | The move buttons of all bars are not displayed |
+| A block editor is open | The move buttons and the Delete block button of all bars are not displayed |
 | No editor is open | The arrows are displayed again |
 
 ### Scenario (nominal): A click on an enabled arrow asks the host for the swap

@@ -5,7 +5,7 @@
  */
 
 import { matchLineEndings } from "../../core/edits/lineEndings";
-import { READ_ONLY_FILE, planBlockTextEdit } from "../../core/edits/sourceEdits";
+import { READ_ONLY_FILE, planBlockTextEdit, planEmptiedBlockRemoval } from "../../core/edits/sourceEdits";
 import type { HostDocument } from "../../host-api/documentStore";
 import { checkBlockLines, type BlockRangeRefusal } from "../../core/mapping/blockRange";
 import { sourceRangeForLines } from "../../core/mapping/sourceMapping";
@@ -38,6 +38,8 @@ export interface ActiveBlockEdit {
   insertion?: InsertionPlan;
   insertAfterLine?: number;
   finalRequested: boolean;
+  /** The final save asked to delete the block when its text is only whitespace (a top-level block or list item). */
+  deleteWhenEmpty?: boolean;
   cancelRequested: boolean;
   applying: boolean;
   hasAppliedEdit: boolean;
@@ -338,7 +340,11 @@ export class BlockEditController {
     const editedText = edit.pendingText === undefined
       ? undefined
       : matchLineEndings(edit.pendingText, edit.lastSavedText, preview.document?.getText(), true);
-    if (editedText === undefined || editedText === edit.lastSavedText) {
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-264
+    // An emptied top-level block or list item, committed: it is deleted with its separator, in one edit.
+    const deleting = editedText !== undefined && edit.finalRequested && edit.deleteWhenEmpty === true
+      && !edit.insertion && !edit.cancelRequested && editedText.trim() === "";
+    if (editedText === undefined || (editedText === edit.lastSavedText && !deleting)) {
       edit.pendingText = undefined;
       if (edit.finalRequested) {
         this.completeActiveBlockEdit(preview, edit);
@@ -352,7 +358,16 @@ export class BlockEditController {
       this.releaseHostEditKeepingEditor(preview);
       return;
     }
-    const textEdit = planBlockTextEdit(edit.sourceStartOffset, edit.lastSavedText, editedText);
+    const textEdit = (deleting
+      ? planEmptiedBlockRemoval(
+        source.document.getText(),
+        edit.sourceStartOffset,
+        edit.lastSavedText,
+        edit.originalText,
+        edit.line,
+        edit.endLine,
+      )
+      : undefined) ?? planBlockTextEdit(edit.sourceStartOffset, edit.lastSavedText, editedText);
     if (!textEdit) {
       this.drainActiveBlockEdit(preview, edit);
       return;
@@ -486,6 +501,7 @@ export class BlockEditController {
       ? insertionText(edit.insertion, message.editedText)
       : message.editedText;
     edit.finalRequested = message.final !== false;
+    edit.deleteWhenEmpty = edit.finalRequested && message.deleteWhenEmpty === true && !edit.insertion;
     if (message.final === true) {
       this.manager.scroll.storePendingPin(preview, message, preview.document ? preview.document.revision : 0);
     }

@@ -106,3 +106,26 @@ test("lone-CR documents keep CR and count lines by CR", () => {
 test("CRLF documents are counted line by line for later lines", () => {
   assert.equal(insert("A\r\n\r\nB\r\n", 3, "NEW"), "A\r\n\r\nB\r\n\r\nNEW\r\n");
 });
+
+for (const [name, eol] of [["LF", "\n"], ["CRLF", "\r\n"], ["lone CR", "\r"]] as const) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-094
+  test(`${name}: leading blank lines of the new block are dropped, its indentation is kept`, () => {
+    const doc = `A${eol}${eol}B${eol}`;
+    assert.equal(insert(doc, 1, `${eol}${eol}NEW`), `A${eol}${eol}NEW${eol}${eol}B${eol}`);
+    assert.equal(insert(doc, 1, ` ${eol}\t${eol}NEW`), `A${eol}${eol}NEW${eol}${eol}B${eol}`);
+    assert.equal(insert(doc, 1, `${eol}  NEW`), `A${eol}${eol}  NEW${eol}${eol}B${eol}`);
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-094
+  test(`${name}: an insertion anchored on a blank line writes one separator before the block`, () => {
+    const doc = `- a${eol}${eol}Para${eol}`;
+    assert.equal(insert(doc, 2, "New"), `- a${eol}${eol}New${eol}${eol}Para${eol}`);
+    assert.equal(insert(`- a${eol}${eol}`, 2, "New"), `- a${eol}${eol}New${eol}`);
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-094
+test("an anchor on a non-blank line keeps two line endings before the block", () => {
+  assert.equal(planInsertion("A\n\nB\n", 1)?.prefix, "\n\n");
+  assert.equal(planInsertion("A\n\nB\n", 2)?.prefix, "\n");
+});

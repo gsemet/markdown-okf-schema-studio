@@ -56,8 +56,8 @@ test("T36: every body insertion point has up and down buttons, disabled at the e
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   for (const line of [1, 52, 100]) {
     const buttons = insertPointAfterLine(harness, line).childElements;
-    assert.deepEqual(buttons.map((button) => button.textContent), ["+", "\u2191", "\u2193"]);
-    assert.deepEqual(buttons.slice(1).map((button) => button.getAttribute("aria-label")), MOVE_LABELS);
+    assert.deepEqual(buttons.map((button) => button.textContent), ["+", "\u2191", "\u2193", "\u00d7"]);
+    assert.deepEqual(buttons.slice(1, 3).map((button) => button.getAttribute("aria-label")), MOVE_LABELS);
     assert.ok(buttons.slice(1).every((button) => button.getAttribute("type") === "button"));
   }
   const disabled = (line: number, direction: "up" | "down") =>

@@ -32,6 +32,7 @@ import { run as runCommentWrite } from "./commentWrite.test";
 import { run as runReviewComments } from "./reviewComments.test";
 import { run as runBlockMove } from "./blockMove.test";
 import { run as runBlockClipboard } from "./blockClipboard.test";
+import { run as runEmptyBlocks } from "./emptyBlocks.test";
 import { run as runInlineThread } from "./inlineThread.test";
 import { run as runLabelRename } from "./labelRename.test";
 import { run as runMystPickers } from "./mystPickers.test";
@@ -301,6 +302,7 @@ async function runTrustedSuite(): Promise<void> {
     ["inline-thread", runInlineThread],
     ["block-move", runBlockMove],
     ["block-clipboard", runBlockClipboard],
+    ["empty-blocks", runEmptyBlocks],
     ["myst-pickers", runMystPickers],
     ["image-picker", runImagePicker],
     ["image-paste", runImagePaste],
