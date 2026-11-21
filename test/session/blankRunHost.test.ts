@@ -133,3 +133,27 @@ test("an editor of a run that changed or never was a run is refused as stale", a
   assert.ok(save.of("previewEditSource")[0]!.error);
   assert.equal(save.document.getText(), text);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("a save or cancel whose blank run differs from the held edit's is refused as stale", async () => {
+  const text = "# Title\n\nA\n\n\n\nB\n";
+  const host = fixture({ text });
+  await host.send("previewEditSave", { ...open("\n"), editedText: "X", final: false });
+  const written = host.document.getText();
+  const applied = host.applyCalls.length;
+  const other = { line: 4, endLine: 5 };
+  await host.send("previewEditSave", { ...open("\n"), replaceBlankRun: other, editedText: "XY", final: false });
+  await host.send("previewEditSave", { ...open("\n"), replaceBlankRun: undefined, editedText: "XY", final: false });
+  await host.send("previewEditCancel", {
+    editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: other,
+  });
+  const errors = host.of("previewEditSource").filter((message) => message.error);
+  assert.equal(errors.length, 3);
+  assert.match(String(errors[0]!.error), /stale/u);
+  assert.equal(host.document.getText(), written, "nothing is written or restored");
+  assert.equal(host.applyCalls.length, applied);
+  await host.send("previewEditCancel", {
+    editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: run,
+  });
+  assert.equal(host.document.getText(), text, "the matching cancel still restores the run");
+});

@@ -141,14 +141,24 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
     const body = blocks.filter((block) => !isProperties(block));
     const range = (block: HTMLElement): Run => rt.blocks.blockRange(block);
     const kept = new Set<HTMLElement>();
-    if (editing) kept.add(editing as HTMLElement);
+    const aboveOf = (run: Run): HTMLElement | undefined =>
+      [...body].reverse().find((block) => range(block).line < run.line) ?? blocks.find(isProperties);
+    if (editing) {
+      kept.add(editing as HTMLElement);
+      // A swap of the content dropped the block and its editor frame: they go back where the run was.
+      const held = runs.get(editing as HTMLElement);
+      const frame = state.activeBlockEdit?.element;
+      if (held && !(editing as HTMLElement).parentNode) {
+        place(editing as HTMLElement, aboveOf(held));
+        if (frame) (editing as HTMLElement).insertAdjacentElement("afterend", frame);
+      }
+    }
     const existing = new Map<string, HTMLElement>();
     runs.forEach((run, block) => {
       if (block.parentNode) existing.set(`${run.line}-${run.endLine}`, block);
     });
     for (const run of readRuns()) {
-      const above = [...body].reverse().find((block) => range(block).line < run.line)
-        ?? blocks.find(isProperties);
+      const above = aboveOf(run);
       const below = body.find((block) => range(block).line > run.endLine);
       const inside = body.some((block) => range(block).line < run.line && run.endLine < range(block).endLine);
       const folded = [above, below].some((block) => block?.getAttribute("data-okf-folded") != null);
@@ -156,7 +166,7 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
       const known = existing.get(`${run.line}-${run.endLine}`);
       if (known) {
         kept.add(known);
-        place(known, above);
+        if (known !== editing) place(known, above);
         continue;
       }
       const block = create(run);

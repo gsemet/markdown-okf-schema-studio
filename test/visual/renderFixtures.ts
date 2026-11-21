@@ -26,6 +26,7 @@ import { analyzeFrontmatter } from "../../src/core/frontmatter/okfFrontmatter";
 import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 import { renderPropertiesTable } from "../../src/core/frontmatter/propertiesTable";
 import { sourceRangeForLines } from "../../src/core/mapping/sourceMapping";
+import { blankRunsMarker } from "../../src/core/render/renderPipeline";
 import { rewriteSphinxHtml, ResolvedResource } from "../../src/core/security/html-sanitizer";
 import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/core/protocol/bootContext";
 import {
@@ -141,7 +142,8 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
       uri: `${pathToFileURL(resourcePath).toString()}${resourceReferenceSuffix(request)}`,
     };
   };
-  const rewritten = rewriteSphinxHtml(wrap(html, ""), {
+  // The host appends the list of blank runs to the content it renders.
+  const rewritten = rewriteSphinxHtml(wrap(html + blankRunsMarker(source), ""), {
     outputRoot: documentDirectory,
     policy,
     nonce: "visual-test",

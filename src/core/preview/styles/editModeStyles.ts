@@ -235,7 +235,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
 /**
  * The blank-lines block of edit mode (`features/blankLines.ts`): a quiet dashed bar named by its
- * label, with the Delete block button at its right end. It is hidden while its editor is open, and
+ * label, with the Delete block button at its left edge, before the label. It is hidden while its editor is open, and
  * the host's list of runs (`data-okf-blank-runs`) never shows.
  */
 const BLANK_LINES_BLOCK_CSS = `[data-okf-blank-runs] {
@@ -253,7 +253,7 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-blank-lines {
   box-sizing: border-box;
   min-height: 1.8em;
   margin: 0.3em 0;
-  padding: 0 0.6em;
+  padding: 0 0.6em 0 2.2em;
   border: 1px dashed var(--studio-descriptionForeground, GrayText);
   border-radius: 4px;
   color: var(--studio-descriptionForeground, GrayText);
@@ -276,7 +276,7 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-blank-lines {
 
 .sphinx-preview-blank-lines button.sphinx-preview-delete {
   position: absolute;
-  right: 0.3em;
+  left: 0.3em;
   top: 50%;
   z-index: 1;
   display: flex;
@@ -302,6 +302,10 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-blank-lines {
 .sphinx-preview-blank-lines[data-sphinx-preview-block-selected="true"] button.sphinx-preview-delete,
 .sphinx-preview-blank-lines button.sphinx-preview-delete:focus-visible {
   opacity: 1;
+}
+
+html[data-sphinx-preview-block-editing="true"] .sphinx-preview-blank-lines .sphinx-preview-delete {
+  display: none;
 }
 
 `;

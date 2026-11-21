@@ -632,6 +632,8 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         if (!keyed || (!blockSelection.isActive() && !rt.blankLines.selected())) return;
         const target = event.target;
         if (target instanceof Element && target.closest("button, a, summary, .sphinx-preview-insert-point")) return;
+        // A blank-lines block that is only focused keeps its keys: it never deletes other blocks.
+        if (keyed.blank && keyed.blank !== rt.blankLines.selected()) return;
         if (keyed.focused && blockSelection.isActive()) {
           const blocks = syncSelectionModel();
           if (!blockSelection.indices().some((index) => blocks[index] === keyed.focused)) return;

@@ -22,6 +22,14 @@ import { applyWrittenEdits, currentPreviewDocument, isDocumentEligible, revision
 import { OWN_EDIT_ECHO_MS } from "./scrollSync";
 import { fireAndForget } from "../../host-api/logger";
 
+/** True when a message's blank run is the run the held edit replaces (both absent counts). */
+function sameBlankRun(
+  run: { line: number; endLine: number } | undefined,
+  held: { line: number; endLine: number } | undefined,
+): boolean {
+  return run?.line === held?.line && run?.endLine === held?.endLine;
+}
+
 /** The block edit the host holds for the page's open inline editor. */
 export interface ActiveBlockEdit {
   editId: string;
@@ -512,6 +520,7 @@ export class BlockEditController {
       || message.endLine !== edit.endLine
       || message.originalText !== edit.originalText
       || message.insertAfterLine !== edit.insertAfterLine
+      || !sameBlankRun(message.replaceBlankRun, edit.blankRunRegion)
       || message.editedText === undefined) {
       this.postEditSourceError(preview, message, "The preview block edit is stale. Reopen the block before saving.");
       return;
@@ -540,7 +549,8 @@ export class BlockEditController {
       || message.revision !== edit.revision
       || message.requestId !== edit.requestId
       || message.line !== edit.line
-      || message.endLine !== edit.endLine) {
+      || message.endLine !== edit.endLine
+      || !sameBlankRun(message.replaceBlankRun, edit.blankRunRegion)) {
       this.postEditSourceError(preview, message, "The preview block edit is stale. Reopen the block before cancelling.");
       return;
     }

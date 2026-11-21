@@ -297,3 +297,91 @@ test("an empty body with only blank lines shows its blank-lines block before Sta
   const harness = harnessWithRuns("1-3", { emptyBody: true });
   assert.equal(blankBlocks(harness).length, 1);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("an editor opened from a blank-lines block stays in its element across a patch without that run", () => {
+  const harness = harnessWithRuns();
+  const blank = blankAt(harness, 0);
+  blank.dispatch("click", plainClick());
+  const openMessage = sent(harness, "previewEditOpen").at(-1)!;
+  harness.dispatchMessage({
+    type: "previewEditSource", documentId: "file:///active.md", revision: 7, requestId: 11,
+    editId: openMessage.editId, originalText: "",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA")!;
+  assert.ok(textarea, "the editor is open");
+  textarea.value = "Typed";
+  textarea.dispatch("input");
+  harness.flushTimers();
+  assert.equal(sent(harness, "previewEditSave").at(-1)?.final, false, "an autosave posted");
+  setRuns(harness, "54-56 102-104");
+  harness.dispatchMessage(patchMessage());
+  assert.ok(blankBlocks(harness).includes(blank), "the element is kept, still a blank-lines block of the page");
+  assert.ok(insertPointAfterLine(harness, 1).insertedElements.includes(blank), "at the place of its run");
+  assert.ok(blank.insertedElements.includes(textarea.parentElement!), "with the editor frame after it");
+  assert.equal(harness.createdElements.filter((element) => element.tagName === "TEXTAREA" && !element.removed).length, 1);
+  const before = harness.messages.length;
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  const [cancel] = sent(harness, "previewEditCancel", before);
+  assert.ok(cancel, "Cancel posts previewEditCancel");
+  assert.deepEqual(runOf(cancel), [3, 6]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+test("Delete and Backspace post nothing on a blank-lines block that is only focused", () => {
+  for (const name of ["Delete", "Backspace"]) {
+    const harness = harnessWithRuns();
+    const before = harness.messages.length;
+    harness.dispatchDocument("keydown", key(name, { target: blankAt(harness, 1) }));
+    assert.equal(sent(harness, "previewBlankRunDelete", before).length, 0, name);
+    assert.equal(sent(harness, "previewBlocksDelete", before).length, 0, name);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+test("Delete on a focused blank-lines block never deletes the selected real blocks", () => {
+  for (const name of ["Delete", "Backspace"]) {
+    const harness = harnessWithRuns();
+    shiftClick(harness, harness.mappings[0]!);
+    assert.deepEqual(selectedLines(harness), [1]);
+    const before = harness.messages.length;
+    harness.dispatchDocument("keydown", key(name, { target: blankAt(harness, 1) }));
+    assert.equal(harness.messages.length, before, name);
+    assert.deepEqual(selectedLines(harness), [1], "the selection is untouched");
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("a run that starts on the separator line ending a list shows its blank-lines block", () => {
+  const harness = harnessWithRuns("52-54", { secondBlockEndLine: 52 });
+  assert.equal(blankBlocks(harness).length, 1);
+  const list = harnessWithRuns("52-54", { secondBlockEndLine: 53 });
+  assert.equal(blankBlocks(list).length, 1, "the list range ends on the run's first line");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("the label is drawn by CSS: it is not in the element's text content", () => {
+  const harness = harnessWithRuns();
+  for (const blank of blankBlocks(harness)) {
+    assert.doesNotMatch(blank.textContent, /blank/iu);
+    assert.match(blank.getAttribute("data-okf-blank-label") ?? "", /^Blank lines \(\d+\)$/u);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("a forged runs element placed among the blocks and the insertion bars is ignored", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const forged = (): RuntimeElement =>
+    new RuntimeElement({ "data-okf-blank-runs": "54-56" }, harness.windowState, 0, 0, "div");
+  harness.previewContent.appendChild(forged());
+  harness.editModeButton.dispatch("click");
+  harness.editModeButton.dispatch("click");
+  insertPointAfterLine(harness, 1).insertAdjacentElement("afterend", forged());
+  insertPointAfterLine(harness, 52).insertAdjacentElement("beforebegin", forged());
+  setRuns(harness, "3-6");
+  harness.editModeButton.dispatch("click");
+  harness.editModeButton.dispatch("click");
+  const blanks = blankBlocks(harness);
+  assert.equal(blanks.length, 1, "only the host's last element counts");
+  assert.ok(insertPointAfterLine(harness, 1).insertedElements.includes(blanks[0]!));
+});

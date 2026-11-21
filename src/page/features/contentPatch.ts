@@ -53,7 +53,9 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     state.applyingContentPatch = true;
     // @implements_req SwRS-MDOKFSTUDIO-TABLE-119
     // A table cell editor an outside change reached closes here without a save: the buffer is the truth.
-    rt.blockEditor.closeBlockEdit(false);
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
+    // The editor of a blank-lines block stays open: its block and frame are put back after the swap.
+    if (!state.activeBlockEdit?.replaceBlankRun) rt.blockEditor.closeBlockEdit(false);
     state.applyingContentPatch = false;
     parts.linkTooltip.close();
     // @implements_req SwRS-MDOKFSTUDIO-CODE-017
