@@ -23,6 +23,7 @@ import {
   withCurrentFrame,
   setViewport,
 } from "./realInput/harness";
+import { RUN_VIEWPORT } from "./realWindowViewport";
 
 const SOURCE = "First paragraph of the page.\n\nSecond paragraph of the page.\n";
 const PNG = Buffer.from(
@@ -92,7 +93,8 @@ export async function run(): Promise<void> {
     await withFailureTrace("drop-files", scenarioTraceCollector(page, () => opened, failures), async () => {
       await workbench.update("colorTheme", mode === "cream" ? "Default Light Modern" : "Default Dark Modern",
         vscode.ConfigurationTarget.Workspace);
-      await setViewport(page, { width: 1200, height: 800 });
+      // Same size as the run's own emulation (RUN_VIEWPORT), see its comment.
+      await setViewport(page, RUN_VIEWPORT);
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
       const source = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("notes/page.md")));

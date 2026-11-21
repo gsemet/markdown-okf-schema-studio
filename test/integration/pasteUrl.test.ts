@@ -25,6 +25,7 @@ import {
   withCurrentFrame,
   setViewport,
 } from "./realInput/harness";
+import { RUN_VIEWPORT } from "./realWindowViewport";
 
 const SOURCE = "Read the guide for details.\nLogo:  then text.\nHome:  then text.\n\nSecond paragraph.\n";
 const DOCS = "https://example.com/docs";
@@ -98,7 +99,8 @@ export async function run(): Promise<void> {
     await withFailureTrace("paste-url", scenarioTraceCollector(page, () => opened, failures), async () => {
       await workbench.update("colorTheme", mode === "cream" ? "Default Light Modern" : "Default Dark Modern",
         vscode.ConfigurationTarget.Workspace);
-      await setViewport(page, { width: 1200, height: 800 });
+      // Same size as the run's own emulation (RUN_VIEWPORT), see its comment.
+      await setViewport(page, RUN_VIEWPORT);
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
       const source = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("paste.md")));
