@@ -82,3 +82,12 @@ test("CR 453: table-insert-slash is on demand in the trusted window and never in
   assert.ok(!STRESS_SCENARIOS_BY_HOST.trusted.includes("table-insert-slash"));
   assert.ok(!STRESS_SCENARIOS_BY_HOST.untrusted.includes("table-insert-slash"));
 });
+
+test("CR 464: diff-preview-scroll is on demand in the trusted window and never in the default plan", () => {
+  assert.ok(STRESS_ON_DEMAND_SCENARIOS.includes("diff-preview-scroll"));
+  const named = { STUDIO_STRESS_SCENARIOS: "diff-preview-scroll" };
+  assert.deepEqual(hostStressPlan(named, "trusted")?.scenarios, ["diff-preview-scroll"]);
+  assert.equal(hostStressPlan(named, "untrusted"), undefined);
+  assert.ok(!(hostStressPlan({}, "trusted")?.scenarios ?? []).includes("diff-preview-scroll"));
+  assert.ok(!STRESS_SCENARIOS_BY_HOST.trusted.includes("diff-preview-scroll"));
+});

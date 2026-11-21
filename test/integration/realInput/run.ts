@@ -10,6 +10,7 @@ import {
   STRESS_SCENARIOS_BY_HOST,
 } from "../../shared/stressPlan";
 import { run as runCheckboxToggle } from "../checkboxToggle.test";
+import { run as runDiffPreviewScroll } from "../diffPreviewScroll.test";
 import { run as runDropFiles } from "../dropFiles.test";
 import { run as runPasteUrl } from "../pasteUrl.test";
 import { scenarioFindInPreview } from "../findInPreview.test";
@@ -107,6 +108,8 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   "drop-files": async () => runDropFiles(),
   // CR 453: on demand only (STRESS_ON_DEMAND_SCENARIOS), after the default names.
   "table-insert-slash": (page) => scenarioTableInsertFromSlash(page),
+  // CR 464: on demand too; a step of the trusted suite that ignores the page of the round, like checkbox-toggle.
+  "diff-preview-scroll": async () => runDiffPreviewScroll(),
   // "wide-table-tab" is out of the stress table: its LASTCELL click was unstable (under investigation).
 };
 
