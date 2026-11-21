@@ -61,7 +61,9 @@ this repository.
 - Windows: `just check` and `just ci-static` work with Git for Windows' `sh`, `bash` and
   `cygpath` on `PATH`; see "Windows" in CONTRIBUTING.md.
 - `just dev` installs Node.js, JavaScript and Python dependencies, and Playwright Chromium
-  (`just install` also works); JavaScript dependencies alone: `fnm exec -- npm ci`.
+  (`just install` also works); JavaScript dependencies alone: `fnm exec -- npm ci`. On Windows it
+  also runs `git config core.longpaths true` in the repository, so a base checkout or a new
+  worktree does not fail with "Filename too long".
 - In a new worktree or a clean checkout, run `just dev` first, before any build, check, test or
   gate; see [local-worktree.guidelines.md](.agents/guidelines/local-worktree.guidelines.md).
 - `just update` upgrades dependencies; `just dev-ci` (`just dev-ci visual`) sets up a CI machine

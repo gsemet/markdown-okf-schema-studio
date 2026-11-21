@@ -29,7 +29,9 @@ libraries, through `just dev-ci visual`, from cached Ubuntu package archives; on
 and macOS only, so `just preflight` runs the static stage there and leaves the others to CI. The recipes need a POSIX shell: install Git for Windows and put `sh`, `bash` and
 `cygpath` on `PATH` (its `usr\bin` folder, or one shim per tool with Scoop), plus `node` (for
 example `fnm default 24` and `fnm env` in your PowerShell profile). The justfile calls `npm.cmd`
-through `fnm` on Windows. Python 3.12 comes from `.python-version`: the next interpreter may lack
+through `fnm` on Windows. `just dev` sets `git config core.longpaths true` in the repository, so
+worktrees and checkouts whose paths pass Windows' 260-character limit do not fail with "Filename
+too long". Python 3.12 comes from `.python-version`: the next interpreter may lack
 prebuilt wheels and need a C compiler. Tests that create symbolic links are skipped unless
 Windows allows them (Developer Mode or administrator rights), and the hang-watchdog tests, which
 read the process list with `ps`, are skipped; the Linux job runs them all.
@@ -623,10 +625,11 @@ release guideline).
 
 	The commands leave `CHANGELOG.md` alone. Add a `## X.Y.Z - YYYY-MM-DD` heading (the version
 	just computed, today's date) right under `## Unreleased`, so the lines move under it and
-	`## Unreleased` stays empty, then amend the version commit:
+	`## Unreleased` stays empty, then amend the version commit. The version commit carries no
+	`Signed-off-by` trailer, so the amend has no `-s`:
 
 	```bash
-	git commit --amend --no-edit -s CHANGELOG.md
+	git commit --amend --no-edit CHANGELOG.md
 	```
 
 4. Validate the version commit, then push it and merge it into `main`:
