@@ -10,6 +10,7 @@ import {
   PASTE_NEXT_TO_INCLUDED,
   planBlockMoveEdit,
   planBlocksCopyCut,
+  planBlocksDelete,
   planBlocksPaste,
   planBlockTextEdit,
   planCheckboxToggle,
@@ -212,3 +213,83 @@ test("a single-line block takes the line ending of the document", () => {
   assert.equal(matchLineEndings("abc\ndef", "abc", "one\rabc\rtwo"), "abc\rdef");
   assert.equal(matchLineEndings("abc\ndef", "abc", "one\r\nabc\ntwo"), "abc\ndef");
 });
+
+const EOLS = [["LF", "\n"], ["CRLF", "\r\n"], ["lone CR", "\r"]] as const;
+const OUT_OF_DATE = { refused: "The preview is out of date. Refresh it and try again." };
+
+for (const [name, eol] of EOLS) {
+  const join = (...lines: string[]): string => lines.join(eol);
+
+  function cutOf(text: string, line: number, endLine: number): { copied: string; text: string; followingLine?: number } {
+    const plan = planBlocksCopyCut(text, line, endLine, "cut");
+    assert.ok("copied" in plan && plan.cut, JSON.stringify(plan));
+    return { copied: plan.copied, text: applyTextEdits(text, [plan.cut.edit]), followingLine: plan.cut.followingLine };
+  }
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-166
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
+  test(`${name}: copy and cut of a list in the middle drop the blank lines after it`, () => {
+    const doc = join("Para", "", "- a", "- b", "", "", "Next", "");
+    assert.deepEqual(planBlocksCopyCut(doc, 3, 6, "copy"), { copied: join("- a", "- b") });
+    const cut = cutOf(doc, 3, 6);
+    assert.equal(cut.copied, join("- a", "- b"));
+    assert.equal(cut.text, join("Para", "", "Next", ""));
+    assert.equal(cut.followingLine, 7);
+    assert.ok(!cut.text.includes(eol.repeat(3)));
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
+  test(`${name}: cut of a list that is the last block`, () => {
+    const cut = cutOf(join("Para", "", "- a", "- b", "", "", ""), 3, 6);
+    assert.equal(cut.text, join("Para", ""));
+    assert.equal(cut.followingLine, undefined);
+    assert.equal(cut.copied, join("- a", "- b"));
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-166
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
+  test(`${name}: copy and cut of a selection that ends on a list`, () => {
+    const doc = join("Alpha", "", "- a", "- b", "", "Omega", "");
+    assert.deepEqual(planBlocksCopyCut(doc, 1, 5, "copy"), { copied: join("Alpha", "", "- a", "- b") });
+    assert.equal(cutOf(doc, 1, 5).text, join("Omega", ""));
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
+  test(`${name}: a cut gives the text and the following line of Delete block`, () => {
+    const cases: [string, number, number][] = [
+      [join("Para", "", "- a", "- b", "", "", "Next", ""), 3, 6],
+      [join("Para", "", "- a", "- b", "", "", ""), 3, 6],
+      [join("Alpha", "", "- a", "- b", "", "Omega", ""), 1, 5],
+      [join("Para", "- a", "- b", "", "", "Next", ""), 2, 5],
+      [join("Para", "", "- a", "- b", "", " \t", "", "Next", ""), 3, 7],
+    ];
+    for (const [doc, line, endLine] of cases) {
+      const cut = cutOf(doc, line, endLine);
+      const deleted = planBlocksDelete(doc, line, endLine);
+      assert.ok("edit" in deleted, JSON.stringify(deleted));
+      assert.equal(cut.text, applyTextEdits(doc, [deleted.edit]), JSON.stringify(doc));
+      assert.equal(cut.followingLine, deleted.followingLine);
+    }
+    const spaced = join("Para", "", "- a", "- b", "", " \t", "", "Next", "");
+    assert.deepEqual(planBlocksCopyCut(spaced, 3, 7, "copy"), { copied: join("- a", "- b") });
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
+  test(`${name}: copy and cut still refuse blank-only, blank-first and out-of-range spans`, () => {
+    const doc = join("A", "", "", "B", "");
+    for (const op of ["copy", "cut"] as const) {
+      assert.ok("refused" in planBlocksCopyCut(doc, 2, 3, op), `${op} blank lines only`);
+      assert.ok("refused" in planBlocksCopyCut(doc, 2, 4, op), `${op} starts on a blank line`);
+      assert.ok("refused" in planBlocksCopyCut(doc, 4, 9, op), `${op} past the end`);
+    }
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-166
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
+  test(`${name}: a selection ending on a no-break-space line is refused, not shortened`, () => {
+    const doc = join("Alpha", "", " ", "");
+    assert.deepEqual(planBlocksCopyCut(doc, 1, 3, "copy"), OUT_OF_DATE);
+    assert.deepEqual(planBlocksCopyCut(doc, 1, 3, "cut"), OUT_OF_DATE);
+  });
+}

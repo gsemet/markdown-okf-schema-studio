@@ -116,15 +116,15 @@ test("files outside the workspace, other addresses and unreadable files are hand
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
-test("a restricted-reads preview takes a drop, and a line that is not a block end refuses it", async () => {
+test("a restricted-reads preview takes a drop, and a line past the end of the document refuses it", async () => {
   const restricted = fixture({ restrictedReads: true });
   await restricted.send(["file:///w/img/logo.png"]);
   assert.equal(restricted.results()[0]!.ok, true);
   assert.notEqual(restricted.document.getText(), MARKDOWN);
-  const blank = fixture();
-  await blank.send(["file:///w/img/logo.png"], 4);
-  assert.equal(blank.results()[0]!.ok, false);
-  assert.equal(blank.document.getText(), MARKDOWN);
+  const stale = fixture();
+  await stale.send(["file:///w/img/logo.png"], 99);
+  assert.equal(stale.results()[0]!.ok, false);
+  assert.equal(stale.document.getText(), MARKDOWN);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005

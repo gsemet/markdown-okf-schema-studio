@@ -125,9 +125,38 @@ test("paste keeps CRLF", () => {
 test("paste refuses an empty clipboard, the frontmatter and stale lines", () => {
   assert.deepEqual(paste("A\n", 1, " \n\n"), { refused: "The clipboard has no text to paste." });
   assert.deepEqual(Object.keys(paste("---\na: 1\n---\n\nA\n", 2, "X") as object), ["refused"]);
-  assert.deepEqual(Object.keys(paste("A\n\nB\n", 2, "X") as object), ["refused"], "blank line");
+  assert.equal(paste("A\n\nB\n", 2, "X"), "A\n\nX\n\nB\n", "a blank line under a block is its separator");
   assert.deepEqual(Object.keys(paste("A\n", 9, "X") as object), ["refused"]);
   assert.deepEqual(Object.keys(paste("A\n", -1, "X") as object), ["refused"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
+test("paste after the blank line that ends a list inserts after the list", () => {
+  const expected = "Para\n\n- a\n- b\n\nX\n\nNext\n";
+  assert.equal(paste("Para\n\n- a\n- b\n\nNext\n", 5, "X"), expected);
+  assert.equal(paste("Para\n\n- a\n- b\n\n\nNext\n", 5, "X"), expected);
+  assert.equal(paste("Para\n\n- a\n- b\n\n\nNext\n", 6, "X"), expected);
+  assert.equal(paste("Para\n\n- a\n- b\n\n", 5, "X"), "Para\n\n- a\n- b\n\nX\n");
+  assert.equal(
+    paste("Para\r\n\r\n- a\r\n- b\r\n\r\nNext\r\n", 5, "X1\nX2"),
+    "Para\r\n\r\n- a\r\n- b\r\n\r\nX1\r\nX2\r\n\r\nNext\r\n",
+  );
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
+test("both blank lines of a run after a list give the same pasted text", () => {
+  const text = "Para\n\n- a\n- b\n\n\nNext\n";
+  const first = paste(text, 5, "X");
+  assert.equal(first, paste(text, 6, "X"));
+  assert.ok(!(first as string).includes("\n\n\n"));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
+test("paste still refuses a blank line with no body above it and a no-break-space line", () => {
+  const out = { refused: "The preview is out of date. Refresh it and try again." };
+  assert.deepEqual(paste("\nA\n", 1, "X"), out);
+  assert.deepEqual(paste("---\na: 1\n---\n\nA\n", 4, "X"), out);
+  assert.deepEqual(paste("A\n\u00a0\n\nB\n", 2, "X"), out);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
