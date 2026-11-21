@@ -40,6 +40,9 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-189
 - SwRS-MDOKFSTUDIO-LIFE-190
 - SwRS-MDOKFSTUDIO-LIFE-191
+- SwRS-MDOKFSTUDIO-LIFE-192
+- SwRS-MDOKFSTUDIO-LIFE-193
+- SwRS-MDOKFSTUDIO-LIFE-194
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -142,4 +145,7 @@ flowchart LR
   - [SwRS-MDOKFSTUDIO-LIFE-189](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-189.md): The line marker of the side preview goes on an edit of the document or a switch of file
   - [SwRS-MDOKFSTUDIO-LIFE-190](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-190.md): A cursor move never marks the side preview
   - [SwRS-MDOKFSTUDIO-LIFE-191](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-191.md): Links and Back and Next followed in the side preview mark their target line
+  - [SwRS-MDOKFSTUDIO-LIFE-192](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-192.md): The line marker marks the table row of the line
+  - [SwRS-MDOKFSTUDIO-LIFE-193](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-193.md): The line marker shows the hidden tabs that hold the line and marks its exact line
+  - [SwRS-MDOKFSTUDIO-LIFE-194](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-194.md): The line marker marks the front matter property row of the line
 <!-- okf:links:end -->

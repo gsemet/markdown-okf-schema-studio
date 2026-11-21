@@ -42,6 +42,15 @@ export function pageRuntimeScript(): string {
 
 export type RuntimeListener = (event: unknown) => void;
 
+/** A text node of the fake page: its data and the viewport top of the character at an index. */
+export interface FakeTextNode {
+  data: string;
+  topAt(index: number): number;
+}
+
+const hasClass = (element: RuntimeElement, name: string): boolean =>
+  `${element.getAttribute("class") ?? ""} ${element.className}`.split(" ").includes(name);
+
 export class RuntimeElement {
   private readonly attributes: Record<string, string>;
   private readonly listeners = new Map<string, RuntimeListener[]>();
@@ -119,6 +128,8 @@ export class RuntimeElement {
   public removed = false;
   public rectProvider: (() => { top: number; height: number; bottom?: number; left?: number; width?: number }) | undefined;
   public rectReadCount = 0;
+  /** Text nodes of the element, for `createTreeWalker` (a soft-wrapped paragraph's measured line tops). */
+  public textNodes: FakeTextNode[] = [];
 
   public get childNodes(): RuntimeElement[] {
     return this.childElements;
@@ -192,7 +203,12 @@ export class RuntimeElement {
         return element.getAttribute("data-sphinx-source-file") !== null
           && element.getAttribute("data-sphinx-source-line") !== null;
       }
+      if (selector === "[data-okf-marker-line]") return element.getAttribute("data-okf-marker-line") !== null;
+      if (selector === "tr[data-okf-field]") {
+        return element.tagName === "TR" && element.getAttribute("data-okf-field") !== null;
+      }
       if (selector === ".myst-code-line") return element.className.split(" ").includes("myst-code-line");
+      if (selector === ".myst-tab-set" || selector === ".myst-tab") return hasClass(element, selector.slice(1));
       if (selector === "table, figure, img, pre, .myst-mermaid-diagram") {
         return ["TABLE", "FIGURE", "IMG", "PRE"].includes(element.tagName)
           || element.className.split(" ").includes("myst-mermaid-diagram");
@@ -260,6 +276,9 @@ export class RuntimeElement {
         || (selector === "[data-okf-frontmatter-editor]" && current.getAttribute("data-okf-frontmatter-editor") !== null)
         || (selector === "[data-okf-frontmatter-menu]" && current.getAttribute("data-okf-frontmatter-menu") !== null)
         || (selector === "tr[data-okf-field]" && current.tagName === "TR" && current.getAttribute("data-okf-field") !== null)
+        || (selector === ".myst-tab-panel"
+          && (current.getAttribute("class") ?? current.className).split(" ").includes("myst-tab-panel"))
+        || ((selector === ".myst-tab-set" || selector === ".myst-tab") && hasClass(current, selector.slice(1)))
         || (selector === "td, th" && ["TD", "TH"].includes(current.tagName))
         || (selector === "table" && current.tagName === "TABLE")
         || (selector === "details" && current.tagName === "DETAILS")
@@ -455,6 +474,8 @@ export interface RuntimeHarness {
   readonly anchor: RuntimeElement;
   readonly image: RuntimeElement;
   readonly mappings: RuntimeElement[];
+  /** The `.myst-tab-set` elements of the content, as `document.querySelectorAll(".myst-tab-set")` finds them. */
+  readonly tabSets: RuntimeElement[];
   readonly headings: RuntimeElement[];
   readonly stickyHeadings: RuntimeElement;
   readonly toolbar: RuntimeElement;
@@ -534,6 +555,15 @@ export interface RuntimeHarness {
   advanceTimers(ms: number): void;
   /** The page clock in milliseconds (moved by `advanceTimers` only). */
   now(): number;
+}
+
+function elementWithId(id: string, roots: RuntimeElement[]): RuntimeElement | null {
+  for (const root of roots) {
+    if (root.getAttribute("id") === id) return root;
+    const found = elementWithId(id, root.childElements);
+    if (found) return found;
+  }
+  return null;
 }
 
 export function createRuntimeHarness(configuration: Partial<{
@@ -683,6 +713,7 @@ export function createRuntimeHarness(configuration: Partial<{
   const exportButton = new RuntimeElement({}, windowState, 0, 30, "button");
   /** The diagram containers of the page (the HTML export waits for them); none by default. */
   const diagrams: RuntimeElement[] = [];
+  const tabSets: RuntimeElement[] = [];
   const zoomOutButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const zoomInButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const widthButton = new RuntimeElement({}, windowState, 0, 30, "button");
@@ -937,8 +968,23 @@ export function createRuntimeHarness(configuration: Partial<{
     getElementById: (id: string): RuntimeElement | null => (
       id === "section" || id === "%41" ? anchor
         : id === "sphinx-myst-preview-content" ? previewContent
-          : null
+          : elementWithId(id, [...tabSets, ...mappings])
     ),
+    // A text walker over the fake text nodes of an element, and a range that measures one character.
+    createTreeWalker: (element: RuntimeElement) => {
+      let next = 0;
+      return { nextNode: (): FakeTextNode | null => element.textNodes[next++] ?? null };
+    },
+    createRange: () => {
+      let node: FakeTextNode | undefined;
+      let index = 0;
+      const rectangle = () => ({ top: node?.topAt(index) ?? Number.NaN, height: 20 });
+      return {
+        setStart: (target: FakeTextNode, at: number): void => { node = target; index = at; },
+        setEnd: (): void => undefined,
+        getClientRects: () => [rectangle()],
+      };
+    },
     querySelector: (selector: string): RuntimeElement | null => {
       if (selector === "[data-sphinx-preview-theme-toggle]") return themeButton;
       if (selector === "[data-sphinx-preview-refresh]") return refreshButton;
@@ -991,6 +1037,7 @@ export function createRuntimeHarness(configuration: Partial<{
     },
     querySelectorAll: (selector: string): RuntimeElement[] => (
       selector === ".myst-mermaid-diagram, .myst-vega-diagram, .myst-plantuml-diagram" ? diagrams
+        : selector === ".myst-tab-set" ? tabSets
         : selector === "img" ? [image]
         : selector === "input.myst-checkbox" ? [checkbox]
         : selector === ".myst-radio" ? radios
@@ -1072,6 +1119,7 @@ export function createRuntimeHarness(configuration: Partial<{
     anchor,
     image,
     mappings,
+    tabSets,
     headings,
     stickyHeadings,
     descriptionButton,

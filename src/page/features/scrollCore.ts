@@ -6,6 +6,7 @@
  */
 
 import type { AnchorPoint } from "../../core/scroll/anchorPolicy";
+import { measureLineTops } from "../modules/lineTops";
 import { normalizeSourcePath } from "./mappedBlocks";
 import {
   MAPPINGS_SELECTOR,
@@ -82,37 +83,6 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     return rectangle.height > 0;
   }
 
-  // @implements_req SwRS-MDOKFSTUDIO-LIFE-119
-  // Document y where each soft-wrapped source line of a paragraph starts. Paragraph text keeps
-  // the source line breaks as newline characters, so the line after each newline starts at the
-  // first visible character that follows it.
-  function measureLineTops(element: Element, line: number, endLine: number): number[] | undefined {
-    if (endLine <= line || String(element.tagName || "").toUpperCase() !== "P"
-      || typeof document.createTreeWalker !== "function"
-      || typeof document.createRange !== "function") return undefined;
-    const walker = document.createTreeWalker(element, 4);
-    const range = document.createRange();
-    const tops: number[] = [];
-    let waiting = 0;
-    for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
-      const text = String(node.data || "");
-      for (let index = 0; index < text.length; index += 1) {
-        const character = text[index]!;
-        if (character === "\n") {
-          waiting += 1;
-          continue;
-        }
-        if (waiting === 0 || character.trim() === "") continue;
-        range.setStart(node, index);
-        range.setEnd(node, index + 1);
-        const rectangle = range.getClientRects?.()[0] ?? range.getBoundingClientRect?.();
-        if (!rectangle || !Number.isFinite(rectangle.top)) return undefined;
-        for (; waiting > 0; waiting -= 1) tops.push(rectangle.top + window.scrollY);
-      }
-    }
-    return tops.length === endLine - line ? tops : undefined;
-  }
-
   function parseMappings(): LayoutEntry[] {
     return Array.from(document.querySelectorAll<HTMLElement>(MAPPINGS_SELECTOR))
       .map((element, domOrder): LayoutEntry | undefined => {
@@ -132,7 +102,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
         const endLine = Number.isSafeInteger(parsedEndLine) && parsedEndLine > parsedSourceLine
           ? parsedEndLine
           : parsedSourceLine;
-        const lineTops = measureLineTops(element, parsedSourceLine, endLine);
+        const lineTops = measureLineTops(document, window, element, parsedSourceLine, endLine);
         return {
           element,
           sourceLine: parsedSourceLine,

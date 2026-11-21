@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The line marker is now exact in tables, tabs and the front matter: it marks the table row of the
+  line (the header row for the delimiter line), shows a hidden tab first (a nested one, or one in a
+  closed dropdown, too) and marks the exact line inside it, and marks the property row of the front
+  matter, opening a collapsed properties table for a property line.
 - The side preview now marks the target line with the arrow when a jump (a search result, Quick Open
   `file.md:40`, Go to Line, Problems, a link) takes the text editor to a line, switching to the file
   first when it is another one. The arrow stays through scrolls and cursor moves and goes when you

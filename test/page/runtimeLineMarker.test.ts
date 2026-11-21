@@ -178,31 +178,48 @@ test("a table line marks the top of the table", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-test("a line inside a hidden tab of a tab-set marks the tab-set top and selects no tab", () => {
-  const harness = createRuntimeHarness({ secondBlockEndLine: 60 });
-  const tabSet = harness.mappings[1]!;
-  // The block of a tab that is not shown has no box: it is not in the layout.
-  const hiddenTab = new RuntimeElement({
-    "data-sphinx-preview-document": "file:///active.md",
-    "data-sphinx-source-end-line": "56",
-    "data-sphinx-source-file": "/workspace/active.md",
-    "data-sphinx-source-line": "54",
-  }, harness.windowState, 0, 0, "div");
-  tabSet.appendChild(hiddenTab);
-  const before = harness.messages.length;
-  reveal(harness, 55);
-  assert.equal(top(overlays(harness)[0]), "500px");
-  assert.equal(overlays(harness).length, 1);
-  assert.equal(hiddenTab.getAttribute("aria-current"), null);
-  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEdit"), false);
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
 test("a front matter line marks the top of the front matter block", () => {
   const harness = createRuntimeHarness({ frontmatterHeight: 120, firstMappedSourceLine: 8 });
   reveal(harness, 4);
   assert.equal(top(overlays(harness)[0]), "0px");
   assert.equal(harness.mappings[0]!.getAttribute("aria-current"), "location");
+});
+
+function child(harness: RuntimeHarness, parent: RuntimeElement, attributes: Record<string, string>, top: number, height: number, tag: string): RuntimeElement {
+  const element = new RuntimeElement(attributes, harness.windowState, top, height, tag);
+  parent.appendChild(element);
+  return element;
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+test("a pipe table row line marks that row, and the delimiter line marks the header row", () => {
+  const harness = createRuntimeHarness({ secondBlockEndLine: 60 });
+  const table = harness.mappings[1]!;
+  child(harness, table, { "data-okf-marker-line": "50" }, 510, 20, "tr");
+  child(harness, table, { "data-okf-marker-line": "52" }, 540, 20, "tr");
+  child(harness, table, { "data-okf-marker-line": "53" }, 560, 20, "tr");
+  reveal(harness, 53);
+  assert.equal(top(overlays(harness)[0]), "560px");
+  reveal(harness, 51);
+  assert.equal(top(overlays(harness)[0]), "510px");
+  assert.equal(overlays(harness).length, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+test("a front matter line marks its property row, a fence or a comment line the section top", () => {
+  const harness = createRuntimeHarness({ frontmatterHeight: 120, firstMappedSourceLine: 8 });
+  const section = harness.mappings[0]!;
+  section.setAttribute("data-okf-properties", "true");
+  section.setAttribute("data-okf-frontmatter-end-line", "7");
+  section.setAttribute("data-sphinx-source-end-line", "1");
+  child(harness, section, { "data-okf-field": "title", "data-okf-line": "2", "data-okf-end-line": "2" }, 40, 20, "tr");
+  child(harness, section, { "data-okf-field": "tags", "data-okf-line": "3", "data-okf-end-line": "5" }, 60, 40, "tr");
+  reveal(harness, 4);
+  assert.equal(top(overlays(harness)[0]), "60px");
+  reveal(harness, 2);
+  assert.equal(top(overlays(harness)[0]), "40px");
+  reveal(harness, 6);
+  assert.equal(top(overlays(harness)[0]), "0px");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-179

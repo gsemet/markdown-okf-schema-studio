@@ -45,6 +45,8 @@ In edit mode the page SHALL draw the line marker over neither the list item hand
 | --- | --- |
 | the overlay | pointer-events none, aria-hidden, under the handles in z-order |
 | the arrow | drawn in the 32 px margin left of the column where handles sit above it |
+| a table row at fixture line 43 (body row 2); line 41 (the delimiter line) | the row is marked (the header row for the delimiter line), the arrow meets no row handle |
+| a property row and a tab-panel line | the marker is drawn, the arrow meets no control and no block editor opens |
 
 ### Verification notes
 

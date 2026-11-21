@@ -8,6 +8,15 @@
  */
 
 import type { RevealScroll } from "../../core/protocol/hostToPage";
+import { measureLineTops } from "../modules/lineTops";
+import {
+  frontmatterRowFor,
+  isCodeBlockItself,
+  markerSpanOf,
+  panelsAround,
+  tableRowFor,
+  targetIn,
+} from "./lineMarkerPlacement";
 import { MAPPINGS_SELECTOR, type LayoutEntry, type PageRuntime } from "./pageRuntime";
 
 /** The marker of a page. */
@@ -84,7 +93,12 @@ export function installLineMarker(rt: PageRuntime): LineMarker {
       if (element.getAttribute("data-sphinx-preview-document") !== context.documentId) continue;
       const start = Number(element.getAttribute("data-sphinx-source-line"));
       const parsedEnd = Number(element.getAttribute("data-sphinx-source-end-line"));
-      const end = Number.isSafeInteger(parsedEnd) && parsedEnd > start ? parsedEnd : start;
+      // The properties section is mapped from line 1 only: its closing fence ends it.
+      const frontmatterEnd = Number(element.getAttribute("data-okf-frontmatter-end-line"));
+      const end = Math.max(
+        Number.isSafeInteger(parsedEnd) && parsedEnd > start ? parsedEnd : start,
+        Number.isSafeInteger(frontmatterEnd) ? frontmatterEnd : 0,
+      );
       if (start <= sourceLine && sourceLine <= end && start > bestStart) {
         best = element;
         bestStart = start;
@@ -107,25 +121,46 @@ export function installLineMarker(rt: PageRuntime): LineMarker {
     return changed;
   }
 
-  // The exact line's top and height, else the top of the enclosing block and its first line height.
-  function lineBox(entry: LayoutEntry, sourceLine: number): LineBox {
+  const rowBox = (row: Element): LineBox => {
+    const rectangle = row.getBoundingClientRect();
+    return { top: rectangle.top + window.scrollY, height: rectangle.height || lineHeightOf(row) };
+  };
+
+  // The exact line's top and height inside `entry`: a table row, a front matter row, a code line, a
+  // wrapped paragraph line, the top of the target; else the top of the block and its first line.
+  function lineBox(entry: LayoutEntry, target: Element, sourceLine: number): LineBox {
     const height = lineHeightOf(entry.element);
     const fallback = { top: entry.top, height: Math.min(height, entry.height || height) };
-    if (sourceLine <= entry.sourceLine || sourceLine > entry.endLine) return fallback;
-    // A code block: the span of the line, counted back from the closing fence. Only when the block
-    // holds no mapped block of its own (a tab-set or a table around a code block is not a code block).
-    const spans = Array.from(entry.element.querySelectorAll?.(".myst-code-line") ?? []);
-    if (spans.length > 0 && (entry.element.querySelectorAll?.(MAPPINGS_SELECTOR).length ?? 0) === 0) {
-      const index = codeSpanIndex(spans.length, entry.endLine, sourceLine);
+    const isBlock = target === entry.element;
+    const row = entry.element.getAttribute("data-okf-properties") === null
+      ? tableRowFor(target, sourceLine)
+      : frontmatterRowFor(entry.element, sourceLine);
+    if (row) return rowBox(row);
+    if (entry.element.getAttribute("data-okf-properties") !== null) return fallback;
+    const span = isBlock ? { start: entry.sourceLine, end: entry.endLine } : markerSpanOf(target);
+    if (!span || sourceLine <= span.start || sourceLine > span.end) {
+      return isBlock || !span ? fallback : targetTop(target, height);
+    }
+    // A code block itself: the span of the line, counted back from the closing fence.
+    if (isCodeBlockItself(target)) {
+      const spans = Array.from(target.querySelectorAll(".myst-code-line"));
+      const index = codeSpanIndex(spans.length, span.end, sourceLine);
       const rectangle = index === undefined ? undefined : spans[index]?.getBoundingClientRect();
       return rectangle
         ? { top: rectangle.top + window.scrollY, height: rectangle.height || height }
-        : fallback;
+        : isBlock ? fallback : targetTop(target, height);
     }
     // A paragraph: the measured tops of its soft-wrapped lines.
-    const top = entry.lineTops?.[sourceLine - entry.sourceLine - 1];
-    return top === undefined ? fallback : { top, height };
+    const tops = isBlock ? entry.lineTops : measureLineTops(document, window, target, span.start, span.end);
+    const top = tops?.[sourceLine - span.start - 1];
+    if (top !== undefined) return { top, height };
+    return isBlock ? fallback : targetTop(target, height);
   }
+
+  const targetTop = (target: Element, height: number): LineBox => {
+    const rectangle = target.getBoundingClientRect();
+    return { top: rectangle.top + window.scrollY, height: Math.min(height, rectangle.height || height) };
+  };
 
   // `aria-current` is shared with `markSourceLine` (the editor selection mark): each owns its own
   // marker attribute, and an element keeps `aria-current` while the other still marks it.
@@ -161,20 +196,62 @@ export function installLineMarker(rt: PageRuntime): LineMarker {
     mark(undefined);
   }
 
+  // Opens what hides the target: the heading section and closed dropdowns, then each hidden tab panel
+  // around it (outermost first), then a collapsed properties table on a property row. True when
+  // something opened. `reveal` makes the tabs call `onChange` (`stabilizeLayout`), which only asks for
+  // an animation frame: the `layoutMeasured` placement (`place(false)`) runs after this request is
+  // done, never inside it (a runtime test pins it).
+  function openWhatHides(block: Element, target: Element, onPropertyRow: boolean): boolean {
+    let changed = unfold(block);
+    if (target !== block && unfold(target)) changed = true;
+    for (const panel of panelsAround(target)) {
+      if ((panel as HTMLElement).hidden && rt.parts.tabs.reveal(panel)) changed = true;
+    }
+    if (onPropertyRow && state.frontmatterCollapsed) {
+      state.frontmatterCollapsed = false;
+      rt.input.applyFrontmatterVisibility();
+      changed = true;
+    }
+    return changed;
+  }
+
+  // The entry of the properties section: its layout entry ends at its first line, so it is built here.
+  function frontmatterEntry(section: HTMLElement): LayoutEntry | undefined {
+    const rectangle = section.getBoundingClientRect();
+    if (!(rectangle.height > 0)) return undefined;
+    const end = Number(section.getAttribute("data-okf-frontmatter-end-line"));
+    return {
+      element: section,
+      sourceLine: 1,
+      endLine: Number.isSafeInteger(end) ? end : 1,
+      top: rectangle.top + window.scrollY,
+      height: rectangle.height,
+      domOrder: 0,
+    };
+  }
+
   // Draws the marker on its line. `unfoldFirst` (a request) opens what hides it; a later placement
-  // never undoes a fold the reader made: the marker is just not drawn while its line is hidden.
+  // never undoes a fold the reader made, nor shows a tab: the marker is just not drawn while its line
+  // is hidden.
   function place(unfoldFirst: boolean): LineBox | undefined {
     if (line === undefined) return undefined;
     const block = containingBlock(line);
-    if (unfoldFirst && block && unfold(block)) rt.scroll.measure();
-    const entry = rt.scroll.entryForLine(line);
-    const hidden = block !== undefined && entry !== undefined
-      && !(entry.sourceLine <= line && line <= entry.endLine);
+    const isFrontmatter = block?.getAttribute("data-okf-properties") !== null && block !== undefined;
+    const target = block ? targetIn(block, line) ?? block : undefined;
+    const propertyRow = isFrontmatter && block ? frontmatterRowFor(block, line) : undefined;
+    if (unfoldFirst && block && target && openWhatHides(block, target, propertyRow !== undefined)) rt.scroll.measure();
+    const entry = isFrontmatter && block ? frontmatterEntry(block) : rt.scroll.entryForLine(line);
+    const hidden = block !== undefined && target !== undefined && (
+      entry === undefined
+      || !(entry.sourceLine <= line && line <= entry.endLine)
+      || panelsAround(target).some((panel) => (panel as HTMLElement).hidden)
+      || (propertyRow !== undefined && state.frontmatterCollapsed)
+    );
     if (!entry || hidden) {
       hide();
       return undefined;
     }
-    const box = lineBox(entry, line);
+    const box = lineBox(entry, target && entry.element.contains(target) ? target : entry.element, line);
     draw(box);
     mark(entry.element);
     return box;

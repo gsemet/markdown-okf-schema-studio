@@ -23,6 +23,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/mystBlocksWindow.ts
 - test/page/modules/tabs.test.ts
+- test/page/runtimeLineMarkerPlacement.test.ts
 - test/visual/cardsTabsScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -75,6 +76,18 @@ When a tab of a tab set is clicked, or has the focus and receives an arrow, Home
 - GIVEN a reader who selected tabs in several sets
 - WHEN a content patch renders the sets again
 - THEN the page puts back the choices it remembers, by position of the set, unless the set lost tabs
+
+### Scenario (nominal): The line marker selects a tab the way a click does
+
+- GIVEN a tab set whose second tab is not shown
+- WHEN the line marker is requested on a line of that tab item
+- THEN the tab is selected as a click selects it (the sets of its sync group follow, the choice is remembered, the focus does not move) and the layout is measured again
+
+### Scenario (boundary): After a patch each set shows its latest choice
+
+- GIVEN a set the reader selected by click and a sync choice made later in its group
+- WHEN a content patch renders the sets again
+- THEN each set shows the later of its own selection and its group's sync choice
 
 ### Related requirements
 

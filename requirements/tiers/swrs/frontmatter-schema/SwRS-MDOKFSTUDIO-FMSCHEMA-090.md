@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/propertiesTable.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
+- test/page/runtimeLineMarkerPlacement.test.ts
 - test/visual/frontmatterCollapseScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -55,6 +56,8 @@ When a writer presses the toggle next to the Frontmatter properties title, the e
 | A page loads while the table was collapsed in the previous page | The table is shown and aria-expanded is true; the state is never stored in the panel state or the workspace |
 | A document is opened in a new preview | The table is shown |
 | The issue badge is pressed while the table is collapsed | The table is shown first, then the focus goes to the first row with an issue |
+| The line marker is requested on a property line while the table is collapsed | The table is expanded first and the row is marked (SwRS-MDOKFSTUDIO-LIFE-194) |
+| The line marker is requested on any other front matter line (a fence, a comment) | The table stays collapsed; a later placement of the marker never expands it |
 
 ### Scenario (boundary): Keyboard and the Description column
 
