@@ -13,7 +13,6 @@ const textTabs = (): vscode.Tab[] => vscode.window.tabGroups.all.flatMap((group)
   .filter((tab) => tab.input instanceof vscode.TabInputText);
 const diffTabs = (): vscode.Tab[] => vscode.window.tabGroups.all.flatMap((group) => group.tabs)
   .filter((tab) => tab.input instanceof vscode.TabInputTextDiff);
-const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * A virtual document at the path of a file, as a `git:` side or the replace preview's "after
@@ -67,13 +66,14 @@ const previewOf = (file: string): boolean => {
  * CR 455 in the real window: the side preview next to a text diff (a diff whose sides are not both
  * the file: a virtual side shares its path). The real file of the diff is previewed, the command
  * opens no text editor, the preview follows a diff that becomes active and scrolls with its real
- * file's side; a staged-like diff (no file side) previews the working-tree file and moves no scroll.
+ * file's side. A staged-like diff (no file side) is covered by the host unit tests only
+ * (test/host/diffPreview.requirements.test.ts): two virtual sides of one path never show as a text diff
+ * tab in the real window.
  */
 export async function run(): Promise<void> {
   const fixture = createFixture("diff-preview", {
     "a.md": `# A\n\n${LONG}`,
     "b.md": `# B\n\n${LONG}`,
-    "c.md": `# C\n\n${LONG}`,
     "notes.txt": "plain text\n",
   });
   const file = (name: string): string => path.join(fixture.directory, name);
@@ -138,20 +138,6 @@ export async function run(): Promise<void> {
     await openDiff(virtualOf(file("b.md")), vscode.Uri.file(file("b.md")));
     await focusOriginalSide();
     await waitFor("the side preview switched to b.md", () => previewOf(file("b.md")), 30_000);
-
-    // T6: a staged-like diff (no file side): the working-tree file is previewed, and no scroll follows the diff.
-    // Start clean: the earlier diff tab and side preview must not take the new diff's slot.
-    await closeAllEditors();
-    await openDiff(virtualOf(file("c.md"), "head"), virtualOf(file("c.md"), "index"));
-    await vscode.commands.executeCommand(COMMAND_ID);
-    await waitFor("the side preview of the working-tree file c.md", () => previewOf(file("c.md")), 30_000);
-    const line = getActivePreviewForTests()?.lastSourceScrollLine;
-    // The command left the focus in the preview: put the cursor in a diff side, so the scroll below is a real one.
-    await focusOriginalSide();
-    await waitFor("the cursor in a virtual diff side", () => vscode.window.activeTextEditor?.document.uri.scheme === SCHEME);
-    await vscode.commands.executeCommand("cursorBottom");
-    await sleep(1500);
-    assert.equal(getActivePreviewForTests()?.lastSourceScrollLine, line, "scrolling a stand-in diff moves no preview");
   } finally {
     provider.dispose();
     await closeAllEditors();
