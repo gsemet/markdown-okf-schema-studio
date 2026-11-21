@@ -2,7 +2,7 @@ import { escapeHtml, plainText, shareDescription } from "../socialCard";
 import { kindClass, mapSummary, metroList, metroSvg, pathColour, plural, scenarioDots, testCount } from "./layout";
 import { citedIds, type MainPath } from "./mainPaths";
 import { behavioursOf, replacementsOf, retiredBehavioursOf, type Area, type Requirement, type Scenario, type ViewerModel } from "./model";
-import { VIEWER_DIR, areaDir, blobUrl, dirLink, pageLink, requirementDir, shortId } from "./urls";
+import { VIEWER_DIR, areaDir, blobUrl, dirLink, pageLink, requirementDir } from "./urls";
 import type { PageSpec } from "./shell";
 
 /** The area, use case and behaviour pages: the body and the spec of each; the shell draws the frame. */
@@ -88,6 +88,8 @@ function mapSection(model: ViewerModel, dir: string, paths: readonly MainPath[])
 <p class="facts">${summary.html}</p>`;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-080
+// @implements_req SwRS-MDOKFSTUDIO-CORE-093
 export function useCasePage(model: ViewerModel, useCase: Requirement): PageSpec {
   const dir = requirementDir(useCase);
   const area = areaOf(model, useCase.scope);
@@ -106,7 +108,7 @@ export function useCasePage(model: ViewerModel, useCase: Requirement): PageSpec 
 <figure class="ucd" role="img" aria-label="Use case diagram of ${e(useCase.title)}">${svg}</figure>
 `;
   const body = `
-<p class="eyebrow"><span class="sw" style="background:${e(area.colour)}"></span>Use case ${e(shortId(useCase.id))}</p>
+<p class="eyebrow"><span class="sw" style="background:${e(area.colour)}"></span>Use case ${e(useCase.id)}</p>
 <h1>${e(useCase.title)}</h1>
 <blockquote class="need">${e(useCase.userNeed)}</blockquote>
 ${diagram}${map}
@@ -115,10 +117,10 @@ ${diagram}${map}
 `;
   return {
     dir, level: "use-case", colour: area.colour, body, area,
-    shareTitle: `${useCase.title} (${useCase.id})`,
+    shareTitle: `Use case ${useCase.id}: ${useCase.title}`,
     description: plainText(useCase.userNeed || useCase.description),
-    title: `Use case ${shortId(useCase.id)}: ${useCase.title}`,
-    crumbs: [{ text: "Areas", dir: VIEWER_DIR }, { text: area.title, dir: areaDir(area.id) }, { text: shortId(useCase.id) }],
+    title: `Use case ${useCase.id}: ${useCase.title}`,
+    crumbs: [{ text: "Areas", dir: VIEWER_DIR }, { text: area.title, dir: areaDir(area.id) }, { text: useCase.id }],
   };
 }
 
@@ -194,6 +196,7 @@ function fileList(model: ViewerModel, files: readonly string[], tests: boolean):
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-CORE-082
+// @implements_req SwRS-MDOKFSTUDIO-CORE-093
 export function behaviourPage(model: ViewerModel, behaviour: Requirement): PageSpec {
   const dir = requirementDir(behaviour);
   const area = areaOf(model, behaviour.scope);
@@ -211,14 +214,14 @@ export function behaviourPage(model: ViewerModel, behaviour: Requirement): PageS
   const previous = index > 0 ? siblings[index - 1] : undefined;
   const next = index >= 0 ? siblings[index + 1] : undefined;
   const pager = parent
-    ? `<nav class="pager" aria-label="Behaviours of ${e(shortId(parent.id))}">${previous ? `<a href="${dirLink(dir, requirementDir(previous))}">← ${e(previous.title)}</a>` : "<span></span>"}${next ? `<a class="next" href="${dirLink(dir, requirementDir(next))}">${e(next.title)} →</a>` : ""}</nav>`
+    ? `<nav class="pager" aria-label="Behaviours of ${e(parent.id)}">${previous ? `<a href="${dirLink(dir, requirementDir(previous))}">← ${e(previous.id)}: ${e(previous.title)}</a>` : "<span></span>"}${next ? `<a class="next" href="${dirLink(dir, requirementDir(next))}">${e(next.id)}: ${e(next.title)} →</a>` : ""}</nav>`
     : "";
   const replaced = model.retired.filter((old) => old.tier === "SwRS" && replacementsOf(model, old).some((candidate) => candidate.id === behaviour.id));
   const replaces = replaced.length > 0
     ? `<div class="retired"><h2>Replaces</h2><div class="blist">${replaced.map((old) => `<div class="brow retired"><span class="id">${e(old.id)}</span><span class="t">${e(old.title)} ${retiredNote(model, dir, old)}</span><span class="m"></span><span class="m"></span></div>`).join("")}</div></div>`
     : "";
   const body = `
-<p class="eyebrow"><span class="sw" style="background:${e(area.colour)}"></span>Behaviour ${e(shortId(behaviour.id))}</p>
+<p class="eyebrow"><span class="sw" style="background:${e(area.colour)}"></span>Behaviour ${e(behaviour.id)}</p>
 <h1>${e(behaviour.title)}</h1>
 <p class="rule">${rule}</p>
 ${whereSection(model, dir, behaviour)}
@@ -236,14 +239,14 @@ ${pager}
 `;
   return {
     dir, level: "behaviour", colour: area.colour, body, area,
-    title: `Behaviour ${shortId(behaviour.id)}: ${behaviour.title}`,
-    shareTitle: `${behaviour.title} (${behaviour.id})`,
+    title: `Behaviour ${behaviour.id}: ${behaviour.title}`,
+    shareTitle: `Behaviour ${behaviour.id}: ${behaviour.title}`,
     description: shareDescription(behaviour.description),
     crumbs: [
       { text: "Areas", dir: VIEWER_DIR },
       { text: area.title, dir: areaDir(area.id) },
-      ...(parent ? [{ text: shortId(parent.id), dir: requirementDir(parent) }] : []),
-      { text: shortId(behaviour.id) },
+      ...(parent ? [{ text: parent.id, dir: requirementDir(parent) }] : []),
+      { text: behaviour.id },
     ],
   };
 }

@@ -54,7 +54,7 @@ When a maintainer builds the Pages site, the build SHALL write one social pictur
 
 - GIVEN a category, a use case and a behaviour
 - WHEN their share texts are written
-- THEN the category says it is a feature category of Markdown OKF-Schema Studio, the use case has its title then its full ID and its whole user need, and the behaviour has its title then its full ID and its rule without backticks or link syntax
+- THEN the category says it is a feature category of Markdown OKF-Schema Studio, the use case has the share title Use case, its full ID, a colon and its title, and its whole user need, and the behaviour has the share title Behaviour, its full ID, a colon and its title, and its rule without backticks or link syntax
 
 ### Scenario (boundary): A long rule
 

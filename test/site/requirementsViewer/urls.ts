@@ -4,7 +4,10 @@ import type { Requirement, ViewerModel } from "./model";
 /** Folder of the viewer inside the site. */
 export const VIEWER_DIR = "requirements";
 
-/** `DIAG-015` for `SwRS-MDOKFSTUDIO-DIAG-015`: only a display label, never in a URL. */
+/**
+ * `DIAG-015` for `SwRS-MDOKFSTUDIO-DIAG-015`. The viewer names a requirement by its full ID everywhere it shows
+ * one; this short form is only the DOM id of a use case diagram (`ucd-diag-015`), never shown and never in a URL.
+ */
 export function shortId(id: string): string {
   return id.replace(/^(?:StRS|SwRS)-MDOKFSTUDIO-/u, "");
 }
