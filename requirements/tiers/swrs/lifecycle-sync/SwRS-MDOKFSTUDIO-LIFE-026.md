@@ -63,6 +63,15 @@ When another saved Markdown file becomes the active editor, or a text diff whose
 - THEN the preview switches to the real file of the diff, b.md, as for a text editor
 - AND a move of the cursor between the sides of the same diff, a diff with no side of the file scheme (a stand-in) and a diff whose real file is the shown document switch nothing
 
+### Scenario (boundary): Editors the side preview does not follow
+
+| Input | Outcome |
+| --- | --- |
+| a side preview of a.md and the multi-file diff editor (the changes view of several files) becomes the active tab | the preview keeps its document: that editor is not followed |
+| a side preview of a.md and the merge editor (3-way merge) becomes the active tab | the preview keeps its document: that editor is not followed |
+
+The reason is the VS Code API: it gives these two editors no tab input class (only the text, text diff, custom, notebook and similar classes exist), so the host cannot tell them from another editor and reads them as an editor change that leaves the preview unchanged. Open the file in a text editor or in the single-file text diff to preview it (documented in docs/known-limitations.md and docs/user/open-studio.md).
+
 ### Scenario (boundary): Only the newest following preview switches
 
 | Input | Outcome |
@@ -99,6 +108,7 @@ When another saved Markdown file becomes the active editor, or a text diff whose
 
 ### Known issues
 
+- Known limit: the multi-file diff editor and the merge editor are not followed (see "Editors the side preview does not follow"); no code detects them, so the row is by reading the API, not run.
 - Known issue: a session replaced because the next document needs another resource root or trust state starts with an empty remembered-state map, so the reading state of earlier documents is not brought back after such a switch.
 
 ### Related requirements
