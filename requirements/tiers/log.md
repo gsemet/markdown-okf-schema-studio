@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-11-22
+
+### Dropdown directive content (CR-465)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-MYST-006 (a `{dropdown}` directive, colon or backtick fence, renders like a dropdown admonition: summary title or Details, body kept, closed unless `:open:`, mapped from opening to closing fence). Reason: the body of a `{dropdown}` was lost in the preview. No new StRS.
+
 ## 2026-11-21
 
 ### Change bar tooltip (CR-463)

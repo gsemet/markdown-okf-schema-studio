@@ -1,6 +1,9 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { attribute, findElement, parseHtml } from "../core/render/dom";
+import { inlineDocument } from "../core/render/mystFeaturesSupport";
+import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { createRuntimeHarness, RuntimeElement, type RuntimeHarness } from "./runtimeHarness";
 import { buildTabSet, codeBlock, watchProperty, wrappedParagraph } from "./runtimeTabSetSupport";
 import { noop, patchMessage } from "./runtimeTestSupport";
@@ -151,6 +154,47 @@ test("a tab set in a closed dropdown is opened, then its tab is selected", () =>
   assert.deepEqual(log, ["details=true", "panel=false"]);
   assert.equal(built.tabs[1]!.getAttribute("aria-selected"), SELECTED);
   assert.equal(top(overlays(harness)[0]), "2450px");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+test("a line in the body of a closed dropdown directive opens it and is marked, from the real render", async () => {
+  const rendered = await renderPreviewDocument({
+    document: inlineDocument(
+      ["Intro.", "", ":::{dropdown} Title", "First body line.", "", "Second body paragraph.", ":::", ""].join("\n"),
+    ),
+    workspaceRoot: process.cwd(),
+    requestId: 1,
+    isWorkspaceTrusted: () => true,
+  });
+  const html = parseHtml(rendered.html);
+  const real = findElement(html, (element) => element.tagName === "details");
+  assert.ok(real, "the dropdown directive rendered a details block");
+  const start = Number(attribute(real, "data-line"));
+  const end = Number(attribute(real, "data-end-line"));
+  assert.deepEqual([start, end], [3, 7]);
+  const body = findElement(real, (element) =>
+    element.tagName === "p" && attribute(element, "data-line") === "6");
+  assert.ok(body, "the second body paragraph is mapped to its source line");
+
+  const harness = createRuntimeHarness();
+  const details = new RuntimeElement(
+    {
+      "data-sphinx-preview-document": "file:///active.md",
+      "data-sphinx-source-file": "/workspace/active.md",
+      "data-sphinx-source-line": String(start),
+      "data-sphinx-source-end-line": String(end),
+    }, harness.windowState, 300, 120, "details");
+  const dropdown = details as RuntimeElement & { open: boolean };
+  dropdown.open = false;
+  harness.mappings.push(details);
+  harness.details.push(details);
+  wrappedParagraph(harness, details, 6, 340, ["Second body paragraph."]);
+  const log: string[] = [];
+  watchProperty(details, "open", "details", log);
+  reveal(harness, 6);
+  assert.deepEqual(log, ["details=true"]);
+  assert.equal(overlays(harness).length, 1);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-179

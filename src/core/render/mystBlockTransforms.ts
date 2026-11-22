@@ -44,6 +44,9 @@ export function normalizeFigureCaptions(node: MystNode): void {
 export function mapQuoteDirectives(node: MystNode): void {
   if (node.type === "mystDirective" && node.position?.start?.line !== undefined && node.position.end?.line !== undefined) {
     for (const container of node.children ?? []) {
+      // @implements_req SwRS-MDOKFSTUDIO-MYST-006
+      // A `{dropdown}` yields a bare `details` node: it takes the range of its directive.
+      if (container.type === "details" && container.position === undefined) container.position = node.position;
       if (container.type !== "container" || container.kind !== "quote") continue;
       for (const quote of container.children ?? []) {
         if (quote.type === "blockquote" && quote.position === undefined) quote.position = node.position;
