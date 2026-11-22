@@ -28,6 +28,10 @@
 - Copy, cut and paste on a list followed by blank lines no longer fail with "The preview is out of
   date": the list is copied without the blank lines, a cut leaves one blank line between the blocks
   around it, and a paste after the list gets one blank line on each side.
+- Blank-line runs inside quotes, alerts, admonitions, panels, cards and other containers now show as a
+  selectable blank-lines block in the side preview, like the ones between top-level blocks (#475).
+- A review comments file whose thread date names a day that does not exist, such as 2026-02-30, is now
+  refused like any other bad date, instead of loading with the date rolled over to the next month (#469).
 
 ## 1.11.0 - 2026-11-21
 
