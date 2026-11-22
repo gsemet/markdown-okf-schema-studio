@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.12.0 - 2026-11-22
+
 - Hovering a green change bar in the side preview now shows a tooltip with the changed source lines of its
   block (for example "Changed lines 26–28 since last commit"). Lines removed since the last commit get a
   red marker in the same column, with its own tooltip, and a click on a bar or a marker opens the
