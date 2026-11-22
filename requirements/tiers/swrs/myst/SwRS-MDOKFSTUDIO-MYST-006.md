@@ -6,8 +6,8 @@ title: Admonitions nest, collapse and map as one block
 description: When an admonition directive contains another directive, the
   extension SHALL render the inner panel inside its parent panel, keep inner
   fences as literal code under a longer outer fence, collapse a dropdown under
-  its title, and map each admonition as one block from its opening line to its
-  closing fence.
+  its title (a dropdown admonition or a dropdown directive), and map each
+  admonition as one block from its opening line to its closing fence.
 project: markdown-okf-schema-studio
 scope: myst
 req_lifecycle: proposed
@@ -22,9 +22,11 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/directives/admonition.ts
+- src/core/render/mystBlockTransforms.ts
 - src/core/render/mystNormalize.ts
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
+- test/page/runtimeLineMarkerPlacement.test.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
@@ -40,7 +42,7 @@ supersedes:
 
 ### Normative behavior
 
-When an admonition directive contains another directive, the extension SHALL render the inner panel inside its parent panel, keep inner fences as literal code under a longer outer fence, collapse a dropdown under its title, and map each admonition as one block from its opening line to its closing fence.
+When an admonition directive contains another directive, the extension SHALL render the inner panel inside its parent panel, keep inner fences as literal code under a longer outer fence, collapse a dropdown under its title (an admonition with `:class: dropdown` or a `{dropdown}` directive, in a colon or a backtick fence), and map each admonition as one block from its opening line to its closing fence.
 
 ### Scenario (nominal): Admonitions nest inside each other
 
@@ -77,9 +79,15 @@ When an admonition directive contains another directive, the extension SHALL ren
 | `:class: dropdown` with `:open: true` | open |
 | `:open: true` without `:class: dropdown` | collapsible section, open |
 
+### Scenario (nominal): The dropdown directive keeps its title and body
+
+- GIVEN `:::{dropdown} Title` and a backtick `{dropdown}` fence with `:open:`, each with a body, and one `{dropdown}` with no title
+- WHEN the preview renders
+- THEN each is a collapsible section (details element, classes admonition and dropdown) whose summary is the title (Details when none), whose body text shows, which is closed unless `:open:` is given, and which carries data-line and data-end-line from its opening to its closing fence
+
 ### Verification notes
 
-- Method: test/core/render/mystFeatures.test.ts (nesting and fence length: "nested backtick and colon delimiters preserve their enclosing Markdown"; mapped block: "MyST admonitions retain the directive range through the closing fence"; dropdown: "dropdown admonitions render as openable details with a summary")
+- Method: test/core/render/mystFeatures.test.ts (nesting and fence length: "nested backtick and colon delimiters preserve their enclosing Markdown"; mapped block: "MyST admonitions retain the directive range through the closing fence"; dropdown: "dropdown admonitions render as openable details with a summary"; dropdown directive: "the dropdown directive keeps its body in both fence styles")
 - Method: test/visual/scenarioDefinitions1.ts (admonition gallery, visual scenario admonitions-dark-titled: in dark and light themes at 900 px each admonition has exactly one title line, a source line and a panel colour distinct from the page, the paragraph after it keeps the body text colour and the page does not scroll sideways; at 460 px, scrolled to a titled block or to the end, the same holds and the scrolled-to block stays inside the frame)
 - Method: test/visual/scenarioDefinitions2.ts (MyST gallery, visual scenario `myst/v${20 + index}-myst-gallery-full-${theme}-900`: in dark and light themes a reference link, a closed dropdown, a definition list, sub and superscript, a kbd key, an abbreviation, a footnote and typeset inline math are present and the page does not overflow horizontally)
 - Criteria: The inner panel is a descendant of the outer panel; the fence length decides which fence closes the directive; data-line and data-end-line match the directive's source lines; the toggle is the native details element; the visual families (one for each gallery, two themes) pass the shared checks.

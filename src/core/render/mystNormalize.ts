@@ -383,6 +383,34 @@ const NODE_RULES: readonly NodeRule[] = [
     },
   },
   {
+    // @implements_req SwRS-MDOKFSTUDIO-MYST-006
+    /*
+     * The `{dropdown}` directive yields a `details` node whose stock handler drops every child,
+     * so the body vanished. Render it as the admonition dropdown: same classes, a summary styled
+     * as the admonition title, the body kept and the directive range mapped.
+     */
+    name: "dropdown directive",
+    kinds: ["details"],
+    run: (node, { line }) => {
+      const classes = new Set(["admonition", "dropdown", ...(node.class ?? "").split(/\s+/u).filter(Boolean)]);
+      const children = node.children ?? [];
+      let summary = children.find((child) => child.type === "summary");
+      if (!summary) {
+        summary = { type: "summary", children: [{ type: "text", value: "Details" }] };
+        node.children = [summary, ...children];
+      }
+      setHast(summary, "summary", { class: "admonition-title" });
+      summary.type = "admonitionTitleInline";
+      setHast(node, "details", {
+        class: [...classes].join(" "),
+        ...(node.open ? { open: true } : {}),
+        ...sourcePositionProperties(node, line),
+      });
+      node.type = "admonitionBlock";
+      return true;
+    },
+  },
+  {
     name: "unresolved citation",
     kinds: ["cite"],
     run: (node) => {

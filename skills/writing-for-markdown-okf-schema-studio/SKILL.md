@@ -37,7 +37,7 @@ VSCodium and Cursor install the same ID from [Open VSX](https://open-vsx.org/ext
 | GFM | headings, tables with `:--` `--:` alignment, task lists `- [ ]`, footnotes `[^1]`, alerts `> [!NOTE]` (also TIP, IMPORTANT, WARNING, CAUTION), autolinks, `~~strike~~` |
 | Code | fenced code with a language (highlighted), `{code-block}` with `:caption:`, `:linenos:`, `:emphasize-lines:`, `:name:` |
 | Math | `$x^2$`, `$$ ... $$`, `{math}` |
-| Admonitions | `:::{note}` `tip` `warning` `important` `danger` ... with an optional title; fold with `:class: dropdown`; `{versionadded}` `{versionchanged}` `{deprecated}` |
+| Admonitions | `:::{note}` `tip` `warning` `important` `danger` ... with an optional title; fold with `:class: dropdown` or a dropdown directive; `{versionadded}` `{versionchanged}` `{deprecated}` |
 | Layout | `{card}` (`:header:` `:footer:`), `{grid}` + `{grid-item-card}` (header `^^^` body `+++` footer), `{tab-set}` + `{tab-item}`, `{figure}`, `{list-table}` |
 | Inline | `{kbd}`, `{ref}` to a `(name)=` label above a heading, definition lists (`Term` then `: text`), `` `= this.field` `` shows a field of the document's own front matter ([examples](references/examples.md)) |
 | Diagrams | `mermaid` fence, `plantuml` fence (built in, no Java), `{uml} file.puml` |
@@ -149,8 +149,7 @@ list table, PlantUML, front matter, review comments, README HTML): [references/e
 - No remote resources: no `https://` images, chart data, fonts or PlantUML `!include` URLs.
   Download the file next to the document; `data:` URIs work.
 - Built-in PlantUML: no URL includes, no standard library (`!include <C4/...>`).
-- Not rendered: `[[toc]]` (use `[TOC]`), emoji shortcodes such as `:smile:`, bare
-  `{dropdown}` (use `:class: dropdown`). An unknown directive shows as a warning box: write
+- Not rendered: `[[toc]]` (use `[TOC]`), emoji shortcodes such as `:smile:`. An unknown directive shows as a warning box: write
   only the names above.
 - Restricted Mode (untrusted workspace) renders everything above; included files and chart data
   stay inside the document's folder.

@@ -637,6 +637,37 @@ test("dropdown admonitions render as openable details with a summary", async () 
   assert.notEqual(attribute(openOnly, "open"), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006
+test("the dropdown directive keeps its body in both fence styles", async () => {
+  const result = await renderPreviewDocument({
+    document: inlineDocument(
+      ":::{dropdown} Colon title\nColon body.\n:::\n\n"
+      + "```{dropdown} Backtick title\n:open:\n\nBacktick body.\n```\n\n"
+      + ":::{dropdown}\nUntitled body.\n:::\n",
+    ),
+    workspaceRoot,
+    requestId: 10,
+    isWorkspaceTrusted: () => true,
+  });
+
+  const html = parseHtml(result.html);
+  const all = findElements(html, (element) =>
+    element.tagName === "details" && hasClass(element, "admonition") && hasClass(element, "dropdown"));
+  assert.equal(all.length, 3);
+  const [colon, backtick, untitled] = all;
+  assert.ok(colon && backtick && untitled);
+  assert.equal(attribute(colon, "open"), undefined);
+  assert.notEqual(attribute(backtick, "open"), undefined);
+  assert.equal(textContent(findElement(colon, isTag("summary"))!), "Colon title");
+  assert.equal(textContent(findElement(backtick, isTag("summary"))!), "Backtick title");
+  assert.equal(textContent(findElement(untitled, isTag("summary"))!), "Details");
+  assert.match(textContent(colon), /Colon body\./u);
+  assert.match(textContent(backtick), /Backtick body\./u);
+  assert.match(textContent(untitled), /Untitled body\./u);
+  assert.equal(attribute(colon, "data-line"), "1");
+  assert.equal(attribute(colon, "data-end-line"), "3");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-MYST-063
 test("MyST GFM and directive tables preserve captions, headers, and alignment", async () => {
   const source = [

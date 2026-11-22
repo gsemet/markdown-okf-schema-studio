@@ -32,6 +32,9 @@
   selectable blank-lines block in the side preview, like the ones between top-level blocks (#475).
 - A review comments file whose thread date names a day that does not exist, such as 2026-02-30, is now
   refused like any other bad date, instead of loading with the date rolled over to the next month (#469).
+- A MyST dropdown written as a `:::{dropdown} Title` directive (colon or backtick fence) now shows its
+  body in the side preview, closed unless it has `:open:`, and is mapped to its source lines like an
+  admonition; its content used to disappear.
 
 ## 1.11.0 - 2026-11-21
 
