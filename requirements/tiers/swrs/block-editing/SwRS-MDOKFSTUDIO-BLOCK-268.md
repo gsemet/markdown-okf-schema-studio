@@ -7,16 +7,17 @@ title: Typing or pasting in a blank-lines block writes the block in place of the
 description: When the writer types a block in a blank-lines block, or pastes in
   it, the extension SHALL write the block in place of the run with one separator
   on each side in one text edit, write nothing for an empty Done, restore the
-  run on Cancel, keep the editor open across an autosave re-render, and refuse a
-  stale run. A block written in place of a run inside a list takes the content
-  indent of the item (CommonMark's content column), or the item's own indent
-  when the run is between two items and the first line of the block starts with
-  a list marker; the host checks the item line and refuses it as stale when it
-  is not a list item line. A block written in place of a run inside a quote
-  keeps the quote markers of the run on every line, and one inside a directive,
-  a panel, a definition or a footnote takes the indent of that container; the
-  host checks the container line and refuses it as stale when it is not a line
-  of that shape.
+  run on Cancel, keep the editor open across an autosave re-render and close it
+  on the render that follows its final save, and refuse a stale run. A block
+  written in place of a run inside a list takes the content indent of the item
+  (CommonMark's content column), or the item's own indent when the run is
+  between two items and the first line of the block starts with a list marker;
+  the host checks the item line and refuses it as stale when it is not a list
+  item line. A block written in place of a run inside a quote keeps the quote
+  markers of the run on every line, and one inside a directive, a panel, a
+  definition or a footnote takes the indent of that container; the host checks
+  the container line and refuses it as stale when it is not a line of that
+  shape.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -67,7 +68,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer types a block in a blank-lines block, or pastes in it, the extension SHALL write the block in place of the run with one separator on each side in one text edit, write nothing for an empty Done, restore the run on Cancel, keep the editor open across an autosave re-render, and refuse a stale run. A block written in place of a run inside a list takes the content indent of the item (CommonMark's content column), or the item's own indent when the run is between two items and the first line of the block starts with a list marker; the host checks the item line and refuses it as stale when it is not a list item line. A block written in place of a run inside a quote keeps the quote markers of the run on every line, and one inside a directive, a panel, a definition or a footnote takes the indent of that container; the host checks the container line and refuses it as stale when it is not a line of that shape.
+When the writer types a block in a blank-lines block, or pastes in it, the extension SHALL write the block in place of the run with one separator on each side in one text edit, write nothing for an empty Done, restore the run on Cancel, keep the editor open across an autosave re-render and close it on the render that follows its final save, and refuse a stale run. A block written in place of a run inside a list takes the content indent of the item (CommonMark's content column), or the item's own indent when the run is between two items and the first line of the block starts with a list marker; the host checks the item line and refuses it as stale when it is not a list item line. A block written in place of a run inside a quote keeps the quote markers of the run on every line, and one inside a directive, a panel, a definition or a footnote takes the indent of that container; the host checks the container line and refuses it as stale when it is not a line of that shape.
 
 ### Scenario: Typing writes the block in place of the run
 
@@ -80,6 +81,12 @@ When the writer types a block in a blank-lines block, or pastes in it, the exten
 - GIVEN the same editor, or a paste on the blank-lines block
 - WHEN Done is pressed with no text, Cancel is pressed after an autosave, or a block is pasted
 - THEN an empty Done changes nothing, Cancel puts the run back, and the paste leaves one blank line on each side
+
+### Scenario: Done closes the editor
+
+- GIVEN a blank-lines block's editor with typed text
+- WHEN the writer presses Done and the host writes the text and renders it
+- THEN the editor closes, "Saving Markdown…" is gone and the block shows in place of the run
 
 ### Scenario: A block typed inside a list item stays in the item
 
@@ -96,8 +103,9 @@ When the writer types a block in a blank-lines block, or pastes in it, the exten
 ### Verification notes
 
 - Method: test/session/blankRunHost.test.ts (LF and CR LF, empty Done, Cancel, paste, stale), test/core/mapping/insertion.test.ts and blockRange.test.ts (planBlankRunInsertion, planBlankRunPaste), test/core/protocol/pageToHost.test.ts (the fields).
+- Method: test/page/runtimeBlankLines.test.ts (Done in the editor of a run, at the top level and in a list, then the patch of the final save closes the editor; an error answer keeps it open), test/session/blankRunHost.test.ts (a final save that writes text asks for a render and posts no done).
 - Method: test/core/mapping/listItemIndent.test.ts and blankRunInList.test.ts (the indents in LF, CR LF and lone CR), test/session/blankRunInListHost.test.ts (save, paste and a stale item line in a list), test/integration/blankLines.test.ts (a real file).
-- Criteria: one TextEdit; line endings kept; the editor of an open run survives refresh().
+- Criteria: one TextEdit; line endings kept; the editor of an open run survives refresh() until its final save is posted; the patch after it closes the editor.
 
 <!-- okf:links:start -->
 ### Links

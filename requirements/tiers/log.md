@@ -2,6 +2,10 @@
 
 ## 2026-11-23
 
+### A blank-lines block's editor closes after its final save (CR-474, issue #485)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-268 (the editor of a blank-lines block stays open across an autosave re-render and closes on the render that follows its final save; new scenario "Done closes the editor"). Reason: after Done the editor stayed on "Saving Markdown…" because the content patch kept it open. No new StRS.
+
 ### Commit of each changelog line (CR-473)
 
 - Added (`proposed`): SwRS-MDOKFSTUDIO-CORE-094 (the release script adds to each line of `## Unreleased` the short SHA-1 of the commit on the base that added it, first in the line's reference group; it writes nothing when a commit is not on the base, unless `--skip-missing` leaves that line alone, or when the file has uncommitted changes). Derives from StRS-MDOKFSTUDIO-CORE-007. No existing requirement changed.

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The editor of a blank-lines block now closes after Done, instead of staying on "Saving Markdown…"
+  (CR-474 blank-save, issue #485).
+
 ## 1.12.0 - 2026-11-22
 
 - Hovering a green change bar in the side preview now shows a tooltip with the changed source lines of its

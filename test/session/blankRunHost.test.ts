@@ -40,6 +40,22 @@ for (const [name, eol] of EOLS) {
   });
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  test(`${name}: a final save that writes text asks for a render and posts no done: the patch closes the editor`, async () => {
+    const host = fixture({ text });
+    host.manager.sourceAvailable = () => true;
+    let renders = 0;
+    host.manager.rendering.refreshPreviewDocument = () => {
+      renders += 1;
+      return Promise.resolve() as never;
+    };
+    await host.send("previewEditSave", { ...open(eol), editedText: "X", final: true });
+    assert.equal(host.document.getText(), withX);
+    assert.equal(host.preview.edits.active, undefined, "the host edit ended");
+    assert.equal(renders, 1, "a render was asked for");
+    assert.deepEqual(host.of("previewEditSource").filter((entry) => entry.done === true), [], "no done answer");
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
   test(`${name}: a block erased after an autosave puts the run back`, async () => {
     const host = fixture({ text });
     await host.send("previewEditSave", { ...open(eol), editedText: "X", final: false });
