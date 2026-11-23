@@ -7,9 +7,8 @@
  * creates therefore both land. An invalid existing file is never overwritten.
  */
 
-import { createHash, randomBytes } from "node:crypto";
-
 import { MAX_SIDECAR_BYTES, parseSidecar, serializeSidecar, type CommentThread } from "./commentModel";
+import { sha256Hex } from "./sha256";
 
 export interface CommentFileIo {
   /** The text of the file; undefined when it does not exist. */
@@ -31,12 +30,16 @@ export type CommentUpdateResult =
 export type CommentChange = (threads: CommentThread[]) => CommentThread[] | string;
 
 export function hashText(text: string): string {
-  return createHash("sha256").update(text).digest("hex");
+  return sha256Hex(text);
 }
 
 /** `t_` or `c_` and 8 hex characters from 4 random bytes. */
 export function formatId(prefix: "t_" | "c_", bytes: Uint8Array): string {
   return prefix + Array.from(bytes.slice(0, 4), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function randomBytes(length: number): Uint8Array {
+  return globalThis.crypto.getRandomValues(new Uint8Array(length));
 }
 
 export function newId(prefix: "t_" | "c_"): string {
@@ -46,7 +49,7 @@ export function newId(prefix: "t_" | "c_"): string {
 /** Writes a temporary file next to `path`, then renames it onto `path`: readers never see a partial file. */
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-054
 async function writeAtomically(io: CommentFileIo, path: string, text: string): Promise<void> {
-  const temporary = `${path}.${randomBytes(6).toString("hex")}.tmp`;
+  const temporary = `${path}.${Array.from(randomBytes(6), (byte) => byte.toString(16).padStart(2, "0")).join("")}.tmp`;
   try {
     await io.write(temporary, text);
     await io.rename(temporary, path);

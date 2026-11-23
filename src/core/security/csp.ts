@@ -1,8 +1,7 @@
-import { randomBytes } from "node:crypto";
-
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-022
 export function createNonce(): string {
-  return randomBytes(18).toString("base64url");
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(18));
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/gu, "-").replace(/\//gu, "_");
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-012

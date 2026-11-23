@@ -33,14 +33,10 @@
  *   PORT_FOLLOW_UP  a follow-up change moves the access behind the `FileSystem` / `ProcessRunner`
  *                   port (async, so it changes timing and is out of a pure move step).
  *   PATH_SHIM       pure path arithmetic: stays until a browser build of the core adds a path shim.
- *   WEB_CRYPTO      follow-up: replace the import with WebCrypto (`globalThis.crypto`).
  */
 const PORT_FOLLOW_UP = "follow-up change: move the access behind the FileSystem / ProcessRunner port";
 const PATH_SHIM = "kept: pure path arithmetic, needs a path shim for a browser build";
-const WEB_CRYPTO = "follow-up change: use WebCrypto (globalThis.crypto) instead of node:crypto";
 const NODE_DEBT = {
-  "src/core/comments/commentStore.ts": {
-    builtins: ["crypto"], reason: "comment ids and text hashes", removal: WEB_CRYPTO },
   "src/core/frontmatter/fileLinks.ts": {
     builtins: ["fs", "path"], reason: "sync existence checks of linked files", removal: PORT_FOLLOW_UP },
   "src/core/frontmatter/okfFrontmatter.ts": {
@@ -64,8 +60,6 @@ const NODE_DEBT = {
     removal: "follow-up change: spawn the jar through the existing ProcessRunner port" },
   "src/core/render/renderPipeline.ts": {
     builtins: ["path"], reason: "include roots", removal: PATH_SHIM },
-  "src/core/security/csp.ts": {
-    builtins: ["crypto"], reason: "CSP nonce", removal: WEB_CRYPTO },
   "src/core/security/resource-policy.ts": {
     builtins: ["fs", "path"], reason: "realpath checks of local resources", removal: PORT_FOLLOW_UP },
 };
