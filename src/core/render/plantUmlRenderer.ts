@@ -1,9 +1,8 @@
-import * as childProcess from "node:child_process";
-import * as fs from "node:fs";
 import * as path from "../path/hostPath";
 
 import { parse, serialize } from "parse5";
 
+import type { PlantUmlFiles, PlantUmlProcesses } from "./plantUmlHost";
 import type { RenderDiagnostic } from "./mystRenderer";
 import type { PolicyFiles } from "../security/resource-policy";
 import { findEscapingPlantUmlInclude } from "./plantUmlIncludes";
@@ -53,24 +52,15 @@ export interface PlantUmlRenderOptions {
   executablePath?: string;
   workspaceRoot: string;
   trusted: boolean;
-  /** Reads the files a diagram includes, to refuse an include that leaves the workspace. */
-  files: PolicyFiles;
+  /** Reads the files a diagram includes and the jar's metadata and the Java home (`stat`). */
+  files: PolicyFiles & PlantUmlFiles;
   signal?: AbortSignal;
-}
-
-export interface PlantUmlProcessSpawner {
-  spawn: typeof childProcess.spawn;
-}
-
-const defaultProcessSpawner: PlantUmlProcessSpawner = { spawn: childProcess.spawn };
-let processSpawner: PlantUmlProcessSpawner = defaultProcessSpawner;
-
-export function setPlantUmlProcessSpawnerForTests(spawner: PlantUmlProcessSpawner): void {
-  processSpawner = spawner;
-}
-
-export function resetPlantUmlProcessSpawnerForTests(): void {
-  processSpawner = defaultProcessSpawner;
+  /**
+   * Runs the jar or the executable. Absent: the host cannot start programs (`capabilities.processes`
+   * is false) and the diagrams are reported unavailable; the host then draws them with the built-in
+   * engine (see `PlantUmlController.engineFor`).
+   */
+  processes?: PlantUmlProcesses;
 }
 
 // A render that finished is reused for the same source under the same invocation, so editing
@@ -89,26 +79,29 @@ export function plantUmlCacheSizeForTests(): number {
   return svgCache.size;
 }
 
+// The JAR identity (size and mtime) joins the key so replacing the JAR invalidates its entries.
+async function jarIdentityOf(files: PlantUmlFiles, jarPath: string | undefined): Promise<string | undefined> {
+  if (jarPath === undefined) {
+    return "";
+  }
+  try {
+    const stat = await files.stat(jarPath);
+    return `${stat.size}:${stat.mtimeMs ?? ""}`;
+  } catch {
+    return undefined;
+  }
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-009
 function cacheKey(
   source: string,
   command: string,
   args: readonly string[],
   workspaceRoot: string,
+  jarIdentity: string | undefined,
 ): string | undefined {
-  if (UNCACHEABLE_SOURCE.test(source)) {
+  if (UNCACHEABLE_SOURCE.test(source) || jarIdentity === undefined) {
     return undefined;
-  }
-  // The JAR identity (size and mtime) joins the key so replacing the JAR invalidates its entries.
-  const jarIndex = args.indexOf("-jar");
-  let jarIdentity = "";
-  if (jarIndex >= 0) {
-    try {
-      const stat = fs.statSync(args[jarIndex + 1] ?? "");
-      jarIdentity = `${stat.size}:${stat.mtimeMs}`;
-    } catch {
-      return undefined;
-    }
   }
   // The whole tuple is the key (no digest), so a hash collision can never serve another diagram.
   return JSON.stringify([command, args, workspaceRoot, PLANTUML_SECURITY_PROFILE, jarIdentity, source]);
@@ -172,21 +165,6 @@ export function resetPlantUmlTimeoutForTests(): void {
   timeoutMs = PLANTUML_TIMEOUT_MS;
 }
 
-// Wrapper scripts (plantuml shell launcher) may leave the JVM running if only the wrapper is
-// signalled, so on POSIX the child leads its own process group and the whole group is killed.
-function killProcessTree(child: childProcess.ChildProcess): void {
-  const exited = child.exitCode != null || child.signalCode != null;
-  if (!exited && process.platform !== "win32" && child.pid !== undefined) {
-    try {
-      process.kill(-child.pid, "SIGTERM");
-      return;
-    } catch {
-      // Fall back to killing the direct child.
-    }
-  }
-  child.kill("SIGTERM");
-}
-
 function attr(node: HtmlNode, name: string): HtmlAttribute | undefined {
   return node.attrs?.find((candidate) => candidate.name === name);
 }
@@ -245,9 +223,9 @@ function resolvedJarPath(jarPath: string, workspaceRoot: string): string {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-089
-function validateJarPath(jarPath: string): string | undefined {
+async function validateJarPath(files: PlantUmlFiles, jarPath: string): Promise<string | undefined> {
   try {
-    if (!fs.statSync(jarPath).isFile()) {
+    if ((await files.stat(jarPath)).kind !== "file") {
       return `The PlantUML JAR path is not a file: ${jarPath}`;
     }
   } catch {
@@ -257,15 +235,16 @@ function validateJarPath(jarPath: string): string | undefined {
 }
 
 // An explicit Java: JAVA_HOME when it holds a java binary, else the one on the PATH.
-export function resolveJavaCommand(
+export async function resolveJavaCommand(
+  files: PlantUmlFiles,
   environment: NodeJS.ProcessEnv = process.env,
   platform: NodeJS.Platform = process.platform,
-): string {
+): Promise<string> {
   const javaHome = environment.JAVA_HOME?.trim();
   if (javaHome && path.isAbsolute(javaHome)) {
     const candidate = path.join(javaHome, "bin", platform === "win32" ? "java.exe" : "java");
     try {
-      if (fs.statSync(candidate).isFile()) {
+      if ((await files.stat(candidate)).kind === "file") {
         return candidate;
       }
     } catch {
@@ -305,116 +284,47 @@ function svgOutput(stdout: string): string {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-097
-function renderSource(
+async function renderSource(
   source: string,
+  processes: PlantUmlProcesses,
   command: string,
   args: readonly string[],
-  env: NodeJS.ProcessEnv,
+  env: Record<string, string>,
   workspaceRoot: string,
   signal: AbortSignal | undefined,
 ): Promise<string> {
   if (source.length > MAX_PLANTUML_SOURCE_LENGTH) {
-    return Promise.reject(new Error("PlantUML source exceeds the 1 MiB preview limit."));
+    throw new Error("PlantUML source exceeds the 1 MiB preview limit.");
   }
   if (signal?.aborted) {
-    return Promise.reject(new Error("PlantUML rendering was canceled."));
+    throw new Error("PlantUML rendering was canceled.");
   }
-
-  return new Promise((resolve, reject) => {
-    let child: childProcess.ChildProcess;
-    try {
-      child = processSpawner.spawn(
-        command,
-        args,
-        {
-          cwd: workspaceRoot,
-          env,
-          stdio: ["pipe", "pipe", "pipe"],
-          detached: process.platform !== "win32",
-        },
-      );
-    } catch (error) {
-      reject(error);
-      return;
-    }
-
-    const stdoutChunks: Buffer[] = [];
-    let stdoutLength = 0;
-    let stderr = "";
-    let stderrTruncated = false;
-    let settled = false;
-    let timer: NodeJS.Timeout | undefined;
-    const cleanup = (): void => {
-      signal?.removeEventListener("abort", abort);
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-    const finish = (callback: () => void): void => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      cleanup();
-      callback();
-    };
-    const abort = (): void => {
-      if (settled) {
-        return;
-      }
-      killProcessTree(child);
-      finish(() => reject(new Error("PlantUML rendering was canceled.")));
-    };
-    const appendStdout = (chunk: Buffer | string): void => {
-      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-      stdoutChunks.push(buffer);
-      stdoutLength += buffer.length;
-      if (stdoutLength > MAX_PLANTUML_OUTPUT_LENGTH) {
-        killProcessTree(child);
-        finish(() => reject(new Error("PlantUML SVG output exceeds the 8 MiB preview limit.")));
-      }
-    };
-    const appendStderr = (chunk: Buffer | string): void => {
-      if (stderr.length >= MAX_PLANTUML_STDERR_LENGTH) {
-        stderrTruncated = true;
-        return;
-      }
-      stderr += chunk.toString();
-      if (stderr.length > MAX_PLANTUML_STDERR_LENGTH) {
-        stderr = stderr.slice(0, MAX_PLANTUML_STDERR_LENGTH);
-        stderrTruncated = true;
-      }
-    };
-
-    child.stdout?.on("data", appendStdout);
-    child.stderr?.on("data", appendStderr);
-    child.once("error", (error) => finish(() => reject(error)));
-    // The child may exit without reading stdin (EPIPE); report it through the normal diagnostics.
-    child.stdin?.on("error", (error) => finish(() => reject(error)));
-    child.once("close", (code, signalName) => finish(() => {
-      if (code !== 0) {
-        const detail = (stderr.trim() || "PlantUML returned no diagnostic.")
-          + (stderrTruncated ? "\n[stderr truncated at 64 KiB]" : "");
-        reject(new Error(
-          `PlantUML exited with ${signalName ? `signal ${signalName}` : `code ${code}`}: ${detail}`,
-        ));
-        return;
-      }
-      try {
-        resolve(svgOutput(Buffer.concat(stdoutChunks).toString("utf8")));
-      } catch (error) {
-        reject(error);
-      }
-    }));
-    timer = setTimeout(() => {
-      killProcessTree(child);
-      finish(() => reject(new Error(
-        `PlantUML did not finish within ${timeoutMs / 1000} s.`,
-      )));
-    }, timeoutMs);
-    signal?.addEventListener("abort", abort, { once: true });
-    child.stdin?.end(source);
+  const result = await processes.run(command, args, {
+    cwd: workspaceRoot,
+    env,
+    input: source,
+    timeoutMs,
+    maxStdoutBytes: MAX_PLANTUML_OUTPUT_LENGTH,
+    maxStderrChars: MAX_PLANTUML_STDERR_LENGTH,
+    ...(signal ? { signal } : {}),
   });
+  if (result.outputExceeded) {
+    throw new Error("PlantUML SVG output exceeds the 8 MiB preview limit.");
+  }
+  if (result.stopped) {
+    throw new Error(signal?.aborted
+      ? "PlantUML rendering was canceled."
+      : `PlantUML did not finish within ${timeoutMs / 1000} s.`);
+  }
+  if (result.exitCode !== 0) {
+    const truncated = result.stderrTruncated === true;
+    const detail = (result.stderr.trim() || "PlantUML returned no diagnostic.")
+      + (truncated ? "\n[stderr truncated at 64 KiB]" : "");
+    throw new Error(
+      `PlantUML exited with ${result.exitCode === null ? `signal ${result.signal ?? "unknown"}` : `code ${result.exitCode}`}: ${detail}`,
+    );
+  }
+  return svgOutput(result.stdout);
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-084
@@ -437,19 +347,30 @@ export async function renderPlantUmlDiagrams(
     };
   }
 
+  const { processes, files } = options;
+  if (!processes || !files) {
+    const message = "PlantUML needs a host that can run programs; the built-in engine draws diagrams without one.";
+    return {
+      diagrams: sources.map(({ line }) => unavailableResult(message, line)),
+      diagnostics: sources.map(({ line }) => diagnostic(message, line)),
+    };
+  }
+
   const configuredPath = options.jarPath?.trim();
   let command: string;
   let args: readonly string[];
+  let jarIdentity: string | undefined = "";
   if (configuredPath) {
     const jarPath = resolvedJarPath(configuredPath, options.workspaceRoot);
-    const jarError = validateJarPath(jarPath);
+    const jarError = await validateJarPath(files, jarPath);
     if (jarError) {
       return {
         diagrams: sources.map(({ line }) => errorResult(jarError, line)),
         diagnostics: sources.map(({ line }) => diagnostic(jarError, line)),
       };
     }
-    command = resolveJavaCommand();
+    command = await resolveJavaCommand(files);
+    jarIdentity = await jarIdentityOf(files, jarPath);
     args = [
       `-Dplantuml.allowlist.path=${options.workspaceRoot}`,
       `-DPLANTUML_LIMIT_SIZE=${PLANTUML_LIMIT_SIZE}`,
@@ -462,8 +383,8 @@ export async function renderPlantUmlDiagrams(
     );
     args = ["-pipe", "-tsvg"];
   }
-  const env: NodeJS.ProcessEnv = {
-    ...process.env,
+  // The runner adds these to the host's own environment.
+  const env: Record<string, string> = {
     PLANTUML_SECURITY_PROFILE,
     PLANTUML_LIMIT_SIZE: String(PLANTUML_LIMIT_SIZE),
     PLANTUML_ALLOWLIST_PATH: options.workspaceRoot,
@@ -472,9 +393,9 @@ export async function renderPlantUmlDiagrams(
   const inFlight = new Map<string, Promise<string>>();
   const renderCached = (source: string): Promise<string> => {
     if (source.length > MAX_PLANTUML_SOURCE_LENGTH || options.signal?.aborted) {
-      return renderSource(source, command, args, env, options.workspaceRoot, options.signal);
+      return renderSource(source, processes, command, args, env, options.workspaceRoot, options.signal);
     }
-    const key = cacheKey(source, command, args, options.workspaceRoot);
+    const key = cacheKey(source, command, args, options.workspaceRoot, jarIdentity);
     const hit = key === undefined ? undefined : svgCache.get(key);
     if (key !== undefined && hit !== undefined) {
       cacheStore(key, hit);
@@ -485,7 +406,7 @@ export async function renderPlantUmlDiagrams(
       return pending;
     }
     const start = (): Promise<string> => renderSource(
-      source, command, args, env, options.workspaceRoot, options.signal,
+      source, processes, command, args, env, options.workspaceRoot, options.signal,
     ).finally(releaseRenderSlot);
     const waiting = acquireRenderSlot(options.signal);
     const run = waiting ? waiting.then(start) : start();

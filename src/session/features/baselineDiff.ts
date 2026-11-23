@@ -41,6 +41,7 @@ export async function renderBaselineContent(
       allowUntrusted: true,
       plantUmlJarPath: preview.plantUmlConfiguration.jarPath,
       plantUmlEngine: manager.plantUml.engineFor(preview),
+      ...(host.capabilities.processes ? { plantUmlProcesses: host.processes } : {}),
       renderSource: host.previewRenderer?.render,
       files: host.files,
     });

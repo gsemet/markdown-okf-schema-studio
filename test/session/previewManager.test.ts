@@ -56,6 +56,7 @@ function renderFixture() {
     files: {},
     documents: store,
     settings: { section: () => ({ get: <T>(_key: string, fallback: T): T => fallback }) },
+    capabilities: { processes: false },
     workspace: { trusted: true, folders: () => [{ path: root }] },
     watcher: {
       watch: () => ({

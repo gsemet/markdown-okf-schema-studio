@@ -42,9 +42,11 @@ export class PlantUmlController {
   /**
    * The engine for this preview's next render: the bundled one unless `useJar` is on. With `useJar`
    * in an untrusted workspace the JAR pipeline is still asked, and it refuses without a process.
+   * A host that cannot start programs (`capabilities.processes` false) always gets the bundled one.
    */
   public engineFor(preview: PreviewSession): "builtin" | "jar" {
-    return resolvePlantUmlEngine(preview.plantUmlEngineSettings, this.manager.host.workspace.trusted) === "builtin"
+    return !this.manager.host.capabilities.processes
+      || resolvePlantUmlEngine(preview.plantUmlEngineSettings, this.manager.host.workspace.trusted) === "builtin"
       ? "builtin"
       : "jar";
   }

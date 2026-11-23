@@ -40,9 +40,6 @@ const PATH_SHIM = "kept: a browser build aliases node:path to a path shim (win32
 const NODE_DEBT = {
   "src/core/path/hostPath.ts": {
     builtins: ["path"], reason: "the one module that re-exports node:path to core and session", removal: PATH_SHIM },
-  "src/core/render/plantUmlRenderer.ts": {
-    builtins: ["child_process", "fs"], reason: "runs the PlantUML jar",
-    removal: "follow-up change: spawn the jar through the existing ProcessRunner port" },
 };
 
 const { builtinModules } = require("node:module");

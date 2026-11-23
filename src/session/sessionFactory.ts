@@ -146,6 +146,7 @@ export class SessionFactory {
           allowUntrusted: true,
           plantUmlJarPath: session.plantUmlConfiguration.jarPath,
           plantUmlEngine: manager.plantUml.engineFor(session),
+          ...(host.capabilities.processes ? { plantUmlProcesses: host.processes } : {}),
           // @implements_req SwRS-MDOKFSTUDIO-LIFE-004
           // The host's renderer (a worker thread in VS Code), else in-process.
           renderSource: host.previewRenderer?.render,
