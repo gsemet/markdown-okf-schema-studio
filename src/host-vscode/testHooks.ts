@@ -65,6 +65,8 @@ export function getActivePreviewForTests():
     phase: BuildQueueState<RenderResult, HostDocument>["phase"];
     status: PreviewStatus;
     requestId?: number;
+    /** The request id of the stage the page shows: it trails `requestId` until the show of a render ends. */
+    shownRequestId?: number;
     documentVersion?: number;
     outputDirectory?: string;
     lastSourceScrollLine?: number;
@@ -146,6 +148,7 @@ export function getActivePreviewForTests():
     phase: state.phase,
     status: preview.status,
     requestId: state.request?.requestId,
+    shownRequestId: preview.stage?.requestId,
     documentVersion: state.request?.documentVersion,
     outputDirectory: preview.stage?.outputDirectory,
     lastSourceScrollLine: preview.scroll.lastSourceScrollLine,
@@ -220,13 +223,18 @@ export function getActivePreviewPanelForTests(): vscode.WebviewPanel | undefined
   return preview ? webviewPanelOf(preview) : undefined;
 }
 
-/** Hands a message to the active preview as if its page had posted it. */
+/**
+ * Hands a message to the active preview as if its page had posted it. The host drops a message
+ * whose requestId is not the one of the shown stage, and the stage is set when the show of a
+ * render ends, after the build queue reports it ready: the message waits for the shows asked so
+ * far, as a real page does (it posts after it was shown).
+ */
 export function sendPreviewMessageForTests(message: unknown): PromiseLike<void> | undefined {
   const preview = activePreview();
-  if (current && preview) {
-    return current.manager.handlePageMessage(preview, message);
-  }
-  return undefined;
+  const activation = current;
+  if (!activation || !preview) return undefined;
+  return activation.manager.rendering.pendingShow(preview)
+    .then(() => activation.manager.handlePageMessage(preview, message));
 }
 
 /**

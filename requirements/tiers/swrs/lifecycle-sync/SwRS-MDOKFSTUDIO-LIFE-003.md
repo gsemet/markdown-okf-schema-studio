@@ -32,6 +32,7 @@ tested_in_files:
 - test/host/diffPreview.requirements.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/host/openCompletes.test.ts
+- test/host/pageMessageWaitsForShow.test.ts
 - test/integration/diffPreview.test.ts
 - test/integration/diffPreviewScroll.test.ts
 - test/integration/lifecycle.test.ts
