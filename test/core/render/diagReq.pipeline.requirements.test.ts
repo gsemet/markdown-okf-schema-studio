@@ -11,11 +11,8 @@ import {
   INCLUDE_BUDGET_MAX_CHARS,
   renderMyst,
 } from "../../../src/core/render/mystRenderer";
-import {
-  resetPlantUmlProcessSpawnerForTests,
-  setPlantUmlProcessSpawnerForTests,
-} from "../../../src/core/render/plantUmlRenderer";
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
+import { fakeRunner, nodeFiles } from "./plantUmlFakes";
 import { findElements, hasClass, parseHtml, textContent } from "./dom";
 import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
 import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
@@ -23,15 +20,11 @@ import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem"
 const BUDGET_MESSAGE = "was not read: the include budget of this render is exhausted.";
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-024
-test("jarPath is ignored while useJar is off and used as soon as the JAR pipeline is chosen", async (t) => {
-  t.after(resetPlantUmlProcessSpawnerForTests);
-  let spawned = 0;
-  setPlantUmlProcessSpawnerForTests({
-    spawn: (() => {
-      spawned += 1;
-      throw new Error("no process may start");
-    }) as never,
+test("jarPath is ignored while useJar is off and used as soon as the JAR pipeline is chosen", async () => {
+  const runner = fakeRunner(() => {
+    throw new Error("no process may start");
   });
+  const host = { plantUmlProcesses: runner };
   const markdown = "```plantuml\n@startuml\nA -> B\n@enduml\n```\n";
   const jarPath = "/missing/plantuml.jar";
 
@@ -45,10 +38,11 @@ test("jarPath is ignored while useJar is off and used as soon as the JAR pipelin
     isWorkspaceTrusted: () => true,
     plantUmlEngine: "builtin",
     plantUmlJarPath: jarPath,
+    ...host,
   });
   assert.deepEqual(await builtin.resolvePlantUml(), { diagrams: [], diagnostics: [] }, "the JAR is neither checked nor started");
   assert.match(builtin.html, /myst-plantuml-diagram/u, "the page keeps the source for the built-in engine");
-  assert.equal(spawned, 0);
+  assert.equal(runner.calls.length, 0);
 
   // useJar on: the same stored path is the one the JAR pipeline uses.
   assert.equal(resolvePlantUmlEngine({ useJar: true }, true), "jar");
@@ -60,11 +54,12 @@ test("jarPath is ignored while useJar is off and used as soon as the JAR pipelin
     isWorkspaceTrusted: () => true,
     plantUmlEngine: "jar",
     plantUmlJarPath: jarPath,
+    ...host,
   });
   const resolved = await jar.resolvePlantUml();
   assert.equal(resolved.diagrams[0]?.status, "error");
   assert.match(resolved.diagrams[0]?.message ?? "", /The PlantUML JAR could not be found: \/missing\/plantuml\.jar/u);
-  assert.equal(spawned, 0, "a missing JAR is refused before any process starts");
+  assert.equal(runner.calls.length, 0, "a missing JAR is refused before any process starts");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-068

@@ -20,6 +20,9 @@ export function createNodeProcessRunner(): ProcessRunner {
             shell: false,
             stdio: ["pipe", "pipe", "pipe"],
             windowsHide: true,
+            // On POSIX the program leads its own process group, so stopping it also stops what a
+            // wrapper script started (a launcher that leaves the JVM running).
+            detached: process.platform !== "win32",
           });
         } catch (error) {
           reject(error);
@@ -28,10 +31,21 @@ export function createNodeProcessRunner(): ProcessRunner {
         let stdout = "";
         let stderr = "";
         let stopped = false;
+        let outputExceeded = false;
+        let stderrTruncated = false;
+        let stdoutBytes = 0;
         let settled = false;
         const stop = (): void => {
           if (child.exitCode !== null || child.signalCode !== null) return;
           stopped = true;
+          if (process.platform !== "win32" && child.pid !== undefined) {
+            try {
+              process.kill(-child.pid, "SIGTERM");
+              return;
+            } catch {
+              // Fall back to stopping the direct child.
+            }
+          }
           child.kill();
         };
         const timer = options.timeoutMs !== undefined ? setTimeout(stop, options.timeoutMs) : undefined;
@@ -46,13 +60,36 @@ export function createNodeProcessRunner(): ProcessRunner {
           action();
         };
         child.stdout?.setEncoding("utf8").on("data", (chunk: string) => {
+          if (outputExceeded) return;
+          stdoutBytes += Buffer.byteLength(chunk);
+          if (options.maxStdoutBytes !== undefined && stdoutBytes > options.maxStdoutBytes) {
+            // Past the cap nothing is kept: the program is stopped and the caller told.
+            outputExceeded = true;
+            stdout = "";
+            stop();
+            return;
+          }
           stdout += chunk;
         });
         child.stderr?.setEncoding("utf8").on("data", (chunk: string) => {
+          const room = options.maxStderrChars === undefined ? Infinity : options.maxStderrChars - stderr.length;
+          if (chunk.length > room) {
+            stderrTruncated = true;
+            stderr += chunk.slice(0, Math.max(room, 0));
+            return;
+          }
           stderr += chunk;
         });
         child.on("error", (error) => finish(() => reject(error)));
-        child.on("close", (exitCode) => finish(() => resolve({ exitCode, stopped, stdout, stderr })));
+        child.on("close", (exitCode, signal) => finish(() => resolve({
+          exitCode,
+          stopped,
+          stdout,
+          stderr,
+          ...(signal ? { signal } : {}),
+          ...(outputExceeded ? { outputExceeded } : {}),
+          ...(stderrTruncated ? { stderrTruncated } : {}),
+        })));
         child.stdin?.on("error", () => undefined);
         child.stdin?.end(options.input ?? "");
       });

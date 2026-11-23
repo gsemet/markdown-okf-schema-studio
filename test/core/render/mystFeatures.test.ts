@@ -15,6 +15,7 @@ import {
   parseHtml,
   textContent,
 } from "./dom";
+import { fakeRunner, nodeFiles } from "./plantUmlFakes";
 import { fixtureDirectory, fixtureDocument, inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
 import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
@@ -284,6 +285,7 @@ test("PlantUML fences and directives preserve diagram source for external render
       requestId: 40 + index,
       isWorkspaceTrusted: () => true,
       plantUmlJarPath: "missing-test-plantuml.jar",
+      plantUmlProcesses: fakeRunner(),
     });
     const html = parseHtml(result.html);
     const diagram = findElement(html, (element) => hasClass(element, "myst-plantuml-diagram"));

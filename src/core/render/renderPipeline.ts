@@ -8,6 +8,7 @@ import {
   renderPlantUmlDiagrams,
   type PlantUmlRenderResult,
 } from "./plantUmlRenderer";
+import type { PlantUmlProcesses } from "./plantUmlHost";
 import type { PlantUmlEngine } from "../configuration/plantUmlConfiguration";
 import { enabledMystExtensionsFor, type ConfFiles } from "../myst/confLocator";
 import { createPreviewResourcePolicy, readBoundedText, type PolicyFiles } from "../security/resource-policy";
@@ -92,6 +93,11 @@ export interface RenderOptions {
   isWorkspaceTrusted: () => boolean;
   allowUntrusted?: boolean;
   plantUmlJarPath?: string;
+  /**
+   * What the `jar` engine runs the jar or the executable with, and reads the jar through. Omitted
+   * (a host without `capabilities.processes`): the diagrams are reported unavailable.
+   */
+  plantUmlProcesses?: PlantUmlProcesses;
   /**
    * `builtin`: the diagrams stay placeholders for the engine bundled into the webview, and
    * `resolvePlantUml` reports nothing (no process, no file read). `jar`: the host renders them
@@ -332,6 +338,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
       resolvePlantUml = (): Promise<PlantUmlRenderResult> => {
         plantUmlPromise ??= renderPlantUmlDiagrams(html, {
           jarPath: options.plantUmlJarPath,
+          processes: options.plantUmlProcesses,
           workspaceRoot: options.workspaceRoot,
           trusted: options.isWorkspaceTrusted(),
           files: options.files,

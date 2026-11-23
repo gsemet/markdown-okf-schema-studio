@@ -6,6 +6,11 @@
 
 - Changed (no requirement text): code and tests of SwRS-MDOKFSTUDIO-FMSCHEMA-055 (the stem index) and FMSCHEMA-063 (link resolution) now read files through an async core port satisfied by `host.files`; behaviour is unchanged. New tests added to their `tested_in_files`. No new StRS or SwRS.
 
+### PlantUML jar through the ProcessRunner port (CR-470)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-DIAG-089 (the JAR pipeline runs through the host process runner; a host without process capability reports the diagrams unavailable, and the session falls back to the built-in engine). Reason: `plantUmlRenderer.ts` no longer imports `child_process` and `fs`; behaviour and messages in VS Code are unchanged. No new StRS.
+- Coverage: SwRS-MDOKFSTUDIO-DIAG-084 and DIAG-097 are now also tested at the node runner (`test/node-services/processRunner.test.ts`: process-group kill, output caps); the `ProcessRunner` port gains `maxStdoutBytes` and `maxStderrChars`.
+
 ## 2026-11-22
 
 ### Dropdown directive content (CR-465)

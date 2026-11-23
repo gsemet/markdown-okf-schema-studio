@@ -1,16 +1,12 @@
 import * as assert from "node:assert/strict";
-import { EventEmitter } from "node:events";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
 
 import { renderMyst } from "../../../src/core/render/mystRenderer";
-import {
-  resetPlantUmlProcessSpawnerForTests,
-  setPlantUmlProcessSpawnerForTests,
-} from "../../../src/core/render/plantUmlRenderer";
 import { renderPreviewDocument, type PreviewDocument } from "../../../src/core/render/renderPipeline";
+import { fakeRunner, nodeFiles } from "./plantUmlFakes";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent } from "./dom";
 import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
@@ -141,25 +137,8 @@ test("without a readDiagramFile hook the {include} resolver reads the file", asy
 });
 
 test("with useJar the JAR receives the text of the {uml} file", async () => {
-  const inputs: string[] = [];
-  setPlantUmlProcessSpawnerForTests({
-    spawn: (() => {
-      const child = Object.assign(new EventEmitter(), {
-        stdout: new EventEmitter(),
-        stderr: new EventEmitter(),
-        stdin: Object.assign(new EventEmitter(), { end: (data: string) => { inputs.push(data); } }),
-        kill: () => true,
-        exitCode: null,
-        signalCode: null,
-      });
-      process.nextTick(() => {
-        child.stdout.emit("data", "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>");
-        child.emit("close", 0, null);
-      });
-      return child;
-    }) as never,
-  });
-  try {
+  const runner = fakeRunner();
+  {
     const { workspaceRoot, docs } = workspace();
     const result = await renderPreviewDocument({
       files: createNodeFileSystem(),
@@ -168,11 +147,10 @@ test("with useJar the JAR receives the text of the {uml} file", async () => {
       requestId: 1,
       isWorkspaceTrusted: () => true,
       plantUmlEngine: "jar",
+      plantUmlProcesses: runner,
     });
     assert.equal((await result.resolvePlantUml()).diagrams[0]?.status, "rendered");
-    assert.deepEqual(inputs.map((input) => input.trim()), [SEQUENCE.trim()]);
-  } finally {
-    resetPlantUmlProcessSpawnerForTests();
+    assert.deepEqual(runner.calls.map((call) => call.options.input?.trim()), [SEQUENCE.trim()]);
   }
 });
 

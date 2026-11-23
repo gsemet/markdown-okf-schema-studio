@@ -39,6 +39,7 @@ tested_in_files:
 - test/core/render/diagReq.jar.requirements.test.ts
 - test/core/render/plantUmlJarIncludes.test.ts
 - test/core/render/plantUmlRenderer.test.ts
+- test/node-services/processRunner.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-DIAG-085

@@ -1,16 +1,12 @@
 import * as assert from "node:assert/strict";
-import { EventEmitter } from "node:events";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
 
 import { findEscapingPlantUmlInclude } from "../../../src/core/render/plantUmlIncludes";
-import {
-  renderPlantUmlDiagrams,
-  resetPlantUmlProcessSpawnerForTests,
-  setPlantUmlProcessSpawnerForTests,
-} from "../../../src/core/render/plantUmlRenderer";
+import { renderPlantUmlDiagrams } from "../../../src/core/render/plantUmlRenderer";
+import { fakeRunner, hostOf } from "./plantUmlFakes";
 import { needsSymlinks } from "../../shared/symlinks";
 import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
@@ -123,47 +119,30 @@ test("a nested include and a computed include path are checked too", async () =>
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-084
 test("a diagram whose include leaves the workspace shows a message and starts no process", async () => {
   const { parent, root, sibling } = createFixture();
-  let spawned = 0;
-  setPlantUmlProcessSpawnerForTests({
-    spawn: (() => {
-      spawned += 1;
-      const child = Object.assign(new EventEmitter(), {
-        stdout: new EventEmitter(),
-        stderr: new EventEmitter(),
-        stdin: Object.assign(new EventEmitter(), { end: (): void => undefined }),
-        kill: (): boolean => true,
-      });
-      process.nextTick(() => {
-        child.stdout.emit("data", "<svg></svg>");
-        child.emit("close", 0, null);
-      });
-      return child as never;
-    }) as never,
-  });
+  const runner = fakeRunner();
   try {
     const html = (source: string): string =>
       `<div class="myst-plantuml-diagram" data-line="3">${source}</div>`;
     const bad = await renderPlantUmlDiagrams(
       html(`@startuml\n!include ${path.join(sibling, "secret.puml")}\n@enduml`),
-      { files: createNodeFileSystem(), workspaceRoot: root, trusted: true },
+      { workspaceRoot: root, trusted: true, ...hostOf(runner) },
     );
     assert.equal(bad.diagrams[0]?.status, "error");
     assert.match(bad.diagrams[0]?.message ?? "", /outside the workspace folder/u);
     assert.match(bad.diagnostics[0]?.message ?? "", /outside the workspace folder/u);
     const climb = await renderPlantUmlDiagrams(
       html("@startuml\n!include ../outside.puml\n@enduml"),
-      { files: createNodeFileSystem(), workspaceRoot: root, trusted: true },
+      { workspaceRoot: root, trusted: true, ...hostOf(runner) },
     );
     assert.equal(climb.diagrams[0]?.status, "error");
-    assert.equal(spawned, 0);
+    assert.equal(runner.calls.length, 0);
     const good = await renderPlantUmlDiagrams(
       html("@startuml\n!include inside.puml\n@enduml"),
-      { files: createNodeFileSystem(), workspaceRoot: root, trusted: true },
+      { workspaceRoot: root, trusted: true, ...hostOf(runner) },
     );
     assert.equal(good.diagrams[0]?.status, "rendered");
-    assert.equal(spawned, 1);
+    assert.equal(runner.calls.length, 1);
   } finally {
-    resetPlantUmlProcessSpawnerForTests();
     fs.rmSync(parent, { recursive: true, force: true });
   }
 });

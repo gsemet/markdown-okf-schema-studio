@@ -18,7 +18,7 @@ const stage: any = {
 
 function stubs() {
   const manager: any = {
-    host: { workspace: { trusted: true }, previewRenderer: undefined, files: createNodeFileSystem() },
+    host: { capabilities: { processes: false }, workspace: { trusted: true }, previewRenderer: undefined, files: createNodeFileSystem() },
     plantUml: { engineFor: () => "builtin" },
     rendering: {
       runtimeContext: (headStage: any) => ({

@@ -78,10 +78,10 @@ test("an include request is answered once with the request's edit id: the file, 
       },
     } as unknown as PreviewSession;
     const requests = Object.assign(Object.create(HostRequestController.prototype) as HostRequestController, {
-      manager: { host: { logger: createMemoryLogger() } },
+      manager: { host: { logger: createMemoryLogger(), capabilities: { processes: true } } },
     });
     const manager = {
-      host: { logger: createMemoryLogger(), workspace: { trusted: true }, files: createNodeFileSystem() },
+      host: { logger: createMemoryLogger(), capabilities: { processes: true }, workspace: { trusted: true }, files: createNodeFileSystem() },
       activePathOf: () => documentPath,
       canonicalPath: (value: string) => value,
       requests,
@@ -131,7 +131,7 @@ test("the include watch is emptied when the preview follows another document", (
     panel: { title: "" },
   } as unknown as PreviewSession;
   const manager = {
-    host: { workspace: { folderOf: () => ({ path: "/notes" }), trusted: true } },
+    host: { capabilities: { processes: false }, workspace: { folderOf: () => ({ path: "/notes" }), trusted: true } },
     pathOf: () => "/notes/two.md",
     diagnostics: { clear: () => undefined },
     // The switch forgets the line marker of the old document (CR 456).
@@ -249,10 +249,10 @@ test("an include request is refused for the Java engine and for a file id the ho
       postToPage: (message: Record<string, unknown>) => { posted.push(message); return Promise.resolve(true); },
     } as unknown as PreviewSession;
     const requests = Object.assign(Object.create(HostRequestController.prototype) as HostRequestController, {
-      manager: { host: { logger: createMemoryLogger() } },
+      manager: { host: { logger: createMemoryLogger(), capabilities: { processes: true } } },
     });
     const manager = {
-      host: { logger: createMemoryLogger(), workspace: { trusted: true }, files: createNodeFileSystem() },
+      host: { logger: createMemoryLogger(), capabilities: { processes: true }, workspace: { trusted: true }, files: createNodeFileSystem() },
       activePathOf: () => documentPath,
       canonicalPath: (value: string) => value,
       requests,
@@ -294,11 +294,11 @@ test("the host remembers the canonical path of a served include and of a missing
       postToPage: () => Promise.resolve(true),
     } as unknown as PreviewSession;
     const requests = Object.assign(Object.create(HostRequestController.prototype) as HostRequestController, {
-      manager: { host: { logger: createMemoryLogger() } },
+      manager: { host: { logger: createMemoryLogger(), capabilities: { processes: true } } },
     });
     const canonicalized: string[] = [];
     const manager = {
-      host: { logger: createMemoryLogger(), workspace: { trusted: true }, files: createNodeFileSystem() },
+      host: { logger: createMemoryLogger(), capabilities: { processes: true }, workspace: { trusted: true }, files: createNodeFileSystem() },
       activePathOf: () => documentPath,
       // The step under test: every watched path goes through the manager's canonical form.
       canonicalPath: (value: string) => {

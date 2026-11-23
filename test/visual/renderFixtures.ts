@@ -25,6 +25,7 @@ import {
 import { analyzeFrontmatterWithLinks } from "../../src/core/frontmatter/okfFrontmatter";
 import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
+import { createNodeProcessRunner } from "../../src/node-services/processRunner";
 import { renderPropertiesTable } from "../../src/core/frontmatter/propertiesTable";
 import { sourceRangeForLines } from "../../src/core/mapping/sourceMapping";
 import { blankRunsMarker } from "../../src/core/render/renderPipeline";
@@ -169,13 +170,14 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
   // The built-in engine (the default) draws in the page; the JAR/PATH pipeline (useJar) in the host.
   const builtinPlantUml = plantumlExpectation === "builtin" || plantumlExpectation === "builtin-unsupported";
   const plantUml = builtinPlantUml ? { diagrams: [] } : await renderPlantUmlDiagrams(rewritten.html, {
-    files: createNodeFileSystem(),
     executablePath: fixture === "13-plantuml-executable-not-found"
       ? "plantuml-screenshot-executable-not-found"
       : plantumlExpectation === "unconfigured" ? "plantuml-visual-intentionally-unconfigured"
       : undefined,
     workspaceRoot: visualRoot,
     trusted: options.trusted !== false,
+    processes: createNodeProcessRunner(),
+    files: createNodeFileSystem(),
   });
   const withPlantUml = injectPlantUmlDiagrams(rewritten.html, plantUml.diagrams);
   // Mirror the real webview: strip the raw YAML block and inject the same

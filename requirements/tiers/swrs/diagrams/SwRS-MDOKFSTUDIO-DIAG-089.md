@@ -93,6 +93,12 @@ When the JAR pipeline cannot draw a PlantUML diagram, the extension SHALL show o
 | all diagrams rendered | no PlantUML warning is reported |
 | a document without PlantUML diagrams, with any jarPath or in an untrusted workspace | nothing is reported: no message and no warning |
 
+### Scenario (refusal): The host cannot run programs
+- GIVEN a host without the processes capability and the JAR pipeline chosen
+- WHEN the preview is rendered
+- THEN every diagram shows PlantUML needs a host that can run programs; the built-in engine draws diagrams without one. with state unavailable and no process starts
+- AND the session selects the built-in engine instead when the host has no processes capability
+
 ### Known issues
 - Known issue: The visual campaign has no Restricted Mode PlantUML scenario.
 - Known issue: The visual scenarios call renderPlantUmlDiagrams with an unlikely executablePath and not through useJar; the absolute executable path case is reachable only that way.
