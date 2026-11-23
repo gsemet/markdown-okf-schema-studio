@@ -27,11 +27,15 @@ implemented_in_files:
 - src/page/features/frontmatterValueEditor.ts
 - src/page/features/pageInput.ts
 - src/page/features/textControls.ts
+- src/session/features/frontmatter.ts
 tested_in_files:
+- test/host/fmtableReq.requirements.test.ts
 - test/integration/realInput/frontmatterFields.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
+- test/page/runtimeDetachedSaveEnds.test.ts
 - test/page/runtimeEditorFlush.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
+- test/page/runtimeFrontmatterSaveEnds.test.ts
 - test/visual/capture_frontmatter_click.py
 - test/visual/frontmatterClickScenarios.ts
 - test/visual/scenarioDefinitions2.ts
@@ -131,6 +135,16 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 
 - Known issue: leaving edit mode discards a typed but unsaved field value, while block editors save theirs.
 
+### Scenario (boundary): A save that changes no text closes the field editor with no message
+- GIVEN a field editor whose value differs from the opening text but whose save plan leaves the document text unchanged
+- WHEN the writer leaves the editor
+- THEN the host writes nothing and answers previewFrontmatterResult with saved and unchanged, and the page closes the field editor with no message
+
+### Scenario (nominal): Every frontmatter save ends
+- GIVEN a frontmatter save of a value, a key or a field action
+- WHEN the host handles it
+- THEN it answers with a saved result that closes the editor, or an error the editor shows; no frontmatter editor stays on its saving status
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-FMEDIT-016: the host checks that produce the refusal messages.
@@ -147,6 +161,7 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 - Method: test/integration/realInput/frontmatterFields.ts, scenarioRefusedValueKeepsEditorUsable part 3 (real mouse: an unchanged title editor open, one click on priority below it opens it although closing the title editor moved priority up by more than 20 px; the reverse click opens title; the buffer is unchanged); replay .agents/skills/markdown-studio-exploratory-qa-claude/scenarios/271-c4-1-click-field-below-open-editor-is-lost.json.
 - Method: visual scenario frontmatter-editing/v09-click-field-below-open-editor-light-900 (test/visual/frontmatterClickScenarios.ts, check in test/visual/capture_frontmatter_click.py: light theme, edit mode, an unchanged title editor open, a real mouse press and release at one point on the priority value below it; priority moved up by more than 20 px and only the priority editor is open).
 - Method: visual scenario frontmatter-editing/v02-edit-enum-value-dark-900 in test/visual/scenarioDefinitions2.ts (refused save shown in the editor).
+- Method: test/page/runtimeFrontmatterSaveEnds.test.ts (the unchanged answer closes the editor) and test/host/fmtableReq.requirements.test.ts (the host answers unchanged and writes nothing).
 - Criteria: receiveFrontmatterResult records the refused text and refocuses the control when the focus was lost; holdsRefusedText is true while the idle control holds that text; closeRefusedEditorFor closes such an editor for another cell; closeFrontmatterEditor is called without a save on edit mode off while the block editor path posts a final save; keepUndoInControl calls stopPropagation for Z and Y with Cmd or Ctrl; the properties click handler resolves a click whose target contains the cell pressed while an editor was open to that cell (a primary press without modifier, remembered by the capture mousedown listener of installPageInput and cleared by every click).
 
 <!-- okf:links:start -->

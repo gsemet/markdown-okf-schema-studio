@@ -27,6 +27,8 @@ export interface CheckboxDeps {
   readonly context: PreviewRuntimeContext;
   /** The open block or frontmatter editor, if any. */
   openEdit(): BlockingEdit | undefined;
+  /** A final save the writer left with Cancel is still in flight (CR 475): no toggle meanwhile. */
+  saveInFlight(): boolean;
   /** A new number for an edit id. */
   nextEditSequence(): number;
   /** The scroll anchor fields every edit message carries. */
@@ -104,7 +106,11 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
   /** With an editor open: prevents `event` and says on its status line why. True when refused. */
   function refuseForOpenEdit(event: Event, action: string): boolean {
     const pendingEdit = deps.openEdit();
-    if (!pendingEdit) return false;
+    if (!pendingEdit) {
+      if (!deps.saveInFlight()) return false;
+      event.preventDefault?.();
+      return true;
+    }
     event.preventDefault?.();
     pendingEdit.status.textContent = `Save or cancel this edit before ${action}.`;
     pendingEdit.status.setAttribute?.("data-visible", "true");

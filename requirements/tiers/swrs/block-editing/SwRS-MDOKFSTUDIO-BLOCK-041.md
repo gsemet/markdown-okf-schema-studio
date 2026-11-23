@@ -24,6 +24,7 @@ implemented_in_files:
 - src/page/features/blockMoves.ts
 - src/page/features/blockSelectionView.ts
 - src/page/features/checkboxes.ts
+- src/page/features/detachedSaveState.ts
 - src/page/features/editMode.ts
 - src/page/features/editorChrome.ts
 - src/page/features/frontmatterEditor.ts
@@ -45,6 +46,7 @@ tested_in_files:
 - test/page/modules/labelRename.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/page/runtimeContentPatch.test.ts
+- test/page/runtimeEditInFlight.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeRadioGroups.test.ts
@@ -127,6 +129,15 @@ The page refuses with the open editor's status line unless the row says otherwis
 - WHEN the writer clicks another block
 - THEN the first editor is saved through its blur and stays open until the render of its save arrives, and the second block opens once, when that render arrives, without a second click; the save in flight is not posted again; an editor with unchanged text closes at the blur and the same click opens the second editor
 
+### Scenario (boundary): No edit gesture runs while an edit is in flight
+- GIVEN an open editor, or a detached save (a final save whose editor the writer closed and the host has not answered)
+- WHEN the writer clicks a block, a field, an insert point, a move handle, a list item or a file drop
+- THEN nothing opens or moves: the open editor keeps its reasons, and the gesture of a detached save waits, as a pending navigation, until the save ends and is dropped if it fails
+
+### Scenario (boundary): A field clicked while a cancelled block save is in flight opens when it ends, and is dropped if it fails
+- GIVEN a detached save and a click on a frontmatter field
+- WHEN the save succeeds the field opens; when it fails the click is dropped and the reopened editor shows the text
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-191: the host holds an open block edit and ends it when the block changes.
@@ -149,7 +160,8 @@ The page refuses with the open editor's status line unless the row says otherwis
 - Method: test/session/renderReq.labelRename.requirements.test.ts (a rename while a block edit is open changes nothing and answers the reason; the document is unchanged).
 - Method: test/page/modules/inlineThread.test.ts (an open edit blocks the change with its reason and the text is kept; no editor sends the request).
 - Method: test/session/reviewReqThreads.requirements.test.ts (an open Markdown edit on the host side refuses a thread change before the document is read; no open edit applies the delete).
-- Criteria: openBlockEditor returns at once while state.activeBlockEdit is set; openFrontmatterValueEditor and openFrontmatterKeyEditor return when activeBlockEdit or activeFrontmatterEdit is set; a field click or key first calls closeRefusedEditorFor, which closes only an idle editor that still holds its refused text; blockSelectionView and blockMoves return when activeFrontmatterEdit is set; handleThreadChange answers before reading the document when edits.active is true; every reason text equals the one in the table; the Refresh button is disabled on open and enabled on close.
+- Method: test/page/runtimeDetachedSave.test.ts (no other edit starts while a detached save is in flight; the click waits and is dropped on a failure).
+- Criteria: openBlockEditor returns at once while an edit is in flight (editInFlight: an open editor or a detached save); openFrontmatterValueEditor and openFrontmatterKeyEditor return when activeBlockEdit or activeFrontmatterEdit is set; a field click or key first calls closeRefusedEditorFor, which closes only an idle editor that still holds its refused text; blockSelectionView and blockMoves return when activeFrontmatterEdit is set; handleThreadChange answers before reading the document when edits.active is true; every reason text equals the one in the table; the Refresh button is disabled on open and enabled on close.
 
 <!-- okf:links:start -->
 ### Links

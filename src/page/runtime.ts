@@ -88,6 +88,8 @@ import { installViewControls } from "./modules/viewControls";
 import { installWarningBanner, warningBannerState, warningBannerText } from "./modules/warningBanner";
 import { installWidthMode } from "./modules/widthMode";
 import { createPageBus, type PageEvents } from "./pageBus";
+import { installDetachedSaves } from "./features/detachedSave";
+import { editInFlight } from "./features/detachedSaveState";
 import { installPageDiagnostics } from "./pageDiagnostics";
 import { createPageHost } from "./pageHost";
 import { applyCodeBlockSettings, pageSettings, stickyHeadingDepthOf } from "./pageSettings";
@@ -139,6 +141,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     descriptionsCollapsed: false,
     frontmatterCollapsed: false,
     activeBlockEdit: undefined,
+    detachedSave: undefined,
     activeFrontmatterEdit: undefined,
     editSequence: 0,
     anchor: undefined,
@@ -195,7 +198,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // editor is open or blocks are selected; it never changes the selection.
   const commentCompose = commentsEnabled ? installCommentCompose(document, window, {
     post: postCommentMessage,
-    busy: () => Boolean(state.activeBlockEdit || state.activeFrontmatterEdit || blockSelection.isActive()),
+    busy: () => Boolean(editInFlight(state) || state.activeFrontmatterEdit || blockSelection.isActive()),
     beforeOpen: () => commentThreads.close(),
   }) : undefined;
   bindEditModeCaptureClicks(rt);
@@ -211,7 +214,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // itself moves the document version before the answer arrives.
   const labelRename = installLabelRename(document, window, {
     isEditMode: () => state.editMode,
-    blockedReason: () => state.activeBlockEdit || state.activeFrontmatterEdit
+    blockedReason: () => editInFlight(state) || state.activeFrontmatterEdit
       ? "Save or cancel the open edit before renaming a label." : undefined,
     nextEditId: () => "label-" + context.requestId + "-" + (++state.editSequence),
     post: (rename, editId) => vscode.postMessage({
@@ -346,7 +349,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     },
     replaceBlockedReason: () => {
       if (!rt.editModeButton) return "Editing is not available in this preview.";
-      return state.activeBlockEdit || state.activeFrontmatterEdit ? "Save or cancel the open edit before replacing." : undefined;
+      return editInFlight(state) || state.activeFrontmatterEdit ? "Save or cancel the open edit before replacing." : undefined;
     },
     reveal: (target) => headingFold.reveal(target),
     ask: (type, payload, done) => hostRequests.ask(type, payload, {}, done),
@@ -405,13 +408,14 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     host: vscode,
     context,
     openEdit: () => state.activeBlockEdit || state.activeFrontmatterEdit,
+    saveInFlight: () => state.detachedSave !== undefined,
     nextEditSequence: () => ++state.editSequence,
     anchorField: () => rt.scroll.anchorField(),
   });
   // Inline threads (<!-- THREAD): the reply box and Delete of an open thread; the host edits the file.
   const inlineThreads = installInlineThreads(document, {
     enabled: true,
-    blockedReason: () => state.activeBlockEdit || state.activeFrontmatterEdit
+    blockedReason: () => editInFlight(state) || state.activeFrontmatterEdit
       ? "Save or cancel the open edit before changing a thread." : undefined,
     ask: (type, payload, done) => hostRequests.ask(type, payload, {}, done),
   });
@@ -423,6 +427,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.textControls = installTextControls(rt);
   rt.blockEditor = installBlockEditor(rt);
   rt.blockSourceEditor = installBlockSourceEditor(rt);
+  rt.detachedSaves = installDetachedSaves(rt);
   rt.editorChrome = installEditorChrome(rt);
   rt.tableCellEditor = installTableCellEditor(rt);
   rt.frontmatter = installFrontmatterEditor(rt);

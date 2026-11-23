@@ -22,6 +22,7 @@ import type { PreviewSession } from "../previewSession";
 import { applyWrittenEdits, currentPreviewDocument, isDocumentEligible, revisionOfStage } from "../sessionDocuments";
 import { OWN_EDIT_ECHO_MS } from "./scrollSync";
 import { fireAndForget } from "../../host-api/logger";
+import { DetachedEdits, type UnsavedText } from "./detachedEdits";
 
 type RunFields = { line: number; endLine: number; itemLine?: number; containerLine?: number };
 
@@ -62,6 +63,8 @@ export interface ActiveBlockEdit {
   /** The final save asked to delete the block when its text is only whitespace (a top-level block or list item). */
   deleteWhenEmpty?: boolean;
   cancelRequested: boolean;
+  /** The writer cancelled the editor while this final save was in flight: the save outlives the editor (CR 475). */
+  detached?: boolean;
   applying: boolean;
   hasAppliedEdit: boolean;
   lastMessage: BlockEditMessage;
@@ -89,6 +92,10 @@ export interface EditState {
    * request does not save again.
    */
   saveFallback?: { timer?: ReturnType<typeof setTimeout>; fired: boolean };
+  /** The text of a final save that failed, until the page says whether it shows it again (CR 475). */
+  unsaved?: UnsavedText;
+  /** An open that arrived during a detached edit, answered when that edit ends (CR 475). */
+  heldOpen?: PageMessageOf<"previewEditOpen">;
   /** The page editor the page was asked to report the close of (`previewEditorWatch`, STAB-03). */
   watchedPageEditorId?: string;
   /** An explicit refresh asked for the next render: it reaches the page even over an open editor. */
@@ -98,6 +105,8 @@ export interface EditState {
    * queued here instead of being posted, so a real-window test can make it arrive late.
    */
   heldSources?: Array<() => void>;
+  /** Test hook only (`holdBlockEditAppliesForTests`): while set, a block edit's write waits here, so a final save stays in flight. */
+  heldApplies?: Array<() => void>;
 }
 
 /** A fresh {@link EditState}. */
@@ -114,7 +123,11 @@ interface BlockSource {
 
 /** The inline block edits of the page and the lock around them. */
 export class BlockEditController {
-  public constructor(private readonly manager: PreviewManager) {}
+  private readonly detached: DetachedEdits;
+
+  public constructor(private readonly manager: PreviewManager) {
+    this.detached = new DetachedEdits(manager, this);
+  }
 
   /** Registers the handlers of the block editor's messages. */
   public register(router: PageMessageRouter): void {
@@ -124,8 +137,10 @@ export class BlockEditController {
     });
     // The page closed an inline editor the host was waiting for (STAB-03). It edits nothing.
     router.on("previewEditClosed", (message, preview) => {
-      this.closePageEditor(preview, message.editId);
+      if (!this.detached.onClosed(preview, message)) this.closePageEditor(preview, message.editId);
     });
+    // The page answers an error that gave back the writer's text (CR 475).
+    router.on("previewEditReopen", (message, preview) => this.detached.onReopen(preview, message));
     router.on("previewSaveRequest", (_message, preview) => {
       const fallback = preview.edits.saveFallback;
       if (fallback?.fired) {
@@ -154,6 +169,10 @@ export class BlockEditController {
         : "a block";
       fireAndForget(this.manager.host.logger, this.manager.host.ui.showWarning(flushRefusalMessage(where, error)), "showWarning");
     }
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
+    // An error answer to a final save gives the writer's text back, so the page can show it again.
+    const unsavedText = message.final === true && typeof message.editedText === "string" ? message.editedText : undefined;
+    if (unsavedText !== undefined) this.detached.keepUnsaved(preview, message.editId, unsavedText, error);
     fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewEditSource",
       documentId: message.documentId,
@@ -161,6 +180,7 @@ export class BlockEditController {
       requestId: message.requestId,
       editId: message.editId,
       error,
+      ...(unsavedText !== undefined ? { unsavedText } : {}),
     }), "postToPage");
   }
 
@@ -183,7 +203,11 @@ export class BlockEditController {
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
-  private handleEditOpen(preview: PreviewSession, message: PageMessageOf<"previewEditOpen">): void {
+  public handleEditOpen(preview: PreviewSession, message: PageMessageOf<"previewEditOpen">): void {
+    if (preview.edits.active?.detached) {
+      this.detached.holdOpen(preview, message);
+      return;
+    }
     if (preview.edits.active) {
       this.postEditSourceError(preview, message, "Another Markdown block is already being edited.");
       return;
@@ -297,16 +321,19 @@ export class BlockEditController {
     renderFollows = false,
     alreadyReleased?: Array<() => void>,
   ): void {
+    const wasDetached = preview.edits.active?.detached === true;
     preview.edits.active = undefined;
     if (renderFollows) {
       preview.edits.lock.drop("render");
       preview.edits.lock.drop("render-result");
     }
-    const queued = alreadyReleased ?? preview.edits.lock.release();
-    preview.edits.watchedPageEditorId = undefined;
+    // A detached edit frees only the host's hold: a newer page editor keeps its wait (STAB-03).
+    const queued = alreadyReleased ?? (wasDetached ? preview.edits.lock.releaseHostEdit() : preview.edits.lock.release());
+    if (!preview.edits.lock.pageEditorOpen) preview.edits.watchedPageEditorId = undefined;
     if (!preview.disposed) {
       queued.forEach((work) => work());
     }
+    this.detached.resumeHeldOpen(preview);
   }
 
   /**
@@ -324,7 +351,7 @@ export class BlockEditController {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
-  private completeActiveBlockEdit(preview: PreviewSession, edit: ActiveBlockEdit): void {
+  public completeActiveBlockEdit(preview: PreviewSession, edit: ActiveBlockEdit): void {
     if (preview.edits.active !== edit) {
       return;
     }
@@ -337,11 +364,25 @@ export class BlockEditController {
       // Every apply of this edit has resolved: only a render of this version or later shows it.
       pin.minVersion = Math.max(pin.minVersion, preview.document.revision);
     }
+    if (preview.edits.unsaved?.editId === edit.editId) preview.edits.unsaved = undefined;
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-263
+    // A detached save has no editor to close: its answer comes first, so the page knows a render follows.
+    if (edit.detached) {
+      fireAndForget(this.manager.host.logger, preview.postToPage({
+        type: "previewEditSource",
+        documentId: edit.lastMessage.documentId,
+        revision: edit.lastMessage.revision,
+        requestId: edit.lastMessage.requestId,
+        editId: edit.editId,
+        done: true,
+        ...(refreshes ? { renderFollows: true as const } : {}),
+      }), "postToPage");
+    }
     this.releaseActiveBlockEdit(preview, refreshes);
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-263
     // A final save always gets an answer: with no render to follow (nothing written, the revision already rendered, or the source unavailable), the page's editor is told it is done. A cancel needs none: the page
     // closed that editor when it posted it.
-    if (!refreshes && !edit.cancelRequested) {
+    if (!refreshes && !edit.cancelRequested && !edit.detached) {
       fireAndForget(this.manager.host.logger, preview.postToPage({
         type: "previewEditSource",
         documentId: edit.lastMessage.documentId,
@@ -403,7 +444,9 @@ export class BlockEditController {
     // @implements_req SwRS-MDOKFSTUDIO-PALETTE-279
     // CR 134: the text editor scrolls to the edit; the page must not follow that echo.
     preview.scroll.ownEditUntil = Infinity;
-    fireAndForget(this.manager.host.logger, applyWrittenEdits(this.manager.host.documents, source.document, [textEdit]).then((applied) => {
+    const write = (): PromiseLike<boolean> => applyWrittenEdits(this.manager.host.documents, source.document, [textEdit]);
+    const held = preview.edits.heldApplies;
+    fireAndForget(this.manager.host.logger, (held ? new Promise<void>((resolve) => held.push(resolve)).then(write) : write()).then((applied) => {
       preview.scroll.ownEditUntil = Date.now() + OWN_EDIT_ECHO_MS;
       if (preview.edits.active !== edit) {
         return;
@@ -600,6 +643,21 @@ export class BlockEditController {
       return true;
     }
     edit.sourceStartOffset = rebased.start;
+    return true;
+  }
+
+  /**
+   * An outside change reached a final save that is requested and not written: the host does not
+   * write it, and answers with the text so the editor shows it (CR 475). Returns false when the
+   * save carries no text to give back.
+   */
+  public keepTextOnOutsideChange(preview: PreviewSession, edit: ActiveBlockEdit): boolean {
+    const message = edit.lastMessage;
+    if (message.final !== true || typeof message.editedText !== "string") return false;
+    this.postEditSourceError(preview, message,
+      "The file changed outside the preview before your text was saved. Copy your text, then reopen the block.");
+    this.releaseHostEditKeepingEditor(preview);
+    this.manager.edits.deferWhileEditing(preview, "render", () => this.manager.rendering.refreshOpenDocument(preview));
     return true;
   }
 

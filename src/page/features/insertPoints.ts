@@ -8,6 +8,7 @@
  */
 
 import { MAPPINGS_SELECTOR, type InsertMove, type InsertPoints, type PageRuntime } from "./pageRuntime";
+import { editInFlight } from "./detachedSaveState";
 
 const START_HINT = "Enter to create a new block";
 const START_HINT_ID = "sphinx-preview-start-hint";
@@ -203,7 +204,7 @@ export function installInsertPoints(rt: PageRuntime): InsertPoints {
       // toggle pressed a moment ago) holds the focus.
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Enter" && event.key !== "ArrowDown") return;
-        if (!state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return;
+        if (!state.editMode || editInFlight(state) || state.activeFrontmatterEdit) return;
         if (event.shiftKey || event.altKey || event.metaKey || event.ctrlKey || event.isComposing) return;
         const start = insertPoints.find((point) =>
           point.className.split(" ").includes("sphinx-preview-insert-point--start"));

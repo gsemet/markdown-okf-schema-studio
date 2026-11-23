@@ -175,7 +175,7 @@ export function createVscodeSettingScopes(): SettingScopes {
 function createVscodeUi(logger: Logger): HostUi {
   return {
     showInformation: (message) => vscode.window.showInformationMessage(message),
-    showWarning: (message) => vscode.window.showWarningMessage(message),
+    showWarning: (message, ...actions) => vscode.window.showWarningMessage(message, ...actions),
     showError: (message) => vscode.window.showErrorMessage(message),
     pickFile: (options) => Promise.resolve(vscode.window.showOpenDialog({
       canSelectMany: false,

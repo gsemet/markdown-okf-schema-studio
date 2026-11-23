@@ -370,6 +370,7 @@ export class FrontmatterController {
   private postEditSaved(
     preview: PreviewSession,
     message: PageMessageOf<"previewFrontmatterSave">,
+    unchanged = false,
   ): void {
     fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewFrontmatterResult",
@@ -378,6 +379,7 @@ export class FrontmatterController {
       requestId: message.requestId,
       editId: message.editId,
       saved: true,
+      ...(unchanged ? { unchanged: true as const } : {}),
     }), "postToPage");
   }
 
@@ -401,6 +403,12 @@ export class FrontmatterController {
         this.postEditError(preview, message, refusal.error);
         return;
       }
+    }
+    // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
+    if (plan.candidateSource === document.getText()) {
+      // Nothing to write, so no change event and no render: the answer must say so.
+      this.postEditSaved(preview, message, true);
+      return;
     }
     return applyWrittenEdits(manager.host.documents, document, [plan.edit]).then((applied) => {
       if (applied) {

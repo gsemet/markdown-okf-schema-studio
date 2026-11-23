@@ -351,6 +351,22 @@ test("STAB-03: previewEditClosed carries the id of the closed editor", () => {
   for (const patch of [{ editId: "" }, { editId: 3 }, { editId: undefined }, { editId: "e".repeat(101) }]) {
     assert.equal(isRegisteredPreviewMessage({ ...closed, ...patch }), false, JSON.stringify(patch));
   }
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+  assert.equal(isRegisteredPreviewMessage({ ...closed, detached: true }), true);
+  for (const detached of [false, "yes", 1]) {
+    assert.equal(isRegisteredPreviewMessage({ ...closed, detached }), false, String(detached));
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+test("previewEditReopen carries the id of the detached save and whether an editor reopened", () => {
+  const reopen = { type: "previewEditReopen", documentId: "doc", revision: 1, requestId: 1, editId: "edit-3", reopened: false };
+  assert.equal(isRegisteredPreviewMessage(reopen), true);
+  assert.equal(isRegisteredPreviewMessage({ ...reopen, reopened: true }), true);
+  for (const patch of [{ editId: "" }, { editId: 3 }, { editId: undefined }, { editId: "e".repeat(101) },
+    { reopened: "no" }, { reopened: undefined }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...reopen, ...patch }), false, JSON.stringify(patch));
+  }
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-186

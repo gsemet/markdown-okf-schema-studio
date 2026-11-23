@@ -15,6 +15,8 @@
 
 import { parse, serialize, type DefaultTreeAdapterTypes } from "parse5";
 
+import { MAX_PAGE_TEXT_LENGTH } from "../protocol/hostToPage";
+
 import {
   PREVIEW_STARTUP_SETTING_KEYS,
   type PreviewStartupSettings,
@@ -27,7 +29,7 @@ type TreeChildNode = DefaultTreeAdapterTypes.ChildNode;
 const CONTENT_ID = "sphinx-myst-preview-content";
 
 /** Upper bound for the content one patch message may carry (the runtime enforces the same). */
-export const MAX_PATCH_CONTENT_LENGTH = 20 * 1024 * 1024;
+export const MAX_PATCH_CONTENT_LENGTH = MAX_PAGE_TEXT_LENGTH;
 
 const NONCE_PLACEHOLDER = "NONCE";
 

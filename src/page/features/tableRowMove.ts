@@ -147,7 +147,7 @@ export function installTableRowMove(rt: PageRuntime): TableRowMove {
   }
 
   function busy(table?: HTMLTableElement): boolean {
-    if (!state.editMode || state.activeFrontmatterEdit || pending !== undefined || settleTimer !== undefined) {
+    if (!state.editMode || state.activeFrontmatterEdit || state.detachedSave || pending !== undefined || settleTimer !== undefined) {
       return true;
     }
     return Boolean(state.activeBlockEdit) && !(table && cellEditOf(table));

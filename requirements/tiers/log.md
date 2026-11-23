@@ -2,6 +2,10 @@
 
 ## 2026-11-23
 
+### Every final save ends (CR-475)
+
+- Added (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-270 (every final save ends in a closed editor or an error that gives the text back). Changed (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-053 (Cancel and Escape close the editor during a final save), BLOCK-216 (the text comes back after a failed or crossed save, the Copy text warning), BLOCK-191 (the detached host edit), BLOCK-041 (no gesture while an edit is in flight), TABLE-025 (cell editors), FMEDIT-019 (an unchanged frontmatter save closes the editor); StRS-MDOKFSTUDIO-BLOCK-006 wording. Reason: an editor could stay on "Saving Markdown..." for good.
+
 ### A blank-lines block's editor closes after its final save (CR-474, issue #485)
 
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-268 (the editor of a blank-lines block stays open across an autosave re-render and closes on the render that follows its final save; new scenario "Done closes the editor"). Reason: after Done the editor stayed on "Saving Markdown…" because the content patch kept it open. No new StRS.

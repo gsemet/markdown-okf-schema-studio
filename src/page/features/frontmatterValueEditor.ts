@@ -8,6 +8,7 @@
 import { createFrontmatterMenu } from "./frontmatterMenu";
 import { buildFrontmatterListEditor, type FrontmatterListEditor } from "./frontmatterListEditor";
 import type { FrontmatterControl, FrontmatterEdit, PageRuntime } from "./pageRuntime";
+import { editInFlight } from "./detachedSaveState";
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
 // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-001
@@ -16,7 +17,14 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
   options?: { newField?: boolean; toggleBoolean?: boolean }): void {
   const { document, context, host, state } = rt;
   const { editorTrace, traceFocus } = rt.diagnostics;
-  if (state.activeBlockEdit || state.activeFrontmatterEdit || row.getAttribute("data-okf-editable") !== "true") return;
+  // A save left in flight by Cancel ends first; the field opens after it, on the row the render brings.
+  if (!state.activeBlockEdit && rt.detachedSaves.deferField(() => {
+    const name = row.getAttribute("data-okf-field");
+    const fresh = [...rt.document.querySelectorAll("tr[data-okf-field]")]
+      .find((candidate) => candidate.getAttribute("data-okf-field") === name);
+    if (fresh) openFrontmatterValueEditor(rt, fresh, options);
+  })) return;
+  if (editInFlight(state) || state.activeFrontmatterEdit || row.getAttribute("data-okf-editable") !== "true") return;
   const valueCell = row.querySelector?.("[data-okf-value-cell]");
   if (!valueCell) return;
   const name = row.getAttribute("data-okf-field");

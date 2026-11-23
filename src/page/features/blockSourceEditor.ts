@@ -44,6 +44,8 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   const receiveBlockEditSource: BlockSourceEditor["receiveBlockEditSource"] = (message) => {
+    // The answer to a final save the writer left with Cancel (CR 475).
+    if (rt.detachedSaves.receive(message)) return;
     if (rt.tableRowMove.receiveSource(message)) return;
     if (rt.listItemMove.receiveSource(message)) return;
     const edit = state.activeBlockEdit;

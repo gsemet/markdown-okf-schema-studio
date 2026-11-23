@@ -336,6 +336,12 @@ export class HostEvents {
             this.manager.edits.deferWhileEditing(session, "render", () => this.manager.rendering.refreshOpenDocument(session));
             continue;
           }
+          // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
+          // A final save met a change from outside: the text is not written, the writer gets it back.
+          if (edit.finalRequested && this.manager.edits.keepTextOnOutsideChange(session, edit)) {
+            this.manager.frontmatter.refresh(session, document);
+            continue;
+          }
           this.manager.edits.releaseActiveBlockEdit(session, true);
         }
         if (this.manager.sourceAvailable(session)) {

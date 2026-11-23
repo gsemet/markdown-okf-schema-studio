@@ -18,6 +18,7 @@ import {
   targetIn,
 } from "./lineMarkerPlacement";
 import { MAPPINGS_SELECTOR, type LayoutEntry, type PageRuntime } from "./pageRuntime";
+import { editInFlight } from "./detachedSaveState";
 
 /** The marker of a page. */
 export interface LineMarker {
@@ -268,7 +269,7 @@ export function installLineMarker(rt: PageRuntime): LineMarker {
     hide();
   }
 
-  const startsAnEdit = (): boolean => Boolean(state.activeBlockEdit || state.activeFrontmatterEdit);
+  const startsAnEdit = (): boolean => Boolean(editInFlight(state) || state.activeFrontmatterEdit);
 
   document.addEventListener("pointerdown", () => {
     if (line !== undefined) clear();

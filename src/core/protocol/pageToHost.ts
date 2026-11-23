@@ -368,7 +368,11 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   // The page closed an inline editor the host asked about with `previewEditorWatch` (STAB-03): the
   // page updates that waited for it can run. It edits nothing.
-  previewEditClosed: (message) => isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "",
+  previewEditClosed: (message) => isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== ""
+    && (message.detached === undefined || message.detached === true),
+  // The page's answer to the error of a detached save that gave back the writer's text (CR 475).
+  previewEditReopen: (message) => isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== ""
+    && typeof message.reopened === "boolean",
   // The MyST palette's pickers: labels of the document, citation keys of the workspace `.bib`
   // files, and a native open dialog for a `{doc}` path. They read only; the answer repeats `editId`.
   previewListTargets: isHostRequest,

@@ -8,6 +8,7 @@
 
 import { carriesFiles, droppedFileUris, nearestPointIndex } from "../modules/dropFiles";
 import type { FileDrop, PageRuntime } from "./pageRuntime";
+import { editInFlight } from "./detachedSaveState";
 
 const MARKER_CLASS = "sphinx-preview-insert-point--drop";
 
@@ -22,7 +23,7 @@ export function installFileDrop(rt: PageRuntime): FileDrop {
   }
 
   function accepts(event: DragEvent): boolean {
-    return state.editMode && !state.activeBlockEdit && !state.activeFrontmatterEdit && carriesFiles(event.dataTransfer);
+    return state.editMode && !editInFlight(state) && !state.activeFrontmatterEdit && carriesFiles(event.dataTransfer);
   }
 
   /** The insertion bar nearest to the pointer, or undefined when the page has none. */

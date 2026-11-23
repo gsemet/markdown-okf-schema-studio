@@ -93,6 +93,7 @@ export const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGa
   previewSaveRequest: "document",
   previewWarningBannerClosed: "document",
   previewEditClosed: "own-id",
+  previewEditReopen: "own-id",
   previewEditFlushed: "own-id",
 };
 

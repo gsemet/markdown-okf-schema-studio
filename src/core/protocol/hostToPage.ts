@@ -78,6 +78,8 @@ export interface PreviewContentPatchMessage extends RenderMessage<"previewConten
 export interface PreviewFrontmatterResultMessage extends RenderMessage<"previewFrontmatterResult"> {
   editId: string;
   saved?: true;
+  /** With `saved`: the plan changed no text, so nothing was written and no render follows. */
+  unchanged?: true;
   error?: string;
 }
 
@@ -88,7 +90,14 @@ export interface PreviewFrontmatterResultMessage extends RenderMessage<"previewF
 export interface PreviewEditSourceMessage extends RenderMessage<"previewEditSource"> {
   editId: string;
   error?: string;
+  /**
+   * With `error` of a final save: the text the writer typed, which the host could not write. The
+   * page puts it back in a reopened editor (CR 475).
+   */
+  unsavedText?: string;
   done?: true;
+  /** With `done` of a detached save: the render of the save follows, the save is not over until then. */
+  renderFollows?: true;
   line?: number;
   endLine?: number;
   originalText?: string;
@@ -399,11 +408,16 @@ export interface HostMessageFilter {
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-054
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-120
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
+/**
+ * The most characters of text a message carries either way: a content patch, a text saved from an
+ * editor, and the text a refused save gives back.
+ */
+export const MAX_PAGE_TEXT_LENGTH = 20 * 1024 * 1024;
+
 /** The page's filter of host messages. */
 export function createHostMessageFilter(): HostMessageFilter {
   // In-place content patch (T34): the limits the host's patch stays within.
   const PATCH_STATUSES = ["pending", "success", "stale", "error", "missing-source", "recovery"];
-  const MAX_PATCH_CONTENT_LENGTH = 20 * 1024 * 1024;
   const MAX_PATCH_DIAGNOSTICS = 500;
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
   const isValidContentPatch = (message: Readonly<Record<string, unknown>>): boolean => {
@@ -414,7 +428,7 @@ export function createHostMessageFilter(): HostMessageFilter {
     const pin = next.initialPin as Record<string, unknown> | undefined;
     if (pin !== undefined && (!pin || typeof pin !== "object"
       || !Number.isFinite(pin.line) || !Number.isFinite(pin.viewportTop))) return false;
-    if (typeof message.contentHtml !== "string" || message.contentHtml.length > MAX_PATCH_CONTENT_LENGTH) return false;
+    if (typeof message.contentHtml !== "string" || message.contentHtml.length > MAX_PAGE_TEXT_LENGTH) return false;
     if (!PATCH_STATUSES.includes(message.status as string)) return false;
     if (typeof message.label !== "string" || message.label.length > 500) return false;
     if (message.message !== undefined && (typeof message.message !== "string" || message.message.length > 20000)) return false;
@@ -425,6 +439,24 @@ export function createHostMessageFilter(): HostMessageFilter {
         && entry.severity.length <= 50 && typeof entry.text === "string" && entry.text.length <= 20000
         && (entry.code === undefined || (typeof entry.code === "string" && entry.code.length <= 100)));
   };
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
+  const isValidEditSource = (message: Readonly<Record<string, unknown>>): boolean =>
+    typeof message.editId === "string"
+    && (message.error === undefined || typeof message.error === "string")
+    && (message.unsavedText === undefined
+      || (typeof message.unsavedText === "string" && message.unsavedText.length <= MAX_PAGE_TEXT_LENGTH))
+    && (message.done === undefined || message.done === true)
+    && (message.renderFollows === undefined || message.renderFollows === true)
+    && (message.originalText === undefined
+      || (typeof message.originalText === "string" && message.originalText.length <= MAX_PAGE_TEXT_LENGTH))
+    && [message.line, message.endLine, message.insertAfterLine]
+      .every((value) => value === undefined || (Number.isSafeInteger(value) && (value as number) >= 0));
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
+  const isValidFrontmatterResult = (message: Readonly<Record<string, unknown>>): boolean =>
+    typeof message.editId === "string"
+    && (message.saved === undefined || typeof message.saved === "boolean")
+    && (message.unchanged === undefined || message.unchanged === true)
+    && (message.error === undefined || typeof message.error === "string");
   const MAX_BASELINE_LENGTH = 20 * 1024 * 1024;
   const MAX_BASELINE_HUNKS = 100_000;
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
@@ -445,8 +477,10 @@ export function createHostMessageFilter(): HostMessageFilter {
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-059
     previewPropertiesTable: { addressing: "render", isValid: (message) => typeof message.markup === "string" },
     previewContentPatch: { addressing: "render", isValid: isValidContentPatch },
-    previewFrontmatterResult: render,
-    previewEditSource: render,
+    previewFrontmatterResult: { addressing: "render", isValid: isValidFrontmatterResult },
+    // The answer to a detached save arrives after the editor closed, when a render may have moved
+    // the page identity: the edit id names the save, the document names the page (CR 475).
+    previewEditSource: { addressing: "document", isValid: isValidEditSource },
     previewCheckboxResult: render,
     // Matched by edit id: the rename itself moves the revision before the answer arrives.
     previewLabelRenameResult: ownId,

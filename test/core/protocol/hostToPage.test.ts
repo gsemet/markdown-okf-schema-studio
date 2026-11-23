@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import type { PageIdentity } from "../../../src/core/protocol/envelope";
-import { createHostMessageFilter, type HostToPageType } from "../../../src/core/protocol/hostToPage";
+import { createHostMessageFilter, MAX_PAGE_TEXT_LENGTH, type HostToPageType } from "../../../src/core/protocol/hostToPage";
 
 /** The filter as the page runs it (the page bundle imports it). */
 const filter = createHostMessageFilter();
@@ -188,4 +188,37 @@ test("the save command names the render and carries nothing else", () => {
   assert.equal(send({ ...page, documentId: "file:///other.md" }), false, "another document");
   assert.equal(send({}), false, "no identity");
   assert.equal(filter.rules.previewSaveCommand.addressing, "render");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+test("previewEditSource and previewFrontmatterResult refuse a payload of the wrong shape", () => {
+  const refused: Array<[HostToPageType, Record<string, unknown>]> = [
+    ["previewEditSource", { editId: undefined }],
+    ["previewEditSource", { error: 3 }],
+    ["previewEditSource", { unsavedText: 3 }],
+    ["previewEditSource", { unsavedText: "x".repeat(MAX_PAGE_TEXT_LENGTH + 1) }],
+    ["previewEditSource", { done: false }],
+    ["previewEditSource", { renderFollows: "yes" }],
+    ["previewEditSource", { originalText: 3 }],
+    ["previewEditSource", { line: 1.5 }],
+    ["previewFrontmatterResult", { editId: 3 }],
+    ["previewFrontmatterResult", { saved: "yes" }],
+    ["previewFrontmatterResult", { unchanged: 1 }],
+    ["previewFrontmatterResult", { error: {} }],
+  ];
+  for (const [type, payload] of refused) {
+    assert.equal(filter.accepts({ ...message(type, page), ...payload }, page), false, `${type} ${JSON.stringify(payload).slice(0, 80)}`);
+  }
+  assert.equal(filter.accepts({
+    ...message("previewEditSource", page), error: "No.", unsavedText: "kept", originalText: undefined,
+  }, page), true);
+  assert.equal(filter.accepts({ ...message("previewEditSource", page), done: true, renderFollows: true }, page), true);
+  assert.equal(filter.accepts({ ...message("previewFrontmatterResult", page), saved: true, unchanged: true }, page), true);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+test("the answer to a detached save finds the page after a render moved its identity", () => {
+  const moved = { ...page, revision: 9, requestId: 14 };
+  assert.equal(filter.accepts({ type: "previewEditSource", ...page, editId: "e", done: true }, moved), true);
+  assert.equal(filter.accepts({ type: "previewEditSource", ...page, documentId: "file:///other.md", editId: "e", done: true }, moved), false);
 });

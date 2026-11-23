@@ -409,17 +409,22 @@ test("Done, Ctrl+Enter and the blur post one final save while the first is in fl
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
-test("Cancel and Escape are ignored while the final save is in flight", () => {
-  const harness = createRuntimeHarness();
-  const textarea = openBlockEditorWithSource(harness);
-  textarea.value = "Second paragraph, changed.";
-  textarea.dispatch("input");
-  findButton(harness, DONE).dispatch("click");
-  const before = harness.messages.length;
-  findButton(harness, CANCEL).dispatch("click");
-  textarea.dispatch("keydown", key("Escape").event);
-  assert.deepEqual(harness.messages.slice(before), [], "nothing is posted");
-  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true", "the editor stays open");
+test("Cancel and Escape close the editor while the final save is in flight", () => {
+  for (const leave of ["Cancel", "Escape"]) {
+    const harness = createRuntimeHarness();
+    const textarea = openBlockEditorWithSource(harness);
+    textarea.value = "Second paragraph, changed.";
+    textarea.dispatch("input");
+    findButton(harness, DONE).dispatch("click");
+    const before = harness.messages.length;
+    if (leave === "Cancel") findButton(harness, CANCEL).dispatch("click");
+    else textarea.dispatch("keydown", key("Escape").event);
+    assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null, `${leave}: the editor closes`);
+    const posted = harness.messages.slice(before).map((message) => message.type);
+    assert.deepEqual(posted, ["previewEditClosed"], `${leave}: the host is told the editor closed, nothing else`);
+    assert.equal(postsOf(harness, "previewEditSave").filter((message) => message.final === true).length, 1,
+      `${leave}: the save is not posted again`);
+  }
 
   const idle = createRuntimeHarness();
   const idleTextarea = openBlockEditorWithSource(idle);

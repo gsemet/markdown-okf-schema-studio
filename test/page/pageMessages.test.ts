@@ -157,8 +157,9 @@ const CASES: readonly MessageCase[] = [
     badPayloads: [{ line: 0 }, { line: -3 }, { line: 1.5 }, { line: "50" }, { line: undefined }],
   },
   {
+    // CR 475: the answer to a detached save arrives after a render may have moved the identity.
     type: "previewEditSource",
-    rule: "render",
+    rule: "document",
     prepare: openBlockEditorRequest,
     message: (harness) => ({
       type: "previewEditSource",

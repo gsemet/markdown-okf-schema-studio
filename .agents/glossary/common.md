@@ -93,3 +93,5 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **View preference**: per-workspace preview setting changed from toolbar rows 2 to 4, `src/core/state/previewViewPreferences.ts`.
 - **Warning banner**: one-line notice at the top of a successfully rendered page counting the `conf.py` MyST extension warnings, with Open Problems and close buttons; out of the flow, closed per document for the session (`[data-sphinx-preview-warning-banner]`, `src/page/modules/warningBanner.ts`).
 - **Width mode**: Margin / Auto / Full width preview column state (`data-sphinx-preview-width`); Auto lets wide tables and figures break out of the column.
+- **Detached save**: a final save whose editor the writer closed with Cancel or Escape while it was in flight; the host answers it with `done` or an error that gives the typed text back (`src/page/features/detachedSave.ts`, `src/session/features/detachedEdits.ts`).
+- **Edit in flight**: an open editor, or a detached save the host has not answered; no other edit gesture starts meanwhile.

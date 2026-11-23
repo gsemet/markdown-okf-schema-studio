@@ -8,6 +8,7 @@
 import { createFrontmatterMenu } from "./frontmatterMenu";
 import { openFrontmatterValueEditor } from "./frontmatterValueEditor";
 import type { FrontmatterEdit, FrontmatterEditor, PageRuntime } from "./pageRuntime";
+import { editInFlight } from "./detachedSaveState";
 
 /** The frontmatter editors of a page. */
 export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
@@ -181,7 +182,11 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-024
   function openFrontmatterKeyEditor(row: Element, nameCell: Element): void {
-    if (state.activeBlockEdit || state.activeFrontmatterEdit || row.getAttribute("data-okf-editable") !== "true") return;
+    // A save left in flight by Cancel ends first; the field opens after it when its row is still there.
+    if (!state.activeBlockEdit && rt.detachedSaves.deferField(() => {
+      if (row.isConnected !== false) openFrontmatterKeyEditor(row, nameCell);
+    })) return;
+    if (editInFlight(state) || state.activeFrontmatterEdit || row.getAttribute("data-okf-editable") !== "true") return;
     const name = row.getAttribute("data-okf-field");
     if (!name) return;
     let value: unknown;
@@ -327,6 +332,12 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     edit.plainSavePending = false;
     const afterResult = edit.afterResult;
     edit.afterResult = undefined;
+    if (message.saved === true && message.unchanged === true) {
+      // The host wrote nothing, so no render follows: this answer ends the field.
+      closeFrontmatterEditor("unchanged save");
+      afterResult?.();
+      return;
+    }
     if (message.saved === true) {
       edit.status.removeAttribute("data-visible");
       edit.status.removeAttribute("data-state");

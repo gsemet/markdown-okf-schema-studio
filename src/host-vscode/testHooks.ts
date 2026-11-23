@@ -249,6 +249,25 @@ export function holdEditSourcesForTests(): { held(): number; release(): void } {
 }
 
 /**
+ * Holds back the document write of every block edit of the active preview from now on, so a final
+ * save stays in flight on purpose. `held()` counts the writes waiting; `release()` lets them go, in
+ * order, and stops holding. The extension and a preview must be active.
+ */
+export function holdBlockEditAppliesForTests(): { held(): number; release(): void } {
+  const preview = activePreview();
+  if (!preview) throw new Error("holdBlockEditAppliesForTests needs an active preview.");
+  const queue: Array<() => void> = [];
+  preview.edits.heldApplies = queue;
+  return {
+    held: () => queue.length,
+    release() {
+      if (preview.edits.heldApplies === queue) preview.edits.heldApplies = undefined;
+      for (const go of queue.splice(0)) go();
+    },
+  };
+}
+
+/**
  * Records every selection change of the text editors from now on, with the kind VS Code reported,
  * the selection count, the first line and the jump the host read from it (trial J1). `stop()` ends
  * the recording. The extension must be active.

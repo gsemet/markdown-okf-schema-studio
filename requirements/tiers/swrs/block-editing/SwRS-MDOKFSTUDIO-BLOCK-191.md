@@ -28,12 +28,14 @@ implemented_in_files:
 - src/core/state/editLock.ts
 - src/page/features/hostHandlers.ts
 - src/session/features/blockEdits.ts
+- src/session/features/detachedEdits.ts
 tested_in_files:
 - test/core/state/blockRange.test.ts
 - test/core/state/editLock.test.ts
 - test/host/previewTiming.test.ts
 - test/integration/previewEditing.test.ts
 - test/page/runtimeBlockEditor.test.ts
+- test/session/detachedSave.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -112,6 +114,21 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 | A held edit of a table cell editor and an outside change (undo, redo, revert) that overlaps its table | No error is shown: the edit is released without writing and the render of the buffer reaches the page, whose content patch closes the editor (SwRS-MDOKFSTUDIO-TABLE-119); the text was autosaved live, so the buffer already holds it |
 | The same change over a prose block editor | The conflict above applies |
 
+### Scenario (boundary): The page closed the editor during its final save
+| Input | Outcome |
+| --- | --- |
+| previewEditClosed with detached for the editor of the held edit | The edit completes with no restore and is always answered with previewEditSource done |
+| An open that arrives while the edit is detached | It is held, at most one: a later open replaces it and the replaced one is answered "Another Markdown block is already being edited."; it is handled with its usual checks when the edit succeeds and refused when it fails |
+| A previewReady that reports an open editor while the edit is detached | The lock is kept |
+| A previewReady that reports none, a page replaced or a document switch | The detached edit is released |
+| The release of a detached edit while a newer page editor is recorded | Only the host hold is freed; the render keeps waiting for the newer editor |
+| A failure or an outside change of a detached edit | The page editor lock of the failed edit is kept until previewEditReopen; with reopened false the edit is released, the preview renders and the Copy text warning is shown |
+
+### Scenario (refusal): An outside change during a final save keeps the text unwritten and the editor open
+- GIVEN a held edit whose final save is requested and not written
+- WHEN the document changes from outside the preview
+- THEN nothing is written, the page gets the error with the text, the host edit is released with the page editor kept and the render waits
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TABLE-119: the cell editor that an outside change closes
@@ -127,6 +144,7 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 - Method: test/page/runtimeBlockEditor.test.ts (`STAB-03: an editor the host watches reports its close; without a watch the close stays silent`, `STAB-03: a watch for an editor that is already closed is answered at once`, `STAB-03: a watch sent while the host already follows another document is still answered`).
 - Method: test/core/state/blockRange.test.ts (`STAB-06: a change before the open block shifts it by the inserted or removed length`, `STAB-06: a change at or after the end of the open block leaves it in place`, `STAB-06: several changes of one event add up; offsets refer to the text before the event`, `STAB-06: a change inside or across the open block is a conflict`, `STAB-06: an empty block (an insertion editor) conflicts only with a change at its offset`); the controller path trackOutsideChange through the host events has no test.
 - Method: test/host/previewTiming.test.ts (a table cell editor): `an undo inside the table releases a held host edit without writing and renders`; test/core/state/editLock.test.ts: `a table cell editor records its source range at open and clears it when it closes`, `a change before the cell editor's table moves its range, one inside it overlaps`.
+- Method: test/session/detachedSave.test.ts (the detached edit, its answers, the held open, the lock kept by a newer editor, the outside change).
 - Criteria: sourceStartOffset and lastSavedText describe the block in the document; releaseActiveBlockEdit runs the queued work once; watchedPageEditorId remembers the editor; the close message is addressed by the editor id only and closePageEditor compares the editor id; onPreviewReady releases only in the cases above; rebaseBlockRange returns the new start or the conflict and the host posts the error.
 
 <!-- okf:links:start -->
