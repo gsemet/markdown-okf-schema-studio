@@ -52,6 +52,20 @@ A pull request is a draft until it is mergeable.
 - The release version PR and its fix PRs follow
   [release-process.guidelines.md](release-process.guidelines.md).
 
+## Updating a branch
+
+A pull request or merge request branch is updated by rebase only, never by merge: history is
+linear (constitution, section 4).
+
+- Allowed: the forge's rebase action (for example GitHub's "Update with rebase", or GitLab's
+  "Rebase" on a merge request), or a local rebase on the base branch followed by
+  `git push --force-with-lease`.
+- Forbidden: any action that merges the base into the branch, for example GitHub's plain "Update
+  branch" button or a local `git merge origin/main`.
+- If you cannot rebase the branch yourself, ask whoever owns it to rebase it.
+- `ci-static` enforces the rule with `just check-no-merge-commits`. A red check is fixed by the
+  rebase command the check prints.
+
 ## GitHub issues
 
 When a change comes from a GitHub issue, the issue number is on the `issue:` line of the change's

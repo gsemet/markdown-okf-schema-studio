@@ -210,7 +210,7 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py test/build/test_check_main_paths.py
+    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py test/build/test_check_main_paths.py test/build/test_no_merge_commits.py
 
 # Check that the current version has valid release notes under docs/releases-notes/.
 release-notes-check:
@@ -290,11 +290,24 @@ site-from-run RUN_ID:
     rm -rf out/reports-download
     just site-assemble
 
-# CI job "static": justfile format check, TypeScript, minimum-VS-Code type, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks, online npm audit, Sphinx contract, requirements report.
+# Fail when the commits of the branch (BASE..HEAD) include a merge commit; the branch is updated by rebase only.
+check-no-merge-commits BASE="origin/main":
+    bash "{{ replace(justfile_directory(), '\', '/') }}/scripts/check-no-merge-commits.sh" "{{ BASE }}"
+
+# Print the base ref of the merge-commit check: the target branch of the pull request or merge request (GitHub or GitLab), else origin/main.
+[private]
+_merge-check-base:
+    #!/usr/bin/env bash
+    set -eu
+    target="${GITHUB_BASE_REF:-${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-}}"
+    echo "origin/${target:-main}"
+
+# CI job "static": no merge commit in the branch, justfile format check, TypeScript, minimum-VS-Code type, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks, online npm audit, Sphinx contract, requirements report.
 ci-static:
     #!/usr/bin/env bash
     set -uo pipefail
-    if just --unstable --fmt --check && just check && just audit && just sphinx-check && just requirements-report; then
+    base="$(just _merge-check-base)"
+    if just check-no-merge-commits "$base" && just --unstable --fmt --check && just check && just audit && just sphinx-check && just requirements-report; then
         echo "ci-static: passed"
     else
         echo "ci-static: FAILED" >&2
