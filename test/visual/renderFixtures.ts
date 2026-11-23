@@ -52,6 +52,7 @@ import { contentWithCellEditorOpenHtml, drawnContentHtml } from "./drawnContent"
 import { buildHtmlExport } from "../../src/core/export/htmlExport";
 import { katexFontUrls } from "../../src/core/export/exportStyles";
 import { THEME_TOKEN_NAMES, VSCODE_VARIABLE_PREFIX } from "../../src/core/preview/themeTokens";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const visualRoot = path.resolve(__dirname, "../../../test/visual");
 const fixtureDirectory = path.join(visualRoot, "fixtures");
@@ -128,13 +129,13 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
       }
       return { path: target, source: fs.readFileSync(target, "utf8") };
     },
-    listDocuments: (pattern, from) => listGlobDocuments(pattern, path.dirname(from), () => true, from),
+    listDocuments: (pattern, from) => listGlobDocuments(createNodeFileSystem(), pattern, path.dirname(from), () => true, from),
   });
 
   // A preview with restricted reads (Restricted Mode) resolves under the restricted policy, as the host does.
-  const policy = createPreviewResourcePolicy(documentDirectory, visualRoot, options.restrictedReads === true);
+  const policy = createPreviewResourcePolicy(createNodeFileSystem(), documentDirectory, visualRoot, options.restrictedReads === true);
   const resolveResource = (request: string, baseDirectory: string): ResolvedResource | undefined => {
-    const resourcePath = policy.resolveResource(request, baseDirectory, { image: true });
+    const resourcePath = policy.resolvePrimed(request, baseDirectory, { image: true });
     if (!resourcePath) {
       return undefined;
     }
@@ -144,7 +145,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     };
   };
   // The host appends the list of blank runs to the content it renders.
-  const rewritten = rewriteSphinxHtml(wrap(html + blankRunsMarker(source), ""), {
+  const sanitize = (): ReturnType<typeof rewriteSphinxHtml> => rewriteSphinxHtml(wrap(html + blankRunsMarker(source), ""), {
     outputRoot: documentDirectory,
     policy,
     nonce: "visual-test",
@@ -156,9 +157,19 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     resolveNavigation: (request) => ({ kind: "deferred", value: request }),
     ...(options.trusted === false ? { allowExternalScripts: false } : {}),
   });
+  // As the host does: the sanitizer is synchronous, so what it could not resolve is primed and it runs again.
+  let rewritten = sanitize();
+  for (let pass = 0; pass < 3; pass += 1) {
+    const missed = policy.takeUnprimed();
+    if (missed.length === 0) break;
+    await policy.prime(missed);
+    policy.diagnostics.length = 0;
+    rewritten = sanitize();
+  }
   // The built-in engine (the default) draws in the page; the JAR/PATH pipeline (useJar) in the host.
   const builtinPlantUml = plantumlExpectation === "builtin" || plantumlExpectation === "builtin-unsupported";
   const plantUml = builtinPlantUml ? { diagrams: [] } : await renderPlantUmlDiagrams(rewritten.html, {
+    files: createNodeFileSystem(),
     executablePath: fixture === "13-plantuml-executable-not-found"
       ? "plantuml-screenshot-executable-not-found"
       : plantumlExpectation === "unconfigured" ? "plantuml-visual-intentionally-unconfigured"

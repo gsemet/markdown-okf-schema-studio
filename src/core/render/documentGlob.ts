@@ -1,5 +1,9 @@
-import * as fs from "node:fs";
 import * as path from "node:path";
+
+import type { FileKind, FileSystem } from "../files/fileSystem";
+
+/** What the glob asks of the file system: a directory listing, and whether an entry is a symbolic link. */
+export type GlobFiles = Pick<FileSystem, "readDirectory" | "isSymbolicLink">;
 
 const DOCUMENT_EXTENSIONS = new Set([".md", ".markdown", ".myst"]);
 const SKIPPED_DIRECTORIES = new Set(["node_modules", ".git", "_build", "out"]);
@@ -47,12 +51,13 @@ export function globToRegExp(pattern: string): RegExp {
  * glob, as sorted posix requests relative to it, extension included. Bounded in matches,
  * directories and depth; `allow` vets each candidate request (the resource policy).
  */
-export function listGlobDocuments(
+export async function listGlobDocuments(
+  files: GlobFiles,
   pattern: string,
   baseDirectory: string,
-  allow: (request: string) => boolean,
+  allow: (request: string) => boolean | Promise<boolean>,
   excludePath?: string,
-): string[] {
+): Promise<string[]> {
   const normalized = pattern.replace(/\\/gu, "/").replace(/^\.\//u, "");
   if (normalized.startsWith("/") || normalized.split("/").includes("..")) return [];
   const segments = normalized.split("/");
@@ -67,32 +72,39 @@ export function listGlobDocuments(
   const matches: string[] = [];
   let directories = 0;
 
-  const walk = (relative: string, depth: number): void => {
+  // A symbolic link is never listed nor walked (the listing reports the kind of its target).
+  const isLink = (request: string): Promise<boolean> =>
+    files.isSymbolicLink(path.join(baseDirectory, request)).catch(() => true);
+
+  const walk = async (relative: string, depth: number): Promise<void> => {
     if (depth > depthLimit || directories >= MAX_GLOB_DIRECTORIES || matches.length >= MAX_GLOB_MATCHES) return;
     directories += 1;
-    let entries: fs.Dirent[];
+    let entries: Array<[string, FileKind]>;
     try {
-      entries = fs.readdirSync(path.join(baseDirectory, relative), { withFileTypes: true });
+      entries = await files.readDirectory(path.join(baseDirectory, relative));
     } catch {
       return;
     }
-    entries.sort((a, b) => a.name.localeCompare(b.name));
-    for (const entry of entries) {
+    entries.sort((a, b) => a[0].localeCompare(b[0]));
+    for (const [name, kind] of entries) {
       if (matches.length >= MAX_GLOB_MATCHES) return;
-      const request = relative ? `${relative}/${entry.name}` : entry.name;
-      if (entry.isDirectory()) {
-        if (!entry.name.startsWith(".") && !SKIPPED_DIRECTORIES.has(entry.name)) walk(request, depth + 1);
+      const request = relative ? `${relative}/${name}` : name;
+      if (kind === "directory") {
+        if (!name.startsWith(".") && !SKIPPED_DIRECTORIES.has(name) && !(await isLink(request))) {
+          await walk(request, depth + 1);
+        }
         continue;
       }
-      const extension = path.extname(entry.name).toLowerCase();
-      if (!entry.isFile() || !DOCUMENT_EXTENSIONS.has(extension) || entry.name.startsWith(".")) continue;
+      const extension = path.extname(name).toLowerCase();
+      if (kind !== "file" || !DOCUMENT_EXTENSIONS.has(extension) || name.startsWith(".")) continue;
       const docname = request.slice(0, request.length - extension.length);
       if (!regex.test(docname) && !regex.test(request)) continue;
       if (excludePath && path.resolve(baseDirectory, request) === path.resolve(excludePath)) continue;
-      if (allow(request)) matches.push(request);
+      if (await isLink(request)) continue;
+      if (await allow(request)) matches.push(request);
     }
   };
 
-  walk(fixed.join("/"), 1);
+  await walk(fixed.join("/"), 1);
   return matches.sort();
 }

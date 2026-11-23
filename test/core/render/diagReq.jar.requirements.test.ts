@@ -18,6 +18,7 @@ import {
   resetPlantUmlProcessSpawnerForTests,
   setPlantUmlProcessSpawnerForTests,
 } from "../../../src/core/render/plantUmlRenderer";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 class FakeChild extends EventEmitter {
   public readonly stdout = new EventEmitter();
@@ -92,12 +93,12 @@ test("JAR results come back in document order with the source line of their diag
   });
   const html = figure("first", 3) + figure("second", 9) + figure("third", 15);
 
-  const result = await renderPlantUmlDiagrams(html, { jarPath, workspaceRoot: root, trusted: true });
+  const result = await renderPlantUmlDiagrams(html, { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true });
 
   assert.deepEqual(result.diagrams.map((item) => item.line), [3, 9, 15]);
   assert.deepEqual(result.diagrams.map((item) => item.svg), [svgFor("first"), svgFor("second"), svgFor("third")]);
 
-  const single = await renderPlantUmlDiagrams(figure("second", 21), { jarPath, workspaceRoot: root, trusted: true });
+  const single = await renderPlantUmlDiagrams(figure("second", 21), { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true });
   assert.deepEqual(single.diagrams.map((item) => [item.status, item.line]), [["rendered", 21]]);
 });
 
@@ -125,7 +126,7 @@ test("the JAR pipeline runs one process per diagram, at most 2 at once, results 
   const html = figure("a", 1) + figure("b", 2) + figure("c", 3);
   const begin = Date.now();
 
-  const rendering = renderPlantUmlDiagrams(html, { jarPath, workspaceRoot: root, trusted: true });
+  const rendering = renderPlantUmlDiagrams(html, { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true });
   await settle();
   assert.deepEqual(started, ["a", "b"], "the third diagram waits while 2 processes run");
   finish("b");
@@ -145,7 +146,7 @@ test("the JAR pipeline runs one process per diagram, at most 2 at once, results 
   assert.ok(Date.now() - begin < 1000, "no wait on the 30 s process timeout");
 
   const none = scriptSpawner(() => assert.fail("no process may start"));
-  const empty = await renderPlantUmlDiagrams("<p>text</p>", { jarPath, workspaceRoot: root, trusted: true });
+  const empty = await renderPlantUmlDiagrams("<p>text</p>", { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true });
   assert.deepEqual(empty, { diagrams: [], diagnostics: [] });
   assert.equal(none.spawned(), 0);
 });
@@ -159,6 +160,7 @@ test("a spawn call that throws is reported on the diagram like any other failure
     }) as never,
   });
   const thrown = await renderPlantUmlDiagrams(figure("@startuml\n@enduml", 4), {
+    files: createNodeFileSystem(),
     workspaceRoot: root,
     trusted: true,
   });
@@ -171,6 +173,7 @@ test("a spawn call that throws is reported on the diagram like any other failure
     }) as never,
   });
   const missing = await renderPlantUmlDiagrams(figure("@startuml\n@enduml", 4), {
+    files: createNodeFileSystem(),
     workspaceRoot: root,
     trusted: true,
   });
@@ -186,7 +189,7 @@ test("a missing java is reported like a missing command; other spawn errors keep
   // A machine with JAVA_HOME set (a CI runner) would name the absolute java path instead of "java".
   const javaHome = process.env.JAVA_HOME;
   delete process.env.JAVA_HOME;
-  const absent = await renderPlantUmlDiagrams(figure("a", 2), { jarPath, workspaceRoot: root, trusted: true })
+  const absent = await renderPlantUmlDiagrams(figure("a", 2), { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true })
     .finally(() => {
       if (javaHome !== undefined) process.env.JAVA_HOME = javaHome;
     });
@@ -200,7 +203,7 @@ test("a missing java is reported like a missing command; other spawn errors keep
   scriptSpawner((_input, child) => {
     process.nextTick(() => child.emit("error", Object.assign(new Error("spawn java EACCES"), { code: "EACCES" })));
   });
-  const denied = await renderPlantUmlDiagrams(figure("a", 2), { jarPath, workspaceRoot: root, trusted: true });
+  const denied = await renderPlantUmlDiagrams(figure("a", 2), { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true });
   assert.deepEqual(denied.diagrams, [{ status: "error", message: "spawn java EACCES", line: 2 }]);
 });
 
@@ -214,6 +217,7 @@ test("a diagram text over 1 MiB is refused without a process, a text of exactly 
   const limit = 1024 * 1024;
 
   const over = await renderPlantUmlDiagrams(figure("x".repeat(limit + 1), 5), {
+    files: createNodeFileSystem(),
     jarPath,
     workspaceRoot: root,
     trusted: true,
@@ -226,6 +230,7 @@ test("a diagram text over 1 MiB is refused without a process, a text of exactly 
   assert.equal(spawner.spawned(), 0);
 
   const at = await renderPlantUmlDiagrams(figure("x".repeat(limit), 5), {
+    files: createNodeFileSystem(),
     jarPath,
     workspaceRoot: root,
     trusted: true,
@@ -248,7 +253,7 @@ test("an output over 8 MiB stops the process; an output of exactly 8 MiB is acce
     }
   });
 
-  const over = await renderPlantUmlDiagrams(figure("over", 6), { jarPath, workspaceRoot: root, trusted: true });
+  const over = await renderPlantUmlDiagrams(figure("over", 6), { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true });
   assert.deepEqual(over.diagrams, [{
     status: "error",
     message: "PlantUML SVG output exceeds the 8 MiB preview limit.",
@@ -256,7 +261,7 @@ test("an output over 8 MiB stops the process; an output of exactly 8 MiB is acce
   }]);
   assert.equal(children[0]?.killed, true);
 
-  const exact = await renderPlantUmlDiagrams(figure("exact", 6), { jarPath, workspaceRoot: root, trusted: true });
+  const exact = await renderPlantUmlDiagrams(figure("exact", 6), { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true });
   assert.equal(exact.diagrams[0]?.status, "rendered");
   assert.equal(children[1]?.killed, false);
 });
@@ -276,7 +281,7 @@ test("one failing JAR diagram leaves the pictures of the other diagrams intact",
   });
   const html = figure("one", 1) + figure("bad", 2) + figure("three", 3);
 
-  const result = await renderPlantUmlDiagrams(html, { jarPath, workspaceRoot: root, trusted: true });
+  const result = await renderPlantUmlDiagrams(html, { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true });
   assert.deepEqual(result.diagrams.map((item) => item.status), ["rendered", "error", "rendered"]);
   assert.equal(result.diagnostics.length, 1);
 
@@ -291,7 +296,7 @@ test("one failing JAR diagram leaves the pictures of the other diagrams intact",
     });
   });
   clearPlantUmlCacheForTests(); // the first pass was cached; this pass must meet the new failing process
-  const failed = await renderPlantUmlDiagrams(html, { jarPath, workspaceRoot: root, trusted: true });
+  const failed = await renderPlantUmlDiagrams(html, { files: createNodeFileSystem(), jarPath, workspaceRoot: root, trusted: true });
   assert.deepEqual(failed.diagrams.map((item) => item.status), ["error", "error", "error"]);
 });
 
@@ -302,6 +307,7 @@ test("a jarPath naming a directory is refused on every diagram before any proces
   const spawner = scriptSpawner(() => assert.fail("no process may start"));
 
   const result = await renderPlantUmlDiagrams(figure("a", 1) + figure("b", 2), {
+    files: createNodeFileSystem(),
     jarPath: directory,
     workspaceRoot: root,
     trusted: true,
@@ -328,6 +334,7 @@ test("a JAR process that ends on a signal names the signal, with its error outpu
     });
   });
   const result = await renderPlantUmlDiagrams(figure("noisy", 1) + figure("silent", 2), {
+    files: createNodeFileSystem(),
     jarPath,
     workspaceRoot: root,
     trusted: true,

@@ -7,6 +7,7 @@ import { insertionText, planBlankRunInsertion } from "../../../src/core/mapping/
 import { blankRuns } from "../../../src/core/mapping/blankRuns";
 import { renderPreviewSource } from "../../../src/core/render/renderPipeline";
 import { attribute, findElements, parseHtml, textContent } from "../render/dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /**
  * A block written or pasted in place of a blank run inside a list (CR-448): the host indents it to the
@@ -18,7 +19,7 @@ const EOLS = [["LF", "\n"], ["CRLF", "\r\n"], ["CR", "\r"]] as const;
 const join = (eol: string, entries: string[]): string => entries.join(eol);
 
 const render = (text: string) =>
-  renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false });
+  renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false }, createNodeFileSystem());
 
 /** The text with `raw` written in the only run of the text, `itemLine` being its list item. */
 function writeInRun(text: string, itemLine: number | undefined, raw: string): string {

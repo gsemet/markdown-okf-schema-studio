@@ -18,6 +18,7 @@ import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { MAX_INCLUDED_FILE_BYTES } from "../../../src/core/security/resource-policy";
 import { findElement, findElements, hasClass, parseHtml, textContent } from "./dom";
 import { inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const root = "/virtual";
 
@@ -36,6 +37,7 @@ async function renderOnDisk(markdown: string, folder: string, requestId = 1) {
   const file = path.join(folder, "main.md");
   fs.writeFileSync(file, markdown);
   return renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: file }, languageId: "markdown", version: 1, getText: () => markdown },
     workspaceRoot: folder,
     requestId,
@@ -112,6 +114,7 @@ test("the rendered HTML is the same whatever the palette mode: the render takes 
   const outputs: string[] = [];
   for (let mode = 0; mode < 3; mode += 1) { // strict, gfm, myst: the mode is not an input of the render
     const result = await renderPreviewDocument({
+      files: createNodeFileSystem(),
       document: inlineDocument(markdown),
       workspaceRoot,
       requestId: 5,

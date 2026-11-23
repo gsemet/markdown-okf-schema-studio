@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElements, hasClass, parseHtml, textContent, type HtmlDocument, type HtmlElement } from "./dom";
 import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /**
  * The renderer gives the line marker its lines (`data-okf-marker-line`): the rows of a pipe table
@@ -13,6 +14,7 @@ import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
 
 async function render(source: string): Promise<{ html: string; dom: HtmlDocument }> {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(source),
     workspaceRoot,
     requestId: 1,

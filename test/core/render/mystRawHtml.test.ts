@@ -6,6 +6,7 @@ import { rewriteSphinxHtml } from "../../../src/core/security/html-sanitizer";
 import { ResourcePolicy } from "../../../src/core/security/resource-policy";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent } from "./dom";
 import { inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const README = [
   "<div align=\"center\">",
@@ -25,11 +26,12 @@ const README = [
 /** Renders the text and passes the page through the preview sanitizer, as the webview does. */
 async function render(text: string, requestId = 1): Promise<ReturnType<typeof parseHtml>> {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(text), workspaceRoot, requestId, isWorkspaceTrusted: () => true,
   });
   const rewritten = rewriteSphinxHtml(result.html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     sourceMapping: { sourceFile: "inline.md", documentId: "doc" },
     resolveResource: (request) => ({ path: request, uri: `vscode-resource:${request}` }),

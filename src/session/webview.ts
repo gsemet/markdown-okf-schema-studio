@@ -17,6 +17,8 @@ import {
 } from "../core/security/html-sanitizer";
 import {
   createPreviewResourcePolicy,
+  type PolicyFiles,
+  type ResourceRequest,
   resourceReferenceSuffix,
   SecurityDiagnostic,
 } from "../core/security/resource-policy";
@@ -159,12 +161,48 @@ function injectPropertiesTable(html: string, markup: string): string {
   return html;
 }
 
+/** The most extra passes of the sanitizer after its first one (see {@link buildPreviewWebviewHtml}). */
+const MAX_PRIMING_PASSES = 3;
+
+function decodeHtmlAttribute(value: string): string {
+  return value
+    .replace(/&#x([\da-f]+);/giu, (_, hex: string) => String.fromCodePoint(Number.parseInt(hex, 16)))
+    .replace(/&#(\d+);/gu, (_, decimal: string) => String.fromCodePoint(Number(decimal)))
+    .replace(/&quot;/gu, '"').replace(/&apos;/gu, "'").replace(/&lt;/gu, "<").replace(/&gt;/gu, ">")
+    .replace(/&amp;/gu, "&");
+}
+
+/**
+ * The resource requests the sanitizer is likely to resolve (`src`, `srcset`, `poster`, `data` and the
+ * `href` of a `<link>`), read off the HTML text (the quotes of the regular expressions are written as hexadecimal escapes) so the policy can ask the file system for them
+ * before the synchronous sanitizer runs. A guess only: a request it misses is found by the
+ * sanitizer itself and primed before a second pass.
+ */
+function likelyResourceRequests(html: string, baseDirectory: string): ResourceRequest[] {
+  const requests: string[] = [];
+  for (const match of html.matchAll(/\b(src|srcset|poster|data)\s*=\s*(?:\x22([^\x22]*)\x22|\x27([^\x27]*)\x27)/giu)) {
+    const value = decodeHtmlAttribute(match[2] ?? match[3] ?? "");
+    if (match[1].toLowerCase() === "srcset") {
+      for (const candidate of value.split(",")) requests.push(candidate.trim().split(/\s+/u)[0]);
+    } else {
+      requests.push(value);
+    }
+  }
+  for (const match of html.matchAll(/<link\b[^>]*?\bhref\s*=\s*(?:\x22([^\x22]*)\x22|\x27([^\x27]*)\x27)/giu)) {
+    requests.push(decodeHtmlAttribute(match[1] ?? match[2] ?? ""));
+  }
+  return [...new Set(requests)]
+    .filter((request) => request !== "" && !request.startsWith("#"))
+    .map((request) => ({ request, baseDirectory, options: { image: true } }));
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-001
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-023
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-022
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
-export function buildPreviewWebviewHtml(
+export async function buildPreviewWebviewHtml(
+  files: PolicyFiles,
   sphinxHtml: string,
   outputDirectory: string,
   /** Where the page loads workspace files and the extension bundle from (see AssetResolver). */
@@ -180,65 +218,88 @@ export function buildPreviewWebviewHtml(
   plantUmlRenderer: "builtin" | "host" = "host",
   /** Restricted reads: the resource policy is narrowed (TRUST-002). */
   restrictedReads = false,
-): PreviewWebviewResult {
-  const policy = createPreviewResourcePolicy(outputDirectory, workspaceRoot, restrictedReads);
+): Promise<PreviewWebviewResult> {
+  const policy = createPreviewResourcePolicy(files, outputDirectory, workspaceRoot, restrictedReads);
   const nonce = createNonce();
-  const resolvedStylesheets = new Set<string>();
-  const stylesheetDiagnostics: SecurityDiagnostic[] = [];
-  const resources = new Map<string, string>();
-  const resolveResource = (request: string, baseDirectory: string): ResolvedResource | undefined => {
-    const resourcePath = policy.resolveResource(request, baseDirectory, { image: true });
-    if (!resourcePath) {
-      return undefined;
-    }
-    const uri = `${assets.resourceUri(resourcePath)}${resourceReferenceSuffix(request)}`;
-    resources.set(uri, resourcePath);
-    return { path: resourcePath, uri };
-  };
-  // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
-  const resolveNavigation = (
-    request: string,
-    _baseDirectory: string,
-  ): { kind: "anchor" | "external" | "deferred" | "blocked"; value?: string } | ResolvedResource => {
-    const reference = classifyPreviewReference(request);
-    return reference.kind === "relative" || reference.kind === "wiki"
-      ? { kind: "deferred", value: reference.value }
-      : reference;
-  };
-  /**
-   * Refuses linked stylesheets outright.
-   *
-   * The preview renders a fragment from the buffer and supplies its own theme, so any
-   * `<link rel="stylesheet">` can only come from raw HTML in the document. Sanitizing one
-   * would mean rewriting a file that belongs to the user, which the preview must never do.
-   */
-  const processStylesheet = (stylesheetPath: string): void => {
-    if (resolvedStylesheets.has(stylesheetPath)) {
-      return;
-    }
-    resolvedStylesheets.add(stylesheetPath);
-    stylesheetDiagnostics.push({
-      code: "blocked-stylesheet",
-      message: "Ignored a linked stylesheet; the preview supplies its own theme.",
-      value: stylesheetPath,
+  // The sanitizer is synchronous and asks the policy about each local resource; the policy answers
+  // from the file facts `prime` gathered. The likely requests are primed first; a request the guess
+  // missed is refused in the pass, listed by the policy, primed, and the page sanitized again.
+  const sanitizePass = (): {
+    rewritten: ReturnType<typeof rewriteSphinxHtml>;
+    stylesheetDiagnostics: SecurityDiagnostic[];
+    resources: Map<string, string>;
+  } => {
+    const resolvedStylesheets = new Set<string>();
+    const stylesheetDiagnostics: SecurityDiagnostic[] = [];
+    const resources = new Map<string, string>();
+    const resolveResource = (request: string, baseDirectory: string): ResolvedResource | undefined => {
+      const resourcePath = policy.resolvePrimed(request, baseDirectory, { image: true });
+      if (!resourcePath) {
+        return undefined;
+      }
+      const uri = `${assets.resourceUri(resourcePath)}${resourceReferenceSuffix(request)}`;
+      resources.set(uri, resourcePath);
+      return { path: resourcePath, uri };
+    };
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
+    const resolveNavigation = (
+      request: string,
+      _baseDirectory: string,
+    ): { kind: "anchor" | "external" | "deferred" | "blocked"; value?: string } | ResolvedResource => {
+      const reference = classifyPreviewReference(request);
+      return reference.kind === "relative" || reference.kind === "wiki"
+        ? { kind: "deferred", value: reference.value }
+        : reference;
+    };
+    /**
+     * Refuses linked stylesheets outright.
+     *
+     * The preview renders a fragment from the buffer and supplies its own theme, so any
+     * `<link rel="stylesheet">` can only come from raw HTML in the document. Sanitizing one
+     * would mean rewriting a file that belongs to the user, which the preview must never do.
+     */
+    const processStylesheet = (stylesheetPath: string): void => {
+      if (resolvedStylesheets.has(stylesheetPath)) {
+        return;
+      }
+      resolvedStylesheets.add(stylesheetPath);
+      stylesheetDiagnostics.push({
+        code: "blocked-stylesheet",
+        message: "Ignored a linked stylesheet; the preview supplies its own theme.",
+        value: stylesheetPath,
+      });
+    };
+    // The sanitizer's one parse also numbers the source blocks (`sourceMapping`).
+    const rewritten = rewriteSphinxHtml(sphinxHtml, {
+      outputRoot: outputDirectory,
+      policy,
+      nonce,
+      ...(scrollContext ? {
+        sourceMapping: {
+          sourceFile: scrollContext.activeSourceFile,
+          documentId: scrollContext.documentId,
+        },
+      } : {}),
+      resolveResource,
+      resolveNavigation,
+      processStylesheet,
+      allowExternalScripts,
     });
+    return { rewritten, stylesheetDiagnostics, resources };
   };
-  // The sanitizer's one parse also numbers the source blocks (`sourceMapping`).
-  const rewritten = rewriteSphinxHtml(sphinxHtml, {
-    outputRoot: outputDirectory,
-    policy,
-    nonce,
-    ...(scrollContext ? {
-      sourceMapping: {
-        sourceFile: scrollContext.activeSourceFile,
-        documentId: scrollContext.documentId,
-      },
-    } : {}),
-    resolveResource,
-    resolveNavigation,
-    processStylesheet,
-    allowExternalScripts,
-  });
+  await policy.prime(likelyResourceRequests(sphinxHtml, outputDirectory));
+  const diagnosticsBefore = policy.diagnostics.length;
+  let pass = sanitizePass();
+  for (let extra = 0; extra < MAX_PRIMING_PASSES; extra += 1) {
+    const missed = policy.takeUnprimed();
+    if (missed.length === 0) break;
+    // The refusals of the first pass are recorded again by the next one.
+    policy.diagnostics.length = diagnosticsBefore;
+    await policy.prime(missed);
+    pass = sanitizePass();
+  }
+  policy.takeUnprimed();
+  const { rewritten, stylesheetDiagnostics, resources } = pass;
   const withPlantUml = injectPlantUmlDiagrams(rewritten.html, plantUmlDiagrams);
   const csp = createContentSecurityPolicy(assets.cspSource, nonce);
   const bundleUri = (file: string): string | undefined => assets.bundleUri(file);

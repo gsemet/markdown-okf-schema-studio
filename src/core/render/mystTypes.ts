@@ -24,6 +24,9 @@ export interface MystRenderResult {
   dependencies: string[];
 }
 
+/** A value, or the promise of it: the file reads of a render are asynchronous (the `FileSystem` port). */
+export type MaybePromise<T> = T | Promise<T>;
+
 /** A file an `{include}` read: its path and text. */
 export interface MystIncludeSource {
   path: string;
@@ -33,18 +36,18 @@ export interface MystIncludeSource {
 /** What a render may read besides the document: included files, diagram files, toctree globs. */
 export interface MystRenderContext {
   sourcePath?: string;
-  resolveInclude: (request: string, sourcePath: string) => MystIncludeSource | undefined;
+  resolveInclude: (request: string, sourcePath: string) => MaybePromise<MystIncludeSource | undefined>;
   /**
    * Reads the diagram file of `{uml} path.puml` (and of `{plantuml} path.puml` without a body)
    * under the rules of `{include}`, with the reason of a refusal. Unset: `resolveInclude` is used
    * and every refusal reads as a missing file.
    */
-  readDiagramFile?: (request: string, sourcePath: string) => BoundedTextRead;
+  readDiagramFile?: (request: string, sourcePath: string) => MaybePromise<BoundedTextRead>;
   /**
    * Lists the documents a `{toctree}` glob entry matches, as requests relative to the source
    * document's folder (any order). Unset: glob entries show as missing.
    */
-  listDocuments?: (pattern: string, sourcePath: string) => string[];
+  listDocuments?: (pattern: string, sourcePath: string) => MaybePromise<string[]>;
   /**
    * MyST extensions the document's Sphinx project enables, when that is known for certain.
    * Set: syntax that needs a missing extension is reported as a warning (rendering is unchanged).

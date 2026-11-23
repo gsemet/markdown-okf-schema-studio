@@ -19,6 +19,7 @@ import {
   resetPlantUmlProcessSpawnerForTests,
   setPlantUmlProcessSpawnerForTests,
 } from "../../../src/core/render/plantUmlRenderer";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 class FakeChild extends EventEmitter {
   public readonly stdout = new EventEmitter();
@@ -69,6 +70,7 @@ test("renders PlantUML through the configured external JAR and injects an image"
 
   try {
     const result = await renderPlantUmlDiagrams(diagramHtml(source), {
+      files: createNodeFileSystem(),
       jarPath: "plantuml.jar",
       workspaceRoot: workspace.root,
       trusted: true,
@@ -119,6 +121,7 @@ test("uses the PATH executable when no JAR is configured and reports missing com
 
   try {
     const untrusted = await renderPlantUmlDiagrams(diagramHtml(), {
+      files: createNodeFileSystem(),
       workspaceRoot: workspace.root,
       trusted: false,
       jarPath: workspace.jarPath,
@@ -127,6 +130,7 @@ test("uses the PATH executable when no JAR is configured and reports missing com
     assert.match(untrusted.diagrams[0]?.message ?? "", /untrusted workspace/u);
 
     const unconfigured = await renderPlantUmlDiagrams(diagramHtml(), {
+      files: createNodeFileSystem(),
       workspaceRoot: workspace.root,
       trusted: true,
     });
@@ -136,6 +140,7 @@ test("uses the PATH executable when no JAR is configured and reports missing com
     assert.match(unconfigured.diagrams[0]?.message ?? "", /not found on PATH/u);
 
     const invalid = await renderPlantUmlDiagrams(diagramHtml(), {
+      files: createNodeFileSystem(),
       workspaceRoot: workspace.root,
       trusted: true,
       jarPath: "missing.jar",
@@ -171,6 +176,7 @@ test("returns diagnostics for PlantUML process failures and malformed output", a
 
   try {
     const processFailure = await renderPlantUmlDiagrams(diagramHtml(), {
+      files: createNodeFileSystem(),
       workspaceRoot: workspace.root,
       trusted: true,
       jarPath: workspace.jarPath,
@@ -180,6 +186,7 @@ test("returns diagnostics for PlantUML process failures and malformed output", a
     assert.equal(processFailure.diagnostics[0]?.severity, "warning");
 
     const malformed = await renderPlantUmlDiagrams(diagramHtml(), {
+      files: createNodeFileSystem(),
       workspaceRoot: workspace.root,
       trusted: true,
       jarPath: workspace.jarPath,
@@ -195,18 +202,22 @@ test("returns diagnostics for PlantUML process failures and malformed output", a
 test("cancels an active PlantUML process", async () => {
   const workspace = createWorkspace();
   const child = new FakeChild();
+  let spawned!: () => void;
+  const started = new Promise<void>((resolve) => { spawned = resolve; });
   setPlantUmlProcessSpawnerForTests({
-    spawn: (() => child as never) as never,
+    spawn: (() => { spawned(); return child as never; }) as never,
   });
   const controller = new AbortController();
 
   try {
     const render = renderPlantUmlDiagrams(diagramHtml(), {
+      files: createNodeFileSystem(),
       workspaceRoot: workspace.root,
       trusted: true,
       jarPath: workspace.jarPath,
       signal: controller.signal,
     });
+    await started;
     controller.abort();
     const result = await render;
     assert.equal(child.killed, true);
@@ -235,6 +246,7 @@ async function withFake<T>(
 
 const render = (workspace: { root: string; jarPath: string }, source?: string) =>
   renderPlantUmlDiagrams(diagramHtml(source), {
+    files: createNodeFileSystem(),
     workspaceRoot: workspace.root,
     trusted: true,
     jarPath: workspace.jarPath,
@@ -366,6 +378,7 @@ test("abort also kills the process group, falling back to child.kill on failure"
   try {
     await withFake(() => child, async (workspace) => {
       const pending = renderPlantUmlDiagrams(diagramHtml(), {
+        files: createNodeFileSystem(),
         workspaceRoot: workspace.root,
         trusted: true,
         jarPath: workspace.jarPath,
@@ -439,8 +452,8 @@ test("the JAR and the PATH command run under the allowlist security profile with
     }) as never,
   });
   try {
-    await renderPlantUmlDiagrams(diagramHtml(), { jarPath: "plantuml.jar", workspaceRoot: workspace.root, trusted: true });
-    await renderPlantUmlDiagrams(diagramHtml(), { workspaceRoot: workspace.root, trusted: true });
+    await renderPlantUmlDiagrams(diagramHtml(), { files: createNodeFileSystem(), jarPath: "plantuml.jar", workspaceRoot: workspace.root, trusted: true });
+    await renderPlantUmlDiagrams(diagramHtml(), { files: createNodeFileSystem(), workspaceRoot: workspace.root, trusted: true });
     assert.equal(seen.length, 2);
     for (const call of seen) {
       assert.equal(call.env.PLANTUML_SECURITY_PROFILE, "ALLOWLIST");

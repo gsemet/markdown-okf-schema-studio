@@ -13,6 +13,7 @@ import {
   textContent,
 } from "./dom";
 import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 async function render(source: string) {
   const result = await renderMyst(source, { sourcePath: "/virtual/main.md", resolveInclude: () => undefined });
@@ -22,6 +23,7 @@ async function render(source: string) {
 /** The full preview pipeline, sanitizer included. */
 async function renderSafe(source: string) {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(source),
     workspaceRoot,
     requestId: 1,

@@ -10,6 +10,7 @@ import { test } from "node:test";
 import { renderPreviewSource } from "../../src/core/render/renderPipeline";
 import { attribute, findElements, parseHtml, textContent } from "../core/render/dom";
 import { fixture } from "./blockFixture";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const EOLS = [["LF", "\n"], ["CRLF", "\r\n"]] as const;
 const lines = (eol: string, ...entries: string[]): string => entries.join(eol);
@@ -19,7 +20,7 @@ const OUT_OF_DATE = "The preview is out of date. Refresh it and try again.";
 
 /** The top-level lists of a rendered text and its items as `[marker line, own paragraphs]`. */
 async function listsOf(text: string): Promise<{ lists: number; items: Array<[number, string]> }> {
-  const { html } = await renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false });
+  const { html } = await renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false }, createNodeFileSystem());
   const document = parseHtml(html);
   const [body] = findElements(document, (e) => e.tagName === "body");
   const lists = body.childNodes.filter((node) => "tagName" in node && (node.tagName === "ul" || node.tagName === "ol"));

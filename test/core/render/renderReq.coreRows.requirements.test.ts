@@ -12,9 +12,11 @@ import { INCLUDE_BUDGET_MAX_CHARS, renderMyst, type MystRenderContext } from "..
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElement, findElements, parseHtml, textContent } from "./dom";
 import { inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 async function render(markdown: string) {
   return renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(markdown),
     workspaceRoot,
     requestId: 1,

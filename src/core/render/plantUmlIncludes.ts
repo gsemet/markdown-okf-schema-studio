@@ -16,6 +16,7 @@ import * as path from "node:path";
 import {
   type BoundedTextRead,
   createPreviewResourcePolicy,
+  type PolicyFiles,
   MAX_INCLUDED_FILE_BYTES,
   readBoundedText,
 } from "../security/resource-policy";
@@ -80,10 +81,11 @@ const NOT_LOCAL = /^\s*(?:<|[a-z][a-z\d+.-]*:)/iu;
  * file (`from`), a top-level one next to the document. `watch` is the path whose change (or
  * creation, for a missing file inside the roots) must draw the diagram again.
  */
-export function resolvePlantUmlInclude(
+export async function resolvePlantUmlInclude(
+  files: PolicyFiles,
   request: PlantUmlIncludeRequest,
   scope: PlantUmlIncludeScope,
-): PlantUmlIncludeAnswer {
+): Promise<PlantUmlIncludeAnswer> {
   const name = request.path.trim();
   if (!name) {
     return { ok: false, reason: "The include names no file." };
@@ -101,12 +103,13 @@ export function resolvePlantUmlInclude(
   const documentDirectory = path.dirname(path.resolve(scope.documentPath));
   // Restricted Mode: the document's folder and below only, whatever the workspace is.
   const policy = createPreviewResourcePolicy(
+    files,
     documentDirectory,
     scope.trusted ? scope.workspaceRoot : undefined,
     scope.restrictedReads === true || !scope.trusted,
   );
   const baseDirectory = request.from === null ? documentDirectory : path.dirname(request.from);
-  const read = readBoundedText(policy, name, baseDirectory);
+  const read = await readBoundedText(policy, name, baseDirectory);
   if (!read.ok) {
     return {
       ok: false,
@@ -168,17 +171,18 @@ function includeFile(argument: string): string {
  * after the real path (never a string prefix). URLs and `<standard library>` names are not files
  * and are left to the JAR.
  */
-export function findEscapingPlantUmlInclude(
+export async function findEscapingPlantUmlInclude(
+  files: PolicyFiles,
   source: string,
   workspaceRoot: string,
-): string | undefined {
+): Promise<string | undefined> {
   const root = path.resolve(workspaceRoot);
-  const policy = createPreviewResourcePolicy(root);
+  const policy = createPreviewResourcePolicy(files, root);
   const visited = new Set<string>();
   const outside = (name: string): string =>
     `PlantUML include "${name}" is outside the workspace folder and was not read.`;
 
-  const check = (text: string, baseDirectory: string, depth: number): string | undefined => {
+  const check = async (text: string, baseDirectory: string, depth: number): Promise<string | undefined> => {
     for (const line of text.split(/\r?\n/u)) {
       const argument = JAR_INCLUDE_LINE.exec(line)?.[1];
       if (argument === undefined) {
@@ -206,11 +210,11 @@ export function findEscapingPlantUmlInclude(
         requests = [{ request: name, base: root }, { request: name, base: baseDirectory }];
       }
       for (const { request, base } of requests) {
-        const read = readBoundedText(policy, request, base);
+        const read = await readBoundedText(policy, request, base);
         if (read.ok) {
           if (!visited.has(read.path) && visited.size < MAX_JAR_INCLUDED_FILES && depth < MAX_JAR_INCLUDE_DEPTH) {
             visited.add(read.path);
-            const refusal = check(read.source, path.dirname(read.path), depth + 1);
+            const refusal = await check(read.source, path.dirname(read.path), depth + 1);
             if (refusal) {
               return refusal;
             }

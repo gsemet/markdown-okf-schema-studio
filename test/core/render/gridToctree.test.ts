@@ -15,6 +15,7 @@ import {
   parseHtml,
   textContent,
 } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const root = "/virtual";
 
@@ -233,7 +234,7 @@ test("a card title that holds a link still renders one link", async () => {
   assert.equal(findElements(dom, (element) => element.tagName === "a").length, 1);
 });
 
-test("listGlobDocuments returns the sorted matching Markdown documents below the folder", () => {
+test("listGlobDocuments returns the sorted matching Markdown documents below the folder", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "okf-glob-"));
   try {
     for (const file of ["chap/b.md", "chap/a.md", "chap/skip.txt", "chap/deep/c.md", "other.md", "node_modules/x/n.md"]) {
@@ -241,12 +242,12 @@ test("listGlobDocuments returns the sorted matching Markdown documents below the
       fs.writeFileSync(path.join(directory, file), "# t\n");
     }
     const allow = (): boolean => true;
-    assert.deepEqual(listGlobDocuments("chap/*", directory, allow), ["chap/a.md", "chap/b.md"]);
-    assert.deepEqual(listGlobDocuments("chap/**", directory, allow), ["chap/a.md", "chap/b.md", "chap/deep/c.md"]);
-    assert.deepEqual(listGlobDocuments("**", directory, allow), ["chap/a.md", "chap/b.md", "chap/deep/c.md", "other.md"]);
-    assert.deepEqual(listGlobDocuments("chap/*", directory, allow, path.join(directory, "chap/a.md")), ["chap/b.md"]);
-    assert.deepEqual(listGlobDocuments("../*", directory, allow), []);
-    assert.deepEqual(listGlobDocuments("chap/*", directory, () => false), []);
+    assert.deepEqual(await listGlobDocuments(createNodeFileSystem(), "chap/*", directory, allow), ["chap/a.md", "chap/b.md"]);
+    assert.deepEqual(await listGlobDocuments(createNodeFileSystem(), "chap/**", directory, allow), ["chap/a.md", "chap/b.md", "chap/deep/c.md"]);
+    assert.deepEqual(await listGlobDocuments(createNodeFileSystem(), "**", directory, allow), ["chap/a.md", "chap/b.md", "chap/deep/c.md", "other.md"]);
+    assert.deepEqual(await listGlobDocuments(createNodeFileSystem(), "chap/*", directory, allow, path.join(directory, "chap/a.md")), ["chap/b.md"]);
+    assert.deepEqual(await listGlobDocuments(createNodeFileSystem(), "../*", directory, allow), []);
+    assert.deepEqual(await listGlobDocuments(createNodeFileSystem(), "chap/*", directory, () => false), []);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }

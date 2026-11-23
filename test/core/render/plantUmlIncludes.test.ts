@@ -10,6 +10,7 @@ import {
   type PlantUmlIncludeScope,
 } from "../../../src/core/render/plantUmlIncludes";
 import { needsSymlinks } from "../../shared/symlinks";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /** workspace/{docs/{page.md, styles/common.puml, styles/parts.puml}, shared/theme.puml}, outside/secret.puml */
 function workspace(): { root: string; workspaceRoot: string; documentPath: string; scope: PlantUmlIncludeScope } {
@@ -28,10 +29,10 @@ function workspace(): { root: string; workspaceRoot: string; documentPath: strin
   return { root, workspaceRoot, documentPath, scope: { documentPath, workspaceRoot, trusted: true } };
 }
 
-test("a top-level include resolves next to the document, a nested one next to the including file", () => {
+test("a top-level include resolves next to the document, a nested one next to the including file", async () => {
   const { documentPath, scope } = workspace();
   const docs = path.dirname(documentPath);
-  const top = resolvePlantUmlInclude({ path: "styles/common.puml", from: null }, scope);
+  const top = await resolvePlantUmlInclude(createNodeFileSystem(), { path: "styles/common.puml", from: null }, scope);
   assert.deepEqual(top, {
     ok: true,
     id: path.join(docs, "styles", "common.puml"),
@@ -39,21 +40,21 @@ test("a top-level include resolves next to the document, a nested one next to th
     watch: path.join(docs, "styles", "common.puml"),
   });
   assert.ok(top.ok);
-  const nested = resolvePlantUmlInclude({ path: "parts.puml", from: top.id }, scope);
+  const nested = await resolvePlantUmlInclude(createNodeFileSystem(), { path: "parts.puml", from: top.id }, scope);
   assert.deepEqual(nested, {
     ok: true,
     id: path.join(docs, "styles", "parts.puml"),
     text: "participant Carol\n",
     watch: path.join(docs, "styles", "parts.puml"),
   });
-  assert.equal(resolvePlantUmlInclude({ path: "parts.puml", from: null }, scope).ok, false,
+  assert.equal((await resolvePlantUmlInclude(createNodeFileSystem(), { path: "parts.puml", from: null }, scope)).ok, false,
     "without the including file the name resolves next to the document");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-054
-test("a trusted workspace serves the workspace; outside it, absolute paths, URLs and the standard library are refused", () => {
+test("a trusted workspace serves the workspace; outside it, absolute paths, URLs and the standard library are refused", async () => {
   const { documentPath, scope } = workspace();
-  assert.equal(resolvePlantUmlInclude({ path: "../shared/theme.puml", from: null }, scope).ok, true);
+  assert.equal((await resolvePlantUmlInclude(createNodeFileSystem(), { path: "../shared/theme.puml", from: null }, scope)).ok, true);
   const refusals: Array<[string, RegExp]> = [
     ["../../outside/secret.puml", /outside the folders the preview reads/u],
     [path.join(path.dirname(documentPath), "styles", "common.puml"), /must be a relative path/u],
@@ -63,34 +64,34 @@ test("a trusted workspace serves the workspace; outside it, absolute paths, URLs
     ["   ", /names no file/u],
   ];
   for (const [request, reason] of refusals) {
-    const answer = resolvePlantUmlInclude({ path: request, from: null }, scope);
+    const answer = await resolvePlantUmlInclude(createNodeFileSystem(), { path: request, from: null }, scope);
     assert.equal(answer.ok, false, request);
     assert.ok(!answer.ok);
     assert.match(answer.reason, reason, request);
     assert.equal(answer.watch, undefined, `${request} is never watched`);
   }
   // A `from` outside the roots cannot widen them: the file it points next to is still checked.
-  const forged = resolvePlantUmlInclude({ path: "secret.puml", from: path.join(path.dirname(documentPath), "..", "..", "outside", "x.puml") }, scope);
+  const forged = await resolvePlantUmlInclude(createNodeFileSystem(), { path: "secret.puml", from: path.join(path.dirname(documentPath), "..", "..", "outside", "x.puml") }, scope);
   assert.equal(forged.ok, false);
-  assert.equal(resolvePlantUmlInclude({ path: "parts.puml", from: "styles/common.puml" }, scope).ok, false,
+  assert.equal((await resolvePlantUmlInclude(createNodeFileSystem(), { path: "parts.puml", from: "styles/common.puml" }, scope)).ok, false,
     "a relative from is not an id the host gave");
 });
 
-test("Restricted Mode serves only the document's folder and below", () => {
+test("Restricted Mode serves only the document's folder and below", async () => {
   const { documentPath, workspaceRoot } = workspace();
   const restricted: PlantUmlIncludeScope = { documentPath, workspaceRoot, trusted: false };
-  assert.equal(resolvePlantUmlInclude({ path: "styles/common.puml", from: null }, restricted).ok, true);
-  const sibling = resolvePlantUmlInclude({ path: "../shared/theme.puml", from: null }, restricted);
+  assert.equal((await resolvePlantUmlInclude(createNodeFileSystem(), { path: "styles/common.puml", from: null }, restricted)).ok, true);
+  const sibling = await resolvePlantUmlInclude(createNodeFileSystem(), { path: "../shared/theme.puml", from: null }, restricted);
   assert.equal(sibling.ok, false, "the workspace outside the document's folder is not served untrusted");
   assert.ok(!sibling.ok);
   assert.match(sibling.reason, /Restricted Mode/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-053
-test("a missing file is refused and watched, a too large file and a symlink escape are refused", needsSymlinks, () => {
+test("a missing file is refused and watched, a too large file and a symlink escape are refused", needsSymlinks, async () => {
   const { root, documentPath, scope } = workspace();
   const docs = path.dirname(documentPath);
-  const missing = resolvePlantUmlInclude({ path: "styles/later.puml", from: null }, scope);
+  const missing = await resolvePlantUmlInclude(createNodeFileSystem(), { path: "styles/later.puml", from: null }, scope);
   assert.deepEqual(missing, {
     ok: false,
     reason: "PlantUML file not found: styles/later.puml.",
@@ -98,13 +99,13 @@ test("a missing file is refused and watched, a too large file and a symlink esca
   });
 
   fs.writeFileSync(path.join(docs, "huge.puml"), Buffer.alloc(5 * 1024 * 1024 + 1, 0x41));
-  const huge = resolvePlantUmlInclude({ path: "huge.puml", from: null }, scope);
+  const huge = await resolvePlantUmlInclude(createNodeFileSystem(), { path: "huge.puml", from: null }, scope);
   assert.equal(huge.ok, false);
   assert.ok(!huge.ok);
   assert.match(huge.reason, /larger than the 5 MiB preview limit/u);
 
   fs.symlinkSync(path.join(root, "outside", "secret.puml"), path.join(docs, "link.puml"));
-  const link = resolvePlantUmlInclude({ path: "link.puml", from: null }, scope);
+  const link = await resolvePlantUmlInclude(createNodeFileSystem(), { path: "link.puml", from: null }, scope);
   assert.equal(link.ok, false);
   assert.ok(!link.ok);
   assert.match(link.reason, /outside the folders the preview reads/u);

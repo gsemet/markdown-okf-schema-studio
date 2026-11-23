@@ -6,6 +6,7 @@ import { test } from "node:test";
 
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElement, hasClass, parseHtml, textContent } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const SPEC = '{ "data": { "values": [{ "a": "A", "b": 1 }] }, "mark": "bar", "encoding": { "x": { "field": "a", "type": "nominal" } } }';
 
@@ -26,6 +27,7 @@ function workspace(): { workspaceRoot: string; docs: string } {
 async function render(text: string, options: { restrictedReads?: boolean; resourceRoot?: "document" } = {}) {
   const { workspaceRoot, docs } = workspace();
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: path.join(docs, "page.md") }, languageId: "markdown", version: 1, getText: () => text },
     workspaceRoot: options.resourceRoot === "document" ? docs : workspaceRoot,
     ...(options.restrictedReads ? { restrictedReads: true } : {}),

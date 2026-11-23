@@ -5,6 +5,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
 
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 import { renderBaselineContent } from "../../src/session/features/baselineDiff";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 
@@ -17,7 +18,7 @@ const stage: any = {
 
 function stubs() {
   const manager: any = {
-    host: { workspace: { trusted: true }, previewRenderer: undefined },
+    host: { workspace: { trusted: true }, previewRenderer: undefined, files: createNodeFileSystem() },
     plantUml: { engineFor: () => "builtin" },
     rendering: {
       runtimeContext: (headStage: any) => ({

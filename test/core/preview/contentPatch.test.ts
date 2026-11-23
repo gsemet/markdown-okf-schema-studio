@@ -17,6 +17,7 @@ import { injectPlantUmlDiagrams } from "../../../src/core/render/plantUmlRendere
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { buildPreviewWebviewHtml, setPreviewStatus } from "../../../src/session/webview";
 import { fakeAssetResolver } from "../../shared/fakeAssets";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 
 const extensionRoot = path.resolve(__dirname, "../../../..");
@@ -35,6 +36,7 @@ async function page(markdown: string, options: { requestId?: number; version?: n
   const version = options.version ?? requestId;
   const sourcePath = path.join(fixtureDirectory, "inline.md");
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: {
       uri: { scheme: "file", fsPath: sourcePath },
       languageId: "markdown",
@@ -45,7 +47,7 @@ async function page(markdown: string, options: { requestId?: number; version?: n
     requestId,
     isWorkspaceTrusted: () => true,
   });
-  const built = buildPreviewWebviewHtml(
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
     result.html,
     result.stage.outputDirectory,
     assets,
@@ -296,10 +298,10 @@ test("T08: two renders with different zoom have the same shell key and the same 
   );
 });
 
-test("the page script is injected verbatim even when it contains replacement patterns", () => {
+test("the page script is injected verbatim even when it contains replacement patterns", async () => {
   // A minified script uses `$` as an identifier, so `$&`, "$'" and "$$" occur in real pages.
   const tricky = "/tmp/a$&b$'c$$d$`e.md";
-  const built = buildPreviewWebviewHtml(
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
     "<html><head></head><body><main>x</main></body></html>",
     "/tmp/out",
     assets,

@@ -17,6 +17,7 @@ import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 import { pageRuntimeScript } from "./runtimeHarness";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const COLUMN = 688;
 const GUTTER = 78;
@@ -33,6 +34,7 @@ test("Auto breaks an svg picture out when its declared width is larger than the 
   fs.mkdirSync(path.join(root, "out", "bundle"), { recursive: true });
   fs.writeFileSync(path.join(root, "out", "bundle", "preview.js"), pageRuntimeScript());
   const rendered = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: documentPath }, languageId: "markdown", version: 1, getText: () => MARKDOWN },
     workspaceRoot: workspace, requestId: 1, isWorkspaceTrusted: () => true, plantUmlEngine: "builtin",
   });
@@ -43,7 +45,7 @@ test("Auto breaks an svg picture out when its declared width is larger than the 
     previewThemeMode: "current" as const,
     initialViewPreferences: { zoom: 100, widthMode: "auto" as const, toc: false, incomingChanges: true, comments: true, toolbarCollapsed: true },
   };
-  const built = buildPreviewWebviewHtml(rendered.html, workspace, bundle, context, workspace, undefined, COLUMN + GUTTER * 2, true, [], "builtin");
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(), rendered.html, workspace, bundle, context, workspace, undefined, COLUMN + GUTTER * 2, true, [], "builtin");
   const pagePath = path.join(root, "page.html");
   fs.writeFileSync(pagePath, built.html);
   let browser;

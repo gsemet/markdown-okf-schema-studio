@@ -18,6 +18,7 @@ import {
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { findElements, hasClass, parseHtml, textContent } from "./dom";
 import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const BUDGET_MESSAGE = "was not read: the include budget of this render is exhausted.";
 
@@ -37,6 +38,7 @@ test("jarPath is ignored while useJar is off and used as soon as the JAR pipelin
   // useJar off: the engine choice is the built-in one whatever jarPath holds.
   assert.equal(resolvePlantUmlEngine({ useJar: false }, true), "builtin");
   const builtin = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(markdown),
     workspaceRoot,
     requestId: 1,
@@ -51,6 +53,7 @@ test("jarPath is ignored while useJar is off and used as soon as the JAR pipelin
   // useJar on: the same stored path is the one the JAR pipeline uses.
   assert.equal(resolvePlantUmlEngine({ useJar: true }, true), "jar");
   const jar = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(markdown),
     workspaceRoot,
     requestId: 2,

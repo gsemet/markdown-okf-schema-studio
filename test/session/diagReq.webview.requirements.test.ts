@@ -11,6 +11,7 @@ import { test } from "node:test";
 
 import type { AssetResolver } from "../../src/host-api/assetResolver";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const assets: AssetResolver = {
   cspSource: "vscode-webview://csp",
@@ -23,14 +24,14 @@ const page = (content: string): string =>
 
 const FIGURE = '<figure class="myst-plantuml-figure"><div class="myst-plantuml-diagram">@startuml\nA -> B\n@enduml</div></figure>';
 
-const build = (content: string, engine: "builtin" | "host"): string =>
-  buildPreviewWebviewHtml(
+const build = async (content: string, engine: "builtin" | "host"): Promise<string> =>
+  (await buildPreviewWebviewHtml(createNodeFileSystem(),
     page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, [], engine,
-  ).html;
+  )).html;
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-023
-test("the built-in PlantUML script is added once with the page nonce, only for the built-in engine and a figure", () => {
-  const html = build(FIGURE, "builtin");
+test("the built-in PlantUML script is added once with the page nonce, only for the built-in engine and a figure", async () => {
+  const html = await build(FIGURE, "builtin");
   const tags = html.match(/<script[^>]*data-sphinx-preview-plantuml[^>]*><\/script>/gu) ?? [];
   assert.equal(tags.length, 1);
   assert.match(tags[0]!, /src="vscode-webview:\/\/bundle\/plantumlPreview\.js"/u);
@@ -38,14 +39,14 @@ test("the built-in PlantUML script is added once with the page nonce, only for t
   assert.ok(nonce);
   assert.ok(html.includes(`'nonce-${nonce}'`) || html.includes(`nonce-${nonce}`), "the nonce is the page's own");
 
-  assert.doesNotMatch(build("<p>no figure</p>", "builtin"), /data-sphinx-preview-plantuml/u);
-  assert.doesNotMatch(build(FIGURE, "host"), /data-sphinx-preview-plantuml/u, "the JAR pipeline injects pictures instead");
+  assert.doesNotMatch(await build("<p>no figure</p>", "builtin"), /data-sphinx-preview-plantuml/u);
+  assert.doesNotMatch(await build(FIGURE, "host"), /data-sphinx-preview-plantuml/u, "the JAR pipeline injects pictures instead");
 });
 
 const REPO = path.resolve(__dirname, "../../..");
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-024
-test("the built-in engine is bundled into the extension's page script and the page loads nothing from outside for it", () => {
+test("the built-in engine is bundled into the extension's page script and the page loads nothing from outside for it", async () => {
   // The engine, its themes and its icons are bundled at build time into out/bundle/plantumlPreview.js.
   const entry = fs.readFileSync(path.join(REPO, "src/page/modules/plantumlPreview.ts"), "utf8");
   assert.match(entry, /^import \{ renderToString \} from "@plantuml\/core";$/mu);
@@ -60,7 +61,7 @@ test("the built-in engine is bundled into the extension's page script and the pa
   assert.doesNotMatch(step, /external/u);
 
   // The page built for the built-in engine takes every script from the extension and allows no fetch.
-  const html = build(FIGURE, "builtin");
+  const html = await build(FIGURE, "builtin");
   const sources = [...html.matchAll(/<(?:script|link)\b[^>]*\b(?:src|href)="([^"]*)"/gu)].map((match) => match[1]!);
   assert.ok(sources.includes("vscode-webview://bundle/plantumlPreview.js"));
   for (const source of sources) {

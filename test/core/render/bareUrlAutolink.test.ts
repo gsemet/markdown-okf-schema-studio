@@ -7,6 +7,7 @@ import { renderMyst } from "../../../src/core/render/mystRenderer";
 import { rewriteSphinxHtml } from "../../../src/core/security/html-sanitizer";
 import { ResourcePolicy } from "../../../src/core/security/resource-policy";
 import { attribute, findElements, parseHtml, textContent, type HtmlElement } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const workspaceRoot = path.resolve(__dirname, "../../../../../..");
 
@@ -87,7 +88,7 @@ test("generated links pass through the same sanitizer and navigation routing as 
   const { html } = await renderMyst("Go https://example.com/a and www.example.com\n\n[x](https://example.com/b)\n");
   const rewritten = rewriteSphinxHtml(html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     resolveResource: () => undefined,
     resolveNavigation: () => ({ kind: "blocked" }),
@@ -103,6 +104,7 @@ test("generated links pass through the same sanitizer and navigation routing as 
 test("the source text sent to the editor keeps the raw URL", async () => {
   const text = "A bare https://example.com/x and www.example.com.\n";
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: {
       uri: { scheme: "file", fsPath: "/workspace/active.md" },
       languageId: "markdown",

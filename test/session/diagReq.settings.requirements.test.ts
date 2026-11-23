@@ -45,7 +45,7 @@ function fixture(options: { lastGood?: boolean; activeIsSession?: boolean } = {}
         calls.push("render");
         return Promise.resolve();
       },
-      updatePreview: (_session: unknown, lastGood: unknown) => calls.push(`update:${JSON.stringify(lastGood)}`),
+      updatePreview: async (_session: unknown, lastGood: unknown) => { calls.push(`update:${JSON.stringify(lastGood)}`); },
     },
   };
   const events = new HostEvents(manager as unknown as PreviewManager);

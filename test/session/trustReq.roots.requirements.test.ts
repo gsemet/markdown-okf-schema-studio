@@ -21,6 +21,7 @@ import { previewLocalResourceRoots, RenderingController } from "../../src/sessio
 import { PreviewManager } from "../../src/session/previewManager";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 import { nodeHostPorts } from "./nodeHostPorts";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const noEvent = (): { dispose(): void } => ({ dispose: () => undefined });
 
@@ -73,7 +74,7 @@ function fixture(trusted: boolean) {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-007
-test("in Restricted Mode the resource root of a document in a subfolder is that subfolder", () => {
+test("in Restricted Mode the resource root of a document in a subfolder is that subfolder", async () => {
   const f = fixture(false);
   try {
     const session = f.manager.createSession(f.panel as never, f.documents[0], { path: f.first } as never);
@@ -83,14 +84,14 @@ test("in Restricted Mode the resource root of a document in a subfolder is that 
     assert.deepEqual(session.navigationRoots, [subfolder]);
     assert.deepEqual(session.sessionRoots, []);
     // The workspace folder is added to the panel roots for its images only (SwRS-MDOKFSTUDIO-TRUST-002).
-    assert.deepEqual(previewLocalResourceRoots(session.workspaceRoot, true, session.workspaceFolder?.path), [subfolder, f.first]);
+    assert.deepEqual(await previewLocalResourceRoots(createNodeFileSystem(), session.workspaceRoot, true, session.workspaceFolder?.path), [subfolder, f.first]);
   } finally {
     f.cleanup();
   }
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-007
-test("in a trusted window the resource root is the folder that holds the document, the second one in a multi-root window", () => {
+test("in a trusted window the resource root is the folder that holds the document, the second one in a multi-root window", async () => {
   const f = fixture(true);
   try {
     const inFirst = f.manager.createSession(f.panel as never, f.documents[0], { path: f.first } as never);
@@ -100,7 +101,7 @@ test("in a trusted window the resource root is the folder that holds the documen
     assert.equal(inSecond.restrictedReads, false);
     assert.equal(inSecond.workspaceRoot, f.second);
     assert.deepEqual(inSecond.sessionRoots, [f.first, f.second]);
-    assert.deepEqual(previewLocalResourceRoots(inSecond.workspaceRoot, false), [f.second]);
+    assert.deepEqual(await previewLocalResourceRoots(createNodeFileSystem(), inSecond.workspaceRoot, false), [f.second]);
   } finally {
     f.cleanup();
   }
@@ -110,7 +111,8 @@ test("in a trusted window the resource root is the folder that holds the documen
 function ignored(): any {
   const target = function ignoredTarget() { return undefined; };
   return new Proxy(target, {
-    get: (_t, key) => (key === Symbol.toPrimitive ? () => "" : key === "then" ? undefined : ignored()),
+    get: (t, key) => (key === Symbol.toPrimitive ? () => "" : key === "then" ? undefined
+      : Object.prototype.hasOwnProperty.call(t, key) ? (t as any)[key] : ignored()),
     apply: () => ignored(),
   });
 }
@@ -124,6 +126,7 @@ test("a rendered page sets the resource root and the bundle folder as the roots 
     fs.mkdirSync(path.join(folder, "notes"), { recursive: true });
     const text = "# Title\n";
     const result = await renderPreviewDocument({
+      files: createNodeFileSystem(),
       document: { uri: { scheme: "file", fsPath: path.join(folder, "notes", "page.md") }, languageId: "markdown", version: 1, getText: () => text },
       workspaceRoot: folder, requestId: 1, isWorkspaceTrusted: () => true, plantUmlEngine: "builtin",
     });
@@ -131,7 +134,7 @@ test("a rendered page sets the resource root and the bundle folder as the roots 
     let roots: readonly string[] = [];
     const manager: any = ignored();
     manager.has = () => true;
-    manager.host = { schemaFiles: nodeSchemaFiles, documents: { idOf: () => undefined } };
+    manager.host = { schemaFiles: nodeSchemaFiles, files: createNodeFileSystem(), documents: { idOf: () => undefined } };
     manager.scroll = { initialAnchorLine: () => undefined, takePendingPin: () => undefined, visibleEditorFor: () => undefined };
     manager.choices = { editMode: false, initialPaletteMode: () => "auto", refreshThreadAuthor: () => undefined };
     manager.previewTitle = () => "page";
@@ -151,7 +154,7 @@ test("a rendered page sets the resource root and the bundle folder as the roots 
     controller.runtimeContext = () => ({ documentId: identity, revision: 1, requestId: 1, activeSourceFile: result.stage.activeDocumentPath });
     controller.assignWebviewHtml = () => undefined;
     controller.clearPendingOverlay = () => undefined;
-    controller.updatePreview(preview, result);
+    await controller.updatePreview(preview, result);
     preview.stage?.dispose();
     assert.deepEqual(roots, [folder, bundleRoot], "the resource root, then the bundle folder, and nothing else");
   } finally {

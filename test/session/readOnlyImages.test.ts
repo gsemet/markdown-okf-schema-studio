@@ -12,6 +12,7 @@ import { createPreviewResourcePolicy } from "../../src/core/security/resource-po
 import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
 import { fakeAssetResolver } from "../shared/fakeAssets";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const SECRET = "PRIVATE-KEY-MATERIAL";
 const NAME = "Screenshot 2022-09-09 at 10.49.17.png";
@@ -53,6 +54,7 @@ afterEach(() => {
 /** The page html of a read-only preview of `text` in `documentDirectory`; images also reach `root`. */
 async function page(text: string, documentDirectory: string, root = documentDirectory): Promise<string> {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: {
       uri: { scheme: "file", fsPath: path.join(documentDirectory, "doc.md") },
       languageId: "markdown",
@@ -67,7 +69,7 @@ async function page(text: string, documentDirectory: string, root = documentDire
     plantUmlEngine: "builtin",
   });
   const assets = fakeAssetResolver({ cspSource: "vscode-webview://csp", url: (file) => `webview://${file}` });
-  const built = buildPreviewWebviewHtml(
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
     result.html, result.stage.outputDirectory, assets, undefined, root,
     undefined, undefined, false, [], "builtin", true,
   );
@@ -132,7 +134,7 @@ test("a restricted-reads preview reaches the images of the workspace root, not i
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-091
-test("the policy of a restricted-reads preview serves an image of the workspace root and nothing else there", () => {
+test("the policy of a restricted-reads preview serves an image of the workspace root and nothing else there", async () => {
   const ws = path.join(sandbox, "ws");
   const guide = path.join(ws, "docs", "guide");
   fs.mkdirSync(guide, { recursive: true });
@@ -140,18 +142,18 @@ test("the policy of a restricted-reads preview serves an image of the workspace 
   fs.writeFileSync(path.join(ws, "images", "x.png"), "png");
   fs.writeFileSync(path.join(ws, "images", "data.csv"), "a,b");
   fs.writeFileSync(path.join(ws, "images", "part.md"), "text");
-  const policy = createPreviewResourcePolicy(guide, ws, true);
+  const policy = createPreviewResourcePolicy(createNodeFileSystem(), guide, ws, true);
   const image = { image: true };
-  assert.deepEqual(policy.resolveResourceDetailed("../../images/x.png", guide, image), { path: path.join(ws, "images", "x.png") });
+  assert.deepEqual(await policy.resolveResourceDetailed("../../images/x.png", guide, image), { path: path.join(ws, "images", "x.png") });
   for (const request of ["../../images/data.csv", "../../images/part.md"]) {
-    assert.deepEqual(policy.resolveResourceDetailed(request, guide, image), { refusal: "resource-outside-root" }, request);
+    assert.deepEqual(await policy.resolveResourceDetailed(request, guide, image), { refusal: "resource-outside-root" }, request);
   }
-  assert.deepEqual(policy.resolveResourceDetailed("../../images/x.png", guide), { refusal: "resource-outside-root" }, "without the image option");
+  assert.deepEqual(await policy.resolveResourceDetailed("../../images/x.png", guide), { refusal: "resource-outside-root" }, "without the image option");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-091
-test("a link named .png that leads to another kind of file is not served from the workspace root", (context) => {
+test("a link named .png that leads to another kind of file is not served from the workspace root", async (context) => {
   const ws = path.join(sandbox, "ws");
   const guide = path.join(ws, "docs");
   fs.mkdirSync(guide, { recursive: true });
@@ -165,10 +167,10 @@ test("a link named .png that leads to another kind of file is not served from th
     context.skip("symbolic links are unavailable");
     return;
   }
-  const policy = createPreviewResourcePolicy(guide, ws, true);
+  const policy = createPreviewResourcePolicy(createNodeFileSystem(), guide, ws, true);
   const image = { image: true };
-  assert.deepEqual(policy.resolveResourceDetailed("../images/fake.png", guide, image), { refusal: "resource-outside-root" });
-  assert.deepEqual(policy.resolveResourceDetailed("../images/alias.png", guide, image), { path: path.join(ws, "images", "real.png") });
+  assert.deepEqual(await policy.resolveResourceDetailed("../images/fake.png", guide, image), { refusal: "resource-outside-root" });
+  assert.deepEqual(await policy.resolveResourceDetailed("../images/alias.png", guide, image), { path: path.join(ws, "images", "real.png") });
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002

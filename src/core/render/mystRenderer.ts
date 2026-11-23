@@ -125,16 +125,16 @@ function createIncludeBudget(): IncludeBudget {
   return { expansions: 0, bytes: 0, exhausted: false, resolved: new Map(), parsed: new Map() };
 }
 
-function resolveIncludeOnce(
+async function resolveIncludeOnce(
   budget: IncludeBudget,
   context: MystRenderContext,
   request: string,
   sourcePath: string,
-): MystIncludeSource | undefined {
+): Promise<MystIncludeSource | undefined> {
   const key = `${path.dirname(sourcePath)}\0${request}`;
   let entry = budget.resolved.get(key);
   if (entry === undefined) {
-    entry = context.resolveInclude(request, sourcePath) ?? null;
+    entry = (await context.resolveInclude(request, sourcePath)) ?? null;
     budget.resolved.set(key, entry);
   }
   return entry ?? undefined;
@@ -157,7 +157,7 @@ function includeBudgetDiagnostic(line: number | undefined): RenderDiagnostic {
  * include budget and recorded as a dependency (a missing file inside the roots too, so the preview
  * renders again once it appears). A refusal is kept for `normalizeNode` to show.
  */
-function resolvePlantUmlFile(
+async function resolvePlantUmlFile(
   node: MystNode,
   request: string,
   sourcePath: string,
@@ -165,7 +165,7 @@ function resolvePlantUmlFile(
   diagnostics: RenderDiagnostic[],
   dependencies: Set<string>,
   budget: IncludeBudget,
-): void {
+): Promise<void> {
   const line = node.position?.start?.line;
   const refuse = (message: string, report = true): void => {
     node.data = { ...node.data, plantUmlFileError: message };
@@ -178,9 +178,9 @@ function resolvePlantUmlFile(
     return;
   }
   const read: BoundedTextRead = context.readDiagramFile
-    ? context.readDiagramFile(request, sourcePath)
-    : (() => {
-      const included = context.resolveInclude(request, sourcePath);
+    ? await context.readDiagramFile(request, sourcePath)
+    : await (async () => {
+      const included = await context.resolveInclude(request, sourcePath);
       return included
         ? { ok: true as const, path: included.path, source: included.source }
         : { ok: false as const, refusal: "missing-resource" as const };
@@ -214,14 +214,14 @@ function resolvePlantUmlFile(
  * charged to the include budget and recorded as dependencies. The texts (and the reason of each
  * refusal) are kept for `normalizeNode`; a remote url is left for the page to refuse.
  */
-function resolveChartFiles(
+async function resolveChartFiles(
   node: MystNode,
   sourcePath: string,
   context: MystRenderContext,
   diagnostics: RenderDiagnostic[],
   dependencies: Set<string>,
   budget: IncludeBudget,
-): void {
+): Promise<void> {
   const parsed = parseChartSource(node.value ?? "");
   if (!parsed.ok) return;
   const line = node.position?.start?.line;
@@ -232,7 +232,7 @@ function resolveChartFiles(
       continue;
     }
     const read: BoundedTextRead = context.readDiagramFile
-      ? context.readDiagramFile(url, sourcePath)
+      ? await context.readDiagramFile(url, sourcePath)
       : { ok: false, refusal: "missing-resource" };
     if (!read.ok) {
       if (read.candidate) dependencies.add(read.candidate);
@@ -259,7 +259,7 @@ function resolveChartFiles(
 
 // @implements_req SwRS-MDOKFSTUDIO-CORE-012
 // @implements_req SwRS-MDOKFSTUDIO-CORE-013
-function expandIncludes(
+async function expandIncludes(
   node: MystNode,
   sourcePath: string,
   context: MystRenderContext,
@@ -268,7 +268,7 @@ function expandIncludes(
   dependencies: Set<string>,
   includeStack: Set<string>,
   budget: IncludeBudget,
-): void {
+): Promise<void> {
   if (!node.children) {
     return;
   }
@@ -276,13 +276,13 @@ function expandIncludes(
   const expandedChildren: MystNode[] = [];
   for (const child of node.children) {
     if (chartKindOf(child)) {
-      resolveChartFiles(child, sourcePath, context, diagnostics, dependencies, budget);
+      await resolveChartFiles(child, sourcePath, context, diagnostics, dependencies, budget);
       expandedChildren.push(child);
       continue;
     }
     const plantUmlFile = plantUmlFileRequest(child);
     if (plantUmlFile) {
-      resolvePlantUmlFile(child, plantUmlFile, sourcePath, context, diagnostics, dependencies, budget);
+      await resolvePlantUmlFile(child, plantUmlFile, sourcePath, context, diagnostics, dependencies, budget);
       expandedChildren.push(child);
       continue;
     }
@@ -304,7 +304,7 @@ function expandIncludes(
         expandedChildren.push(child);
         continue;
       }
-      const included = expandable ? resolveIncludeOnce(budget, context, request, sourcePath) : undefined;
+      const included = expandable ? await resolveIncludeOnce(budget, context, request, sourcePath) : undefined;
 
       if (!included || includeStack.has(included.path)) {
         expandedChildren.push(child);
@@ -342,7 +342,7 @@ function expandIncludes(
       }
       const nestedStack = new Set(includeStack);
       nestedStack.add(included.path);
-      expandIncludes(
+      await expandIncludes(
         includedAst,
         included.path,
         context,
@@ -356,7 +356,7 @@ function expandIncludes(
       continue;
     }
 
-    expandIncludes(
+    await expandIncludes(
       child,
       sourcePath,
       context,
@@ -398,7 +398,7 @@ interface RenderState {
 /** A named step of a render, run in list order. */
 interface RenderPass<Input> {
   readonly name: string;
-  readonly run: (input: Input) => void;
+  readonly run: (input: Input) => void | Promise<void>;
 }
 
 /** The tree passes, in order, from the parsed tree to the tree the HTML writer reads. */
@@ -447,11 +447,11 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   },
   {
     name: "includes",
-    run: (state) => {
+    run: async (state) => {
       const { context } = state;
       if (!context?.sourcePath) return;
       const includeBudget = createIncludeBudget();
-      expandIncludes(
+      await expandIncludes(
         state.ast,
         context.sourcePath,
         context,
@@ -465,13 +465,13 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   },
   {
     name: "toctrees",
-    run: (state) => {
+    run: async (state) => {
       const { context } = state;
       const sourcePath = context?.sourcePath ?? "";
-      expandToctrees(state.ast, {
+      await expandToctrees(state.ast, {
         sourcePath,
         read: (request) => (context && sourcePath ? context.resolveInclude(request, sourcePath) : undefined),
-        ...(context?.listDocuments ? { list: (pattern) => context.listDocuments?.(pattern, sourcePath) ?? [] } : {}),
+        ...(context?.listDocuments ? { list: async (pattern) => (await context.listDocuments?.(pattern, sourcePath)) ?? [] } : {}),
         dependencies: state.dependencies,
       });
     },
@@ -585,7 +585,7 @@ export async function renderMyst(
     tableAlignments: [],
   };
   for (const pass of TREE_PASSES) {
-    pass.run(state);
+    await pass.run(state);
   }
   let html = mystToHtml(state.ast);
   for (const pass of HTML_PASSES) {

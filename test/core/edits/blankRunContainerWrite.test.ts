@@ -6,6 +6,7 @@ import { blankRuns, quoteBlankRuns } from "../../../src/core/mapping/blankRuns";
 import { insertionText, planBlankRunInsertion } from "../../../src/core/mapping/insertion";
 import { renderPreviewSource } from "../../../src/core/render/renderPipeline";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent, type HtmlElement } from "../render/dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /**
  * CR-462, section 4: a block written or pasted in place of a run inside a container takes the
@@ -16,7 +17,7 @@ const EOLS = [["LF", "\n"], ["CRLF", "\r\n"], ["CR", "\r"]] as const;
 const eolOf = (eol: string, text: string): string => text.replace(/\n/gu, eol);
 
 const render = (text: string) =>
-  renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false });
+  renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false }, createNodeFileSystem());
 
 interface Row {
   name: string;

@@ -12,6 +12,7 @@ import { renderMyst, type MystRenderContext } from "../../../src/core/render/mys
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent } from "./dom";
 import { inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const root = "/virtual";
 
@@ -99,6 +100,7 @@ test("an included file is not checked against conf.py while the document's own t
 // @tests_req SwRS-MDOKFSTUDIO-MYST-017
 test("doc and download roles render as plain links and numref as an inert placeholder", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "See {doc}`other/page`, {doc}`Label <other/page>`, {download}`manifest <schema/m.json>` and {download}`schema/m.json`.\n\n"
       + "(fig-x)=\n## Figure heading\n\nRef {numref}`fig-x` and {numref}`Figure <fig-x>`.\n",

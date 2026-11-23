@@ -10,6 +10,7 @@ import * as path from "node:path";
 import { test } from "node:test";
 
 import type { PageToHostMessage } from "../../src/core/protocol/pageToHost";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 import { PlantUmlIncludeWatch } from "../../src/core/render/plantUmlIncludes";
 import { PageMessageDispatcher } from "../../src/session/pageMessages";
 import { PlantUmlController } from "../../src/session/features/plantUml";
@@ -61,7 +62,7 @@ test("an include request is handled for the current document even one render beh
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090
-test("an include request is answered once with the request's edit id: the file, or a refusal", () => {
+test("an include request is answered once with the request's edit id: the file, or a refusal", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "diag-req-include-"));
   try {
     const documentPath = path.join(root, "doc.md");
@@ -80,12 +81,12 @@ test("an include request is answered once with the request's edit id: the file, 
       manager: { host: { logger: createMemoryLogger() } },
     });
     const manager = {
-      host: { logger: createMemoryLogger(), workspace: { trusted: true } },
+      host: { logger: createMemoryLogger(), workspace: { trusted: true }, files: createNodeFileSystem() },
       activePathOf: () => documentPath,
       canonicalPath: (value: string) => value,
       requests,
     };
-    let handler: ((message: unknown, preview: PreviewSession) => void) | undefined;
+    let handler: ((message: unknown, preview: PreviewSession) => unknown) | undefined;
     new PlantUmlController(manager as never).register({
       on: (type: string, callback: typeof handler) => {
         assert.equal(type, "previewPlantUmlInclude");
@@ -96,7 +97,7 @@ test("an include request is answered once with the request's edit id: the file, 
       type: "previewPlantUmlInclude", documentId: DOCUMENT, revision: 4, requestId: 9, path: name, from: null, editId,
     });
 
-    handler!(request("part.puml", "edit-1"), preview);
+    await handler!(request("part.puml", "edit-1"), preview);
     assert.equal(posted.length, 1);
     assert.equal(posted[0]!.type, "previewPlantUmlIncludeResult");
     assert.equal(posted[0]!.editId, "edit-1");
@@ -104,7 +105,7 @@ test("an include request is answered once with the request's edit id: the file, 
     assert.equal(posted[0]!.id, path.join(fs.realpathSync(root), "part.puml"));
     assert.equal(posted[0]!.text, "@startuml\nA -> B\n@enduml\n");
 
-    handler!(request("../../etc/passwd", "edit-2"), preview);
+    await handler!(request("../../etc/passwd", "edit-2"), preview);
     assert.equal(posted.length, 2);
     assert.equal(posted[1]!.editId, "edit-2");
     assert.equal(posted[1]!.ok, false);
@@ -234,7 +235,7 @@ test("JAR results of a render that is no longer the current one are dropped", ()
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-053
-test("an include request is refused for the Java engine and for a file id the host never issued", () => {
+test("an include request is refused for the Java engine and for a file id the host never issued", async () => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "diag-req-include-gate-")));
   try {
     const documentPath = path.join(root, "doc.md");
@@ -251,27 +252,27 @@ test("an include request is refused for the Java engine and for a file id the ho
       manager: { host: { logger: createMemoryLogger() } },
     });
     const manager = {
-      host: { logger: createMemoryLogger(), workspace: { trusted: true } },
+      host: { logger: createMemoryLogger(), workspace: { trusted: true }, files: createNodeFileSystem() },
       activePathOf: () => documentPath,
       canonicalPath: (value: string) => value,
       requests,
     };
-    let handler: ((message: unknown, preview: PreviewSession) => void) | undefined;
+    let handler: ((message: unknown, preview: PreviewSession) => unknown) | undefined;
     new PlantUmlController(manager as never).register({ on: (_type: string, callback: typeof handler) => { handler = callback; } } as never);
     const ask = (name: string, from: string | null, editId: string): Record<string, unknown> => ({
       type: "previewPlantUmlInclude", documentId: DOCUMENT, revision: 4, requestId: 9, path: name, from, editId,
     });
 
-    handler!(ask("part.puml", null, "e1"), preview);
+    await handler!(ask("part.puml", null, "e1"), preview);
     assert.equal(posted[0]!.ok, false, "the Java engine reads includes itself: the host serves none");
 
     (preview as unknown as { plantUmlEngineSettings: { useJar: boolean } }).plantUmlEngineSettings = { useJar: false };
-    handler!(ask("next.puml", path.join(root, "part.puml"), "e2"), preview);
+    await handler!(ask("next.puml", path.join(root, "part.puml"), "e2"), preview);
     assert.equal(posted[1]!.ok, false, "a from the host never issued is refused");
 
-    handler!(ask("part.puml", null, "e3"), preview);
+    await handler!(ask("part.puml", null, "e3"), preview);
     assert.equal(posted[2]!.ok, true);
-    handler!(ask("next.puml", posted[2]!.id as string, "e4"), preview);
+    await handler!(ask("next.puml", posted[2]!.id as string, "e4"), preview);
     assert.equal(posted[3]!.ok, true, `a from the host issued is served: ${String(posted[3]!.reason)}`);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
@@ -279,7 +280,7 @@ test("an include request is refused for the Java engine and for a file id the ho
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-053
-test("the host remembers the canonical path of a served include and of a missing one, and nothing for a refused one", () => {
+test("the host remembers the canonical path of a served include and of a missing one, and nothing for a refused one", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "diag-req-watch-"));
   try {
     const real = fs.realpathSync(root);
@@ -297,7 +298,7 @@ test("the host remembers the canonical path of a served include and of a missing
     });
     const canonicalized: string[] = [];
     const manager = {
-      host: { logger: createMemoryLogger(), workspace: { trusted: true } },
+      host: { logger: createMemoryLogger(), workspace: { trusted: true }, files: createNodeFileSystem() },
       activePathOf: () => documentPath,
       // The step under test: every watched path goes through the manager's canonical form.
       canonicalPath: (value: string) => {
@@ -306,20 +307,20 @@ test("the host remembers the canonical path of a served include and of a missing
       },
       requests,
     };
-    let handler: ((message: unknown, preview: PreviewSession) => void) | undefined;
+    let handler: ((message: unknown, preview: PreviewSession) => unknown) | undefined;
     new PlantUmlController(manager as never).register({ on: (_type: string, callback: typeof handler) => { handler = callback; } } as never);
     const request = (name: string, editId: string): Record<string, unknown> => ({
       type: "previewPlantUmlInclude", documentId: DOCUMENT, revision: 4, requestId: 9, path: name, from: null, editId,
     });
 
-    handler!(request("part.puml", "edit-1"), preview);
-    handler!(request("later.puml", "edit-2"), preview);
+    await handler!(request("part.puml", "edit-1"), preview);
+    await handler!(request("later.puml", "edit-2"), preview);
     assert.deepEqual(canonicalized, [path.join(real, "part.puml"), path.join(real, "later.puml")]);
     assert.equal(includeWatch.has(`canonical:${path.join(real, "part.puml")}`), true, "the served file, by its canonical path");
     assert.equal(includeWatch.has(`canonical:${path.join(real, "later.puml")}`), true, "the missing candidate, for its creation");
     assert.equal(includeWatch.size, 2);
 
-    handler!(request("../../outside.puml", "edit-3"), preview);
+    await handler!(request("../../outside.puml", "edit-3"), preview);
     assert.equal(includeWatch.size, 2, "nothing is remembered for a file outside the folders");
     assert.equal(canonicalized.length, 2);
   } finally {

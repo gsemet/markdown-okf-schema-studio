@@ -10,11 +10,13 @@ import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
 import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 import { fakeAssetResolver } from "../shared/fakeAssets";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const SOURCE = "---\ntitle: Hello\n---\n\n# Heading\n";
 
 async function firstLoad(): Promise<string> {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: "/ws/doc.md" }, languageId: "markdown", version: 1, getText: () => SOURCE },
     workspaceRoot: "/ws",
     requestId: 1,
@@ -34,7 +36,7 @@ async function firstLoad(): Promise<string> {
     requestId: 1,
     activeSourceFile: result.stage.activeDocumentPath,
   };
-  const built = buildPreviewWebviewHtml(
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
     result.html, result.stage.outputDirectory, assets, context, "/ws",
     { result: frontmatter, tableEnabled: true }, undefined, false, [], "host", true,
   );

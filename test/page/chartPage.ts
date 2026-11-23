@@ -17,6 +17,7 @@ import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
 import { THEMES } from "../visual/themes";
 import { fakeAssetResolver } from "../shared/fakeAssets";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const EXTENSION_ROOT = path.resolve(__dirname, "../../..");
 
@@ -132,6 +133,7 @@ export async function openPreviewPage(
       logLevel: "silent",
     });
   const rendered = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: documentPath }, languageId: "markdown", version: 1, getText: () => markdown },
     workspaceRoot: workspace,
     requestId: 1,
@@ -141,7 +143,7 @@ export async function openPreviewPage(
   const bundle = fakeAssetResolver({ cspSource: "file:", url: (filePath) => pathToFileURL(filePath).href, extensionRoot: root });
   // Only the diagram runtime is bundled here: the page keeps its inline stylesheet and has no KaTeX.
   const assets = { ...bundle, bundleUri: (...segments: string[]) => segments[0] === runtimeFile ? bundle.bundleUri(...segments) : undefined };
-  const built = buildPreviewWebviewHtml(
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
     rendered.html, workspace, assets, undefined, workspace, undefined, undefined, true, [], "builtin",
   );
   const pagePath = path.join(root, "page.html");

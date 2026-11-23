@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import { renderPreviewSource } from "../../../src/core/render/renderPipeline";
 import { attribute, findElements, parseHtml } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /**
  * The ranges the page reads to place the blank-lines block of a run inside a list (CR-448): the list
@@ -25,7 +26,7 @@ const rangeOf = (element: Parameters<typeof attribute>[0]): [number, number] =>
 test("the source gives the five runs: between items, in an item, in a fence, ending a list and in an admonition", async () => {
   const { html } = await renderPreviewSource({
     text: SOURCE, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false,
-  });
+  }, createNodeFileSystem());
   assert.equal(/data-okf-blank-runs="([^"]*)"/u.exec(html)?.[1], "4-6 10-12 18-19 22-23 26-27");
   const document = parseHtml(html);
   const [list] = findElements(document, (element) => element.tagName === "ul");

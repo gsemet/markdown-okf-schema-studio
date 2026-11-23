@@ -6,6 +6,7 @@ import { renderMyst, type MystRenderContext } from "../../../src/core/render/mys
 import { rewriteSphinxHtml } from "../../../src/core/security/html-sanitizer";
 import { ResourcePolicy } from "../../../src/core/security/resource-policy";
 import { attribute, findElements, hasClass, parseHtml, textContent } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /** A document with `front` as its front matter (one YAML line each) and `body` below it. */
 async function render(front: string[], body: string) {
@@ -156,7 +157,7 @@ test("the value, the warning class and the hostile text survive the page sanitiz
   const { html } = await render(['title: "<img src=x onerror=alert(1)>"'], "`= this.title` `= this.owner`");
   const { html: page } = rewriteSphinxHtml(html, {
     outputRoot: path.resolve(__dirname),
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     resolveResource: () => undefined,
     resolveNavigation: () => ({ kind: "blocked" }),

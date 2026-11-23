@@ -12,6 +12,7 @@ import {
   setPlantUmlProcessSpawnerForTests,
 } from "../../../src/core/render/plantUmlRenderer";
 import { findElement, hasClass, parseHtml, textContent } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const workspaceRoot = path.resolve(__dirname, "../../../..");
 const source = "```plantuml\n@startuml\nAlice -> Bob: hello\n@enduml\n```\n";
@@ -54,6 +55,7 @@ for (const trusted of [true, false]) {
     const record = countingSpawner();
     try {
       const result = await renderPreviewDocument({
+        files: createNodeFileSystem(),
         document: inlineDocument(source),
         workspaceRoot,
         requestId: 1,
@@ -81,6 +83,7 @@ test("useJar keeps the external pipeline: trusted it spawns, Restricted Mode ref
   const record = countingSpawner();
   try {
     const trusted = await renderPreviewDocument({
+      files: createNodeFileSystem(),
       document: inlineDocument(source),
       workspaceRoot,
       requestId: 2,
@@ -91,6 +94,7 @@ test("useJar keeps the external pipeline: trusted it spawns, Restricted Mode ref
     assert.deepEqual(record.spawns, ["plantuml"]);
 
     const untrusted = await renderPreviewDocument({
+      files: createNodeFileSystem(),
       document: inlineDocument(source),
       workspaceRoot,
       requestId: 3,

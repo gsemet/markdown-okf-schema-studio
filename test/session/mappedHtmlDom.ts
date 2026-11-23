@@ -12,6 +12,7 @@ import { parse, type DefaultTreeAdapterTypes } from "parse5";
 import { renderMyst } from "../../src/core/render/mystRenderer";
 import { rewriteSphinxHtml } from "../../src/core/security/html-sanitizer";
 import { ResourcePolicy } from "../../src/core/security/resource-policy";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 type Parse5Element = DefaultTreeAdapterTypes.Element;
 type Parse5Node = DefaultTreeAdapterTypes.Node;
@@ -117,7 +118,7 @@ export async function renderMappedPage(source: string, sourceFile: string, docum
   const rendered = await renderMyst(source);
   const rewritten = rewriteSphinxHtml(rendered.html, {
     outputRoot: "/w",
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     sourceMapping: { sourceFile, documentId },
     resolveResource: (request) => ({ path: request, uri: `vscode-resource:${request}` }),

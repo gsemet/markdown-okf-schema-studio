@@ -37,8 +37,10 @@ tested_in_files:
 - test/core/render/renderReq.coreRows.requirements.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 - test/integration/projectFeatures.test.ts
+- test/security/resource-policy.memory.test.ts
 - test/security/resource-policy.test.ts
 - test/security/trustReq.requirements.test.ts
+- test/session/webview.priming.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-CORE-016

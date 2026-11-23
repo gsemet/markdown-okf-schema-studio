@@ -16,6 +16,7 @@ import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 import { pageRuntimeScript } from "./runtimeHarness";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const MARKDOWN = "שלום עולם, זו פסקה בעברית.\n\nHello world, an English paragraph.\n";
 
@@ -30,6 +31,7 @@ test("a Hebrew paragraph ends at the right edge of the column and an English one
   fs.mkdirSync(path.join(root, "out", "bundle"), { recursive: true });
   fs.writeFileSync(path.join(root, "out", "bundle", "preview.js"), pageRuntimeScript());
   const rendered = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: documentPath }, languageId: "markdown", version: 1, getText: () => MARKDOWN },
     workspaceRoot: workspace, requestId: 1, isWorkspaceTrusted: () => true,
   });
@@ -40,7 +42,7 @@ test("a Hebrew paragraph ends at the right edge of the column and an English one
     previewThemeMode: "current" as const,
     initialViewPreferences: { zoom: 100, widthMode: "auto" as const, toc: false, incomingChanges: true, comments: true, toolbarCollapsed: true },
   };
-  const built = buildPreviewWebviewHtml(rendered.html, workspace, bundle, context, workspace, undefined, 844, true, [], "builtin");
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(), rendered.html, workspace, bundle, context, workspace, undefined, 844, true, [], "builtin");
   const pagePath = path.join(root, "page.html");
   fs.writeFileSync(pagePath, built.html);
   let browser;

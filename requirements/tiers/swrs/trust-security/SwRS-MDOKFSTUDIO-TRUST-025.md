@@ -27,9 +27,11 @@ implemented_in_files:
 tested_in_files:
 - test/integration/untrusted-suite.ts
 - test/security/html-policy.test.ts
+- test/security/resource-policy.memory.test.ts
 - test/security/resource-policy.test.ts
 - test/security/trustReq.pageBuild.requirements.test.ts
 - test/security/trustReq.requirements.test.ts
+- test/session/webview.priming.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

@@ -6,6 +6,7 @@ import { renderMyst } from "../../../src/core/render/mystRenderer";
 import { rewriteSphinxHtml } from "../../../src/core/security/html-sanitizer";
 import { ResourcePolicy } from "../../../src/core/security/resource-policy";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent, type HtmlElement } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /** Radio choice lists (`- ( )` / `- (x)`): which items form a radio group, and how it renders. */
 
@@ -148,7 +149,7 @@ test("the webview sanitizer keeps the radio roles, states and source attributes"
   const { html } = await renderMyst("Choose:\n\n- (x) keep\n- ( ) drop\n");
   const rewritten = rewriteSphinxHtml(html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     resolveResource: () => undefined,
     resolveNavigation: () => ({ kind: "blocked" }),
@@ -176,7 +177,7 @@ test("in the mapped webview HTML the selected option is the group's only tab sto
   const { html } = await renderMyst(source);
   const rewritten = rewriteSphinxHtml(html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     sourceMapping: { sourceFile: "plan.md", documentId: "file:///plan.md" },
     resolveResource: () => undefined,
@@ -210,7 +211,7 @@ test("in a list that mixes task items and options, and in a nested group, the op
   const { html } = await renderMyst(source);
   const rewritten = rewriteSphinxHtml(html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     sourceMapping: { sourceFile: "plan.md", documentId: "file:///plan.md" },
     resolveResource: () => undefined,

@@ -32,7 +32,7 @@ import {
 } from "../webview";
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import { PreviewDiagnostic, RenderError, RenderResult, RenderStage } from "../../core/render/renderPipeline";
-import { isBroadRestrictedRoot } from "../../core/security/resource-policy";
+import { isBroadRestrictedRoot, type PolicyFiles } from "../../core/security/resource-policy";
 import { needsRefresh } from "../../core/state/editLock";
 import type { PreviewPanelState } from "../../core/state/previewState";
 import type { PreviewRuntimeContext } from "../../core/protocol/bootContext";
@@ -69,14 +69,15 @@ function sameResourceRoots(previous: readonly string[], next: readonly string[])
  * images of the document folder (`resourceRoot`, even a broad one) and of the workspace folder
  * (`workspaceFolder`, unless it is broad); a trusted one loads from its resource root.
  */
-export function previewLocalResourceRoots(
+export async function previewLocalResourceRoots(
+  files: Pick<PolicyFiles, "realpath">,
   resourceRoot: string,
   restrictedReads: boolean,
   workspaceFolder?: string,
-): string[] {
+): Promise<string[]> {
   if (!restrictedReads) return [resourceRoot];
   const extra = workspaceFolder !== undefined && workspaceFolder !== resourceRoot
-    && !isBroadRestrictedRoot(workspaceFolder) ? [workspaceFolder] : [];
+    && !await isBroadRestrictedRoot(files, workspaceFolder) ? [workspaceFolder] : [];
   return [resourceRoot, ...extra];
 }
 
@@ -155,22 +156,30 @@ export class RenderingController extends PageDocumentController {
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-011
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
   /** Shows a finished render: a content patch when the loaded page allows it, else a new document. */
-  public updatePreview(preview: PreviewSession, result: RenderResult): void {
+  public updatePreview(preview: PreviewSession, result: RenderResult): Promise<void> {
+    // The file lookups of the page are asynchronous: the shows of one session run one after the
+    // other, in the order they were asked, so a late one never overwrites a newer page.
+    const next = (this.updates.get(preview) ?? Promise.resolve()).then(() => this.showPreview(preview, result));
+    this.updates.set(preview, next.catch(() => undefined));
+    return next;
+  }
+
+  private readonly updates = new WeakMap<PreviewSession, Promise<void>>();
+
+  private isShowable(preview: PreviewSession, result: RenderResult): boolean {
+    return !preview.disposed
+      && this.manager.has(preview)
+      && preview.documentUri === result.stage.activeDocumentIdentity;
+  }
+
+  private async showPreview(preview: PreviewSession, result: RenderResult): Promise<void> {
     const { manager } = this;
     // Deliberately renders results that the buffer has already moved past: a newer build is
     // queued behind it, and dropping them here would freeze the preview while the user types.
-    if (
-      preview.disposed
-      || !manager.has(preview)
-      || preview.documentUri !== result.stage.activeDocumentIdentity
-    ) {
+    if (!this.isShowable(preview, result)) {
       result.stage.dispose();
       return;
     }
-    const previousStage = preview.stage;
-    const previousHtml = preview.webview.html;
-    const previousNonce = preview.webview.nonce;
-    const previousRoots = preview.page.resourceRoots;
     const context = this.runtimeContext(
       result.stage,
       preview.state,
@@ -186,7 +195,8 @@ export class RenderingController extends PageDocumentController {
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
     // A preview with restricted reads loads images from its document folder and its workspace folder, never from
     // a broad workspace folder (the home folder, a file-system root).
-    const localResourceRoots = previewLocalResourceRoots(
+    const localResourceRoots = await previewLocalResourceRoots(
+      manager.host.files,
       preview.workspaceRoot,
       preview.restrictedReads,
       preview.workspaceFolder?.path,
@@ -220,8 +230,8 @@ export class RenderingController extends PageDocumentController {
     );
     // The live preview renders in-process and only references workspace files (the document
     // itself and assets like figures), so the workspace folder is the single localResourceRoot.
-    this.setResourceRoots(preview, localResourceRoots);
-    const webview = buildPreviewWebviewHtml(
+    const webview = await buildPreviewWebviewHtml(
+      manager.host.files,
       result.html,
       result.stage.outputDirectory,
       preview.panel.assets,
@@ -239,6 +249,16 @@ export class RenderingController extends PageDocumentController {
       plantUmlRenderer,
       preview.restrictedReads,
     );
+    if (!this.isShowable(preview, result)) {
+      result.stage.dispose();
+      return;
+    }
+    // Read after the last wait: what the page shows now is what this render replaces.
+    const previousStage = preview.stage;
+    const previousHtml = preview.webview.html;
+    const previousNonce = preview.webview.nonce;
+    const previousRoots = preview.page.resourceRoots;
+    this.setResourceRoots(preview, localResourceRoots);
     const status: PreviewStatus = preview.hadFailure ? "recovery" : "success";
     const html = setPreviewStatus(webview.html, status, undefined, result.diagnostics);
     // A page that is ready for the previous stage gets the new content in place when everything
@@ -380,7 +400,7 @@ export class RenderingController extends PageDocumentController {
             result.stage.dispose(); // a newer render reached the page in the meantime
             return;
           }
-          this.updatePreview(preview, result);
+          fireAndForget(manager.host.logger, this.updatePreview(preview, result), "Showing a deferred render");
         }, () => result.stage.dispose());
         return;
       }
@@ -388,7 +408,7 @@ export class RenderingController extends PageDocumentController {
       // result must not come back over it.
       preview.edits.forceNextResult = false;
       preview.edits.lock.drop("render-result");
-      this.updatePreview(preview, result);
+      fireAndForget(manager.host.logger, this.updatePreview(preview, result), "Showing a render");
       return;
     }
     if (state.phase !== "failed") {

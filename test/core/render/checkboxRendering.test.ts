@@ -14,6 +14,7 @@ import {
   textContent,
   type HtmlElement,
 } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const workspaceRoot = path.resolve(__dirname, "../../../../../..");
 
@@ -108,7 +109,7 @@ test("the webview sanitizer keeps checkbox inputs and their source attributes", 
   const { html } = await renderMyst("- [x] keep me\n");
   const rewritten = rewriteSphinxHtml(html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     resolveResource: () => undefined,
     resolveNavigation: () => ({ kind: "blocked" }),

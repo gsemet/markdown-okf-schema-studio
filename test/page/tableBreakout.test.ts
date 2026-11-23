@@ -33,6 +33,7 @@ import { fakeAssetResolver } from "../shared/fakeAssets";
 import { THEMES } from "../visual/themes";
 import { PINNED_MONO_FAMILY, PINNED_SANS_FAMILY, pinTestFonts } from "./pinnedFont";
 import { pageRuntimeScript } from "./runtimeHarness";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 /** Both themes; STUDIO_TABLE_THEME picks one (the review pictures of a failing run). */
 const RUN_THEMES = process.env.STUDIO_TABLE_THEME ? [process.env.STUDIO_TABLE_THEME] : ["light", "dark"];
@@ -211,6 +212,7 @@ async function openPage(markdown: string, themeId: string, options: OpenOptions 
   fs.mkdirSync(path.join(root, "out", "bundle"), { recursive: true });
   fs.writeFileSync(path.join(root, "out", "bundle", "preview.js"), pageRuntimeScript());
   const rendered = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: documentPath }, languageId: "markdown", version: 1, getText: () => markdown },
     workspaceRoot: workspace,
     requestId: 1,
@@ -227,7 +229,7 @@ async function openPage(markdown: string, themeId: string, options: OpenOptions 
     previewThemeMode: "current" as const,
     initialViewPreferences: { zoom: 100, widthMode: "auto" as const, toc: false, incomingChanges: true, comments: true, toolbarCollapsed: true },
   };
-  const built = buildPreviewWebviewHtml(
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
     rendered.html, workspace, bundle, context, workspace, undefined, COLUMN + GUTTER * 2, true, [], "builtin",
   );
   assert.ok(serializeRuntimeContext(context).length > 0);

@@ -12,6 +12,7 @@ import {
 } from "../../../src/core/render/plantUmlRenderer";
 import { renderPreviewDocument, type PreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const SEQUENCE = "@startuml\nAlice -> Bob: from a file\n@enduml\n";
 
@@ -40,6 +41,7 @@ async function render(text: string, options: { trusted?: boolean; resourceRoot?:
   const { workspaceRoot, docs, root } = workspace();
   const documentPath = path.join(docs, "page.md");
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: previewDocument(documentPath, text),
     // The extension passes the document's folder as the resource root of a Restricted Mode preview.
     workspaceRoot: options.resourceRoot === "document" ? docs : workspaceRoot,
@@ -160,6 +162,7 @@ test("with useJar the JAR receives the text of the {uml} file", async () => {
   try {
     const { workspaceRoot, docs } = workspace();
     const result = await renderPreviewDocument({
+      files: createNodeFileSystem(),
       document: previewDocument(path.join(docs, "page.md"), "```{uml} diagrams/flow.puml\n```\n"),
       workspaceRoot,
       requestId: 1,
@@ -182,6 +185,7 @@ test("a diagram file larger than 5 MiB is refused with a message and one warning
   fs.writeFileSync(path.join(docs, "diagrams", "exact.puml"), body(limit));
   const text = "```{uml} diagrams/big.puml\n```\n\n```{uml} diagrams/exact.puml\n```\n";
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: previewDocument(path.join(docs, "page.md"), text),
     workspaceRoot,
     requestId: 1,

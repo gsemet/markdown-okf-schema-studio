@@ -3,7 +3,6 @@
     "isToolComment": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module."
   },
   "src/core/render/documentGlob.ts": {
-    "MAX_GLOB_MATCHES": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module.",
     "globToRegExp": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module."
   },
   "src/core/render/highlight.ts": {

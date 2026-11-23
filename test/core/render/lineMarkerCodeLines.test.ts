@@ -5,6 +5,7 @@ import { codeSpanIndex } from "../../../src/page/features/lineMarker";
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElements, hasClass, parseHtml, textContent, type HtmlElement } from "./dom";
 import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /**
  * The line marker counts a code line back from the block's last source line (the closing fence):
@@ -26,6 +27,7 @@ interface CodeBlock {
 
 async function codeBlocksOf(source: string): Promise<CodeBlock[]> {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(source),
     workspaceRoot,
     requestId: 1,

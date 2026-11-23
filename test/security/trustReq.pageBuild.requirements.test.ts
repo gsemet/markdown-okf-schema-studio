@@ -14,6 +14,7 @@ import { afterEach, test } from "node:test";
 import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
 import { fakeAssetResolver } from "../shared/fakeAssets";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const directories: string[] = [];
 
@@ -29,9 +30,9 @@ function folder(): string {
   return directory;
 }
 
-function build(content: string, directory = folder()) {
+async function build(content: string, directory = folder()) {
   const assets = fakeAssetResolver({ cspSource: "vscode-webview://csp", url: (filePath) => `webview:/${filePath}`, extensionRoot: directory });
-  return buildPreviewWebviewHtml(
+  return await buildPreviewWebviewHtml(createNodeFileSystem(),
     `<html><head></head><body><main id="sphinx-myst-preview-content">${content}</main></body></html>`,
     directory, assets, undefined, undefined, undefined, undefined, true, [], "builtin",
   );
@@ -41,8 +42,8 @@ const codes = (diagnostics: ReadonlyArray<{ code: string }>, code: string): numb
   diagnostics.filter((entry) => entry.code === code).length;
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-036
-test("an embed, an object and a form are removed with their content and each records blocked-active-element", () => {
-  const built = build(
+test("an embed, an object and a form are removed with their content and each records blocked-active-element", async () => {
+  const built = await build(
     '<p>before</p><embed src="movie.swf"><object data="file.pdf"><p>inside-object</p></object>'
     + '<form action="/send"><input name="q"><p>inside-form</p></form><p>after</p>',
   );
@@ -58,10 +59,10 @@ test("an embed, an object and a form are removed with their content and each rec
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025
-test("a srcset whose candidates are all refused is removed and records blocked-srcset", () => {
+test("a srcset whose candidates are all refused is removed and records blocked-srcset", async () => {
   const directory = folder();
   fs.writeFileSync(path.join(directory, "local.png"), "png");
-  const built = build(
+  const built = await build(
     '<img src="local.png" srcset="data:image/png;base64,AAAA 1x, javascript:alert(1) 2x" alt="refused">'
     + '<img src="local.png" srcset="local.png 1x, data:image/png;base64,AAAA 2x" alt="mixed">',
     directory,
@@ -78,8 +79,8 @@ test("a srcset whose candidates are all refused is removed and records blocked-s
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-042
-test("a wiki link is routed by the host, a bad anchor and javascript: lose their href with blocked-navigation", () => {
-  const built = build('<a href="wiki:Some Page">wiki</a><a href="# x">bad</a><a href="javascript:alert(1)">script</a>');
+test("a wiki link is routed by the host, a bad anchor and javascript: lose their href with blocked-navigation", async () => {
+  const built = await build('<a href="wiki:Some Page">wiki</a><a href="# x">bad</a><a href="javascript:alert(1)">script</a>');
   assert.match(built.html, /<a href="#" data-sphinx-preview-navigation="wiki:Some Page">wiki<\/a>/u);
   const bad = /<a[^>]*>bad<\/a>/u.exec(built.html)?.[0] ?? "";
   assert.doesNotMatch(bad, /href=/u, "no href remains on the bad anchor");
@@ -94,8 +95,8 @@ test("a wiki link is routed by the host, a bad anchor and javascript: lose their
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-042
-test("an SVG xlink:href is treated like an HTML link: blocked loses its address, allowed keeps it, both keep the request for the host", () => {
-  const built = build(
+test("an SVG xlink:href is treated like an HTML link: blocked loses its address, allowed keeps it, both keep the request for the host", async () => {
+  const built = await build(
     '<svg><a xlink:href="javascript:alert(2)"><text>blocked</text></a><a xlink:href="#section"><text>allowed</text></a></svg>',
   );
   const blocked = /<a[^>]*><text>blocked/u.exec(built.html)?.[0] ?? "";
@@ -111,10 +112,10 @@ test("an SVG xlink:href is treated like an HTML link: blocked loses its address,
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-042
-test("a linked stylesheet is removed: inside the roots it is ignored, outside it is refused, each with blocked-stylesheet", () => {
+test("a linked stylesheet is removed: inside the roots it is ignored, outside it is refused, each with blocked-stylesheet", async () => {
   const directory = folder();
   fs.writeFileSync(path.join(directory, "theme.css"), "p { color: red }");
-  const built = build('<link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="../../../outside.css"><p>Text</p>', directory);
+  const built = await build('<link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="../../../outside.css"><p>Text</p>', directory);
   assert.doesNotMatch(built.html, /<link|theme\.css|outside\.css/u);
   const stylesheets = built.diagnostics.filter((entry) => entry.code === "blocked-stylesheet");
   assert.deepEqual(stylesheets.map((entry) => [entry.message, entry.value]), [
@@ -124,8 +125,8 @@ test("a linked stylesheet is removed: inside the roots it is ignored, outside it
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-012
-test("a policy meta element in the body is kept as an inert element; only the policy of the head applies", () => {
-  const built = build('<meta http-equiv="Content-Security-Policy" content="default-src *"><p>Text</p>');
+test("a policy meta element in the body is kept as an inert element; only the policy of the head applies", async () => {
+  const built = await build('<meta http-equiv="Content-Security-Policy" content="default-src *"><p>Text</p>');
   const head = /<head>([\s\S]*?)<\/head>/u.exec(built.html)?.[1] ?? "";
   assert.equal(head.match(/http-equiv="Content-Security-Policy"/gu)?.length, 1);
   assert.match(head, /content="default-src 'none';/u);
@@ -142,11 +143,12 @@ test("the Mermaid and PlantUML scripts and the maths style carry the page nonce"
   const markdown = "```mermaid\ngraph TD; A-->B\n```\n\n```plantuml\n@startuml\nA -> B\n@enduml\n```\n\n$$\n\\sqrt{x^2}\n$$\n";
   fs.writeFileSync(documentPath, markdown);
   const rendered = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: documentPath }, languageId: "markdown", version: 1, getText: () => markdown },
     workspaceRoot: directory, requestId: 1, isWorkspaceTrusted: () => true, plantUmlEngine: "builtin",
   });
   const assets = fakeAssetResolver({ cspSource: "vscode-webview://csp", url: (filePath) => `webview:/${filePath}`, extensionRoot: directory });
-  const html = buildPreviewWebviewHtml(rendered.html, directory, assets, undefined, undefined, undefined, undefined, true, [], "builtin").html;
+  const html = (await buildPreviewWebviewHtml(createNodeFileSystem(), rendered.html, directory, assets, undefined, undefined, undefined, undefined, true, [], "builtin")).html;
   const nonce = /'nonce-([^']+)'/u.exec(html)?.[1];
   assert.ok(nonce);
   const mermaid = /<script[^>]*data-sphinx-preview-mermaid[^>]*>/u.exec(html)?.[0] ?? "";

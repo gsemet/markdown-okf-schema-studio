@@ -1,7 +1,7 @@
 import * as path from "node:path";
 
 import { blankRuns, quoteBlankRuns } from "../mapping/blankRuns";
-import { listGlobDocuments } from "./documentGlob";
+import { listGlobDocuments, type GlobFiles } from "./documentGlob";
 import { loadEngine } from "./mystEngine";
 import { renderMyst, RenderDiagnostic } from "./mystRenderer";
 import {
@@ -9,8 +9,11 @@ import {
   type PlantUmlRenderResult,
 } from "./plantUmlRenderer";
 import type { PlantUmlEngine } from "../configuration/plantUmlConfiguration";
-import { enabledMystExtensionsFor } from "../myst/confLocator";
-import { createPreviewResourcePolicy, readBoundedText } from "../security/resource-policy";
+import { enabledMystExtensionsFor, type ConfFiles } from "../myst/confLocator";
+import { createPreviewResourcePolicy, readBoundedText, type PolicyFiles } from "../security/resource-policy";
+
+/** The file access of a render: the policy's real paths and reads, the glob's listings, the `conf.py` lookup. */
+export type RenderFiles = PolicyFiles & GlobFiles & ConfFiles;
 
 /** The document to render, as the host's text document gives it. */
 export interface PreviewDocument {
@@ -76,6 +79,8 @@ export interface RenderOptions {
    */
   revision?: number;
   workspaceRoot: string;
+  /** Where the render reads files from (includes, diagram files, globs, `conf.py`, PlantUML includes). */
+  files: RenderFiles;
   /**
    * Restricted reads (no workspace folder, or Restricted Mode; editing is not affected): includes and resources are
    * narrowed (no home folder or file-system root, no dot-directory). Omitted: full reads.
@@ -205,25 +210,29 @@ function createStage(options: RenderOptions, diagnostics: PreviewDiagnostic[]): 
  * diagram files and toctree globs are read through it). Plain data in and out, so a worker thread
  * runs the same function (`src/node-services/renderWorker.ts`).
  */
-export async function renderPreviewSource(input: SourceRenderInput): Promise<SourceRenderOutput> {
+export async function renderPreviewSource(
+  input: SourceRenderInput,
+  files: RenderFiles,
+): Promise<SourceRenderOutput> {
   const documentDirectory = path.dirname(input.documentPath);
-  const resourcePolicy = createPreviewResourcePolicy(documentDirectory, input.workspaceRoot, input.restrictedReads);
+  const resourcePolicy = createPreviewResourcePolicy(files, documentDirectory, input.workspaceRoot, input.restrictedReads);
   // The first render loads the engine; that time is not the render's.
   await loadEngine();
   const started = performance.now();
   const rendered = await renderMyst(input.text, {
     sourcePath: input.documentPath,
     ...(input.enabledMystExtensions ? { enabledMystExtensions: new Set(input.enabledMystExtensions) } : {}),
-    resolveInclude: (request, sourcePath) => {
-      const read = readBoundedText(resourcePolicy, request, path.dirname(sourcePath));
+    resolveInclude: async (request, sourcePath) => {
+      const read = await readBoundedText(resourcePolicy, request, path.dirname(sourcePath));
       return read.ok ? { path: read.path, source: read.source } : undefined;
     },
     // `{uml} file.puml`: the same read as `{include}`, with the reason of a refusal.
     readDiagramFile: (request, sourcePath) => readBoundedText(resourcePolicy, request, path.dirname(sourcePath)),
     listDocuments: (pattern, sourcePath) => listGlobDocuments(
+      files,
       pattern,
       path.dirname(sourcePath),
-      (candidate) => resourcePolicy.resolveResource(candidate, path.dirname(sourcePath)) !== undefined,
+      async (candidate) => (await resourcePolicy.resolveResource(candidate, path.dirname(sourcePath))) !== undefined,
       sourcePath,
     ),
   });
@@ -305,8 +314,8 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
         diagnostics.push({ ...diagnostic, code: diagnostic.code === "myst-extension" ? diagnostic.code : "myst-diagnostic", file: stage.activeDocumentPath });
       }
     } else {
-      const enabled = enabledMystExtensionsFor(stage.activeDocumentPath, options.workspaceRoot);
-      const rendered = await (options.renderSource ?? renderPreviewSource)({
+      const enabled = await enabledMystExtensionsFor(options.files, stage.activeDocumentPath, options.workspaceRoot);
+      const rendered = await (options.renderSource ?? ((input) => renderPreviewSource(input, options.files)))({
         text: options.document.getText(),
         documentPath: stage.activeDocumentPath,
         workspaceRoot: options.workspaceRoot,
@@ -325,6 +334,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
           jarPath: options.plantUmlJarPath,
           workspaceRoot: options.workspaceRoot,
           trusted: options.isWorkspaceTrusted(),
+          files: options.files,
           signal: deferredController.signal,
         }).catch((error: unknown) => ({
           diagrams: [],

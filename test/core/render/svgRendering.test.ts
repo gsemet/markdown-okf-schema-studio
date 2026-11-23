@@ -7,10 +7,12 @@ import { test } from "node:test";
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { PREVIEW_THEME_CSS } from "../../../src/core/preview/previewStyles";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 async function render(text: string) {
   const workspaceRoot = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "svg-render-")));
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: path.join(workspaceRoot, "page.md") }, languageId: "markdown", version: 1, getText: () => text },
     workspaceRoot,
     requestId: 1,
