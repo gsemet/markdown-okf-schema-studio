@@ -39,6 +39,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/comments/commentEditing.test.ts
 - test/core/comments/reviewReq.requirements.test.ts
+- test/core/comments/sha256.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/host-vscode/fileRename.test.ts
 - test/integration/commentWrite.test.ts
