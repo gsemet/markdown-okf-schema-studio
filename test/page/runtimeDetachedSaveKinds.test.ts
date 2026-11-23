@@ -9,7 +9,7 @@ import {
 /**
  * A detached save that fails reopens the editor it left, whatever the editor was (CR 475, checks 14
  * to 20): a paragraph, a table cell (the cell left earlier, a Tab-added row), an insertion and a
- * blank-lines block. The retry posts the first save again, with the identity of the first.
+ * blank-line block. The retry posts the first save again, with the identity of the first.
  */
 
 const DONE = "Done editing";
@@ -79,7 +79,7 @@ function detached(kind: Kind): Scenario {
     addBlankRuns(harness, "3-6 54-56");
     const blank = harness.createdElements.find((element) =>
       element.className.split(" ").includes("sphinx-preview-blank-lines") && !element.removed);
-    assert.ok(blank, "a blank-lines block");
+    assert.ok(blank, "a blank-line block");
     blank.dispatch("click", plainClick());
     harness.dispatchMessage({
       type: "previewEditSource", ...IDENTITY, editId: harness.messages.at(-1)?.editId, originalText: "\n\n\n\n",

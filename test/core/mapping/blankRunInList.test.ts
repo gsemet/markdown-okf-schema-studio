@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { planBlocksPaste } from "../../../src/core/edits/sourceEdits";
 import { planBlankRunPaste, planBlankRunRemoval } from "../../../src/core/mapping/blockRange";
 import { insertionText, planBlankRunInsertion } from "../../../src/core/mapping/insertion";
-import { blankRuns } from "../../../src/core/mapping/blankRuns";
+import { shownBlankLines } from "../../../src/core/mapping/blankRuns";
 import { renderPreviewSource } from "../../../src/core/render/renderPipeline";
 import { attribute, findElements, parseHtml, textContent } from "../render/dom";
 import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
@@ -21,10 +21,16 @@ const join = (eol: string, entries: string[]): string => entries.join(eol);
 const render = (text: string) =>
   renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false }, createNodeFileSystem());
 
-/** The text with `raw` written in the only run of the text, `itemLine` being its list item. */
+/** The first shown blank line of the text, one line: `endLine === line`. */
+function firstShown(text: string): { line: number; endLine: number } {
+  const [first] = shownBlankLines(text);
+  return { line: first.line, endLine: first.line };
+}
+
+/** The text with `raw` written in the first shown blank line of the text, `itemLine` being its list item. */
 function writeInRun(text: string, itemLine: number | undefined, raw: string): string {
-  const [run] = blankRuns(text);
-  const plan = planBlankRunInsertion(text, run.line, run.endLine, itemLine);
+  const run = firstShown(text);
+  const plan = planBlankRunInsertion(text, run.line, itemLine);
   return text.slice(0, plan.replace!.start) + insertionText(plan, raw) + text.slice(plan.replace!.end);
 }
 
@@ -136,9 +142,9 @@ for (const [name, eol] of EOLS) {
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
   test(`${name}: a paste takes the same indent as typing, and refuses a line that is no list item`, async () => {
-    const [run] = blankRuns(between);
+    const run = firstShown(between);
     const paste = (clipboard: string, itemLine?: number) =>
-      planBlankRunPaste(between, run.line, run.endLine, clipboard, itemLine);
+      planBlankRunPaste(between, run.line, clipboard, itemLine);
     const more = paste("More", 1);
     assert.ok(!("refused" in more));
     const applied = (plan: { offset: number; text: string; end?: number }): string =>
@@ -160,15 +166,15 @@ for (const [name, eol] of EOLS) {
   });
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
-  test(`${name}: removing a run between items or inside an item keeps one blank line and one list`, async () => {
+  test(`${name}: removing a blank line between items or inside an item removes that line only and keeps one list`, async () => {
     for (const text of [between, inItem, nested]) {
-      const [run] = blankRuns(text);
-      const plan = planBlankRunRemoval(text, run.line, run.endLine);
+      const run = firstShown(text);
+      const plan = planBlankRunRemoval(text, run.line);
       assert.ok(!("refused" in plan));
       const removed = text.slice(0, (plan as { start: number }).start) + text.slice((plan as { end: number }).end);
       const lines = text.split(eol);
-      lines.splice(run.line, run.endLine - run.line);
-      assert.equal(removed, lines.join(eol), "line `line` stays and nothing else changes");
+      lines.splice(run.line - 1, 1);
+      assert.equal(removed, lines.join(eol), "only the removed line goes");
       assert.equal((await listsOf(removed)).lists, 1);
     }
   });

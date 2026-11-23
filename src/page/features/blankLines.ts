@@ -1,8 +1,10 @@
 /**
- * The blank-lines blocks of edit mode: one reachable block for each run of two or more blank lines
- * (CommonMark blank lines, or the empty `>` lines of a quote). The host finds the runs and appends
- * them as the last element of the content (`<div hidden data-okf-blank-runs="L-E L-E">`); the page
- * reads the list only there, so authored content cannot forge a run. The blocks are the page's own
+ * The blank-line blocks of edit mode: one reachable block for each shown blank line (CommonMark blank
+ * lines, or the empty `>` lines of a quote; the separator Markdown needs stays hidden). The host finds
+ * the ranges of shown lines and appends them as the last element of the content
+ * (`<div hidden data-okf-blank-runs="L-E L-L">`); the page reads the list only there, so authored
+ * content cannot forge one. A range is located once, and its blocks (`{ line: n, endLine: n }`, one
+ * per line, in line order) all go at that spot. The blocks are the page's own
  * elements (never mapped to a source line, so no other feature takes them for a block of the
  * document): they are made here and tracked here. Where a block goes, and which runs show nothing
  * (a fence, a table, a closed dropdown, a folded section), is decided in `blankRunHosts.ts`: a run
@@ -22,6 +24,8 @@ const SELECTED_ATTRIBUTE = "data-sphinx-preview-block-selected";
 const RUN_PATTERN = /^([1-9][0-9]{0,8})-([1-9][0-9]{0,8})$/u;
 
 interface Run extends RunLines {
+  /** The first line of the range this block came from (its run, for the selection after a delete). */
+  first: number;
   /** A run inside a list: the first line of the list item that holds its block. */
   itemLine?: number;
   /** A run inside another container: the line the host reads its indent from. */
@@ -33,27 +37,27 @@ interface Run extends RunLines {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
-/** The runs of the host's list, in order; a malformed or overlapping entry is dropped (runs may touch). */
-function parseRuns(value: string | null): Run[] {
-  const runs: Run[] = [];
+/** The ranges of the host's list, in order; a malformed or overlapping entry is dropped (a range may be one line). */
+function parseRuns(value: string | null): RunLines[] {
+  const runs: RunLines[] = [];
   for (const entry of (value ?? "").split(" ")) {
     const match = RUN_PATTERN.exec(entry);
     if (!match) continue;
     const run = { line: Number(match[1]), endLine: Number(match[2]) };
     const last = runs[runs.length - 1];
-    if (run.endLine > run.line && (!last || run.line > last.endLine)) runs.push(run);
+    if (run.endLine >= run.line && (!last || run.line > last.endLine)) runs.push(run);
   }
   return runs;
 }
 
-/** The blank-lines blocks of a page. */
+/** The blank-line blocks of a page. */
 export function installBlankLines(rt: PageRuntime): BlankLines {
   const { document, state } = rt;
   const runs = new Map<HTMLElement, Run>();
   let selectedBlock: HTMLElement | undefined;
 
   // The list of the host: the last element of the content that the page did not make itself.
-  function readRuns(): Run[] {
+  function readRuns(): RunLines[] {
     const content = document.getElementById?.(CONTENT_ID);
     const children = Array.from(content?.children ?? []) as HTMLElement[];
     for (let index = children.length - 1; index >= 0; index -= 1) {
@@ -79,11 +83,11 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
       undefined,
       {
         line: run.line,
-        endLine: run.endLine,
+        endLine: run.line,
         insertAfterLine: run.line - 1,
         replaceBlankRun: {
           line: run.line,
-          endLine: run.endLine,
+          endLine: run.line,
           ...(run.itemLine !== undefined ? { itemLine: run.itemLine } : {}),
           ...(run.containerLine !== undefined ? { containerLine: run.containerLine } : {}),
         },
@@ -92,21 +96,20 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
     );
   }
 
-  function create(run: Run): HTMLElement {
+  function create(): HTMLElement {
     const block = document.createElement("div");
     block.className = BLOCK_CLASS;
     block.setAttribute("role", "button");
     block.setAttribute("tabindex", "0");
-    const count = run.endLine - run.line + 1;
-    block.setAttribute("aria-label", `Blank lines, ${count} lines. Press Enter to write a block here.`);
-    block.setAttribute("data-okf-blank-label", `Blank lines (${count})`);
+    block.setAttribute("aria-label", "Blank line. Press Enter to write a block here.");
+    block.setAttribute("data-okf-blank-label", "Blank line");
     block.appendChild(createDeleteBlockButton(document, () => {
       rt.selection.requestDeleteBlankLines(block);
     }));
     block.addEventListener("click", (event) => {
       event.preventDefault?.();
       event.stopPropagation?.();
-      // Shift+click extends a block selection; a blank-lines block never joins it.
+      // Shift+click extends a block selection; a blank-line block never joins it.
       if ((event as MouseEvent).shiftKey) return;
       open(block);
     });
@@ -151,7 +154,7 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
     return false;
   }
 
-  // The children of a container that are not the page's own: blank-lines blocks, editor frame, insertion bars.
+  // The children of a container that are not the page's own: blank-line blocks, editor frame, insertion bars.
   const skipOwn = (child: HTMLElement): boolean =>
     runs.has(child) || child === state.activeBlockEdit?.element || hasClass(child, INSERT_POINT_CLASS);
 
@@ -164,7 +167,7 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
     }
     const blocks = rt.blocks.topLevelMappedBlocks();
     const kept = new Set<HTMLElement>();
-    const put = (block: HTMLElement, spot: NonNullable<ReturnType<typeof locateRun>>, run: Run): void => {
+    const put = (block: HTMLElement, spot: NonNullable<ReturnType<typeof locateRun>>, run: RunLines): void => {
       if ("host" in spot) placeInHost(rt, block, spot.host, run, skipOwn);
       else place(block, spot.above);
     };
@@ -191,25 +194,37 @@ export function installBlankLines(rt: PageRuntime): BlankLines {
       }
     }
     const existing = new Map<string, HTMLElement>();
-    const keyOf = (run: Run): string =>
-      `${run.line}-${run.endLine}-${run.itemLine ?? ""}-${run.containerLine ?? ""}`;
+    const keyOf = (run: Run): string => `${run.line}-${run.itemLine ?? ""}-${run.containerLine ?? ""}`;
     runs.forEach((run, block) => {
       if (attached(block, run)) existing.set(keyOf(run), block);
     });
+    // A block goes right after the previous one of its range (after its editor frame, when it has one).
+    const putAfter = (block: HTMLElement, previous: HTMLElement): void => {
+      const frame = state.activeBlockEdit?.element;
+      const anchor = previous === editing && frame && previous.nextElementSibling === frame ? frame : previous;
+      if (anchor.nextElementSibling !== block) anchor.insertAdjacentElement("afterend", block);
+    };
     for (const found of readRuns()) {
       const spot = locateRun(rt, found, blocks);
       if (!spot) continue;
-      const run: Run = "host" in spot ? runOfHost(found, spot.host) : found;
-      const known = existing.get(keyOf(run));
-      if (known) {
-        kept.add(known);
-        if (known !== editing) put(known, spot, run);
-        continue;
+      const base: Run = "host" in spot ? runOfHost({ ...found, first: found.line }, spot.host) : { ...found, first: found.line };
+      let previous: HTMLElement | undefined;
+      for (let line = found.line; line <= found.endLine; line += 1) {
+        const run: Run = { ...base, line, endLine: line };
+        let block = existing.get(keyOf(run));
+        const known = block !== undefined;
+        if (!block) {
+          block = create();
+          existing.set(keyOf(run), block);
+        }
+        runs.set(block, run);
+        kept.add(block);
+        if (!known || block !== editing) {
+          if (previous) putAfter(block, previous);
+          else put(block, spot, found);
+        }
+        previous = block;
       }
-      const block = create(run);
-      runs.set(block, run);
-      put(block, spot, run);
-      kept.add(block);
     }
     Array.from(runs.keys()).filter((block) => !kept.has(block)).forEach(remove);
   }

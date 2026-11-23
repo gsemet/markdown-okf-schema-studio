@@ -36,7 +36,7 @@ export function installDetachedSaves(rt: PageRuntime): DetachedSaves {
     });
   };
 
-  /** Opens the editor of the failed save again on the same block, bar or blank-lines block. */
+  /** Opens the editor of the failed save again on the same block, bar or blank-line block. */
   const openAgain = (record: DetachedSave): void => {
     if (record.replaceBlankRun) {
       const run = record.replaceBlankRun;
@@ -120,7 +120,7 @@ export function installDetachedSaves(rt: PageRuntime): DetachedSaves {
       blockEditor.clearPendingBlockNavigation();
       state.pendingBlockSelection = undefined;
       // A paragraph or a cell is found again by its place in the document; an insertion bar and a
-      // blank-lines block by their lines.
+      // blank-line block by their lines.
       let navigation: DetachedSave["navigation"];
       if (edit.insertAfterLine === undefined && !edit.replaceBlankRun) {
         blockEditor.rememberPendingBlockNavigation(edit.target, "end", edit.selectedCell);

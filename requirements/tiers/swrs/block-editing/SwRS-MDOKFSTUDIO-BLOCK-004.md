@@ -75,11 +75,11 @@ The selection is the one of SwRS-MDOKFSTUDIO-BLOCK-140: it is outlined in the fo
 
 Table-cell editors keep their own Escape and Cmd/Ctrl+Enter and do not select a block when they close.
 
-### Scenario (nominal): The arrows reach a blank-lines block
+### Scenario (nominal): The arrows reach each blank-line block
 
-- GIVEN edit mode on and a blank-lines block between two blocks
-- WHEN the writer presses Down on the block above
-- THEN the blank-lines block is selected, and the next Down selects the block below it (see SwRS-MDOKFSTUDIO-BLOCK-267)
+- GIVEN edit mode on and two blank-line blocks between two blocks
+- WHEN the writer presses Down on the block above, and then Down again
+- THEN the first blank-line block is selected, then the second, and the next Down selects the block below them (see SwRS-MDOKFSTUDIO-BLOCK-267)
 
 ### Verification notes
 

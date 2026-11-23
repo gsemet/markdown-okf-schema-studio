@@ -509,8 +509,8 @@ export class SourceEditController {
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
   /**
-   * Removal of a blank run: its lines go and one separator stays, in one edit (one undo step). The
-   * block after the run moves up into its place, so the screen is held there. Nothing goes to the clipboard.
+   * Removal of one blank line: the line and its line break go, in one edit (one undo step). The
+   * line after it moves up into its place, so the screen is held there. Nothing goes to the clipboard.
    */
   private handleBlankRunDelete(
     preview: PreviewSession,
@@ -521,7 +521,7 @@ export class SourceEditController {
     if (!document) {
       return undefined;
     }
-    const plan = planBlankRunDelete(document.getText(), message.line, message.endLine);
+    const plan = planBlankRunDelete(document.getText(), message.line);
     if ("refused" in plan) {
       this.postBlocksResult(preview, message, op, { ok: false, reason: plan.refused });
       return undefined;

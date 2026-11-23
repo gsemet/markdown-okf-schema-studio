@@ -1,4 +1,4 @@
-"""The blank-lines block inside a quote, an alert, an admonition, a context-tag panel, a definition and a footnote (CR-462)."""
+"""The blank-line block inside a quote, an alert, an admonition, a context-tag panel, a definition and a footnote (CR-462)."""
 
 from __future__ import annotations
 
@@ -62,8 +62,8 @@ EDITOR_HOME = """() => {
 # @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 # @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
 def check_blank_lines_in_containers(page: Page, scenario: dict, failures: list[Failure], mode: str) -> None:
-  """The fixture `95-blank-lines-in-containers`: one run in each of a quote, an alert, an admonition, a
-  context-tag panel, a definition and a footnote. `containers-edit`: one block in each container, as wide as
+  """The fixture `95-blank-lines-in-containers`: one run of three empty lines in each of a quote, an alert, an admonition, a
+  context-tag panel, a definition and a footnote. `containers-edit`: two blocks in each container (the first line is the separator), as wide as
   the container's content box and clear of its border, the Delete block button at the block's left edge
   (`bar` step). `containers-reading`: none (`top` step). `containers-typing`: the editor opens inside the
   quote and is still inside the re-rendered quote once text is typed and the autosave ran (`text` step)."""
@@ -71,12 +71,13 @@ def check_blank_lines_in_containers(page: Page, scenario: dict, failures: list[F
   state = page.evaluate(READ_CONTAINERS, EXPECTED)
   if mode == "containers-reading":
     if state["count"] != 0:
-      failures.append(Failure(name, f"blank lines in containers: reading mode shows {state['count']} blank-lines block(s)"))
+      failures.append(Failure(name, f"blank lines in containers: reading mode shows {state['count']} blank-line block(s)"))
     save_step(page, scenario, "top", caret="hide")
     return
   kinds = [block["kind"] for block in state["blocks"]]
-  if kinds != [kind for kind, _ in EXPECTED] or state["shown"] != len(EXPECTED):
-    failures.append(Failure(name, f"blank lines in containers: blocks in {kinds} ({state['shown']} shown), expected one in each of {[kind for kind, _ in EXPECTED]}"))
+  wanted = [kind for kind, _ in EXPECTED for _ in range(2)]
+  if kinds != wanted or state["shown"] != len(wanted):
+    failures.append(Failure(name, f"blank lines in containers: blocks in {kinds} ({state['shown']} shown), expected two in each of {[kind for kind, _ in EXPECTED]}"))
     return
   for block in state["blocks"]:
     width, inner = block["box"]["width"], block["inner"]

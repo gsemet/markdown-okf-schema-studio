@@ -1,7 +1,7 @@
 # Blank lines block
 
-The first paragraph sits above a run of three blank lines.
+The first paragraph sits above three blank lines. The first is the separator Markdown needs and stays hidden.
 
 
 
-The second paragraph sits below it: in edit mode the run shows as a blank-lines block between the two.
+The second paragraph sits below them: in edit mode the other two blank lines show as two blank-line blocks between the two.

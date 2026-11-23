@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { planBlocksPaste } from "../../../src/core/edits/sourceEdits";
-import { blankRuns, quoteBlankRuns } from "../../../src/core/mapping/blankRuns";
+import { blankRuns, quoteBlankRuns, shownBlankLines } from "../../../src/core/mapping/blankRuns";
 import { insertionText, planBlankRunInsertion } from "../../../src/core/mapping/insertion";
 import { renderPreviewSource } from "../../../src/core/render/renderPipeline";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent, type HtmlElement } from "../render/dom";
@@ -54,7 +54,7 @@ const ROWS: Row[] = [
     name: "a quote at the start of the file",
     text: ">\n>\n> b\n",
     typed: "More",
-    written: "> More\n>\n> b\n",
+    written: ">\n> More\n>\n> b\n",
     top: ["blockquote"],
     inside: { select: tag("blockquote"), text: "More" },
   },
@@ -277,17 +277,19 @@ const paragraphsOf = (element: HtmlElement): string[] =>
     .map((node) => textContent(node).replace(/\s+/gu, " ").replace(/\s*↩$/u, "").trim())
     .filter((text) => text !== "");
 
-/** The only run of the text, the quote run first, as the page sends it. */
+/** The first shown blank line of the only run of the text, as the page sends it (one line, `endLine === line`). */
 function onlyRun(text: string): { line: number; endLine: number } {
   const runs = [...quoteBlankRuns(text), ...blankRuns(text)];
   assert.equal(runs.length, 1, "the text has one run");
-  return runs[0];
+  const [first] = shownBlankLines(text);
+  assert.ok(first, "the run shows a blank line");
+  return { line: first.line, endLine: first.line };
 }
 
 /** The text written by the insertion plan. */
 function inserted(text: string, typed: string, row: Row): string {
   const run = onlyRun(text);
-  const plan = planBlankRunInsertion(text, run.line, run.endLine, row.itemLine, row.containerLine);
+  const plan = planBlankRunInsertion(text, run.line, row.itemLine, row.containerLine);
   return text.slice(0, plan.replace!.start) + insertionText(plan, typed) + text.slice(plan.replace!.end);
 }
 
@@ -321,7 +323,7 @@ for (const [name, eol] of EOLS) {
 test("a plain run at the top level, with no container line, is written as before", () => {
   const text = "a\n\n\nb\n";
   const run = onlyRun(text);
-  const plan = planBlankRunInsertion(text, run.line, run.endLine);
+  const plan = planBlankRunInsertion(text, run.line);
   assert.equal(plan.indent, undefined);
   assert.equal(text.slice(0, plan.replace!.start) + insertionText(plan, "More\n\n  Text") + text.slice(plan.replace!.end), "a\n\nMore\n\n  Text\n\nb\n");
 });

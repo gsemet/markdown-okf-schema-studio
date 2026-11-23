@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
-  checkBlankRun, checkBlockLines, pastedBlockText, planBlankRunPaste, planBlankRunRemoval, planCut, planPaste, spanText,
+  checkBlankLine, checkBlockLines, pastedBlockText, planBlankRunPaste, planBlankRunRemoval, planCut, planPaste, spanText,
 } from "../../../src/core/mapping/blockRange";
 
 function cut(text: string, line: number, endLine: number): string | { refused: string } {
@@ -179,64 +179,84 @@ test("checkBlockLines accepts blocks with blank lines inside, a list ending on i
   assert.equal(checkBlockLines("---\na: 1\n---\n\nB\n", 1, 3), undefined, "the frontmatter rule is not part of this check");
 });
 
-function removeRun(text: string, line: number, endLine: number): string | { refused: string } {
-  const plan = planBlankRunRemoval(text, line, endLine);
+function removeLine(text: string, line: number): string | { refused: string } {
+  const plan = planBlankRunRemoval(text, line);
   if ("refused" in plan) return plan;
   return text.slice(0, plan.start) + text.slice(plan.end);
 }
 
-function pasteInRun(text: string, line: number, endLine: number, raw: string): string | { refused: string } {
-  const plan = planBlankRunPaste(text, line, endLine, raw);
+function pasteInLine(text: string, line: number, raw: string): string | { refused: string } {
+  const plan = planBlankRunPaste(text, line, raw);
   if ("refused" in plan) return plan;
   return text.slice(0, plan.offset) + plan.text + text.slice(plan.end ?? plan.offset);
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
-test("checkBlankRun accepts a whole run and refuses anything the text no longer has", () => {
+test("checkBlankLine accepts a shown blank line and refuses the separator and anything the text no longer has", () => {
   const text = "a\n\n\n\nb\n";
-  assert.equal(checkBlankRun(text, 2, 4), undefined);
-  assert.ok(checkBlankRun(text, 2, 3), "a run that stops short of the blank line below it");
-  assert.ok(checkBlankRun(text, 3, 4), "a run that starts below a blank line");
-  assert.ok(checkBlankRun(text, 2, 2), "one line is not a run");
-  assert.ok(checkBlankRun(text, 4, 6), "a line that is not blank");
-  assert.ok(checkBlankRun(text, 2, 40), "a line past the end");
-  assert.ok(checkBlankRun(text, 0, 3));
-  assert.ok(checkBlankRun("a\n \n\nb", 2, 3), "a no-break space is not blank");
-  assert.ok(checkBlankRun("---\nt: x\n---\n\n\nb", 1, 3), "the frontmatter is not a run");
-  assert.equal(checkBlankRun("---\nt: x\n---\n\n\nb", 4, 5), undefined);
+  assert.equal(checkBlankLine(text, 3), undefined);
+  assert.equal(checkBlankLine(text, 4), undefined);
+  assert.ok(checkBlankLine(text, 2), "the separator, the first line of the run");
+  assert.ok(checkBlankLine(text, 1), "a line of text");
+  assert.ok(checkBlankLine(text, 5), "a line of text below the run");
+  assert.ok(checkBlankLine(text, 40), "a line past the end");
+  assert.ok(checkBlankLine(text, 0));
+  assert.ok(checkBlankLine(text, 3.5));
+  assert.ok(checkBlankLine("a\n\u00a0\n\nb", 3), "a no-break space is not blank, so no run is left");
+  assert.ok(checkBlankLine("a\n\nb", 2), "a single blank line between two blocks");
+  const frontmatter = "---\nt: x\n---\n\n\nb";
+  for (const line of [1, 2, 3, 4]) assert.ok(checkBlankLine(frontmatter, line), `line ${line}: the frontmatter or the separator`);
+  assert.equal(checkBlankLine(frontmatter, 5), undefined);
+  assert.equal(checkBlankLine("a\n\n", 2), undefined, "a single blank line at the end of the body");
+  assert.equal(checkBlankLine("\n", 1), undefined, "a text of one blank line");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
-test("removing a run between two blocks keeps one blank line", () => {
-  assert.equal(removeRun("a\n\n\n\nb\n", 2, 4), "a\n\nb\n");
-  assert.equal(removeRun("a\r\n\r\n\r\nb\r\n", 2, 3), "a\r\n\r\nb\r\n");
-  assert.equal(removeRun("---\nt: x\n---\n\n\nb\n", 4, 5), "---\nt: x\n---\n\nb\n");
-  const plan = planBlankRunRemoval("a\n\n\n\nb\n", 2, 4);
-  assert.equal("followingLine" in plan && plan.followingLine, 5);
+test("removing a blank line removes that line and its line break, never the separator", () => {
+  assert.equal(removeLine("a\n\n\n\nb\n", 3), "a\n\n\nb\n");
+  assert.equal(removeLine("a\n\n\n\nb\n", 4), "a\n\n\nb\n");
+  assert.ok("refused" in (planBlankRunRemoval("a\n\n\n\nb\n", 2) as object), "the separator is refused");
+  assert.equal(removeLine("a\r\n\r\n\r\n\r\nb\r\n", 3), "a\r\n\r\n\r\nb\r\n", "no bare LF in CR LF");
+  assert.equal(removeLine("a\n\n\n\nb\n", 3).toString().includes("\r"), false, "no CR in LF");
+  assert.equal(removeLine("---\nt: x\n---\n\n\n\nb\n", 5), "---\nt: x\n---\n\n\nb\n");
+  const plan = planBlankRunRemoval("a\n\n\n\nb\n", 3);
+  assert.equal("followingLine" in plan && plan.followingLine, 4);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
-test("removing a run at the start or the end leaves no blank line there", () => {
-  assert.equal(removeRun("\n\n\na\n", 1, 3), "a\n");
-  assert.equal(removeRun("a\n\n\n", 2, 3), "a\n");
-  assert.equal(removeRun("a\n\n  ", 2, 3), "a");
-  assert.equal(removeRun("\n\n\n", 1, 3), "");
-  const plan = planBlankRunRemoval("a\n\n\n", 2, 3);
+test("removing the last line of the text keeps its final line break, or its absence", () => {
+  assert.equal(removeLine("a\n\n\n", 3), "a\n\n");
+  assert.equal(removeLine("a\n\n\n", 2), "a\n\n");
+  assert.equal(removeLine("a\n\n  ", 3), "a\n", "no final line break: the new last line has none");
+  assert.equal(removeLine("a\r\n\r\n\r\n", 3), "a\r\n\r\n");
+  const plan = planBlankRunRemoval("a\n\n\n", 3);
   assert.equal("followingLine" in plan && plan.followingLine, undefined);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
-test("removing a run that the text no longer has is refused", () => {
-  assert.ok("refused" in planBlankRunRemoval("a\nb\n", 2, 3));
+test("removing a line of a text of only blank lines; the last one that is left empties the text", () => {
+  assert.equal(removeLine("\n\n\n", 3), "\n\n");
+  assert.equal(removeLine("\n\n\n", 1), "\n\n");
+  assert.equal(removeLine("\n", 1), "");
+  assert.equal(removeLine("\n\n\na\n", 1), "\n\na\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+test("removing a line that the text no longer has is refused", () => {
+  assert.ok("refused" in planBlankRunRemoval("a\nb\n", 2));
+  assert.ok("refused" in planBlankRunRemoval("a\n\nb\n", 2), "a single separator");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
-test("a paste in place of a run leaves one blank line on each side", () => {
-  assert.equal(pasteInRun("a\n\n\n\nb\n", 2, 4, "X\n"), "a\n\nX\n\nb\n");
-  assert.equal(pasteInRun("\n\na\n", 1, 2, "X\n"), "X\n\na\n");
-  assert.equal(pasteInRun("a\n\n\n", 2, 3, "X"), "a\n\nX\n");
-  assert.equal(pasteInRun("a\r\n\r\n\r\nb", 2, 3, "X\nY"), "a\r\n\r\nX\r\nY\r\n\r\nb");
-  assert.deepEqual(pasteInRun("a\n\n\nb", 2, 3, "  \n"), { refused: "The clipboard has no text to paste." });
-  assert.ok(typeof pasteInRun("a\nb", 2, 3, "X") === "object");
+test("a paste in place of a blank line adds a separator only where a neighbour line is not blank", () => {
+  assert.equal(pasteInLine("a\n\n\n\nb\n", 3, "X\n"), "a\n\nX\n\nb\n");
+  assert.equal(pasteInLine("a\n\n\n\nb\n", 4, "X\n"), "a\n\n\nX\n\nb\n");
+  assert.equal(pasteInLine("\n\na\n", 1, "X\n"), "X\n\na\n");
+  assert.equal(pasteInLine("a\n\n\n", 3, "X"), "a\n\nX\n");
+  assert.equal(pasteInLine("a\n\n\n", 2, "X"), "a\n\nX\n\n");
+  assert.equal(pasteInLine("a\r\n\r\n\r\nb", 3, "X\nY"), "a\r\n\r\nX\r\nY\r\n\r\nb");
+  assert.deepEqual(pasteInLine("a\n\n\nb", 3, "  \n"), { refused: "The clipboard has no text to paste." });
+  assert.ok(typeof pasteInLine("a\nb", 2, "X") === "object");
+  assert.ok("refused" in (planBlankRunPaste("a\n\nb", 2, "X") as object), "the separator is refused");
 });

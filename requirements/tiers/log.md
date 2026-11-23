@@ -2,6 +2,10 @@
 
 ## 2026-11-23
 
+### One blank-line block per extra blank line (CR-476)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-266 (each shown blank line is one blank-line block: N-1 between two blocks, every line at the end of the body, at line 1 and in a body of only blank lines; quote runs never show their first line), BLOCK-267 (arrows stop on each block), BLOCK-268 (the text replaces that one line, a separator only where needed), BLOCK-269 (Delete removes that one line; selection after it), BLOCK-265 and BLOCK-004 scenarios. StRS-MDOKFSTUDIO-BLOCK-011 amended (Path 3) and approved. Reason: a run of six blank lines showed one block and a delete removed all of them.
+
 ### Every final save ends (CR-475)
 
 - Added (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-270 (every final save ends in a closed editor or an error that gives the text back). Changed (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-053 (Cancel and Escape close the editor during a final save), BLOCK-216 (the text comes back after a failed or crossed save, the Copy text warning), BLOCK-191 (the detached host edit), BLOCK-041 (no gesture while an edit is in flight), TABLE-025 (cell editors), FMEDIT-019 (an unchanged frontmatter save closes the editor); StRS-MDOKFSTUDIO-BLOCK-006 wording. Reason: an editor could stay on "Saving Markdown..." for good.

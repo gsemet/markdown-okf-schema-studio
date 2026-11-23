@@ -511,17 +511,18 @@ test("previewRefresh carries the reading state as optional fields and refuses th
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
-test("CR-444: a blank run in a block edit or a paste needs two lines and the insertion point above it", () => {
+test("CR-476: a blank line in a block edit or a paste is one line (endLine equals line) and the insertion point above it", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
-  const run = { line: 4, endLine: 6 };
+  const run = { line: 4, endLine: 4 };
   for (const type of ["previewEditOpen", "previewEditSave", "previewEditCancel"]) {
     const edit = {
-      ...base, type, editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: run,
+      ...base, type, editId: "e1", line: 4, endLine: 4, insertAfterLine: 3, replaceBlankRun: run,
       originalText: "", editedText: "x",
     };
     assert.equal(isRegisteredPreviewMessage(edit), true, type);
     for (const patch of [
-      { replaceBlankRun: { line: 4, endLine: 4 } }, { replaceBlankRun: { line: 0, endLine: 6 } },
+      { replaceBlankRun: { line: 4, endLine: 6 } }, { replaceBlankRun: { line: 4, endLine: 3 } },
+      { replaceBlankRun: { line: 0, endLine: 0 } }, { replaceBlankRun: { line: 5, endLine: 4 } },
       { replaceBlankRun: { line: 4 } }, { replaceBlankRun: "4-6" }, { insertAfterLine: 4 },
       { insertAfterLine: undefined },
     ]) {
@@ -530,7 +531,7 @@ test("CR-444: a blank run in a block edit or a paste needs two lines and the ins
   }
   const paste = { ...base, type: "previewBlocksPaste", insertAfterLine: 3, replaceBlankRun: run };
   assert.equal(isRegisteredPreviewMessage(paste), true);
-  for (const patch of [{ replaceBlankRun: { line: 4, endLine: 4 } }, { insertAfterLine: 4 }, { replaceBlankRun: 5 }]) {
+  for (const patch of [{ replaceBlankRun: { line: 4, endLine: 6 } }, { insertAfterLine: 4 }, { replaceBlankRun: 5 }]) {
     assert.equal(isRegisteredPreviewMessage({ ...paste, ...patch }), false, JSON.stringify(patch));
   }
 });
@@ -538,10 +539,10 @@ test("CR-444: a blank run in a block edit or a paste needs two lines and the ins
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
 test("CR-448: the item line of a blank run inside a list is a source line above the run", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
-  const withItem = (itemLine: unknown) => ({ line: 4, endLine: 6, itemLine });
+  const withItem = (itemLine: unknown) => ({ line: 4, endLine: 4, itemLine });
   for (const type of ["previewEditOpen", "previewEditSave", "previewEditCancel"]) {
     const edit = {
-      ...base, type, editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: withItem(1),
+      ...base, type, editId: "e1", line: 4, endLine: 4, insertAfterLine: 3, replaceBlankRun: withItem(1),
       originalText: "", editedText: "x",
     };
     assert.equal(isRegisteredPreviewMessage(edit), true, type);
@@ -560,13 +561,13 @@ test("CR-448: the item line of a blank run inside a list is a source line above 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
-test("CR-444: previewBlankRunDelete validates two or more lines and the optional pin", () => {
+test("CR-476: previewBlankRunDelete validates one line (endLine equals line) and the optional pin", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1, type: "previewBlankRunDelete" };
-  const message = { ...base, line: 4, endLine: 6, pinViewportTop: 10 };
+  const message = { ...base, line: 4, endLine: 4, pinViewportTop: 10 };
   assert.equal(isRegisteredPreviewMessage(message), true);
   assert.equal(isRegisteredPreviewMessage({ ...message, pinViewportTop: undefined }), true);
   for (const patch of [
-    { line: 0 }, { endLine: 4 }, { endLine: 3 }, { endLine: 1.5 }, { line: undefined }, { endLine: "6" },
+    { line: 0, endLine: 0 }, { endLine: 6 }, { endLine: 3 }, { endLine: 1.5 }, { line: undefined }, { endLine: "4" },
     { pinViewportTop: 200000 },
   ]) {
     assert.equal(isRegisteredPreviewMessage({ ...message, ...patch }), false, JSON.stringify(patch));
@@ -576,10 +577,10 @@ test("CR-444: previewBlankRunDelete validates two or more lines and the optional
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 test("CR-462: the container line of a blank run is a source line above the run, never with an item line", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
-  const withContainer = (containerLine: unknown, itemLine?: unknown) => ({ line: 4, endLine: 6, containerLine, itemLine });
+  const withContainer = (containerLine: unknown, itemLine?: unknown) => ({ line: 4, endLine: 4, containerLine, itemLine });
   for (const type of ["previewEditOpen", "previewEditSave", "previewEditCancel"]) {
     const edit = {
-      ...base, type, editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: withContainer(1),
+      ...base, type, editId: "e1", line: 4, endLine: 4, insertAfterLine: 3, replaceBlankRun: withContainer(1),
       originalText: "", editedText: "x",
     };
     assert.equal(isRegisteredPreviewMessage(edit), true, type);

@@ -7,7 +7,7 @@
 import { matchLineEndings } from "../../core/edits/lineEndings";
 import { READ_ONLY_FILE, planBlockTextEdit, planEmptiedBlockRemoval } from "../../core/edits/sourceEdits";
 import type { HostDocument } from "../../host-api/documentStore";
-import { checkBlankRun, checkBlockLines, type BlockRangeRefusal } from "../../core/mapping/blockRange";
+import { checkBlankLine, checkBlockLines, type BlockRangeRefusal } from "../../core/mapping/blockRange";
 import { sourceRangeForLines } from "../../core/mapping/sourceMapping";
 import { blankRunIndent } from "../../core/mapping/blankRunContainer";
 import { insertionText, planBlankRunInsertion, planInsertion, type InsertionPlan } from "../../core/mapping/insertion";
@@ -26,17 +26,17 @@ import { DetachedEdits, type UnsavedText } from "./detachedEdits";
 
 type RunFields = { line: number; endLine: number; itemLine?: number; containerLine?: number };
 
-/** True when a message's blank run (with its item or container line) is the run the held edit replaces (both absent counts). */
+/** True when a message's blank line (with its item or container line) is the line the held edit replaces (both absent counts). */
 function sameBlankRun(run: RunFields | undefined, held: RunFields | undefined): boolean {
   return run?.line === held?.line && run?.endLine === held?.endLine && run?.itemLine === held?.itemLine
     && run?.containerLine === held?.containerLine;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
-/** True when a run without an item or container line, or with one of the shape its container has above the run, can be written in. */
+/** True when a blank line without an item or container line, or with one of the shape its container has above the line, can be written in. */
 function containerLineHolds(text: string, run: RunFields): boolean {
   return (run.itemLine === undefined && run.containerLine === undefined)
-    || blankRunIndent(text, run.line, run.endLine, run.itemLine, run.containerLine) !== undefined;
+    || blankRunIndent(text, run.line, run.itemLine, run.containerLine) !== undefined;
 }
 
 /** The block edit the host holds for the page's open inline editor. */
@@ -55,8 +55,9 @@ export interface ActiveBlockEdit {
   insertion?: InsertionPlan;
   insertAfterLine?: number;
   /**
-   * Set for a block written in place of a blank run: the run's lines and the text they held. The page
-   * never sees it (its `originalText` stays empty). An emptied editor and a cancel put this text back.
+   * Set for a block written in place of a blank line: the line (`endLine` is `line`) and the text it held. The page
+   * never sees it (its `originalText` stays empty). An emptied editor and a cancel put this text back, byte
+   * for byte, with any separator an autosave added.
    */
   blankRunRegion?: { line: number; endLine: number; itemLine?: number; containerLine?: number; text: string };
   finalRequested: boolean;
@@ -218,7 +219,7 @@ export class BlockEditController {
         || message.line === undefined
         || message.endLine === undefined
         || (message.replaceBlankRun
-          ? checkBlankRun(document.getText(), message.replaceBlankRun.line, message.replaceBlankRun.endLine) !== undefined
+          ? checkBlankLine(document.getText(), message.replaceBlankRun.line) !== undefined
             || !containerLineHolds(document.getText(), message.replaceBlankRun)
             || message.line !== message.replaceBlankRun.line
             || message.endLine !== message.replaceBlankRun.endLine
@@ -496,10 +497,10 @@ export class BlockEditController {
       // A save that re-creates the edit of a blank run checks the run again against the document.
       const plan = !document ? undefined
         : run
-          ? (checkBlankRun(document.getText(), run.line, run.endLine) === undefined
+          ? (checkBlankLine(document.getText(), run.line) === undefined
             && containerLineHolds(document.getText(), run)
             && message.line === run.line && message.endLine === run.endLine
-            ? planBlankRunInsertion(document.getText(), run.line, run.endLine, run.itemLine, run.containerLine)
+            ? planBlankRunInsertion(document.getText(), run.line, run.itemLine, run.containerLine)
             : undefined)
           : planInsertion(document.getText(), message.insertAfterLine);
       if (!document || !plan || message.originalText === undefined || message.editedText === undefined) {
@@ -587,7 +588,7 @@ export class BlockEditController {
       return;
     }
     edit.lastMessage = message;
-    // An emptied editor over a blank run puts the run back; the run is the empty state of the block.
+    // An emptied editor over a blank line puts the line back; the line is the empty state of the block.
     edit.pendingText = edit.blankRunRegion && message.editedText.trim() === ""
       ? edit.blankRunRegion.text
       : edit.insertion

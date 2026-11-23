@@ -349,7 +349,7 @@ export function checkBlocksPaste(text: string, afterLine: number): EditRefusal |
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
 /**
  * Inserts the clipboard text `clipboard` as new blocks after `afterLine` (0: start of the body); with
- * `blankRun`, in place of that blank run (the lines above and below keep one separator).
+ * `blankRun` (one line), in place of that one blank line (a separator only where a neighbour line is not blank).
  */
 export function planBlocksPaste(
   text: string,
@@ -358,20 +358,19 @@ export function planBlocksPaste(
   blankRun?: { line: number; endLine: number; itemLine?: number; containerLine?: number },
 ): EditRefusal | { edit: TextEdit } {
   const plan = blankRun
-    ? planBlankRunPaste(text, blankRun.line, blankRun.endLine, clipboard, blankRun.itemLine, blankRun.containerLine)
+    ? planBlankRunPaste(text, blankRun.line, clipboard, blankRun.itemLine, blankRun.containerLine)
     : planPaste(text, afterLine, clipboard);
   if ("refused" in plan) return { refused: plan.refused };
   return { edit: { start: plan.offset, end: plan.end ?? plan.offset, text: plan.text } };
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
-/** The one edit that removes a blank run and keeps one separator; `followingLine` as in {@link planBlocksDelete}. */
+/** The one edit that removes one blank line; `followingLine` as in {@link planBlocksDelete}. */
 export function planBlankRunDelete(
   text: string,
   line: number,
-  endLine: number,
 ): EditRefusal | { edit: TextEdit; followingLine?: number } {
-  const plan = planBlankRunRemoval(text, line, endLine);
+  const plan = planBlankRunRemoval(text, line);
   if ("refused" in plan) return { refused: plan.refused };
   return { edit: { start: plan.start, end: plan.end, text: "" }, followingLine: plan.followingLine };
 }

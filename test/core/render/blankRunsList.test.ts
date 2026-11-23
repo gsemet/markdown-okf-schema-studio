@@ -16,22 +16,29 @@ function runsAttribute(html: string): string | undefined {
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 test("the rendered content ends with a hidden list of the blank runs of the source", async () => {
   const { html } = await render("# Title\n\nA\n\n\n\nB\n\n\nC\n");
-  assert.equal(runsAttribute(html), "4-6 8-9");
+  assert.equal(runsAttribute(html), "5-6 9-9");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 test("a source with no run has the list element with an empty value, and every render carries it", async () => {
   assert.equal(runsAttribute((await render("A\n\nB\n")).html), "");
   assert.equal(runsAttribute((await render("")).html), "");
-  assert.equal(runsAttribute((await render("---\ntitle: x\n---\n\n\nbody\n")).html), "4-5");
+  assert.equal(runsAttribute((await render("---\ntitle: x\n---\n\n\nbody\n")).html), "5-5");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 test("an edit changes the list: the next render of the content patch carries the new runs", async () => {
   const before = await render("A\n\n\nB\n");
   const after = await render("A\n\nB\n");
-  assert.equal(runsAttribute(before.html), "2-3");
+  assert.equal(runsAttribute(before.html), "3-3");
   assert.equal(runsAttribute(after.html), "");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+test("the list names the shown blank lines: a line of text then six blank lines gives 2-7, a single shown line L-L", async () => {
+  assert.equal(runsAttribute((await render("Text.\n\n\n\n\n\n\n")).html), "2-7");
+  assert.equal(runsAttribute((await render("a\n\n\nb\n")).html), "3-3");
+  assert.equal(runsAttribute((await render("\n\na\n")).html), "1-2", "at the top of a file every blank line shows");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
@@ -43,7 +50,7 @@ test("a blank run in a code fence is not a run of the source's blocks", async ()
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 test("a quote run and a plain run are in the list, sorted by line", async () => {
   const { html } = await render("> a\n>\n>\n> b\n\n\nc\n");
-  assert.equal(runsAttribute(html), "2-3 5-6");
+  assert.equal(runsAttribute(html), "3-3 6-6");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
@@ -73,12 +80,12 @@ const holds = (element: HtmlElement | undefined, line: number, endLine: number, 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 test("a quote holds its run up to its edges: in its middle, at its start and at the end of the text", async () => {
   const { html } = await render("> a\n>\n>\n> b\n\n>\n>\n> c\n\nx\n>\n>\n");
-  assert.equal(runsAttribute(html), "2-3 6-7 11-12");
+  assert.equal(runsAttribute(html), "3-3 7-7 12-12");
   const quotes = findElements(parseHtml(html), (e) => e.tagName === "blockquote");
   assert.deepEqual(quotes.map(rangeOf), [[1, 4], [6, 8], [11, 12]]);
-  assert.ok(holds(quotes[0], 2, 3, false), "a run in the middle is held strictly");
-  assert.ok(!holds(quotes[1], 6, 7, false) && holds(quotes[1], 6, 7, true), "a run at the start needs the edge test");
-  assert.ok(!holds(quotes[2], 11, 12, false) && holds(quotes[2], 11, 12, true), "a run at the end needs the edge test");
+  assert.ok(holds(quotes[0], 3, 3, false), "a run in the middle is held strictly");
+  assert.ok(holds(quotes[1], 7, 7, false), "a run at the start: its first line is the separator, the shown line is strictly inside");
+  assert.ok(!holds(quotes[2], 12, 12, false) && holds(quotes[2], 12, 12, true), "a run at the end needs the edge test");
 });
 
 /** The first element of the rendered text that the selector accepts. */
@@ -132,7 +139,7 @@ test("a quote directive, a figure and a card hold their run", async () => {
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 test("footnote paragraphs are mapped blocks inside the footnotes section, which carries no line", async () => {
   const { html } = await render("A[^a] B[^b] C[^c]\n\n[^a]: f1\n\n\n    f2\n\n[^b]:\n\n\n    body\n\n[^c]: f3\n");
-  assert.equal(runsAttribute(html), "4-5 9-10");
+  assert.equal(runsAttribute(html), "5-5 10-10");
   const document = parseHtml(html);
   const section = findElement(document, (e) => e.tagName === "section" && attribute(e, "data-footnotes") !== undefined);
   assert.ok(section);

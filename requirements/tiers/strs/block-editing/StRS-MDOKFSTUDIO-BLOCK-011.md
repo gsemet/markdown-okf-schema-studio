@@ -7,11 +7,19 @@ description: When a writer clicks the insert point after a block in edit mode,
   or opens the preview of a document with no body in edit mode and uses the
   Start writing button or the Enter key, the Studio SHALL open an empty editor
   at that place and insert the typed text as a new block with one blank line on
-  each side.
+  each side. When a writer types in a blank-line block of edit mode, the Studio
+  SHALL write the typed text in place of that one blank line and keep the other
+  blank lines around it, adding a blank line before or after the text only where
+  Markdown needs one to separate it from a neighbouring block.
 project: markdown-okf-schema-studio
 scope: block-editing
-req_lifecycle: proposed
+req_lifecycle: approved
 status: stable
+approved_by: gaetan@xeberon.net
+approved_at: '2026-11-23T14:00:00+01:00'
+verified:
+  by: human:gaetan@xeberon.net
+  at: '2026-11-23T14:00:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -36,7 +44,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer clicks the insert point after a block in edit mode, or opens the preview of a document with no body in edit mode and uses the Start writing button or the Enter key, the Studio SHALL open an empty editor at that place and insert the typed text as a new block with one blank line on each side.
+When a writer clicks the insert point after a block in edit mode, or opens the preview of a document with no body in edit mode and uses the Start writing button or the Enter key, the Studio SHALL open an empty editor at that place and insert the typed text as a new block with one blank line on each side. When a writer types in a blank-line block of edit mode, the Studio SHALL write the typed text in place of that one blank line and keep the other blank lines around it, adding a blank line before or after the text only where Markdown needs one to separate it from a neighbouring block.
 
 ### Preserved stakeholder intent
 
@@ -91,6 +99,15 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-BLOCK-253 (nominal): Enter on the selected Start writing button opens the same editor
 2. The editor of the first block is open
 
+#### Path 3: Write on a blank line
+
+1. Edit mode is on and the document has extra blank lines
+   - SwRS-MDOKFSTUDIO-BLOCK-266: each extra blank line shows as a blank-line block
+2. A blank-line block is shown
+   - SwRS-MDOKFSTUDIO-BLOCK-268: the writer types in it and the host writes the text in place of that one blank line, keeping the other blank lines
+   - Option SwRS-MDOKFSTUDIO-BLOCK-269 (nominal): Delete removes that one blank line
+3. The typed text is in the document where the blank line was
+
 <!-- okf:links:start -->
 ### Links
 
@@ -103,8 +120,8 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-BLOCK-253](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-253.md): Start writing is the keyboard selection of an empty document
   - [SwRS-MDOKFSTUDIO-BLOCK-264](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-264.md): An emptied top-level block or list item is deleted with its separator when the writer commits it
   - [SwRS-MDOKFSTUDIO-BLOCK-265](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-265.md): Delete block deletes the blocks of a selection with one separator in one undo step
-  - [SwRS-MDOKFSTUDIO-BLOCK-266](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-266.md): Edit mode shows each blank run between top-level blocks, between list items or inside a list item or a quote as a blank-lines block
-  - [SwRS-MDOKFSTUDIO-BLOCK-267](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-267.md): A blank-lines block takes the arrows, Enter and a click
-  - [SwRS-MDOKFSTUDIO-BLOCK-268](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-268.md): Typing or pasting in a blank-lines block writes the block in place of the run
-  - [SwRS-MDOKFSTUDIO-BLOCK-269](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-269.md): Removing a blank-lines block keeps one separator
+  - [SwRS-MDOKFSTUDIO-BLOCK-266](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-266.md): Edit mode shows each shown blank line as a blank-line block
+  - [SwRS-MDOKFSTUDIO-BLOCK-267](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-267.md): A blank-line block takes the arrows, Enter and a click
+  - [SwRS-MDOKFSTUDIO-BLOCK-268](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-268.md): Typing or pasting in a blank-line block writes the text in place of that blank line
+  - [SwRS-MDOKFSTUDIO-BLOCK-269](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-269.md): Removing a blank-line block removes that one blank line
 <!-- okf:links:end -->
