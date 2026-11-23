@@ -12,8 +12,8 @@ const manifest = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../../pa
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-001
 test("the extension activates only on its commands, its Open With editor, panel restore and Markdown files", () => {
-  // CR-445: `onLanguage:markdown` is the one language event, so the opening watcher runs before any
-  // preview exists; the engine, the watchers and the diagnostics start with the first preview.
+  // CR-445: `onLanguage:markdown` is the one language event, so the extension is awake when a Markdown
+  // file opens (the reverse migration of the retired opening settings runs then); the engine, the watchers and the diagnostics start with the first preview.
   assert.deepEqual([...manifest.activationEvents].sort(), [
     "onCommand:markdown-okf-schema-studio.openPreview",
     "onCommand:markdown-okf-schema-studio.refreshPreview",
