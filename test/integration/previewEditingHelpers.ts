@@ -22,6 +22,7 @@ export async function waitForCurrentPreview(document: vscode.TextDocument, previ
       && preview.documentVersion === document.version
       && preview.requestId !== undefined
       && preview.requestId !== previousRequestId
+      && preview.shownRequestId === preview.requestId
       && /<section\b[^>]*data-okf-properties/u.test(preview.html)
       && /data-okf-field="related"[^]*?data-okf-link-status="valid"/u.test(preview.html)
       && /data-okf-field="metadata"[^]*?data-okf-link-status="valid"/u.test(preview.html)
