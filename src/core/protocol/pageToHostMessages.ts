@@ -419,6 +419,17 @@ export interface PreviewEditFlushedMessage extends PageMessageBase<"previewEditF
 /** The page closed the inline editor the host asked about with `previewEditorWatch`. */
 export interface PreviewEditClosedMessage extends PageMessageBase<"previewEditClosed"> {
   editId: string;
+  /** Set when the writer cancelled while the final save was in flight: the save outlives the editor. */
+  detached?: true;
+}
+
+/**
+ * The page's answer to the error of a detached save that gave back the writer's text: whether it
+ * reopened an editor with that text (`reopened`), or could not (the host then shows the text).
+ */
+export interface PreviewEditReopenMessage extends PageMessageBase<"previewEditReopen"> {
+  editId: string;
+  reopened: boolean;
 }
 
 /** The labels of the document, for the MyST palette. */
@@ -488,6 +499,7 @@ export type PageToHostMessage =
   | PreviewCommentDeleteMessage
   | PreviewEditFlushedMessage
   | PreviewEditClosedMessage
+  | PreviewEditReopenMessage
   | PreviewListTargetsMessage
   | PreviewListCitationsMessage
   | PreviewPickDocumentMessage

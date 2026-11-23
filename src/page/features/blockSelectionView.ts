@@ -7,6 +7,7 @@
 
 import { isApplePlatform } from "../pageSettings";
 import type { BlockSelectionView, PageRuntime, PendingBlockSelection, SelectionAnchor } from "./pageRuntime";
+import { editInFlight } from "./detachedSaveState";
 import { installStructuralNavigationView } from "./structuralNavigationView";
 
 /** The selection view of a page. */
@@ -154,7 +155,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
   function applyPendingBlockSelection(): void {
     const pending = state.pendingBlockSelection;
     state.pendingBlockSelection = undefined;
-    if (!pending || !state.editMode || state.activeBlockEdit) return;
+    if (!pending || !state.editMode || editInFlight(state)) return;
     const count = rt.blocks.selectableBlocks().length;
     if (pending.afterDelete) {
       selectAfterDelete(pending, count);
@@ -214,7 +215,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
   /** Sends the delete of a blank run; the block that follows it (else the one above, or the list that held it) gets the selection. */
   function requestDeleteBlankLines(block: HTMLElement): boolean {
     const run = rt.blankLines.runOf(block);
-    if (!run || !state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return false;
+    if (!run || !state.editMode || editInFlight(state) || state.activeFrontmatterEdit) return false;
     if (blocksFlight || deleteWaitsForRender()) return false;
     const blocks = syncSelectionModel();
     postBlocksMessage("previewBlankRunDelete", { line: run.line, endLine: run.endLine }, block);
@@ -247,7 +248,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
   function requestDeleteBlock(block: HTMLElement): boolean {
-    if (!state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return false;
+    if (!state.editMode || editInFlight(state) || state.activeFrontmatterEdit) return false;
     const blocks = syncSelectionModel();
     if (blockSelection.isActive() && blocks[blockSelection.endIndex!] === block) {
       const range = blockSelection.range();
@@ -408,7 +409,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
   // the viewport) and the focus moves to that block, so Up / Down carry on and the page never shows
   // the focus ring. A focus on a toolbar button, a block or an editor is left alone.
   function restoreBlockSelection(): void {
-    if (!state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return;
+    if (!state.editMode || editInFlight(state) || state.activeFrontmatterEdit) return;
     if (document.visibilityState === "hidden") return;
     if (!isPageTarget(document.activeElement ?? null)) return;
     const blocks = syncSelectionModel();
@@ -433,7 +434,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
    */
   function plainKeyTarget(event: KeyboardEvent): { focused: HTMLElement | undefined; blank?: HTMLElement } | undefined {
     if (!state.editMode || event.isComposing || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return undefined;
-    if (state.activeBlockEdit || state.activeFrontmatterEdit || event.defaultPrevented) return undefined;
+    if (editInFlight(state) || state.activeFrontmatterEdit || event.defaultPrevented) return undefined;
     const target = event.target;
     const toggle = target instanceof Element && target === rt.editModeButton;
     if (!toggle && ownsKeys(target, "[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]", true)) return undefined;
@@ -503,7 +504,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       document.addEventListener("keydown", (event) => {
         if (!state.editMode || event.isComposing || !event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
         if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
-        if (state.activeBlockEdit || state.activeFrontmatterEdit) return;
+        if (editInFlight(state) || state.activeFrontmatterEdit) return;
         const target = event.target;
         if (ownsKeys(target, "[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]", true)) return;
         const blank = blockSelection.isActive() ? undefined
@@ -604,7 +605,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       // pastes after the selection or after the block of a focused "+" bar.
       document.addEventListener("keydown", (event) => {
         const key = clipboardKey(event);
-        if (!key || !state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return;
+        if (!key || !state.editMode || editInFlight(state) || state.activeFrontmatterEdit) return;
         const target = event.target;
         if (ownsKeys(target, "[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]", true)) return;
         const blocks = syncSelectionModel();

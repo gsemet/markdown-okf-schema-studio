@@ -43,15 +43,20 @@ export function fixture(options: FixtureOptions = {}) {
   const hooks = {
     gate: undefined as Promise<void> | undefined,
     rejectWith: undefined as Error | undefined,
+    /** VS Code refuses the edit: it resolves false and the document keeps its text. */
+    refuse: false,
     /** A file VS Code holds read-only: it accepts an edit and changes nothing. */
     readOnly: false,
     readClipboard: (): Promise<string> => Promise.resolve("Pasted block.\n"),
     writeClipboard: (_text: string): Promise<void> => Promise.resolve(),
+    /** The action the writer picks on a warning that offers actions; undefined dismisses it. */
+    warningChoice: undefined as string | undefined,
   };
   const documents = Object.assign(Object.create(store) as object, {
     applyEdits: (target: typeof document, edits: readonly TextEdit[], applyOptions?: never) => {
       applyCalls.push(edits);
       if (hooks.rejectWith) return Promise.reject(hooks.rejectWith);
+      if (hooks.refuse) return Promise.resolve(false);
       if (hooks.readOnly) return Promise.resolve(true);
       const outcome = Promise.resolve(store.applyEdits(target, edits, applyOptions));
       return hooks.gate ? hooks.gate.then(() => outcome) : outcome;
@@ -66,9 +71,9 @@ export function fixture(options: FixtureOptions = {}) {
     ui: {
       readClipboard: () => hooks.readClipboard(),
       writeClipboard: (text: string) => hooks.writeClipboard(text),
-      showWarning: (text: string) => {
+      showWarning: (text: string, ...actions: string[]) => {
         warnings.push(text);
-        return Promise.resolve(undefined);
+        return Promise.resolve(actions.includes(hooks.warningChoice ?? "") ? hooks.warningChoice : undefined);
       },
     },
   } as unknown as HostServices;

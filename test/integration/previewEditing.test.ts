@@ -13,6 +13,7 @@ import {
   sendPreviewMessageForTests,
   setRenderDelayForTests,
 } from "./extensionApi";
+import { detachedFinalSaveEnds } from "./detachedSaveWindow";
 import { RealWindowEvidence } from "./evidence";
 import { setViewport } from "./realWindowViewport";
 import { saveThenWriteLinkedTarget } from "./linkedTargetSave";
@@ -977,6 +978,8 @@ async function stepEditLock(ctx: EditingContext): Promise<void> {
     });
     await waitFor("the changed include to render after the edit ends", () =>
       getActivePreviewForTests()?.html.includes("Changed lock include text") ?? false);
+
+    await detachedFinalSaveEnds(document, blockA);
   }
 }
 

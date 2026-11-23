@@ -24,11 +24,21 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/page/features/blockSourceEditor.ts
+- src/page/features/detachedSave.ts
 - src/session/features/blockEdits.ts
+- src/session/features/detachedEdits.ts
+- src/session/hostEvents.ts
 tested_in_files:
+- test/core/protocol/hostToPage.test.ts
+- test/core/protocol/pageToHost.test.ts
 - test/integration/previewEditing.test.ts
 - test/page/blockReq.requirements.test.ts
+- test/page/runtimeDetachedSave.test.ts
+- test/page/runtimeDetachedSaveEnds.test.ts
+- test/page/runtimeDetachedSaveKinds.test.ts
+- test/page/runtimeSaveEnds.test.ts
 - test/session/blockReq.requirements.test.ts
+- test/session/detachedSave.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -82,6 +92,23 @@ When the host refuses to open a block editor or to save its text, the extension 
 - THEN the next autosave is posted and the key hint returns to the status line
 
 
+### Scenario (refusal): A save that fails after Cancel, or meets a change of the file, reopens the editor with the typed text and the reason
+- GIVEN an editor whose final save is in flight and that the writer closed with Cancel or Escape
+- WHEN the host answers with an error carrying unsavedText (a refusal, a rejected write, a source block that changed, a change of the file)
+- THEN the page reopens the editor on that block with the same editor id and no previewEditOpen, the text box holds the typed text, the status line shows the reason, and the page posts previewEditReopen with reopened true
+- AND the clicks and field opens that waited for the save are dropped
+- AND until the page answers, the host keeps the editor id as the open page editor, so renders wait, and keeps the text
+
+### Scenario (refusal): A change of the file while the editor saves keeps the editor open with the typed text and the reason
+- GIVEN a final save that is requested and not written, and a change of the document from outside the preview
+- WHEN the change arrives
+- THEN the host writes nothing, answers with the error "The file changed outside the preview before your text was saved. Copy your text, then reopen the block." carrying the text, and keeps the render waiting for the editor
+
+### Scenario (refusal): A failure the preview cannot show offers the text to copy
+- GIVEN a failed detached save and a page that answers previewEditReopen with reopened false
+- WHEN the host receives it
+- THEN the host releases the edit, renders, and shows a warning with a "Copy text" action; picking it puts the kept text on the clipboard and dismissing it writes nothing
+
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TRUST-065: the gate of each page message, including the stale write
 - SwRS-MDOKFSTUDIO-BLOCK-058: the outcome of a host source edit, including a failed apply
@@ -90,6 +117,7 @@ When the host refuses to open a block editor or to save its text, the extension 
 - Method: test/page/blockReq.requirements.test.ts (refused open leaves the frame without a text box, `Escape and a click on another block leave the frame of a refused open`, answer of another editor, refused save keeps the typed text, typing again) with `a refused open leaves the frame without a text box and records the error` and `a refused save keeps the typed text and lets the next input save again`; the branch of the open is receiveBlockEditSource in src/page/features/blockSourceEditor.ts.
 - Method: test/session/blockReq.requirements.test.ts (accepted requests, stale open, stale lines) with `an open for a document that changed since the render is refused and registers no editor` and `a first save for lines or an insertion point that do not exist is refused as stale`.
 - Method: test/integration/previewEditing.test.ts (a mismatched originalText leaves the document unchanged; saves and cancels of mismatching edits); the message texts of these two rows have no assertion.
+- Method: test/session/detachedSave.test.ts (the text given back by every error answer to a final save and by no other, the reopen answer, the warning and its Copy text action, the outside change), test/page/runtimeDetachedSave.test.ts (the reopen, the retry with the identity of the first save, the dropped clicks) and test/core/protocol/pageToHost.test.ts with test/core/protocol/hostToPage.test.ts (the validators of previewEditSource and previewEditReopen).
 - Criteria: the status text equals the host message and the frame of a refused open stays the open editor until the writer leaves it; the error is posted by postEditSourceError; currentSourceEdit returns nothing for the stale case; handleEditSave compares originalText with the document slice and every field of the held edit is compared; lastPostedText is cleared so that the next text is posted.
 
 <!-- okf:links:start -->

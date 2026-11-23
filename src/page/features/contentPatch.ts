@@ -60,6 +60,7 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     const blankRunEdit = state.activeBlockEdit?.replaceBlankRun && !state.activeBlockEdit.finishing;
     if (!blankRunEdit) rt.blockEditor.closeBlockEdit(false);
     state.applyingContentPatch = false;
+    rt.detachedSaves.rendered();
     parts.linkTooltip.close();
     // @implements_req SwRS-MDOKFSTUDIO-CODE-017
     parts.codeCopy.hide();

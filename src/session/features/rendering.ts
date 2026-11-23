@@ -539,7 +539,11 @@ export class RenderingController extends PageDocumentController {
     if (preview.edits.active) {
       // A page of another render, or one that reports no open editor, has no inline editor: the
       // lock would block every later edit (STAB-02).
-      const outcome = preview.edits.lock.onPreviewReady(value.requestId, value.blockEditOpen);
+      // A detached save has no editor on the page (`blockEditOpen: false` is what it reports): it
+      // ends with its own answer, and only a replaced page or a document switch releases it (CR 475).
+      const outcome = preview.edits.active.detached === true
+        ? { released: false, flush: [] }
+        : preview.edits.lock.onPreviewReady(value.requestId, value.blockEditOpen);
       if (outcome.released) {
         manager.edits.releaseActiveBlockEdit(preview, false, outcome.flush);
       }

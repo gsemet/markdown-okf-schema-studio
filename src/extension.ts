@@ -19,6 +19,7 @@ export {
   getActivePreviewPanelForTests,
   getLivePreviewRolesForTests,
   holdEditSourcesForTests,
+  holdBlockEditAppliesForTests,
   listCitationKeysForTests,
   listDocumentTargetsForTests,
   previewGroupFocusMovesForTests,

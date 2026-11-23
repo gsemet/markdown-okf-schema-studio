@@ -31,7 +31,7 @@ export class MemoryStore implements KeyValueStore {
 export function recordingUi(shown: string[], log: string[] = []): HostUi {
   return new Proxy({}, {
     get: (_target, name) => (name === "showInformation" || name === "showWarning" || name === "showError")
-      ? (message: string) => {
+      ? (message: string, ..._actions: string[]) => {
         shown.push(`${String(name)}: ${message}`);
         log.push("show");
         return Promise.resolve(undefined);

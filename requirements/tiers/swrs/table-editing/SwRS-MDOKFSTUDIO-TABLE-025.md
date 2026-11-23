@@ -31,6 +31,8 @@ implemented_in_files:
 tested_in_files:
 - test/integration/realInput/tableEscape.ts
 - test/integration/realInput/tableTabRow.ts
+- test/page/runtimeDetachedSaveKinds.test.ts
+- test/page/runtimeSaveEnds.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/page/runtimeTableCellEscape.test.ts
 - test/page/runtimeTableCellTabRow.test.ts
@@ -99,6 +101,11 @@ When the writer presses Escape in a cell editor outside an IME composition, the 
 - WHEN the focus then moves elsewhere
 - THEN nothing is sent
 
+### Scenario (nominal): Escape or Cancel in a cell during a final save closes the editor with no message
+- GIVEN a cell editor whose final save is in flight, with a cell left earlier, a row added by Tab, or the focus outside the cell editor
+- WHEN the writer presses Escape or Cancel
+- THEN the editor closes with previewEditClosed and no previewEditCancel and no second final save, and the save completes with the text finished
+
 ### Scenario (nominal): Escape with the focus outside the cell editor
 - GIVEN a cell editor open and the focus on another element of the page
 - WHEN Escape is pressed while the key target and the active element are outside the cell editor
@@ -132,6 +139,7 @@ When the writer presses Escape in a cell editor outside an IME composition, the 
 - Method: test/integration/realInput/tableEscape.ts (real-window scenario scenarioTableEscapeKeepsCellsLeft, QA replay 271-c2-1: type, Tab, Escape, then type, click, Escape; the buffer line and the shown cells agree).
 - Method: test/integration/realInput/textEditing.ts, markers in test/integration/realInput/markers.ts (real-window scenario scenarioEscapeCancels, id table-editing/r04-escape-cancels-cell: Escape after typing).
 - Method: visual scenarios table-editing/v02 to v05, v24 and v25 (check_cell_escape_keeps_cells_left in test/visual/capture_table_escape.py, run by check_preview_edit_mode: text typed in a cell, ArrowDown, Escape; the last save is final and holds the text of the cell left, no previewEditCancel is posted, and the editor closes once the host renders the page).
+- Method: test/page/runtimeSaveEnds.test.ts (Escape and Cancel in a cell during a final save, with a cell left earlier, a Tab-added row and the focus outside).
 - Criteria: No message with final true after Escape and an unchanged source in the real-window scenario. With a cell left earlier in the session, the last save is final and holds the text of that cell and not the open cell's typed text; no previewEditCancel is posted. Exactly one cancel per key press in the two focus scenarios. No message and an open editor in the composition scenario.
 
 <!-- okf:links:start -->
@@ -142,5 +150,5 @@ When the writer presses Escape in a cell editor outside an IME composition, the 
 - Derives from:
   - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
 - Depends on:
-  - [SwRS-MDOKFSTUDIO-BLOCK-053](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-053.md): Cancel and Escape restore the saved text
+  - [SwRS-MDOKFSTUDIO-BLOCK-053](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-053.md): Cancel and Escape restore the saved text, or close the editor during a final save
 <!-- okf:links:end -->

@@ -15,6 +15,7 @@
 import type { PreviewEditSourceMessage } from "../../core/protocol/hostToPage";
 import { moveListItem } from "../modules/listItemMove";
 import type { ListItemMove, PageRuntime } from "./pageRuntime";
+import { editInFlight } from "./detachedSaveState";
 
 /** How long a move waits for the host source before the handle is usable again. */
 const MOVE_TIMEOUT_MS = 5000;
@@ -121,7 +122,7 @@ export function installListItemMove(rt: PageRuntime): ListItemMove {
   }
 
   function busy(): boolean {
-    return !state.editMode || Boolean(state.activeFrontmatterEdit) || Boolean(state.activeBlockEdit)
+    return !state.editMode || Boolean(state.activeFrontmatterEdit) || editInFlight(state)
       || pending !== undefined || settleTimer !== undefined;
   }
 

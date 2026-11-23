@@ -158,3 +158,20 @@ test("a value save, an add, a rename and a remove are each one text edit of the 
   }
   assert.deepEqual(sizes, [1, 1, 1, 1]);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+test("a frontmatter save that changes no text is answered saved and unchanged, with no document edit", async (t) => {
+  const applied: number[] = [];
+  const originalApply = fakeVscode.workspace.applyEdit;
+  fakeVscode.workspace.applyEdit = (edit) => { applied.push(edit.size); return Promise.resolve(true); };
+  t.after(() => { fakeVscode.workspace.applyEdit = originalApply; });
+  const host = await readyPreview(t);
+  const from = host.posted.length;
+  await host.fromPage(save(host, { fieldName: "title", fieldValue: "Old" }));
+  await host.settle();
+  const answers = results(host, from);
+  assert.equal(answers.length, 1);
+  assert.equal(answers[0]!.saved, true, JSON.stringify(answers[0]));
+  assert.equal(answers[0]!.unchanged, true);
+  assert.deepEqual(applied, []);
+});

@@ -57,11 +57,12 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     }
     if (cancel) {
       clearPendingBlockNavigation();
+      const identity = edit.saveIdentity ?? context;
       host.postMessage({
         type: "previewEditCancel",
-        documentId: context.documentId,
-        revision: context.revision,
-        requestId: context.requestId,
+        documentId: identity.documentId,
+        revision: identity.revision,
+        requestId: identity.requestId,
         editId: edit.editId,
         line: edit.line,
         endLine: edit.endLine,
@@ -111,13 +112,14 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     if (edit.reportClose) postEditClosed(edit.editId);
   }
 
-  function postEditClosed(editId: string): void {
+  function postEditClosed(editId: string, detached = false): void {
     host.postMessage({
       type: "previewEditClosed",
       documentId: context.documentId,
       revision: context.revision,
       requestId: context.requestId,
       editId,
+      ...(detached ? { detached: true as const } : {}),
     });
   }
 
@@ -286,6 +288,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     if (state.activeBlockEdit?.openRefused) closeBlockEdit(false);
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
     if (state.activeBlockEdit) return;
+    // A save left in flight by Cancel ends first; the block opens after it.
+    if (rt.detachedSaves.deferOpen(target, selectedCell, initialCaretPosition)) return;
     // A field editor is open (a click on a block or a "+" blurred it and posted a plain save):
     // wait for the answer. A refused value is discarded and the field shows its saved value; a
     // saved value opens the editor as before.
@@ -317,7 +321,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     if (selectedCell && (!Number.isSafeInteger(rowIndex) || !Number.isSafeInteger(columnIndex))) return;
     const renderedTarget = selectedCell ? target : (target.closest?.<HTMLElement>("pre") || target);
     rt.editMode.setEditHover(undefined);
-    const editId = context.requestId + "-" + (++state.editSequence);
+    const reopenId = rt.detachedSaves.reopeningId();
+    const editId = reopenId ?? context.requestId + "-" + (++state.editSequence);
     const element = document.createElement("div");
     element.className = selectedCell
       ? "sphinx-preview-table-cell-editor"
@@ -384,7 +389,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     };
     document.documentElement?.setAttribute?.("data-sphinx-preview-block-editing", "true");
     if (rt.refreshButton) rt.refreshButton.disabled = true;
-    host.postMessage({
+    // A reopened editor takes the edit the host still holds: there is nothing to open.
+    if (reopenId === undefined) host.postMessage({
       type: "previewEditOpen",
       documentId: context.documentId,
       revision: context.revision,
@@ -432,11 +438,12 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       edit.status.textContent = "Saving Markdown…";
     }
     edit.lastPostedText = editedText;
+    const identity = edit.saveIdentity ?? context;
     host.postMessage({
       type: "previewEditSave",
-      documentId: context.documentId,
-      revision: context.revision,
-      requestId: context.requestId,
+      documentId: identity.documentId,
+      revision: identity.revision,
+      requestId: identity.requestId,
       editId: edit.editId,
       line: edit.line,
       endLine: edit.endLine,
@@ -573,7 +580,13 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
   // reached the document.
   function cancelBlockEdit(): void {
     const edit = state.activeBlockEdit;
-    if (!edit || edit.finishing) return;
+    if (!edit) return;
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-053
+    // A final save in flight goes on: the editor closes now and the host's answer ends the save.
+    if (edit.finishing) {
+      rt.detachedSaves.detach(edit);
+      return;
+    }
     closeBlockEdit(edit.hasAutosavedChange === true);
   }
 

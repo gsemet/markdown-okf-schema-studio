@@ -10,6 +10,7 @@ import { STALE_REQUEST } from "../../core/protocol/staleRequest";
 import { createDeleteBlockButton } from "../modules/deleteBlockButton";
 import { isApplePlatform } from "../pageSettings";
 import type { BlockMoves, InsertMove, PageRuntime, PendingMoveSelection } from "./pageRuntime";
+import { editInFlight } from "./detachedSaveState";
 
 /** How long a moved selection waits for the render of its move. */
 const MOVE_SELECTION_MAX_AGE = 5000;
@@ -62,7 +63,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   function postBlockMove(block: HTMLElement, neighbour: HTMLElement, direction: "up" | "down",
     span?: { line: number; endLine: number }): boolean {
-    if (!state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return false;
+    if (!state.editMode || editInFlight(state) || state.activeFrontmatterEdit) return false;
     const own = span || rt.blocks.blockRange(block);
     const other = rt.blocks.blockRange(neighbour);
     const top = (block.closest?.("pre") || block).getBoundingClientRect?.().top;
@@ -249,7 +250,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
     if (!pending) return;
     setPendingMoveSelection(undefined);
     if (!(Date.now() - pending.at < MOVE_SELECTION_MAX_AGE)) return;
-    if (!state.editMode || state.activeBlockEdit || pending.documentId !== context.documentId) return;
+    if (!state.editMode || editInFlight(state) || pending.documentId !== context.documentId) return;
     if (rt.blocks.selectableBlocks().length !== pending.count) return;
     rt.selection.selectBlocksNow({ index: pending.anchor, count: pending.count }, pending.target);
   }
@@ -397,7 +398,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
       // Alt+Up/Down on a focused block or insertion bar moves the block like its arrow buttons.
       document.addEventListener("keydown", (event) => {
         const direction = moveChordDirection(event, false);
-        if (!direction || !state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return;
+        if (!direction || !state.editMode || editInFlight(state) || state.activeFrontmatterEdit) return;
         const target = event.target;
         if (!(target instanceof Element)
           || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)

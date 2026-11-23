@@ -45,8 +45,11 @@ export interface ConfirmOptions {
 export interface HostUi {
   /** Shows an information notification. */
   showInformation(message: string): PromiseLike<unknown>;
-  /** Shows a warning notification. */
-  showWarning(message: string): PromiseLike<unknown>;
+  /**
+   * Shows a warning notification. With `actions` it offers one button per label and resolves to the
+   * label the user chose, or undefined when it was dismissed.
+   */
+  showWarning(message: string, ...actions: readonly string[]): PromiseLike<string | undefined>;
   /** Shows an error notification. */
   showError(message: string): PromiseLike<unknown>;
   /** Lets the user pick one file; undefined when the picker was cancelled. */

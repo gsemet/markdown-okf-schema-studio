@@ -504,7 +504,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       shownMessages.push({ kind: "information", text });
       return Promise.resolve(undefined);
     },
-    showWarningMessage: (text: string) => {
+    showWarningMessage: (text: string, ..._actions: string[]) => {
       shownMessages.push({ kind: "warning", text });
       return Promise.resolve(undefined);
     },

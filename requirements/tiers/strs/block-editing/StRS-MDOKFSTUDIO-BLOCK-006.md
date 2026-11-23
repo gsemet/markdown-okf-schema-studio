@@ -32,6 +32,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-245
 - SwRS-MDOKFSTUDIO-BLOCK-256
 - SwRS-MDOKFSTUDIO-BLOCK-263
+- SwRS-MDOKFSTUDIO-BLOCK-270
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-TRUST-064
@@ -46,7 +47,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-While a writer types in a block editor, the Studio SHALL write the text into the document shortly after the last keystroke, keep the editor, its text and its caret whatever else changes in the preview, apply Done, Ctrl or Cmd+Enter or leaving the text box as keeping the text and Cancel or Escape as restoring the block, and save and close every open editor before the preview switches to another document.
+While a writer types in a block editor, the Studio SHALL write the text into the document shortly after the last keystroke, keep the editor, its text and its caret whatever else changes in the preview, apply Done, Ctrl or Cmd+Enter or leaving the text box as keeping the text and Cancel or Escape as restoring the block (or, once Done was pressed, as closing the editor while the save completes; if that save cannot be written, the typed text comes back in the editor, or is offered to copy), and save and close every open editor before the preview switches to another document.
 
 ### Preserved stakeholder intent
 
@@ -110,7 +111,8 @@ sequenceDiagram
 2. The typed text is in the document
    - SwRS-MDOKFSTUDIO-BLOCK-047: Done, Cmd or Ctrl+Enter, or leaving the text box commits the edit
    - Option SwRS-MDOKFSTUDIO-BLOCK-047 (refusal): the host refuses the final save
-   - Option SwRS-MDOKFSTUDIO-BLOCK-053 (nominal): Cancel or Escape restores the saved text
+   - Option SwRS-MDOKFSTUDIO-BLOCK-053 (nominal): Cancel or Escape restores the saved text, or closes the editor during a final save
+   - Option SwRS-MDOKFSTUDIO-BLOCK-270 (boundary): every final save ends in a closed editor or an error that gives the text back
 3. The final text is saved
    - SwRS-MDOKFSTUDIO-BLOCK-058: the preview renders once after the final save
 4. The preview shows the saved block once
@@ -129,7 +131,7 @@ sequenceDiagram
 - Derived by:
   - [SwRS-MDOKFSTUDIO-BLOCK-042](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-042.md): Typing is autosaved as the smallest single replacement
   - [SwRS-MDOKFSTUDIO-BLOCK-047](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-047.md): Done, Cmd/Ctrl+Enter or leaving the text box commits the edit
-  - [SwRS-MDOKFSTUDIO-BLOCK-053](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-053.md): Cancel and Escape restore the saved text
+  - [SwRS-MDOKFSTUDIO-BLOCK-053](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-053.md): Cancel and Escape restore the saved text, or close the editor during a final save
   - [SwRS-MDOKFSTUDIO-BLOCK-191](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-191.md): The host holds an open block edit and ends it when the block changes
   - [SwRS-MDOKFSTUDIO-BLOCK-193](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-193.md): Page updates wait while an inline editor is open
   - [SwRS-MDOKFSTUDIO-BLOCK-205](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-205.md): Open editors are saved before the page hides or leaves the document
@@ -139,6 +141,7 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-BLOCK-245](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-245.md): previewEditFlushed carries the flush id and a flag
   - [SwRS-MDOKFSTUDIO-BLOCK-256](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-256.md): The host refuses a block edit whose first line is blank
   - [SwRS-MDOKFSTUDIO-BLOCK-263](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-263.md): A block editor left without a change, or whose final save writes nothing, always closes
+  - [SwRS-MDOKFSTUDIO-BLOCK-270](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-270.md): Every final save of a block or cell editor ends
   - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host handles the page messages of every preview, whatever the trust
   - [SwRS-MDOKFSTUDIO-TRUST-059](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
   - [SwRS-MDOKFSTUDIO-TRUST-064](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-064.md): Flush and editor watch messages are addressed by their own id

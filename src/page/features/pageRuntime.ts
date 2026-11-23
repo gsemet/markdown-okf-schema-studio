@@ -20,6 +20,7 @@ import type {
 } from "../../core/protocol/hostToPage";
 import type { AnchorPolicy, ScrollAnchor } from "../../core/scroll/anchorPolicy";
 import type { HostMessageRouter } from "../hostMessages";
+import type { DetachedSave, DetachedSaves } from "./detachedSaveState";
 import type { createBlockSelection } from "../modules/blockSelection";
 import type { installChipToggle } from "../modules/chipToggle";
 import type { installTabs } from "../modules/tabs";
@@ -191,6 +192,8 @@ export interface BlockEdit {
   /** The element that holds the palette above the frame. */
   host?: HTMLElement;
   hintReplaced?: boolean;
+  /** The identity a reopened editor's saves keep (CR 475). */
+  saveIdentity?: { documentId: string; revision: number; requestId: number };
   /** The host waits for `previewEditClosed` of this editor (STAB-03). */
   reportClose?: boolean;
   /** The Edit figure button opened this editor: show the figure form once the source is in. */
@@ -324,6 +327,8 @@ export interface PageRuntimeState {
   /** The properties table is collapsed below its header; kept in memory only, never persisted. */
   frontmatterCollapsed: boolean;
   activeBlockEdit: BlockEdit | undefined;
+  /** A final save its closed editor left in flight (CR 475). */
+  detachedSave: DetachedSave | undefined;
   activeFrontmatterEdit: FrontmatterEdit | undefined;
   /** Numbers the edit ids of this page. */
   editSequence: number;
@@ -513,7 +518,7 @@ export interface BlockEditor {
     sourceRange: { line: number; endLine: number; insertAfterLine?: number; replaceBlankRun?: { line: number; endLine: number; itemLine?: number; containerLine?: number } } | undefined,
     initialCaretPosition?: CaretPosition): void;
   closeBlockEdit(cancel?: boolean): void;
-  postEditClosed(editId: string): void;
+  postEditClosed(editId: string, detached?: boolean): void;
   postBlockEditSave(final: boolean): boolean | undefined;
   autosaveBlockEdit(): void;
   saveBlockEdit(): void;
@@ -774,6 +779,7 @@ export interface PageRuntime {
   textControls: TextControls;
   blockEditor: BlockEditor;
   blockSourceEditor: BlockSourceEditor;
+  detachedSaves: DetachedSaves;
   editorChrome: EditorChrome;
   tableCellEditor: TableCellEditor;
   frontmatter: FrontmatterEditor;

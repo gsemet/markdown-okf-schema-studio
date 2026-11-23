@@ -106,7 +106,12 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
   // A row that Tab added in the session that opened in it goes away when it is still empty once the
   // open cell is back to its opening text: the table is saved once without it.
   function cancelTableCellEdit(edit: BlockEdit): void {
-    if (edit.finishing) return;
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-025
+    // A final save in flight goes on in the background: Cancel and Escape close the editor.
+    if (edit.finishing) {
+      rt.blockEditor.cancelBlockEdit();
+      return;
+    }
     if (edit.tabAddedRow !== undefined && edit.tabAddedRow === edit.tableRowIndex && edit.tableModel
       && edit.tableInput && edit.cellTextAtOpen !== undefined) {
       const addedRow = edit.tableModel.rows[modelRowOf(edit.tableRowIndex)];
@@ -637,7 +642,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Escape") return;
         const edit = state.activeBlockEdit;
-        if (!edit || edit.finishing) return;
+        if (!edit) return;
         // The frame of a refused open has no text box: Escape anywhere closes it.
         if (edit.openRefused) {
           event.preventDefault?.();
