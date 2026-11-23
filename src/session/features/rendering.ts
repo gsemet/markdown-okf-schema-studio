@@ -159,12 +159,25 @@ export class RenderingController extends PageDocumentController {
   public updatePreview(preview: PreviewSession, result: RenderResult): Promise<void> {
     // The file lookups of the page are asynchronous: the shows of one session run one after the
     // other, in the order they were asked, so a late one never overwrites a newer page.
-    const next = (this.updates.get(preview) ?? Promise.resolve()).then(() => this.showPreview(preview, result));
+    this.pending.set(preview, (this.pending.get(preview) ?? 0) + 1);
+    const next = (this.updates.get(preview) ?? Promise.resolve()).then(async () => {
+      try {
+        await this.showPreview(preview, result);
+      } finally {
+        this.pending.set(preview, (this.pending.get(preview) ?? 1) - 1);
+      }
+    });
     this.updates.set(preview, next.catch(() => undefined));
     return next;
   }
 
   private readonly updates = new WeakMap<PreviewSession, Promise<void>>();
+  private readonly pending = new WeakMap<PreviewSession, number>();
+
+  /** Whether a show asked for the session has not finished yet. */
+  public hasPendingShow(preview: PreviewSession): boolean {
+    return (this.pending.get(preview) ?? 0) > 0;
+  }
 
   /**
    * Settles when the shows asked so far for the session have finished (the page then holds the

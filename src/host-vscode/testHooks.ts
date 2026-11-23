@@ -227,14 +227,17 @@ export function getActivePreviewPanelForTests(): vscode.WebviewPanel | undefined
  * Hands a message to the active preview as if its page had posted it. The host drops a message
  * whose requestId is not the one of the shown stage, and the stage is set when the show of a
  * render ends, after the build queue reports it ready: the message waits for the shows asked so
- * far, as a real page does (it posts after it was shown).
+ * far, as a real page does (it posts after it was shown); with no show pending it is handled at once.
  */
 export function sendPreviewMessageForTests(message: unknown): PromiseLike<void> | undefined {
   const preview = activePreview();
   const activation = current;
   if (!activation || !preview) return undefined;
-  return activation.manager.rendering.pendingShow(preview)
-    .then(() => activation.manager.handlePageMessage(preview, message));
+  const { manager } = activation;
+  // No show pending: handle at once, so a test that does not await reads the effect right after.
+  if (!manager.rendering.hasPendingShow(preview)) return manager.handlePageMessage(preview, message);
+  return manager.rendering.pendingShow(preview)
+    .then(() => manager.handlePageMessage(preview, message));
 }
 
 /**
