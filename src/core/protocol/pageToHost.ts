@@ -123,8 +123,8 @@ type PageStateType = PageStateMessageUnion["type"];
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
 /**
- * A blank run of the message: two or more lines, so `endLine` is above `line`. A run inside a list
- * also names its list item line, a source line above the run; a run inside another container names
+ * One blank line of the message: `endLine` is `line`. A line inside a list
+ * also names its list item line, a source line above it; a line inside another container names
  * the container's line the same way (never both).
  */
 const isBlankRunFields = (value: unknown): boolean => {
@@ -132,7 +132,7 @@ const isBlankRunFields = (value: unknown): boolean => {
   const run = value as { line?: unknown; endLine?: unknown; itemLine?: unknown; containerLine?: unknown };
   const aboveRun = (field: unknown): boolean =>
     field === undefined || (isSourceLine(field) && (field as number) < (run.line as number));
-  return isSourceLine(run.line) && isSourceLine(run.endLine) && (run.endLine as number) > (run.line as number)
+  return isSourceLine(run.line) && isSourceLine(run.endLine) && run.endLine === run.line
     && aboveRun(run.itemLine) && aboveRun(run.containerLine)
     && (run.itemLine === undefined || run.containerLine === undefined);
 };
@@ -327,7 +327,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
     && isPinViewportTop(message.pinViewportTop),
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
   previewBlankRunDelete: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
-    && (message.endLine as number) > (message.line as number)
+    && message.endLine === message.line
     && isPinViewportTop(message.pinViewportTop),
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-259
   previewBlocksPaste: (message) => Number.isSafeInteger(message.insertAfterLine)

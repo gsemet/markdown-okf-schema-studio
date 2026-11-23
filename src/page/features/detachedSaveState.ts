@@ -25,7 +25,7 @@ export interface DetachedSave {
   /** The text the block held when the editor opened, and the text of the final save. */
   originalText: string;
   editedText: string;
-  /** An insertion editor (the bar is found again by its line) and a blank-lines block's editor. */
+  /** An insertion editor (the bar is found again by its line) and a blank-line block's editor. */
   insertAfterLine?: number;
   replaceBlankRun?: { line: number; endLine: number; itemLine?: number; containerLine?: number };
   /** The editor's own state, put back on a reopened editor. */

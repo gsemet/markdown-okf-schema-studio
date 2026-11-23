@@ -1,6 +1,5 @@
 /**
- * The blank-lines block of edit mode (CR-444): a run of extra blank lines shows as a small block between
- * two paragraphs, shows its Delete block button when selected, and never shows in reading mode.
+ * The blank-line block of edit mode (CR-444): each shown blank line is its own small block (CR-476), shows its Delete block button when selected, and never shows in reading mode.
  */
 
 import { WIDE } from "./scenarioAssertions";
@@ -9,6 +8,7 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 const FIXTURE = "92-blank-lines-block";
 const LIST_FIXTURE = "93-blank-lines-in-lists";
 const CONTAINERS_FIXTURE = "95-blank-lines-in-containers";
+const SIX_FIXTURE = "96-blank-lines-six";
 
 export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
   {
@@ -20,9 +20,9 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     editMode: true,
     blankLinesChecks: "edit" as const,
-    description: "Light theme, 900 px pane, edit mode: three blank lines between two paragraphs show as one "
-      + "dashed blank-lines block labelled 'Blank lines (3)', as wide as the content column, with no Delete "
-      + "block button shown yet (the `bar` step).",
+    description: "Light theme, 900 px pane, edit mode: three blank lines between two paragraphs show as two "
+      + "dashed blank-line blocks (the first line is the hidden separator) labelled 'Blank line', each as wide "
+      + "as the content column, with no Delete block button shown yet (the `bar` step).",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
@@ -33,7 +33,7 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     editMode: true,
     blankLinesChecks: "selected" as const,
-    description: "Dark theme, 900 px pane, edit mode: the blank-lines block reached with the Down arrow from "
+    description: "Dark theme, 900 px pane, edit mode: the blank-line block reached with the Down arrow from "
       + "the first paragraph takes the selection look and shows its Delete block button at its left edge, "
       + "before the label (the `selected` step).",
   },
@@ -46,7 +46,7 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     blankLinesChecks: "reading" as const,
     description: "Light theme, 900 px pane, reading mode of the same file: the two paragraphs have no "
-      + "blank-lines block between them (the `top` step).",
+      + "blank-line block between them (the `top` step).",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
@@ -57,8 +57,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     editMode: true,
     blankLinesChecks: "list-edit" as const,
-    description: "Light theme, 900 px pane, edit mode: a run of blank lines between two list items and one "
-      + "between two paragraphs of an item each show one blank-lines block inside the item that holds it, as "
+    description: "Light theme, 900 px pane, edit mode: a run of three blank lines between two list items and one "
+      + "between two paragraphs of an item each show two blank-line blocks inside the item that holds them, as "
       + "wide as the item's content, and the blank lines of the fence in the third item show none (the `bar` step).",
   },
   {
@@ -70,7 +70,7 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     editMode: true,
     blankLinesChecks: "list-selected" as const,
-    description: "Dark theme, 900 px pane, edit mode: the blank-lines block between two items, reached with the "
+    description: "Dark theme, 900 px pane, edit mode: the blank-line block between two items, reached with the "
       + "Down arrow, shows its Delete block button at its left edge, clear of the list item handles (the `selected` step).",
   },
   {
@@ -81,7 +81,7 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     ...WIDE,
     scroll: { kind: "top" as const },
     blankLinesChecks: "list-reading" as const,
-    description: "Light theme, 900 px pane, reading mode of the same file: the list shows no blank-lines block (the `top` step).",
+    description: "Light theme, 900 px pane, reading mode of the same file: the list shows no blank-line block (the `top` step).",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
@@ -92,7 +92,7 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     editMode: true,
     blankLinesChecks: "list-typing" as const,
-    description: "Light theme, 900 px pane, edit mode: the editor of the blank-lines block between two items opens "
+    description: "Light theme, 900 px pane, edit mode: the editor of the blank-line block between two items opens "
       + "inside the first item, and stays inside an item of the list after text is typed and the autosave ran (the `text` step).",
   },
   {
@@ -105,8 +105,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     editMode: true,
     blankLinesChecks: "containers-edit" as const,
     description: "Light theme, 900 px pane, edit mode: a run of empty lines in a quote, in an alert, in an admonition, "
-      + "in a context-tag panel, in a definition and in a footnote each show one blank-lines block inside the container "
-      + "that holds it, as wide as its content box, clear of the quote border and the alert icon, with the Delete block "
+      + "in a context-tag panel, in a definition and in a footnote each show two blank-line blocks inside the container "
+      + "that holds them, as wide as its content box, clear of the quote border and the alert icon, with the Delete block "
       + "button at the block's left edge (the `bar` step).",
   },
   {
@@ -117,7 +117,7 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     ...WIDE,
     scroll: { kind: "top" as const },
     blankLinesChecks: "containers-reading" as const,
-    description: "Dark theme, 900 px pane, reading mode of the same file: the containers show no blank-lines block (the `top` step).",
+    description: "Dark theme, 900 px pane, reading mode of the same file: the containers show no blank-line block (the `top` step).",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
@@ -128,7 +128,19 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     editMode: true,
     blankLinesChecks: "containers-typing" as const,
-    description: "Light theme, 900 px pane, edit mode: the editor of the blank-lines block of the quote opens inside "
+    description: "Light theme, 900 px pane, edit mode: the editor of the blank-line block of the quote opens inside "
       + "the quote, and stays inside the one re-rendered quote after text is typed and the autosave ran (the `text` step).",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    id: "block-editing/v54-blank-lines-six-light-900",
+    fixture: SIX_FIXTURE,
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    blankLinesChecks: "six" as const,
+    description: "Light theme, 900 px pane, edit mode: a line of text then six blank lines at the end of the "
+      + "document show six blank-line blocks in a row, one for each blank line, each labelled 'Blank line' (the `bar` step).",
   },
 ];

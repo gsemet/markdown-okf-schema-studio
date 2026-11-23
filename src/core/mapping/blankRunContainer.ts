@@ -1,6 +1,7 @@
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { isContextTagOpenLine } from "../render/mystContextTags";
 import { splitLines } from "./blockMove";
+import { blankRunAround } from "./blankRuns";
 import { listItemIndentOfLine, startsSiblingItem } from "./listItemIndent";
 import { emptyQuoteLine, quoteContent, type EmptyQuoteLine } from "./quoteLine";
 
@@ -57,8 +58,10 @@ export function startsDefinitionEntry(block: readonly string[]): boolean {
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
 /**
- * The indent of a block written in place of the blank run `line`..`endLine` (already checked by
- * `checkBlankRun`), with the optional line of the list item (`itemLine`) or of the other container
+ * The indent of a block written in place of the blank line `line` (already checked by
+ * `checkBlankLine`), read from the whole run that holds it (`blankRunAround`: the container line and
+ * the sibling rules look at the run's first line above it and the line below it), with the optional
+ * line of the list item (`itemLine`) or of the other container
  * (`containerLine`: a directive's opening fence, a context tag's opening line, a definition's marker
  * line, a footnote's label line) that holds the run. For a quote run, the container line is read
  * without its quote markers, which must sit at the run's depth and columns.
@@ -70,13 +73,13 @@ export function startsDefinitionEntry(block: readonly string[]): boolean {
 export function blankRunIndent(
   text: string,
   line: number,
-  endLine: number,
   itemLine?: number,
   containerLine?: number,
 ): RunIndent | undefined {
   const lines = splitLines(text);
-  const first = lines[line - 1];
-  if (!first) return undefined;
+  const run = blankRunAround(text, line);
+  const first = run ? lines[run.line - 1] : undefined;
+  if (!run || !first) return undefined;
   const shape: EmptyQuoteLine | undefined = emptyQuoteLine(first.text);
   const base: RunIndent = shape
     ? { quote: `${shape.prefix} `, blank: first.text, content: "" }
@@ -84,13 +87,13 @@ export function blankRunIndent(
   const anchorLine = itemLine ?? containerLine;
   if (anchorLine === undefined) return base;
   if (itemLine !== undefined && containerLine !== undefined) return undefined;
-  if (!Number.isSafeInteger(anchorLine) || anchorLine < 1 || anchorLine >= line) return undefined;
+  if (!Number.isSafeInteger(anchorLine) || anchorLine < 1 || anchorLine >= run.line) return undefined;
   const frontmatter = matchFrontmatterBlock(text);
   if (frontmatter && anchorLine <= splitLines(text.slice(0, frontmatter.length)).length) return undefined;
   const read = (lineText: string): string | undefined => (shape ? quoteContent(lineText, shape) : lineText);
   const anchor = read(lines[anchorLine - 1].text);
   if (anchor === undefined) return undefined;
-  const below = endLine < lines.length ? read(lines[endLine].text) : undefined;
+  const below = run.endLine < lines.length ? read(lines[run.endLine].text) : undefined;
   const indent = itemLine !== undefined ? itemIndent(anchor, below) : containerIndent(anchor, below);
   return indent ? { ...base, ...indent } : undefined;
 }

@@ -2,17 +2,19 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-BLOCK-266
 uuid: 67d10e20-e5f6-4e08-a7b5-6af9441a918d
-title: Edit mode shows each blank run between top-level blocks, between list
-  items or inside a list item or a quote as a blank-lines block
-description: When edit mode is on, the extension SHALL show every run of two or
-  more blank lines between top-level blocks, at the start or at the end of the
-  body, between two items of a top-level list or inside a list item, and every
-  run of two or more empty quote lines of the same depth inside a quote, an
-  alert, an admonition, a definition or a footnote, as one blank-lines block
-  placed from the host's run list, inside the list item that holds a run of a
-  list, and show nothing for a single separator, a run inside another block (a
-  fence, an HTML block or a table), a run next to a folded block, a folded or
-  included list, reading mode or the export.
+title: Edit mode shows each shown blank line as a blank-line block
+description: When edit mode is on, the extension SHALL show each shown blank
+  line as one blank-line block, so that N blank lines between two blocks show
+  N-1 blocks, the first being the separator that stays hidden, and it shows
+  every blank line at the end of the body, at the top of a file without
+  frontmatter and in a body of only blank lines; of the empty quote lines of a
+  run it shows all but the first, wherever the run stands. This holds between
+  top-level blocks, between list items, inside a list item, and inside a quote,
+  an alert, an admonition, a definition or a footnote; the blocks are placed
+  from the host's list of shown lines, inside the list item or container that
+  holds them, and nothing is shown for a separator, a blank line inside another
+  block (a fence, an HTML block or a table), next to a folded block, in a folded
+  or included list, in reading mode or in the export.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -55,36 +57,54 @@ tested_in_files:
 default_owner_email: gaetan@xeberon.net
 ---
 
-## Edit mode shows each blank run between top-level blocks as a blank-lines block
+## Edit mode shows each shown blank line as a blank-line block
 
 ### Normative behavior
 
-When edit mode is on, the extension SHALL show every run of two or more blank lines between top-level blocks, at the start or at the end of the body, between two items of a top-level list or inside a list item, and every run of two or more empty quote lines of the same depth inside a quote, an alert, an admonition, a definition or a footnote, as one blank-lines block placed from the host's run list, inside the list item that holds a run of a list, and show nothing for a single separator, a run inside another block (a fence, an HTML block or a table), a run next to a folded block, a folded or included list, reading mode or the export.
+When edit mode is on, the extension SHALL show each shown blank line as one blank-line block: of N blank lines between two blocks it shows N-1, the first being the separator that stays hidden, and it shows every blank line at the end of the body, at the top of a file without frontmatter and in a body of only blank lines; of the empty quote lines of a run it shows all but the first, wherever the run stands. This holds between top-level blocks, between list items, inside a list item, and inside a quote, an alert, an admonition, a definition or a footnote; the blocks are placed from the host's list of shown lines, inside the list item or container that holds them, and nothing is shown for a separator, a blank line inside another block (a fence, an HTML block or a table), next to a folded block, in a folded or included list, in reading mode or in the export.
 
-### Scenario: Runs are shown
+### Scenario: Blank lines are shown
 
-- GIVEN edit mode on and a source with two blank lines between two blocks, two at the start of the body and three at its end
+- GIVEN edit mode on and a source with two blank lines between two blocks, two at the start of a file without frontmatter, and three at the end of the body
 - WHEN the content is rendered or patched
-- THEN each run is one blank-lines block, placed after the insert point of the block above (or first, or before Start writing), with a label that gives the line count, and the host's hidden list of runs (data-okf-blank-runs) is the only source of the runs
+- THEN the two between the blocks show one blank-line block (the first line is the separator), the two at the start show two, and the three at the end show three, each labelled "Blank line", placed after the insert point of the block above (or first, or before Start writing), and the host's hidden list of shown lines (data-okf-blank-runs) is the only source of them
+
+### Scenario: A line of text then six blank lines
+
+- GIVEN edit mode on and a line of text followed by six blank lines at the end of the body
+- WHEN the content is rendered
+- THEN six blank-line blocks show, one for each blank line
+
+### Scenario: Frontmatter then three blank lines
+
+- GIVEN edit mode on and frontmatter followed by three blank lines and nothing else
+- WHEN the content is rendered
+- THEN three blank-line blocks show, because the body has no block to separate
+
+### Scenario: Quote lines
+
+- GIVEN edit mode on and a quote with three empty quote lines in a row
+- WHEN the content is rendered
+- THEN two blank-line blocks show inside the quote, the first empty quote line being the separator
 
 ### Scenario: Runs inside a list are shown
 
 - GIVEN edit mode on and a top-level list with a run between two items and a run between two paragraphs of an item
 - WHEN the content is rendered or patched
-- THEN each run is one blank-lines block placed inside the list item that holds it, after the last child that starts before the run, and a patch that replaces the list puts the block back in the new item
+- THEN each shown blank line is one blank-line block placed inside the list item that holds it, after the last child that starts before it, and a patch that replaces the list puts the block back in the new item
 
 ### Scenario: Nothing is shown
 
 - GIVEN a single blank separator, a run inside a code fence, a directive, an HTML block or a table (also in a list item), a run inside a quote, an alert, an admonition or a list they hold, a run next to a folded block, a folded or included list, reading mode, or the export
 - WHEN the content is rendered
-- THEN no blank-lines block exists, and the export drops data-okf-blank-runs and data-okf-blank-lines
+- THEN no blank-line block exists, and the export drops data-okf-blank-runs and data-okf-blank-lines
 
 ### Verification notes
 
-- Method: test/core/mapping/blankRuns.test.ts (blankRuns: separators, start, end, CR LF, lone CR, frontmatter, no-break space), test/core/render/blankRunsList.test.ts (the hidden list), test/core/export (the attributes are dropped).
-- Method: test/page/runtimeBlankLines.test.ts (placement, folded and in-block runs skipped, a refresh after a patch).
+- Method: test/core/mapping/blankRuns.test.ts (shownBlankLines: N-1 blocks, the end of the body, line 1, a body of only blank lines, quote runs, CR LF, lone CR, no-break space; a line of text then six blank lines), test/core/render/blankRunsList.test.ts (the hidden list of shown lines, the issue's case "2-7"), test/core/export (the attributes are dropped).
+- Method: test/page/runtimeBlankLines.test.ts (one block per line of a range, placement, folded and in-block runs skipped, a refresh after a patch), test/visual/capture_blank_lines_block.py (two blocks for three blank lines, six blocks for six).
 - Method: the list cases of test/page/runtimeBlankLines.test.ts, test/core/render/blankRunsInLists.test.ts (the ranges the page reads), test/visual/capture_blank_lines_block.py (the blocks in their items, none in a fence).
-- Criteria: only spaces and tabs are blank; the page never trusts authored data-okf-blank-lines.
+- Criteria: only spaces and tabs are blank; the label is "Blank line" and no block shows a line count; the page never trusts authored data-okf-blank-lines.
 
 <!-- okf:links:start -->
 ### Links

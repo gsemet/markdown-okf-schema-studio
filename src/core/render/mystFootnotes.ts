@@ -1,6 +1,6 @@
 /**
  * The page-only label line of each footnote of the footnotes section (`data-okf-footnote-line` on
- * its `li`): the page reads it to place the blank-lines block of a run inside a footnote, and to
+ * its `li`): the page reads it to place the blank-line block of a run inside a footnote, and to
  * send the line the host reads the footnote's indent from. It is never `data-line`.
  */
 

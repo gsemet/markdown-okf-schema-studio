@@ -125,7 +125,7 @@ export interface BlockEdit {
   line: number;
   endLine: number;
   insertAfterLine?: number;
-  /** The blank run the new block replaces (a block written where the blank-lines block was). */
+  /** The blank run the new block replaces (a block written where the blank-line block was). */
   replaceBlankRun?: { line: number; endLine: number; itemLine?: number; containerLine?: number };
   selectedCell?: HTMLTableCellElement;
   renderedCellContent?: HTMLElement;
@@ -303,6 +303,8 @@ export interface PendingBlockSelection {
    */
   afterDelete?: boolean;
   at?: number;
+  /** A deleted blank line `line` of the run (`first`, item or container line): the block now there, else the one above, gets it. */
+  blank?: { line: number; first: number; itemLine?: number; containerLine?: number };
 }
 
 /** What the runtime reads from the saved state of the page at startup. */
@@ -622,27 +624,24 @@ export interface BlockSelectionView {
    * False when nothing was sent.
    */
   requestDeleteBlock(block: HTMLElement): boolean;
-  /** Removes the blank run of the blank-lines block `block` (its Delete block button, Delete, Backspace). */
+  /** Removes the blank run of the blank-line block `block` (its Delete block button, Delete, Backspace). */
   requestDeleteBlankLines(block: HTMLElement): boolean;
   bindKeys(): void;
 }
 
-/**
- * The blank-lines blocks of edit mode (`features/blankLines.ts`): one reachable block for each run of
- * two or more blank lines, read from the host's list of runs.
- */
+/** The blank-line blocks of edit mode (`features/blankLines.ts`): one block per shown blank line, from the host's list. */
 export interface BlankLines {
   /** Builds, keeps and removes the blocks after a change of the content, the mode or the folds. */
   refresh(): void;
   /** The blocks of the page, in document order. */
   blocks(): HTMLElement[];
   /**
-   * The lines of a block's run; for a run inside a list the first line of the list item that holds it
-   * (`itemLine`), for a run inside another container that container's line (`containerLine`), and
-   * `holder`, the top-level block that holds a run inside a container.
+   * The one line of a block (`endLine` is `line`) and `first`, the first line of the range it came from
+   * (its "run"); inside a list the item line (`itemLine`), inside another container its line
+   * (`containerLine`), and `holder`, the top-level block that holds it.
    */
-  runOf(block: Element): { line: number; endLine: number; itemLine?: number; containerLine?: number; holder?: HTMLElement } | undefined;
-  /** The blank-lines block a node is in, if any. */
+  runOf(block: Element): { line: number; endLine: number; first: number; itemLine?: number; containerLine?: number; holder?: HTMLElement } | undefined;
+  /** The blank-line block a node is in, if any. */
   blockOfTarget(target: EventTarget | null): HTMLElement | undefined;
   /** The selected block, if any. */
   selected(): HTMLElement | undefined;

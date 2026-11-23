@@ -2,7 +2,7 @@ import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { insertionText, planBlankRunInsertion, planInsertion } from "./insertion";
 import { splitLines } from "./blockMove";
 import { blankRunIndent } from "./blankRunContainer";
-import { emptyQuoteLine, sameQuoteShape } from "./quoteLine";
+import { shownBlankLines } from "./blankRuns";
 
 /** A selected run of top-level blocks: 1-based, inclusive source lines. */
 export interface BlockSpan {
@@ -30,7 +30,7 @@ export interface PastePlan {
   end?: number;
 }
 
-/** What a blank run's removal deletes: offsets, and the first line (before it) that moves up. */
+/** What a blank line's removal deletes: offsets, and the first line (before it) that moves up. */
 export interface BlankRunRemovalPlan {
   start: number;
   end: number;
@@ -215,94 +215,52 @@ export function planPaste(text: string, afterLine: number, raw: string): PastePl
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
 /**
- * Validates a blank run against the text. A plain run: two or more CommonMark blank lines after the
- * frontmatter, with a line that is not blank (or the frontmatter, or the start) above and below. A
- * quote run: two or more empty quote lines of the same depth and marker columns after the
- * frontmatter, with no such line above or below.
+ * Validates one blank line against the text: it must be a shown blank line (`shownBlankLines`: not a
+ * separator, not in the frontmatter, not past the end, not a line of text).
  */
-export function checkBlankRun(text: string, line: number, endLine: number): BlockRangeRefusal | undefined {
-  if (!Number.isSafeInteger(line) || !Number.isSafeInteger(endLine) || line < 1 || endLine <= line) {
+export function checkBlankLine(text: string, line: number): BlockRangeRefusal | undefined {
+  if (!Number.isSafeInteger(line) || line < 1) {
     return { refused: OUT_OF_DATE };
   }
-  const lines = splitLines(text);
-  const frontmatterLines = frontmatterLineCount(text);
-  if (endLine > lines.length || line <= frontmatterLines) {
-    return { refused: OUT_OF_DATE };
-  }
-  const shape = emptyQuoteLine(lines[line - 1].text);
-  if (shape) {
-    const sameShape = (lineText: string | undefined): boolean => {
-      const other = lineText === undefined ? undefined : emptyQuoteLine(lineText);
-      return other !== undefined && sameQuoteShape(shape, other);
-    };
-    for (let current = line + 1; current <= endLine; current += 1) {
-      if (!sameShape(lines[current - 1].text)) return { refused: OUT_OF_DATE };
-    }
-    const aboveSame = line > 1 && line - 1 > frontmatterLines && sameShape(lines[line - 2].text);
-    return aboveSame || sameShape(lines[endLine]?.text) ? { refused: OUT_OF_DATE } : undefined;
-  }
-  for (let current = line; current <= endLine; current += 1) {
-    if (!isCommonMarkBlank(lines[current - 1].text)) {
-      return { refused: OUT_OF_DATE };
-    }
-  }
-  const aboveBlank = line > 1 && line - 1 > frontmatterLines && isCommonMarkBlank(lines[line - 2].text);
-  const belowBlank = endLine < lines.length && isCommonMarkBlank(lines[endLine].text);
-  return aboveBlank || belowBlank ? { refused: OUT_OF_DATE } : undefined;
+  return shownBlankLines(text).some((range) => range.line <= line && line <= range.endLine)
+    ? undefined
+    : { refused: OUT_OF_DATE };
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
 /**
- * Plans the removal of a blank run, keeping one separator: between two blocks (the frontmatter is
- * one) lines `line + 1`..`endLine` go; at the start of a file without frontmatter, and at the end of
- * the body, every line of the run goes (the text then ends where the line above ends, with its line
- * break when the document had a final one). A text of only blank lines becomes empty. A quote run
- * always keeps its first line, byte for byte (the empty quote line is the separator): lines
- * `line + 1`..`endLine` go; at the end of the text the final line break is kept, or kept absent.
+ * Plans the removal of one shown blank line: the line and its line break go, one `TextEdit`. The
+ * separator is never a shown line, so it stays and two blocks are never glued. The last line of the
+ * text goes with the line break before it instead, so the text keeps its final line break, or its
+ * absence; a text that is only that one line becomes empty.
  */
-export function planBlankRunRemoval(
-  text: string,
-  line: number,
-  endLine: number,
-): BlankRunRemovalPlan | BlockRangeRefusal {
-  const refusal = checkBlankRun(text, line, endLine);
+export function planBlankRunRemoval(text: string, line: number): BlankRunRemovalPlan | BlockRangeRefusal {
+  const refusal = checkBlankLine(text, line);
   if (refusal) {
     return refusal;
   }
   const lines = splitLines(text);
   const offsetOfLine = (count: number): number =>
     lines.slice(0, count).reduce((sum, entry) => sum + entry.text.length + entry.eol.length, 0);
-  const followingLine = endLine < lines.length ? endLine + 1 : undefined;
-  if (emptyQuoteLine(lines[line - 1].text)) {
-    // A quote run keeps its first line wherever it is: the empty quote line is the separator.
-    if (followingLine !== undefined) return { start: offsetOfLine(line), end: offsetOfLine(endLine), followingLine };
-    const finalBreak = lines[lines.length - 1].eol !== "";
-    return {
-      start: finalBreak ? offsetOfLine(line) : offsetOfLine(line - 1) + lines[line - 1].text.length,
-      end: text.length,
-      followingLine,
-    };
-  }
-  if (followingLine !== undefined) {
-    return { start: offsetOfLine(line === 1 ? 0 : line), end: offsetOfLine(endLine), followingLine };
+  if (line < lines.length) {
+    return { start: offsetOfLine(line - 1), end: offsetOfLine(line), followingLine: line + 1 };
   }
   if (line === 1) {
-    return { start: 0, end: text.length, followingLine };
+    return { start: 0, end: text.length, followingLine: undefined };
   }
   const keepsFinalBreak = lines[lines.length - 1].eol !== "";
   return {
     start: offsetOfLine(line - 1) - (keepsFinalBreak ? 0 : lines[line - 2].eol.length),
     end: text.length,
-    followingLine,
+    followingLine: undefined,
   };
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
-/** Plans a paste in place of a blank run: one separator on each side of the pasted block. */
+/** Plans a paste in place of one blank line: a separator on a side only where the neighbour is not blank. */
 export function planBlankRunPaste(
   text: string,
   line: number,
-  endLine: number,
   raw: string,
   itemLine?: number,
   containerLine?: number,
@@ -311,14 +269,14 @@ export function planBlankRunPaste(
   if (block === "") {
     return { refused: "The clipboard has no text to paste." };
   }
-  const refusal = checkBlankRun(text, line, endLine);
+  const refusal = checkBlankLine(text, line);
   if (refusal) {
     return refusal;
   }
   if ((itemLine !== undefined || containerLine !== undefined)
-    && blankRunIndent(text, line, endLine, itemLine, containerLine) === undefined) {
+    && blankRunIndent(text, line, itemLine, containerLine) === undefined) {
     return { refused: OUT_OF_DATE };
   }
-  const plan = planBlankRunInsertion(text, line, endLine, itemLine, containerLine);
+  const plan = planBlankRunInsertion(text, line, itemLine, containerLine);
   return { offset: plan.offset, text: insertionText(plan, block), end: plan.replace?.end };
 }

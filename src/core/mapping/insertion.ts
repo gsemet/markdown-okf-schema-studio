@@ -3,6 +3,8 @@ import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { splitLines } from "./blockMove";
 import { blankRunIndent, startsDefinitionEntry, startsFootnoteDefinition, type RunIndent } from "./blankRunContainer";
 import { startsWithListMarker } from "./listItemIndent";
+import { emptyQuoteLine, sameQuoteShape } from "./quoteLine";
+import { isCommonMarkBlank } from "./blockRange";
 
 export interface InsertionPlan {
   /** UTF-16 offset in the document text where the inserted text starts. */
@@ -10,7 +12,7 @@ export interface InsertionPlan {
   prefix: string;
   suffix: string;
   lineEnding: string;
-  /** A blank run's region the inserted text replaces (`offset` is its start); absent otherwise. */
+  /** A blank line's region the inserted text replaces (`offset` is its start); absent otherwise. */
   replace?: { start: number; end: number };
   /**
    * A blank run inside a quote or another container (a list item, a directive, a definition, a
@@ -25,36 +27,40 @@ const lineEndingOf = (text: string): string =>
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
 /**
- * The plan of a block written in place of the blank run at lines `line`..`endLine` (already checked
- * by `checkBlankRun`). The region runs from the end of line `line - 1` (the start of the text for
- * line 1) to the start of line `endLine + 1`, or to the end of the text for a run at the end. One
- * separator goes before the block (none at the start of the file) and one after it (none at the
- * end, where the document's final line break is kept, or kept absent). In a quote run each separator
- * is a copy of the run's first line. With `itemLine` (the line of the list item that holds the run)
- * or `containerLine` (the line of the directive, panel, definition or footnote that holds it), and
- * for a quote run, the plan also carries the indent of the block; a container line that does not
- * hold is ignored here, the callers check it first.
+ * The plan of a block written in place of the one blank line `line` (already checked by
+ * `checkBlankLine`). The region is that line without its line break, which stays as it is, so the
+ * document's final line break, or its absence, is kept. A separator goes before the block only when
+ * line `line - 1` exists and is not blank, and after it only when line `line + 1` exists and is not
+ * blank: a CommonMark blank line, or, in a quote run, an empty quote line of the run's shape. In a
+ * quote run a separator is a copy of the run's first line. With `itemLine` (the line of the list item
+ * that holds the line) or `containerLine` (the line of the directive, panel, definition or footnote
+ * that holds it), and for a quote run, the plan also carries the indent of the block; a container
+ * line that does not hold is ignored here, the callers check it first.
  */
 export function planBlankRunInsertion(
   text: string,
   line: number,
-  endLine: number,
   itemLine?: number,
   containerLine?: number,
 ): InsertionPlan {
   const lines = splitLines(text);
   const lineEnding = lineEndingOf(text);
-  const offsetOfLine = (count: number): number =>
-    lines.slice(0, count).reduce((sum, entry) => sum + entry.text.length + entry.eol.length, 0);
-  const start = line === 1 ? 0 : offsetOfLine(line - 1) - lines[line - 2].eol.length;
-  const hasBelow = endLine < lines.length;
-  const end = hasBelow ? offsetOfLine(endLine) : text.length;
-  const indent = blankRunIndent(text, line, endLine, itemLine, containerLine) ?? blankRunIndent(text, line, endLine);
+  const start = lines.slice(0, line - 1).reduce((sum, entry) => sum + entry.text.length + entry.eol.length, 0);
+  const end = start + lines[line - 1].text.length;
+  const indent = blankRunIndent(text, line, itemLine, containerLine) ?? blankRunIndent(text, line);
   const separator = indent?.blank === undefined ? "" : indent.blank;
+  const shape = emptyQuoteLine(lines[line - 1].text);
+  const isBlankNeighbour = (neighbour: string): boolean => {
+    if (isCommonMarkBlank(neighbour)) return true;
+    const other = shape ? emptyQuoteLine(neighbour) : undefined;
+    return shape !== undefined && other !== undefined && sameQuoteShape(shape, other);
+  };
+  const before = lines[line - 2];
+  const after = lines[line];
   return {
     offset: start,
-    prefix: line === 1 ? "" : lineEnding + separator + lineEnding,
-    suffix: hasBelow ? lineEnding + separator + lineEnding : lines[lines.length - 1].eol,
+    prefix: before !== undefined && !isBlankNeighbour(before.text) ? separator + lineEnding : "",
+    suffix: after !== undefined && !isBlankNeighbour(after.text) ? lineEnding + separator : "",
     lineEnding,
     replace: { start, end },
     ...(indent && (indent.blank !== undefined || itemLine !== undefined || containerLine !== undefined) ? { indent } : {}),

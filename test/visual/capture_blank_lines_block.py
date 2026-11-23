@@ -1,4 +1,4 @@
-"""The blank-lines block of edit mode: its look, its selection and its Delete block button, and its absence in reading mode (CR-444), and the blocks of runs inside a list (CR-448)."""
+"""The blank-line blocks of edit mode: their look, their selection and their Delete block button, and their absence in reading mode (CR-444), the blocks of runs inside a list (CR-448), and one block for each shown blank line (CR-476)."""
 
 from __future__ import annotations
 
@@ -19,6 +19,8 @@ READ = """() => {
   const paragraphs = [...content.querySelectorAll('p')];
   return {
     shown: blocks.filter((block) => getComputedStyle(block).display !== 'none').length,
+    boxes: blocks.map(box),
+    labels: blocks.map((block) => getComputedStyle(block, '::before').content),
     paragraphs: paragraphs.map(box),
     content: box(content),
     block: blocks[0] ? {
@@ -38,9 +40,10 @@ READ = """() => {
 # @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 # @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
 def check_blank_lines_block(page: Page, scenario: dict, failures: list[Failure]) -> None:
-  """`edit`: one blank-lines block between the paragraphs, its label drawn by CSS, its button hidden
+  """`edit`: two blank-line blocks between the paragraphs (three blank lines, the first is the hidden
+  separator), their label drawn by CSS, the button hidden
   (`bar` step). `selected`: Down from the first paragraph selects it and shows the Delete block
-  button at its left edge (`selected` step). `reading`: no blank-lines block is shown (`top` step)."""
+  button at its left edge (`selected` step). `reading`: no blank-line block is shown (`top` step)."""
   mode = scenario.get("blankLinesChecks")
   if not mode:
     return
@@ -51,50 +54,77 @@ def check_blank_lines_block(page: Page, scenario: dict, failures: list[Failure])
   if mode.startswith("containers-"):
     check_blank_lines_in_containers(page, scenario, failures, mode)
     return
+  if mode == "six":
+    check_six_blank_lines(page, scenario, failures)
+    return
   if mode == "reading":
     state = page.evaluate(READ)
     if state["shown"] != 0 or state["block"] is not None:
-      failures.append(Failure(name, f"blank lines block: reading mode shows {state['shown']} blank-lines block(s)"))
+      failures.append(Failure(name, f"blank-line block: reading mode shows {state['shown']} blank-line block(s)"))
     save_step(page, scenario, "top", caret="hide")
     return
   if mode == "selected":
-    # Shift+click on the first paragraph starts a block selection; Down then steps onto the blank-lines block.
+    # Shift+click on the first paragraph starts a block selection; Down then steps onto the blank-line block.
     page.locator(f"{CONTENT} p").first.click(modifiers=["Shift"])
     page.keyboard.press("ArrowDown")
     page.wait_for_timeout(250)
   state = page.evaluate(READ)
   block = state["block"]
-  if block is None or state["shown"] != 1:
-    failures.append(Failure(name, f"blank lines block: {state['shown']} shown, expected 1"))
+  if block is None or state["shown"] != 2:
+    failures.append(Failure(name, f"blank-line block: {state['shown']} shown, expected 2 (three blank lines, the first is the separator)"))
     return
   box = block["box"]
   first, second = state["paragraphs"][0], state["paragraphs"][1]
-  if not (first["bottom"] <= box["top"] + 0.5 and box["bottom"] <= second["top"] + 0.5):
-    failures.append(Failure(name, "blank lines block: it is not between the two paragraphs"))
+  last = state["boxes"][-1]
+  if not (first["bottom"] <= box["top"] + 0.5 and last["bottom"] <= second["top"] + 0.5 and box["bottom"] <= last["top"] + 0.5):
+    failures.append(Failure(name, "blank-line block: it is not between the two paragraphs"))
   if box["height"] < 16:
-    failures.append(Failure(name, f"blank lines block: it is {box['height']:.0f} px high"))
+    failures.append(Failure(name, f"blank-line block: it is {box['height']:.0f} px high"))
   if abs(box["width"] - first["width"]) > 4 and abs(box["width"] - state["content"]["width"]) > 4:
-    failures.append(Failure(name, f"blank lines block: it is {box['width']:.0f} px wide, not the content column"))
-  if "Blank lines (3)" not in block["label"]:
-    failures.append(Failure(name, f"blank lines block: the drawn label is {block['label']}"))
+    failures.append(Failure(name, f"blank-line block: it is {box['width']:.0f} px wide, not the content column"))
+  if "Blank line" not in block["label"] or "Blank lines" in block["label"]:
+    failures.append(Failure(name, f"blank-line block: the drawn label is {block['label']}"))
   if block["text"] != "":
-    failures.append(Failure(name, f"blank lines block: its text outside the button is {block['text']!r}, the label must be CSS only"))
+    failures.append(Failure(name, f"blank-line block: its text outside the button is {block['text']!r}, the label must be CSS only"))
   button = block["button"]
   if button is None or button["label"] != "Delete block":
-    failures.append(Failure(name, "blank lines block: no Delete block button"))
+    failures.append(Failure(name, "blank-line block: no Delete block button"))
     return
   if mode == "edit":
     if button["opacity"] > 0.01:
-      failures.append(Failure(name, "blank lines block: the Delete block button shows before any selection"))
+      failures.append(Failure(name, "blank-line block: the Delete block button shows before any selection"))
     save_step(page, scenario, "bar", caret="hide")
     return
   if block["selected"] != "true":
-    failures.append(Failure(name, "blank lines block: Down did not select it"))
+    failures.append(Failure(name, "blank-line block: Down did not select it"))
   if button["opacity"] < 0.99:
-    failures.append(Failure(name, f"blank lines block: the Delete block button is not shown (opacity {button['opacity']})"))
+    failures.append(Failure(name, f"blank-line block: the Delete block button is not shown (opacity {button['opacity']})"))
   if button["box"]["left"] - box["left"] > 12:
-    failures.append(Failure(name, "blank lines block: the Delete block button is not at its left edge"))
+    failures.append(Failure(name, "blank-line block: the Delete block button is not at its left edge"))
   save_step(page, scenario, "selected", caret="hide")
+
+
+def check_six_blank_lines(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The fixture `96-blank-lines-six`: a line of text then six blank lines at the end of the document show
+  six blank-line blocks, one after the other, each at least 16 px high and as wide as the content column
+  (`bar` step)."""
+  name = scenario["page"]
+  state = page.evaluate(READ)
+  if state["shown"] != 6 or len(state["boxes"]) != 6:
+    failures.append(Failure(name, f"blank-line block: {state['shown']} shown, expected 6, one for each blank line"))
+    return
+  previous = None
+  for box, label in zip(state["boxes"], state["labels"]):
+    if box["height"] < 16:
+      failures.append(Failure(name, f"blank-line block: one block is {box['height']:.0f} px high"))
+    if abs(box["width"] - state["content"]["width"]) > 4:
+      failures.append(Failure(name, f"blank-line block: one block is {box['width']:.0f} px wide, not the content column"))
+    if "Blank line" not in label or "Blank lines" in label:
+      failures.append(Failure(name, f"blank-line block: the drawn label is {label}"))
+    if previous is not None and box["top"] < previous["bottom"] - 0.5:
+      failures.append(Failure(name, "blank-line block: two blocks overlap"))
+    previous = box
+  save_step(page, scenario, "bar", caret="hide")
 
 
 READ_LIST = """() => {
@@ -142,8 +172,8 @@ EDITOR_HOME = """() => {
 # @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
 # @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
 def check_blank_lines_in_lists(page: Page, scenario: dict, failures: list[Failure], mode: str) -> None:
-  """The fixture `93-blank-lines-in-lists`: a run between the first two items and a run between the two
-  paragraphs of the second item each show one block inside their item, as wide as the item's text (the first may stop short of the
+  """The fixture `93-blank-lines-in-lists`: a run of three blank lines between the first two items and one between the two
+  paragraphs of the second item each show two blocks (the first blank line is the separator) inside their item, as wide as the item's text (the first may stop short of the
   floating toolbar), and the blank lines of the fence in the third item show none. `list-selected`: Down from the title steps
   onto the list, then onto the first block, whose Delete block button is at its left edge and clear of
   the item handles. `list-reading`: none. `list-typing`: the editor opens in the first item and is still
@@ -152,13 +182,13 @@ def check_blank_lines_in_lists(page: Page, scenario: dict, failures: list[Failur
   state = page.evaluate(READ_LIST)
   if mode == "list-reading":
     if state["count"] != 0:
-      failures.append(Failure(name, f"blank lines in lists: reading mode shows {state['count']} blank-lines block(s)"))
+      failures.append(Failure(name, f"blank lines in lists: reading mode shows {state['count']} blank-line block(s)"))
     save_step(page, scenario, "top", caret="hide")
     return
-  if state["count"] != 2 or state["inFence"] != 0:
-    failures.append(Failure(name, f"blank lines in lists: {state['count']} blocks ({state['inFence']} in the fence), expected 2 and none in the fence"))
+  if state["count"] != 4 or state["inFence"] != 0:
+    failures.append(Failure(name, f"blank lines in lists: {state['count']} blocks ({state['inFence']} in the fence), expected 4 (two for each run of three blank lines) and none in the fence"))
     return
-  expected = ["First item", "Second item"]
+  expected = ["First item", "First item", "Second item", "Second item"]
   for block, item in zip(state["blocks"], expected):
     if block["item"] != item or not block["directChild"]:
       failures.append(Failure(name, f"blank lines in lists: a block is in {block['item']!r}, expected a child of {item!r}"))

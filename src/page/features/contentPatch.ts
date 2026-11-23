@@ -54,7 +54,7 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     // @implements_req SwRS-MDOKFSTUDIO-TABLE-119
     // A table cell editor an outside change reached closes here without a save: the buffer is the truth.
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-268
-    // The editor of a blank-lines block stays open across an autosave's re-render: its block and frame
+    // The editor of a blank-line block stays open across an autosave's re-render: its block and frame
     // are put back after the swap. Once its final save was posted (`finishing`), the patch closes it,
     // as for any block: the host answers that save with this render, not with `done`.
     const blankRunEdit = state.activeBlockEdit?.replaceBlankRun && !state.activeBlockEdit.finishing;

@@ -234,9 +234,8 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
 /**
- * The blank-lines block of edit mode (`features/blankLines.ts`): a quiet dashed bar named by its
- * label, with the Delete block button at its left edge, before the label. It is hidden while its editor is open, and
- * the host's list of runs (`data-okf-blank-runs`) never shows.
+ * The blank-line block of edit mode (`features/blankLines.ts`), one per shown blank line: a dashed bar with its label
+ * and the Delete block button at its left edge. Hidden while its editor is open; the host's list never shows.
  */
 const BLANK_LINES_BLOCK_CSS = `[data-okf-blank-runs] {
   display: none;
@@ -263,6 +262,15 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-blank-lines {
 
 .sphinx-preview-blank-lines::before {
   content: attr(data-okf-blank-label);
+}
+
+/* Blocks of one range stack with no gap. */
+.sphinx-preview-blank-lines + .sphinx-preview-blank-lines {
+  margin-top: 0;
+  border-top-width: 0;
+}
+.sphinx-preview-blank-lines:has(+ .sphinx-preview-blank-lines) {
+  margin-bottom: 0;
 }
 
 .sphinx-preview-blank-lines:hover,

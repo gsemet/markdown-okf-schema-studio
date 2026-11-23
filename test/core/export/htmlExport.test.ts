@@ -341,7 +341,7 @@ test("a properties table without a schema keeps its two columns inside the close
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
-test("the host's list of blank runs and a blank-lines block are not exported", () => {
+test("the host's list of blank runs and a blank-line block are not exported", () => {
   const { html } = build(
     '<p data-sphinx-source-line="1">A</p><div class="sphinx-preview-blank-lines" data-okf-blank-lines="2-4"></div>' +
       '<p data-sphinx-source-line="5">B</p><div hidden data-okf-blank-runs="2-4"></div>',

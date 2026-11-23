@@ -1,5 +1,5 @@
 /**
- * Where the blank-lines block of a run goes on the page: inside the container that holds the run (a
+ * Where the blank-line block of a run goes on the page: inside the container that holds the run (a
  * list item, a quote, an alert, an admonition, a context-tag panel, a figure, a card, a grid item, a
  * definition, a footnote), or after the top-level block above it. The rules read only the mapped
  * blocks and the page-only attributes of the render; they never change the page.
@@ -221,7 +221,7 @@ export function locateRun(rt: PageRuntime, run: RunLines, blocks: readonly HTMLE
  * Puts `block` inside the host container: right after its last child that starts before the run, else
  * right before its first child that starts after it, else last. A card's paragraphs sit in an unmapped
  * body, so there the mapped children are used. `skip` names the children that are not the page's (the
- * blank-lines blocks, the editor frame, the insertion bars).
+ * blank-line blocks, the editor frame, the insertion bars).
  */
 export function placeInHost(
   rt: PageRuntime,

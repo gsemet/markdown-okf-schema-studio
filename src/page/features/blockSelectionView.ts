@@ -156,6 +156,10 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     const pending = state.pendingBlockSelection;
     state.pendingBlockSelection = undefined;
     if (!pending || !state.editMode || editInFlight(state)) return;
+    if (pending.blank) {
+      selectBlankAfterDelete(pending.blank);
+      return;
+    }
     const count = rt.blocks.selectableBlocks().length;
     if (pending.afterDelete) {
       selectAfterDelete(pending, count);
@@ -163,6 +167,18 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     }
     if (count !== pending.count) return;
     selectBlocksNow(pending.anchor, pending.targetIndex, pending.quiet !== true);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // After a blank line was removed: the blank-line block of the same line number in the same run (the
+  // next blank line took its number), else the one just above it in that run, else nothing is selected,
+  // so a further Delete or Backspace posts nothing.
+  function selectBlankAfterDelete(deleted: NonNullable<PendingBlockSelection["blank"]>): void {
+    const inRun = rt.blankLines.blocks().map((block) => ({ block, run: rt.blankLines.runOf(block)! }))
+      .filter(({ run }) => run.first === deleted.first && run.itemLine === deleted.itemLine
+        && run.containerLine === deleted.containerLine);
+    const next = inRun.find(({ run }) => run.line === deleted.line) ?? inRun.find(({ run }) => run.line === deleted.line - 1);
+    if (next) selectBlank(next.block, false);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-265
@@ -199,35 +215,27 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     return true;
   }
 
-  /** The index of the block with the smallest line after the run, else of the one with the largest line before it. */
-  function afterRunIndex(blocks: HTMLElement[], run: { line: number; endLine: number }): number {
-    let after = -1;
-    let before = -1;
-    blocks.forEach((entry, index) => {
-      const { line } = rt.blocks.blockRange(entry);
-      if (line > run.endLine && (after < 0 || line < rt.blocks.blockRange(blocks[after]).line)) after = index;
-      if (line < run.line && (before < 0 || line >= rt.blocks.blockRange(blocks[before]).line)) before = index;
-    });
-    return after >= 0 ? after : Math.max(before, 0);
-  }
-
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-269
-  /** Sends the delete of a blank run; the block that follows it (else the one above, or the list that held it) gets the selection. */
+  /** Sends the delete of one blank line; the blank-line block now at its place (else the one above) gets the selection. */
   function requestDeleteBlankLines(block: HTMLElement): boolean {
     const run = rt.blankLines.runOf(block);
     if (!run || !state.editMode || editInFlight(state) || state.activeFrontmatterEdit) return false;
     if (blocksFlight || deleteWaitsForRender()) return false;
     const blocks = syncSelectionModel();
-    postBlocksMessage("previewBlankRunDelete", { line: run.line, endLine: run.endLine }, block);
+    postBlocksMessage("previewBlankRunDelete", { line: run.line, endLine: run.line }, block);
     state.pendingBlockSelection = {
       anchor: undefined,
-      // A run inside a container selects the top-level block that held it; any other run selects the
-      // block that follows it, else the one before it (found by comparing lines).
-      targetIndex: run.holder && blocks.includes(run.holder) ? blocks.indexOf(run.holder) : afterRunIndex(blocks, run),
+      targetIndex: 0,
       count: blocks.length,
       quiet: true,
       afterDelete: true,
       at: Date.now(),
+      blank: {
+        line: run.line,
+        first: run.first,
+        ...(run.itemLine !== undefined ? { itemLine: run.itemLine } : {}),
+        ...(run.containerLine !== undefined ? { containerLine: run.containerLine } : {}),
+      },
     };
     return true;
   }
@@ -301,14 +309,14 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-266
-  // A blank-lines block is the current stop: only the blank-lines blocks and the body blocks, by line.
-  function selectBlank(block: HTMLElement): void {
+  // A blank-line block is the current stop: only the blank-line blocks and the body blocks, by line.
+  function selectBlank(block: HTMLElement, scroll = true): void {
     if (blockSelection.isActive()) {
       blockSelection.clear();
       renderBlockSelection([]);
     }
-    rt.blankLines.select(block);
-    ensureSelectionStatus().textContent = "Blank lines selected";
+    rt.blankLines.select(block, scroll);
+    ensureSelectionStatus().textContent = "Blank line selected";
     document.documentElement?.setAttribute?.("data-sphinx-preview-actions-owner", "keyboard");
   }
 
@@ -327,15 +335,15 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       const run = rt.blankLines.runOf(block);
       if (run) list.push({ block, index: -1, blank: true, ...run });
     });
-    // On equal lines a body block comes before the blank-lines blocks it holds (the sort is stable).
+    // On equal lines a body block comes before the blank-line blocks it holds (the sort is stable).
     return list.sort((a, b) => a.line - b.line || Number(a.blank) - Number(b.blank));
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-267
   /**
-   * The stop next to `from` (a blank-lines block, or the free end of the block selection), in the
-   * order of the first lines: a list is followed by the blank-lines blocks inside it, then by the
-   * block after it. `skipBlank` passes over the blank-lines blocks.
+   * The stop next to `from` (a blank-line block, or the free end of the block selection), in the
+   * order of the first lines: a list is followed by the blank-line blocks inside it, then by the
+   * block after it. `skipBlank` passes over the blank-line blocks.
    */
   function neighbourStop(blocks: HTMLElement[], delta: number, from: HTMLElement | undefined, skipBlank = false): Stop | undefined {
     const all = stops(blocks);
@@ -345,7 +353,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       currentBlock = blocks[free];
     }
     if (!currentBlock) return undefined;
-    // By position in the sorted stops, never by line: a container and the blank-lines block that
+    // By position in the sorted stops, never by line: a container and the blank-line block that
     // starts on its first line have the same line.
     const position = all.findIndex((stop) => stop.block === currentBlock);
     if (position < 0) return undefined;
@@ -510,7 +518,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         const blank = blockSelection.isActive() ? undefined
           : rt.blankLines.blockOfTarget(target) ?? rt.blankLines.selected();
         if (blank) {
-          // A blank-lines block never joins a selection: Shift+Arrow starts one on its neighbour.
+          // A blank-line block never joins a selection: Shift+Arrow starts one on its neighbour.
           const blocks = syncSelectionModel();
           event.preventDefault?.();
           event.stopPropagation?.();
@@ -624,7 +632,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
             insertAfterLine: blankRun.line - 1,
             replaceBlankRun: {
               line: blankRun.line,
-              endLine: blankRun.endLine,
+              endLine: blankRun.line,
               ...(blankRun.itemLine !== undefined ? { itemLine: blankRun.itemLine } : {}),
               ...(blankRun.containerLine !== undefined ? { containerLine: blankRun.containerLine } : {}),
             },
@@ -663,7 +671,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         if (!keyed || (!blockSelection.isActive() && !rt.blankLines.selected())) return;
         const target = event.target;
         if (target instanceof Element && target.closest("button, a, summary, .sphinx-preview-insert-point")) return;
-        // A blank-lines block that is only focused keeps its keys: it never deletes other blocks.
+        // A blank-line block that is only focused keeps its keys: it never deletes other blocks.
         if (keyed.blank && keyed.blank !== rt.blankLines.selected()) return;
         if (keyed.focused && blockSelection.isActive()) {
           const blocks = syncSelectionModel();

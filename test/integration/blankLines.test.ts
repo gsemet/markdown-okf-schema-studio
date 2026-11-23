@@ -33,11 +33,12 @@ async function openPreview(document: vscode.TextDocument): Promise<NonNullable<R
 }
 
 const LINES = ["# Title", "", "A", "", "", "", "B", ""];
-// Blank runs inside a list (CR-448): lines 4-6 between two items, lines 10-12 inside the second item.
+// Blank runs inside a list (CR-448): lines 4-6 between two items, lines 10-12 inside the second item. The first line
+// of a run between two blocks is the hidden separator (CR-476): lines 5-6 and 11-12 are the shown blank lines.
 const LIST_LINES = ["# Title", "", "- a", "", "", "", "- b", "", "  p1", "", "", "", "  p2", ""];
 
 // Blank runs inside containers (CR-462): lines 4-6 inside a quote, 13-15 inside an admonition in a list item,
-// 22-24 inside a footnote.
+// 22-24 inside a footnote; the first line of each is the separator, the others are shown (CR-476).
 const CONTAINER_LINES = [
   "# Title", "", "> One", ">", ">", ">", "> Two", "", "- a", "", "  ```{note}", "  One", "", "", "", "  Two", "  ```", "",
   "Text[^1].", "", "[^1]: First", "", "", "", "    Second", "",
@@ -85,9 +86,9 @@ async function withFixture(
 }
 
 /**
- * A blank run written in place and removed on a real file in LF and CRLF, between paragraphs, inside a list (CR-448) and inside a quote, an admonition and a footnote (CR-462): the run takes one block
- * with one blank line on each side, a delete keeps one blank line, the line endings stay, one undo
- * brings the run back.
+ * A shown blank line written in place and removed on a real file in LF and CRLF, between paragraphs, inside a list (CR-448) and inside a quote, an admonition and a footnote (CR-462):
+ * each shown blank line is its own block (CR-476), the text replaces that one line (a separator is added only where the neighbour line exists and is not blank), a delete removes
+ * that one line, the line endings stay, one undo brings the line back.
  */
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
@@ -95,11 +96,11 @@ async function withFixture(
 export async function run(): Promise<void> {
   for (const [name, eol] of [["lf", "\n"], ["crlf", "\r\n"]] as const) {
     const original = LINES.join(eol);
-    const run = { line: 4, endLine: 6 };
+    const run = { line: 5, endLine: 5 };
 
     await withFixture(`blank-lines-write-${name}`, eol, LINES, async (document, send) => {
       await untilApplied(document, () => send({
-        type: "previewEditSave", editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: run,
+        type: "previewEditSave", editId: "e1", line: 5, endLine: 5, insertAfterLine: 4, replaceBlankRun: run,
         originalText: "", editedText: "X", final: false,
       }));
       assert.equal(document.getText(), ["# Title", "", "A", "", "X", "", "B", ""].join(eol), `${name}: block in place`);
@@ -110,24 +111,42 @@ export async function run(): Promise<void> {
     });
 
     await withFixture(`blank-lines-delete-${name}`, eol, LINES, async (document, send) => {
-      await untilApplied(document, () => send({ type: "previewBlankRunDelete", line: 4, endLine: 6 }));
-      assert.equal(document.getText(), ["# Title", "", "A", "", "B", ""].join(eol), `${name}: one blank line kept`);
+      await untilApplied(document, () => send({ type: "previewBlankRunDelete", line: 5, endLine: 5 }));
+      assert.equal(document.getText(), ["# Title", "", "A", "", "", "B", ""].join(eol), `${name}: only that blank line goes`);
       if (name === "crlf") assert.equal(/(?<!\r)\n/u.test(document.getText()), false, "no bare LF in a CRLF file");
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
       await vscode.commands.executeCommand("undo");
       assert.equal(document.getText(), original, `${name}: one undo brings the run back`);
     });
 
+    await withFixture(`blank-lines-write-last-${name}`, eol, LINES, async (document, send) => {
+      await untilApplied(document, () => send({
+        type: "previewEditSave", editId: "e1", line: 6, endLine: 6, insertAfterLine: 5, replaceBlankRun: { line: 6, endLine: 6 },
+        originalText: "", editedText: "X", final: false,
+      }));
+      assert.equal(document.getText(), ["# Title", "", "A", "", "", "X", "", "B", ""].join(eol), `${name}: a separator is added before B`);
+      if (name === "crlf") assert.equal(/(?<!\r)\n/u.test(document.getText()), false, "no bare LF in a CRLF file");
+    });
+
+    const ENDING = ["Text.", "", "", "", "", "", "", ""];
+    await withFixture(`blank-lines-end-${name}`, eol, ENDING, async (document, send) => {
+      await untilApplied(document, () => send({
+        type: "previewEditSave", editId: "e1", line: 7, endLine: 7, insertAfterLine: 6, replaceBlankRun: { line: 7, endLine: 7 },
+        originalText: "", editedText: "X", final: false,
+      }));
+      assert.equal(document.getText(), ["Text.", "", "", "", "", "", "X", ""].join(eol), `${name}: at the end of the body no separator is added`);
+    });
+
     const listOriginal = LIST_LINES.join(eol);
-    const between = { line: 4, endLine: 6, itemLine: 3 };
-    const inItem = { line: 10, endLine: 12, itemLine: 7 };
+    const between = { line: 5, endLine: 5, itemLine: 3 };
+    const inItem = { line: 11, endLine: 11, itemLine: 7 };
     const noBareLineBreak = (document: vscode.TextDocument): void => {
       if (name === "crlf") assert.equal(/(?<!\r)\n/u.test(document.getText()), false, "no bare LF in a CRLF file");
     };
 
     await withFixture(`blank-lines-list-delete-${name}`, eol, LIST_LINES, async (document, send) => {
-      await untilApplied(document, () => send({ type: "previewBlankRunDelete", line: 4, endLine: 6 }));
-      assert.equal(document.getText(), LIST_LINES.slice(0, 4).concat(LIST_LINES.slice(6)).join(eol), `${name}: list, one blank line kept`);
+      await untilApplied(document, () => send({ type: "previewBlankRunDelete", line: 5, endLine: 5 }));
+      assert.equal(document.getText(), LIST_LINES.slice(0, 4).concat(LIST_LINES.slice(5)).join(eol), `${name}: list, only that blank line goes`);
       noBareLineBreak(document);
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
       await vscode.commands.executeCommand("undo");
@@ -136,7 +155,7 @@ export async function run(): Promise<void> {
 
     await withFixture(`blank-lines-list-item-${name}`, eol, LIST_LINES, async (document, send) => {
       await untilApplied(document, () => send({
-        type: "previewEditSave", editId: "e1", line: 10, endLine: 12, insertAfterLine: 9, replaceBlankRun: inItem,
+        type: "previewEditSave", editId: "e1", line: 11, endLine: 11, insertAfterLine: 10, replaceBlankRun: inItem,
         originalText: "", editedText: "More", final: false,
       }));
       assert.equal(
@@ -149,7 +168,7 @@ export async function run(): Promise<void> {
 
     await withFixture(`blank-lines-list-sibling-${name}`, eol, LIST_LINES, async (document, send) => {
       await untilApplied(document, () => send({
-        type: "previewEditSave", editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: between,
+        type: "previewEditSave", editId: "e1", line: 5, endLine: 5, insertAfterLine: 4, replaceBlankRun: between,
         originalText: "", editedText: "- c", final: false,
       }));
       assert.equal(
@@ -162,7 +181,7 @@ export async function run(): Promise<void> {
 
     await withFixture(`blank-lines-list-nested-${name}`, eol, LIST_LINES, async (document, send) => {
       await untilApplied(document, () => send({
-        type: "previewEditSave", editId: "e1", line: 10, endLine: 12, insertAfterLine: 9, replaceBlankRun: inItem,
+        type: "previewEditSave", editId: "e1", line: 11, endLine: 11, insertAfterLine: 10, replaceBlankRun: inItem,
         originalText: "", editedText: "- c", final: false,
       }));
       assert.equal(
@@ -191,25 +210,25 @@ export async function run(): Promise<void> {
       }));
 
     await withFixture(`blank-lines-quote-delete-${name}`, eol, CONTAINER_LINES, async (document, send) => {
-      await untilApplied(document, () => send({ type: "previewBlankRunDelete", line: 4, endLine: 6 }));
-      assert.equal(document.getText(), without(4, 2).join(eol), `${name}: quote, one empty line kept`);
+      await untilApplied(document, () => send({ type: "previewBlankRunDelete", line: 5, endLine: 5 }));
+      assert.equal(document.getText(), without(4, 1).join(eol), `${name}: quote, only that empty line goes`);
       await undone(document, "quote delete");
     });
 
     await withFixture(`blank-lines-quote-write-${name}`, eol, CONTAINER_LINES, async (document, send) => {
-      await save(document, send, { line: 4, endLine: 6 }, "More");
+      await save(document, send, { line: 5, endLine: 5 }, "More");
       assert.equal(document.getText(), replaced(3, [">", "> More", ">"]), `${name}: "More" written in the quote`);
       await undone(document, "quote write");
     });
 
     await withFixture(`blank-lines-admonition-write-${name}`, eol, CONTAINER_LINES, async (document, send) => {
-      await save(document, send, { line: 13, endLine: 15, containerLine: 11 }, "More");
+      await save(document, send, { line: 14, endLine: 14, containerLine: 11 }, "More");
       assert.equal(document.getText(), replaced(12, ["", "  More", ""]), `${name}: "More" written in the admonition of the item`);
       await undone(document, "admonition write");
     });
 
     await withFixture(`blank-lines-footnote-write-${name}`, eol, CONTAINER_LINES, async (document, send) => {
-      await save(document, send, { line: 22, endLine: 24, containerLine: 21 }, "More");
+      await save(document, send, { line: 23, endLine: 23, containerLine: 21 }, "More");
       assert.equal(document.getText(), replaced(21, ["", "    More", ""]), `${name}: "More" written in the footnote`);
       await undone(document, "footnote write");
     });

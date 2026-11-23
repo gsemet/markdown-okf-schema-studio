@@ -6,7 +6,7 @@ import { attribute, findElements, parseHtml } from "./dom";
 import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /**
- * The ranges the page reads to place the blank-lines block of a run inside a list (CR-448): the list
+ * The ranges the page reads to place the blank-line block of a run inside a list (CR-448): the list
  * holds the run strictly, the item before it starts on its marker line, a fence and an admonition
  * hold their own runs.
  */
@@ -27,7 +27,7 @@ test("the source gives the five runs: between items, in an item, in a fence, end
   const { html } = await renderPreviewSource({
     text: SOURCE, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false,
   }, createNodeFileSystem());
-  assert.equal(/data-okf-blank-runs="([^"]*)"/u.exec(html)?.[1], "4-6 10-12 18-19 22-23 26-27");
+  assert.equal(/data-okf-blank-runs="([^"]*)"/u.exec(html)?.[1], "5-6 11-12 19-19 23-23 27-27");
   const document = parseHtml(html);
   const [list] = findElements(document, (element) => element.tagName === "ul");
   assert.deepEqual(rangeOf(list!), [3, 23], "the list holds the runs between items and in an item strictly");

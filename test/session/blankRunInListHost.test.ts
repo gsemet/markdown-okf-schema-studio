@@ -1,5 +1,5 @@
 /**
- * Host side of a blank-lines block inside a list (CR-448): a removal, a block written or pasted in
+ * Host side of a blank-line block inside a list (CR-448): a removal, a block written or pasted in
  * place of a run between two items or inside an item, and the host's refusal of an item line that is
  * not a list item line, in LF and CR LF documents.
  */
@@ -35,46 +35,46 @@ const errors = (host: ReturnType<typeof fixture>): string[] =>
   host.of("previewEditSource").filter((message) => message.error).map((message) => String(message.error));
 
 for (const [name, eol] of EOLS) {
-  // Lines: 1 "- a", 2-4 the run, 5 "- b", 6 "", 7 "- c", 8 "  p1", 9-11 the run, 12 "  p2".
+  // Lines: 3 "- a", 4-6 the run (5-6 shown); in `inItem`: 5 "  p1", 6-8 the run (7-8 shown), 9 "  p2".
   const between = lines(eol, "# T", "", "- a", "", "", "", "- b", "");
   const inItem = lines(eol, "# T", "", "- a", "", "  p1", "", "", "", "  p2", "");
-  const betweenRun = { line: 4, endLine: 6, itemLine: 3 };
-  const inItemRun = { line: 6, endLine: 8, itemLine: 3 };
+  const betweenRun = { line: 5, endLine: 5, itemLine: 3 };
+  const inItemRun = { line: 7, endLine: 7, itemLine: 3 };
   const openOf = (run: { line: number; endLine: number; itemLine?: number }) => ({
     editId: "e1", line: run.line, endLine: run.endLine, insertAfterLine: run.line - 1, replaceBlankRun: run, originalText: "",
   });
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
-  test(`${name}: previewBlankRunDelete between two items keeps the first blank line and leaves one list`, async () => {
+  test(`${name}: previewBlankRunDelete between two items removes that one line and leaves one list`, async () => {
     const host = fixture({ text: between });
-    await host.send("previewBlankRunDelete", { line: 4, endLine: 6 });
-    const expected = lines(eol, "# T", "", "- a", "", "- b", "");
+    await host.send("previewBlankRunDelete", { line: 5, endLine: 5 });
+    const expected = lines(eol, "# T", "", "- a", "", "", "- b", "");
     assert.equal(host.document.getText(), expected);
     assert.equal(host.applyCalls.length, 1);
     assert.deepEqual((await listsOf(expected)).lists, 1);
   });
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
-  test(`${name}: previewBlankRunDelete keeps the first blank line byte for byte, spaces included`, async () => {
+  test(`${name}: previewBlankRunDelete removes that one line and keeps the others byte for byte, spaces included`, async () => {
     const text = lines(eol, "# T", "", "- a", "  ", "", "  ", "- b", "");
     const host = fixture({ text });
-    await host.send("previewBlankRunDelete", { line: 4, endLine: 6 });
-    assert.equal(host.document.getText(), lines(eol, "# T", "", "- a", "  ", "- b", ""));
+    await host.send("previewBlankRunDelete", { line: 5, endLine: 5 });
+    assert.equal(host.document.getText(), lines(eol, "# T", "", "- a", "  ", "  ", "- b", ""));
     assert.equal(host.applyCalls.length, 1);
   });
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
   test(`${name}: previewBlankRunDelete between two paragraphs of an item changes nothing else`, async () => {
     const host = fixture({ text: inItem });
-    await host.send("previewBlankRunDelete", { line: 6, endLine: 8 });
-    const expected = lines(eol, "# T", "", "- a", "", "  p1", "", "  p2", "");
+    await host.send("previewBlankRunDelete", { line: 7, endLine: 7 });
+    const expected = lines(eol, "# T", "", "- a", "", "  p1", "", "", "  p2", "");
     assert.equal(host.document.getText(), expected);
     assert.equal(host.applyCalls.length, 1);
     assert.deepEqual(await listsOf(expected), { lists: 1, items: [[3, "a|p1|p2"]] });
   });
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
-  test(`${name}: "More" typed between two items is written in the item with one blank line on each side`, async () => {
+  test(`${name}: "More" typed between two items is written in the item with a blank line on each side`, async () => {
     const host = fixture({ text: between });
     await host.send("previewEditOpen", openOf(betweenRun));
     assert.deepEqual(errors(host), []);
@@ -85,9 +85,9 @@ for (const [name, eol] of EOLS) {
     await host.send("previewEditSave", { ...openOf(betweenRun), editedText: "More text", final: false });
     assert.equal(host.document.getText(), lines(eol, "# T", "", "- a", "", "  More text", "", "- b", ""));
     await host.send("previewEditCancel", {
-      editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: betweenRun,
+      editId: "e1", line: 5, endLine: 5, insertAfterLine: 4, replaceBlankRun: betweenRun,
     });
-    assert.equal(host.document.getText(), between, "the run is back byte for byte");
+    assert.equal(host.document.getText(), between, "the blank line is back byte for byte");
   });
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
@@ -145,7 +145,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(late.document.getText(), changed);
 
     const pasted = fixture({ text: between });
-    await pasted.send("previewBlocksPaste", { insertAfterLine: 3, replaceBlankRun: paragraph });
+    await pasted.send("previewBlocksPaste", { insertAfterLine: 4, replaceBlankRun: paragraph });
     assert.deepEqual(
       pasted.of("previewBlocksResult").map(({ op, ok, reason }) => ({ op, ok, reason })),
       [{ op: "paste", ok: false, reason: OUT_OF_DATE }],
@@ -160,9 +160,9 @@ for (const [name, eol] of EOLS) {
     const written = host.document.getText();
     const other = { ...betweenRun, itemLine: 1 };
     await host.send("previewEditSave", { ...openOf(other), editedText: "More!", final: false });
-    await host.send("previewEditSave", { ...openOf({ line: 4, endLine: 6 }), editedText: "More!", final: false });
+    await host.send("previewEditSave", { ...openOf({ line: 5, endLine: 5 }), editedText: "More!", final: false });
     await host.send("previewEditCancel", {
-      editId: "e1", line: 4, endLine: 6, insertAfterLine: 3, replaceBlankRun: { line: 4, endLine: 6 },
+      editId: "e1", line: 5, endLine: 5, insertAfterLine: 4, replaceBlankRun: { line: 5, endLine: 5 },
     });
     assert.equal(errors(host).length, 3);
     assert.equal(host.document.getText(), written);
@@ -172,14 +172,14 @@ for (const [name, eol] of EOLS) {
   test(`${name}: a paste with an item line writes "More" in the item`, async () => {
     const host = fixture({ text: between });
     host.hooks.readClipboard = () => Promise.resolve("More");
-    await host.send("previewBlocksPaste", { insertAfterLine: 3, replaceBlankRun: betweenRun });
+    await host.send("previewBlocksPaste", { insertAfterLine: 4, replaceBlankRun: betweenRun });
     const written = lines(eol, "# T", "", "- a", "", "  More", "", "- b", "");
     assert.equal(host.document.getText(), written);
     assert.deepEqual(await listsOf(written), { lists: 1, items: [[3, "a|More"], [7, "b"]] });
 
     const item = fixture({ text: between });
     item.hooks.readClipboard = () => Promise.resolve("- c");
-    await item.send("previewBlocksPaste", { insertAfterLine: 3, replaceBlankRun: betweenRun });
+    await item.send("previewBlocksPaste", { insertAfterLine: 4, replaceBlankRun: betweenRun });
     assert.equal(item.document.getText(), lines(eol, "# T", "", "- a", "", "- c", "", "- b", ""));
   });
 }

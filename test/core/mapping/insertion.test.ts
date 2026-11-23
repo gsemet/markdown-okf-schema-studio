@@ -130,27 +130,67 @@ test("an anchor on a non-blank line keeps two line endings before the block", ()
   assert.equal(planInsertion("A\n\nB\n", 2)?.prefix, "\n");
 });
 
-function writeInRun(text: string, line: number, endLine: number, raw: string): string {
-  const plan = planBlankRunInsertion(text, line, endLine);
+function writeInLine(text: string, line: number, raw: string): string {
+  const plan = planBlankRunInsertion(text, line);
   return text.slice(0, plan.replace!.start) + insertionText(plan, raw) + text.slice(plan.replace!.end);
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
-test("a block written in a run takes its place and leaves one blank line on each side", () => {
-  assert.equal(writeInRun("a\n\n\n\nb\n", 2, 4, "X"), "a\n\nX\n\nb\n");
-  assert.equal(writeInRun("\n\na\n", 1, 2, "X"), "X\n\na\n");
-  assert.equal(writeInRun("a\n\n\n", 2, 3, "X"), "a\n\nX\n");
-  assert.equal(writeInRun("a\n\n  ", 2, 3, "X"), "a\n\nX");
+test("a block written in a blank line of a run between blocks takes that line, a separator only after the last one", () => {
+  const text = "a\n\n\n\nb\n";
+  assert.equal(writeInLine(text, 3, "X"), "a\n\nX\n\nb\n", "the first shown line: no separator, the line above and below are blank");
+  assert.equal(writeInLine(text, 4, "X"), "a\n\n\nX\n\nb\n", "the last shown line: a separator after");
+  assert.equal(planBlankRunInsertion(text, 3).prefix, "");
+  assert.equal(planBlankRunInsertion(text, 3).suffix, "");
+  assert.equal(planBlankRunInsertion(text, 4).suffix, "\n");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
-test("a block written in a run keeps the line ending of the document", () => {
-  assert.equal(writeInRun("a\r\n\r\n\r\nb\r\n", 2, 3, "X\nY"), "a\r\n\r\nX\r\nY\r\n\r\nb\r\n");
+test("a block written in the first line of a run at the end of the body gets a separator before, the last line none", () => {
+  assert.equal(writeInLine("a\n\n\n", 2, "X"), "a\n\nX\n\n");
+  assert.equal(writeInLine("a\n\n\n", 3, "X"), "a\n\nX\n");
+  assert.equal(writeInLine("a\n\n  ", 3, "X"), "a\n\nX", "no final line break: kept absent");
+  assert.equal(writeInLine("a\n\n  ", 2, "X"), "a\n\nX\n  ");
+  assert.equal(writeInLine("a\n\n", 2, "X"), "a\n\nX\n", "one blank line at the end");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
-test("the plan of a run names the region it replaces", () => {
-  const plan = planBlankRunInsertion("a\n\n\n\nb\n", 2, 4);
-  assert.deepEqual(plan.replace, { start: 1, end: 5 });
-  assert.equal(plan.offset, 1);
+test("a block written at the top of a file gets a separator after it only when the line below is not blank", () => {
+  assert.equal(writeInLine("\na\n", 1, "X"), "X\n\na\n");
+  assert.equal(writeInLine("\n\na\n", 1, "X"), "X\n\na\n");
+  assert.equal(writeInLine("\n\na\n", 2, "X"), "\nX\n\na\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("the first line of a blank-only body after the frontmatter gets a separator before, after the closing fence", () => {
+  assert.equal(writeInLine("---\nt: x\n---\n\n\n", 4, "X"), "---\nt: x\n---\n\nX\n\n");
+  assert.equal(writeInLine("---\nt: x\n---\n\n\n", 5, "X"), "---\nt: x\n---\n\nX\n");
+  assert.equal(writeInLine("---\nt: x\n---\n\n", 4, "X"), "---\nt: x\n---\n\nX\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("in a quote run a separator is a copy of the run's first line, and a blank line after it counts as blank", () => {
+  assert.equal(writeInLine("> a\n>\n>\n>\nText\n", 3, "X"), "> a\n>\n> X\n>\nText\n", "a separator after");
+  assert.equal(writeInLine("> a\n>\n>\n>\nText\n", 4, "X"), "> a\n>\n>\n> X\n>\nText\n");
+  assert.equal(writeInLine("> a\n>\n>\n\nText\n", 3, "X"), "> a\n>\n> X\n\nText\n", "no extra > line before a blank line");
+  assert.equal(writeInLine("> a\n>\n>\n", 3, "X"), "> a\n>\n> X\n", "the final line break is kept");
+  assert.equal(writeInLine(">  \n>  \n>  \nText\n", 2, "X"), ">  \n> X\n>  \nText\n", "a copy, byte for byte");
+});
+
+for (const [name, eol] of [["LF", "\n"], ["CRLF", "\r\n"], ["lone CR", "\r"]] as const) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  test(`${name}: a block written in a blank line keeps the line ending of the document`, () => {
+    const doc = ["a", "", "", "", "b", ""].join(eol);
+    assert.equal(writeInLine(doc, 3, "X\nY"), ["a", "", "X", "Y", "", "b", ""].join(eol));
+    assert.equal(writeInLine(doc, 4, "X"), ["a", "", "", "X", "", "b", ""].join(eol));
+    const end = ["Text", "", "", ""].join(eol);
+    assert.equal(writeInLine(end, 2, "More"), ["Text", "", "More", "", ""].join(eol));
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("the plan of a blank line names the region it replaces: that line without its line break", () => {
+  assert.deepEqual(planBlankRunInsertion("a\n\n\n\nb\n", 3).replace, { start: 3, end: 3 });
+  assert.equal(planBlankRunInsertion("a\n\n\n\nb\n", 3).offset, 3);
+  assert.deepEqual(planBlankRunInsertion("a\n\n  ", 3).replace, { start: 3, end: 5 });
 });

@@ -173,8 +173,8 @@ export interface Scenario {
   listItemHandleChecks?: "place" | "push" | "drag";
   /** CR-439: the bar of a hovered block shows + up down and Delete block; `status` adds the move status beside it. */
   deleteBlockBarChecks?: "bar" | "status";
-  /** CR-444: the blank-lines block of a run of blank lines: `edit` its look, `selected` its Delete block button, `reading` none; CR-448 `list-*`: the same for the runs inside a list; CR-462 `containers-*`: the runs inside a quote, an alert, an admonition, a panel, a definition and a footnote. */
-  blankLinesChecks?: "edit" | "selected" | "reading" | "list-edit" | "list-selected" | "list-reading" | "list-typing" | "containers-edit" | "containers-reading" | "containers-typing";
+  /** CR-444: the blank-line block of a run of blank lines: `edit` its look, `selected` its Delete block button, `reading` none; CR-448 `list-*`: the same for the runs inside a list; CR-462 `containers-*`: the runs inside a quote, an alert, an admonition, a panel, a definition and a footnote. */
+  blankLinesChecks?: "edit" | "selected" | "reading" | "list-edit" | "list-selected" | "list-reading" | "list-typing" | "containers-edit" | "containers-reading" | "containers-typing" | "six";
   /** CR 281: with the unchanged title editor open, one click on the priority value below it opens priority. */
   frontmatterClickChecks?: boolean;
   /** CR 290: the Rename label field of a table label opens above the icon and covers no cell. */
