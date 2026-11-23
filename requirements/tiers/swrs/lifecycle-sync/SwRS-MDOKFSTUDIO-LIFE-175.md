@@ -11,8 +11,8 @@ description: When the extension activates and the user or the workspace settings
   show the migration notice, and leave every other entry untouched.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-req_lifecycle: proposed
-status: stable
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,14 +20,11 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/host-vscode/vscodeHost.ts
-- src/session/associationMigration.ts
-tested_in_files:
-- test/core/configuration/editorAssociationMigration.test.ts
-- test/host/openAtLine.test.ts
-- test/session/associationMigration.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
+superseded_by:
+- SwRS-MDOKFSTUDIO-LIFE-195
 ---
 
 ## The editor association of Markdown files is migrated to the Studio setting once per scope
@@ -68,5 +65,7 @@ When the extension activates and the user or the workspace settings hold the wor
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader opens a Markdown file at a searched line and sees that line marked in Studio
+  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview and gets the raw text on request
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LIFE-195](SwRS-MDOKFSTUDIO-LIFE-195.md): The editor association of Markdown files is restored once from the retired Studio setting
 <!-- okf:links:end -->

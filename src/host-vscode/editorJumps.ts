@@ -2,7 +2,7 @@
  * The jumps of the text editors: the only reader of the selection change event for jumps. It builds
  * the facts of each change (its kind, the target file or diff side, whether Studio itself asked for
  * the selection), asks the pure rules (`core/navigation/jumpSignal.ts`) and fires `onJump` with the
- * real file's URI and 1-based line. The opening watcher and the side preview marker both read it.
+ * real file's URI and 1-based line. The side preview marker reads it.
  *
  * A diff side is read as the side preview reads a diff: `realSideOfDiff`, never the stand-in file.
  * The side is the one that got the selection (the event's own editor), not the active editor.
@@ -17,7 +17,7 @@ import {
   type SelectionFacts,
 } from "../core/navigation/jumpSignal";
 import { activeDiffInput, isDiffSide, isEligibleUri, realSideOfDiff } from "./diffRealFile";
-import type { StudioSelections } from "./openInStudio";
+import type { StudioSelections } from "./studioSelections";
 
 /** A jump into a Markdown file: the real file, the 1-based line, and when it was seen. */
 export interface EditorJump {

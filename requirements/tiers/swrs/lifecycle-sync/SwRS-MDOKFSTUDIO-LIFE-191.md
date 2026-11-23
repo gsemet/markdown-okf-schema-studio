@@ -44,12 +44,12 @@ When a link, Back or Next followed in the side preview that follows the editor o
 | Input | Outcome |
 | --- | --- |
 | a link with no line | no marker |
-| a link followed from a Studio tab | no marker request |
+| a link or Back or Next followed from a Studio tab, or from the side preview | the session always asks the host to show the document at the target line, and a Studio tab requests no marker |
 | the selection the link asks for | it is recorded as Studio's own, so the jump signal does not mark it a second time |
 
 ### Verification notes
 
-- Method: test/session/toolbarReq.requirements.test.ts ("a link with a fragment ...", "a link followed from a Studio tab ...") and test/host/studioSelections.test.ts.
+- Method: test/session/toolbarReq.requirements.test.ts ("a link with a fragment ...", "a link followed from a Studio tab ...", "a link to a Markdown file always opens a text editor at the target line ...", "Back to another Markdown document always opens a text editor at the stored line ...") and test/host/studioSelections.test.ts.
 - Criteria: each outcome of the table above holds.
 
 <!-- okf:links:start -->
@@ -58,5 +58,5 @@ When a link, Back or Next followed in the side preview that follows the editor o
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader opens a Markdown file at a searched line and sees that line marked in Studio
+  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview and gets the raw text on request
 <!-- okf:links:end -->

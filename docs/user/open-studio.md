@@ -33,12 +33,11 @@ Every image in this guide opens at full size when selected.
 ## Open at a line
 
 A search result, a **Go to Line** in Quick Open (`file.md:40`) or a link that opens a Markdown file
-at a line opens Studio at that line, and an arrow in the margin marks it. The arrow disappears on
-your next click in the page, when you start an edit, or when another line is asked; scrolling keeps
-it. In a table the arrow marks the row of the line, in a tab that is not shown Studio shows the tab
-first, and in the front matter it marks the property row (a collapsed properties table opens first).
-A file that is already shown in Studio is revealed at the line, in the group where it is, instead of
-opening a second tab.
+at a line opens the text editor at that line. Studio does not take the file over. With the side
+preview open, an arrow in the margin marks the line (next section). The arrow disappears on your next
+click in the page, when you start an edit, or when another line is asked; scrolling keeps it. In a table
+the arrow marks the row of the line, in a tab that is not shown Studio shows the tab first, and in the
+front matter it marks the property row (a collapsed properties table opens first).
 
 ### With the side preview open
 
@@ -68,18 +67,23 @@ recorded these kinds in VS Code on Linux:
 
 Only the first four rows were recorded; the others follow from the design.
 
-Two settings under **Opening Files** (see [Settings](settings.md)) decide what opens in Studio:
+A Markdown file opens as text, whoever opens it: the Explorer, Quick Open, a search result or a link.
+Studio never closes or replaces a text editor. To open every `.md` file in Studio, associate it
+in your settings:
 
-- `open.searchResultsInStudio` (default on): a search result or a jump to a line opens Studio.
-- `open.markdownFilesInStudio` (default off): every Markdown file you open opens in Studio, from
-  the Explorer, Quick Open or a link. It replaces the `workbench.editorAssociations` entry for
-  `*.md` that older versions asked for: the first time, Studio moves that entry to this setting.
+```json
+"workbench.editorAssociations": { "*.md": "markdown-okf-schema-studio.editor" }
+```
+
+With that association VS Code itself opens Studio. A jump to a line (a search result, Quick Open
+`file.md:40`) then opens Studio at the top of the file and the side preview marks nothing. Version
+1.11.0 offered the settings `open.searchResultsInStudio` and `open.markdownFilesInStudio` for this; the
+first activation of a later version turns an `open.markdownFilesInStudio` that was on into the
+association above, at the same scope (your user settings, your workspace, or both), and removes both settings.
 
 To read the raw text on purpose, run **Markdown OKF-Schema Studio: Open as Text** (or **Reopen
 Editor With... > Text Editor**). That text editor stays text. A diff stays a text diff, and its side preview shows the real file.
-
-Studio shows the text editor for a moment before it replaces it, so a first opening can flash the
-raw text. See [Known Limitations](../known-limitations.md#opening-files) for what is not covered.
+See [Known Limitations](../known-limitations.md#opening-files) for what is not covered.
 
 ## In the Agents window
 

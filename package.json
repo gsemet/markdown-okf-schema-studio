@@ -424,24 +424,6 @@
             "order": 80
           }
         }
-      },
-      {
-        "title": "Opening Files",
-        "order": 6,
-        "properties": {
-          "markdownOkfSchemaStudio.open.searchResultsInStudio": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "Opens a Markdown file in Studio, at the line, when VS Code jumps to a line of it (a search result, Quick Open `file.md:42`, a problem, a link). **On**: a Markdown file opened in a new text editor at a line is replaced by the Studio tab at that line, marked with an arrow; a plain opening stays a text editor, and a jump stays a text editor while the side preview is open. **Off**: such a jump opens the text editor.",
-            "order": 90
-          },
-          "markdownOkfSchemaStudio.open.markdownFilesInStudio": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "Opens every Markdown file in Studio. **On**: a Markdown file opened in a new text editor is replaced by the Studio tab, at the line when there is one; diffs, restored tabs and the text editor of \"Open as Text\" stay text. **Off** (default): a plain opening stays a text editor. This setting replaces VS Code's `workbench.editorAssociations` entry for `*.md` that names Studio, which Studio moves here once. Use \"Open as Text\" on a Studio tab to get the raw text.",
-            "order": 91
-          }
-        }
       }
     ]
   },

@@ -52,7 +52,7 @@ While the side preview shows a line marker, the host SHALL tell the page to remo
 | an edit the page itself applied | the host posts no clear (the page already removed it) |
 | an edit of another document | the marker stays |
 | a switch of document | the marker is removed and does not come back on returning |
-| a Studio tab | it keeps its own marker rules (CR-445) |
+| a Studio tab | it is asked for no marker by a jump, so it has none to clear |
 
 ### Verification notes
 
@@ -65,5 +65,5 @@ While the side preview shows a line marker, the host SHALL tell the page to remo
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader opens a Markdown file at a searched line and sees that line marked in Studio
+  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview and gets the raw text on request
 <!-- okf:links:end -->

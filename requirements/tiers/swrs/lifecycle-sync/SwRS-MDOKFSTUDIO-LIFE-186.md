@@ -23,7 +23,7 @@ derived_by: []
 implemented_in_files:
 - src/core/navigation/jumpSignal.ts
 - src/host-vscode/editorJumps.ts
-- src/host-vscode/openInStudio.ts
+- src/host-vscode/studioSelections.ts
 tested_in_files:
 - test/core/navigation/jumpSignal.test.ts
 - test/host/editorJumps.test.ts
@@ -67,5 +67,5 @@ When a text editor of an eligible Markdown file, or a side of a text diff whose 
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader opens a Markdown file at a searched line and sees that line marked in Studio
+  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview and gets the raw text on request
 <!-- okf:links:end -->

@@ -4,7 +4,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { STUDIO_SELECTION_WINDOW_MS, StudioSelections } from "../../src/host-vscode/openInStudio";
+import { STUDIO_SELECTION_WINDOW_MS, StudioSelections } from "../../src/host-vscode/studioSelections";
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-186
 test("an expected selection is taken once, with its purpose, by uri and line", () => {

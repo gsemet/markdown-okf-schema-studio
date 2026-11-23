@@ -12,7 +12,7 @@ import { COMMAND_ID, fake, startStudio, Uri, workspaceRoot, writeFile } from "./
 import * as vscode from "vscode";
 
 import { startEditorJumps, type EditorJump, type SelectionRecord } from "../../src/host-vscode/editorJumps";
-import { StudioSelections } from "../../src/host-vscode/openInStudio";
+import { StudioSelections } from "../../src/host-vscode/studioSelections";
 
 const COMMAND = 3;
 const KEYBOARD = 1;

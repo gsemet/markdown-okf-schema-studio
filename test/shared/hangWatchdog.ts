@@ -58,9 +58,10 @@ export const STEP_BUDGETS_MS: Readonly<Record<string, number>> = {
   "scroll-sync-suite": 5 * 60_000,
   "untrusted-suite": 2 * 60_000,
   "standalone-suite": 2 * 60_000,
+  "reverse-migration-suite": 2 * 60_000,
 };
 /** Suites whose whole body is one watchdog step (they have no `step()` inside). */
-export const WHOLE_SUITE_STEPS: readonly string[] = ["scroll-sync-suite", "untrusted-suite", "standalone-suite"];
+export const WHOLE_SUITE_STEPS: readonly string[] = ["scroll-sync-suite", "untrusted-suite", "standalone-suite", "reverse-migration-suite"];
 /**
  * Deadline of the reload campaign: it drives its window from the launcher (no heartbeat), so the
  * deadline is its only guard. Healthy: about 10 s (9.2 s locally).

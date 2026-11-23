@@ -125,10 +125,11 @@ test("CR 173: budgets and the launch deadline come from one place and the enviro
 });
 
 test("CR 173: whole-suite steps and the reload campaign fail well before the 20-minute CI step timeout", () => {
-  assert.deepEqual([...WHOLE_SUITE_STEPS].sort(), ["scroll-sync-suite", "standalone-suite", "untrusted-suite"]);
+  assert.deepEqual([...WHOLE_SUITE_STEPS].sort(), ["reverse-migration-suite", "scroll-sync-suite", "standalone-suite", "untrusted-suite"]);
   assert.equal(stepBudgetMs("scroll-sync-suite", {}), 5 * 60_000);
   assert.equal(stepBudgetMs("untrusted-suite", {}), 2 * 60_000);
   assert.equal(stepBudgetMs("standalone-suite", {}), 2 * 60_000);
+  assert.equal(stepBudgetMs("reverse-migration-suite", {}), 2 * 60_000);
   // The stress mode repeats the Restricted Mode captures: that suite is bounded by the launch deadline.
   assert.equal(stepBudgetMs("untrusted-suite", { STUDIO_REAL_INPUT_SCENARIO: "stress", STUDIO_LAUNCH_TIMEOUT_MS: "7000" }), 7_000);
   assert.equal(stepBudgetMs("scroll-sync-suite", { STUDIO_REAL_INPUT_SCENARIO: "stress" }), 5 * 60_000);

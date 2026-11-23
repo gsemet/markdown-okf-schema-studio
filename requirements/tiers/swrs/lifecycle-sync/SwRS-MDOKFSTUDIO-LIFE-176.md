@@ -47,11 +47,11 @@ When a feature with an introduction first takes effect, the extension SHALL show
 | the same introduction asked again, in the session or after a restart | nothing is shown |
 | the reader runs Show Feature Introductions Again | every introduction key is forgotten and no other stored key, and each introduction shows once more |
 | the store cannot write | the failure is logged and the notice still shows once in the session |
-| the migration notice was shown | it replaces the introduction of the same feature, which is marked shown without being shown |
+| the extension ships no introduction today | the shipped list is empty: nothing is shown, and Show Feature Introductions Again still runs and forgets nothing it holds |
 
 ### Verification notes
 
-- Method: unit tests in test/session/featureIntroductions.test.ts, host test "Show Feature Introductions Again forgets the stored introductions" in test/host/openAtLine.test.ts, and the manifest test "CR-445: Open as Text is in the palette ..." in test/security/package-contract.test.ts (the command and its palette entry).
+- Method: unit tests in test/session/featureIntroductions.test.ts (each takes its own list of introductions, since the shipped list is empty; shown once, key stored before the message, nothing in a later session, reset, a store that cannot write, the empty shipped list), host test "Show Feature Introductions Again forgets the stored introductions" in test/host/openAtLine.test.ts, and the manifest test "CR-445: Open as Text is in the palette ..." in test/security/package-contract.test.ts (the command and its palette entry).
 - Criteria: one stored key per introduction under the prefix markdownOkfSchemaStudio.introductions., written before the notice; the reset removes those keys only.
 
 <!-- okf:links:start -->
@@ -60,5 +60,5 @@ When a feature with an introduction first takes effect, the extension SHALL show
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader opens a Markdown file at a searched line and sees that line marked in Studio
+  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview and gets the raw text on request
 <!-- okf:links:end -->

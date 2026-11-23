@@ -124,10 +124,9 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.ok(Array.isArray(categories), "the settings are contributed as ordered categories");
   assert.deepEqual(
     categories.map((category) => [category.title, category.order]),
-    [["Preview", 1], ["Editing", 2], ["Frontmatter", 3], ["Comments", 4], ["PlantUML", 5], ["Opening Files", 6]],
+    [["Preview", 1], ["Editing", 2], ["Frontmatter", 3], ["Comments", 4], ["PlantUML", 5]],
   );
-  // The "Opening Files" category holds the `open.*` keys (CR-445).
-  const prefixOf = (title: string): string => `markdownOkfSchemaStudio.${title === "Opening Files" ? "open" : title.toLowerCase()}.`;
+  const prefixOf = (title: string): string => `markdownOkfSchemaStudio.${title.toLowerCase()}.`;
   for (const category of categories) {
     const prefix = prefixOf(category.title);
     for (const key of Object.keys(category.properties)) {
@@ -145,8 +144,6 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.frontmatter.projectRoot",
       "markdownOkfSchemaStudio.frontmatter.propertiesTable",
       "markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties",
-      "markdownOkfSchemaStudio.open.markdownFilesInStudio",
-      "markdownOkfSchemaStudio.open.searchResultsInStudio",
       "markdownOkfSchemaStudio.plantuml.jarPath",
       "markdownOkfSchemaStudio.plantuml.useJar",
       "markdownOkfSchemaStudio.preview.codeBlocks.darkBackground",
