@@ -1,4 +1,4 @@
-import * as path from "node:path";
+import * as path from "../path/hostPath";
 
 import { readTextFile, type FileSystem } from "../files/fileSystem";
 import { parseConf, type ParsedConf } from "./confParser";

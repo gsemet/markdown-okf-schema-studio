@@ -95,7 +95,7 @@ import the layers below it, never one above it.
 | `src/host-api/` | The port interfaces every host implements (documents, files, settings, watchers, processes...) | `core` types |
 | `src/page/` | The preview page, bundled for the browser: runtime, typed features, page modules (`page/modules/`) | `core`, npm packages |
 | `src/node-services/` | Node implementations of ports and Node-only services (file system, processes, Sphinx build, watchers) | `core`, `host-api`, Node, npm packages |
-| `src/session/` | The host-neutral controllers: `PreviewManager`, `PreviewSession`, feature controllers, page HTML | `core`, `host-api`, `node:path` |
+| `src/session/` | The host-neutral controllers: `PreviewManager`, `PreviewSession`, feature controllers, page HTML | `core`, `host-api` (paths through `src/core/path/hostPath.ts`, no Node built-in) |
 | `src/host-memory/` | An in-memory host for tests and future headless hosts | `core`, `host-api` |
 | `src/host-vscode/` | The VS Code host (with `src/extension.ts`): activation, port adapters, test hooks | everything except `page` and other hosts; the only code that imports `vscode` |
 

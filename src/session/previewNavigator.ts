@@ -4,7 +4,7 @@
  * classification lives in `core/navigation/previewNavigation.ts`; this half reads the disk through
  * the `FileSystem` port.
  */
-import * as path from "node:path";
+import * as path from "../core/path/hostPath";
 
 import type { FileSystem } from "../host-api/fileSystem";
 import {

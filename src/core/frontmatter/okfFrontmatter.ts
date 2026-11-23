@@ -12,7 +12,7 @@
  * `frontmatterParse.ts`, `frontmatterValidate.ts` and `frontmatterSerialize.ts`, re-exported here.
  */
 
-import * as path from "node:path";
+import * as path from "../path/hostPath";
 import { parseDocument } from "yaml";
 import type { FileLinkInspectionOptions, FrontmatterLinkResult } from "./fileLinkTypes";
 import {

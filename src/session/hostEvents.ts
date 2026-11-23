@@ -6,7 +6,7 @@
  * activation (`src/host-vscode/activation.ts`) forwards the events here.
  */
 
-import * as path from "node:path";
+import * as path from "../core/path/hostPath";
 
 import { FRONTMATTER_CONFIGURATION_SECTION, readFrontmatterConfiguration } from "../core/configuration/frontmatterConfiguration";
 import {

@@ -6,7 +6,7 @@
  * snapshot is served only after a click on the Export button or the command this session sent.
  */
 
-import * as path from "node:path";
+import * as path from "../../core/path/hostPath";
 
 import { buildHtmlExport, collectImageSources, snapshotHasMath, type HtmlExportInputs } from "../../core/export/htmlExport";
 import { katexFontUrls } from "../../core/export/exportStyles";

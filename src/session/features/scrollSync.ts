@@ -6,7 +6,7 @@
  * report none (`HostCapabilities.editorPairing`), and the page then runs without pairing.
  */
 
-import * as path from "node:path";
+import * as path from "../../core/path/hostPath";
 
 import type { DocumentChange } from "../../host-api/documentStore";
 import type { PairedEditor } from "../../host-api/textEditors";

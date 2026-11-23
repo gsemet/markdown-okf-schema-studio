@@ -5,7 +5,7 @@
  * and opens the target: an anchor of the page, another document, or an external URL.
  */
 
-import * as path from "node:path";
+import * as path from "../../core/path/hostPath";
 
 import {
   findSchemaDirectory,

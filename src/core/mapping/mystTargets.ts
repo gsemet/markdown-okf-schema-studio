@@ -5,7 +5,7 @@
  * must not import `vscode`.
  */
 
-import * as path from "node:path";
+import * as path from "../path/hostPath";
 
 import { advanceFence } from "../syntax/markdownSyntax";
 import { isValidLabelName } from "./labelRename";
