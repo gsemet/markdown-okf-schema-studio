@@ -3,7 +3,7 @@
 ## Unreleased
 
 - The editor of a blank-lines block now closes after Done, instead of staying on "Saving Markdown…"
-  (CR-474 blank-save, issue #485).
+  (CR-474 blank-save, PR #491, issue #485).
 
 ## 1.12.0 - 2026-11-22
 
