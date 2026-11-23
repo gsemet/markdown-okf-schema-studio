@@ -7,6 +7,9 @@
 - Cancel and Escape now always close an editor whose save is still running, and a save that fails
   gives your text back in an editor you can save again, instead of leaving the block on "Saving
   Markdown…" (CR-475 save-guard, issue #485).
+- Each extra blank line in edit mode now shows as its own blank-line block, and typing in one writes
+  your text in place of that one blank line and keeps the others (CR-476 blank-per-line, PR #494,
+  issue #485).
 
 ## 1.12.0 - 2026-11-22
 
