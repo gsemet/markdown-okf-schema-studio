@@ -34,8 +34,7 @@ import { createWorkerRenderer } from "../node-services/renderWorker";
 import { nodeSchemaFiles } from "../node-services/schemaFiles";
 import { lastKeystrokeAt } from "./keystrokes";
 import { createVscodeDocumentStore, type VscodeDocumentStore } from "./documents";
-import { StudioLineRequests, StudioOpenedTextEditors, StudioSelections } from "./openInStudio";
-import { putStudioInPlace } from "./studioPlacement";
+import { StudioSelections } from "./studioSelections";
 
 /** The VS Code host's ports, with the VS Code-only parts of its document store and its assets. */
 export interface VscodeHost extends HostServices {
@@ -147,13 +146,13 @@ function createVscodeSettings(): Settings {
   };
 }
 
-/** The only settings the extension writes: its own, and the editor associations it migrates. */
+/** The only settings the extension writes: its own (the retired ones it removes), and the editor association it restores. */
 function isWritableSetting(section: string, key: string): boolean {
   return (section === "workbench" && key === "editorAssociations")
     || section === "markdownOkfSchemaStudio" || section.startsWith("markdownOkfSchemaStudio.");
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-LIFE-175
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-195
 /** The one place that writes a setting (VS Code `ConfigurationTarget`); every other key is refused. */
 export function createVscodeSettingScopes(): SettingScopes {
   const target = (scope: SettingScope): vscode.ConfigurationTarget =>
@@ -280,15 +279,10 @@ function createVscodeWatcher(): Watcher {
 /** The only schemes handed to the operating system. */
 const EXTERNAL_URI_SCHEMES: ReadonlySet<string> = new Set(["http", "https", "mailto"]);
 
-function createVscodeNavigation(
-  openedByStudio: StudioOpenedTextEditors,
-  lineRequests: StudioLineRequests,
-  selections: StudioSelections,
-): Navigation {
+function createVscodeNavigation(selections: StudioSelections): Navigation {
   return {
     async showDocument(documentId, selection) {
       const targetUri = vscode.Uri.parse(documentId);
-      openedByStudio.record(targetUri.toString());
       // The selection is Studio's own: the session marks the line itself (4.5), the jump signal must not mark it twice.
       if (selection) selections.expect(targetUri.toString(), selection.start.line, "marked-by-session");
       const existingGroup = vscode.window.tabGroups.all.find((group) => group.tabs.some((tab) =>
@@ -297,19 +291,6 @@ function createVscodeNavigation(
         viewColumn: existingGroup?.viewColumn ?? vscode.ViewColumn.One,
         preview: false,
         ...(selection ? { selection: toVscodeRange(selection) } : {}),
-      });
-    },
-    // @implements_req SwRS-MDOKFSTUDIO-LIFE-182
-    async showDocumentInStudio(documentId, line) {
-      const uri = vscode.Uri.parse(documentId);
-      // Studio's own navigation opens no text editor: nothing is replaced, nothing flashes. It starts
-      // from the group the reader is in: a Studio tab of the file there is revealed, else the most
-      // recently active one of another group, else a new tab opens in this group.
-      await putStudioInPlace(lineRequests, {
-        uri,
-        ...(line === undefined ? {} : { line }),
-        column: vscode.window.tabGroups.activeTabGroup.viewColumn,
-        action: "studio-at-line",
       });
     },
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-090
@@ -394,12 +375,8 @@ function createVscodeLogger(): Logger {
   };
 }
 
-/** Creates the VS Code host; its text editor openings are recorded in `openedByStudio`. */
-export function createVscodeHost(
-  openedByStudio = new StudioOpenedTextEditors(),
-  lineRequests = new StudioLineRequests(),
-  selections = new StudioSelections(),
-): VscodeHost {
+/** Creates the VS Code host; the selections Studio itself makes are recorded in `selections`. */
+export function createVscodeHost(selections = new StudioSelections()): VscodeHost {
   const documents = createVscodeDocumentStore();
   const logger = createVscodeLogger();
   return {
@@ -428,7 +405,7 @@ export function createVscodeHost(
     logger,
     watcher: createVscodeWatcher(),
     processes: createNodeProcessRunner(),
-    navigation: createVscodeNavigation(openedByStudio, lineRequests, selections),
+    navigation: createVscodeNavigation(selections),
     editors: createVscodeEditors(documents),
     theme: createVscodeTheme(),
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-004

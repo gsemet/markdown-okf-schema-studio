@@ -2,14 +2,14 @@
 type: StRS
 id: StRS-MDOKFSTUDIO-LIFE-023
 uuid: d69de1f3-13c3-4ce8-ad19-125933b2f53f
-title: A reader opens a Markdown file at a searched line and sees that line
-  marked in Studio
-description: When a reader opens a Markdown file at a line from a search, Quick
-  Open, a problem or a link, the Studio SHALL show that file in a Studio tab at
-  that line with the line marked, through settings of its own, while leaving
-  diffs, text editors asked for on purpose and the side preview workflow as text
-  editors, and with the side preview open the text editor SHALL go to the line
-  and the side preview SHALL mark it.
+title: A reader sees the line of a jump marked in the side preview and gets the
+  raw text on request
+description: When a jump moves a Markdown text editor to a line while the side
+  preview follows the editor, the Studio SHALL mark that line in the side
+  preview, and when the reader asks for the raw text of a Markdown file, the
+  Studio SHALL open the text editor and never replace it by a Studio tab, while
+  the reader who wants every Markdown file in Studio uses the editor association
+  of VS Code.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -17,10 +17,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
-user_need: As a reader, I click a search result, a problem or a link to a
-  Markdown file and land in Studio on that line, with an arrow showing me where
-  it is; I keep my diffs as text, I can still ask for the raw text, and the
-  editor association I set for Markdown keeps working through a Studio setting.
+user_need: As a reader, I jump to a line of a Markdown file from a search, a
+  problem or a link and see that line marked in the side preview; I can always
+  ask for the raw text and it stays text; the editor association I set for
+  Markdown keeps working, and an older setting of the Studio for it is turned
+  into that association for me.
 derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-174
 - SwRS-MDOKFSTUDIO-LIFE-175
@@ -43,33 +44,35 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-192
 - SwRS-MDOKFSTUDIO-LIFE-193
 - SwRS-MDOKFSTUDIO-LIFE-194
+- SwRS-MDOKFSTUDIO-LIFE-195
 default_owner_email: gaetan@xeberon.net
 ---
 
-## A reader opens a Markdown file at a searched line and sees that line marked in Studio
+## A reader sees the line of a jump marked in the side preview and gets the raw text on request
 
 ### Normative behavior
 
-When a reader opens a Markdown file at a line from a search, Quick Open, a problem or a link, the Studio SHALL show that file in a Studio tab at that line with the line marked, through settings of its own, while leaving diffs, text editors asked for on purpose and the side preview workflow as text editors, and with the side preview open the text editor SHALL go to the line and the side preview SHALL mark it.
+When a jump moves a Markdown text editor to a line while the side preview follows the editor, the Studio SHALL mark that line in the side preview, and when the reader asks for the raw text of a Markdown file, the Studio SHALL open the text editor and never replace it by a Studio tab, while the reader who wants every Markdown file in Studio uses the editor association of VS Code.
 
 ### Preserved stakeholder intent
 
-As a reader, I click a search result, a problem or a link to a Markdown file and land in Studio on that line, with an arrow showing me where it is; I keep my diffs as text, I can still ask for the raw text, and the editor association I set for Markdown keeps working through a Studio setting.
+As a reader, I jump to a line of a Markdown file from a search, a problem or a link and see that line marked in the side preview; I can always ask for the raw text and it stays text; the editor association I set for Markdown keeps working, and an older setting of the Studio for it is turned into that association for me.
 
 ### Rationale and constraints
 
-- Round 1 of the change ships the pieces the reader meets first: the settings group Opening Files, the one-time move of a `*.md` editor association to a Studio setting, the one-time feature introduction, the on-demand "Open as Text" command, and the lazy start of the preview services. The marker, the opening policy and the watcher are specified when they ship.
-- Studio never writes a built-in `markdown.preview.*` setting; its only settings write is the association migration.
-- A Markdown file alone activates the extension (activation event `onLanguage:markdown`), so the opening watcher can run before any preview exists; the engine, the watchers and the diagnostics stay off until the first Studio preview.
+- The Studio never closes or replaces a text tab to put a Studio tab in its place. Opening every Markdown file in Studio is the job of the editor association `workbench.editorAssociations` of VS Code.
+- Versions 1.11.0 and 1.12.0 had a setting Open Markdown files in Studio and a watcher that replaced text tabs; this version removes both and writes the `*.md` association back, once and silently, for a reader who had the setting on.
+- Studio never writes a built-in `markdown.preview.*` setting; its only settings writes are the one-time restore of the `*.md` association and the removal of the retired Studio settings.
+- A Markdown file alone activates the extension (activation event `onLanguage:markdown`), so the restore runs for a reader who has no association yet; the engine, the watchers and the diagnostics stay off until the first Studio preview.
+- With the `*.md` association set, a jump opens a Studio tab at the top of the file, and the side preview marks nothing then; the marker works when the file opens in the text editor.
 
 ### Use case diagram
 
 ```mermaid
 flowchart LR
-    R([Reader]) -->|sets Opening Files settings| S[Studio settings]
-    R -->|Open as Text on a Studio tab| T[Text editor of the file]
-    M[Old *.md editor association] -->|moved once, with a notice| S
-    S -->|round 1: stored; the opening watcher reads them in a later round| W[Opening watcher]
+    R([Reader]) -->|Open as Text on a Studio tab| T[Text editor of the file]
+    R -->|jumps to a line while the side preview is open| P[Side preview with the line marked]
+    O[Old Studio setting for Markdown files] -->|restored once, silently| A[Editor association of VS Code]
 ```
 
 ### Main paths
@@ -77,49 +80,32 @@ flowchart LR
 #### Path 1: Keep the raw text one command away
 
 1. A Markdown file shows in a Studio tab
-   - SwRS-MDOKFSTUDIO-LIFE-177: the reader runs Open as Text and the text editor of the same file opens in the same group, at the line shown
+   - SwRS-MDOKFSTUDIO-LIFE-177: the reader runs Open as Text and the text editor of the same file opens in the same group, at the line shown, and stays
    - Option SwRS-MDOKFSTUDIO-LIFE-177 (refusal): when the active tab is not a Studio tab, a message says so and nothing opens
 2. The reader reads and edits the raw text
 
-#### Path 3: Open Studio at a searched line
-
-1. A Studio tab opens for a file at a line (a search result, a link target)
-   - SwRS-MDOKFSTUDIO-LIFE-183: the host reveals the Studio tab of the file or opens a new one in the right group
-   - SwRS-MDOKFSTUDIO-LIFE-181: the line reaches the page once it is ready and wins over the restored reading place
-   - Option SwRS-MDOKFSTUDIO-LIFE-181 (refusal): a line that is not a whole number from 1 is refused and nothing moves
-2. The page shows the line marked
-   - SwRS-MDOKFSTUDIO-LIFE-178: the page unfolds what hides the line, scrolls to it silently and draws an arrow and a band on it
-   - SwRS-MDOKFSTUDIO-LIFE-180: in edit mode the marker covers no handle or action
-3. The reader reads on
-   - SwRS-MDOKFSTUDIO-LIFE-179: the marker stays through scrolls and layout changes and goes on a pointer press, an edit or a new line
-
-#### Path 4: Follow a link inside Studio
-
-1. A Studio tab shows a Markdown file and Open Markdown files in Studio is on
-   - SwRS-MDOKFSTUDIO-LIFE-182: a link, Back or Next to another Markdown file opens Studio at the target line
-   - Option SwRS-MDOKFSTUDIO-LIFE-182 (refusal): the side preview, the setting off or a target that is not Markdown opens a text editor as before
-
-#### Path 5: Jump while the side preview is open
+#### Path 2: Jump while the side preview is open
 
 1. A search result, a problem or a link takes a text editor to a line while the side preview follows the editor
    - SwRS-MDOKFSTUDIO-LIFE-186: the host tells the jump from a cursor move
    - SwRS-MDOKFSTUDIO-LIFE-187: the side preview that follows the editor marks the line, switching to the file first when it is another one
    - Option SwRS-MDOKFSTUDIO-LIFE-190 (refusal): a cursor move of the keyboard or the mouse marks nothing
 2. The side preview places the line
+   - SwRS-MDOKFSTUDIO-LIFE-181: the line reaches the page once it is ready, and only once
    - SwRS-MDOKFSTUDIO-LIFE-188: the page scrolls as the anchor setting says
+   - SwRS-MDOKFSTUDIO-LIFE-178: the page unfolds what hides the line, scrolls to it silently and draws an arrow and a band on it
+   - Option SwRS-MDOKFSTUDIO-LIFE-180 (boundary): in edit mode the marker covers no handle or action
 3. The reader reads and edits on
    - SwRS-MDOKFSTUDIO-LIFE-189: the marker stays through scrolls and goes on an edit of the document or a switch of file
-   - SwRS-MDOKFSTUDIO-LIFE-191: a link or Back or Next followed in the side preview marks its target line the same way
+   - Option SwRS-MDOKFSTUDIO-LIFE-179 (nominal): the marker stays through layout changes and goes on a pointer press or a new line
+   - Option SwRS-MDOKFSTUDIO-LIFE-191 (nominal): a link or Back or Next followed in the side preview marks its target line the same way
 
-#### Path 2: Move to the Studio settings
+#### Path 3: Get the association back from the old setting
 
-1. The reader's user or workspace settings hold the `*.md` association to the Studio editor
-   - SwRS-MDOKFSTUDIO-LIFE-175: the extension moves it to open.markdownFilesInStudio once per scope and shows one notice
-   - Option SwRS-MDOKFSTUDIO-LIFE-175 (refusal): a write that fails keeps the association and tries again at the next start
-2. The settings group Opening Files shows the two settings
-   - SwRS-MDOKFSTUDIO-LIFE-174: the group lists the settings with their defaults
-   - SwRS-MDOKFSTUDIO-LIFE-176: the feature introduction shows once and can be shown again
-3. The reader has the Studio settings and the notices
+1. The reader's user or workspace settings hold the retired setting Open Markdown files in Studio, on
+   - SwRS-MDOKFSTUDIO-LIFE-195: the extension writes the `*.md` association in that scope, then removes the retired settings, and shows nothing
+   - Option SwRS-MDOKFSTUDIO-LIFE-195 (refusal): a write that fails keeps the retired setting and tries again at the next start
+2. The reader's Markdown files open in Studio through the association of VS Code
 
 <!-- okf:links:start -->
 ### Links
@@ -148,4 +134,5 @@ flowchart LR
   - [SwRS-MDOKFSTUDIO-LIFE-192](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-192.md): The line marker marks the table row of the line
   - [SwRS-MDOKFSTUDIO-LIFE-193](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-193.md): The line marker shows the hidden tabs that hold the line and marks its exact line
   - [SwRS-MDOKFSTUDIO-LIFE-194](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-194.md): The line marker marks the front matter property row of the line
+  - [SwRS-MDOKFSTUDIO-LIFE-195](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-195.md): The editor association of Markdown files is restored once from the retired Studio setting
 <!-- okf:links:end -->

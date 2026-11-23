@@ -6,12 +6,12 @@ title: The extension activates only on its own entry points
 description: "When VS Code loads the extension manifest, the extension SHALL declare
   VS Code 1.95 as its lowest supported version and as its only activation events the
   two Studio commands, the Studio Open With editor, the Studio preview panel serializer
-  and the Markdown language, and start only its registrations and the editor association
-  migration at activation, leaving the preview engine, the watchers and the diagnostics
-  to the first Studio preview, and contribute no command whose identifier starts with
-  markdown. and no language and no grammar, so that the built-in Markdown support
-  is neither activated nor replaced, and declare that it supports the VS Code Agents
-  window, so that VS Code enables it there without a user setting."
+  and the Markdown language, and start only its registrations and the restore of the
+  editor association at activation, leaving the preview engine, the watchers and the
+  diagnostics to the first Studio preview, and contribute no command whose identifier
+  starts with markdown. and no language and no grammar, so that the built-in Markdown
+  support is neither activated nor replaced, and declare that it supports the VS Code
+  Agents window, so that VS Code enables it there without a user setting."
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -42,7 +42,7 @@ supersedes:
 
 ### Normative behavior
 
-When VS Code loads the extension manifest, the extension SHALL declare VS Code 1.95 as its lowest supported version and as its only activation events the two Studio commands, the Studio Open With editor, the Studio preview panel serializer and the Markdown language, and start only its registrations and the editor association migration at activation, leaving the preview engine, the watchers and the diagnostics to the first Studio preview, and contribute no command whose identifier starts with markdown. and no language and no grammar, so that the built-in Markdown support is neither activated nor replaced, and declare that it supports the VS Code Agents window, so that VS Code enables it there without a user setting.
+When VS Code loads the extension manifest, the extension SHALL declare VS Code 1.95 as its lowest supported version and as its only activation events the two Studio commands, the Studio Open With editor, the Studio preview panel serializer and the Markdown language, and start only its registrations and the restore of the editor association at activation, leaving the preview engine, the watchers and the diagnostics to the first Studio preview, and contribute no command whose identifier starts with markdown. and no language and no grammar, so that the built-in Markdown support is neither activated nor replaced, and declare that it supports the VS Code Agents window, so that VS Code enables it there without a user setting.
 
 ### Scenario (nominal): A Studio command runs
 

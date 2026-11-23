@@ -6,7 +6,7 @@ import { downloadAndUnzipVSCode, runTests } from "@vscode/test-electron";
 import { runReloadCampaign } from "./reload-suite";
 import { testProfileLaunchArgs, writeTestProfileSettings } from "../shared/testProfile";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
-import { createRunDirectories, freePort, instanceIdFromEnvironment, instanceTag } from "../shared/runIsolation";
+import { createRunDirectories, freePort, instanceIdFromEnvironment, instanceTag, shortTemporaryRoot } from "../shared/runIsolation";
 import { heartbeatFileFor, launchDeadlineMs, RELOAD_LAUNCH_DEADLINE_MS, stressDeadlineLine } from "../shared/hangWatchdog";
 import { resetHeartbeat, watchLaunch } from "../shared/launchWatchdog";
 
@@ -173,6 +173,50 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
   }
 }
 
+/**
+ * The reverse-migration window (CR 477): its own user-data directory, whose `User/settings.json`
+ * holds the retired `open.markdownFilesInStudio` setting on, and a `.code-workspace` file that holds
+ * it too. The suite reads both files back after one activation.
+ */
+async function runReverseMigrationScenario(): Promise<void> {
+  const suiteName = "reverse-migration-suite.js";
+  const directories = createRunDirectories(instanceId);
+  const { userDataDirectory, extensionsDirectory } = directories;
+  writeTestProfileSettings(userDataDirectory);
+  const settingsFile = path.join(userDataDirectory, "User", "settings.json");
+  fs.writeFileSync(settingsFile, JSON.stringify({
+    ...JSON.parse(fs.readFileSync(settingsFile, "utf8")) as Record<string, unknown>,
+    "markdownOkfSchemaStudio.open.markdownFilesInStudio": true,
+    "markdownOkfSchemaStudio.open.searchResultsInStudio": true,
+  }, null, 2));
+  const workspaceDirectory = fs.mkdtempSync(path.join(shortTemporaryRoot(), `studio-${instanceTag(instanceId)}-w-`));
+  const workspaceFile = path.join(workspaceDirectory, "reverse-migration.code-workspace");
+  fs.writeFileSync(workspaceFile, JSON.stringify({
+    folders: [{ path: workspaceDirectory }],
+    settings: { "markdownOkfSchemaStudio.open.markdownFilesInStudio": true, "workbench.startupEditor": "none" },
+  }));
+  const executable = await codeExecutablePath();
+  const heartbeatFile = heartbeatFileFor(instanceId, suiteName);
+  resetHeartbeat(heartbeatFile);
+  try {
+    await watchLaunch({ name: suiteName, heartbeatFile, userDataDirectory }, runTests({
+      vscodeExecutablePath: executable,
+      extensionDevelopmentPath: extensionRoot,
+      extensionTestsPath: path.join(__dirname, suiteName),
+      extensionTestsEnv: {
+        STUDIO_E2E_INSTANCE: instanceId,
+        STUDIO_HEARTBEAT_FILE: heartbeatFile,
+        STUDIO_USER_DATA_DIR: userDataDirectory,
+      },
+      launchArgs: ["--user-data-dir", userDataDirectory, "--extensions-dir", extensionsDirectory, workspaceFile, ...testProfileLaunchArgs()],
+    }));
+  } finally {
+    resetHeartbeat(heartbeatFile);
+    directories.dispose();
+    fs.rmSync(workspaceDirectory, { recursive: true, force: true });
+  }
+}
+
 /** The reload campaign drives its window from here (no host suite, no heartbeat): deadline only. */
 async function runWatchedReloadCampaign(): Promise<void> {
   const executable = await codeExecutablePath();
@@ -200,6 +244,10 @@ async function main(): Promise<void> {
     await runScenario("trusted-suite.js", false);
     return;
   }
+  if (process.argv.includes("--reverse-migration-only")) {
+    await runReverseMigrationScenario();
+    return;
+  }
   if (process.argv.includes("--untrusted-only")) {
     await runScenario("untrusted-suite.js", true);
     return;
@@ -209,6 +257,7 @@ async function main(): Promise<void> {
   await runScenario("untrusted-suite.js", true);
   await runScenario("trusted-suite.js", false);
   await runScenario("standalone-suite.js", false);
+  await runReverseMigrationScenario();
   await runWatchedReloadCampaign();
 }
 
@@ -220,7 +269,7 @@ const integrationManifest = {
   revision: execFileSync("git", ["rev-parse", "HEAD"], { cwd: extensionRoot, encoding: "utf8" }).trim(),
   dirty: execFileSync("git", ["status", "--porcelain"], { cwd: extensionRoot, encoding: "utf8" }).trim().length > 0,
   scope: process.argv.includes("--reload-only") ? "reload" : process.argv.includes("--trusted-only") ? "trusted"
-    : process.argv.includes("--untrusted-only") ? "untrusted" : process.argv.includes("--scroll-only") ? "scroll" : "all",
+    : process.argv.includes("--untrusted-only") ? "untrusted" : process.argv.includes("--reverse-migration-only") ? "reverse-migration" : process.argv.includes("--scroll-only") ? "scroll" : "all",
 };
 fs.writeFileSync(path.join(artifactRoot, "integration-manifest.json"), JSON.stringify(integrationManifest, null, 2));
 void main().then(() => {

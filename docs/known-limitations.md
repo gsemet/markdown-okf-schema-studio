@@ -66,8 +66,8 @@ files of a session whose working folder is on this machine. Remote or cloud agen
 folders are not local `file` folders, are not supported.
 
 The stock Markdown preview and its `markdown.*` settings remain separate. Opening a Markdown file
-activates the extension, which then starts only its registrations, the editor association
-migration and the opening watcher; the preview engine, the watchers and the diagnostics start with the first Studio preview.
+activates the extension, which then starts only its registrations and the one-time restore of the
+editor association (version 1.11.0 settings); the preview engine, the watchers and the diagnostics start with the first Studio preview.
 Other files do not activate it.
 
 Fenced `diff` and `patch` blocks are supported as visualization-only rendered code. Their literal
@@ -76,14 +76,13 @@ offer per-line navigation, or change the separate native source/version diff exp
 
 ## Opening Files
 
-Studio opens a Markdown file in place of a text editor that VS Code already showed, so what the
-settings `open.searchResultsInStudio` and `open.markdownFilesInStudio` promise has these limits,
-measured on VS Code 1.147.0 on Windows:
+A Markdown file opens as text; Studio opens only when you choose it (Open With, the Open Preview to
+Side button) or when you associate `*.md` with Studio in `workbench.editorAssociations`. With that
+association these limits apply, measured on VS Code 1.143 on Windows:
 
-- The raw text can flash: a first opening shows the text editor for about 70 ms, then an empty
-  group for about 370 ms, before Studio.
-- A Studio tab that is pinned or is a preview tab does not move to a line when a search result or
-  Quick Open `file.md:40` targets it: the line and the marker are lost, the Studio tab stays where it is.
+- A jump to a line (a search result, Quick Open `file.md:40`, a link) opens Studio at the top of the
+  file, and the side preview marks nothing: VS Code opens the custom editor and drops the selection.
+- A jump to a file that is already open as text keeps that text tab and opens a Studio tab beside it.
 - The side preview marks the line of every move VS Code reports as a command with one selection, not
   only a search result or a link: Go to Symbol and Find next can mark it too if VS Code reports
   them as a command (not verified: the real-window trial recorded no selection change for Go Back or
@@ -93,10 +92,6 @@ measured on VS Code 1.147.0 on Windows:
 - A jump on a diff side marks the line of the real file by line number: a diff that adds or removes
   lines before the target can mark a line that is not the one you clicked on.
 - **Open as Text** on a document with unsaved changes asks to save first.
-- **Open With... > Text Editor** is replaced by Studio while `open.markdownFilesInStudio` is on. Use
-  **Open as Text** or **Reopen Editor With... > Text Editor**, which stay text.
-- The first Markdown file you open, the one that activates the extension, can open as text: the
-  watcher cannot tell it from a tab restored with the window. Reopen it, or open any later file.
 
 ## Installation Boundary
 

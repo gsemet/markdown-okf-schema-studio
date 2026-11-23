@@ -11,8 +11,8 @@ description: When the reader follows a link or a Back or Next move from a Studio
   as before.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-req_lifecycle: proposed
-status: stable
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -20,12 +20,8 @@ derives_from:
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files:
-- src/host-vscode/vscodeHost.ts
-- src/session/features/studioNavigation.ts
-tested_in_files:
-- test/host/putStudioInPlace.test.ts
-- test/session/toolbarReq.requirements.test.ts
+implemented_in_files: []
+tested_in_files: []
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -61,5 +57,5 @@ When the reader follows a link or a Back or Next move from a Studio Open With ta
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader opens a Markdown file at a searched line and sees that line marked in Studio
+  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview and gets the raw text on request
 <!-- okf:links:end -->

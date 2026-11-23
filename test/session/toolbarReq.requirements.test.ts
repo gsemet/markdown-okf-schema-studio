@@ -32,8 +32,6 @@ interface Fixture {
   readonly preview: PreviewSession;
   readonly posted: Array<Record<string, any>>;
   readonly shown: Array<{ id: string; selection: unknown }>;
-  /** The calls of `showDocumentInStudio`. */
-  readonly studioShown: Array<{ id: string; line: number | undefined }>;
   readonly warnings: string[];
   readonly searches: string[];
   readonly state: { requestId: number; open: (id: string) => Promise<HostDocument>; editors: PairedEditor[]; applying: Set<string> };
@@ -62,14 +60,12 @@ function fixture(options: {
   restrictedReads?: boolean;
   followsActiveEditor?: boolean;
   activeText?: string;
-  markdownFilesInStudio?: boolean;
 } = {}): Fixture {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "toolbar-req-")));
   const activePath = path.join(root, "active.md");
   fs.writeFileSync(activePath, options.activeText ?? "# Active\n\n## Part\n");
   const posted: Array<Record<string, any>> = [];
   const shown: Array<{ id: string; selection: unknown }> = [];
-  const studioShown: Array<{ id: string; line: number | undefined }> = [];
   const warnings: string[] = [];
   const searches: string[] = [];
   const state = {
@@ -96,16 +92,11 @@ function fixture(options: {
         shown.push({ id, selection });
         return Promise.resolve();
       },
-      showDocumentInStudio: (id: string, line?: number) => {
-        studioShown.push({ id, line });
-        return Promise.resolve();
-      },
       openExternal: () => Promise.resolve(true),
     },
     settings: {
       section: () => ({
-        get: (key: string, fallback: unknown) => key === "markdownFilesInStudio"
-          ? options.markdownFilesInStudio ?? fallback : fallback,
+        get: (_key: string, fallback: unknown) => fallback,
       }),
     },
     ui: { showWarning: (message: string) => { warnings.push(message); return Promise.resolve(); } },
@@ -167,7 +158,7 @@ function fixture(options: {
     requestId: preview.stage!.requestId,
   });
   return {
-    root, manager, preview, posted, shown, studioShown, warnings, searches, state, identity,
+    root, manager, preview, posted, shown, warnings, searches, state, identity,
     send: (type, extra = {}) => manager.handlePageMessage(preview, { type, ...identity(), ...extra }),
     cleanup: () => fs.rmSync(root, { recursive: true, force: true }),
   };
@@ -767,48 +758,27 @@ test("turning the anchor mode on aligns the preview with the text editor", async
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-182
-test("a link to a Markdown file from a Studio tab opens Studio at the marker line when Markdown files open in Studio", async () => {
-  const f = fixture({ followsActiveEditor: false, markdownFilesInStudio: true });
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+test("a link to a Markdown file always opens a text editor at the target line, from a Studio tab or the side preview", async () => {
+  const tab = fixture({ followsActiveEditor: false });
+  const side = fixture({ followsActiveEditor: true });
   try {
-    fs.writeFileSync(path.join(f.root, "second.md"), ["# Second", "", "## Part", "", "Text", ""].join("\n"));
-    await f.send("previewLink", { request: "second.md#part" });
-    assert.deepEqual(f.studioShown, [{ id: pathToFileURL(path.join(f.root, "second.md")).toString(), line: 3 }]);
-    assert.equal(f.shown.length, 0, "no text editor opens");
-    await f.send("previewLink", { request: "second.md" });
-    assert.deepEqual(f.studioShown.at(-1), { id: pathToFileURL(path.join(f.root, "second.md")).toString(), line: undefined });
+    for (const f of [tab, side]) {
+      fs.writeFileSync(path.join(f.root, "second.md"), ["# Second", "", "## Part", "", "Text", ""].join("\n"));
+      await f.send("previewLink", { request: "second.md#part" });
+      assert.equal(f.shown.length, 1, "one text editor opens");
+      assert.equal(f.shown[0].id, pathToFileURL(path.join(f.root, "second.md")).toString());
+      assert.equal((f.shown[0].selection as { start: { line: number } }).start.line, 2);
+    }
   } finally {
-    f.cleanup();
+    tab.cleanup();
+    side.cleanup();
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-182
-test("a link keeps opening a text editor for the side preview, a non-Markdown target or the setting off", async () => {
-  const sidePreview = fixture({ followsActiveEditor: true, markdownFilesInStudio: true });
-  const settingOff = fixture({ followsActiveEditor: false, markdownFilesInStudio: false });
-  const studioTab = fixture({ followsActiveEditor: false, markdownFilesInStudio: true });
-  try {
-    for (const f of [sidePreview, settingOff, studioTab]) {
-      fs.writeFileSync(path.join(f.root, "second.md"), ["# Second", ""].join("\n"));
-      fs.writeFileSync(path.join(f.root, "notes.txt"), ["text", ""].join("\n"));
-    }
-    await sidePreview.send("previewLink", { request: "second.md" });
-    await settingOff.send("previewLink", { request: "second.md" });
-    await studioTab.send("previewLink", { request: "notes.txt" });
-    for (const f of [sidePreview, settingOff, studioTab]) {
-      assert.equal(f.shown.length, 1);
-      assert.equal(f.studioShown.length, 0);
-    }
-  } finally {
-    sidePreview.cleanup();
-    settingOff.cleanup();
-    studioTab.cleanup();
-  }
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-182
-test("Back to another Markdown document from a Studio tab opens Studio at the stored line; a move inside the document stays a source scroll", async () => {
-  const f = fixture({ followsActiveEditor: false, markdownFilesInStudio: true });
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+test("Back to another Markdown document always opens a text editor at the stored line; a move inside the document stays a source scroll", async () => {
+  const f = fixture({ followsActiveEditor: false });
   try {
     const other = path.join(f.root, "other.md");
     fs.writeFileSync(other, ["# Other", "", "line 3", "", "line 5", ""].join("\n"));
@@ -816,13 +786,14 @@ test("Back to another Markdown document from a Studio tab opens Studio at the st
     history.push({ uri: pathToFileURL(other).toString(), line: 5 });
     history.push({ uri: f.preview.documentUri, line: 1 });
     await f.send("previewHistoryGo", { direction: "back" });
-    assert.deepEqual(f.studioShown, [{ id: pathToFileURL(other).toString(), line: 5 }]);
-    assert.equal(f.shown.length, 0);
+    assert.equal(f.shown.length, 1);
+    assert.equal(f.shown[0].id, pathToFileURL(other).toString());
+    assert.equal((f.shown[0].selection as { start: { line: number } }).start.line, 4);
 
     history.push({ uri: f.preview.documentUri, line: 3 });
     history.push({ uri: f.preview.documentUri, line: 9 });
     await f.send("previewHistoryGo", { direction: "back" });
-    assert.equal(f.studioShown.length, 1, "a move inside the document opens nothing");
+    assert.equal(f.shown.length, 1, "a move inside the document opens nothing");
     assert.ok(f.posted.some((message) => message.type === "sourceScroll" && message.line === 3));
   } finally {
     f.cleanup();

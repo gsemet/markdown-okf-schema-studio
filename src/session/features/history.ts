@@ -11,7 +11,6 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { revisionOfStage } from "../sessionDocuments";
-import { navigatesInStudio } from "./studioNavigation";
 import { fireAndForget } from "../../host-api/logger";
 
 /** The whole lines `first` to `last` (zero-based) of a document, as an editor selection. */
@@ -119,14 +118,10 @@ export class HistoryController {
       const document = await host.documents.open(target.uri);
       this.postHistoryState(preview);
       const lineIndex = Math.min(Math.max(0, target.line - 1), Math.max(0, document.lineCount - 1));
-      if (navigatesInStudio(host, preview, document.path)) {
-        await host.navigation.showDocumentInStudio(target.uri, lineIndex + 1);
-      } else {
-        // @implements_req SwRS-MDOKFSTUDIO-LIFE-191
-        // The side preview that follows the editor marks the target line itself (see links.ts).
-        if (preview.followsActiveEditor) this.manager.scroll.requestJumpMarker(preview, target.uri, lineIndex + 1);
-        await host.navigation.showDocument(target.uri, lineSelection(document, lineIndex, lineIndex));
-      }
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-191
+      // The side preview that follows the editor marks the target line itself (see links.ts).
+      if (preview.followsActiveEditor) this.manager.scroll.requestJumpMarker(preview, target.uri, lineIndex + 1);
+      await host.navigation.showDocument(target.uri, lineSelection(document, lineIndex, lineIndex));
     } catch (error) {
       // The document did not change, so the position does not move either.
       history.restore(before);

@@ -374,7 +374,6 @@ export function createFakeVscode(options: FakeVscodeOptions) {
   const commands = new Map<string, (...args: unknown[]) => unknown>();
   const executedCommands: Array<{ id: string; args: unknown[] }> = [];
   const shownMessages: Array<{ kind: string; text: string }> = [];
-  const outputLines: string[] = [];
   /** The targets `workspace.fs.rename` deleted before renaming onto them (see its `overwrite`). */
   const targetsDeletedByRename: string[] = [];
   const events = {
@@ -499,7 +498,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       window.visibleTextEditors = [editor];
       return Promise.resolve(editor);
     },
-    createOutputChannel: () => ({ appendLine: (line: string) => void outputLines.push(line) }),
+    createOutputChannel: () => ({ appendLine: (): void => undefined }),
     showInformationMessage: (text: string) => {
       shownMessages.push({ kind: "information", text });
       return Promise.resolve(undefined);
@@ -722,7 +721,6 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       commands,
       executedCommands,
       shownMessages,
-      outputLines,
       targetsDeletedByRename,
       events,
       showDocument,

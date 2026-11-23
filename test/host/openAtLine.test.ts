@@ -1,16 +1,15 @@
 /**
- * Host tests of CR-445 round 1 that run the real activation against the fake `vscode` module: the
- * lazy start of the services, the setting writer, the "Open as Text" command and the registry of the
- * text editors Studio opened.
+ * Host tests that run the real activation against the fake `vscode` module: the lazy start of the
+ * services, the setting writer, the "Open as Text" command, and the guarantee that no text tab is
+ * ever closed or replaced by a Studio tab (the opening watcher is gone).
  */
 import * as assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
 
 // The harness first: it installs the fake `vscode` module the production imports below need.
-import { captured, fake, startStudio, workspaceRoot, writeFile, type Studio } from "./lifeReqHarness";
+import { captured, fake, startStudio, writeFile, type Studio } from "./lifeReqHarness";
 import { OPEN_AS_TEXT_COMMAND_ID as OPEN_AS_TEXT, SHOW_INTRODUCTIONS_COMMAND_ID as SHOW_AGAIN } from "../../src/host-vscode/activation";
 import { createVscodeSettingScopes } from "../../src/host-vscode/vscodeHost";
-import { StudioLineRequests, StudioOpenedTextEditors } from "../../src/host-vscode/openInStudio";
 import { servicesStartedForTests, setCurrentActivation } from "../../src/host-vscode/testHooks";
 
 
@@ -48,22 +47,22 @@ test("an activation with no preview creates no file watcher", (t) => {
   assert.equal(studio.activation.servicesStarted, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-175
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
 test("the setting writer maps the user and workspace values, and writes to the matching target", async () => {
   fake.controls.configuration.values.set("workbench.editorAssociations", { globalValue: { "*.md": "x" }, workspaceValue: undefined });
   fake.controls.configuration.updates.length = 0;
   const scopes = createVscodeSettingScopes();
   assert.deepEqual(scopes.inspect("workbench", "editorAssociations"), { user: { "*.md": "x" }, workspace: undefined });
-  await scopes.write("markdownOkfSchemaStudio.open", "markdownFilesInStudio", true, "user");
+  await scopes.write("markdownOkfSchemaStudio", "open.markdownFilesInStudio", undefined, "user");
   await scopes.write("workbench", "editorAssociations", undefined, "workspace");
   assert.deepEqual(fake.controls.configuration.updates, [
-    { section: "markdownOkfSchemaStudio.open", key: "markdownFilesInStudio", value: true, target: 1 },
+    { section: "markdownOkfSchemaStudio", key: "open.markdownFilesInStudio", value: undefined, target: 1 },
     { section: "workbench", key: "editorAssociations", value: undefined, target: 2 },
   ]);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-149
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-175
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
 test("the setting writer refuses the built-in Markdown preview settings and any other key without writing", async () => {
   fake.controls.configuration.updates.length = 0;
   const scopes = createVscodeSettingScopes();
@@ -74,7 +73,7 @@ test("the setting writer refuses the built-in Markdown preview settings and any 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-177
-test("Open as Text on a Studio tab opens the text editor at the previewed line, closes the Studio tab and records the file", async (t) => {
+test("Open as Text on a Studio tab opens the text editor at the previewed line in the same column, closes the Studio tab and expects the selection as no-mark", async (t) => {
   const studio = start(t);
   const file = writeFile("# One\n\ntext\n");
   fake.controls.shownTextOptions.length = 0;
@@ -84,8 +83,12 @@ test("Open as Text on a Studio tab opens the text editor at the previewed line, 
   assert.equal(fake.controls.shownTextOptions.length, 1);
   assert.equal((fake.controls.shownTextOptions[0] as { preview: boolean }).preview, false);
   assert.equal(fake.controls.closedTabs.length, 1, "the Studio tab is closed");
+  const options = fake.controls.shownTextOptions[0] as { viewColumn: number; selection: { start: { line: number } } };
+  assert.equal(options.viewColumn, fake.vscode.window.tabGroups.activeTabGroup.viewColumn, "the same column");
+  assert.equal(options.selection.start.line, 0, "the previewed line (the top when no page reported one)");
   const uri = fake.vscode.Uri.file(file).toString();
-  assert.equal(studio.activation.openedByStudio.has(uri), true, "the watcher will not replace this text editor");
+  assert.equal(studio.activation.studioSelections.take(uri, 0), "no-mark", "the side preview does not mark this opening");
+  assert.deepEqual(fake.controls.executedCommands.filter((call) => call.id === "vscode.openWith"), [], "no Studio tab opens in its place");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-177
@@ -104,63 +107,44 @@ test("Open as Text with no Studio tab active tells the reader and opens nothing"
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-176
 test("Show Feature Introductions Again forgets the stored introductions", async (t) => {
   const studio = start(t);
-  const key = "markdownOkfSchemaStudio.introductions.openInStudio";
+  const key = "markdownOkfSchemaStudio.introductions.someIntroduction";
   await studio.context.globalState.update(key, true);
   await studio.runCommand(SHOW_AGAIN);
   assert.equal(studio.context.globalState.get(key), undefined);
 });
 
+const STUDIO_TYPE = "markdown-okf-schema-studio.editor";
+const openWithCalls = (): Array<{ args: unknown[] }> => fake.controls.executedCommands.filter((call) => call.id === "vscode.openWith");
+
+function resetTabs(): void {
+  fake.controls.studioTabs.length = 0;
+  fake.controls.executedCommands.length = 0;
+  fake.controls.closedTabs.length = 0;
+  fake.controls.activeGroupColumn.value = 1;
+  fake.controls.configuration.values.clear();
+  fake.controls.configuration.updates.length = 0;
+}
+
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-177
-test("the registry of Studio's text editors remembers a file for a few seconds only", () => {
-  let now = 1000;
-  const registry = new StudioOpenedTextEditors(() => now);
-  assert.equal(registry.has("file:///a.md"), false);
-  registry.record("file:///a.md");
-  now += 4999;
-  assert.equal(registry.has("file:///a.md"), true);
-  assert.equal(registry.has("file:///b.md"), false);
-  now += 2;
-  assert.equal(registry.has("file:///a.md"), false);
-  assert.ok(workspaceRoot.length > 0);
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
-test("the line recorded for a Studio tab about to open is taken once and only inside the window", () => {
-  let now = 1000;
-  const requests = new StudioLineRequests(() => now);
-  requests.recordPending("file:///a.md", 12);
-  assert.equal(requests.takePending("file:///a.md"), 12);
-  assert.equal(requests.takePending("file:///a.md"), undefined, "taken once");
-  requests.recordPending("file:///a.md", 3);
-  now += 60_000;
-  assert.equal(requests.takePending("file:///a.md"), undefined, "outside the window");
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
-test("a line goes to a live Studio session first and is recorded as pending when none takes it", () => {
-  const requests = new StudioLineRequests(() => 0);
-  const sent: Array<[string, number]> = [];
-  let taken = true;
-  requests.bindLiveSessions((uri, line) => {
-    sent.push([uri, line]);
-    return taken;
-  });
-  requests.deliver("file:///a.md", 5);
-  assert.deepEqual(sent, [["file:///a.md", 5]]);
-  assert.equal(requests.takePending("file:///a.md"), undefined, "a live session took it");
-  taken = false;
-  requests.deliver("file:///a.md", 9);
-  assert.equal(requests.takePending("file:///a.md"), 9);
-});
-
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
-test("a Studio tab opened by Open With takes the pending line of its document", async (t) => {
+test("a Markdown text tab that opens, plainly or at a line, with default settings is never closed or replaced", async (t) => {
+  resetTabs();
   const studio = start(t);
-  const document = await fake.controls.showDocument(writeFile("# One\n\ntext\n"));
-  studio.activation.lineRequests.recordPending(document.uri.toString(), 3);
-  await captured.provider!.resolveCustomTextEditor(document, fake.vscode.window.createWebviewPanel("markdown-okf-schema-studio.editor", "Studio", 1));
-  const session = [...studio.activation.manager.sessions()].find((entry) => entry.documentUri === document.uri.toString());
-  assert.ok(session, "the session exists");
-  assert.equal(session.scroll.pendingRevealLine?.line, 3, "the line is kept; the field is now an object with its document and age");
-  assert.equal(studio.activation.lineRequests.takePending(document.uri.toString()), undefined, "consumed");
+  fake.controls.openTab(writeFile("# A\n"));
+  fake.controls.openTab(writeFile("# B\n\ntext\n"), { line: 3, isPreview: true });
+  await studio.advance(2000);
+  assert.deepEqual(openWithCalls(), [], "no vscode.openWith");
+  assert.deepEqual(fake.controls.closedTabs, [], "no tab closed");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177
+test("a Markdown text tab that opens while *.md is associated with Studio, or the retired setting is on, is never closed or replaced", async (t) => {
+  resetTabs();
+  fake.controls.configuration.values.set("workbench.editorAssociations", { globalValue: { "*.md": STUDIO_TYPE } });
+  fake.controls.configuration.values.set("markdownOkfSchemaStudio.open.markdownFilesInStudio", { workspaceValue: true });
+  const studio = start(t);
+  fake.controls.openTab(writeFile("# A\n"));
+  fake.controls.openTab(writeFile("# B\n\ntext\n"), { line: 3 });
+  await studio.advance(2000);
+  assert.deepEqual(openWithCalls(), [], "no vscode.openWith");
+  assert.deepEqual(fake.controls.closedTabs, [], "no tab closed");
 });

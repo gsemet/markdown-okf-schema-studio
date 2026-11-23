@@ -5,10 +5,10 @@ uuid: 31d75948-1869-435a-bacd-2922a051d51c
 title: The settings editor lists the Studio settings in titled groups
 description: The extension SHALL contribute exactly the settings of its settings
   registry, with their schema text and defaults generated into package.json, in
-  the groups Preview, Editing, Frontmatter, Comments, PlantUML and Opening Files
-  in that order, each setting with a unique order and a markdownDescription of
-  at most 700 characters, reading a setting with nothing stored, and an absent
-  or wrongly typed boot entry of the page, as its default.
+  the groups Preview, Editing, Frontmatter, Comments and PlantUML in that order,
+  each setting with a unique order and a markdownDescription of at most 700
+  characters, reading a setting with nothing stored, and an absent or wrongly
+  typed boot entry of the page, as its default.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -37,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-The extension SHALL contribute exactly the settings of its settings registry, with their schema text and defaults generated into package.json, in the groups Preview, Editing, Frontmatter, Comments, PlantUML and Opening Files in that order, each setting with a unique order and a markdownDescription of at most 700 characters, reading a setting with nothing stored, and an absent or wrongly typed boot entry of the page, as its default.
+The extension SHALL contribute exactly the settings of its settings registry, with their schema text and defaults generated into package.json, in the groups Preview, Editing, Frontmatter, Comments and PlantUML in that order, each setting with a unique order and a markdownDescription of at most 700 characters, reading a setting with nothing stored, and an absent or wrongly typed boot entry of the page, as its default.
 
 ### Scenario (nominal): Group order and key prefix
 
 - GIVEN the package manifest
 - WHEN the configuration is read
-- THEN the groups are Preview 1, Editing 2, Frontmatter 3, Comments 4, PlantUML 5 and Opening Files 6
+- THEN the groups are Preview 1, Editing 2, Frontmatter 3, Comments 4 and PlantUML 5, and no group Opening Files nor any setting whose key starts with markdownOkfSchemaStudio.open.
 - AND a setting named markdownOkfSchemaStudio.comments.authorName sits in the Comments group, because every setting is in the group of its key prefix
 
 ### Scenario (nominal): Descriptions, order and sorting

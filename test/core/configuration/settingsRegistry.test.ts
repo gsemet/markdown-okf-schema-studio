@@ -12,7 +12,6 @@ import {
 import {
   bootSettingKeys,
   contributedConfiguration,
-  DEFAULT_SEARCH_RESULTS_IN_STUDIO,
   PREVIEW_SETTINGS,
   readSettings,
   SETTING_CATEGORIES,
@@ -38,7 +37,7 @@ test("the generated settings schema is the package.json one, byte for byte", () 
 test("categories keep their titles and order, and settings are sorted by their order", () => {
   const configuration = contributedConfiguration();
   assert.deepEqual(configuration.map((category) => [category.title, category.order]), [
-    ["Preview", 1], ["Editing", 2], ["Frontmatter", 3], ["Comments", 4], ["PlantUML", 5], ["Opening Files", 6],
+    ["Preview", 1], ["Editing", 2], ["Frontmatter", 3], ["Comments", 4], ["PlantUML", 5],
   ]);
   for (const category of configuration) {
     const orders = Object.values(category.properties).map((schema) => schema.order);
@@ -165,16 +164,11 @@ test("the Studio settings live under their own prefix, and no source writes a se
   assert.deepEqual(writers, ["src/host-vscode/vscodeHost.ts"], "settings are written through one writer, by section name");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-174
-test("the Opening Files settings are two booleans: the search results one on by default, the every-file one off", () => {
-  const open = SETTING_CATEGORIES.find((category) => category.section === "open");
-  assert.ok(open, "an `open` section exists");
-  assert.equal(settingSection("open"), "markdownOkfSchemaStudio.open");
-  assert.deepEqual(settingDefaults(open.settings), { searchResultsInStudio: DEFAULT_SEARCH_RESULTS_IN_STUDIO, markdownFilesInStudio: false });
-  assert.equal(DEFAULT_SEARCH_RESULTS_IN_STUDIO, true);
-  const properties = contributedConfiguration().find((category) => category.title === "Opening Files")!.properties;
-  assert.deepEqual(Object.keys(properties), [
-    "markdownOkfSchemaStudio.open.searchResultsInStudio",
-    "markdownOkfSchemaStudio.open.markdownFilesInStudio",
-  ]);
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-156
+test("no Opening Files category and no open.* setting is declared: the raw text stays text", () => {
+  assert.equal(SETTING_CATEGORIES.some((category) => category.section === "open"), false);
+  const configuration = contributedConfiguration();
+  assert.equal(configuration.some((category) => category.title === "Opening Files"), false);
+  const names = configuration.flatMap((category) => Object.keys(category.properties));
+  assert.deepEqual(names.filter((name) => name.startsWith("markdownOkfSchemaStudio.open.")), []);
 });

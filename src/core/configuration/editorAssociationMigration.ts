@@ -1,44 +1,47 @@
 /**
- * The rewrite of a `workbench.editorAssociations` value for the editor association migration: it
- * removes the entry that opens every `*.md` file in the Studio editor and keeps every other entry.
+ * The rewrite of a `workbench.editorAssociations` value for the editor association restore: it adds
+ * the entry that opens every `*.md` file in the Studio editor and keeps every other entry. It is the
+ * inverse of the removal 1.11.0 made when it moved the entry to a setting, which 1.12.1 retires.
  * Pure module: no host API, no DOM, no Node built-ins.
  */
 
 /** The view type of the Studio Open With editor, as `workbench.editorAssociations` names it. */
 export const STUDIO_EDITOR_VIEW_TYPE = "markdown-okf-schema-studio.editor";
 
-/** The only pattern the migration touches; folder settings and other patterns are left alone. */
+/** The only pattern the restore touches; folder settings and other patterns are left alone. */
 const MARKDOWN_PATTERN = "*.md";
 
-/** The outcome of the rewrite: `value` is what the scope should hold when `changed`. */
-export interface AssociationRewrite {
-  /** True when an entry was removed. */
-  changed: boolean;
-  /** The new value of the setting (`undefined` removes the key); the input itself when not `changed`. */
-  value: unknown;
-}
+/**
+ * What to do with the association value of one scope:
+ * - `write`: write `value` (the entry was added);
+ * - `none`: nothing to write (the scope already has a `*.md` entry, Studio's or another editor's);
+ * - `malformed`: the value is neither an object nor an array; nothing is written and the caller
+ *   keeps the retired setting so nothing is lost.
+ */
+export type AssociationRestore =
+  | { readonly kind: "write"; readonly value: unknown }
+  | { readonly kind: "none" }
+  | { readonly kind: "malformed" };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**
- * Removes the `*.md` entry that names the Studio editor from a scope's association value: the
- * object form (`{"*.md": "<view type>"}`) and the legacy array form
- * (`[{ viewType, filenamePattern }]`). An entry naming another editor, another pattern
- * (`**` + `/*.md`, `docs/*.md`) or anything unexpected is kept. An emptied value becomes `undefined`.
+ * Adds the `*.md` entry naming the Studio editor to a scope's association value: the object form
+ * (`{"*.md": "<view type>"}`), the legacy array form (`[{ viewType, filenamePattern }]`), or an
+ * absent value. A `*.md` entry that already exists, for Studio or for another editor, is the
+ * user's own and wins: nothing is written. Other entries and their order are kept.
  */
-export function removeStudioMarkdownAssociation(value: unknown): AssociationRewrite {
+export function restoreStudioMarkdownAssociation(value: unknown): AssociationRestore {
+  if (value === undefined) return { kind: "write", value: { [MARKDOWN_PATTERN]: STUDIO_EDITOR_VIEW_TYPE } };
   if (Array.isArray(value)) {
-    const kept = value.filter((entry) => !(isRecord(entry)
-      && entry.filenamePattern === MARKDOWN_PATTERN
-      && entry.viewType === STUDIO_EDITOR_VIEW_TYPE));
-    if (kept.length === value.length) return { changed: false, value };
-    return { changed: true, value: kept.length === 0 ? undefined : kept };
+    if (value.some((entry) => isRecord(entry) && entry.filenamePattern === MARKDOWN_PATTERN)) return { kind: "none" };
+    return { kind: "write", value: [...value, { viewType: STUDIO_EDITOR_VIEW_TYPE, filenamePattern: MARKDOWN_PATTERN }] };
   }
-  if (isRecord(value) && value[MARKDOWN_PATTERN] === STUDIO_EDITOR_VIEW_TYPE) {
-    const { [MARKDOWN_PATTERN]: _removed, ...rest } = value;
-    return { changed: true, value: Object.keys(rest).length === 0 ? undefined : rest };
+  if (isRecord(value)) {
+    if (MARKDOWN_PATTERN in value) return { kind: "none" };
+    return { kind: "write", value: { ...value, [MARKDOWN_PATTERN]: STUDIO_EDITOR_VIEW_TYPE } };
   }
-  return { changed: false, value };
+  return { kind: "malformed" };
 }

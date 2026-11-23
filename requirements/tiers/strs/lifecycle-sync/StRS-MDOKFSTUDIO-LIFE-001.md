@@ -50,9 +50,9 @@ As a writer, I open a rendered preview of the Markdown file I am editing beside 
 
 - Asking again for a preview reuses the preview that is already open instead of opening a second one.
 - A file that is not a saved Markdown file gets an explanation instead of a preview.
-- The Studio is not the default editor of Markdown files unless the reader turns on the setting Open Markdown files in Studio; by default the reader opts in for each file.
+- The Studio is not the default editor of Markdown files unless the reader makes it so with the editor association of VS Code (`workbench.editorAssociations`); by default the reader opts in for each file.
 - The tab opens at once and fills in when the render ends.
-- The Studio changes none of the built-in Markdown preview settings; its only write outside its own settings is the one-time move of a `*.md` editor association to its setting.
+- The Studio changes none of the built-in Markdown preview settings; its only write outside its own settings is the one-time restore of the `*.md` editor association, with the removal of the retired Studio settings.
 - Files that a reader opens while the side preview has focus are shown in another editor group than the preview, so the preview is not replaced by them.
 - Closing the preview releases the group it locked, but never a group that holds anything else.
 - Several previews can be open at once, the side preview and one or more Open With tabs; each keeps its own state, render and file watching, and shows its own document and its own place.
