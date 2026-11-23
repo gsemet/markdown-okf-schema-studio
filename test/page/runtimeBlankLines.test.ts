@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { createRuntimeHarness, RuntimeElement, type RuntimeHarness } from "./runtimeHarness";
-import { insertPointAfterLine, MOVE_IDENTIFIERS, patchMessage, plainClick } from "./runtimeTestSupport";
+import { findButton, insertPointAfterLine, MOVE_IDENTIFIERS, patchMessage, plainClick } from "./runtimeTestSupport";
 
 /**
  * The blank-lines block (CR-444): built from the host's list of runs, reachable by the keyboard and
@@ -608,4 +608,108 @@ test("Delete on a blank-lines block of a list posts the removal, then the list h
   setRuns(harness, "22-26");
   harness.dispatchMessage(patchMessage());
   assert.deepEqual(selectedLines(harness), [10], "the list that held the run");
+});
+
+// --- The final save of a blank-lines block's editor (issue 485) -----------------------------------
+
+const DONE = "Done editing";
+
+/** Opens the editor of the blank-lines block `index`, answers its source, types `Text`. */
+function openTyped(harness: RuntimeHarness, index = 0, autosave = false): RuntimeElement {
+  blankAt(harness, index).dispatch("click", plainClick());
+  const openMessage = sent(harness, "previewEditOpen").at(-1)!;
+  harness.dispatchMessage({
+    type: "previewEditSource", documentId: "file:///active.md", revision: 7, requestId: 11,
+    editId: openMessage.editId, originalText: "",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA" && inPage(element))!;
+  assert.ok(textarea, "the editor is open");
+  textarea.value = "Text";
+  textarea.dispatch("input");
+  if (autosave) {
+    harness.flushTimers();
+    assert.equal(sent(harness, "previewEditSave").at(-1)?.final, false, "an autosave posted");
+  }
+  return textarea;
+}
+
+/** Still in the page: neither it nor an ancestor was removed (a removed frame keeps its children). */
+function inPage(element: RuntimeElement): boolean {
+  for (let node: RuntimeElement | undefined = element; node; node = node.parentElement) {
+    if (node.removed) return false;
+  }
+  return true;
+}
+
+const savingShown = (harness: RuntimeHarness): boolean =>
+  harness.createdElements.some((element) => inPage(element) && element.textContent === "Saving Markdown…");
+
+const openEditors = (harness: RuntimeHarness): number =>
+  harness.createdElements.filter((element) => element.tagName === "TEXTAREA" && inPage(element)).length;
+
+function pressDone(harness: RuntimeHarness): void {
+  findButton(harness, DONE).dispatch("click");
+  assert.equal(sent(harness, "previewEditSave").at(-1)?.final, true, "the final save is posted");
+  assert.ok(savingShown(harness), "Saving Markdown… is shown");
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("Done in a blank-lines block's editor: the patch of its final save closes the editor", () => {
+  for (const autosave of [false, true]) {
+    const harness = harnessWithRuns("2-7");
+    const blank = blankAt(harness, 0);
+    const textarea = openTyped(harness, 0, autosave);
+    assert.deepEqual(runOf(sent(harness, "previewEditOpen").at(-1)), [2, 7]);
+    pressDone(harness);
+    const before = harness.messages.length;
+    setRuns(harness, "40-44");
+    harness.dispatchMessage(patchMessage());
+    assert.equal(openEditors(harness), 0, "the editor is closed (autosave " + String(autosave) + ")");
+    assert.equal(inPage(textarea), false, "its frame is out of the page");
+    assert.equal(savingShown(harness), false, "no Saving Markdown… is left");
+    assert.ok(!blankBlocks(harness).includes(blank), "the held blank-lines block is gone");
+    assert.equal(sent(harness, "previewEditCancel", before).length, 0, "no previewEditCancel");
+    // The page is not stuck: a block of the patch's list opens a new editor.
+    const open = sent(harness, "previewEditOpen").length;
+    blankAt(harness, 0).dispatch("click", plainClick());
+    assert.equal(sent(harness, "previewEditOpen").length, open + 1, "a new editor opens");
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("Done in the editor of a run inside a list: the patch closes the editor", () => {
+  const { harness } = listHarness("11-14 22-26");
+  const blank = blankAt(harness, 0);
+  const textarea = openTyped(harness, 0, true);
+  pressDone(harness);
+  const before = harness.messages.length;
+  setRuns(harness, "22-26");
+  harness.dispatchMessage(patchMessage());
+  assert.equal(openEditors(harness), 0, "the editor is closed");
+  assert.equal(inPage(textarea), false, "its frame is out of the page");
+  assert.equal(savingShown(harness), false);
+  assert.ok(!blankBlocks(harness).includes(blank), "the held block is gone");
+  assert.equal(blankBlocks(harness).length, 1, "the block of the run that is left");
+  assert.equal(sent(harness, "previewEditCancel", before).length, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+test("an error answer to Done keeps the editor open across a patch, and a second Done then a patch closes it", () => {
+  const harness = harnessWithRuns("2-7");
+  const textarea = openTyped(harness);
+  pressDone(harness);
+  harness.dispatchMessage({
+    type: "previewEditSource", documentId: "file:///active.md", revision: 7, requestId: 11,
+    editId: sent(harness, "previewEditOpen").at(-1)!.editId, error: "The text changed.",
+  });
+  assert.equal(openEditors(harness), 1, "the editor stays after an error answer");
+  setRuns(harness, "40-44");
+  harness.dispatchMessage(patchMessage());
+  assert.equal(openEditors(harness), 1, "no final save in flight: a patch keeps the editor open");
+  pressDone(harness);
+  setRuns(harness, "40-44");
+  harness.dispatchMessage(patchMessage({ revision: 8, requestId: 12, next: { revision: 9, requestId: 13 } }));
+  assert.equal(openEditors(harness), 0, "the second final save's patch closes it");
+  assert.equal(inPage(textarea), false);
+  assert.equal(savingShown(harness), false);
 });
