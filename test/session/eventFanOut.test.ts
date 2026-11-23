@@ -12,6 +12,9 @@ import * as path from "node:path";
 import { mock, test } from "node:test";
 
 import { getCachedMarkdownStemIndex } from "../../src/core/frontmatter/stemIndex";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
+
+const files = createNodeFileSystem();
 import type { HostServices } from "../../src/host-api/index";
 import { nodeHostPorts } from "./nodeHostPorts";
 import type { PanelGroups } from "../../src/host-api/previewPanel";
@@ -184,20 +187,20 @@ test("a file event on the shared watcher reaches every preview of the root", () 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
-test("saving a Markdown file keeps the stem index, creating or deleting one rebuilds it", () => {
+test("saving a Markdown file keeps the stem index, creating or deleting one rebuilds it", async () => {
   const f = fixture(0);
   try {
     f.manager.events.watchStemRoot(f.root);
     const [watcher] = f.fakeWatchers.live().filter((entry) => entry.pattern === "**/*.md");
     assert.ok(watcher);
-    const before = getCachedMarkdownStemIndex([f.root]);
+    const before = await getCachedMarkdownStemIndex(files, [f.root]);
     for (const handler of [...watcher.changed]) handler(f.foreignPath);
-    assert.equal(getCachedMarkdownStemIndex([f.root]), before, "a change keeps the index");
+    assert.equal(await getCachedMarkdownStemIndex(files, [f.root]), before, "a change keeps the index");
     for (const handler of [...watcher.created]) handler(f.foreignPath);
-    const rebuilt = getCachedMarkdownStemIndex([f.root]);
+    const rebuilt = await getCachedMarkdownStemIndex(files, [f.root]);
     assert.notEqual(rebuilt, before, "a created file rebuilds it");
     for (const handler of [...watcher.deleted]) handler(f.foreignPath);
-    assert.notEqual(getCachedMarkdownStemIndex([f.root]), rebuilt, "a deleted file rebuilds it");
+    assert.notEqual(await getCachedMarkdownStemIndex(files, [f.root]), rebuilt, "a deleted file rebuilds it");
   } finally {
     f.manager.events.disposeStemRootWatchers();
     f.cleanup();

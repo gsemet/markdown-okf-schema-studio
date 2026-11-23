@@ -4,7 +4,8 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
 
-import { analyzeFrontmatter } from "../../../src/core/frontmatter/okfFrontmatter";
+import { analyzeFrontmatterWithLinks } from "../../../src/core/frontmatter/okfFrontmatter";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
 
 /**
@@ -31,7 +32,7 @@ function writeFile(root: string, relative: string, content: string): void {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
-test("T220: a sibling past the 500th stem is known, and the suggestions start with the document's folder", () => {
+test("T220: a sibling past the 500th stem is known, and the suggestions start with the document's folder", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-suggestions-"));
   try {
     writeFile(root, "index.md", "# Bundle\n");
@@ -46,7 +47,8 @@ test("T220: a sibling past the 500th stem is known, and the suggestions start wi
     writeFile(root, "notes/zz-sibling.md", "# Sibling\n");
     writeFile(root, "notes/source.md", "---\ntype: note\nrelated: [related-target]\n---\nBody.\n");
     const sourcePath = path.join(root, "notes/source.md");
-    const analysis = analyzeFrontmatter({
+    const analysis = await analyzeFrontmatterWithLinks({
+      files: createNodeFileSystem(),
       schemaFiles: nodeSchemaFiles,
       filePath: sourcePath,
       sourceText: fs.readFileSync(sourcePath, "utf8"),
@@ -77,7 +79,7 @@ test("T220: a sibling past the 500th stem is known, and the suggestions start wi
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
-test("T220: a stem found in several folders is suggested once, at its closest distance", () => {
+test("T220: a stem found in several folders is suggested once, at its closest distance", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-suggestions-"));
   try {
     writeFile(root, "index.md", "# Bundle\n");
@@ -87,7 +89,8 @@ test("T220: a stem found in several folders is suggested once, at its closest di
     writeFile(root, "alpha.md", "# Alpha\n");
     writeFile(root, "notes/source.md", "---\ntype: note\nrelated: [alpha]\n---\nBody.\n");
     const sourcePath = path.join(root, "notes/source.md");
-    const analysis = analyzeFrontmatter({
+    const analysis = await analyzeFrontmatterWithLinks({
+      files: createNodeFileSystem(),
       schemaFiles: nodeSchemaFiles,
       filePath: sourcePath,
       sourceText: fs.readFileSync(sourcePath, "utf8"),

@@ -4,6 +4,7 @@
  * `okfFrontmatter.ts` (which calls it), so neither imports the other for them.
  */
 
+import type { LinkFiles } from "./linkFiles";
 import type { MarkdownStemIndex } from "./stemIndex";
 
 export const FILE_LINK_RESOLUTIONS = [
@@ -45,12 +46,13 @@ export interface FrontmatterLinkResult {
 }
 
 export interface FileLinkInspectionOptions {
+  /** The file access of the resolution (the host's `FileSystem` satisfies it). */
+  files: LinkFiles;
   filePath: string;
   bundleRoot?: string;
   projectRoot?: string;
   workspaceRoots?: readonly string[];
   schemaDirectory?: string;
-  resolveTargets?: boolean;
   stemIndex?: MarkdownStemIndex;
   allowOutsideWorkspaceLinks?: boolean;
 }

@@ -7,6 +7,7 @@ import { parseDocument } from "yaml";
 
 import {
   analyzeFrontmatter,
+  analyzeFrontmatterWithLinks,
   createFrontmatterFieldPatch,
   createFrontmatterFieldRemovePatch,
   createFrontmatterFieldRenamePatch,
@@ -22,9 +23,12 @@ import {
   resolveSchemaRefs,
   setSchemaFileReaderForTests,
 } from "../../../src/core/frontmatter/okfFrontmatter";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
 import { inspectFrontmatterLinks } from "../../../src/core/frontmatter/fileLinks";
 import { needsSymlinks } from "../../shared/symlinks";
+
+const linkFiles = createNodeFileSystem();
 
 interface SyntheticFs {
   root: string;
@@ -598,7 +602,7 @@ test("analyzeFrontmatter validates enums, consts, and formats against the schema
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
-test("analyzeFrontmatter inspects annotated scalar and array links without AJV keyword errors", () => {
+test("analyzeFrontmatter inspects annotated scalar and array links without AJV keyword errors", async () => {
   const fsRoot = makeSyntheticFs({
     "index.md": "# Bundle\n",
     "log.md": "# Log\n",
@@ -642,7 +646,8 @@ test("analyzeFrontmatter inspects annotated scalar and array links without AJV k
     assert.ok(fast.fields.some((field) => field.name === "attachments"));
     assert.equal(fast.summary.errors, 0);
 
-    const result = analyzeFrontmatter({
+    const result = await analyzeFrontmatterWithLinks({
+      files: linkFiles,
       schemaFiles: nodeSchemaFiles,
       filePath: sourcePath,
       sourceText: fs.readFileSync(sourcePath, "utf8"),
@@ -688,7 +693,7 @@ test("frontmatter link identity prefers the configured id and otherwise uses the
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
-test("analyzeFrontmatter attaches nested link results to the parent field", () => {
+test("analyzeFrontmatter attaches nested link results to the parent field", async () => {
   const fsRoot = makeSyntheticFs({
     "index.md": "# Bundle\n",
     "_schema/note.schema.yaml": [
@@ -711,7 +716,8 @@ test("analyzeFrontmatter attaches nested link results to the parent field", () =
   });
   try {
     const sourcePath = path.join(fsRoot.root, "docs/source.md");
-    const result = analyzeFrontmatter({
+    const result = await analyzeFrontmatterWithLinks({
+      files: linkFiles,
       schemaFiles: nodeSchemaFiles,
       filePath: sourcePath,
       sourceText: fs.readFileSync(sourcePath, "utf8"),
@@ -733,7 +739,7 @@ test("analyzeFrontmatter attaches nested link results to the parent field", () =
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
-test("file-link union applicability honors pattern and explicit root precedence", () => {
+test("file-link union applicability honors pattern and explicit root precedence", async () => {
   const firstRoot = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-root-a-"));
   const secondRoot = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-root-b-"));
   try {
@@ -762,10 +768,11 @@ test("file-link union applicability honors pattern and explicit root precedence"
         },
       },
     } as Record<string, unknown>;
-    const ambiguous = inspectFrontmatterLinks(
+    const ambiguous = await inspectFrontmatterLinks(
       { reference: "REQ-1", bundle: "REQ-1.md" },
       schema,
       {
+        files: linkFiles,
         filePath: path.join(firstRoot, "active.md"),
         bundleRoot: path.join(firstRoot, "missing-bundle"),
         workspaceRoots: [firstRoot, secondRoot],
@@ -774,17 +781,17 @@ test("file-link union applicability honors pattern and explicit root precedence"
     );
     assert.equal(ambiguous.find((link) => link.fieldPath === "reference")?.code, "E10");
     assert.equal(ambiguous.find((link) => link.fieldPath === "bundle")?.code, "W15");
-    const ignored = inspectFrontmatterLinks(
+    const ignored = await inspectFrontmatterLinks(
       { reference: "OTHER-missing" },
       schema,
-      { filePath: path.join(firstRoot, "active.md"), workspaceRoots: [firstRoot, secondRoot] },
+      { files: linkFiles, filePath: path.join(firstRoot, "active.md"), workspaceRoots: [firstRoot, secondRoot] },
     );
     assert.deepEqual(ignored, []);
     fs.rmSync(path.join(secondRoot, "REQ-1.md"));
-    const unique = inspectFrontmatterLinks(
+    const unique = await inspectFrontmatterLinks(
       { reference: "REQ-1" },
       schema,
-      { filePath: path.join(firstRoot, "active.md"), workspaceRoots: [firstRoot, secondRoot] },
+      { files: linkFiles, filePath: path.join(firstRoot, "active.md"), workspaceRoots: [firstRoot, secondRoot] },
     );
     assert.equal(unique[0]?.status, "valid");
   } finally {
@@ -794,7 +801,7 @@ test("file-link union applicability honors pattern and explicit root precedence"
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
-test("file-link union applicability preserves boolean local references", () => {
+test("file-link union applicability preserves boolean local references", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-boolean-ref-"));
   try {
     const source = path.join(root, "source.md");
@@ -824,10 +831,10 @@ test("file-link union applicability preserves boolean local references", () => {
       },
     } as Record<string, unknown>;
 
-    const results = inspectFrontmatterLinks(
+    const results = await inspectFrontmatterLinks(
       { falseAnnotatedRef: "missing.md", trueAnnotatedRef: "missing.md" },
       schema,
-      { filePath: source },
+      { files: linkFiles, filePath: source },
     );
 
     assert.deepEqual(results.map((link) => link.fieldPath), ["trueAnnotatedRef"]);
@@ -838,7 +845,7 @@ test("file-link union applicability preserves boolean local references", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
-test("filename-stem links recheck symlink containment after an internal target drifts", needsSymlinks, () => {
+test("filename-stem links recheck symlink containment after an internal target drifts", needsSymlinks, async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-symlink-drift-"));
   const inside = path.join(root, "inside.md");
   const outside = path.join(os.tmpdir(), `okf-link-outside-${process.pid}.md`);
@@ -861,20 +868,20 @@ test("filename-stem links recheck symlink containment after an internal target d
         },
       },
     } as Record<string, unknown>;
-    const initial = inspectFrontmatterLinks(
+    const initial = await inspectFrontmatterLinks(
       { reference: "Alias" },
       schema,
-      { filePath: source, bundleRoot: root },
+      { files: linkFiles, filePath: source, bundleRoot: root },
     );
     assert.equal(initial[0]?.status, "valid");
     assert.equal(initial[0]?.resolvedPath, fs.realpathSync(inside));
 
     fs.unlinkSync(alias);
     fs.symlinkSync(outside, alias);
-    const drifted = inspectFrontmatterLinks(
+    const drifted = await inspectFrontmatterLinks(
       { reference: "Alias" },
       schema,
-      { filePath: source, bundleRoot: root },
+      { files: linkFiles, filePath: source, bundleRoot: root },
     );
     assert.equal(drifted[0]?.status, "invalid");
     assert.equal(drifted[0]?.code, "E10");
@@ -886,14 +893,14 @@ test("filename-stem links recheck symlink containment after an internal target d
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
-test("filename-stem links report W15 when matching candidates are unavailable", needsSymlinks, () => {
+test("filename-stem links report W15 when matching candidates are unavailable", needsSymlinks, async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-unavailable-stem-"));
   const source = path.join(root, "source.md");
   const unavailable = path.join(root, "Unavailable.md");
   try {
     fs.writeFileSync(source, "# Source\n", "utf8");
     fs.symlinkSync(path.join(root, "missing.md"), unavailable);
-    const results = inspectFrontmatterLinks(
+    const results = await inspectFrontmatterLinks(
       { reference: "Unavailable" },
       {
         properties: {
@@ -903,7 +910,7 @@ test("filename-stem links report W15 when matching candidates are unavailable", 
           },
         },
       },
-      { filePath: source, bundleRoot: root },
+      { files: linkFiles, filePath: source, bundleRoot: root },
     );
     assert.equal(results[0]?.status, "unavailable");
     assert.equal(results[0]?.code, "W15");
@@ -1081,7 +1088,7 @@ test("frontmatter add with afterField reports whether the field was placed", () 
   assert.equal(plain.positioned, undefined);
 });
 
-test("T22: linkSuggestions are set only for filename-stem fields and only when links are inspected", () => {
+test("T22: linkSuggestions are set only for filename-stem fields and only when links are inspected", async () => {
   const fsRoot = makeSyntheticFs({
     "index.md": "# Bundle\n",
     "_schema/note.schema.yaml": [
@@ -1110,7 +1117,8 @@ test("T22: linkSuggestions are set only for filename-stem fields and only when l
   });
   try {
     const sourcePath = path.join(fsRoot.root, "docs/source.md");
-    const analyze = (inspectLinks: boolean) => analyzeFrontmatter({
+    const analyze = (inspectLinks: boolean) => analyzeFrontmatterWithLinks({
+      files: linkFiles,
       schemaFiles: nodeSchemaFiles,
       filePath: sourcePath,
       sourceText: fs.readFileSync(sourcePath, "utf8"),
@@ -1120,14 +1128,14 @@ test("T22: linkSuggestions are set only for filename-stem fields and only when l
       strictAdditionalProperties: false,
       workspaceRoots: [fsRoot.root],
     });
-    const on = new Map(analyze(true).fields.map((field) => [field.name, field] as const));
+    const on = new Map((await analyze(true)).fields.map((field) => [field.name, field] as const));
     assert.ok(on.get("refs")?.linkSuggestions?.includes("StRS-A"));
     assert.ok(on.get("refs")?.linkSuggestions?.includes("StRS-B"));
     assert.ok(on.get("single")?.linkSuggestions?.includes("StRS-A"));
     assert.equal(on.get("attachments")?.linkSuggestions, undefined);
     assert.equal(on.get("title")?.linkSuggestions, undefined);
     assert.equal(on.get("type")?.linkSuggestions, undefined);
-    const off = analyze(false);
+    const off = await analyze(false);
     assert.ok(off.fields.every((field) => field.linkSuggestions === undefined));
   } finally {
     fs.rmSync(fsRoot.root, { recursive: true, force: true });

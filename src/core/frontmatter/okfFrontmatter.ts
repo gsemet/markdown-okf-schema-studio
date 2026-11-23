@@ -14,10 +14,11 @@
 
 import * as path from "node:path";
 import { parseDocument } from "yaml";
-import type { FileLinkInspectionOptions } from "./fileLinkTypes";
+import type { FileLinkInspectionOptions, FrontmatterLinkResult } from "./fileLinkTypes";
 import {
   inspectFrontmatterLinks,
   filenameStemSuggestions,
+  pendingFrontmatterLinks,
 } from "./fileLinks";
 import { frontmatterEndLine, frontmatterFieldLines } from "./frontmatterChanges";
 import { extractFrontmatter, extractFrontmatterShared, stripJson5Comments } from "./frontmatterParse";
@@ -33,6 +34,7 @@ import {
   type FieldIssue,
   type FrontmatterResult,
 } from "./frontmatterValidate";
+import type { LinkFiles } from "./linkFiles";
 import type { SchemaFiles } from "./schemaFiles";
 import { getResolvedSchema, resetSchemaRegistryForTests, type SchemaDependencyCheck } from "./schemaRegistry";
 import { getCachedValidator } from "./schemaValidator";
@@ -308,16 +310,60 @@ export interface FrontmatterOptions {
   allowOutsideWorkspaceLinks?: boolean;
 }
 
-/** Builds the webview payload for a document's frontmatter. */
-export function analyzeFrontmatter(options: FrontmatterOptions): FrontmatterResult {
-  const result = analyzeFrontmatterCore(options);
-  const lines = frontmatterFieldLines(options.sourceText);
+/** What {@link analyzeFrontmatterWithLinks} reads: {@link FrontmatterOptions} and the files the links resolve through. */
+export interface FrontmatterWithLinksOptions extends FrontmatterOptions {
+  /** The file access of the link inspection (the host's `FileSystem` satisfies it). */
+  files: LinkFiles;
+}
+
+/**
+ * Builds the webview payload for a document's frontmatter, without looking up any link target: the
+ * links that parse are `pending`, and no stem suggestion is made. Synchronous (the first paint,
+ * the refresh, the save validation). {@link analyzeFrontmatterWithLinks} resolves the links.
+ */
+export function analyzeFrontmatter(options: Omit<FrontmatterOptions, "inspectLinks"> & { inspectLinks?: false }): FrontmatterResult {
+  const prepared = prepareAnalysis(options);
+  if (!("effective" in prepared)) return withSourceLines(prepared, options.sourceText);
+  const linkResults = pendingFrontmatterLinks(prepared.frontmatter, prepared.schema);
+  const fields = buildFields(prepared, options.strictAdditionalProperties, linkResults);
+  return withSourceLines(completeAnalysis(prepared, fields, linkResults), options.sourceText);
+}
+
+/**
+ * Builds the webview payload with the links resolved (and, with `inspectLinks: true`, the stem
+ * suggestions of the filename-stem fields), reading files only through `options.files`.
+ */
+export async function analyzeFrontmatterWithLinks(options: FrontmatterWithLinksOptions): Promise<FrontmatterResult> {
+  const prepared = prepareAnalysis(options);
+  if (!("effective" in prepared)) return withSourceLines(prepared, options.sourceText);
+  const inspection: FileLinkInspectionOptions = { ...prepared.linkInspectionOptions, files: options.files };
+  const linkResults = options.inspectLinks === false
+    ? pendingFrontmatterLinks(prepared.frontmatter, prepared.schema)
+    : await inspectFrontmatterLinks(prepared.frontmatter, prepared.schema, inspection);
+  const fields = buildFields(prepared, options.strictAdditionalProperties, linkResults);
+  if (options.inspectLinks === true) {
+    let stems: Awaited<ReturnType<typeof filenameStemSuggestions>> | undefined;
+    for (const field of fields) {
+      if (!fieldUsesFilenameStemLinks(prepared.effective.properties[field.name])) continue;
+      stems ??= await filenameStemSuggestions(inspection);
+      if (stems.suggestions.length > 0) {
+        field.linkSuggestions = stems.suggestions;
+        // Only a capped dropdown needs the full list; otherwise the suggestions are the known set.
+        if (stems.known.length > stems.suggestions.length) field.linkKnownStems = stems.known;
+      }
+    }
+  }
+  return withSourceLines(completeAnalysis(prepared, fields, linkResults), options.sourceText);
+}
+
+function withSourceLines(result: FrontmatterResult, sourceText: string): FrontmatterResult {
+  const lines = frontmatterFieldLines(sourceText);
   const fields = lines.size === 0 ? result.fields : result.fields.map((field) => {
     const sourceLines = lines.get(field.name);
     return sourceLines ? { ...field, sourceLines } : field;
   });
   // Without a matched schema every key is allowed.
-  const endLine = result.present ? frontmatterEndLine(options.sourceText) : undefined;
+  const endLine = result.present ? frontmatterEndLine(sourceText) : undefined;
   return {
     ...result,
     fields,
@@ -326,7 +372,19 @@ export function analyzeFrontmatter(options: FrontmatterOptions): FrontmatterResu
   };
 }
 
-function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult {
+/** The analysis up to the link step: what the fields and the summary are built from. */
+interface PendingAnalysis {
+  frontmatter: Record<string, unknown>;
+  schema: Record<string, unknown>;
+  effective: ReturnType<typeof effectiveProperties>;
+  info: FieldIssue[];
+  missingRequiredFields: string[];
+  /** The link inspection settings, before the files are attached. */
+  linkInspectionOptions: Omit<FileLinkInspectionOptions, "files">;
+}
+
+/** Everything that needs no link lookup: the final result when no table is built, else the state to finish. */
+function prepareAnalysis(options: FrontmatterOptions): FrontmatterResult | PendingAnalysis {
   // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
   const extraction = extractFrontmatterShared(options.sourceText);
   if (!extraction.present) {
@@ -432,7 +490,7 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
   const missingRequiredFields = [...effective.required].filter(
     (name) => !Object.hasOwn(frontmatter, name),
   );
-  const linkInspectionOptions: FileLinkInspectionOptions = {
+  const linkInspectionOptions: Omit<FileLinkInspectionOptions, "files"> = {
     filePath: options.filePath,
     ...(options.bundleRoot ? { bundleRoot: options.bundleRoot } : {}),
     ...(options.projectRoot ? { projectRoot: options.projectRoot } : {}),
@@ -442,28 +500,24 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
       : {}),
     schemaDirectory: schemaDir,
   };
-  const linkResults = inspectFrontmatterLinks(frontmatter, schema, {
-    ...linkInspectionOptions,
-    resolveTargets: options.inspectLinks !== false,
-  });
-  const fields = fieldsFromYaml(
-    frontmatter,
-    effective,
-    options.strictAdditionalProperties,
-    linkResults,
-  );
-  if (options.inspectLinks === true) {
-    let stems: ReturnType<typeof filenameStemSuggestions> | undefined;
-    for (const field of fields) {
-      if (!fieldUsesFilenameStemLinks(effective.properties[field.name])) continue;
-      stems ??= filenameStemSuggestions(linkInspectionOptions);
-      if (stems.suggestions.length > 0) {
-        field.linkSuggestions = stems.suggestions;
-        // Only a capped dropdown needs the full list; otherwise the suggestions are the known set.
-        if (stems.known.length > stems.suggestions.length) field.linkKnownStems = stems.known;
-      }
-    }
-  }
+  return { frontmatter, schema, effective, info, missingRequiredFields, linkInspectionOptions };
+}
+
+function buildFields(
+  pending: PendingAnalysis,
+  strictAdditionalProperties: boolean,
+  linkResults: FrontmatterLinkResult[],
+): FrontmatterResult["fields"] {
+  return fieldsFromYaml(pending.frontmatter, pending.effective, strictAdditionalProperties, linkResults);
+}
+
+/** The result of an analysis whose fields are built (links resolved or pending). */
+function completeAnalysis(
+  pending: PendingAnalysis,
+  fields: FrontmatterResult["fields"],
+  linkResults: FrontmatterLinkResult[],
+): FrontmatterResult {
+  const { frontmatter, schema, effective, info, missingRequiredFields } = pending;
   const availableFields = effective.order
     .filter((name) => !fields.some((field) => field.name === name))
     .map((name): AvailableFieldEntry => {

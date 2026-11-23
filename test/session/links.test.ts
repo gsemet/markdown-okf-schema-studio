@@ -58,7 +58,7 @@ test("a frontmatter link finds its marker with the identity of the text it was a
     },
     pathOf: (candidate: { path: string }) => candidate.path,
     frontmatter: {
-      analyze: (_preview: unknown, _filePath: string, source: string) => {
+      analyzeWithLinks: (_preview: unknown, _filePath: string, source: string) => {
         analysedTexts.push(source);
         return { fields: [], linkResults: [link] };
       },

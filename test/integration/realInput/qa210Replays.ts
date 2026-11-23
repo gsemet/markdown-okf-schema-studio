@@ -6,6 +6,7 @@ import { type Page } from "playwright-core";
 
 import { resolveFrontmatterLinkRoots } from "../../../src/core/frontmatter/fileLinks";
 import { MarkdownStemIndex } from "../../../src/core/frontmatter/stemIndex";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 import { lineDelta } from "../../shared/lineDelta";
 import {
   bufferText,
@@ -264,17 +265,19 @@ function realFolder(folder: string): string {
  * order) and keeps each stem once, so another folder can only add stems before the target, never
  * remove one; and no other file can hold the target's stem (see LINK_HINT_TARGET).
  */
-function assertTargetBeyondDropdownCap(filePath: string, target: string): void {
+async function assertTargetBeyondDropdownCap(filePath: string, target: string): Promise<void> {
   const repository = realFolder(REPOSITORY_ROOT);
-  const roots = resolveFrontmatterLinkRoots({
+  const files = createNodeFileSystem();
+  const roots = (await resolveFrontmatterLinkRoots({
+    files,
     filePath,
     workspaceRoots: (vscode.workspace.workspaceFolders ?? []).map((folder) => folder.uri.fsPath),
     schemaDirectory: path.join(path.dirname(filePath), "_schema"),
-  }).filenameRoots.map(realFolder);
+  })).filenameRoots.map(realFolder);
   assert.ok(roots.includes(repository),
     `precondition: the link roots ${JSON.stringify(roots)} do not hold the repository ${repository}`);
-  const index = new MarkdownStemIndex([repository]);
-  assert.equal(index.get(target).length, 1, `precondition: one file of the repository is named ${target}.md`);
+  const index = await MarkdownStemIndex.build(files, [repository]);
+  assert.equal((await index.get(files, target)).length, 1, `precondition: one file of the repository is named ${target}.md`);
   const position = index.stems().indexOf(target);
   assert.ok(position >= LINK_DROPDOWN_CAP,
     `precondition: fewer than ${LINK_DROPDOWN_CAP} Markdown stems of the repository sort before the target `
@@ -290,7 +293,7 @@ function assertTargetBeyondDropdownCap(filePath: string, target: string): void {
 export async function scenarioLinkHintMatchesTable(page: Page): Promise<void> {
   await withDocument("realinput-qa210-c6-2", LINK_HINT_DOCUMENT, async (document) => {
     fs.writeFileSync(path.join(path.dirname(document.uri.fsPath), `${LINK_HINT_TARGET}.md`), "# Link hint target\n");
-    assertTargetBeyondDropdownCap(document.uri.fsPath, LINK_HINT_TARGET);
+    await assertTargetBeyondDropdownCap(document.uri.fsPath, LINK_HINT_TARGET);
     await openSidePreview(document);
     await waitForRender(document);
     await setEditMode(page, true);
