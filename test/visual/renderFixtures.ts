@@ -52,7 +52,6 @@ import { contentWithCellEditorOpenHtml, drawnContentHtml } from "./drawnContent"
 import { buildHtmlExport } from "../../src/core/export/htmlExport";
 import { katexFontUrls } from "../../src/core/export/exportStyles";
 import { THEME_TOKEN_NAMES, VSCODE_VARIABLE_PREFIX } from "../../src/core/preview/themeTokens";
-import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const visualRoot = path.resolve(__dirname, "../../../test/visual");
 const fixtureDirectory = path.join(visualRoot, "fixtures");
