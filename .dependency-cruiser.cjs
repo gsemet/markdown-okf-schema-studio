@@ -26,42 +26,23 @@
  * Core files that still import Node built-ins, with the only built-ins each may use, why, and the
  * plan that removes the exception. Synchronous file access and process spawning that predate the
  * ports (see the "Leaks" table of the multi-host analysis). They work in every Node host (VS Code,
- * a future headless host) but block a browser build of the core. Pure `path` arithmetic is listed
- * too: a browser build would need a path shim.
+ * a future headless host) but block a browser build of the core. Path arithmetic goes through
+ * `src/core/path/hostPath.ts`, the only module of core and session importing `node:path`: a browser
+ * build aliases it to a path shim.
  *
  * Removal plans:
  *   PORT_FOLLOW_UP  a follow-up change moves the access behind the `FileSystem` / `ProcessRunner`
  *                   port (async, so it changes timing and is out of a pure move step).
- *   PATH_SHIM       pure path arithmetic: stays until a browser build of the core adds a path shim.
+ *   PATH_SHIM       the single hostPath module: a browser build aliases node:path there.
  */
 const PORT_FOLLOW_UP = "follow-up change: move the access behind the FileSystem / ProcessRunner port";
-const PATH_SHIM = "kept: pure path arithmetic, needs a path shim for a browser build";
+const PATH_SHIM = "kept: a browser build aliases node:path to a path shim (win32 and posix included) in this one module";
 const NODE_DEBT = {
-  "src/core/frontmatter/fileLinks.ts": {
-    builtins: ["path"], reason: "path arithmetic of link roots and targets", removal: PATH_SHIM },
-  "src/core/frontmatter/okfFrontmatter.ts": {
-    builtins: ["path"], reason: "schema directory and $ref path resolution", removal: PATH_SHIM },
-  "src/core/frontmatter/stemIndex.ts": {
-    builtins: ["path"], reason: "path arithmetic of filename stems", removal: PATH_SHIM },
-  "src/core/mapping/imageReference.ts": {
-    builtins: ["path"], reason: "relative image paths", removal: PATH_SHIM },
-  "src/core/mapping/mystTargets.ts": {
-    builtins: ["path"], reason: "relative bibliography paths", removal: PATH_SHIM },
-  "src/core/myst/confLocator.ts": {
-    builtins: ["path"], reason: "search of the governing conf.py path", removal: PATH_SHIM },
-  "src/core/render/documentGlob.ts": {
-    builtins: ["path"], reason: "toctree glob path matching", removal: PATH_SHIM },
-  "src/core/render/mystRenderer.ts": {
-    builtins: ["path"], reason: "include and image path resolution", removal: PATH_SHIM },
-  "src/core/render/plantUmlIncludes.ts": {
-    builtins: ["path"], reason: "!include path resolution", removal: PATH_SHIM },
+  "src/core/path/hostPath.ts": {
+    builtins: ["path"], reason: "the one module that re-exports node:path to core and session", removal: PATH_SHIM },
   "src/core/render/plantUmlRenderer.ts": {
-    builtins: ["child_process", "fs", "path"], reason: "runs the PlantUML jar",
+    builtins: ["child_process", "fs"], reason: "runs the PlantUML jar",
     removal: "follow-up change: spawn the jar through the existing ProcessRunner port" },
-  "src/core/render/renderPipeline.ts": {
-    builtins: ["path"], reason: "include roots", removal: PATH_SHIM },
-  "src/core/security/resource-policy.ts": {
-    builtins: ["path"], reason: "path containment checks of local resources", removal: PATH_SHIM },
 };
 
 const { builtinModules } = require("node:module");
@@ -170,11 +151,11 @@ module.exports = {
       to: { path: `^src/page/|${HOSTS}` },
     },
     {
-      name: "session-node-builtins-path-only",
-      comment: "The session layer reaches the disk through ports; only path arithmetic is allowed.",
+      name: "session-no-node-builtins",
+      comment: "The session layer reaches the disk through ports and paths through src/core/path/hostPath.ts: no Node built-in.",
       severity: "error",
       from: { path: "^src/session/" },
-      to: { dependencyTypes: ["core"], pathNot: builtins(["path"]) },
+      to: { dependencyTypes: ["core"] },
     },
     {
       name: "session-not-to-node-services",

@@ -4,7 +4,7 @@
  * listener holds it; the last release disposes it. Host-neutral: it works on the `Watcher` port.
  */
 
-import * as path from "node:path";
+import * as path from "../core/path/hostPath";
 
 import type { Disposable } from "../host-api/events";
 import type { Watcher } from "../host-api/watcher";

@@ -1,4 +1,4 @@
-import * as path from "node:path";
+import * as path from "../core/path/hostPath";
 
 import type { AssetResolver } from "../host-api/assetResolver";
 import { type FrontmatterResult } from "../core/frontmatter/okfFrontmatter";

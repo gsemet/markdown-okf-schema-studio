@@ -1,4 +1,4 @@
-import * as path from "node:path";
+import * as path from "../path/hostPath";
 import type { LinkFiles } from "./linkFiles";
 
 const EXCLUDED_DIRECTORY_NAMES = new Set([

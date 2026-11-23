@@ -7,7 +7,7 @@
  * (`src/host-vscode/activation.ts`) creates the panels and forwards the events.
  */
 
-import * as path from "node:path";
+import * as path from "../core/path/hostPath";
 
 import type { HostDocument } from "../host-api/documentStore";
 import type { HostServices } from "../host-api/index";

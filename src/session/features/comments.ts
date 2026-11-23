@@ -5,7 +5,7 @@
  * (saved with the document), and moves the sidecar with a renamed document.
  */
 
-import * as path from "node:path";
+import * as path from "../../core/path/hostPath";
 
 import { createDocumentIndex, reanchorThreads, shiftThreadLines, toLineChanges } from "../../core/comments/anchoring";
 import { resolveAuthor } from "../../core/comments/author";

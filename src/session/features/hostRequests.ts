@@ -6,7 +6,7 @@
  */
 
 import { STALE_REQUEST } from "../../core/edits/sourceEdits";
-import * as path from "node:path";
+import * as path from "../../core/path/hostPath";
 
 import { IMAGE_EXTENSIONS, isImageFileName, relativeImageReference } from "../../core/mapping/imageReference";
 import { docReference, documentTargets } from "../../core/mapping/mystTargets";

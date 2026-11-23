@@ -4,7 +4,7 @@
  * `DocumentStore` port).
  */
 
-import * as path from "node:path";
+import * as path from "../core/path/hostPath";
 
 import { READ_ONLY_FILE } from "../core/edits/readOnlyReasons";
 import type { TextEdit } from "../core/edits/textEdit";

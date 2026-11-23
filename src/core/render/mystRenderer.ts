@@ -5,7 +5,7 @@
  * and HTML passes on the writer's output. Each pass lives in the module of its subject.
  */
 
-import * as path from "node:path";
+import * as path from "../path/hostPath";
 
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import {

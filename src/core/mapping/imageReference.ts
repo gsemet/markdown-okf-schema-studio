@@ -4,7 +4,7 @@
  * `vscode`.
  */
 
-import * as path from "node:path";
+import * as path from "../path/hostPath";
 
 /** Image types a reference may point to (nothing is read or written, so SVG is fine). */
 export const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp", "svg"];

@@ -5,7 +5,7 @@
  * files read together stay under `MAX_BIB_BYTES`. Everything is asynchronous.
  */
 
-import * as path from "node:path";
+import * as path from "../core/path/hostPath";
 
 import type { FileSystem } from "../host-api/fileSystem";
 import type { WorkspaceInfo } from "../host-api/workspaceInfo";
