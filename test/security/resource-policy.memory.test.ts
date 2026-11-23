@@ -53,3 +53,10 @@ test("the sync path decides from the primed answers only, and a request never pr
   assert.equal(policy.resolvePrimed("inside.png", root, { image: true }), path.join(root, "image.png"));
   assert.deepEqual(policy.takeUnprimed(), []);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+test("a policy never primed lists the request instead of refusing it as outside every root", () => {
+  const policy = new ResourcePolicy(fixture(), [{ label: "output", directory: root }]);
+  assert.equal(policy.resolvePrimed("image.png", root, { image: true }), undefined);
+  assert.deepEqual(policy.takeUnprimed().map((entry) => entry.request), ["image.png"]);
+});

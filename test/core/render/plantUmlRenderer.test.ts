@@ -375,8 +375,10 @@ test("abort also kills the process group, falling back to child.kill on failure"
     throw new Error("ESRCH");
   }) as typeof process.kill;
   const controller = new AbortController();
+  let spawned!: () => void;
+  const started = new Promise<void>((resolve) => { spawned = resolve; });
   try {
-    await withFake(() => child, async (workspace) => {
+    await withFake(() => { spawned(); return child; }, async (workspace) => {
       const pending = renderPlantUmlDiagrams(diagramHtml(), {
         files: createNodeFileSystem(),
         workspaceRoot: workspace.root,
@@ -384,6 +386,7 @@ test("abort also kills the process group, falling back to child.kill on failure"
         jarPath: workspace.jarPath,
         signal: controller.signal,
       });
+      await started;
       controller.abort();
       await pending;
     });
