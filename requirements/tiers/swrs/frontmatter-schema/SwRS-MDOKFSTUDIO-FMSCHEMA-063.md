@@ -28,6 +28,7 @@ implemented_in_files:
 - src/core/frontmatter/propertiesTable.ts
 - src/session/features/frontmatter.ts
 tested_in_files:
+- test/core/frontmatter/linkFiles.memory.test.ts
 - test/core/frontmatter/propertiesTable.test.ts
 - test/integration/previewEditing.test.ts
 - test/page/runtimeScroll.test.ts

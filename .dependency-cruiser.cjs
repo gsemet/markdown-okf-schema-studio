@@ -38,11 +38,11 @@ const PORT_FOLLOW_UP = "follow-up change: move the access behind the FileSystem 
 const PATH_SHIM = "kept: pure path arithmetic, needs a path shim for a browser build";
 const NODE_DEBT = {
   "src/core/frontmatter/fileLinks.ts": {
-    builtins: ["fs", "path"], reason: "sync existence checks of linked files", removal: PORT_FOLLOW_UP },
+    builtins: ["path"], reason: "path arithmetic of link roots and targets", removal: PATH_SHIM },
   "src/core/frontmatter/okfFrontmatter.ts": {
     builtins: ["path"], reason: "schema directory and $ref path resolution", removal: PATH_SHIM },
   "src/core/frontmatter/stemIndex.ts": {
-    builtins: ["fs", "path"], reason: "sync walk of the workspace for filename stems", removal: PORT_FOLLOW_UP },
+    builtins: ["path"], reason: "path arithmetic of filename stems", removal: PATH_SHIM },
   "src/core/mapping/imageReference.ts": {
     builtins: ["path"], reason: "relative image paths", removal: PATH_SHIM },
   "src/core/mapping/mystTargets.ts": {

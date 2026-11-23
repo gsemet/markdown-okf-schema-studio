@@ -23,7 +23,7 @@ test("a malformed frontmatter link request is refused with its own reason", asyn
     navigator: {},
     pathOf: (value: { path: string }) => value.path,
     frontmatter: {
-      analyze: () => ({ fields: [], linkResults: [] }),
+      analyzeWithLinks: () => ({ fields: [], linkResults: [] }),
       setState: () => undefined,
     },
   } as unknown as PreviewManager;

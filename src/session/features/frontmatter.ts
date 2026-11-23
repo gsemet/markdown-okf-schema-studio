@@ -6,7 +6,12 @@
 
 import { checkFrontmatterCandidate, FRONTMATTER_STALE, planFrontmatterSave } from "../../core/edits/frontmatterEdit";
 import type { LinkedTargetWatch } from "../../host-api/linkedTargets";
-import { analyzeFrontmatter, type FrontmatterResult } from "../../core/frontmatter/okfFrontmatter";
+import {
+  analyzeFrontmatter,
+  analyzeFrontmatterWithLinks,
+  type FrontmatterOptions,
+  type FrontmatterResult,
+} from "../../core/frontmatter/okfFrontmatter";
 import { renderPropertiesTable, replacePropertiesTableHtml } from "../../core/frontmatter/propertiesTable";
 import type { HostDocument } from "../../host-api/documentStore";
 import type { SourceMappingOptions } from "../../core/mapping/sourceMapping";
@@ -63,26 +68,50 @@ export class FrontmatterController {
       this.manager.edits.trackPendingSave(preview, this.handleSave(preview, message)));
   }
 
-  /** The frontmatter analysis of `sourceText` with the settings and roots of the preview. */
-  public analyze(
+  private optionsFor(
     preview: PreviewSession,
     filePath: string,
     sourceText: string,
-    inspectLinks: boolean,
-    workspaceRoots: string[] = preview.sessionRoots,
-  ): FrontmatterResult {
-    return analyzeFrontmatter({
+    workspaceRoots: string[],
+  ): Omit<FrontmatterOptions, "inspectLinks"> {
+    return {
       schemaFiles: this.manager.host.schemaFiles,
       filePath,
       sourceText,
       stopDir: preview.workspaceRoot,
       allowSchemaResolution: !preview.restrictedReads,
-      inspectLinks,
       strictAdditionalProperties: preview.frontmatterConfiguration.strictAdditionalProperties,
       bundleRoot: preview.frontmatterConfiguration.bundleRoot,
       projectRoot: preview.frontmatterConfiguration.projectRoot,
       allowOutsideWorkspaceLinks: preview.frontmatterConfiguration.allowOutsideWorkspaceLinks,
       workspaceRoots,
+    };
+  }
+
+  /** The frontmatter analysis of `sourceText` with the settings and roots of the preview; its links stay pending (no file lookup). */
+  public analyze(
+    preview: PreviewSession,
+    filePath: string,
+    sourceText: string,
+    workspaceRoots: string[] = preview.sessionRoots,
+  ): FrontmatterResult {
+    return analyzeFrontmatter({
+      ...this.optionsFor(preview, filePath, sourceText, workspaceRoots),
+      inspectLinks: false,
+    });
+  }
+
+  /** The same analysis with the links resolved and the stem suggestions, through the host's file system. */
+  public analyzeWithLinks(
+    preview: PreviewSession,
+    filePath: string,
+    sourceText: string,
+    workspaceRoots: string[] = preview.sessionRoots,
+  ): Promise<FrontmatterResult> {
+    return analyzeFrontmatterWithLinks({
+      ...this.optionsFor(preview, filePath, sourceText, workspaceRoots),
+      files: this.manager.host.files,
+      inspectLinks: true,
     });
   }
 
@@ -158,40 +187,60 @@ export class FrontmatterController {
     }
     state.linkEnrichmentTimer = setTimeout(() => {
       state.linkEnrichmentTimer = undefined;
-      const current = preview.document;
-      if (preview.disposed
-        || !manager.has(preview)
-        || preview.documentUri !== documentUri
-        || !current
-        || current.id !== documentUri
-        || current.revision !== revision
-        || (result !== undefined && !manager.rendering.isCurrentRender(preview, result, generation))) {
-        return;
-      }
-      const frontmatter = this.analyze(preview, manager.pathOf(current), current.getText(), true);
-      if (preview.disposed
-        || !manager.has(preview)
-        || preview.documentUri !== documentUri
-        || preview.document !== current
-        || current.revision !== revision
-        || (result !== undefined && !manager.rendering.isCurrentRender(preview, result, generation))) {
-        return;
-      }
-      this.setState(preview, frontmatter, documentUri, revision, true);
-      const stage = preview.stage;
-      const sourceMapping = stage && stage.activeDocumentIdentity === documentUri ? {
-        documentId: stage.activeDocumentIdentity,
-        activeSourceFile: stage.activeDocumentPath,
-      } : undefined;
-      manager.edits.deferWhileEditing(preview, "links", () => {
-        if (!preview.disposed
-          && preview.document === current
-          && current.revision === revision
-          && preview.stage === stage) {
-          this.patchPropertiesTable(preview, frontmatter, sourceMapping);
-        }
-      });
+      // A rejection is logged and leaves the table as it is (links pending): never unhandled.
+      fireAndForget(
+        manager.host.logger,
+        this.enrichLinks(preview, documentUri, revision, result, generation),
+        "link enrichment",
+      );
     }, LINK_ENRICHMENT_DEBOUNCE_MS);
+  }
+
+  /**
+   * The body of the debounced enrichment: resolves the links through the host's file system, then
+   * records and patches them unless the document, its revision or the render moved on meanwhile.
+   */
+  private async enrichLinks(
+    preview: PreviewSession,
+    documentUri: string,
+    revision: number,
+    result: RenderResult | undefined,
+    generation: number | undefined,
+  ): Promise<void> {
+    const { manager } = this;
+    const current = preview.document;
+    if (preview.disposed
+      || !manager.has(preview)
+      || preview.documentUri !== documentUri
+      || !current
+      || current.id !== documentUri
+      || current.revision !== revision
+      || (result !== undefined && !manager.rendering.isCurrentRender(preview, result, generation))) {
+      return;
+    }
+    const frontmatter = await this.analyzeWithLinks(preview, manager.pathOf(current), current.getText());
+    if (preview.disposed
+      || !manager.has(preview)
+      || preview.documentUri !== documentUri
+      || preview.document !== current
+      || current.revision !== revision
+      || (result !== undefined && !manager.rendering.isCurrentRender(preview, result, generation))) {
+      return;
+    }
+    this.setState(preview, frontmatter, documentUri, revision, true);
+    const stage = preview.stage;
+    const sourceMapping = stage && stage.activeDocumentIdentity === documentUri ? {
+      documentId: stage.activeDocumentIdentity,
+      activeSourceFile: stage.activeDocumentPath,
+    } : undefined;
+    manager.edits.deferWhileEditing(preview, "links", () => {
+      if (!preview.disposed
+        && preview.document === current
+        && current.revision === revision
+        && preview.stage === stage) {
+        this.patchPropertiesTable(preview, frontmatter, sourceMapping);
+      }
+    });
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
@@ -219,7 +268,7 @@ export class FrontmatterController {
       if (!current || current.id !== preview.documentUri || current.revision !== document.revision) {
         return;
       }
-      const result = this.analyze(preview, manager.pathOf(current), current.getText(), false);
+      const result = this.analyze(preview, manager.pathOf(current), current.getText());
       this.setState(preview, result, preview.documentUri, current.revision, false);
       const sourceMapping = preview.stage ? {
         documentId: preview.stage.activeDocumentIdentity,
@@ -346,7 +395,7 @@ export class FrontmatterController {
       return;
     }
     if (plan.needsSchemaCheck) {
-      const candidate = this.analyze(preview, manager.pathOf(document), plan.candidateSource, false);
+      const candidate = this.analyze(preview, manager.pathOf(document), plan.candidateSource);
       const refusal = checkFrontmatterCandidate(plan, candidate, preview.frontmatter.result);
       if (refusal) {
         this.postEditError(preview, message, refusal.error);

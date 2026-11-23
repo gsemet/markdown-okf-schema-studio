@@ -22,7 +22,8 @@ import {
   renderPreviewStickyHeadings,
   renderPreviewToolbar,
 } from "../../src/core/preview/previewToolbar";
-import { analyzeFrontmatter } from "../../src/core/frontmatter/okfFrontmatter";
+import { analyzeFrontmatterWithLinks } from "../../src/core/frontmatter/okfFrontmatter";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 import { renderPropertiesTable } from "../../src/core/frontmatter/propertiesTable";
 import { sourceRangeForLines } from "../../src/core/mapping/sourceMapping";
@@ -171,7 +172,8 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
   const workspaceRoots = options.fixturesWorkspace === true ? { workspaceRoots: [fixtureDirectory] } : {};
   const deferredFrontmatterLinks = SCENARIOS.some((scenario) =>
     scenario.fixture === fixture && scenario.frontmatterLinkState !== undefined);
-  const frontmatter = analyzeFrontmatter({
+  const frontmatter = await analyzeFrontmatterWithLinks({
+    files: createNodeFileSystem(),
     schemaFiles: nodeSchemaFiles,
     sourceText: source,
     filePath: sourcePath,
@@ -186,7 +188,8 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
   const tableEnabled = options.propertiesTable !== false;
   const markup = renderPropertiesTable(frontmatter, tableEnabled, sourceMapping);
   const deferredMarkup = deferredFrontmatterLinks
-    ? renderPropertiesTable(analyzeFrontmatter({
+    ? renderPropertiesTable(await analyzeFrontmatterWithLinks({
+      files: createNodeFileSystem(),
       schemaFiles: nodeSchemaFiles,
       sourceText: source,
       filePath: sourcePath,

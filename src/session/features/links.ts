@@ -13,6 +13,7 @@ import {
   type FrontmatterResult,
 } from "../../core/frontmatter/okfFrontmatter";
 import { resolveFrontmatterLinkRoots } from "../../core/frontmatter/fileLinks";
+import type { FrontmatterLinkRoots } from "../../core/frontmatter/fileLinkTypes";
 import { resourcePathPart } from "../../core/security/resource-policy";
 import type { TextRange } from "../../host-api/documentStore";
 import { decodePath, markdownFragmentRange, markdownMarkerLine } from "../../core/navigation/previewNavigation";
@@ -45,7 +46,7 @@ export function createLinkState(): LinkState {
 function cachedFrontmatterLinkCandidate(
   link: NonNullable<FrontmatterResult["linkResults"]>[number],
   filePath: string,
-  roots: ReturnType<typeof resolveFrontmatterLinkRoots>,
+  roots: FrontmatterLinkRoots,
 ): string | undefined {
   if (!link.normalizedTarget || !link.resolution || link.resolution === "filename-stem") {
     return undefined;
@@ -97,6 +98,9 @@ export class LinkController {
           ? preview.document
           : await host.documents.open(host.documents.idOf(stage.activeDocumentPath));
         const currentPath = manager.pathOf(currentDocument);
+        // Read the text before any await: the link analysis and the marker identity below come from
+        // the same snapshot, as they did when the analysis was synchronous.
+        const currentText = currentDocument.getText();
         const frontmatterState = preview.frontmatter;
         const canReuseResolvedLinks = frontmatterState.result !== undefined
           && frontmatterState.documentUri === currentDocument.id
@@ -108,7 +112,7 @@ export class LinkController {
           && candidate.arrayIndex === (typeof identity.arrayIndex === "number" ? identity.arrayIndex : undefined));
         const freshFrontmatter = cachedFrontmatter && cachedLink?.resolution !== "filename-stem"
           ? cachedFrontmatter
-          : manager.frontmatter.analyze(preview, currentPath, currentDocument.getText(), true, analysisRoots);
+          : await manager.frontmatter.analyzeWithLinks(preview, currentPath, currentText, analysisRoots);
         if (!canReuseResolvedLinks && preview.documentUri === currentDocument.id) {
           manager.frontmatter.setState(
             preview,
@@ -128,7 +132,8 @@ export class LinkController {
           };
         }
         const suffix = `${link.query ? `?${link.query}` : ""}${link.fragment !== undefined ? `#${link.fragment}` : ""}`;
-        const resolvedRoots = resolveFrontmatterLinkRoots({
+        const resolvedRoots = await resolveFrontmatterLinkRoots({
+          files: host.files,
           filePath: currentPath,
           bundleRoot: preview.frontmatterConfiguration.bundleRoot,
           projectRoot: preview.frontmatterConfiguration.projectRoot,
@@ -136,9 +141,6 @@ export class LinkController {
           schemaDirectory: findSchemaDirectory(host.schemaFiles, currentPath, preview.workspaceRoot),
         });
         const candidatePath = cachedFrontmatterLinkCandidate(link, currentPath, resolvedRoots);
-        // Read the text before the await below: the marker identity must come from the same snapshot
-        // as the link analysis, as it did when the validation was synchronous.
-        const currentText = currentDocument.getText();
         const navigation = await navigator.validateResolvedPreviewNavigation(
           candidatePath ?? link.resolvedPath,
           suffix,

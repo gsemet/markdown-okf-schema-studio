@@ -1,4 +1,3 @@
-import * as fs from "node:fs";
 import * as path from "node:path";
 import { parseDocument } from "yaml";
 import { markdownMarkerLine } from "../navigation/previewNavigation";
@@ -21,6 +20,7 @@ import type {
   FrontmatterLinkRoots,
 } from "./fileLinkTypes";
 import { matchFrontmatterBlock } from "./frontmatterParse";
+import type { LinkFiles } from "./linkFiles";
 import {
   getCachedMarkdownStemIndex,
   invalidateStemIndex,
@@ -40,16 +40,17 @@ export {
 } from "./fileLinkTypes";
 
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
-function linkedFileDetails(
+async function linkedFileDetails(
+  files: LinkFiles,
   targetPath: string,
   annotation: ParsedAnnotation,
   frontmatter: Record<string, unknown>,
   sourcePath: string,
-): Pick<FrontmatterLinkResult, "tooltipFields" | "previewFields" | "markerLine"> {
+): Promise<Pick<FrontmatterLinkResult, "tooltipFields" | "previewFields" | "markerLine">> {
   if (!annotation.tooltipShowsFields?.length && !annotation.previewShowsFields?.length
     && !annotation.showLineNumber) return {};
   try {
-    const source = fs.readFileSync(targetPath, "utf8");
+    const source = new TextDecoder().decode(await files.readFile(targetPath));
     const yaml = matchFrontmatterBlock(source.replace(/^\uFEFF/u, ""))?.body;
     const document = yaml === undefined ? undefined : parseDocument(yaml);
     const metadata: unknown = document && document.errors.length === 0 ? document.toJS() : undefined;
@@ -78,10 +79,10 @@ function linkedFileDetails(
   }
 }
 
-function rootPath(candidate: string | undefined): string | undefined {
+async function rootPath(files: LinkFiles, candidate: string | undefined): Promise<string | undefined> {
   if (!candidate) return undefined;
   try {
-    return fs.statSync(candidate).isDirectory() ? fs.realpathSync(candidate) : undefined;
+    return (await files.stat(candidate)).kind === "directory" ? await files.realpath(candidate) : undefined;
   } catch {
     return undefined;
   }
@@ -92,10 +93,19 @@ function isWithin(root: string, candidate: string): boolean {
   return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
-function gitRoot(filePath: string): string | undefined {
+async function pathExists(files: LinkFiles, candidate: string): Promise<boolean> {
+  try {
+    await files.stat(candidate);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function gitRoot(files: LinkFiles, filePath: string): Promise<string | undefined> {
   let current = path.dirname(path.resolve(filePath));
   for (;;) {
-    if (fs.existsSync(path.join(current, ".git"))) return current;
+    if (await pathExists(files, path.join(current, ".git"))) return current;
     const parent = path.dirname(current);
     if (parent === current) return undefined;
     current = parent;
@@ -103,54 +113,70 @@ function gitRoot(filePath: string): string | undefined {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
-function configuredRoot(
+async function configuredRoot(
+  files: LinkFiles,
   configured: string | undefined,
   filePath: string,
   workspaceRoots: readonly string[],
-): { specified: boolean; root: string | undefined } {
+): Promise<{ specified: boolean; root: string | undefined }> {
   if (!configured?.trim()) return { specified: false, root: undefined };
   const value = configured.trim();
   const candidates = path.isAbsolute(value)
     ? [value]
     : [path.resolve(workspaceRoots[0] ?? path.dirname(filePath), value)];
-  return {
-    specified: true,
-    root: candidates.map(rootPath).find((candidate): candidate is string => candidate !== undefined),
-  };
+  let root: string | undefined;
+  for (const candidate of candidates) {
+    root = await rootPath(files, candidate);
+    if (root !== undefined) break;
+  }
+  return { specified: true, root };
 }
 
-function conventionBundleRoot(schemaDirectory: string | undefined, filePath: string): string | undefined {
+async function isFile(files: LinkFiles, candidate: string): Promise<boolean> {
+  try {
+    return (await files.stat(candidate)).kind === "file";
+  } catch {
+    return false;
+  }
+}
+
+async function conventionBundleRoot(
+  files: LinkFiles,
+  schemaDirectory: string | undefined,
+  filePath: string,
+): Promise<string | undefined> {
   if (!schemaDirectory) return undefined;
-  const candidate = rootPath(path.dirname(schemaDirectory));
+  const candidate = await rootPath(files, path.dirname(schemaDirectory));
   if (!candidate || !isWithin(candidate, path.resolve(filePath))) return undefined;
-  const hasMarker = ["index.md", "log.md"].some((name) => fs.statSync(path.join(candidate, name), { throwIfNoEntry: false })?.isFile());
-  return hasMarker ? candidate : undefined;
+  for (const name of ["index.md", "log.md"]) {
+    if (await isFile(files, path.join(candidate, name))) return candidate;
+  }
+  return undefined;
 }
 
-function uniqueRoots(roots: readonly (string | undefined)[]): string[] {
-  return [...new Set(roots.flatMap((root) => {
-    const resolved = rootPath(root);
-    return resolved ? [resolved] : [];
-  }))];
+async function uniqueRoots(files: LinkFiles, roots: readonly (string | undefined)[]): Promise<string[]> {
+  const resolved = await Promise.all(roots.map((root) => rootPath(files, root)));
+  return [...new Set(resolved.filter((root): root is string => root !== undefined))];
 }
 
-export function resolveFrontmatterLinkRoots(options: FileLinkInspectionOptions): FrontmatterLinkRoots {
+export async function resolveFrontmatterLinkRoots(options: FileLinkInspectionOptions): Promise<FrontmatterLinkRoots> {
+  const { files } = options;
   const workspaceRoots = options.workspaceRoots ?? [];
-  const navigationRoots = uniqueRoots(workspaceRoots.length > 0
+  const navigationRoots = await uniqueRoots(files, workspaceRoots.length > 0
     ? workspaceRoots
     : [path.dirname(options.filePath)]);
-  const configuredBundle = configuredRoot(options.bundleRoot, options.filePath, workspaceRoots);
-  const configuredProject = configuredRoot(options.projectRoot, options.filePath, workspaceRoots);
+  const configuredBundle = await configuredRoot(files, options.bundleRoot, options.filePath, workspaceRoots);
+  const configuredProject = await configuredRoot(files, options.projectRoot, options.filePath, workspaceRoots);
   const bundleRoot = configuredBundle.specified
     ? configuredBundle.root
-    : conventionBundleRoot(options.schemaDirectory, options.filePath);
-  const detectedProjectRoot = gitRoot(options.filePath);
+    : await conventionBundleRoot(files, options.schemaDirectory, options.filePath);
+  const detectedProjectRoot = await gitRoot(files, options.filePath);
   const projectRoot = configuredProject.specified
     ? configuredProject.root
     : detectedProjectRoot && navigationRoots.some((root) => isWithin(root, detectedProjectRoot))
       ? detectedProjectRoot
       : undefined;
-  const filenameRoots = uniqueRoots([...workspaceRoots, bundleRoot]);
+  const filenameRoots = await uniqueRoots(files, [...workspaceRoots, bundleRoot]);
   return { bundleRoot, projectRoot, filenameRoots, navigationRoots };
 }
 
@@ -164,10 +190,13 @@ export interface FilenameStemSuggestions {
 
 /** Known Markdown filename stems under the roots used by filename-stem resolution. */
 // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-010
-export function filenameStemSuggestions(options: FileLinkInspectionOptions, limit = 500): FilenameStemSuggestions {
-  const index = getCachedMarkdownStemIndex(resolveFrontmatterLinkRoots(options).filenameRoots);
+export async function filenameStemSuggestions(
+  options: FileLinkInspectionOptions,
+  limit = 500,
+): Promise<FilenameStemSuggestions> {
+  const index = await getCachedMarkdownStemIndex(options.files, (await resolveFrontmatterLinkRoots(options)).filenameRoots);
   return {
-    suggestions: index.nearestStems(path.dirname(path.resolve(options.filePath)), limit),
+    suggestions: await index.nearestStems(options.files, path.dirname(path.resolve(options.filePath)), limit),
     known: index.stems(),
   };
 }
@@ -176,8 +205,23 @@ function rejectAbsolute(target: string): boolean {
   return path.isAbsolute(target) || /^[A-Za-z]:[\\/]/u.test(target) || target.startsWith("\\\\");
 }
 
+async function withinAnyRealRoot(
+  files: LinkFiles,
+  roots: readonly string[],
+  realPath: string,
+): Promise<boolean> {
+  for (const root of roots) {
+    try {
+      if (isWithin(await files.realpath(root), realPath)) return true;
+    } catch {
+      // An unresolvable root contains nothing.
+    }
+  }
+  return false;
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
-function resolveExact(
+async function resolveExact(
   target: string,
   resolution: FileLinkResolution,
   options: FileLinkInspectionOptions,
@@ -185,9 +229,10 @@ function resolveExact(
   project: string | undefined,
   navigationRoots: readonly string[],
   field: string,
-): { path: string; normalizedTarget: string } | LinkError {
+): Promise<{ path: string; normalizedTarget: string } | LinkError> {
+  const { files } = options;
   if (rejectAbsolute(target)) return diagnostic("E10", field, `absolute target '${target}' is not allowed`);
-  const documentRoot = rootPath(path.dirname(path.resolve(options.filePath)))
+  const documentRoot = await rootPath(files, path.dirname(path.resolve(options.filePath)))
     ?? path.dirname(path.resolve(options.filePath));
   const root = resolution === "document-relative"
     ? documentRoot
@@ -207,9 +252,9 @@ function resolveExact(
     return diagnostic("E10", field, `target '${target}' escapes its navigation root`);
   }
   try {
-    const realRoot = fs.realpathSync(root);
-    const realPath = fs.realpathSync(candidate);
-    if (!fs.statSync(realPath).isFile()) {
+    const realRoot = await files.realpath(root);
+    const realPath = await files.realpath(candidate);
+    if ((await files.stat(realPath)).kind !== "file") {
       return diagnostic("E10", field, `target '${target}' does not resolve to a file`);
     }
     if (resolution !== "document-relative" && !isWithin(realRoot, realPath)) {
@@ -217,13 +262,7 @@ function resolveExact(
     }
     if (resolution === "document-relative"
       && !options.allowOutsideWorkspaceLinks
-      && !containmentRoots.some((containmentRoot) => {
-        try {
-          return isWithin(fs.realpathSync(containmentRoot), realPath);
-        } catch {
-          return false;
-        }
-      })) {
+      && !(await withinAnyRealRoot(files, containmentRoots, realPath))) {
       return diagnostic("E10", field, `target '${target}' escapes its navigation root`);
     }
     return { path: realPath, normalizedTarget };
@@ -233,20 +272,21 @@ function resolveExact(
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
-function resolveFilenameStem(
+async function resolveFilenameStem(
+  files: LinkFiles,
   target: string,
   roots: readonly string[],
   field: string,
   stemIndex?: MarkdownStemIndex,
-): { path: string; normalizedTarget: string } | LinkError {
+): Promise<{ path: string; normalizedTarget: string } | LinkError> {
   if (rejectAbsolute(target)) return diagnostic("E10", field, `absolute target '${target}' is not allowed`);
   if (roots.length === 0) return diagnostic("W15", field, "filename-stem root is unavailable");
-  let lookup = (stemIndex ?? getCachedMarkdownStemIndex(roots)).lookup(target);
+  let lookup = await (stemIndex ?? await getCachedMarkdownStemIndex(files, roots)).lookup(files, target);
   // An indexed file that no longer exists means the cached index is stale (file watcher events
   // can lag, or miss the files of a deleted directory): rebuild it once before deciding.
   if (!stemIndex && lookup.unavailable) {
     invalidateStemIndex();
-    lookup = getCachedMarkdownStemIndex(roots).lookup(target);
+    lookup = await (await getCachedMarkdownStemIndex(files, roots)).lookup(files, target);
   }
   const uniqueMatches = [...new Set(lookup.paths)];
   if (uniqueMatches.length === 0) {
@@ -303,93 +343,127 @@ function workspaceRelativePath(
   return (relative || path.basename(filePath)).split(path.sep).join("/");
 }
 
-// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
-export function inspectFrontmatterLinks(
-  frontmatter: Record<string, unknown>,
-  schema: Record<string, unknown>,
-  options: FileLinkInspectionOptions,
-): FrontmatterLinkResult[] {
-  const resolveTargets = options.resolveTargets !== false;
-  const roots = resolveTargets ? resolveFrontmatterLinkRoots(options) : undefined;
-  const annotations = iterAnnotations(schema, frontmatter, [], schema, new Set());
-  const results: FrontmatterLinkResult[] = [];
+/** A link of the frontmatter as the schema declares it: parsed, or rejected with its diagnostic. */
+interface CollectedLink {
+  item: AnnotationValue;
+  annotation: ParsedAnnotation | undefined;
+  parsed: ParsedLink | undefined;
+  error: LinkError | undefined;
+}
+
+/** The links the schema annotates in `frontmatter`, parsed and de-duplicated; reads no file. */
+function collectLinks(frontmatter: Record<string, unknown>, schema: Record<string, unknown>): CollectedLink[] {
+  const collected: CollectedLink[] = [];
   const seen = new Set<string>();
-  for (const item of annotations) {
+  for (const item of iterAnnotations(schema, frontmatter, [], schema, new Set())) {
     const annotation = parseAnnotation(item.annotation, item.fieldPath);
     if ("code" in annotation) {
-      results.push(resultForError(item, undefined, undefined, annotation));
+      collected.push({ item, annotation: undefined, parsed: undefined, error: annotation });
       continue;
     }
     const parsed = parseLink(item.value, annotation.syntax, item.fieldPath);
     if ("code" in parsed) {
-      results.push(resultForError(item, annotation, undefined, parsed));
+      collected.push({ item, annotation, parsed: undefined, error: parsed });
       continue;
     }
     const identity = `${item.fieldPath}:${item.arrayIndex ?? "scalar"}:${annotation.resolution}:${annotation.syntax}:${parsed.target}`;
     if (seen.has(identity)) continue;
     seen.add(identity);
-    if (!resolveTargets) {
-      results.push({
-        value: item.value,
-        fieldPath: item.fieldPath,
-        arrayIndex: item.arrayIndex,
-        basenameMarker: annotation.basenameMarker,
-        idMarker: annotation.idMarker,
-        syntax: annotation.syntax,
-        resolution: annotation.resolution,
-        target: parsed.target,
-        normalizedTarget: parsed.target,
-        resolvedPath: undefined,
-        query: parsed.query,
-        fragment: parsed.fragment,
-        label: parsed.label,
-        status: "pending",
-        code: undefined,
-        severity: undefined,
-        message: "",
-      });
+    collected.push({ item, annotation, parsed, error: undefined });
+  }
+  return collected;
+}
+
+function pendingResult(item: AnnotationValue, annotation: ParsedAnnotation, parsed: ParsedLink): FrontmatterLinkResult {
+  return {
+    value: item.value,
+    fieldPath: item.fieldPath,
+    arrayIndex: item.arrayIndex,
+    basenameMarker: annotation.basenameMarker,
+    idMarker: annotation.idMarker,
+    syntax: annotation.syntax,
+    resolution: annotation.resolution,
+    target: parsed.target,
+    normalizedTarget: parsed.target,
+    resolvedPath: undefined,
+    query: parsed.query,
+    fragment: parsed.fragment,
+    label: parsed.label,
+    status: "pending",
+    code: undefined,
+    severity: undefined,
+    message: "",
+  };
+}
+
+/**
+ * The links of the frontmatter before any target is looked up: the ones that parse are `pending`,
+ * the others carry their diagnostic. Synchronous and reads no file: the first paint uses it.
+ */
+export function pendingFrontmatterLinks(
+  frontmatter: Record<string, unknown>,
+  schema: Record<string, unknown>,
+): FrontmatterLinkResult[] {
+  return collectLinks(frontmatter, schema).map(({ item, annotation, parsed, error }) =>
+    error ? resultForError(item, annotation, parsed, error) : pendingResult(item, annotation!, parsed!));
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
+export async function inspectFrontmatterLinks(
+  frontmatter: Record<string, unknown>,
+  schema: Record<string, unknown>,
+  options: FileLinkInspectionOptions,
+): Promise<FrontmatterLinkResult[]> {
+  const roots = await resolveFrontmatterLinkRoots(options);
+  const results: FrontmatterLinkResult[] = [];
+  for (const { item, annotation, parsed, error } of collectLinks(frontmatter, schema)) {
+    if (error) {
+      results.push(resultForError(item, annotation, parsed, error));
       continue;
     }
-    const resolved = annotation.resolution === "filename-stem"
-      ? resolveFilenameStem(
-        parsed.target,
-        roots?.filenameRoots ?? [],
+    const link = parsed!;
+    const annotated = annotation!;
+    const resolved = annotated.resolution === "filename-stem"
+      ? await resolveFilenameStem(
+        options.files,
+        link.target,
+        roots.filenameRoots,
         item.fieldPath,
         options.stemIndex,
       )
-      : resolveExact(
-        parsed.target,
-        annotation.resolution,
+      : await resolveExact(
+        link.target,
+        annotated.resolution,
         options,
-        roots?.bundleRoot,
-        roots?.projectRoot,
-        roots?.navigationRoots ?? [],
+        roots.bundleRoot,
+        roots.projectRoot,
+        roots.navigationRoots,
         item.fieldPath,
       );
     if ("code" in resolved) {
-      results.push(resultForError(item, annotation, parsed, resolved));
+      results.push(resultForError(item, annotated, link, resolved));
       continue;
     }
     results.push({
       value: item.value,
       fieldPath: item.fieldPath,
       arrayIndex: item.arrayIndex,
-      basenameMarker: annotation.basenameMarker,
-      idMarker: annotation.idMarker,
-      syntax: annotation.syntax,
-      resolution: annotation.resolution,
-      target: parsed.target,
+      basenameMarker: annotated.basenameMarker,
+      idMarker: annotated.idMarker,
+      syntax: annotated.syntax,
+      resolution: annotated.resolution,
+      target: link.target,
       normalizedTarget: resolved.normalizedTarget,
       resolvedPath: resolved.path,
-      ...linkedFileDetails(resolved.path, annotation, frontmatter, options.filePath),
+      ...await linkedFileDetails(options.files, resolved.path, annotated, frontmatter, options.filePath),
       workspaceRelativePath: workspaceRelativePath(
         resolved.path,
-        roots?.navigationRoots ?? [],
+        roots.navigationRoots,
         options.filePath,
       ),
-      query: parsed.query,
-      fragment: parsed.fragment,
-      label: parsed.label,
+      query: link.query,
+      fragment: link.fragment,
+      label: link.label,
       status: "valid",
       code: undefined,
       severity: undefined,

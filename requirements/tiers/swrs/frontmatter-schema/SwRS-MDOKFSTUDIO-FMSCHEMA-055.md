@@ -26,8 +26,10 @@ implemented_in_files:
 - src/core/frontmatter/stemIndex.ts
 - src/session/hostEvents.ts
 tested_in_files:
+- test/core/frontmatter/linkFiles.memory.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/stemIndex.holes.test.ts
+- test/core/frontmatter/stemIndex.symlink.test.ts
 - test/core/frontmatter/stemIndex.test.ts
 - test/session/eventFanOut.test.ts
 default_owner_email: gaetan@xeberon.net

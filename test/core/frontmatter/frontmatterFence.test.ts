@@ -14,6 +14,7 @@ import {
   matchFrontmatterBlock,
 } from "../../../src/core/frontmatter/okfFrontmatter";
 import { renderMyst } from "../../../src/core/render/mystRenderer";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 import { attribute, findElement, parseHtml } from "../render/dom";
 
 // STAB-01: the closing fence must stand on its own line. A value ending in `...` or `---` must
@@ -112,7 +113,7 @@ test("frontmatter fence: CRLF empty block accepts an added field with CRLF endin
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
-test("linked file details read the frontmatter of a BOM-prefixed file", () => {
+test("linked file details read the frontmatter of a BOM-prefixed file", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-bom-link-"));
   try {
     fs.writeFileSync(path.join(root, "target.md"), "\uFEFF---\ndescription: With BOM...\n---\n# Body\n");
@@ -121,7 +122,8 @@ test("linked file details read the frontmatter of a BOM-prefixed file", () => {
       syntax: "plain",
       preview_shows_fields: ["description"],
     } } } };
-    const [result] = inspectFrontmatterLinks({ target: "target.md" }, schema, {
+    const [result] = await inspectFrontmatterLinks({ target: "target.md" }, schema, {
+      files: createNodeFileSystem(),
       filePath: path.join(root, "doc.md"), workspaceRoots: [root],
     });
     assert.deepEqual(result.previewFields, { description: "With BOM..." });

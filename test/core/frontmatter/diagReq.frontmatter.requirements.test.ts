@@ -17,7 +17,10 @@ import {
 } from "../../../src/core/frontmatter/okfFrontmatter";
 import { linkStatusLabel, renderPropertiesTable } from "../../../src/core/frontmatter/propertiesTable";
 import { getResolvedSchema, resetSchemaRegistryForTests } from "../../../src/core/frontmatter/schemaRegistry";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
+
+const files = createNodeFileSystem();
 import { needsSymlinks } from "../../shared/symlinks";
 
 const roots: string[] = [];
@@ -114,11 +117,12 @@ const linkSchema = (annotation: Record<string, unknown> = LINK): Record<string, 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
-test("an absolute link target is refused with an E10 error in POSIX, drive-letter and UNC form", () => {
+test("an absolute link target is refused with an E10 error in POSIX, drive-letter and UNC form", async () => {
   const root = temporaryRoot();
   for (const resolution of ["document-relative", "bundle-relative", "project-relative"]) {
     for (const target of ["/etc/hosts", "C:/x.md", "C:\\x.md", "\\\\server\\share\\x.md"]) {
-      const [link] = inspectFrontmatterLinks({ ref: target }, linkSchema({ resolution, syntax: "plain" }), {
+      const [link] = await inspectFrontmatterLinks({ ref: target }, linkSchema({ resolution, syntax: "plain" }), {
+        files,
         filePath: path.join(root, "doc.md"),
         bundleRoot: root,
         projectRoot: root,
@@ -131,24 +135,25 @@ test("an absolute link target is refused with an E10 error in POSIX, drive-lette
   }
 });
 
-test("a bundle-relative target cannot leave its root, by path or through a symbolic link", needsSymlinks, () => {
+test("a bundle-relative target cannot leave its root, by path or through a symbolic link", needsSymlinks, async () => {
   const root = temporaryRoot();
   const bundle = path.join(root, "bundle");
   fs.mkdirSync(path.join(bundle, "docs"), { recursive: true });
   fs.writeFileSync(path.join(root, "outside.md"), "# Outside\n");
   fs.symlinkSync(path.join(root, "outside.md"), path.join(bundle, "link.md"));
-  const inspect = (target: string) => inspectFrontmatterLinks({ ref: target }, linkSchema(), {
+  const inspect = async (target: string) => (await inspectFrontmatterLinks({ ref: target }, linkSchema(), {
+    files,
     filePath: path.join(bundle, "docs", "doc.md"),
     bundleRoot: bundle,
     workspaceRoots: [root],
-  })[0]!;
+  }))[0]!;
 
-  const traversal = inspect("../outside.md");
+  const traversal = await inspect("../outside.md");
   assert.equal(traversal.code, "E10");
   assert.equal(traversal.message, "target '../outside.md' escapes its bundle-relative root at 'ref'");
   assert.equal(linkStatusLabel(traversal), "Outside the allowed folder");
 
-  const symbolic = inspect("link.md");
+  const symbolic = await inspect("link.md");
   assert.equal(symbolic.code, "E10");
   assert.equal(symbolic.message, "target 'link.md' escapes its bundle-relative root at 'ref'");
 });

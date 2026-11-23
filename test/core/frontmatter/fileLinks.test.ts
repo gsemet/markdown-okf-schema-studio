@@ -6,8 +6,12 @@ import { test } from "node:test";
 
 import {
   inspectFrontmatterLinks,
+  pendingFrontmatterLinks,
   resolveFrontmatterLinkRoots,
 } from "../../../src/core/frontmatter/fileLinks";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
+
+const files = createNodeFileSystem();
 
 const linkAnnotation = {
   resolution: "document-relative",
@@ -15,15 +19,12 @@ const linkAnnotation = {
 };
 
 function inspect(frontmatter: Record<string, unknown>, schema: Record<string, unknown>) {
-  return inspectFrontmatterLinks(frontmatter, schema, {
-    filePath: "/workspace/document.md",
-    resolveTargets: false,
-  });
+  return pendingFrontmatterLinks(frontmatter, schema);
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
-test("link annotations read target fields and exact marker lines afresh", () => {
+test("link annotations read target fields and exact marker lines afresh", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-details-"));
   const target = path.join(root, "target.md");
   const schema = { properties: { target: { "x-okf-link": {
@@ -36,15 +37,15 @@ test("link annotations read target fields and exact marker lines afresh", () => 
   } } } };
   try {
     fs.writeFileSync(target, "---\ndescription: 'The <tool> SHALL work.'\n---\n@tests_req REQ-10\n@tests_req REQ-1\n");
-    const read = () => inspectFrontmatterLinks({ id: "REQ-1", target: "target.md" }, schema, {
-      filePath: path.join(root, "REQ-1.md"), workspaceRoots: [root],
-    })[0];
-    assert.deepEqual(read().tooltipFields, { description: "The <tool> SHALL work." });
-    assert.deepEqual(read().previewFields, { description: "The <tool> SHALL work." });
-    assert.equal(read().markerLine, 5);
+    const read = async () => (await inspectFrontmatterLinks({ id: "REQ-1", target: "target.md" }, schema, {
+      files, filePath: path.join(root, "REQ-1.md"), workspaceRoots: [root],
+    }))[0];
+    assert.deepEqual((await read()).tooltipFields, { description: "The <tool> SHALL work." });
+    assert.deepEqual((await read()).previewFields, { description: "The <tool> SHALL work." });
+    assert.equal((await read()).markerLine, 5);
     fs.writeFileSync(target, "---\ndescription: Updated\n---\n");
-    assert.deepEqual(read().previewFields, { description: "Updated" });
-    assert.equal(read().markerLine, undefined);
+    assert.deepEqual((await read()).previewFields, { description: "Updated" });
+    assert.equal((await read()).markerLine, undefined);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
@@ -151,7 +152,7 @@ test("conditional, patternProperties, and additionalProperties schemas are trave
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
-test("document-relative links stay inside workspace roots unless explicitly allowed", () => {
+test("document-relative links stay inside workspace roots unless explicitly allowed", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-containment-"));
   const workspace = path.join(root, "workspace");
   const source = path.join(workspace, "docs", "active.md");
@@ -167,19 +168,19 @@ test("document-relative links stay inside workspace roots unless explicitly allo
     },
   } as Record<string, unknown>;
   try {
-    const blocked = inspectFrontmatterLinks(
+    const blocked = (await inspectFrontmatterLinks(
       { target: "../../outside/target.md" },
       schema,
-      { filePath: source, workspaceRoots: [workspace] },
-    )[0];
+      { files, filePath: source, workspaceRoots: [workspace] },
+    ))[0];
     assert.equal(blocked?.code, "E10");
     assert.match(blocked?.message ?? "", /navigation root/u);
 
-    const allowed = inspectFrontmatterLinks(
+    const allowed = (await inspectFrontmatterLinks(
       { target: "../../outside/target.md" },
       schema,
-      { filePath: source, workspaceRoots: [workspace], allowOutsideWorkspaceLinks: true },
-    )[0];
+      { files, filePath: source, workspaceRoots: [workspace], allowOutsideWorkspaceLinks: true },
+    ))[0];
     assert.equal(allowed?.status, "valid");
     assert.equal(allowed?.resolvedPath, fs.realpathSync(outside));
   } finally {
@@ -187,7 +188,7 @@ test("document-relative links stay inside workspace roots unless explicitly allo
   }
 });
 
-test("auto-detected git roots outside the workspace are ignored", () => {
+test("auto-detected git roots outside the workspace are ignored", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-project-root-"));
   const workspace = path.join(root, "workspace");
   const source = path.join(workspace, "active.md");
@@ -197,13 +198,15 @@ test("auto-detected git roots outside the workspace are ignored", () => {
   fs.writeFileSync(source, "# Active\n", "utf8");
   fs.writeFileSync(projectTarget, "# Project target\n", "utf8");
   try {
-    const roots = resolveFrontmatterLinkRoots({
+    const roots = await resolveFrontmatterLinkRoots({
+      files,
       filePath: source,
       workspaceRoots: [workspace],
     });
     assert.equal(roots.projectRoot, undefined);
 
-    const explicit = resolveFrontmatterLinkRoots({
+    const explicit = await resolveFrontmatterLinkRoots({
+      files,
       filePath: source,
       projectRoot: root,
       workspaceRoots: [workspace],

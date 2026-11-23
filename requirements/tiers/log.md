@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-11-23
+
+### Frontmatter file lookups behind the async FileSystem port (CR-468)
+
+- Changed (no requirement text): code and tests of SwRS-MDOKFSTUDIO-FMSCHEMA-055 (the stem index) and FMSCHEMA-063 (link resolution) now read files through an async core port satisfied by `host.files`; behaviour is unchanged. New tests added to their `tested_in_files`. No new StRS or SwRS.
+
 ## 2026-11-22
 
 ### Dropdown directive content (CR-465)
