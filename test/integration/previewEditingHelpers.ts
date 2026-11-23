@@ -14,7 +14,7 @@ export async function waitFor(description: string, predicate: () => boolean, tim
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
-export async function waitForCurrentPreview(document: vscode.TextDocument, previousRequestId?: number): Promise<void> {
+export async function waitForCurrentPreview(document: vscode.TextDocument, previousRequestId?: number, htmlPattern?: RegExp): Promise<void> {
   await waitFor("the preview to render the current document version", () => {
     const preview = getActivePreviewForTests();
     return preview?.documentUri === document.uri.toString()
@@ -24,7 +24,8 @@ export async function waitForCurrentPreview(document: vscode.TextDocument, previ
       && preview.requestId !== previousRequestId
       && /<section\b[^>]*data-okf-properties/u.test(preview.html)
       && /data-okf-field="related"[^]*?data-okf-link-status="valid"/u.test(preview.html)
-      && /data-okf-field="metadata"[^]*?data-okf-link-status="valid"/u.test(preview.html);
+      && /data-okf-field="metadata"[^]*?data-okf-link-status="valid"/u.test(preview.html)
+      && (htmlPattern?.test(preview.html) ?? true);
   });
 }
 

@@ -43,6 +43,7 @@ When VS Code restores a Studio preview panel, the extension SHALL open in it the
 - GIVEN a saved state with documentId, sourceFile, sourceLine 4, scrollTop 88 and descriptionsCollapsed true
 - WHEN VS Code restores the panel
 - THEN the panel renders the file, the session state holds sourceLine 4 and scrollTop 88 and the boot context holds descriptionsCollapsed true
+- AND the restore completes once the page shows the rendered document (by reading deserializePreviewPanel, which awaits requestDocument)
 
 ### Scenario (boundary): File outside a folder
 

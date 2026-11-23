@@ -27,9 +27,11 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/host-vscode/activation.ts
+- src/session/previewManager.ts
 tested_in_files:
 - test/host/diffPreview.requirements.test.ts
 - test/host/lifeReq.requirements.test.ts
+- test/host/openCompletes.test.ts
 - test/integration/diffPreview.test.ts
 - test/integration/diffPreviewScroll.test.ts
 - test/integration/lifecycle.test.ts
@@ -70,6 +72,7 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 - GIVEN a saved Markdown file in the active editor and no Studio preview open
 - WHEN the reader runs Open Preview to Side
 - THEN a preview panel opens beside the editor, titled Studio · preview.md, and renders the file (integration test test/integration/lifecycle.test.ts, first lifecycle render)
+- AND the command completes once the page shows the rendered document, not while it still shows the pending status page (host test test/host/openCompletes.test.ts)
 - AND with the active editor alone in the only editor group, the panel is requested with ViewColumn.Beside, so VS Code opens it in a new group to the side (deduced from the code, not run)
 
 ### Scenario (nominal): The shown document again
@@ -77,6 +80,7 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 - GIVEN a side preview showing preview.md and preview.md in the active editor
 - WHEN the reader runs Open Preview to Side again
 - THEN no second panel opens; the existing panel is revealed and the document is rendered again
+- AND the command completes once the page shows that render (host test test/host/openCompletes.test.ts)
 
 ### Scenario (nominal): Another document
 
@@ -171,6 +175,7 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 ### Verification notes
 
 - Method: test/security/package-contract.test.ts, unit test "contributes only opt-in Markdown OKF-Schema Studio commands" (Entry points of the command and Resource that is not offered the command: compares the contributed command with deepEqual to the expected entry, menus.commandPalette to the two expected entries, menus["explorer/context"] and menus["editor/title"] to the expected entries, and the keybindings to the one entry with key ctrl+k shift+v and mac cmd+k shift+v; the key press itself is never exercised; the Explorer entry and the chord are not in the README).
+- Method: test/host/openCompletes.test.ts (First preview, The shown document again: starts the command under the mock clock, reads the page when the command's promise settles and asserts it holds the admonition of the source, not the status page; the wait is `RenderingController.pendingShow` in `PreviewManager.requestDocument`; Another document is not awaited and keeps its earlier behavior).
 - Method: test/host/lifeReq.requirements.test.ts and test/integration/lifecycle.test.ts also check No eligible file and the file checks below.
 - Method: test/integration/lifecycle.test.ts (First preview: runs the command on preview.md and waits for a ready render and the title Studio · preview.md; Another document: runs the command with the URI of the second file while the preview follows the first and waits for the preview to show the second file).
 - Method: test/host/lifeReq.requirements.test.ts, unit tests "Open Preview to Side on the shown document reveals the preview and renders it again" (The shown document again: reads openPreview, sidePreview.panel.reveal, then requestDocument when document.id equals sidePreview.documentUri), "Open Preview to Side ignores previews that do not follow the active editor" (Previews that do not follow the active editor: reads manager.latest(followsActiveEditor)) and "the side preview and the Open With editor do not retain their page while hidden" (Hidden preview: reads createWebviewPanel and registerCustomEditorProvider in src/host-vscode/activation.ts and asserts retainContextWhenHidden is not true).

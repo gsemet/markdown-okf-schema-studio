@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Open Preview to Side, Refresh Preview and a restored panel complete once the page shows the document again,
+  as in 1.12.0 (CR-479 heavy-red, PR #493).
 - The editor of a blank-lines block now closes after Done, instead of staying on "Saving Markdown…"
   (CR-474 blank-save, PR #491, issue #485).
 - Cancel and Escape now always close an editor whose save is still running, and a save that fails

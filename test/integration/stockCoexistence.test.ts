@@ -232,7 +232,9 @@ export async function run(): Promise<void> {
     await waitFor("the delayed fixture MyST view", () => {
       const preview = getActivePreviewForTests();
       return preview?.documentUri === delayedDocument.uri.toString()
-        && preview.phase === "ready";
+        && preview.phase === "ready"
+        && preview.status === "success"
+        && preview.html.includes("Second Preview Fixture");
     });
     const delayedPreview = getActivePreviewForTests();
     assert.ok(delayedPreview);

@@ -6,6 +6,10 @@
 
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-266 (each shown blank line is one blank-line block: N-1 between two blocks, every line at the end of the body, at line 1 and in a body of only blank lines; quote runs never show their first line), BLOCK-267 (arrows stop on each block), BLOCK-268 (the text replaces that one line, a separator only where needed), BLOCK-269 (Delete removes that one line; selection after it), BLOCK-265 and BLOCK-004 scenarios. StRS-MDOKFSTUDIO-BLOCK-011 amended (Path 3) and approved. Reason: a run of six blank lines showed one block and a delete removed all of them.
 
+### Open Preview and Refresh Preview complete once the page shows the document (CR-479 heavy-red)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-LIFE-003 (scenarios "First preview" and "The shown document again": the command completes once the page shows the rendered document, not while it holds the pending status page; "Another document" is unchanged), SwRS-MDOKFSTUDIO-LIFE-032 (Refresh Preview, scenario "Dirty buffer": same sentence) and SwRS-MDOKFSTUDIO-LIFE-127 (restored panel, scenario "Restore of a saved reading place": same sentence). Reason: since the async show of a finished render (20b12216) the commands resolved before the page was assigned. No new StRS.
+
 ### Every final save ends (CR-475)
 
 - Added (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-270 (every final save ends in a closed editor or an error that gives the text back). Changed (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-053 (Cancel and Escape close the editor during a final save), BLOCK-216 (the text comes back after a failed or crossed save, the Copy text warning), BLOCK-191 (the detached host edit), BLOCK-041 (no gesture while an edit is in flight), TABLE-025 (cell editors), FMEDIT-019 (an unchanged frontmatter save closes the editor); StRS-MDOKFSTUDIO-BLOCK-006 wording. Reason: an editor could stay on "Saving Markdown..." for good.

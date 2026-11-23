@@ -528,7 +528,7 @@ async function stepFrontmatterSaves(ctx: EditingContext, initial: ReturnType<typ
   await waitFor("the frontmatter key to be renamed", () =>
     document.getText().includes("summary: Existing summary")
       && !document.getText().includes("legacy_summary:"));
-  await waitForCurrentPreview(document);
+  await waitForCurrentPreview(document, undefined, /data-okf-field="summary"[^]*Summary provided by the renamed schema property\./u);
   const renamedPreview = getActivePreviewForTests()?.html ?? "";
   assert.match(renamedPreview, /data-okf-field="summary"/u);
   assert.ok(
@@ -781,7 +781,7 @@ async function stepTableAndInsert(ctx: EditingContext): Promise<void> {
     editedText: tableStages[tableStages.length - 1],
     final: true,
   });
-  await waitForCurrentPreview(document);
+  await waitForCurrentPreview(document, undefined, /(?=[^]*edited x)(?=[^]*edited q)(?=[^]*edited B)/u);
   for (const value of ["edited x", "edited q", "edited B"]) {
     assert.ok(getActivePreviewForTests()?.html.includes(value), `the final preview must retain ${value}`);
   }
