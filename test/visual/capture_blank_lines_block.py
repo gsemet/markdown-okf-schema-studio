@@ -106,18 +106,20 @@ def check_blank_lines_block(page: Page, scenario: dict, failures: list[Failure])
 
 def check_six_blank_lines(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The fixture `96-blank-lines-six`: a line of text then six blank lines at the end of the document show
-  six blank-line blocks, one after the other, each at least 16 px high and as wide as the content column
+  six blank-line blocks, one after the other, each at least 16 px high and as wide as the text column
   (`bar` step)."""
   name = scenario["page"]
   state = page.evaluate(READ)
   if state["shown"] != 6 or len(state["boxes"]) != 6:
     failures.append(Failure(name, f"blank-line block: {state['shown']} shown, expected 6, one for each blank line"))
     return
+  # The text column (the first paragraph's width) is narrower than the pane (`content`, which has padding).
+  first = state["paragraphs"][0]
   previous = None
   for box, label in zip(state["boxes"], state["labels"]):
     if box["height"] < 16:
       failures.append(Failure(name, f"blank-line block: one block is {box['height']:.0f} px high"))
-    if abs(box["width"] - state["content"]["width"]) > 4:
+    if abs(box["width"] - first["width"]) > 4 and abs(box["width"] - state["content"]["width"]) > 4:
       failures.append(Failure(name, f"blank-line block: one block is {box['width']:.0f} px wide, not the content column"))
     if "Blank line" not in label or "Blank lines" in label:
       failures.append(Failure(name, f"blank-line block: the drawn label is {label}"))

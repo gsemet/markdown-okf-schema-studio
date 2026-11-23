@@ -617,6 +617,14 @@ def chip_color(page: Page, selector: str) -> str | None:
 
 FIRST_ELEMENT_GAP = 40
 FIRST_ELEMENT_TOLERANCE = 4
+# The fixture `20-empty-document.md` is one newline, not a 0-byte file: a file of only blank lines shows
+# every line (spec rules 2 and 3), so edit mode draws one blank-line block, then the Start writing button.
+# Measured in the real page (900px pane): the block sits at the top (~3.6px, no gap of its own) and the
+# button, which carries the 40px gap, starts FIRST_ELEMENT_GAP below the block.
+BLANK_BLOCK_SELECTOR = ".sphinx-preview-blank-lines"
+START_BUTTON_SELECTOR = ".sphinx-preview-insert-point--start button"
+BLANK_BLOCK_TOP = 4
+START_BUTTON_GAP_BELOW_BLOCK = FIRST_ELEMENT_GAP
 FIRST_GAP_REPORT_DIR = VISUAL_REPORT_DIR / "first-gap"
 
 
@@ -628,8 +636,10 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
   The rule: the first element (or the Start writing button, the open first-block editor, the
   controls of a leading properties table) starts 40 +-4px below the top. The only exception is an
   interactive element in a pane of 480px or less (the toolbar covers most of the width): it is then
-  pushed just far enough that it clears the toolbar, and the report says so. Every measurement is
-  written to out/reports/visual/first-gap/<group>/<scenario>.json.
+  pushed just far enough that it clears the toolbar, and the report says so. Mode "empty" is a
+  document of one blank line (`20-empty-document.md` is one newline): its blank-line block is the
+  first element (at the top of the pane) and the Start writing button starts 40 +-4px below the block.
+  Every measurement is written to out/reports/visual/first-gap/<group>/<scenario>.json.
   """
   mode = scenario.get("firstElementGap")
   if not mode:
@@ -648,7 +658,7 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
     const hit = r => r.width > 0 && r.height > 0 && r.left < bar.right && r.right > bar.left
       && r.top < bar.bottom && r.bottom > bar.top;
     return {
-      viewportTop: rect.top, scrollY: window.scrollY, top: rect.top + window.scrollY, width: rect.width, left: rect.left, right: rect.right,
+      viewportTop: rect.top, scrollY: window.scrollY, top: rect.top + window.scrollY, height: rect.height, width: rect.width, left: rect.left, right: rect.right,
       overlaps: hit(rect),
       barBottom: bar.bottom, barLeft: bar.left,
       clearance: parseFloat(root.getPropertyValue('--sphinx-preview-first-clearance')) || 0,
@@ -690,11 +700,13 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
     };
   }"""
 
-  def record(label: str, selector: str, controls: str | None = None, interactive: bool = False) -> None:
+  def record(label: str, selector: str, controls: str | None = None, interactive: bool = False, below: float | None = None, at: float | None = None) -> float | None:
+    """Records one element's top gap. `at` replaces the 40px expectation by that top; `below` (the bottom of
+    the element above it) by that bottom plus START_BUTTON_GAP_BELOW_BLOCK. Returns the element's bottom."""
     got = page.evaluate(probe, selector)
     if not got:
       failures.append(Failure(page_name, f"[{label}] {selector} is not in the page"))
-      return
+      return None
     hits = 0
     if controls:
       hits = page.evaluate(
@@ -711,8 +723,14 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
     gap = got["top"]
     pushed = got["clearance"] > 0
     ok_uniform = abs(gap - FIRST_ELEMENT_GAP) <= FIRST_ELEMENT_TOLERANCE
+    if below is not None or at is not None:
+      expected = at if at is not None else (below or 0) + START_BUTTON_GAP_BELOW_BLOCK
+      if abs(gap - expected) > FIRST_ELEMENT_TOLERANCE:
+        failures.append(Failure(page_name, f"[{label}] the top is {gap:.1f}px, expected {expected:.1f}px +-{FIRST_ELEMENT_TOLERANCE} (an empty document is one blank line: its block, then the button {START_BUTTON_GAP_BELOW_BLOCK}px below)"))
     # Only a narrow pane (the toolbar covers most of the width) may push an interactive element down.
     ok_pushed = pushed and page.viewport_size["width"] <= 480 and gap > FIRST_ELEMENT_GAP
+    if below is not None or at is not None:
+      ok_uniform = True  # judged against the element above instead of the 40px gap
     records.append({
       "label": label, "selector": selector, "mode": mode, "state": label.split(":")[0],
       "pane": page.viewport_size["width"], "widthMode": width_mode,
@@ -733,6 +751,7 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
       failures.append(Failure(page_name, f"[{label}] {selector} overlaps the floating toolbar{diagnostic}"))
     if hits:
       failures.append(Failure(page_name, f"[{label}] {hits} control(s) of {selector} sit under the toolbar{diagnostic}"))
+    return gap + got["height"]
 
   def finish() -> None:
     FIRST_GAP_REPORT_DIR.mkdir(parents=True, exist_ok=True)
@@ -786,7 +805,9 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
   page.locator("[data-sphinx-preview-edit-toggle]").click()
   page.wait_for_timeout(200)
   if mode == "empty":
-    record("edit:Start writing", ".sphinx-preview-insert-point--start button", interactive=True)
+    # The document is one blank line: the block comes first, the button right below it.
+    block_bottom = record("edit:blank-line block", BLANK_BLOCK_SELECTOR, at=BLANK_BLOCK_TOP)
+    record("edit:Start writing", START_BUTTON_SELECTOR, interactive=True, below=block_bottom)
     finish()
     return
   measure_first("edit")
