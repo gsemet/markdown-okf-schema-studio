@@ -8,8 +8,9 @@
   opening watcher is gone, and so are the settings `open.searchResultsInStudio` and
   `open.markdownFilesInStudio` of 1.11.0. To open every `.md` file in Studio, associate `*.md` with Studio in
   `workbench.editorAssociations`; the first activation does it for you where `open.markdownFilesInStudio` was
-  on. With the association, a jump to a line opens Studio at the top and the side preview marks nothing
-  (CR-477 raw-text, PR #0).
+  on. With the association, an Explorer click opens Studio, and a jump to a line opens Studio at the top and
+  the side preview marks nothing. With the default settings, a search result or a jump opens the text
+  editor at the line again, as it did before 1.11.0, explicitly (CR-477 raw-text, PR #0).
 - The editor of a blank-lines block now closes after Done, instead of staying on "Saving Markdown…"
   (CR-474 blank-save, PR #491, issue #485).
 - Cancel and Escape now always close an editor whose save is still running, and a save that fails

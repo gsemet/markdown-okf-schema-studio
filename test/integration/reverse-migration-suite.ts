@@ -41,6 +41,13 @@ async function runReverseMigration(): Promise<void> {
   assert.match(read(userSettings), RETIRED, "the user settings were seeded with the retired setting");
   assert.match(read(workspaceFile.fsPath), RETIRED, "the workspace file was seeded with the retired setting");
 
+  // The Markdown file that triggers the activation (onLanguage:markdown) opens before the association exists.
+  const folder = path.dirname(workspaceFile.fsPath);
+  const trigger = path.join(folder, "trigger.md");
+  const next = path.join(folder, "next.md");
+  fs.writeFileSync(trigger, "# Trigger\n");
+  fs.writeFileSync(next, "# Next\n");
+  await vscode.window.showTextDocument(vscode.Uri.file(trigger), { preview: false });
   await vscode.extensions.getExtension("GaetanSemet.markdown-okf-schema-studio")?.activate();
   await waitUntil("the retired settings to leave both files", () =>
     !RETIRED.test(read(userSettings)) && !RETIRED.test(read(workspaceFile.fsPath)), 30_000);
@@ -53,4 +60,13 @@ async function runReverseMigration(): Promise<void> {
   const configuration = vscode.workspace.getConfiguration("workbench").inspect<Record<string, string>>("editorAssociations");
   assert.equal(configuration?.globalValue?.["*.md"], EDITOR_VIEW_TYPE, "the user value, read by VS Code");
   assert.equal(configuration?.workspaceValue?.["*.md"], EDITOR_VIEW_TYPE, "the workspace value, read by VS Code");
+
+  const tabInputs = (): vscode.Tab[] => vscode.window.tabGroups.all.flatMap((group) => group.tabs);
+  const triggerTabs = tabInputs().filter((tab) => tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === trigger);
+  assert.equal(triggerTabs.length, 1, "the file that triggered the activation is still a text editor");
+  assert.equal(tabInputs().some((tab) => tab.input instanceof vscode.TabInputCustom && tab.input.uri.fsPath === trigger), false,
+    "no Studio tab took the triggering file's place");
+  await vscode.commands.executeCommand("vscode.open", vscode.Uri.file(next));
+  await waitUntil("a Studio tab for the next Markdown file", () => tabInputs().some((tab) => tab.input instanceof vscode.TabInputCustom
+    && tab.input.viewType === EDITOR_VIEW_TYPE && tab.input.uri.fsPath === next), 30_000);
 }

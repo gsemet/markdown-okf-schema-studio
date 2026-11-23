@@ -50,7 +50,8 @@ the arrow keys or a click never draws it.
 With **Scroll preview with editor** on, the editor leads: the preview scrolls only when the line is
 not already on screen. With it off, the preview scrolls the line to the reading line. A link or
 Back and Next followed in the side preview mark their target line the same way. A Studio tab beside
-the text editor marks nothing on a jump.
+the text editor marks nothing on a jump. The marker needs the file to open in the text editor: under the
+`*.md` association a jump opens a Studio tab, and the side preview marks nothing.
 
 Which moves count as a jump depends on the kind VS Code gives them. The real-window trial J1
 recorded these kinds in VS Code on Linux:
@@ -81,8 +82,8 @@ With that association VS Code itself opens Studio. A jump to a line (a search re
 first activation of a later version turns an `open.markdownFilesInStudio` that was on into the
 association above, at the same scope (your user settings, your workspace, or both), and removes both settings.
 
-To read the raw text on purpose, run **Markdown OKF-Schema Studio: Open as Text** (or **Reopen
-Editor With... > Text Editor**). That text editor stays text. A diff stays a text diff, and its side preview shows the real file.
+To read the raw text on purpose, run **Markdown OKF-Schema Studio: Open as Text**, **Reopen
+Editor With... > Text Editor** or **Open With... > Text Editor**. That text editor stays text. A diff stays a text diff, and its side preview shows the real file.
 See [Known Limitations](../known-limitations.md#opening-files) for what is not covered.
 
 ## In the Agents window
