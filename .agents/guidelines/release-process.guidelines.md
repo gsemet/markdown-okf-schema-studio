@@ -44,7 +44,9 @@ named by the date of the pull request (the date may differ from the tag's; nothi
 1. The owner says "release X". The version number is agreed with the owner.
 2. The stack of the release lands on `main` first (or the version PR tops it: see "The version PR
    on top of a stack"). Every PR with a `feat` or `fix` commit adds one user-facing line to
-   `CHANGELOG.md` `## Unreleased`, in that PR, appended at the end of the list; a rebase conflict
+   `CHANGELOG.md` `## Unreleased`, in that PR, appended at the end of the list and ending with its
+   references, written as in "CHANGELOG line" of
+   [pull-request.guidelines.md](pull-request.guidelines.md); a rebase conflict
    on that block keeps both lines. PRs that are only `test`, `ci`, `build`, `docs` or `chore` add
    no line and tick the template checkbox with "No user-facing change". A `feat` or `fix` PR that
    landed without its line is a gap of that PR: a fix PR adds the line before the version commit.
@@ -68,7 +70,8 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    stack". A red job is fixed with a fix PR, which is merged, and the run of the new HEAD is
    awaited. A flake: re-run once (`gh run rerun <run-id> --failed`); if it fails again, treat it as
    red.
-5. **Only then** the version commit: `just bump-version`, the changelog heading, the version pull
+5. **Only then** the version commit: `just bump-version`, then `just changelog-refs` (adds the commit
+   item to every line of `## Unreleased`), then the changelog heading, the version pull
    request (notes folder and version commit in one `chore: version X.Y.Z` commit, body following
    `.github/PULL_REQUEST_TEMPLATE.md`; see "How to Release" in CONTRIBUTING.md). `just check` fails
    without valid notes, so the PR cannot merge without them. The owner reviews the folder in the
@@ -77,6 +80,8 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    version push (CI rule 14) stays the final gate. When the version PR tops a ready stack, the
    version commit is made on the top branch: see "The version PR on top of a stack".
    The version commit carries no `Signed-off-by` trailer: amend it without `-s`.
+   The SHA-1 of a line is known only once its commit is on `main`, and the release adds it in the
+   version commit, so no follow-up commit on `main` is ever needed for it.
    If the local `just preflight` stops at `ci-integration` because the screen is locked, do not
    wait: dispatch `gh workflow run ci.yml --ref <branch> -f heavy=true` at once on the release branch
    and go on; its `integration` job is the real-window proof.
@@ -129,6 +134,9 @@ The version PR may be the top PR of a stack that is ready to merge:
 1. The stack's bottom is based on the current `origin/main` HEAD. Every PR below the version PR is
    ready (CI green, review done). The version commit (`just bump-version`, changelog heading, notes
    folder) is made on the top branch, so Commitizen sees the commits of the stack.
+   Run `just changelog-refs origin/main --skip-missing` before the heading: the commits of the stack
+   are not on `main` yet (and a rebase merge rewrites their SHA-1), so the stack's own lines ship
+   without their commit item.
 2. From here until the release is published, every other merge is held.
 3. Dispatch the heavy run on the top branch:
    `gh workflow run ci.yml --ref <top-branch> -f heavy=true`. Find it with
@@ -186,6 +194,9 @@ folded sections.
 Write like a maintainer telling a colleague what changed. Use short, complete sentences, plain
 verbs, and "you". Write for the user: no ticket numbers, no requirement IDs, no internal terms
 (agent roles, change request numbers, rounds), no implementation.
+
+The references at the end of a changelog line (commit, change request, pull request, issue) are
+not copied into the notes.
 
 - Each highlight is a heading that says what you can now do, then at most two sentences, then the
   picture. Nothing comes under the picture, except the short Markdown example of a new syntax.

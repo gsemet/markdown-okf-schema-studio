@@ -592,7 +592,9 @@ release guideline).
 	git fetch origin --tags
 	```
 
-	Then check that `## Unreleased` in `CHANGELOG.md` has one user-facing line for every
+	Then check that `## Unreleased` in `CHANGELOG.md` has one user-facing line, ending with its
+	references (see "CHANGELOG line" in the
+	[pull-request guideline](.agents/guidelines/pull-request.guidelines.md)), for every
 	`feat` and `fix` commit since the last release tag, and treat a missing one as a gap of its
 	PR: a fix PR adds it before the version commit. Each PR adds its own line, appended at the end of
 	`## Unreleased` (test, CI, build and documentation commits get none). This check is the
@@ -629,7 +631,9 @@ release guideline).
 	Commit or stash existing edits to these version files before running the command.
 	Explicit versions must be stable `X.Y.Z`, newer than the baseline, and not already tagged.
 
-	The commands leave `CHANGELOG.md` alone. Add a `## X.Y.Z - YYYY-MM-DD` heading (the version
+	The commands leave `CHANGELOG.md` alone. First run `just changelog-refs`, which adds the commit
+	of each line of `## Unreleased` (`just changelog-refs origin/main --skip-missing` when the version
+	PR tops a stack, whose commits are not on `main` yet). Then add a `## X.Y.Z - YYYY-MM-DD` heading (the version
 	just computed, today's date) right under `## Unreleased`, so the lines move under it and
 	`## Unreleased` stays empty, then amend the version commit. The version commit carries no
 	`Signed-off-by` trailer, so the amend has no `-s`:

@@ -39,13 +39,45 @@ even in this repository.
   at the template's comment; the Verifier fails a body whose Impacts has neither.
 - A decision an agent took without the user is listed in the PR body under "Autonomous decisions".
 
+## CHANGELOG line
+
+The `## Unreleased` line that a `feat` or `fix` pull request adds to `CHANGELOG.md` (when and where:
+[release-process.guidelines.md](release-process.guidelines.md), step 2) ends with its references in
+parentheses, in one group at the end of its last physical line. The items are separated by `, ` and
+come in this order:
+
+1. `commit <short SHA-1>`: added by the release only, never by hand (see step 5 of
+   [release-process.guidelines.md](release-process.guidelines.md)).
+2. `CR-<number> <short name>`: the change request, when the change has one (a pull request opened
+   directly has none).
+3. The pull request in the forge's notation: `PR #476` on GitHub, `MR !476` on GitLab.
+4. `issue <ref>` for the linked issue, when there is one: `issue #413` (GitHub or GitLab),
+   `issue PROJ-12` (Jira). Several issues: one `issue` item each.
+
+A piece that does not exist is left out. Examples:
+
+- GitHub, as the author writes it: `(CR-463 change-bar-tooltip, PR #476, issue #413)`; after the
+  release: `(commit 1a5b98b, CR-463 change-bar-tooltip, PR #476, issue #413)`.
+- GitLab: `(commit 1a5b98b, CR-463 change-bar-tooltip, MR !476, issue #413)`.
+- Jira issue, no change request: `(commit 1a5b98b, PR #476, issue PROJ-12)`.
+- Minimum: `(PR #476)`, then `(commit 1a5b98b, PR #476)`.
+
+Whoever opens the pull request writes the CR item and the issue item with the line, and adds the
+pull request (merge request on GitLab) item right after opening it, because the forge gives the
+number only then: in a commit on the same branch, before the pull request is marked ready.
+
+No check enforces the format; it is read in review like the rest of the diff. The CHANGELOG line is
+not the PR body: the rule "no CR numbers in the body text" still holds for the body, and the
+references belong in the CHANGELOG line.
+
 ## Draft until mergeable
 
 A pull request is a draft until it is mergeable.
 
 - Open it with `gh pr create --draft`.
 - Mark it ready with `gh pr ready <n>` only when CI is green at its head, the review is approved,
-  the Verifier's verdict at that head is `Verdict: VERIFIED` and `ready` is reported.
+  the Verifier's verdict at that head is `Verdict: VERIFIED`, the CHANGELOG line, when there is
+  one, names its pull request, and `ready` is reported.
 - When a CR goes back for a new round, put it back to draft with `gh pr ready <n> --undo`.
 - In a stack, each PR turns ready on its own, as soon as it is mergeable, without waiting for the
   rest of the stack.

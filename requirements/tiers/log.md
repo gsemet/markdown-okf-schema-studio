@@ -2,6 +2,10 @@
 
 ## 2026-11-23
 
+### Commit of each changelog line (CR-473)
+
+- Added (`proposed`): SwRS-MDOKFSTUDIO-CORE-094 (the release script adds to each line of `## Unreleased` the short SHA-1 of the commit on the base that added it, first in the line's reference group; it writes nothing when a commit is not on the base, unless `--skip-missing` leaves that line alone, or when the file has uncommitted changes). Derives from StRS-MDOKFSTUDIO-CORE-007. No existing requirement changed.
+
 ### Frontmatter file lookups behind the async FileSystem port (CR-468)
 
 - Changed (no requirement text): code and tests of SwRS-MDOKFSTUDIO-FMSCHEMA-055 (the stem index) and FMSCHEMA-063 (link resolution) now read files through an async core port satisfied by `host.files`; behaviour is unchanged. New tests added to their `tested_in_files`. No new StRS or SwRS.
