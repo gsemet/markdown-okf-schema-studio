@@ -57,6 +57,7 @@ When a reader runs Refresh Preview, by the command or by the Refresh button, the
 - GIVEN a preview of preview-other.md and a buffer edited by an API edit without a save
 - WHEN the reader runs Refresh Preview
 - THEN a new render with a higher requestId shows the edit marker
+- AND the command completes once the page shows that render (host test test/host/openCompletes.test.ts)
 
 ### Scenario (nominal): Over an open editor
 

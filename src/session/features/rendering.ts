@@ -166,6 +166,15 @@ export class RenderingController extends PageDocumentController {
 
   private readonly updates = new WeakMap<PreviewSession, Promise<void>>();
 
+  /**
+   * Settles when the shows asked so far for the session have finished (the page then holds the
+   * rendered document). Never rejects; resolves at once when no show is pending (a disposed
+   * session, a hidden panel, a result deferred for an open editor).
+   */
+  public pendingShow(preview: PreviewSession): Promise<void> {
+    return this.updates.get(preview) ?? Promise.resolve();
+  }
+
   private isShowable(preview: PreviewSession, result: RenderResult): boolean {
     return !preview.disposed
       && this.manager.has(preview)

@@ -424,6 +424,9 @@ export class PreviewManager {
       // @implements_req SwRS-MDOKFSTUDIO-CORE-025
       this.rendering.setStatus(session, "error", failureMessage(outcome.error, "The render failed."));
     }
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-003
+    // The command completes once the page shows the document, not while it still holds the status page.
+    await this.rendering.pendingShow(session);
   }
 
   /** Renders `document` in the session; a failure shows the error status. */
