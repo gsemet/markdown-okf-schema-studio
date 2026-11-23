@@ -20,6 +20,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-075
 - SwRS-MDOKFSTUDIO-CORE-076
 - SwRS-MDOKFSTUDIO-CORE-078
+- SwRS-MDOKFSTUDIO-CORE-094
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -74,4 +75,5 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-CORE-075](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-075.md): Plugin manifest versions equal the package version
   - [SwRS-MDOKFSTUDIO-CORE-076](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-076.md): CI tags a version change only after a green heavy run of the commit
   - [SwRS-MDOKFSTUDIO-CORE-078](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-078.md): A version ships only with its reviewed release notes
+  - [SwRS-MDOKFSTUDIO-CORE-094](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-094.md): The release adds the commit of each changelog line
 <!-- okf:links:end -->

@@ -210,7 +210,7 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py test/build/test_check_main_paths.py test/build/test_no_merge_commits.py
+    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py test/build/test_check_main_paths.py test/build/test_no_merge_commits.py test/build/test_changelog_refs.py
 
 # Check that the current version has valid release notes under docs/releases-notes/.
 release-notes-check:
@@ -497,6 +497,10 @@ package:
 # Compute the next npm version and create a version commit, without tagging.
 bump-version:
     uv run --group release python scripts/version.py
+
+# Add the commit of each line of ## Unreleased in CHANGELOG.md (release, before the changelog heading).
+changelog-refs BASE="origin/main" *ARGS:
+    uv run --no-sync python scripts/changelog_refs.py --base "{{ BASE }}" {{ ARGS }}
 
 # Set X.Y.Z and create a version commit, without tagging.
 version VERSION:
