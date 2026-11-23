@@ -16,6 +16,7 @@ import {
   textContent,
 } from "./dom";
 import { fixtureDirectory, fixtureDocument, inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-010
 test("wikilinks render as lazy note targets without changing code or existing links", async () => {
@@ -23,7 +24,7 @@ test("wikilinks render as lazy note targets without changing code or existing li
     "See [[Note]], [[Folder/My Note#Heading|Label]] and [[#Section]].\n\n"
     + "`[[Code]]` and [existing [[label]]](target.md).\n\n```text\n[[Fenced]]\n```\n",
   );
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const links = findElements(parseHtml(result.html), isTag("a"));
   assert.deepEqual(links.map((link) => attribute(link, "href")), [
@@ -38,6 +39,7 @@ test("wikilinks render as lazy note targets without changing code or existing li
 test("the in-process renderer preserves the active-file MyST feature contract", async () => {
   const document = fixtureDocument("feature-contract.md");
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document,
     workspaceRoot,
     requestId: 1,
@@ -84,6 +86,7 @@ test("the in-process renderer preserves the active-file MyST feature contract", 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-019
 test("figure references render figures whose body supplies the caption", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "See {ref}`fig-example`.\n\n"
       + "```{figure} example.svg\n"
@@ -111,6 +114,7 @@ test("figure references render figures whose body supplies the caption", async (
 // @tests_req SwRS-MDOKFSTUDIO-MYST-019
 test("references to captionless figures and tables stay readable", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "See {ref}`fig-empty` and {ref}`tbl-empty`.\n\n"
       + "```{figure} image.svg\n"
@@ -138,6 +142,7 @@ test("references to captionless figures and tables stay readable", async () => {
 // @tests_req SwRS-MDOKFSTUDIO-MYST-019
 test("a numref to a captionless figure or table shows its number", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "See {ref}`fig-empty`, {numref}`fig-empty`, {ref}`tbl-empty` and {numref}`tbl-empty`.\n\n"
       + "```{figure} image.svg\n"
@@ -179,6 +184,7 @@ test("a numref to a captionless figure or table shows its number", async () => {
 // @tests_req SwRS-MDOKFSTUDIO-CODE-014
 test("MyST code directives number and emphasize lines relative to their start", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "```{code} ipython3\n"
       + ":emphasize-lines: 5,7-8\n"
@@ -212,6 +218,7 @@ test("MyST code directives number and emphasize lines relative to their start", 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-022
 test("MyST code-cell directives render numbered input without claiming execution", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "```{code-cell} python\n"
       + ":linenos:\n"
@@ -246,6 +253,7 @@ test("Mermaid fences and directives preserve diagram source for webview renderin
 
   for (const [index, source] of sources.entries()) {
     const result = await renderPreviewDocument({
+      files: createNodeFileSystem(),
       document: inlineDocument(source),
       workspaceRoot,
       requestId: 30 + index,
@@ -270,6 +278,7 @@ test("PlantUML fences and directives preserve diagram source for external render
 
   for (const [index, source] of sources.entries()) {
     const result = await renderPreviewDocument({
+      files: createNodeFileSystem(),
       document: inlineDocument(source),
       workspaceRoot,
       requestId: 40 + index,
@@ -292,6 +301,7 @@ test("PlantUML fences and directives preserve diagram source for external render
 // @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("Sphinx version admonitions render generated titles and Markdown bodies", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       ":::{versionadded} 1.2.3\nA new feature with **bold** text.\n:::\n\n"
       + ":::{versionchanged} 2.0.0\nAn updated behavior.\n:::\n\n"
@@ -331,6 +341,7 @@ test("Sphinx version admonitions render generated titles and Markdown bodies", a
 // @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("custom admonition titles preserve inline Markdown and their class", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       ":::{admonition} My custom title with *Markdown*!\n"
       + ":class: tip\n\n"
@@ -358,6 +369,7 @@ test("nested backtick and colon delimiters preserve their enclosing Markdown", a
     const outerFence = "`".repeat(outerLength);
     const innerFence = "`".repeat(outerLength - 1);
     const result = await renderPreviewDocument({
+      files: createNodeFileSystem(),
       document: inlineDocument(
         `${outerFence}markdown\n`
         + `${innerFence}markdown\n`
@@ -379,6 +391,7 @@ test("nested backtick and colon delimiters preserve their enclosing Markdown", a
   }
 
   const nestedFence = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "````md\n```\n"
       + ":::{admonition} My custom title with *Markdown*!\n"
@@ -400,6 +413,7 @@ test("nested backtick and colon delimiters preserve their enclosing Markdown", a
     hasClass(element, "admonition") && hasClass(element, "tip")), undefined);
 
   const nested = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "::::{note}\nOuter note.\n:::{tip}\nInner tip.\n:::\n::::\n",
     ),
@@ -418,6 +432,7 @@ test("nested backtick and colon delimiters preserve their enclosing Markdown", a
 
 test("GitHub alert syntax preserves an explicit title", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument("> [!note] Note\n> Tips\n> Keep useful advice concise.\n"),
     workspaceRoot,
     requestId: 5,
@@ -440,6 +455,7 @@ test("GitHub alert syntax preserves an explicit title", async () => {
 // @tests_req SwRS-MDOKFSTUDIO-GFM-009
 test("GitHub alert syntax defaults the title when none is provided", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument("> [!TIP]\n> Tips remain visible.\n"),
     workspaceRoot,
     requestId: 6,
@@ -460,6 +476,7 @@ test("GitHub alert syntax defaults the title when none is provided", async () =>
 
 test("GitHub bold Note, Important, and Warning markers become simple admonitions", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "> **Note**\n> Note body.\n\n"
       + "> **Important**\n> Important body.\n\n"
@@ -487,6 +504,7 @@ test("GitHub bold Note, Important, and Warning markers become simple admonitions
 // @tests_req SwRS-MDOKFSTUDIO-MYST-017
 test("MyST typography renders definitions, abbreviations, scripts, and footnotes", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "Term\n: Definition text.\n\n"
       + "{abbr}`HR (Heart Rate)`; H{sub}`2`O; x{sup}`th`.\n\n"
@@ -536,6 +554,7 @@ test("all named MyST admonitions receive their documented default title", async 
     .map((kind) => `:::{${kind}}\nBody for ${kind}.\n:::`)
     .join("\n\n");
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(source),
     workspaceRoot,
     requestId: 8,
@@ -556,6 +575,7 @@ test("all named MyST admonitions receive their documented default title", async 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("a leading bold paragraph or heading supplies the MyST admonition title", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       ":::{note}\n**A bold title**\n\nBody after the title.\n:::\n\n"
       + ":::{danger}\n### A heading title\n\nBody after the heading.\n:::\n",
@@ -586,6 +606,7 @@ test("a leading bold paragraph or heading supplies the MyST admonition title", a
 // @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("Quarto callout classes render as semantic MyST admonitions", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "::: {.callout-tip}\n## Tip with Caption\n\nThis is a Quarto callout.\n:::\n",
     ),
@@ -609,6 +630,7 @@ test("Quarto callout classes render as semantic MyST admonitions", async () => {
 // @tests_req SwRS-MDOKFSTUDIO-MYST-006
 test("dropdown admonitions render as openable details with a summary", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       ":::{warning} Read more\n:class: simple dropdown\n:open: true\n:icon: false\n\nDetails body.\n:::\n\n"
       + ":::{tip} Open option only\n:open: true\n\nOpen body.\n:::\n",
@@ -640,6 +662,7 @@ test("dropdown admonitions render as openable details with a summary", async () 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-006
 test("the dropdown directive keeps its body in both fence styles", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       ":::{dropdown} Colon title\nColon body.\n:::\n\n"
       + "```{dropdown} Backtick title\n:open:\n\nBacktick body.\n```\n\n"
@@ -702,6 +725,7 @@ test("MyST GFM and directive tables preserve captions, headers, and alignment", 
     "```",
   ].join("\n");
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(source),
     workspaceRoot,
     requestId: 10,
@@ -764,6 +788,7 @@ test("CR038: a list-table renders its title, header rows, widths and alignment a
     "```",
   ].join("\n");
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(source),
     workspaceRoot,
     requestId: 12,
@@ -797,6 +822,7 @@ test("CR038: a list-table renders its title, header rows, widths and alignment a
 // @tests_req SwRS-MDOKFSTUDIO-MYST-063
 test("CR038: :header-rows: decides how many rows are header cells", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument([
       "```{list-table}", ":header-rows: 2", "", "* - h1", "  - h2", "* - s1", "  - s2", "* - b1", "  - b2", "```",
     ].join("\n")),
@@ -815,6 +841,7 @@ test("CR038: :header-rows: decides how many rows are header cells", async () => 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-063
 test("CR038: list-table widths that do not match the columns or are not numbers are ignored", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument([
       "```{list-table}", ":widths: 1 2 3", "", "* - a", "  - b", "```", "",
       "```{list-table}", ":widths: auto", "", "* - a", "  - b", "```",
@@ -831,6 +858,7 @@ test("CR038: list-table widths that do not match the columns or are not numbers 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-031
 test("raw HTML tables preserve complex cell spans without active content", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "<table>\n"
       + "<tr><th rowspan=\"2\">Projection</th><th colspan=\"2\">Area</th></tr>\n"
@@ -860,6 +888,7 @@ test("raw HTML tables preserve complex cell spans without active content", async
 // @tests_req SwRS-MDOKFSTUDIO-GFM-031
 test("raw HTML table cell styles are preserved as safe preview metadata", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       '<table><tr><th style="background: -webkit-linear-gradient(20deg, #09009f, #E743D9); '
       + '-webkit-background-clip: text; -webkit-text-fill-color: transparent">Gradient</th>'
@@ -891,7 +920,7 @@ test("raw HTML table cell styles are preserved as safe preview metadata", async 
 
   const rewritten = rewriteSphinxHtml(result.html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     resolveResource: () => undefined,
     resolveNavigation: () => ({ kind: "blocked" }),
@@ -910,6 +939,7 @@ test("raw HTML table cell styles are preserved as safe preview metadata", async 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-034
 test("a colour span inside a raw HTML table keeps named, hex, rgb and hsl colours", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       '<table><tr><td><span style="color: red">Urgent</span> <span style="color: hsl(120, 100%, 25%); '
       + 'background-color: #ffeeaa">Ok</span> <span style="color: var(--x)">No</span></td></tr></table>\n',
@@ -920,7 +950,7 @@ test("a colour span inside a raw HTML table keeps named, hex, rgb and hsl colour
   });
   const rewritten = rewriteSphinxHtml(result.html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     resolveResource: () => undefined,
     resolveNavigation: () => ({ kind: "blocked" }),
@@ -943,6 +973,7 @@ test("table directives render trusted workspace-local HTML includes", async () =
     + ":::{include} included-table.html\n:::\n::::\n",
   );
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document,
     workspaceRoot,
     requestId: 12,
@@ -967,6 +998,7 @@ test("table directives render trusted workspace-local HTML includes", async () =
 // @tests_req SwRS-MDOKFSTUDIO-CORE-022
 test("Jupyter table output embeds show a project-build placeholder", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       ":::{table} Notebook table\n:label: tbl:notebook\n\n![](#tbl:data-cars)\n:::\n",
     ),
@@ -991,6 +1023,7 @@ test("Jupyter table output embeds show a project-build placeholder", async () =>
 // @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("block elements carry the source line the editor scrolls against", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument("# One\n\nalpha\n\n## Two\n\nbeta\n\n| A | B |\n|---|---|\n| x | y |\n"),
     workspaceRoot,
     requestId: 2,
@@ -1007,6 +1040,7 @@ test("block elements carry the source line the editor scrolls against", async ()
 // @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("multiline blocks retain their full mapped source range", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument("First line\ncontinued line\n\nSecond block.\n"),
     workspaceRoot,
     requestId: 21,
@@ -1024,6 +1058,7 @@ test("multiline blocks retain their full mapped source range", async () => {
 // @tests_req SwRS-MDOKFSTUDIO-MYST-006
 test("MyST admonitions retain the directive range through the closing fence", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "Before the calibration gate.\n\n"
       + "```{warning} Calibration gate\n"
@@ -1046,6 +1081,7 @@ test("MyST admonitions retain the directive range through the closing fence", as
 // @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("standalone hyphenated context tags render as mapped Markdown admonitions", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "Before the allocation context.\n\n"
       + "<fullcycle-model-allocation>\n\n"
@@ -1085,6 +1121,7 @@ test("standalone hyphenated context tags render as mapped Markdown admonitions",
 // @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("simple and snake_case context tags preserve adjacent fences and source ranges", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "<context>\n"
       + "```yaml\n"
@@ -1126,6 +1163,7 @@ test("simple and snake_case context tags preserve adjacent fences and source ran
 // @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("nested context tags preserve each wrapper range", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "<outer-context>\n\n"
       + "Outer body.\n\n"
@@ -1156,6 +1194,7 @@ test("nested context tags preserve each wrapper range", async () => {
 // @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("unsupported context boundaries stay literal and fenced XML stays code", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "<broken-context>\n\n"
       + "This body must remain visible.\n\n"
@@ -1191,6 +1230,7 @@ test("unsupported context boundaries stay literal and fenced XML stays code", as
 // @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("standard HTML and inline or fenced XML stay outside context grouping", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       "<div class=\"real-html\">\n"
       + "HTML div body.\n"
@@ -1233,6 +1273,7 @@ test("standard HTML and inline or fenced XML stay outside context grouping", asy
 // @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("block source ranges stay absolute when leading frontmatter is stripped", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument("---\ntype: finding\nstatus: draft\n---\n# Heading\n\nFirst line\ncontinued line\n"),
     workspaceRoot,
     requestId: 22,
@@ -1253,6 +1294,7 @@ test("block source ranges stay absolute when leading frontmatter is stripped", a
 // @tests_req SwRS-MDOKFSTUDIO-CORE-022
 test("project-scoped roles and directives degrade to labelled placeholders", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument("Text {cite}`smith2024` here.\n\n```{animation} chart.js\n```\n"),
     workspaceRoot,
     requestId: 3,
@@ -1275,6 +1317,7 @@ test("project-scoped roles and directives degrade to labelled placeholders", asy
 test("an untrusted workspace refuses to render", async () => {
   await assert.rejects(
     renderPreviewDocument({
+      files: createNodeFileSystem(),
       document: inlineDocument("# Nope\n"),
       workspaceRoot,
       requestId: 4,
@@ -1289,6 +1332,7 @@ test("figures and plain images are mapped blocks with their closing source line"
   const source = "Intro\n\n:::{figure} a.svg\n:alt: x\n\nCap\n:::\n\n"
     + "```{figure} b.svg\n\nCap2\n```\n\n![alt](c.png)\n";
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(source),
     workspaceRoot,
     requestId: 3,
@@ -1314,6 +1358,7 @@ test("figures and plain images are mapped blocks with their closing source line"
 test("image directives are mapped blocks spanning the directive's source lines", async () => {
   const source = "Intro\n\n```{image} b.png\n:alt: x\n```\n\n:::{image} d.png\n:::\n";
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(source),
     workspaceRoot,
     requestId: 4,
@@ -1340,7 +1385,7 @@ test("tilde pairs render as struck-through text only in prose", async () => {
       + "`~~code~~`\n\n```text\n~~fenced~~\n```\n\n"
       + "```{include} included-strike.md\n```\n",
     );
-    const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
       documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
     const root = parseHtml(result.html);
     const dels = findElements(root, isTag("del"));
@@ -1360,6 +1405,7 @@ test("tilde pairs render as struck-through text only in prose", async () => {
 // @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("a lone raw <img> block is a mapped block with a source line", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument("Before.\n\n<img src=\"img.png\" alt=\"c\">\n\nAfter.\n"),
     workspaceRoot,
     requestId: 3,
@@ -1381,7 +1427,7 @@ test("a table inserted by the edition palette renders as a table with its header
     value: "Intro", selectionStart: 5, selectionEnd: 5, scope: "block", arg: "3x4",
   })!;
   const document = inlineDocument("Intro" + insertion.text + "\n\nAfter.\n");
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const root = parseHtml(result.html);
   const tables = findElements(root, isTag("table"));
@@ -1398,6 +1444,7 @@ test("a table inserted by the edition palette renders as a table with its header
 // @tests_req SwRS-MDOKFSTUDIO-GFM-008
 test("a footnote reference with no definition invents no footnote text and the render succeeds", async () => {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument("A claim[^2] stays readable.\n\nThe next paragraph.\n"),
     workspaceRoot,
     requestId: 1,

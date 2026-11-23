@@ -1,5 +1,9 @@
-import * as fs from "node:fs";
 import * as path from "node:path";
+
+import type { FileSystem } from "../files/fileSystem";
+
+/** What the resource policy asks of the file system: real paths, regular-file checks and reads. */
+export type PolicyFiles = Pick<FileSystem, "realpath" | "stat" | "readFile">;
 
 export interface ResourceRoot {
   label: string;
@@ -53,6 +57,15 @@ interface CanonicalRoot {
   directory: string;
   realDirectory: string;
   documentFolder: boolean;
+  /** Too broad to serve a preview with restricted reads (see {@link isBroadRestrictedRoot}); set only with `restrictedReads`. */
+  broad: boolean;
+}
+
+/** A resource request the sanitizer asked for before its answer was known (see {@link ResourcePolicy.prime}). */
+export interface ResourceRequest {
+  request: string;
+  baseDirectory: string;
+  options?: ResourceRequestOptions;
 }
 
 const SCHEME_PATTERN = /^[a-z][a-z\d+.-]*:/i;
@@ -118,9 +131,9 @@ function diagnostic(
   diagnostics.push({ code, message, value });
 }
 
-function realOrResolved(directory: string): string {
+async function realOrResolved(files: Pick<FileSystem, "realpath">, directory: string): Promise<string> {
   try {
-    return fs.realpathSync(path.resolve(directory));
+    return await files.realpath(path.resolve(directory));
   } catch {
     return path.resolve(directory);
   }
@@ -149,13 +162,16 @@ function foldCase(value: string): string {
  * user's home folder, a folder that contains it (`/Users`, `C:\Users`), a file-system root or a
  * drive root. Symbolic links are resolved first.
  */
-export function isBroadRestrictedRoot(directory: string): boolean {
-  const real = realOrResolved(directory);
+export async function isBroadRestrictedRoot(
+  files: Pick<FileSystem, "realpath">,
+  directory: string,
+): Promise<boolean> {
+  const real = await realOrResolved(files, directory);
   if (path.parse(real).root === real) {
     return true;
   }
   const home = homeFolder();
-  return home !== undefined && isWithin(foldCase(real), foldCase(realOrResolved(home)));
+  return home !== undefined && isWithin(foldCase(real), foldCase(await realOrResolved(files, home)));
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-031
@@ -169,6 +185,7 @@ export function isBroadRestrictedRoot(directory: string): boolean {
  * dot-segment below the root (`.ssh`, `.aws`, `.config`) is always refused.
  */
 export function createPreviewResourcePolicy(
+  files: PolicyFiles,
   documentDirectory: string,
   workspaceRoot?: string,
   restrictedReads = false,
@@ -177,7 +194,7 @@ export function createPreviewResourcePolicy(
     { label: "preview document directory", directory: documentDirectory, documentFolder: true },
     ...(workspaceRoot ? [{ label: "workspace root", directory: workspaceRoot }] : []),
   ];
-  return new ResourcePolicy(roots, restrictedReads ? { restrictedReads: true } : {});
+  return new ResourcePolicy(files, roots, restrictedReads ? { restrictedReads: true } : {});
 }
 
 const MAX_FILE_FACTS = 2000;
@@ -190,44 +207,62 @@ export interface ResourcePolicyOptions {
 export class ResourcePolicy {
   public readonly diagnostics: SecurityDiagnostic[] = [];
 
-  private readonly roots: CanonicalRoot[];
+  private roots: CanonicalRoot[] = [];
+
+  private opening: Promise<void> | undefined;
 
   private readonly restrictedReads: boolean;
 
   // One policy serves one render. The file-system answer for a path (its real path, or that it is
   // no regular file) is asked once per render: a page that references the same image or include
-  // many times stats it once. Bounded; a render that outgrows it starts a fresh memo.
+  // many times stats it once. Bounded; a render that outgrows it starts a fresh memo. The decision
+  // itself is synchronous and reads only this memo: `prime` (or an async resolve) fills it first.
   private readonly fileFacts = new Map<string, string | null>();
 
-  public constructor(roots: readonly ResourceRoot[], options: ResourcePolicyOptions = {}) {
+  private unprimed: ResourceRequest[] = [];
+
+  public constructor(
+    public readonly files: PolicyFiles,
+    private readonly rootRequests: readonly ResourceRoot[],
+    options: ResourcePolicyOptions = {},
+  ) {
     this.restrictedReads = options.restrictedReads === true;
-    this.roots = roots.flatMap((root) => {
-      try {
-        const directory = path.resolve(root.directory);
-        const realDirectory = fs.realpathSync(directory);
-        return [{ label: root.label, directory, realDirectory, documentFolder: root.documentFolder === true }];
-      } catch {
-        diagnostic(
-          this.diagnostics,
-          "missing-root",
-          `The ${root.label} resource root is unavailable.`,
-          root.directory,
-        );
-        return [];
+  }
+
+  /** Canonicalizes the roots once (their real paths); a root that cannot be resolved is reported and dropped. */
+  private open(): Promise<void> {
+    this.opening ??= (async (): Promise<void> => {
+      const roots: CanonicalRoot[] = [];
+      for (const root of this.rootRequests) {
+        try {
+          const directory = path.resolve(root.directory);
+          const realDirectory = await this.files.realpath(directory);
+          const broad = this.restrictedReads && await isBroadRestrictedRoot(this.files, directory);
+          roots.push({ label: root.label, directory, realDirectory, documentFolder: root.documentFolder === true, broad });
+        } catch {
+          diagnostic(
+            this.diagnostics,
+            "missing-root",
+            `The ${root.label} resource root is unavailable.`,
+            root.directory,
+          );
+        }
       }
-    });
+      this.roots = roots;
+    })();
+    return this.opening;
   }
 
   /** The real path of `candidate` when it is a regular file, else null; memoized per render. */
-  private realFile(candidate: string): string | null {
+  private async realFile(candidate: string): Promise<string | null> {
     const memo = this.fileFacts.get(candidate);
     if (memo !== undefined) return memo;
     let real: string | null;
     try {
-      if (!fs.statSync(candidate).isFile()) {
+      if ((await this.files.stat(candidate)).kind !== "file") {
         throw new Error("resource is not a file");
       }
-      real = fs.realpathSync(candidate);
+      real = await this.files.realpath(candidate);
     } catch {
       real = null;
     }
@@ -236,12 +271,49 @@ export class ResourcePolicy {
     return real;
   }
 
-  public resolveResource(
+  /**
+   * Asks the file system about every request that reaches a file check, so the synchronous
+   * {@link resolvePrimed} answers from the memo. A request that is refused earlier needs no lookup.
+   */
+  public async prime(requests: readonly ResourceRequest[]): Promise<void> {
+    await this.open();
+    for (const entry of requests) {
+      const outcome = this.evaluate(entry.request, entry.baseDirectory, entry.options ?? {}, true);
+      if ("need" in outcome) await this.realFile(outcome.need);
+    }
+  }
+
+  /** The requests {@link resolvePrimed} could not answer from the memo since the last call; the list is emptied. */
+  public takeUnprimed(): ResourceRequest[] {
+    const taken = this.unprimed;
+    this.unprimed = [];
+    return taken;
+  }
+
+  /**
+   * The synchronous decision, for a caller that cannot wait (the HTML sanitizer): it answers from
+   * the memo that {@link prime} filled. A request whose file facts are not known is refused as
+   * missing and listed in {@link takeUnprimed}; the file system is never read here.
+   */
+  public resolvePrimed(
+    request: string,
+    baseDirectory: string,
+    options: ResourceRequestOptions = {},
+  ): string | undefined {
+    const outcome = this.evaluate(request, baseDirectory, options, false);
+    if ("need" in outcome) {
+      this.unprimed.push({ request, baseDirectory, options });
+      return undefined;
+    }
+    return "path" in outcome ? outcome.path : undefined;
+  }
+
+  public async resolveResource(
     request: string,
     baseDirectory: string,
     options?: ResourceRequestOptions,
-  ): string | undefined {
-    const resolution = this.resolveResourceDetailed(request, baseDirectory, options);
+  ): Promise<string | undefined> {
+    const resolution = await this.resolveResourceDetailed(request, baseDirectory, options);
     return "path" in resolution ? resolution.path : undefined;
   }
 
@@ -251,19 +323,36 @@ export class ResourcePolicy {
    * `resolveResource` with the reason of a refusal (the diagnostic code it records), and for a
    * missing file inside the roots the absolute path it would have, so a caller can watch for it.
    */
-  public resolveResourceDetailed(
+  public async resolveResourceDetailed(
     request: string,
     baseDirectory: string,
     options: ResourceRequestOptions = {},
-  ): ResourceResolution {
+  ): Promise<ResourceResolution> {
+    await this.open();
+    let outcome = this.evaluate(request, baseDirectory, options, false);
+    for (let attempt = 0; "need" in outcome && attempt < 3; attempt += 1) {
+      await this.realFile(outcome.need);
+      outcome = this.evaluate(request, baseDirectory, options, false);
+    }
+    return "need" in outcome ? { refusal: "missing-resource", candidate: outcome.need } : outcome;
+  }
+
+  /**
+   * The decision, from the memo of file facts: a resolution, or `need` (the candidate whose file
+   * facts are unknown yet). `quiet` records no diagnostic (a priming pass).
+   */
+  private evaluate(
+    request: string,
+    baseDirectory: string,
+    options: ResourceRequestOptions,
+    quiet: boolean,
+  ): ResourceResolution | { need: string } {
+    const note = (code: string, message: string): void => {
+      if (!quiet) diagnostic(this.diagnostics, code, message, request);
+    };
     const decoded = decodePath(resourcePathPart(request));
     if (!decoded || decoded.includes("\0") || decoded.includes("\\")) {
-      diagnostic(
-        this.diagnostics,
-        "invalid-resource-path",
-        "The resource path could not be decoded safely.",
-        request,
-      );
+      note("invalid-resource-path", "The resource path could not be decoded safely.");
       return { refusal: "invalid-resource-path" };
     }
 
@@ -272,12 +361,7 @@ export class ResourcePolicy {
       decoded.startsWith("//") ||
       schemeOf(decoded) !== undefined
     ) {
-      diagnostic(
-        this.diagnostics,
-        "blocked-resource-scheme",
-        "Only relative resources inside the staged roots are allowed.",
-        request,
-      );
+      note("blocked-resource-scheme", "Only relative resources inside the staged roots are allowed.");
       return { refusal: "blocked-resource-scheme" };
     }
 
@@ -288,48 +372,37 @@ export class ResourcePolicy {
     const reachable = this.restrictedReads && !image ? this.roots.filter((entry) => entry.documentFolder) : this.roots;
     const root = reachable.find((entry) => isWithin(entry.directory, candidate));
     if (!root) {
-      diagnostic(
-        this.diagnostics,
-        "resource-outside-root",
-        "The resource is outside the staged preview roots.",
-        request,
-      );
+      note("resource-outside-root", "The resource is outside the staged preview roots.");
       return { refusal: "resource-outside-root" };
     }
 
     if (this.restrictedReads) {
-      if (isBroadRestrictedRoot(root.directory) && !(image && root.documentFolder)) {
-        diagnostic(
-          this.diagnostics,
+      if (root.broad && !(image && root.documentFolder)) {
+        note(
           "restricted-root",
           "This preview has restricted reads and is in your home folder or a file-system root, so it reads no "
           + "include or resource except the images next to the document; open a folder in the "
           + "workspace to include files.",
-          request,
         );
         return { refusal: "restricted-root" };
       }
       const hidden = path.relative(root.directory, candidate).split(path.sep)
         .some((segment) => segment.startsWith("."));
       if (hidden) {
-        diagnostic(
-          this.diagnostics,
+        note(
           "hidden-path",
           "A preview with restricted reads does not read paths inside dot-directories such as .ssh or .config.",
-          request,
         );
         return { refusal: "hidden-path" };
       }
     }
 
-    const known = this.realFile(candidate);
+    const known = this.fileFacts.get(candidate);
+    if (known === undefined) {
+      return { need: candidate };
+    }
     if (known === null) {
-      diagnostic(
-        this.diagnostics,
-        "missing-resource",
-        "The staged resource does not exist or is not a regular file.",
-        request,
-      );
+      note("missing-resource", "The staged resource does not exist or is not a regular file.");
       return { refusal: "missing-resource", candidate };
     }
     const realCandidate = known;
@@ -339,11 +412,9 @@ export class ResourcePolicy {
       && path.relative(root.realDirectory, realCandidate).split(path.sep)
         .some((segment) => segment.startsWith("."))
     ) {
-      diagnostic(
-        this.diagnostics,
+      note(
         "hidden-path",
         "A preview with restricted reads does not read paths inside dot-directories such as .ssh or .config.",
-        request,
       );
       return { refusal: "hidden-path" };
     }
@@ -353,25 +424,18 @@ export class ResourcePolicy {
     if (
       this.restrictedReads
       && image
-      && (!root.documentFolder || isBroadRestrictedRoot(root.directory))
+      && (!root.documentFolder || root.broad)
       && !IMAGE_EXTENSIONS.test(realCandidate)
     ) {
-      diagnostic(
-        this.diagnostics,
+      note(
         "resource-outside-root",
         "A preview with restricted reads reads an image file only, and this link leads to another kind of file.",
-        request,
       );
       return { refusal: "resource-outside-root" };
     }
 
     if (!isWithin(root.realDirectory, realCandidate)) {
-      diagnostic(
-        this.diagnostics,
-        "symlink-escape",
-        `The resource escapes the ${root.label} root through a symlink.`,
-        request,
-      );
+      note("symlink-escape", `The resource escapes the ${root.label} root through a symlink.`);
       return { refusal: "symlink-escape" };
     }
 
@@ -379,7 +443,7 @@ export class ResourcePolicy {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-090
-  public resolveNavigation(request: string, baseDirectory: string): NavigationResult {
+  public async resolveNavigation(request: string, baseDirectory: string): Promise<NavigationResult> {
     const trimmed = request.trim();
     if (trimmed.startsWith("#")) {
       return ANCHOR_PATTERN.test(trimmed)
@@ -414,7 +478,7 @@ export class ResourcePolicy {
       return { kind: "blocked" };
     }
 
-    const localPath = this.resolveResource(decoded, baseDirectory);
+    const localPath = await this.resolveResource(decoded, baseDirectory);
     return localPath
       ? { kind: "local", path: localPath, suffix: resourceReferenceSuffix(trimmed) }
       : { kind: "blocked" };
@@ -446,21 +510,21 @@ export function rewriteSrcset(
  * Reads a text file the way `{include}` does: through `policy` (relative path, inside the roots,
  * no symlink escape), a regular file of at most `maxBytes`, as UTF-8.
  */
-export function readBoundedText(
+export async function readBoundedText(
   policy: ResourcePolicy,
   request: string,
   baseDirectory: string,
   maxBytes = MAX_INCLUDED_FILE_BYTES,
-): BoundedTextRead {
-  const resolution = policy.resolveResourceDetailed(request, baseDirectory);
+): Promise<BoundedTextRead> {
+  const resolution = await policy.resolveResourceDetailed(request, baseDirectory);
   if (!("path" in resolution)) {
     return { ok: false, refusal: resolution.refusal, ...(resolution.candidate ? { candidate: resolution.candidate } : {}) };
   }
   try {
-    if (fs.statSync(resolution.path).size > maxBytes) {
+    if ((await policy.files.stat(resolution.path)).size > maxBytes) {
       return { ok: false, refusal: "too-large" };
     }
-    return { ok: true, path: resolution.path, source: fs.readFileSync(resolution.path, "utf8") };
+    return { ok: true, path: resolution.path, source: new TextDecoder("utf-8", { ignoreBOM: true }).decode(await policy.files.readFile(resolution.path)) };
   } catch {
     return { ok: false, refusal: "unreadable" };
   }

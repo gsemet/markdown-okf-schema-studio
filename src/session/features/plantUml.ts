@@ -125,7 +125,7 @@ export class PlantUmlController {
    * (only the document's folder and below in Restricted Mode) and watched, so a change draws the
    * diagrams again. It reads only; the answer repeats `editId`.
    */
-  private handleInclude(preview: PreviewSession, message: PageMessageOf<"previewPlantUmlInclude">): void {
+  private async handleInclude(preview: PreviewSession, message: PageMessageOf<"previewPlantUmlInclude">): Promise<void> {
     const { manager } = this;
     // Only the built-in engine reads includes through the host, and only next to the document or
     // to a file the host itself named in an earlier answer.
@@ -137,7 +137,8 @@ export class PlantUmlController {
       manager.requests.postHostResult(preview, message, { ok: false, reason: `PlantUML file ${message.path} could not be read.` });
       return;
     }
-    const answer = resolvePlantUmlInclude(
+    const answer = await resolvePlantUmlInclude(
+      manager.host.files,
       { path: message.path, from: message.from },
       { documentPath: manager.activePathOf(preview), workspaceRoot: preview.workspaceRoot, trusted: manager.host.workspace.trusted, restrictedReads: preview.restrictedReads },
     );

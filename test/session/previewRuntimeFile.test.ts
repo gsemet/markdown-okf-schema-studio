@@ -12,6 +12,7 @@ import {
 import { pageRuntimeScript } from "../page/runtimeHarness";
 import { attribute, findElements, parseHtml, type HtmlElement } from "../core/render/dom";
 import { fakeAssetResolver } from "../shared/fakeAssets";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 
 const extensionRoot = path.resolve(__dirname, "../../..");
@@ -25,6 +26,7 @@ const assets = fakeAssetResolver({
 
 async function page(markdown: string, requestId: number, maxContentWidth?: number): Promise<{ html: string; context: PreviewRuntimeContext }> {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: sourcePath }, languageId: "markdown", version: requestId, getText: () => markdown },
     workspaceRoot: extensionRoot,
     requestId,
@@ -37,7 +39,7 @@ async function page(markdown: string, requestId: number, maxContentWidth?: numbe
     activeSourceFile: result.stage.activeDocumentPath,
     initialAnchor: 2,
   };
-  const built = buildPreviewWebviewHtml(
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
     result.html,
     result.stage.outputDirectory,
     assets,

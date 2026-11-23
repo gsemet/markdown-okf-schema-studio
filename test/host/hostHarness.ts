@@ -88,8 +88,10 @@ export interface HostSession {
   postedSince(from: number, type?: string): Array<Record<string, unknown>>;
 }
 
+/** One turn of the event loop, then one round trip to the disk: the host reads files through an async port. */
 async function turn(): Promise<void> {
   await new Promise<void>((resolve) => setImmediate(resolve));
+  await fs.promises.stat(__filename);
 }
 
 /**

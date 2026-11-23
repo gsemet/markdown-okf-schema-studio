@@ -9,6 +9,7 @@ import { test } from "node:test";
 
 import type { AssetResolver } from "../../src/host-api/assetResolver";
 import { buildPreviewWebviewHtml } from "../../src/session/webview";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const assets: AssetResolver = {
   cspSource: "vscode-webview://csp",
@@ -22,12 +23,12 @@ const page = (content: string): string =>
 const CHART = '<figure class="myst-vega-figure"><div class="myst-vega-diagram" data-myst-chart-kind="vega-lite">{}</div></figure>';
 const MERMAID = '<figure class="myst-mermaid-figure"><div class="myst-mermaid-diagram">graph TD</div></figure>';
 
-const build = (content: string) =>
-  buildPreviewWebviewHtml(page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, [], "builtin").html;
+const build = async (content: string) =>
+  (await buildPreviewWebviewHtml(createNodeFileSystem(), page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, [], "builtin")).html;
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-129
-test("the chart runtime script is added once with the page nonce, only when the content holds a chart", () => {
-  const html = build(CHART + CHART);
+test("the chart runtime script is added once with the page nonce, only when the content holds a chart", async () => {
+  const html = await build(CHART + CHART);
   const tags = html.match(/<script[^>]*data-sphinx-preview-vega[^>]*><\/script>/gu) ?? [];
   assert.equal(tags.length, 1);
   assert.match(tags[0]!, /src="vscode-webview:\/\/bundle\/vegaPreview\.js"/u);
@@ -35,18 +36,18 @@ test("the chart runtime script is added once with the page nonce, only when the 
   assert.ok(nonce);
   assert.ok(html.includes(`nonce-${nonce}`), "the nonce is the page's own");
 
-  assert.doesNotMatch(build("<p>no chart</p>"), /data-sphinx-preview-vega|vegaPreview/u);
-  const mermaidOnly = build(MERMAID);
+  assert.doesNotMatch(await build("<p>no chart</p>"), /data-sphinx-preview-vega|vegaPreview/u);
+  const mermaidOnly = await build(MERMAID);
   assert.doesNotMatch(mermaidOnly, /vegaPreview/u, "a Mermaid page does not load the chart runtime");
   assert.match(mermaidOnly, /data-sphinx-preview-mermaid/u);
-  const both = build(MERMAID + CHART);
+  const both = await build(MERMAID + CHART);
   assert.match(both, /data-sphinx-preview-mermaid/u);
   assert.match(both, /data-sphinx-preview-vega/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-124
-test("the page policy of a chart page has no eval and no network", () => {
-  const csp = /<meta http-equiv="Content-Security-Policy" content="([^"]*)"/u.exec(build(CHART))?.[1] ?? "";
+test("the page policy of a chart page has no eval and no network", async () => {
+  const csp = /<meta http-equiv="Content-Security-Policy" content="([^"]*)"/u.exec(await build(CHART))?.[1] ?? "";
   assert.ok(csp);
   assert.doesNotMatch(csp, /unsafe-eval|unsafe-inline|wasm-unsafe-eval/u);
   assert.match(csp, /connect-src 'none'/u);

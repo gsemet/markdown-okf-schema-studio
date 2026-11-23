@@ -7,6 +7,7 @@ import { threadId } from "node:worker_threads";
 
 import { RenderCanceledError, renderPreviewSource, type SourceRenderInput } from "../../src/core/render/renderPipeline";
 import { createWorkerRenderer } from "../../src/node-services/renderWorker";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 function workspace(context: { after: (fn: () => void) => void }): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "render-worker-"));
@@ -52,7 +53,7 @@ test("renders in a worker thread, with the output of the in-process render", asy
   context.after(() => renderer.dispose());
   const source = input(root, "# Title\n\n```{include} part.md\n```\n\n:::{note}\nBody\n:::\n");
   const { renderMs: workerMs, ...fromWorker } = await renderer.render(source);
-  const { renderMs: inProcessMs, ...inProcess } = await renderPreviewSource(source);
+  const { renderMs: inProcessMs, ...inProcess } = await renderPreviewSource(source, createNodeFileSystem());
   assert.deepEqual(fromWorker, inProcess);
   assert.equal(typeof workerMs, "number");
   assert.equal(typeof inProcessMs, "number");
@@ -78,7 +79,7 @@ test("the host thread stays free while a worker renders", async (context) => {
   const workerBlocked = stopWorker();
   const stopInProcess = watchEventLoop();
   const inProcessStart = performance.now();
-  await renderPreviewSource(input(root, text));
+  await renderPreviewSource(input(root, text), createNodeFileSystem());
   const inProcessMs = performance.now() - inProcessStart;
   const inProcessBlocked = stopInProcess();
   // In-process, the thread is blocked for most of the render; with the worker, only briefly.

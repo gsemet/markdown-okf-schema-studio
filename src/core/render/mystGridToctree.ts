@@ -11,6 +11,7 @@
 import { advanceFence, frontmatterRange } from "../syntax/markdownSyntax";
 import { BoundedCache } from "./boundedCache";
 import { isCommentHtml } from "./commentMarkers";
+import type { MaybePromise } from "./mystTypes";
 
 export interface GridNode {
   type: string;
@@ -574,9 +575,9 @@ export function expandGrids(node: GridNode, parse: GridParse, source: GridSource
 export interface ToctreeContext {
   sourcePath: string;
   /** Reads a target document, as an include does; undefined when it is missing or unreadable. */
-  read: (request: string) => { path: string; source: string } | undefined;
+  read: (request: string) => MaybePromise<{ path: string; source: string } | undefined>;
   /** Relative requests of the documents matching a glob pattern; undefined: globs are unsupported. */
-  list?: (pattern: string) => string[];
+  list?: (pattern: string) => MaybePromise<string[]>;
   dependencies: Set<string>;
 }
 
@@ -649,12 +650,12 @@ function link(href: string, label: string, extra = ""): unknown {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-057
-function toctreeEntry(name: string, title: string | undefined, context: ToctreeContext): unknown {
+async function toctreeEntry(name: string, title: string | undefined, context: ToctreeContext): Promise<unknown> {
   if (EXTERNAL_URL.test(name)) {
     return element("li", "myst-toctree-entry", [link(name, title ?? name, " myst-toctree-external")]);
   }
   for (const candidate of candidatesFor(name)) {
-    const target = context.read(candidate);
+    const target = await context.read(candidate);
     if (!target) continue;
     context.dependencies.add(target.path);
     const label = title ?? firstHeading(target.source) ?? baseName(candidate);
@@ -665,7 +666,7 @@ function toctreeEntry(name: string, title: string | undefined, context: ToctreeC
   ]);
 }
 
-function toctreeEntries(node: GridNode, context: ToctreeContext): unknown[] {
+async function toctreeEntries(node: GridNode, context: ToctreeContext): Promise<unknown[]> {
   const glob = node.options?.glob === true || node.options?.glob === "";
   const names = (node.value ?? "").split(/\r?\n/u).map((line) => line.trim()).filter((line) => line && !line.startsWith(":"));
   const entries: unknown[] = [];
@@ -675,35 +676,35 @@ function toctreeEntries(node: GridNode, context: ToctreeContext): unknown[] {
     const name = explicit ? explicit[2].trim() : raw;
     const title = explicit ? explicit[1].trim() : undefined;
     if (glob && /[*?[]/u.test(name) && !EXTERNAL_URL.test(name)) {
-      const matches = [...new Set(context.list?.(name) ?? [])].sort();
+      const matches = [...new Set((await context.list?.(name)) ?? [])].sort();
       if (matches.length === 0) {
-        entries.push(toctreeEntry(name, title, { ...context, read: () => undefined }));
+        entries.push(await toctreeEntry(name, title, { ...context, read: () => undefined }));
       }
       for (const match of matches.slice(0, MAX_TOCTREE_ENTRIES - entries.length)) {
-        entries.push(toctreeEntry(match, undefined, context));
+        entries.push(await toctreeEntry(match, undefined, context));
       }
       continue;
     }
-    entries.push(toctreeEntry(name, title, context));
+    entries.push(await toctreeEntry(name, title, context));
   }
   return node.options?.reversed === true ? entries.reverse() : entries;
 }
 
 /** Rewrites every `{toctree}` directive under `node` into a list of links to its documents. */
-export function expandToctrees(node: GridNode, context: ToctreeContext): void {
+export async function expandToctrees(node: GridNode, context: ToctreeContext): Promise<void> {
   // A target listed by several toctrees (or twice) is read once per render.
   const reads = new Map<string, ReturnType<ToctreeContext["read"]>>();
   const read = context.read;
-  expandToctreesOnce(node, {
+  await expandToctreesOnce(node, {
     ...context,
     read: (request) => {
-      if (!reads.has(request)) reads.set(request, read(request));
+      if (!reads.has(request)) reads.set(request, Promise.resolve(read(request)));
       return reads.get(request);
     },
   });
 }
 
-function expandToctreesOnce(node: GridNode, context: ToctreeContext): void {
+async function expandToctreesOnce(node: GridNode, context: ToctreeContext): Promise<void> {
   for (const child of node.children ?? []) {
     if (child.type === "mystDirective" && child.name?.toLowerCase() === "toctree") {
       const hidden = child.options?.hidden === true || child.options?.hidden === "";
@@ -713,7 +714,7 @@ function expandToctreesOnce(node: GridNode, context: ToctreeContext): void {
         if (caption) {
           hChildren.push(element("p", "myst-toctree-caption", [text(caption)], { role: "heading", ariaLevel: "2" }));
         }
-        hChildren.push(element("ul", "myst-toctree-list", toctreeEntries(child, context)));
+        hChildren.push(element("ul", "myst-toctree-list", await toctreeEntries(child, context)));
       }
       child.type = "mystToctree";
       child.children = [];
@@ -723,7 +724,7 @@ function expandToctreesOnce(node: GridNode, context: ToctreeContext): void {
       });
       child.data = { ...child.data, hChildren };
     } else {
-      expandToctreesOnce(child, context);
+      await expandToctreesOnce(child, context);
     }
   }
 }

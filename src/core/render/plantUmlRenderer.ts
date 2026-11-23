@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { parse, serialize } from "parse5";
 
 import type { RenderDiagnostic } from "./mystRenderer";
+import type { PolicyFiles } from "../security/resource-policy";
 import { findEscapingPlantUmlInclude } from "./plantUmlIncludes";
 import { MAX_PLANTUML_SOURCE_LENGTH } from "./plantUmlLimits";
 
@@ -52,6 +53,8 @@ export interface PlantUmlRenderOptions {
   executablePath?: string;
   workspaceRoot: string;
   trusted: boolean;
+  /** Reads the files a diagram includes, to refuse an include that leaves the workspace. */
+  files: PolicyFiles;
   signal?: AbortSignal;
 }
 
@@ -499,7 +502,7 @@ export async function renderPlantUmlDiagrams(
 
   const outcomes = await Promise.all(sources.map(async ({ source, line }) => {
     try {
-      const escape = findEscapingPlantUmlInclude(source, options.workspaceRoot);
+      const escape = await findEscapingPlantUmlInclude(options.files, source, options.workspaceRoot);
       if (escape) {
         throw new Error(escape);
       }

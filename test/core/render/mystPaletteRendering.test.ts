@@ -20,6 +20,7 @@ import {
   type HtmlElement,
 } from "./dom";
 import { inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 // T25: what the GFM group of the palette writes renders as an alert, checkboxes and a table.
 function paletteInsert(id: string, value: string, at: number, arg?: string): string {
@@ -34,7 +35,7 @@ test("an alert inserted by the edition palette renders as an admonition of the c
   const written = paletteInsert("alert", "Mind the gap", 4, "WARNING");
   assert.equal(written, "> [!WARNING]\n> Mind the gap");
   const document = inlineDocument(written + "\n\nAfter.\n");
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const admonition = findElement(parseHtml(result.html), (element) =>
     hasClass(element, "admonition") && hasClass(element, "warning"));
@@ -50,7 +51,7 @@ test("checkboxes written by the edition palette render as checkbox inputs", asyn
   text = paletteInsert("checkbox", text, first);
   assert.equal(text, "- [ ] buy milk\n- [ ] bake bread");
   const document = inlineDocument(text + "\n");
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const boxes = findElements(parseHtml(result.html), (element) =>
     element.tagName === "input" && hasClass(element, "myst-checkbox"));
@@ -62,7 +63,7 @@ test("a pipe table converted by the edition palette renders as a table with the 
   const html = paletteInsert("htmlTable", source, 3);
   assert.equal(html.startsWith("<table>"), true);
   const document = inlineDocument("Intro\n\n" + html + "\n\nAfter.\n");
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const tables = findElements(parseHtml(result.html), isTag("table"));
   assert.equal(tables.length, 1);
@@ -80,7 +81,7 @@ test("a pipe table converted by the edition palette renders as a table with the 
 test("a new HTML table inserted by the edition palette renders as a 2 x 2 table", async () => {
   const html = paletteInsert("htmlTable", "Intro", 5);
   const document = inlineDocument(html + "\n\nAfter.\n");
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const tables = findElements(parseHtml(result.html), isTag("table"));
   assert.equal(tables.length, 1);
@@ -92,7 +93,7 @@ test("a new HTML table inserted by the edition palette renders as a 2 x 2 table"
 // T26: what the details, footnote, mermaid, alignment and kbd actions write renders.
 async function renderPalette(markdown: string) {
   const document = inlineDocument(markdown + "\n");
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   return { html: parseHtml(result.html), raw: result.html };
 }
@@ -251,11 +252,11 @@ test("a label before a list or at the end of the document renders its own anchor
 
 test("an anchor icon is not a mapped block or Tab stop, while the labelled blocks keep their mapping", async () => {
   const document = inlineDocument("(intro)=\nA paragraph.\n\n(sec)=\n# Heading\n\n(items)=\n- a\n");
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const rewritten = rewriteSphinxHtml(result.html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     sourceMapping: { sourceFile: document.uri.fsPath, documentId: "preview-1" },
     resolveResource: () => undefined,
@@ -419,11 +420,11 @@ test("a span with a colour style renders as data attributes, anything else is dr
     + "<span style=\"color: red; position: fixed\">named</span> and "
     + "<span style=\"color: url(x)\">bad</span>.\n",
   );
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const rewritten = rewriteSphinxHtml(result.html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     resolveResource: () => undefined,
     resolveNavigation: () => ({ kind: "blocked" }),
@@ -440,7 +441,7 @@ async function colouredSpans(markdown: string): Promise<HtmlElement[]> {
   const { raw } = await renderPalette(markdown);
   const rewritten = rewriteSphinxHtml(raw, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     resolveResource: () => undefined,
     resolveNavigation: () => ({ kind: "blocked" }),

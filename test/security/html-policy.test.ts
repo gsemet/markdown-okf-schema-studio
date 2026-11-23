@@ -12,6 +12,7 @@ import {
   sanitizeTableStyle,
 } from "../../src/core/security/html-sanitizer";
 import { ResourcePolicy } from "../../src/core/security/resource-policy";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const temporaryDirectories: string[] = [];
 
@@ -24,15 +25,22 @@ afterEach(() => {
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-036
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-042
-test("rewrites local resources and removes active HTML content", () => {
+test("rewrites local resources and removes active HTML content", async () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
   for (const file of ["theme.css", "theme.js", "image.png", "font.woff2", "movie.mp4", "chapter.html"]) {
     fs.writeFileSync(path.join(output, file), file);
   }
-  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
+  // The sanitizer is synchronous: the policy answers from the file facts it gathered beforehand.
+  await policy.prime(["theme.css", "theme.js", "image.png", "movie.mp4", "chapter.html"]
+    .map((request) => ({ request, baseDirectory: output })));
+  const navigations = new Map([
+    ["chapter.html", await policy.resolveNavigation("chapter.html", output)],
+    ["javascript:alert(1)", await policy.resolveNavigation("javascript:alert(1)", output)],
+  ]);
   const resolveResource = (request: string, baseDirectory: string) => {
-    const resourcePath = policy.resolveResource(request, baseDirectory);
+    const resourcePath = policy.resolvePrimed(request, baseDirectory);
     return resourcePath ? { path: resourcePath, uri: `webview://${path.basename(resourcePath)}` } : undefined;
   };
   const result = rewriteSphinxHtml(
@@ -43,7 +51,7 @@ test("rewrites local resources and removes active HTML content", () => {
       nonce: "unit-nonce",
       resolveResource,
       resolveNavigation: (request, baseDirectory) => {
-        const navigation = policy.resolveNavigation(request, baseDirectory);
+        const navigation = navigations.get(request) ?? { kind: "blocked" as const };
         if (navigation.kind === "local") {
           return { path: navigation.path, uri: `webview://${path.basename(navigation.path)}` };
         }
@@ -72,12 +80,13 @@ test("rewrites local resources and removes active HTML content", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-011
-test("reduced previews remove external scripts while retaining contained media", () => {
+test("reduced previews remove external scripts while retaining contained media", async () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
   fs.writeFileSync(path.join(output, "theme.js"), "alert(1)");
   fs.writeFileSync(path.join(output, "image.png"), "image");
-  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
+  await policy.prime(["theme.js", "image.png"].map((request) => ({ request, baseDirectory: output })));
   const result = rewriteSphinxHtml(
     '<html><body><script src="theme.js"></script><img src="image.png" alt="image"></body></html>',
     {
@@ -86,7 +95,7 @@ test("reduced previews remove external scripts while retaining contained media",
       nonce: "unit-nonce",
       allowExternalScripts: false,
       resolveResource: (request, baseDirectory) => {
-        const resourcePath = policy.resolveResource(request, baseDirectory);
+        const resourcePath = policy.resolvePrimed(request, baseDirectory);
         return resourcePath ? { path: resourcePath, uri: `webview://${path.basename(resourcePath)}` } : undefined;
       },
       resolveNavigation: () => ({ kind: "blocked" }),
@@ -99,11 +108,12 @@ test("reduced previews remove external scripts while retaining contained media",
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-011
-test("trusted previews also remove scripts and a nonce attribute of the document", () => {
+test("trusted previews also remove scripts and a nonce attribute of the document", async () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
   fs.writeFileSync(path.join(output, "theme.js"), "alert(1)");
-  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
+  await policy.prime([{ request: "theme.js", baseDirectory: output }]);
   const result = rewriteSphinxHtml(
     '<html><body><script src="theme.js"></script><script src="https://example.invalid/x.js"></script>'
     + '<p nonce="stolen">text</p></body></html>',
@@ -112,7 +122,7 @@ test("trusted previews also remove scripts and a nonce attribute of the document
       policy,
       nonce: "unit-nonce",
       resolveResource: (request, baseDirectory) => {
-        const resourcePath = policy.resolveResource(request, baseDirectory);
+        const resourcePath = policy.resolvePrimed(request, baseDirectory);
         return resourcePath ? { path: resourcePath, uri: `webview://${path.basename(resourcePath)}` } : undefined;
       },
       resolveNavigation: () => ({ kind: "blocked" }),
@@ -126,7 +136,7 @@ test("trusted previews also remove scripts and a nonce attribute of the document
 
 const bareContext = {
   outputRoot: "/workspace",
-  policy: new ResourcePolicy([]),
+  policy: new ResourcePolicy(createNodeFileSystem(), []),
   nonce: "unit-nonce",
   resolveResource: () => undefined,
   resolveNavigation: () => ({ kind: "blocked" as const }),
@@ -161,7 +171,7 @@ test("maps rendered source lines to the active preview document", () => {
     '<html><body><main><h1 data-line="1">Title</h1><p data-line="4" data-end-line="6">Body</p><p>Unmapped</p></main></body></html>',
     {
       outputRoot: "/workspace",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       sourceMapping: { sourceFile: "/workspace/active.md", documentId: "preview-1" },
       resolveResource: () => undefined,
@@ -179,7 +189,7 @@ test("keeps the included-block marker next to the source mapping", () => {
     '<html><body><main><p data-line="3" data-end-line="4" data-sphinx-preview-included="true">In</p></main></body></html>',
     {
       outputRoot: "/workspace",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       sourceMapping: { sourceFile: "/workspace/active.md", documentId: "preview-1" },
       resolveResource: () => undefined,
@@ -196,7 +206,7 @@ test("keeps the single-line marker of a one-line card part next to the source ma
     '<html><body><main><div class="myst-grid-card-option" data-line="4" data-end-line="4" data-single-line="true">H</div></main></body></html>',
     {
       outputRoot: "/workspace",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       sourceMapping: { sourceFile: "/workspace/active.md", documentId: "preview-1" },
       resolveResource: () => undefined,
@@ -214,7 +224,7 @@ test("CR038: a column width in percent becomes a stylesheet rule; other widths a
     + '</colgroup><tr><td>a</td><td>b</td><td>c</td><td>d</td></tr></table></body></html>',
     {
       outputRoot: "/tmp",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       resolveResource: () => undefined,
       resolveNavigation: () => ({ kind: "blocked" }),
@@ -237,7 +247,7 @@ test("rewrites sanitized table styles into a nonce-bearing stylesheet", () => {
     + '<p style="color: red">Direct style</p></body></html>',
     {
       outputRoot: "/tmp",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       resolveResource: () => undefined,
       resolveNavigation: () => ({ kind: "blocked" }),
@@ -292,7 +302,7 @@ test("removes refresh metadata with surrounding whitespace", () => {
     '<html><head><meta http-equiv=" refresh " content="0;url=https://evil.test"></head><body>ok</body></html>',
     {
       outputRoot: "/tmp",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       resolveResource: () => undefined,
       resolveNavigation: () => ({ kind: "blocked" }),
@@ -307,7 +317,7 @@ test("keeps deferred relative navigation inert and host-routable", () => {
     '<html><body><h1 data-sphinx-source-file="/workspace/active.md" data-sphinx-source-line="4" data-sphinx-preview-block="heading">Title</h1><img src="image.png"><a href="chapter-two.md">Next</a></body></html>',
     {
       outputRoot: "/tmp",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       resolveResource: () => undefined,
       resolveNavigation: () => ({ kind: "deferred", value: "chapter-two.md" }),
@@ -327,7 +337,7 @@ test("a mapped block that already carries a tabindex keeps it, so a radio group 
       + '<li tabindex="-1"><p>Option</p></li></ul><p data-sphinx-source-file="/workspace/active.md" data-sphinx-source-line="6" data-sphinx-preview-block="after">After</p></body></html>',
     {
       outputRoot: "/tmp",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       resolveResource: () => undefined,
       resolveNavigation: () => ({ kind: "blocked" }),
@@ -340,7 +350,7 @@ test("a mapped block that already carries a tabindex keeps it, so a radio group 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-031
-test("resolves parent-relative figure images through the workspace root", () => {
+test("resolves parent-relative figure images through the workspace root", async () => {
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-figure-test-"));
   temporaryDirectories.push(workspace);
   const documentDirectory = path.join(workspace, "book", "chapters");
@@ -352,15 +362,16 @@ test("resolves parent-relative figure images through the workspace root", () => 
 
   // Mirrors buildPreviewWebviewHtml's policy composition: the document directory is
   // the base for relative resolution, the workspace root bounds what may leave it.
-  const policy = new ResourcePolicy([
+  const policy = new ResourcePolicy(createNodeFileSystem(), [
     { label: "preview document directory", directory: documentDirectory },
     { label: "workspace root", directory: workspace },
   ]);
   const resolveResource = (request: string, baseDirectory: string) => {
-    const resourcePath = policy.resolveResource(request, baseDirectory);
+    const resourcePath = policy.resolvePrimed(request, baseDirectory);
     // A URI path, like asWebviewUri: forward slashes on every platform.
     return resourcePath ? { path: resourcePath, uri: `webview://${resourcePath.split(path.sep).join("/")}` } : undefined;
   };
+  await policy.prime([{ request: "../external-img/figure.svg", baseDirectory: documentDirectory }]);
   const html = `<figure><img src="../external-img/figure.svg" alt="figure"></figure>`;
   const rewritten = rewriteSphinxHtml(html, {
     outputRoot: documentDirectory,
@@ -376,20 +387,21 @@ test("resolves parent-relative figure images through the workspace root", () => 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-008
-test("strips figure images that escape even the workspace root", () => {
+test("strips figure images that escape even the workspace root", async () => {
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-figure-test-"));
   temporaryDirectories.push(workspace);
   const documentDirectory = path.join(workspace, "book", "chapters");
   fs.mkdirSync(documentDirectory, { recursive: true });
 
-  const policy = new ResourcePolicy([
+  const policy = new ResourcePolicy(createNodeFileSystem(), [
     { label: "preview document directory", directory: documentDirectory },
     { label: "workspace root", directory: workspace },
   ]);
   const resolveResource = (request: string, baseDirectory: string) => {
-    const resourcePath = policy.resolveResource(request, baseDirectory);
+    const resourcePath = policy.resolvePrimed(request, baseDirectory);
     return resourcePath ? { path: resourcePath, uri: `webview://${resourcePath}` } : undefined;
   };
+  await policy.prime([{ request: "../../../etc/hostname", baseDirectory: documentDirectory }]);
   const html = `<figure><img src="../../../etc/hostname" alt="escape"></figure>`;
   const rewritten = rewriteSphinxHtml(html, {
     outputRoot: documentDirectory,
@@ -406,7 +418,7 @@ test("strips figure images that escape even the workspace root", () => {
 test("data-okf-width keeps a plain length and nothing else", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
-  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
   const result = rewriteSphinxHtml(
     "<body><main><img data-okf-width=\"60%\"><img data-okf-width=\"12.5em\"><img data-okf-width=\"300\">"
     + "<img data-okf-width=\"60%;position:fixed\"><img data-okf-width=\"url(x)\"><img data-okf-width=\"\"></main></body>",
@@ -451,7 +463,7 @@ test("table styles share the colour grammar and refuse every injection shape", (
 test("span style keeps only named, hex, rgb and hsl colour and background-color as data attributes", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
-  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
   const run = (body: string) => rewriteSphinxHtml(`<body><main>${body}</main></body>`, {
     outputRoot: output,
     policy,
@@ -501,7 +513,7 @@ test("span style keeps only named, hex, rgb and hsl colour and background-color 
 test("emits dir=auto on block elements and keeps only ltr, rtl and auto", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
-  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
   const result = rewriteSphinxHtml(
     "<html><body><main><h1>T</h1><p>a</p><p dir=\"rtl\">b</p><p dir=\"RTL \">c</p><p dir=\"evil\">d</p>"
     + "<ul><li>e</li></ul><blockquote>f</blockquote><table><tr><th>g</th><td>h</td></tr></table><div>i</div></main></body></html>",
@@ -529,7 +541,7 @@ test("emits dir=auto on block elements and keeps only ltr, rtl and auto", () => 
 test("a blocked link has no href and names the reason in its title", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
-  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
   const result = rewriteSphinxHtml(
     "<html><body><a href=\"https%3A/../x\">bad</a></body></html>",
     {
@@ -548,7 +560,7 @@ test("a blocked link has no href and names the reason in its title", () => {
 test("the SVG presentation attributes pass the final sanitizer only with a local value", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
-  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
   const result = rewriteSphinxHtml(
     '<!doctype html><html><body><svg><defs><marker id="m"></marker></defs><path d="M0 0" marker-end="url(https://e.test/m.svg#m)" visibility="visible" paint-order="image-set(x 1x)"></path><path d="M1 1" marker-end="url(#m)" font-style="italic"></path></svg></body></html>',
     {
@@ -569,7 +581,7 @@ test("the SVG presentation attributes pass the final sanitizer only with a local
 test("the SVG value check never touches aria attributes nor an HTML element", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
-  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
   const result = rewriteSphinxHtml(
     '<!doctype html><html><body><button aria-label="Copy (Ctrl+C)">c</button><div aria-label="Metadata: data:info">m</div>'
       + '<a aria-label="Open https://example.com">o</a><p rotate="9" textlength="4">p</p>'

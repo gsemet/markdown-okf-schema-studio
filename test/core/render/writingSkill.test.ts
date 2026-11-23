@@ -6,6 +6,7 @@ import { test } from "node:test";
 
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { findElements, hasClass, parseHtml, textContent } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /** The writing skill is installed on machines without this repository: it is checked as a folder. */
 const skillDirectory = path.resolve(__dirname, "../../../../skills/writing-for-markdown-okf-schema-studio");
@@ -56,6 +57,7 @@ async function renderExample(example: string) {
   }
   const text = example.endsWith("\n") ? example : `${example}\n`;
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: {
       uri: { scheme: "file", fsPath: path.join(workspaceRoot, "plan.md") },
       languageId: "markdown",

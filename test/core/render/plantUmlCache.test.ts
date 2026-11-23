@@ -12,6 +12,7 @@ import {
   resetPlantUmlProcessSpawnerForTests,
   setPlantUmlProcessSpawnerForTests,
 } from "../../../src/core/render/plantUmlRenderer";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 class FakeChild extends EventEmitter {
   public readonly stdout = new EventEmitter();
@@ -54,7 +55,7 @@ test("a second render of the same source starts no process", async () => {
       return child as never;
     }) as never,
   });
-  const options = { jarPath: ws.jarPath, workspaceRoot: ws.root, trusted: true };
+  const options = { files: createNodeFileSystem(), jarPath: ws.jarPath, workspaceRoot: ws.root, trusted: true };
   const source = "@startuml\nA -> B\n@enduml";
   try {
     const first = await renderPlantUmlDiagrams(html(source), options);
@@ -113,6 +114,7 @@ test("at most two PlantUML processes run at once", async () => {
   const sources = [1, 2, 3, 4, 5].map((n) => `@startuml\nA -> B${n}\n@enduml`);
   try {
     const pending = renderPlantUmlDiagrams(html(...sources), {
+      files: createNodeFileSystem(),
       jarPath: ws.jarPath, workspaceRoot: ws.root, trusted: true,
     });
     let finished = 0;

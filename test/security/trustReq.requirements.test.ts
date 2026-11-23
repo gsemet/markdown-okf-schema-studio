@@ -20,6 +20,7 @@ import {
 import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { buildErrorWebviewHtml, buildPreviewWebviewHtml, buildStatusWebviewHtml } from "../../src/session/webview";
 import { fakeAssetResolver } from "../shared/fakeAssets";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const temporaryDirectories: string[] = [];
 
@@ -102,41 +103,43 @@ test("a status page carries the policy and its own nonce and no script", () => {
 // The resource policy
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025
-test("a resource must be an existing regular file", () => {
+test("a resource must be an existing regular file", async () => {
   const root = makeDirectory();
   fs.writeFileSync(path.join(root, "image.png"), "image");
   fs.mkdirSync(path.join(root, "sub"));
-  const policy = new ResourcePolicy([{ label: "output", directory: root }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: root }]);
 
-  assert.deepEqual(policy.resolveResourceDetailed("image.png", root), { path: path.join(root, "image.png") });
-  assert.deepEqual(policy.resolveResourceDetailed("ghost.png", root), {
+  assert.deepEqual(await policy.resolveResourceDetailed("image.png", root), { path: path.join(root, "image.png") });
+  assert.deepEqual(await policy.resolveResourceDetailed("ghost.png", root), {
     refusal: "missing-resource",
     candidate: path.join(root, "ghost.png"),
   });
-  assert.deepEqual(policy.resolveResourceDetailed("sub", root), {
+  assert.deepEqual(await policy.resolveResourceDetailed("sub", root), {
     refusal: "missing-resource",
     candidate: path.join(root, "sub"),
   });
-  assert.equal(policy.resolveResource("ghost.png", root), undefined);
+  assert.equal(await policy.resolveResource("ghost.png", root), undefined);
   assert.equal(policy.diagnostics.filter((entry) => entry.code === "missing-resource").length, 3);
 });
 
-test("a resource root that does not exist is dropped with the diagnostic missing-root", () => {
+test("a resource root that does not exist is dropped with the diagnostic missing-root", async () => {
   const present = makeDirectory();
   fs.writeFileSync(path.join(present, "image.png"), "image");
   const absent = path.join(makeDirectory(), "not-on-disk");
-  const policy = new ResourcePolicy([
+  const policy = new ResourcePolicy(createNodeFileSystem(), [
     { label: "ghost", directory: absent },
     { label: "output", directory: present },
   ]);
 
+  // The roots are opened by the first request (the file system is asked through an async port).
+  assert.equal(await policy.resolveResource("image.png", present), path.join(present, "image.png"));
   assert.deepEqual(policy.diagnostics, [
     { code: "missing-root", message: "The ghost resource root is unavailable.", value: absent },
   ]);
   // Nothing resolves through the dropped root.
-  assert.deepEqual(policy.resolveResourceDetailed("x.png", absent), { refusal: "resource-outside-root" });
+  assert.deepEqual(await policy.resolveResourceDetailed("x.png", absent), { refusal: "resource-outside-root" });
   // A file of the other root is found.
-  assert.equal(policy.resolveResource("image.png", present), path.join(present, "image.png"));
+  assert.equal(await policy.resolveResource("image.png", present), path.join(present, "image.png"));
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -145,15 +148,15 @@ test("a resource root that does not exist is dropped with the diagnostic missing
 // @tests_req SwRS-MDOKFSTUDIO-CORE-013
 test("an include that cannot be read is left unresolved", async (t) => {
   const root = makeDirectory();
-  const policy = new ResourcePolicy([{ label: "folder", directory: root }]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "folder", directory: root }]);
 
   // A file of 5 MiB plus one byte is refused as too large, one of 5 MiB is read.
   const large = path.join(root, "large.md");
   fs.writeFileSync(large, "");
   fs.truncateSync(large, MAX_INCLUDED_FILE_BYTES + 1);
-  assert.deepEqual(readBoundedText(policy, "large.md", root), { ok: false, refusal: "too-large" });
+  assert.deepEqual(await readBoundedText(policy, "large.md", root), { ok: false, refusal: "too-large" });
   fs.truncateSync(large, MAX_INCLUDED_FILE_BYTES);
-  assert.equal(readBoundedText(policy, "large.md", root).ok, true);
+  assert.equal((await readBoundedText(policy, "large.md", root)).ok, true);
 
   // A file the process cannot read is refused as unreadable (a superuser reads it anyway).
   const secret = path.join(root, "secret.md");
@@ -178,12 +181,13 @@ test("an include that cannot be read is left unresolved", async (t) => {
     t.diagnostic("the process reads files without permission: the unreadable case is skipped");
     return;
   }
-  assert.deepEqual(readBoundedText(policy, "secret.md", root), { ok: false, refusal: "unreadable" });
+  assert.deepEqual(await readBoundedText(policy, "secret.md", root), { ok: false, refusal: "unreadable" });
 
   // The render leaves the directive as a placeholder and shows nothing of the file.
   const documentPath = path.join(root, "doc.md");
   const markdown = "# Doc\n\n```{include} secret.md\n```\n";
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: documentPath }, languageId: "markdown", version: 1, getText: () => markdown },
     workspaceRoot: root,
     requestId: 1,
@@ -204,6 +208,7 @@ test("a read-only preview reads includes from the folder of its document", async
 
   // A read-only preview has the folder of its document as resource root.
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: documentPath }, languageId: "markdown", version: 1, getText: () => markdown },
     workspaceRoot: folder,
     requestId: 1,
@@ -221,7 +226,7 @@ test("a read-only preview reads includes from the folder of its document", async
 // The sanitizer
 
 function sanitize(html: string): string {
-  const policy = new ResourcePolicy([]);
+  const policy = new ResourcePolicy(createNodeFileSystem(), []);
   return rewriteSphinxHtml(html, {
     outputRoot: "/workspace",
     policy,
@@ -237,7 +242,7 @@ test("the sanitizer removes style elements and records blocked-inline-style", ()
     "<html><head></head><body><style>p { color: red }</style><p>Text</p></body></html>",
     {
       outputRoot: "/workspace",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       resolveResource: () => undefined,
       resolveNavigation: () => ({ kind: "blocked" }),
@@ -265,7 +270,7 @@ test("the sanitizer reports a removed element and a removed attribute", () => {
     '<html><head><base href="https://example.test/"></head><body><p data-example="1">Text</p></body></html>',
     {
       outputRoot: "/workspace",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       resolveResource: () => undefined,
       resolveNavigation: () => ({ kind: "blocked" }),
@@ -282,7 +287,7 @@ test("an ignored linked stylesheet is reported and its link element is removed",
     '<html><head><link rel="stylesheet" href="theme.css"></head><body><p>Text</p></body></html>',
     {
       outputRoot: "/workspace",
-      policy: new ResourcePolicy([]),
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
       nonce: "unit-nonce",
       resolveResource: (request) => ({ path: `/workspace/${request}`, uri: `webview:/${request}` }),
       resolveNavigation: () => ({ kind: "blocked" }),
@@ -294,10 +299,10 @@ test("an ignored linked stylesheet is reported and its link element is removed",
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-042
-test("an anchor or external link keeps its address and the original request", () => {
+test("an anchor or external link keeps its address and the original request", async () => {
   const assets = fakeAssetResolver({ cspSource: CSP_SOURCE, url: (filePath) => `webview:/${filePath}` });
   const directoryPath = makeDirectory();
-  const built = buildPreviewWebviewHtml(
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
     '<html><body><main id="sphinx-myst-preview-content">'
     + '<a href="#section">anchor</a>'
     + '<a href="https://example.test/docs">web</a>'
@@ -317,10 +322,10 @@ test("an anchor or external link keeps its address and the original request", ()
   );
 });
 
-test("each removal or rewrite is recorded with its code, message and value", () => {
+test("each removal or rewrite is recorded with its code, message and value", async () => {
   const assets = fakeAssetResolver({ cspSource: CSP_SOURCE, url: (filePath) => `webview:/${filePath}` });
   const directoryPath = makeDirectory();
-  const built = buildPreviewWebviewHtml(
+  const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
     '<html><body><main id="sphinx-myst-preview-content">'
     + '<iframe src="https://example.test/"></iframe>'
     + '<img src="../../outside.png" alt="x">'

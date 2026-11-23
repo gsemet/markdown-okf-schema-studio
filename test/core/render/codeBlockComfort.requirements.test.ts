@@ -14,11 +14,13 @@ import { highlightCodeBlocks } from "../../../src/core/render/highlight";
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent } from "./dom";
 import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const block = (attributes: string, body: string): string => `<pre><code ${attributes}>${body}</code></pre>`;
 
 async function render(markdown: string): Promise<string> {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(markdown),
     workspaceRoot,
     requestId: 1,

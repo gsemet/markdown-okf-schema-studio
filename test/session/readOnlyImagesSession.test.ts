@@ -13,6 +13,7 @@ import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 import { RenderingController } from "../../src/session/features/rendering";
 import { fakeAssetResolver } from "../shared/fakeAssets";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 let sandbox = "";
 
@@ -31,7 +32,8 @@ afterEach(() => {
 function ignored(): any {
   const target = function ignoredTarget() { return undefined; };
   return new Proxy(target, {
-    get: (_t, key) => (key === Symbol.toPrimitive ? () => "" : key === "then" ? undefined : ignored()),
+    get: (t, key) => (key === Symbol.toPrimitive ? () => "" : key === "then" ? undefined
+      : Object.prototype.hasOwnProperty.call(t, key) ? (t as any)[key] : ignored()),
     apply: () => ignored(),
   });
 }
@@ -41,6 +43,7 @@ async function show(): Promise<{ html: string; roots: readonly string[]; toolbar
   const guide = path.join(ws, "docs", "guide");
   const text = "![x](../../images/x.png)\n";
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: {
       uri: { scheme: "file", fsPath: path.join(guide, "doc.md") },
       languageId: "markdown",
@@ -59,7 +62,7 @@ async function show(): Promise<{ html: string; roots: readonly string[]; toolbar
   let toolbar: unknown;
   const manager: any = ignored();
   manager.has = () => true;
-  manager.host = { schemaFiles: nodeSchemaFiles, documents: { idOf: () => undefined } };
+  manager.host = { schemaFiles: nodeSchemaFiles, files: createNodeFileSystem(), documents: { idOf: () => undefined } };
   manager.scroll = { initialAnchorLine: () => undefined, takePendingPin: () => undefined, visibleEditorFor: () => undefined };
   manager.choices = { editMode: false, initialPaletteMode: () => "auto", refreshThreadAuthor: () => undefined };
   manager.previewTitle = () => "doc";
@@ -88,7 +91,7 @@ async function show(): Promise<{ html: string; roots: readonly string[]; toolbar
   controller.runtimeContext = (...args: unknown[]) => (toolbar = args[5], { documentId: identity, revision: 1, requestId: 1, activeSourceFile: result.stage.activeDocumentPath });
   controller.assignWebviewHtml = () => undefined;
   controller.clearPendingOverlay = () => undefined;
-  controller.updatePreview(preview, result);
+  await controller.updatePreview(preview, result);
   const html: string = preview.webview.html;
   preview.stage?.dispose();
   return { html, roots, toolbar };

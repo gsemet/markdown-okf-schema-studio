@@ -6,6 +6,7 @@ import { clearMathCache, renderMathHtml, safeKatexStyle } from "../../../src/cor
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElements, hasClass, parseHtml, textContent } from "./dom";
 import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-024
 test("typesets inline and display math with local assets and CSP-compatible styles", () => {
@@ -58,7 +59,7 @@ test("math cannot inject trusted HTML commands or external links", () => {
 test("dollar amounts stay text while a real dollar span is maths", async () => {
   const source = "Plans: $19 base ($200), $5 and $6, $100\u2013$380, and $x$, $x^2$, and $a + b$ typeset.\n";
   const document = inlineDocument(source);
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 1,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const page = parseHtml(renderMathHtml(result.html, "katex.css", "nonce"));
   const paragraph = findElements(page, (element) => element.tagName === "p")[0];
@@ -70,7 +71,7 @@ test("dollar amounts stay text while a real dollar span is maths", async () => {
 test("bold dollar prices do not consume the surrounding emphasis markers", async () => {
   const source = "**$671** cache reads + **$402** 5-min cache writes + **$85** 1-h cache writes + **$216** output\n";
   const document = inlineDocument(source);
-  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 2,
+  const result = await renderPreviewDocument({ files: createNodeFileSystem(), document, workspaceRoot, requestId: 2,
     documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
   const paragraph = findElements(parseHtml(result.html), (element) => element.tagName === "p")[0];
   const bold = findElements(paragraph, (element) => element.tagName === "strong");

@@ -77,6 +77,9 @@ interface StemRootWatcher {
 /** The host events of one {@link PreviewManager} (its `events`). */
 export class HostEvents {
   /** One `.md` watcher per workspace root: it keeps the filename-stem index of links current. */
+  /** The conf.py events run one after the other (see `onConfFileEvent`). */
+  private confEvents: Promise<void> = Promise.resolve();
+
   private readonly stemRootWatchers = new Map<string, StemRootWatcher>();
 
   /** The canonical shown path of each session, with the path it was resolved from. */
@@ -182,20 +185,32 @@ export class HostEvents {
    * after the event (a created or deleted file can change which one governs). Other previews and
    * unrelated conf.py files are left alone; an open block edit defers the refresh.
    */
-  public onConfFileEvent(filePath: string): void {
+  public onConfFileEvent(filePath: string): Promise<void> {
+    // One event at a time: the before / invalidate / after order of an event must not interleave with another's.
+    const run = this.confEvents.then(() => this.refreshForConfFileEvent(filePath));
+    this.confEvents = run.then(() => undefined, () => undefined);
+    return run;
+  }
+
+  private async refreshForConfFileEvent(filePath: string): Promise<void> {
     const candidates = [...this.manager.sessions()].filter(
       (session) => session.document && !session.disposed && !isIgnoredWatchPath(filePath, session.workspaceRoot));
     if (candidates.length === 0) {
       return;
     }
-    const locate = (session: PreviewSession): string | undefined =>
-      locateConfFor(this.manager.pathOf(session.document!), session.workspaceRoot);
-    const before = new Map(candidates.map((session) => [session, locate(session)]));
+    const files = this.manager.host.files;
+    const locate = (session: PreviewSession): Promise<string | undefined> =>
+      locateConfFor(files, this.manager.pathOf(session.document!), session.workspaceRoot);
+    const before = new Map<PreviewSession, string | undefined>();
+    for (const session of candidates) {
+      before.set(session, await locate(session));
+    }
     invalidateConfCache();
     this.manager.sharedRenders.invalidate();
     for (const session of candidates) {
+      if (session.disposed) continue;
       if (sameFile(this.manager.canonicalPath, before.get(session), filePath)
-        || sameFile(this.manager.canonicalPath, locate(session), filePath)) {
+        || sameFile(this.manager.canonicalPath, await locate(session), filePath)) {
         this.manager.edits.deferWhileEditing(session, "render", () => this.manager.rendering.refreshOpenDocument(session, true));
       }
     }
@@ -450,7 +465,7 @@ export class HostEvents {
       } else {
         const lastGood = session.queue.getState().lastGood;
         if (lastGood) {
-          this.manager.rendering.updatePreview(session, lastGood);
+          fireAndForget(this.manager.host.logger, this.manager.rendering.updatePreview(session, lastGood), "Showing the last render");
         }
       }
     }

@@ -10,6 +10,7 @@ import { test } from "node:test";
 
 import { renderPreviewSource } from "../../src/core/render/renderPipeline";
 import { fixture } from "./blockFixture";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const EOLS = [["LF", "\n"], ["CRLF", "\r\n"]] as const;
 const lines = (eol: string, ...entries: string[]): string => entries.join(eol);
@@ -27,7 +28,7 @@ const openOf = (run: Run) => ({
 });
 
 const render = async (text: string): Promise<string> =>
-  (await renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false })).html;
+  (await renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false }, createNodeFileSystem())).html;
 
 /** Saves `typed` in place of `run` of `text` and returns the document afterwards. */
 async function saved(text: string, run: Run, typed: string): Promise<{ text: string; errors: string[] }> {

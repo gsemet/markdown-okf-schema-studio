@@ -25,6 +25,7 @@ import {
 } from "../core/render/renderPipeline";
 import { preloadMystEngine } from "../core/render/mystEngine";
 import type { PreviewRenderer } from "../host-api/previewRenderer";
+import { createNodeFileSystem } from "./nodeFileSystem";
 
 /** Marks the threads this module starts (`workerData.role`). */
 const WORKER_ROLE = "markdown-okf-schema-studio.render-worker";
@@ -51,7 +52,7 @@ function serveRenders(): void {
   if (!port) return;
   port.on("message", (message: ToWorker) => {
     if (message?.type !== "render") return;
-    renderPreviewSource(message.input).then(
+    renderPreviewSource(message.input, createNodeFileSystem()).then(
       (output) => port.postMessage({ type: "done", id: message.id, output, threadId } satisfies FromWorker),
       (error: unknown) => port.postMessage({
         type: "failed",
@@ -142,7 +143,7 @@ export function createWorkerRenderer(options: WorkerRendererOptions = {}): Worke
   const scriptPath = options.scriptPath ?? path.join(__dirname, "renderWorker.js");
   const maxWorkers = Math.max(1, options.maxWorkers ?? DEFAULT_MAX_WORKERS);
   const idleMs = options.idleMs ?? DEFAULT_IDLE_MS;
-  const fallback = options.fallback ?? renderPreviewSource;
+  const fallback = options.fallback ?? ((input: SourceRenderInput) => renderPreviewSource(input, createNodeFileSystem()));
   const handles = new Set<Handle>();
   const waiters: Waiter[] = [];
   const stats: WorkerRendererStats = { started: 0, aborted: 0, workerRenders: 0, fallbackRenders: 0 };

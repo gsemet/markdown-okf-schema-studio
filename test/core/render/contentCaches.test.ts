@@ -1,6 +1,5 @@
 import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
-import realFs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { mock, test } from "node:test";
@@ -12,6 +11,7 @@ import { getHighlighter, highlightCodeBlocks } from "../../../src/core/render/hi
 import { renderMathHtml } from "../../../src/core/render/mathRenderer";
 import { expandToctrees, firstHeading, type GridNode } from "../../../src/core/render/mystGridToctree";
 import { ResourcePolicy } from "../../../src/core/security/resource-policy";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 // @tests_req SwRS-MDOKFSTUDIO-CODE-001
 test("a code block that did not change is highlighted once, a changed one again", () => {
@@ -65,20 +65,23 @@ test("the bounded cache evicts the least recently used entry and refuses an over
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-013
-test("a resource referenced many times in one render is stat-ed once", (t) => {
+test("a resource referenced many times in one render is stat-ed once", async (t) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "okf-policy-cache-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.writeFileSync(path.join(root, "img.png"), "x");
-  const policy = new ResourcePolicy([{ label: "workspace", directory: root }]);
-  const stat = mock.method(realFs, "statSync");
-  const real = mock.method(realFs, "realpathSync");
+  const disk = createNodeFileSystem();
+  const policy = new ResourcePolicy(disk, [{ label: "workspace", directory: root }]);
+  const stat = mock.method(disk, "stat");
+  const real = mock.method(disk, "realpath");
   try {
     for (let index = 0; index < 5; index += 1) {
-      assert.equal(policy.resolveResource("img.png", root), path.join(root, "img.png"));
-      assert.equal(policy.resolveResource("missing.png", root), undefined);
+      assert.equal(await policy.resolveResource("img.png", root), path.join(root, "img.png"));
+      assert.equal(await policy.resolveResource("missing.png", root), undefined);
     }
     assert.equal(stat.mock.callCount(), 2, "one stat per distinct path");
-    assert.equal(real.mock.callCount(), 1, "one realpath for the one existing file");
+    const file = path.join(root, "img.png");
+    assert.equal(real.mock.calls.filter((call) => call.arguments[0] === file).length, 1,
+      "one realpath for the one existing file");
     assert.equal(policy.diagnostics.filter((entry) => entry.code === "missing-resource").length, 5,
       "every refusal is still reported");
   } finally {

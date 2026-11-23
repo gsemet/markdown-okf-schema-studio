@@ -3,9 +3,10 @@ import { test } from "node:test";
 
 import { renderPreviewSource } from "../../../src/core/render/renderPipeline";
 import { attribute, findElement, findElements, hasClass, parseHtml, type HtmlElement } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const render = (text: string) =>
-  renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false });
+  renderPreviewSource({ text, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false }, createNodeFileSystem());
 
 /** The value of the host's list of runs, the last element of the rendered content. */
 function runsAttribute(html: string): string | undefined {

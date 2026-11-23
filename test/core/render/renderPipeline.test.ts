@@ -11,6 +11,7 @@ import {
   WorkspaceTrustError,
   type RenderOptions,
 } from "../../../src/core/render/renderPipeline";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
   return {
@@ -24,6 +25,7 @@ function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
     documentIdentity: "file:///active.md",
     revision: 7,
     isWorkspaceTrusted: () => true,
+    files: createNodeFileSystem(),
     ...overrides,
   };
 }

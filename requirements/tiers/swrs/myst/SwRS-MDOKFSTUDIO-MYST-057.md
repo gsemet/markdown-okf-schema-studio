@@ -23,6 +23,7 @@ implemented_in_files:
 - src/core/render/mystGridToctree.ts
 tested_in_files:
 - test/core/render/contentCaches.test.ts
+- test/core/render/documentGlob.test.ts
 - test/core/render/gridToctree.test.ts
 - test/core/render/renderReq.myst.requirements.test.ts
 default_owner_email: gaetan@xeberon.net

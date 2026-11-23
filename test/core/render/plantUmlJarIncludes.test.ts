@@ -12,6 +12,7 @@ import {
   setPlantUmlProcessSpawnerForTests,
 } from "../../../src/core/render/plantUmlRenderer";
 import { needsSymlinks } from "../../shared/symlinks";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 interface Fixture {
   parent: string;
@@ -33,7 +34,7 @@ function createFixture(): Fixture {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-084
-test("includes inside the workspace folder are accepted", () => {
+test("includes inside the workspace folder are accepted", async () => {
   const { parent, root } = createFixture();
   try {
     const source = [
@@ -47,14 +48,14 @@ test("includes inside the workspace folder are accepted", () => {
       "!include https://example.test/x.puml",
       "@enduml",
     ].join("\n");
-    assert.equal(findEscapingPlantUmlInclude(source, root), undefined);
+    assert.equal(await findEscapingPlantUmlInclude(createNodeFileSystem(), source, root), undefined);
   } finally {
     fs.rmSync(parent, { recursive: true, force: true });
   }
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-084
-test("an include that leaves the workspace through parent segments is refused", () => {
+test("an include that leaves the workspace through parent segments is refused", async () => {
   const { parent, root } = createFixture();
   try {
     for (const line of [
@@ -63,7 +64,7 @@ test("an include that leaves the workspace through parent segments is refused", 
       "!includesub ../outside.puml!PART",
       "!include_many \"../ws-secret/secret.puml\"",
     ]) {
-      const refusal = findEscapingPlantUmlInclude(`@startuml\n${line}\n@enduml`, root);
+      const refusal = await findEscapingPlantUmlInclude(createNodeFileSystem(), `@startuml\n${line}\n@enduml`, root);
       assert.match(refusal ?? "", /outside the workspace folder/u, line);
     }
   } finally {
@@ -72,16 +73,16 @@ test("an include that leaves the workspace through parent segments is refused", 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-084
-test("an absolute path into a sibling folder sharing the workspace name prefix is refused", () => {
+test("an absolute path into a sibling folder sharing the workspace name prefix is refused", async () => {
   const { parent, root, sibling } = createFixture();
   try {
-    const refusal = findEscapingPlantUmlInclude(
+    const refusal = await findEscapingPlantUmlInclude(createNodeFileSystem(),
       `@startuml\n!include ${path.join(sibling, "secret.puml")}\n@enduml`,
       root,
     );
     assert.match(refusal ?? "", /outside the workspace folder/u);
     assert.match(
-      findEscapingPlantUmlInclude(`!include ${path.join(parent, "outside.puml")}`, root) ?? "",
+      await findEscapingPlantUmlInclude(createNodeFileSystem(), `!include ${path.join(parent, "outside.puml")}`, root) ?? "",
       /outside/u,
     );
   } finally {
@@ -90,12 +91,12 @@ test("an absolute path into a sibling folder sharing the workspace name prefix i
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-084
-test("a symlink inside the workspace that points out of it is refused", needsSymlinks, () => {
+test("a symlink inside the workspace that points out of it is refused", needsSymlinks, async () => {
   const { parent, root, sibling } = createFixture();
   try {
     fs.symlinkSync(sibling, path.join(root, "link"));
     assert.match(
-      findEscapingPlantUmlInclude("!include link/secret.puml", root) ?? "",
+      await findEscapingPlantUmlInclude(createNodeFileSystem(), "!include link/secret.puml", root) ?? "",
       /outside the workspace folder/u,
     );
   } finally {
@@ -104,16 +105,16 @@ test("a symlink inside the workspace that points out of it is refused", needsSym
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-084
-test("a nested include and a computed include path are checked too", () => {
+test("a nested include and a computed include path are checked too", async () => {
   const { parent, root } = createFixture();
   try {
     fs.writeFileSync(path.join(root, "sub", "nested.puml"), "!include ../../outside.puml\n");
     assert.match(
-      findEscapingPlantUmlInclude("!include sub/nested.puml", root) ?? "",
+      await findEscapingPlantUmlInclude(createNodeFileSystem(), "!include sub/nested.puml", root) ?? "",
       /outside the workspace folder/u,
     );
-    assert.match(findEscapingPlantUmlInclude("!include $path", root) ?? "", /computed/u);
-    assert.match(findEscapingPlantUmlInclude("!include %getenv(\"HOME\")", root) ?? "", /computed/u);
+    assert.match(await findEscapingPlantUmlInclude(createNodeFileSystem(), "!include $path", root) ?? "", /computed/u);
+    assert.match(await findEscapingPlantUmlInclude(createNodeFileSystem(), "!include %getenv(\"HOME\")", root) ?? "", /computed/u);
   } finally {
     fs.rmSync(parent, { recursive: true, force: true });
   }
@@ -144,20 +145,20 @@ test("a diagram whose include leaves the workspace shows a message and starts no
       `<div class="myst-plantuml-diagram" data-line="3">${source}</div>`;
     const bad = await renderPlantUmlDiagrams(
       html(`@startuml\n!include ${path.join(sibling, "secret.puml")}\n@enduml`),
-      { workspaceRoot: root, trusted: true },
+      { files: createNodeFileSystem(), workspaceRoot: root, trusted: true },
     );
     assert.equal(bad.diagrams[0]?.status, "error");
     assert.match(bad.diagrams[0]?.message ?? "", /outside the workspace folder/u);
     assert.match(bad.diagnostics[0]?.message ?? "", /outside the workspace folder/u);
     const climb = await renderPlantUmlDiagrams(
       html("@startuml\n!include ../outside.puml\n@enduml"),
-      { workspaceRoot: root, trusted: true },
+      { files: createNodeFileSystem(), workspaceRoot: root, trusted: true },
     );
     assert.equal(climb.diagrams[0]?.status, "error");
     assert.equal(spawned, 0);
     const good = await renderPlantUmlDiagrams(
       html("@startuml\n!include inside.puml\n@enduml"),
-      { workspaceRoot: root, trusted: true },
+      { files: createNodeFileSystem(), workspaceRoot: root, trusted: true },
     );
     assert.equal(good.diagrams[0]?.status, "rendered");
     assert.equal(spawned, 1);

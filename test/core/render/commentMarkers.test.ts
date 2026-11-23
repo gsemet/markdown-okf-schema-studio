@@ -6,6 +6,7 @@ import { renderMyst } from "../../../src/core/render/mystRenderer";
 import { rewriteSphinxHtml } from "../../../src/core/security/html-sanitizer";
 import { ResourcePolicy } from "../../../src/core/security/resource-policy";
 import { attribute, findElement, findElements, hasClass, parseHtml, textContent } from "./dom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 const workspaceRoot = path.resolve(__dirname, "../../../../../..");
 
@@ -202,7 +203,7 @@ test("chip markup survives the sanitizer without event attributes", async () => 
   const { html } = await renderMyst("<!-- note -->\n\nTODO here <!-- inline --> now\n");
   const rewritten = rewriteSphinxHtml(html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     resolveResource: () => undefined,
     resolveNavigation: () => ({ kind: "blocked" }),

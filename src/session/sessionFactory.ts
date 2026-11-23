@@ -149,6 +149,7 @@ export class SessionFactory {
           // @implements_req SwRS-MDOKFSTUDIO-LIFE-004
           // The host's renderer (a worker thread in VS Code), else in-process.
           renderSource: host.previewRenderer?.render,
+          files: host.files,
         }),
       ),
       onState: (state) => manager.rendering.handleQueueState(session, state),

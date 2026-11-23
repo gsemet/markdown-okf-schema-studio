@@ -42,12 +42,14 @@ export async function renderBaselineContent(
       plantUmlJarPath: preview.plantUmlConfiguration.jarPath,
       plantUmlEngine: manager.plantUml.engineFor(preview),
       renderSource: host.previewRenderer?.render,
+      files: host.files,
     });
   } catch {
     return undefined;
   }
   try {
-    const page = buildPreviewWebviewHtml(
+    const page = await buildPreviewWebviewHtml(
+      host.files,
       result.html,
       result.stage.outputDirectory,
       preview.panel.assets,

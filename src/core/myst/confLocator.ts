@@ -1,6 +1,6 @@
-import * as fs from "node:fs";
 import * as path from "node:path";
 
+import { readTextFile, type FileSystem } from "../files/fileSystem";
 import { parseConf, type ParsedConf } from "./confParser";
 
 /** How long a lookup stays trusted before the disk is checked again. */
@@ -11,10 +11,12 @@ const FALLBACK_CANDIDATES = [
   "docs/conf.py", "doc/conf.py", "sphinx/conf.py", "source/conf.py", "docs/source/conf.py",
 ];
 
+/** What the locator asks of the file system: the existence and the text of a `conf.py`. */
+export type ConfFiles = Pick<FileSystem, "stat" | "readFile">;
+
 export interface ConfLocatorOptions {
+  files: ConfFiles;
   now?: () => number;
-  readFile?: (file: string) => string;
-  statFile?: (file: string) => { mtimeMs: number; size: number } | undefined;
 }
 
 interface DirectoryEntry {
@@ -30,10 +32,13 @@ interface FileEntry {
   conf: ParsedConf;
 }
 
-function defaultStat(file: string): { mtimeMs: number; size: number } | undefined {
+async function statRegularFile(
+  files: ConfFiles,
+  file: string,
+): Promise<{ mtimeMs: number; size: number } | undefined> {
   try {
-    const stat = fs.statSync(file);
-    return stat.isFile() ? { mtimeMs: stat.mtimeMs, size: stat.size } : undefined;
+    const stat = await files.stat(file);
+    return stat.kind === "file" ? { mtimeMs: stat.mtimeMs ?? 0, size: stat.size } : undefined;
   } catch {
     return undefined;
   }
@@ -49,39 +54,45 @@ export interface ConfLocator {
    * The MyST extensions the nearest `conf.py` enables, or undefined when nothing can be said:
    * no `conf.py`, a file that cannot be read with certainty, or a project without a MyST parser.
    */
-  enabledMystExtensions(documentPath: string, workspaceRoot: string): ReadonlySet<string> | undefined;
+  enabledMystExtensions(documentPath: string, workspaceRoot: string): Promise<ReadonlySet<string> | undefined>;
   /** The `conf.py` that governs the document (ancestor walk, then the D29 fallback), if any. */
-  locate(documentPath: string, workspaceRoot: string): string | undefined;
+  locate(documentPath: string, workspaceRoot: string): Promise<string | undefined>;
   invalidate(): void;
 }
 
-export function createConfLocator(options: ConfLocatorOptions = {}): ConfLocator {
+export function createConfLocator(options: ConfLocatorOptions): ConfLocator {
   const now = options.now ?? Date.now;
-  const readFile = options.readFile ?? ((file: string): string => fs.readFileSync(file, "utf8"));
-  const statFile = options.statFile ?? defaultStat;
+  const statFile = (file: string): Promise<{ mtimeMs: number; size: number } | undefined> =>
+    statRegularFile(options.files, file);
+  const readFile = (file: string): Promise<string> => readTextFile(options.files as FileSystem, file);
   const directories = new Map<string, DirectoryEntry>();
   const files = new Map<string, FileEntry>();
+  // Bumped by `invalidate`: a lookup that started before it must not store its (stale) answer.
+  let generation = 0;
 
   /** Common Sphinx source folders under the workspace root; exactly one candidate counts. */
-  function findFallback(root: string): string | null {
-    const found = FALLBACK_CANDIDATES
-      .map((relative) => path.join(root, ...relative.split("/")))
-      .filter((candidate) => statFile(candidate));
+  async function findFallback(root: string): Promise<string | null> {
+    const found: string[] = [];
+    for (const relative of FALLBACK_CANDIDATES) {
+      const candidate = path.join(root, ...relative.split("/"));
+      if (await statFile(candidate)) found.push(candidate);
+    }
     return found.length === 1 ? found[0] : null;
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-MYST-066
-  function findConf(directory: string, root: string): string | null {
+  async function findConf(directory: string, root: string): Promise<string | null> {
     const cached = directories.get(directory);
     if (cached && now() - cached.checkedAt < CONF_RECHECK_MS) {
       return cached.confPath;
     }
+    const started = generation;
     let confPath: string | null = null;
     // A document outside the workspace folder only looks at its own folder.
     const limit = isInside(root, directory) ? root : directory;
     for (let current = directory; ; current = path.dirname(current)) {
       const candidate = path.join(current, "conf.py");
-      if (statFile(candidate)) {
+      if (await statFile(candidate)) {
         confPath = candidate;
         break;
       }
@@ -90,20 +101,21 @@ export function createConfLocator(options: ConfLocatorOptions = {}): ConfLocator
       }
     }
     if (confPath === null && isInside(root, directory)) {
-      confPath = findFallback(root);
+      confPath = await findFallback(root);
     }
-    directories.set(directory, { confPath, checkedAt: now() });
+    if (started === generation) directories.set(directory, { confPath, checkedAt: now() });
     return confPath;
   }
 
-  function readConf(confPath: string): ParsedConf | undefined {
+  async function readConf(confPath: string): Promise<ParsedConf | undefined> {
     const cached = files.get(confPath);
     if (cached && now() - cached.checkedAt < CONF_RECHECK_MS) {
       return cached.conf;
     }
-    const stat = statFile(confPath);
+    const started = generation;
+    const stat = await statFile(confPath);
     if (!stat) {
-      files.delete(confPath);
+      if (started === generation) files.delete(confPath);
       return undefined;
     }
     if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) {
@@ -112,54 +124,66 @@ export function createConfLocator(options: ConfLocatorOptions = {}): ConfLocator
     }
     let conf: ParsedConf;
     try {
-      conf = parseConf(readFile(confPath));
+      conf = parseConf(await readFile(confPath));
     } catch {
       conf = { extensions: [], mystExtensions: [], certain: false };
     }
-    files.set(confPath, { mtimeMs: stat.mtimeMs, size: stat.size, checkedAt: now(), conf });
+    if (started === generation) files.set(confPath, { mtimeMs: stat.mtimeMs, size: stat.size, checkedAt: now(), conf });
     return conf;
   }
 
   return {
-    enabledMystExtensions(documentPath, workspaceRoot) {
+    async enabledMystExtensions(documentPath, workspaceRoot) {
       const directory = path.dirname(path.resolve(documentPath));
-      const confPath = findConf(directory, path.resolve(workspaceRoot));
+      const confPath = await findConf(directory, path.resolve(workspaceRoot));
       if (confPath === null) {
         return undefined;
       }
-      const conf = readConf(confPath);
+      const conf = await readConf(confPath);
       if (!conf || !conf.certain
         || !conf.extensions.some((name) => name === "myst_parser" || name === "myst_nb")) {
         return undefined;
       }
       return new Set(conf.mystExtensions);
     },
-    locate(documentPath, workspaceRoot) {
-      return findConf(path.dirname(path.resolve(documentPath)), path.resolve(workspaceRoot)) ?? undefined;
+    async locate(documentPath, workspaceRoot) {
+      return (await findConf(path.dirname(path.resolve(documentPath)), path.resolve(workspaceRoot))) ?? undefined;
     },
     invalidate() {
+      generation += 1;
       directories.clear();
       files.clear();
     },
   };
 }
 
-const sharedLocator = createConfLocator();
+let shared: { files: ConfFiles; locator: ConfLocator } | undefined;
+
+/** The shared (cached) locator of `files`; a host has one file system, so one locator lives. */
+function sharedLocator(files: ConfFiles): ConfLocator {
+  if (shared?.files !== files) shared = { files, locator: createConfLocator({ files }) };
+  return shared.locator;
+}
 
 /** The enabled MyST extensions for a document, from the shared (cached) lookup. */
 export function enabledMystExtensionsFor(
+  files: ConfFiles,
   documentPath: string,
   workspaceRoot: string,
-): ReadonlySet<string> | undefined {
-  return sharedLocator.enabledMystExtensions(documentPath, workspaceRoot);
+): Promise<ReadonlySet<string> | undefined> {
+  return sharedLocator(files).enabledMystExtensions(documentPath, workspaceRoot);
 }
 
 /** The `conf.py` that governs a document, from the shared (cached) lookup. */
-export function locateConfFor(documentPath: string, workspaceRoot: string): string | undefined {
-  return sharedLocator.locate(documentPath, workspaceRoot);
+export function locateConfFor(
+  files: ConfFiles,
+  documentPath: string,
+  workspaceRoot: string,
+): Promise<string | undefined> {
+  return sharedLocator(files).locate(documentPath, workspaceRoot);
 }
 
 /** Drops every cached lookup; called when a `conf.py` is created, changed or deleted. */
 export function invalidateConfCache(): void {
-  sharedLocator.invalidate();
+  shared?.locator.invalidate();
 }

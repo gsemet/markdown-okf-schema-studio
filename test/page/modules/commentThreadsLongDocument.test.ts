@@ -10,6 +10,7 @@ import { installCommentThreads } from "../../../src/page/modules/commentThreads"
 import { parseHtml, type HtmlNode } from "../../core/render/dom";
 import { inlineDocument, workspaceRoot } from "../../core/render/mystFeaturesSupport";
 import { FakeDocument, FakeElement, FakeText, provideGlobalElement } from "./fakeDom";
+import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
 /**
  * CR 266: comments of a long document (the repository README) were in the comments file but not
@@ -62,11 +63,12 @@ function readme(sections: number): string {
 
 async function renderHtml(text: string): Promise<string> {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(text), workspaceRoot, requestId: 1, isWorkspaceTrusted: () => true,
   });
   return rewriteSphinxHtml(result.html, {
     outputRoot: workspaceRoot,
-    policy: new ResourcePolicy([]),
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
     nonce: "unit-nonce",
     sourceMapping: { sourceFile: "inline.md", documentId: "doc" },
     resolveResource: (request) => ({ path: request, uri: `vscode-resource:${request}` }),

@@ -37,6 +37,7 @@ import { REPORTS_ROOT, EXTENSION_ROOT } from "../reportPaths";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 import { frameStats, installFrameProbe, rebuiltBlocks, snapshotBlocks, type FrameSample } from "./frameProbe";
 import { PROBE_EDIT_PARAGRAPH, PROBE_MERMAID_COUNT, probeChapter } from "./largeChapter";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 
 const PROBE_ROOT = path.join(REPORTS_ROOT, "probe");
@@ -76,6 +77,7 @@ export function asLoadedByVsCode(html: string): string {
 
 async function buildPage(text: string, version: number, requestId: number): Promise<BuiltPage> {
   const result = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: { uri: { scheme: "file", fsPath: SOURCE_PATH }, languageId: "markdown", version, getText: () => text },
     workspaceRoot: EXTENSION_ROOT,
     requestId,
@@ -91,7 +93,8 @@ async function buildPage(text: string, version: number, requestId: number): Prom
     inspectLinks: false,
     strictAdditionalProperties: false,
   });
-  const built = webviewModule.buildPreviewWebviewHtml(
+  const built = await webviewModule.buildPreviewWebviewHtml(
+    createNodeFileSystem(),
     result.html,
     result.stage.outputDirectory,
     assets,

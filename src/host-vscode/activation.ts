@@ -244,7 +244,9 @@ export class StudioActivation {
       const diagnostics = manager.diagnostics.start();
       // The single conf.py watcher: it also sees the workspace-root fallbacks of decision D29.
       const confWatcher = host.watcher.watch(undefined, "**/conf.py");
-      const onConfFileEvent = (filePath: string): void => manager.events.onConfFileEvent(filePath);
+      const onConfFileEvent = (filePath: string): void => {
+        fireAndForget(host.logger, manager.events.onConfFileEvent(filePath), "Refreshing the previews of a conf.py");
+      };
       context.subscriptions.push(
         diagnostics,
         confWatcher,

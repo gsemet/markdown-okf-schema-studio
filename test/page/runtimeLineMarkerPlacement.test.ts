@@ -7,6 +7,7 @@ import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { createRuntimeHarness, RuntimeElement, type RuntimeHarness } from "./runtimeHarness";
 import { buildTabSet, codeBlock, watchProperty, wrappedParagraph } from "./runtimeTabSetSupport";
 import { noop, patchMessage } from "./runtimeTestSupport";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 /**
  * The placement of the line marker (features/lineMarker.ts) on a hidden tab, a table row and a front
@@ -160,6 +161,7 @@ test("a tab set in a closed dropdown is opened, then its tab is selected", () =>
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
 test("a line in the body of a closed dropdown directive opens it and is marked, from the real render", async () => {
   const rendered = await renderPreviewDocument({
+    files: createNodeFileSystem(),
     document: inlineDocument(
       ["Intro.", "", ":::{dropdown} Title", "First body line.", "", "Second body paragraph.", ":::", ""].join("\n"),
     ),

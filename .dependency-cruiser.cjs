@@ -48,9 +48,9 @@ const NODE_DEBT = {
   "src/core/mapping/mystTargets.ts": {
     builtins: ["path"], reason: "relative bibliography paths", removal: PATH_SHIM },
   "src/core/myst/confLocator.ts": {
-    builtins: ["fs", "path"], reason: "sync search of the governing conf.py", removal: PORT_FOLLOW_UP },
+    builtins: ["path"], reason: "search of the governing conf.py path", removal: PATH_SHIM },
   "src/core/render/documentGlob.ts": {
-    builtins: ["fs", "path"], reason: "sync toctree glob expansion", removal: PORT_FOLLOW_UP },
+    builtins: ["path"], reason: "toctree glob path matching", removal: PATH_SHIM },
   "src/core/render/mystRenderer.ts": {
     builtins: ["path"], reason: "include and image path resolution", removal: PATH_SHIM },
   "src/core/render/plantUmlIncludes.ts": {
@@ -61,7 +61,7 @@ const NODE_DEBT = {
   "src/core/render/renderPipeline.ts": {
     builtins: ["path"], reason: "include roots", removal: PATH_SHIM },
   "src/core/security/resource-policy.ts": {
-    builtins: ["fs", "path"], reason: "realpath checks of local resources", removal: PORT_FOLLOW_UP },
+    builtins: ["path"], reason: "path containment checks of local resources", removal: PATH_SHIM },
 };
 
 const { builtinModules } = require("node:module");
