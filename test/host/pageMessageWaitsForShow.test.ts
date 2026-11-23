@@ -62,3 +62,25 @@ test("a page message sent when the queue is ready, while the show is held, is ap
   assert.ok(answers.length > 0, "the save was answered");
   assert.ok(answers.every((answer) => answer.error !== STALE), `the save was not refused as stale: ${JSON.stringify(answers)}`);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+test("a page message sent with no show pending is handled before any await", async (t) => {
+  const studio = startStudio(t.mock.timers);
+  setCurrentActivation(studio.activation);
+  t.after(() => {
+    setCurrentActivation(undefined);
+    studio.close();
+  });
+  await studio.openSide(writeFile(SOURCE));
+  const preview = studio.manager.active!;
+  assert.equal(studio.manager.rendering.hasPendingShow(preview), false, "no show is pending");
+  const manager = studio.manager as unknown as { handlePageMessage: (...args: unknown[]) => unknown };
+  const real = manager.handlePageMessage.bind(manager);
+  let handled = 0;
+  manager.handlePageMessage = (...args) => {
+    handled += 1;
+    return real(...args);
+  };
+  void sendPreviewMessageForTests({ type: "unknownMessageForTest" });
+  assert.equal(handled, 1, "the message was handled synchronously");
+});
