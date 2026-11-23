@@ -211,6 +211,9 @@ export class ResourcePolicy {
 
   private opening: Promise<void> | undefined;
 
+  // True once the roots are canonicalized: before, the synchronous decision has no root to compare with.
+  private opened = false;
+
   private readonly restrictedReads: boolean;
 
   // One policy serves one render. The file-system answer for a path (its real path, or that it is
@@ -249,6 +252,7 @@ export class ResourcePolicy {
         }
       }
       this.roots = roots;
+      this.opened = true;
     })();
     return this.opening;
   }
@@ -300,6 +304,11 @@ export class ResourcePolicy {
     baseDirectory: string,
     options: ResourceRequestOptions = {},
   ): string | undefined {
+    if (!this.opened) {
+      // A caller that forgot to prime: list the request instead of refusing it as outside every root.
+      this.unprimed.push({ request, baseDirectory, options });
+      return undefined;
+    }
     const outcome = this.evaluate(request, baseDirectory, options, false);
     if ("need" in outcome) {
       this.unprimed.push({ request, baseDirectory, options });

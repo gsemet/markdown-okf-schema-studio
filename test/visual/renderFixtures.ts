@@ -158,6 +158,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     ...(options.trusted === false ? { allowExternalScripts: false } : {}),
   });
   // As the host does: the sanitizer is synchronous, so what it could not resolve is primed and it runs again.
+  await policy.prime([]);
   let rewritten = sanitize();
   for (let pass = 0; pass < 3; pass += 1) {
     const missed = policy.takeUnprimed();
