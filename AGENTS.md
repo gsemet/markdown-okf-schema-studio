@@ -74,6 +74,7 @@ this repository.
 - Build: `just compile`; format the justfile: `just format`; package a VSIX: `just package`
 - Formatting, TypeScript, import boundaries, file size, unused exports, settings schema, unit, contract and
   security checks: `just check`
+- Merge commits in the branch (base `origin/main` by default; `ci-static` runs it first): `just check-no-merge-commits [BASE]`
 - Settings schema of `package.json` from the settings registry: `just generate-settings`
 - Python Sphinx source-mapping contract: `just sphinx-check`
 - Mutation campaign on `src/core` (manual, hours, not in `check` or `preflight`): `just mutation-core [SAMPLE]`; see "Mutation testing of src/core" in CONTRIBUTING.md
