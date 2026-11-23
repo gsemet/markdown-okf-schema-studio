@@ -222,6 +222,7 @@ export async function scenarioPropertiesTableWithoutReload(page: Page, evidence:
         + JSON.stringify(source.getText()));
       await waitForRender(source);
       await waitFor("the render to be ready in the page", () => getActivePreviewForTests()?.webviewReady === true);
+      await waitFor("the last render to be shown", shownRenderIsCurrent);
       await new Promise((resolve) => setTimeout(resolve, 600));
       const assignments = htmlAssignmentCount() - a0;
       const renders = (getActivePreviewForTests()?.renderedStages ?? 0) - renders0;
@@ -274,6 +275,17 @@ function contentPatchCount(): number {
   return getActivePreviewForTests()?.contentPatches ?? 0;
 }
 
+/**
+ * True once the page shows the last requested render. The build queue says "ready" before the show
+ * of the render ends (the show awaits the resource roots and the page html), and the counters of
+ * the active preview change only at the end of the show: a counter read right after `waitForRender`
+ * can run before the page document is assigned or patched (CR-479).
+ */
+function shownRenderIsCurrent(): boolean {
+  const preview = getActivePreviewForTests();
+  return preview?.requestId !== undefined && preview.shownRequestId === preview.requestId;
+}
+
 /** Runs `body` with preview.incrementalUpdates set in the workspace, then restores the setting. */
 export async function withIncrementalUpdates(enabled: boolean, body: () => Promise<void>): Promise<void> {
   const configuration = vscode.workspace.getConfiguration("markdownOkfSchemaStudio.preview");
@@ -324,6 +336,9 @@ export async function scenarioContentPatchedInPlace(page: Page, evidence: Eviden
       + JSON.stringify(source.getText().slice(-60)));
     await waitForRender(source);
     await waitFor("the render to be ready in the page", () => getActivePreviewForTests()?.webviewReady === true);
+    await waitFor("the renders were applied as content patches", () => contentPatchCount() > patches0 && shownRenderIsCurrent());
+    // Kept: after the show ends, 600 ms give a wrong document assignment time to show in the
+    // counter the strict assertion below reads (the wait above does not cover that).
     await new Promise((resolve) => setTimeout(resolve, 600));
     console.log("RI-T34 typing: " + (htmlAssignmentCount() - a0) + " html assignments, "
       + (contentPatchCount() - patches0) + " content patches");
@@ -367,6 +382,7 @@ export async function scenarioContentPatchedInPlace(page: Page, evidence: Eviden
     await waitFor("the slow render to be ready in the page", () => getActivePreviewForTests()?.webviewReady === true);
     await waitFor("the overlay to be gone", async () =>
       await frame.locator("[data-sphinx-preview-pending-overlay]").count() === 0);
+    await waitFor("the slow render was applied as a content patch", () => contentPatchCount() > patches1 && shownRenderIsCurrent());
     assert.equal(htmlAssignmentCount(), a1, "the slow render did not assign the document");
     assert.ok(contentPatchCount() > patches1, "the slow render was applied as a content patch");
     assert.equal(getActivePreviewForTests()?.pendingOverlayVisible, false);
@@ -424,6 +440,7 @@ export async function scenarioContentPatchedInPlace(page: Page, evidence: Eviden
       await typeText(page, "123", 60);
       await waitForRender(source);
       await waitFor("the render to be ready in the page", () => getActivePreviewForTests()?.webviewReady === true);
+      await waitFor("the document to be assigned again", () => htmlAssignmentCount() > offAssignments && shownRenderIsCurrent());
       assert.ok(htmlAssignmentCount() > offAssignments, "with the setting off the document is assigned again");
       assert.equal(contentPatchCount(), offPatches, "with the setting off nothing is patched");
       await waitFor("the previous frame to be replaced", () => offFrame.isDetached());
@@ -494,6 +511,7 @@ export async function scenarioLargeDocumentPatched(page: Page, evidence: Evidenc
       await throttle.send("Emulation.setCPUThrottlingRate", { rate: 1 }).catch(() => undefined);
       await throttle.detach().catch(() => undefined);
     }
+    await waitFor("the renders were applied as content patches", () => contentPatchCount() > patches0 && shownRenderIsCurrent(), 30_000);
     await new Promise((resolve) => setTimeout(resolve, 600));
     console.log("RI-T34 large document typing: " + (htmlAssignmentCount() - a0) + " html assignments, "
       + (contentPatchCount() - patches0) + " content patches");
