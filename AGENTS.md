@@ -72,12 +72,12 @@ this repository.
 ## Main targets
 
 - Build: `just compile`; format the justfile: `just format`; package a VSIX: `just package`
-- Formatting, TypeScript, import boundaries, file size, unused exports, settings schema, unit, contract and
-  security checks: `just check`
+- Formatting, TypeScript, import boundaries, file size, unused exports, settings schema, the feature clip
+  kit's storyboard tests (`just clip-kit-test`), unit, contract and security checks: `just check`
 - Merge commits in the branch (base `origin/main` by default; `ci-static` runs it first): `just check-no-merge-commits [BASE]`
 - Settings schema of `package.json` from the settings registry: `just generate-settings`
 - Python Sphinx source-mapping contract: `just sphinx-check`
-- Feature clip (manual, a real VS Code window, not in `check` or `preflight`): `just clip NAME [STEP]`
+- Feature clip (manual, a real VS Code window, not in `check` or `preflight`; its storyboard parser's tests are, as `just clip-kit-test`): `just clip NAME [STEP]`
 - Mutation campaign on `src/core` (manual, hours, not in `check` or `preflight`): `just mutation-core [SAMPLE]`; see "Mutation testing of src/core" in CONTRIBUTING.md
 - Requirements: `just requirements-lint` (validate), `just requirements-update` (coverage and
   navigation), `just requirements-report` (traceability report in `out/reports/requirements/`)
