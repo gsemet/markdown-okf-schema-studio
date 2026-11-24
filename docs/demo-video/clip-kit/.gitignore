@@ -1,0 +1,5 @@
+# The working files of a take and a render stay in the scratch folder; these keep a stray copy out of Git.
+remotion/node_modules
+remotion/public/
+remotion/src/story.json
+remotion/src/take.json
