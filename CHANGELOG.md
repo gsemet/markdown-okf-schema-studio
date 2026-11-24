@@ -2,23 +2,25 @@
 
 ## Unreleased
 
+## 1.12.1 - 2026-11-24
+
 - Open Preview to Side, Refresh Preview and a restored panel complete once the page shows the document again,
-  as in 1.12.0 (CR-479 heavy-red, PR #495).
+  as in 1.12.0 (commit b5e0cdfd, CR-479 heavy-red, PR #495)
 - A Markdown file now opens as text again, whoever opens it (Explorer, Quick Open, search result, link): the
   opening watcher is gone, and so are the settings `open.searchResultsInStudio` and
   `open.markdownFilesInStudio` of 1.11.0. To open every `.md` file in Studio, associate `*.md` with Studio in
   `workbench.editorAssociations`; the first activation does it for you where `open.markdownFilesInStudio` was
   on. With the association, an Explorer click opens Studio, and a jump to a line opens Studio at the top and
   the side preview marks nothing. With the default settings, a search result or a jump opens the text
-  editor at the line again, as it did before 1.11.0, explicitly (CR-477 raw-text, PR #0).
+  editor at the line again, as it did before 1.11.0, explicitly (CR-477 raw-text, PR #493)
 - The editor of a blank-lines block now closes after Done, instead of staying on "Saving Markdown…"
-  (CR-474 blank-save, PR #491, issue #485).
+  (commit b37a0e56, CR-474 blank-save, PR #491, issue #485)
 - Cancel and Escape now always close an editor whose save is still running, and a save that fails
   gives your text back in an editor you can save again, instead of leaving the block on "Saving
-  Markdown…" (CR-475 save-guard, issue #485).
+  Markdown…" (commit dcc84def, CR-475 save-guard, PR #492, issue #485)
 - Each extra blank line in edit mode now shows as its own blank-line block, and typing in one writes
-  your text in place of that one blank line and keeps the others (CR-476 blank-per-line, PR #494,
-  issue #485).
+  your text in place of that one blank line and keeps the others (commit 755e828d, CR-476 blank-per-line, PR #494,
+  issue #485)
 
 ## 1.12.0 - 2026-11-22
 
