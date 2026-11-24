@@ -77,6 +77,7 @@ this repository.
 - Merge commits in the branch (base `origin/main` by default; `ci-static` runs it first): `just check-no-merge-commits [BASE]`
 - Settings schema of `package.json` from the settings registry: `just generate-settings`
 - Python Sphinx source-mapping contract: `just sphinx-check`
+- Feature clip (manual, a real VS Code window, not in `check` or `preflight`): `just clip NAME [STEP]`
 - Mutation campaign on `src/core` (manual, hours, not in `check` or `preflight`): `just mutation-core [SAMPLE]`; see "Mutation testing of src/core" in CONTRIBUTING.md
 - Requirements: `just requirements-lint` (validate), `just requirements-update` (coverage and
   navigation), `just requirements-report` (traceability report in `out/reports/requirements/`)
@@ -112,6 +113,8 @@ this repository.
   [release-process.guidelines.md](.agents/guidelines/release-process.guidelines.md)
 - When making, editing or reviewing a short demo video:
   [short-demo-process.guidelines.md](docs/demo-video/guidelines/short-demo-process.guidelines.md)
+- When making a feature clip (a few seconds, one feature) or adding one to a release:
+  [feature-clip-process.guidelines.md](docs/demo-video/guidelines/feature-clip-process.guidelines.md)
 - When adding, removing or changing a rendered syntax (directive, role, fence language, marker,
   HTML element, palette mode, limit): update the writing skill `skills/writing-for-markdown-okf-schema-studio/`
   in the same pull request, per

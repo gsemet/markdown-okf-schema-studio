@@ -38,6 +38,7 @@ named by the date of the pull request (the date may differ from the tag's; nothi
 | `release-notes.md` | The GitHub release notes, with relative image links |
 | `tweet.md` | The announcement thread, three posts |
 | Images | The images of the notes and the thread, directly in the folder |
+| Clips | The GIF and the MP4 of a feature clip, copied from `docs/demo-video/clips/<clip>/` into the folder (Git LFS stores one object for both copies) |
 
 ## The steps of a release
 
@@ -54,7 +55,13 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    (or, in the stacked way, from the dispatch of the branch heavy run), every other merge is held
    until the release is published, and no work on a new change starts until then.
 3. The notes and the thread are drafted from `CHANGELOG.md` `## Unreleased` and the reports of the
-   changes, in `docs/releases-notes/`. They go in the version PR.
+   changes, in `docs/releases-notes/`. They go in the version PR. A visible feature may get a feature
+   clip ([feature-clip-process.guidelines.md](../../docs/demo-video/guidelines/feature-clip-process.guidelines.md)):
+   the maintainer decides which feature gets one, and the clip is made in the change of the feature
+   or right after it, before the version pull request, so it ships with the feature. Its GIF is the
+   picture of that feature's highlight in `release-notes.md`, linked by file name, so the existing
+   check of `scripts/release_notes.py` and the release's asset upload take it as they take a PNG. The
+   release-note file in the repository keeps the GIF, never a video link.
 4. The last merge of the stack started the heavy run on `main` HEAD. Wait for
    `integration` and `stress` to be green on that exact commit, and read the result of each job:
    a red `stress` does not turn this run red.
@@ -111,13 +118,27 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    CONTRIBUTING.md. The Open VSX publication uses the trusted publisher registered on
    open-vsx.org (no stored token). The owner deletes `VSCE_PAT` once a release published with
    `--oidc` has succeeded.
-7. The release is archived with a `04-report.md` in the release CR's folder, next to `01-intent.md`,
+7. **Publish the clip** (owner only, for a release with a clip; after the GitHub release exists and
+   the version is served):
+   1. In the GitHub release editor, the owner drags `<clip>.mp4` (at most 10 MB) from the release
+      folder into the release body at the clip's highlight, in place of its GIF line. GitHub plays
+      only a video uploaded through its own interface, not a relative `.mp4` in the repository.
+      `release-notes.md` in the repository is not changed: it keeps the GIF.
+   2. The owner opens the published release page: the video plays at the highlight, and the
+      highlight does not show both the video and the GIF.
+   3. Post 1 of the announcement thread is posted with `<clip>.mp4` attached (its `Video:` line),
+      with `poster.png` as the cover when X asks for one.
+
+   The agent does not do this step.
+8. The release is archived with a `04-report.md` in the release CR's folder, next to `01-intent.md`,
    `02-answers.md` and `03-change-spec.md` (a subagent cannot write some Markdown names, such as
    `report.md`, but a numbered name works): tag, release URL, CI runs (heavy run on `main`,
    version push), and the issues the release closed (from the PRs' closing references,
    `gh pr view <n> --json closingIssuesReferences`, and the `issue:` lines of the changes). A
    `retro.md` next to it lists what cost time in the release, its root cause and the process fix.
-8. The agent that talks to the owner drafts "Released in
+   For a release with a clip, `04-report.md` also records the clip's name and whether step 7 was
+   done (the release body plays the MP4, post 1 carries it), as the owner reports it.
+9. The agent that talks to the owner drafts "Released in
    https://github.com/gsemet/markdown-okf-schema-studio/releases/tag/vX.Y.Z" for each listed issue,
    gets one owner approval for the whole list, posts each with `gh issue comment`, and reads the
    comments back. This comes after the publication, so it does not break the rule that nothing is
@@ -148,7 +169,7 @@ The version PR may be the top PR of a stack that is ready to merge:
    in order (`gh stack merge <version PR> --rebase`, see
    [stacked-prs.guidelines.md](stacked-prs.guidelines.md)).
 5. The version push on `main` runs the heavy jobs again (CI rule 14). It stays the final gate and
-   makes the tag. Steps 6 to 8 follow as usual.
+   makes the tag. Steps 6 to 9 follow as usual.
 
 ## The version PR body
 
@@ -160,7 +181,9 @@ and a heading:
 2. `---`, then `# 🐦 Announcement thread (rendered)`, then the content of `tweet.md`.
 
 The committed files keep their relative image links (the release check requires them); only the
-copy in the body points to the images at the PR head. The images are in Git LFS, so the links use
+copy in the body points to the images at the PR head, and a `Video:` line of the thread links its MP4
+the same way, so the owner can open it from the PR page (a GIF is already covered by the image
+expression). The images are in Git LFS, so the links use
 `media.githubusercontent.com` (a `raw.githubusercontent.com` link shows the LFS pointer, not the
 picture). `body-sections.md` holds the template sections without the closing attribution line,
 which ends the body after the thread:
@@ -169,7 +192,8 @@ which ends the body after the thread:
 dir=docs/releases-notes/<date>-vX.Y.Z
 base="https://media.githubusercontent.com/media/gsemet/markdown-okf-schema-studio/$(git rev-parse HEAD)/$dir"
 rewrite() { sed -E -e "s#(\]\(|src=\")([^/\":)]+\.(png|jpe?g|gif))#\1$base/\2#g" \
-                     -e "s#^Image: ([^ /]+\.(png|jpe?g|gif))\$#Image: ![\1]($base/\1)#" "$1"; }
+                     -e "s#^Image: ([^ /]+\.(png|jpe?g|gif))\$#Image: ![\1]($base/\1)#" \
+                     -e "s#^Video: ([^ /]+\.mp4)\$#Video: [\1]($base/\1)#" "$1"; }
 { cat body-sections.md
   printf '\n---\n\n# 📰 Release notes (rendered)\n\n'; rewrite "$dir/release-notes.md"
   printf '\n---\n\n# 🐦 Announcement thread (rendered)\n\n'; rewrite "$dir/tweet.md"
@@ -204,7 +228,9 @@ not copied into the notes.
   by side in one image, and the text does not describe the before again.
 - Each picture is cropped to the part of the screen where the change happens: no toolbar, no empty
   margin, no unrelated content around it (for a change in a list, no floating toolbar or
-  frontmatter table).
+  frontmatter table). One exception: a feature clip's GIF is not cropped. It shows the whole filmed
+  window, and the clip's one zoom on the result stands in for the crop. The rest of the rule holds
+  for every still picture.
 - A joined before | after image crops both halves to the same region at the same scale.
 - A capture of a gesture (a drag, a hover) keeps the element and what the gesture acts on, not the
   blocks around it (the list and its handles, not the alerts below it).
@@ -265,12 +291,16 @@ published text may then differ from the file, and that is accepted.
 ## Announcement thread
 
 Three posts on X, in `tweet.md` of the notes folder, each under a `## 1/`, `## 2/`, `## 3/` heading,
-followed by an `Image:` line with the file name of its picture when it has one. Only the owner posts.
+followed by an `Image:` line with the file name of its picture when it has one. Only the owner posts
+and uploads.
 
 1. **The story** (may be long; X shows "Show more" past 280 characters). Written in the first
    person, as one would tell a colleague: start from a concrete moment of work with a coding agent
    that the release improves, then say what is different now. Name at most three changes, in
-   plain words, not a feature list. One picture: the hero image.
+   plain words, not a feature list. One picture: the hero image. When the release has a feature
+   clip, **its MP4 replaces the hero image** and is the thread's hook: post 1 carries a
+   `Video: <clip>.mp4` line instead of its `Image:` line (X takes one video or up to four images per
+   post, never both), and no other post changes. Step 7 of "The steps of a release" uploads it.
 2. **The release notes**: one sentence that invites to read the details, and the GitHub release
    URL (`https://github.com/gsemet/markdown-okf-schema-studio/releases/tag/vX.Y.Z`).
 3. **The install link**: one sentence (install or update, free, MIT), and the Marketplace URL
@@ -284,7 +314,9 @@ Read each post aloud: it should sound like a person, not a press release.
 ## Hero image
 
 A hero image is recommended for a minor or major release, not required: an existing capture is
-enough for a small one. It serves post 1 and the first highlight of the notes. A dedicated one is a
+enough for a small one. It serves post 1 and the first highlight of the notes. When the release has a
+feature clip, the hero image is still made for the release folder but is not posted in the thread:
+the clip's MP4 takes its place in post 1. A dedicated one is a
 simulated visual scenario, so it is reproducible and checked:
 
 - fixture `test/visual/fixtures/<NN>-release-<x>-<y>-showcase.md`, scenario

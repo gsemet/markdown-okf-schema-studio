@@ -1,0 +1,189 @@
+{
+  "clip": "raw-copy-balance-edges",
+  "passed": true,
+  "length": 8.5,
+  "mp4": {
+    "seconds": 8.5,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "codec": "h264",
+    "pixFmt": "yuv420p",
+    "audioStreams": 0,
+    "bytes": 952052,
+    "crf": "master (crf 18)"
+  },
+  "webm": {
+    "seconds": 8.5,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "codec": "vp9",
+    "audioStreams": 0,
+    "bytes": 574936
+  },
+  "gif": {
+    "width": 960,
+    "fps": 12,
+    "bytes": 1396686,
+    "loopCount": 0,
+    "ladderStep": 0,
+    "colors": 128,
+    "step": {
+      "step": 0,
+      "fps": 12,
+      "width": 960,
+      "colors": 128
+    }
+  },
+  "loopSeamSsim": 0.98855,
+  "take": {
+    "rawFps": 5.1,
+    "screencastFrames": 44,
+    "filmedSeconds": 8.546,
+    "playbackRate": 1.005,
+    "readingMode": "off",
+    "pasteWidgets": 0,
+    "verifyPassed": true
+  },
+  "host": {
+    "vscodeVersion": "1.147.0",
+    "vscodePinned": true,
+    "extensionVersion": "1.12.1",
+    "extensionSource": "vsix",
+    "deviceScale": 1.75,
+    "workArea": {
+      "width": 3440,
+      "height": 1392
+    },
+    "platform": "win32"
+  },
+  "checks": [
+    {
+      "name": "mp4 duration within 5 to 12 s",
+      "ok": true,
+      "value": "8.500 s",
+      "detail": ""
+    },
+    {
+      "name": "mp4 duration equals Length within one frame",
+      "ok": true,
+      "value": "8.500 s vs 8.5 s",
+      "detail": ""
+    },
+    {
+      "name": "mp4 size",
+      "ok": true,
+      "value": "1920x1080",
+      "detail": ""
+    },
+    {
+      "name": "mp4 30 fps",
+      "ok": true,
+      "value": "30/1",
+      "detail": ""
+    },
+    {
+      "name": "mp4 h264 yuv420p",
+      "ok": true,
+      "value": "h264 yuv420p",
+      "detail": ""
+    },
+    {
+      "name": "mp4 has no audio stream",
+      "ok": true,
+      "value": "0",
+      "detail": ""
+    },
+    {
+      "name": "mp4 faststart",
+      "ok": true,
+      "value": "ftyp,moov,free,mdat",
+      "detail": ""
+    },
+    {
+      "name": "mp4 at most 10 MB",
+      "ok": true,
+      "value": "0.91 MB",
+      "detail": "crf master (crf 18)"
+    },
+    {
+      "name": "webm vp9",
+      "ok": true,
+      "value": "vp9",
+      "detail": ""
+    },
+    {
+      "name": "webm same size, fps and duration",
+      "ok": true,
+      "value": "1920x1080 30/1 8.500 s",
+      "detail": ""
+    },
+    {
+      "name": "webm has no audio stream",
+      "ok": true,
+      "value": "0",
+      "detail": ""
+    },
+    {
+      "name": "webm at most 3 MB",
+      "ok": true,
+      "value": "0.55 MB",
+      "detail": ""
+    },
+    {
+      "name": "gif width and fps are the ladder's",
+      "ok": true,
+      "value": "960 px, 12/1",
+      "detail": "ladder step 0"
+    },
+    {
+      "name": "gif at most 3 MB",
+      "ok": true,
+      "value": "1.33 MB",
+      "detail": ""
+    },
+    {
+      "name": "gif NETSCAPE2.0 loop count 0",
+      "ok": true,
+      "value": "0",
+      "detail": ""
+    },
+    {
+      "name": "loop seam SSIM at least 0.98 and below 1.0",
+      "ok": true,
+      "value": "0.98855",
+      "detail": ""
+    },
+    {
+      "name": "scenario verify passed",
+      "ok": true,
+      "value": "true",
+      "detail": ""
+    },
+    {
+      "name": "no paste-options widget after the paste",
+      "ok": true,
+      "value": "0",
+      "detail": ""
+    },
+    {
+      "name": "Studio in reading mode at the start",
+      "ok": true,
+      "value": "off",
+      "detail": ""
+    },
+    {
+      "name": "screencast at least 30 frames per second after retiming",
+      "ok": true,
+      "value": "30 (retimed by ffmpeg)",
+      "detail": "raw 5.1 fps"
+    },
+    {
+      "name": "playback rate inside 0.77 to 1.3",
+      "ok": true,
+      "value": "1.005",
+      "detail": ""
+    }
+  ]
+}
