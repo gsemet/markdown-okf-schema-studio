@@ -1,12 +1,21 @@
-# Release runbook: payments service
+# Release runbook
 
-Deploy on a weekday morning, with the on-call engineer in the channel.
-
-:::{important} Before you deploy
-Run the database migrations first, then restart the workers one at a time.
+:::{important}
+Run the **database migrations first**, then restart the workers one at a time.
 :::
 
-The deploy script checks the migration version and refuses to start the workers on an old schema.
+| Step | Command |
+| --- | --- |
+| Migrate | `just migrate` |
+| Restart | `just restart-workers` |
+
+---
+
+The deploy script refuses to start the workers on an old schema.
+
+:::{warning}
+Never restart every worker at once: the queue drops the jobs in flight.
+:::
 
 ## Rollback
 

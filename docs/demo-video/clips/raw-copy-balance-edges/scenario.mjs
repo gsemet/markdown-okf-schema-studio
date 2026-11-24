@@ -1,5 +1,6 @@
-// The scenario of the clip: a selection that starts inside an admonition and ends after it is copied
-// with the platform copy shortcut and pasted into a plain Markdown editor, with balanceEdges on.
+// The scenario of the clip: a selection that starts inside the bold of an untitled admonition, crosses a
+// table and a thematic break, and ends inside the warning admonition is copied with the platform copy
+// shortcut and pasted into a plain Markdown editor, with balanceEdges on.
 // The text of every caption, badge and time is in clip.md, not here.
 
 /** Clip-relative file to workspace-relative file. */
@@ -15,12 +16,24 @@ export const settings = {
   "workbench.editorAssociations": { "runbook.md": "markdown-okf-schema-studio.editor" },
 };
 
-const EXPECTED = [
-  ":::{important} Before you deploy",
-  "database migrations first, then restart the workers one at a time.",
+/** The text the paste must hold, character for character: the "Expected paste" block of clip.md (a test compares them). */
+export const EXPECTED = [
+  ":::{important}",
+  "**migrations first**, then restart the workers one at a time.",
   ":::",
   "",
-  "The deploy script checks the migration version and refuses to start the workers on an old schema.",
+  "| Step | Command |",
+  "| --- | --- |",
+  "| Migrate | `just migrate` |",
+  "| Restart | `just restart-workers` |",
+  "",
+  "---",
+  "",
+  "The deploy script refuses to start the workers on an old schema.",
+  "",
+  ":::{warning}",
+  "Never restart every worker",
+  ":::",
 ].join("\n");
 
 const normalise = (text) => text.replaceAll(" ", " ").replace(/\s+/gu, " ").trim();
@@ -38,6 +51,25 @@ async function editorLines(page) {
     }
     return lines.sort((a, b) => a.y - b.y);
   });
+}
+
+/** The rectangle of the characters [start, end) of the n-th non-empty editor line (page coordinates). */
+async function lineSpan(page, n, start, end) {
+  return page.evaluate(([n, start, end]) => {
+    const lines = [...document.querySelectorAll(".monaco-editor .view-lines .view-line")].filter((l) => l.textContent?.trim()).sort((a, b) => a.getBoundingClientRect().y - b.getBoundingClientRect().y);
+    const line = lines[n];
+    const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
+    const range = document.createRange();
+    let pos = 0, started = false;
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const len = node.data.length;
+      if (!started && start < pos + len) { range.setStart(node, start - pos); started = true; }
+      if (started && end <= pos + len) { range.setEnd(node, end - pos); break; }
+      pos += len;
+    }
+    const rect = range.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, w: rect.width, h: rect.height };
+  }, [n, start, end]);
 }
 
 /** The reading-mode attribute, read from a fresh preview frame (the webview reloads while the layout changes). */
@@ -81,7 +113,7 @@ export async function setup(t) {
   await t.sleep(500);
 }
 
-/** The filmed action. Times (seconds from the start of the take) follow the proposal of clip.md. */
+/** The filmed action: from inside the bold of the untitled admonition to inside the warning. */
 export async function run(t) {
   const { page } = t;
   const start = Date.now();
@@ -90,10 +122,10 @@ export async function run(t) {
   const frame = await t.frameOf();
 
   await until(0.3);
-  await t.selectText(frame, "database", "old schema.");
+  await t.selectText(frame, "migrations", "every worker");
   const selected = normalise(await frame.evaluate(() => getSelection()?.toString() ?? ""));
   t.record("selection", selected);
-  if (!selected.startsWith("database") || !selected.endsWith("old schema.")) throw new Error(`the page selection is not the expected one: "${selected}"`);
+  if (!selected.startsWith("migrations") || !selected.endsWith("every worker")) throw new Error(`the page selection is not the expected one: "${selected}"`);
 
   await until(2.6);
   await t.press("ControlOrMeta+C", "copy");
@@ -108,11 +140,11 @@ export async function run(t) {
   await t.sleep(250);
   const widgets = await page.locator(".post-edit-widget").count();
   t.record("pasteWidgets", widgets);
-  if (widgets !== 0) throw new Error(`${widgets} paste-options widget(s) shown after the paste`);
 
   await until(4.4);
   const lines = await editorLines(page);
-  if (lines.length < 5) throw new Error(`the notes editor shows ${lines.length} lines after the paste, expected at least 5`);
+  t.record("pastedLines", lines.length);
+  if (lines.length !== 12) throw new Error(`the notes editor shows ${lines.length} non-empty lines after the paste, expected 12`);
   const pad = 24;
   const x = Math.min(...lines.map((line) => line.x)) - pad;
   const y = lines[0].y - pad;
@@ -120,18 +152,27 @@ export async function run(t) {
   const bottom = lines.at(-1).y + lines.at(-1).h + pad;
   t.zoom("result", { x, y, w: right - x, h: bottom - y });
 
-  await until(5.2);
-  // A little air around the line, so the outline does not touch the first colon.
-  t.mark("delimiter", { x: lines[0].x - 8, y: lines[0].y - 3, w: lines[0].w + 16, h: lines[0].h + 6 });
-  await until(6.8);
-  t.unmark("delimiter");
-  await until(7.6);
+  const air = (r) => ({ x: r.x - 6, y: r.y - 3, w: r.w + 12, h: r.h + 6 });
+  await until(5.0);
+  // Mark 1: the added opening line `:::{important}`.
+  t.mark("1", air(lines[0]));
+  await until(6.2);
+  t.unmark("1");
+  // Mark 2: the added opening `**` before "migrations".
+  t.mark("2", air(await lineSpan(page, 1, 0, 2)));
+  await until(7.4);
+  t.unmark("2");
+  // Mark 3: the added closing `:::`.
+  t.mark("3", air(lines.at(-1)));
+  await until(8.6);
+  t.unmark("3");
+  await until(8.8);
   t.unzoom("result");
   await t.moveTo(home.x, home.y, 0.6);
-  await until(8.5);
+  await until(9.8);
 }
 
-/** The pasted text, read from disk (auto-save is on), must be the text CR-481's container rule gives. */
+/** The pasted text, read from disk (auto-save is on), must be the text the feature gives: a difference fails the take. */
 export async function verify(t) {
   await t.sleep(800);
   const pasted = t.workspaceFile("notes.md");
