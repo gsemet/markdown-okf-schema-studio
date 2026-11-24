@@ -8,8 +8,8 @@ description: When the writer copies a non-empty native selection in read or edit
   mode, the page SHALL take the copy and leave it to the browser when the
   selection or the focus is in a text control, a block selection is active in
   edit mode, the page holds no source text for its render, the selection lies
-  only in interface chrome, an edge lies in an old-side card, or an edge cannot
-  be placed.
+  only in interface chrome, or an edge lies in an old-side card; an edge that
+  cannot be placed snaps to its element (SwRS-MDOKFSTUDIO-BLOCK-286).
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -34,7 +34,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer copies a non-empty native selection in read or edit mode, the page SHALL take the copy and leave it to the browser when the selection or the focus is in a text control, a block selection is active in edit mode, the page holds no source text for its render, the selection lies only in interface chrome, an edge lies in an old-side card, or an edge cannot be placed.
+When the writer copies a non-empty native selection in read or edit mode, the page SHALL take the copy and leave it to the browser when the selection or the focus is in a text control, a block selection is active in edit mode, the page holds no source text for its render, the selection lies only in interface chrome, or an edge lies in an old-side card; an edge that cannot be placed snaps to its element (SwRS-MDOKFSTUDIO-BLOCK-286).
 
 ### Scenario: nominal
 
@@ -44,7 +44,7 @@ When the writer copies a non-empty native selection in read or edit mode, the pa
 
 ### Scenario: boundary
 
-- GIVEN no source text, a collapsed selection, a text control, an active block selection, a selection only in chrome or an unplaced edge
+- GIVEN no source text, a collapsed selection, a text control, an active block selection, or a selection only in chrome
 - WHEN the reader presses the copy chord
 - THEN the browser's native copy runs
 

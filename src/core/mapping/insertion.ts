@@ -2,7 +2,7 @@ import { sourceLines } from "../edits/textEdit";
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { splitLines } from "./blockMove";
 import { blankRunIndent, startsDefinitionEntry, startsFootnoteDefinition, type RunIndent } from "./blankRunContainer";
-import { startsWithListMarker } from "./listItemIndent";
+import { startsWithListMarker } from "./listMarker";
 import { emptyQuoteLine, sameQuoteShape } from "./quoteLine";
 import { isCommonMarkBlank } from "./blockRange";
 

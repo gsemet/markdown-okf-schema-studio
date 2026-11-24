@@ -59,6 +59,78 @@ test("a copy with the source text of the shown render puts the Markdown on the c
   assert.equal(typeof taken.data["text/html"], "string");
 });
 
+interface FakeNode {
+  nodeType: number;
+  data?: string;
+  tagName?: string;
+  childNodes: FakeNode[];
+  parentNode: FakeNode | null;
+  parentElement: FakeNode | null;
+  [key: string]: unknown;
+}
+
+/** A text node and an element of the few members the raw copy reads (a selection that is not the whole document). */
+const fakeText = (data: string): FakeNode => ({ nodeType: 3, data, childNodes: [], parentNode: null, parentElement: null });
+function fakeElement(tagName: string, attributes: Record<string, string>, children: FakeNode[]): FakeNode {
+  const element: FakeNode = {
+    nodeType: 1, tagName: tagName.toUpperCase(), childNodes: children, parentNode: null, parentElement: null,
+    classList: { contains: () => false },
+    getAttributeNames: () => Object.keys(attributes),
+    getAttribute: (name: string) => attributes[name] ?? null,
+    closest: () => null,
+  };
+  for (const child of children) Object.assign(child, { parentNode: element, parentElement: element });
+  return element;
+}
+
+/** Copies, with `balanceEdges` set or not in the boot context, the selection from `offset` in "world" to the end of " again". */
+function copyPartOfParagraph(balanceEdges: boolean | undefined): string | undefined {
+  const harness = createRuntimeHarness({ emptyBody: true, ...(balanceEdges === undefined ? {} : { "rawCopy.balanceEdges": balanceEdges }) });
+  harness.dispatchMessage(sourceText("Hello **world** again\n"));
+  const content = readableContent(harness);
+  const world = fakeText("world");
+  const again = fakeText(" again");
+  const paragraph = fakeElement("p", { "data-sphinx-source-line": "1", "data-sphinx-source-end-line": "1" }, [
+    fakeText("Hello "), fakeElement("strong", {}, [world]), again,
+  ]);
+  Object.assign(paragraph, { parentNode: content, parentElement: content });
+  Object.defineProperty(content, "childNodes", { value: [paragraph], configurable: true });
+  (content as unknown as { contains(node: FakeNode | RuntimeElement): boolean }).contains = (node) => {
+    for (let current: FakeNode | RuntimeElement | null = node; current; current = (current as FakeNode).parentNode) if (current === content) return true;
+    return false;
+  };
+  const range = {
+    startContainer: world, startOffset: 2, endContainer: again, endOffset: again.data!.length,
+    intersectsNode: () => true,
+    cloneContents: () => createElement(harness, "div"),
+  };
+  harness.window.getSelection = () => ({ rangeCount: 1, isCollapsed: false, anchorNode: world, focusNode: again, getRangeAt: () => range });
+  const data: Record<string, string> = {};
+  harness.dispatchDocument("copy", {
+    clipboardData: { setData: (type: string, value: string) => { data[type] = value; } },
+    preventDefault: () => undefined,
+  });
+  return data["text/plain"];
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
+test("the rawCopy.balanceEdges boot setting makes a copy that starts inside a bold word balanced; off, absent or false it is the exact cut", () => {
+  assert.equal(copyPartOfParagraph(true), "**rld** again", "on: the bold's opening delimiters are added");
+  assert.equal(copyPartOfParagraph(false), "rld** again", "off");
+  assert.equal(copyPartOfParagraph(undefined), "rld** again", "absent: off by default");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
+test("with the rawCopy.balanceEdges boot setting on or off, a copy of the whole document is still the whole source", () => {
+  for (const enabled of [true, false]) {
+    const harness = createRuntimeHarness({ emptyBody: true, "rawCopy.balanceEdges": enabled });
+    harness.dispatchMessage(sourceText(SOURCE));
+    const taken = copy(harness);
+    assert.equal(taken.prevented, true);
+    assert.equal(taken.data["text/plain"], SOURCE);
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-272
 test("a copy before the page received the source text stays native", () => {
   const harness = createRuntimeHarness({ emptyBody: true });

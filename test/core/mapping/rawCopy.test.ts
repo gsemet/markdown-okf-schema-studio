@@ -31,12 +31,12 @@ test("the seam cases pin the verbatim cut, nothing added at either edge", async 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-273
-test("balanceRawCut cuts two placed edges verbatim and leaves an unplaced edge or a reversed cut native", () => {
+test("balanceRawCut cuts two placed edges verbatim and snaps an unplaced edge to the document side and leaves a reversed cut native", () => {
   const placed = (offset: number): ResolvedRawEdge => ({ kind: "placed", offset, frames: [] });
-  const cut = (start: ResolvedRawEdge, end: ResolvedRawEdge) => ({ source: "0123456789", lineBreak: "\n" as const, start, end });
+  const cut = (start: ResolvedRawEdge, end: ResolvedRawEdge) => ({ source: "0123456789", lineBreak: "\n" as const, balanceEdges: false, start, end });
   assert.equal(balanceRawCut(cut(placed(2), placed(6))), "2345");
-  assert.equal(balanceRawCut(cut({ kind: "unplaced", frames: [] }, placed(6))), undefined);
-  assert.equal(balanceRawCut(cut(placed(2), { kind: "unplaced", frames: [] })), undefined);
+  assert.equal(balanceRawCut(cut({ kind: "unplaced", frames: [] }, placed(6))), "012345");
+  assert.equal(balanceRawCut(cut(placed(2), { kind: "unplaced", frames: [] })), "23456789");
   assert.equal(balanceRawCut(cut(placed(6), placed(2))), undefined);
 });
 
@@ -122,11 +122,12 @@ test("a block inside a tab item is read through the tab item's frame", async () 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-273
-test("a rendered text the source does not hold leaves the copy native", async () => {
+test("a rendered text the source does not hold copies the whole element that holds it (setting off or on)", async () => {
   const source = "# Head\n\nPlain paragraph here.\n";
   const html = await previewHtml(source);
   const page = pageOf(source, html.replace("Plain paragraph here.", "Quite another text."));
-  assert.equal(copyRaw(page, { text: "Quite" }, { text: "text.", offset: "end" }), undefined);
+  assert.equal(copyRaw(page, { text: "Quite" }, { text: "text.", offset: "end" }), "Plain paragraph here.");
+  assert.equal(copyRaw(page, { text: "Quite", offset: 3 }, { text: "text.", offset: 2 }, { balanceEdges: true }), "Plain paragraph here.");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-273
@@ -220,8 +221,8 @@ test("a range that ends at the start of the next block ends at the end of the te
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-275
-test("a page without a mapped element and an empty selection copy nothing", async () => {
-  assert.equal(rawMarkdownForSelection("a\n", { frames: [], text: "", offset: 0 }, { frames: [], text: "", offset: 0 }), undefined);
+test("an edge in no mapped element snaps to the document side, and an empty selection copies nothing", async () => {
+  assert.equal(rawMarkdownForSelection("a\n", { frames: [], text: "", offset: 0 }, { frames: [], text: "", offset: 0 }), "a\n");
   const page = await renderPage("Only line.\n");
   assert.equal(copyRaw(page, { text: "Only", offset: 2 }, { text: "Only", offset: 1 }), undefined);
 });

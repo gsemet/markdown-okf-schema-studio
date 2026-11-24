@@ -9,7 +9,8 @@ description: When the page copies a native selection, it SHALL cut the source
   end edge, mapping a code block's characters exactly, an edge in a container's
   opening line to that line's start or end, a block under a tab item through the
   nearest mapped element and a card's current side through the block it copies,
-  and adding nothing at either edge.
+  and adding nothing at either edge while preview.rawCopy.balanceEdges is off;
+  on, see SwRS-MDOKFSTUDIO-BLOCK-278.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -36,7 +37,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the page copies a native selection, it SHALL cut the source verbatim from the character under the start edge to the character under the end edge, mapping a code block's characters exactly, an edge in a container's opening line to that line's start or end, a block under a tab item through the nearest mapped element and a card's current side through the block it copies, and adding nothing at either edge.
+When the page copies a native selection, it SHALL cut the source verbatim from the character under the start edge to the character under the end edge, mapping a code block's characters exactly, an edge in a container's opening line to that line's start or end, a block under a tab item through the nearest mapped element and a card's current side through the block it copies, and adding nothing at either edge while preview.rawCopy.balanceEdges is off; on, see SwRS-MDOKFSTUDIO-BLOCK-278.
 
 ### Scenario: nominal
 
@@ -48,7 +49,7 @@ When the page copies a native selection, it SHALL cut the source verbatim from t
 
 - GIVEN an edge that cannot be aligned with the source text
 - WHEN the copy is taken
-- THEN the copy stays native
+- THEN the edge snaps to its whole element (SwRS-MDOKFSTUDIO-BLOCK-286)
 
 ### Verification notes
 

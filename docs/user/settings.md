@@ -20,6 +20,13 @@ width;
   document itself, see [Folding Sections](folding.md).
 - `preview.stickyHeadingDepth` (default 3): heading levels pinned at the top while scrolling (1-6).
 - `preview.incrementalUpdates` (default on): update changed parts in place; off reloads the page.
+- `preview.rawCopy.balanceEdges` (default off, read when a preview opens): a Ctrl/Cmd+C of a text selection copies
+  the Markdown under the selection exactly. On, the copy is also balanced at its edges: it gets back the opening
+  delimiters of the bold, link or code span it starts in, the closing ones of the one it ends in, and the opening
+  or closing lines of the admonition, code block, table, list item or heading it only partly covers. A selection
+  inside one block adds nothing. Example, in `Hello **world** again`: from the `r` of `world` to the end of the
+  line, off copies `rld** again` and on copies `**rld** again`; from the `o` to the `l` of `world` copies `orl`
+  either way.
 - `preview.showComments` (default on): show HTML comments as gray chips; click one (or press Enter
   or Space on it) to open the comment text in a box under the line. Each chip is labelled
   "comment". Off hides every review mark in open previews at once (gray and thread chips,

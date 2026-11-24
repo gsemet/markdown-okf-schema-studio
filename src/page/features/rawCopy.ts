@@ -6,6 +6,7 @@
  * are `src/core/mapping/rawCopy.ts`; this module reads the DOM into the two edges.
  */
 
+import { readPreviewBootSettings } from "../../core/configuration/previewConfiguration";
 import { isChromeProbe, type ChromeProbe } from "../../core/export/chromeMarks";
 import { rawMarkdownForSelection } from "../../core/mapping/rawCopy";
 import { RawCopyTree, type RawCopyPoint, type RawCopyTreeAdapter } from "../../core/mapping/rawCopyTree";
@@ -20,10 +21,13 @@ const NATIVE_COPY_SURFACES = "textarea, input, select, [contenteditable]:not([co
   + "[data-sphinx-preview-block-editor], [data-okf-frontmatter-editor], [data-sphinx-preview-table-cell-editor], "
   + "[data-sphinx-preview-find], [data-okf-comment-compose]";
 
-/** What the page adds to the chrome of the export: line numbers, cards of the side-by-side view, hidden math. */
+/**
+ * What the page adds to the chrome of the export: cards of the side-by-side view, hidden math. A code
+ * line's number is an attribute of the line (`data-line-number`), not an element: the line is code text.
+ */
 function isPageChrome(probe: ChromeProbe): boolean {
   return isChromeProbe(probe) || probe.hasClass("katex-mathml")
-    || probe.attributeNames().some((name) => name === "data-line-number" || name === "data-okf-sbs-card"
+    || probe.attributeNames().some((name) => name === "data-okf-sbs-card"
       || name === "data-okf-sbs-replaced" || name === "data-okf-comment-popover");
 }
 
@@ -103,6 +107,7 @@ function renderedHtml(document: Document, range: Range): string {
   const holder = document.createElement("div");
   holder.appendChild(range.cloneContents());
   for (const element of Array.from(holder.querySelectorAll("*"))) {
+    element.removeAttribute("data-line-number");
     const card = element.hasAttribute("data-okf-sbs-card");
     if ((!card && isPageChrome(probeOf(element))) || element.closest("[data-okf-sbs-side=\"base\"]")) element.remove();
   }
@@ -120,6 +125,8 @@ export function installRawCopy(
   deps: RawCopyDeps,
 ): void {
   const { context } = deps;
+  // `preview.rawCopy.balanceEdges`, read once: a change reloads the page (a startup setting).
+  const balanceEdges = readPreviewBootSettings(context)["rawCopy.balanceEdges"];
   let held: { text: string; documentId: string; revision: number; requestId: number } | undefined;
   router.on("previewSourceText", (message) => {
     held = { text: message.text, documentId: message.documentId, revision: message.revision, requestId: message.requestId };
@@ -139,11 +146,12 @@ export function installRawCopy(
     const end = pointInPageBlock(contentPoint(content, range.endContainer, range.endOffset, "end"));
     if (!start || !end) return undefined;
     const tree = new RawCopyTree(domTree, content, isPageChrome);
-    return rawMarkdownForSelection(text, tree.edge(start, "start"), tree.edge(end, "end"));
+    return rawMarkdownForSelection(text, tree.edge(start, "start"), tree.edge(end, "end"), { balanceEdges });
   };
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-272
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-277
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-278
   document.addEventListener("copy", (event: ClipboardEvent) => {
     const text = sourceText();
     const content = document.getElementById(CONTENT_ID);

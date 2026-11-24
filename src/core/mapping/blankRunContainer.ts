@@ -2,7 +2,7 @@ import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { isContextTagOpenLine } from "../render/mystContextTags";
 import { splitLines } from "./blockMove";
 import { blankRunAround } from "./blankRuns";
-import { listItemIndentOfLine, startsSiblingItem } from "./listItemIndent";
+import { listItemIndentOfLine, startsSiblingItem } from "./listMarker";
 import { emptyQuoteLine, quoteContent, type EmptyQuoteLine } from "./quoteLine";
 
 /** The kind of entry a block written between two entries of a container can be a sibling of. */

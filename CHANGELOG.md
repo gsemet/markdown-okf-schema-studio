@@ -4,6 +4,8 @@
 
 - Ctrl/Cmd+C of a text selection in the preview now copies the Markdown under the selection (as text) and the
   rendered selection (as HTML), in reading and edit mode (PR #498)
+- New setting `preview.rawCopy.balanceEdges` (off by default): the raw Markdown copy of a text selection also gets the
+  opening and closing delimiters and lines of the constructs its edges cut through (CR-481)
 
 ## 1.12.1 - 2026-11-24
 

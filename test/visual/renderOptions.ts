@@ -38,6 +38,8 @@ export interface ScenarioRenderOptions {
   readonly codeBlocksDarkBackground?: false;
   /** `false`: no automatic line numbers (`preview.codeBlocks.lineNumbers` off). Default on. */
   readonly codeBlocksLineNumbers?: false;
+  /** `true`: a raw copy balances the edges of the selection (`preview.rawCopy.balanceEdges` on). Default off. */
+  readonly rawCopyBalanceEdges?: true;
   /** `true`: a writable review-comment preview (Resolve, Delete and the reply box in the thread popover, `commentsEnabled`). Default off. */
   readonly commentsEnabled?: true;
   /**
@@ -67,7 +69,7 @@ export interface ScenarioRenderOptions {
 const OPTION_ORDER: readonly (keyof ScenarioRenderOptions)[] = [
   "trusted", "restrictedReads", "strictAdditionalProperties", "propertiesTable",
   "maxContentWidth", "paletteMode", "zoom", "incomingChanges", "markEditorSelection", "commentsEnabled", "hostMessages",
-  "codeBlocksDarkBackground", "codeBlocksLineNumbers",
+  "codeBlocksDarkBackground", "codeBlocksLineNumbers", "rawCopyBalanceEdges",
   "freshWorkspace", "mystExtensions", "fixturesWorkspace",
 ];
 

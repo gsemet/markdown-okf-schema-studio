@@ -26,6 +26,15 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-275
 - SwRS-MDOKFSTUDIO-BLOCK-276
 - SwRS-MDOKFSTUDIO-BLOCK-277
+- SwRS-MDOKFSTUDIO-BLOCK-278
+- SwRS-MDOKFSTUDIO-BLOCK-279
+- SwRS-MDOKFSTUDIO-BLOCK-280
+- SwRS-MDOKFSTUDIO-BLOCK-281
+- SwRS-MDOKFSTUDIO-BLOCK-282
+- SwRS-MDOKFSTUDIO-BLOCK-283
+- SwRS-MDOKFSTUDIO-BLOCK-284
+- SwRS-MDOKFSTUDIO-BLOCK-285
+- SwRS-MDOKFSTUDIO-BLOCK-286
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -59,4 +68,13 @@ As a reader, when I select text in the preview and copy it, I want the Markdown 
   - [SwRS-MDOKFSTUDIO-BLOCK-275](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-275.md): Select all and copy gives the whole source exactly
   - [SwRS-MDOKFSTUDIO-BLOCK-276](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-276.md): A copied selection never holds interface chrome nor the text of an old-side card
   - [SwRS-MDOKFSTUDIO-BLOCK-277](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-277.md): The raw copy puts Markdown as plain text and the rendered selection as HTML
+  - [SwRS-MDOKFSTUDIO-BLOCK-278](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-278.md): The raw copy balances its edges only when the opt-in setting is on
+  - [SwRS-MDOKFSTUDIO-BLOCK-279](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-279.md): An inline construct cut by an edge is balanced with its delimiters
+  - [SwRS-MDOKFSTUDIO-BLOCK-280](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-280.md): A container cut by an edge is balanced with its opening and closing lines
+  - [SwRS-MDOKFSTUDIO-BLOCK-281](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-281.md): A code block cut by an edge is balanced with its fences
+  - [SwRS-MDOKFSTUDIO-BLOCK-282](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-282.md): A table cut by an edge is copied as whole rows or as one cell
+  - [SwRS-MDOKFSTUDIO-BLOCK-283](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-283.md): A list item cut by an edge keeps its marker and a shifted indentation
+  - [SwRS-MDOKFSTUDIO-BLOCK-284](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-284.md): A heading cut by an edge keeps its marker or its underline
+  - [SwRS-MDOKFSTUDIO-BLOCK-285](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-285.md): A definition, an HTML block or a footnote cut by an edge is balanced
+  - [SwRS-MDOKFSTUDIO-BLOCK-286](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-286.md): An edge the alignment cannot place snaps to its whole element
 <!-- okf:links:end -->

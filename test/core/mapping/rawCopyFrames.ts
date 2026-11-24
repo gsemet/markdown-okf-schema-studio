@@ -97,20 +97,27 @@ function pointOf(page: RenderedPage, spot: Spot): { node: HtmlNode; offset: numb
 }
 
 /** The raw Markdown the page would copy for a selection from one spot to another. */
-export function copyRaw(page: RenderedPage, from: Spot, to: Spot): string | undefined {
+export function copyRaw(
+  page: RenderedPage,
+  from: Spot,
+  to: Spot,
+  options?: { balanceEdges?: boolean },
+): string | undefined {
   return rawMarkdownForSelection(
     page.source,
     page.tree.edge(pointOf(page, from), "start"),
     page.tree.edge(pointOf(page, to), "end"),
+    options,
   );
 }
 
 /** A selection of the whole content: from its first point to its last (Select all). */
-export function copyAll(page: RenderedPage): string | undefined {
+export function copyAll(page: RenderedPage, options?: { balanceEdges?: boolean }): string | undefined {
   const count = childrenOf(page.main).length;
   return rawMarkdownForSelection(
     page.source,
     page.tree.edge({ node: page.main, offset: 0 }, "start"),
     page.tree.edge({ node: page.main, offset: count }, "end"),
+    options,
   );
 }
