@@ -570,6 +570,7 @@ export function createRuntimeHarness(configuration: Partial<{
   scrollPreviewWithEditor: boolean;
   scrollEditorWithPreview: boolean;
   markEditorSelection: boolean;
+  "rawCopy.balanceEdges": boolean;
   stickyHeadingDepth: number;
   toolbarBottom: number;
   controlsHeight: number;

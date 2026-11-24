@@ -152,6 +152,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.preview.listItemsInToc",
       "markdownOkfSchemaStudio.preview.markEditorSelection",
       "markdownOkfSchemaStudio.preview.maxContentWidth",
+      "markdownOkfSchemaStudio.preview.rawCopy.balanceEdges",
       "markdownOkfSchemaStudio.preview.scrollEditorWithPreview",
       "markdownOkfSchemaStudio.preview.scrollPreviewWithEditor",
       "markdownOkfSchemaStudio.preview.showComments",

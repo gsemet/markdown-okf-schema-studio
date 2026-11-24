@@ -1,3 +1,5 @@
+import { balanceEdges } from "./rawCopyBalance";
+
 /**
  * The seam between the resolution of a copied selection's two edges (rawCopy.ts) and the Markdown
  * that is copied: `balanceRawCut` turns the two resolved edges into text. This module holds no
@@ -34,18 +36,31 @@ export interface RawCut {
   lineBreak: "\n" | "\r\n";
   start: ResolvedRawEdge;
   end: ResolvedRawEdge;
+  /** The copy balances its edges (`preview.rawCopy.balanceEdges` on); off cuts the source verbatim. */
+  balanceEdges: boolean;
+}
+
+/** The source offset of an edge: its placed offset, else the whole element that holds it (start of its first line, end of its last). */
+function snapEdge(cut: RawCut, edge: ResolvedRawEdge, side: "start" | "end"): number {
+  if (edge.kind === "placed") return edge.offset;
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-286
+  const frame = [...edge.frames].reverse().find((candidate) => !candidate.atomic);
+  if (frame) return side === "start" ? frame.start : frame.end;
+  return side === "start" ? 0 : cut.source.length;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-273
 /**
- * The Markdown copied for a resolved cut; `undefined` leaves the copy native: an edge that could not
- * be placed, or a start after the end. For now the cut is verbatim, from the character under the
- * start edge to the character under the end edge, with nothing added: the edges are balanced by
- * copy-raw-edge-balancing, which replaces this body and keeps the signature.
+ * The Markdown copied for a resolved cut; `undefined` leaves the copy native when the start lies
+ * after the end. An edge the alignment could not place is snapped to the element that holds it
+ * first (setting off or on). With `preview.rawCopy.balanceEdges` off the copy is the source between
+ * the two edges, verbatim; on, it is balanced (rawCopyBalance.ts): a construct holding both edges
+ * is copied without its delimiters, one holding a single edge gets the delimiters it is missing.
  */
 export function balanceRawCut(cut: RawCut): string | undefined {
-  const { start, end } = cut;
-  if (start.kind !== "placed" || end.kind !== "placed") return undefined;
-  if (start.offset > end.offset) return undefined;
-  return cut.source.slice(start.offset, end.offset);
+  const start = snapEdge(cut, cut.start, "start");
+  const end = snapEdge(cut, cut.end, "end");
+  if (start > end) return undefined;
+  if (!cut.balanceEdges) return cut.source.slice(start, end);
+  return balanceEdges(cut.source, cut.lineBreak, start, end);
 }

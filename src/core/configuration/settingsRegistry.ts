@@ -239,6 +239,14 @@ export const PREVIEW_SETTINGS = {
     markdownDescription: "Lists list items in the table of contents, for documents that write each requirement, rule or record as a list item. **On**: the table of contents also shows each item of a top-level list (not a list inside another item) by its first line, cut to about 80 characters, one level below the heading before it. **Off** (default): the table of contents lists the headings only.",
     order: 25,
   }, asStored, bootFlag(false)),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-278
+  /** A raw Markdown copy balances the edges of the selection (opt-in). */
+  "rawCopy.balanceEdges": startupSetting<boolean>({
+    type: "boolean",
+    default: false,
+    markdownDescription: "Balances the edges of a copied selection. Copying a selection in the preview (Ctrl+C, Cmd+C) puts the raw Markdown under it on the clipboard. **On**: a selection entirely inside a construct (an admonition, a code block, a table cell, a list item, a bold word) copies its content only, and a selection that starts or ends inside a construct and crosses its boundary gets the missing delimiters added (closing `**`, the admonition's fence lines, the table's header rows, the list marker, the heading marker), so the pasted Markdown stays well formed. **Off** (default): the exact source between the two edges, nothing added or removed.",
+    order: 26,
+  }, asStored, bootFlag(false)),
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-214
   /** Mark blocks changed since the last commit with a green bar (T16). */
   showIncomingChanges: setting<boolean>({

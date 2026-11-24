@@ -785,7 +785,8 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "block-editing/v52-blank-lines-in-containers-reading-dark-900": "In reading mode in the dark preview at 900 px, the same file shows no blank-line block in its quote, alert, admonition, panel, definition or footnote.",
   "block-editing/v53-blank-lines-in-containers-typing-light-900": "In edit mode in the light preview at 900 px, clicking the blank-line block of the quote opens the editor inside the quote, and after text is typed and the autosave ran the editor is still open inside the one quote.",
   "block-editing/v54-blank-lines-six-light-900": "In edit mode in the light preview at 900 px, a line of text followed by six blank lines at the end of the document shows six blank-line blocks in a row, each drawing the label Blank line with CSS only, each at least 16 px high and as wide as the content column.",
-  "block-editing/v55-raw-copy-light-900": "In reading mode in the light preview at 900 px, a selection from inside the bold word to inside the first table value copies as text the exact Markdown between those characters, and Select all copies the whole source."
+  "block-editing/v55-raw-copy-light-900": "In reading mode in the light preview at 900 px, a selection from inside the bold word to inside the first table value copies as text the exact Markdown between those characters, and Select all copies the whole source.",
+  "block-editing/v56-raw-copy-balanced-light-900": "In reading mode in the light preview at 900 px with the balanceEdges setting on, a selection from inside a bold word to the end of its paragraph copies the bold with its delimiters, and a selection ending inside an admonition copies its closing line too."
 };
 
 /**
@@ -973,6 +974,7 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "block-editing/v53-blank-lines-in-containers-typing-light-900": ["text"],
   "block-editing/v54-blank-lines-six-light-900": ["bar"],
   "block-editing/v55-raw-copy-light-900": ["selected"],
+  "block-editing/v56-raw-copy-balanced-light-900": ["selected"],
 };
 
 /**

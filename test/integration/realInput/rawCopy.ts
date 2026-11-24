@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { type Page } from "playwright-core";
 
 import { withDocument } from "./common";
-import { openSidePreview, press, setEditMode, waitFor, waitForEditor, waitForRender, withCurrentFrame } from "./harness";
+import { findCurrentFrame, openSidePreview, press, setEditMode, waitFor, waitForEditor, waitForRender, withCurrentFrame } from "./harness";
 
 const DOCUMENT = [
   "# Raw copy",
@@ -27,11 +27,30 @@ const DOCUMENT = [
 /** The raw Markdown from the start of the paragraph before the table to the end of the table's row. */
 const SELECTED = DOCUMENT.slice(DOCUMENT.indexOf("Paragraph before"), DOCUMENT.indexOf("first |") + "first".length);
 
+const BALANCED_DOCUMENT = [
+  "# Raw copy balanced",
+  "",
+  ":::{note} Heads up",
+  "Paragraph with a **bold** word.",
+  ":::",
+  "",
+  "| Name | Value |",
+  "| ---- | ----- |",
+  "| one  | first row |",
+  "",
+  "Closing line.",
+  "",
+].join("\n");
+
+/** With the setting on: the admonition's opening line, the bold's opening delimiters, then the cut to the end of the touched row. */
+const BALANCED_SELECTED = ":::{note} Heads up\n**"
+  + BALANCED_DOCUMENT.slice(BALANCED_DOCUMENT.indexOf("old** word"), BALANCED_DOCUMENT.indexOf("first row |") + "first row |".length);
+
 const MODIFIER = process.platform === "darwin" ? "Meta" : "Control";
 
-/** Puts a real Range from the start of one text to the end of another on the page, with the page focused. */
-async function selectBetween(page: Page, from: string, to: string): Promise<void> {
-  await withCurrentFrame(page, (frame) => frame.evaluate(({ first, last }) => {
+/** Puts a real Range from the start of one text (`skip` characters in) to the end of another on the page, with the page focused. */
+async function selectBetween(page: Page, from: string, to: string, skip = 0): Promise<void> {
+  await withCurrentFrame(page, (frame) => frame.evaluate(({ first, last, skipped }) => {
     const root = window.document.getElementById("sphinx-myst-preview-content") as HTMLElement;
     root.focus();
     const walker = window.document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -43,11 +62,11 @@ async function selectBetween(page: Page, from: string, to: string): Promise<void
     walker.currentNode = root;
     const end = find(last);
     const range = window.document.createRange();
-    range.setStart(start, start.data.indexOf(first));
+    range.setStart(start, start.data.indexOf(first) + skipped);
     range.setEnd(end, end.data.indexOf(last) + last.length);
     window.getSelection()!.removeAllRanges();
     window.getSelection()!.addRange(range);
-  }, { first: from, last: to }));
+  }, { first: from, last: to, skipped: skip }));
 }
 
 /**
@@ -64,6 +83,18 @@ async function copyUntil(page: Page, label: string, expected: string): Promise<v
   }).catch((error: unknown) => {
     throw new Error(`${String(error)} Clipboard: ${JSON.stringify(last)}.`);
   });
+}
+
+/** Runs `body` with preview.rawCopy.balanceEdges set in the workspace, then restores the setting. */
+async function withRawCopyBalanceEdges(enabled: boolean, body: () => Promise<void>): Promise<void> {
+  const configuration = vscode.workspace.getConfiguration("markdownOkfSchemaStudio.preview");
+  const original = configuration.inspect<boolean>("rawCopy.balanceEdges")?.workspaceValue;
+  await configuration.update("rawCopy.balanceEdges", enabled, vscode.ConfigurationTarget.Workspace);
+  try {
+    await body();
+  } finally {
+    await configuration.update("rawCopy.balanceEdges", original, vscode.ConfigurationTarget.Workspace);
+  }
 }
 
 /**
@@ -107,6 +138,29 @@ export async function scenarioRawCopy(page: Page): Promise<void> {
       }));
       await copyUntil(page, "the open block editor to copy its own selection natively", "**bold**");
       assert.equal(document.getText(), DOCUMENT, "copying from the block editor changes nothing in the document");
+    } finally {
+      await vscode.env.clipboard.writeText(saved);
+    }
+  });
+
+  // CR-481: with preview.rawCopy.balanceEdges set while the preview is open, the page reloads with the new boot context
+  // and balances the edges of a selection.
+  await withDocument("realinput-raw-copy-balanced", BALANCED_DOCUMENT, async (document) => {
+    await openSidePreview(document);
+    await waitForRender(document);
+    await setEditMode(page, false);
+    const saved = await vscode.env.clipboard.readText();
+    try {
+      await withRawCopyBalanceEdges(true, async () => {
+        await waitForRender(document, (html) => /"rawCopy\.balanceEdges":\s*true/u.test(html));
+        await waitFor("the ready webview with the new boot context", async () => (await findCurrentFrame(page)) !== undefined);
+        // From inside a bold word of an admonition's paragraph to the middle of a table row after the admonition:
+        // the admonition's opening line and the bold's delimiters are added; the row is whole.
+        // @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
+        await selectBetween(page, "bold", "first", 1);
+        await copyUntil(page, "the balanced copy of a selection from a bold word to a table row", BALANCED_SELECTED);
+        assert.equal(document.getText(), BALANCED_DOCUMENT, "a balanced copy changes nothing in the document");
+      });
     } finally {
       await vscode.env.clipboard.writeText(saved);
     }

@@ -2,6 +2,12 @@
 
 ## 2026-11-24
 
+### Raw copy: edge balancing (opt-in)
+
+- Added (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-278 (the opt-in setting `preview.rawCopy.balanceEdges`), BLOCK-279 (inline constructs), BLOCK-280 (containers), BLOCK-281 (code blocks), BLOCK-282 (tables), BLOCK-283 (list items), BLOCK-284 (headings), BLOCK-285 (definitions, HTML blocks, footnote definitions), BLOCK-286 (an unplaced edge snaps to its element)
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-272 (an unplaced edge no longer leaves the copy native), BLOCK-273 (adds nothing at an edge while the setting is off; on, see BLOCK-278)
+- Reason: CR-481; the cut stays verbatim by default and a writer opts in to a balanced copy
+
 ### Raw copy of a selection (CR-480)
 
 - Added (`proposed`): StRS-MDOKFSTUDIO-BLOCK-027 (a reader copies a selection as the exact Markdown under it), SwRS-MDOKFSTUDIO-BLOCK-271 (the host gives the page the source text of the render), BLOCK-272 (scope and native cases), BLOCK-273 (edge mapping and verbatim cut), BLOCK-274 (generated and included blocks whole), BLOCK-275 (Select all copies the whole source), BLOCK-276 (no chrome, no old side), BLOCK-277 (text/plain and text/html). Changed: SwRS-MDOKFSTUDIO-BLOCK-166 refusal row and StRS-MDOKFSTUDIO-BLOCK-016 constraint (a native selection is copied by the raw copy). Reason: Ctrl+C of a selection gave the rendered text, not the Markdown under it.

@@ -94,10 +94,16 @@ function resolveEdge(source: string, table: LineTable, edge: RawCopyEdge, side: 
 /**
  * The raw Markdown under a selection: the source between the character under `start` and the
  * character under `end`. An edge in generated content or an included block moves to the whole
- * construct, a clamped edge to the start or the end of the document. `undefined` when an edge cannot
- * be placed (the copy stays native).
+ * construct, a clamped edge to the start or the end of the document, an edge that cannot be placed
+ * to the whole element that holds it. `options.balanceEdges` (the setting) balances the cut's
+ * edges. `undefined` when the start lies after the end (the copy stays native).
  */
-export function rawMarkdownForSelection(source: string, start: RawCopyEdge, end: RawCopyEdge): string | undefined {
+export function rawMarkdownForSelection(
+  source: string,
+  start: RawCopyEdge,
+  end: RawCopyEdge,
+  options?: { balanceEdges?: boolean },
+): string | undefined {
   // Both edges at the content's own sides (a real Select all ends in the first and last text, not the container): the whole source.
   const whole = (start.extreme === true || start.clamp === "start") && (end.extreme === true || end.clamp === "end");
   const table = buildLineTable(source);
@@ -105,6 +111,7 @@ export function rawMarkdownForSelection(source: string, start: RawCopyEdge, end:
   return balanceRawCut({
     source,
     lineBreak: firstBreak === "\r\n" ? "\r\n" : "\n",
+    balanceEdges: options?.balanceEdges === true,
     start: resolveEdge(source, table, whole ? { ...start, clamp: "start" } : start, "start"),
     end: resolveEdge(source, table, whole ? { ...end, clamp: "end" } : end, "end"),
   });
