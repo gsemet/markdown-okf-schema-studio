@@ -490,6 +490,10 @@ preflight: clean format
         exit 1
     fi
 
+# Make or remake a feature clip (docs/demo-video/clips/NAME); STEP: doctor, setup, take, render, check or all.
+clip NAME STEP="all" *ARGS:
+    fnm exec -- node docs/demo-video/clip-kit/clip.mjs docs/demo-video/clips/{{ NAME }} {{ STEP }} {{ ARGS }}
+
 # Package the extension as a VSIX.
 package:
     {{ npm }} run package
