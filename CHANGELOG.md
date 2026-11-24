@@ -6,7 +6,7 @@
   editor): it opens the file in a Studio tab at the caret's line and marks it, keeps the text tab, and
   reveals a Studio tab of the file already open in another group instead of opening a second one. In a
   Studio tab, a link to another Markdown file and Studio's Back and Next now open the target at its
-  heading or line, in a Studio tab when it opens as one (CR-483 searched-line, PR #TBD)
+  heading or line, in a Studio tab when it opens as one (CR-483 searched-line, PR #500)
 - Ctrl/Cmd+C of a text selection in the preview now copies the Markdown under the selection (as text) and the
   rendered selection (as HTML), in reading and edit mode (PR #498)
 - New setting `preview.rawCopy.balanceEdges` (off by default): the raw Markdown copy of a text selection also gets the
