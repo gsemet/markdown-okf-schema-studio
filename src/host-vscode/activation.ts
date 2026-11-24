@@ -31,6 +31,8 @@ import { restoreEditorAssociation } from "../session/associationMigration";
 import { FEATURE_INTRODUCTIONS, FeatureIntroductions } from "../session/featureIntroductions";
 import { startEditorJumps, type EditorJumps } from "./editorJumps";
 import { StudioSelections } from "./studioSelections";
+import { EDITOR_VIEW_TYPE as STUDIO_EDITOR_VIEW_TYPE, StudioLines } from "./studioTabs";
+import { OPEN_IN_STUDIO_AT_LINE_COMMAND_ID, openInStudioAtLine } from "./openInStudioAtLine";
 
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-001
 /** The command that opens the side preview. */
@@ -61,7 +63,7 @@ export const SHOW_INTRODUCTIONS_COMMAND_ID = "markdown-okf-schema-studio.showFea
 /** The view type of the side preview panels (and of their serializer). */
 export const PANEL_VIEW_TYPE = "markdown-okf-schema-studio.preview";
 /** The view type of the custom editor (a fixed preview of one document). */
-export const EDITOR_VIEW_TYPE = "markdown-okf-schema-studio.editor";
+export const EDITOR_VIEW_TYPE = STUDIO_EDITOR_VIEW_TYPE;
 
 /** What one activation of the extension holds; disposed by `deactivate`. */
 export class StudioActivation {
@@ -70,6 +72,8 @@ export class StudioActivation {
   public readonly manager: PreviewManager;
   /** The selections Studio itself makes in a text editor: the jump signal does not read them as jumps. */
   public readonly studioSelections = new StudioSelections();
+  /** The lines handed to Studio tabs (the pending hand-off and the calls that open a tab for it). */
+  public readonly studioLines = new StudioLines();
   /** The jumps of the text editors, set by {@link start}. */
   public editorJumps: EditorJumps | undefined;
   /** The extension context of this activation, set by {@link start}. */
@@ -78,9 +82,10 @@ export class StudioActivation {
   private started = false;
 
   public constructor(public readonly extensionUri: vscode.Uri) {
-    this.host = createVscodeHost(this.studioSelections);
+    this.host = createVscodeHost(this.studioSelections, this.studioLines);
     this.groups = createVscodePanelGroups(PANEL_VIEW_TYPE, (column) => this.manager.hasLivePanelIn(column));
     this.manager = new PreviewManager(this.host, this.groups);
+    this.studioLines.pending.bindLiveSessions((uri, line, column) => this.giveLineToLiveStudioTab(uri, line, column));
   }
 
   /** The port's view of a webview panel of this extension. */
@@ -122,6 +127,8 @@ export class StudioActivation {
       }),
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-177
       vscode.commands.registerCommand(OPEN_AS_TEXT_COMMAND_ID, () => this.openAsText()),
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-198
+      vscode.commands.registerCommand(OPEN_IN_STUDIO_AT_LINE_COMMAND_ID, () => openInStudioAtLine(host, this.studioLines)),
       vscode.workspace.onDidCloseTextDocument((document) => manager.events.onDocumentClosed(document.uri.toString())),
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-003
       vscode.commands.registerCommand(COMMAND_ID, (uri?: unknown) => this.openPreview(uri)),
@@ -245,6 +252,21 @@ export class StudioActivation {
     this.started = false;
     this.context = undefined;
     resetRenderHooksForTests();
+  }
+
+  /**
+   * Gives `line` to the live Studio tab of `uri` (the one in group `column` when several show it);
+   * true when one took it. A side preview and a restored fixed preview are not Studio tabs.
+   */
+  private giveLineToLiveStudioTab(uri: string, line: number, column?: number): boolean {
+    const { manager } = this;
+    const matches = (preview: { inStudioTab: boolean; documentUri: string }): boolean =>
+      preview.inStudioTab && preview.documentUri === uri;
+    const preview = (column === undefined ? undefined : manager.latest((candidate) =>
+      matches(candidate) && candidate.panel.column === column)) ?? manager.latest(matches);
+    if (!preview) return false;
+    manager.scroll.requestRevealLine(preview, line, { documentId: uri });
+    return true;
   }
 
   /** The Open as Text command: the text editor of the active Studio tab's file takes the tab's place. */
@@ -427,6 +449,11 @@ export class StudioActivation {
       }
       const workspaceFolder = host.workspace.folderOf(document.path);
       preview = manager.createSession(panel, document, workspaceFolder, undefined, false);
+      preview.inStudioTab = true;
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-196
+      // A line handed to this Studio tab (a link, Back or Next, the command) is taken once, here.
+      const pendingLine = this.studioLines.pending.take(document.id);
+      if (pendingLine !== undefined) manager.scroll.requestRevealLine(preview, pendingLine, { documentId: document.id });
       manager.startRender(preview, document);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

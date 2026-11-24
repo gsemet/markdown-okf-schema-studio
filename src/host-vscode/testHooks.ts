@@ -32,8 +32,24 @@ export function setCurrentActivation(activation: StudioActivation | undefined): 
   current = activation;
 }
 
+/** The document a test pinned as "the active preview" (see {@link pinPreviewForTests}). */
+let pinnedDocument: string | undefined;
+
 function activePreview(): PreviewSession | undefined {
+  if (pinnedDocument !== undefined) {
+    const pinned = current?.manager.latest((candidate) => candidate.documentUri === pinnedDocument);
+    if (pinned) return pinned;
+  }
   return current?.manager.active;
+}
+
+/**
+ * Makes the preview of `documentUri` (the latest session of that document) the one the test hooks
+ * read and message, instead of the session created last; `undefined` goes back to that default.
+ * The manager's own notion of "active" is the last session created, not the tab the reader sees.
+ */
+export function pinPreviewForTests(documentUri: string | undefined): void {
+  pinnedDocument = documentUri;
 }
 
 function webviewPanelOf(preview: PreviewSession): vscode.WebviewPanel {

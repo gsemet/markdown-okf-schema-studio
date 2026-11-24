@@ -101,6 +101,13 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       when: "activeCustomEditorId == 'markdown-okf-schema-studio.editor'",
       group: "1_markdown@1",
     },
+    // CR-483: Open in Studio at This Line, in the overflow of the title bar of a Markdown text editor.
+    // The third entry is added; the intent of the two above is unchanged.
+    {
+      command: "markdown-okf-schema-studio.openInStudioAtLine",
+      when: "resourceExtname == .md && activeEditor == workbench.editors.files.textFileEditor",
+      group: "1_markdown@2",
+    },
   ]);
   assert.deepEqual(packageJson.contributes.menus["explorer/context"], [
     {
@@ -442,4 +449,26 @@ test("CR-445: Open as Text is in the palette and the editor title overflow of a 
   assert.equal(title.length, 1);
   assert.equal(title[0]!.when, studioTab);
   assert.notEqual(title[0]!.group, "navigation", "an overflow entry, not a toolbar button");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-198
+test("CR-483: Open in Studio at This Line is a palette and title command for Markdown text editors, with no keybinding and no opening setting", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
+    contributes: {
+      commands: Array<{ command: string; title: string; category?: string }>;
+      menus: Record<string, Array<{ command: string; when?: string }>>;
+      keybindings: Array<{ command: string }>;
+      configuration: Array<{ properties: Record<string, unknown> }>;
+    };
+  };
+  const id = "markdown-okf-schema-studio.openInStudioAtLine";
+  const declared = packageJson.contributes.commands.filter((entry) => entry.command === id);
+  assert.deepEqual(declared.map((entry) => entry.title), ["Open in Studio at This Line"]);
+  assert.equal(declared[0]!.category, "Markdown OKF-Schema Studio");
+  const palette = packageJson.contributes.menus.commandPalette!.filter((entry) => entry.command === id);
+  assert.deepEqual(palette.map((entry) => entry.when), ["resourceExtname == .md && !activeCustomEditorId"]);
+  assert.equal(packageJson.contributes.menus["editor/title"]!.filter((entry) => entry.command === id).length, 1);
+  assert.deepEqual(packageJson.contributes.keybindings.filter((entry) => entry.command === id), [], "no default keybinding");
+  assert.deepEqual(packageJson.contributes.configuration.flatMap((category) => Object.keys(category.properties)).filter((key) => key.startsWith("markdownOkfSchemaStudio.open.")), [],
+    "no setting for how a file opens");
 });

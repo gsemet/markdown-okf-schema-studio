@@ -6,6 +6,7 @@
 
 import type { HostDocument, TextRange } from "../../host-api/documentStore";
 import type { PreviewPanel } from "../../host-api/previewPanel";
+import type { ShowDocumentOutcome } from "../../host-api/navigation";
 import { NavigationHistory, type NavigationEntry } from "../../core/state/navigationHistory";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
@@ -53,9 +54,17 @@ export class HistoryController {
 
   /** Tells the page which of Back and Next can go anywhere. Stale ids are dropped by the page. */
   public postHistoryState(preview: PreviewSession): void {
+    const history = this.historyOf(preview);
+    this.postStateOf(preview, history);
+    // The Studio tabs that share this history show the same position: tell each of them too.
+    for (const other of this.manager.sessions()) {
+      if (other !== preview && this.histories.get(other.panel) === history) this.postStateOf(other, history);
+    }
+  }
+
+  private postStateOf(preview: PreviewSession, history: NavigationHistory): void {
     const stage = preview.stage;
     if (preview.disposed || !stage) return;
-    const history = this.historyOf(preview);
     const state = { canBack: history.canBack(), canForward: history.canForward() };
     preview.probe.lastHistoryState = state;
     fireAndForget(this.manager.host.logger, preview.postToPage({
@@ -74,6 +83,42 @@ export class HistoryController {
     history.depart(this.currentPlace(preview));
     history.push(target);
     this.postHistoryState(preview);
+  }
+
+  /** The Studio tab of `uri` other than `source` that a link or a history move just opened or revealed. */
+  private studioTabOf(source: PreviewSession, uri: string): PreviewSession | undefined {
+    return this.manager.latest((candidate) => candidate !== source && candidate.inStudioTab && candidate.documentUri === uri);
+  }
+
+  /** Makes the panel of `created` follow the history of `source`'s panel, as a Studio tab a link created does. */
+  public shareHistory(source: PreviewSession, created: PreviewSession): void {
+    this.histories.set(created.panel, this.historyOf(source));
+    this.postHistoryState(created);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-197
+  /**
+   * Records a link followed from the Studio tab `source` to the Markdown file of `target`, by what
+   * opened: a new Studio tab shares the source's history; a Studio tab already open keeps its own,
+   * departs from its place and gains the place left in the source and the target; a text editor
+   * (or anything else) records nothing.
+   */
+  public recordStudioLink(source: PreviewSession, outcome: ShowDocumentOutcome, target: NavigationEntry): void {
+    if (outcome === "other") return;
+    const left = this.currentPlace(source);
+    this.recordNavigation(source, target);
+    const opened = this.studioTabOf(source, target.uri);
+    if (!opened) return;
+    if (outcome === "studio-created") {
+      this.shareHistory(source, opened);
+      return;
+    }
+    const own = this.historyOf(opened);
+    if (own === this.historyOf(source)) return;
+    own.depart(this.currentPlace(opened));
+    own.push({ uri: left.uri, line: left.line ?? 1 });
+    own.push(target);
+    this.postHistoryState(opened);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
@@ -121,7 +166,19 @@ export class HistoryController {
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-191
       // The side preview that follows the editor marks the target line itself (see links.ts).
       if (preview.followsActiveEditor) this.manager.scroll.requestJumpMarker(preview, target.uri, lineIndex + 1);
-      await host.navigation.showDocument(target.uri, lineSelection(document, lineIndex, lineIndex));
+      const selection = lineSelection(document, lineIndex, lineIndex);
+      if (preview.inStudioTab && !preview.followsActiveEditor && document.path?.toLowerCase().endsWith(".md")) {
+        // @implements_req SwRS-MDOKFSTUDIO-LIFE-196
+        // A Studio tab hands the stored line, and a Studio tab the move created follows this history.
+        const outcome = await host.navigation.showDocument(target.uri, selection, { fromStudioTab: true, line: lineIndex + 1 });
+        // Intent: a Studio tab that Back or Next created shares this history, as a followed link's does
+        // (SwRS-MDOKFSTUDIO-LIFE-197), so Back in the new tab walks the same places. An existing tab
+        // keeps its own history, and a text editor has none.
+        const opened = outcome === "studio-created" ? this.studioTabOf(preview, target.uri) : undefined;
+        if (opened) this.shareHistory(preview, opened);
+        return;
+      }
+      await host.navigation.showDocument(target.uri, selection);
     } catch (error) {
       // The document did not change, so the position does not move either.
       history.restore(before);

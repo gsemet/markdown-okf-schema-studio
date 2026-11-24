@@ -303,7 +303,10 @@ test("a link request of a stale page or a disposed preview is ignored", async ()
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
-test("a locked preview records anchor jumps only", async () => {
+test("a fixed preview that is not a Studio tab records anchor jumps only; a Studio tab records a link only when it opens in a Studio tab", async () => {
+  // A fixed preview (one that does not follow the active editor) and is not a Studio tab: a link to
+  // another document records nothing (CR 483 narrowed the rule to the fixed preview, since a Studio
+  // tab is a fixed preview too but records its moves, SwRS-MDOKFSTUDIO-LIFE-197).
   const f = fixture({ followsActiveEditor: false });
   try {
     fs.writeFileSync(path.join(f.root, "second.md"), "# Second\n");
@@ -316,6 +319,30 @@ test("a locked preview records anchor jumps only", async () => {
     assert.equal(history.canBack(), true, "the anchor jump is recorded");
   } finally {
     f.cleanup();
+  }
+  // A Studio tab whose link opens as a text editor keeps its history.
+  const text = fixture({ followsActiveEditor: false });
+  try {
+    fs.writeFileSync(path.join(text.root, "second.md"), "# Second\n");
+    text.preview.inStudioTab = true;
+    text.manager.host.navigation.showDocument = () => Promise.resolve("other");
+    const history = text.manager.history.historyOf(text.preview);
+    await text.send("previewLink", { request: "second.md" });
+    assert.equal(history.canBack(), false, "a link that opens as text records nothing");
+  } finally {
+    text.cleanup();
+  }
+  // A Studio tab whose link opens in a Studio tab records it.
+  const studio = fixture({ followsActiveEditor: false });
+  try {
+    fs.writeFileSync(path.join(studio.root, "second.md"), "# Second\n");
+    studio.preview.inStudioTab = true;
+    studio.manager.host.navigation.showDocument = () => Promise.resolve("studio-existing");
+    const history = studio.manager.history.historyOf(studio.preview);
+    await studio.send("previewLink", { request: "second.md" });
+    assert.equal(history.canBack(), true, "a link that opens in a Studio tab is recorded");
+  } finally {
+    studio.cleanup();
   }
 });
 

@@ -287,13 +287,16 @@ export class LinkController {
         }
       }
       if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
-      if (preview.followsActiveEditor) {
-        // A locked preview does not follow the opened file, so only anchor jumps are recorded.
-        const opened = await host.documents.open(targetId).then((document) => document, () => undefined);
-        if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
-        if (opened?.path !== undefined && path.extname(opened.path).toLowerCase() === ".md") {
-          manager.history.recordNavigation(preview, { uri: opened.id, line: (selection?.start.line ?? 0) + 1 });
-        }
+      // A side preview that follows the editor records a link to another Markdown file. A Studio tab
+      // records it only when the target opens in a Studio tab (below); any other fixed preview records
+      // anchor jumps only, because it does not follow the opened file.
+      const opened = preview.followsActiveEditor || preview.inStudioTab
+        ? await host.documents.open(targetId).then((document) => document, () => undefined)
+        : undefined;
+      if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
+      const markdownTarget = opened?.path !== undefined && path.extname(opened.path).toLowerCase() === ".md";
+      if (preview.followsActiveEditor && markdownTarget) {
+        manager.history.recordNavigation(preview, { uri: opened!.id, line: (selection?.start.line ?? 0) + 1 });
       }
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-191
       // The side preview that follows the editor marks the target line itself; the host records the
@@ -301,7 +304,16 @@ export class LinkController {
       if (preview.followsActiveEditor && selection !== undefined) {
         manager.scroll.requestJumpMarker(preview, targetId, selection.start.line + 1);
       }
-      await host.navigation.showDocument(targetId, selection);
+      if (preview.inStudioTab && !preview.followsActiveEditor && markdownTarget) {
+        // @implements_req SwRS-MDOKFSTUDIO-LIFE-196
+        // @implements_req SwRS-MDOKFSTUDIO-LIFE-197
+        // A Studio tab hands the target's line (line 1 for a link with neither) and learns what opened.
+        const line = (selection?.start.line ?? 0) + 1;
+        const outcome = await host.navigation.showDocument(targetId, selection, { fromStudioTab: true, line });
+        manager.history.recordStudioLink(preview, outcome ?? "other", { uri: targetId, line });
+      } else {
+        await host.navigation.showDocument(targetId, selection);
+      }
     } catch (error) {
       fireAndForget(host.logger, host.ui.showWarning(
         `Markdown OKF-Schema Studio could not open ${navigation.path}: ${error instanceof Error ? error.message : String(error)}`,

@@ -9,6 +9,10 @@
 - Reason: CR-481; the cut stays verbatim by default and a writer opts in to a balanced copy
 - Code block line numbers no longer count as page chrome in the raw copy, so an edge in a code block is placed (setting off or on)
 
+### Open Studio at a searched line (CR-483)
+
+- Added (`proposed`): SwRS-MDOKFSTUDIO-LIFE-196 (a link, Back or Next from a Studio tab opens the target at its line or anchor and reveals a Studio tab open in any group), LIFE-197 (the history of a link followed from a Studio tab: shared with a created tab, appended to an existing one, nothing for a text editor), LIFE-198 (the command Open in Studio at This Line opens a Studio tab at the caret's line and keeps the text tab). Changed: SwRS-MDOKFSTUDIO-LIFE-181 (any session, not only the side preview, holds a requested line), SwRS-MDOKFSTUDIO-TOOLBAR-059 (Studio tab rule in the refusal rows), StRS-MDOKFSTUDIO-LIFE-023 (title, statement, rationale). Reason: a link or Back in a Studio tab lost its line, and the reader had no explicit way to open Studio at a line.
+
 ### Raw copy of a selection (CR-480)
 
 - Added (`proposed`): StRS-MDOKFSTUDIO-BLOCK-027 (a reader copies a selection as the exact Markdown under it), SwRS-MDOKFSTUDIO-BLOCK-271 (the host gives the page the source text of the render), BLOCK-272 (scope and native cases), BLOCK-273 (edge mapping and verbatim cut), BLOCK-274 (generated and included blocks whole), BLOCK-275 (Select all copies the whole source), BLOCK-276 (no chrome, no old side), BLOCK-277 (text/plain and text/html). Changed: SwRS-MDOKFSTUDIO-BLOCK-166 refusal row and StRS-MDOKFSTUDIO-BLOCK-016 constraint (a native selection is copied by the raw copy). Reason: Ctrl+C of a selection gave the rendered text, not the Markdown under it.

@@ -23,6 +23,7 @@ implemented_in_files:
 - src/session/features/history.ts
 - src/session/features/links.ts
 tested_in_files:
+- test/session/studioTabNavigation.test.ts
 - test/session/toolbarReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -58,5 +59,5 @@ When a link, Back or Next followed in the side preview that follows the editor o
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview and gets the raw text on request
+  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview, opens Studio at a line, and gets the raw text on request
 <!-- okf:links:end -->

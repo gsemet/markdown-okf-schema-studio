@@ -91,6 +91,11 @@ export class PreviewSession {
   public readonly panel: PreviewPanel;
   /** True for the side preview that follows the active editor; false for a fixed preview. */
   public followsActiveEditor: boolean;
+  /**
+   * True for a Studio tab: the preview of the custom editor (an Open With tab), set only by the host
+   * that resolves one. An older side preview that VS Code restored is a fixed preview, not a Studio tab.
+   */
+  public inStudioTab = false;
   /** Column of the editor group the host locked for the preview; undefined if none. */
   public lockedColumn?: number;
   /** The render queue of the document (set right after creation, see PreviewManager). */

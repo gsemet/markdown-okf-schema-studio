@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/state/navigationHistory.test.ts
 - test/integration/previewHistory.test.ts
 - test/page/runtimeScroll.test.ts
+- test/session/studioTabNavigation.test.ts
 - test/session/toolbarReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -41,7 +42,7 @@ supersedes:
 
 ### Normative behavior
 
-When the reader follows a link to another Markdown document in a preview that follows the active editor, or an anchor of the shown document that resolves to a source line, the extension SHALL record the place in the history of that panel (at most the 50 newest places, no duplicate of the current place, the places after the current one dropped), and when Back or Next leads to a recorded place, open its document with the stored line selected or scroll the preview to the stored line.
+When the reader follows a link to another Markdown document in a preview that follows the active editor (a Studio tab follows SwRS-MDOKFSTUDIO-LIFE-197 instead: it records the link only when the target opens in a Studio tab), or an anchor of the shown document that resolves to a source line, the extension SHALL record the place in the history of that panel (at most the 50 newest places, no duplicate of the current place, the places after the current one dropped), and when Back or Next leads to a recorded place, open its document with the stored line selected or scroll the preview to the stored line.
 
 ### Scenario (nominal): Link to another Markdown document
 - GIVEN a preview of first.md at line 3 and a link to second.md#target
@@ -64,8 +65,9 @@ When the reader follows a link to another Markdown document in a preview that fo
 | An anchor whose id has no source line, such as a generated id | The preview still scrolls but no history entry is added (an entry is added only when markdownFragmentRange finds a line) |
 | A link to notes.txt or another local file whose extension is not .md | The file opens in the editor and the history is unchanged |
 | A link to NOTES.MD | It is recorded, because the extension is compared in lower case |
-| A link to second.md followed in a locked preview (one that does not follow the active editor) | second.md opens and the history is unchanged |
-| An in-page anchor followed in the same locked preview | The jump is recorded |
+| A link to second.md followed in a locked preview that is not a Studio tab (one that does not follow the active editor) | second.md opens and the history is unchanged |
+| A link to second.md followed in a Studio tab | The move is recorded only when second.md opens in a Studio tab, per SwRS-MDOKFSTUDIO-LIFE-197; when it opens as a text editor the history is unchanged |
+| An in-page anchor followed in a locked preview | The jump is recorded |
 
 ### Scenario (nominal): Back or Next to another document
 - GIVEN the history first.md line 3 then second.md
