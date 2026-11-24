@@ -68,7 +68,7 @@ export function checkClip(ctx, story) {
   const take = JSON.parse(readFileSync(join(ctx.take, "take.json"), "utf8"));
   const verify = JSON.parse(readFileSync(join(ctx.take, "verify.json"), "utf8"));
   const host = JSON.parse(readFileSync(ctx.takeHostFile, "utf8"));
-  const frame = 1 / 30;
+  const frame = 1 / story.fps;
 
   // MP4.
   const mp4 = probe(file("mp4"));
@@ -79,8 +79,8 @@ export function checkClip(ctx, story) {
   values.mp4 = { seconds: Math.round(duration * 1000) / 1000, width: video.width, height: video.height, fps: fraction(video.r_frame_rate), codec: video.codec_name, pixFmt: video.pix_fmt, audioStreams: mp4.streams.filter((s) => s.codec_type === "audio").length, bytes: mp4Size, crf: used.mp4.crf };
   want("mp4 duration within 5 to 12 s", duration >= 5 && duration <= 12, `${duration.toFixed(3)} s`);
   want("mp4 duration equals Length within one frame", Math.abs(duration - story.length) <= frame + 1e-3, `${duration.toFixed(3)} s vs ${story.length} s`);
-  want("mp4 size", video.width === 1920 && video.height === 1080, `${video.width}x${video.height}`);
-  want("mp4 30 fps", fraction(video.r_frame_rate) === 30, video.r_frame_rate);
+  want("mp4 size", video.width === story.width && video.height === story.height, `${video.width}x${video.height}`, `storyboard ${story.width}x${story.height}`);
+  want(`mp4 ${story.fps} fps`, fraction(video.r_frame_rate) === story.fps, video.r_frame_rate);
   want("mp4 h264 yuv420p", video.codec_name === "h264" && video.pix_fmt === "yuv420p", `${video.codec_name} ${video.pix_fmt}`);
   want("mp4 has no audio stream", values.mp4.audioStreams === 0, String(values.mp4.audioStreams));
   want("mp4 faststart", boxes.indexOf("moov") >= 0 && boxes.indexOf("moov") < boxes.indexOf("mdat"), boxes.join(","));
@@ -93,7 +93,7 @@ export function checkClip(ctx, story) {
   const webmDuration = Number(webm.format.duration);
   values.webm = { seconds: Math.round(webmDuration * 1000) / 1000, width: wv.width, height: wv.height, fps: fraction(wv.r_frame_rate), codec: wv.codec_name, audioStreams: webm.streams.filter((s) => s.codec_type === "audio").length, bytes: webmSize };
   want("webm vp9", wv.codec_name === "vp9", wv.codec_name);
-  want("webm same size, fps and duration", wv.width === 1920 && wv.height === 1080 && fraction(wv.r_frame_rate) === 30 && Math.abs(webmDuration - duration) <= 2 * frame, `${wv.width}x${wv.height} ${wv.r_frame_rate} ${webmDuration.toFixed(3)} s`);
+  want("webm same size, fps and duration", wv.width === story.width && wv.height === story.height && fraction(wv.r_frame_rate) === story.fps && Math.abs(webmDuration - duration) <= 2 * frame, `${wv.width}x${wv.height} ${wv.r_frame_rate} ${webmDuration.toFixed(3)} s`);
   want("webm has no audio stream", values.webm.audioStreams === 0, String(values.webm.audioStreams));
   want("webm at most 3 MB", webmSize <= BUDGETS.webm, `${(webmSize / MB).toFixed(2)} MB`);
 
@@ -116,7 +116,7 @@ export function checkClip(ctx, story) {
   want("scenario verify passed", verify.passed === true, String(verify.passed));
   want("no paste-options widget after the paste", verify.notes?.pasteWidgets === 0, String(verify.notes?.pasteWidgets));
   want("Studio in reading mode at the start", verify.notes?.readingMode === "off", String(verify.notes?.readingMode));
-  want("screencast at least 30 frames per second after retiming", true, "30 (retimed by ffmpeg)", `raw ${take.rawFps} fps`);
+  want("screencast at least the storyboard's frame rate after retiming", story.fps <= 30, "30 (retimed by ffmpeg)", `raw ${take.rawFps} fps, storyboard ${story.fps} fps`);
   want("playback rate inside 0.77 to 1.3", story.rate >= 0.77 && story.rate <= 1.3, story.rate.toFixed(3));
 
   const report = {

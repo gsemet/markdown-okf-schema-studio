@@ -71,19 +71,21 @@ export function encodeAll(ctx, story, take) {
 
   let gifStep = 0;
   for (const [index, step] of GIF_LADDER.entries()) {
-    const graph = `fps=${step.fps},scale=${step.width}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=${step.colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`;
+    const width = Math.min(step.width, story.width);
+    const graph = `fps=${step.fps},scale=${width}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=${step.colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`;
     ff(["-i", master, "-filter_complex", graph, "-loop", "0", out("gif")]);
     gifStep = index;
     if (size(out("gif")) <= BUDGETS.gif) break;
   }
-  used.gif = { step: gifStep, ...GIF_LADDER[gifStep] };
+  used.gif = { step: gifStep, ...GIF_LADDER[gifStep], width: Math.min(GIF_LADDER[gifStep].width, story.width) };
 
   // Pictures.
+  // The key frames: the folder is emptied first, so no frame of an earlier render stays.
   const frames = join(ctx.clipDir, "frames");
+  rmSync(frames, { recursive: true, force: true });
   mkdirSync(frames, { recursive: true });
   const total = Math.round(story.length * story.fps);
   const at = (seconds, file) => ff(["-ss", seconds.toFixed(3), "-i", out("mp4"), "-frames:v", "1", file]);
-  const press = (id) => take.presses.find((candidate) => candidate.id === id);
   const copy = take.presses[0];
   const paste = take.presses.at(-1);
   at(0, join(ctx.clipDir, "poster.png"));
@@ -91,7 +93,10 @@ export function encodeAll(ctx, story, take) {
   at(paste.t / story.rate + 0.3, join(frames, "02-pasted.png"));
   const zoomIn = take.zooms[0].t / story.rate + 0.6;
   at((zoomIn + story.zoom.holdTo) / 2, join(frames, "03-zoomed.png"));
-  void press;
+  // One frame per mark, at the middle of its range, numbered from 04 in the storyboard's order.
+  for (const [index, mark] of story.marks.entries()) {
+    at((mark.from + mark.to) / 2, join(frames, `${String(index + 4).padStart(2, "0")}-mark-${mark.id}.png`));
+  }
 
   const font = filterPath(fontFile());
   const label = `drawtext=fontfile='${font}':text='%{pts\\:hms}':x=6:y=6:fontsize=18:fontcolor=white:box=1:boxcolor=black@0.6`;
