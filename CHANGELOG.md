@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Ctrl/Cmd+C of a text selection in the preview now copies the Markdown under the selection (as text) and the
-  rendered selection (as HTML), in reading and edit mode (CR-480 copy-selection-raw-markdown)
+  rendered selection (as HTML), in reading and edit mode (PR #498)
 
 ## 1.12.1 - 2026-11-24
 
