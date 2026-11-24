@@ -2,6 +2,11 @@
 
 ## 2026-11-24
 
+### Site: feature clips play as video
+
+- Added (`proposed`): SwRS-MDOKFSTUDIO-CORE-095 (the published site plays a feature clip as a looping video where a page shows its GIF), derived from StRS-MDOKFSTUDIO-CORE-008
+- Reason: CR-482; the feature clip kit and its first clip, the raw copy with `balanceEdges` on
+
 ### Raw copy: edge balancing (opt-in)
 
 - Added (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-278 (the opt-in setting `preview.rawCopy.balanceEdges`), BLOCK-279 (inline constructs), BLOCK-280 (containers), BLOCK-281 (code blocks), BLOCK-282 (tables), BLOCK-283 (list items), BLOCK-284 (headings), BLOCK-285 (definitions, HTML blocks, footnote definitions), BLOCK-286 (an unplaced edge snaps to its element)
