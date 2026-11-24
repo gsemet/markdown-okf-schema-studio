@@ -7,6 +7,7 @@
 - Added (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-278 (the opt-in setting `preview.rawCopy.balanceEdges`), BLOCK-279 (inline constructs), BLOCK-280 (containers), BLOCK-281 (code blocks), BLOCK-282 (tables), BLOCK-283 (list items), BLOCK-284 (headings), BLOCK-285 (definitions, HTML blocks, footnote definitions), BLOCK-286 (an unplaced edge snaps to its element)
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-BLOCK-272 (an unplaced edge no longer leaves the copy native), BLOCK-273 (adds nothing at an edge while the setting is off; on, see BLOCK-278)
 - Reason: CR-481; the cut stays verbatim by default and a writer opts in to a balanced copy
+- Code block line numbers no longer count as page chrome in the raw copy, so an edge in a code block is placed (setting off or on)
 
 ### Raw copy of a selection (CR-480)
 
