@@ -5,6 +5,10 @@ written for an agent that produces the video with the maintainer, who decides. I
 57.5-second video and the takes before it: the worked example is in [short-demo-01/](../short-demo-01/), and the lessons are
 in the steps below, with the reason for each rule.
 
+A video of a few seconds on one feature is a feature clip and follows
+[feature-clip-process.guidelines.md](feature-clip-process.guidelines.md); the identity table below stays
+the source of the colours, type, caption pill, cursor and zoom rules that clips reuse.
+
 The method in one sentence: film the real product, keep every text in one Markdown storyboard that
 the maintainer edits, and show a real render early and often, because a video is judged by watching
 it, not by reading its plan.

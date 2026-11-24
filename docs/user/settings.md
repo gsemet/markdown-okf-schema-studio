@@ -27,6 +27,7 @@ width;
   inside one block adds nothing. Example, in `Hello **world** again`: from the `r` of `world` to the end of the
   line, off copies `rld** again` and on copies `**rld** again`; from the `o` to the `l` of `world` copies `orl`
   either way.
+  ![A selection from inside an admonition to the next paragraph is copied with Ctrl+C and pasted with Ctrl+V: the admonition's opening line is added](../demo-video/clips/raw-copy-balance-edges/raw-copy-balance-edges.gif)
 - `preview.showComments` (default on): show HTML comments as gray chips; click one (or press Enter
   or Space on it) to open the comment text in a box under the line. Each chip is labelled
   "comment". Off hides every review mark in open previews at once (gray and thread chips,
