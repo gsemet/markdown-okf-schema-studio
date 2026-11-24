@@ -5,6 +5,7 @@
  */
 
 import { classifyPreviewReference } from "../navigation/previewNavigation";
+import { COMMENT_MARKS, isChromeProbe } from "./chromeMarks";
 import {
   attr,
   childElements,
@@ -21,27 +22,6 @@ import {
   type HtmlElement,
   type HtmlParent,
 } from "./exportDom";
-
-/** The elements that never belong in an exported file: controls, scripts and everything that loads. */
-const REMOVED_TAGS = new Set([
-  "button", "textarea", "select", "script", "link", "iframe", "object", "embed", "base", "frame", "frameset",
-]);
-
-/** Classes of review comments and editing chrome. The element goes with its content. */
-const REMOVED_CLASSES = [
-  "okf-comment", "okf-chip", "okf-comment-body", "sphinx-preview-insert-point", "sphinx-preview-edit-palette",
-  "sphinx-preview-link-panel", "okf-fold-toggle",
-];
-
-/** Attributes that mark editing chrome. The element goes with its content. */
-const REMOVED_BY_ATTRIBUTE = [
-  "data-sphinx-preview-block-editor", "data-sphinx-preview-block-editor-host", "data-sphinx-preview-edit-status",
-  "data-okf-row-handle", "data-okf-col-handle", "data-okf-frontmatter-editor", "data-okf-frontmatter-menu",
-  "data-okf-fold-toggle", "data-okf-comment-kind", "data-okf-blank-runs", "data-okf-blank-lines",
-];
-
-/** The comment attributes that only mark text or a block (the text stays; the element goes only if it is a wrapper). */
-const COMMENT_MARKS = ["data-okf-comment-thread", "data-okf-comment-resolved", "data-okf-comment-badged", "data-okf-comment-badge-after"];
 
 /** `data-sphinx-preview-*` attributes the CSS needs: the frozen breakout of the width mode. */
 const KEPT_PREVIEW_ATTRIBUTES = new Set([
@@ -132,14 +112,11 @@ function convertProperties(root: HtmlParent): void {
 }
 
 /** True for an element of review or editing chrome that goes with its whole content. */
-function isChrome(element: HtmlElement): boolean {
-  if (REMOVED_TAGS.has(element.tagName)) return true;
-  if (REMOVED_CLASSES.some((name) => hasClass(element, name))) return true;
-  if (hasAnyAttribute(element, REMOVED_BY_ATTRIBUTE)) return true;
-  // Any other comment attribute (popover, badge, compose box, orphan entry, actions) is chrome; a highlight is not.
-  return element.attrs.some((entry) => (entry.name.startsWith("data-okf-comment") || entry.name.startsWith("data-okf-thread"))
-    && !COMMENT_MARKS.includes(entry.name) && entry.name !== "data-okf-thread-count");
-}
+const isChrome = (element: HtmlElement): boolean => isChromeProbe({
+  tagName: element.tagName,
+  hasClass: (name) => hasClass(element, name),
+  attributeNames: () => element.attrs.map((entry) => entry.name),
+});
 
 function isTabRadio(element: HtmlElement): boolean {
   return element.tagName === "input" && attr(element, "type") === "radio" && hasAttr(element, "data-export-tab");

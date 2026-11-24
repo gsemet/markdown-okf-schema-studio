@@ -46,6 +46,7 @@ import { installStickyHeadings } from "./features/stickyHeadings";
 import { installTableCellEditor } from "./features/tableCellEditor";
 import { installTableRowMove } from "./features/tableRowMove";
 import { installTextControls } from "./features/textControls";
+import { installRawCopy } from "./features/rawCopy";
 import { installThemeMode } from "./features/themeMode";
 import { createPageHostMessages } from "./hostMessages";
 import type { HostTransport } from "./hostTransport";
@@ -210,6 +211,11 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // The button follows the host's answer (`hostRequests` is created below, before any click).
   const codeCopy = installCodeCopy(document, window, (text, done, userGesture) =>
     hostRequests.ask("previewCopyText", { text, userGesture }, {}, done));
+  // A copy of a native selection puts the raw Markdown under it on the clipboard (features/rawCopy.ts).
+  installRawCopy(document, window, hostMessages, {
+    context,
+    blockSelectionActive: () => state.editMode && blockSelection.isActive(),
+  });
   // Edit mode: the anchor icon of a label renames it. The result is matched by edit id: the edit
   // itself moves the document version before the answer arrives.
   const labelRename = installLabelRename(document, window, {

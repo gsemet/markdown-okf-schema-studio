@@ -49,6 +49,7 @@ import { BREAKOUT_HANDLE_SCENARIOS } from "./breakoutHandleScenarios";
 import { TABLE_CELL_ROOM_SCENARIOS } from "./tableCellRoomScenarios";
 import { FIND_WIDE_TABLE_SCENARIOS } from "./findWideTableScenarios";
 import { STICKY_LONG_TITLE_SCENARIOS } from "./stickyLongTitleScenarios";
+import { RAW_COPY_SCENARIOS } from "./rawCopyScenarios";
 import { TABLE_GRID_PASTE_SCENARIOS } from "./tableGridPasteScenarios";
 import { TABLE_IN_CONTAINER_SCENARIOS } from "./tableInContainerScenarios";
 import { LIST_ITEM_HANDLE_SCENARIOS } from "./listItemHandleScenarios";
@@ -505,6 +506,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...STICKY_LONG_TITLE_SCENARIOS,
   ...TABLE_TAB_HINT_SCENARIOS,
   ...TABLE_GRID_PASTE_SCENARIOS,
+  ...RAW_COPY_SCENARIOS,
   ...TABLE_IN_CONTAINER_SCENARIOS,
   ...LIST_ITEM_HANDLE_SCENARIOS,
   ...DELETE_BLOCK_BAR_SCENARIOS,

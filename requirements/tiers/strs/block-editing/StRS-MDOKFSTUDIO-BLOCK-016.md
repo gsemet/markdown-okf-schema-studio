@@ -56,7 +56,7 @@ As a writer, I select a run of blocks with Shift+click or Shift+Arrow to treat t
 - The selection is announced to screen readers and cleared by Escape, a plain click, a refresh of the preview or leaving edit mode.
 - An included block stops the range, and the properties table is never selected.
 - Copy never changes the document; cut and paste are one undo step each.
-- The clipboard keys stay native in a text box, a field, the properties table and in reading mode.
+- The block selection does not take the clipboard keys in a text box, a field, the properties table or in reading mode (a native selection is copied by the raw copy, StRS-MDOKFSTUDIO-BLOCK-027).
 
 ### Use case diagram
 
