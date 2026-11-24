@@ -63,3 +63,10 @@ test("never relativizes absolute or protocol-relative URLs", () => {
     assert.equal(rewriteLinkTarget(value, "README.md", "index.html", renderedPages), value);
   }
 });
+
+test("a clip's WebM keeps its relative path from a docs page", () => {
+  assert.equal(
+    rewriteLinkTarget("../demo-video/clips/x/x.webm", "docs/user/settings.md", "docs/user/settings.html", renderedPages),
+    "../demo-video/clips/x/x.webm",
+  );
+});

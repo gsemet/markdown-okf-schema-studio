@@ -6,6 +6,7 @@ import { parseFragment, serialize } from "parse5";
 
 import { renderMyst } from "../../src/core/render/mystRenderer";
 import { E2E_SCREENSHOT_ROOT, EXTENSION_ROOT, REPORTS_ROOT } from "../reportPaths";
+import { clipVideos, copyClipMedia, isClipSource } from "./siteClips";
 import { outputPathForMarkdown, rewriteLinkTarget } from "./siteLinks";
 import { headTags } from "./siteHead";
 import { REQUIREMENTS_REPORT_PATH, writeRequirementsViewer } from "./requirementsViewer/write";
@@ -68,6 +69,7 @@ main h1 { font-size: clamp(28px, 4vw, 40px); margin: 6px 0 12px; }
 main h2 { font-size: 1.6rem; margin-top: 2.5rem; }
 main h3 { font-size: 1.25rem; }
 img { max-width: 100%; height: auto; }
+video { max-width: 100%; height: auto; }
 .report-link { display: inline-block; margin: 1rem 0 2rem; padding: .55rem .85rem; border: 1px solid var(--link); border-radius: 6px; text-decoration: none; }
 .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
 .gallery figure { margin: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
@@ -135,7 +137,8 @@ async function renderMarkdown(sourcePath: string, outputPath: string): Promise<v
   }
   const relativeSource = path.relative(EXTENSION_ROOT, sourcePath).split(path.sep).join("/");
   const relativeOutput = path.relative(siteRoot, outputPath).split(path.sep).join("/");
-  const body = rewriteRenderedLinks(result.html, relativeSource, relativeOutput);
+  const withClips = clipVideos(result.html, relativeSource, (repoPath) => fs.existsSync(path.join(EXTENSION_ROOT, repoPath)));
+  const body = rewriteRenderedLinks(withClips, relativeSource, relativeOutput);
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, pageDocument(path.basename(outputPath, ".html"), relativeOutput, body, simpleCardFor(relativeSource)?.card));
 }
@@ -343,10 +346,16 @@ viewer.addEventListener('click', event => { if (event.target === viewer) viewer.
 </script>`;
 }
 
+/** The Markdown files the site renders: the README, Contributing and the docs pages, never a clip's own production files. */
+export function renderedMarkdownFiles(): string[] {
+  const docs = walkMarkdown(path.join(EXTENSION_ROOT, "docs")).filter((file) => !isClipSource(path.relative(EXTENSION_ROOT, file).split(path.sep).join("/")));
+  return [path.join(EXTENSION_ROOT, "README.md"), path.join(EXTENSION_ROOT, "CONTRIBUTING.md"), ...docs];
+}
+
 async function main(): Promise<void> {
   fs.rmSync(siteRoot, { recursive: true, force: true });
   fs.mkdirSync(siteRoot, { recursive: true });
-  const markdownFiles = [path.join(EXTENSION_ROOT, "README.md"), path.join(EXTENSION_ROOT, "CONTRIBUTING.md"), ...walkMarkdown(path.join(EXTENSION_ROOT, "docs"))];
+  const markdownFiles = renderedMarkdownFiles();
   for (const sourcePath of markdownFiles) {
     const relativeSource = path.relative(EXTENSION_ROOT, sourcePath).split(path.sep).join("/");
     renderedPages.add(relativeSource);
@@ -359,6 +368,7 @@ async function main(): Promise<void> {
   if (fs.existsSync(imageRoot)) {
     fs.cpSync(imageRoot, path.join(siteRoot, "images"), { recursive: true, errorOnExist: false, force: true });
   }
+  copyClipMedia(EXTENSION_ROOT, siteRoot);
   fs.copyFileSync(path.join(EXTENSION_ROOT, "images", "logo.svg"), path.join(siteRoot, "favicon.svg"));
   if (fs.existsSync(REPORTS_ROOT)) {
     fs.cpSync(REPORTS_ROOT, path.join(siteRoot, "reports"), { recursive: true, errorOnExist: false, force: true });

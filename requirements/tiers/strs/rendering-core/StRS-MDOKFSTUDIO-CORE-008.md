@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-091
 - SwRS-MDOKFSTUDIO-CORE-092
 - SwRS-MDOKFSTUDIO-CORE-093
+- SwRS-MDOKFSTUDIO-CORE-095
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -92,4 +93,5 @@ flowchart LR
   - [SwRS-MDOKFSTUDIO-CORE-091](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-091.md): The site requirements viewer plays a path of a use case map
   - [SwRS-MDOKFSTUDIO-CORE-092](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-092.md): The site requirements viewer finds a requirement by its ID
   - [SwRS-MDOKFSTUDIO-CORE-093](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-093.md): The site requirements viewer names every requirement by its full ID
+  - [SwRS-MDOKFSTUDIO-CORE-095](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-095.md): The published site plays a feature clip as a looping video
 <!-- okf:links:end -->

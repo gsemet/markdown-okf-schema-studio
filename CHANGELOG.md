@@ -11,6 +11,8 @@
   rendered selection (as HTML), in reading and edit mode (PR #498)
 - New setting `preview.rawCopy.balanceEdges` (off by default): the raw Markdown copy of a text selection also gets the
   opening and closing delimiters and lines of the constructs its edges cut through (PR #499)
+- The published docs site now plays a feature clip as a looping video where a page shows its GIF; the first one
+  shows the raw copy with `balanceEdges` on
 
 ## 1.12.1 - 2026-11-24
 
