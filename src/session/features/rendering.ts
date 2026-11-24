@@ -591,6 +591,8 @@ export class RenderingController extends PageDocumentController {
     // A pairing or theme change announced before the page listened did not reach it.
     manager.scroll.postPageLiveState(preview, value);
     manager.view.postShowComments(preview);
+    // The text of the shown render, for the raw copy of a selection (a patched page reports ready too).
+    manager.view.postSourceText(preview, value.requestId);
     // A freshly loaded page has no marks and assumes the marks are enabled; a patched page keeps
     // what it shows.
     if (preview.page.patchedRequestId === undefined) {

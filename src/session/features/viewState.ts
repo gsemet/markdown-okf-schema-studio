@@ -126,6 +126,24 @@ export class ViewStateController {
     }), "postToPage");
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-271
+  /**
+   * Gives the page the text of the document of the render it reports ready for, so a copied
+   * selection can be cut from the source. Nothing is posted for a render that is no longer the
+   * current stage.
+   */
+  public postSourceText(preview: PreviewSession, readyRequestId: number): void {
+    const stage = preview.stage;
+    if (preview.disposed || !stage || stage.requestId !== readyRequestId) return;
+    fireAndForget(this.manager.host.logger, preview.postToPage({
+      type: "previewSourceText",
+      text: stage.sourceText,
+      documentId: stage.activeDocumentIdentity,
+      revision: revisionOfStage(stage),
+      requestId: stage.requestId,
+    }), "postToPage");
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-THEME-016
   /** The host's color theme changed: the page re-themes at once, the render follows. */
   public notifyTheme(preview: PreviewSession): void {

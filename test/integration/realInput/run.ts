@@ -61,6 +61,7 @@ import { scenarioFindWideTable } from "./findWideTable";
 import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
 import { scenarioLabelRenameAboveTable } from "./labelRenameAboveTable";
 import { scenarioTableTabRow } from "./tableTabRow";
+import { scenarioRawCopy } from "./rawCopy";
 import { scenarioTableGridPaste } from "./tableGridPaste";
 import { scenarioTableInContainer } from "./tableInContainer";
 import { scenarioTableShortDelimiter } from "./tableShortDelimiter";
@@ -236,6 +237,7 @@ export async function run(): Promise<void> {
       "table-tab-row": () => scenarioTableTabRow(page),
       "table-short-delimiter": () => scenarioTableShortDelimiter(page),
       "table-grid-paste": () => scenarioTableGridPaste(page),
+      "raw-copy": () => scenarioRawCopy(page),
       "table-in-container": () => scenarioTableInContainer(page),
       "table-row-tokens": async () => {
         await scenarioColumnMoveKeepsBlockIdAtRowEnd(page);
@@ -303,6 +305,8 @@ export async function run(): Promise<void> {
     await scenarioTableShortDelimiter(page);
     // QA replay 271-c5-2: a spreadsheet paste into a cell fills the cells from it.
     await scenarioTableGridPaste(page);
+    // CR-480: a Select all and a copy put the Markdown on the clipboard.
+    await scenarioRawCopy(page);
     // QA replay 271-c3-3: a table inside a quote, an alert or an admonition opens the cell editor.
     await scenarioTableInContainer(page);
     // QA replays 271-c1b-1 and 271-c1b-2: block ids and tokens at the end of a table row.

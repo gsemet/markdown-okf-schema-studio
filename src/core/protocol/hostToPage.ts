@@ -224,6 +224,14 @@ export interface PreviewShowCommentsMessage extends RenderMessage<"previewShowCo
   showComments: boolean;
 }
 
+/**
+ * The full text of the document of the render the page shows (frontmatter included): the page cuts
+ * the raw Markdown of a copied selection from it.
+ */
+export interface PreviewSourceTextMessage extends RenderMessage<"previewSourceText"> {
+  text: string;
+}
+
 /** The source lines that differ from HEAD, and whether the marks are enabled (T16). */
 export interface PreviewIncomingChangesMessage extends RenderMessage<"previewIncomingChanges"> {
   enabled: boolean;
@@ -356,6 +364,7 @@ export type HostToPageMessage =
   | PreviewLinkTargetsMessage
   | PreviewHistoryStateMessage
   | PreviewShowCommentsMessage
+  | PreviewSourceTextMessage
   | PreviewIncomingChangesMessage
   | PreviewBaselineDiffMessage
   | PreviewCommentsMessage
@@ -514,6 +523,11 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewLinkTargets: { addressing: "render", isValid: (message) => Array.isArray(message.targets) },
     previewHistoryState: render,
     previewShowComments: render,
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-271
+    previewSourceText: {
+      addressing: "render",
+      isValid: (message) => typeof message.text === "string" && message.text.length <= MAX_PAGE_TEXT_LENGTH,
+    },
     previewIncomingChanges: render,
     previewBaselineDiff: { addressing: "render", isValid: isValidBaselineDiff },
     previewComments: render,

@@ -40,6 +40,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewLinkTargets: { targets: [] },
   previewHistoryState: { canBack: true, canForward: false },
   previewShowComments: { showComments: true },
+  previewSourceText: { text: "# Title" },
   previewIncomingChanges: { enabled: true, ranges: [] },
   previewBaselineDiff: { html: "<p>x</p>", hunks: [{ baseStart: 1, baseEnd: 1, start: 1, end: 1 }] },
   previewComments: { threads: [] },
@@ -221,4 +222,17 @@ test("the answer to a detached save finds the page after a render moved its iden
   const moved = { ...page, revision: 9, requestId: 14 };
   assert.equal(filter.accepts({ type: "previewEditSource", ...page, editId: "e", done: true }, moved), true);
   assert.equal(filter.accepts({ type: "previewEditSource", ...page, documentId: "file:///other.md", editId: "e", done: true }, moved), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271
+test("previewSourceText carries the document text for its render: a bounded string, nothing else", () => {
+  assert.equal(filter.rules.previewSourceText.addressing, "render");
+  const text = (value: unknown, identity: Partial<PageIdentity> = page): boolean =>
+    filter.accepts({ type: "previewSourceText", ...identity, text: value }, page);
+  assert.equal(text(""), true, "an empty document is a document");
+  assert.equal(text("x".repeat(MAX_PAGE_TEXT_LENGTH)), true);
+  assert.equal(text("x".repeat(MAX_PAGE_TEXT_LENGTH + 1)), false, "over the bound");
+  assert.equal(text(undefined), false, "no text");
+  assert.equal(text(12), false, "not a string");
+  assert.equal(text("x", { ...page, requestId: 12 }), false, "another render");
 });

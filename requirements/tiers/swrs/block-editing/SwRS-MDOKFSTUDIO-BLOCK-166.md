@@ -74,7 +74,7 @@ When a writer presses the platform copy chord with blocks selected in edit mode 
 
 | Input | Outcome |
 | --- | --- |
-| Copy, cut or paste chord in reading mode (edit mode off, a selection left over) | The page does nothing and the browser copies |
+| Copy, cut or paste chord in reading mode (edit mode off, a selection left over) | The block-copy handler does nothing; a copy goes to the raw copy (SwRS-MDOKFSTUDIO-BLOCK-272), a cut or a paste to the browser |
 | Ctrl+V in a block text box with the focus | The text box pastes natively |
 | The chord in a field, in the properties table or with an open editor | The page leaves the key to the browser |
 | The chord with Shift or Alt | The page leaves the key to the browser |

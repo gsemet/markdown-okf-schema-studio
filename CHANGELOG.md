@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Ctrl/Cmd+C of a text selection in the preview now copies the Markdown under the selection (as text) and the
+  rendered selection (as HTML), in reading and edit mode (CR-480 copy-selection-raw-markdown)
+
 ## 1.12.1 - 2026-11-24
 
 - Open Preview to Side, Refresh Preview and a restored panel complete once the page shows the document again,

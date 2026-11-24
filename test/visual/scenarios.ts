@@ -167,6 +167,7 @@ export interface Scenario {
   tabHintChecks?: boolean;
   /** CR 292: a spreadsheet paste into the last cell fills the cells from it, adds a row and a column, in one save. */
   tableGridPasteChecks?: boolean;
+  rawCopyChecks?: boolean;
   /** CR 291: a cell of a table inside a quote, an alert or a MyST admonition opens the cell editor and the table bar. */
   tableInContainerChecks?: "quote" | "note";
   /** CR 432: the list item handles sit left of their list or outermost container, on the first line; `push` in a narrow pane; `drag` held then dropped. */
