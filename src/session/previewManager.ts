@@ -493,8 +493,10 @@ export class PreviewManager {
     const panel = session.panel;
     const followsActiveEditor = session.followsActiveEditor;
     const lockedColumn = session.lockedColumn;
+    const inStudioTab = session.inStudioTab;
     this.disposeSession(session, false);
     const replacement = this.createSession(panel, document, workspaceFolder, restoredState, followsActiveEditor);
+    replacement.inStudioTab = inStudioTab;
     // A line requested for this document (a jump) waits for the replacement's page.
     if (session.scroll.pendingRevealLine?.documentId === document.id) {
       replacement.scroll.pendingRevealLine = session.scroll.pendingRevealLine;

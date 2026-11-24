@@ -53,6 +53,8 @@ export const STEP_BUDGET_DEFAULT_MS = 3 * 60_000;
 export const STEP_BUDGETS_MS: Readonly<Record<string, number>> = {
   "real-input": 10 * 60_000,
   "preview-editing": 10 * 60_000,
+  // CR-483: 28 jumps, each from a fresh fixture and an empty window (about 8 s each when healthy).
+  "open-at-line-probe": 8 * 60_000,
   // Suites without inner steps run as one step (WHOLE_SUITE_STEPS). The scroll window takes about
   // 2 minutes (115 s locally, 126 s on CI); the Restricted Mode and standalone windows seconds.
   "scroll-sync-suite": 5 * 60_000,

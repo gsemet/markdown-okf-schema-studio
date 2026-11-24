@@ -2,42 +2,11 @@ import * as assert from "node:assert/strict";
 import * as path from "node:path";
 import * as vscode from "vscode";
 
-import { COMMAND_ID, EDITOR_VIEW_TYPE, getActivePreviewForTests } from "./extensionApi";
-import {
-  closeAllEditors,
-  connectWorkbench,
-  createFixture,
-  findCurrentFrame,
-  waitFor,
-} from "./realInput/harness";
+import { COMMAND_ID, getActivePreviewForTests } from "./extensionApi";
+import { FILLER, pageMarks, settle, studioTabs, tabs, textTabs, withAssociation } from "./openAtLineHelpers";
+import { connectWorkbench, createFixture, findCurrentFrame, waitFor } from "./realInput/harness";
 
-const FILLER = Array.from({ length: 80 }, (_, index) => `Line ${index + 1}: filler paragraph.\n`).join("\n");
 const OPEN_AS_TEXT = "markdown-okf-schema-studio.openAsText";
-
-function tabs(): vscode.Tab[] {
-  return vscode.window.tabGroups.all.flatMap((group) => group.tabs);
-}
-const studioTabs = (): vscode.Tab[] => tabs().filter((tab) => tab.input instanceof vscode.TabInputCustom
-  && tab.input.viewType === EDITOR_VIEW_TYPE);
-const textTabs = (): vscode.Tab[] => tabs().filter((tab) => tab.input instanceof vscode.TabInputText);
-const settle = (milliseconds: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, milliseconds));
-
-/**
- * The editor association a reader would set (`"*.md"` to Studio) for the body, then put back as it was
- * (the user value, so that the next step of the trusted window starts clean).
- */
-async function withAssociation<T>(associated: boolean, body: () => Promise<T>): Promise<T> {
-  const configuration = vscode.workspace.getConfiguration("workbench");
-  const before = configuration.inspect<Record<string, string>>("editorAssociations")?.globalValue;
-  await configuration.update("editorAssociations", associated ? { "*.md": EDITOR_VIEW_TYPE } : undefined, vscode.ConfigurationTarget.Global);
-  try {
-    await closeAllEditors();
-    return await body();
-  } finally {
-    await configuration.update("editorAssociations", before, vscode.ConfigurationTarget.Global);
-    await closeAllEditors();
-  }
-}
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-177
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-195
@@ -68,8 +37,7 @@ export async function run(): Promise<void> {
     await withAssociation(true, async () => {
       await vscode.commands.executeCommand("vscode.open", plain);
       await waitFor("a Studio tab for a plain opening", () => studioTabs().length === 1 && textTabs().length === 0, 30_000);
-      const frame = await findCurrentFrame(page);
-      assert.equal(frame === undefined ? 0 : await frame.locator(".sphinx-preview-line-marker").count(), 0, "a plain opening has no marker");
+      assert.equal(await pageMarks(page), 0, "a plain opening has no marker");
       // Open as Text: the Studio tab goes, a text tab takes its place.
       await vscode.commands.executeCommand(OPEN_AS_TEXT);
       await waitFor("a text tab after Open as Text", () => textTabs().length === 1 && studioTabs().length === 0, 30_000);
@@ -87,8 +55,7 @@ export async function run(): Promise<void> {
       await vscode.commands.executeCommand("vscode.open", target, { selection: new vscode.Range(41, 0, 41, 0) });
       await waitFor("a tab for the jump under the association", () => tabs().length >= 1, 30_000);
       await settle(2500);
-      const frame = studioTabs().length === 1 ? await findCurrentFrame(page) : undefined;
-      const marks = frame === undefined ? 0 : await frame.locator(".sphinx-preview-line-marker").count();
+      const marks = studioTabs().length === 1 ? await pageMarks(page) : 0;
       console.log(`[open-at-line] jump under the association: studio=${studioTabs().length} text=${textTabs().length} marks=${marks}`);
       assert.deepEqual([studioTabs().length, textTabs().length, marks], [1, 0, 0], "a jump under the association opens Studio at the top, with no marker");
     });
@@ -157,5 +124,6 @@ export async function run(): Promise<void> {
     });
   } finally {
     await browser.close();
+    fixture.dispose();
   }
 }

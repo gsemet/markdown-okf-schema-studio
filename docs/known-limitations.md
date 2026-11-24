@@ -78,11 +78,22 @@ offer per-line navigation, or change the separate native source/version diff exp
 
 A Markdown file opens as text; Studio opens only when you choose it (Open With, the Open Preview to
 Side button) or when you associate `*.md` with Studio in `workbench.editorAssociations`. With that
-association these limits apply, measured on VS Code 1.143 on Windows:
+association these limits apply, measured on VS Code 1.147.0 on Windows 11 (a probe of the real window,
+`test/integration/openAtLineProbe.test.ts`):
 
-- A jump to a line (a search result, Quick Open `file.md:40`, a link) opens Studio at the top of the
-  file, and the side preview marks nothing: VS Code opens the custom editor and drops the selection.
-- A jump to a file that is already open as text keeps that text tab and opens a Studio tab beside it.
+- A jump to a line made by VS Code (a search result, Quick Open `file.md:40`, a `file.md#L40` or
+  `file.md#heading` link in a text editor, a Problems entry, Go to Symbol, or a plain jump of another
+  extension) opens Studio at the top of the file, and nothing marks a line: VS Code opens the custom
+  editor and gives it no selection, no fragment or query on its address and no text editor, so Studio
+  has no reliable signal of the line. The Search view's match could not be driven by a command in the
+  probe. Nothing watches for these jumps. To land on the line, run **Open in Studio at This Line**
+  from the text editor that shows it (the entries with no signal all rely on this command), or follow
+  a link to the file from a Studio tab, which does hand its line over.
+- With a Studio tab of the file already open in another group, a jump from Quick Open, a link or a
+  plain jump opens a second Studio tab in the active group at the top; Problems, Go to Symbol and
+  Search reveal nothing at the line. **Open in Studio at This Line** reveals the existing tab instead.
+- A jump to a file that is already open as text keeps that text tab and opens a Studio tab beside it
+  (measured again on 1.147.0).
 - The side preview marks the line of every move VS Code reports as a command with one selection, not
   only a search result or a link: Go to Symbol and Find next can mark it too if VS Code reports
   them as a command (not verified: the real-window trial recorded no selection change for Go Back or

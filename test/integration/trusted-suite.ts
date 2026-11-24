@@ -53,6 +53,8 @@ import { run as runSidePreviewJump } from "./sidePreviewJump.test";
 import { run as runLifecycle } from "./lifecycle.test";
 import { run as runMystDiagnostics } from "./mystDiagnostics.test";
 import { run as runOpenAtLine } from "./openAtLine.test";
+import { run as runOpenAtLineProbe } from "./openAtLineProbe.test";
+import { run as runOpenAtLineStudio } from "./openAtLineStudio.test";
 import { run as runProjectFeatures } from "./projectFeatures.test";
 import { run as runSerializer } from "./serializer.test";
 import { run as runSourceMapping } from "./sourceMapping.test";
@@ -266,6 +268,8 @@ async function runTrustedSuite(): Promise<void> {
     await step("hostile-html", runHostilePreview);
     await step("stock-coexistence", runStockCoexistence);
     await step("open-at-line", runOpenAtLine);
+    await step("open-at-line-probe", runOpenAtLineProbe);
+    await step("open-at-line-studio", runOpenAtLineStudio);
   }
   try {
     if (!onlyRealInput) await step("checkbox-toggle", runCheckboxToggle);

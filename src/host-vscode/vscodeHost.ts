@@ -35,6 +35,7 @@ import { nodeSchemaFiles } from "../node-services/schemaFiles";
 import { lastKeystrokeAt } from "./keystrokes";
 import { createVscodeDocumentStore, type VscodeDocumentStore } from "./documents";
 import { StudioSelections } from "./studioSelections";
+import { StudioLines } from "./studioTabs";
 
 /** The VS Code host's ports, with the VS Code-only parts of its document store and its assets. */
 export interface VscodeHost extends HostServices {
@@ -279,19 +280,25 @@ function createVscodeWatcher(): Watcher {
 /** The only schemes handed to the operating system. */
 const EXTERNAL_URI_SCHEMES: ReadonlySet<string> = new Set(["http", "https", "mailto"]);
 
-function createVscodeNavigation(selections: StudioSelections): Navigation {
+function createVscodeNavigation(selections: StudioSelections, lines: StudioLines): Navigation {
   return {
-    async showDocument(documentId, selection) {
+    async showDocument(documentId, selection, options) {
       const targetUri = vscode.Uri.parse(documentId);
       // The selection is Studio's own: the session marks the line itself (4.5), the jump signal must not mark it twice.
       if (selection) selections.expect(targetUri.toString(), selection.start.line, "marked-by-session");
       const existingGroup = vscode.window.tabGroups.all.find((group) => group.tabs.some((tab) =>
         tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === targetUri.fsPath));
-      await vscode.commands.executeCommand("vscode.open", targetUri, {
-        viewColumn: existingGroup?.viewColumn ?? vscode.ViewColumn.One,
+      const viewColumn = existingGroup?.viewColumn ?? vscode.ViewColumn.One;
+      const open = () => vscode.commands.executeCommand("vscode.open", targetUri, {
+        viewColumn,
         preview: false,
         ...(selection ? { selection: toVscodeRange(selection) } : {}),
       });
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-196
+      if (options?.fromStudioTab) {
+        return lines.openFromStudioTab(targetUri, options.line ?? 1, viewColumn, open);
+      }
+      await open();
     },
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-090
     openExternal: async (url) => {
@@ -376,7 +383,7 @@ function createVscodeLogger(): Logger {
 }
 
 /** Creates the VS Code host; the selections Studio itself makes are recorded in `selections`. */
-export function createVscodeHost(selections = new StudioSelections()): VscodeHost {
+export function createVscodeHost(selections = new StudioSelections(), lines = new StudioLines()): VscodeHost {
   const documents = createVscodeDocumentStore();
   const logger = createVscodeLogger();
   return {
@@ -405,7 +412,7 @@ export function createVscodeHost(selections = new StudioSelections()): VscodeHos
     logger,
     watcher: createVscodeWatcher(),
     processes: createNodeProcessRunner(),
-    navigation: createVscodeNavigation(selections),
+    navigation: createVscodeNavigation(selections, lines),
     editors: createVscodeEditors(documents),
     theme: createVscodeTheme(),
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-004

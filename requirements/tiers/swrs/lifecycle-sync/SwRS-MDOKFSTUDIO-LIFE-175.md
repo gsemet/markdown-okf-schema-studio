@@ -65,7 +65,7 @@ When the extension activates and the user or the workspace settings hold the wor
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview and gets the raw text on request
+  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview, opens Studio at a line, and gets the raw text on request
 - Superseded by:
   - [SwRS-MDOKFSTUDIO-LIFE-195](SwRS-MDOKFSTUDIO-LIFE-195.md): The editor association of Markdown files is restored once from the retired Studio setting
 <!-- okf:links:end -->

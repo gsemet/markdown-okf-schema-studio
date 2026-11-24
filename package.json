@@ -124,6 +124,11 @@
         "category": "Markdown OKF-Schema Studio"
       },
       {
+        "command": "markdown-okf-schema-studio.openInStudioAtLine",
+        "title": "Open in Studio at This Line",
+        "category": "Markdown OKF-Schema Studio"
+      },
+      {
         "command": "markdown-okf-schema-studio.showFeatureIntroductionsAgain",
         "title": "Show Feature Introductions Again",
         "category": "Markdown OKF-Schema Studio"
@@ -180,6 +185,10 @@
           "when": "activeCustomEditorId == 'markdown-okf-schema-studio.editor'"
         },
         {
+          "command": "markdown-okf-schema-studio.openInStudioAtLine",
+          "when": "resourceExtname == .md && !activeCustomEditorId"
+        },
+        {
           "command": "markdown-okf-schema-studio.showFeatureIntroductionsAgain"
         }
       ],
@@ -193,6 +202,11 @@
           "command": "markdown-okf-schema-studio.openAsText",
           "when": "activeCustomEditorId == 'markdown-okf-schema-studio.editor'",
           "group": "1_markdown@1"
+        },
+        {
+          "command": "markdown-okf-schema-studio.openInStudioAtLine",
+          "when": "resourceExtname == .md && activeEditor == workbench.editors.files.textFileEditor",
+          "group": "1_markdown@2"
         }
       ],
       "explorer/context": [

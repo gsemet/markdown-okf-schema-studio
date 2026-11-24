@@ -17,6 +17,7 @@ export const {
   listCitationKeysForTests,
   listDocumentTargetsForTests,
   noteKeystrokeForTests,
+  pinPreviewForTests,
   PANEL_VIEW_TYPE,
   previewGroupFocusMovesForTests,
   previewGroupUnlocksSettledForTests,

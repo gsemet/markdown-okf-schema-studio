@@ -22,6 +22,7 @@ export {
   holdBlockEditAppliesForTests,
   listCitationKeysForTests,
   listDocumentTargetsForTests,
+  pinPreviewForTests,
   previewGroupFocusMovesForTests,
   previewGroupUnlocksSettledForTests,
   recordSelectionChangesForTests,

@@ -30,6 +30,7 @@ tested_in_files:
 - test/core/configuration/editorAssociationMigration.test.ts
 - test/host/openAtLine.test.ts
 - test/integration/openAtLine.test.ts
+- test/integration/openAtLineProbe.test.ts
 - test/integration/reverse-migration-suite.ts
 - test/session/associationMigration.test.ts
 default_owner_email: gaetan@xeberon.net
@@ -79,7 +80,7 @@ When the extension activates and the user or the workspace settings hold the ret
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derives from:
-  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview and gets the raw text on request
+  - [StRS-MDOKFSTUDIO-LIFE-023](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-023.md): A reader sees the line of a jump marked in the side preview, opens Studio at a line, and gets the raw text on request
 - Supersedes:
   - [SwRS-MDOKFSTUDIO-LIFE-175](SwRS-MDOKFSTUDIO-LIFE-175.md): The editor association of Markdown files is migrated to the Studio setting once per scope
 <!-- okf:links:end -->

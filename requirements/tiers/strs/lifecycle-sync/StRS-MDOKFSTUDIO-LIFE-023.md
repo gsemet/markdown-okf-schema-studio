@@ -2,14 +2,15 @@
 type: StRS
 id: StRS-MDOKFSTUDIO-LIFE-023
 uuid: d69de1f3-13c3-4ce8-ad19-125933b2f53f
-title: A reader sees the line of a jump marked in the side preview and gets the
-  raw text on request
+title: A reader sees the line of a jump marked in the side preview, opens Studio
+  at a line, and gets the raw text on request
 description: When a jump moves a Markdown text editor to a line while the side
   preview follows the editor, the Studio SHALL mark that line in the side
   preview, and when the reader asks for the raw text of a Markdown file, the
-  Studio SHALL open the text editor and never replace it by a Studio tab, while
-  the reader who wants every Markdown file in Studio uses the editor association
-  of VS Code.
+  Studio SHALL open the text editor and never replace it by a Studio tab, the
+  reader SHALL be able to open a Studio tab at a line from the text editor and
+  by a link, Back or Next inside a Studio tab, while the reader who wants every
+  Markdown file in Studio uses the editor association of VS Code.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 req_lifecycle: proposed
@@ -45,14 +46,17 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-193
 - SwRS-MDOKFSTUDIO-LIFE-194
 - SwRS-MDOKFSTUDIO-LIFE-195
+- SwRS-MDOKFSTUDIO-LIFE-196
+- SwRS-MDOKFSTUDIO-LIFE-197
+- SwRS-MDOKFSTUDIO-LIFE-198
 default_owner_email: gaetan@xeberon.net
 ---
 
-## A reader sees the line of a jump marked in the side preview and gets the raw text on request
+## A reader sees the line of a jump marked in the side preview, opens Studio at a line, and gets the raw text on request
 
 ### Normative behavior
 
-When a jump moves a Markdown text editor to a line while the side preview follows the editor, the Studio SHALL mark that line in the side preview, and when the reader asks for the raw text of a Markdown file, the Studio SHALL open the text editor and never replace it by a Studio tab, while the reader who wants every Markdown file in Studio uses the editor association of VS Code.
+When a jump moves a Markdown text editor to a line while the side preview follows the editor, the Studio SHALL mark that line in the side preview, and when the reader asks for the raw text of a Markdown file, the Studio SHALL open the text editor and never replace it by a Studio tab, the reader SHALL be able to open a Studio tab at a line from the text editor (command Open in Studio at This Line) and by a link, Back or Next inside a Studio tab, while the reader who wants every Markdown file in Studio uses the editor association of VS Code.
 
 ### Preserved stakeholder intent
 
@@ -64,6 +68,7 @@ As a reader, I jump to a line of a Markdown file from a search, a problem or a l
 - Versions 1.11.0 and 1.12.0 had a setting Open Markdown files in Studio and a watcher that replaced text tabs; this version removes both and writes the `*.md` association back, once and silently, for a reader who had the setting on.
 - Studio never writes a built-in `markdown.preview.*` setting; its only settings writes are the one-time restore of the `*.md` association and the removal of the retired Studio settings.
 - A Markdown file alone activates the extension (activation event `onLanguage:markdown`), so the restore runs for a reader who has no association yet; the engine, the watchers and the diagnostics stay off until the first Studio preview.
+- Open in Studio at This Line and a link, Back or Next in a Studio tab hand the line to the Studio tab of the target (a Studio tab open in any group is revealed, not duplicated); no tab is ever closed. A link opened as text in a Studio tab records no history.
 - With the `*.md` association set, a jump opens a Studio tab at the top of the file, and the side preview marks nothing then; the marker works when the file opens in the text editor.
 
 ### Use case diagram
@@ -76,6 +81,10 @@ flowchart LR
 ```
 
 ### Main paths
+
+#### Path 0: Open Studio at a line
+
+The reader runs Open in Studio at This Line on a Markdown text editor, or follows a link in a Studio tab; the Studio tab opens at the line and the text tab stays.
 
 #### Path 1: Keep the raw text one command away
 
@@ -135,4 +144,7 @@ flowchart LR
   - [SwRS-MDOKFSTUDIO-LIFE-193](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-193.md): The line marker shows the hidden tabs that hold the line and marks its exact line
   - [SwRS-MDOKFSTUDIO-LIFE-194](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-194.md): The line marker marks the front matter property row of the line
   - [SwRS-MDOKFSTUDIO-LIFE-195](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-195.md): The editor association of Markdown files is restored once from the retired Studio setting
+  - [SwRS-MDOKFSTUDIO-LIFE-196](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-196.md): A link, Back or Next from a Studio tab opens the target at its line or anchor
+  - [SwRS-MDOKFSTUDIO-LIFE-197](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-197.md): The history of a link followed from a Studio tab
+  - [SwRS-MDOKFSTUDIO-LIFE-198](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-198.md): Open in Studio at This Line opens a Studio tab at the caret's line and keeps the text tab
 <!-- okf:links:end -->

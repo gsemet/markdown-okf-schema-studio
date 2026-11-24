@@ -82,7 +82,15 @@ With that association VS Code itself opens Studio. A jump to a line (a search re
 first activation of a later version turns an `open.markdownFilesInStudio` that was on into the
 association above, at the same scope (your user settings, your workspace, or both), and removes both settings.
 
-To read the raw text on purpose, run **Markdown OKF-Schema Studio: Open as Text**, **Reopen
+### Open in Studio at This Line
+
+To open the Markdown text editor you are in as a Studio tab at the caret's line, run **Markdown OKF-Schema Studio: Open in Studio at This Line**. It is in the Command Palette and in the title bar menu (the `...` overflow) of a Markdown text editor, and has no default keybinding. The Studio tab opens in the same group, reveals the line and marks it with the arrow; the text tab stays open and no tab is closed. If a Studio tab of the file is already open in another group, that tab is revealed and given the line, and no second tab opens. On a Studio tab, with no editor or on a file that is not Markdown, it only tells you to open a Markdown file as text.
+
+### Links, Back and Next in a Studio tab
+
+In a Studio tab, a link to another Markdown file, and Studio's own Back and Next to a place in another file, open the target at its line or heading (line 1 for a link with neither), in a Studio tab when the target opens as one. A Studio tab of the target that is open in any group is revealed instead of opening a second one. Studio's Back and Next are not VS Code's Go Back: Studio's follow the places you moved through in Studio. With the default settings a link opens the target as text and records nothing in the history; the line is then not handed to a Studio tab.
+
+The text always stays: to read the raw text on purpose, run **Markdown OKF-Schema Studio: Open as Text**, **Reopen
 Editor With... > Text Editor** or **Open With... > Text Editor**. That text editor stays text. A diff stays a text diff, and its side preview shows the real file.
 See [Known Limitations](../known-limitations.md#opening-files) for what is not covered.
 

@@ -99,3 +99,4 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Width mode**: Margin / Auto / Full width preview column state (`data-sphinx-preview-width`); Auto lets wide tables and figures break out of the column.
 - **Detached save**: a final save whose editor the writer closed with Cancel or Escape while it was in flight; the host answers it with `done` or an error that gives the typed text back (`src/page/features/detachedSave.ts`, `src/session/features/detachedEdits.ts`).
 - **Edit in flight**: an open editor, or a detached save the host has not answered; no other edit gesture starts meanwhile.
+- **Line hand-off**: the 1-based line a Studio tab reveals and marks when it opens or is revealed from a command, a link, Back or Next; held once as a pending line for a new Studio tab (5 seconds, `PendingLines` in `src/core/navigation/pendingLine.ts`), or given to a live Studio tab (`src/host-vscode/studioTabs.ts`).
