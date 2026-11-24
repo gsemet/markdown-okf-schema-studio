@@ -175,8 +175,8 @@ check-settings:
 generate-settings:
     {{ npm }} run generate:settings
 
-# Format the justfile and run TypeScript, minimum-VS-Code type, boundary, size, unused-export, marker companion, settings schema, unit, contract, security and requirements checks.
-check: format compile check-min-vscode check-boundaries check-limits check-exports check-markers check-settings unit contracts security release-tests release-notes-check requirements-lint
+# Format the justfile and run TypeScript, minimum-VS-Code type, boundary, size, unused-export, marker companion, settings schema, clip kit storyboard, unit, contract, security and requirements checks.
+check: format compile check-min-vscode check-boundaries check-limits check-exports check-markers check-settings clip-kit-test unit contracts security release-tests release-notes-check requirements-lint
 
 # Audit the production npm dependencies against the registry advisories (online): fails on high or critical.
 audit:
@@ -493,6 +493,10 @@ preflight: clean format
 # Make or remake a feature clip (docs/demo-video/clips/NAME); STEP: doctor, setup, take, render, check or all.
 clip NAME STEP="all" *ARGS:
     fnm exec -- node docs/demo-video/clip-kit/clip.mjs docs/demo-video/clips/{{ NAME }} {{ STEP }} {{ ARGS }}
+
+# Test the feature clip kit's storyboard parser (docs/demo-video/clip-kit/lib/*.test.mjs; no ffmpeg, no VS Code).
+clip-kit-test:
+    fnm exec -- node scripts/node-test.mjs clip-kit "docs/demo-video/clip-kit/lib/*.test.mjs"
 
 # Package the extension as a VSIX.
 package:
