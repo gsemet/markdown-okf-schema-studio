@@ -19,8 +19,8 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-BLOCK-041
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-REVIEW-044; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

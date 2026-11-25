@@ -18,8 +18,9 @@ derives_from:
 - StRS-MDOKFSTUDIO-LIFE-010
 - StRS-MDOKFSTUDIO-LIFE-021
 depends_on: []
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LIFE-100, SwRS-MDOKFSTUDIO-LIFE-108;
+  no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

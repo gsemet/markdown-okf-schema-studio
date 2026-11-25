@@ -17,8 +17,9 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Archived. Another requirement specifies this behaviour, so no marker
+  is expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

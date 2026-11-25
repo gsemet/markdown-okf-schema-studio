@@ -232,3 +232,122 @@ test("ratchet, unnamed companion lines: a listed companion may only shrink", () 
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+const scenarios = (...list: string[]): string => `scenarios:\n${list.map((id) => `  - id: ${id}\n    title: Title of ${id}\n`).join("")}`;
+const requirementFiles = (id: string, extra = ""): Files => ({ [`requirements/tiers/swrs/core/${id}.md`]: swrs(id, "superseded", extra) });
+const strsFiles = (id: string, extra = ""): Files => ({
+  [`requirements/tiers/strs/core/${id}.md`]: `---\ntype: StRS\nid: ${id}\nreq_lifecycle: proposed\n${extra}---\n\n# ${id}\n`,
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S2
+test("rule 4: a marker names a scenario declared in the target's scenarios:", () => {
+  const [id] = ids(1);
+  const declared = requirementFiles(id, scenarios("S1", "S2"));
+  const marked = (marker: string): Files => ({ ...declared, "test/a.test.ts": `${marker}\n` });
+
+  const undeclared = check(marked(`// @tests_req ${id}#S3`));
+  assert.equal(undeclared.status, 1);
+  assert.match(undeclared.out, new RegExp(`test/a\.test\.ts:1: fragment-undeclared: @tests_req ${id}#S3 `, "u"));
+  assert.equal(check(marked(`// @tests_req ${id}#S0`)).status, 1, "S0 is not an id");
+  assert.equal(check(marked(`// @tests_req ${id}#S1`)).status, 0);
+  assert.equal(check(marked(`// @tests_req ${id}#S2`)).status, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S3
+test("rule 4: a marker on a target with scenarios: has a fragment, on a target without has none", () => {
+  const [id, bare] = ids(2);
+  const files: Files = { ...requirementFiles(id, scenarios("S1")), ...requirementFiles(bare) };
+
+  const missing = check({ ...files, "test/a.test.ts": `// @tests_req ${id}\n` });
+  assert.equal(missing.status, 1);
+  assert.match(missing.out, new RegExp(`test/a\.test\.ts:1: fragment-required: @tests_req ${id} `, "u"));
+
+  const unexpected = check({ ...files, "test/a.test.ts": `// @tests_req ${bare}#S1\n` });
+  assert.equal(unexpected.status, 1);
+  assert.match(unexpected.out, new RegExp(`test/a\.test\.ts:1: fragment-unexpected: @tests_req ${bare}#S1 `, "u"));
+
+  assert.equal(check({ ...files, "test/a.test.ts": `// @tests_req ${id}#S1\n// @tests_req ${bare}\n` }).status, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S1
+test("rule 2 and rule 4: two fragments of one ID count as one ID in a marker block", () => {
+  const [one, two, three] = ids(3);
+  const files: Files = { ...requirementFiles(one, scenarios("S1", "S2")), ...requirementFiles(two), ...requirementFiles(three) };
+  const block = [`// @tests_req ${one}#S1`, `// @tests_req ${one}#S2`, `// @tests_req ${two}`, `// @tests_req ${three}`].join("\n");
+  const result = check({ ...files, "test/a.test.ts": `${block}\ntest("x", () => {});\n` });
+  assert.equal(result.status, 0, result.out);
+
+  const acceptance = "StRS-T-CORE-001";
+  const withAccepts = check({ ...files, ...strsFiles(acceptance), "test/integration/a.test.ts": `${block}\n// @accepts_req ${acceptance}\ntest("x", () => {});\n` });
+  assert.equal(withAccepts.status, 1, "an @accepts_req marker joins the block");
+  assert.match(withAccepts.out, /a marker block names 4 requirement IDs \(at most 3\)/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S4
+test("rule 5: @accepts_req sits under test/integration/, except for the StRS of products other than the editor", () => {
+  const strs = "StRS-T-CORE-001";
+  const outside = "StRS-T-CORE-007";
+  const files: Files = { ...strsFiles(strs), ...strsFiles(outside) };
+
+  const refused = check({ ...files, "test/visual/a.test.ts": `// @accepts_req ${strs}\n` });
+  assert.equal(refused.status, 1);
+  assert.match(refused.out, new RegExp(`test/visual/a\.test\.ts:1: accepts-placement: @accepts_req ${strs} `, "u"));
+  assert.equal(check({ ...files, "src/a.ts": `// @accepts_req ${strs}\n` }).status, 1, "never in src");
+
+  assert.equal(check({ ...files, "test/integration/a.test.ts": `// @accepts_req ${strs}\n` }).status, 0);
+  assert.equal(check({ ...files, "test/build/a.test.ts": `// @accepts_req ${outside}\n` }).status, 0, "CORE-007 is accepted on its bench");
+  assert.equal(check({ ...files, "test/visual/a.test.ts": `// @accepts_req ${outside}\n` }).status, 1, "only under build, security, site or core");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S5
+test("rule 5: @accepts_req never targets a SwRS", () => {
+  const [id] = ids(1);
+  const result = check({ ...requirementFiles(id), "test/integration/a.test.ts": `// @accepts_req ${id}\n` });
+  assert.equal(result.status, 1);
+  assert.match(result.out, new RegExp(`test/integration/a\.test\.ts:1: accepts-on-swrs: @accepts_req ${id} `, "u"));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S6
+test("rule 5: no @tests_req StRS under test/integration/, and the baseline holds the existing ones", () => {
+  const strs = "StRS-T-CORE-001";
+  const files: Files = { ...strsFiles(strs), "test/integration/a.test.ts": `// @tests_req ${strs}\n` };
+
+  const refused = check(files);
+  assert.equal(refused.status, 1);
+  assert.match(refused.out, new RegExp(`test/integration/a\.test\.ts:1: strs-tests-in-integration: @tests_req ${strs} `, "u"));
+  assert.equal(check({ ...files, "test/integration/a.test.ts": "", "test/visual/a.test.ts": `// @tests_req ${strs}\n` }).status, 0, "a simulated bench may test a StRS path");
+
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-markers-"));
+  try {
+    spawnSync("git", ["init", "-q"], { cwd: root });
+    for (const [file, content] of Object.entries({ "requirements/config.yml": CONFIG, ...files })) {
+      fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
+      fs.writeFileSync(path.join(root, file), content);
+    }
+    fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
+    const write = (count: number): void =>
+      fs.writeFileSync(path.join(root, "scripts", "marker-baseline.json"), JSON.stringify({ blocks: {}, unnamedCompanionLines: {}, strsTestsInIntegration: { "test/integration/a.test.ts": count } }));
+    write(1);
+    assert.equal(runAt(root).status, 0, "listed at its count");
+    write(2);
+    assert.match(runAt(root).out, /shrank to 1 \(baseline 2\)/u);
+    write(0);
+    assert.match(runAt(root).out, /: 1 @tests_req StRS markers under test\/integration\/ \(baseline 0\)/u);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S3
+test("rules 4 and 5 read companion marker lines too, and print one line per failure", () => {
+  const [id] = ids(1);
+  const result = check({
+    ...hostFiles,
+    ...requirementFiles(id, scenarios("S1")),
+    "src/host/main.markers.ts": companion("src/host/main.ts", [`// @tests_req ${id} — scenarioPalette`, `// @tests_req ${id}#S2 — scenarioPalette`]),
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.out, /main\.markers\.ts:2: fragment-required: @tests_req SwRS-T-CORE-001 /u);
+  assert.match(result.out, /main\.markers\.ts:3: fragment-undeclared: @tests_req SwRS-T-CORE-001#S2 /u);
+});

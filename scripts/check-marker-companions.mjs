@@ -2,7 +2,9 @@
  * Requirement markers (`just check-markers`).
  *
  * A marker is a link from a requirement to the code or test that carries it
- * (`@implements_req <ID>`, `@tests_req <ID>`). The check holds three rules and a ratchet.
+ * (`@implements_req <ID>`, `@tests_req <ID>`, `@accepts_req <StRS-ID>`), with an optional `#S<n>`
+ * fragment naming one scenario of the requirement (`@tests_req <ID>#S<n>`). The check holds the
+ * rules below and a ratchet.
  *
  * Marker block: the requirement markers that sit together with no line of code between them.
  * Several one-ID marker comments above one declaration or one test form one block, even when blank
@@ -28,6 +30,18 @@
  *    `// @implements_req <ID> — <code point>`; the name occurs as text in the host file or in a
  *    file directly in the host's folder.
  *
+ * 4. Fragments (the new-mode rules of okfreq, enforced while the bundle is still in the old mode).
+ *    A `#S<n>` fragment names a scenario declared in the `scenarios:` of the target; a marker on a
+ *    target that declares `scenarios:` has a fragment, and a marker on a target that declares none
+ *    has none (`fragment-undeclared`, `fragment-required`, `fragment-unexpected`). The ID-exists
+ *    check and the 3-ID cap of rule 2 use the ID without its fragment.
+ * 5. Benches. `@accepts_req` appears only under `test/integration/` (a StRS path walked in real VS
+ *    Code), except for the StRS of ACCEPTANCE_OUTSIDE_VSCODE (CORE-007, CORE-008, TRUST-014), which
+ *    may sit under `test/build`, `test/security`, `test/site` or `test/core`; it never targets a
+ *    SwRS (`accepts-placement`, `accepts-on-swrs`). No `@tests_req StRS-...` sits under
+ *    `test/integration/` (`strs-tests-in-integration`).
+ *    Each failure of rules 4 and 5 prints `<path>:<line>: <rule>: <marker>`.
+ *
  * Ratchet (`scripts/marker-baseline.json`): `blocks` (rule 2: the sum of IDs over the over-limit
  * blocks of a file) and `unnamedCompanionLines` (rule 3: the unnamed marker lines of a companion)
  * list what was already wrong; a listed file may only shrink. The check fails when a listed file
@@ -47,12 +61,21 @@ import { parse as parseYaml } from "yaml";
 /** Maximum distinct requirement IDs in one marker block. */
 export const BLOCK_LIMIT = 3;
 const IN_FORCE = new Set(["draft", "proposed", "approved"]);
-const MARKER = /^\s*(?:(?:#|\/\/|\/\*|\*|<!--)\s*)?(@implements_req|@tests_req)\s+([A-Za-z][A-Za-z0-9_-]*)/u;
+const MARKER = /^\s*(?:(?:#|\/\/|\/\*|\*|<!--)\s*)?(@implements_req|@tests_req|@accepts_req)\s+([A-Za-z][A-Za-z0-9_-]*)(?:#([^\s,;:)*]*))?/u;
+/** The StRS that a real VS Code walk cannot reach: the release, the site and the built VSIX. */
+export const ACCEPTANCE_OUTSIDE_VSCODE = /^StRS-[A-Za-z0-9]+-(?:CORE-007|CORE-008|TRUST-014)$/u;
+const ACCEPTANCE_DIRS = ["test/integration"];
+const ACCEPTANCE_OUTSIDE_DIRS = ["test/build", "test/security", "test/site", "test/core"];
+const FRAGMENT = /^S[1-9][0-9]*$/u;
+/** The rule whose offenders existed before this check and sit on the baseline until the marker sort removes them. */
+const RATCHETED_RULE = "strs-tests-in-integration";
 
-/** The marker of a line as okfreq reads it, or undefined. */
+/** The marker of a line as okfreq reads it, or undefined. `fragment` is the text after `#`, if any; `text` the marker itself. */
 export function parseMarker(line) {
   const match = MARKER.exec(line.replace(/\r$/u, ""));
-  return match ? { kind: match[1], id: match[2] } : undefined;
+  if (!match) return undefined;
+  const text = `${match[1]} ${match[2]}${match[3] === undefined ? "" : `#${match[3]}`}`;
+  return { kind: match[1], id: match[2], fragment: match[3], text };
 }
 
 /** `marker`, `comment`, `blank` or `code`. */
@@ -112,6 +135,55 @@ export function readScopes(root) {
 function frontmatter(text) {
   const match = /^---\r?\n([\s\S]*?)\r?\n---/u.exec(text);
   return match ? (parseYaml(match[1]) ?? {}) : {};
+}
+
+/** Every requirement of `requirements/tiers`: ID to `{ tier, scenarios }` (`scenarios` is a Set of ids, or undefined). */
+export function readRequirements(root) {
+  const requirements = new Map();
+  for (const file of trackedFiles(root, "requirements/tiers")) {
+    const id = /(?:StRS|SwRS)-[A-Za-z0-9]+-[A-Z]+-\d+(?=\.md$)/u.exec(file)?.[0];
+    if (!id) continue;
+    const text = readFileSync(path.join(root, file), "utf8");
+    let scenarios;
+    if (text.includes("scenarios:")) {
+      const declared = frontmatter(text).scenarios;
+      if (Array.isArray(declared)) scenarios = new Set(declared.map((entry) => String(entry?.id)));
+    }
+    requirements.set(id, { tier: id.startsWith("StRS-") ? "StRS" : "SwRS", scenarios });
+  }
+  return requirements;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-CORE-097
+/**
+ * Rules 4 and 5 on one line: `{ rule, message }`, the message being `<path>:<line>: <rule>: <marker> (<why>)`. `file` is the
+ * repository-relative path, `number` the 1-based line number.
+ */
+export function checkMarkerRules(file, number, line, requirements) {
+  const marker = parseMarker(line);
+  if (!marker || marker.kind === "@implements_req") return [];
+  const target = requirements.get(marker.id);
+  if (!target) return [];
+  const fail = (rule, why) => ({ rule, message: `${file}:${number}: ${rule}: ${marker.text} (${why})` });
+  const problems = [];
+  if (marker.kind === "@accepts_req") {
+    const outside = ACCEPTANCE_OUTSIDE_VSCODE.test(marker.id) && insideDirs(file, ACCEPTANCE_OUTSIDE_DIRS);
+    if (target.tier === "SwRS") {
+      problems.push(fail("accepts-on-swrs", "@accepts_req targets a StRS path; a SwRS test uses @tests_req <SwRS-ID>#S<n>"));
+    } else if (!insideDirs(file, ACCEPTANCE_DIRS) && !outside) {
+      problems.push(fail("accepts-placement", "@accepts_req sits under test/integration/; CORE-007, CORE-008 and TRUST-014 may sit under test/build, test/security, test/site or test/core"));
+    }
+  } else if (target.tier === "StRS" && insideDirs(file, ACCEPTANCE_DIRS)) {
+    problems.push(fail(RATCHETED_RULE, "a StRS path walked in real VS Code is an @accepts_req; test/integration/ holds no @tests_req StRS"));
+  }
+  if (target.scenarios === undefined) {
+    if (marker.fragment !== undefined) problems.push(fail("fragment-unexpected", `${marker.id} declares no scenarios:; write the marker without a fragment`));
+  } else if (marker.fragment === undefined) {
+    problems.push(fail("fragment-required", `${marker.id} declares scenarios:; name the one this marker checks with #S<n>`));
+  } else if (!FRAGMENT.test(marker.fragment) || !target.scenarios.has(marker.fragment)) {
+    problems.push(fail("fragment-undeclared", `a #S<n> fragment names a scenario declared in the scenarios: of ${marker.id}: ${[...target.scenarios].join(", ")}`));
+  }
+  return problems;
 }
 
 /** Rule 1: the in-force, non-exempt SwRS with no `@implements_req` in a source dir. */
@@ -189,9 +261,9 @@ export function checkCompanion(root, file, requirementIds) {
     if (trimmed !== "" && !trimmed.startsWith("//") && trimmed !== "export {};") {
       problems.push(`${where}: a companion holds only comment lines and "export {};"`);
     }
-    const marker = /^\/\/ @(implements_req|tests_req) (\S+)(.*)$/u.exec(trimmed);
+    const marker = /^\/\/ @(implements_req|tests_req|accepts_req) ([^\s#]+)(?:#\S*)?(.*)$/u.exec(trimmed);
     if (!marker) {
-      if (/@(implements_req|tests_req)\b/u.test(trimmed)) problems.push(`${where}: malformed marker`);
+      if (/@(implements_req|tests_req|accepts_req)\b/u.test(trimmed)) problems.push(`${where}: malformed marker`);
       return;
     }
     markers += 1;
@@ -208,9 +280,13 @@ export function checkCompanion(root, file, requirementIds) {
 }
 
 function readBaseline(baselinePath) {
-  if (!existsSync(baselinePath)) return { blocks: {}, unnamedCompanionLines: {} };
+  if (!existsSync(baselinePath)) return { blocks: {}, unnamedCompanionLines: {}, strsTestsInIntegration: {} };
   const parsed = JSON.parse(readFileSync(baselinePath, "utf8"));
-  return { blocks: parsed.blocks ?? {}, unnamedCompanionLines: parsed.unnamedCompanionLines ?? {} };
+  return {
+    blocks: parsed.blocks ?? {},
+    unnamedCompanionLines: parsed.unnamedCompanionLines ?? {},
+    strsTestsInIntegration: parsed.strsTestsInIntegration ?? {},
+  };
 }
 
 function writeBaseline(baselinePath, baseline) {
@@ -219,11 +295,13 @@ function writeBaseline(baselinePath, baseline) {
     description: "Requirement markers that were already wrong when the gate started (see scripts/check-marker-companions.mjs). "
       + "blocks: files with a marker block of more than 3 requirement IDs, with the sum of IDs over their over-limit blocks. "
       + "unnamedCompanionLines: companion files with marker lines that do not name their scenario or code point. "
+      + "strsTestsInIntegration: test/integration files that hold @tests_req StRS markers (to be sorted into @accepts_req or removed), with their count. "
       + "They may only shrink: lower an entry when its file improves (node scripts/check-marker-companions.mjs --update) "
       + "and remove it once the file is clean. Never add a file or raise a number.",
     limit: BLOCK_LIMIT,
     blocks: sort(baseline.blocks),
     unnamedCompanionLines: sort(baseline.unnamedCompanionLines),
+    strsTestsInIntegration: sort(baseline.strsTestsInIntegration),
   };
   writeFileSync(baselinePath, JSON.stringify(document, null, 2) + "\n", "utf8");
 }
@@ -251,17 +329,16 @@ export function runCheck(root, { update = false } = {}) {
   const rule1 = checkSourceMarkers(root, sourceDirs);
   errors.push(...rule1.problems);
 
-  const requirementIds = new Set(
-    git(root, ["ls-files", "--cached", "--others", "--exclude-standard", "-z", "requirements/tiers"])
-      .map((file) => /(?:StRS|SwRS)-[A-Za-z0-9]+-[A-Z]+-\d+(?=\.md$)/u.exec(file)?.[0])
-      .filter(Boolean),
-  );
+  const requirements = readRequirements(root);
+  const requirementIds = new Set(requirements.keys());
 
   const dirs = [...sourceDirs, ...testDirs];
   const blockCounts = new Map();
   const blockDetail = new Map();
   const unnamedCounts = new Map();
   const unnamedDetail = new Map();
+  const benchCounts = new Map();
+  const benchDetail = new Map();
   let companions = 0;
   for (const file of trackedFiles(root, ...dirs).filter((entry) => insideDirs(entry, dirs))) {
     const text = readFileSync(path.join(root, file), "utf8");
@@ -277,6 +354,17 @@ export function runCheck(root, { update = false } = {}) {
         unnamedDetail.set(file, unnamed);
       }
     }
+    const benchFailures = [];
+    text.split("\n").forEach((line, index) => {
+      for (const failure of checkMarkerRules(file, index + 1, line, requirements)) {
+        if (failure.rule === RATCHETED_RULE) benchFailures.push(failure.message);
+        else errors.push(failure.message);
+      }
+    });
+    if (benchFailures.length > 0) {
+      benchCounts.set(file, benchFailures.length);
+      benchDetail.set(file, benchFailures);
+    }
     if (allNamed) continue;
     const over = markerBlocks(text).filter((block) => block.ids.size > BLOCK_LIMIT);
     if (over.length > 0) {
@@ -288,22 +376,24 @@ export function runCheck(root, { update = false } = {}) {
   const baseline = readBaseline(baselinePath);
   const staleBlocks = new Map();
   const staleUnnamed = new Map();
+  const staleBench = new Map();
+  ratchet({ counts: benchCounts, detail: benchDetail, listed: baseline.strsTestsInIntegration, what: "@tests_req StRS markers under test/integration/", errors, stale: staleBench });
   ratchet({ counts: blockCounts, detail: blockDetail, listed: baseline.blocks, what: "requirement IDs in over-limit marker blocks", errors, stale: staleBlocks });
   ratchet({ counts: unnamedCounts, detail: unnamedDetail, listed: baseline.unnamedCompanionLines, what: "unnamed companion marker lines", errors, stale: staleUnnamed });
 
   if (update) {
-    for (const [stale, listed] of [[staleBlocks, baseline.blocks], [staleUnnamed, baseline.unnamedCompanionLines]]) {
+    for (const [stale, listed] of [[staleBlocks, baseline.blocks], [staleUnnamed, baseline.unnamedCompanionLines], [staleBench, baseline.strsTestsInIntegration]]) {
       for (const [file, count] of stale) {
         if (count === undefined) delete listed[file];
         else listed[file] = count;
       }
     }
     writeBaseline(baselinePath, baseline);
-    const lowered = staleBlocks.size + staleUnnamed.size;
+    const lowered = staleBlocks.size + staleUnnamed.size + staleBench.size;
     console.log(`check-markers: ${relativeBaseline} updated (${lowered} entr${lowered === 1 ? "y" : "ies"} lowered or removed)`);
   } else {
     const hint = "node scripts/check-marker-companions.mjs --update";
-    for (const [stale, listed] of [[staleBlocks, baseline.blocks], [staleUnnamed, baseline.unnamedCompanionLines]]) {
+    for (const [stale, listed] of [[staleBlocks, baseline.blocks], [staleUnnamed, baseline.unnamedCompanionLines], [staleBench, baseline.strsTestsInIntegration]]) {
       for (const [file, count] of stale) {
         errors.push(count === undefined
           ? `${file}: clean or gone; remove it from ${relativeBaseline} (${hint})`
@@ -312,7 +402,7 @@ export function runCheck(root, { update = false } = {}) {
     }
   }
 
-  const onBaseline = new Set([...Object.keys(baseline.blocks), ...Object.keys(baseline.unnamedCompanionLines)]).size;
+  const onBaseline = new Set([...Object.keys(baseline.blocks), ...Object.keys(baseline.unnamedCompanionLines), ...Object.keys(baseline.strsTestsInIntegration)]).size;
   return {
     errors,
     summary: `check-markers: ${companions} companion file(s), ${rule1.inForce} in-force SwRS marked, ${onBaseline} files on the marker baseline`,

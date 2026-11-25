@@ -2,6 +2,15 @@
 
 ## 2026-11-25
 
+### StRS paths and SwRS scenarios on okfreq 0.18 (CR-504, first layer)
+
+- Bumped okf-schema to 0.18.1 and the bundle schemas to its declarations (`scenarios:`, `accepted_in_files`, the StRS acceptance waiver fields); `markers.accepts` is `@accepts_req` and `accepted_in_files` is a generated field. `strs_test_coverage_mode` is unchanged (`linked-swrs-and-validation-test`).
+- Added (`proposed`): SwRS-MDOKFSTUDIO-CORE-097 (the marker check reads the scenarios of every requirement and refuses an undeclared, missing or unexpected `#S<n>` fragment, an `@accepts_req` on the wrong bench or on a SwRS, and a `@tests_req` StRS marker under `test/integration/`), derived from StRS-MDOKFSTUDIO-CORE-007. Reason: CR-504; the new-mode fragment rules are enforced while the bundle is still in the old mode.
+
+### Retired SwRS are exempt from markers
+
+- Changed (metadata only, no body text): 97 retired SwRS (92 superseded, 5 deprecated) that were not exempt get `annotation_exemption: true` and an `exemption_reason` in the existing form (`Superseded by SwRS-...; no marker expected.` or `Archived. ...`). Reason: CR-504, D5; okfreq counts every non-exempt SwRS as a coverage target of its StRS whatever its lifecycle, against the project convention. None of the 97 is approved.
+
 ### Vega charts: live view with a hover detail (CR-503)
 
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-DIAG-123 (a chart is a live SVG view, no image; a hover box lists the fields of the mark: Vega-Lite by default, a full Vega chart only where its spec encodes a tooltip, none for `"tooltip": null`; no event binding), DIAG-009 (a detached chart view of the same source and theme is shown again, 16 views, finalized only when detached), DIAG-128 (an exported chart is its inline SVG with local gradient references, no hover box, no script), StRS-MDOKFSTUDIO-DIAG-015 (Path 1 step 3 wording)
