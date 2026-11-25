@@ -82,8 +82,7 @@ test("CR234: a removal next to a changed line across a blank line is one hunk", 
   assert.deepEqual(lineHunks("a\nold\n\nz\n", "a\nnew\n\nadded\nz\n"), [{ baseStart: 2, baseEnd: 3, start: 2, end: 4 }]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S5
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S7
 test("CR234: a removal is never merged across a heading or a text line", () => {
   assert.deepEqual(lineHunks("a\ngone\n\n# H\n\nold\nz\n", "a\n\n# H\n\nnew\nz\n"), [
     { baseStart: 2, baseEnd: 2, start: 2, end: 1 },

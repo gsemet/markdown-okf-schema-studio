@@ -46,7 +46,6 @@ tested_in_files:
 - test/integration/radioChoice.test.ts
 - test/page/runtimeRadioGroups.test.ts
 - test/session/radioChoice.test.ts
-- test/visual/radioPlanScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

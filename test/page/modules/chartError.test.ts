@@ -27,7 +27,7 @@ test("an invalid chart shown several times has exactly one error with one detail
   assert.doesNotMatch(chart.querySelector("details")!.textContent, /Unknown mark/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S3
 test("the reason is plain text, never HTML", () => {
   const doc = new FakeDocument();
   const chart = chartWithSource(doc);

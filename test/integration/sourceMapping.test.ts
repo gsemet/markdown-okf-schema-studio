@@ -40,7 +40,6 @@ export async function run(): Promise<void> {
     const sourceFile = escapeRegex(path.resolve(fixturePath));
     assert.match(preview.html, new RegExp(`data-sphinx-preview-document="${documentId}"`, "u"));
     assert.match(preview.html, new RegExp(`data-sphinx-source-file="${sourceFile}"`, "u"));
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S2
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S7
     assert.match(preview.html, /data-sphinx-source-line="[1-9]\d*"/u);
     assert.match(preview.html, /data-sphinx-preview-block="source-block-\d+"/u);

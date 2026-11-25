@@ -123,7 +123,6 @@ export const GFM_GALLERY_ASSERTIONS: ContentAssertion[] = [
   { message: "three task list checkboxes, one checked", selector: `${MAIN} input.myst-checkbox`, count: 3, expr: "document.querySelectorAll('#sphinx-myst-preview-content input.myst-checkbox:checked').length === 1" },
   { message: "the table honours column alignment", selector: `${MAIN} table:not(.myst-raw-html-table table) th:nth-child(3)`, css: { textAlign: "right" } },
   // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S3
-  // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S4
   {
     message: "every cell of the table keeps a computed minimum width of 5em",
     selector: `${MAIN} table:not(.myst-raw-html-table table) :where(th, td)`,
@@ -733,7 +732,6 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
   ...FIRST_GAP_CASES.filter(([name]) => ["paragraph", "table"].includes(name))
     .map(([name, fixture, kind]) => ({
       // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011#S2
-      // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011#S3
       id: `first-element-gap-${name}-360-collapsed`,
       fixture,
       theme: "light" as const,

@@ -69,3 +69,14 @@ test("a StRS without the section gives no path and an unknown id is kept as cite
   const paths = parseMainPaths("### Main paths\n\n#### Path 1: x\n\n1. A\n   - SwRS-UNKNOWN-999: moves\n2. B\n");
   assert.deepEqual(citedIds(paths), ["SwRS-UNKNOWN-999"], "the parser does not check that the id exists");
 });
+
+test("a path heading carries its S<n> id, and the older heading has none", () => {
+  const section = (heading: string): string =>
+    `### Main paths\n\n${heading}\n\n1. A state\n   - SwRS-X-001: go\n2. Another state\n`;
+  const withId = parseMainPaths(section("#### Path S2: Reopen a document"));
+  assert.equal(withId[0]?.id, "S2");
+  assert.equal(withId[0]?.title, "Reopen a document");
+  const older = parseMainPaths(section("#### Path 2: Reopen a document"));
+  assert.equal(older[0]?.id, "");
+  assert.equal(older[0]?.title, "Reopen a document");
+});

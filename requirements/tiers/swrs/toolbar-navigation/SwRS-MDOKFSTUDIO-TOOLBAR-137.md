@@ -35,7 +35,6 @@ tested_in_files:
 - test/page/exportWhileEditing.test.ts
 - test/page/modules/exportSnapshot.test.ts
 - test/visual/capture_export_html.py
-- test/visual/exportHtmlScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

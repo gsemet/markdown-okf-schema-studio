@@ -14,7 +14,7 @@ test("chartKindOf names the chart of a vega-lite or vega fence and nothing else"
   assert.equal(chartKindOf({ type: "mystDirective", name: "vega-lite" }), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S3
 test("parseChartSource reads a JSON or YAML object and gives the reason for anything else", () => {
   const json = parseChartSource('{ "mark": "bar", "data": { "values": [{ "a": 1 }] } }');
   assert.ok(json.ok && json.spec.mark === "bar");

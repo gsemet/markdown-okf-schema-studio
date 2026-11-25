@@ -46,7 +46,6 @@ implemented_in_files:
 tested_in_files:
 - test/core/scroll/anchorPolicy.holes.test.ts
 - test/core/scroll/anchorPolicy.test.ts
-- test/integration/scroll-sync-suite.ts
 - test/integration/sourceMapping.test.ts
 - test/page/lifeReq.requirements.test.ts
 - test/page/runtimeContentPatch.test.ts

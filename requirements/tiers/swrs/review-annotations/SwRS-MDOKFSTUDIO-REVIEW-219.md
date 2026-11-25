@@ -31,7 +31,6 @@ derived_by: []
 implemented_in_files:
 - src/session/features/comments.ts
 tested_in_files:
-- test/integration/commentAnchors.test.ts
 - test/integration/realInput/tableCommentUndo.ts
 - test/session/reviewReqComments.requirements.test.ts
 default_owner_email: gaetan@xeberon.net

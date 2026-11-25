@@ -41,13 +41,11 @@ function historyOf(): NonNullable<ReturnType<typeof getActivePreviewForTests>>["
 // @accepts_req StRS-MDOKFSTUDIO-TOOLBAR-009#S1
 // @accepts_req StRS-MDOKFSTUDIO-TOOLBAR-011#S1
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S2
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S3
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S3
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S7
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S2
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S5
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S4
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S10
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117#S1
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117#S3
 export async function run(): Promise<void> {

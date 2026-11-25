@@ -25,6 +25,7 @@ test("no section, or a section without a Mermaid fence, has no diagram", () => {
 });
 
 test("with two fences the first is taken, and a section in the links block is ignored", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S1
   // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S2
   assert.equal(parseUseCaseDiagram(`### Use case diagram\n\n${FENCE("flowchart LR\n  A --> B")}\n\n${FENCE(DIAGRAM_SOURCE)}\n`), "flowchart LR\n  A --> B");
   assert.equal(parseUseCaseDiagram(`## T\n\n<!-- okf:links:start -->\n### Use case diagram\n\n${FENCE(DIAGRAM_SOURCE)}\n`), undefined);

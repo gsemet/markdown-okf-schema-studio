@@ -152,7 +152,6 @@ test("a document that changes while the author is resolved gets the changed-mean
   assert.equal(quick.results[0]!.ok, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 test("a reply, a delete and a find replace on a file VS Code holds read-only answer the read-only reason", async () => {
   for (const restrictedReads of [false, true]) {
     const readOnly = setup({ readOnly: true, restrictedReads });

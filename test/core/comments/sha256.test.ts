@@ -5,8 +5,6 @@ import { test } from "node:test";
 import { hashText } from "../../../src/core/comments/commentStore";
 import { sha256Hex } from "../../../src/core/comments/sha256";
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S10
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S11
 test("the synchronous sha256 equals node:crypto on empty, ASCII, multibyte, long and block-boundary inputs", () => {
   const inputs = [
     "",

@@ -69,9 +69,7 @@ tested_in_files:
 - test/core/protocol/pageToHost.test.ts
 - test/core/state/previewTheme.test.ts
 - test/core/state/previewViewPreferences.test.ts
-- test/integration/lifecycle.test.ts
 - test/integration/paletteMode.test.ts
-- test/integration/previewEditing.test.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/tocColumn.test.ts

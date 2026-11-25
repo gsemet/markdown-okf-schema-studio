@@ -99,7 +99,7 @@ test("dropped files are written as relative links and images after the line, tit
   assert.equal(drop.applyCalls.length, 1, "one undo step");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S3
 test("files outside the workspace, other addresses and unreadable files are handled without touching the source", async () => {
   const outside = fixture();
   await outside.send(["file:///outside/other.md", "https://example.com/a.md"]);
@@ -138,7 +138,6 @@ test("a dropped Markdown file is not read under restricted reads: its link has n
   assert.equal(restricted.document.getText().includes("Getting"), false, "the heading is not read");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 test("a drop on a file VS Code holds read-only answers the read-only reason", async () => {
   for (const restrictedReads of [false, true]) {
     const drop = fixture({ readOnly: true, restrictedReads });
@@ -150,7 +149,6 @@ test("a drop on a file VS Code holds read-only answers the read-only reason", as
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
 test("a drop on a standalone file links any file relative to the document, reading none", async () => {
   const drop = fixture({ standalone: true, restrictedReads: true });
   await drop.send(["file:///lone/img/logo.png", "file:///w/notes/The%20Guide.md"]);

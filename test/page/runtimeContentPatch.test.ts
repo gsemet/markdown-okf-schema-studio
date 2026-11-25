@@ -86,7 +86,6 @@ function traceStartup(
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S1
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S8
 test("T33: the startup sequence of effects and messages is stable", () => {
   const scenarios: Array<[string, Parameters<typeof createRuntimeHarness>[0], boolean | undefined]> = [
@@ -892,8 +891,6 @@ test("CR 050: a patch keeps the code of each status line and refuses a malformed
   assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>", "a code that is not a string refuses the patch");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S1
-// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S2
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-059#S6
 test("T34: the patch rebuilds the status region from plain text", () => {
   const harness = createRuntimeHarness({ previewStatus: "success" });

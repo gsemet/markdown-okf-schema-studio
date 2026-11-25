@@ -12,7 +12,6 @@ function model() {
 
 test("the model separates active from retired by req_lifecycle and reads the older key", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-083#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
   const m = model();
   assert.deepEqual(m.retired.map((r) => r.id), ["StRS-X-002", "SwRS-X-015", "SwRS-X-016"]);
   assert.equal(m.byId.get("SwRS-X-014")?.lifecycle, "proposed", "lifecycle is the fallback of req_lifecycle");
@@ -30,7 +29,6 @@ test("the model separates active from retired by req_lifecycle and reads the old
 
 test("the model counts the figures of active requirements and the areas", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S3
   const { stats, areas } = model();
   assert.equal(stats.targets, 5);
   assert.equal(stats.implemented, 4);
@@ -51,7 +49,6 @@ test("the model counts the figures of active requirements and the areas", () => 
 test("the model reads scenarios, files, parents, paths and known issues", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S3
   // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S4
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S2
   const m = model();
   const go = m.byId.get("SwRS-X-011")!;
   assert.deepEqual(go.scenarios.map((s) => [s.kind, s.name]), [["nominal", "Go on"], ["boundary", "Go on twice"]]);
@@ -93,4 +90,13 @@ test("the model reads table scenarios, notes and mixed scenarios in source order
   const list = m.byId.get("SwRS-X-011")!.scenarios[0]!;
   assert.equal(list.blocks.length, 1);
   assert.deepEqual(list.blocks[0], { type: "steps", lines: [...list.steps] });
+});
+
+test("a scenario heading carries its S<n> id, and the older heading has none", () => {
+  const [withId, older] = parseScenarios("### Scenario S3 (boundary): Twice\n\n- GIVEN a\n\n### Scenario (refusal): Old\n\n- GIVEN b\n");
+  assert.equal(withId?.id, "S3");
+  assert.equal(withId?.kind, "boundary");
+  assert.equal(withId?.name, "Twice");
+  assert.equal(older?.id, "");
+  assert.equal(older?.kind, "refusal");
 });

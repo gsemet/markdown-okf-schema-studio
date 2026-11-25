@@ -23,6 +23,8 @@ export type ScenarioBlock =
   | { readonly type: "note"; readonly text: string };
 
 export interface Scenario {
+  /** The scenario id of a `### Scenario S<n> (kind): name` heading (`S2`), empty for the older heading without one. */
+  readonly id: string;
   readonly kind: string;
   readonly name: string;
   /** The GIVEN, WHEN, THEN and AND lines, in order (decoded). */
@@ -182,7 +184,7 @@ function tableCells(line: string): string[] {
  */
 // @implements_req SwRS-MDOKFSTUDIO-CORE-082
 export function parseScenarios(raw: string): Scenario[] {
-  const scenarios: { kind: string; name: string; steps: string[]; blocks: ScenarioBlock[] }[] = [];
+  const scenarios: { id: string; kind: string; name: string; steps: string[]; blocks: ScenarioBlock[] }[] = [];
   let current: (typeof scenarios)[number] | undefined;
   /** What an indented line continues: the last step, the last note, or nothing. */
   let last: "step" | "note" | undefined;
@@ -190,9 +192,9 @@ export function parseScenarios(raw: string): Scenario[] {
   let prose = false;
   let table: { header: string[]; rows: string[][] } | undefined;
   for (const line of bodyOf(raw).split("\n")) {
-    const heading = /^###\s+Scenario(?:\s+S\d+)?(?:\s*\(([^)]*)\))?\s*:\s*(.*?)\s*$/u.exec(line);
+    const heading = /^###\s+Scenario(?:\s+(S\d+))?(?:\s*\(([^)]*)\))?\s*:\s*(.*?)\s*$/u.exec(line);
     if (heading) {
-      current = { kind: (heading[1] ?? "").trim() || "nominal", name: heading[2] ?? "", steps: [], blocks: [] };
+      current = { id: heading[1] ?? "", kind: (heading[2] ?? "").trim() || "nominal", name: heading[3] ?? "", steps: [], blocks: [] };
       scenarios.push(current);
       last = undefined;
       prose = false;

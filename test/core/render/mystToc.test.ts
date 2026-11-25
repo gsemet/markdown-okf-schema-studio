@@ -36,7 +36,7 @@ test("[TOC] renders the headings as a nested list of links to their ids", async 
   assert.equal(textContent(findElement(doc, (e) => e.tagName === "p")!), "text");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S1
 test("the marker is replaced by the list and is not rendered as a wiki link", async () => {
   const { html } = await renderMyst(SOURCE);
   assert.doesNotMatch(html, /wiki:toc/u);

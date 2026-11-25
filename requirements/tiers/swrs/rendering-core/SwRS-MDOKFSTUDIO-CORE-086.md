@@ -32,7 +32,6 @@ derived_by: []
 implemented_in_files:
 - test/site/siteTheme.ts
 tested_in_files:
-- test/site/requirementsViewer/pages.test.ts
 - test/site/requirementsViewer/write.test.ts
 - test/site/siteLinks.test.ts
 - test/site/siteTheme.test.ts

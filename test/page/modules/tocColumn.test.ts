@@ -220,8 +220,7 @@ test("an empty document shows No headings", () => {
   assert.match(nav().textContent, /No headings/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S2
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S1
 test("the TOC is rebuilt after the content is replaced, once per frame", () => {
   const { content, toc, flush, entries, frames } = setup({ toc: true });
   content.appendChild(heading("h1", "Old"));
@@ -322,7 +321,8 @@ test("the twisty name says Fold when open and Unfold when folded", () => {
   assert.equal(twisties()[0].getAttribute("aria-label"), open);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S7
 test("collapsing a parent hides its descendants, and a rebuild keeps it collapsed", () => {
   const { content, toc, flush, twisties, entries, getState } = setup({ toc: true });
   outline(content);
@@ -342,7 +342,7 @@ test("collapsing a parent hides its descendants, and a rebuild keeps it collapse
   assert.deepEqual(entries().map(hiddenOf), [false, false, false, false, false]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S5
 test("collapsing a middle parent hides only its own subtree", () => {
   const { content, toc, flush, twisties, entries } = setup({ toc: true });
   outline(content);
@@ -587,7 +587,6 @@ test("Escape typed elsewhere than on the overlay is left to the handler that own
   assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S7
 test("a click on a tick goes to that heading", () => {
   const { content, toc, flush, ticks, scrolled } = setup({ toc: true });
   const first = heading("h1", "Title");

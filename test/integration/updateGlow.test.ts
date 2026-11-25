@@ -133,7 +133,6 @@ export async function run(): Promise<void> {
     assert.deepEqual(typing.ranges, [], "typing in the active text editor glows nowhere");
     console.log("PASS update glow: typing in the active text editor glows nowhere");
 
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S3
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S5
     // 4. Undo (of the typing, in the active editor): it glows.
     await vscode.commands.executeCommand("undo");

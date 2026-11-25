@@ -108,7 +108,6 @@ const LINKS = (targets: string[]): string =>
   targets.map((target, index) => `<a data-sphinx-preview-navigation="${target}">link ${index}</a>`).join(" ");
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("the save dialog proposes notes.html next to the file with the HTML filter, and the bytes written are the builder output", async () => {
   const h = harness();
   const body = "<h1>Notes</h1><p>text</p>";
@@ -215,8 +214,6 @@ test("a snapshot with no gesture and no command is refused; one after the comman
   assert.equal(h.written.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S2
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S3
 test("a snapshot the host cannot read, or one of another document, is answered with a refusal and an error message", () => {
   const h = harness();
   const posted: Array<Record<string, unknown>> = [];

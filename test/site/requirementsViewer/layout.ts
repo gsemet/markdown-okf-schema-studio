@@ -21,7 +21,7 @@ export function testCount(count: number): string {
 
 /** One coloured dot per scenario. */
 export function scenarioDots(scenarios: readonly Scenario[]): string {
-  const dots = scenarios.map((scenario) => `<i class="${kindClass(scenario.kind)}" title="${escapeHtml(scenario.kind)}: ${escapeHtml(scenario.name)}"></i>`).join("");
+  const dots = scenarios.map((scenario) => `<i class="${kindClass(scenario.kind)}" title="${scenario.id ? `${escapeHtml(scenario.id)} ` : ""}${escapeHtml(scenario.kind)}: ${escapeHtml(scenario.name)}"></i>`).join("");
   return `<span class="dots">${dots}</span>`;
 }
 
@@ -470,7 +470,7 @@ export function metroList(model: ViewerModel, paths: readonly MainPath[], fromDi
       }
       return `<li class="${last ? "goal" : ""}"><span class="vstate">${escapeHtml(step.state)}</span>${step.options.map(option).join("")}${via}</li>`;
     });
-    return `<h3 class="pname" ${colour}>Path ${pathIndex + 1}: ${escapeHtml(path.title)}</h3><ol class="vline" ${colour}>${rows.join("")}</ol>`;
+    return `<h3 class="pname" ${colour}>Path ${escapeHtml(path.id || String(pathIndex + 1))}: ${escapeHtml(path.title)}</h3><ol class="vline" ${colour}>${rows.join("")}</ol>`;
   });
   return `<div class="metro-list">${parts.join("")}</div>`;
 }

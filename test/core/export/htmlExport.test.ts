@@ -114,7 +114,7 @@ test("a table cell under the cell editor is exported with its content shown and 
   assert.doesNotMatch(body, /data-sphinx-table-cell-content|aria-hidden|block-editor|textarea|typed|<button/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a paragraph under the block editor is exported, its editor is not", () => {
   const { html } = build(
     '<p data-sphinx-preview-editing="true">Rendered paragraph</p>'
@@ -274,7 +274,6 @@ test("the width mode, the width rule and the theme mode go on the file, the zoom
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S2
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S3
 test("the token rule follows the preview sheet and names every resolved token", () => {
   const tokens = Object.fromEntries(THEME_TOKEN_NAMES.map((name) => [name, `#${name.length}00`]));
   const { html } = build("<p>x</p>", { tokens });
@@ -298,7 +297,7 @@ test("nested tab sets get their own radio names and a dropdown keeps its open st
   assert.match(bodyOf(html), /<details><summary>Shut/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a THREAD chip with its popover, a TODO chip, source-mapping attributes and the tabindex of mapped blocks are left out", () => {
   const { html } = build(
     '<p data-sphinx-source-file="a.md" data-sphinx-source-line="3" data-sphinx-preview-block="1" tabindex="0">mapped</p>'

@@ -291,8 +291,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "The same constructs on a light theme, including both rendered Mermaid diagrams.",
   },
   ...["dark", "light"].flatMap((theme) => [{
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S1
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
     id: `nested-list-typing-${theme}`,
     fixture: "16-nested-list-editing",
     theme,
@@ -369,7 +367,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     },
   ]),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-005#S1
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-005#S2
     id: "mermaid-map-dark",
     mermaidThemeSwitch: true,
@@ -381,7 +378,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The OKF knowledge-base map in the dark preview.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S1
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S3
     id: "mermaid-map-light",
     fixture: "06-mermaid-map",
     theme: "light",
@@ -400,7 +397,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The OKF knowledge-base map without host color variables.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S5
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S3
     id: "plantuml-success-light",
     fixture: "12-plantuml-optional",
     theme: "light",
@@ -445,8 +442,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "A missing PlantUML executable shows an actionable settings message and preserves the source.",
   },
   ...(["light", "dark", "cream"] as const).map((mode) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-017#S2
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-017#S4
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-017#S1
     id: `code-copy-button-${mode}`,
     fixture: "04-code-and-tables",
     theme: mode === "light" ? "light" : "dark",
@@ -461,7 +457,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-CODE-017#S8
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-017#S9
     id: `code-blocks/v${17 + index}-copy-button-keyboard-focus-${theme}-900`,
     fixture: "04-code-and-tables",
     theme,
@@ -671,7 +666,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-CODE-001#S1
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-001#S2
     id: "syntax-dark-rust",
     fixture: "06-syntax-highlighting",
     theme: "dark",
@@ -780,7 +774,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S1
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S5
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029#S1
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029#S6
     id: "okf-schema-table",
@@ -794,8 +787,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "table shows name, value, and the schema description of each field.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S4
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S7
     id: "okf-schema-narrow",
     screenshotOf: "frontmatter-scroll-feedback",
     fixture: "08-okf-schema",
@@ -854,8 +845,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Whole-page edit mode preserves source layout while a focused paragraph editor shows its caret.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S7
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S10
     id: "edit-paragraph-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -1298,8 +1287,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "and the hint line \"Enter to create a new block\" is visible under it, at least 20 px below the top edge.",
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S1
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S6
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S9
     id: `toolbar-navigation/v${39 + index}-sticky-running-text-${theme}-900`,
     fixture: "62-cursor-block",
     theme,
@@ -1413,8 +1401,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   })),
   ...(["cream", "dark"] as const).map((mode, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-PALETTE-002#S1
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
     id: `palette-slash/v${23 + index}-edit-bar-tooltip-rule-${mode}-900`,
     fixture: "64-rule-edit",
     theme: mode === "dark" ? "dark" as const : "light" as const,
@@ -1455,7 +1441,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     ["light", "light", 20],
     ["dark", "dark", 21],
   ] as const).map(([name, theme, number]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S2
     id: `block-editing/v${number}-keyboard-table-cell-${name}-900`,
     fixture: "26-first-table",
     theme,

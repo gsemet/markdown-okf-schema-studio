@@ -26,7 +26,6 @@ implemented_in_files:
 - src/host-vscode/activation.ts
 tested_in_files:
 - test/host/coreReq.requirements.test.ts
-- test/integration/projectFeatures.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

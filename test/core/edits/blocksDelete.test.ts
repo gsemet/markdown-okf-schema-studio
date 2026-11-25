@@ -82,7 +82,6 @@ for (const [name, eol] of EOLS) {
     );
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S1
   test(`${name}: stale lines give no removal`, () => {
     const doc = join("A", "", "B", "");
     assert.equal(planEmptiedBlockRemoval(doc, 0, "A", "A", 3, 3), undefined);

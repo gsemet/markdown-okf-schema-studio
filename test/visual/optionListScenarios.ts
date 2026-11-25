@@ -35,7 +35,6 @@ export const OPTION_LIST_SCENARIOS: ScenarioDefinition[] = [
   ...VARIANTS.map((variant, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-PALETTE-277#S3
     // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S3
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S5
     id: `palette-slash/v${30 + index}-option-list-enter-${variant.name}-900`,
     fixture: "77-option-list-editing",
     theme: variant.theme,

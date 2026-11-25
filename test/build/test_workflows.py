@@ -183,7 +183,6 @@ def _after_a_skippable_job(jobs: dict[str, dict]) -> set[str]:
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S5
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
 def test_every_job_after_a_skippable_job_opts_out_of_the_implicit_success() -> None:
     jobs = _ci_jobs()
     for name in sorted(_after_a_skippable_job(jobs)):
@@ -699,8 +698,6 @@ def test_gallery_runs_on_a_heavy_dispatch_when_integration_and_report_passed() -
 XVFB_SCREEN = "2600x1440x24"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_every_xvfb_screen_is_wider_than_the_emulated_viewports() -> None:
     """CR 326: the default 1280x1024 screen dropped clicks past x=1280 (2400 px is the widest viewport)."""
     import re
@@ -713,7 +710,6 @@ def test_every_xvfb_screen_is_wider_than_the_emulated_viewports() -> None:
         assert int(match.group(1)) >= 2600 and int(match.group(2)) >= 1440, call
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_stress_dispatch_inputs_reach_the_stress_recipe_through_env() -> None:
     import yaml
 
@@ -727,7 +723,6 @@ def test_stress_dispatch_inputs_reach_the_stress_recipe_through_env() -> None:
     assert step["env"]["STUDIO_STRESS_SCENARIOS"] == "${{ inputs.stress_scenarios }}"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 def test_ci_stress_recipe_quotes_and_validates_repeat() -> None:
     recipe = (ROOT / "justfile").read_text().split("\nci-stress ", 1)[1].split("\n\n", 1)[0]
     assert "{{ quote(REPEAT) }}" in recipe
@@ -736,7 +731,6 @@ def test_ci_stress_recipe_quotes_and_validates_repeat() -> None:
     assert "exit 2" in recipe
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 def test_ci_stress_recipe_defaults_to_11_rounds_and_leaves_the_deadline_computed() -> None:
     recipe_text = (ROOT / "justfile").read_text().split("\nci-stress ", 1)[1].split("\n\n", 1)[0]
     assert recipe_text.startswith('REPEAT=env("STUDIO_STRESS_REPEAT", "11")')
@@ -1070,7 +1064,6 @@ def yaml_jobs(path: Path) -> dict[str, dict]:
     return yaml.safe_load(path.read_text())["jobs"]
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_toc_loop_inputs_reach_the_recipe_and_leave_the_deadline_computed() -> None:
     import yaml
 

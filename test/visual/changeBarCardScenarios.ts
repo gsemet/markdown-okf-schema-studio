@@ -52,7 +52,6 @@ const CARD_ASSERTIONS: ContentAssertion[] = [
 export const CHANGE_BAR_CARD_SCENARIOS: ScenarioDefinition[] = (["light", "dark"] as const).flatMap((theme, index) => [
   {
     // @tests_req SwRS-MDOKFSTUDIO-REVIEW-221#S1
-    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-221#S2
     id: `review-annotations/v${33 + index}-removed-marker-${theme}-900`,
     fixture: "44-change-bar",
     theme,

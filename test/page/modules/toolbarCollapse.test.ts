@@ -89,7 +89,6 @@ test("CR 162: the rows carry the animating mark before hidden changes, and lose 
   assert.deepEqual(t.log.slice(before), ["change hidden=false animating=null"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S6
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S1
 test("the layout is measured after the animation in both directions, once for quick clicks", () => {
   const t = setup({ collapsed: false });

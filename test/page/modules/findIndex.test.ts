@@ -21,7 +21,7 @@ const pattern = (query: string, regex = false): RegExp => {
   return compiled.pattern;
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S4
 test("text blocks follow the block elements; inline elements stay in their block", () => {
   const root = el("main", [
     el("p", ["one ", el("strong", ["two"]), " three"]),
@@ -31,7 +31,7 @@ test("text blocks follow the block elements; inline elements stay in their block
   assert.deepEqual(collectTextBlocks(root as never).map((block) => block.text), ["one two three", "cell a", "cell b", "item x"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S4
 test("white space collapses as the reader sees it, code keeps its own", () => {
   const root = el("main", [
     el("p", ["wrapped\n  over   lines ", el("em", [" and  more"])]),

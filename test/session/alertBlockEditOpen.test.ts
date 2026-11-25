@@ -169,7 +169,7 @@ const CONSECUTIVE_ALERTS = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
 test("each of several consecutive alerts opens only its own lines", async () => {
   const expected: Array<[string, number, number]> = [
     ["The note.", 1, 2],

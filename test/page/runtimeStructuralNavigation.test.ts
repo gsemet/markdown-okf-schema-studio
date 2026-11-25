@@ -104,7 +104,6 @@ test("CR 157: Right on a selected table selects its first header cell", () => {
   assert.equal(cells[0][0].focusOptions !== undefined, true, "the cell takes the focus");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S2
 test("CR 157: the four arrows move cell to cell and stop at the edges", () => {
   const { harness, cells } = page();
@@ -144,8 +143,6 @@ test("CR 157: Escape on a cell returns to the table block, a second Escape leave
   assert.deepEqual(selectedLines(harness), [], "Escape at the top level keeps clearing the selection");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S2
 test("CR 157: Enter on a selected cell opens the cell editor like a click", () => {
   const { harness, table, cells } = page();
   selectBlock(harness, 60);
@@ -204,7 +201,6 @@ test("CR 157: Up and Down walk the inner blocks of a container and stop at its e
   assert.deepEqual(selectedLines(harness), [73], "Down at the last inner block stays inside");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
 test("CR 157: Enter on an inner block opens that block's editor", () => {
   const { harness } = page();
   selectBlock(harness, 70);

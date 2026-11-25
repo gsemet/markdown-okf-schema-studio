@@ -62,8 +62,6 @@ test("a pipe table after a front matter counts whole-file lines", async () => {
   assert.deepEqual(rowLines(dom).filter((line) => line !== undefined), expectedRows(5));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
 test("a pipe table in a blockquote marks its rows and itself", async () => {
   const { dom } = await render(["Intro.", "", ...TABLE.map((line) => `> ${line}`), ""].join("\n"));
@@ -73,15 +71,11 @@ test("a pipe table in a blockquote marks its rows and itself", async () => {
   assert.equal(attribute(table, "data-okf-marker-end-line"), "6");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table in a GitHub alert marks its rows", async () => {
   const { dom } = await render(["Intro.", "", "> [!NOTE]", ...TABLE.map((line) => `> ${line}`), ""].join("\n"));
   assert.deepEqual(rowLines(dom), expectedRows(4));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table in a {note} and in an {admonition} marks its rows", async () => {
   const note = await render(["Intro.", "", ":::{note}", ...TABLE, ":::", ""].join("\n"));
   assert.deepEqual(rowLines(note.dom), expectedRows(4));
@@ -91,15 +85,11 @@ test("a pipe table in a {note} and in an {admonition} marks its rows", async () 
   assert.equal(attribute(table, "data-okf-marker-line"), "6");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table in a list item marks its rows", async () => {
   const { dom } = await render(["Intro.", "", "- item", "", ...TABLE.map((line) => `  ${line}`), ""].join("\n"));
   assert.deepEqual(rowLines(dom), expectedRows(5));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
 test("a pipe table in a tab item marks its rows, and a click on the item still edits the whole item", async () => {
   const source = [
@@ -228,8 +218,6 @@ test("CRLF text gives the same marker lines as LF text", async () => {
   assert.deepEqual(rowLines((await render(table.join("\r\n"))).dom), expectedRows(3));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table with aligned columns (written through the HTML pass) marks its rows too", async () => {
   const aligned = ["| a | b |", "| :- | -: |", "| 1 | 2 |", "| 3 | 4 |"];
   const top = await render(["Intro.", "", ...aligned, ""].join("\n"));

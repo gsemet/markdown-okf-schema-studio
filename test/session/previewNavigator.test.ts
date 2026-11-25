@@ -186,7 +186,6 @@ test("classifies anchors, external links, and workspace-local files", async () =
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S2
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-094#S1
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-094#S2
 test("blocks unsafe anchors, schemes, and paths", async () => {
   const workspaceRoot = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-navigation-test-"));

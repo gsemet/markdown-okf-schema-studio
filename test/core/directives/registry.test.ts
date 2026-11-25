@@ -14,8 +14,6 @@ import { PALETTE_ACTIONS } from "../../../src/core/palette/paletteActions";
 import { PREVIEW_THEME_CSS } from "../../../src/core/preview/previewStyles";
 import type { MystNode } from "../../../src/core/render/mystNode";
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S2
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
 test("each directive name has one plug-in, found by its exact name", () => {
   const names = MYST_DIRECTIVES.flatMap((directive) => directive.names);
   assert.equal(new Set(names).size, names.length);

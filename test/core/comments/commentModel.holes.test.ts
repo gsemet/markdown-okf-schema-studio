@@ -76,8 +76,7 @@ test("a comment date is an ISO 8601 date-time with a zone, to the minute or fine
   assert.ok(errorsOf(file([thread({ createdAt: 20261021 })])).length > 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S6
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S3
 test("a sidecar is refused over 2 MiB of text or of UTF-8, and accepted at exactly 2 MiB", () => {
   const base = file([]);
   const exact = base + " ".repeat(MAX_SIDECAR_BYTES - base.length);
@@ -153,10 +152,7 @@ test("a valid sidecar returns its document name and every thread", () => {
   assert.deepEqual(parsed.threads.map((entry) => [entry.id, entry.resolved]), [["a", false], ["b", true]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S6
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S7
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S2
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S3
 test("an anchor sent by the page holds at most 500 characters of quote and 32 of prefix and suffix", () => {
   const anchor = (extra: Record<string, unknown>) => ({ line: 2, endLine: 2, quote: "q", prefix: "p", suffix: "s", ...extra });
   assert.equal(isValidAnchor(anchor({})), true, "one line is a valid range");

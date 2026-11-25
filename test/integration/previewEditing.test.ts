@@ -27,7 +27,6 @@ export interface EditingContext {
 }
 
 /** The properties table renders from the schema: fields, link statuses and excerpts, evidence line badges. */
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S1
 async function stepFrontmatterTable(ctx: EditingContext): Promise<NonNullable<ReturnType<typeof getActivePreviewForTests>>> {
   const schemaPreview = getActivePreviewForTests();
   assert.ok(schemaPreview);
@@ -49,7 +48,6 @@ async function stepFrontmatterTable(ctx: EditingContext): Promise<NonNullable<Re
 /** A link tooltip shows the target description and excerpt; the violation of the closed schema counts in the badge and shows as an error row. */
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S1
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S3
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S1
 async function stepLinkTooltips(ctx: EditingContext): Promise<void> {
   const { page, evidence } = ctx;
   for (const theme of ["white", "dark"] as const) {
@@ -78,8 +76,6 @@ async function stepLinkTooltips(ctx: EditingContext): Promise<void> {
 
 /** The Description column collapses, the choice survives a refresh, in wide and narrow layouts. */
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S4
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S2
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S12
 async function stepDescriptionColumn(ctx: EditingContext): Promise<void> {
   const { page, document, evidence } = ctx;
   assert.match(
@@ -126,7 +122,6 @@ async function stepDescriptionColumn(ctx: EditingContext): Promise<void> {
 /** Each frontmatter link opens its target at its fragment or marker line; the line badge follows the file. */
 // @accepts_req StRS-MDOKFSTUDIO-FMSCHEMA-014#S1
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073#S1
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073#S2
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S2
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S7
 async function stepLinksOpen(ctx: EditingContext): Promise<void> {
@@ -336,9 +331,6 @@ async function stepAnchorMode(ctx: EditingContext, initial: ReturnType<typeof cu
 }
 
 /** Frontmatter saves of an enum, a boolean, an added, removed and renamed field change only their lines; a required field is not removed. */
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S1
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024#S1
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024#S3
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
 async function stepFrontmatterSaves(ctx: EditingContext, initial: ReturnType<typeof currentContext>): Promise<void> {
   const { document } = ctx;
@@ -629,10 +621,6 @@ async function stepFrontmatterRefusals(ctx: EditingContext, initial: ReturnType<
 
 /** A body block is edited, autosaved and saved; a save whose original text no longer matches is refused. */
 // @accepts_req StRS-MDOKFSTUDIO-BLOCK-003#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S8
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S9
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
 async function stepBodyEdits(ctx: EditingContext): Promise<void> {
   const { document } = ctx;
   const bodyEditContext = currentContext(document);
@@ -716,7 +704,6 @@ async function stepBodyEdits(ctx: EditingContext): Promise<void> {
   assert.match(document.getText(), /Autosaved final line\nAutosaved second line\n/u);
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S7
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S11
   const latest = currentContext(document);
   const beforeMismatchedBlockEdit = document.getText();
   sendPreviewMessageForTests({
@@ -734,8 +721,6 @@ async function stepBodyEdits(ctx: EditingContext): Promise<void> {
 /** A table is edited cell by cell, a new block is inserted with clean blank lines, and a cancelled insertion is removed. */
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-094#S2
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-094#S3
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S2
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
 async function stepTableAndInsert(ctx: EditingContext): Promise<void> {
   const { document } = ctx;
   const tableContext = currentContext(document);

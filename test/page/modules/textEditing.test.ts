@@ -219,7 +219,7 @@ test("CR 119: deleteLine on the last line takes the break before it and moves th
   assert.equal(deleteLine("", 0), undefined, "no text, no edit");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 test("CR 119: deleteLine removes every line a selection touches, not the line it ends at the start of", () => {
   assert.equal(deleteLine("a\nb\nc\nd", 2, 5), "a\n|d", "a selection over b and c");
   assert.equal(deleteLine("a\nb\nc\nd", 1, 4), "c|\nd", "from the end of a to the start of c: a and b");

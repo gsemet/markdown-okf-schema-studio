@@ -9,7 +9,6 @@ const pageWith = (text: string | undefined) => ({
     selector.includes(RUNTIME_CONTEXT_ATTRIBUTE) && text !== undefined ? ({ textContent: text } as Element) : null,
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-156#S5
 test("the boot context reads a JSON object and falls back to an empty one for anything else", () => {
   assert.deepEqual(readBootContext(pageWith('{"activeSourceFile":"/w/a.md","requestId":3}')), {
     activeSourceFile: "/w/a.md",

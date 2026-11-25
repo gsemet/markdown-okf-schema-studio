@@ -115,7 +115,7 @@ test("off or not set in both scopes: no association is written and the leftover 
   assert.deepEqual(uiCalls, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S2
 test("a fresh install writes nothing at all", async () => {
   const { writes, globalState, workspaceState, uiCalls, run } = setup({});
   assert.deepEqual(await run(), []);
@@ -144,7 +144,7 @@ test("a failing association write keeps the setting, is logged, shows nothing, a
   assert.deepEqual(uiCalls, [], "no notification, no warning, nothing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S2
 test("a second run writes nothing", async () => {
   const { writes, run } = setup({ [`user|${FILES}`]: true, [`workspace|${FILES}`]: true });
   await run();

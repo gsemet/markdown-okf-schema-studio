@@ -452,8 +452,6 @@ test("a move, a cut and a paste on a file VS Code holds read-only answer the rea
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S6
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S8
 test("a block save on a file VS Code holds read-only is told, and the images pasted meanwhile are removed", async () => {

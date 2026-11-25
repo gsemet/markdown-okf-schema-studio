@@ -48,7 +48,6 @@ tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/integration/previewEditing.test.ts
 - test/page/runtimeScroll.test.ts
-- test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-015

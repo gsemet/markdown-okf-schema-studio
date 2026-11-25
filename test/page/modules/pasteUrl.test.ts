@@ -37,7 +37,6 @@ test("CR 145: an image URL makes an image, with the selection as alt text", () =
   assert.equal(isImageUrl("mailto:a@b.co"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-264#S1
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-264#S3
 test("CR 145: only http, https and mailto addresses are links", () => {
   for (const text of ["javascript:alert(1)", "data:text/html,x", "file:///etc/passwd", "ftp://x.org/a", "www.example.com",

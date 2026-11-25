@@ -99,7 +99,6 @@ async function waitForGitRepository(uri: vscode.Uri): Promise<void> {
 
 // @accepts_req StRS-MDOKFSTUDIO-REVIEW-018#S1
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S1
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S2
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S5
 /**

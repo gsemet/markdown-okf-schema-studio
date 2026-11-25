@@ -34,7 +34,8 @@
  *    A `#S<n>` fragment names a scenario declared in the `scenarios:` of the target; a marker on a
  *    target that declares `scenarios:` has a fragment, and a marker on a target that declares none
  *    has none (`fragment-undeclared`, `fragment-required`, `fragment-unexpected`). The ID-exists
- *    check and the 3-ID cap of rule 2 use the ID without its fragment.
+ *    check and the 3-ID cap of rule 2 use the ID without its fragment. An `@implements_req` never
+ *    has a fragment (`implements-fragment`): the code implements the requirement as a whole.
  * 5. Benches. `@accepts_req` appears only under `test/integration/` (a StRS path walked in real VS
  *    Code), except for the StRS of ACCEPTANCE_OUTSIDE_VSCODE (CORE-007, CORE-008, TRUST-014), which
  *    may sit under `test/build`, `test/security`, `test/site` or `test/core`; it never targets a
@@ -161,7 +162,11 @@ export function readRequirements(root) {
  */
 export function checkMarkerRules(file, number, line, requirements) {
   const marker = parseMarker(line);
-  if (!marker || marker.kind === "@implements_req") return [];
+  if (!marker) return [];
+  if (marker.kind === "@implements_req") {
+    // The code point implements the whole requirement: a fragment names a scenario, which only a test checks.
+    return marker.fragment === undefined ? [] : [{ rule: "implements-fragment", message: `${file}:${number}: implements-fragment: ${marker.text} (@implements_req names a requirement, never a scenario; write the marker without #S<n>)` }];
+  }
   const target = requirements.get(marker.id);
   if (!target) return [];
   const fail = (rule, why) => ({ rule, message: `${file}:${number}: ${rule}: ${marker.text} (${why})` });

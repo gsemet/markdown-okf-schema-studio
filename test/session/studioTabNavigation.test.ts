@@ -230,7 +230,7 @@ test("a link to a Studio tab that is already open keeps its own history and appe
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-197#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-197#S2
 test("a link from a Studio tab that opens as text records nothing, in either history", async () => {
   const f = fixture();
   try {

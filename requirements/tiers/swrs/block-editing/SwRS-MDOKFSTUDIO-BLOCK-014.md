@@ -61,7 +61,6 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/core/render/includeMapping.test.ts
-- test/integration/previewEditing.test.ts
 - test/integration/realInput/editorWidgets.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/linkEditModeClick.test.ts
@@ -73,7 +72,6 @@ tested_in_files:
 - test/visual/alertEditingScenarios.ts
 - test/visual/capture_list_numbers.py
 - test/visual/linkEditModeScenarios.ts
-- test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

@@ -38,8 +38,6 @@ const liveLines = (): Record<string, number> =>
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S7
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-125#S3
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-125#S4
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219#S2
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219#S4
 /**
  * T45: threads follow the text. Edits shift them in memory without any write; the save of the
  * document writes the moved lines; an orphan keeps its line; no sidecar is created; an invalid or

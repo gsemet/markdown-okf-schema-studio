@@ -9,7 +9,6 @@ from capture_support import Failure
 
 
 # @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S1
-# @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S2
 # @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
 def check_side_by_side(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
     """The Side-by-side button turns a changed block into a two-column card (HEAD left, now right) and hides the original; turning it off, or entering edit mode, shows the original again."""

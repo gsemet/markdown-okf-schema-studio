@@ -32,8 +32,6 @@ def test_offset_fails() -> None:
         assert side in (table_bar_flow_failure({**SHIPPED, side: "12px"}) or "")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-064#S1
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-064#S2
 def test_wrong_z_index_fails() -> None:
     assert "z-index" in (table_bar_flow_failure({**SHIPPED, "zIndex": "auto"}) or "")
     assert table_bar_flow_failure({**SHIPPED, "zIndex": "2"}) is not None

@@ -296,7 +296,6 @@ for (const [name, eol] of EOLS) {
   });
 
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S2
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S4
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-166#S1
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-166#S4
   // @tests_req SwRS-MDOKFSTUDIO-BLOCK-169#S3

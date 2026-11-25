@@ -121,8 +121,6 @@ test("T34: the shell key ignores the status region and the runtime script, and n
   assert.notEqual(shellKey(withoutToolbar), shellKey(html), "a changed toolbar is a changed shell");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S2
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S7
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-071#S1
 test("T34: shell keys differ when Mermaid appears or disappears, and when math appears", async () => {
   const plain = await page("Text only.\n");
@@ -138,7 +136,6 @@ test("T34: shell keys differ when Mermaid appears or disappears, and when math a
   assert.notEqual(shellKey(plain), shellKey(math), "the math stylesheet is part of the shell");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-124#S1
 test("CR 149: shell keys differ when a chart appears or disappears, and charts of two pages share a shell", async () => {
   const chart = '```vega-lite\n{"mark":"bar","data":{"values":[{"a":1}]}}\n```\n';
   const plain = await page("Text only.\n");

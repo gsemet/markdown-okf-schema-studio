@@ -60,7 +60,6 @@ tested_in_files:
 - test/integration/blockMove.test.ts
 - test/integration/commentWrite.test.ts
 - test/integration/imagePaste.test.ts
-- test/integration/standalone-suite.ts
 - test/integration/untrusted-suite.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/checkboxRefusal.test.ts

@@ -107,7 +107,6 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
     if opened["overflowX"] > 1:
       failures.append(Failure(page_name, f"horizontal page scroll of {opened['overflowX']}px with the TOC open"))
     # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S1
-    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
     levels = sorted({entry["level"] for entry in opened["entries"]})
     if levels != ["1", "2", "3", "4"]:
       failures.append(Failure(page_name, f"the TOC lists levels {levels}, expected 1 to 4"))
@@ -195,7 +194,6 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
       if not current["visible"]:
         failures.append(Failure(page_name, "the current TOC entry is scrolled out of the TOC column"))
     # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
-    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S7
     twisty = page.locator("nav[data-sphinx-preview-toc] button[data-sphinx-preview-toc-twisty]").first
     if twisty.count():
       twisty.click()

@@ -62,7 +62,6 @@ test("an item with a nested list, a fenced block and a blank line inside moves w
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S7
 test("a tight list stays tight and a loose list keeps its gaps in place", () => {
   assert.equal(moveListItem(lines("- a", "- b", "- c", ""), 3, 2, 0), lines("- c", "- a", "- b", ""));
   const loose = lines("- a", "", "- b", "", "- c", "");

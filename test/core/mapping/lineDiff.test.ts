@@ -37,7 +37,7 @@ test("T16: line endings do not count as changes", () => {
   assert.deepEqual(changedLineRanges("a\rb\r", "a\nB\n"), [{ start: 2, end: 2 }]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S6
 test("T16: a base without a trailing newline matches one with it", () => {
   assert.deepEqual(changedLineRanges("a\nb", "a\nb\n"), []);
 });

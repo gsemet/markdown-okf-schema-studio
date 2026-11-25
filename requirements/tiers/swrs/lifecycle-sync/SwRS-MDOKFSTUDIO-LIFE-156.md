@@ -38,7 +38,6 @@ implemented_in_files:
 - src/page/bootContext.ts
 tested_in_files:
 - test/core/configuration/settingsRegistry.test.ts
-- test/page/bootContext.test.ts
 - test/page/pageSettings.test.ts
 - test/security/package-contract.test.ts
 default_owner_email: gaetan@xeberon.net

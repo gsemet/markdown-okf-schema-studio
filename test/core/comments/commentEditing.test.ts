@@ -78,7 +78,7 @@ test("T43: isValidAnchor enforces lines and the 500 / 32 / 32 limits", () => {
   assert.equal(isValidAnchor({ line: 1, endLine: 1 }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044#S3
 test("T43: normalizeBody trims and enforces 1 to 10000 characters", () => {
   assert.equal(normalizeBody("  hi \n"), "hi");
   assert.equal(normalizeBody(""), undefined);

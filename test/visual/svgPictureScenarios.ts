@@ -39,7 +39,6 @@ export const SVG_PICTURE_SCENARIOS: ScenarioDefinition[] = [
   ...THEMES.map(([version, mode, theme, label]) => ({
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-126#S1
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-126#S2
     id: `diagrams/${version}-svg-picture-${mode}-900`,
     fixture: "82-svg-picture",
     theme,

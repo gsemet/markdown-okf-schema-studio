@@ -553,8 +553,7 @@ test("an undo or a redo shifts the followed lines and marks every thread to be c
   s.controller.clear(preview);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S4
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S1
 test("an unrelated undo keeps a short-quote thread on its followed line, far beyond the search window", async () => {
   const s = setup();
   const body = Array.from({ length: 12 }, (_, index) => `filler ${index}`);

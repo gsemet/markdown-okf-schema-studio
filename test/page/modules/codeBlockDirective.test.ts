@@ -121,7 +121,6 @@ test("insertion replaces a blank line, follows a text line or wraps the selected
   assert.equal(selected.text, "```{code-block} py\n:linenos:\n\nb\n```");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S3
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S4
 test("the form refuses a bad language, emphasized lines, or a multi-line caption or name", () => {
   const ok = { language: "python", linenos: false, emphasizeLines: "1, 3-4", caption: "x", name: "n" };

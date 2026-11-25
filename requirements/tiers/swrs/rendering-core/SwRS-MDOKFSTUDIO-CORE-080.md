@@ -29,7 +29,6 @@ implemented_in_files:
 tested_in_files:
 - test/site/requirementsViewer/home.test.ts
 - test/site/requirementsViewer/pages.test.ts
-- test/site/requirementsViewer/write.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

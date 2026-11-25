@@ -37,7 +37,6 @@ tested_in_files:
 - test/core/render/renderPipeline.test.ts
 - test/host/coreReq.requirements.test.ts
 - test/node-services/build/buildQueue.test.ts
-- test/page/runtimeContentPatch.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-CORE-024

@@ -207,7 +207,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "that line.",
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S2
     id: "lifecycle-sync/v06-line-marker-edit-mode-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -244,7 +244,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Dark theme, 900 px pane: the page asked to show the second body row of a table marks that row, within 3 px of its top.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S2
     id: "lifecycle-sync/v09-line-marker-folded-section-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -260,7 +260,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "marker is drawn on the line.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S2
     id: "lifecycle-sync/v10-line-marker-closed-dropdown-dark-900",
     fixture: FIXTURE,
     theme: "dark",
@@ -272,7 +272,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "marker is drawn on the line.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S2
     id: "lifecycle-sync/v11-line-marker-edit-mode-list-dark-900",
     fixture: FIXTURE,
     theme: "dark",
@@ -311,7 +311,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "scroll, draws the arrow and the band on that line and leaves the page scrolled where it was.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S2
     id: "lifecycle-sync/v14-line-marker-delimiter-line-light-900",
     fixture: PRECISION,
     theme: "light",
@@ -399,7 +399,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Light theme, 900 px pane: a comment line of the front matter marks the top of the properties table.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S2
     id: "lifecycle-sync/v22-line-marker-edit-mode-property-row-dark-900",
     fixture: PRECISION,
     theme: "dark",
@@ -411,7 +411,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Dark theme, 900 px pane, edit mode: a property row is marked, the arrow meets no control and no editor opens.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S2
     id: "lifecycle-sync/v23-line-marker-edit-mode-tab-panel-dark-900",
     fixture: PRECISION,
     theme: "dark",

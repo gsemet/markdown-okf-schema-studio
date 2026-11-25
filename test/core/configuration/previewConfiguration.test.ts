@@ -84,8 +84,7 @@ test("comment chips are shown by default and can be turned off", () => {
   assert.equal(read(false), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S3
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S5
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S4
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S2
 test("incremental updates can be turned off and default to on", () => {
   const read = (value?: boolean): boolean => readPreviewConfiguration({

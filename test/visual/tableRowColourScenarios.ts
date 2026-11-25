@@ -15,7 +15,6 @@ const PAGE_THEMES = [
 export const TABLE_ROW_COLOUR_SCENARIOS: ScenarioDefinition[] = [
   ...PAGE_THEMES.map(([version, mode, theme, label]) => ({
     // @tests_req SwRS-MDOKFSTUDIO-CORE-077#S1
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-077#S2
     id: `rendering-core/${version}-table-row-colours-${mode}-900`,
     fixture: "81-table-row-colours",
     theme,

@@ -52,13 +52,13 @@ test("numbers and booleans show as text", async () => {
   assert.equal(paragraphText(html), "42 1.5 true false");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S3
 test("a list shows its items joined with commas", async () => {
   const { html } = await render(["tags: [alpha, beta, 3, true]"], "Tags: `= this.tags`");
   assert.equal(paragraphText(html), "Tags: alpha, beta, 3, true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S3
 test("an object shows as its YAML on one line", async () => {
   const { html } = await render(["owner:", "  name: Ada", "  team: core"], "`= this.owner`");
   assert.equal(paragraphText(html), "{ name: Ada, team: core }");
@@ -173,7 +173,6 @@ test("the value, the warning class and the hostile text survive the page sanitiz
   assert.equal(textContent(values(page)[0]!), "<img src=x onerror=alert(1)>");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S3
 // @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("an empty object counts as missing, like an empty list", async () => {
   const { html, diagnostics } = await render(["owner: {}", "tags: []"], "`= this.owner` `= this.tags`");

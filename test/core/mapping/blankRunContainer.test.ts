@@ -96,7 +96,6 @@ const ROWS: Row[] = [
 
 for (const [name, eol] of EOLS) {
   for (const row of ROWS) {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
     test(`${name}: the indent of ${row.name}`, () => {
       const text = join(eol, [...row.lines, ""]);
       const run = quoteBlankRuns(text)[0] ?? blankRuns(text)[0];
@@ -120,8 +119,6 @@ test("a quote run has its first line, byte for byte, as the copy of a blank line
   assert.deepEqual(blankRunIndent("a\n\n\nb\n", 2), { quote: "", content: "" }, "and no container indent");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a footnote label after a tab is no footnote label: it is refused", () => {
   const text = "\t[^a]: f1\n\n\n\tmore\n";
   assert.equal(blankRunIndent(text, 2, undefined, 1), undefined);

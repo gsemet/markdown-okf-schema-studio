@@ -307,7 +307,7 @@ function growingSetup() {
   return { document, paragraph, rect, focused, open, popover, question, press, type };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217#S3
 test("CR 265 r2: the popover is placed again after the Resolve / Delete row fills it", () => {
   const { rect, open } = growingSetup();
   const root = open();

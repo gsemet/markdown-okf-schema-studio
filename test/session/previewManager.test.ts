@@ -203,7 +203,6 @@ test("a page refresh inside the join window renders again instead of joining the
   await joinWindowScenario(0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S2
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S3
 test("a stalled machine between two requests does not close the join window", async () => {
   // The stall is longer than the window of real time: only the controlled time decides.

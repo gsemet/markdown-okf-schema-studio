@@ -273,7 +273,6 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
     await page.keyboard.type("studio");
     const count = async (): Promise<string> => (await (await liveFrame(page)).locator("[data-find-count]").textContent()) ?? "";
     // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S2
     // Headline, paragraph x2, admonition, table, link, math, last words: "studio" in any case.
     await settle("the match count", async () => /^1 of \d+$/u.test(await count()));
     const total = Number((await count()).split(" of ")[1]);

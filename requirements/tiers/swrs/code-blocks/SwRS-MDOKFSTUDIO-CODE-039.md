@@ -48,7 +48,6 @@ tested_in_files:
 - test/core/render/renderReq.codeBlocks.requirements.test.ts
 - test/page/modules/codeCopy.test.ts
 - test/page/pageSettings.test.ts
-- test/security/package-contract.test.ts
 - test/visual/codeBlockComfortScenarios.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

@@ -47,7 +47,6 @@ tested_in_files:
 - test/page/modules/incomingChanges.test.ts
 - test/page/modules/reviewReq.requirements.test.ts
 - test/page/runtimePageControls.test.ts
-- test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-REVIEW-208

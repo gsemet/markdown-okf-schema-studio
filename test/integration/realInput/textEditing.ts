@@ -446,7 +446,7 @@ export async function scenarioUndoStaysInEditor(
 
 /**
  * RI-T20: Cmd/Ctrl+B and Ctrl+/ edit the text box, and one Cmd/Ctrl+Z undoes each of them.
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S6
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S1
  */
 export async function scenarioShortcuts(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t20", async (source) => {
@@ -621,8 +621,6 @@ export async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise
 
 // @accepts_req StRS-MDOKFSTUDIO-PALETTE-019#S1
 // @accepts_req StRS-MDOKFSTUDIO-PALETTE-005#S1
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031#S1
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031#S4
 /** RI-T21: palette buttons edit the text box without closing it, and one undo reverts each. */
 export async function scenarioPalette(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t21", async (source) => {

@@ -105,7 +105,6 @@ test("a link target that repeats the text is left out: the visible matches are r
   assert.match(result.text, /\(https:\/\/example\.com\/needle\)/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("link titles, angle-bracket targets and targets with parentheses are left out too", () => {
   const source = 'A needle [needle](<x needle> "a needle") and [b](u/(needle)) [c](needle \'needle\') [needle][r]\n';

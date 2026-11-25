@@ -54,7 +54,6 @@ implemented_in_files:
 tested_in_files:
 - test/core/protocol/hostToPage.test.ts
 - test/core/protocol/pageToHost.test.ts
-- test/integration/previewEditing.test.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeDetachedSave.test.ts
 - test/page/runtimeDetachedSaveEnds.test.ts

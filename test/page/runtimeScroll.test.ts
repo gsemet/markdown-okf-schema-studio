@@ -1033,7 +1033,6 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
   assert.equal(harness.windowState.scrollY, 935);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117#S3
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117#S4
 test("an escape left after four decoding rounds is refused, whatever its digits", () => {
   const harness = createRuntimeHarness();

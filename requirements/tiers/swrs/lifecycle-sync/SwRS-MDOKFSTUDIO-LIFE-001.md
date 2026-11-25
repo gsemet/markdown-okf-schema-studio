@@ -40,7 +40,6 @@ implemented_in_files:
 - src/host-vscode/activation.ts
 tested_in_files:
 - test/host/openAtLine.test.ts
-- test/integration/stockCoexistence.test.ts
 - test/security/lifeReq.requirements.test.ts
 - test/security/package-contract.test.ts
 - test/security/trustReq.requirements.test.ts

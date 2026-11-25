@@ -46,8 +46,7 @@ function check(files: Files): { status: number | null; out: string } {
 const BOX = fence("sequenceDiagram", "    participant Writer", "    participant Box", "    Writer->>Box: hi");
 
 test("refusal: a participant named Box used in a message is reported at its line with Mermaid's message", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-090#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-090#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-090#S3
   const id = "StRS-T-PALETTE-001";
   const text = strs(id, BOX);
   const result = check({ [`${id}.md`]: text });
@@ -111,7 +110,6 @@ test("boundary: no section, no fence, an empty fence or a fence after the sectio
 
 test("the shipped bundle parses, with as many diagrams as the site extracts", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-090#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-090#S2
   const strsDir = path.join(repo, "requirements", "tiers", "strs");
   const walk = (dir: string): string[] =>
     fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -127,8 +125,6 @@ test("the shipped bundle parses, with as many diagrams as the site extracts", ()
 });
 
 test("every id the guideline lists as reserved is reported", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-090#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-090#S3
   const guideline = fs.readFileSync(path.join(repo, "requirements", "guidelines", "project.guidelines.md"), "utf8");
   const words = (kind: string): string[] => {
     const line = guideline.split(/\r?\n/u).find((entry) => entry.trimStart().startsWith(`- \`${kind}\``));

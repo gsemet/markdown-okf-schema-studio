@@ -204,7 +204,6 @@ test("a MyST package of another version or with unexpected content fails the bui
  * engine (directly or through a relative import): it takes rendered HTML from the bundle built by
  * esbuild.mjs (out/test/bundle/mystRenderer.js), which carries the source patches.
  */
-// @tests_req SwRS-MDOKFSTUDIO-CORE-070#S1
 test("no integration test imports the MyST engine unbundled", () => {
   const engine = /(?:from\s+|import\s*\(\s*|require\s*\(\s*)["'](?:myst-[\w-]+|markdown-it-[\w-]+|unified)["']/u;
   // `import type` is erased by tsc: it never loads the module in the host.

@@ -34,7 +34,6 @@ implemented_in_files:
 - src/session/sessionFactory.ts
 tested_in_files:
 - test/core/render/renderPipeline.test.ts
-- test/host/openAtLine.test.ts
 - test/node-services/renderWorker.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

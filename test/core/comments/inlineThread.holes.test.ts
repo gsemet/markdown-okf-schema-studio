@@ -11,7 +11,6 @@ import {
 
 const thread = ["<!-- THREAD", "Ada (2026-10-21 10:00):", "  Why?", "-->"];
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S4
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-186#S5
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-186#S8
 test("a reply is accepted at exactly 10,000 characters and refused at 10,001", () => {

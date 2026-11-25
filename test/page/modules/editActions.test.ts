@@ -147,7 +147,6 @@ test("the todo toggle is its own inverse", () => {
   assert.equal(run("todo", wrapped), "[" + original + "]");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S8
 test("the registry lists the actions with metadata and indexes them by id", () => {
   // P11: the `/` menu's own entries (Bulleted and Numbered list) are registered but have no button.
   assert.deepEqual(registry.actions.filter((action) => action.slash?.menuOnly).map((action) => action.id), ["bulletList", "numberedList"]);

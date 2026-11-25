@@ -115,7 +115,6 @@ test("lineDelta: one inserted line is reported as one added line", () => {
 
 for (const entry of corpus) {
   // @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S1
-  // @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S4
   test(`round trip preserves the source: ${entry.name}`, () => {
     const tools = createMarkdownTableTools();
     const model = tools.parse(entry.source);

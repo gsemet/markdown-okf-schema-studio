@@ -15,7 +15,6 @@ async function waitFor(description: string, predicate: () => boolean, timeoutMs 
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S3
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S10
 /** An untracked file (new, never committed) gets no incoming-change message and no error. */
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);

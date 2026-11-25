@@ -26,8 +26,7 @@ test("rejects missing or non-integer ids and oversize documentId", () => {
   assert.equal(check({ ...valid, requestId: 2 ** 53 }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S2
 test("rejects non-objects, unregistered and prototype-key types", () => {
   assert.equal(check(null), false);
   assert.equal(check("sample"), false);

@@ -64,8 +64,6 @@ test("a rename while a block edit is open changes nothing and answers Save or ca
   assert.deepEqual(t.applied, [], "the document is unchanged");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 test("a rename on a file VS Code holds read-only answers the read-only reason", async () => {
   for (const restrictedReads of [false, true]) {
     const t = setup({ restrictedReads, blockEditOpen: false, readOnly: true });

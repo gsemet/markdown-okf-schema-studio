@@ -350,10 +350,9 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
               return actual.every((color, index) => color === expected[index]);
             }, { mode, palettes });
           });
-          // @tests_req SwRS-MDOKFSTUDIO-THEME-001#S3
-          // @tests_req SwRS-MDOKFSTUDIO-THEME-001#S4
           // @tests_req SwRS-MDOKFSTUDIO-THEME-025#S1
           // @tests_req SwRS-MDOKFSTUDIO-THEME-025#S2
+          // @tests_req SwRS-MDOKFSTUDIO-THEME-025#S3
           await captureAfter(evidence, page, realInputId(`38-toolbar-${host.toLowerCase()}-${mode}`),
             `${mode} preview mode updates the document and floating toolbar on the ${host} VS Code theme.`);
         }

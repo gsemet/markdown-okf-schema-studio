@@ -74,8 +74,6 @@ test("the grid form refuses columns, gutter and card counts out of range", () =>
   assert.match(validateGrid({ columns: "2", gutter: "", cards: "25" }) ?? "", /^Cards/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270#S2
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S2
 test("the registry lists Card and Grid, with their panel, in the MyST palette only", () => {
   const actions = createEditActions(["js"], createMarkdownTableTools(), isSafeOkfColor);
   for (const id of ["card", "grid"]) {

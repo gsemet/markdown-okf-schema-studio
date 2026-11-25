@@ -57,7 +57,6 @@ tested_in_files:
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockMoves.test.ts
 - test/page/runtimeCardOptionEnter.test.ts
-- test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-BLOCK-029

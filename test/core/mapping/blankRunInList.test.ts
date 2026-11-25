@@ -110,7 +110,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(findElements(outer, (e) => e.tagName === "li").length, 2, "the item holds the nested item");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
   test(`${name}: "More" after a tab marker and after a second marker takes four spaces`, async () => {
     assert.equal(writeInRun(join(eol, ["-\ta", "", "", "", "- b"]), 1, "More"), join(eol, ["-\ta", "", "    More", "", "- b"]));
     assert.equal(writeInRun(join(eol, ["- - a", "", "", "", "- b"]), 1, "More"), join(eol, ["- - a", "", "    More", "", "- b"]));

@@ -221,8 +221,7 @@ test("a render canceled before it starts runs no process", async () => {
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S4
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S8
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S1
 test("asks the runner to cap stderr at 64 KiB and notes the truncation it reports", async () => {
   await withWorkspace(async (workspace) => {
     const runner = fakeRunner(() => ({
@@ -239,8 +238,7 @@ test("asks the runner to cap stderr at 64 KiB and notes the truncation it report
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S4
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S8
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S1
 test("a stderr within the cap carries no truncation note", async () => {
   await withWorkspace(async (workspace) => {
     const message = (await render(workspace, fakeRunner(() => exited("", 1, "boom")))).diagnostics[0]?.message ?? "";

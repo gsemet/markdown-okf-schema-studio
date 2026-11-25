@@ -95,7 +95,6 @@ test("a new row and a new column line carry the prefix of the table lines", () =
   assert.ok(lines.every((line) => line.split("|").length === 5), lines.join("\n"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("Windows line endings stay and the closing line break is kept or absent as in the source", () => {
   const crlf = "> [!NOTE]\r\n> | A | B |\r\n> | - | - |\r\n> | 1 | 2 |\r\n> after\r\n";
   assert.equal(

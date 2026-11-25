@@ -329,7 +329,7 @@ test("while the block editor is open, palette requests are answered after its au
 
 const paste = { mime: "image/png", dataBase64: PNG.toString("base64") };
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S6
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S5
 test("an image paste is refused for an unsaved document or one that is not the previewed document", async () => {
   const unsaved = setup({ documentPath: undefined });
   const answer = await unsaved.ask("previewPasteImage", paste);
@@ -356,7 +356,6 @@ test("an image paste is refused for a folder outside the workspace, links resolv
   assert.ok(inside.writes > 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S6
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
 test("an image paste is saved next to a standalone file and in Restricted Mode", async () => {
   const standalone = setup({ restrictedReads: true, workspaceFolder: undefined });

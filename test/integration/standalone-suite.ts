@@ -37,7 +37,6 @@ async function waitForDocument(documentUri: string): Promise<void> {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S1
 export async function run(): Promise<void> {
   // Heartbeat and timeout dumps of the hang watchdog (stepWatchdog.ts).

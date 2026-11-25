@@ -83,7 +83,6 @@ interface Measure {
  * start below it. Real VS Code window, cream preview theme on a dark VS Code theme (or the theme
  * named by STUDIO_TOOLBAR_COVER_THEME); the evidence shots are written before the assertions.
  */
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S1
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");

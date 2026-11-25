@@ -269,6 +269,17 @@ test("rule 4: a marker on a target with scenarios: has a fragment, on a target w
   assert.equal(check({ ...files, "test/a.test.ts": `// @tests_req ${id}#S1\n// @tests_req ${bare}\n` }).status, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S3
+test("rule 4: an @implements_req never has a fragment", () => {
+  const [id] = ids(1);
+  const files: Files = requirementFiles(id, scenarios("S1"));
+
+  const wrong = check({ ...files, "src/a.ts": `// @implements_req ${id}#S1\n` });
+  assert.equal(wrong.status, 1);
+  assert.match(wrong.out, new RegExp(`src/a\.ts:1: implements-fragment: @implements_req ${id}#S1 `, "u"));
+  assert.equal(check({ ...files, "src/a.ts": `// @implements_req ${id}\n` }).status, 0);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-CORE-097#S1
 test("rule 2 and rule 4: two fragments of one ID count as one ID in a marker block", () => {
   const [one, two, three] = ids(3);

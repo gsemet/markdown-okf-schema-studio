@@ -35,7 +35,6 @@ derived_by: []
 implemented_in_files:
 - src/page/features/blockSelectionView.ts
 tested_in_files:
-- test/build/integrationEditModeRestore.test.ts
 - test/integration/windowSwitchKeys.test.ts
 - test/page/runtimeBlockDelete.test.ts
 - test/page/runtimeBlockSelection.test.ts

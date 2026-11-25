@@ -21,7 +21,6 @@ async function settle(): Promise<void> {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255#S2
 test("CR 188: a held block source reaches the page only when the queue runs, unchanged", async () => {
   const store = createMemoryDocumentStore();
   const document = store.add("file:///w/README.md", "First paragraph.\n\nSecond paragraph.\n", "/w/README.md");
