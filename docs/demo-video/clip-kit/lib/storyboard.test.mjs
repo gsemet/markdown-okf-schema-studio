@@ -14,7 +14,11 @@ import { EXPECTED as EXPECTED_FIGURE } from "../../clips/figure-editor/scenario.
 import { EXPECTED as EXPECTED_GRID } from "../../clips/slash-menu-grid/scenario.mjs";
 import { EXPECTED as EXPECTED_TABLE } from "../../clips/table-anchors/scenario.mjs";
 import { STAGE as STAGE_THEME } from "../../clips/theme-switch/scenario.mjs";
+import { STAGE as STAGE_WIDE } from "../../clips/wide-table-auto-width/scenario.mjs";
 import { parseClip, parseClipText, parseSections, validateStory } from "./storyboard.mjs";
+
+/** The committed hold of the wide-table-auto-width clip's zoom, in seconds. */
+const ZOOM_HOLD_WIDE = 9.6;
 
 /** The committed length of the figure-editor clip, in seconds. */
 const LENGTH_FIGURE = 12;
@@ -61,6 +65,11 @@ const MARKS_MODES = [
   [5.9, 7.5],
   [7.7, 8.9],
   [9.1, 10.3],
+];
+/** The marks of the shipped wide-table-auto-width clip.md: the times of its Mark rows. */
+const MARKS_WIDE = [
+  [4.4, 6.6],
+  [6.8, 9.0],
 ];
 const darwin = { platform: "darwin" };
 
@@ -547,6 +556,43 @@ test("the shipped table-anchors clip.md reads as the clip the owner reviews", ()
 test("the shipped table-anchors stage is the padded pipe table the clip films", () => {
   const stageFile = fileURLToPath(new URL("../../clips/table-anchors/stage/launch-checklist.md", import.meta.url));
   assert.equal(readFileSync(stageFile, "utf8"), STAGE_TABLE);
+});
+
+test("the shipped wide-table-auto-width clip.md reads as the clip the owner reviews", () => {
+  const wideFile = fileURLToPath(new URL("../../clips/wide-table-auto-width/clip.md", import.meta.url));
+  const wide = parseClip(wideFile);
+  assert.equal(wide.width, 1280);
+  assert.equal(wide.height, 720);
+  assert.equal(wide.fps, 15);
+  assert.deepEqual(
+    wide.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["In Margin, a wide table is cut at the column", "In Auto, the table breaks out; the text keeps its column"],
+  );
+  assert.equal(wide.captions[0].from, 0);
+  assert.equal(wide.captions[0].to, wide.captions[1].from);
+  assert.equal(wide.captions[1].to, wide.length);
+  assert.deepEqual(wide.badges, {});
+  assert.equal(wide.zoom.id, "page");
+  assert.equal(wide.zoom.holdTo, ZOOM_HOLD_WIDE);
+  assert.deepEqual(
+    wide.marks.map((mark) => mark.id),
+    ["1", "2"],
+  );
+  assert.deepEqual(wide.marks.map((mark) => [mark.from, mark.to]), MARKS_WIDE);
+  for (const [index, mark] of wide.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= wide.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= wide.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  assert.equal(wide.expectedPaste, null);
+  const filmed = { filmed: wide.length, presses: [], zooms: [{ id: "page", t: 3.8 }], marks: [{ id: "1" }, { id: "2" }] };
+  const out = validateStory(wide, filmed, win32);
+  assert.equal(out.platform, "win32");
+  assert.equal(out.fps, 15);
+});
+
+test("the stage of the wide-table-auto-width scenario is the shipped stage file, byte for byte", () => {
+  const stageFile = fileURLToPath(new URL("../../clips/wide-table-auto-width/stage/deploys.md", import.meta.url));
+  assert.equal(STAGE_WIDE, readFileSync(stageFile, "utf8"));
 });
 
 test("the shipped figure-editor clip.md reads as the clip the owner reviews", () => {

@@ -232,6 +232,18 @@ test("the shipped OKF page plays the frontmatter clip as video", async () => {
   }
 });
 
+test("the shipped wide tables page plays the wide table clip as video", async () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  const clip = "docs/demo-video/clips/wide-table-auto-width";
+  const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "wide-tables.md"), "utf8");
+  const rendered = await renderMyst(source);
+  const html = clipVideos(rendered.html, "docs/user/wide-tables.md", (repoPath) => fs.existsSync(path.join(EXTENSION_ROOT, repoPath)));
+  assert.ok(html.includes(`<video src="../demo-video/clips/wide-table-auto-width/wide-table-auto-width.webm"`), "the page holds the clip's video");
+  for (const file of ["wide-table-auto-width.webm", "wide-table-auto-width.gif", "poster.png"]) {
+    assert.ok(fs.existsSync(path.join(EXTENSION_ROOT, clip, file)), file);
+  }
+});
+
 test("a clip's storyboard and stage documents are not site pages", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-095
   assert.equal(isClipSource("docs/demo-video/clips/x/clip.md"), true);
