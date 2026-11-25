@@ -111,6 +111,18 @@ test("the shipped toolbar page plays the export clip as video", async () => {
   }
 });
 
+test("the shipped toolbar page plays the diff clip as video", async () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  const clip = "docs/demo-video/clips/diff-side-by-side";
+  const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "toolbar.md"), "utf8");
+  const rendered = await renderMyst(source);
+  const html = clipVideos(rendered.html, "docs/user/toolbar.md", (repoPath) => fs.existsSync(path.join(EXTENSION_ROOT, repoPath)));
+  assert.ok(html.includes(`<video src="../demo-video/clips/diff-side-by-side/diff-side-by-side.webm"`), "the page holds the clip's video");
+  for (const file of ["diff-side-by-side.webm", "diff-side-by-side.gif", "poster.png"]) {
+    assert.ok(fs.existsSync(path.join(EXTENSION_ROOT, clip, file)), file);
+  }
+});
+
 test("a clip's storyboard and stage documents are not site pages", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-095
   assert.equal(isClipSource("docs/demo-video/clips/x/clip.md"), true);
