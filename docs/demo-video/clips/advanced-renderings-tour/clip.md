@@ -33,11 +33,10 @@ back to the top at the end for the loop. It shows six texts in turn.
 Off camera (`setup`): reading mode, the page in Cream (the default of a fresh workspace), the
 toolbar left as a fresh workspace has it, the page scrolled to the top, all four drawings rendered
 (`data-render-state="rendered"` on the Mermaid, PlantUML and both Vega blocks) and the pointer
-parked off the page content, so frame 0 shows no hover.
+parked off the page content, so frame 0 shows no hover. The way to scroll is tried from there and
+the page put back at the top.
 
 ## 1. Mermaid
-
-![The page zoomed on the first view, before the first mark](frames/03-zoomed.png)
 
 ![Mark 1 around the Mermaid flowchart, with its caption](frames/04-mark-1.png)
 
@@ -72,6 +71,8 @@ parked off the page content, so frame 0 shows no hover.
 | Text 3 *(on screen)* | **Vega-Lite** charts from a few lines |
 
 ## 4. Vega
+
+![The middle of the zoom hold, 8.0 s: the second view as the scroll ends, before mark 4](frames/03-zoomed.png)
 
 ![Mark 4 around the Vega bar chart, after the scroll](frames/07-mark-4.png)
 
@@ -109,7 +110,7 @@ changed):
 
 - At the start and before each mark, all six renderings are drawn: `.myst-mermaid-diagram`,
   `.myst-plantuml-diagram` and both `.myst-vega-diagram` blocks (`data-myst-chart-kind`
-  `vega-lite` and `vega`) have `data-render-state="rendered"` and an image; the `.math-display`
+  `vega-lite` and `vega`) have `data-render-state="rendered"` and a drawing (an image for Mermaid and PlantUML, the live `svg` of `.myst-vega-view` for the charts); the `.math-display`
   block holds a `.katex` element; the `.myst-svg-figure` holds an `svg`.
 - No PlantUML block shows an error (`.myst-plantuml-error`): the built-in engine drew it, with no
   Java and no JAR on the filming machine.
@@ -143,12 +144,17 @@ changed):
   under it; each mark is placed after its scroll settled and no mark is shown during a scroll.
   The take used the `scrollTo` way: the CDP mouse wheel (`t.page.mouse.wheel`) over the preview did not
   move the page in the trial, so the scenario scrolls the preview frame in small eased steps, 50 ms
-  apart (the same picture on screen), over 0.8 s down and 0.6 s back.
+  apart (the same picture on screen), over 0.7 s down and 0.6 s back. The way is tried off camera:
+  tried during the take, it delayed the scroll and mark 4 came in over a moving page.
 - **Fit.** The trial found that the window of the take (1169x660 CSS pixels) did not hold the three
   renderings of the first view at the drafted sizes, so the stage was made smaller, in this order:
   the Vega-Lite `height` 90 to 30 (x axis labels horizontal), the Vega `height` 100 to 80, the SVG
   `width` 480 to 300, and the PlantUML sequence with `hide footbox`, `scale 0.75` and a `participant`
-  instead of an `actor`. Each mark is inside the zoom rect (about 1.3x) and above the caption.
+  instead of an `actor`. Studio now sizes chart text with the page text, which made the line chart
+  taller and put the bottom of its mark under the caption, so its x axis has no title
+  (`"title": null`; the labels W1 to W5 say the weeks). At height 80 the y tick labels of the Vega
+  bar chart overlapped, so its left axis asks for fewer ticks (`"tickCount": 3`). Each mark is
+  inside the zoom rect (about 1.3x) and above the caption.
 - **The loop seam.** The page is back at the top and unzoomed for the last 0.4 s, so the last frame
   matches frame 0 (the kit wants an SSIM of at least 0.98 and below 1.0).
 - **GIF budget.** The GIF used the first step of the kit's ladder (12 fps, 960 px, 128 colours) and

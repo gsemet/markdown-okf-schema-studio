@@ -31,7 +31,7 @@ Search --> Reader: results
   ] },
   "mark": { "type": "line", "point": true },
   "encoding": {
-    "x": { "field": "week", "type": "ordinal", "axis": { "labelAngle": 0 } },
+    "x": { "field": "week", "type": "ordinal", "title": null, "axis": { "labelAngle": 0 } },
     "y": { "field": "p95", "type": "quantitative", "title": "p95 (ms)" }
   }
 }
@@ -49,7 +49,7 @@ Search --> Reader: results
     { "name": "x", "type": "band", "domain": { "data": "table", "field": "region" }, "range": "width", "padding": 0.2 },
     { "name": "y", "domain": { "data": "table", "field": "queries" }, "nice": true, "range": "height" }
   ],
-  "axes": [{ "orient": "bottom", "scale": "x" }, { "orient": "left", "scale": "y" }],
+  "axes": [{ "orient": "bottom", "scale": "x" }, { "orient": "left", "scale": "y", "tickCount": 3 }],
   "marks": [{ "type": "rect", "from": { "data": "table" }, "encode": { "enter": {
     "x": { "scale": "x", "field": "region" }, "width": { "scale": "x", "band": 1 },
     "y": { "scale": "y", "field": "queries" }, "y2": { "scale": "y", "value": 0 } } } }]
