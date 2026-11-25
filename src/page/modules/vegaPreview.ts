@@ -40,6 +40,7 @@ async function renderCharts(pending: readonly HTMLElement[]): Promise<void> {
   const theme = chartThemeFrom(
     (name) => getComputedStyle(document.body).getPropertyValue(name).trim(),
     getComputedStyle(document.body).backgroundColor,
+    getComputedStyle(document.body).fontSize,
   );
   await Promise.all(pending.map(async (chart) => {
     const source = chartSources.get(chart) ?? chart.textContent?.trim() ?? "";

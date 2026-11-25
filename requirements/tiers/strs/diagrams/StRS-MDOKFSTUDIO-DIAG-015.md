@@ -74,7 +74,7 @@ sequenceDiagram
 #### Path 1: Read a chart in the page
 
 1. A document holds a Vega-Lite or Vega fence
-   - SwRS-MDOKFSTUDIO-DIAG-121: the fence becomes a chart figure with a collapsed source section
+   - SwRS-MDOKFSTUDIO-DIAG-121: the fence becomes a chart figure with a source section kept for the HTML export
    - Option SwRS-MDOKFSTUDIO-DIAG-122 (refusal): chart data comes only from a file inside the allowed folders; a remote url shows a message
 2. The page has a chart figure
    - SwRS-MDOKFSTUDIO-DIAG-124: the chart runtime loads with the chart and needs no eval

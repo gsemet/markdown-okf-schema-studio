@@ -6,7 +6,8 @@ so they also work in Restricted Mode. The runtime is loaded only on a page that 
 the page keeps its strict Content Security Policy (no `unsafe-eval`: expressions run in the Vega
 interpreter). The chart is an SVG picture that follows the preview theme (Cream, White, Dark or the
 VS Code theme): background, text, axes and marks take the colours of the page, and a theme switch
-draws the charts again. The syntax is the one of
+draws the charts again. The legend, axis and title text follows the size of the page text, so it also
+follows the Markdown font size setting and the preview zoom. The syntax is the one of
 [Markdown Preview Enhanced](https://shd101wyy.github.io/markdown-preview-enhanced/#/diagrams?id=vega-and-vega-lite).
 
 The specification is JSON or YAML. A first chart, with its data in the document:
@@ -83,8 +84,15 @@ the file next to the document, or paste the rows into `values`.
 ## Errors
 
 A specification that is not valid JSON or YAML, a Vega or Vega-Lite error, or a data file that
-cannot be read shows its message in place of the chart (like a Mermaid error), with the source still
-available in the **Chart source** section under the chart. The document is never changed.
+cannot be read shows its message in place of the chart (like a Mermaid error). The preview shows no
+**Chart source** section under a chart, since the source is the document itself; the HTML export
+keeps it, closed, under each chart. The document is never changed.
+
+## Your own `config`
+
+A specification's own `config`, and the properties of its marks and axes, win over the sizes and
+colours Studio gives a chart. For example, `config: { legend: { labelFontSize: 9 } }` draws the legend
+labels at 9 px whatever the page text size.
 
 ## Insert a chart
 

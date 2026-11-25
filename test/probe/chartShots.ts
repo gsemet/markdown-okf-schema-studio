@@ -14,7 +14,7 @@ async function shoot(folder: string, name: string, markdown: string, theme: stri
   if (!opened) throw new Error("no Chromium can start here");
   try {
     const { page } = opened;
-    const drawn = markdown === CHART_DOCUMENT ? 3 : 2;
+    const drawn = markdown === CHART_DOCUMENT ? 4 : 3;
     await page.waitForFunction((count) => document.querySelectorAll(".myst-vega-diagram[data-render-state]").length === count, drawn, { timeout: 30_000 });
     await page.setViewportSize({ width: 820, height: 1000 });
     const height = await page.evaluate(() => Math.ceil([...document.querySelectorAll(".myst-vega-figure")].at(-1)!.getBoundingClientRect().bottom + window.scrollY) + 28);

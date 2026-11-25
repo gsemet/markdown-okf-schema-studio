@@ -70,3 +70,18 @@ test("the limit stops the search across blocks", () => {
   const root = el("main", [el("p", ["a a a"]), el("p", ["a a a"])]);
   assert.equal(findInBlocks(collectTextBlocks(root as never), pattern("a"), 4).length, 4);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+test("the Chart source section of a chart is not searched: its text is hidden in the preview", () => {
+  const root = el("main", [
+    el("p", ["body text"]),
+    el("figure", [
+      el("div", ["chart picture"], { class: "myst-vega-diagram" }),
+      el("details", [el("summary", ["Chart source"]), el("pre", [el("code", ["mark: bar"])])], { class: "myst-vega-source" }),
+    ], { class: "myst-vega-figure" }),
+  ]);
+  const texts = collectTextBlocks(root as never).map((block) => block.text);
+  assert.deepEqual(texts, ["body text", "chart picture"]);
+  assert.equal(findInBlocks(collectTextBlocks(root as never), pattern("mark: bar"), 10).length, 0, "a word of the chart source finds no match");
+  assert.equal(findInBlocks(collectTextBlocks(root as never), pattern("body"), 10).length, 1, "body text still finds its match");
+});

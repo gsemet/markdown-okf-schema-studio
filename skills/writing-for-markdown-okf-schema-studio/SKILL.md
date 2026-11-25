@@ -41,7 +41,7 @@ VSCodium and Cursor install the same ID from [Open VSX](https://open-vsx.org/ext
 | Layout | `{card}` (`:header:` `:footer:`), `{grid}` + `{grid-item-card}` (header `^^^` body `+++` footer), `{tab-set}` + `{tab-item}`, `{figure}`, `{list-table}` |
 | Inline | `{kbd}`, `{ref}` to a `(name)=` label above a heading, definition lists (`Term` then `: text`), `` `= this.field` `` shows a field of the document's own front matter ([examples](references/examples.md)) |
 | Diagrams | `mermaid` fence, `plantuml` fence (built in, no Java), `{uml} file.puml` |
-| Charts | `vega-lite` and `vega` fences, JSON or YAML, inline `values` or a relative CSV, TSV, JSON file |
+| Charts | `vega-lite` and `vega` fences, JSON or YAML, inline `values` or a relative CSV, TSV, JSON file; own `config` sets sizes and colours |
 | Images | `![alt](path)` and `{figure}` for local PNG, JPEG, SVG files (inline SVG: see below) |
 | Navigation | `[TOC]` or `[[_TOC_]]` alone on a line, or `{contents}` (`:depth: 2`, `:local:`) |
 | README HTML | `<div align>`, `<p align>`, `<img width>`, `<picture>`, `<details>`, `<kbd>`, `<sub>`, `<sup>` |
