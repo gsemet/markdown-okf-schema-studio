@@ -46,7 +46,8 @@ const BLOCK_TAGS = new Set([
 ]);
 /** Elements whose text is controls, code of the page or the find bar itself. */
 const SKIPPED_TAGS = new Set(["SCRIPT", "STYLE", "TEMPLATE", "NOSCRIPT", "BUTTON", "INPUT", "TEXTAREA", "SELECT"]);
-const SKIPPED_SELECTOR = ".katex-mathml, .okf-comment, .myst-checkbox-refusal, [data-sphinx-preview-find], "
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-121
+const SKIPPED_SELECTOR = ".katex-mathml, .okf-comment, .myst-checkbox-refusal, .myst-vega-source, [data-sphinx-preview-find], "
   + "[data-find-ignore], [aria-hidden='true']";
 
 const isSpace = (character: string): boolean => /\s/u.test(character);

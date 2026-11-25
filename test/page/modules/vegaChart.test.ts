@@ -134,3 +134,100 @@ test("the chart config follows the theme: dark and light palettes, page font and
   assert.equal(chartThemeFrom(() => "", "rgb(0, 0, 0)").dark, true);
   assert.equal(chartThemeFrom(() => "", "rgba(0, 0, 0, 0)").dark, false);
 });
+
+const AT_14 = chartThemeFrom((name) => ({ "--studio-editor-foreground": "#112233" })[name] ?? "", "rgb(255, 255, 255)", "14px");
+const AT_18 = chartThemeFrom((name) => ({ "--studio-editor-foreground": "#112233" })[name] ?? "", "rgb(255, 255, 255)", "18px");
+
+type SizedConfig = {
+  legend: Record<string, unknown>;
+  axis: Record<string, unknown>;
+  title: Record<string, unknown>;
+  header: Record<string, unknown>;
+  axisXDiscrete: Record<string, unknown>;
+  mark: Record<string, unknown>;
+};
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("the chart text sizes are ratios of the body font size: the table of values at 14 px", () => {
+  const config = chartConfig(AT_14) as SizedConfig;
+  assert.deepEqual(config.legend, {
+    labelColor: "#112233", labelFont: "sans-serif", titleColor: "#112233", titleFont: "sans-serif",
+    labelFontSize: 13, titleFontSize: 13.3, titleFontWeight: "bold",
+    symbolSize: 118, symbolStrokeWidth: 2.5, rowPadding: 5.2, titlePadding: 4.8,
+  });
+  assert.equal(config.axis.labelFontSize, 11.9);
+  assert.equal(config.axis.titleFontSize, 13.3);
+  assert.equal(config.axis.titleFontWeight, "bold");
+  assert.equal(config.axis.titlePadding, 6);
+  assert.equal(config.title.fontSize, 16.1);
+  assert.equal(config.title.fontWeight, "bold");
+  assert.equal(config.title.subtitleFontSize, 12.6);
+  assert.equal(config.header.labelFontSize, 11.9);
+  assert.equal(config.header.titleFontSize, 13.3);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("the chart text sizes scale with the body font size (18 px)", () => {
+  const config = chartConfig(AT_18) as SizedConfig;
+  assert.equal(config.legend.labelFontSize, 16.7);
+  assert.equal(config.axis.labelFontSize, 15.3);
+  assert.equal(config.title.fontSize, 20.7);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("the body font size falls back to 13 when it is not a number above 0", () => {
+  const fontSizeOf = (computed?: string): number => chartThemeFrom(() => "", "rgb(255, 255, 255)", computed).fontSize;
+  assert.equal(fontSizeOf(), 13);
+  assert.equal(fontSizeOf(""), 13);
+  assert.equal(fontSizeOf("abc"), 13);
+  assert.equal(fontSizeOf("0px"), 13);
+  assert.equal(fontSizeOf("-4px"), 13);
+  assert.equal(fontSizeOf("18px"), 18);
+  assert.equal((chartConfig(chartThemeFrom(() => "", "rgb(255, 255, 255)", "abc")) as SizedConfig).legend.labelFontSize, 12.1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("the subtitle takes the label colour, discrete x labels are horizontal, and there is no mark tooltip", () => {
+  const config = chartConfig(AT_14) as SizedConfig;
+  assert.equal(config.title.subtitleColor, "#112233");
+  assert.equal(config.axisXDiscrete.labelAngle, 0);
+  assert.equal(config.axisXDiscrete.labelOverlap, true);
+  assert.equal("tooltip" in config.mark, false);
+});
+
+/** The `font-size` of the SVG text elements whose content is `label`. */
+function sizesOf(svg: string, label: string): string[] {
+  return [...svg.matchAll(/<text[^>]*>/gu)]
+    .filter((match) => svg.slice(match.index + match[0].length).startsWith(label))
+    .map((match) => /font-size="([\d.]+)/u.exec(match[0])?.[1] ?? "");
+}
+
+const COLOURED = {
+  data: { values: [{ category: "A", amount: 28, kind: "Legend entry" }, { category: "B", amount: 55, kind: "Other entry" }] },
+  mark: "bar",
+  encoding: {
+    x: { field: "category", type: "nominal" },
+    y: { field: "amount", type: "quantitative" },
+    color: { field: "kind", type: "nominal" },
+  },
+};
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("a Vega-Lite legend is drawn at the page-relative size, and its own config wins", async () => {
+  const studio = await drawChart("vega-lite", JSON.stringify(COLOURED), AT_14);
+  assert.deepEqual([...new Set(sizesOf(studio, "Legend entry"))], ["13"]);
+  const own = await drawChart("vega-lite", JSON.stringify({ ...COLOURED, config: { legend: { labelFontSize: 9 } } }), AT_14);
+  assert.deepEqual([...new Set(sizesOf(own, "Legend entry"))], ["9"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("a Vega legend takes the page-relative size, and a size of its own spec wins", async () => {
+  const spec = (legend: Record<string, unknown>) => ({
+    width: 120, height: 80,
+    data: [{ name: "t", values: [{ k: "Legend entry", v: 3 }, { k: "Other entry", v: 7 }] }],
+    scales: [{ name: "c", type: "ordinal", domain: { data: "t", field: "k" }, range: "category" }],
+    legends: [{ fill: "c", ...legend }],
+  });
+  assert.deepEqual([...new Set(sizesOf(await drawChart("vega", JSON.stringify(spec({})), AT_14), "Legend entry"))], ["13"]);
+  assert.deepEqual([...new Set(sizesOf(await drawChart("vega", JSON.stringify(spec({ labelFontSize: 9 })), AT_14), "Legend entry"))], ["9"]);
+});

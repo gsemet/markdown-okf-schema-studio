@@ -370,7 +370,9 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   margin-inline: auto;
 }
 
+/* @implements_req SwRS-MDOKFSTUDIO-DIAG-121: the source is the document itself; the export shows it again. */
 #sphinx-myst-preview-content details.myst-vega-source {
+  display: none;
   margin-top: 0.75em;
   text-align: start;
 }

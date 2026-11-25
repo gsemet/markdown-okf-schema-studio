@@ -23,6 +23,8 @@ export interface ChartTheme {
   readonly grid: string;
   readonly accent: string;
   readonly fontFamily: string;
+  /** The body font size in px; the chart text sizes are ratios of it. */
+  readonly fontSize: number;
 }
 
 const LIGHT_CATEGORIES = ["#2f6db5", "#d9822b", "#3f9a68", "#b6455f", "#7a5ab8", "#2e9aa6", "#a08a1f", "#6b7280"];
@@ -44,31 +46,67 @@ function vegaMarkColours(theme: ChartTheme): Record<string, unknown> {
   };
 }
 
-/** The Vega config that gives a chart the colours and font of the page. */
+const round1 = (value: number): number => Math.round(value * 10) / 10;
+
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-123
+/**
+ * The Vega config that gives a chart the colours, the font and the text sizes of the page: every
+ * size is a ratio of the body font size, so it follows the Markdown font size and the zoom.
+ */
 export function chartConfig(theme: ChartTheme): Record<string, unknown> {
   const categories = [theme.accent, ...(theme.dark ? DARK_CATEGORIES : LIGHT_CATEGORIES).slice(1)];
   const text = { color: theme.foreground, font: theme.fontFamily };
+  const body = theme.fontSize;
+  const legendLabel = round1(body * 0.93);
+  const axisLabel = round1(body * 0.85);
+  const titleSize = round1(body * 0.95);
   return {
     background: "transparent",
     font: theme.fontFamily,
     view: { stroke: "transparent" },
-    title: { ...text, subtitleColor: theme.muted, subtitleFont: theme.fontFamily },
+    title: {
+      ...text,
+      fontSize: round1(body * 1.15),
+      fontWeight: "bold",
+      subtitleColor: theme.foreground,
+      subtitleFont: theme.fontFamily,
+      subtitleFontSize: round1(body * 0.9),
+    },
     axis: {
       domainColor: theme.muted,
       tickColor: theme.muted,
       gridColor: theme.grid,
       labelColor: theme.foreground,
       labelFont: theme.fontFamily,
+      labelFontSize: axisLabel,
       titleColor: theme.foreground,
       titleFont: theme.fontFamily,
+      titleFontSize: titleSize,
+      titleFontWeight: "bold",
+      titlePadding: round1(0.5 * axisLabel),
     },
+    axisXDiscrete: { labelAngle: 0, labelOverlap: true },
     legend: {
       labelColor: theme.foreground,
       labelFont: theme.fontFamily,
+      labelFontSize: legendLabel,
       titleColor: theme.foreground,
       titleFont: theme.fontFamily,
+      titleFontSize: titleSize,
+      titleFontWeight: "bold",
+      symbolSize: Math.round(0.7 * legendLabel * legendLabel),
+      symbolStrokeWidth: 2.5,
+      rowPadding: round1(0.4 * legendLabel),
+      titlePadding: round1(0.4 * axisLabel),
     },
-    header: { labelColor: theme.foreground, titleColor: theme.foreground, labelFont: theme.fontFamily, titleFont: theme.fontFamily },
+    header: {
+      labelColor: theme.foreground,
+      titleColor: theme.foreground,
+      labelFont: theme.fontFamily,
+      titleFont: theme.fontFamily,
+      labelFontSize: axisLabel,
+      titleFontSize: titleSize,
+    },
     mark: { color: theme.accent },
     text,
     range: { category: categories, ordinal: { scheme: "blues" } },

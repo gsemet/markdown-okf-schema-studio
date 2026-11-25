@@ -11,8 +11,15 @@ function isDarkColor(color: string): boolean {
   return 0.2126 * red! + 0.7152 * green! + 0.0722 * blue! < 0.18;
 }
 
+/** The body font size in px from a computed `font-size`; 13 when it is not a number above 0. */
+function bodyFontSize(computed: string): number {
+  const size = Number.parseFloat(computed);
+  return Number.isFinite(size) && size > 0 ? size : 13;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-123
 /** The chart theme of a page from the value of its CSS variables (`read` returns "" when unset). */
-export function chartThemeFrom(read: (name: string) => string, backgroundColor: string): ChartTheme {
+export function chartThemeFrom(read: (name: string) => string, backgroundColor: string, fontSize = ""): ChartTheme {
   const value = (name: string, fallback: string): string => read(name) || fallback;
   const dark = isDarkColor(backgroundColor);
   return {
@@ -22,5 +29,6 @@ export function chartThemeFrom(read: (name: string) => string, backgroundColor: 
     grid: value("--sphinx-preview-border", dark ? "#3c3c3c" : "#d4d4d4"),
     accent: value("--studio-textLink-foreground", dark ? "#6aa7e8" : "#2f6db5"),
     fontFamily: value("--sphinx-preview-font", "sans-serif"),
+    fontSize: bodyFontSize(fontSize),
   };
 }

@@ -2,6 +2,11 @@
 
 ## 2026-11-25
 
+### Vega charts: readable text, no Chart source in the preview (CR-502)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-DIAG-123 (legend, axis and title sizes follow the body text size, discrete x labels horizontal, subtitle in the label colour, a spec's own config wins; the error message is "Unable to render the chart." and no Chart source is shown in the preview), DIAG-121 (the preview hides the collapsed Chart source section and the HTML export shows it, closed), StRS-MDOKFSTUDIO-DIAG-015 (Path 1 step 1 wording)
+- Reason: the owner found the chart text too small, legends first, and the source section repeats the document in the preview
+
 ### Gallery: a stable link for each screenshot (CR-506)
 
 - Added (`proposed`): SwRS-MDOKFSTUDIO-CORE-096 (each screenshot of the site gallery has its own stable URL, `gallery.html#<capture id>`), derived from StRS-MDOKFSTUDIO-CORE-008

@@ -8,7 +8,7 @@ export function showChartError(chart: HTMLElement, reason: string): void {
   error.setAttribute("class", "myst-vega-error");
 
   const message = doc.createElement("p");
-  message.textContent = "Unable to render the chart. Its source remains available below.";
+  message.textContent = "Unable to render the chart.";
   error.appendChild(message);
 
   const details = doc.createElement("details");

@@ -51,7 +51,11 @@ export function tokenRule(tokens: Record<string, string>): string {
 
 const CONTENT = "#sphinx-myst-preview-content";
 
-/** The rules of the elements the export changes: CSS-only tab sets and the properties `details`. */
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-121
+/**
+ * The rules of the elements the export changes: CSS-only tab sets, the properties `details` and the
+ * Chart source section, which the preview hides and the export shows again (closed).
+ */
 export function exportSheet(maxTabs: number, colorScheme: "light" | "dark"): string {
   const set = `${CONTENT} .myst-tab-set`;
   const perTab = Array.from({ length: maxTabs }, (_unused, index) => {
@@ -97,6 +101,10 @@ ${perTab}
 
 ${CONTENT} details[data-okf-properties] > summary.okf-properties-title {
   cursor: pointer;
+}
+
+${CONTENT} details.myst-vega-source {
+  display: block;
 }
 
 ${CONTENT} details[data-okf-properties]:not([open]) > summary.okf-properties-title {
