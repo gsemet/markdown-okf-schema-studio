@@ -11,8 +11,10 @@ export interface WidthModeContext {
  * Width button of row 3: Margin (the configured column), Auto (the column stays, but
  * tables, figures, images and code blocks wider than it break out, up to the available width and
  * centred on it; code blocks stay in the list and are not centred when narrow) and Full
- * width (no column limit). `onChange` runs after the mode changed and lets the page keep its
- * reading line; `update()` re-measures the wide elements (Auto only).
+ * width (no column limit). A code block is measured with its border, a captioned one through its
+ * inner `pre`, and an overflowing code block has no 1 px tolerance. `onChange` runs after the mode
+ * changed and lets the page keep its reading line; `update()` re-measures the wide elements (Auto
+ * only).
  */
 export function installWidthMode(
   document: Document,
@@ -147,6 +149,15 @@ export function installWidthMode(
   const tableOf = (wrapper: Element): Element | null => (
     wrapper.tagName === "TABLE" ? wrapper : wrapper.tagName === "FIGURE" ? wrapper.querySelector?.("table") ?? null : null
   );
+
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
+  // The code box of a wrapper: a code block itself, or the code of a captioned one (a figure whose
+  // direct child is a `pre`). A Mermaid figure holds its source deeper: it is not a code block.
+  const codeOf = (wrapper: Element): Element | null => {
+    if (wrapper.tagName === "PRE") return wrapper;
+    if (wrapper.tagName !== "FIGURE") return null;
+    return Array.from(wrapper.children).find((child) => child.tagName === "PRE") ?? null;
+  };
 
   interface TablePlan {
     grid: Element[][];
@@ -318,6 +329,8 @@ export function installWidthMode(
     for (const [wrapper, plan] of plans) {
       if (!held.has(wrapper) && tableMinimum(plan) <= column + 1) stays.add(wrapper);
     }
+    // The code blocks whose code overflows: a 1 px overflow already shows a whole scroll bar.
+    const overflowing = new Set<Element>();
     const widths = measured.map((wrapper) => {
       const image = sizedElement(wrapper);
       // An image is capped by the column, so its own size is the natural width: the pixel width
@@ -328,7 +341,14 @@ export function installWidthMode(
       // scrollWidth is rounded down: a table of 1038.2px given 1038px would squeeze its cells and
       // wrap them, so the fractional box width counts too and the result is rounded up.
       const box = wrapper.getBoundingClientRect?.()?.width ?? 0;
-      return Math.ceil(Math.max(wrapper.scrollWidth, declared, intrinsic, box));
+      // A code block's scrollWidth leaves out its borders while the breakout sets the border box
+      // (2 px short), and a captioned block's overflow is inside its `pre`: it needs the wrapper's
+      // box around the whole content of the code. A code box that is not laid out (width 0) adds nothing.
+      const code = codeOf(wrapper);
+      const laidOut = code && code.clientWidth > 0 ? code : null;
+      if (laidOut && laidOut.scrollWidth > laidOut.clientWidth) overflowing.add(wrapper);
+      const codeNeed = laidOut ? box - laidOut.clientWidth + laidOut.scrollWidth : 0;
+      return Math.ceil(Math.max(wrapper.scrollWidth, declared, intrinsic, box, codeNeed));
     });
     for (const wrapper of measured) {
       wrapper.removeAttribute(measuring);
@@ -338,7 +358,8 @@ export function installWidthMode(
       if (stays.has(wrapper)) return;
       const room = hasRowHandles(wrapper) ? pane - reserved - handleGutter * 2 : available;
       const extra = widths[index] <= room ? Math.ceil(widths[index] - column) : Math.floor(room - column);
-      if (extra <= 1) return;
+      // A gain of 1 px or less is rounding (fractional box widths), unless code really overflows.
+      if (extra <= (overflowing.has(wrapper) ? 0 : 1)) return;
       wrapper.setAttribute(wideAttribute, "");
       (wrapper as HTMLElement).style.setProperty(breakoutProperty, extra + "px");
       (wrapper as HTMLElement).style.setProperty(shiftProperty, shift + "px");
