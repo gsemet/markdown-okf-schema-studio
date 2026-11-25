@@ -27,6 +27,8 @@ document. The name stored with a comment is the
 operating system user name. The setting can be set per user, per workspace or per folder
 (`.vscode/settings.json`), for example to sign the comments of one project with an alias.
 
+![A sentence is selected in the preview, the Comment button pressed, a comment typed and saved with Ctrl+Enter / ⌘Enter: the sentence is highlighted and a click opens its thread with Reply, Resolve and Delete](../demo-video/clips/comment-thread/comment-thread.gif)
+
 A thread popover also has **Resolve** (then **Reopen**) and **Delete**; Delete asks "Delete
 thread?" with Yes and No in the popover, and deleting the last thread keeps the file with an empty
 list. A thread whose block and quote can no longer be found is never dropped: it is listed under
