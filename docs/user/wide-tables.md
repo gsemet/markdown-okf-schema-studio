@@ -20,3 +20,5 @@ card) keeps the width of its container and scrolls. Margin and Full width are un
 The capture uses the cream theme.
 
 [![Cream preview in Auto width: a narrow text column with a wide table and a wide figure breaking out of it, centred](../../images/readme/margin-break-cream.png)](../../images/readme/margin-break-cream.png)
+
+![A page in Margin width shows a twelve-month table cut at the text column; one click on the Width button sets Auto and the table breaks out of the column, centred, with every month and the total, while the paragraph keeps its narrow column](../demo-video/clips/wide-table-auto-width/wide-table-auto-width.gif)
