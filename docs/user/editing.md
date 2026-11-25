@@ -201,6 +201,9 @@ environments),
   undo, and it works while a cell of the table is open too (the text typed in the cell moves with
   its row or column). In a list-table the cells and the `:widths:` numbers of a moved column move
   together and the `* -` and `  -` markers keep their places.
+
+  ![In edit mode, the row "Fix the login bug" is dragged by its handle to the top of a pipe table, then the "Due" column by its handle to the first place: the raw Markdown beside follows each move and every cell keeps its spacing](../demo-video/clips/table-anchors/table-anchors.gif)
+
   Typing `/` at a line start opens a Notion-style command menu with completion
   (see [Slash Menu](slash-menu.md)).
 - **Linked evidence:**
