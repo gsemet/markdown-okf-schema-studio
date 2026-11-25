@@ -52,7 +52,7 @@ test("takeLines fails the start mode line when Studio was in the other mode, and
   assert.equal(takeLines({ passed: false, notes: { readingMode: "off", pasteWidgets: 0 } })[0].ok, false);
 });
 
-test("the shipped scenarios declare their checks: the drag clip edit mode with no paste, the paste clip edit mode with a paste, the raw copy clip the defaults, the diff clip reading mode with no paste", async () => {
+test("the shipped scenarios declare their checks: the drag, paste, raw copy, diff, grid and theme clips each their edit mode and paste", async () => {
   const drag = await import(scenarioOf("drag-list-item"));
   assert.deepEqual(resolveChecks(drag.checks), { editMode: "on", paste: false });
   const paste = await import(scenarioOf("paste-spreadsheet-cells"));
@@ -65,4 +65,6 @@ test("the shipped scenarios declare their checks: the drag clip edit mode with n
   assert.deepEqual(resolveChecks(diff.checks), { editMode: "off", paste: false });
   const grid = await import(scenarioOf("slash-menu-grid"));
   assert.deepEqual(resolveChecks(grid.checks), { editMode: "on", paste: false });
+  const theme = await import(scenarioOf("theme-switch"));
+  assert.deepEqual(resolveChecks(theme.checks), { editMode: "off", paste: false });
 });

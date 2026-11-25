@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { EXPECTED as EXPECTED_DRAG } from "../../clips/drag-list-item/scenario.mjs";
 import { EXPECTED } from "../../clips/raw-copy-balance-edges/scenario.mjs";
 import { EXPECTED as EXPECTED_GRID } from "../../clips/slash-menu-grid/scenario.mjs";
+import { STAGE as STAGE_THEME } from "../../clips/theme-switch/scenario.mjs";
 import { parseClip, parseClipText, parseSections, validateStory } from "./storyboard.mjs";
 
 const clipFile = fileURLToPath(new URL("../../clips/raw-copy-balance-edges/clip.md", import.meta.url));
@@ -18,13 +19,18 @@ const take = {
   filmed: 9.85,
   presses: [
     { id: "copy", t: 2.6 },
-    { id: "paste", t: 4.2 },
+    { id: "paste", t: 4.6 },
   ],
   zooms: [{ id: "result", t: 4.4 }],
   marks: [{ id: "1" }, { id: "2" }, { id: "3" }],
 };
 const SHIPPED_PASTE_LENGTH = 10.0; // the Length of clips/paste-spreadsheet-cells/clip.md, set from the take
 const win32 = { platform: "win32" };
+/** The marks of the shipped theme-switch clip.md: the times of its Mark rows. */
+const MARKS_THEME = [
+  [5.2, 7.0],
+  [7.0, 8.8],
+];
 const darwin = { platform: "darwin" };
 
 /** A small valid storyboard, to change one thing at a time. */
@@ -317,6 +323,36 @@ test("the shipped diff-side-by-side clip.md reads as the clip the owner reviews"
   assert.equal(out.fps, 15);
 });
 
+test("the shipped theme-switch clip.md reads as the clip the owner reviews", () => {
+  const themeFile = fileURLToPath(new URL("../../clips/theme-switch/clip.md", import.meta.url));
+  const theme = parseClip(themeFile);
+  assert.equal(theme.width, 1280);
+  assert.equal(theme.height, 720);
+  assert.equal(theme.fps, 15);
+  assert.deepEqual(
+    theme.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["One click turns the whole page to another theme", "Diagrams and charts follow the theme"],
+  );
+  assert.equal(theme.captions[0].from, 0);
+  assert.equal(theme.captions[0].to, theme.captions[1].from);
+  assert.equal(theme.captions[1].to, theme.length);
+  assert.deepEqual(theme.badges, {});
+  assert.equal(theme.zoom.id, "charts");
+  assert.deepEqual(
+    theme.marks.map((mark) => mark.id),
+    ["1", "2"],
+  );
+  assert.deepEqual(theme.marks.map((mark) => [mark.from, mark.to]), MARKS_THEME);
+  for (const [index, mark] of theme.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= theme.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= theme.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  const filmed = { filmed: theme.length, presses: [], zooms: [{ id: "charts", t: 4.2 }], marks: [{ id: "1" }, { id: "2" }] };
+  const out = validateStory(theme, filmed, win32);
+  assert.equal(out.platform, "win32");
+  assert.equal(out.fps, 15);
+});
+
 test("the shipped slash-menu-grid clip.md reads as the clip the owner reviews", () => {
   const gridFile = fileURLToPath(new URL("../../clips/slash-menu-grid/clip.md", import.meta.url));
   const grid = parseClip(gridFile);
@@ -344,4 +380,9 @@ test("the shipped slash-menu-grid clip.md reads as the clip the owner reviews", 
   const block = /^Expected result[^\n]*\n(?:[^\n]*\n)*?```markdown\n([\s\S]*?)\n```/mu.exec(readFileSync(gridFile, "utf8"));
   assert.ok(block, "clip.md has an Expected result block");
   assert.equal(block[1], EXPECTED_GRID);
+});
+
+test("the stage of the theme-switch scenario is the shipped stage file, byte for byte", () => {
+  const stageFile = fileURLToPath(new URL("../../clips/theme-switch/stage/handbook.md", import.meta.url));
+  assert.equal(STAGE_THEME, readFileSync(stageFile, "utf8"));
 });
