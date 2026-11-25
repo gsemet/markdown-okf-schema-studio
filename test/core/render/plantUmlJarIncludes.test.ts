@@ -29,7 +29,7 @@ function createFixture(): Fixture {
   return { parent, root, sibling };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S7
 test("includes inside the workspace folder are accepted", async () => {
   const { parent, root } = createFixture();
   try {
@@ -50,7 +50,7 @@ test("includes inside the workspace folder are accepted", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S7
 test("an include that leaves the workspace through parent segments is refused", async () => {
   const { parent, root } = createFixture();
   try {
@@ -68,7 +68,7 @@ test("an include that leaves the workspace through parent segments is refused", 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S7
 test("an absolute path into a sibling folder sharing the workspace name prefix is refused", async () => {
   const { parent, root, sibling } = createFixture();
   try {
@@ -86,7 +86,7 @@ test("an absolute path into a sibling folder sharing the workspace name prefix i
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S7
 test("a symlink inside the workspace that points out of it is refused", needsSymlinks, async () => {
   const { parent, root, sibling } = createFixture();
   try {
@@ -100,7 +100,8 @@ test("a symlink inside the workspace that points out of it is refused", needsSym
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S7
 test("a nested include and a computed include path are checked too", async () => {
   const { parent, root } = createFixture();
   try {
@@ -116,7 +117,7 @@ test("a nested include and a computed include path are checked too", async () =>
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S7
 test("a diagram whose include leaves the workspace shows a message and starts no process", async () => {
   const { parent, root, sibling } = createFixture();
   const runner = fakeRunner();

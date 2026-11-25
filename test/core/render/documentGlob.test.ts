@@ -16,7 +16,7 @@ function tree() {
   return files;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S4
 test("a glob lists the documents below the folder, sorted, without hidden files and generated folders", async () => {
   const files = tree();
   assert.deepEqual(await listGlobDocuments(files, "**", base, allowAll), [
@@ -26,7 +26,8 @@ test("a glob lists the documents below the folder, sorted, without hidden files 
   assert.deepEqual(await listGlobDocuments(files, "sub/*", base, allowAll), ["sub/c.markdown"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S4
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S5
 test("a glob leaves out the excluded document, a refused candidate and an absolute or parent pattern", async () => {
   const files = tree();
   assert.deepEqual(await listGlobDocuments(files, "*", base, allowAll, path.join(base, "a.md")), ["b.md"]);
@@ -35,7 +36,8 @@ test("a glob leaves out the excluded document, a refused candidate and an absolu
   assert.deepEqual(await listGlobDocuments(files, "/etc/*", base, allowAll), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S4
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S5
 test("a glob lists no symbolic link and walks no linked folder", async () => {
   const files = tree();
   files.addFile(path.resolve("/project/elsewhere/z.md"), "# z\n");
@@ -47,7 +49,7 @@ test("a glob lists no symbolic link and walks no linked folder", async () => {
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S4
 test("a glob stops at the most matches and gives nothing for a folder that cannot be read", async () => {
   const files = createPlatformMemoryFileSystem();
   for (let index = 0; index < MAX_GLOB_MATCHES + 30; index += 1) {

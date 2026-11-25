@@ -50,7 +50,8 @@ async function inspect(f: Fixture, resolution: string, value: string, filePath =
   }))[0]!;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S2
 test("a stem is unique, ambiguous or unknown in the memory file system", async () => {
   const f = fixture();
   f.memory.addFile("/ws/a/unique.md", "# u\n");
@@ -65,7 +66,7 @@ test("a stem is unique, ambiguous or unknown in the memory file system", async (
   assert.equal((await inspect(f, "filename-stem", "missing")).status, "invalid");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
 test("the memory walk skips excluded and hidden directories", async () => {
   const f = fixture();
   f.memory.addFile("/ws/visible/target.md", "# t\n");
@@ -76,7 +77,7 @@ test("the memory walk skips excluded and hidden directories", async () => {
   assert.deepEqual(index.stems(), ["target"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
 test("a file removed after the build is unavailable, never listed", async () => {
   const f = fixture();
   f.memory.addFile("/ws/a/gone.md", "# g\n");
@@ -87,7 +88,8 @@ test("a file removed after the build is unavailable, never listed", async () => 
   assert.equal(lookup.unavailable, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S6
 test("the cached index is shared by concurrent callers and rebuilt after an invalidation", async () => {
   const f = fixture();
   f.memory.addFile("/ws/a/one.md", "# 1\n");
@@ -104,7 +106,7 @@ test("the cached index is shared by concurrent callers and rebuilt after an inva
   assert.deepEqual(rebuilt.stems(), ["one", "two"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
 test("an invalidation during a build discards that build", async () => {
   const f = fixture();
   f.memory.addFile("/ws/a/one.md", "# 1\n");
@@ -117,7 +119,8 @@ test("an invalidation during a build discards that build", async () => {
   assert.deepEqual(index.stems(), ["late", "one"], "the served index is a rebuild that sees the new file");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S7
 test("document-relative, bundle and project links resolve through the port", async () => {
   const f = fixture();
   f.memory.addFile("/ws/docs/sibling.md", "# s\n");
@@ -134,7 +137,8 @@ test("document-relative, bundle and project links resolve through the port", asy
   assert.equal((await inspect(f, "document-relative", "nope.md")).status, "invalid");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S3
 test("a linked file with a BOM and a marker gives its details through the port", async () => {
   const f = fixture();
   f.memory.addFile("/ws/docs/target.md", "\uFEFF---\ntitle: Target\n---\n# Target\n@ref alpha\n");

@@ -59,7 +59,8 @@ function keyOn(harness: RuntimeHarness, target: RuntimeElement, name: string): v
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S8
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-193
 test("a paragraph line in a hidden tab selects the tab, marks the exact wrapped line and posts nothing", () => {
   const harness = createRuntimeHarness();
@@ -113,7 +114,8 @@ test("a paragraph line after a code block in a tab panel is not put on a code sp
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S6
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S8
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-193
 test("a line in a nested hidden tab selects the outer tab first, then the inner one", () => {
   const harness = createRuntimeHarness();
@@ -157,7 +159,7 @@ test("a tab set in a closed dropdown is opened, then its tab is selected", () =>
   assert.equal(top(overlays(harness)[0]), "2450px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-006
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006#S5
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
 test("a line in the body of a closed dropdown directive opens it and is marked, from the real render", async () => {
   const rendered = await renderPreviewDocument({
@@ -275,7 +277,8 @@ test("the line of a tab item belongs to its panel and selects its tab", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S8
 test("a tab revealed by the marker takes the click's path: the sets of its sync group follow", () => {
   const harness = createRuntimeHarness();
   const first = buildTabSet(harness, {
@@ -357,7 +360,7 @@ function collapse(harness: RuntimeHarness): void {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S1
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-194
 test("a row line expands a collapsed properties table and marks the row; a fence line leaves it collapsed", () => {
   const harness = createRuntimeHarness({ frontmatterHeight: 160, firstMappedSourceLine: 22 });
@@ -377,7 +380,7 @@ test("a row line expands a collapsed properties table and marks the row; a fence
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-179
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S1
 test("a properties table the reader collapses again hides the marker, and a later placement never expands it", () => {
   const harness = createRuntimeHarness({ frontmatterHeight: 160, firstMappedSourceLine: 22 });
   frontmatter(harness);

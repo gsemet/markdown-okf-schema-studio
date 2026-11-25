@@ -16,6 +16,11 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-129
+scenarios:
+- id: S1
+  title: No eval and no network
+- id: S2
+  title: The policy is unchanged
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,13 +41,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a page holds a chart figure, the chart runtime SHALL evaluate chart expressions with the Vega interpreter so that the page content security policy keeps no unsafe-eval and no network access.
 
-### Scenario (nominal): No eval and no network
+### Scenario S1 (nominal): No eval and no network
 
 - GIVEN a page with a Vega-Lite chart and a Vega chart whose expressions (calculate, filter, signals, formulas) need evaluating
 - WHEN the page is opened under its content security policy
 - THEN the policy has no unsafe-eval, no unsafe-inline and connect-src none, both charts are drawn, no policy violation and no console error is reported, and the chart code builds no function from a string (the specification is parsed with ast true and evaluated by the Vega interpreter)
 
-### Scenario (refusal): The policy is unchanged
+### Scenario S2 (refusal): The policy is unchanged
 
 - GIVEN the page policy of a page with charts
 - WHEN it is compared with a page without charts

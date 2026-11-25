@@ -20,6 +20,23 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: With a schema, the field goes where its row shows
+- id: S2
+  title: First in schema order and custom keys
+- id: S3
+  title: Without a schema, the field follows the row whose menu was used
+- id: S4
+  title: The editor of the added field opens by itself once
+- id: S5
+  title: Reload and later renders
+- id: S6
+  title: A pending editor that cannot be used is dropped
+- id: S7
+  title: A new custom key is saved as a plain scalar when that is safe
+- id: S8
+  title: Text that would not read back as the same string
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,48 +63,48 @@ supersedes:
 
 When a writer adds a field, the extension SHALL insert it as one line where its row shows and open the editor of the new field once: with a schema right after the present field that precedes it in schema order or right before the next one when it comes first, without a schema after the row whose menu was used, else at the end of the block.
 
-### Scenario (nominal): With a schema, the field goes where its row shows
+### Scenario S1 (nominal): With a schema, the field goes where its row shows
 - GIVEN a schema listing title, owner, status and a document with title and status
 - WHEN owner is added
 - THEN owner is inserted between title and status whichever row was clicked, right after the present field that precedes it in schema order
 
-### Scenario (boundary): First in schema order and custom keys
+### Scenario S2 (boundary): First in schema order and custom keys
 | Added field | Insert point |
 | --- | --- |
 | a field that comes first in schema order, with a leading comment in the block | after the leading comment lines, before the first key (beforeField) |
 | a schema field whose schema neighbours are absent from the document | the absent schema neighbours are skipped |
 | a custom key | after the last row |
 
-### Scenario (nominal): Without a schema, the field follows the row whose menu was used
+### Scenario S3 (nominal): Without a schema, the field follows the row whose menu was used
 | Added field | Insert point |
 | --- | --- |
 | owner, added from the menu of title, in a document without a schema with the fields title and status | directly after title |
 | owner, with an afterField naming a field that does not exist | appended at the end of the block |
 
-### Scenario (nominal): The editor of the added field opens by itself once
+### Scenario S4 (nominal): The editor of the added field opens by itself once
 - GIVEN an add posted for the field owner in edit mode
 - WHEN the re-rendered table arrives
 - THEN the editor of owner opens and the pending edit is cleared when it closes
 
-### Scenario (boundary): Reload and later renders
+### Scenario S5 (boundary): Reload and later renders
 | Page load | Outcome |
 | --- | --- |
 | the render that posted the add is loaded again | the pending edit is kept for the next render |
 | a later render of an already opened editor | the editor is not reopened |
 
-### Scenario (refusal): A pending editor that cannot be used is dropped
+### Scenario S6 (refusal): A pending editor that cannot be used is dropped
 | Situation when the table is re-rendered | Outcome |
 | --- | --- |
 | edit mode turned off | no editor opens and the pending edit is cleared |
 | the row of the new field is missing | no editor opens and the pending edit is cleared |
 | the add was refused by the host (error result) | the pending edit is cleared |
 
-### Scenario (nominal): A new custom key is saved as a plain scalar when that is safe
+### Scenario S7 (nominal): A new custom key is saved as a plain scalar when that is safe
 - GIVEN a custom key just added with the empty string as value
 - WHEN the writer types plain text and presses Enter
 - THEN the editor is one text line, the save carries fieldValueStyle plain and the value is written unquoted
 
-### Scenario (boundary): Text that would not read back as the same string
+### Scenario S8 (boundary): Text that would not read back as the same string
 | Value typed for the new custom key | Outcome |
 | --- | --- |
 | yes, on, or a date-like value | written quoted |

@@ -34,7 +34,7 @@ SCROLL_ON_CLOSE = """() => { window.__widthScrollFrames = new Promise((resolve) 
 }); }""" % TABLE
 
 
-# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S7
 def check_width_mode_scroll(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Auto width, edit mode: a table wider than the pane, scrolled sideways, keeps its scrollLeft when a
   layout pass measures it again: after a cell editor closes (Escape) and after a 3 px pane resize."""

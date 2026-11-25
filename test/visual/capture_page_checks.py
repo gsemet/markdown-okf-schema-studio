@@ -81,7 +81,8 @@ def apply_scroll(page: Page, scroll: dict) -> str:
     raise ValueError(f"unknown scroll mode: {kind}")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001
+# @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001#S6
+# @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001#S7
 def stress_frontmatter_scroll(page: Page, scenario: dict, failures: list[Failure]) -> None:
     if not scenario.get("scrollFeedbackStress"):
         return
@@ -624,7 +625,8 @@ def sidecar_json(scenario: dict, position: str, result: dict) -> str:
     }, indent=2) + "\n"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-THEME-025
+# @tests_req SwRS-MDOKFSTUDIO-THEME-025#S1
+# @tests_req SwRS-MDOKFSTUDIO-THEME-025#S5
 def check_forced_white_theme(page: Page, scenario: dict, failures: list[Failure]) -> None:
     if scenario.get("previewThemeMode") != "white":
         return
@@ -720,7 +722,8 @@ FORCED_CREAM_CHECKS = """
 """
 
 
-# @tests_req SwRS-MDOKFSTUDIO-THEME-031
+# @tests_req SwRS-MDOKFSTUDIO-THEME-031#S3
+# @tests_req SwRS-MDOKFSTUDIO-THEME-031#S4
 # @tests_req SwRS-MDOKFSTUDIO-CORE-028
 def check_forced_cream_theme(page: Page, scenario: dict, failures: list[Failure]) -> None:
     if scenario.get("previewThemeMode") != "cream":

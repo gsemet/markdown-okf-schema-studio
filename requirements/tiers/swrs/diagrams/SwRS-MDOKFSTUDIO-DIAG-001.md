@@ -18,6 +18,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-129
+scenarios:
+- id: S1
+  title: Fence and directive
+- id: S2
+  title: Empty diagram
+- id: S3
+  title: Valid flowchart is drawn as a picture
+- id: S4
+  title: Labels fit their boxes in the picture
+- id: S5
+  title: Line-break tags in the SVG
+- id: S6
+  title: Picture width against the content column
+- id: S7
+  title: A diagram under edit is hidden
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -54,25 +69,25 @@ supersedes:
 
 When a document contains a mermaid fence or a {mermaid} directive, the extension SHALL render a figure whose diagram element is labelled "Mermaid diagram" and holds the diagram text, with the same text in a collapsed "Diagram source" disclosure, and have the page draw it as one inert picture that fits the content column.
 
-### Scenario (nominal): Fence and directive
+### Scenario S1 (nominal): Fence and directive
 
 - GIVEN a document with a mermaid fence and a {mermaid} directive, each holding a flowchart
 - WHEN the preview is rendered
 - THEN two Mermaid figures appear, each with a diagram element labelled "Mermaid diagram" holding the flowchart text and a collapsed details element whose summary reads "Diagram source" and whose code block holds the same text
 
-### Scenario (boundary): Empty diagram
+### Scenario S2 (boundary): Empty diagram
 
 - GIVEN a mermaid fence with no text
 - WHEN the preview is rendered
 - THEN a figure with an empty diagram element is still produced, the page draws nothing in it and shows no message
 
-### Scenario (nominal): Valid flowchart is drawn as a picture
+### Scenario S3 (nominal): Valid flowchart is drawn as a picture
 
 - GIVEN a valid Mermaid flowchart
 - WHEN the page draws the diagram
 - THEN the diagram element holds one image of class myst-mermaid-image with alt text "Mermaid diagram" and a src starting with data:image/svg+xml;charset=utf-8 (an SVG drawn at the strict security level), the diagram text is replaced, and data-render-state is rendered
 
-### Scenario (nominal): Labels fit their boxes in the picture
+### Scenario S4 (nominal): Labels fit their boxes in the picture
 
 - GIVEN a flowchart with node labels ("Review telemetry", "Hold and inspect") and edge labels ("Yes", "No"), drawn with Mermaid's HTML labels
 - WHEN the page draws the diagram and shows it as an SVG image
@@ -80,20 +95,20 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - AND the Mermaid configuration and theme variables carry the same font family and size, so the image draws each label with the metrics it was measured with
 - AND in the image, the text of every label fits its label box and, for a node, its shape: no label loses its last characters
 
-### Scenario (boundary): Line-break tags in the SVG
+### Scenario S5 (boundary): Line-break tags in the SVG
 
 - GIVEN Mermaid output whose SVG contains HTML line-break tags written without a closing slash
 - WHEN the page builds the image source
 - THEN the data URI holds the self-closing form of each line-break tag so the SVG loads as an image
 
-### Scenario (boundary): Picture width against the content column
+### Scenario S6 (boundary): Picture width against the content column
 
 | Picture | Outcome |
 | --- | --- |
 | Natural width exceeds the content column | Displayed at the column width with its height scaled in proportion (max-width 100 percent, height auto) |
 | Narrower than the content column | Keeps its natural size, is not enlarged and is centred |
 
-### Scenario (nominal): A diagram under edit is hidden
+### Scenario S7 (nominal): A diagram under edit is hidden
 
 | Event | Outcome |
 | --- | --- |

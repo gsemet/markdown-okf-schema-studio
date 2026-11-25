@@ -16,6 +16,11 @@ derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-009
 - SwRS-MDOKFSTUDIO-DIAG-129
+scenarios:
+- id: S1
+  title: Read a chart in the page
+- id: S2
+  title: Read a drawing in the page
 user_need: A writer puts a chart or a drawing in the document and sees it in the
   page, with nothing executed or fetched.
 derived_by:
@@ -71,7 +76,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Read a chart in the page
+#### Path S1: Read a chart in the page
 
 1. A document holds a Vega-Lite or Vega fence
    - SwRS-MDOKFSTUDIO-DIAG-121: the fence becomes a chart figure with a source section kept for the HTML export
@@ -81,7 +86,7 @@ sequenceDiagram
 3. The chart is drawn in the colours of the page
    - SwRS-MDOKFSTUDIO-DIAG-123: the chart is a themed live SVG with a hover detail, or the error shows in its place
 
-#### Path 2: Read a drawing in the page
+#### Path S2: Read a drawing in the page
 
 1. A document holds an svg fence or a raw svg block
    - SwRS-MDOKFSTUDIO-DIAG-125: the SVG is rebuilt from an allow-list and drawn inline

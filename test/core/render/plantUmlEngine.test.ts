@@ -47,8 +47,9 @@ for (const trusted of [true, false]) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S6
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S4
 test("useJar keeps the external pipeline: trusted it spawns, Restricted Mode refuses it without a process", async () => {
   const runner = fakeRunner();
   const trusted = await renderPreviewDocument({
@@ -77,7 +78,8 @@ test("useJar keeps the external pipeline: trusted it spawns, Restricted Mode ref
   assert.deepEqual(started(runner), ["plantuml"], "Restricted Mode must not start the JAR");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S8
 test("the jar engine on a host without a process runner reports the diagrams unavailable", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(source),

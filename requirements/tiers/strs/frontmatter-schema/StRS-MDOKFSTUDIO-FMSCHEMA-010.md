@@ -15,6 +15,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Fields and their problems
 user_need: As a writer, I see which fields the schema expects, in a stable
   order, with their meaning, see exactly which metadata is wrong and jump to it,
   and as a team lead I have misspelled or stray metadata fields flagged.
@@ -88,7 +91,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Fields and their problems
+#### Path S1: Fields and their problems
 
 1. The type of the document has a schema
    - SwRS-MDOKFSTUDIO-FMSCHEMA-029: the page shows Name, Value and Description columns, declared fields in schema order, then the other keys

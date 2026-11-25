@@ -19,6 +19,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-001
 - StRS-MDOKFSTUDIO-FMSCHEMA-006
 depends_on: []
+scenarios:
+- id: S1
+  title: No type
+- id: S2
+  title: Other reasons for the generic table
+- id: S3
+  title: Markup in a name or a value
+- id: S4
+  title: The properties section maps to source line 1
+- id: S5
+  title: The key column fits its keys
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,13 +57,13 @@ supersedes:
 
 When the frontmatter has no string `type`, or no schema lookup is made for the document, the extension SHALL show a two-column table headed Names and Values that lists the keys in source order, without type icons or a Description column, with every name, value, tooltip and data attribute escaped as text and its section marked as source line 1, and SHALL keep each key on one line in a key column as wide as its longest key, up to 40% of the table.
 
-### Scenario (nominal): No type
+### Scenario S1 (nominal): No type
 
 - GIVEN a document whose frontmatter is `b: 1` then `a: two`
 - WHEN the preview is rendered
 - THEN a two-column table with the headers Names and Values lists b before a, with no type icon, no Description column and no badge
 
-### Scenario (boundary): Other reasons for the generic table
+### Scenario S2 (boundary): Other reasons for the generic table
 
 | Input | Outcome |
 | --- | --- |
@@ -61,14 +72,14 @@ When the frontmatter has no string `type`, or no schema lookup is made for the d
 | A schema exists for the type and the workspace is in Restricted Mode | The table is generic and no field is editable |
 | A Markdown file opened outside every workspace folder with a typed frontmatter | The table is generic |
 
-### Scenario (refusal): Markup in a name or a value
+### Scenario S3 (refusal): Markup in a name or a value
 
 | Input | Outcome |
 | --- | --- |
 | A field whose value is a bold tag, an ampersand and double quotes written as a YAML string | The Value cell shows the characters literally (escaped as lt, amp and quot entities) and no bold element is created |
 | A field whose name contains an angle bracket | The name appears as text in the Name cell and in the row attributes, never as an element |
 
-### Scenario (nominal): The properties section maps to source line 1
+### Scenario S4 (nominal): The properties section maps to source line 1
 
 - GIVEN a document with frontmatter and a source mapping for the preview
 - WHEN the table is rendered
@@ -76,7 +87,7 @@ When the frontmatter has no string `type`, or no schema lookup is made for the d
 - WHEN the editor cursor is on line 1 of the source and the preview syncs to the source line
 - THEN the preview scrolls back to the top where the properties section sits
 
-### Scenario (boundary): The key column fits its keys
+### Scenario S5 (boundary): The key column fits its keys
 
 | Input | Outcome |
 | --- | --- |

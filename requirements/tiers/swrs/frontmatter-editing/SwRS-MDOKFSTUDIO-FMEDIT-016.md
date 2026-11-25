@@ -25,6 +25,29 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: A YAML value that does not parse is refused
+- id: S2
+  title: An empty or non-text YAML value
+- id: S3
+  title: A value that does not fit the field type
+- id: S4
+  title: Values that are accepted
+- id: S5
+  title: A schema error on the edited field
+- id: S6
+  title: Only errors of the edited field block a save
+- id: S7
+  title: A save for a missing field or revision is stale
+- id: S8
+  title: A frontmatter save that names its editor and field is accepted
+- id: S9
+  title: A save that does not name its editor, field or value is ignored
+- id: S10
+  title: Accepted bounds of the optional fields
+- id: S11
+  title: The frontmatter-save fields are accepted only on a frontmatter save
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -52,12 +75,12 @@ supersedes:
 
 When the host receives a frontmatter save whose YAML value does not parse or is empty, or whose value does not fit the field type or the schema, the extension SHALL refuse it with "Invalid YAML value: {parser message}" for a YAML value and with the matching message otherwise, and change nothing; a previewFrontmatterSave message that does not name a non-empty editId and fieldName, or that carries a field outside its accepted shape, is ignored without a reply.
 
-### Scenario (nominal): A YAML value that does not parse is refused
+### Scenario S1 (nominal): A YAML value that does not parse is refused
 - GIVEN a save with fieldValueFormat yaml and the text [
 - WHEN the host plans the save
 - THEN the answer is the error "Invalid YAML value: " followed by the parser message and the document is unchanged
 
-### Scenario (refusal): An empty or non-text YAML value
+### Scenario S2 (refusal): An empty or non-text YAML value
 | Save with fieldValueFormat yaml | Answer |
 | --- | --- |
 | an empty or blank text | "Invalid YAML value: Enter a YAML value." |
@@ -65,20 +88,20 @@ When the host receives a frontmatter save whose YAML value does not parse or is 
 
 A save with the flush flag skips the parse refusal and keeps the typed text (see SwRS-MDOKFSTUDIO-FMEDIT-067).
 
-### Scenario (refusal): A value that does not fit the field type
+### Scenario S3 (refusal): A value that does not fit the field type
 | Save received for a schema field | Answer (the document is unchanged) |
 | --- | --- |
 | null for a field that is not nullable | "The frontmatter field is stale or its value does not match the schema." |
 | paused for an enum field with the values draft and active | the same stale-field message |
 | a text, date or time that is not a string; a boolean field that is not a boolean; a number that is not finite; a list that is not an array | the same stale-field message |
 
-### Scenario (boundary): Values that are accepted
+### Scenario S4 (boundary): Values that are accepted
 | Save | Outcome |
 | --- | --- |
 | null for a nullable schema field | accepted |
 | any value for a document without a schema | no type check applies and the value is written |
 
-### Scenario (refusal): A schema error on the edited field
+### Scenario S5 (refusal): A schema error on the edited field
 | Save received | Answer (the document is unchanged) |
 | --- | --- |
 | a value that violates a constraint of the schema field | "Schema validation failed: " followed by the schema message |
@@ -86,20 +109,20 @@ A save with the flush flag skips the parse refusal and keeps the typed text (see
 | a rename after which the field cannot be found in the re-analysis | "The renamed frontmatter field could not be validated." |
 | null for a field whose conditional (if/then) rule does not apply because the condition is not met | not refused: the same null save is accepted and written |
 
-### Scenario (boundary): Only errors of the edited field block a save
+### Scenario S6 (boundary): Only errors of the edited field block a save
 | Situation | Outcome |
 | --- | --- |
 | the only error of the edited field is a broken link | the save is accepted |
 | another field of the frontmatter has a schema error and a different field is edited with a valid value | the save is accepted |
 
-### Scenario (refusal): A save for a missing field or revision is stale
+### Scenario S7 (refusal): A save for a missing field or revision is stale
 | Save received | Answer (the document is unchanged) |
 | --- | --- |
 | a field name absent from the current analysis | "The frontmatter field is stale or its value does not match the schema." |
 | a document revision that differs from the revision of the document | the same stale-field message |
 | an add of a name that already exists | the same stale-field message |
 
-### Scenario (nominal): A frontmatter save that names its editor and field is accepted
+### Scenario S8 (nominal): A frontmatter save that names its editor and field is accepted
 | previewFrontmatterSave message | Outcome |
 | --- | --- |
 | editId e1 and fieldName status (with its fieldValue) | accepted |
@@ -107,7 +130,7 @@ A save with the flush flag skips the parse refusal and keeps the typed text (see
 
 The envelope, the size bound and the pin fields (pinLine, pinViewportTop) are checked once for all page messages (see SwRS-MDOKFSTUDIO-TRUST-052).
 
-### Scenario (refusal): A save that does not name its editor, field or value is ignored
+### Scenario S9 (refusal): A save that does not name its editor, field or value is ignored
 | previewFrontmatterSave message | Outcome |
 | --- | --- |
 | without fieldName, or with an empty fieldName | refused: nothing is replied and the document is unchanged |
@@ -115,7 +138,7 @@ The envelope, the size bound and the pin fields (pinLine, pinViewportTop) are ch
 | without fieldValue, unless frontmatterAction is remove | refused: nothing is replied and the document is unchanged |
 | with fieldValueFormat other than yaml | refused: nothing is replied and the document is unchanged |
 
-### Scenario (boundary): Accepted bounds of the optional fields
+### Scenario S10 (boundary): Accepted bounds of the optional fields
 | Field | Accepted shape |
 | --- | --- |
 | afterField | a string of 1 to 1024 characters without a line break, only with frontmatterAction add; an add whose afterField contains a line break, or a remove with afterField, is dropped and the document is unchanged |
@@ -125,7 +148,7 @@ The envelope, the size bound and the pin fields (pinLine, pinViewportTop) are ch
 | flush | true |
 | newFieldName | a string |
 
-### Scenario (refusal): The frontmatter-save fields are accepted only on a frontmatter save
+### Scenario S11 (refusal): The frontmatter-save fields are accepted only on a frontmatter save
 - GIVEN a previewScroll message with newFieldName owner (or any other message type that carries fieldValueFormat, fieldValueStyle, newFieldName, afterField or frontmatterAction)
 - WHEN it is checked
 - THEN it is refused

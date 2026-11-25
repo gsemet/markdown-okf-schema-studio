@@ -31,7 +31,7 @@ implemented_in_files:
 - src/page/features/statusRegion.ts
 - src/session/features/pageDocument.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/host/previewTiming.test.ts
 - test/integration/dirtySnapshots.test.ts

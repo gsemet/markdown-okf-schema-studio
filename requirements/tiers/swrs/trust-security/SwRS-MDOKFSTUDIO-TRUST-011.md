@@ -15,6 +15,11 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Script with a source in any preview
+- id: S2
+  title: Inline script and nonce attribute
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,13 +38,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension builds the page of a document, it SHALL have the sanitizer remove every script element of the document, inline or with a source, in every preview, with full or restricted reads, and never keep a nonce attribute written by the document. The scripts of the preview itself are added by the host after sanitizing.
 
-### Scenario (nominal): Script with a source in any preview
+### Scenario S1 (nominal): Script with a source in any preview
 
 - GIVEN a script element whose source is a file inside the roots, in a preview with restricted reads or full reads, and an image inside the roots
 - WHEN the page is built
 - THEN the script element is gone with the diagnostic blocked-script and the image stays
 
-### Scenario (refusal): Inline script and nonce attribute
+### Scenario S2 (refusal): Inline script and nonce attribute
 
 | Input | Outcome |
 | --- | --- |

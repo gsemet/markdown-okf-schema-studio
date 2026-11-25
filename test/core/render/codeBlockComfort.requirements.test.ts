@@ -29,7 +29,7 @@ async function render(markdown: string): Promise<string> {
   return result.html;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-039
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
 test("a block of two lines or more is wrapped into numbered lines and marked for the setting; one line is not", () => {
   const many = highlightCodeBlocks(block('class="language-python"', "a = 1\nb = 2\nc = 3\n"));
   assert.match(many, /<code class="shiki language-python" data-myst-auto-numbers="true">/u);
@@ -50,7 +50,8 @@ test("a block of two lines or more is wrapped into numbered lines and marked for
   assert.equal((nolanguage.match(/class="myst-code-line"/gu) ?? []).length, 2, "a block without a label too");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-039
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S5
 test("the text of a wrapped block is the source text, empty lines included, and the numbers are not text", () => {
   const source = "first\n\nthird\n";
   for (const attributes of ['class="language-python"', 'class="language-wobblescript"', 'class="language-python" data-myst-line-numbers="true"']) {
@@ -60,7 +61,8 @@ test("the text of a wrapped block is the source text, empty lines included, and 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-039
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S5
 test("a MyST code-block numbers and emphasizes lines whatever the setting says: the options reach the markup", async () => {
   const html = parseHtml(await render(
     "```{code-block} python\n:linenos:\n:lineno-start: 10\n:emphasize-lines: 11\nx = 1\ny = 2\nz = 3\n```\n\n"
@@ -77,7 +79,7 @@ test("a MyST code-block numbers and emphasizes lines whatever the setting says: 
   assert.deepEqual(lines.map((line) => hasClass(line, "myst-code-line-emphasized")), [false, true, false]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-040
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S6
 test("the page policy allows neither WebAssembly nor inline styles, and the highlighted markup needs neither", async () => {
   const policy = createContentSecurityPolicy("vscode-webview:", "nonce");
   assert.doesNotMatch(policy, /wasm-unsafe-eval|unsafe-eval|unsafe-inline/u);
@@ -86,7 +88,7 @@ test("the page policy allows neither WebAssembly nor inline styles, and the high
   assert.doesNotMatch(html, /style=/u, "a token carries a colour class, never a style attribute");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-040
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S6
 test("the highlighter runs without WebAssembly (strict CSP) and writes no inline style", () => {
   const module = path.resolve(__dirname, "../../../src/core/render/highlight.js");
   const script = `

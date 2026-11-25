@@ -19,6 +19,25 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-TRUST-052
+scenarios:
+- id: S1
+  title: A navigation saves the typed text as a flush
+- id: S2
+  title: What the flush sends for each editor
+- id: S3
+  title: Hiding or closing the page saves the open editor
+- id: S4
+  title: The host writes a flush save as typed
+- id: S5
+  title: A flush skips the type check
+- id: S6
+  title: A refused flush warns that the typed text was dropped
+- id: S7
+  title: A normal save carries no flush flag
+- id: S8
+  title: A refused plain save is saved again as a flush before a navigation
+- id: S9
+  title: Waiting for a plain save
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,54 +66,54 @@ supersedes:
 
 When a navigation or a host flush request occurs while a field or key editor is open, the extension SHALL save the typed text as a flush before leaving, which the host writes as typed, skipping the type, YAML and schema checks.
 
-### Scenario (nominal): A navigation saves the typed text as a flush
+### Scenario S1 (nominal): A navigation saves the typed text as a flush
 - GIVEN a YAML field editor holding invalid YAML and a click on a link to another file
 - WHEN the page navigates
 - THEN a save with flush true and the text as typed is posted before the navigation
 
-### Scenario (boundary): What the flush sends for each editor
+### Scenario S2 (boundary): What the flush sends for each editor
 | Editor open when the page flushes | Text sent |
 | --- | --- |
 | a number field with a bad number | the number as typed text |
 | a key editor with surrounding spaces | the key trimmed |
 | a key editor with an empty key | the old key is kept |
 
-### Scenario (nominal): Hiding or closing the page saves the open editor
+### Scenario S3 (nominal): Hiding or closing the page saves the open editor
 | Event | Outcome |
 | --- | --- |
 | the page receives pagehide, or visibilitychange to hidden, with a field editor open and text typed | one previewFrontmatterSave with flush true and the typed text is posted |
 | the page is hidden with no field editor open | no frontmatter save is posted |
 
-### Scenario (nominal): The host writes a flush save as typed
+### Scenario S4 (nominal): The host writes a flush save as typed
 - GIVEN a flush save of the text [ for a YAML field
 - WHEN the host plans it
 - THEN the text is written as a string and the plan needs no schema check
 
-### Scenario (boundary): A flush skips the type check
+### Scenario S5 (boundary): A flush skips the type check
 - GIVEN a flush save of three for a number field with a schema
 - WHEN the host plans it
 - THEN the value is written instead of the stale-field refusal
 
 Other refusals (stale field, bad key, YAML that cannot be patched) still apply to a flush save.
 
-### Scenario (refusal): A refused flush warns that the typed text was dropped
+### Scenario S6 (refusal): A refused flush warns that the typed text was dropped
 | Save refused by the host | Outcome |
 | --- | --- |
 | a flush save of the field status, with a reason | a warning reads "Markdown OKF-Schema Studio could not save the text you typed in the frontmatter field "status": {reason}. That text was not saved." |
 | a normal save | no host warning is shown, only the error in the editor |
 
-### Scenario (boundary): A normal save carries no flush flag
+### Scenario S7 (boundary): A normal save carries no flush flag
 | Save posted | Message |
 | --- | --- |
 | a field editor committed with Enter or by leaving it | no flush property |
 | an editor flushed by a navigation | flush true |
 
-### Scenario (nominal): A refused plain save is saved again as a flush before a navigation
+### Scenario S8 (nominal): A refused plain save is saved again as a flush before a navigation
 - GIVEN a plain save in flight and a navigation waiting
 - WHEN the host refuses the save
 - THEN the editor is enabled again, the typed text is posted again as a flush, then the navigation goes on
 
-### Scenario (boundary): Waiting for a plain save
+### Scenario S9 (boundary): Waiting for a plain save
 | Pending plain save | Outcome |
 | --- | --- |
 | gets no result | the navigation goes on after the bounded wait of about 1.5 seconds |

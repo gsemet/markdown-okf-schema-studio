@@ -18,6 +18,25 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Inline maths is typeset in the text line
+- id: S2
+  title: Display maths is typeset in its own block
+- id: S3
+  title: Maths typesets offline without inline styles
+- id: S4
+  title: A style declaration that could leave its rule
+- id: S5
+  title: The KaTeX bundle is missing
+- id: S6
+  title: Unparsable formulas stay readable
+- id: S7
+  title: Maths cannot run active content
+- id: S8
+  title: Sphinx-style math delimiters are typeset
+- id: S9
+  title: Long display equations scroll inside their box
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,37 +65,37 @@ supersedes:
 
 When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an align-style environment inside `$$` or `{math}`, the extension SHALL typeset it as maths with KaTeX from the extension bundle without network or inline styles, keep a formula that cannot be parsed readable, refuse active content, and scroll a long display equation inside its own box.
 
-### Scenario (nominal): Inline maths is typeset in the text line
+### Scenario S1 (nominal): Inline maths is typeset in the text line
 
 - GIVEN `$x^2$` and `$a + b$` in a sentence
 - WHEN the preview renders
 - THEN both inline math spans sit in the text line
 
-### Scenario (boundary): Display maths is typeset in its own block
+### Scenario S2 (boundary): Display maths is typeset in its own block
 
 - GIVEN `$$ ... $$` and a `\begin{align}` block
 - WHEN the preview renders
 - THEN display math is typeset in its own block
 
-### Scenario (nominal): Maths typesets offline without inline styles
+### Scenario S3 (nominal): Maths typesets offline without inline styles
 
 - GIVEN a document with display math
 - WHEN the preview renders offline
 - THEN the equation is typeset with the KaTeX stylesheet and fonts of the extension bundle, with no script, no network request and no inline style attribute, the styles being classes in one nonce-protected style block
 
-### Scenario (refusal): A style declaration that could leave its rule
+### Scenario S4 (refusal): A style declaration that could leave its rule
 
 - GIVEN typeset maths whose style value holds a declaration with a brace, an angle bracket, an at sign or a backslash
 - WHEN the nonce style block is built
 - THEN that declaration is dropped and the other declarations stay
 
-### Scenario (refusal): The KaTeX bundle is missing
+### Scenario S5 (refusal): The KaTeX bundle is missing
 
 - GIVEN the KaTeX bundle is missing
 - WHEN the preview renders
 - THEN equations stay as raw TeX text
 
-### Scenario (refusal): Unparsable formulas stay readable
+### Scenario S6 (refusal): Unparsable formulas stay readable
 
 - GIVEN a document with one invalid and one valid formula, or with only an invalid formula
 - WHEN the preview renders
@@ -87,7 +106,7 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 | one invalid and one valid formula | the invalid one keeps its raw TeX with a wavy underline and the tooltip This equation could not be rendered by KaTeX, and the valid one is typeset |
 | only an invalid formula | the same raw TeX with underline and tooltip, and no warning is listed in the status region or Problems view |
 
-### Scenario (refusal): Maths cannot run active content
+### Scenario S7 (refusal): Maths cannot run active content
 
 - GIVEN a formula that uses `\href`, `\htmlStyle`, another trusted command, or a runaway macro
 - WHEN the preview renders
@@ -99,13 +118,13 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 | `\htmlStyle` | no style is applied |
 | runaway macro | expansion stays within 1000 (maxExpand) and size within 100 (maxSize); trust is off |
 
-### Scenario (boundary): Sphinx-style math delimiters are typeset
+### Scenario S8 (boundary): Sphinx-style math delimiters are typeset
 
 - GIVEN a math span `\(x^2\)` and a math block `\[...\]`, then plain text with `$...$` outside math nodes, code, and a second typesetting pass
 - WHEN the preview renders
 - THEN both delimiters are typeset, the text with `$...$` outside math nodes and the code are unchanged, and the second pass changes nothing
 
-### Scenario (boundary): Long display equations scroll inside their box
+### Scenario S9 (boundary): Long display equations scroll inside their box
 
 - GIVEN a very long display equation wider than the pane, and the long chapter scrolled to its display equation
 - WHEN the preview renders and the scroll lands

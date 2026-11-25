@@ -15,6 +15,19 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-012
+scenarios:
+- id: S1
+  title: Entries render as labelled preview links
+- id: S2
+  title: Entry kinds
+- id: S3
+  title: Caption, hidden, reversed and size options
+- id: S4
+  title: Glob entries list the matching documents sorted
+- id: S5
+  title: Glob scan limits
+- id: S6
+  title: Missing documents show as warned text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,18 +56,18 @@ supersedes:
 
 When a document holds a `{toctree}`, the extension SHALL list its documents as links that open in the preview, labelled by the given title, else the first level-1 heading, else the file name, expand glob entries in sorted order and show a document that cannot be found as warned text without a link.
 
-### Scenario (nominal): Entries render as labelled preview links
+### Scenario S1 (nominal): Entries render as labelled preview links
 - GIVEN entries a Title followed by the target in angle brackets and a bare target
 - WHEN the preview renders
 - THEN the first uses Title and the second the target's first level-1 heading, skipping frontmatter and code fences, else the file name
 
-### Scenario (boundary): Entry kinds
+### Scenario S2 (boundary): Entry kinds
 | Input | Outcome |
 | --- | --- |
 | A web address entry | An external link |
 | A target with `.myst`, `.markdown` or the exact name | The target is found by those extensions |
 
-### Scenario (boundary): Caption, hidden, reversed and size options
+### Scenario S3 (boundary): Caption, hidden, reversed and size options
 | Input | Outcome |
 | --- | --- |
 | `:caption: Guide` | A level-2 heading Guide appears above the list |
@@ -66,7 +79,7 @@ When a document holds a `{toctree}`, the extension SHALL list its documents as l
 
 The options are independent.
 
-### Scenario (nominal): Glob entries list the matching documents sorted
+### Scenario S4 (nominal): Glob entries list the matching documents sorted
 | Input | Outcome |
 | --- | --- |
 | `:glob:` with `chapters/*` matching three files | Three links appear in sorted order |
@@ -76,14 +89,14 @@ The options are independent.
 
 A glob entry uses `*`, `**`, `?` or `[abc]` and lists the matching `.md`, `.markdown` and `.myst` documents below the folder.
 
-### Scenario (boundary): Glob scan limits
+### Scenario S5 (boundary): Glob scan limits
 | Input | Outcome |
 | --- | --- |
 | A folder holding 250 matches | 200 are listed |
 | A match inside `node_modules`, `.git`, `_build` or `out` | It is not listed |
 | Folders beyond 400 or levels beyond 8 | They are not read |
 
-### Scenario (refusal): Missing documents show as warned text
+### Scenario S6 (refusal): Missing documents show as warned text
 | Input | Outcome |
 | --- | --- |
 | An entry naming a missing file | Its text shows without a link, in a warning style, with the tooltip Document not found: name |

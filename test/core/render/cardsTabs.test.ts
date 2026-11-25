@@ -45,7 +45,8 @@ const CARD = [
 const part = (card: Parameters<typeof findElement>[0], name: string) =>
   findElement(card, (element) => hasClass(element, name));
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-100
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S2
 test("a standalone card shows its header option above the title, then the body and the footer", async () => {
   const { dom, diagnostics, html } = await render(CARD);
   const card = findElement(dom, (element) => hasClass(element, "myst-card"));
@@ -62,7 +63,8 @@ test("a standalone card shows its header option above the title, then the body a
   assert.equal(diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-100
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S3
 test("a standalone card splits header and footer at ^^^ and +++, and links its title", async () => {
   const { dom } = await render([
     ":::{card} Linked",
@@ -84,7 +86,8 @@ test("a standalone card splits header and footer at ^^^ and +++, and links its t
   assert.equal(attribute(link, "title"), "Open the guide");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-100
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S2
 test("a card without header or footer shows the title and body only", async () => {
   const { dom } = await render(":::{card} Plain\nOnly body.\n:::\n");
   const card = findElement(dom, (element) => hasClass(element, "myst-card"))!;
@@ -93,7 +96,8 @@ test("a card without header or footer shows the title and body only", async () =
   assert.match(textContent(card), /Plain[\s\S]*Only body\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-100
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S3
 test("class-card adds safe class names only, on a standalone card and on a grid card", async () => {
   const standalone = await renderSafe(":::{card} Styled\n:class-card: wide my-card okf-comment sphinx-x bad\"name\nBody.\n:::\n");
   const card = findElement(standalone.dom, (element) => hasClass(element, "myst-card"))!;
@@ -104,7 +108,8 @@ test("class-card adds safe class names only, on a standalone card and on a grid 
   assert.ok(hasClass(findElement(grid.dom, (element) => hasClass(element, "myst-grid-card"))!, "tall"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-100
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S3
 test("a card nests inside a grid item and holds a code block", async () => {
   const { dom } = await render([
     "::::{grid} 1",
@@ -141,7 +146,7 @@ const TABS = [
   "::::",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S1
 test("a tab set renders a tablist of buttons wired to panels with ARIA roles", async () => {
   const { dom, diagnostics } = await render(TABS);
   const set = findElement(dom, (element) => hasClass(element, "myst-tab-set"))!;
@@ -163,7 +168,7 @@ test("a tab set renders a tablist of buttons wired to panels with ARIA roles", a
   assert.equal(diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S1
 test("the :selected: tab shows its panel and the others are hidden; the first tab is the default", async () => {
   const selected = (await render(TABS)).dom;
   const states = (dom: typeof selected) => {
@@ -184,7 +189,8 @@ test("the :selected: tab shows its panel and the others are hidden; the first ta
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S2
 test("tabs keep their sync key and the sync group of the set", async () => {
   const { dom } = await render(TABS.replace("::::{tab-set}", "::::{tab-set}\n:sync-group: language\n"));
   const tabs = findElements(dom, (element) => attribute(element, "role") === "tab");
@@ -195,7 +201,8 @@ test("tabs keep their sync key and the sync group of the set", async () => {
   assert.equal(attribute(findElement(plain, (element) => hasClass(element, "myst-tab-set"))!, "data-myst-tab-group"), "tab");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S3
 test("each tab item and the tab set carry their own source lines for editing", async () => {
   const { dom } = await render(`Intro\n\n${TABS}\n`);
   const set = findElement(dom, (element) => hasClass(element, "myst-tab-set"))!;
@@ -217,7 +224,8 @@ test("each tab item and the tab set carry their own source lines for editing", a
   assert.deepEqual(lineOf(panels[1]), ["8", "12"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S2
 test("tab panels hold any block, a grid and a card among them, and tab sets nest", async () => {
   const { dom } = await render([
     "::::::{tab-set}",
@@ -248,7 +256,7 @@ function lineOf(element: Parameters<typeof attribute>[0]): [string | undefined, 
   return [attribute(element, "data-line"), attribute(element, "data-end-line")];
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S3
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
 test("a comment and a thread in a tab item keep their own source line range", async () => {
@@ -277,7 +285,7 @@ test("a comment and a thread in a tab item keep their own source line range", as
   assert.deepEqual(findElements(panel, (element) => element.tagName === "p").map(lineOf), [[undefined, undefined]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S3
 test("a table, a code block, a card and a grid in a tab item are no blocks of their own", async () => {
   const { dom } = await render([
     "::::::{tab-set}",
@@ -311,7 +319,8 @@ test("a table, a code block, a card and a grid in a tab item are no blocks of th
   assert.deepEqual(findElements(panel, (element) => element !== panel && attribute(element, "data-line") !== undefined), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S3
 test("a nested tab set in a tab item is no block of its own, only the outer item is edited", async () => {
   const { dom } = await render([
     "::::::{tab-set}",
@@ -330,7 +339,7 @@ test("a nested tab set in a tab item is no block of its own, only the outer item
   assert.deepEqual(findElements(panels[0], (element) => element !== panels[0] && attribute(element, "data-line") !== undefined), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S1
 test("the sanitized preview keeps the tab roles, ids and hidden panels but no script or handler", async () => {
   const { dom, html } = await renderSafe(TABS.replace("Python", "Py<script>alert(1)</script>thon"));
   const tabs = findElements(dom, (element) => attribute(element, "role") === "tab");
@@ -341,7 +350,8 @@ test("the sanitized preview keeps the tab roles, ids and hidden panels but no sc
   assert.doesNotMatch(html, /<script|onclick|javascript:/iu);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S3
 test("tab item titles stay plain text inside the tab button", async () => {
   const { dom } = await render(TABS.replace("Python", "**Py** [link](https://example.com)"));
   const tab = findElements(dom, (element) => attribute(element, "role") === "tab")[0];
@@ -349,7 +359,8 @@ test("tab item titles stay plain text inside the tab button", async () => {
   assert.equal(findElement(tab, (element) => element.tagName === "a"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
 test("a version admonition is titled with its version and no trailing colon", async () => {
   const { dom } = await render([
     ":::{versionadded} 0.47",
@@ -368,13 +379,14 @@ test("a version admonition is titled with its version and no trailing colon", as
   assert.deepEqual(titles, ["Added in version 0.47", "Changed in version 0.50", "Deprecated since version 1.0"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-100
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S2
 test("the stylesheet gives a standalone card the grid card look and its own spacing", () => {
   assert.match(PREVIEW_THEME_CSS, /\.myst-card\s*\{[^}]*margin:/u);
   assert.match(PREVIEW_THEME_CSS, /\.myst-grid-card\s*\{[^}]*border:/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S1
 test("the stylesheet lays the tab bar out in a row and removes a hidden panel", () => {
   assert.match(PREVIEW_THEME_CSS, /\.myst-tab-list\s*\{[^}]*display:\s*flex/u);
   assert.match(PREVIEW_THEME_CSS, /\.myst-tab\[aria-selected="true"\]\s*\{/u);

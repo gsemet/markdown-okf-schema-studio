@@ -44,7 +44,7 @@ async function firstLoad(): Promise<string> {
   return built.html;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 test("the first load of a page with restricted reads has edit cells in the properties table and an enabled Edit button", async () => {
   const html = await firstLoad();
   assert.match(html, /data-okf-editable="true"/u);

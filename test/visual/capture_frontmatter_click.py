@@ -11,7 +11,7 @@ PRIORITY_CELL = 'tr[data-okf-field="priority"] [data-okf-edit-cell="value"]'
 EDITORS = "[data-okf-frontmatter-editor]"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+# @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
 def check_frontmatter_click_below_editor(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """With the unchanged title editor open, a real press and release at one point on the priority value
   below it closes the title editor (the rows shift up on the press) and leaves the priority editor open."""

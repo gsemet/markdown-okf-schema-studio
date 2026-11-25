@@ -22,6 +22,21 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
+scenarios:
+- id: S1
+  title: Unchanged diagram after a node replacement
+- id: S2
+  title: Changed source or theme
+- id: S3
+  title: A content patch draws only new diagrams
+- id: S4
+  title: Draw passes run one at a time
+- id: S5
+  title: A late picture for a replaced key is not shown
+- id: S6
+  title: A late error for a replaced key is not shown
+- id: S7
+  title: The JAR pipeline reuses an earlier render
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -54,19 +69,19 @@ When the page needs a Mermaid diagram, a PlantUML diagram drawn by the built-in 
 
 When the JAR pipeline renders a diagram text that an earlier successful render already drew, the extension SHALL reuse that SVG without starting a process.
 
-### Scenario (nominal): Unchanged diagram after a node replacement
+### Scenario S1 (nominal): Unchanged diagram after a node replacement
 
 - GIVEN a Mermaid diagram already drawn, then a content update that replaces its node with the same source under the same theme
 - WHEN the page draws the new node
 - THEN the earlier picture is shown and Mermaid is not run; the page keeps the 64 most recent Mermaid drawings, by source and theme colours
 
-### Scenario (boundary): Changed source or theme
+### Scenario S2 (boundary): Changed source or theme
 
 - GIVEN a drawn diagram whose source or theme colours changed
 - WHEN the page draws it
 - THEN Mermaid runs again; a theme attribute change that leaves the colours as they were draws nothing
 
-### Scenario (nominal): A content patch draws only new diagrams
+### Scenario S3 (nominal): A content patch draws only new diagrams
 
 | Patch | Outcome |
 | --- | --- |
@@ -77,14 +92,14 @@ When the JAR pipeline renders a diagram text that an earlier successful render a
 
 The page draws the diagrams that have no render state and leaves the diagrams that have one untouched.
 
-### Scenario (boundary): Draw passes run one at a time
+### Scenario S4 (boundary): Draw passes run one at a time
 
 | Situation | Outcome |
 | --- | --- |
 | A content patch and a theme change are requested while a pass is running | The next pass starts only when the running pass finishes, in the order requested |
 | A pass is requested before the Mermaid module has loaded | The pass starts after the load and not before |
 
-### Scenario (refusal): A late picture for a replaced key is not shown
+### Scenario S5 (refusal): A late picture for a replaced key is not shown
 
 | Situation | Outcome |
 | --- | --- |
@@ -93,14 +108,14 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 | A PlantUML diagram is drawn, a theme switch starts a second render of the element, and the first finishes after the second | Only the second render's picture is shown; the first result is dropped and the element is unchanged |
 | A chart is drawn, a newer theme replaces it while it runs | The result is cached and not shown |
 
-### Scenario (refusal): A late error for a replaced key is not shown
+### Scenario S6 (refusal): A late error for a replaced key is not shown
 
 | Situation | Outcome |
 | --- | --- |
 | A PlantUML drawing fails after a newer render took the element | No error message is shown for the replaced key |
 | A Mermaid drawing fails for the node's current key | The error message is shown and the state is error |
 
-### Scenario (nominal): The JAR pipeline reuses an earlier render
+### Scenario S7 (nominal): The JAR pipeline reuses an earlier render
 
 | Input | Outcome |
 | --- | --- |

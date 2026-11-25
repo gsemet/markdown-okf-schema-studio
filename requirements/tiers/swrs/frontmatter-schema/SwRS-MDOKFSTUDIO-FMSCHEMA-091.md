@@ -16,6 +16,11 @@ derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-014
 relates_to:
 - StRS-MDOKFSTUDIO-FMSCHEMA-001
+scenarios:
+- id: S1
+  title: A closed properties details
+- id: S2
+  title: No schema
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the exported page has frontmatter properties, the extension SHALL write the properties table as a closed details element that opens on a click and, when the schema was found, shows the Description column.
 
-### Scenario (nominal): A closed properties details
+### Scenario S1 (nominal): A closed properties details
 
 - GIVEN a page whose frontmatter has `type: swrs` and the schema is found
 - WHEN the exported file is opened with JavaScript off
 - THEN the properties are a `details` element that is closed, a click on its summary opens it, and the table shows a Description column
 
-### Scenario (boundary): No schema
+### Scenario S2 (boundary): No schema
 
 | Input | Outcome |
 | --- | --- |

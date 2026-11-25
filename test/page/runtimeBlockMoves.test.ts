@@ -129,7 +129,7 @@ test("T36: a disabled button posts nothing, and the buttons stand down while an 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S2
 test("T36: a refused move says why next to the bar; a result of another context is ignored", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   moveButton(harness, 52, "down").dispatch("click", plainClick());

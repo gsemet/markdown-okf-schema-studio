@@ -57,8 +57,8 @@ const render = (
     ...(extra.signal ? { signal: extra.signal } : {}),
   });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-105
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S6
 test("renders PlantUML through the configured external JAR and injects an image", async () => {
   await withWorkspace(async (workspace) => {
     const runner = fakeRunner(() => exited(`PlantUML log\n<svg xmlns="http://www.w3.org/2000/svg"><rect /></svg>\n`));
@@ -98,7 +98,8 @@ test("renders PlantUML through the configured external JAR and injects an image"
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S3
 test("uses the PATH executable when no JAR is configured and reports missing commands", async () => {
   await withWorkspace(async (workspace) => {
     const runner = fakeRunner(({ command }) => {
@@ -136,7 +137,8 @@ test("uses the PATH executable when no JAR is configured and reports missing com
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S3
 test("a JAR path that is a folder is refused before any process starts", async () => {
   await withWorkspace(async (workspace) => {
     const runner = fakeRunner();
@@ -152,7 +154,7 @@ test("a JAR path that is a folder is refused before any process starts", async (
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S8
 test("a host without a process runner reports the diagrams unavailable and starts nothing", async () => {
   await withWorkspace(async (workspace) => {
     const unconfigured = await renderPlantUmlDiagrams(diagramHtml(), {
@@ -219,7 +221,8 @@ test("a render canceled before it starts runs no process", async () => {
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S4
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S8
 test("asks the runner to cap stderr at 64 KiB and notes the truncation it reports", async () => {
   await withWorkspace(async (workspace) => {
     const runner = fakeRunner(() => ({
@@ -236,7 +239,8 @@ test("asks the runner to cap stderr at 64 KiB and notes the truncation it report
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S4
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S8
 test("a stderr within the cap carries no truncation note", async () => {
   await withWorkspace(async (workspace) => {
     const message = (await render(workspace, fakeRunner(() => exited("", 1, "boom")))).diagnostics[0]?.message ?? "";
@@ -244,7 +248,8 @@ test("a stderr within the cap carries no truncation note", async () => {
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S3
 test("asks the runner to stop a program past 8 MiB of SVG and reports the limit", async () => {
   await withWorkspace(async (workspace) => {
     // A host that enforces the cap stops the program and says so; the renderer reports the limit
@@ -270,7 +275,8 @@ test("a program stopped at the timeout gives a clear diagnostic", async () => {
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S3
 test("the JAR and the PATH command run under the allowlist security profile with a size limit", async () => {
   await withWorkspace(async (workspace) => {
     const runner = fakeRunner();
@@ -292,7 +298,8 @@ test("the JAR and the PATH command run under the allowlist security profile with
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S3
 test("java is taken from JAVA_HOME when it holds a binary, else from the PATH", async () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), "markdown-okf-java-home-"));
   // Below the working directory: a temporary folder on another Windows drive has no relative path.

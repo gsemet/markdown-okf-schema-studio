@@ -18,6 +18,25 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: The menu sits in the edited row with an Add field button
+- id: S2
+  title: The picker lists the schema fields still missing
+- id: S3
+  title: Default value of the chosen field
+- id: S4
+  title: Without schema fields to add, a typed name is added
+- id: S5
+  title: The Add button waits for a name
+- id: S6
+  title: Custom key when extra properties are allowed
+- id: S7
+  title: No Custom key when extra properties are forbidden
+- id: S8
+  title: An invalid custom key name is refused in the picker
+- id: S9
+  title: The menu stays inside its row in a narrow preview
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,18 +61,18 @@ supersedes:
 
 When a field editor is open, the extension SHALL show inside the edited row, after the control, a field action menu labelled "Frontmatter field actions" with an "Add field" button that adds a field chosen among the schema fields still missing or typed as a custom key.
 
-### Scenario (nominal): The menu sits in the edited row with an Add field button
+### Scenario S1 (nominal): The menu sits in the edited row with an Add field button
 | Editor open on the row | Outcome |
 | --- | --- |
 | a value editor | a toolbar "Frontmatter field actions" sits in the edited row after the control, with a button "Add frontmatter field" labelled Add field |
 | a key editor | the same menu with the Add field button appears |
 
-### Scenario (nominal): The picker lists the schema fields still missing
+### Scenario S2 (nominal): The picker lists the schema fields still missing
 - GIVEN a schema with the missing field owner
 - WHEN the writer opens Add field and chooses owner in the select "Frontmatter field to add" (placeholder "Choose a field...")
 - THEN an add save for owner is posted at once, placed right after the open row, with the first value found among the schema default, then the empty string
 
-### Scenario (boundary): Default value of the chosen field
+### Scenario S3 (boundary): Default value of the chosen field
 | Missing field | Value posted |
 | --- | --- |
 | boolean | false |
@@ -63,27 +82,27 @@ When a field editor is open, the extension SHALL show inside the edited row, aft
 | a field with a schema default | the schema default |
 | any other field | the empty string |
 
-### Scenario (nominal): Without schema fields to add, a typed name is added
+### Scenario S4 (nominal): Without schema fields to add, a typed name is added
 - GIVEN a document without a schema (or a schema with no field left to add)
 - WHEN the writer opens Add field, types owner in the text input "New field name" and presses Enter or the Add button
 - THEN an add save for owner with an empty value is posted, after the open field (afterField)
 
-### Scenario (boundary): The Add button waits for a name
+### Scenario S5 (boundary): The Add button waits for a name
 - GIVEN no name typed in the text input
 - WHEN the picker is shown
 - THEN the button "Add selected frontmatter field" is disabled until a name is typed
 
-### Scenario (nominal): Custom key when extra properties are allowed
+### Scenario S6 (nominal): Custom key when extra properties are allowed
 - GIVEN a picker listing schema fields and a schema that allows additional properties
 - WHEN the writer chooses "Custom key…"
 - THEN a "New field name" input appears, nothing is posted, and Enter in it with the name notes posts an add of notes with an empty value
 
-### Scenario (boundary): No Custom key when extra properties are forbidden
+### Scenario S7 (boundary): No Custom key when extra properties are forbidden
 - GIVEN a schema root with additionalProperties false and schema fields left to add
 - WHEN the picker renders
 - THEN it lists the fields and has no "Custom key…" entry (the properties section carries the flag described in SwRS-MDOKFSTUDIO-FMSCHEMA-084)
 
-### Scenario (refusal): An invalid custom key name is refused in the picker
+### Scenario S8 (refusal): An invalid custom key name is refused in the picker
 | Custom key typed, then Enter | Message in the editor status (nothing is posted) |
 | --- | --- |
 | empty, or only spaces | "Enter a name for the new field." |
@@ -91,7 +110,7 @@ When a field editor is open, the extension SHALL show inside the edited row, aft
 | a line break | "The field name cannot contain a line break." |
 | a name already shown in the table | 'The field "x" already exists.' |
 
-### Scenario (boundary): The menu stays inside its row in a narrow preview
+### Scenario S9 (boundary): The menu stays inside its row in a narrow preview
 | Preview width | Outcome |
 | --- | --- |
 | normal | neither the value nor another row is covered by the menu or its tooltips |

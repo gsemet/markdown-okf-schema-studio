@@ -14,6 +14,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Edit a field in place
 user_need: As a writer, I edit a document's metadata directly in the properties
   table, where I read it, one field at a time, without leaving the preview or
   fighting other editors; I enter valid values with a control suited to the
@@ -113,7 +116,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Edit a field in place
+#### Path S1: Edit a field in place
 
 1. The properties table is shown in edit mode
    - SwRS-MDOKFSTUDIO-FMEDIT-001: a click on a name or value cell opens a field editor inside that cell

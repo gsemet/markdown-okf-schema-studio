@@ -16,6 +16,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Read and fold the properties
+- id: S2
+  title: Edit the frontmatter
 user_need: As a writer, I read my document metadata as a table above the text,
   safely, without opening the YAML; I read values in the form I typed them, hide
   the Description column when I need room, turn the table off or adjust how
@@ -97,7 +102,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Read and fold the properties
+#### Path S1: Read and fold the properties
 
 1. A document starts with a `---` line and a YAML mapping
    - SwRS-MDOKFSTUDIO-FMSCHEMA-001: the page shows the frontmatter as a properties table above the body
@@ -110,7 +115,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-FMSCHEMA-005 (nominal): without a type, a two-column Names and Values table lists the keys in source order
 3. The table is hidden below its header
 
-#### Path 2: Edit the frontmatter
+#### Path S2: Edit the frontmatter
 
 1. The properties table is shown
    - SwRS-MDOKFSTUDIO-FMSCHEMA-043: the page re-analyses the frontmatter 300 ms after the last change and replaces the table

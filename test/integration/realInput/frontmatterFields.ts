@@ -139,8 +139,8 @@ const LIST_SCHEMA = [
 ].join("\n");
 
 /** RI-T21: a click on a link value edits it; Enter and Backspace manage list items. */
-// @tests_req StRS-MDOKFSTUDIO-FMEDIT-001
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043#S4
 export async function scenarioListEditorClickAndKeys(page: Page, evidence: Evidence): Promise<void> {
   const fixture = createFixture("realinput-t21", {
     "smoke.md": LIST_DOCUMENT,
@@ -414,7 +414,7 @@ export async function scenarioRequiredAndPositionedAdd(page: Page, evidence: Evi
  * new field's editor opens right after the add, for a custom key and for a schema field.
  * `selectOption` is the one allowed exception to the real-input rule (native select popup).
  */
-// @tests_req StRS-MDOKFSTUDIO-FMEDIT-005
+// @accepts_req StRS-MDOKFSTUDIO-FMEDIT-005#S2
 export async function scenarioCustomKeyAndOpenNewField(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t25", SCOPE_DOCUMENT, async (document) => {
     await openSidePreview(document);
@@ -501,8 +501,8 @@ const POSITION_DOCUMENT = [
  * Enter saves as a plain scalar; Escape on the field picker cancels the open edit.
  * `selectOption` is the one allowed exception to the real-input rule (native select popup).
  */
-// @tests_req StRS-MDOKFSTUDIO-FMEDIT-005
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S5
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S6
 export async function scenarioAddFieldPositionAndEscape(page: Page, evidence: Evidence): Promise<void> {
   const schema = REQUIRED_SCHEMA.replace("required: [type, scope]\n", "");
   await withDocument("realinput-t41", POSITION_DOCUMENT, async (document) => {

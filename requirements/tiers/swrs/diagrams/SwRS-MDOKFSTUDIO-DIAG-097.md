@@ -18,6 +18,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-007
 depends_on: []
+scenarios:
+- id: S1
+  title: Error text is capped at 64 KiB
+- id: S2
+  title: The diagram text is limited to 1 MiB
+- id: S3
+  title: The output is limited to 8 MiB
+- id: S4
+  title: A render stops after 30 seconds
+- id: S5
+  title: Cancelling a render stops the process group
+- id: S6
+  title: A render already cancelled starts no process
+- id: S7
+  title: A process that ignores its input becomes a message
+- id: S8
+  title: A render settles exactly once
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,48 +62,48 @@ supersedes:
 
 When a JAR render meets a bound on the diagram text, the output, the error text or the run time, or is cancelled, the extension SHALL end it with a message on the diagram, kill the whole PlantUML process group where it started one, keep at most the first 64 KiB of error text followed by the note [stderr truncated at 64 KiB], and settle the render exactly once without raising an uncaught exception in the extension host.
 
-### Scenario (boundary): Error text is capped at 64 KiB
+### Scenario S1 (boundary): Error text is capped at 64 KiB
 | Input | Outcome |
 | --- | --- |
 | a failing process that writes more than 64 KiB to its error output | the message holds at most the first 64 KiB of error text followed by [stderr truncated at 64 KiB] |
 | a failing process with a short error output | the whole text is shown with no note |
 
-### Scenario (boundary): The diagram text is limited to 1 MiB
+### Scenario S2 (boundary): The diagram text is limited to 1 MiB
 | Input | Outcome |
 | --- | --- |
 | a diagram text of 1,048,577 characters with useJar on | the diagram shows PlantUML source exceeds the 1 MiB preview limit. with state error and no process starts |
 | a diagram text of exactly 1,048,576 characters | the process is started |
 
-### Scenario (boundary): The output is limited to 8 MiB
+### Scenario S3 (boundary): The output is limited to 8 MiB
 | Input | Outcome |
 | --- | --- |
 | a process that writes more than 8 MiB to its standard output | the process is killed and the diagram shows PlantUML SVG output exceeds the 8 MiB preview limit. with state error |
 | a process whose output is exactly 8 MiB | the output is accepted |
 
-### Scenario (refusal): A render stops after 30 seconds
+### Scenario S4 (refusal): A render stops after 30 seconds
 - GIVEN a process that never answers
 - WHEN 30 seconds pass
 - THEN the whole process group is killed and the diagram shows PlantUML did not finish within 30 s. with state error
 - AND a process that answers in time ends with its timer cleared and no timeout message
 
-### Scenario (nominal): Cancelling a render stops the process group
+### Scenario S5 (nominal): Cancelling a render stops the process group
 - GIVEN a running PlantUML process on POSIX and a render cancelled by a newer render stage or the closing of the preview
 - WHEN the render is cancelled
 - THEN SIGTERM goes to the whole process group, falling back to the direct child, and the diagram reports PlantUML rendering was canceled.
 - AND a process that has already exited receives no signal
 
-### Scenario (refusal): A render already cancelled starts no process
+### Scenario S6 (refusal): A render already cancelled starts no process
 - GIVEN a render whose abort signal is already set
 - WHEN the render starts
 - THEN no process is started and PlantUML rendering was canceled. is reported
 - AND an abort signal that fires after the render has settled changes nothing
 
-### Scenario (refusal): A process that ignores its input becomes a message
+### Scenario S7 (refusal): A process that ignores its input becomes a message
 - GIVEN a process that exits before reading its input, or a standard input that emits an error
 - WHEN the diagram is rendered
 - THEN the diagram shows a failure message, the render ends with a diagnostic and the host raises no uncaught exception
 
-### Scenario (boundary): A render settles exactly once
+### Scenario S8 (boundary): A render settles exactly once
 - GIVEN the close, error and timeout events of one process firing in the same tick
 - WHEN the events are handled
 - THEN the render has one result and the later events are ignored

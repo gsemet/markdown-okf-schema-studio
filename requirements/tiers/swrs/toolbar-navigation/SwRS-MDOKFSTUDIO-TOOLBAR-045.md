@@ -24,7 +24,7 @@ implemented_in_files:
 - src/core/preview/styles/contentLayoutStyles.ts
 - src/page/modules/tocColumn.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/page/modules/tocColumn.test.ts
 - test/visual/capture_toc_checks.py
 default_owner_email: gaetan@xeberon.net

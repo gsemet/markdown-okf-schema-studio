@@ -45,8 +45,9 @@ function build(fixture: Fixture, status: string): string {
 }
 
 for (const fixture of fixtures) {
-  // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
-  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+  // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S2
+  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S2
+  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S3
   test(`frontmatter fence: ${fixture.name}`, async () => {
     const source = build(fixture, "draft");
     const extraction = extractFrontmatter(source);
@@ -112,7 +113,7 @@ test("frontmatter fence: CRLF empty block accepts an added field with CRLF endin
   assert.equal(edited, "---\r\nstatus: draft\r\n---\r\n# Body\r\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S6
 test("linked file details read the frontmatter of a BOM-prefixed file", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-bom-link-"));
   try {

@@ -13,6 +13,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Read a text of the preview
+- id: S2
+  title: Find the Studio in the Extensions view
 user_need: As a reader, I see messages that speak of the preview, not of the
   tools that built it, and I recognise the Studio in the Extensions view by its
   own icon.
@@ -46,6 +51,20 @@ flowchart LR
     M --> S[Speak of the product, never of the build tool]
     X --> I[The Studio own icon]
 ```
+
+### Main paths
+
+#### Path S1: Read a text of the preview
+
+1. The Studio shows a text to the reader
+   - SwRS-MDOKFSTUDIO-TRUST-070: the text never mentions the build tool
+2. The reader reads a text that speaks of the preview
+
+#### Path S2: Find the Studio in the Extensions view
+
+1. The Studio appears in the Extensions view
+   - SwRS-MDOKFSTUDIO-TRUST-074: the package declares its 256 pixel PNG icon
+2. The reader recognises the Studio by its own icon
 
 <!-- okf:links:start -->
 ### Links

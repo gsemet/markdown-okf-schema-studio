@@ -214,7 +214,7 @@ export async function scenarioTitleBarButton(page: Page, evidence: Evidence): Pr
 }
 
 // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-013
-// @tests_req SwRS-MDOKFSTUDIO-THEME-016
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016#S7
 /** RI-T38: the anchor button needs a paired text editor; a reopened preview starts in preview mode. */
 export async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<void> {
   const demo = [
@@ -352,9 +352,10 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
               return actual.every((color, index) => color === expected[index]);
             }, { mode, palettes });
           });
-          // @tests_req StRS-MDOKFSTUDIO-THEME-002
-          // @tests_req SwRS-MDOKFSTUDIO-THEME-001
-          // @tests_req SwRS-MDOKFSTUDIO-THEME-025
+          // @tests_req SwRS-MDOKFSTUDIO-THEME-001#S3
+          // @tests_req SwRS-MDOKFSTUDIO-THEME-001#S4
+          // @tests_req SwRS-MDOKFSTUDIO-THEME-025#S1
+          // @tests_req SwRS-MDOKFSTUDIO-THEME-025#S2
           await captureAfter(evidence, page, realInputId(`38-toolbar-${host.toLowerCase()}-${mode}`),
             `${mode} preview mode updates the document and floating toolbar on the ${host} VS Code theme.`);
         }
@@ -378,7 +379,6 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
           "rgb(255, 255, 255)");
         assert.equal(await frame.locator(".admonition.tip").count(), 1);
         assert.equal(await frame.locator(".admonition.warning").count(), 1);
-        // @tests_req StRS-MDOKFSTUDIO-DIAG-001
         await waitFor("the demo Mermaid and SVG images to load", async () => {
           const diagram = frame.locator("img.myst-mermaid-image");
           const svg = frame.locator('img[alt="Fleet operating loop: plan, dispatch, observe, and correct."]');

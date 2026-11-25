@@ -17,6 +17,21 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LAYOUT-003
+scenarios:
+- id: S1
+  title: Wide table and oversized block
+- id: S2
+  title: Column off the pane centre
+- id: S3
+  title: Table-of-contents column
+- id: S4
+  title: Elements kept in the column
+- id: S5
+  title: Author pixel width and a gain of 1 px
+- id: S6
+  title: Measured again when the layout changes
+- id: S7
+  title: Re-measure keeps the sideways scroll
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -24,7 +39,7 @@ implemented_in_files:
 - src/page/features/scrollCore.ts
 - src/page/modules/widthMode.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/page/codeBlockBreakout.test.ts
 - test/page/diagReq.layout.requirements.test.ts
 - test/page/runtimePageControls.test.ts
@@ -59,23 +74,23 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 | A code block of 1600 px of content | Capped at the available area (breakout 268 px) and scrolls inside it |
 | A code block inside a list item, wider than the item | Not marked; scrolls inside the item (Known issue) |
 
-### Scenario (nominal): Wide table and oversized block
+### Scenario S1 (nominal): Wide table and oversized block
 - GIVEN Auto mode, a column of 700 px, a pane of 1000 px, a table needing 900 px and a code block needing 1600 px
 - WHEN the elements are measured
 - THEN the table gets a breakout of 200 px; the code block is capped at the available area, a breakout of 268 px (1000 minus 32 gutters minus 700); an element not wider than the column is not marked
 
-### Scenario (nominal): Column off the pane centre
+### Scenario S2 (nominal): Column off the pane centre
 - GIVEN the column starts 120 px from the pane edge so that it is 30 px off the pane centre
 - WHEN the elements are measured
 - THEN the breakout shift is 30 px, so the wide element is centred on the available area, and a narrow element keeps an empty shift
 
-### Scenario (nominal): Table-of-contents column
+### Scenario S3 (nominal): Table-of-contents column
 - GIVEN Auto mode, TOC reserve 256 px, a pane of 1000 px, a column of 400 px starting at 100 px and a table needing 1600 px
 - WHEN the elements are measured
 - THEN the available area is 712 px, the breakout is 312 px and the shift is 72 px, because the open table-of-contents column of 256 px is excluded from the available area, from the centre of the breakout and from the cap
 - AND when the TOC reserve is 0 (closed, or pane under 760 px) the available area is the pane minus the 32 px gutters
 
-### Scenario (refusal): Elements kept in the column
+### Scenario S4 (refusal): Elements kept in the column
 | Input | Outcome |
 | --- | --- |
 | A wide table marked data-sphinx-preview-editing in Auto mode (its source editor is open) | Not marked wide; keeps the column width while its source editor is open |
@@ -84,21 +99,21 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 | An image whose data-okf-width is 20em | Not marked wide |
 | An image whose data-okf-width is 3rem | Not marked wide |
 
-### Scenario (boundary): Author pixel width and a gain of 1 px
+### Scenario S5 (boundary): Author pixel width and a gain of 1 px
 | Input | Outcome |
 | --- | --- |
 | Image with data-okf-width 800 and intrinsic width 3000 px, in a 700 px column | Breakout based on 800 px, so 100 px |
 | Element 701 px wide in a 700 px column | Not marked wide (a table, image or diagram, or a code block whose code does not overflow; an overflowing code block, see the code block scenario) |
 | Element as wide as the column, or 1 px wider, measured after a resize | Not marked wide; for a code block, not marked unless its code overflows |
 
-### Scenario (nominal): Measured again when the layout changes
+### Scenario S6 (nominal): Measured again when the layout changes
 | Input | Outcome |
 | --- | --- |
 | Auto mode with a wide table and the window is resized | The table is measured again and is marked wide with its breakout |
 | A content patch, an image load, a toolbar collapse, a table-of-contents toggle or a change of the edited element | The wide elements are measured again |
 | An editor opens or closes on a top-level block that cannot break out (a paragraph, a heading, a list) | Nothing is measured again: no verdict can change |
 
-### Scenario (nominal): Re-measure keeps the sideways scroll
+### Scenario S7 (nominal): Re-measure keeps the sideways scroll
 - GIVEN Auto mode and a wide table that the reader scrolled sideways
 - WHEN a layout pass measures it again (a cell editor closes, the pane is resized, an image loads)
 - THEN its scrollLeft is kept, clamped to the new maximum scroll (scroll width minus box width)

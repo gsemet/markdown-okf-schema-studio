@@ -193,7 +193,8 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S2
 test("hovering a code block shows the copy button inside its top right corner", () => {
   const t = harness();
   const { pre, code } = t.makePre("print('hi')\n", 100);
@@ -218,7 +219,8 @@ test("the button stays while the pointer moves from the block to the button", ()
   assert.equal(t.button().hidden, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S11
 test("a click posts the raw code only, without filename or line numbers, and shows a check mark", () => {
   const t = harness();
   const { code } = t.makePre("line one\nline two\n", 100);
@@ -246,7 +248,7 @@ test("an unhighlighted block without a code element copies the pre text", () => 
   assert.deepEqual(t.posted, ["plain text"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S6
 test("mousedown on the button is prevented so an open editor keeps focus", () => {
   const t = harness();
   const { code } = t.makePre("a", 100);
@@ -254,7 +256,8 @@ test("mousedown on the button is prevented so an open editor keeps focus", () =>
   assert.equal(t.button().fire("mousedown").prevented, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S3
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S9
 test("blocks being edited, in a block editor, or holding a diagram are skipped", () => {
   const t = harness();
   const editing = t.makePre("a", 100);
@@ -341,7 +344,8 @@ const SHAPES: Array<{ name: string; language?: string; attributes?: string; file
   { name: "diff with line numbers", language: "diff", attributes: ' data-myst-line-numbers="true"', code: "-a\n+b\n c\n" },
   { name: "filename label", filename: "src/example.ts", code: "plain in a labelled block\nsecond\n" },
   { name: "filename label, highlighted, numbered", language: "typescript", filename: "a.ts", attributes: ' data-myst-line-numbers="true"', code: "let x;\n\nlet y;\n" },
-  // @tests_req SwRS-MDOKFSTUDIO-CODE-039
+  // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S3
   { name: "automatically numbered block with an empty line", language: "python", code: "a = 1\n\nb = '<x>'\n" },
   { name: "automatically numbered block of an unknown language", language: "wobblescript", code: "one\n\ntwo & three\n" },
   { name: "multi-line token", language: "typescript", attributes: ' data-myst-line-numbers="true"', code: "/* one\n   two */\nconst s = `a\nb`;\n" },
@@ -364,7 +368,7 @@ for (const shape of SHAPES) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S7
 test("in edit mode the button click copies and neither opens nor commits an editor", () => {
   const t = harness();
   const { pre, code } = t.makePre("copy me\n", 100);
@@ -379,7 +383,8 @@ test("in edit mode the button click copies and neither opens nor commits an edit
   assert.equal(opened.length, 1, "a click on the block itself still reaches them");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S8
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S9
 test("keyboard: a code block is a tab stop, focusing it shows the button, Tab and Shift+Tab move between them", () => {
   const t = harness();
   const { pre } = t.makePre("print('hi')\n", 100);
@@ -405,7 +410,7 @@ test("keyboard: a code block is a tab stop, focusing it shows the button, Tab an
   assert.equal(t.button().hidden, true, "focus leaving hides the button");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S8
 test("keyboard: activating the focused button copies the code", () => {
   const t = harness();
   const { pre } = t.makePre("print('hi')\n", 100);
@@ -416,7 +421,8 @@ test("keyboard: activating the focused button copies the code", () => {
   assert.equal(t.button().getAttribute("aria-label"), "Copied");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S8
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S9
 test("keyboard: scrolling stops with the pointer elsewhere, the focused block keeps its button", () => {
   const t = harness();
   const { pre } = t.makePre("a\n", 100);
@@ -428,7 +434,7 @@ test("keyboard: scrolling stops with the pointer elsewhere, the focused block ke
   assert.equal(t.button().hidden, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S3
 test("the button says Copied only after the host answers ok, and shows the refusal otherwise", () => {
   const saved = reply;
   try {
@@ -461,7 +467,7 @@ test("the button says Copied only after the host answers ok, and shows the refus
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S11
 test("a click the user made carries the gesture flag, a dispatched click does not", () => {
   const t = harness();
   const { code } = t.makePre("a\n", 100);
@@ -471,7 +477,7 @@ test("a click the user made carries the gesture flag, a dispatched click does no
   assert.deepEqual(t.gestures, [true, false]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S6
 test("P-08: scroll events within one frame place the button once, for the position of that frame", () => {
   const t = harness();
   const { pre, code } = t.makePre("a\n", 100);
@@ -490,7 +496,8 @@ test("P-08: scroll events within one frame place the button once, for the positi
   assert.equal(t.pendingFrames(), 1, "the next scroll asks for a new frame");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S3
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S5
 test("a second click within 1.5 s restarts the Copied confirmation from its own answer", () => {
   const saved = reply;
   try {

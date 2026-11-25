@@ -19,6 +19,27 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-MYST-097
+scenarios:
+- id: S1
+  title: The click opens the rename field
+- id: S2
+  title: A label above a table opens the field above its icon
+- id: S3
+  title: Clicks that open no field
+- id: S4
+  title: Enter sends the rename or closes
+- id: S5
+  title: Invalid names are not sent
+- id: S6
+  title: Labels starting with a symbol
+- id: S7
+  title: A rename from a stale render
+- id: S8
+  title: Escape or an outside press closes the field
+- id: S9
+  title: A successful rename reports the remaining uses
+- id: S10
+  title: Progress, refusal and silence of the host
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -53,12 +74,12 @@ supersedes:
 
 When a reader clicks the anchor icon of a label in edit mode, the extension SHALL open a Rename label popover with a prefilled, selected, focused Label name field before block click handling, send a rename only for a changed valid name and show the answer of the host in the field, placed so that it does not cover the block its label introduces.
 
-### Scenario (nominal): The click opens the rename field
+### Scenario S1 (nominal): The click opens the rename field
 - GIVEN edit mode on and the label `(draft_1)=` before a paragraph, which shows an anchor icon with a pointer cursor
 - WHEN the anchor icon is clicked
 - THEN a dialog Rename label opens under it with the Label name field prefilled with `draft_1`, selected and focused, and no block editor opens
 
-### Scenario (boundary): A label above a table opens the field above its icon
+### Scenario S2 (boundary): A label above a table opens the field above its icon
 | Input | Outcome |
 | --- | --- |
 | Anchor icon of a label held by no paragraph or heading (`(table-label)=` right before a table, also a code block, a figure or a directive) clicked in edit mode, with room above the icon | The field opens above the icon: its bottom edge is 6 px above the icon's top edge, its left edge as for any label; it covers no cell of the table |
@@ -68,18 +89,18 @@ When a reader clicks the anchor icon of a label in edit mode, the extension SHAL
 
 The field is anchored by its bottom edge when it opens above. A label held by a paragraph or a heading keeps the placement under its icon. The field never exceeds the width of the pane (its padding and border included).
 
-### Scenario (refusal): Clicks that open no field
+### Scenario S3 (refusal): Clicks that open no field
 | Input | Outcome |
 | --- | --- |
 | Anchor icon clicked with edit mode off | Nothing opens and the icon stays a link target |
 
-### Scenario (nominal): Enter sends the rename or closes
+### Scenario S4 (nominal): Enter sends the rename or closes
 | Input (Enter pressed in the field) | Outcome |
 | --- | --- |
 | A changed valid name | One rename with the label line is posted |
 | The name left unchanged | The field closes and nothing is posted |
 
-### Scenario (refusal): Invalid names are not sent
+### Scenario S5 (refusal): Invalid names are not sent
 | Input (Enter pressed in the field) | Outcome |
 | --- | --- |
 | `bad name` (a space) | The message is shown and nothing is posted |
@@ -89,7 +110,7 @@ The field is anchored by its bottom edge when it opens above. A label held by a 
 
 The message reads: Use letters, digits and _ . : - only (100 characters at most). The host and the message validator repeat the check.
 
-### Scenario (nominal): Labels starting with a symbol
+### Scenario S6 (nominal): Labels starting with a symbol
 | Input | Outcome |
 | --- | --- |
 | Anchor icon of the label `(_draft)=`, `(.hidden)=` or `(-dash)=` clicked in edit mode | The rename field opens prefilled and selected, like for any other label, and no block editor opens |
@@ -97,19 +118,19 @@ The message reads: Use letters, digits and _ . : - only (100 characters at most)
 
 The anchor icon, the field and the host share one name pattern: letters, digits and `_ . : -`, 100 characters at most. Every label that shows an icon can be renamed.
 
-### Scenario (refusal): A rename from a stale render
+### Scenario S7 (refusal): A rename from a stale render
 | Input | Outcome |
 | --- | --- |
 | A rename sent from an older render | The host answers ok false with The label is no longer on that line. Refresh the preview.; the field shows it and is editable again |
 
-### Scenario (boundary): Escape or an outside press closes the field
+### Scenario S8 (boundary): Escape or an outside press closes the field
 | Input (field open) | Outcome |
 | --- | --- |
 | Escape | The field closes and nothing is sent |
 | Pointer press outside the popover and the icon | The field closes and nothing is sent |
 | Pointer press on a table cell while the field is open | The field closes, nothing is sent and the cell editor opens in the same click |
 
-### Scenario (nominal): A successful rename reports the remaining uses
+### Scenario S9 (nominal): A successful rename reports the remaining uses
 | Input (rename succeeds) | Outcome |
 | --- | --- |
 | Two `{ref}` uses of the old name | The field shows Renamed. 2 uses of "old" remain in this document. |
@@ -117,7 +138,7 @@ The anchor icon, the field and the host share one name pattern: letters, digits 
 
 Only `{ref}` forms are counted. The field closes itself 5 s after the success message; a new rename or Escape within the 5 s makes the field follow the new action and no stale close occurs.
 
-### Scenario (boundary): Progress, refusal and silence of the host
+### Scenario S10 (boundary): Progress, refusal and silence of the host
 | Input | Outcome |
 | --- | --- |
 | A posted rename the host has not answered | The field is disabled and reads Renaming... |

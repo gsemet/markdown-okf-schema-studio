@@ -17,6 +17,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Read highlighted code
+- id: S2
+  title: Review a diff
 user_need: Writers need code samples to read as they would in published
   documentation, in the language and colours of their editor, and reviewers need
   to see at a glance what a change adds and removes.
@@ -95,7 +100,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Read highlighted code
+#### Path S1: Read highlighted code
 
 1. A document holds a fenced code block
    - SwRS-MDOKFSTUDIO-CODE-001: the preview colours the keywords, strings, numbers and comments of the language named by the fence label
@@ -105,7 +110,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-CODE-039 (boundary): a single line is never numbered
 3. The lines of the code are numbered
 
-#### Path 2: Review a diff
+#### Path S2: Review a diff
 
 1. A document holds a diff block
    - SwRS-MDOKFSTUDIO-CODE-008: lines starting with + are marked as additions and lines starting with - as deletions

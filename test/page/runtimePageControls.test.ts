@@ -34,7 +34,8 @@ function clickEvent(target: RuntimeElement): ClickEvent {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S4
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S7
 test("clicking a checkbox posts a source toggle instead of revealing the block", () => {
   const harness = createRuntimeHarness();
   const messageCount = harness.messages.length;
@@ -65,7 +66,8 @@ test("clicking a checkbox posts a source toggle instead of revealing the block",
   assert.equal(harness.checkbox.checked, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S5
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S7
 test("a rejected checkbox toggle reverts the box and explains why", () => {
   const harness = createRuntimeHarness();
   harness.checkbox.checked = true;
@@ -148,7 +150,7 @@ test("T38: an unpaired preview disables the anchor button and a previewPairing m
   assert.equal(harness.anchorButton.getAttribute("title"), NO_EDITOR_TOOLTIP);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-016
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016#S8
 test("a page whose pairing and theme messages were lost while it loaded gets both from the host's answer to its ready report", () => {
   // The page loaded with the context of a render made before a text editor showed the file. The
   // host's previewPairing and themeChanged reached the document before its runtime listened (VS
@@ -258,7 +260,8 @@ test("T43: invalid or foreign pending overlay messages are ignored", () => {
   assert.equal(pendingOverlays(harness).length, 1, "invalid hides do not remove the overlay");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-038
+// @tests_req SwRS-MDOKFSTUDIO-THEME-038#S3
+// @tests_req SwRS-MDOKFSTUDIO-THEME-038#S4
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169
 test("T08: zoom buttons set the zoom variable, post the preference and keep the state", () => {
   const harness = createRuntimeHarness();
@@ -330,7 +333,7 @@ function widthModeFixture(initial?: string) {
   return { harness, wide: make("table", 900), small: make("table", 400), huge: make("pre", 1600) };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-020
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-020#S2
 test("T10: the width button cycles margin, auto, full width and posts widthMode", () => {
   const { harness } = widthModeFixture();
   const root = harness.documentElement;
@@ -355,7 +358,7 @@ test("T10: the width button cycles margin, auto, full width and posts widthMode"
   assert.equal(harness.getWebviewState().viewWidthMode, "full");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S4
 test("T10: only elements wider than the column are flagged, and only in Auto", () => {
   const { harness, wide, small, huge } = widthModeFixture();
   assert.equal(wide.getAttribute("data-sphinx-preview-wide"), null, "margin: nothing flagged");
@@ -413,7 +416,7 @@ test("T10b: a narrow element is not flagged and the shift is cleared outside Aut
   assert.equal(wide.style.getPropertyValue("--sphinx-preview-breakout-shift"), "");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022#S5
 test("T10b: a paragraph holding only an image is marked as a figure in every width mode", () => {
   const { harness } = widthModeFixture();
   const paragraph = new RuntimeElement({}, harness.windowState, 0, 40, "p");
@@ -435,7 +438,8 @@ test("T10b: a wide table gets its fractional max-content width rounded up, so no
   assert.equal(wide.style.getPropertyValue("--sphinx-preview-breakout"), "201px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S1
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S7
 test("T10b: a table with row handles keeps their room left of it when it breaks out", () => {
   const { harness, wide } = widthModeFixture();
   wide.scrollWidth = 1600;
@@ -491,7 +495,7 @@ class ScrollingTable extends RuntimeElement {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S7
 test("T10b: a layout pass in Auto keeps the sideways scroll of a wide table", () => {
   const { harness } = widthModeFixture("auto");
   const table = new ScrollingTable({}, harness.windowState, 0, 40, "table");
@@ -804,7 +808,7 @@ test("P8: the stored preference and the saved webview state decide the collapsed
   assert.equal(saved.moreRows.hidden, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-001
+// @tests_req SwRS-MDOKFSTUDIO-THEME-001#S2
 test("fresh workspace: the toolbar starts collapsed and the preview theme starts in cream", () => {
   const fresh = createRuntimeHarness();
   assert.equal(fresh.moreRows.hidden, true, "rows 2 to 4 are hidden without a stored choice");
@@ -859,7 +863,7 @@ test("T13: a state snapshot keeps the TOC visibility and the folded sections", (
   assert.equal(state.viewZoom, 100);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-016
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016#S3
 test("the page root records the theme kind: 2, 1, 3 then 4, and default without one", () => {
   const harness = createRuntimeHarness();
   const ready = harness.messages.find((message) => message.type === "previewReady") as PageIdentity | undefined;

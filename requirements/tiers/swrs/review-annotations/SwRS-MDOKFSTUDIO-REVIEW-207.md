@@ -26,7 +26,7 @@ derived_by: []
 implemented_in_files:
 - src/page/modules/incomingChanges.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/page/modules/incomingChanges.test.ts
 - test/page/modules/reviewReq.requirements.test.ts
 - test/page/runtimePageControls.test.ts

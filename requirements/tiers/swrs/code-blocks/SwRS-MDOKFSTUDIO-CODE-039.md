@@ -17,6 +17,19 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
+scenarios:
+- id: S1
+  title: A block of two lines or more is numbered
+- id: S2
+  title: A single line is never numbered
+- id: S3
+  title: The numbers are never copied
+- id: S4
+  title: The MyST options win over the setting
+- id: S5
+  title: A MyST code directive numbers and emphasizes lines
+- id: S6
+  title: Invalid directive values fall back
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,13 +61,13 @@ supersedes:
 
 When a code block of two lines or more is shown and the setting preview.codeBlocks.lineNumbers is on, the extension SHALL number its lines with generated content that neither the copy button nor a selection picks up, and SHALL number a MyST code block with the linenos or lineno-start option from its start value whatever the setting says, emphasizing the lines listed in its emphasize-lines option.
 
-### Scenario (nominal): A block of two lines or more is numbered
+### Scenario S1 (nominal): A block of two lines or more is numbered
 
 - GIVEN a fenced `python` block of three lines and a block of two lines in a language that is not bundled
 - WHEN the preview renders them with the setting on (the default)
 - THEN each line is its own line element numbered from 1 by generated content, and the line numbers are not part of the text of the block
 
-### Scenario (boundary): A single line is never numbered
+### Scenario S2 (boundary): A single line is never numbered
 
 | Input | Outcome |
 | --- | --- |
@@ -62,25 +75,25 @@ When a code block of two lines or more is shown and the setting preview.codeBloc
 | a block of two or more lines, setting off | no number is shown, the lines keep their text |
 | a block of two or more lines with no language label | numbered like the others |
 
-### Scenario (nominal): The numbers are never copied
+### Scenario S3 (nominal): The numbers are never copied
 
 - GIVEN a numbered block with an empty line in the middle
 - WHEN the reader presses the copy button or selects the block with the mouse
 - THEN the copied text equals the source text, empty line included, and holds no line number
 
-### Scenario (nominal): The MyST options win over the setting
+### Scenario S4 (nominal): The MyST options win over the setting
 
 - GIVEN a `{code-block}` with `:linenos:`, `:lineno-start: 10` and `:emphasize-lines: 11`
 - WHEN the preview renders it with the setting off
 - THEN its lines are numbered from 10 whatever the setting says and the second line is emphasized
 
-### Scenario (nominal): A MyST code directive numbers and emphasizes lines
+### Scenario S5 (nominal): A MyST code directive numbers and emphasizes lines
 
 - GIVEN a `{code}`, `{code-block}` or `{code-cell}` with `:linenos:`, `:lineno-start: 10` and `:emphasize-lines: 2`
 - WHEN the preview renders it
 - THEN lines are numbered from 10 and the second line is emphasized
 
-### Scenario (refusal): Invalid directive values fall back
+### Scenario S6 (refusal): Invalid directive values fall back
 
 - GIVEN a directive with `:lineno-start: abc` and `:emphasize-lines: 2,x`
 - WHEN the preview renders it

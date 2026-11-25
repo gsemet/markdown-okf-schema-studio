@@ -18,6 +18,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
+scenarios:
+- id: S1
+  title: A fence ends only at a matching closing fence
+- id: S2
+  title: Indent, info string, length and mark
+- id: S3
+  title: Front matter
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,12 +41,12 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension reads a Markdown source to render it, to anchor a review comment, to resolve a link fragment or to list label targets, it SHALL find a code fence only at up to three spaces of indent, close it only with a fence of the same mark, at least as long, followed by nothing but white space, and find the front matter only as a first-line "---" marker closed by a "---" or "..." line, so that every one of them sees the same lines as code or front matter.
 
-### Scenario (nominal): A fence ends only at a matching closing fence
+### Scenario S1 (nominal): A fence ends only at a matching closing fence
 - GIVEN a source with a ```` ``` ```` fence closed by a line of three backticks and a label, a comment target or an alert after it
 - WHEN the preview renders, a comment is anchored or a link fragment is resolved
 - THEN the lines inside the fence are code for each of them and the lines after it are content
 
-### Scenario (boundary): Indent, info string, length and mark
+### Scenario S2 (boundary): Indent, info string, length and mark
 | Input | Outcome |
 | --- | --- |
 | A fence indented by four spaces or more | not a fence; the line is content |
@@ -47,7 +54,7 @@ When the extension reads a Markdown source to render it, to anchor a review comm
 | A closing fence shorter than the opening one, or of the other mark | does not close the fence |
 | A closing fence longer than the opening one, or with trailing spaces | closes the fence |
 
-### Scenario (boundary): Front matter
+### Scenario S3 (boundary): Front matter
 | Input | Outcome |
 | --- | --- |
 | `---` on the first line, closed by `---` or `...` (trailing spaces allowed) | the lines between are front matter, not content |

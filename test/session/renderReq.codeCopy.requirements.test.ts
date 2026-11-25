@@ -46,7 +46,8 @@ function setup(options: { restrictedReads: boolean }) {
   return { clipboard, edits, posted, preview, dispatcher, copy, failWrite: (value: boolean) => { failWrite = value; } };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S6
 test("a copy request only needs the document; a stale version or render request still copies and is answered", async () => {
   const t = setup({ restrictedReads: false });
   await t.dispatcher.handle(t.preview, t.copy({ revision: 3 }));
@@ -60,7 +61,7 @@ test("a copy request only needs the document; a stale version or render request 
   assert.equal(t.posted.length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S9
 test("an oversized text is refused with a reason and a failing clipboard is answered as not copied", async () => {
   const t = setup({ restrictedReads: false });
   await t.dispatcher.handle(t.preview, { ...t.copy(), text: "x".repeat(MAX_COPY + 1) });
@@ -75,7 +76,7 @@ test("an oversized text is refused with a reason and a failing clipboard is answ
   assert.deepEqual([t.posted[2]?.ok, t.posted[2]?.reason], [false, "Could not copy."]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 test("a read-only preview still writes the requested code to the clipboard and edits nothing", async () => {
   const t = setup({ restrictedReads: true });
   await t.dispatcher.handle(t.preview, t.copy());
@@ -83,7 +84,7 @@ test("a read-only preview still writes the requested code to the clipboard and e
   assert.deepEqual(t.edits, [], "no edit request was processed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S11
 test("a copy request without a user gesture is refused and writes nothing", async () => {
   const t = setup({ restrictedReads: false });
   await t.dispatcher.handle(t.preview, { ...t.copy(), userGesture: false } as PageToHostMessage);

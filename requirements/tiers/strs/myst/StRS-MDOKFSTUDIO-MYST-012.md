@@ -12,6 +12,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: A table of contents
 user_need: As a writer, I want to see the document tree I declared so that I can
   catch missing pages.
 derived_by:
@@ -58,7 +61,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: A table of contents
+#### Path S1: A table of contents
 
 1. A document holds a `{toctree}`
    - SwRS-MDOKFSTUDIO-MYST-057: the page lists its documents as links that open in the preview, labelled by title, first heading or file name

@@ -96,7 +96,8 @@ test("incremental updates can be turned off and default to on", () => {
   assert.equal(read(false), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S3
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S4
 test("normalizes preview content width and reserves zero for unlimited", () => {
   const values = new Map<string, number>([
     ["maxContentWidth", 2500],
@@ -135,7 +136,8 @@ test("normalizes sticky heading depth to one through six levels", () => {
   assert.equal(readDepth(Number.NaN), 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S2
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S3
 test("the content width setting is rounded to whole pixels and a negative value gives the default", () => {
   const readWidth = (value: number): number => readPreviewConfiguration({
     get<T>(section: string, defaultValue: T): T {

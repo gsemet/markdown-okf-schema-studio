@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Follow a link field
+- id: S2
+  title: Link problems in the badge
 user_need: As a schema author, I declare that a field points to files so that
   writers get checked, navigable references; as a writer, I see at a glance
   which references are broken and why, and as a reviewer, I see key facts about
@@ -114,7 +119,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Follow a link field
+#### Path S1: Follow a link field
 
 1. A schema annotates a property with `x-okf-link`
    - SwRS-MDOKFSTUDIO-FMSCHEMA-046: the page finds the annotation and resolves the target apart from its query and fragment
@@ -132,7 +137,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-FMSCHEMA-073 (refusal): an unusable link opens nothing and shows a warning
 5. The target is open in the editor
 
-#### Path 2: Link problems in the badge
+#### Path S2: Link problems in the badge
 
 1. The link target is checked against the files
    - SwRS-MDOKFSTUDIO-FMSCHEMA-039: the badge in the table title counts the link problems

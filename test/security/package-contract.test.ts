@@ -17,8 +17,9 @@ function contributedSettings(categories: ConfigurationCategory[]): Record<string
   return Object.assign({}, ...categories.map((category) => category.properties)) as Record<string, Record<string, unknown>>;
 }
 
-// @tests_req StRS-MDOKFSTUDIO-TRUST-012
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-074
+// @tests_req StRS-MDOKFSTUDIO-TRUST-012#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-074#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-074#S2
 test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the shared logo", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as { icon: string };
   assert.equal(manifest.icon, "images/logo.png");
@@ -33,7 +34,7 @@ test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the share
 });
 
 // @tests_req StRS-MDOKFSTUDIO-LIFE-021
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S8
 test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     name: string;
@@ -192,8 +193,10 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(showIncomingChanges.default, true);
   assert.equal(showIncomingChanges.order, 22);
   assert.match(showIncomingChanges.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
-  // @tests_req SwRS-MDOKFSTUDIO-CODE-039
-  // @tests_req SwRS-MDOKFSTUDIO-CODE-040
+  // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CODE-040#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CODE-040#S4
   for (const [name, order] of [["darkBackground", 23], ["lineNumbers", 24]] as const) {
     const codeSetting = properties[
       `markdownOkfSchemaStudio.preview.codeBlocks.${name}`
@@ -301,7 +304,7 @@ test("the built-in PlantUML engine ships pinned and the JAR is an explicit opt-i
   assert.ok(!ignore.some((line) => /^out\/bundle|^out\/\*\*/u.test(line.trim())), "the webview bundles must ship in the VSIX");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-124
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-124#S1
 test("CR 149: the chart runtime ships pinned in its own bundle and evaluates expressions with the interpreter", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as { dependencies: Record<string, string> };
   for (const name of ["vega", "vega-lite", "vega-interpreter"]) {
@@ -383,8 +386,8 @@ test("CR 144: Cmd/Ctrl+F runs the find command on the focused preview only", () 
   assert.match(bindings[0].when, /!editorTextFocus/u, "the text editor keeps its own find");
 });
 
-// @tests_req StRS-MDOKFSTUDIO-TRUST-014
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-092
+// @accepts_req StRS-MDOKFSTUDIO-TRUST-014#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-092#S3
 test("CR 135: the VSIX leaves out source maps, internal docs, agent files and the Python project file", () => {
   const ignore = fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8")
     .split(/\r?\n/u).map((line) => line.trim());

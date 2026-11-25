@@ -13,7 +13,6 @@ const TYPE_LIST = ".sphinx-preview-edit-palette-menu[data-edit-popover-at='caret
 export const RELEASE_SHOWCASE_SCENARIOS: ScenarioDefinition[] = [
   {
     // @tests_req StRS-MDOKFSTUDIO-CORE-001
-    // @tests_req StRS-MDOKFSTUDIO-DIAG-015
     id: "rendering-core/v26-release-showcase-cream-1200",
     fixture: "70-release-showcase",
     theme: "light",

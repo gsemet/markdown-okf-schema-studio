@@ -22,8 +22,10 @@ function inspect(frontmatter: Record<string, unknown>, schema: Record<string, un
   return pendingFrontmatterLinks(frontmatter, schema);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S4
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S4
 test("link annotations read target fields and exact marker lines afresh", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-details-"));
   const target = path.join(root, "target.md");
@@ -51,7 +53,8 @@ test("link annotations read target fields and exact marker lines afresh", async 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S4
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S6
 test("link display options reject invalid metadata", () => {
   for (const annotation of [
     { tooltip_shows_fields: "description" },
@@ -65,7 +68,7 @@ test("link display options reject invalid metadata", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S3
 test("oneOf annotations are collected only when exactly one branch matches", () => {
   const schema: Record<string, unknown> = {
     type: "object",
@@ -88,7 +91,8 @@ test("oneOf annotations are collected only when exactly one branch matches", () 
   assert.equal(unique[0].status, "pending");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S4
 test("conditional, patternProperties, and additionalProperties schemas are traversed", () => {
   const schema: Record<string, unknown> = {
     type: "object",
@@ -151,7 +155,8 @@ test("conditional, patternProperties, and additionalProperties schemas are trave
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050#S10
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050#S11
 test("document-relative links stay inside workspace roots unless explicitly allowed", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-containment-"));
   const workspace = path.join(root, "workspace");

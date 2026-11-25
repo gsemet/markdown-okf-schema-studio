@@ -174,7 +174,7 @@ test("the line marker's attributes (marker lines, front matter end line) are lef
   assert.doesNotMatch(body, /data-okf-marker|data-okf-frontmatter-end-line/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091#S1
 test("the properties table becomes a closed details with a summary and no editing data", () => {
   const { html } = build(
     '<section data-okf-properties="1" open><div class="okf-properties-title">Properties '
@@ -309,7 +309,7 @@ test("a THREAD chip with its popover, a TODO chip, source-mapping attributes and
   assert.doesNotMatch(body, /data-sphinx-source|data-sphinx-preview-block|tabindex|TODO|popover|<button|fold<|data-okf-comment/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091#S1
 test("the Description column stays and the editing data goes, whatever the toggle state of the page", () => {
   const { html } = build(
     '<section data-okf-properties data-okf-available-keys="a,b" data-okf-available-fields="x"><div class="okf-properties-title">Frontmatter properties'
@@ -327,7 +327,7 @@ test("the Description column stays and the editing data goes, whatever the toggl
   assert.doesNotMatch(body, /data-okf-(value|enums|link-|available|edit-cell)|<button/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091#S1
 test("a properties table without a schema keeps its two columns inside the closed details", () => {
   const { html } = build(
     '<section data-okf-properties><div class="okf-properties-title">Frontmatter properties</div>'

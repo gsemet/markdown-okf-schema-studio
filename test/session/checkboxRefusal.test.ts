@@ -56,7 +56,8 @@ const toggle = (extra: Record<string, unknown> = {}): Record<string, unknown> =>
   editId: "c1", line: 3, endLine: 3, column: 2, checked: true, ...extra,
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S7
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S8
 test("a malformed checkbox toggle is answered, so the box never stays busy", () => {
   const { dispatcher, session, answers, handled } = harness();
   for (const bad of [{ column: -1 }, { column: 1.5 }, { checked: "yes" }, { endLine: 4 }]) {
@@ -71,7 +72,7 @@ test("a malformed checkbox toggle is answered, so the box never stays busy", () 
   assert.equal(answers.length, 4);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
 test("a checkbox toggle of a standalone file or in Restricted Mode reaches the handler", () => {
   const standalone = harness({ restrictedReads: true });
   standalone.dispatcher.handle(standalone.session, toggle());

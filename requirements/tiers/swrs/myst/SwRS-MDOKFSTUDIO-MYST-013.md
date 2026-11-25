@@ -17,6 +17,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-015
 depends_on: []
+scenarios:
+- id: S1
+  title: Standalone context tags render as titled panels
+- id: S2
+  title: Only the context tag pattern becomes a panel
+- id: S3
+  title: Nested context tags render as nested panels
+- id: S4
+  title: Unpaired tags stay visible as text
+- id: S5
+  title: Non-context tags are never grouped
+- id: S6
+  title: Context tags group inside containers and split raw HTML blocks
+- id: S7
+  title: A raw HTML block with tags and Markdown is split
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,43 +54,43 @@ supersedes:
 
 When a document holds a lower-case context tag alone on its line with a matching closing tag, the extension SHALL render a no-icon admonition panel titled with the literal tag around the Markdown between the tags, mapped from opening to closing line, nested pairs as nested panels, and keep an unpaired or non-context tag visible as literal text.
 
-### Scenario (nominal): Standalone context tags render as titled panels
+### Scenario S1 (nominal): Standalone context tags render as titled panels
 
 - GIVEN an opening and a closing context tag named context around links, bold and a fenced YAML block
 - WHEN the preview renders
 - THEN a panel titled with the tag holds the rendered Markdown and maps to both lines
 
-### Scenario (boundary): Only the context tag pattern becomes a panel
+### Scenario S2 (boundary): Only the context tag pattern becomes a panel
 
 - GIVEN an inline tag in a sentence
 - WHEN the preview renders
 - THEN the raw tag is not rendered as HTML and no panel is made, since only the pattern `[a-z][a-z0-9_-]*` (lower-case letters, digits, hyphens and underscores) alone on its line with a matching closing tag becomes a panel
 
-### Scenario (nominal): Nested context tags render as nested panels
+### Scenario S3 (nominal): Nested context tags render as nested panels
 
 - GIVEN an outer tag pair around an inner one
 - WHEN the preview renders
 - THEN two panels are shown, the inner inside the outer, with distinct source ranges, each pair mapping to its own lines
 
-### Scenario (refusal): Unpaired tags stay visible as text
+### Scenario S4 (refusal): Unpaired tags stay visible as text
 
 - GIVEN a context tag with a missing or mismatched closing tag, a tag with attributes, a self-closing tag, or an inner pair with a missing closing tag
 - WHEN the preview renders
 - THEN the tag and its body show as literal text and no panel is made, the unpaired inner tag staying literal text inside the outer panel
 
-### Scenario (refusal): Non-context tags are never grouped
+### Scenario S5 (refusal): Non-context tags are never grouped
 
 - GIVEN `div`, `details`, `summary`, `table`, `script`, inline XML or fenced `xml` code, or an upper-case or dotted tag
 - WHEN the preview renders
 - THEN they are never grouped into a panel
 
-### Scenario (nominal): Context tags group inside containers and split raw HTML blocks
+### Scenario S6 (nominal): Context tags group inside containers and split raw HTML blocks
 
 - GIVEN a context tag pair inside a block quote, list item, definition list or directive container, or a raw HTML block kept whole by the parser
 - WHEN the preview renders
 - THEN the pair is grouped as a panel inside its container (for a list item, the panel appears inside the list item) and its Markdown is parsed
 
-### Scenario (boundary): A raw HTML block with tags and Markdown is split
+### Scenario S7 (boundary): A raw HTML block with tags and Markdown is split
 
 - GIVEN a raw HTML block with tags and Markdown without blank lines holding a GitHub alert
 - WHEN the preview renders

@@ -188,7 +188,8 @@ function fieldAfterDetached(): { harness: RuntimeHarness; editId: string } {
 const fieldControl = (harness: RuntimeHarness) =>
   harness.createdElements.find((element) => element.getAttribute("aria-label") === "Frontmatter priority" && !element.removed);
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S12
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
 test("a frontmatter field clicked during a detached save opens only after the save ends", () => {
   const { harness, editId } = fieldAfterDetached();
@@ -197,7 +198,8 @@ test("a frontmatter field clicked during a detached save opens only after the sa
   assert.ok(fieldControl(harness), "opens after the end");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S12
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
 test("a frontmatter field clicked during a detached save does not open when the save fails", () => {
   const { harness, editId } = fieldAfterDetached();

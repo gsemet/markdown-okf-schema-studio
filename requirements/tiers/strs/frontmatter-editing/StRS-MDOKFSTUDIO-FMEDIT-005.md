@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Rename a key
+- id: S2
+  title: Add a field
 user_need: As a writer, I rename a metadata key without touching the rest of the
   frontmatter, add the metadata fields my schema expects, or a custom one, and
   fill them in at once, and remove an obsolete field safely, without losing
@@ -92,7 +97,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Rename a key
+#### Path S1: Rename a key
 
 1. The properties table is shown in edit mode
    - SwRS-MDOKFSTUDIO-FMEDIT-024: a click on a field name opens the key editor
@@ -102,7 +107,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-FMEDIT-024 (refusal): an empty or padded name is refused
 3. The key has its new name and the comments are kept
 
-#### Path 2: Add a field
+#### Path S2: Add a field
 
 1. A field editor is open
    - SwRS-MDOKFSTUDIO-FMEDIT-028: the Add field button adds a field chosen among the missing schema fields or typed as a custom key

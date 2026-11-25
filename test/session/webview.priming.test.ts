@@ -33,7 +33,8 @@ test("a local image found by the guess is shown, and a link out of the folder is
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-013
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S6
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S7
 test("an image the guess misses (an unquoted attribute) is found by the sanitizer and shown after a second pass", async () => {
   const built = await build(fixture(), "<img src=ok.png>");
   assert.ok(built.html.includes(`src="webview://${path.join(workspace, "ok.png")}"`), built.html);
@@ -41,7 +42,7 @@ test("an image the guess misses (an unquoted attribute) is found by the sanitize
     "the refusal of the first pass is not reported");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S3
 test("an image the guess misses that leaves the folder through a link is still refused, once", async () => {
   const built = await build(fixture(), "<img src=escape.png>");
   assert.ok(!built.html.includes(`webview://${path.join(outside, "secret.png")}`));

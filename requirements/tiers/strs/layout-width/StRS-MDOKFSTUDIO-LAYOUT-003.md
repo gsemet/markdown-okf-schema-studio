@@ -13,16 +13,21 @@ scope: layout-width
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-17T22:42:16+01:00'
+approved_at: '2026-11-25T15:37:43+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-17T22:42:16+01:00'
+  at: '2026-11-25T15:37:43+01:00'
 origin: native
 tier: StRS
 derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+scenarios:
+- id: S1
+  title: Change the width mode
+- id: S2
+  title: Set the width in the settings
 user_need: As a writer or team, I choose how wide the text column is, from a
   narrow measure to the whole pane, and every open preview follows; as a reader,
   I switch between a narrow reading column, a column that lets wide content out,
@@ -103,7 +108,7 @@ The Width button cycles the three modes, and the setting applies in each of them
 
 ### Main paths
 
-#### Path 1: Change the width mode
+#### Path S1: Change the width mode
 
 1. The text column is as wide as the setting says
    - SwRS-MDOKFSTUDIO-LAYOUT-020: the reader presses the Width button and the mode goes Margin, Auto, Full width, back to Margin, keeping the reading line
@@ -117,7 +122,7 @@ The Width button cycles the three modes, and the setting applies in each of them
    - Option SwRS-MDOKFSTUDIO-LIFE-169 (refusal): the host refuses a value outside the table
 4. The width choice is kept for the workspace
 
-#### Path 2: Set the width in the settings
+#### Path S2: Set the width in the settings
 
 1. The setting maxContentWidth is changed
    - SwRS-MDOKFSTUDIO-LAYOUT-002: the page shows a text column exactly that wide, centred in a wider pane

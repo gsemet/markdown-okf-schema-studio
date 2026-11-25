@@ -15,6 +15,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Draw with an own JAR
 user_need: As a writer, I decide whether PlantUML runs in the safe bundled
   engine or in my own installation, changing the choice applies to open
   previews, and a blocked, failing or heavy diagram never freezes the editor or
@@ -122,7 +125,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Draw with an own JAR
+#### Path S1: Draw with an own JAR
 
 1. PlantUML diagrams are drawn by the built-in engine
    - SwRS-MDOKFSTUDIO-DIAG-024: the writer sets useJar to true and the JAR pipeline is selected

@@ -18,6 +18,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-009
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-054
+scenarios:
+- id: S1
+  title: File diagram
+- id: S2
+  title: Options only
+- id: S3
+  title: Dependency
+- id: S4
+  title: Files that are not read
+- id: S5
+  title: Missing file
+- id: S6
+  title: Budget exhausted
+- id: S7
+  title: Directives without file or body
+- id: S8
+  title: Include base of nested diagrams
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,17 +62,17 @@ supersedes:
 
 When a {uml} directive or a {plantuml} directive without a body names a file, the extension SHALL render the diagram stored in that file, using the file text as the diagram and as the expandable source and recording the file name on the diagram element, record the file as a dependency of the render, or show the reason it cannot be read in place of the diagram.
 
-### Scenario (nominal): File diagram
+### Scenario S1 (nominal): File diagram
 - GIVEN a {uml} directive and a {plantuml} directive without a body, both naming diagrams/flow.puml
 - WHEN the preview is rendered
 - THEN both figures hold the file text as diagram and source, with data-plantuml-file equal to diagrams/flow.puml and data-plantuml-base equal to the file's real path
 
-### Scenario (boundary): Options only
+### Scenario S2 (boundary): Options only
 - GIVEN a {plantuml} directive whose body holds only a :caption: option
 - WHEN the preview is rendered
 - THEN it is treated as body-less, the file is rendered and the caption is not shown
 
-### Scenario (nominal): Dependency
+### Scenario S3 (nominal): Dependency
 - GIVEN a {uml} directive naming an existing file
 - WHEN the preview is rendered
 - THEN the file's real path is in the render dependencies
@@ -64,7 +81,7 @@ When a {uml} directive or a {plantuml} directive without a body names a file, th
 - WHEN the preview is rendered
 - THEN no file dependency is recorded for it
 
-### Scenario (refusal): Files that are not read
+### Scenario S4 (refusal): Files that are not read
 The refusal message replaces the diagram, no diagram figure is produced and one warning is reported for the line.
 
 | Input | Outcome |
@@ -73,7 +90,7 @@ The refusal message replaces the diagram, no diagram figure is produced and one 
 | Absolute path (a Windows drive path such as C:\diagrams\a.puml included) or URL | the message says the path must be a relative path to a local file |
 | File larger than 5 MiB | the message says the file is larger than the 5 MiB preview limit |
 
-### Scenario (refusal): Missing file
+### Scenario S5 (refusal): Missing file
 - GIVEN a {uml} directive naming diagrams/later.puml that does not exist
 - WHEN the preview is rendered
 - THEN the message PlantUML file not found: diagrams/later.puml. appears with a warning on line 1 and the missing path is a dependency
@@ -82,18 +99,18 @@ The refusal message replaces the diagram, no diagram figure is produced and one 
 - WHEN the preview renders again
 - THEN the diagram appears
 
-### Scenario (refusal): Budget exhausted
+### Scenario S6 (refusal): Budget exhausted
 - GIVEN a render whose include budget is used up and a {uml} directive after it, or two such directives
 - WHEN the preview is rendered
 - THEN each diagram is replaced by the message that the file was not read because the include budget of this render is exhausted, and only one budget warning is reported for the render
 
-### Scenario (boundary): Directives without file or body
+### Scenario S7 (boundary): Directives without file or body
 | Input | Outcome |
 | --- | --- |
 | {uml} with no argument and no body | the message The {uml} directive needs a diagram file path or a diagram body. appears in place of the diagram and a warning is reported |
 | {plantuml} with no argument and no body | no such message; the diagram is an empty figure |
 
-### Scenario (nominal): Include base of nested diagrams
+### Scenario S8 (nominal): Include base of nested diagrams
 A diagram that comes from an included document or from a {uml} file resolves its !include lines next to that file.
 
 | Input | Outcome |

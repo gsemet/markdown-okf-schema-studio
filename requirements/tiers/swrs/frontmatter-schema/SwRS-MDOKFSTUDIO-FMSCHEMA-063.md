@@ -20,6 +20,23 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-050
 - SwRS-MDOKFSTUDIO-FMSCHEMA-055
+scenarios:
+- id: S1
+  title: Valid link
+- id: S2
+  title: List of links
+- id: S3
+  title: Link that does not resolve
+- id: S4
+  title: Plain labels of the problems
+- id: S5
+  title: First paint
+- id: S6
+  title: Pending link has no Studio tooltip
+- id: S7
+  title: Links resolved after the render
+- id: S8
+  title: Document changed meanwhile
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,26 +63,26 @@ supersedes:
 
 When a properties table with annotated link values is rendered, the extension SHALL show each link as pending on the first paint and, about 150 ms later, replace the table in place so that a resolving link is a keyboard-focusable link whose tooltip starts with the workspace-relative path of the target, and an unresolved link shows its text followed by an error or warning mark and a plain label, with the full "[E10]" or "[W15]" message in a keyboard-focusable tooltip.
 
-### Scenario (nominal): Valid link
+### Scenario S1 (nominal): Valid link
 
 - GIVEN a link value t.md that resolves to bundle/docs/t.md
 - WHEN the table is rendered
 - THEN the Value cell holds a focusable link t.md whose tooltip starts with bundle/docs/t.md, carrying the navigation request okf-link and the status valid
 
-### Scenario (nominal): List of links
+### Scenario S2 (nominal): List of links
 
 - GIVEN a list field whose items are annotated links
 - WHEN the table is rendered
 - THEN each item is its own link
 
-### Scenario (refusal): Link that does not resolve
+### Scenario S3 (refusal): Link that does not resolve
 
 | Link value | Table state | Outcome |
 | --- | --- | --- |
 | nope.md (not found) | Rendered | The text nope.md is followed by the mark ✖ and the label File not found; the text can be focused with the keyboard and its tooltip holds the full [E10] message |
 | A bundle-relative link without a bundle root | Rendered | The text is followed by the mark ⚠ and the label Link root unavailable; the tooltip holds the full [W15] message |
 
-### Scenario (boundary): Plain labels of the problems
+### Scenario S4 (boundary): Plain labels of the problems
 
 | Problem | Label |
 | --- | --- |
@@ -78,25 +95,25 @@ When a properties table with annotated link values is rendered, the extension SH
 | Any other E10 | Invalid link |
 | Any other W15 | Link unavailable |
 
-### Scenario (nominal): First paint
+### Scenario S5 (nominal): First paint
 
 - GIVEN a document with annotated links
 - WHEN the preview is first rendered
 - THEN each link shows its text and a spinner labelled File links are being resolved and is marked busy, without the Studio link tooltip
 
-### Scenario (refusal): Pending link has no Studio tooltip
+### Scenario S6 (refusal): Pending link has no Studio tooltip
 
 - GIVEN the pointer is moved over a pending link
 - WHEN the pointer rests on it
 - THEN the Studio link tooltip is not shown
 
-### Scenario (nominal): Links resolved after the render
+### Scenario S7 (nominal): Links resolved after the render
 
 - GIVEN a rendered table with pending links
 - WHEN 150 ms pass
 - THEN the table is swapped in place and no spinner is left
 
-### Scenario (refusal): Document changed meanwhile
+### Scenario S8 (refusal): Document changed meanwhile
 
 - GIVEN the document, the render or the panel changed before the timer fired, or a block or field editor is open
 - WHEN the timer fires

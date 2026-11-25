@@ -46,7 +46,7 @@ function openPage(variables: Record<string, string>): {
   return { run, diagram, calls, inits };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-005
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-005#S1
 test("the Mermaid border, secondary and tertiary colours come from their theme variables, with fixed fallbacks", async () => {
   const themed = openPage({
     "--studio-textCodeBlock-background": "#101820",
@@ -76,8 +76,9 @@ test("the Mermaid border, secondary and tertiary colours come from their theme v
   assert.equal(fallbacks.tertiaryColor, "#ffffff");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-005
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-005#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-005#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S2
 test("a theme attribute change that leaves the Mermaid colours as they were draws nothing", async () => {
   const page = openPage({ "--studio-textCodeBlock-background": "#f0f0f0" });
   await page.run.settle();
@@ -94,7 +95,8 @@ test("a theme attribute change that leaves the Mermaid colours as they were draw
   assert.equal(page.diagram.dataset.renderState, "rendered");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S6
 test("a PlantUML drawing that fails after a newer render took the element shows no error", async () => {
   const doc = new FakeDocument();
   const element = doc.add("div", { class: "myst-plantuml-diagram" });

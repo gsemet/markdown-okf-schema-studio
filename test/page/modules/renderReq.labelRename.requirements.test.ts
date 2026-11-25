@@ -87,7 +87,8 @@ function harness(label = "old") {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S3
 test("without an answer after 6 s the field is editable again with a message; an answer clears the timer", () => {
   const silent = harness();
   silent.click();

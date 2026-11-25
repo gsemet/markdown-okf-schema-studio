@@ -45,7 +45,8 @@ function replaceDocument(document: vscode.TextDocument, text: string): vscode.Wo
 // @tests_req StRS-MDOKFSTUDIO-LIFE-007
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169
-// @tests_req SwRS-MDOKFSTUDIO-THEME-016
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016#S1
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016#S5
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const extensionRoot = path.resolve(__dirname, "../../..");
@@ -142,7 +143,6 @@ export async function run(): Promise<void> {
     const secondPreview = getActivePreviewForTests();
     assert.ok(secondPreview);
     assert.doesNotMatch(secondPreview.html, /Markdown OKF-Schema Studio Fixture/u);
-    // @tests_req StRS-MDOKFSTUDIO-THEME-004
     assert.match(secondPreview.html, /"previewThemeMode":"dark"/u);
     assert.equal(secondPreview.lastRevealedSourceLine, undefined);
 

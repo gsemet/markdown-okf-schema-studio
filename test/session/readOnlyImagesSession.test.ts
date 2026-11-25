@@ -97,15 +97,15 @@ async function show(): Promise<{ html: string; roots: readonly string[]; toolbar
   return { html, roots, toolbar };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
 test("Restricted Mode: an image of the workspace folder outside the document folder is shown and its folder is a webview root", async () => {
   const { html, roots } = await show();
   assert.ok(html.includes(`src="webview://${path.join(sandbox, "ws", "images", "x.png")}"`), html);
   assert.deepEqual(roots, [path.join(sandbox, "ws", "docs", "guide"), path.join(sandbox, "ws")]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 test("Restricted Mode: the page boots with the Comment button and the reply box on", async () => {
   const { toolbar } = await show();
   assert.equal((toolbar as { commentsEnabled?: boolean }).commentsEnabled, true);

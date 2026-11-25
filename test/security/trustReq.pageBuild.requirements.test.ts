@@ -41,7 +41,7 @@ async function build(content: string, directory = folder()) {
 const codes = (diagnostics: ReadonlyArray<{ code: string }>, code: string): number =>
   diagnostics.filter((entry) => entry.code === code).length;
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S1
 test("an embed, an object and a form are removed with their content and each records blocked-active-element", async () => {
   const built = await build(
     '<p>before</p><embed src="movie.swf"><object data="file.pdf"><p>inside-object</p></object>'
@@ -58,7 +58,7 @@ test("an embed, an object and a form are removed with their content and each rec
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S7
 test("a srcset whose candidates are all refused is removed and records blocked-srcset", async () => {
   const directory = folder();
   fs.writeFileSync(path.join(directory, "local.png"), "png");
@@ -78,7 +78,7 @@ test("a srcset whose candidates are all refused is removed and records blocked-s
   assert.equal(srcset[0]?.message, "Removed a srcset with no safe local candidates.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S2
 test("a wiki link is routed by the host, a bad anchor and javascript: lose their href with blocked-navigation", async () => {
   const built = await build('<a href="wiki:Some Page">wiki</a><a href="# x">bad</a><a href="javascript:alert(1)">script</a>');
   assert.match(built.html, /<a href="#" data-sphinx-preview-navigation="wiki:Some Page">wiki<\/a>/u);
@@ -94,7 +94,7 @@ test("a wiki link is routed by the host, a bad anchor and javascript: lose their
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S3
 test("an SVG xlink:href is treated like an HTML link: blocked loses its address, allowed keeps it, both keep the request for the host", async () => {
   const built = await build(
     '<svg><a xlink:href="javascript:alert(2)"><text>blocked</text></a><a xlink:href="#section"><text>allowed</text></a></svg>',
@@ -111,7 +111,7 @@ test("an SVG xlink:href is treated like an HTML link: blocked loses its address,
   assert.match(allowed, /data-sphinx-preview-navigation="#section"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S4
 test("a linked stylesheet is removed: inside the roots it is ignored, outside it is refused, each with blocked-stylesheet", async () => {
   const directory = folder();
   fs.writeFileSync(path.join(directory, "theme.css"), "p { color: red }");
@@ -124,7 +124,7 @@ test("a linked stylesheet is removed: inside the roots it is ignored, outside it
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S4
 test("a policy meta element in the body is kept as an inert element; only the policy of the head applies", async () => {
   const built = await build('<meta http-equiv="Content-Security-Policy" content="default-src *"><p>Text</p>');
   const head = /<head>([\s\S]*?)<\/head>/u.exec(built.html)?.[1] ?? "";
@@ -136,7 +136,7 @@ test("a policy meta element in the body is kept as an inert element; only the po
   assert.equal(built.html.match(/http-equiv="Content-Security-Policy"/gu)?.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-022
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S2
 test("the Mermaid and PlantUML scripts and the maths style carry the page nonce", async () => {
   const directory = folder();
   const documentPath = path.join(directory, "page.md");

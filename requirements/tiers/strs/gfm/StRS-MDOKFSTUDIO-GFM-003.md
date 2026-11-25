@@ -17,6 +17,9 @@ derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Tick a task
 user_need: As a writer or reviewer, I tick task checkboxes directly in the
   preview and the source changes by exactly that character.
 derived_by:
@@ -72,7 +75,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Tick a task
+#### Path S1: Tick a task
 
 1. A task-list item holds [ ]
    - SwRS-MDOKFSTUDIO-GFM-016: the page renders a checkbox in place of the bullet

@@ -21,6 +21,22 @@ derives_from:
 - StRS-MDOKFSTUDIO-TRUST-006
 - StRS-MDOKFSTUDIO-TOOLBAR-011
 depends_on: []
+scenarios:
+- id: S1
+  title: Preview with restricted reads of a file outside the workspace
+- id: S2
+  title: Preview with restricted reads in an untrusted workspace
+- id: S3
+  title: Writable preview
+- id: S4
+  title: Roots the webview may load from
+- id: S5
+  title: Runtime and stylesheet as bundle files
+- id: S6
+  title: New panel and status pages allow no local file
+- id: S7
+  title: Links and includes of a preview with restricted reads stay in the
+    folder of the document
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -50,41 +66,41 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension shows a document, it SHALL allow the webview to load local files only from the resource root of the preview (the folder of the document for a preview with restricted reads, which also loads the images of the workspace folder that holds it unless that folder is broad; the workspace folder for a preview with full reads) and from the bundle folder of the extension, and no local file for the pending page that clears the content and for the missing-source page.
 
-### Scenario (nominal): Preview with restricted reads of a file outside the workspace
+### Scenario S1 (nominal): Preview with restricted reads of a file outside the workspace
 - GIVEN a Markdown file outside every workspace folder, with an image beside it
 - WHEN the reader previews it
 - THEN the resource root is the folder of the file and the image beside it loads
 
-### Scenario (nominal): Preview with restricted reads in an untrusted workspace
+### Scenario S2 (nominal): Preview with restricted reads in an untrusted workspace
 - GIVEN a document in a subfolder of an untrusted workspace folder
 - WHEN the reader previews it
 - THEN the resource root is that subfolder; the workspace folder serves images only (SwRS-MDOKFSTUDIO-TRUST-002)
 
-### Scenario (nominal): Writable preview
+### Scenario S3 (nominal): Writable preview
 | Input | Outcome |
 | --- | --- |
 | A trusted workspace and a document in a subfolder of its folder | The resource root is the workspace folder |
 | A trusted window with two workspace folders and a document in the second | The resource root is the second folder |
 
-### Scenario (nominal): Roots the webview may load from
+### Scenario S4 (nominal): Roots the webview may load from
 - GIVEN a preview with full reads of a workspace document, or a preview with restricted reads of a file outside the workspace
 - WHEN the page is shown
 - THEN the webview may load from the workspace folder (full reads) or the folder of the file (restricted reads), and from the bundle folder, and from nowhere else; a preview with restricted reads of a workspace document may also load from the workspace folder (its images, SwRS-MDOKFSTUDIO-TRUST-002) but not from the rest of the disk
 
-### Scenario (nominal): Runtime and stylesheet as bundle files
+### Scenario S5 (nominal): Runtime and stylesheet as bundle files
 | Input | Outcome |
 | --- | --- |
 | A rendered page, its HTML read | It holds a script element with the bundle URL of preview.js and the attribute data-sphinx-preview-scroll-sync, and the page's style imports preview.css |
 | Two renders of one document type, their pages built | Only the JSON element of the context differs, so the shell keys are equal |
 
-### Scenario (refusal): New panel and status pages allow no local file
+### Scenario S6 (refusal): New panel and status pages allow no local file
 | Input | Outcome |
 | --- | --- |
 | A panel just created for a preview, no document rendered yet | Its webview has no local resource root |
 | A preview whose source file was deleted, the page replaced by the missing-source page | The webview has no local resource root until a document is rendered again |
 | The page replaced by the pending page that clears the content | The webview has no local resource root |
 
-### Scenario (boundary): Links and includes of a preview with restricted reads stay in the folder of the document
+### Scenario S7 (boundary): Links and includes of a preview with restricted reads stay in the folder of the document
 | Input | Outcome |
 | --- | --- |
 | A standalone preview and a link to a file below the document's folder | It opens |

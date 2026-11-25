@@ -32,7 +32,7 @@ implemented_in_files:
 - src/session/features/blockEdits.ts
 - src/session/features/scrollSync.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/integration/editToolbarCover.test.ts
 - test/integration/tallBlockScroll.test.ts
 - test/page/escapeClose.test.ts

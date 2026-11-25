@@ -20,6 +20,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Anchor and external addresses
+- id: S2
+  title: Relative and wiki links are routed by the host
+- id: S3
+  title: Blocked links
+- id: S4
+  title: Linked stylesheet
+- id: S5
+  title: Removals are recorded on the record of the page
+- id: S6
+  title: Removals are not shown to the reader
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,7 +54,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, https or mailto address as the href, turn a relative or wiki request into the href # that the host routes from data-sphinx-preview-navigation, remove the address of a blocked request (naming the reason in the title of the link when it has none), remove a linked stylesheet (recording a diagnostic that it is ignored when the file is inside the roots), and record each removal or rewrite as a diagnostic with a code, a message and the value on the record of the page, without showing it in the status area of the preview.
 
-### Scenario (nominal): Anchor and external addresses
+### Scenario S1 (nominal): Anchor and external addresses
 
 | Input | Outcome |
 | --- | --- |
@@ -49,14 +62,14 @@ When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, h
 | https://example.test/docs | the address is kept as the href, with the original request in data-sphinx-preview-navigation |
 | mailto:docs@example.test | the address is kept as the href, with the original request in data-sphinx-preview-navigation |
 
-### Scenario (nominal): Relative and wiki links are routed by the host
+### Scenario S2 (nominal): Relative and wiki links are routed by the host
 
 | Input | Outcome |
 | --- | --- |
 | a link with href chapter-two.md | the href is # and data-sphinx-preview-navigation is chapter-two.md |
 | a link whose request is wiki:Some Page | the href is # and the request is kept in data-sphinx-preview-navigation |
 
-### Scenario (refusal): Blocked links
+### Scenario S3 (refusal): Blocked links
 
 | Input | Outcome |
 | --- | --- |
@@ -65,14 +78,14 @@ When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, h
 | an xlink:href the link rules block (an SVG link) | no href remains; the request is only in data-sphinx-preview-navigation, as for an HTML link; the diagnostic blocked-navigation is recorded |
 | an xlink:href the link rules allow (an SVG link) | the address is kept and the request is in data-sphinx-preview-navigation; the host routes the click, as for an HTML link |
 
-### Scenario (boundary): Linked stylesheet
+### Scenario S4 (boundary): Linked stylesheet
 
 | Input | Outcome |
 | --- | --- |
 | a link element for theme.css inside the roots | the element is removed; the page build records the diagnostic blocked-stylesheet (message Ignored a linked stylesheet; the preview supplies its own theme.) |
 | a link element for a file outside the roots | the element is removed with the diagnostic blocked-stylesheet (message Removed a stylesheet outside staged output.) |
 
-### Scenario (nominal): Removals are recorded on the record of the page
+### Scenario S5 (nominal): Removals are recorded on the record of the page
 
 - GIVEN a document whose HTML holds an iframe
 - WHEN the preview renders
@@ -81,7 +94,7 @@ When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, h
 - WHEN the preview renders
 - THEN the record holds the diagnostic blocked-resource with the reference as its value (message Removed a resource outside staged output.)
 
-### Scenario (refusal): Removals are not shown to the reader
+### Scenario S6 (refusal): Removals are not shown to the reader
 
 - GIVEN a document whose HTML holds an iframe or an image outside the roots
 - WHEN the preview renders

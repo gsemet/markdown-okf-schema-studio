@@ -20,6 +20,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-TRUST-004
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-025
+scenarios:
+- id: S1
+  title: Preview with restricted reads in an ordinary folder
+- id: S2
+  title: Non-image resource and include outside the document folder
+- id: S3
+  title: Dot-directory
+- id: S4
+  title: Broad folder
+- id: S5
+  title: Trusted workspace
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,31 +54,31 @@ default_owner_email: gaetan@xeberon.net
 
 When a preview has restricted reads (no workspace folder, or Restricted Mode; editing is not affected), the extension SHALL refuse every include and resource whose path lies below a dot-segment, and SHALL read includes and resources other than images from the folder of the document only, and none of them when that folder is the home folder of the user, a folder that contains it or a file-system root, showing the reason as a diagnostic. The images of such a preview are SwRS-MDOKFSTUDIO-TRUST-091.
 
-### Scenario (nominal): Preview with restricted reads in an ordinary folder
+### Scenario S1 (nominal): Preview with restricted reads in an ordinary folder
 
 - GIVEN a preview with restricted reads of a document in a folder that is not the home folder
 - WHEN the document includes a file next to it, or loads an image next to it
 - THEN the include and the image are served as before
 
-### Scenario (refusal): Non-image resource and include outside the document folder
+### Scenario S2 (refusal): Non-image resource and include outside the document folder
 
 - GIVEN the same preview with restricted reads
 - WHEN a file that is not an image, or an include, lies in the workspace folder outside the folder of the document
 - THEN it is refused with the code resource-outside-root, as before
 
-### Scenario (refusal): Dot-directory
+### Scenario S3 (refusal): Dot-directory
 
 - GIVEN a preview with restricted reads in any folder
 - WHEN an include or a resource names a path with a segment that starts with a dot below the folder of the document (.ssh/id_rsa, .agents/rule.md), or a symbolic link that leads to such a path
 - THEN it is refused with the code hidden-path and the diagnostic "A preview with restricted reads does not read paths inside dot-directories such as .ssh or .config."
 
-### Scenario (refusal): Broad folder
+### Scenario S4 (refusal): Broad folder
 
 - GIVEN a preview with restricted reads whose document is in the home folder, in a folder that contains it (such as /Users) or in a file-system or drive root
 - WHEN an include or a resource that is not an image is requested, even a plain file next to the document
 - THEN it is refused with the code restricted-root and the diagnostic that names the home folder
 
-### Scenario (boundary): Trusted workspace
+### Scenario S5 (boundary): Trusted workspace
 
 - GIVEN a preview of a trusted workspace folder
 - WHEN a document includes a file inside a dot-directory such as .agents

@@ -18,6 +18,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-THEME-002
 depends_on: []
+scenarios:
+- id: S1
+  title: White on a dark host
+- id: S2
+  title: Dark on a light host and on a dark host
+- id: S3
+  title: Cream on a dark host
+- id: S4
+  title: Warm paper rule
+- id: S5
+  title: Toolbar colours of the forced modes
+- id: S6
+  title: Sticky heading band and borders
+- id: S7
+  title: The same colours on both hosts
+- id: S8
+  title: The three mode blocks of the stylesheet
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,19 +58,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a forced theme mode (Dark, White or Cream) is shown, the extension SHALL paint the page, the floating toolbar and its pressed button, the sticky heading band and the note panels from the palette of that mode alone, so that the White mode paints a white page with the dark foreground text, light panels and a light colour scheme, and every forced mode looks the same on a dark and on a light VS Code theme.
 
-### Scenario (nominal): White on a dark host
+### Scenario S1 (nominal): White on a dark host
 
 - GIVEN the handbook document forced to White on a dark VS Code theme in a 900 px pane (visual scenario theme-zoom/v01), and the frontmatter fixture forced to White on a dark host (visual scenario theme-zoom/v07)
 - WHEN the preview is rendered
 - THEN the body background is rgb(255, 255, 255), the page text and the text of the first admonition are rgb(31, 31, 31) and the admonition panel is light (every colour channel at least 180); with the properties table the page background is white, the text is the dark foreground and the first admonition panel is light, as in the handbook
 
-### Scenario (nominal): Dark on a light host and on a dark host
+### Scenario S2 (nominal): Dark on a light host and on a dark host
 
 - GIVEN the handbook forced to Dark while the VS Code theme stays light in a 900 px pane (visual scenario theme-zoom/v08), and Dark mode on a dark VS Code theme (real-input capture theme-zoom/r03)
 - WHEN the preview is rendered
 - THEN on the light host the html attribute data-sphinx-preview-theme-mode is dark, the body background is rgb(30, 30, 30), the text is rgb(212, 212, 212), the colour scheme is dark, the first admonition is drawn on a dark panel and the h1 heading is readable on it; on the dark host the page is rgb(30, 30, 30) and the toolbar rgb(37, 37, 38), the same as on a light host
 
-### Scenario (nominal): Cream on a dark host
+### Scenario S3 (nominal): Cream on a dark host
 
 - GIVEN the handbook forced to Cream on a dark VS Code theme in a 900 px pane (visual scenarios theme-zoom/v02 to v06, also with the admonition gallery, code and tables, the properties fixture and an open paragraph editor)
 - WHEN the preview is rendered
@@ -64,13 +81,13 @@ and widget border rather than the host dropdown colours. In Cream these are rgb(
 rgb(43, 42, 39) and rgb(214, 205, 189), even when the host dropdown is dark. Dark and White apply
 the same rule with their own palette; Current mode continues to follow the host.
 
-### Scenario (boundary): Warm paper rule
+### Scenario S4 (boundary): Warm paper rule
 
 - GIVEN the Cream colour variables of the stylesheet
 - WHEN the editor background is read
 - THEN its red channel is above 0xE8 and red is greater than green, which is greater than blue
 
-### Scenario (nominal): Toolbar colours of the forced modes
+### Scenario S5 (nominal): Toolbar colours of the forced modes
 
 - GIVEN a forced mode shown on a VS Code theme as in the table
 - WHEN the toolbar is drawn
@@ -82,7 +99,7 @@ the same rule with their own palette; Current mode continues to follow the host.
 | Dark mode on a light VS Code theme | Toolbar background rgb(37, 37, 38), pressed button rgb(14, 99, 156) |
 | Dark mode on a dark VS Code theme (capture theme-zoom/r03) | Toolbar background rgb(37, 37, 38) |
 
-### Scenario (nominal): Sticky heading band and borders
+### Scenario S6 (nominal): Sticky heading band and borders
 
 - GIVEN a forced mode shown, the sticky heading band drawn, and the top, right and bottom border colours of the toolbar and of every note panel read
 - WHEN the mode is as in the table
@@ -96,13 +113,13 @@ the same rule with their own palette; Current mode continues to follow the host.
 | Toolbar and note panel borders, White | rgb(200, 200, 200) |
 | Toolbar and note panel borders, Cream | rgb(214, 205, 189) |
 
-### Scenario (boundary): The same colours on both hosts
+### Scenario S7 (boundary): The same colours on both hosts
 
 - GIVEN Dark, White and Cream in turn on the default dark and the default light VS Code themes, and a host that maps the tokens to its own palette
 - WHEN the page and toolbar colours are read
 - THEN on both hosts they equal the colours of the scenarios above, and the mode colours do not depend on the host mapping
 
-### Scenario (boundary): The three mode blocks of the stylesheet
+### Scenario S8 (boundary): The three mode blocks of the stylesheet
 
 - GIVEN the Dark, White and Cream mode blocks of the stylesheet (selectors `html[data-sphinx-preview-theme-mode="{mode}"], ... body`)
 - WHEN the variable names and the values of each block are read

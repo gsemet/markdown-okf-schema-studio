@@ -399,7 +399,6 @@ async function flushFrameState(page: Page): Promise<string> {
  * even when it is not valid YAML, does not fit the schema or is not a number. The preview then
  * shows the validation error; the text is never lost.
  */
-// @tests_req StRS-MDOKFSTUDIO-FMEDIT-008
 export async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidence): Promise<void> {
   await withFlushDocuments("realinput-cr25e", async (first, second) => {
     const cases: Array<{ field: string; selector: string; typed: string | undefined; expected: RegExp }> = [

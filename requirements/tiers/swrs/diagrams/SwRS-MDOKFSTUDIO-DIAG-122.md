@@ -18,6 +18,13 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-025
+scenarios:
+- id: S1
+  title: A relative data file
+- id: S2
+  title: A remote url
+- id: S3
+  title: A file outside the folders, missing, too large or of another format
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,19 +47,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a Vega-Lite or Vega chart names a relative data url, the extension SHALL read that file under the rules of the include directive (inside the document folder or workspace, no symlink escape, at most 5 MiB), hand its text to the page with the chart, and refuse every remote url with a message.
 
-### Scenario (nominal): A relative data file
+### Scenario S1 (nominal): A relative data file
 
 - GIVEN a document in a workspace folder and a vega-lite chart with data.url data/rows.csv, a file next to the document
 - WHEN the preview renders
 - THEN the chart element carries the text of the file in data-myst-chart-files under the url as written, the file is a dependency of the render (the preview renders again when it changes), and the page draws the rows of the file; a CSV or TSV file is parsed by the extension without evaluating code, a JSON file as JSON
 
-### Scenario (refusal): A remote url
+### Scenario S2 (refusal): A remote url
 
 - GIVEN a chart whose data url starts with https:, http:, file: or //
 - WHEN the preview renders and the page draws the chart
 - THEN nothing is read and no request is made (connect-src stays none), and the chart shows the message Remote chart data is not loaded followed by the url
 
-### Scenario (refusal): A file outside the folders, missing, too large or of another format
+### Scenario S3 (refusal): A file outside the folders, missing, too large or of another format
 
 - GIVEN a data url that the allowed-roots rule (SwRS-MDOKFSTUDIO-TRUST-025) refuses, names a missing file, an absolute path or a file larger than 5 MiB, or names a format other than csv, tsv or json
 - WHEN the preview renders

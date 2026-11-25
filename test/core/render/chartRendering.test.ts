@@ -41,7 +41,8 @@ async function render(text: string, options: { restrictedReads?: boolean; resour
 
 const chartOf = (dom: ReturnType<typeof parseHtml>) => findElement(dom, (element) => hasClass(element, "myst-vega-diagram"));
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S2
 test("a vega-lite fence becomes a chart figure with its source, a vega fence the same", async () => {
   for (const [lang, kind] of [["vega-lite", "vega-lite"], ["vega", "vega"]] as const) {
     const { dom, html, diagnostics } = await render(`Before.\n\n\`\`\`${lang}\n${SPEC}\n\`\`\`\n\nAfter.\n`);
@@ -58,14 +59,14 @@ test("a vega-lite fence becomes a chart figure with its source, a vega fence the
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S3
 test("a mermaid fence and other languages are not charts", async () => {
   const { dom } = await render("```mermaid\ngraph TD\n A --> B\n```\n\n```json\n{}\n```\n");
   assert.equal(chartOf(dom), undefined);
   assert.ok(findElement(dom, (element) => hasClass(element, "myst-mermaid-figure")));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
 test("a relative data url is read through the resource policy and handed to the page with the chart", async () => {
   const spec = '{ "data": { "url": "data/rows.csv" }, "mark": "bar" }';
   const { dom, diagnostics } = await render(`\`\`\`vega-lite\n${spec}\n\`\`\`\n`);
@@ -75,7 +76,8 @@ test("a relative data url is read through the resource policy and handed to the 
   assert.equal(diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S2
 test("a remote data url is never read: the chart carries no file and the page refuses it with a message", async () => {
   const { dom, stage } = await render('```vega-lite\n{ "data": { "url": "https://example.com/a.csv" }, "mark": "bar" }\n```\n');
   const chart = chartOf(dom)!;
@@ -84,7 +86,8 @@ test("a remote data url is never read: the chart carries no file and the page re
   assert.deepEqual(stage.dependencies, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S3
 test("a data file outside the folders the preview reads, a missing file and an absolute path are refused with a reason", async () => {
   const cases: Array<[string, RegExp]> = [
     ["../../../outside/secret.csv", /outside the folders the preview reads/u],
@@ -101,7 +104,7 @@ test("a data file outside the folders the preview reads, a missing file and an a
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S3
 test("in Restricted Mode only the document folder and below is read", async () => {
   const inside = await render('```vega-lite\n{ "data": { "url": "data/rows.csv" }, "mark": "bar" }\n```\n', { restrictedReads: true, resourceRoot: "document" });
   assert.ok(attribute(chartOf(inside.dom)!, "data-myst-chart-files"));
@@ -110,7 +113,7 @@ test("in Restricted Mode only the document folder and below is read", async () =
   assert.match(attribute(chartOf(outside.dom)!, "data-myst-chart-errors")!, /outside the folders/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S3
 test("an invalid specification still renders a chart element: the page shows the error, the source stays", async () => {
   const { dom } = await render("```vega-lite\n{ not a spec\n```\n");
   const chart = chartOf(dom)!;

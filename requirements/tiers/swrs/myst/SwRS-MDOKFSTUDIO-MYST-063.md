@@ -15,6 +15,23 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-017
+scenarios:
+- id: S1
+  title: A list-table renders like a pipe table
+- id: S2
+  title: List-table header rows
+- id: S3
+  title: Invalid list-table widths are ignored
+- id: S4
+  title: A list-table is edited as one block
+- id: S5
+  title: The table directive keeps caption, id and alignment
+- id: S6
+  title: A table directive around a raw HTML table
+- id: S7
+  title: The csv-table directive renders a table
+- id: S8
+  title: The table directive family shares the table styles and palette action
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,18 +58,18 @@ supersedes:
 
 When a document holds a `{list-table}`, `{csv-table}` or `{table}` directive, the extension SHALL render it as an ordinary table with the table styles, with its caption, header rows, widths and alignment as the directive options give them, and offer the table palette action.
 
-### Scenario (nominal): A list-table renders like a pipe table
+### Scenario S1 (nominal): A list-table renders like a pipe table
 - GIVEN a `{list-table}` with title, two header rows and widths `30 70`
 - WHEN the preview renders
 - THEN a caption, two header rows and 30/70 column proportions appear, with `:align:` and inline Markdown cells, as one source block with no overflow, and cell, header and border styles match a pipe table
 
-### Scenario (boundary): List-table header rows
+### Scenario S2 (boundary): List-table header rows
 | Input | Outcome |
 | --- | --- |
 | `:header-rows: 1` | The first row is in `thead` with `th` |
 | `:header-rows: 0` | No header cells are made |
 
-### Scenario (refusal): Invalid list-table widths are ignored
+### Scenario S3 (refusal): Invalid list-table widths are ignored
 | Input | Outcome |
 | --- | --- |
 | `:widths: auto` | No column group exists |
@@ -61,28 +78,28 @@ When a document holds a `{list-table}`, `{csv-table}` or `{table}` directive, th
 | Three widths for two columns | No column group exists |
 | Valid widths | Applied as percent |
 
-### Scenario (nominal): A list-table is edited as one block
+### Scenario S4 (nominal): A list-table is edited as one block
 - GIVEN a `{list-table}` and a Markdown table
 - WHEN a cell is clicked in edit mode
 - THEN the whole list-table opens in one editor, because its cell paragraphs carry no source line, while a Markdown table opens its cell editor
 
-### Scenario (nominal): The table directive keeps caption, id and alignment
+### Scenario S5 (nominal): The table directive keeps caption, id and alignment
 - GIVEN a `{table}` with caption, `:label:` and `:align: center` around a pipe table with aligned columns
 - WHEN the preview renders
 - THEN a captioned table has the label as id, is aligned and keeps each column's GFM alignment on every cell; palette-written captioned tables render a caption
 
-### Scenario (boundary): A table directive around a raw HTML table
+### Scenario S6 (boundary): A table directive around a raw HTML table
 - GIVEN a `{table}` with `:align:` around a raw HTML table
 - WHEN the preview renders
 - THEN the HTML table takes the alignment
 
-### Scenario (nominal): The csv-table directive renders a table
+### Scenario S7 (nominal): The csv-table directive renders a table
 | Input | Outcome |
 | --- | --- |
 | A `{csv-table}` with `:header:` and a quoted cell spanning two lines | The header row is made and the quoted cell holds both lines |
 | A `{csv-table}` with a caption and `:align: right` and no `:header:` | The table has the caption and alignment and no header cells |
 
-### Scenario (nominal): The table directive family shares the table styles and palette action
+### Scenario S8 (nominal): The table directive family shares the table styles and palette action
 | Input | Outcome |
 | --- | --- |
 | A `{list-table}` | Table styles apply and the table palette action is offered |

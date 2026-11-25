@@ -106,8 +106,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "on a white page would be invisible.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-THEME-002
-    // @tests_req SwRS-MDOKFSTUDIO-THEME-025
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-025#S1
     id: "handbook-forced-white",
     fixture: "01-handbook-overview",
     theme: "dark",
@@ -119,7 +118,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "must all use the light palette.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-THEME-001
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-001#S2
     id: "handbook-forced-cream",
     fixture: "01-handbook-overview",
     theme: "dark",
@@ -132,7 +131,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "the page. Nothing may look dark, yellow or washed out.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-THEME-031
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-031#S3
     id: "admonitions-forced-cream-full",
     fixture: "02-admonition-gallery",
     theme: "dark",
@@ -203,9 +202,9 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "and that admonition padding does not eat the usable column.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-001
-    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001
-    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S3
     id: "handbook-narrow-table",
     horizontalOverflow: true,
     fixture: "01-handbook-overview",
@@ -217,8 +216,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "far-right Audit column. The page itself must not widen.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-MYST-015
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-001
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S4
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
     id: "admonitions-dark-full",
     fixture: "02-admonition-gallery",
     theme: "dark",
@@ -241,7 +240,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "for a generic admonition carrying an author-supplied class.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-006
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-006#S4
     id: "admonitions-dark-titled",
     fixture: "02-admonition-gallery",
     theme: "dark",
@@ -272,7 +271,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   },
   {
     // @tests_req StRS-MDOKFSTUDIO-CORE-003
-    // @tests_req StRS-MDOKFSTUDIO-MYST-005
     // @tests_req SwRS-MDOKFSTUDIO-CORE-022
     id: "unresolved-dark-full",
     fixture: "03-unresolved-constructs",
@@ -348,7 +346,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   })),
   ...["dark", "light"].flatMap((theme) => [
     {
-      // @tests_req SwRS-MDOKFSTUDIO-MYST-013
+      // @tests_req SwRS-MDOKFSTUDIO-MYST-013#S1
+      // @tests_req SwRS-MDOKFSTUDIO-MYST-013#S3
       id: `context-tags-${theme}-wide`,
       fixture: "15-context-tags",
       theme,
@@ -372,8 +371,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     },
   ]),
   {
-    // @tests_req StRS-MDOKFSTUDIO-DIAG-001
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-005
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-005#S1
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-005#S2
     id: "mermaid-map-dark",
     mermaidThemeSwitch: true,
     fixture: "06-mermaid-map",
@@ -384,7 +383,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The OKF knowledge-base map in the dark preview.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S1
     id: "mermaid-map-light",
     fixture: "06-mermaid-map",
     theme: "light",
@@ -403,8 +402,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The OKF knowledge-base map without host color variables.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-DIAG-007
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-105
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S5
     id: "plantuml-success-light",
     fixture: "12-plantuml-optional",
     theme: "light",
@@ -437,7 +435,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "Intentionally unconfigured PlantUML shows the JAR-path guidance and expandable source, not a successful diagram.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S5
     id: "plantuml-executable-not-found",
     fixture: "13-plantuml-executable-not-found",
     theme: "light",
@@ -449,8 +447,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "A missing PlantUML executable shows an actionable settings message and preserves the source.",
   },
   ...(["light", "dark", "cream"] as const).map((mode) => ({
-    // @tests_req StRS-MDOKFSTUDIO-CODE-004
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-017
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-017#S2
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-017#S4
     id: `code-copy-button-${mode}`,
     fixture: "04-code-and-tables",
     theme: mode === "light" ? "light" : "dark",
@@ -464,7 +462,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "the floating toolbar; clicking it posts the raw code and turns the icon into a check mark.",
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-017
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-017#S8
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-017#S9
     id: `code-blocks/v${17 + index}-copy-button-keyboard-focus-${theme}-900`,
     fixture: "04-code-and-tables",
     theme,
@@ -581,7 +580,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "The caption has no generated figure number; inspect its separation from body text.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-031
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-031#S1
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-031#S3
     id: "chapter-figure-dark",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -600,7 +600,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The important-block landmark and following body-colour paragraph.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-024
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-024#S9
     id: "chapter-dark-half",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -635,8 +635,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "Same chapter opening on a light theme, for side-by-side contrast review.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-003
-    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S5
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S6
     id: "chapter-max-width-dark-full",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -672,8 +672,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "content that escaped the block.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-CODE-001
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-001
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-001#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-001#S2
     id: "syntax-dark-rust",
     fixture: "06-syntax-highlighting",
     theme: "dark",
@@ -715,8 +715,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "unregistered grammar that must degrade to plain monospace text.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-CODE-001
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-008
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-008#S4
     id: "diff-dark-preview",
     fixture: "06-syntax-highlighting",
     theme: "dark",
@@ -759,7 +758,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "must retain its green and red line treatments.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-007
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-007#S3
     id: "syntax-narrow-python",
     horizontalOverflow: true,
     fixture: "06-syntax-highlighting",
@@ -782,10 +781,10 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "readable link-blue text against the soft white-mode code background.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
-    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-006
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S1
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S5
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029#S1
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029#S6
     id: "okf-schema-table",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -797,7 +796,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "table shows name, value, and the schema description of each field.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S4
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S7
     id: "okf-schema-narrow",
     screenshotOf: "frontmatter-scroll-feedback",
     fixture: "08-okf-schema",
@@ -810,7 +810,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "the name and value columns remain readable without horizontal crowding.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S2
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S7
     id: "frontmatter-links-loading",
     fixture: "14-frontmatter-links",
     theme: "dark",
@@ -822,7 +823,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "keeps its text and shows a small spinner immediately after it.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-014
     id: "frontmatter-links-loaded",
     fixture: "14-frontmatter-links",
     theme: "dark",
@@ -1231,7 +1231,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   },
   {
     // @tests_req StRS-MDOKFSTUDIO-BLOCK-003
-    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-004
     id: "edit-first-block-top-wide",
     fixture: "17-wrapped-editing",
     theme: "light",
@@ -1331,7 +1330,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     { n: "24", theme: "light", mode: "cream" },
     { n: "25", theme: "dark", mode: undefined },
   ] as const).map(({ n, theme, mode }) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005#S3
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005#S5
     id: `frontmatter-schema/v${n}-frontmatter-long-keys-${mode ?? theme}-900`,
     fixture: "64-frontmatter-long-keys",
     theme,
@@ -1346,7 +1346,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     { n: "26", fixture: "65-frontmatter-skill-metadata", name: "skill-metadata-cream", theme: "light", mode: "cream", keys: 3 },
     { n: "27", fixture: "66-frontmatter-short-keys", name: "short-keys-dark", theme: "dark", mode: undefined, keys: 3 },
   ] as const).map(({ n, fixture, name, theme, mode, keys }) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005#S5
     id: `frontmatter-schema/v${n}-frontmatter-${name}-900`,
     fixture,
     theme,
@@ -1382,8 +1382,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     { name: "cream", theme: "dark", mode: "cream" },
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((variant, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-MYST-005
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-096
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-096#S1
     id: `myst/v${37 + index}-unclosed-directives-${variant.name}-900`,
     fixture: "64-unclosed-directives",
     theme: variant.theme,
@@ -1399,8 +1398,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     { name: "cream", theme: "dark", mode: "cream" },
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((variant, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-MYST-005
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-096
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-096#S2
     id: `myst/v${39 + index}-unclosed-fence-mid-document-${variant.name}-900`,
     fixture: "65-unclosed-fence-mid-document",
     theme: variant.theme,

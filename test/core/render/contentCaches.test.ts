@@ -13,7 +13,8 @@ import { expandToctrees, firstHeading, type GridNode } from "../../../src/core/r
 import { ResourcePolicy } from "../../../src/core/security/resource-policy";
 import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S4
 test("a code block that did not change is highlighted once, a changed one again", () => {
   const spy = mock.method(getHighlighter(), "codeToTokensWithThemes");
   try {
@@ -30,7 +31,8 @@ test("a code block that did not change is highlighted once, a changed one again"
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-024
+// @tests_req SwRS-MDOKFSTUDIO-MYST-024#S6
+// @tests_req SwRS-MDOKFSTUDIO-MYST-024#S8
 test("a formula that did not change is typeset once, and a rejected one is remembered", () => {
   const spy = mock.method(katex, "renderToString");
   try {
@@ -90,7 +92,7 @@ test("a resource referenced many times in one render is stat-ed once", async (t)
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S1
 test("a toctree target listed twice in one render is read once", () => {
   const toctree = (value: string): GridNode => ({ type: "mystDirective", name: "toctree", value, children: [] });
   const tree: GridNode = { type: "root", children: [toctree("guide\nguide"), toctree("guide")] };

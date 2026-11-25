@@ -40,7 +40,7 @@ async function link(
   return (await inspectFrontmatterLinks({ target }, schemaFor(resolution), { files, filePath, ...options }))[0];
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S3
 test("without a workspace folder the navigation root is the folder of the document, and with one it is that folder", async () => {
   const root = makeRoot();
   try {
@@ -55,7 +55,8 @@ test("without a workspace folder the navigation root is the folder of the docume
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S6
 test("the project root is the Git root of the document, only when a navigation root holds it", async () => {
   const root = makeRoot();
   try {
@@ -72,7 +73,8 @@ test("the project root is the Git root of the document, only when a navigation r
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S6
 test("an absolute target is refused by its shape and a target that only contains a colon is not", async () => {
   const root = makeRoot();
   try {
@@ -89,7 +91,7 @@ test("an absolute target is refused by its shape and a target that only contains
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S6
 test("a document-relative target is resolved from the real folder of the document and contained by the navigation roots", async (context) => {
   const root = makeRoot();
   try {
@@ -121,8 +123,8 @@ test("a document-relative target is resolved from the real folder of the documen
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S6
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S6
 test("bundle-relative and project-relative targets start from their own root, and bundle-relative-stem adds .md", async () => {
   const root = makeRoot();
   try {
@@ -148,7 +150,7 @@ test("bundle-relative and project-relative targets start from their own root, an
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S6
 test("a missing root is reported by its kind, and a target leaving its root is refused before the disk is read", async () => {
   const root = makeRoot();
   try {

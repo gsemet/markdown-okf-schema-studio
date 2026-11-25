@@ -17,6 +17,23 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LAYOUT-003
+scenarios:
+- id: S1
+  title: Default cap in a wide pane
+- id: S2
+  title: Configured cap above the default
+- id: S3
+  title: Normalisation of the setting
+- id: S4
+  title: Zero lifts the limit
+- id: S5
+  title: Configured width in the page style
+- id: S6
+  title: Invalid configured width in the page style
+- id: S7
+  title: Open preview follows a change of the setting
+- id: S8
+  title: No last good render or unrelated section
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -49,17 +66,17 @@ supersedes:
 
 When a preview page is built or the setting markdownOkfSchemaStudio.preview.maxContentWidth changes, the extension SHALL normalise the setting to a whole number of pixels from 0 to 2400 (960 when it is negative or not a finite number), write it into the page style as the width rule, and show a text column exactly that wide and centred in a wider pane, with no cap when the value is 0.
 
-### Scenario (nominal): Default cap in a wide pane
+### Scenario S1 (nominal): Default cap in a wide pane
 - GIVEN the setting maxContentWidth at its default 960, Margin width mode, 100 percent zoom and a 1600 px pane
 - WHEN the preview is rendered
 - THEN the content column is 960 px wide and the free space is split equally left and right
 
-### Scenario (nominal): Configured cap above the default
+### Scenario S2 (nominal): Configured cap above the default
 - GIVEN maxContentWidth set to 1400 and a 2000 px pane (visual scenario v85)
 - WHEN the preview is rendered
 - THEN the content column is exactly 1400 px wide and centred; in a pane narrower than the cap the column takes the pane width instead
 
-### Scenario (boundary): Normalisation of the setting
+### Scenario S3 (boundary): Normalisation of the setting
 | Input | Outcome |
 | --- | --- |
 | 2500 | 2400 |
@@ -70,28 +87,28 @@ When a preview page is built or the setting markdownOkfSchemaStudio.preview.maxC
 | the text wide | 960, the default |
 | NaN | 960, the default |
 
-### Scenario (boundary): Zero lifts the limit
+### Scenario S4 (boundary): Zero lifts the limit
 - GIVEN maxContentWidth set to 0 and a 2000 px pane
 - WHEN the width rule is built and the preview is rendered
 - THEN the rule reads :root { --sphinx-preview-content-max-width: none; } and the column is not limited to a pixel width
 - AND with maxContentWidth set to 1 the rule reads --sphinx-preview-content-max-width: 1px, because only 0 lifts the limit
 
-### Scenario (nominal): Configured width in the page style
+### Scenario S5 (nominal): Configured width in the page style
 - GIVEN maxContentWidth set to 1200
 - WHEN the page HTML is built
 - THEN the page style ends with :root { --sphinx-preview-content-max-width: 1200px; }
 
-### Scenario (refusal): Invalid configured width in the page style
+### Scenario S6 (refusal): Invalid configured width in the page style
 - GIVEN maxContentWidth set to a negative number
 - WHEN the page HTML is built
 - THEN the page style carries 960px, the default
 
-### Scenario (nominal): Open preview follows a change of the setting
+### Scenario S7 (nominal): Open preview follows a change of the setting
 - GIVEN an open preview that has a last good render and maxContentWidth changed from 960 to 1200
 - WHEN the settings change event arrives
 - THEN the session re-reads the preview configuration, schedules the incoming-changes refresh, and updates the preview from the last good render; the page shell now carries the new width rule, so the whole page is replaced (no in-place content patch)
 
-### Scenario (refusal): No last good render or unrelated section
+### Scenario S8 (refusal): No last good render or unrelated section
 - GIVEN an open preview that has no last good render yet, or a settings change outside the preview, PlantUML and frontmatter sections
 - WHEN the settings change event arrives
 - THEN the preview is not updated (no change for an unrelated section; nothing to redraw without a last good render)

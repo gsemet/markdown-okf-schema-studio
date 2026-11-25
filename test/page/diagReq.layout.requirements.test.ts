@@ -30,7 +30,7 @@ function image(harness: ReturnType<typeof createRuntimeHarness>, attributes: Rec
   return element;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S5
 test("Auto measures an image from the width its author wrote, and ignores a gain of 1 px or less", () => {
   const declared = autoFixture();
   const sized = image(declared, { "data-okf-width": "800" }, 3000);
@@ -82,7 +82,7 @@ function stabilisedScroll(): number {
   return baseline.windowState.scrollY;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-020
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-020#S4
 test("a width mode change keeps the line at the reading position, with or without an anchor yet", () => {
   const expected = stabilisedScroll();
   assert.notEqual(expected, 250, "the reflow moves the reading line");
@@ -106,7 +106,7 @@ test("a width mode change keeps the line at the reading position, with or withou
   assert.equal(fresh.windowState.scrollY, 350, "the anchor is taken from the line at the current scroll position");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011#S7
 test("a width mode change measures the first-element clearance again, even when nothing moved", () => {
   const harness = createRuntimeHarness();
   const property = "--sphinx-preview-toolbar-bottom";

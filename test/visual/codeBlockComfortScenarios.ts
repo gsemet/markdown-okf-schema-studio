@@ -64,8 +64,9 @@ const COMMON = {
 
 export const CODE_BLOCK_COMFORT_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-039
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-040
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S5
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-040#S3
     id: "code-blocks/v19-comfort-cream-900",
     ...COMMON,
     theme: "dark",
@@ -74,7 +75,7 @@ export const CODE_BLOCK_COMFORT_SCENARIOS: ScenarioDefinition[] = [
     description: "Code blocks in the cream theme with the defaults: Dark+ background and colours, line numbers on blocks of two lines or more, a one-line block without a number, an unknown language as plain text and a MyST block numbered from 10 with its second line emphasized.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-040
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-040#S3
     id: "code-blocks/v20-comfort-white-900",
     ...COMMON,
     theme: "dark",
@@ -83,7 +84,8 @@ export const CODE_BLOCK_COMFORT_SCENARIOS: ScenarioDefinition[] = [
     description: "The same code blocks in the white theme: the Dark+ background and colours and the line numbers are the same as in cream.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-040
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-040#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-040#S3
     id: "code-blocks/v21-comfort-dark-900",
     ...COMMON,
     theme: "dark",
@@ -91,7 +93,8 @@ export const CODE_BLOCK_COMFORT_SCENARIOS: ScenarioDefinition[] = [
     description: "The same code blocks in the dark theme: Dark+ background and colours, line numbers, and inline code that keeps its own look.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-039
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S5
     id: "code-blocks/v22-comfort-no-numbers-cream-900",
     ...COMMON,
     theme: "dark",
@@ -101,7 +104,7 @@ export const CODE_BLOCK_COMFORT_SCENARIOS: ScenarioDefinition[] = [
     description: "Cream theme with the line numbers setting off: no automatic number, the MyST block with :linenos: is still numbered from 10.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CODE-040
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-040#S3
     id: "code-blocks/v23-comfort-light-blocks-cream-900",
     ...COMMON,
     theme: "dark",

@@ -17,6 +17,25 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-006
+scenarios:
+- id: S1
+  title: JSON5 with comments
+- id: S2
+  title: Extension fallback of a relative reference
+- id: S3
+  title: Other forms of a relative reference
+- id: S4
+  title: Standard JSON pointer fragment
+- id: S5
+  title: Schema that cannot be parsed
+- id: S6
+  title: YAML syntax error
+- id: S7
+  title: Empty YAML schema
+- id: S8
+  title: Schema that cannot be compiled
+- id: S9
+  title: Compile failure in a narrow preview
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -27,7 +46,7 @@ tested_in_files:
 - test/core/frontmatter/diagReq.frontmatter.requirements.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/schemaRegistry.test.ts
-- test/integration/previewEditing.test.ts
+- test/integration/previewEditingSchemaSteps.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -42,20 +61,20 @@ supersedes:
 
 When a schema file is written in YAML, JSON or JSON5, the extension SHALL load it, stripping line and block comments outside strings from JSON and JSON5 files and inlining its relative `$ref` references to other files of the schema folder, and showing a row of the table for a schema it cannot parse or compile.
 
-### Scenario (nominal): JSON5 with comments
+### Scenario S1 (nominal): JSON5 with comments
 
 - GIVEN a Note.schema.json5 file with a line comment, a block comment and one declared string property
 - WHEN a document of type Note is analysed
 - THEN the schema loads and the property is listed with its text type
 
-### Scenario (nominal): Extension fallback of a relative reference
+### Scenario S2 (nominal): Extension fallback of a relative reference
 
 - GIVEN a schema with allOf holding a node `$ref: base.schema` and a folder with base.schema.yml declaring an id string property
 - WHEN the document is analysed
 - THEN the resolved schema declares the id property and no $ref remains in it
 - AND a node that is exactly a relative `$ref` is replaced by the content of the file, trying the name as written then `.json`, `.json5`, `.yaml` and `.yml`
 
-### Scenario (boundary): Other forms of a relative reference
+### Scenario S3 (boundary): Other forms of a relative reference
 
 | Input | Outcome |
 | --- | --- |
@@ -64,39 +83,39 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 | two properties a and b that both refer to base.schema.yaml, which is not part of a cycle | a is replaced by the file content and b becomes a reference to the schema root |
 | `$ref: nope.yaml` whose file does not exist | the node becomes a reference to the schema root (the fragment alone is kept when the reference has one) |
 
-### Scenario (refusal): Standard JSON pointer fragment
+### Scenario S4 (refusal): Standard JSON pointer fragment
 
 - GIVEN a node `$ref: base.schema.yaml#/defs/s` for the same file
 - WHEN the document is analysed
 - THEN the property that holds the reference is left without a schema, the schema does not compile and the red row "Schema validation failed to run: schema is invalid: ..." is shown
 
-### Scenario (refusal): Schema that cannot be parsed
+### Scenario S5 (refusal): Schema that cannot be parsed
 
 | Input | Outcome |
 | --- | --- |
 | a Note.schema.json5 file that is not valid JSON after comments are stripped | the table is generic and one warning row starts with "Schema could not be parsed: {error}", with a warning badge |
 | a Note.schema.json5 file with a trailing comma after the last property | the schema cannot be parsed and the warning row "Schema could not be parsed: {error}" is shown |
 
-### Scenario (refusal): YAML syntax error
+### Scenario S6 (refusal): YAML syntax error
 
 - GIVEN a Note.schema.yaml file holding the line `type: [a`
 - WHEN a document of type Note is analysed
 - THEN no "Schema could not be parsed" row appears; the partly parsed content is used and here the validator rejects it with the "Schema validation failed to run" row
 
-### Scenario (boundary): Empty YAML schema
+### Scenario S7 (boundary): Empty YAML schema
 
 - GIVEN a Note.schema.yaml file that is empty or holds only comments
 - WHEN a document of type Note is analysed
 - THEN the type stays without schema: the table is generic, one informational row reads "schema file 'Note.schema.yaml' is empty" (the wording of okf-schema), the summary is 0 errors, 0 warnings, 1 info and the analysis does not throw
 
-### Scenario (refusal): Schema that cannot be compiled
+### Scenario S8 (refusal): Schema that cannot be compiled
 
 - GIVEN a schema declaring a property with `type: nonsense`
 - WHEN a document of type Note is analysed
 - THEN one red alert row reads "Schema validation failed to run: schema is invalid: ..." and the badge reads 1 error
 - AND the declared fields are still listed in schema order, with their documentation
 
-### Scenario (boundary): Compile failure in a narrow preview
+### Scenario S9 (boundary): Compile failure in a narrow preview
 
 - GIVEN the same table in a 460 px preview with the Description column hidden
 - WHEN the preview is rendered

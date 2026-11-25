@@ -17,6 +17,23 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LAYOUT-004
+scenarios:
+- id: S1
+  title: Toolbar beside the column
+- id: S2
+  title: Toolbar ending above the gap
+- id: S3
+  title: First-block editor narrowed
+- id: S4
+  title: First-block editor pushed down
+- id: S5
+  title: Start writing button and properties table controls
+- id: S6
+  title: Palette bottom edge of the first-block editor
+- id: S7
+  title: The clearance follows layout changes
+- id: S8
+  title: Toolbar bottom edge for the sticky palette
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -26,7 +43,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/diagReq.layout.requirements.test.ts
 - test/page/modules/firstClearance.test.ts
-- test/visual/capture_comment_checks.py
+- test/visual/capture_first_gap_checks.py
 - test/visual/scenarioAssertions.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -45,29 +62,29 @@ supersedes:
 
 When the floating toolbar covers the first control of the page (the open first-block editor, the Start writing button or the controls of a leading properties table), the extension SHALL publish the smallest clearance and inset that move it down or narrow it out of the toolbar's way, and a clearance of 0 and an inset of 0 when the toolbar sits beside the text column or ends above the 40 px gap, so that the first element keeps exactly 40 px. The extension SHALL measure the clearance again after layout changes (a window resize, a change of size or content of the column, the toolbar or a leading properties table, a root attribute, a web font load, the window load, the toolbar collapsed or expanded, a change of the width mode) and publish the toolbar bottom edge plus 8 px as --sphinx-preview-toolbar-bottom while the toolbar shares horizontal space with the text column (0 otherwise).
 
-### Scenario (nominal): Toolbar beside the column
+### Scenario S1 (nominal): Toolbar beside the column
 - GIVEN a column from 100 to 700 px and a toolbar that starts at 800 px, with an open first-block editor
 - WHEN the clearance is measured
 - THEN the published first clearance and first inset are both 0 px
 
-### Scenario (nominal): Toolbar ending above the gap
+### Scenario S2 (nominal): Toolbar ending above the gap
 - GIVEN a 460 px column and a toolbar that overlaps it horizontally but ends at 20 px, above the 40 px gap
 - WHEN the clearance is measured
 - THEN the clearance and the inset are 0 px
 
-### Scenario (nominal): First-block editor narrowed
+### Scenario S3 (nominal): First-block editor narrowed
 - GIVEN a column from 0 to 900 px with a content box from 16 to 884 px, a toolbar from 600 to 850 px and an open first-block editor
 - WHEN the clearance is measured
 - THEN the inset is 292 px (884 minus 600 plus 8), the clearance is 0 and the inset is published as --sphinx-preview-first-inset
 - AND a hidden Start writing button because the editor replaced it, in the same wide pane, counts as an open first-block editor: clearance 0 and inset 292 px
 
-### Scenario (nominal): First-block editor pushed down
+### Scenario S4 (nominal): First-block editor pushed down
 - GIVEN a 460 px column, a toolbar from 200 to 450 px reaching down to 84 px and an open first-block editor, so that narrowing it would leave the frame under 320 px
 - WHEN the clearance is measured
 - THEN the clearance is 52 px (toolbar bottom 84 plus 8 margin minus 40 gap), the inset is 0 and the frame top is just below the toolbar
 - AND a plain paragraph as the first element in the same pane keeps its 40 px margin, because the clearance applies only to the first-block editor, the Start writing button and a leading properties table
 
-### Scenario (nominal): Start writing button and properties table controls
+### Scenario S5 (nominal): Start writing button and properties table controls
 | Input | Outcome |
 | --- | --- |
 | 460 px column, toolbar from 200 to 450 px reaching down to 84 px, Start writing button from 16 to 316 px | Clearance 52 px |
@@ -77,13 +94,13 @@ When the floating toolbar covers the first control of the page (the open first-b
 | 460 px column, left-aligned badge of a leading properties table at 250 to 310 px with a top of 45 px under a toolbar reaching 84 px | Clearance 47 px (toolbar bottom 84 plus 8 margin minus the badge top 45) |
 | 900 px column whose controls are all clear of the toolbar | Clearance and inset 0, the table keeps its 40 px gap |
 
-### Scenario (boundary): Palette bottom edge of the first-block editor
+### Scenario S6 (boundary): Palette bottom edge of the first-block editor
 | Input | Outcome |
 | --- | --- |
 | Column 0 to 900 px, toolbar 600 to 850 px reaching down to 84 px, open first-block editor (frame gives up 292 px) | --sphinx-preview-first-bar-bottom is 0px and the palette stays in the 40 px place, while --sphinx-preview-toolbar-bottom is 92px |
 | 460 px column, toolbar 200 to 450 px reaching down to 84 px, open first-block editor (inset 0) | --sphinx-preview-first-bar-bottom is 92px, so the palette sticks below the toolbar |
 
-### Scenario (nominal): The clearance follows layout changes
+### Scenario S7 (nominal): The clearance follows layout changes
 - GIVEN a leading properties table whose Description toggle moves under the toolbar after the last measurement
 - WHEN the window load event fires
 - THEN the inset is measured again and published (192 px in the tested layout)
@@ -100,7 +117,7 @@ When the floating toolbar covers the first control of the page (the open first-b
 - WHEN the Width button is clicked
 - THEN the first-element clearance is measured again, so the first element keeps its 40 px gap below the toolbar at the new width; a width mode change that leaves the column width and the toolbar position unchanged still measures again (the change callback calls the update unconditionally) and the published values stay the same
 
-### Scenario (boundary): Toolbar bottom edge for the sticky palette
+### Scenario S8 (boundary): Toolbar bottom edge for the sticky palette
 | Input | Outcome |
 | --- | --- |
 | 460 px column and a toolbar from 200 to 450 px ending at 84 px | --sphinx-preview-toolbar-bottom is 92px |

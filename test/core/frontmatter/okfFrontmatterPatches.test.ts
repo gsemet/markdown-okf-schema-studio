@@ -11,7 +11,7 @@ function applyFieldPatch(source: string, patch: { start: number; end: number; te
   return source.slice(0, patch.start) + patch.text + source.slice(patch.end);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
 test("value patch rewrites only the edited field line and keeps its inline comment", () => {
   const source = "---\ntype: finding\ntitle: Alpha  # trailing comment\nstatus: draft\n---\n\nBody.\n";
   const patch = createFrontmatterFieldPatch(source, "title", "Beta");
@@ -23,7 +23,7 @@ test("value patch rewrites only the edited field line and keeps its inline comme
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S5
 test("value patch for an anchored value still writes correct data", () => {
   const source = "---\na: &x 1\nb: 3\n---\n";
   const patch = createFrontmatterFieldPatch(source, "a", 2);
@@ -32,7 +32,8 @@ test("value patch for an anchored value still writes correct data", () => {
   assert.deepEqual(extractFrontmatter(updated).frontmatter, { a: 2, b: 3 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S5
 test("value patch for a nested map written as an object yields the same data", () => {
   const source = [
     "---",
@@ -52,7 +53,8 @@ test("value patch for a nested map written as an object yields the same data", (
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S3
 test("appending a sequence item keeps a comment line between existing items", () => {
   const source = "---\ntags:\n  - one\n  # note\n  - two\nstatus: draft\n---\n";
   const patch = createFrontmatterFieldPatch(source, "tags", ["one", "two", "three"]);
@@ -63,7 +65,8 @@ test("appending a sequence item keeps a comment line between existing items", ()
   assert.equal(extractFrontmatter(updated).frontmatter?.status, "draft");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S2
 test("value patch with an unchanged value leaves the document text identical", () => {
   const source = "---\ntype: finding\n# keep\ntitle: Alpha  # note\ntags:\n  - one\n  - two\n---\nBody\n";
   const patch = createFrontmatterFieldPatch(source, "title", "Alpha");
@@ -74,7 +77,7 @@ test("value patch with an unchanged value leaves the document text identical", (
   assert.equal(applyFieldPatch(source, listPatch), source);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S2
 test("value patch fills an empty value on CRLF documents without touching the next line", () => {
   const source = "---\r\nexemption_reason:\r\nderived_by: []\r\n---\r\n\r\nBody\r\n";
   const patch = createFrontmatterFieldPatch(source, "exemption_reason", "n/a");
@@ -136,7 +139,7 @@ test("replacing a commented scalar by a list keeps the comment once", () => {
   assert.deepEqual(extractFrontmatter(updated).frontmatter, { tags: ["one", "two"], status: "draft" });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-004
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-004#S5
 test("a multi-line value on a plain field is written as a literal block", () => {
   const source = "---\ndescription: When export is requested\n  output.\nb: 2\n---\n";
   const patch = createFrontmatterFieldPatch(source, "description", "a\nb");
@@ -166,7 +169,7 @@ test("a multi-line comment inside a CRLF nested map keeps CRLF line endings", ()
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029#S2
 test("frontmatter field removal keeps the comment lines above the removed key", () => {
   const source = "---\ntype: x\n# about legacy\nlegacy: 1\n# about status\nstatus: draft\n---\n";
   const patch = createFrontmatterFieldRemovePatch(source, "legacy");

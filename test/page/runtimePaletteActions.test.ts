@@ -734,7 +734,8 @@ test("T38: an image over 10 MB is refused in the editor without a message to the
   assert.match(String(status?.textContent), /larger than 10 MB/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S9
 test("T38: a reply for another edit is ignored and a refusal shows its reason", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);

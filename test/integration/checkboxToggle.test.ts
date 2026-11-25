@@ -63,7 +63,7 @@ async function capture(
   console.log(`PASS checkbox screenshot: ${id}`);
 }
 
-// @tests_req StRS-MDOKFSTUDIO-GFM-003
+// @accepts_req StRS-MDOKFSTUDIO-GFM-003#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");

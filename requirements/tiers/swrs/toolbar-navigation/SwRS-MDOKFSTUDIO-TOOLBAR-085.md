@@ -27,7 +27,7 @@ tested_in_files:
 - test/page/modules/linkNavigation.test.ts
 - test/page/modules/toolbarReq.requirements.test.ts
 - test/page/runtimeContentPatch.test.ts
-- test/visual/scenarioDefinitions2.ts
+- test/visual/scenarioDefinitions3.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

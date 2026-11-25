@@ -50,7 +50,8 @@ test("edit mode opens mapped figures and admonition titles at their source range
   assert.equal(admonitionRequest?.endLine, 34);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024#S2
 test("frontmatter name cells open a schema-suggesting key editor and save on blur", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.editModeButton.dispatch("click");
@@ -120,7 +121,7 @@ test("Escape cancels an unsaved frontmatter key edit", () => {
   assert.equal(harness.refreshButton.disabled, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S1
 test("edit mode exposes schema enum controls and saves the selected value", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   assert.equal(harness.frontmatterNameCell.getAttribute("tabindex"), null);
@@ -252,7 +253,7 @@ test("clicking a boolean name cell still opens the key editor and reading mode d
   assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S2
 test("frontmatter list editor supports add, reorder, remove, and direct array saves", () => {
   const harness = createRuntimeHarness();
   harness.frontmatterRow.setAttribute("data-okf-type", "list");
@@ -592,7 +593,8 @@ test("frontmatter validation errors show an explicit error state", () => {
   assert.equal(status.textContent, "Schema validation failed: must NOT have fewer than 1 characters");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S9
 test("frontmatter field actions render inside the edited row", () => {
   for (const fieldCell of ["name", "value"] as const) {
     const harness = createRuntimeHarness({ mapFrontmatter: true, viewportWidth: 460, viewportHeight: 600 });
@@ -625,7 +627,8 @@ test("frontmatter field actions render inside the edited row", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S12
 test("frontmatter blur toward the field actions does not save", () => {
   type Harness = ReturnType<typeof createRuntimeHarness>;
   const saves = (harness: Harness) =>
@@ -708,7 +711,8 @@ test("frontmatter text values open a one-row textarea", () => {
   assert.equal(textarea.rows, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029#S4
 test("frontmatter field toolbar adds and removes fields", () => {
   const addHarness = createRuntimeHarness({ mapFrontmatter: true });
   addHarness.editModeButton.dispatch("click");
@@ -830,7 +834,8 @@ test("schema-free frontmatter values use a generic YAML editor", () => {
   assert.equal(prevented, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S4
 for (const modifier of ["metaKey", "ctrlKey"] as const) {
   test(`schema-free number value commits from the YAML editor with ${modifier}+Enter`, () => {
     const harness = createRuntimeHarness();
@@ -860,7 +865,7 @@ for (const modifier of ["metaKey", "ctrlKey"] as const) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S4
 test("schema-free number value refuses non-numeric text from the YAML editor", () => {
   const harness = createRuntimeHarness();
   harness.frontmatterRow.setAttribute("data-okf-schema-found", "false");
@@ -912,7 +917,7 @@ test("text frontmatter values use a wrapping textarea that grows with its conten
   assert.equal(textarea.style.height, "4000px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-004
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-004#S1
 test("Enter saves a one-line frontmatter text field and Shift+Enter does not", () => {
   const { harness, textarea } = openTextFieldEditor("Alpha");
   assert.equal(textarea.getAttribute("aria-keyshortcuts"), "Enter Shift+Enter");
@@ -1022,7 +1027,8 @@ test("Escape cancels an unsaved frontmatter value edit", () => {
   assert.equal(harness.refreshButton.disabled, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001#S5
 test("frontmatter cells open their field editor with the keyboard in edit mode", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.editModeButton.dispatch("click");
@@ -1062,7 +1068,7 @@ test("T41: a new custom key opens a one-line text editor, not the YAML editor", 
   assert.equal(textarea.value, "");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S7
 test("T41: Enter saves a new custom key as plain text and Shift+Enter adds a line", () => {
   const { harness, textarea } = newCustomKeyHarness();
   textarea.value = "Ann";
@@ -1188,13 +1194,15 @@ function refusedNumberEditor() {
   return { harness, control, click, titleCell, titleDisplay };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S9
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S12
 test("a refused frontmatter value save puts the focus back in the control", () => {
   const { harness, control } = refusedNumberEditor();
   assert.equal(harness.document.activeElement, control);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S9
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
 test("Escape closes the editor after a refused frontmatter value save", () => {
   const { harness, control } = refusedNumberEditor();
   const before = frontmatterSaves(harness).length;
@@ -1209,7 +1217,7 @@ test("Escape closes the editor after a refused frontmatter value save", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
 test("a click on another field after a refused value save closes the refused editor and opens the other", () => {
   const { harness, control, click, titleCell, titleDisplay } = refusedNumberEditor();
   const before = frontmatterSaves(harness).length;
@@ -1225,7 +1233,7 @@ test("a click on another field after a refused value save closes the refused edi
   assert.ok(harness.createdElements.some((element) => element.getAttribute("aria-label") === "Frontmatter title"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S9
 test("a corrected value and Enter after a refused value save post exactly one new save", () => {
   const { harness, control } = refusedNumberEditor();
   const before = frontmatterSaves(harness).length;
@@ -1237,7 +1245,8 @@ test("a corrected value and Enter after a refused value save post exactly one ne
   assert.equal(saves.at(-1)?.fieldValue, 4);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S9
 test("a changed value after a refused value save is saved once by the blur", () => {
   const { harness, control, titleCell } = refusedNumberEditor();
   const before = frontmatterSaves(harness).length;
@@ -1249,7 +1258,7 @@ test("a changed value after a refused value save is saved once by the blur", () 
   assert.equal(control.disabled, true, "the changed value is saving");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S2
 test("a refused key save puts the focus back in the key control and its blur posts nothing again", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true, trackFocus: true, blurOnFocusChange: true });
   harness.editModeButton.dispatch("click");
@@ -1335,7 +1344,7 @@ function unchangedTitleEditorAbovePriority() {
   return { harness, rows, click, press, titleControl, titleDisplay, titleCell, priorityControl };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
 test("a click on a field below an unchanged editor opens it when the close moved the field", () => {
   const { harness, rows, click, press, titleDisplay, priorityControl } = unchangedTitleEditorAbovePriority();
   press(harness.frontmatterValueCell);
@@ -1349,7 +1358,8 @@ test("a click on a field below an unchanged editor opens it when the close moved
   assert.equal(frontmatterSaves(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
 test("a click on a field below a changed editor saves it and opens no other editor", () => {
   const { harness, rows, click, press, titleControl, priorityControl } = unchangedTitleEditorAbovePriority();
   titleControl.value = "Another title";
@@ -1360,7 +1370,8 @@ test("a click on a field below a changed editor saves it and opens no other edit
   assert.equal(priorityControl(), undefined, "no other editor opens in that click");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S4
 test("a click that no press on a field cell started opens no editor", () => {
   const { harness, rows, click, press, titleDisplay, priorityControl } = unchangedTitleEditorAbovePriority();
   click(rows);
@@ -1376,7 +1387,8 @@ test("a click that no press on a field cell started opens no editor", () => {
   assert.equal(titleDisplay.getAttribute("hidden"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S4
 test("a press that another press replaced does not open the first cell", () => {
   const { harness, rows, click, press, titleControl, priorityControl } = unchangedTitleEditorAbovePriority();
   press(harness.frontmatterValueCell);
@@ -1385,7 +1397,7 @@ test("a press that another press replaced does not open the first cell", () => {
   assert.equal(priorityControl(), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
 test("a click on the name cell of a field below an unchanged editor opens its key editor", () => {
   const { harness, rows, click, press } = unchangedTitleEditorAbovePriority();
   press(harness.frontmatterNameCell);

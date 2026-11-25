@@ -36,7 +36,7 @@ implemented_in_files:
 - src/page/modules/commentsToggle.ts
 - src/session/features/viewState.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/integration/realInput/blockKeys.ts
 - test/page/modules/chipToggle.test.ts
 - test/page/modules/commentThreads.test.ts

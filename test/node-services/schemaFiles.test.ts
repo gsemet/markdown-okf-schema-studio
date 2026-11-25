@@ -7,7 +7,7 @@ import { mock, test } from "node:test";
 
 import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019#S7
 test("the schema directory listing is read once while the directory is unchanged and again after a change", (t) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "okf-schema-list-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
@@ -30,7 +30,8 @@ test("the schema directory listing is read once while the directory is unchanged
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019#S7
 test("a listing read right after the folder changed is not reused: a file added in the same clock step is found", (t) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "okf-schema-recent-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));

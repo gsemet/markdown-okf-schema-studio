@@ -20,6 +20,23 @@ depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TRUST-005
+scenarios:
+- id: S1
+  title: Zoom in, one step
+- id: S2
+  title: Zoom in, last step
+- id: S3
+  title: Zoom out, two steps
+- id: S4
+  title: Zoom out, last step
+- id: S5
+  title: The zoom a page starts at
+- id: S6
+  title: The tooltips name the value a click gives
+- id: S7
+  title: A click at a limit changes nothing
+- id: S8
+  title: A zoom change keeps the reading line
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,31 +54,31 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader presses the Zoom in button below 200 % or the Zoom out button above 70 %, the extension SHALL change the zoom by 10 percentage points, set the zoom variable and the html attribute data-sphinx-preview-zoom to the new value, name the value of the next click in the button tooltips and disable the button at its limit.
 
-### Scenario (nominal): Zoom in, one step
+### Scenario S1 (nominal): Zoom in, one step
 
 - GIVEN a page at 100 % and the Zoom in button on toolbar row 3 (accessible name "Zoom in")
 - WHEN the button is clicked
 - THEN --sphinx-preview-zoom is 1.1, data-sphinx-preview-zoom is 110 and one previewViewPreferenceChanged message with value 110 is posted (stored under SwRS-MDOKFSTUDIO-LIFE-169)
 
-### Scenario (boundary): Zoom in, last step
+### Scenario S2 (boundary): Zoom in, last step
 
 - GIVEN a page at 190 %
 - WHEN the button is clicked
 - THEN the zoom is 200 and the button is disabled
 
-### Scenario (nominal): Zoom out, two steps
+### Scenario S3 (nominal): Zoom out, two steps
 
 - GIVEN a page at 110 % and the Zoom out button on toolbar row 3 (accessible name "Zoom out")
 - WHEN the button is clicked twice
 - THEN data-sphinx-preview-zoom reads 100, then 90 and the last posted message carries the value 90
 
-### Scenario (boundary): Zoom out, last step
+### Scenario S4 (boundary): Zoom out, last step
 
 - GIVEN a page at 80 %
 - WHEN the button is clicked
 - THEN the zoom is 70, --sphinx-preview-zoom is 0.7 and the button is disabled
 
-### Scenario (boundary): The zoom a page starts at
+### Scenario S5 (boundary): The zoom a page starts at
 
 - GIVEN a page start as in the table
 - WHEN the page starts
@@ -72,7 +89,7 @@ When the reader presses the Zoom in button below 200 % or the Zoom out button ab
 | No panel state and no initial view preference | --sphinx-preview-zoom is 1, data-sphinx-preview-zoom is 100 and both zoom buttons are enabled |
 | An initial zoom that is not a finite number | The zoom is 100 |
 
-### Scenario (nominal): The tooltips name the value a click gives
+### Scenario S6 (nominal): The tooltips name the value a click gives
 
 - GIVEN a page at a zoom as in the table
 - WHEN the title and data-tooltip of each zoom button are read
@@ -85,13 +102,13 @@ When the reader presses the Zoom in button below 200 % or the Zoom out button ab
 | Page at 70 % | Zoom in (80 %) | Zoom out (minimum 70 %) |
 | Page at 200 % | Zoom in (maximum 200 %) | Zoom out (190 %) |
 
-### Scenario (refusal): A click at a limit changes nothing
+### Scenario S7 (refusal): A click at a limit changes nothing
 
 - GIVEN a page at 70 %, and a page started at 200 %
 - WHEN the Zoom out button of the first page is read and clicked, and the Zoom in button of the second page is read
 - THEN the Zoom out button is disabled, the zoom stays 70 and no message is posted; the Zoom in button is disabled, --sphinx-preview-zoom is 2 and Zoom out is enabled
 
-### Scenario (nominal): A zoom change keeps the reading line
+### Scenario S8 (nominal): A zoom change keeps the reading line
 
 - GIVEN a page scrolled to a paragraph, with no scroll anchor set or with a scroll anchor already set
 - WHEN the reader changes the zoom

@@ -21,6 +21,13 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-009
+scenarios:
+- id: S1
+  title: A chart is drawn as a themed picture
+- id: S2
+  title: A theme change draws again
+- id: S3
+  title: An invalid specification
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,13 +54,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the page draws a Vega-Lite or Vega chart, it SHALL replace the specification text with one live SVG view (an svg inside a view element, never an image and never a data URL) whose background, text, axis and mark colours follow the preview theme and whose legend, axis and title text sizes follow the body text size (legend label 0.93, axis label 0.85 and title 1.15 times the body size), with horizontal discrete x labels and the subtitle in the label colour, and a specification's own config wins; the view SHALL show a hover detail box (a fixed box under the body, in the colours and font size of the page, that never takes the pointer) listing the fields of the mark under the pointer, for a Vega-Lite chart by default, for a full Vega chart only where its own spec encodes a tooltip, and for no chart that sets tooltip to null; the view SHALL bind no event, signal or link of the chart; and the page SHALL show the error message in place of the chart when the specification is invalid.
 
-### Scenario (nominal): A chart is drawn as a themed picture
+### Scenario S1 (nominal): A chart is drawn as a themed picture
 
 - GIVEN a page with a Vega-Lite chart and a Vega chart in the Cream theme
 - WHEN the chart runtime has run
 - THEN each chart element holds one div of the class myst-vega-view with a live svg (max-width 100%, centred) and no img, data-render-state is rendered, the axis text and title use the foreground of the page, the marks use the link colour of the page, the background is transparent and the font is the page font, and the page logs no policy violation, also after a hover and a theme change
 
-### Scenario (nominal): A theme change draws again
+### Scenario S2 (nominal): A theme change draws again
 
 - GIVEN charts drawn in the light theme
 - WHEN the page background and foreground change to a dark theme
@@ -77,7 +84,7 @@ When the page draws a Vega-Lite or Vega chart, it SHALL replace the specificatio
 - WHEN the chart is drawn, then the Markdown font size is set to 18 px and the preview is zoomed to 150 %
 - THEN the legend label is 13 px, the axis label 11.9 px and the title 16.1 px, the discrete x labels are horizontal, the subtitle has the label colour, the charts are drawn again with larger text at 18 px (legend label 16.7) and at 150 % (legend label 19.5 at 14 px), a body size that does not parse gives 13, and the spec's own label size wins over the page-relative one
 
-### Scenario (refusal): An invalid specification
+### Scenario S3 (refusal): An invalid specification
 
 - GIVEN a chart whose text is not valid JSON or YAML, or that Vega-Lite or Vega rejects
 - WHEN the page draws it

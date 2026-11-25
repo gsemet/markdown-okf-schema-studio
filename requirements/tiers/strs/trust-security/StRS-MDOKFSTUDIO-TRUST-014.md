@@ -13,6 +13,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Install and package from pinned dependencies
+- id: S2
+  title: Lint and draw the use case diagrams
 user_need: As a maintainer, I install on the pinned Node.js version from the
   official registry, and when I package the Studio the bundles the preview loads
   are in the package.
@@ -49,6 +54,24 @@ flowchart LR
     B -->|packages| K[Extension package]
     K --> O[Bundles the preview loads]
 ```
+
+### Main paths
+
+#### Path S1: Install and package from pinned dependencies
+
+1. A maintainer installs the Studio on the pinned Node.js version
+   - SwRS-MDOKFSTUDIO-TRUST-075: Node.js 24 is pinned, the lock file resolves from the official registry and the built-in PlantUML engine has one exact version
+2. The Studio is built from pinned, official dependencies
+   - SwRS-MDOKFSTUDIO-TRUST-092: the package keeps out/bundle, with the engine bundle and its licence, and leaves out only build leftovers
+3. The package holds the bundles the preview loads
+
+#### Path S2: Lint and draw the use case diagrams
+
+1. A maintainer runs the requirements lint
+   - SwRS-MDOKFSTUDIO-CORE-090: the lint parses the Mermaid fence of every use case diagram and fails naming the file, the line and the use case
+2. Every use case diagram parses
+   - SwRS-MDOKFSTUDIO-CORE-087: the Pages site build draws each diagram as an inline SVG under the user need
+3. The site shows the use case diagrams
 
 <!-- okf:links:start -->
 ### Links

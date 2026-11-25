@@ -16,6 +16,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-THEME-002
 depends_on: []
+scenarios:
+- id: S1
+  title: Token map
+- id: S2
+  title: Variable not set by the host
+- id: S3
+  title: Stylesheet without the map
+- id: S4
+  title: Map first
+- id: S5
+  title: Every token read is in the map
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,31 +43,31 @@ default_owner_email: gaetan@xeberon.net
 
 When the host sets a colour the page uses, the extension SHALL paint the page with that colour, and when the host does not set it, the page SHALL keep the fallback colour written in its rule. The page reads the host variables through one token map: each neutral --studio- token is declared on the root and on body as the VS Code variable of the same name, the --vscode- prefix appears only inside that map, and every --studio- token the stylesheet or the Mermaid theme reads is in it.
 
-### Scenario (nominal): Token map
+### Scenario S1 (nominal): Token map
 
 - GIVEN the token name list
 - WHEN the VS Code mapping block is read
 - THEN it starts with `:root, body` and holds one declaration `--studio-{name}: var(--vscode-{name})` for each name of the token list (57 names at the time of writing, not asserted), with no duplicate name
 
-### Scenario (boundary): Variable not set by the host
+### Scenario S2 (boundary): Variable not set by the host
 
 - GIVEN a host that does not set one of the mapped --vscode- variables
 - WHEN a rule reads var(--studio-{name}, {fallback})
 - THEN the token is unset, so the fallback written in the rule applies exactly as it did for the host variable
 
-### Scenario (nominal): Stylesheet without the map
+### Scenario S3 (nominal): Stylesheet without the map
 
 - GIVEN the accessibility and theme stylesheets
 - WHEN the token map block is removed
 - THEN no text --vscode- remains
 
-### Scenario (nominal): Map first
+### Scenario S4 (nominal): Map first
 
 - GIVEN the accessibility stylesheet
 - WHEN its start is read
 - THEN it starts with the token map
 
-### Scenario (boundary): Every token read is in the map
+### Scenario S5 (boundary): Every token read is in the map
 
 - GIVEN the tokens read by the page, as in the table
 - WHEN the names are checked against the token list

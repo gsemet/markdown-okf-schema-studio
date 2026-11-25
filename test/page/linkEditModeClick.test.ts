@@ -190,7 +190,8 @@ test("edit mode: a click on a link while another block editor is open saves it f
   assert.equal(posts(harness, "previewEditSave").length, 1, "the open editor is saved first, as for any block");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001#S3
 test("edit mode: a link of the properties table keeps its field editor and its Cmd click", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true, propertiesMapped: true });
   harness.editModeButton.dispatch("click");

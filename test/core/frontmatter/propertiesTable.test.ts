@@ -41,13 +41,13 @@ function fieldWith(overrides: Partial<FieldEntry>): FieldEntry {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004#S3
 test("no markup when frontmatter is absent or the table is disabled", () => {
   assert.equal(renderPropertiesTable(resultWith({ present: false }), true), "");
   assert.equal(renderPropertiesTable(resultWith(), false), "");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005#S3
 test("renders a two-column Obsidian-like table with escaped values", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [
@@ -74,7 +74,8 @@ test("renders a two-column Obsidian-like table with escaped values", () => {
   assert.doesNotMatch(markup, /status/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S2
 test("description controls live in column headers with an adjacent collapsed restore slot", () => {
   const markup = renderPropertiesTable(resultWith({ schemaFound: true }), true);
   assert.match(markup, /<div class="okf-properties-title">Frontmatter properties<button[^>]*data-okf-frontmatter-toggle/u);
@@ -83,7 +84,8 @@ test("description controls live in column headers with an adjacent collapsed res
   assert.equal((markup.match(/data-okf-description-toggle/gu) ?? []).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S7
 test("annotated scalar and list values render independent navigation and status markup", () => {
   const valid: FrontmatterLinkResult = {
     value: "docs/a.md",
@@ -135,7 +137,8 @@ test("annotated scalar and list values render independent navigation and status 
   assert.match(markup, /docs\/missing\.md/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S3
 test("valid link tooltips expose workspace-relative paths", () => {
   const valid: FrontmatterLinkResult = {
     value: "../docs/a.md",
@@ -301,7 +304,8 @@ test("renders boolean values as read-only checkboxes in preview mode", () => {
   assert.match(markup, /<span data-okf-value-display><input type="checkbox" class="okf-value-checkbox" aria-label="disabled" aria-disabled="true" tabindex="-1"><span class="okf-boolean-value">false<\/span><\/span>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S5
 test("caps long list previews and reports omitted items", () => {
   const omitted = 5;
   const value = Array.from({ length: MAX_LIST_ITEMS + omitted }, (_, index) => `item-${index + 1}`);
@@ -347,7 +351,7 @@ test("does not match a list link by array index without a field path", () => {
   assert.doesNotMatch(markup, /okf-frontmatter-link|data-okf-link-code="E10"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S2
 test("renders list items with hyphen markers", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [fieldWith({ name: "files", value: ["one"], valueKind: "list", fieldType: "list" })],
@@ -367,7 +371,8 @@ test("maps the injected properties section to the frontmatter source", () => {
   assert.match(markup, /data-sphinx-preview-document="file:\/\/\/active\.md"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S4
 test("error rows carry the red underline class and hover tooltip", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [
@@ -582,7 +587,7 @@ test("schema-matched tables add a third description column", () => {
 });
 
 test("renders empty lists without a phantom preview item", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
+  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S5
   const markup = renderPropertiesTable(resultWith({
     fields: [fieldWith({
       name: "derives_from",
@@ -613,7 +618,8 @@ test("marks schema-nullable fields in row metadata", () => {
 });
 
 test("escapes list preview items without truncating short lists", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
+  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S2
+  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S5
   const markup = renderPropertiesTable(resultWith({
     fields: [fieldWith({
       name: "links",
@@ -643,7 +649,7 @@ test("plain yaml tables stay two-column even when docs are absent", () => {
   assert.doesNotMatch(markup, /okf-doc/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S1
 test("nested object values render as escaped YAML while keeping edit metadata", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [
@@ -695,7 +701,8 @@ test("schema declarations do not appear as description annotations", () => {
   assert.doesNotMatch(markup, /array of string · required|boolean · must be false/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029#S4
 test("name cells carry a size-bounded Obsidian-style type icon", () => {
   const markup = renderPropertiesTable(resultWith({
     orderMode: "schema",
@@ -745,7 +752,8 @@ test("T22: link suggestions are rendered as an escaped row attribute only when p
   assert.equal(markup.match(/data-okf-link-suggestions=/gu)?.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S7
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S8
 test("T220: the known stems are rendered as a second escaped row attribute next to the suggestions", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [
@@ -848,7 +856,8 @@ test("unavailable links use the warning icon", () => {
   assert.match(markup, /<span aria-hidden="true">⚠<\/span> Link root unavailable/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S3
 test("the header badge is a button that goes to the first issue", () => {
   const markup = renderPropertiesTable(resultWith({
     summary: { errors: 2, warnings: 1, infos: 0 },
@@ -877,7 +886,7 @@ test("T30: replacing with precomputed markup is identical to replacing from the 
   assert.equal(replacePropertiesTableHtml(html, oldMarkup), html);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005#S3
 test("a long key carries its full name as tooltip, a short key keeps the row tooltip", () => {
   const longName = "a_deliberately_very_long_property_name";
   const markup = renderPropertiesTable(resultWith({
@@ -925,7 +934,7 @@ test("with source mapping the properties section carries the closing fence line,
   assert.equal(endLineOf("---\ntitle: A\n---\n\n# Body\n", false), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S1
 test("the properties header carries one keyboard-reachable toggle that collapses the table, expanded by default", () => {
   const markup = renderPropertiesTable(resultWith({ schemaFound: true }), true);
   assert.equal((markup.match(/data-okf-frontmatter-toggle/gu) ?? []).length, 1);

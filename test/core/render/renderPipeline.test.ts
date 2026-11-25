@@ -93,7 +93,8 @@ test("cancellation while rendering rejects a late successful result", async (con
   await assert.rejects(render, RenderCanceledError);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-072
+// @tests_req SwRS-MDOKFSTUDIO-MYST-072#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-072#S5
 test("MyST syntax missing from the nearest conf.py warns once per extension, rendering unchanged", async (context) => {
   context.after(resetRenderHooksForTests);
   const fs = await import("node:fs");

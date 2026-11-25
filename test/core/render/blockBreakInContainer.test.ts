@@ -25,13 +25,13 @@ const CASES: ReadonlyArray<readonly [name: string, source: string, expected: rea
 ];
 
 for (const [name, source, expected] of CASES) {
-  // @tests_req SwRS-MDOKFSTUDIO-MYST-096
+  // @tests_req SwRS-MDOKFSTUDIO-MYST-096#S5
   test(`a +++ line in ${name} renders as text`, async () => {
     assert.deepEqual(await paragraphs(source), expected);
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-096
+// @tests_req SwRS-MDOKFSTUDIO-MYST-096#S5
 test("a +++ line at the root stays a block break", async () => {
   assert.deepEqual(await paragraphs("a\n\n+++\n\nb\n"), ["a", "b"]);
 });

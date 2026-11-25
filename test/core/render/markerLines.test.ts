@@ -177,7 +177,8 @@ const markerPair = (element: HtmlElement): [number | undefined, number | undefin
 ];
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098#S3
 test("the content of a tab item carries whole-file marker lines and no source mapping", async () => {
   const { dom } = await render(TAB_SET);
   const panels = findElements(dom, (element) => hasClass(element, "myst-tab-panel"));

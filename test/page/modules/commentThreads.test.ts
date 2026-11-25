@@ -441,7 +441,7 @@ test("T43: Cmd/Ctrl+Enter sends a reply and keys typed in the reply box stay the
   assert.deepEqual(replies, [["t1", "ok"]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 test("T43: no reply box without a reply hook (read-only previews)", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -912,7 +912,8 @@ test("comments hidden: an open popover closes and does not come back with the th
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S7
 test("a thread reply and a resolve (the path of delete too) each wait 15 seconds for the host's answer", () => {
   const { document, comments, calls, delays } = setupWithActions();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");

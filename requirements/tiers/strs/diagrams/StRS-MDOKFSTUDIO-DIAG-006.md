@@ -13,16 +13,21 @@ scope: diagrams
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-17T19:27:51+01:00'
+approved_at: '2026-11-25T15:37:43+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-17T19:27:51+01:00'
+  at: '2026-11-25T15:37:43+01:00'
 origin: native
 tier: StRS
 derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-009
 - SwRS-MDOKFSTUDIO-DIAG-129
+scenarios:
+- id: S1
+  title: Read a PlantUML diagram
+- id: S2
+  title: Learn why a diagram has no picture
 user_need: As a writer, I get PlantUML pictures right after installing the
   extension, also in Restricted Mode, and learn why a diagram has no picture and
   what to change instead of seeing a blank block.
@@ -106,7 +111,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Read a PlantUML diagram
+#### Path S1: Read a PlantUML diagram
 
 1. The document holds a PlantUML diagram
    - SwRS-MDOKFSTUDIO-DIAG-023: the built-in engine draws the fence or directive as one inert centred picture
@@ -114,7 +119,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-DIAG-039 (nominal): a content patch draws only the new diagrams
 2. The diagram is drawn as a picture in the light or dark variant of the preview
 
-#### Path 2: Learn why a diagram has no picture
+#### Path S2: Learn why a diagram has no picture
 
 1. The document holds a PlantUML diagram
    - SwRS-MDOKFSTUDIO-DIAG-032: the built-in engine fails or refuses a library, a URL or too long a source and shows one message that says why

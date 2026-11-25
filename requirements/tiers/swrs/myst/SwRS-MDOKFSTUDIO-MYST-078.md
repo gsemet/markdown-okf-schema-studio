@@ -18,6 +18,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
 depends_on: []
+scenarios:
+- id: S1
+  title: A warning becomes a Problems entry
+- id: S2
+  title: The line is clamped to the document
+- id: S3
+  title: An untrusted workspace publishes nothing
+- id: S4
+  title: Entries are replaced and removed
+- id: S5
+  title: A conf.py change updates the previews it governs
+- id: S6
+  title: A conf.py that governs nothing re-renders nothing
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,22 +51,22 @@ supersedes:
 
 When a live preview shows a document with extension warnings in a trusted workspace, the extension SHALL publish them to the Problems view as whole-line warnings from Markdown OKF-Schema Studio with code myst-extension, the line clamped to the document length, replace or remove them when the document re-renders, its preview closes or its document changes, and re-render the open previews a created, edited or deleted conf.py governs.
 
-### Scenario (nominal): A warning becomes a Problems entry
+### Scenario S1 (nominal): A warning becomes a Problems entry
 - GIVEN a trusted workspace and a warning on line 3
 - WHEN the preview renders
 - THEN a Problems entry and an underline appear on line 3
 
-### Scenario (boundary): The line is clamped to the document
+### Scenario S2 (boundary): The line is clamped to the document
 - GIVEN a warning line beyond the document length
 - WHEN it is published
 - THEN the line is clamped
 
-### Scenario (refusal): An untrusted workspace publishes nothing
+### Scenario S3 (refusal): An untrusted workspace publishes nothing
 - GIVEN a workspace that is not trusted
 - WHEN the preview renders a document with extension warnings
 - THEN no Problems entry is published
 
-### Scenario (nominal): Entries are replaced and removed
+### Scenario S4 (nominal): Entries are replaced and removed
 - GIVEN a new render with fewer warnings
 - WHEN it completes
 - THEN old entries are replaced
@@ -63,12 +76,12 @@ When a live preview shows a document with extension warnings in a trusted worksp
 | The preview closes | no entries remain |
 | The document changes | its entries are replaced or removed |
 
-### Scenario (nominal): A conf.py change updates the previews it governs
+### Scenario S5 (nominal): A conf.py change updates the previews it governs
 - GIVEN a conf.py that is created, edited or deleted
 - WHEN the watcher fires
 - THEN exactly the open previews it governs re-render without reopening, deferred while a block edit is open, and warnings come or go
 
-### Scenario (refusal): A conf.py that governs nothing re-renders nothing
+### Scenario S6 (refusal): A conf.py that governs nothing re-renders nothing
 - GIVEN a conf.py governing nothing, or an ignored path such as node_modules
 - WHEN the watcher fires
 - THEN nothing re-renders

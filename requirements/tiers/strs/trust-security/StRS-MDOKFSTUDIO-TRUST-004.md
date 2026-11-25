@@ -14,6 +14,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Load a local image
 user_need: As a reader, I preview a Markdown file from anywhere on my disk and
   see the images and media beside it, without the preview reading the rest of my
   disk, whether the path uses parent paths, encoding or links.
@@ -64,7 +67,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Load a local image
+#### Path S1: Load a local image
 
 1. The document refers to a local image
    - SwRS-MDOKFSTUDIO-TRUST-025: the page gets the address of the file only if the reference is a relative path that decodes safely to an existing regular file inside the allowed roots

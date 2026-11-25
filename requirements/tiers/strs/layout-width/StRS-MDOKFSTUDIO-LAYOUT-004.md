@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: The first element starts below the top
+- id: S2
+  title: The toolbar covers the first control
 user_need: As a reader or writer, I see every document start at the same
   comfortable distance below the top, whether it opens with text, a heading, a
   table, a picture, an admonition, properties or an empty page, and I can click
@@ -83,7 +88,7 @@ The clearance is measured again until the layout is quiet.
 
 ### Main paths
 
-#### Path 1: The first element starts below the top
+#### Path S1: The first element starts below the top
 
 1. A document opens in read mode or in edit mode
    - SwRS-MDOKFSTUDIO-LAYOUT-007: the first element starts 40 px below the top of the pane
@@ -93,7 +98,7 @@ The clearance is measured again until the layout is quiet.
    - Option SwRS-MDOKFSTUDIO-LAYOUT-043 (boundary): a toolbar beside the column reserves nothing
 3. The first blocks are clear of the floating toolbar
 
-#### Path 2: The toolbar covers the first control
+#### Path S2: The toolbar covers the first control
 
 1. The floating toolbar covers the first control of the page
    - SwRS-MDOKFSTUDIO-LAYOUT-011: the page moves the control down or narrows it out of the toolbar's way

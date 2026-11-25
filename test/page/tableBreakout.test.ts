@@ -323,7 +323,8 @@ function documentOf(items: ReadonlyArray<{ title: string; markdown: string[] }>)
   return items.flatMap((item, index) => [`## ${index + 1}. ${item.title}`, "", ...item.markdown]).join("\n");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-044
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-044#S1
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-044#S2
 test("Auto keeps a table in the column when its minimum widths fit and breaks it out when they do not", async (t) => {
   for (const themeId of RUN_THEMES) {
     const opened = await openPage(documentOf(CASES), themeId);
@@ -368,7 +369,8 @@ test("Auto keeps a table in the column when its minimum widths fit and breaks it
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-044
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-044#S2
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-044#S3
 test("Auto breaks a table out when a cell holds content that cannot shrink", async (t) => {
   for (const themeId of RUN_THEMES) {
     const opened = await openPage(documentOf(UNSHRINKABLE), themeId);
@@ -477,7 +479,8 @@ async function withPage(
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S1
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S3
 test("Auto keeps the breakout of a table while a cell is edited, in every cell it moves to", async (t) => {
   // The tick matrix grows by 70 to 270 px when the 300 px minimum of the selected cell is measured.
   await withPage(t, caseOf("ten columns: tick matrix"), async (page, themeId) => {
@@ -493,7 +496,7 @@ test("Auto keeps the breakout of a table while a cell is edited, in every cell i
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S3
 test("Auto keeps a table that fits the column in the column while a cell is edited", async (t) => {
   await withPage(t, caseOf("eight columns: numbers"), async (page, themeId) => {
     const before = await layoutPass(page);
@@ -506,7 +509,7 @@ test("Auto keeps a table that fits the column in the column while a cell is edit
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S6
 test("Auto measures a table again on a real resize while a cell is edited", async (t) => {
   await withPage(t, caseOf("ten columns: tick matrix"), async (page, themeId) => {
     await layoutPass(page);
@@ -529,7 +532,7 @@ test("Auto measures a table again on a real resize while a cell is edited", asyn
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S3
 test("Auto gives the column width to a table edited as source, or holding another editor field", async (t) => {
   await withPage(t, caseOf("two columns: long code paths"), async (page, themeId) => {
     if (!precondition(t, (await layoutPass(page)).wide, `${themeId}: the table breaks out before any edit`)) return;
@@ -550,7 +553,8 @@ test("Auto gives the column width to a table edited as source, or holding anothe
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S3
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S6
 test("an editor opened on a paragraph does not measure the tables again; one opened on a table does", async (t) => {
   await withPage(t, "A paragraph above the table.\n\n" + caseOf("two columns: long code paths"), async (page, themeId) => {
     if (!precondition(t, (await layoutPass(page)).wide, `${themeId}: the table breaks out before any edit`)) return;

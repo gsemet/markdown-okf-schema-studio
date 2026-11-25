@@ -363,7 +363,7 @@ test("previews of one root share one file watcher, which closing the last previe
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-026
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 test("a document outside the workspace folder gets a new session on the same panel", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# A\n");
@@ -412,7 +412,8 @@ test("the recorded column of a locked preview follows its group", async (t) => {
   assert.equal(session.lockedColumn, undefined, "a preview whose group was not locked records no column");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 test("granting trust turns an open Restricted Mode preview into one with full reads", async (t) => {
   const untrusted = start(t, { trusted: false });
   const file = writeFile("# Restricted\n\n- [ ] task\n");
@@ -462,7 +463,7 @@ function watchFlush(session: PreviewSession): boolean[] {
   return aliveWhenPosted;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 test("granting trust flushes the open page editor before the preview is replaced", async (t) => {
   const studio = start(t, { trusted: false });
   const { panel } = await studio.openSide(writeFile("# Restricted\n\nTyping here.\n"));
@@ -554,7 +555,8 @@ function folderControl(t: TestContext): (roots: readonly string[]) => void {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 test("adding a workspace folder gives the previews of its files full reads on the same panel", async (t) => {
   const studio = start(t);
   const setFolders = folderControl(t);
@@ -898,7 +900,7 @@ test("deactivating the extension disposes the sessions and leaves the panels to 
   assert.doesNotThrow(() => studio.manager.disposeSession(sessions[0]!, false), "disposing twice does nothing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S3
 test("the Description column choice of a document is stored for the workspace and read at creation", async (t) => {
   const studio = start(t);
   const stored = writeFile("# Stored\n");

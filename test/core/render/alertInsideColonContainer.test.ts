@@ -22,7 +22,7 @@ function mapped(html: string): HtmlElement[] {
   return findElements(parseHtml(html), (element) => attribute(element, "data-line") !== undefined);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("an alert inside a card keeps the text after it inside the card", async () => {
   const source = [":::{card} Title", "> [!NOTE]", "> in card", "", "After alert.", ":::", "", "Outside.", ""].join("\n");
   const { html } = await renderMyst(source);
@@ -40,7 +40,7 @@ test("an alert inside a card keeps the text after it inside the card", async () 
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("an alert inside a tab item of a tab set keeps the text after it in the tab", async () => {
   const source = [
     "::::{tab-set}",
@@ -72,7 +72,7 @@ test("an alert inside a tab item of a tab set keeps the text after it in the tab
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("an alert in a three-colon card of a nested grid keeps the text after it in the card", async () => {
   const source = [
     ":::::{grid} 1",
@@ -104,7 +104,7 @@ test("an alert in a three-colon card of a nested grid keeps the text after it in
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("inside a colon container the alert is a backtick directive; outside it stays a colon fence", () => {
   const inside = expandGithubAlertsWithLines(":::{card}\n> [!NOTE]\n> a\n\nx\n:::\n");
   assert.deepEqual(inside.text.split("\n").slice(0, 5), [":::{card}", "````{note}", ":class: simple", "a", "````"]);
@@ -116,7 +116,7 @@ test("inside a colon container the alert is a backtick directive; outside it sta
   assert.ok(closed.text.split("\n").includes(":::{note}"), "an alert after closed containers is a colon fence");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("a four-backtick code block in an alert body inside a card does not end the alert", async () => {
   const source = [":::{card} T", "> [!NOTE]", "> ````md", "> code", "> ````", "", "after", ":::", "", "Outside.", ""].join("\n");
   const { html } = await renderMyst(source);
@@ -147,7 +147,7 @@ function gridAlert(head: string): string {
 }
 
 for (const head of ["> [!NOTE]", "> **Note**"]) {
-  // @tests_req SwRS-MDOKFSTUDIO-GFM-009
+  // @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
   test(`a grid inside the alert "${head}" stays inside its note`, async () => {
     const { html } = await renderMyst(gridAlert(head));
     const root = parseHtml(html);
@@ -163,7 +163,8 @@ for (const head of ["> [!NOTE]", "> **Note**"]) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("the blocks of a grid inside an alert map to the lines of the document", async () => {
   const { html } = await renderMyst(gridAlert("> [!NOTE]"));
   const root = parseHtml(html);
@@ -179,7 +180,8 @@ test("the blocks of a grid inside an alert map to the lines of the document", as
   assert.ok(blocks.some(([, line, end]) => line === 6 && end === 8), "card B is lines 6 to 8");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S7
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("an alert without a colon fence in its body keeps the three-colon admonition", () => {
   const { text } = expandGithubAlertsWithLines(["> [!NOTE]", "> plain", ""].join("\n"));
   assert.equal(text.split("\n")[0], ":::{note}");

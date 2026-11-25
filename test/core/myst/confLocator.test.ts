@@ -16,7 +16,7 @@ function workspace(): { root: string; docs: string; clean: () => void } {
 
 const CONF = "extensions = ['myst_parser']\nmyst_enable_extensions = ['deflist']\n";
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S1
 test("the nearest conf.py wins and the enabled set comes from it", async (context) => {
   const { root, docs, clean } = workspace();
   context.after(clean);
@@ -27,7 +27,7 @@ test("the nearest conf.py wins and the enabled set comes from it", async (contex
   assert.deepEqual([...enabled ?? []], ["deflist"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S4
 test("no conf.py, no myst_parser or an uncertain conf.py give no set", async (context) => {
   const { root, docs, clean } = workspace();
   context.after(clean);
@@ -49,7 +49,7 @@ test("myst_nb counts like myst_parser", async (context) => {
   assert.deepEqual([...enabled ?? []], []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S2
 test("a conf.py above the workspace root is not used", async (context) => {
   const { root, docs, clean } = workspace();
   context.after(clean);
@@ -96,7 +96,7 @@ test("typing does not touch the disk: results are cached until the interval or a
   assert.equal((await locator.enabledMystExtensions(document, root)), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S3
 test("D29: a single conf.py in a common folder of the root is the fallback", async (context) => {
   const { root, clean } = workspace();
   context.after(clean);
@@ -135,7 +135,7 @@ test("D29: an ancestor conf.py wins over a fallback, and invalidation covers the
   assert.deepEqual([...(await locator.enabledMystExtensions(document, root)) ?? []], ["dollarmath"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S3
 test("D29: a document outside the workspace folder does not get the fallback", async (context) => {
   const { root, clean } = workspace();
   context.after(clean);

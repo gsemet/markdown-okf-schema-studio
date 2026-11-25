@@ -19,6 +19,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Nearest folder wins
+- id: S2
+  title: The file is chosen by the type name
+- id: S3
+  title: Folder and file matching
+- id: S4
+  title: No schema folder
+- id: S5
+  title: No file for the type
+- id: S6
+  title: No lookup in Restricted Mode or for a standalone file
+- id: S7
+  title: The schema folder listing is kept while the folder is unchanged
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -27,7 +42,7 @@ implemented_in_files:
 - src/node-services/schemaFiles.ts
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
-- test/integration/previewEditing.test.ts
+- test/integration/previewEditingSchemaSteps.ts
 - test/node-services/schemaFiles.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -43,20 +58,20 @@ supersedes:
 
 When a document's frontmatter has a string `type`, the extension SHALL look for the schema folder by walking up from the document's folder to the workspace folder root and use the first `_schema` folder, or `_schemas` when a level has no `_schema`, pick in it the file `{type}.schema.yaml`, `.yml`, `.json` or `.json5` whose stem equals the type ignoring case, and look up no schema when the workspace is not trusted or the document is not inside a workspace folder.
 
-### Scenario (nominal): Nearest folder wins
+### Scenario S1 (nominal): Nearest folder wins
 
 - GIVEN a workspace with `_schema` at its root and `_schema` in the sub-folder docs, and a document in docs/guide
 - WHEN the document is analysed
 - THEN the schema folder is docs/_schema
 
-### Scenario (nominal): The file is chosen by the type name
+### Scenario S2 (nominal): The file is chosen by the type name
 
 | Input | Outcome |
 | --- | --- |
 | A schema folder with Note.schema.yaml and a document of type note | Note.schema.yaml is used as the schema |
 | A schema folder with note.schema.json, note.schema.yml and note.schema.yaml | note.schema.yaml is used and the other two files are ignored (preference `.yaml`, then `.yml`, `.json`, `.json5`) |
 
-### Scenario (boundary): Folder and file matching
+### Scenario S3 (boundary): Folder and file matching
 
 | Input | Outcome |
 | --- | --- |
@@ -66,13 +81,13 @@ When a document's frontmatter has a string `type`, the extension SHALL look for 
 | A file named Note.SCHEMA.YAML and a document of type note | It matches; the stem and the `.schema` suffix are compared in lower case |
 | A file that does not end in `.schema` plus an accepted extension | It never matches |
 
-### Scenario (refusal): No schema folder
+### Scenario S4 (refusal): No schema folder
 
 - GIVEN a workspace with no `_schema` or `_schemas` folder above the document
 - WHEN the document is analysed with a type
 - THEN the generic table is shown and no info row appears
 
-### Scenario (refusal): No file for the type
+### Scenario S5 (refusal): No file for the type
 
 - GIVEN a schema folder holding only other.schema.yaml and a document of type Note
 - WHEN the preview is rendered
@@ -80,7 +95,7 @@ When a document's frontmatter has a string `type`, the extension SHALL look for 
 - WHEN the file Note.schema.yaml is added to the folder and the document is analysed again
 - THEN the info row is gone and the schema table is shown
 
-### Scenario (refusal): No lookup in Restricted Mode or for a standalone file
+### Scenario S6 (refusal): No lookup in Restricted Mode or for a standalone file
 
 | Input | Outcome |
 | --- | --- |
@@ -88,7 +103,7 @@ When a document's frontmatter has a string `type`, the extension SHALL look for 
 | A document without a type in Restricted Mode | No info row is shown |
 | A Markdown file opened outside every workspace folder with a typed frontmatter | No schema is read |
 
-### Scenario (boundary): The schema folder listing is kept while the folder is unchanged
+### Scenario S7 (boundary): The schema folder listing is kept while the folder is unchanged
 
 - GIVEN a schema folder listed in an earlier render
 - WHEN the document is rendered again, first with the folder unchanged and then after a schema file was added or the folder removed

@@ -17,6 +17,21 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: A click or a key opens the editor
+- id: S2
+  title: Reading mode opens no editor
+- id: S3
+  title: A plain click on a link value edits the field
+- id: S4
+  title: Link clicks that still follow the link
+- id: S5
+  title: Field and key editors have no palette or slash menu
+- id: S6
+  title: A 460 px preview opens and cancels an editor without page overflow
+- id: S7
+  title: A tall properties table at 460 px scrolls to both ends
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,25 +60,25 @@ supersedes:
 
 When a writer clicks, or presses Enter or Space on, a name or value cell of the properties table in edit mode, the extension SHALL open a field editor inside that cell.
 
-### Scenario (nominal): A click or a key opens the editor
+### Scenario S1 (nominal): A click or a key opens the editor
 
 - GIVEN edit mode on and a properties table whose title field is a text field
 - WHEN the writer clicks the value cell, or focuses it and presses Enter or Space
 - THEN an editor labelled "Frontmatter title" opens inside that cell
 
-### Scenario (refusal): Reading mode opens no editor
+### Scenario S2 (refusal): Reading mode opens no editor
 
 - GIVEN edit mode off (reading mode)
 - WHEN the writer clicks a name or value cell of the table
 - THEN no editor opens and the table is unchanged; a field whose value is a plain number, boolean or null with no schema type carries no edit attribute; in edit mode the cells have tabindex 0, outside it they have none
 
-### Scenario (nominal): A plain click on a link value edits the field
+### Scenario S3 (nominal): A plain click on a link value edits the field
 
 - GIVEN edit mode on and a field value that shows a link
 - WHEN the writer clicks the link without a modifier
 - THEN the field editor opens and no navigation happens
 
-### Scenario (boundary): Link clicks that still follow the link
+### Scenario S4 (boundary): Link clicks that still follow the link
 
 | Input | Outcome |
 | --- | --- |
@@ -71,19 +86,19 @@ When a writer clicks, or presses Enter or Space on, a name or value cell of the 
 | Click with Cmd or Ctrl in edit mode | The link is followed |
 | Click on the link in reading mode | The link is followed |
 
-### Scenario (refusal): Field and key editors have no palette or slash menu
+### Scenario S5 (refusal): Field and key editors have no palette or slash menu
 
 - GIVEN a text field editor open
 - WHEN the writer types / or makes a text selection in it
 - THEN no slash menu opens and no edition palette appears; only the block editors bind the palette and the slash menu
 
-### Scenario (nominal): A 460 px preview opens and cancels an editor without page overflow
+### Scenario S6 (nominal): A 460 px preview opens and cancels an editor without page overflow
 
 - GIVEN edit mode on at 460 px with a tall properties table
 - WHEN the writer clicks the value cell of the status field, types a new value and presses Escape
 - THEN a field editor opens in that cell, then closes on Escape and the cell shows the original value, and the page has no horizontal scroll at any moment
 
-### Scenario (boundary): A tall properties table at 460 px scrolls to both ends
+### Scenario S7 (boundary): A tall properties table at 460 px scrolls to both ends
 
 - GIVEN edit mode on at 460 px with a tall properties table
 - WHEN the writer scrolls the preview to the bottom and back to the top, then the source editor syncs to line 1 while the preview is scrolled down

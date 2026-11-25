@@ -51,7 +51,7 @@ function shown(diagram: EntryElement): string | undefined {
   return (diagram.querySelector("img") as unknown as { src?: string } | null)?.src;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S2
 test("Mermaid draws only once the page fonts are loaded", async () => {
   const document = new EntryDocument();
   document.diagram("myst-mermaid-diagram", "graph TD; A-->B");
@@ -66,7 +66,7 @@ test("Mermaid draws only once the page fonts are loaded", async () => {
   assert.equal(calls.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S3
 test("Mermaid measures in the page's styled measure element, which goes away once drawn", async () => {
   const { page } = openPage(["graph TD; A-->B"]);
   await page.run.settle();
@@ -78,7 +78,8 @@ test("Mermaid measures in the page's styled measure element, which goes away onc
   assert.equal(measure?.parentNode, null, "removed once the diagram is drawn");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S3
 test("Mermaid element ids never repeat, also for the diagrams of replaced content", async () => {
   const { page, diagrams } = openPage(["graph TD; A-->B", "graph TD; C-->D"]);
   await page.run.settle();
@@ -97,7 +98,7 @@ test("Mermaid element ids never repeat, also for the diagrams of replaced conten
   assert.equal(added.dataset.renderState, "rendered");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S4
 test("Mermaid draw passes run one at a time, in the order they were requested", async () => {
   const { page } = openPage(["graph TD; A-->B"]);
   await page.run.settle();
@@ -125,7 +126,7 @@ test("Mermaid draw passes run one at a time, in the order they were requested", 
   assert.equal(added.dataset.renderState, "rendered");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S2
 test("a Mermaid theme change during a drawing is drawn after that drawing ends", async () => {
   const { page, diagrams } = openPage(["graph TD; A-->B"]);
   await page.run.settle();
@@ -148,7 +149,7 @@ test("a Mermaid theme change during a drawing is drawn after that drawing ends",
   assert.match(decodeURIComponent(shown(diagrams[0]!)!), /old theme/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S6
 test("a failed Mermaid drawing shows one error for the current key and sets the error state", async () => {
   const { page, diagrams } = openPage(["graph TD; A-->"]);
   await page.run.settle();

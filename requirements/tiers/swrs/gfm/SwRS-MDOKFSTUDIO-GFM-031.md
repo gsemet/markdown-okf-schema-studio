@@ -18,6 +18,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
 - StRS-MDOKFSTUDIO-MYST-017
 depends_on: []
+scenarios:
+- id: S1
+  title: Spans preserved
+- id: S2
+  title: Span limits
+- id: S3
+  title: Safe colours kept
+- id: S4
+  title: Unsafe style removed
+- id: S5
+  title: Active content removed
+- id: S6
+  title: Unknown tag and comment
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,31 +53,31 @@ supersedes:
 
 When a document contains a raw HTML table, the extension SHALL rebuild it from an allow-list of tags and attributes, rendering its cells with rowspan and colspan from 1 to 999, align, scope, simple class names, title and a sanitized style subset, and removing script, style, iframe, svg, form, embed and object elements with their content and dropping comments.
 
-### Scenario (nominal): Spans preserved
+### Scenario S1 (nominal): Spans preserved
 
 - GIVEN a raw table with colspan=2 and rowspan=2 cells
 - WHEN the preview is rendered
 - THEN the cells span as written
 
-### Scenario (boundary): Span limits
+### Scenario S2 (boundary): Span limits
 
 - GIVEN cells with colspan=999, colspan=1000 and rowspan=0
 - WHEN the preview is rendered
 - THEN 999 is kept and the out-of-range values 1000 and 0 are not applied
 
-### Scenario (nominal): Safe colours kept
+### Scenario S3 (nominal): Safe colours kept
 
 - GIVEN a cell style 'color: red; background-color: #fff' or 'color: hsl(0,0%,0%)'
 - WHEN the preview is rendered
 - THEN both declarations are kept (the style keeps only text and background colours, text-fill, background-clip text and linear gradients; every colour follows the colour grammar of SwRS-MDOKFSTUDIO-GFM-034, so var(), url(), !important, comments, escapes and names outside the closed list and the keywords currentcolor, inherit, initial and unset are removed; the space form rgb(0 0 0 / 50%) is kept)
 
-### Scenario (refusal): Unsafe style removed
+### Scenario S4 (refusal): Unsafe style removed
 
 - GIVEN a cell style 'position: fixed; background: url(x)'
 - WHEN the preview is rendered
 - THEN declarations are removed and a diagnostic is recorded
 
-### Scenario (refusal): Active content removed
+### Scenario S5 (refusal): Active content removed
 
 | Input | Outcome |
 | --- | --- |
@@ -72,7 +85,7 @@ When a document contains a raw HTML table, the extension SHALL rebuild it from a
 | a table cell with a script element | the script is dropped |
 | style, svg, form, embed or object elements in a cell | removed with their content |
 
-### Scenario (boundary): Unknown tag and comment
+### Scenario S6 (boundary): Unknown tag and comment
 
 - GIVEN a cell with an unknown tag around text and an HTML comment
 - WHEN the preview is rendered

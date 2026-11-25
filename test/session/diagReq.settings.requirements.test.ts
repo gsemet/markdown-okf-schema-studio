@@ -56,7 +56,7 @@ const affecting = (...sections: string[]) => ({
   affects: (section: string) => sections.includes(section),
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S7
 test("a plantuml setting change reads the settings again and renders the open document again", () => {
   const { events, session, calls, values } = fixture();
   values["markdownOkfSchemaStudio.plantuml"] = { useJar: true, jarPath: " tools/plantuml.jar " };
@@ -73,7 +73,8 @@ test("a plantuml setting change reads the settings again and renders the open do
   assert.equal(other.session.plantUmlConfiguration, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004#S4
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004#S5
 test("a frontmatter setting change reads the settings again and analyses the table of the active document only", () => {
   const active = fixture();
   active.values["markdownOkfSchemaStudio.frontmatter"] = { strictAdditionalProperties: true };
@@ -92,7 +93,8 @@ test("a frontmatter setting change reads the settings again and analyses the tab
   assert.deepEqual(other.calls, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S7
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S8
 test("a preview setting change reads the width again and updates the preview from its last good render", () => {
   const open = fixture();
   open.values["markdownOkfSchemaStudio.preview"] = { maxContentWidth: 1200 };
@@ -107,7 +109,7 @@ test("a preview setting change reads the width again and updates the preview fro
   assert.equal(fresh.calls.some((call) => call.startsWith("update:")), false, "nothing to redraw without a last good render");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-027
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-027#S3
 test("editing a schema file refreshes nothing by itself; the next document change re-analyses the table", () => {
   const calls: string[] = [];
   const session: Record<string, unknown> = {

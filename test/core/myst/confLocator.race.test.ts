@@ -9,7 +9,7 @@ const CONF_PATH = path.join(ROOT, "docs", "conf.py");
 const DOCUMENT = path.join(ROOT, "docs", "a.md");
 const textOf = (extension: string) => `extensions = ['myst_parser']\nmyst_enable_extensions = ['${extension}']\n`;
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S5
 test("an invalidation during a lookup in flight stores nothing stale: the next lookup reads the file again", async () => {
   let text = textOf("deflist");
   let reads = 0;

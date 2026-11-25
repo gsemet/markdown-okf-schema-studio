@@ -58,9 +58,11 @@ export const CARDS_TABS_SCENARIOS: ScenarioDefinition[] = [
     { name: "cream", theme: "light", mode: "cream" },
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((variant, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-001
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-100
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-098
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S2
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S4
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-100#S1
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-098#S1
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-098#S2
     id: `myst/v${41 + index}-cards-tabs-version-${variant.name}-900`,
     fixture: "68-cards-tabs-version",
     theme: variant.theme,
@@ -72,7 +74,8 @@ export const CARDS_TABS_SCENARIOS: ScenarioDefinition[] = [
     description: `Version notes, a standalone card and a tab set, ${variant.name} preview, 900 px pane.`,
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-099
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-099#S1
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-099#S7
     id: "myst/v43-tabs-keyboard-light-900",
     fixture: "68-cards-tabs-version",
     theme: "light",
@@ -92,7 +95,8 @@ export const CARDS_TABS_SCENARIOS: ScenarioDefinition[] = [
     { name: "light", theme: "light" },
     { name: "dark", theme: "dark" },
   ] as const).map((variant, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-098
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-098#S1
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-098#S3
     id: `myst/v${44 + index}-tab-panel-edit-${variant.name}-900`,
     fixture: "68-cards-tabs-version",
     theme: variant.theme,

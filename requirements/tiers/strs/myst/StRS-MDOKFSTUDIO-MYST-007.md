@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Missing extensions are reported
+- id: S2
+  title: The banner
 user_need: As a Sphinx author, I want to learn about unsupported syntax before
   building, through a quiet warning with a path to details, so that I avoid
   failed builds and can act without being interrupted.
@@ -87,7 +92,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Missing extensions are reported
+#### Path S1: Missing extensions are reported
 
 1. A document uses syntax of a MyST extension
    - SwRS-MDOKFSTUDIO-MYST-066: the extension reads the enabled MyST extensions from the nearest `conf.py`, as text, never running it
@@ -100,7 +105,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-MYST-078 (refusal): an untrusted workspace publishes nothing
 4. The warnings are in the Problems view
 
-#### Path 2: The banner
+#### Path S2: The banner
 
 1. The warnings are listed
    - SwRS-MDOKFSTUDIO-MYST-081: a successful render shows a one-line banner with the count, an Open Problems button and a Close button

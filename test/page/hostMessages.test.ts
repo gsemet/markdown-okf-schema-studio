@@ -14,7 +14,7 @@ function pushTransport(): { transport: HostTransport; send(data: unknown): void 
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S3
 test("a host message addressed to the page reaches its handler; any other goes to unhandled", () => {
   const messages = createPageHostMessages();
   const { transport, send } = pushTransport();
@@ -62,7 +62,8 @@ test("the VS Code transport passes the webview API through and unwraps window me
   assert.deepEqual(transport.getState(), { b: 2 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S3
 test("a window message event reaches the page only from the host frames, the page itself or an event without a sender", () => {
   const parent = {};
   const other = {};

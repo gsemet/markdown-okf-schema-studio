@@ -29,7 +29,7 @@ function contrast(foreground: string, background: string): number {
   return (light + 0.05) / (dark + 0.05);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-001
+// @tests_req SwRS-MDOKFSTUDIO-THEME-001#S4
 test("cream is an accepted preview theme mode with its own coffee toolbar icon", () => {
   assert.equal(isPreviewThemeMode("cream"), true);
   assert.equal(isPreviewThemeMode("sepia"), false);
@@ -38,7 +38,8 @@ test("cream is an accepted preview theme mode with its own coffee toolbar icon",
   assert.match(PREVIEW_THEME_CSS, /data-theme-mode="cream"\] \[data-theme-icon="cream"\]/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-025
+// @tests_req SwRS-MDOKFSTUDIO-THEME-025#S1
+// @tests_req SwRS-MDOKFSTUDIO-THEME-025#S4
 test("cream defines a light warm palette for every variable white mode overrides", () => {
   const cream = creamVariables();
   const white = /html\[data-sphinx-preview-theme-mode="white"\] body\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
@@ -54,7 +55,7 @@ test("cream defines a light warm palette for every variable white mode overrides
   assert.ok(red > 0xe8 && red > green && green > blue, `${background} is not a warm light paper colour`);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-031
+// @tests_req SwRS-MDOKFSTUDIO-THEME-031#S3
 test("cream text and background pairs meet WCAG AA 4.5:1", () => {
   const cream = creamVariables();
   const surfaces = [
@@ -106,7 +107,7 @@ test("explicit themes override the same host colors, including the floating tool
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-007
+// @tests_req SwRS-MDOKFSTUDIO-CODE-007#S5
 // @tests_req SwRS-MDOKFSTUDIO-CORE-028
 test("cream mirrors the white-mode code colouring", () => {
   assert.match(

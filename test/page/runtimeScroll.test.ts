@@ -20,7 +20,8 @@ test("latest saved Description visibility wins over an older enrichment snapshot
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S4
 test("Description column toggles persist and restore both states", () => {
   const harness = createRuntimeHarness({ viewportWidth: 900 });
   assert.equal(harness.descriptionButton.getAttribute("aria-expanded"), "true");
@@ -316,7 +317,7 @@ test("source anchoring does not reserve a row for floating controls", () => {
   assert.equal(harness.mappings[1].getBoundingClientRect().top, 65);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-022
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S3
 test("the boot context cannot terminate its containing script element", () => {
   const script = serializeRuntimeContext({
     documentId: "file:///active.md</script><script>alert(1)</script>",
@@ -356,7 +357,8 @@ test("observes preview content instead of the document body", () => {
   assert.notEqual(harness.observedResizeTarget, harness.body);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-001
+// @tests_req SwRS-MDOKFSTUDIO-THEME-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-THEME-001#S3
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169
 test("cycles preview theme modes and restores the saved selection", () => {
@@ -394,7 +396,8 @@ test("cycles preview theme modes and restores the saved selection", () => {
   assert.equal(shared.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "dark");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S8
 test("frontmatter tooltips preserve exact safe text and restore accessible metadata on dismissal", () => {
   for (const dismissal of ["leave", "blur", "scroll", "resize", "outside", "Escape", "refresh", "pagehide", "beforeunload"]) {
     const harness = createRuntimeHarness({ viewportHeight: 600, controlsHeight: 116 });
@@ -430,7 +433,8 @@ test("frontmatter tooltips preserve exact safe text and restore accessible metad
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S6
 test("an invalid link span shows its full message in a tooltip on keyboard focus", () => {
   const harness = createRuntimeHarness({ viewportHeight: 600, controlsHeight: 116 });
   const title = "[E10] target 'missing.py' does not resolve to a file";
@@ -457,7 +461,8 @@ test("a pending link never opens a tooltip", () => {
   assert.equal(harness.createdElements.length, before);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S3
 test("the badge click scrolls to and focuses the first issue row and highlights it briefly", () => {
   const harness = createRuntimeHarness({ viewportHeight: 600 });
   harness.frontmatterRow.setAttribute("class", "okf-error okf-known");
@@ -1031,7 +1036,7 @@ test("an escape left after four decoding rounds is refused, whatever its digits"
   assert.equal(harness.windowState.scrollY, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S5
 test("markWideTables marks short cells and the overflow of a wide table, never the properties table", () => {
   const harness = createRuntimeHarness();
   const table = new RuntimeElement({}, harness.windowState, 0, 100, "table");
@@ -1167,7 +1172,7 @@ test("previewReady reports the pinned anchor only when the load restored a pin",
   assert.equal("anchorLine" in plainReady, false, "a load without a pin sends no anchorLine");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S6
 test("P-08: layout triggers within one frame measure the page once", () => {
   const harness = createRuntimeHarness();
   const reads = (): number => harness.mappings.reduce((count, mapping) => count + mapping.rectReadCount, 0);

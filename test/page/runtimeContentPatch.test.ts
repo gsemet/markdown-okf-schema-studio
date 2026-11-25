@@ -866,7 +866,7 @@ test("T34: the patch removes the pending overlay and the link tooltip", () => {
   assert.equal(link.getAttribute("title"), "target", "the link title was restored");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S4
 test("CR 050: a patch keeps the code of each status line and refuses a malformed one", () => {
   const harness = createRuntimeHarness({ previewStatus: "success" });
   harness.dispatchMessage(patchMessage({
@@ -1019,7 +1019,7 @@ test("T34: a patch keeps the scroll position when the host sends no anchor", () 
   assert.equal(harness.windowState.scrollY, 240);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S6
 test("T34: a pending checkbox toggle of the old content cannot revert the new content", () => {
   const harness = createRuntimeHarness();
   harness.checkbox.checked = true;
@@ -1086,7 +1086,8 @@ test("T34: links of the new content keep known target hints and discover new tar
   assert.equal(typed.getAttribute("title"), "/ws/Typed.md");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S4
 // Moved from test/webview/linkNavigation.test.ts ("discovery hints ignore stale renders and never
 // replace the original target"): the page's host message filter matches previewLinkTargets to the
 // render it shows before the router hands it to the link navigation.

@@ -19,6 +19,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Fresh nonce of 18 bytes
+- id: S2
+  title: Elements that carry the nonce
+- id: S3
+  title: Boot context as inert JSON
+- id: S4
+  title: Content patch keeps the nonce
+- id: S5
+  title: Patched record loaded as a new document
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,31 +55,31 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension builds a page, it SHALL draw a nonce of 18 random bytes encoded as base64url for every page it builds, give it to every script and style element it writes except the inert JSON element of the boot context, keep the nonce of the loaded page when it applies a render as a content patch, and replace the nonce of a patched record by a fresh one before it loads the record as a new document.
 
-### Scenario (nominal): Fresh nonce of 18 bytes
+### Scenario S1 (nominal): Fresh nonce of 18 bytes
 | Input | Outcome |
 | --- | --- |
 | Two builds of the same document, the nonces compared | They differ |
 | Any nonce, measured | It is 24 base64url characters, the encoding of 18 bytes |
 
-### Scenario (nominal): Elements that carry the nonce
+### Scenario S2 (nominal): Elements that carry the nonce
 | Input | Outcome |
 | --- | --- |
 | A rendered page, built | The runtime script and the accessibility style element carry the page nonce |
 | A page with a raw HTML table style and a maths block | Their style elements carry the page nonce, and the JSON context element carries none |
 
-### Scenario (nominal): Boot context as inert JSON
+### Scenario S3 (nominal): Boot context as inert JSON
 | Input | Outcome |
 | --- | --- |
 | A document id that contains a closing script tag followed by a script element, the context serialized | The output contains no closing script tag |
 | The same context with a less-than sign in a path, parsed by the page as JSON | The original path comes back, because the sign is written as a unicode escape |
 
-### Scenario (nominal): Content patch keeps the nonce
+### Scenario S4 (nominal): Content patch keeps the nonce
 | Input | Outcome |
 | --- | --- |
 | A loaded page and a new render of the same document, applied as a content patch | The record of the page carries the nonce of the loaded page |
 | Two renders of one document type, their page shells compared | The shells are equal although the nonces differ |
 
-### Scenario (refusal): Patched record loaded as a new document
+### Scenario S5 (refusal): Patched record loaded as a new document
 | Input | Outcome |
 | --- | --- |
 | A page that received content patches and is created again by VS Code, or whose patch is not acknowledged; the host loads its record as a new document | The nonce of the record differs from every earlier nonce of the preview |

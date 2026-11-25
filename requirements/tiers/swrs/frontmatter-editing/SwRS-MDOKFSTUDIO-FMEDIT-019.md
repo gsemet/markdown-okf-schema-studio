@@ -18,6 +18,31 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: A changed value is saved when the writer leaves the editor
+- id: S2
+  title: An unchanged value posts nothing
+- id: S3
+  title: A click on another field opens it after an unchanged editor closes
+- id: S4
+  title: A press that is not completed by its click
+- id: S5
+  title: Escape cancels a field editor
+- id: S6
+  title: Escape that does not cancel
+- id: S7
+  title: Turning edit mode off closes a field editor without saving
+- id: S8
+  title: A save in flight disables the editor and shows its status
+- id: S9
+  title: A refused field save stays visible in the editor
+- id: S10
+  title: Undo and redo keys act on the field text
+- id: S11
+  title: A save that changes no text closes the field editor with no message
+- id: S12
+  title: Every frontmatter save ends
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -55,25 +80,25 @@ supersedes:
 
 When a writer commits a field editor with Enter, with a checkbox change or by moving focus out of it, the extension SHALL post a save only when the value differs from the original, close the editor without a post on Escape, and show the progress and the outcome of the save in the editor.
 
-### Scenario (nominal): A changed value is saved when the writer leaves the editor
+### Scenario S1 (nominal): A changed value is saved when the writer leaves the editor
 
 - GIVEN a text field editor whose value was changed
 - WHEN the writer moves focus out of the editor
 - THEN one previewFrontmatterSave is posted; focus moving to the editor's own field menu or to Set to null does not save
 
-### Scenario (boundary): An unchanged value posts nothing
+### Scenario S2 (boundary): An unchanged value posts nothing
 
 - GIVEN a field editor whose value is unchanged
 - WHEN the writer presses Enter or leaves the editor
 - THEN the editor closes and nothing is posted
 
-### Scenario (nominal): A click on another field opens it after an unchanged editor closes
+### Scenario S3 (nominal): A click on another field opens it after an unchanged editor closes
 
 - GIVEN a field editor (value or key) whose value is unchanged, above other fields of the properties table
 - WHEN the writer clicks the value or key cell of another field, and closing the editor on the press moves that cell before the button is released
 - THEN the editor closes without a post and the clicked field's editor opens in the same click; a click on a field above the editor does the same
 
-### Scenario (refusal): A press that is not completed by its click
+### Scenario S4 (refusal): A press that is not completed by its click
 
 | Input | Outcome |
 | --- | --- |
@@ -82,26 +107,26 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 | A press on a field cell with Shift, Ctrl, Alt or Cmd held, or with another button | It is not remembered; the click opens nothing from it |
 | The writer clicks a field below an editor whose value was changed | The changed value is saved and no other editor opens in that click |
 
-### Scenario (nominal): Escape cancels a field editor
+### Scenario S5 (nominal): Escape cancels a field editor
 
 - GIVEN a field editor with typed text
 - WHEN the writer presses Escape in the control, or in the field picker or a header cell of the properties section
 - THEN the editor closes and nothing is posted
 
-### Scenario (refusal): Escape that does not cancel
+### Scenario S6 (refusal): Escape that does not cancel
 
 | Input | Outcome |
 | --- | --- |
 | Escape outside the properties section | The editor stays open |
 | Escape while the save of the editor is in flight | The editor stays open |
 
-### Scenario (boundary): Turning edit mode off closes a field editor without saving
+### Scenario S7 (boundary): Turning edit mode off closes a field editor without saving
 
 - GIVEN a field editor with text typed and not saved
 - WHEN the writer turns edit mode off
 - THEN the editor closes (closeFrontmatterEditor is called), the cell shows the original value again and no save is posted; an open block editor with unsaved changes is saved instead, which is the difference with a field editor
 
-### Scenario (nominal): A save in flight disables the editor and shows its status
+### Scenario S8 (nominal): A save in flight disables the editor and shows its status
 
 | Input | Outcome |
 | --- | --- |
@@ -112,7 +137,7 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 | Host answers with saved true | The status reads "Saved. Refreshing preview…", and the re-rendered table then replaces the editor |
 | Result carrying another editId | It is ignored and the status is unchanged |
 
-### Scenario (refusal): A refused field save stays visible in the editor
+### Scenario S9 (refusal): A refused field save stays visible in the editor
 
 | Input | Outcome |
 | --- | --- |
@@ -125,7 +150,7 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 | Error result without text | The editor shows "The frontmatter edit could not be applied." |
 | Result carrying another editId | It is ignored |
 
-### Scenario (nominal): Undo and redo keys act on the field text
+### Scenario S10 (nominal): Undo and redo keys act on the field text
 
 - GIVEN a value editor with typed text
 - WHEN the writer presses Cmd or Ctrl+Z or Y
@@ -135,12 +160,12 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 
 - Known issue: leaving edit mode discards a typed but unsaved field value, while block editors save theirs.
 
-### Scenario (boundary): A save that changes no text closes the field editor with no message
+### Scenario S11 (boundary): A save that changes no text closes the field editor with no message
 - GIVEN a field editor whose value differs from the opening text but whose save plan leaves the document text unchanged
 - WHEN the writer leaves the editor
 - THEN the host writes nothing and answers previewFrontmatterResult with saved and unchanged, and the page closes the field editor with no message
 
-### Scenario (nominal): Every frontmatter save ends
+### Scenario S12 (nominal): Every frontmatter save ends
 - GIVEN a frontmatter save of a value, a key or a field action
 - WHEN the host handles it
 - THEN it answers with a saved result that closes the editor, or an error the editor shows; no frontmatter editor stays on its saving status

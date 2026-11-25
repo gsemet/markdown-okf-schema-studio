@@ -25,7 +25,7 @@ function addPicture(harness: RuntimeHarness): { figure: RuntimeElement; picture:
 
 const click = (target: RuntimeElement) => ({ target, preventDefault: () => undefined, stopPropagation: () => undefined });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-127
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-127#S2
 test("in edit mode a click on an svg picture asks the host for the source of the block that holds it", () => {
   const harness = createRuntimeHarness();
   const { picture } = addPicture(harness);
@@ -39,7 +39,7 @@ test("in edit mode a click on an svg picture asks the host for the source of the
   assert.equal(posted[0]!.endLine, 34, "the last line of the figure");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-127
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-127#S1
 test("in reading mode a click on an svg picture opens no editor", () => {
   const harness = createRuntimeHarness();
   const { picture } = addPicture(harness);

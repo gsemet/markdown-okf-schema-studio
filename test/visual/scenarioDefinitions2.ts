@@ -1,5 +1,5 @@
 /**
- * The screenshot scenarios, second part, in campaign order (after `scenarioDefinitions1.ts`).
+ * The screenshot scenarios, second part, in campaign order (after `scenarioDefinitions1.ts`; the third part is `scenarioDefinitions3.ts`).
  */
 import { LINK_HINT_SCENARIOS } from "./linkHintScenarios";
 import { RELEASE_SHOWCASE_SCENARIOS } from "./releaseShowcaseScenarios";
@@ -127,7 +127,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
         : (viewport.width === 900 || theme === "light" ? " (the `open` step keeps the opened editor)." : ".")),
   }))),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024#S2
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024#S3
     id: "edit-frontmatter-key-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -141,9 +142,10 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "The expanded key suggestions show an unused property from the matching JSON Schema.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
-    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
-    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S1
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S7
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S12
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S3
     id: "edit-frontmatter-value-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -310,8 +312,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "Long heading ancestry keeps one line per level in the sticky band, each cut with an ellipsis, and the band is three lines tall.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-010
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S1
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S3
     id: "okf-schema-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -323,7 +325,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "title badge with readable contrast.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S5
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S6
     id: "okf-schema-missing-required-dark",
     fixture: "09-okf-schema-missing-required",
     theme: "dark",
@@ -344,8 +347,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "summary below the last property row.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-006
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S5
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S6
     id: "schema-validation-error-dark",
     fixture: "10-schema-validation-error",
     theme: "dark",
@@ -376,7 +379,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "The full-width schema diagnostic wraps on a narrow viewport without overflowing its cell.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005#S2
     id: "frontmatter-scroll-feedback",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -387,7 +390,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "Three scroll cycles reach both ends; the final frame returns to the top of the tall frontmatter table.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001#S7
     id: "frontmatter-scroll-feedback-edit",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -399,7 +402,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "Edit mode remains on after three scroll cycles; the field editor is closed and the final frame is at the top.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
     id: "frontmatter-dark",
     fixture: "07-frontmatter",
     theme: "dark",
@@ -510,7 +512,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   ...([
     ["light", WIDE], ["light", XLARGE], ["light", NARROW], ["dark", WIDE],
   ] as const).flatMap(([theme, viewport]) => (["margin", "auto", "full"] as const).map((mode) => ({
-    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-001
     id: `width-mode-break-${mode}-${theme === "dark" ? "dark-" : ""}${viewport.width}`,
     fixture: "34-width-mode-break",
     theme,
@@ -547,7 +548,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   ...RELEASE_SHOWCASE_SCENARIOS,
   {
-    // @tests_req StRS-MDOKFSTUDIO-MYST-016
     id: "myst/v34-readme-showcase-edit-cream-1000",
     fixture: "54-readme-showcase",
     theme: "light",
@@ -561,7 +561,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "README capture, cream theme, edit mode: the card grid and the figure of the demo handbook stay rendered while the clicked admonition is open in its Markdown editor.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
     id: "frontmatter-schema/v23-readme-showcase-schema-cream-1000",
     fixture: "54-readme-showcase",
     theme: "light",
@@ -585,7 +584,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "README capture, cream theme: the blocks changed since the last commit (intro paragraph, one card, the admonition and the figure) carry the green bar at the left margin.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S2
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S7
     id: "diagrams/v17-readme-showcase-diagrams-cream-1000",
     fixture: "54-readme-showcase",
     theme: "light",
@@ -695,9 +695,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["dark", undefined],
     ["dark", "cream"],
   ] as const).map(([theme, mode]) => ({
-    // @tests_req StRS-MDOKFSTUDIO-MYST-017
-    // @tests_req StRS-MDOKFSTUDIO-MYST-009
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-036
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-036#S1
     id: `figure-anchors-${theme}-${mode ?? "theme"}`,
     fixture: "33-figures-anchors",
     theme,
@@ -712,7 +710,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "to a label scrolls to it.",
   })),
   ...["white", "dark"].flatMap((mode) => [WIDE, NARROW].map((viewport) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S5
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S6
     id: `frontmatter-link-details-${mode}-${viewport.width}`,
     fixture: "14-frontmatter-links",
     theme: "dark",
@@ -749,7 +748,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     { n: "15", theme: "dark" },
     { n: "16", theme: "cream" },
   ] as const).map(({ n, theme }) => ({
-    // @tests_req StRS-MDOKFSTUDIO-CODE-001
     id: `code-blocks/v${n}-code-block-caption-${theme}-900`,
     fixture: "46-code-block-caption",
     theme: theme === "cream" ? "dark" : theme,
@@ -784,7 +782,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the last paragraph is reachable inside the frame with its bottom padding.",
   },
   ...([["dark", 900], ["light", 900], ["light", 460]] as const).map(([theme, width], index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-GFM-002
     id: `gfm/v0${index + 2}-gfm-gallery-full-${theme}-${width}`,
     fixture: "37-gfm-gallery",
     theme,
@@ -795,9 +792,9 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Every GFM construct on one page (five alerts, strikethrough, footnotes, task list, aligned table, raw HTML table and details, colour span, autolink), ${theme}, ${width} px pane.`,
   })),
   ...(["dark", "light"] as const).map((theme, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-MYST-018
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-006
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-001
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-006#S4
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-006#S5
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S2
     id: `myst/v${20 + index}-myst-gallery-full-${theme}-900`,
     fixture: "38-myst-gallery",
     theme,
@@ -808,7 +805,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Every MyST construct on one page (label and references, dropdown, definition list, sub and sup, kbd and abbr roles, footnote, math, glossary), ${theme}, 900 px pane.`,
   })),
   ...([["light", 900, 2], ["dark", 900, 2], ["light", 460, 1]] as const).map(([theme, width, columns], index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-053
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-053#S3
     id: `myst/v${22 + index}-grid-cards-full-${theme}-${width}`,
     fixture: "46-grid-cards",
     theme,
@@ -819,7 +816,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `A {grid} of items and cards with header, body, footer, link and a nested grid, ${theme}, ${width} px pane (${columns} column${columns === 1 ? "" : "s"}).`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-MYST-012
     id: `myst/v${25 + index}-toctree-caption-full-${theme}-900`,
     fixture: "47-toctree",
     theme,
@@ -830,7 +826,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Three {toctree} lists: with caption and a missing target, a glob and a hidden one, ${theme}, 900 px pane.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-063
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-063#S2
     id: `myst/v${27 + index}-list-table-full-${theme}-900`,
     fixture: "46-list-table",
     theme,
@@ -841,8 +837,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `A pipe table and two {list-table} directives (a titled one with :widths: and a centred table, one with two header rows), ${theme}, 900 px pane: the list-tables use the pipe table's cell, header and border styles.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-DIAG-001
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-015
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-015#S1
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-015#S3
     id: `diagrams/v0${8 + index}-mermaid-syntax-error-${theme}-900`,
     fixture: "40-mermaid-error",
     theme,
@@ -854,10 +850,9 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `An invalid Mermaid diagram in the ${theme} theme: the error message replaces the picture, the source stays available and the text after it continues.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-DIAG-006
-    // @tests_req StRS-MDOKFSTUDIO-DIAG-007
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-024
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-023
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S4
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S5
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S4
     id: `diagrams/v${10 + index}-plantuml-builtin-${theme}-900`,
     fixture: "48-plantuml-builtin",
     theme,
@@ -870,7 +865,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "(no Java, no plantuml command, no network): two pictures in the theme colours and the sources below them.",
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-032
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-032#S3
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-032#S4
     id: "diagrams/v12-plantuml-builtin-unsupported-light-900",
     fixture: "49-plantuml-unsupported",
     theme: "light",
@@ -884,7 +880,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "for a file and the source stays available.",
   },
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-068
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S1
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S7
     id: `diagrams/v${13 + index}-plantuml-file-${theme}-900`,
     fixture: "50-plantuml-file",
     theme,
@@ -897,9 +894,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "reads the files like {include} and the built-in engine draws both, with the file text as the source below them.",
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-DIAG-009
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-039
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-046
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-039#S4
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-046#S1
     id: `diagrams/v${15 + index}-plantuml-include-${theme}-900`,
     fixture: "51-plantuml-include",
     theme,
@@ -912,7 +908,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the host for both files (the nested one next to the including file) and the built-in engine draws the result.",
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S7
     id: "diagrams/v18-plantuml-theme-sprite-light-900",
     fixture: "63-plantuml-theme-sprite",
     theme: "light",
@@ -925,8 +921,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "engine draws it with the Smetana layout, the theme colours and the icon, without a request.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S4
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S6
     id: "frontmatter-schema/v20-invalid-yaml-dark-900",
     fixture: "41-invalid-yaml",
     theme: "dark",
@@ -936,7 +932,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "Frontmatter with broken YAML: the preview reports the parse problem and still renders the Markdown body.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S5
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S6
     id: "frontmatter-schema/v21-unknown-field-strict-light-900",
     fixture: "42-strict-unknown-field",
     theme: "light",
@@ -947,7 +944,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "A schema-typed document with a field the schema does not declare, with the strict setting on: the field gets a warning and the badge counts it.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004#S3
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004#S4
     id: "frontmatter-schema/v22-properties-hidden-light-900",
     fixture: "43-properties-hidden",
     theme: "light",
@@ -959,8 +957,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   // P9 B5 (a): theme, zoom, trust, layout, toolbar, block and palette states of the extension.
   {
-    // @tests_req StRS-MDOKFSTUDIO-THEME-002
-    // @tests_req SwRS-MDOKFSTUDIO-THEME-025
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-025#S2
     id: "theme-zoom/v08-forced-dark-handbook-light-900",
     fixture: "01-handbook-overview",
     theme: "light",
@@ -972,8 +969,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the page, text, note panels and headings all use the dark palette.",
   },
   ...([[70, WIDE, "900"], [200, WIDE, "900"], [150, NARROW, "460"]] as const).map(([zoom, viewport, width], index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-THEME-011
-    // @tests_req SwRS-MDOKFSTUDIO-THEME-043
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-043#S2
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-043#S3
     id: `theme-zoom/v${String(9 + index).padStart(2, "0")}-zoom-${zoom}-light-${width}`,
     fixture: "01-handbook-overview",
     theme: "light",
@@ -987,7 +984,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   // CR 047: a workspace that stored no choice opens with the built-in defaults, on a light and on a
   // dark host (the cream page hides the host theme, so the dark one uses a narrow pane to differ).
   ...([["light", 12, WIDE, "900"], ["dark", 13, NARROW, "460"]] as const).map(([theme, number, viewport, width]) => ({
-    // @tests_req StRS-MDOKFSTUDIO-THEME-004
     id: `theme-zoom/v${number}-fresh-workspace-${theme}-${width}`,
     fixture: "01-handbook-overview",
     theme,
@@ -1001,7 +997,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the preview opens in the cream theme and the floating toolbar shows only its first row, without any click.",
   })),
   ...([["dark", WIDE, "900", 1], ["light", NARROW, "460", 2]] as const).map(([theme, viewport, width, number]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+    // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
     id: `trust-security/v0${number}-restricted-page-${theme}-${width}`,
     fixture: "08-okf-schema",
     theme,
@@ -1135,8 +1131,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "is not covered by anything and flips above the caret near the bottom; the final frame shows it with /tab typed.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-003
-    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S3
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S5
     id: "layout-width/v85-max-width-setting-light-2000",
     fixture: "05-long-chapter",
     theme: "light",
@@ -1228,7 +1224,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "and the thread chips at once, the TODO chip stays, and a second press brings them back.",
   },
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-GFM-021
+    // @tests_req SwRS-MDOKFSTUDIO-GFM-021#S5
     id: `gfm/v0${5 + index}-checkbox-refusal-${theme}-900`,
     fixture: "37-gfm-gallery",
     theme,
@@ -1263,8 +1259,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["dark", undefined, 30],
     ["light", "cream", 31],
   ] as const).map(([theme, mode, number]) => ({
-    // @tests_req StRS-MDOKFSTUDIO-MYST-007
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-081
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-081#S4
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-081#S8
     id: `myst/v${number}-conf-warning-banner-${mode ?? theme}-900`,
     fixture: "53-conf-warnings",
     theme,
@@ -1302,199 +1298,4 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the page told the host which set of warnings was closed (so it stays closed for this document), "
       + "and the warnings stay in the status region.",
   },
-  // CR 050: an image inside a paragraph stays in the text; a standalone image stays a figure.
-  {
-    id: "rendering-core/v23-inline-image-in-text-light-900",
-    fixture: "52-inline-image",
-    theme: "light",
-    ...WIDE,
-    scroll: { kind: "top" as const },
-    contentAssertions: INLINE_IMAGE_ASSERTIONS,
-    description: "A paragraph with an image between two pieces of text, then an image on its own: the first image is drawn "
-      + "in the line of text, after \"Text before the logo\" and before \"and text after it\"; the standalone image stays a "
-      + "centred block of its own.",
-  },
-  {
-    id: "rendering-core/v24-inline-image-in-text-edit-dark-900",
-    fixture: "52-inline-image",
-    theme: "dark",
-    ...WIDE,
-    scroll: { kind: "top" as const },
-    editMode: true,
-    contentAssertions: INLINE_IMAGE_ASSERTIONS,
-    description: "The same page in edit mode, dark theme: the inline image stays in its line of text and the standalone image "
-      + "stays a centred figure.",
-  },
-  // CR 050: an image pasted into a paragraph editor becomes a paragraph of its own.
-  {
-    // @tests_req StRS-MDOKFSTUDIO-PALETTE-018
-    id: "palette-slash/v22-pasted-image-paragraph-light-900",
-    fixture: "52-inline-image",
-    theme: "light",
-    ...WIDE,
-    scroll: { kind: "top" as const },
-    editMode: true,
-    pasteImageChecks: true,
-    description: "An image pasted at the end of a paragraph editor (after a typed space) and in the middle of its text: "
-      + "each time the reference goes on a paragraph of its own, with a blank line before and after it, and its name is "
-      + "selected. The final frame shows the editor after the paste at the end.",
-  },
-  ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
-    id: `toolbar-navigation/v${35 + index}-link-warning-${theme}-900`,
-    fixture: "61-link-warnings",
-    theme,
-    ...WIDE,
-    scroll: { kind: "top" as const },
-    render: {
-      hostMessages: [{ delayMs: 50, data: { type: "previewLinkTargets", targets: [
-        { request: "guide.md", kind: "local", path: "/workspace/guide.md" },
-        { request: "docs/guid.md", kind: "blocked", reason: "File not found: docs/guid.md" },
-        { request: "../private/notes.md", kind: "blocked", reason: "The navigation target is outside the workspace." },
-      ] } }],
-    },
-    contentAssertions: LINK_WARNING_ASSERTIONS,
-    description: `Three links, one valid and two to a missing or blocked file, ${theme}, 900 px pane: the links keep their text and colour and `
-      + "a small warning icon follows each of the two that cannot be opened.",
-  })),
-  ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-GFM-034
-    id: `gfm/v0${7 + index}-raw-table-colour-spans-${theme}-900`,
-    fixture: "59-raw-table-colour-spans",
-    theme,
-    ...WIDE,
-    scroll: { kind: "top" as const },
-    fullPage: true,
-    contentAssertions: RAW_TABLE_COLOUR_SPANS_ASSERTIONS,
-    description: `Coloured spans in a raw HTML table (a named colour, hsl(), a hex colour on an rgba() background, and a var()/url() value that is dropped), ${theme}, 900 px pane.`,
-  })),
-  ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-102
-    id: `myst/v${35 + index}-dollar-prices-full-${theme}-900`,
-    fixture: "55-dollar-prices",
-    theme,
-    ...WIDE,
-    scroll: { kind: "top" as const },
-    fullPage: true,
-    contentAssertions: DOLLAR_PRICES_ASSERTIONS,
-    description: `Three price sentences (\`$19 ... ($200)\`, \`$5 and $6\`, \`$100–$380\`), three real math spans and four bold prices, ${theme}, 900 px pane: the preview keeps prices as text and typesets only valid math.`,
-  })),
-  ...([
-    { name: "light", theme: "light", mode: undefined },
-    { name: "dark", theme: "dark", mode: undefined },
-    { name: "cream", theme: "dark", mode: "cream" },
-  ] as const).flatMap((variant, index) => [
-    {
-      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-      id: `table-editing/v0${6 + index}-row-handles-${variant.name}-900`,
-      fixture: "56-table-row-handles",
-      theme: variant.theme,
-      ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
-      ...WIDE,
-      scroll: { kind: "top" as const },
-      editMode: true,
-      contentAssertions: ROW_HANDLE_ASSERTIONS,
-      description: `Edit mode, ${variant.name} preview, 900 px pane: each body row of two pipe tables shows the list editor's handle just left of the table, centred on its row, the header rows show none, and the table that fills the column keeps its handles in the pane, unclipped.`,
-    },
-    {
-      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-      id: `table-editing/v${String(9 + index).padStart(2, "0")}-row-dragging-${variant.name}-900`,
-      fixture: "56-table-row-handles",
-      theme: variant.theme,
-      ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
-      ...WIDE,
-      scroll: { kind: "top" as const },
-      editMode: true,
-      pageActions: [{
-        drag: `[data-okf-row-handle-layer] .okf-table-row-handle[data-okf-row="1"]`,
-        over: `${MAIN} table:nth-of-type(1) tbody tr:nth-child(3)`,
-        hold: true as const,
-      }],
-      contentAssertions: ROW_DRAG_ASSERTIONS,
-      description: `Edit mode, ${variant.name} preview, 900 px pane, the first handle of the short table dragged over the third row with the button still down: the dragged row is dimmed and a line under the third row shows where it would land.`,
-    },
-  ]),
-  ...([
-    { name: "light", theme: "light", mode: undefined },
-    { name: "dark", theme: "dark", mode: undefined },
-    { name: "cream", theme: "dark", mode: "cream" },
-  ] as const).map((variant, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-    id: `table-editing/v${12 + index}-list-table-row-handles-${variant.name}-900`,
-    fixture: "57-list-table-row-handles",
-    theme: variant.theme,
-    ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
-    ...WIDE,
-    scroll: { kind: "top" as const },
-    editMode: true,
-    contentAssertions: LIST_ROW_HANDLE_ASSERTIONS,
-    description: `Edit mode, ${variant.name} preview, 900 px pane: each body row of two {list-table} directives (one header row, then two header rows) shows the list editor's handle just left of the table, centred on its row, the header rows show none, and no handle is clipped.`,
-  })),
-  ...([
-    { name: "light", theme: "light", mode: undefined },
-    { name: "dark", theme: "dark", mode: undefined },
-    { name: "cream", theme: "dark", mode: "cream" },
-  ] as const).flatMap((variant, index) => [
-    {
-      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-      id: `table-editing/v${15 + index}-row-handles-narrow-${variant.name}-360`,
-      fixture: "56-table-row-handles",
-      theme: variant.theme,
-      ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
-      width: NARROW360.width,
-      height: 1000,
-      scroll: { kind: "top" as const },
-      editMode: true,
-      contentAssertions: NARROW_ROW_HANDLE_ASSERTIONS,
-      description: `Edit mode, ${variant.name} preview, 360 px pane: the tables leave no room on their left, so they are pushed right by a handle's width; the handles stay in the pane, left of the tables and centred on their rows, even where a table scrolls sideways.`,
-    },
-    {
-      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-      id: `table-editing/v${18 + index}-list-table-row-handles-narrow-${variant.name}-360`,
-      fixture: "57-list-table-row-handles",
-      theme: variant.theme,
-      ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
-      width: NARROW360.width,
-      height: 1000,
-      scroll: { kind: "top" as const },
-      editMode: true,
-      contentAssertions: LIST_ROW_HANDLE_ASSERTIONS,
-      description: `Edit mode, ${variant.name} preview, 360 px pane: the two {list-table} directives keep their handles in the pane, left of the tables and centred on their rows.`,
-    },
-  ]),
-  ...([
-    { name: "light", theme: "light", mode: undefined },
-    { name: "dark", theme: "dark", mode: undefined },
-    { name: "cream", theme: "dark", mode: "cream" },
-  ] as const).map((variant, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-    id: `table-editing/v${21 + index}-row-handles-scrolling-table-${variant.name}-900`,
-    fixture: "58-wide-table-row-handles",
-    theme: variant.theme,
-    ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
-    ...WIDE,
-    scroll: { kind: "top" as const },
-    editMode: true,
-    contentAssertions: WIDE_ROW_HANDLE_ASSERTIONS,
-    description: `Edit mode, ${variant.name} preview, 900 px pane: a pipe table of fourteen columns, wider than the pane and scrolled sideways, keeps the handle of each body row left of the table, outside its scrolling box, visible and centred on its row.`,
-  })),
-  ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-048
-    id: `table-editing/v${24 + index}-table-bar-groups-${theme}-360`,
-    fixture: "60-table-bar-groups",
-    theme,
-    width: NARROW360.width,
-    height: 800,
-    scroll: { kind: "selector" as const, value: "main table:not(.okf-properties) tbody td:nth-child(3)", offset: 72 },
-    editMode: true,
-    editTarget: "table-cell" as const,
-    machineChecks: ["overlay-covers-text", "overlay-clipped"],
-    description: `The table bar of a cell editor, ${theme}, 360 px pane: a rule before Col left and before List table but none between Col left and Col right and Col \u2212, and the rule of the cell formatting group goes with the group onto its own line.`,
-  })),
 ];

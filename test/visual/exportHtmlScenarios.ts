@@ -16,7 +16,7 @@ export const EXPORT_HTML_SCENARIOS: ScenarioDefinition[] = ([
   // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
   // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
   // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
-  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091
+  // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091#S1
   id: `toolbar-navigation/v${variant.number}-export-html-${variant.name}-900`,
   fixture: "87-export-html",
   theme: variant.theme,

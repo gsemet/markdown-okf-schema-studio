@@ -87,14 +87,12 @@ from capture_layout_checks import (
 )
 from capture_toc_checks import check_toc_column, check_toc_shot
 from capture_comment_checks import (
-  FIRST_GAP_REPORT_DIR,
   check_code_copy,
   check_comment_chips,
   check_comment_toggle,
   check_edit_affordances,
   check_edit_palette_tall,
   check_figure_anchors,
-  check_first_element_gap,
   check_inline_thread,
   check_comment_button_thread,
   check_comment_marks_hidden,
@@ -103,6 +101,7 @@ from capture_comment_checks import (
   check_slash_menu,
   check_table_toolbar_tall,
 )
+from capture_first_gap_checks import FIRST_GAP_REPORT_DIR, check_first_element_gap
 from capture_width_switch import apply_width_switch
 from capture_export_html import check_export_html
 from capture_width_scroll import check_width_mode_scroll

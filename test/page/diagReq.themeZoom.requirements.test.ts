@@ -42,7 +42,8 @@ function themePage(options: {
   return { theme, root };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-001
+// @tests_req SwRS-MDOKFSTUDIO-THEME-001#S2
+// @tests_req SwRS-MDOKFSTUDIO-THEME-001#S3
 test("an unknown theme mode is ignored: the saved mode comes next, Cream last", () => {
   assert.equal(themePage({ context: "sepia" }).theme.mode(), "cream");
   assert.equal(themePage({ context: "sepia", saved: "white" }).theme.mode(), "white");
@@ -118,7 +119,7 @@ function stabilisedScroll(): number {
   return baseline.windowState.scrollY;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-038
+// @tests_req SwRS-MDOKFSTUDIO-THEME-038#S8
 test("a zoom change keeps the text at the reading line, with or without an anchor already set", () => {
   const expected = stabilisedScroll();
   assert.notEqual(expected, 250, "the reflow moves the reading line");

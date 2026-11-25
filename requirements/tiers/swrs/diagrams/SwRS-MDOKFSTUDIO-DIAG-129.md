@@ -16,6 +16,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
+scenarios:
+- id: S1
+  title: The script of an engine follows its figure
+- id: S2
+  title: A figure appearing or leaving changes the page shell
+- id: S3
+  title: The Mermaid renderer loads the diagram types it needs
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,7 +39,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the rendered content holds a diagram or chart figure, the extension SHALL add the script of that engine to the page once, with the page nonce, and SHALL add no script of an engine whose figure the page does not hold.
 
-### Scenario (nominal): The script of an engine follows its figure
+### Scenario S1 (nominal): The script of an engine follows its figure
 
 | Rendered content | Outcome |
 | --- | --- |
@@ -43,13 +50,13 @@ When the rendered content holds a diagram or chart figure, the extension SHALL a
 | figures of two engines | each of the two scripts appears once |
 | a figure of one engine and none of another | the page holds no script tag of the other engine |
 
-### Scenario (boundary): A figure appearing or leaving changes the page shell
+### Scenario S2 (boundary): A figure appearing or leaving changes the page shell
 
 - GIVEN a page with a Mermaid figure or a chart
 - WHEN a content update adds a figure of another engine, or removes the only figure of an engine
 - THEN the shell key differs, so the page is loaded again with the scripts that its content needs instead of being patched in place
 
-### Scenario (nominal): The Mermaid renderer loads the diagram types it needs
+### Scenario S3 (nominal): The Mermaid renderer loads the diagram types it needs
 
 - GIVEN a document with a Mermaid figure
 - WHEN the page loads the renderer

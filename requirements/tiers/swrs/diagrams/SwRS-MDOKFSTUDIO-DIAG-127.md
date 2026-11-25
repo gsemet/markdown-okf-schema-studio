@@ -14,6 +14,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
+scenarios:
+- id: S1
+  title: A click opens the editor
+- id: S2
+  title: The picture is a mapped block
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,13 +36,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer clicks an svg picture in edit mode, the preview SHALL open the source editor of the block that holds it, as it does for a Mermaid diagram.
 
-### Scenario (nominal): A click opens the editor
+### Scenario S1 (nominal): A click opens the editor
 
 - GIVEN edit mode on and a page with an svg picture
 - WHEN the writer clicks the picture
 - THEN the source editor of the block that holds it opens over the figure, with the lines of the fence or of the raw svg
 
-### Scenario (boundary): The picture is a mapped block
+### Scenario S2 (boundary): The picture is a mapped block
 
 - GIVEN an svg fence or a raw svg block
 - WHEN the preview renders it

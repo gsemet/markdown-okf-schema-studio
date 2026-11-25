@@ -24,7 +24,8 @@ async function waitFor(description: string, predicate: () => boolean, timeoutMs 
 }
 
 // @tests_req StRS-MDOKFSTUDIO-PALETTE-007
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-192
 /** The image button's native dialog: relative path of the pick, refusals, cancel (dialog stubbed). */
 export async function run(): Promise<void> {

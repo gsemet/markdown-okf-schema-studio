@@ -44,7 +44,8 @@ function virtualLocator() {
 
 const documentIn = (...segments: string[]) => path.join(ROOT, "docs", ...segments, "a.md");
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S3
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S4
 test("an answer is trusted for fewer than 2000 ms, and the disk is checked again at exactly 2000 ms", async () => {
   const { disk, locator, put } = virtualLocator();
   put(confText("deflist"), 1);
@@ -66,7 +67,7 @@ test("an answer is trusted for fewer than 2000 ms, and the disk is checked again
   assert.ok(disk.stats > statsAfterRecheck);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S4
 test("a conf.py is parsed again when its modification time or its size changes, and only then", async () => {
   const { disk, locator, put } = virtualLocator();
   const document = documentIn();
@@ -86,7 +87,7 @@ test("a conf.py is parsed again when its modification time or its size changes, 
   assert.equal(disk.reads, 3, "nothing changed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S4
 test("a conf.py that disappears is forgotten, so one that comes back is read again even with the same time and size", async () => {
   const { disk, locator, put } = virtualLocator();
   put(confText("deflist"), 10, 50);
@@ -101,7 +102,8 @@ test("a conf.py that disappears is forgotten, so one that comes back is read aga
   assert.deepEqual([...(await locator.enabledMystExtensions(documentIn("b"), ROOT)) ?? []], ["colon_fence"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S4
 test("a conf.py that cannot be read gives no set, and does not stop other lookups", async () => {
   const { disk, locator, put } = virtualLocator();
   disk.files.set(CONF_PATH, { mtimeMs: 1, size: 5, text: "" });

@@ -19,6 +19,25 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: The banner shows the count and both buttons
+- id: S2
+  title: Other statuses show the full list instead
+- id: S3
+  title: The banner takes no layout room
+- id: S4
+  title: Open Problems opens the Problems view
+- id: S5
+  title: A malformed or mismatched previewShowProblems is ignored
+- id: S6
+  title: Closing dismisses the banner for that document
+- id: S7
+  title: The banner returns when the warning set changes
+- id: S8
+  title: The memory of closed banners is bounded
+- id: S9
+  title: Restricted Mode lists the warnings in the tooltip
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -29,7 +48,7 @@ implemented_in_files:
 - src/session/features/viewState.ts
 - src/session/workspaceChoices.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/page/modules/warningBanner.test.ts
 - test/session/commentAuthorResource.test.ts
@@ -50,17 +69,17 @@ supersedes:
 
 When a render succeeds with conf.py warnings, the extension SHALL show a one-line banner N MyST syntax warning(s) from conf.py with a warning icon, an Open Problems button and a Close the warning button, as a polite status after the status region in Tab order, that takes no layout room and stays closed for that document until the set of warning texts changes.
 
-### Scenario (nominal): The banner shows the count and both buttons
+### Scenario S1 (nominal): The banner shows the count and both buttons
 - GIVEN two warnings and a successful render
 - WHEN the preview renders
 - THEN the banner shows the count (2 MyST syntax warnings from conf.py), the warning icon, an Open Problems button and a Close the warning button, as a polite status after the status region in Tab order
 
-### Scenario (refusal): Other statuses show the full list instead
+### Scenario S2 (refusal): Other statuses show the full list instead
 - GIVEN an error, stale, recovery or pending status
 - WHEN the preview renders
 - THEN the status region shows the full list instead of the banner
 
-### Scenario (boundary): The banner takes no layout room
+### Scenario S3 (boundary): The banner takes no layout room
 | Input | Outcome |
 | --- | --- |
 | The banner appears or closes | No content or scroll anchor moves |
@@ -68,7 +87,7 @@ When a render succeeds with conf.py warnings, the extension SHALL show a one-lin
 | A very narrow pane (460 px) | It stays on one line with an ellipsis and adds no sideways scroll |
 | Light, dark and cream themes | It stays readable |
 
-### Scenario (nominal): Open Problems opens the Problems view
+### Scenario S4 (nominal): Open Problems opens the Problems view
 | Input (the reader activates Open Problems) | Outcome |
 | --- | --- |
 | A trusted preview | The host's Problems view opens |
@@ -76,18 +95,18 @@ When a render succeeds with conf.py warnings, the extension SHALL show a one-lin
 
 The message type previewShowProblems (page to host) carries the envelope fields only (documentId, revision, requestId), no further field, and passes the document gate (SwRS-MDOKFSTUDIO-TRUST-052 for the envelope, SwRS-MDOKFSTUDIO-TRUST-065 for the gate).
 
-### Scenario (refusal): A malformed or mismatched previewShowProblems is ignored
+### Scenario S5 (refusal): A malformed or mismatched previewShowProblems is ignored
 | Input | Outcome |
 | --- | --- |
 | previewShowProblems without the envelope | not a registered message; ignored, no handler runs |
 | previewShowProblems whose documentId is not the shown document | dropped by the document gate; the Problems view is not opened |
 
-### Scenario (nominal): Closing dismisses the banner for that document
+### Scenario S6 (nominal): Closing dismisses the banner for that document
 - GIVEN the banner shown
 - WHEN the reader activates the Close the warning button
 - THEN the banner is removed at once without moving anything, the warning set key is sent, the host remembers it per document until VS Code restarts and hands it back on reload, so the banner stays closed after a reload and a second preview of the file shares the dismissal
 
-### Scenario (boundary): The banner returns when the warning set changes
+### Scenario S7 (boundary): The banner returns when the warning set changes
 | Input (after a dismissal) | Outcome |
 | --- | --- |
 | A new warning text | The banner shows again |
@@ -96,12 +115,12 @@ The message type previewShowProblems (page to host) carries the envelope fields 
 
 The warnings stay in the status region in every case.
 
-### Scenario (boundary): The memory of closed banners is bounded
+### Scenario S8 (boundary): The memory of closed banners is bounded
 | Input | Outcome |
 | --- | --- |
 | A banner closed for a 201st document in one session | The least recently used dismissal is forgotten (that document shows its banner again) and the memory keeps at most 200 documents |
 
-### Scenario (boundary): Restricted Mode lists the warnings in the tooltip
+### Scenario S9 (boundary): Restricted Mode lists the warnings in the tooltip
 - GIVEN an untrusted workspace
 - WHEN the preview renders
 - THEN no warning is published to the Problems view, the banner has no Open Problems button, its tooltip lists the warning lines and the Close the warning button is kept and closes the banner

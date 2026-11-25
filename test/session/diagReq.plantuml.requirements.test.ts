@@ -22,7 +22,8 @@ import { createMemoryLogger } from "../../src/host-memory/memoryLogger";
 
 const DOCUMENT = "file:///notes/doc.md";
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
 test("an include request is handled for the current document even one render behind, and dropped otherwise", () => {
   const handled: string[] = [];
   const session = {
@@ -61,7 +62,8 @@ test("an include request is handled for the current document even one render beh
   assert.deepEqual(handled, ["previewPlantUmlInclude"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
 test("an include request is answered once with the request's edit id: the file, or a refusal", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "diag-req-include-"));
   try {
@@ -115,7 +117,8 @@ test("an include request is answered once with the request's edit id: the file, 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-053
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-053#S6
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-053#S8
 test("the include watch is emptied when the preview follows another document", () => {
   const includeWatch = new PlantUmlIncludeWatch();
   includeWatch.remember("/notes/included.puml");
@@ -186,7 +189,8 @@ const applyOf = (controller: PlantUmlController): (
   preview: PreviewSession, result: unknown, generation: number, plantUml: unknown,
 ) => void => (controller as unknown as { apply: never }).apply;
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S7
 test("each failing JAR diagram is also a plantuml-render warning with the document path", () => {
   const { controller, preview, result, set } = applyFixture(true);
   const plantUml = {
@@ -216,7 +220,7 @@ test("each failing JAR diagram is also a plantuml-render warning with the docume
   assert.doesNotMatch(ok.set[0]!.html, /plantuml-render/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-105
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S6
 test("JAR results of a render that is no longer the current one are dropped", () => {
   const plantUml = { diagrams: [{ status: "rendered", svg: "<svg></svg>" }], diagnostics: [] };
 
@@ -234,7 +238,7 @@ test("JAR results of a render that is no longer the current one are dropped", ()
   assert.match(current.set[0]!.html, /myst-plantuml-image/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-053
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-053#S3
 test("an include request is refused for the Java engine and for a file id the host never issued", async () => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "diag-req-include-gate-")));
   try {
@@ -279,7 +283,8 @@ test("an include request is refused for the Java engine and for a file id the ho
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-053
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-053#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-053#S3
 test("the host remembers the canonical path of a served include and of a missing one, and nothing for a refused one", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "diag-req-watch-"));
   try {

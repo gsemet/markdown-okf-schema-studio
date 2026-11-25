@@ -30,7 +30,7 @@ implemented_in_files:
 - src/core/render/mystRawHtml.ts
 - src/core/render/mystRenderer.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/core/render/mystPaletteRendering.test.ts
 - test/core/render/mystRawHtml.test.ts
 - test/core/render/renderReq.gfm.requirements.test.ts

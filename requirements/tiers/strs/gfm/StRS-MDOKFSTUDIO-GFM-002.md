@@ -13,13 +13,18 @@ scope: gfm
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-18T18:51:15+01:00'
+approved_at: '2026-11-25T15:37:43+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-18T18:51:15+01:00'
+  at: '2026-11-25T15:37:43+01:00'
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Paste a link and a table
+- id: S2
+  title: Alerts and raw HTML tables
 user_need: As a writer, I see GitHub Flavored Markdown the way GitHub shows it,
   with working links and the raw HTML that GitHub documents rely on, and nothing
   unsafe is rendered.
@@ -102,7 +107,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Paste a link and a table
+#### Path S1: Paste a link and a table
 
 1. Prose holds a bare URL
    - SwRS-MDOKFSTUDIO-GFM-001: the page renders it as a link that follows the Markdown link policy
@@ -112,7 +117,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-GFM-008 (boundary): a single tilde pair and tildes in code stay literal
 3. The struck text, the footnote and the aligned table are drawn
 
-#### Path 2: Alerts and raw HTML tables
+#### Path S2: Alerts and raw HTML tables
 
 1. A block quote starts with [!NOTE], [!TIP], [!IMPORTANT], [!WARNING] or [!CAUTION]
    - SwRS-MDOKFSTUDIO-GFM-009: the page renders it as an admonition of that type

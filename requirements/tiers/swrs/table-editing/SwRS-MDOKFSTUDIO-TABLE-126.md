@@ -22,7 +22,7 @@ supersedes:
 implemented_in_files:
 - src/page/features/tableCellEditor.ts
 tested_in_files:
-- test/page/runtimeTableCellEditor.test.ts
+- test/page/runtimeTableCellEditorReveal.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

@@ -20,6 +20,17 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-005
+scenarios:
+- id: S1
+  title: An unclosed or empty directive shows its source
+- id: S2
+  title: An unclosed fence in the middle of a document
+- id: S3
+  title: Nested constructs and frontmatter
+- id: S4
+  title: Labels and includes are not touched
+- id: S5
+  title: A +++ line inside a container renders as text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,24 +54,24 @@ supersedes:
 
 When a document holds a directive or fence the parser cannot build (an unclosed or empty backtick or colon fence such as a list-table or table without its body, also nested in another directive), the extension SHALL render the raw source lines of that construct as a code block and render the rest of the document, instead of failing the render. When an opening fence (backticks or colons, with or without a directive name) has no closing fence and a heading follows it, the extension SHALL render only the opening line as a code block, report a warning ("unclosed fence") on that line, and render the lines after it as ordinary document content. When a document holds a +++ line inside a container (a MyST directive, a quote, a list item or an alert), the extension SHALL render the line as text and keep rendering the document; only a +++ line at the root of the document stays a block break.
 
-### Scenario (nominal): An unclosed or empty directive shows its source
+### Scenario S1 (nominal): An unclosed or empty directive shows its source
 The parser reports a directive without its required body as an error the HTML writer cannot emit; the construct is shown as written instead.
 - GIVEN a document ending with a ```` ```{list-table} ```` line, or holding a `:::{table} Caption` fence with no body, and other text around it
 - WHEN the preview renders
 - THEN the lines of the construct, options and closing fence included, appear as one code block in place, and the text before and after renders as usual
 
-### Scenario (nominal): An unclosed fence in the middle of a document
+### Scenario S2 (nominal): An unclosed fence in the middle of a document
 Markdown runs an unclosed fence to the end of the file; the preview departs from that so the sections after it stay visible. The source is never changed.
 - GIVEN a document with a ```` ```{list-table} ````, a `:::{table}`, a `:::{note}` or a plain ```` ``` ```` line that has no closing fence, followed by paragraphs and a heading
 - WHEN the preview renders
 - THEN the opening line appears as a code block, a warning with the code `unclosed-fence` is reported on that line, and the paragraphs and headings after it render as usual, also when the fence is nested in a closed directive or several fences are left open
 
-### Scenario (boundary): Nested constructs and frontmatter
+### Scenario S3 (boundary): Nested constructs and frontmatter
 - GIVEN an unclosed directive inside a `{note}` admonition, or a document with frontmatter or CRLF line breaks
 - WHEN the preview renders
 - THEN the raw block sits inside the admonition, and its lines are those of the document, frontmatter lines counted
 
-### Scenario (refusal): Labels and includes are not touched
+### Scenario S4 (refusal): Labels and includes are not touched
 | Input | Outcome |
 | --- | --- |
 | A label opened with `(name` and never closed | the line stays a paragraph |
@@ -69,7 +80,7 @@ Markdown runs an unclosed fence to the end of the file; the preview departs from
 | A closed fence, or a fence unclosed to the end of the file with no heading after it | unchanged: a plain code block runs to the end of the file, a directive without body is shown as the code block of its lines |
 | A directive error with no usable position (for example one from an included file) | the code block holds the opening fence rebuilt from the directive name and arguments |
 
-### Scenario (boundary): A +++ line inside a container renders as text
+### Scenario S5 (boundary): A +++ line inside a container renders as text
 - GIVEN a `:::{note}` directive whose body holds a line `+++` between the paragraphs "a" and "b"
 - WHEN the preview renders
 - THEN the note shows the paragraphs "a", "+++" and "b", and the document renders

@@ -59,7 +59,7 @@ const HEADING_ASSERTIONS: ContentAssertion[] = [
 
 export const TOOLBAR_FLOAT_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043#S5
     id: "layout-width/v88-toolbar-float-first-lines-cream-393",
     fixture: "75-toolbar-float",
     theme: "light",
@@ -72,7 +72,7 @@ export const TOOLBAR_FLOAT_SCENARIOS: ScenarioDefinition[] = [
       + "the first paragraph wrap around the toolbar, no line of their text runs under it, and the heading keeps its 40px gap.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043#S2
     id: "layout-width/v89-toolbar-float-box-below-reach-cream-900",
     fixture: "29-width-modes",
     theme: "light",
@@ -85,7 +85,7 @@ export const TOOLBAR_FLOAT_SCENARIOS: ScenarioDefinition[] = [
       + "beside the toolbar, and the small table under it starts below the toolbar's reach, centred on the column.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043#S6
     id: "layout-width/v90-heading-clears-raw-align-light-900",
     fixture: "76-heading-clears-align",
     theme: "light",

@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { isSafeOkfColor } from "../../../src/core/security/spanColors";
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-034
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034#S1
 test("the colour grammar accepts hex and bounded rgb()/rgba()", () => {
   for (const good of ["#c00", "#c00f", "#cc0000", "#CC000080", "rgb(0, 128, 255)", "rgb(10%,20%,30.5%)",
     "rgba(1,2,3,0.5)", "rgba(1,2,3,.5)", "rgba(1,2,3,1)", "rgba(1,2,3,50%)"]) {
@@ -17,7 +17,7 @@ test("the colour grammar accepts hex and bounded rgb()/rgba()", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-034
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034#S4
 test("the colour grammar accepts names from a closed list and hsl()/hsla()", () => {
   for (const good of ["red", "RebeccaPurple", "transparent", " white ", "hsl(120, 100%, 50%)", "hsl(120deg,100%,50%)",
     "hsla(0, 0%, 0%, 0.5)", "hsla(360,10.5%,20%,50%)", "HSL(0,0%,0%)"]) {
@@ -30,7 +30,7 @@ test("the colour grammar accepts names from a closed list and hsl()/hsla()", () 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-034
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034#S4
 test("the colour grammar refuses every injection shape", () => {
   const injections = [
     "var(--x)", "red; background: url(x)", "red}body{color:red", "red{", "red\\", "\\72ed", "r\\65 d", "re\\\nd",
@@ -44,7 +44,7 @@ test("the colour grammar refuses every injection shape", () => {
   for (const bad of injections) assert.equal(isSafeOkfColor(bad), false, JSON.stringify(bad));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-034
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034#S4
 test("the colour grammar accepts the space form and four keywords, strictly", () => {
   for (const good of ["rgb(0 0 0)", "rgb(10% 20% 30%)", "rgb(0 0 0 / 50%)", "rgba(1 2 3 / .5)", "rgb(1 2 3/0.5)",
     "hsl(120 100% 50%)", "hsl(120deg 100% 50% / 0.4)", "hsla(0 0% 0% / 1)", "currentcolor", "CurrentColor", "inherit",

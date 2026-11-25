@@ -14,7 +14,7 @@ import { PALETTE_ICONS } from "../../../src/core/palette/paletteIcons";
 
 const descriptors = PALETTE_ACTION_IDS.map((id) => [id, PALETTE_ACTIONS[id] as PaletteActionDescriptor] as const);
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-017
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-017#S4
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("the registry lists every palette action once, in display order", () => {
   assert.deepEqual(PALETTE_ACTION_IDS, [

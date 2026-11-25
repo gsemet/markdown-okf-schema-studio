@@ -16,14 +16,25 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LAYOUT-004
+scenarios:
+- id: S1
+  title: Paragraph first in read mode
+- id: S2
+  title: Elements with their own margin in read mode
+- id: S3
+  title: Edit mode
+- id: S4
+  title: Open first-block editor
+- id: S5
+  title: Other first blocks and the Start writing button
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/preview/styles/contentLayoutStyles.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
-- test/visual/capture_comment_checks.py
+- test/core/preview/previewStylesGutter.test.ts
+- test/visual/capture_first_gap_checks.py
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-LAYOUT-008
@@ -37,27 +48,27 @@ supersedes:
 
 When a document opens in read mode or in edit mode, the extension SHALL start its first element, whatever the element is, 40 px below the top of the pane as a top margin of that element, including the frame of an open first-block editor with its edition palette on top and the Start writing button of an empty document.
 
-### Scenario (nominal): Paragraph first in read mode
+### Scenario S1 (nominal): Paragraph first in read mode
 - GIVEN a document whose first element is a paragraph, read mode, 900 px pane
 - WHEN the preview is rendered
 - THEN the paragraph starts 40 px (within 4 px) below the top of the pane
 
-### Scenario (nominal): Elements with their own margin in read mode
+### Scenario S2 (nominal): Elements with their own margin in read mode
 - GIVEN documents that open with an h1, an h2, an h3, a table, an image, an admonition, a properties table or a schema properties table
 - WHEN each preview is rendered
 - THEN each first element starts 40 px (within 4 px) below the top, and the column itself has no 40 px padding and does not move
 
-### Scenario (nominal): Edit mode
+### Scenario S3 (nominal): Edit mode
 - GIVEN edit mode on and a document whose first element is a paragraph, then one that opens with an h1, h2 or h3, then one whose first element is an image, an admonition, a table or a properties table
 - WHEN the preview is rendered
 - THEN the first element starts 40 px (within 4 px) below the top in each case
 
-### Scenario (nominal): Open first-block editor
+### Scenario S4 (nominal): Open first-block editor
 - GIVEN edit mode on, a wide pane (900 px) and the first paragraph opened in its editor
 - WHEN the frame is rendered
 - THEN the frame, with the palette on top, starts 40 px (within 4 px) below the top and the palette starts at the height of the editor frame
 
-### Scenario (boundary): Other first blocks and the Start writing button
+### Scenario S5 (boundary): Other first blocks and the Start writing button
 | Input | Outcome |
 | --- | --- |
 | The first block is an h1, h2, h3, an image or an admonition and is opened in its editor | The frame starts 40 px (within 4 px) below the top |

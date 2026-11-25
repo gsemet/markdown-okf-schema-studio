@@ -338,7 +338,7 @@ test("P11: ranking puts a prefix before a word start before a subsequence", () =
     "one letter: prefix, word start, then contained");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-017
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-017#S3
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-263
 test("P11: the registry's aliases find the expected command first", () => {
   const first = (mode: EditActionMode, query: string): string | undefined => {

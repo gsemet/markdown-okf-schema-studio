@@ -32,7 +32,8 @@ function makeRoots(): { output: string; outside: string } {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-013
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S5
 test("canonicalizes local resources and rejects hostile paths", needsSymlinks, async () => {
   const { output, outside } = makeRoots();
   fs.symlinkSync(path.join(outside, "secret.txt"), path.join(output, "escape.txt"));

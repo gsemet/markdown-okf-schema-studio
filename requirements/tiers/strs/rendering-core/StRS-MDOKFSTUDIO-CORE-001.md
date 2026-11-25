@@ -11,10 +11,10 @@ scope: rendering-core
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-17T19:27:51+01:00'
+approved_at: '2026-11-25T15:37:43+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-17T19:27:51+01:00'
+  at: '2026-11-25T15:37:43+01:00'
 origin: native
 tier: StRS
 derives_from: []

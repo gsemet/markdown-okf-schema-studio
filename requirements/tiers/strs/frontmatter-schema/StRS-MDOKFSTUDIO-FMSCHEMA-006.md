@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: A schema is found and loaded
+- id: S2
+  title: No schema is looked up
 user_need: As a writer of Open Knowledge Format documents, I get schema-aware
   metadata simply by setting the type and learn when no schema is found; as a
   schema author, I write schemas in the format I prefer, reuse shared
@@ -84,7 +89,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: A schema is found and loaded
+#### Path S1: A schema is found and loaded
 
 1. The frontmatter has a string `type`
    - SwRS-MDOKFSTUDIO-FMSCHEMA-019: the page walks up to the nearest `_schema` folder and picks the file named by the type
@@ -96,7 +101,7 @@ stateDiagram-v2
    - SwRS-MDOKFSTUDIO-FMSCHEMA-027: an edit of the schema is used at the next analysis, without refreshing the open preview by itself
 4. The next analysis uses the new content of the schema
 
-#### Path 2: No schema is looked up
+#### Path S2: No schema is looked up
 
 1. The frontmatter has no string `type`
    - SwRS-MDOKFSTUDIO-FMSCHEMA-005: the page shows a two-column Names and Values table of the keys in source order

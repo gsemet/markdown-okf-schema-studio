@@ -15,6 +15,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Setting off
+- id: S2
+  title: Setting at its default
+- id: S3
+  title: Document without frontmatter
+- id: S4
+  title: A frontmatter setting change re-analyses the open previews
+- id: S5
+  title: Which setting changes re-analyse
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,31 +50,31 @@ supersedes:
 
 When `markdownOkfSchemaStudio.frontmatter.propertiesTable` is false, the extension SHALL show neither the properties table nor the raw frontmatter text and still render the body of the document.
 
-### Scenario (nominal): Setting off
+### Scenario S1 (nominal): Setting off
 
 - GIVEN a document with frontmatter and the heading `# Title`, with `frontmatter.propertiesTable` set to false
 - WHEN the preview is rendered
 - THEN no properties table and no frontmatter text appear and the heading Title is rendered at the top of the preview
 
-### Scenario (nominal): Setting at its default
+### Scenario S2 (nominal): Setting at its default
 
 - GIVEN the same document with `frontmatter.propertiesTable` unset (default true, boolean, no other accepted value)
 - WHEN the preview is rendered
 - THEN the properties table is shown above the heading
 
-### Scenario (boundary): Document without frontmatter
+### Scenario S3 (boundary): Document without frontmatter
 
 - GIVEN a document without frontmatter and the setting false
 - WHEN the preview is rendered
 - THEN the body is rendered as with the setting on
 
-### Scenario (nominal): A frontmatter setting change re-analyses the open previews
+### Scenario S4 (nominal): A frontmatter setting change re-analyses the open previews
 
 - GIVEN an open preview of the active document with an undeclared field
 - WHEN `frontmatter.strictAdditionalProperties` is changed to true
 - THEN the open table shows the unknown-field warning without reopening the preview
 
-### Scenario (boundary): Which setting changes re-analyse
+### Scenario S5 (boundary): Which setting changes re-analyse
 
 | Input | Outcome |
 | --- | --- |

@@ -40,7 +40,7 @@ function toctree(names: string[], options = ""): string {
 
 const numbered = (count: number): string[] => Array.from({ length: count }, (_, index) => `doc${index + 1}`);
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S1
 test("a toctree shows at most 500 entries and all of them when there are 500", async () => {
   const over = toctreeLabels((await renderMyst(toctree(numbered(501)), context({}))).html);
   assert.equal(over.length, 500);
@@ -50,7 +50,7 @@ test("a toctree shows at most 500 entries and all of them when there are 500", a
   assert.equal(exact.length, 500);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S2
 test("a toctree with :reversed: flips the entry order and keeps the written order otherwise", async () => {
   const names = ["alpha", "beta", "gamma"];
   assert.deepEqual(toctreeLabels((await renderMyst(toctree(names, ":reversed:"), context({}))).html), ["gamma", "beta", "alpha"]);
@@ -74,7 +74,7 @@ const EXTENSION_SAMPLES = [
 const warnings = (diagnostics: Array<{ code?: string }>): number =>
   diagnostics.filter((entry) => entry.code === "myst-extension").length;
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-072
+// @tests_req SwRS-MDOKFSTUDIO-MYST-072#S6
 test("at most 10 extension warnings are kept and 10 or fewer are all kept", async () => {
   const enabled = new Set<string>();
   const render = (count: number) => renderMyst(
@@ -97,7 +97,7 @@ test("an included file is not checked against conf.py while the document's own t
   assert.equal(warnings(own.diagnostics), 1, "the same syntax in the document's own text warns");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-017
+// @tests_req SwRS-MDOKFSTUDIO-MYST-017#S3
 test("doc and download roles render as plain links and numref as an inert placeholder", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),

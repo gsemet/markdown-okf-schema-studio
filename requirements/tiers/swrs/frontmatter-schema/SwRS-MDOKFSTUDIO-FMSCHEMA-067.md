@@ -21,6 +21,23 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-063
 - SwRS-MDOKFSTUDIO-FMSCHEMA-046
+scenarios:
+- id: S1
+  title: Tooltip fields found
+- id: S2
+  title: Tooltip fields missing or structured
+- id: S3
+  title: Excerpt beside the link
+- id: S4
+  title: Line of the marker
+- id: S5
+  title: No line label
+- id: S6
+  title: Details refresh when the target changes on disk
+- id: S7
+  title: Tooltip opens on hover and focus
+- id: S8
+  title: Tooltip closes
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -57,13 +74,13 @@ supersedes:
 
 When a link annotation lists `tooltip_shows_fields`, `preview_shows_fields` or `show_line_number`, the extension SHALL show the details of the resolved target with the link, adding to its tooltip one "name: value" line per listed field found in the target's frontmatter (counting only string, number and boolean values), showing beside it an excerpt of the listed preview fields and the line of its marker, refreshing them when the target changes on disk, and presenting the tooltip on hover and focus until it closes.
 
-### Scenario (nominal): Tooltip fields found
+### Scenario S1 (nominal): Tooltip fields found
 
 - GIVEN tooltip_shows_fields owner and count and a target whose frontmatter has owner Bob and count 3
 - WHEN the table is rendered
 - THEN the tooltip lists the path, then owner: Bob and count: 3
 
-### Scenario (boundary): Tooltip fields missing or structured
+### Scenario S2 (boundary): Tooltip fields missing or structured
 
 | Listed field | Outcome |
 | --- | --- |
@@ -71,7 +88,7 @@ When a link annotation lists `tooltip_shows_fields`, `preview_shows_fields` or `
 | Holding a mapping (not a string, number or boolean) | Not in the tooltip |
 | Target with a leading byte-order mark | Read normally |
 
-### Scenario (nominal): Excerpt beside the link
+### Scenario S3 (nominal): Excerpt beside the link
 
 | Setup | Outcome |
 | --- | --- |
@@ -79,13 +96,13 @@ When a link annotation lists `tooltip_shows_fields`, `preview_shows_fields` or `
 | An excerpt longer than the room | Clipped with an ellipsis by CSS; the excerpt element has the full text in its own title |
 | A preview field that the target does not define | No excerpt is shown |
 
-### Scenario (nominal): Line of the marker
+### Scenario S4 (nominal): Line of the marker
 
 - GIVEN basename_marker Evidence, id_marker id, the document id dd, show_line_number true and a target whose tenth line is Evidence dd
 - WHEN the table is rendered
 - THEN the link shows line 10 (the 1-based line of the first line of the target that carries the marker followed by the document identity)
 
-### Scenario (boundary): No line label
+### Scenario S5 (boundary): No line label
 
 | Input | Outcome |
 | --- | --- |
@@ -95,7 +112,7 @@ When a link annotation lists `tooltip_shows_fields`, `preview_shows_fields` or `
 | The line xEvidence dd | Does not match (the marker must start the line or follow whitespace) |
 | An annotation without id_marker | The file name stem without extension of the document itself (not of the target) is the identity |
 
-### Scenario (nominal): Details refresh when the target changes on disk
+### Scenario S6 (nominal): Details refresh when the target changes on disk
 
 | Event | Outcome |
 | --- | --- |
@@ -103,7 +120,7 @@ When a link annotation lists `tooltip_shows_fields`, `preview_shows_fields` or `
 | The target is created | The link details are resolved again |
 | The target is deleted | The link turns into the not-found problem |
 
-### Scenario (nominal): Tooltip opens on hover and focus
+### Scenario S7 (nominal): Tooltip opens on hover and focus
 
 | Trigger | Outcome |
 | --- | --- |
@@ -112,7 +129,7 @@ When a link annotation lists `tooltip_shows_fields`, `preview_shows_fields` or `
 | A link that is pending | No tooltip (see SwRS-MDOKFSTUDIO-FMSCHEMA-063) |
 | An invalid or unavailable span | Focusable, with the same tooltip |
 
-### Scenario (nominal): Tooltip closes
+### Scenario S8 (nominal): Tooltip closes
 
 | Trigger | Outcome |
 | --- | --- |

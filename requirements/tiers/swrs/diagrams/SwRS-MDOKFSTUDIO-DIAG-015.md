@@ -16,6 +16,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
+scenarios:
+- id: S1
+  title: Syntax error
+- id: S2
+  title: Reason with markup
+- id: S3
+  title: Theme switches redraw the error
+- id: S4
+  title: Changing reason
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,25 +44,25 @@ supersedes:
 
 When Mermaid cannot draw a diagram, the page SHALL show at the top of the diagram element exactly one message "Unable to render Mermaid diagram. Its source remains available below." followed by one collapsed "Show the parser error" section holding the parser's reason as plain text, and set data-render-state to error.
 
-### Scenario (nominal): Syntax error
+### Scenario S1 (nominal): Syntax error
 
 - GIVEN a Mermaid diagram with invalid syntax
 - WHEN the page draws it
 - THEN the diagram element starts with the message "Unable to render Mermaid diagram. Its source remains available below.", then a closed details element titled "Show the parser error" holding the reason, and data-render-state is error; the "Diagram source" disclosure still holds the source
 
-### Scenario (boundary): Reason with markup
+### Scenario S2 (boundary): Reason with markup
 
 - GIVEN a parser reason that contains HTML text such as an image tag with an onerror handler
 - WHEN the page shows the error
 - THEN the reason is displayed as text, no element is created from it and the details element stays closed
 
-### Scenario (boundary): Theme switches redraw the error
+### Scenario S3 (boundary): Theme switches redraw the error
 
 - GIVEN an invalid Mermaid diagram
 - WHEN the theme changes through dark, white, cream and the original mode
 - THEN after each change the diagram holds one error message and one details section
 
-### Scenario (boundary): Changing reason
+### Scenario S4 (boundary): Changing reason
 
 - GIVEN an error shown for line 2 and a new error for line 3
 - WHEN the page shows the second error

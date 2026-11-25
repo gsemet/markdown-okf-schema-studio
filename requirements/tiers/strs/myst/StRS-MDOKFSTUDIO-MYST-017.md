@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: A figure
+- id: S2
+  title: A table
 user_need: As a writer, I want figures sized and aligned and every table form
   shown as a table, without building, so that I can judge the layout of my
   document in VS Code.
@@ -61,14 +66,14 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: A figure
+#### Path S1: A figure
 
 1. A document holds a figure directive
    - SwRS-MDOKFSTUDIO-MYST-031: the page renders the image with its alt text, caption and id
    - Option SwRS-MDOKFSTUDIO-MYST-031 (refusal): an invalid width is dropped
 2. The figure is shown with its width and alignment
 
-#### Path 2: A table
+#### Path S2: A table
 
 1. A document holds a list-table, csv-table or table directive
    - SwRS-MDOKFSTUDIO-MYST-063: the page renders an ordinary table with the table styles

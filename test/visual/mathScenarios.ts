@@ -19,9 +19,9 @@ const MATH_ASSERTIONS: ContentAssertion[] = [
 
 export const MATH_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req StRS-MDOKFSTUDIO-MYST-006
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-024
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-102
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-024#S1
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-024#S3
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-102#S1
     id: "myst/v47-maths-offline-light-900",
     fixture: "89-maths-offline",
     theme: "light",

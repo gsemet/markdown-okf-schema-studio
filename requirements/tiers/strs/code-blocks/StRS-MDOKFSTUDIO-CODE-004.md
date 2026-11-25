@@ -12,6 +12,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Copy a code sample
 user_need: Readers need to reuse code samples without selecting text by hand,
   even in Restricted Mode.
 derived_by:
@@ -75,7 +78,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Copy a code sample
+#### Path S1: Copy a code sample
 
 1. A code block is in the preview
    - SwRS-MDOKFSTUDIO-CODE-017: the pointer over the block, or its keyboard focus, shows the Copy code button at its top-right corner

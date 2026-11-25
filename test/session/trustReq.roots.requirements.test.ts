@@ -73,7 +73,8 @@ function fixture(trusted: boolean) {
   return { manager, first, second, documents, panel, roots, cleanup };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S7
 test("in Restricted Mode the resource root of a document in a subfolder is that subfolder", async () => {
   const f = fixture(false);
   try {
@@ -90,7 +91,7 @@ test("in Restricted Mode the resource root of a document in a subfolder is that 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S7
 test("in a trusted window the resource root is the folder that holds the document, the second one in a multi-root window", async () => {
   const f = fixture(true);
   try {
@@ -117,7 +118,8 @@ function ignored(): any {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S7
 test("a rendered page sets the resource root and the bundle folder as the roots of its panel", async () => {
   const sandbox = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "trust-roots-bundle-")));
   try {

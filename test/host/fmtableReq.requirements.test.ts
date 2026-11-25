@@ -40,7 +40,8 @@ function results(host: HostSession, from: number): Array<Record<string, unknown>
   return host.postedSince(from, FRONTMATTER_ERRORS);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S5
 test("a frontmatter save in an untrusted workspace is applied like in a trusted one", async (t) => {
   fakeVscode.workspace.isTrusted = false;
   const applied: number[] = [];
@@ -64,8 +65,9 @@ test("a frontmatter save in an untrusted workspace is applied like in a trusted 
   assert.deepEqual(applied, [1], "Restricted Mode edits the frontmatter in one document edit");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S5
 test("a frontmatter save on a file VS Code holds read-only answers the read-only reason, trusted or not", async (t) => {
   const originalApply = fakeVscode.workspace.applyEdit;
   t.after(() => {
@@ -89,7 +91,8 @@ test("a frontmatter save on a file VS Code holds read-only answers the read-only
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
 test("a frontmatter save from an older render is answered with a reopen hint; another document gets no answer", async (t) => {
   const host = await readyPreview(t);
   const identity = host.loadedIdentity();
@@ -159,7 +162,8 @@ test("a value save, an add, a rename and a remove are each one text edit of the 
   assert.deepEqual(sizes, [1, 1, 1, 1]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S12
 test("a frontmatter save that changes no text is answered saved and unchanged, with no document edit", async (t) => {
   const applied: number[] = [];
   const originalApply = fakeVscode.workspace.applyEdit;

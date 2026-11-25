@@ -231,7 +231,7 @@ test("a pasted image that cannot be read shows The image could not be read. and 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S9
 test("a rich text conversion answered after the editor closed inserts nothing; an open editor gets the Markdown", () => {
   for (const current of [false, true]) {
     let answer: ((result: { ok?: boolean; markdown?: unknown }) => void) | undefined;

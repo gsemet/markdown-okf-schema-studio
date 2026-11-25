@@ -19,7 +19,7 @@ import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem"
 
 const BUDGET_MESSAGE = "was not read: the include budget of this render is exhausted.";
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S6
 test("jarPath is ignored while useJar is off and used as soon as the JAR pipeline is chosen", async () => {
   const runner = fakeRunner(() => {
     throw new Error("no process may start");
@@ -62,7 +62,8 @@ test("jarPath is ignored while useJar is off and used as soon as the JAR pipelin
   assert.equal(runner.calls.length, 0, "a missing JAR is refused before any process starts");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-068
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S6
 test("after the include budget is exhausted every remaining diagram file shows the budget message, with one warning", async () => {
   const root = "/virtual";
   const files: Record<string, string> = {

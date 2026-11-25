@@ -18,6 +18,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-LAYOUT-003
 depends_on:
 - SwRS-MDOKFSTUDIO-LAYOUT-032
+scenarios:
+- id: S1
+  title: Mode left
+- id: S2
+  title: Full width in a wide pane
+- id: S3
+  title: Full width centres the content
+- id: S4
+  title: Narrow tables and figures
+- id: S5
+  title: Paragraph marked as a figure
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -26,7 +37,7 @@ implemented_in_files:
 - src/page/modules/widthMode.ts
 tested_in_files:
 - test/core/preview/layoutThemeStyles.test.ts
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/page/runtimePageControls.test.ts
 - test/page/widthModeScenarios.test.ts
 - test/visual/capture_layout_checks.py
@@ -44,30 +55,30 @@ supersedes:
 
 When the width mode is Margin or Full width, the extension SHALL keep tables, code blocks and figures inside the text column in Margin and let them scroll or wrap instead of leaving it, and lift the column limit with a page side gutter of 16 px in Full width, centring narrower tables and figures at their own width in every width mode.
 
-### Scenario (nominal): Mode left
+### Scenario S1 (nominal): Mode left
 - GIVEN an element marked wide in Auto mode
 - WHEN the mode returns to Margin
 - THEN the mark and the breakout values are cleared
 
-### Scenario (nominal): Full width in a wide pane
+### Scenario S2 (nominal): Full width in a wide pane
 - GIVEN Full width mode and a 1600 px pane
 - WHEN the preview is rendered
 - THEN the column cap is 100000 px and the content gutter is 16 px
 - AND the same pane in Margin mode has a content gutter of the clamp of 16 px, 8vw and 78 px, so up to 78 px each side instead of 16 px
 
-### Scenario (nominal): Full width centres the content
+### Scenario S3 (nominal): Full width centres the content
 | Input | Outcome |
 | --- | --- |
 | Full width mode, light theme, 460 px pane (visual scenario v80) | The table, code block and figure are centred with at least 15 px gutters and the text has 16 px (within 2 px) side margins |
 | Full width mode, dark theme, 900 px pane (visual scenario v83) | The same centring and gutters hold, and the page does not scroll horizontally |
 
-### Scenario (nominal): Narrow tables and figures
+### Scenario S4 (nominal): Narrow tables and figures
 - GIVEN a table 300 px wide in a 700 px column, in Margin, Auto and Full width
 - WHEN the preview is rendered
 - THEN the table is centred through automatic inline margins in all three modes
 - AND a paragraph holding only an image and its caption has the figure and its caption centred under the picture, and a code block narrower than the column stays left with its own width
 
-### Scenario (boundary): Paragraph marked as a figure
+### Scenario S5 (boundary): Paragraph marked as a figure
 | Input | Outcome |
 | --- | --- |
 | Top-level paragraph whose only child is an image and whose text is empty, measured in Margin, then in Auto | Carries data-sphinx-preview-figure in both modes |

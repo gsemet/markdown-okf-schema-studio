@@ -16,6 +16,25 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-015
 depends_on: []
+scenarios:
+- id: S1
+  title: Named kind shows its default title
+- id: S2
+  title: Kind outside the named list
+- id: S3
+  title: Accent colour and badge by kind
+- id: S4
+  title: Version admonitions
+- id: S5
+  title: Custom admonition title and class
+- id: S6
+  title: Untitled admonition takes its title from the first body line
+- id: S7
+  title: Simple and icon-less admonitions
+- id: S8
+  title: Dropdown admonitions show their state
+- id: S9
+  title: Quarto callouts
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -51,7 +70,7 @@ supersedes:
 
 When a document holds an admonition directive, the extension SHALL render a panel with the title, accent colour, badge and Markdown body of its kind, and a custom, untitled, simple, icon-less, version or Quarto form keeps its own title and decoration.
 
-### Scenario (nominal): Named kind shows its default title
+### Scenario S1 (nominal): Named kind shows its default title
 
 - GIVEN a document with a `:::{note}` directive and a Markdown body, and one directive for each other named kind written with colon or backtick fences
 - WHEN the preview renders
@@ -70,13 +89,13 @@ When a document holds an admonition directive, the extension SHALL render a pane
 | tip | Tip |
 | warning | Warning |
 
-### Scenario (boundary): Kind outside the named list
+### Scenario S2 (boundary): Kind outside the named list
 
 - GIVEN a document with an admonition kind outside the named list, or an admonition name that is not registered
 - WHEN the preview renders
 - THEN the panel is titled Admonition, uses the generic Admonition rendering and keeps its body
 
-### Scenario (nominal): Accent colour and badge by kind
+### Scenario S3 (nominal): Accent colour and badge by kind
 
 - GIVEN a note, a tip, an important, a warning, a caution and a danger admonition
 - WHEN the preview renders
@@ -91,7 +110,7 @@ When a document holds an admonition directive, the extension SHALL render a pane
 | caution | red with an octagon (not the warning yellow) |
 | danger | red with a cross |
 
-### Scenario (nominal): Version admonitions
+### Scenario S4 (nominal): Version admonitions
 
 - GIVEN `{versionadded} 2.1` with a body, `{versionchanged}` and `{deprecated}` with versions, and a body with emphasis
 - WHEN the preview renders
@@ -103,13 +122,13 @@ When a document holds an admonition directive, the extension SHALL render a pane
 | `{versionchanged}` | Changed in version X | yellow |
 | `{deprecated}` | Deprecated since version X | red |
 
-### Scenario (nominal): Custom admonition title and class
+### Scenario S5 (nominal): Custom admonition title and class
 
 - GIVEN `{admonition} A *plain* title` with `:class: tip`, and an `{admonition}` without a `:class:` option
 - WHEN the preview renders
 - THEN the title shows its inline Markdown rendered (emphasised text) and the panel has the tip colour, and the panel without a class keeps the neutral accent
 
-### Scenario (boundary): Untitled admonition takes its title from the first body line
+### Scenario S6 (boundary): Untitled admonition takes its title from the first body line
 
 - GIVEN an admonition without a title argument whose body starts with a bold line or a heading
 - WHEN the preview renders
@@ -122,19 +141,19 @@ When a document holds an admonition directive, the extension SHALL render a pane
 
 A GitHub alert (`> [!NOTE]`, `> **Note**`) is not an untitled admonition here: its first body line stays in the body (SwRS-MDOKFSTUDIO-GFM-009).
 
-### Scenario (boundary): Simple and icon-less admonitions
+### Scenario S7 (boundary): Simple and icon-less admonitions
 
 - GIVEN an admonition with `:class: simple`, and an admonition with `:icon: false`
 - WHEN the preview renders
 - THEN the first is a plain left-bar callout and the second hides the badge, each option changing only its own decoration
 
-### Scenario (boundary): Dropdown admonitions show their state
+### Scenario S8 (boundary): Dropdown admonitions show their state
 
 - GIVEN an admonition with `:class: dropdown`, once closed and once with `:open: true`
 - WHEN the preview renders and the reader toggles the title
 - THEN a chevron at the right of the title points right while the dropdown is closed and down while it is open, whatever the admonition kind and theme
 
-### Scenario (boundary): Quarto callouts
+### Scenario S9 (boundary): Quarto callouts
 
 - GIVEN a Quarto callout div such as `::: {.callout-tip}`, once with a leading heading and once without
 - WHEN the preview renders

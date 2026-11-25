@@ -27,6 +27,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-007
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-024
+scenarios:
+- id: S1
+  title: JAR configured
+- id: S2
+  title: PATH command
+- id: S3
+  title: Reading and resolving jarPath
+- id: S4
+  title: Command missing
+- id: S5
+  title: Text on standard input, workspace folder as working directory
+- id: S6
+  title: The picture is the SVG span of the output
+- id: S7
+  title: Include leaves the workspace folder
+- id: S8
+  title: One process per diagram, at most 2 at once
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -58,19 +75,19 @@ When useJar is true in a trusted workspace, the extension SHALL render each Plan
 
 Before any process starts, the extension SHALL refuse a diagram with an include directive whose file (or whose nested include) leaves the workspace folder, by parent segments, an absolute path, a sibling folder sharing the folder-name prefix or a symbolic link, or is computed by a function or variable, and show a message instead of the picture.
 
-### Scenario (nominal): JAR configured
+### Scenario S1 (nominal): JAR configured
 - GIVEN useJar true, a trusted workspace and an existing JAR path
 - WHEN a preview with a PlantUML diagram is rendered
 - THEN the process started is java, taken from JAVA_HOME/bin when JAVA_HOME is an absolute path and holds a java binary and from the PATH otherwise, with the arguments -jar, the JAR path, -pipe, -tsvg preceded by the size-limit and allowlist-path properties
 - AND its environment sets PLANTUML_SECURITY_PROFILE to ALLOWLIST, PLANTUML_LIMIT_SIZE to 4096 and PLANTUML_ALLOWLIST_PATH to the workspace folder
 
-### Scenario (nominal): PATH command
+### Scenario S2 (nominal): PATH command
 - GIVEN useJar true, a trusted workspace and an empty jarPath
 - WHEN a preview with a PlantUML diagram is rendered
 - THEN the process started is plantuml with the arguments -pipe and -tsvg
 - AND its environment carries the same three PlantUML variables
 
-### Scenario (boundary): Reading and resolving jarPath
+### Scenario S3 (boundary): Reading and resolving jarPath
 | Input | Outcome |
 | --- | --- |
 | jarPath of two spaces, a path and a tab | the result is the path without the padding |
@@ -79,28 +96,28 @@ Before any process starts, the extension SHALL refuse a diagram with an include 
 | Relative jarPath tools/plantuml.jar with a workspace folder | java is given the JAR path inside the workspace folder |
 | Absolute jarPath | java is given that path unchanged |
 
-### Scenario (refusal): Command missing
+### Scenario S4 (refusal): Command missing
 - GIVEN no plantuml command on the PATH
 - WHEN a preview is rendered
 - THEN the diagram shows the executable-not-found message
 
-### Scenario (nominal): Text on standard input, workspace folder as working directory
+### Scenario S5 (nominal): Text on standard input, workspace folder as working directory
 - GIVEN a diagram with some text, the JAR pipeline and a workspace folder open in the editor
 - WHEN the process is started
 - THEN the process standard input receives exactly the diagram text and its working directory is the workspace root
 
-### Scenario (nominal): The picture is the SVG span of the output
+### Scenario S6 (nominal): The picture is the SVG span of the output
 - GIVEN a process that prints log lines before and after the SVG, or a multibyte character split across two output chunks
 - WHEN the output is read
 - THEN the picture is the SVG only, the log lines are ignored and the character is decoded correctly
 
-### Scenario (refusal): Include leaves the workspace folder
+### Scenario S7 (refusal): Include leaves the workspace folder
 - GIVEN a diagram with an include directive naming ../outside.puml, an absolute path into a sibling folder whose name starts with the workspace folder name, a symbolic link that points out of the folder, a file that itself includes such a path, or a path computed by a function or variable
 - WHEN the preview is rendered
 - THEN no process is started for that diagram, which shows a message that the include is outside the workspace folder (or is computed and cannot be checked), and a warning is reported
 - AND includes inside the folder, URLs and standard-library names are passed to the process unchanged
 
-### Scenario (boundary): One process per diagram, at most 2 at once
+### Scenario S8 (boundary): One process per diagram, at most 2 at once
 
 | Input | Outcome |
 | --- | --- |

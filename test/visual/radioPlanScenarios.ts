@@ -41,7 +41,7 @@ const VARIANTS = [
 ] as const;
 
 export const RADIO_PLAN_SCENARIOS: ScenarioDefinition[] = [...VARIANTS.map((variant, index) => ({
-  // @tests_req SwRS-MDOKFSTUDIO-GFM-040
+  // @tests_req SwRS-MDOKFSTUDIO-GFM-040#S1
   id: `gfm/v${10 + index}-radio-plan-${variant.name}-900`,
   fixture: "74-radio-plan",
   theme: variant.theme,
@@ -53,7 +53,7 @@ export const RADIO_PLAN_SCENARIOS: ScenarioDefinition[] = [...VARIANTS.map((vari
   contentAssertions: PLAN_ASSERTIONS,
   description: `A plan with a bulleted and an ordered radio group (the recommended options selected) and a task list, ${variant.name} preview, 900 px pane, toolbar collapsed.`,
 })), ...VARIANTS.map((variant, index) => ({
-  // @tests_req SwRS-MDOKFSTUDIO-GFM-041
+  // @tests_req SwRS-MDOKFSTUDIO-GFM-041#S1
   id: `gfm/v${12 + index}-radio-tab-entry-${variant.name}-900`,
   fixture: "74-radio-plan",
   theme: variant.theme,

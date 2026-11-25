@@ -19,7 +19,7 @@ function trySymlink(target: string, link: string, type: "dir" | "file" | "juncti
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
 test("the walk through the Node port never descends a symbolic link to a directory", async (context) => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-stem-symlink-"));
   try {
@@ -38,7 +38,8 @@ test("the walk through the Node port never descends a symbolic link to a directo
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S4
 test("a dangling .md symbolic link is a candidate that gives W15", async (context) => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-stem-dangling-"));
   try {

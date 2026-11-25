@@ -19,6 +19,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
 depends_on: []
+scenarios:
+- id: S1
+  title: Hex and rgba kept
+- id: S2
+  title: Unsafe values removed
+- id: S3
+  title: Diagnostic for removed declarations
+- id: S4
+  title: The page applies valid colours
+- id: S5
+  title: Hand-edited invalid attribute
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,7 +43,7 @@ tested_in_files:
 - test/core/security/spanColors.test.ts
 - test/page/modules/spanColors.test.ts
 - test/security/html-policy.test.ts
-- test/visual/scenarioDefinitions2.ts
+- test/visual/scenarioDefinitions3.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-GFM-035
@@ -45,13 +56,13 @@ supersedes:
 
 When a span style declares color or background-color as a named colour (a closed list of the CSS colour names and transparent), one of the keywords currentcolor, inherit, initial and unset, hex (#rgb, #rgba, #rrggbb, #rrggbbaa), rgb()/rgba() or hsl()/hsla() in the comma form or in the space form with an optional '/ alpha' (never mixed), with numbers in range, the extension SHALL keep the colours as data attributes and apply them on the page only after revalidating each value with the same grammar, removing var(), url(), expression(), !important, comments, escapes, semicolon or brace injection, other keywords and other properties, and recording the diagnostic removed-unsafe-style ('Removed unsafe style attribute.') for a removed declaration. The colour grammar is the one used for raw HTML table styles (SwRS-MDOKFSTUDIO-GFM-031), and a span inside a raw HTML table follows the same rule.
 
-### Scenario (nominal): Hex and rgba kept
+### Scenario S1 (nominal): Hex and rgba kept
 
 - GIVEN a span with style 'color:#f00; background-color: rgba(0,0,0,50%)' or 'color: red; background-color: hsl(0,0%,0%)', also nested, in a pipe-table cell and in a raw HTML table cell
 - WHEN the preview is rendered
 - THEN both colours are exposed as data attributes
 
-### Scenario (refusal): Unsafe values removed
+### Scenario S2 (refusal): Unsafe values removed
 
 | Input | Outcome |
 | --- | --- |
@@ -60,20 +71,20 @@ When a span style declares color or background-color as a named colour (a closed
 | `rgb(0, 0 0)` (comma and space mixed), `rgb(0 0 0 0.5)` (no slash), `rgb(256 0 0)` | the value is removed and the text kept |
 | `rgb(0 0 0 / 50%)`, `hsl(120 100% 50%)`, `currentcolor` | the value is kept |
 
-### Scenario (boundary): Diagnostic for removed declarations
+### Scenario S3 (boundary): Diagnostic for removed declarations
 
 | Input | Outcome |
 | --- | --- |
 | span style 'color:#f00; position:fixed' | the diagnostic removed-unsafe-style ('Removed unsafe style attribute.') is recorded |
 | span style 'color:#f00' | no diagnostic is recorded |
 
-### Scenario (nominal): The page applies valid colours
+### Scenario S4 (nominal): The page applies valid colours
 
 - GIVEN a span with data-okf-color '#f00' under the preview content
 - WHEN colours are applied
 - THEN the element style color is set through the CSSOM
 
-### Scenario (refusal): Hand-edited invalid attribute
+### Scenario S5 (refusal): Hand-edited invalid attribute
 
 - GIVEN a span with data-okf-color 'url(x)'
 - WHEN colours are applied

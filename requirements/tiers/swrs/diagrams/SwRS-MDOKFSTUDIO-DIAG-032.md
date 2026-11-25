@@ -18,6 +18,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-006
 - StRS-MDOKFSTUDIO-DIAG-007
 depends_on: []
+scenarios:
+- id: S1
+  title: Library include
+- id: S2
+  title: Directives that are refused before the engine
+- id: S3
+  title: Loaders of the built-in engine refuse
+- id: S4
+  title: Unsupported directive inside an included file
+- id: S5
+  title: Engine failure shows its reason
+- id: S6
+  title: Source of 1 MiB
+- id: S7
+  title: Messages use the error style
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,14 +61,14 @@ supersedes:
 
 When a built-in diagram needs a URL, a library, a theme read from a folder or more than 1 MiB of source, or the built-in engine fails, the page SHALL show one message that says why, with the useJar hint where it applies, instead of a picture, and fetch or load nothing.
 
-### Scenario (nominal): Library include
+### Scenario S1 (nominal): Library include
 - GIVEN a diagram with an include of the C4 library name in angle brackets on line 3
 - WHEN the page draws it
 - THEN when a built-in diagram has a line starting with !includeurl, !includedef or !import, an include of a URL or of a library name in angle brackets, or a !theme with from, the page shows one message naming the directive and its line and the useJar hint instead of a picture and sets data-render-state to unavailable
 - AND here the message names that directive and line 3 and the useJar hint, there is no picture, the state is unavailable, and the source disclosure keeps the text
 - AND the engine is not run and no previewPlantUmlInclude message is sent
 
-### Scenario (boundary): Directives that are refused before the engine
+### Scenario S2 (boundary): Directives that are refused before the engine
 | Input | Outcome |
 | --- | --- |
 | a line starting with !includeurl, !includedef or !import | the message naming the directive and its line, state unavailable; the engine is not run and the host is not asked for a file |
@@ -62,7 +77,7 @@ When a built-in diagram needs a URL, a library, a theme read from a folder or mo
 | a source with CRLF line endings and an indented !includeurl line on line 2 | the message names line 2 |
 | a diagram with an include of a local file only | not refused: the file is asked of the host and the engine runs (see SwRS-MDOKFSTUDIO-DIAG-046) |
 
-### Scenario (refusal): Loaders of the built-in engine refuse
+### Scenario S3 (refusal): Loaders of the built-in engine refuse
 | Input | Outcome |
 | --- | --- |
 | the engine asks for a library URL (a standard-library bundle) or an optional script such as emoji | the loader answers with an error saying it is not available in the built-in PlantUML engine; no script tag is added and nothing is fetched |
@@ -72,13 +87,13 @@ When a built-in diagram needs a URL, a library, a theme read from a folder or mo
 | a loader request of kind theme (a !theme read from a folder or a URL, even if the pre-scan did not catch the directive) | the loader answers with an error saying the theme is not available in the built-in PlantUML engine; no theme file is read |
 | the same theme refusal during a render | the diagram shows the include failure message with the failure reason as its message, state error, and the result is not kept |
 
-### Scenario (refusal): Unsupported directive inside an included file
+### Scenario S4 (refusal): Unsupported directive inside an included file
 - GIVEN an included local file with an include of a library name on line 2
 - WHEN the diagram is drawn
 - THEN the diagram shows the unavailable message naming the directive, line 2, the file name and the useJar hint, and the state is unavailable
 - AND the refusal is not kept: the diagram drawn again after the file was fixed runs the engine again with the new file text
 
-### Scenario (refusal): Engine failure shows its reason
+### Scenario S5 (refusal): Engine failure shows its reason
 | Input | Outcome |
 | --- | --- |
 | the engine rejects a diagram (syntax error) with a reason | the message reads "The built-in PlantUML engine could not render this diagram: " followed by the reason as plain text and the useJar hint, no picture, state error, and the source is kept |
@@ -86,13 +101,13 @@ When a built-in diagram needs a URL, a library, a theme read from a folder or mo
 | an empty reason | the text unknown error is used |
 | the engine throws | the same message with the thrown message as the reason, state error |
 
-### Scenario (boundary): Source of 1 MiB
+### Scenario S6 (boundary): Source of 1 MiB
 | Input | Outcome |
 | --- | --- |
 | a diagram source of 1,048,577 characters (over 1 MiB) | "The PlantUML source exceeds the 1 MiB preview limit." appears, the state is unavailable and the engine is not run |
 | a diagram source of exactly 1,048,576 characters | the engine runs normally |
 
-### Scenario (nominal): Messages use the error style
+### Scenario S7 (nominal): Messages use the error style
 | Input | Outcome |
 | --- | --- |
 | a PlantUML diagram that shows a message | the paragraph of class myst-plantuml-error uses --studio-errorForeground (fallback #f14c4c) and italic text |

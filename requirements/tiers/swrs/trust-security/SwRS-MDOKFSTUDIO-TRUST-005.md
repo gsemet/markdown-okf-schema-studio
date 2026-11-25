@@ -29,6 +29,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-011
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Every write request type is handled
+- id: S2
+  title: Viewing actions of a preview with restricted reads
+- id: S3
+  title: The dispatcher stops no request for trust
+- id: S4
+  title: The citation list needs a trusted workspace folder
+- id: S5
+  title: Reasons that do not depend on trust
+- id: S6
+  title: Host-side writes follow the trust-free rule
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -74,7 +87,7 @@ supersedes:
 
 When the host receives a page message from a preview, the extension SHALL handle it as for a trusted workspace, whether the preview belongs to a trusted workspace, to Restricted Mode or to a standalone file, and SHALL refuse a write request only for a reason that does not depend on trust (an older render, an open edit, a document that is not a saved file, a file VS Code holds read-only, a malformed request) or because it needs a read that Restricted Mode narrows (the citation list). A refusal names its real cause and changes nothing.
 
-### Scenario (nominal): Every write request type is handled
+### Scenario S1 (nominal): Every write request type is handled
 
 - GIVEN a preview with restricted reads (an untrusted workspace, or a file outside every workspace folder) and a valid, current write request of any type in the table
 - WHEN the host receives the request
@@ -96,7 +109,7 @@ When the host receives a page message from a preview, the extension SHALL handle
 | previewPasteImage | the image is saved next to the document; for a standalone file the folder of the document is the root, for a document in a workspace folder that folder is |
 | previewPaletteModeChanged, previewEditModeChanged | the choice is stored for the workspace |
 
-### Scenario (nominal): Viewing actions of a preview with restricted reads
+### Scenario S2 (nominal): Viewing actions of a preview with restricted reads
 
 A preview has restricted reads because the workspace is untrusted or the file is standalone. Each action below reaches its handler and has the outcome of the row.
 
@@ -111,19 +124,19 @@ A preview has restricted reads because the workspace is untrusted or the file is
 | Copy code (previewCopyText) | the requested code text is on the clipboard and the document is unchanged |
 | Label list (previewListTargets) | answered from the document text, as with full reads |
 
-### Scenario (nominal): The dispatcher stops no request for trust
+### Scenario S3 (nominal): The dispatcher stops no request for trust
 
 - GIVEN a preview with restricted reads
 - WHEN the page sends previewEditOpen, previewViewPreferenceChanged, previewHistoryGo, previewLink or previewLinkDiscover
 - THEN each reaches the handler of its type; a theme message stays accepted while an edit request is handled (see SwRS-MDOKFSTUDIO-TRUST-005)
 
-### Scenario (refusal): The citation list needs a trusted workspace folder
+### Scenario S4 (refusal): The citation list needs a trusted workspace folder
 
 - GIVEN a preview with restricted reads
 - WHEN the page sends previewListCitations for the current render
 - THEN the host answers ok false with "Listing citations searches the workspace for .bib files, which needs a trusted workspace folder that holds this file." and reads no file; the label list (previewListTargets) is answered from the document text
 
-### Scenario (refusal): Reasons that do not depend on trust
+### Scenario S5 (refusal): Reasons that do not depend on trust
 
 | Input | Outcome |
 | --- | --- |
@@ -133,7 +146,7 @@ A preview has restricted reads because the workspace is untrusted or the file is
 | A file that VS Code holds read-only (files.readonlyInclude, or made read-only in the session) | VS Code accepts the edit and writes nothing: every write above (the label rename, thread reply and delete, find and replace, block save, move, cut, paste and drop, checkbox toggle, metadata save) checks that the text changed and answers "This file is read-only in VS Code." instead of success (see SwRS-MDOKFSTUDIO-TRUST-001); a pasted image whose block save fails that way is deleted again |
 | A malformed checkbox toggle or radio group | Answered with "The checkbox request was not understood. Refresh the preview." |
 
-### Scenario (nominal): Host-side writes follow the trust-free rule
+### Scenario S6 (nominal): Host-side writes follow the trust-free rule
 
 | Input | Outcome |
 | --- | --- |

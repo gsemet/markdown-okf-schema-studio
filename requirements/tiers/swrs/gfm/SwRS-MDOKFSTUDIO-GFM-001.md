@@ -17,6 +17,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
 depends_on: []
+scenarios:
+- id: S1
+  title: Bare URLs in prose, lists and tables
+- id: S2
+  title: Trailing punctuation stays outside the link
+- id: S3
+  title: Text with a meaning is not autolinked
+- id: S4
+  title: Only http, https and www hosts are autolinked
+- id: S5
+  title: Autolinks follow the Markdown link policy
+- id: S6
+  title: The block editor shows the raw URL
+- id: S7
+  title: Pathological URLs render in linear time
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,13 +55,13 @@ supersedes:
 
 When prose contains a bare http://, https:// or www. URL, the extension SHALL render it as a link that follows the Markdown link policy, opening www. URLs as https://, leaving trailing sentence punctuation and unbalanced closing parentheses outside the link, and leaving unlinked any text that has another meaning or another scheme.
 
-### Scenario (nominal): Bare URLs in prose, lists and tables
+### Scenario S1 (nominal): Bare URLs in prose, lists and tables
 
 - GIVEN a paragraph, a list item and a table cell each containing https://example.com and www.example.com
 - WHEN the preview is rendered
 - THEN each URL is a link and the www. link targets https://www.example.com
 
-### Scenario (boundary): Trailing punctuation stays outside the link
+### Scenario S2 (boundary): Trailing punctuation stays outside the link
 
 | Input | Outcome |
 | --- | --- |
@@ -54,7 +69,7 @@ When prose contains a bare http://, https:// or www. URL, the extension SHALL re
 | `(https://example.com/a_(b))` | the link keeps the balanced parentheses of a_(b) and ends before the last closing parenthesis |
 | `(see https://example.com/a)` | the closing parenthesis is outside the link |
 
-### Scenario (refusal): Text with a meaning is not autolinked
+### Scenario S3 (refusal): Text with a meaning is not autolinked
 
 | Input | Outcome |
 | --- | --- |
@@ -64,7 +79,7 @@ When prose contains a bare http://, https:// or www. URL, the extension SHALL re
 | `abchttps://example.com` (glued to a word character) | not a link |
 | `a@example.com` | not a link |
 
-### Scenario (refusal): Only http, https and www hosts are autolinked
+### Scenario S4 (refusal): Only http, https and www hosts are autolinked
 
 | Input | Outcome |
 | --- | --- |
@@ -73,19 +88,19 @@ When prose contains a bare http://, https:// or www. URL, the extension SHALL re
 | `data:` and `vbscript:` text | no link is created |
 | `www.` and `www.localhost` (no dotted host) | no link is created |
 
-### Scenario (nominal): Autolinks follow the Markdown link policy
+### Scenario S5 (nominal): Autolinks follow the Markdown link policy
 
 - GIVEN a bare https://example.com URL, and a bare URL whose generated link the sanitizer would reject
 - WHEN the rendered HTML is sanitized
 - THEN the first link carries the same attributes and navigation routing as [x](https://example.com), and the rejected link is removed exactly as for a Markdown link
 
-### Scenario (nominal): The block editor shows the raw URL
+### Scenario S6 (nominal): The block editor shows the raw URL
 
 - GIVEN a paragraph 'visit https://example.com now', and a paragraph with www.example.com
 - WHEN the block editor source is requested
 - THEN the text equals the original source, so the www.example.com paragraph still reads www.example.com and not an https:// link
 
-### Scenario (boundary): Pathological URLs render in linear time
+### Scenario S7 (boundary): Pathological URLs render in linear time
 
 | Input | Outcome |
 | --- | --- |

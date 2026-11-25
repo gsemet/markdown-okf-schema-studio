@@ -58,7 +58,8 @@ function fileErrors(html: ReturnType<typeof parseHtml>): string[] {
     .map((element) => textContent(element).trim());
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-068
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S7
 test("{uml} path.puml and a body-less {plantuml} path.puml render the file, name it and depend on it", async () => {
   const { result, html, docs } = await render(
     "# Page\n\n```{uml} diagrams/flow.puml\n```\n\n```{plantuml} diagrams/flow.puml\n:caption: Flow\n```\n\n"
@@ -154,7 +155,7 @@ test("with useJar the JAR receives the text of the {uml} file", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-068
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S1
 test("a diagram file larger than 5 MiB is refused with a message and one warning; a file of exactly 5 MiB is read", async () => {
   const { workspaceRoot, docs } = workspace();
   const limit = 5 * 1024 * 1024;

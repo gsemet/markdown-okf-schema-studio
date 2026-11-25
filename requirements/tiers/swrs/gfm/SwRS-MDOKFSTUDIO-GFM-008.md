@@ -17,6 +17,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
 depends_on: []
+scenarios:
+- id: S1
+  title: Struck text in prose and tables
+- id: S2
+  title: Single tildes and code
+- id: S3
+  title: Footnote renders
+- id: S4
+  title: Reference without definition
+- id: S5
+  title: Aligned column
+- id: S6
+  title: Unaligned columns
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,37 +51,37 @@ supersedes:
 
 When prose contains ~~text~~, a footnote reference with its definition, or a GFM pipe table, the extension SHALL render the text struck through, the reference with its footnote text, and the table header with the alignment of the delimiter row on every cell of the column, leaving a single ~x~ pair and tildes in code literal.
 
-### Scenario (nominal): Struck text in prose and tables
+### Scenario S1 (nominal): Struck text in prose and tables
 
 - GIVEN ~~old~~ in a paragraph, a list item and a table cell
 - WHEN the preview is rendered
 - THEN each is rendered struck through
 
-### Scenario (boundary): Single tildes and code
+### Scenario S2 (boundary): Single tildes and code
 
 - GIVEN '~x~' in prose and '~~x~~' in inline code
 - WHEN the preview is rendered
 - THEN both stay literal text
 
-### Scenario (nominal): Footnote renders
+### Scenario S3 (nominal): Footnote renders
 
 - GIVEN a paragraph with [^1] and a definition [^1]: Text
 - WHEN the preview is rendered
 - THEN a reference and the footnote text are present
 
-### Scenario (boundary): Reference without definition
+### Scenario S4 (boundary): Reference without definition
 
 - GIVEN a [^2] reference with no definition
 - WHEN the preview is rendered
 - THEN no footnote text is invented and rendering succeeds
 
-### Scenario (nominal): Aligned column
+### Scenario S5 (nominal): Aligned column
 
 - GIVEN a pipe table with a '---:' column
 - WHEN the preview is rendered
 - THEN each cell of that column is right-aligned and the header row is a header
 
-### Scenario (boundary): Unaligned columns
+### Scenario S6 (boundary): Unaligned columns
 
 - GIVEN a pipe table with plain '---' columns
 - WHEN the preview is rendered

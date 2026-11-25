@@ -7,7 +7,7 @@ import { test } from "node:test";
 
 import { PREVIEW_THEME_CSS, previewContentWidthCss } from "../../../src/core/preview/previewStyles";
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S4
 test("the width rule is a whole number of pixels, a negative value gives the default and only 0 lifts the limit", () => {
   assert.equal(previewContentWidthCss(1049.6), ":root { --sphinx-preview-content-max-width: 1050px; }");
   assert.equal(previewContentWidthCss(-1), ":root { --sphinx-preview-content-max-width: 960px; }");
@@ -18,7 +18,8 @@ test("the width rule is a whole number of pixels, a negative value gives the def
   assert.equal(previewContentWidthCss(0), ":root { --sphinx-preview-content-max-width: none; }");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022#S3
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022#S4
 test("a table is centred through automatic inline margins and a figure paragraph is centred, in every width mode", () => {
   assert.match(PREVIEW_THEME_CSS,
     /#sphinx-myst-preview-content > table,\s*#sphinx-myst-preview-content > \.table-wrapper\s*\{\s*margin-inline: auto;/u);
@@ -41,7 +42,7 @@ function zoomRuleSelectors(): string[] {
   return selectors;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-043
+// @tests_req SwRS-MDOKFSTUDIO-THEME-043#S2
 test("the toolbar does not scale with the zoom: no toolbar rule reads the zoom variables", () => {
   const selectors = zoomRuleSelectors();
   assert.ok(selectors.length > 0, "the zoom is used by some rules");
@@ -50,7 +51,8 @@ test("the toolbar does not scale with the zoom: no toolbar rule reads the zoom v
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-016
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016#S2
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016#S3
 test("no rule of the page palette is keyed to a host theme kind, so the host variables rule in high contrast too", () => {
   assert.doesNotMatch(PREVIEW_THEME_CSS, /data-sphinx-preview-theme="(?:[1-4]|default)"/u);
 });

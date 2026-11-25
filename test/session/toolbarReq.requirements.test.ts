@@ -191,7 +191,7 @@ function showOther(preview: PreviewSession, id: string): void {
   preview.stage = { ...preview.stage!, activeDocumentIdentity: id } as never;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
 test("a preview with restricted reads stores a view preference like any other", async () => {
   const f = fixture({ restrictedReads: true });
   try {
@@ -283,7 +283,8 @@ test("following a link applies the pending saves before the link is resolved", a
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S6
 test("a link request of a stale page or a disposed preview is ignored", async () => {
   const f = fixture();
   try {
@@ -636,7 +637,8 @@ test("one search per wikilink name runs at a time", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S7
 test("in a preview with restricted reads only the document's folder is allowed", async () => {
   const f = fixture({ restrictedReads: true });
   try {

@@ -60,7 +60,8 @@ function setup(titles = ["A", "B", "C"], selected = 0) {
   return { document, built, tabs };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S3
 test("ArrowRight and ArrowLeft move the selection and the focus, and wrap around", () => {
   const { built } = setup();
   const first = key(built.tabs[0], "ArrowRight");
@@ -75,7 +76,8 @@ test("ArrowRight and ArrowLeft move the selection and the focus, and wrap around
   assert.deepEqual(states(built), ["false/-1/hidden", "false/-1/hidden", "true/0/shown"], "wraps from the first to the last");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S2
 test("Home and End select the first and the last tab", () => {
   const { built } = setup(["A", "B", "C", "D"], 1);
   key(built.tabs[1], "End");
@@ -86,7 +88,8 @@ test("Home and End select the first and the last tab", () => {
   assert.equal(built.tabs[0].focused, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S4
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S5
 test("other keys, modified keys and other targets leave the tabs alone", () => {
   const { built, document } = setup();
   assert.equal(key(built.tabs[0], "ArrowDown").prevented, 0);
@@ -102,7 +105,8 @@ test("other keys, modified keys and other targets leave the tabs alone", () => {
   assert.deepEqual(states(built), ["true/0/shown", "false/-1/hidden", "false/-1/hidden"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S8
 test("a click selects the tab and shows its panel only", () => {
   const { built } = setup();
   built.tabs[2].fire("click");
@@ -112,7 +116,7 @@ test("a click selects the tab and shows its panel only", () => {
   assert.deepEqual(states(built), ["false/-1/hidden", "false/-1/hidden", "true/0/shown"], "a click on a panel changes nothing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S6
 test("a tab set nested in a panel keeps its own selection", () => {
   const document = new Doc();
   const outer = buildSet(document, "o", ["One", "Two"], 0);
@@ -127,7 +131,7 @@ test("a tab set nested in a panel keeps its own selection", () => {
   assert.deepEqual(states(inner), ["false/-1/hidden", "true/0/shown"], "the inner set keeps its choice");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S5
 test("tabs with the same sync key in the same group follow each other, another group does not", () => {
   const document = new Doc();
   const first = buildSet(document, "a", ["Python", "Node"], 0, "language", ["py", "node"]);
@@ -143,7 +147,8 @@ test("tabs with the same sync key in the same group follow each other, another g
   assert.deepEqual(states(first), ["true/0/shown", "false/-1/hidden"], "py is selected everywhere in the group");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S7
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S9
 test("apply puts the choices back on content that a patch rendered again", () => {
   const document = new Doc();
   const before = buildSet(document, "t", ["A", "B", "C"], 0);
@@ -163,7 +168,7 @@ test("apply puts the choices back on content that a patch rendered again", () =>
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S4
 test("reveal shows the tab of a hidden panel without moving the focus and tells onChange; a shown panel changes nothing", () => {
   const document = new Doc();
   const built = buildSet(document, "t", ["A", "B", "C"], 0);
@@ -179,7 +184,7 @@ test("reveal shows the tab of a hidden panel without moving the focus and tells 
   assert.equal(changes, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S5
 test("reveal of a tab with a sync key makes the other set of the group follow, and a set of another group stays", () => {
   const document = new Doc();
   const first = buildSet(document, "a", ["Python", "Node"], 0, "language", ["py", "node"]);
@@ -193,7 +198,8 @@ test("reveal of a tab with a sync key makes the other set of the group follow, a
   assert.equal(first.tabs[1].focused + second.tabs[0].focused, 0, "no focus moved");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S4
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S5
 test("onChange runs once after a click, a key, a sync follow and a reveal, and not when nothing changed", () => {
   const document = new Doc();
   const first = buildSet(document, "a", ["Python", "Node"], 0, "language", ["py", "node"]);
@@ -220,7 +226,8 @@ test("onChange runs once after a click, a key, a sync follow and a reveal, and n
   assert.equal(changes, 4);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-099
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S6
+// @tests_req SwRS-MDOKFSTUDIO-MYST-099#S9
 test("a revealed tab with no sync key stays after apply, and a revealed sync tab is shown by every set of its group (C1)", () => {
   const document = new Doc();
   const first = buildSet(document, "a", ["Python", "Node"], 0, "language", ["py", "node"]);

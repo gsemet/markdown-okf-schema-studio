@@ -17,6 +17,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-010
 relates_to:
 - StRS-MDOKFSTUDIO-FMEDIT-005
+scenarios:
+- id: S1
+  title: Violations mark their field rows
+- id: S2
+  title: 2020-12 keywords and formats
+- id: S3
+  title: Missing required field
+- id: S4
+  title: Whole-document error
+- id: S5
+  title: Closed schema
+- id: S6
+  title: Strict setting
+- id: S7
+  title: Cases without an issue
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,45 +63,45 @@ supersedes:
 
 When the frontmatter is validated against its schema, the extension SHALL apply the keywords of JSON Schema 2020-12 with formats and report every violation, on the row of the field concerned when it names one and in a row of its own otherwise.
 
-### Scenario (nominal): Violations mark their field rows
+### Scenario S1 (nominal): Violations mark their field rows
 
 - GIVEN a schema with a number maximum 5 and a date-time format, and a document with values 9 and x for those fields
 - WHEN the preview is rendered
 - THEN both rows are underlined in red, every violation is reported (not only the first) and their tooltips read must be <= 5 and must match format "date-time"
 
-### Scenario (nominal): 2020-12 keywords and formats
+### Scenario S2 (nominal): 2020-12 keywords and formats
 
 | Input | Outcome |
 | --- | --- |
 | a schema using prefixItems with items false and a list value whose second item has the wrong type | the list row carries the error must be number |
 | a schema property with a format and a value that does not match it | the row carries the format error |
 
-### Scenario (nominal): Missing required field
+### Scenario S3 (nominal): Missing required field
 
 - GIVEN a schema requiring title and a document without title
 - WHEN the preview is rendered
 - THEN a row named title with an empty value is listed last and carries the error Required field "title" is missing.
 
-### Scenario (nominal): Whole-document error
+### Scenario S4 (nominal): Whole-document error
 
 - GIVEN a schema with minProperties 3 and a document with the single key type
 - WHEN the preview is rendered
 - THEN a red row reads must NOT have fewer than 3 properties and the badge reads 1 error
 
-### Scenario (nominal): Closed schema
+### Scenario S5 (nominal): Closed schema
 
 - GIVEN a schema with additionalProperties false declaring type and a, and a document that also sets zz
 - WHEN the preview is rendered
 - THEN one error row reads must NOT have additional properties, whatever the strict setting
 - AND the properties section carries data-okf-additional-properties="false"
 
-### Scenario (nominal): Strict setting
+### Scenario S6 (nominal): Strict setting
 
 - GIVEN `markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties` true, a schema declaring type and title, and a document that also sets titel
 - WHEN the preview is rendered
 - THEN the row titel carries the warning "Unknown field; it is not declared in the "{type}" schema." and the badge counts one warning
 
-### Scenario (boundary): Cases without an issue
+### Scenario S7 (boundary): Cases without an issue
 
 | Input | Outcome |
 | --- | --- |

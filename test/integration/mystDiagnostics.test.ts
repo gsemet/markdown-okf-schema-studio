@@ -33,7 +33,7 @@ function previewReady(): boolean {
   return preview?.phase === "ready" && preview.status === "success";
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-078
+// @tests_req SwRS-MDOKFSTUDIO-MYST-078#S3
 /** Without a preview there are no entries; in an untrusted workspace there never are. */
 export async function runUntrusted(): Promise<void> {
   const document = await vscode.workspace.openTextDocument(vscode.Uri.file(docPath));
@@ -44,8 +44,9 @@ export async function runUntrusted(): Promise<void> {
   assert.deepEqual(mystEntries(document.uri), [], "an untrusted workspace published diagnostics");
 }
 
-// @tests_req StRS-MDOKFSTUDIO-MYST-007
-// @tests_req SwRS-MDOKFSTUDIO-MYST-078
+// @accepts_req StRS-MDOKFSTUDIO-MYST-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-078#S5
+// @tests_req SwRS-MDOKFSTUDIO-MYST-078#S6
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const originalConf = fs.readFileSync(confPath, "utf8");

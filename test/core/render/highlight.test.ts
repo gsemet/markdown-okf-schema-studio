@@ -7,7 +7,7 @@ const renderedText = (html: string): string => html.replace(/<[^>]*>/gu, "");
 const unescaped = (html: string): string =>
   renderedText(html).replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&");
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S1
 test("colours tokens for a registered grammar", () => {
   const html = highlightCodeBlocks(
     '<pre><code class="language-rust">fn main() { let x = 1; }\n</code></pre>',
@@ -18,13 +18,13 @@ test("colours tokens for a registered grammar", () => {
   assert.match(html, /<span class="sd-b5cea8 sl-08764d">1<\/span>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S2
 test("resolves the fence label through aliases", () => {
   const html = highlightCodeBlocks('<pre><code class="language-py">x = "value"\n</code></pre>');
   assert.match(html, /<span class="sd-ce9178 sl-a31515">"value"<\/span>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S4
 test("every bundled language colours its tokens, and a token never carries an inline style", () => {
   const samples: Record<string, string> = {
     python: 'def f(x):\n    return "a"\n',
@@ -67,7 +67,7 @@ test("the palette languages are the bundled grammars and their aliases", () => {
   assert.equal(new Set(names).size, names.length);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-008
+// @tests_req SwRS-MDOKFSTUDIO-CODE-008#S4
 test("renders diff and patch fences with signed-line treatments", () => {
   const source = "--- a/settings.ini\n+++ b/settings.ini\n@@ -1 +1 @@\n value=true\n-old=true\n+old=false\n\n";
 
@@ -87,7 +87,8 @@ test("renders diff and patch fences with signed-line treatments", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-039
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S5
 test("wraps numbered lines without breaking multiline highlighted spans", () => {
   const html = highlightCodeBlocks(
     '<pre><code class="language-python" data-myst-line-numbers="true"'
@@ -102,7 +103,7 @@ test("wraps numbered lines without breaking multiline highlighted spans", () => 
   assert.equal((html.match(/<\/span>/gu) ?? []).length, (html.match(/<span\b/gu) ?? []).length);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S3
 test("leaves an unregistered grammar as plain text", () => {
   const source = '<pre><code class="language-wobblescript">depot :: promote\n</code></pre>';
   assert.equal(highlightCodeBlocks(source), source);

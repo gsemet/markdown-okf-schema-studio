@@ -121,7 +121,8 @@ test("T34: the shell key ignores the status region and the runtime script, and n
   assert.notEqual(shellKey(withoutToolbar), shellKey(html), "a changed toolbar is a changed shell");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S7
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-071
 test("T34: shell keys differ when Mermaid appears or disappears, and when math appears", async () => {
   const plain = await page("Text only.\n");
@@ -137,7 +138,7 @@ test("T34: shell keys differ when Mermaid appears or disappears, and when math a
   assert.notEqual(shellKey(plain), shellKey(math), "the math stylesheet is part of the shell");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-124
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-124#S1
 test("CR 149: shell keys differ when a chart appears or disappears, and charts of two pages share a shell", async () => {
   const chart = '```vega-lite\n{"mark":"bar","data":{"values":[{"a":1}]}}\n```\n';
   const plain = await page("Text only.\n");
@@ -172,7 +173,8 @@ test("T34: canPatch refuses pages without a content container", async () => {
   assert.equal(canPatch(rendered, statusPage), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-105
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S4
 test("T34: injecting PlantUML diagrams into a page keeps its shell key, so the diagrams can be patched in", async () => {
   const html = await page("```plantuml\n@startuml\nAlice -> Bob: hello\n@enduml\n```\n");
   assert.match(html, /myst-plantuml-diagram/u);
@@ -258,7 +260,8 @@ test("T34: a ready report with the identifiers of the last assignment is a webvi
     false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-022
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S5
 test("T34: the record of a patched page carries the nonce of the loaded page and keeps its shell", async () => {
   const loaded = await page("# Loaded\n\nText.\n", { requestId: 1, version: 1 });
   const next = await page("# Next\n\nOther text.\n", { requestId: 2, version: 2 });
@@ -283,7 +286,8 @@ test("T34: reuseNonce swaps every occurrence, in the policy tokens and in the at
   assert.equal(swapped.replaceAll("NEW456", "OLD123"), html);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-043
+// @tests_req SwRS-MDOKFSTUDIO-THEME-043#S5
+// @tests_req SwRS-MDOKFSTUDIO-THEME-043#S6
 test("T08: two renders with different zoom have the same shell key and the same context key", async () => {
   const first = await page("# Title\n\nText.\n", { requestId: 21, version: 21, zoom: 100 });
   const second = await page("# Title\n\nText.\n", { requestId: 23, version: 23, zoom: 130 });

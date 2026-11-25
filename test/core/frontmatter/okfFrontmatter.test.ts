@@ -60,7 +60,8 @@ test.afterEach(() => {
   setSchemaFileReaderForTests(undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S5
 test("extractFrontmatter detects and parses the leading YAML block", () => {
   const extraction = extractFrontmatter("---\ntype: finding\nid: F-1\n---\n\nBody.\n");
   assert.equal(extraction.present, true);
@@ -71,7 +72,7 @@ test("extractFrontmatter detects and parses the leading YAML block", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029#S4
 test("fieldIconType maps schema declarations and generic values to display types", () => {
   assert.equal(fieldIconType({ enum: ["a", "b"] }, "a", ["a", "b"]), "enum");
   assert.equal(fieldIconType({ const: "SwRS" }, "SwRS", null), "enum");
@@ -85,7 +86,8 @@ test("fieldIconType maps schema declarations and generic values to display types
   assert.equal(fieldIconType(undefined, "plain", null), "unknown");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S3
 test("frontmatter field patches preserve comments, fences, line endings, and body", () => {
   const source = "---\r\ntype: finding\r\n# Keep this note\r\nid: F-1\r\n---\r\n\r\nBody stays untouched.\r\n";
   const patch = createFrontmatterFieldPatch(source, "id", "F-2");
@@ -99,7 +101,8 @@ test("frontmatter field patches preserve comments, fences, line endings, and bod
   assert.doesNotMatch(patch.text, /(?<!\r)\n/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S3
 test("frontmatter scalar and object edits preserve YAML node metadata", () => {
   const source = [
     "---",
@@ -133,7 +136,8 @@ test("frontmatter scalar and object edits preserve YAML node metadata", () => {
   assert.match(updated, /---\n\nBody stays untouched\.\n$/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S3
 test("frontmatter array edits keep comments attached to reordered items", () => {
   const source = [
     "---",
@@ -152,7 +156,7 @@ test("frontmatter array edits keep comments attached to reordered items", () => 
   assert.equal(extractFrontmatter(updated).frontmatter?.links instanceof Array, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S6
 test("frontmatter key renames preserve comments and reject duplicate destinations", () => {
   const source = [
     "---",
@@ -177,8 +181,10 @@ test("frontmatter key renames preserve comments and reject duplicate destination
   assert.equal(createFrontmatterFieldRenamePatch(source, "legacy_summary", "  "), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S2
 test("frontmatter field removal preserves comments, fences, and body", () => {
   const source = [
     "---",
@@ -200,13 +206,13 @@ test("frontmatter field removal preserves comments, fences, and body", () => {
   assert.equal(createFrontmatterFieldRemovePatch(source, "missing"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S3
 test("extractFrontmatter rejects a document without frontmatter", () => {
   const extraction = extractFrontmatter("# Just a heading\n\nNo frontmatter here.\n");
   assert.equal(extraction.present, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S4
 test("extractFrontmatter reports invalid YAML with the parse error", () => {
   const extraction = extractFrontmatter("---\nfoo: [unclosed\n---\n");
   assert.equal(extraction.present, true);
@@ -221,7 +227,7 @@ test("parseYamlValue handles structured values and rejects malformed YAML", () =
   assert.equal(parseYamlValue("  \n").valid, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019#S4
 test("findSchemaDirectory walks ancestors and prefers _schema over _schemas", () => {
   const fsRoot = makeSyntheticFs({
     "_schemas/decoy.txt": "decoy",
@@ -238,7 +244,7 @@ test("findSchemaDirectory walks ancestors and prefers _schema over _schemas", ()
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019#S4
 test("findSchemaDirectory still finds _schemas when _schema is absent", () => {
   const fsRoot = makeSyntheticFs({
     "bundle/_schemas/concept.schema.yaml": "type: object",
@@ -254,7 +260,8 @@ test("findSchemaDirectory still finds _schemas when _schema is absent", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019#S5
 test("matchSchemaFile matches case-insensitively on the stem before .schema", () => {
   const fsRoot = makeSyntheticFs({
     "Concept.schema.yaml": "type: object",
@@ -275,7 +282,7 @@ test("matchSchemaFile matches case-insensitively on the stem before .schema", ()
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S2
 test("resolveSchemaRefs inlines relative references with extension fallbacks", () => {
   const fsRoot = makeSyntheticFs({
     "_schema/base.schema.yml": "type: object\nproperties:\n  id:\n    type: string\n",
@@ -297,7 +304,7 @@ test("resolveSchemaRefs inlines relative references with extension fallbacks", (
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029#S2
 test("effectiveProperties collapses allOf branches and collects required", () => {
   const effective = effectiveProperties({
     allOf: [
@@ -309,7 +316,7 @@ test("effectiveProperties collapses allOf branches and collects required", () =>
   assert.deepEqual([...effective.required], ["type", "id", "uuid", "tier"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029#S1
 test("analyzeFrontmatter yields schema-ordered fields with docs and enums", () => {
   const fsRoot = makeSyntheticFs({
     "_schema/base.schema.yaml": [
@@ -446,7 +453,7 @@ test("frontmatter without a type skips schema discovery and validation", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005#S1
 test("analyzeFrontmatter surfaces an info when the type has no schema", () => {
   const fsRoot = makeSyntheticFs({
     "_schema/concept.schema.yaml": "type: object\n",
@@ -468,7 +475,8 @@ test("analyzeFrontmatter surfaces an info when the type has no schema", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019#S4
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019#S6
 test("reduced mode explains that schema validation needs a trusted workspace", () => {
   const fsRoot = makeSyntheticFs({
     "_schema/finding.schema.yaml": "type: object\nproperties:\n  status: { enum: [draft, active] }\n",
@@ -491,7 +499,7 @@ test("reduced mode explains that schema validation needs a trusted workspace", (
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005#S2
 test("unmatched OKF-like SKILL frontmatter remains generic and skips schema validation", () => {
   const source = [
     "---",
@@ -559,7 +567,8 @@ test("unmatched OKF-like SKILL frontmatter remains generic and skips schema vali
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S5
 test("analyzeFrontmatter validates enums, consts, and formats against the schema", () => {
   const fsRoot = makeSyntheticFs({
     "_schema/base.schema.yaml": [
@@ -600,8 +609,10 @@ test("analyzeFrontmatter validates enums, consts, and formats against the schema
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S4
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S4
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S7
 test("analyzeFrontmatter inspects annotated scalar and array links without AJV keyword errors", async () => {
   const fsRoot = makeSyntheticFs({
     "index.md": "# Bundle\n",
@@ -692,7 +703,7 @@ test("frontmatter link identity prefers the configured id and otherwise uses the
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S3
 test("analyzeFrontmatter attaches nested link results to the parent field", async () => {
   const fsRoot = makeSyntheticFs({
     "index.md": "# Bundle\n",
@@ -737,8 +748,9 @@ test("analyzeFrontmatter attaches nested link results to the parent field", asyn
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S6
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050#S6
 test("file-link union applicability honors pattern and explicit root precedence", async () => {
   const firstRoot = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-root-a-"));
   const secondRoot = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-root-b-"));
@@ -800,7 +812,7 @@ test("file-link union applicability honors pattern and explicit root precedence"
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S6
 test("file-link union applicability preserves boolean local references", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-boolean-ref-"));
   try {
@@ -844,7 +856,8 @@ test("file-link union applicability preserves boolean local references", async (
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S2
 test("filename-stem links recheck symlink containment after an internal target drifts", needsSymlinks, async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-symlink-drift-"));
   const inside = path.join(root, "inside.md");
@@ -892,7 +905,8 @@ test("filename-stem links recheck symlink containment after an internal target d
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S3
 test("filename-stem links report W15 when matching candidates are unavailable", needsSymlinks, async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-unavailable-stem-"));
   const source = path.join(root, "source.md");
@@ -920,7 +934,8 @@ test("filename-stem links report W15 when matching candidates are unavailable", 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S6
 test("strict mode warns on unknown fields; lenient mode does not", () => {
   const schemaYaml = [
     "type: object",
@@ -960,7 +975,8 @@ test("strict mode warns on unknown fields; lenient mode does not", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S5
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S6
 test("missing required fields are exposed as an ordered schema summary", () => {
   const fsRoot = makeSyntheticFs({
     "_schema/note.schema.yaml": [
@@ -988,7 +1004,8 @@ test("missing required fields are exposed as an ordered schema summary", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S5
 test("json5 and json schema formats parse correctly", () => {
   const fsRoot = makeSyntheticFs({
     "_schema/playbook.schema.json5": "// comment\n{\n  \"type\": \"object\",\n  \"properties\": { \"type\": { \"const\": \"playbook\" } },\n  \"required\": [\"type\"]\n}\n",
@@ -1064,7 +1081,7 @@ test("schema declarations do not become description annotations", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S3
 test("frontmatter add with afterField reports whether the field was placed", () => {
   const source = "---\ntitle: A\nstatus: draft\n---\n";
   const placed = createFrontmatterFieldPatch(source, "owner", "Ana", { afterField: "title" });
@@ -1172,7 +1189,7 @@ test("T24: analyzeFrontmatter flags schema-required fields only", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S5
 test("T25: additionalPropertiesAllowed is false only for a schema forbidding extra keys", () => {
   const sourceText = "---\ntype: concept\nname: x\n---\nBody.\n";
   const analyze = (schemaLines: string[] | undefined): boolean | undefined => {
@@ -1199,7 +1216,8 @@ test("T25: additionalPropertiesAllowed is false only for a schema forbidding ext
   assert.equal(analyze(undefined), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S3
 test("T41: a schema field goes between its schema neighbours, whatever row was clicked", () => {
   const order = ["type", "scope", "lifecycle", "derived_by", "depends_on"];
   const keys = ["type", "scope", "lifecycle", "derived_by"];
@@ -1208,7 +1226,8 @@ test("T41: a schema field goes between its schema neighbours, whatever row was c
   assert.deepEqual(frontmatterAddPlacement(["scope", "lifecycle"], order, "type"), { beforeField: "scope" });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S2
 test("T41: a schema field skips schema neighbours that are absent and goes before custom keys", () => {
   const order = ["type", "scope", "lifecycle"];
   assert.deepEqual(frontmatterAddPlacement(["type", "extra"], order, "lifecycle"), { afterField: "type" });
@@ -1216,7 +1235,8 @@ test("T41: a schema field skips schema neighbours that are absent and goes befor
   assert.deepEqual(frontmatterAddPlacement([], order, "type"), {});
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S2
 test("T41: a custom key goes after the last row of the table, where non-schema keys are listed", () => {
   const order = ["type", "scope", "lifecycle"];
   // The table lists schema fields first, then the other keys in source order.
@@ -1225,7 +1245,8 @@ test("T41: a custom key goes after the last row of the table, where non-schema k
   assert.deepEqual(frontmatterAddPlacement([], order, "reviewer"), {});
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S4
 test("T41: beforeField inserts above the named field with a one-line diff", () => {
   const source = "---\nscope: Core\nstatus: draft\n---\nBody\n";
   const patch = createFrontmatterFieldPatch(source, "type", "SwRS", { beforeField: "scope" });
@@ -1250,7 +1271,7 @@ test("T41: beforeField inserts above the named field with a one-line diff", () =
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S7
 test("T41: plain scalar safety", () => {
   for (const safe of ["Ann", "two words", "a-b", "x.y"]) {
     assert.equal(isPlainSafeScalar(safe), true, safe);
@@ -1262,7 +1283,7 @@ test("T41: plain scalar safety", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S7
 test("T41: plainScalar writes a new custom key's text unquoted only when safe", () => {
   const edit = (value: string) => {
     const source = '---\nstatus: review\napprover: ""\npriority: 3\n---\n';
@@ -1280,7 +1301,7 @@ test("T41: plainScalar writes a new custom key's text unquoted only when safe", 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S7
 test("T41: without plainScalar an edited quoted value keeps its quotes", () => {
   const source = '---\napprover: ""\n---\n';
   const patch = createFrontmatterFieldPatch(source, "approver", "Ann");
@@ -1288,7 +1309,7 @@ test("T41: without plainScalar an edited quoted value keeps its quotes", () => {
   assert.equal(source.slice(0, patch.start) + patch.text + source.slice(patch.end), '---\napprover: "Ann"\n---\n');
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S7
 test("T41: plainScalar quotes a date-like value", () => {
   const source = '---\napprover: ""\n---\n';
   const patch = createFrontmatterFieldPatch(source, "approver", "2026-10-13", { plainScalar: true });
@@ -1296,7 +1317,8 @@ test("T41: plainScalar quotes a date-like value", () => {
   assert.equal(source.slice(0, patch.start) + patch.text + source.slice(patch.end), '---\napprover: "2026-10-13"\n---\n');
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S2
 test("T41: beforeField on the first key inserts after leading comment lines", () => {
   const source = "---\n# header\ntitle: x\n---\n";
   const patch = createFrontmatterFieldPatch(source, "a", "", { beforeField: "title" });
@@ -1340,7 +1362,7 @@ test("inherited Object.prototype names are not treated as present or declared fi
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S5
 test("frontmatter patches stay minimal when the block holds a recursive alias", () => {
   const source = "---\ntitle: a\nloop: &x\n  self: *x\nother: [1,2]\n---\nbody\n";
   const apply = (patch: { start: number; end: number; text: string } | undefined): string => {

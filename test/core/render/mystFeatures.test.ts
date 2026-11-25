@@ -84,7 +84,8 @@ test("the in-process renderer preserves the active-file MyST feature contract", 
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-019
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019#S3
 test("figure references render figures whose body supplies the caption", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -112,7 +113,8 @@ test("figure references render figures whose body supplies the caption", async (
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-019
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019#S3
 test("references to captionless figures and tables stay readable", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -140,7 +142,8 @@ test("references to captionless figures and tables stay readable", async () => {
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-019
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019#S3
 test("a numref to a captionless figure or table shows its number", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -181,8 +184,9 @@ test("a numref to a captionless figure or table shows its number", async () => {
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-039
-// @tests_req SwRS-MDOKFSTUDIO-CODE-014
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S5
+// @tests_req SwRS-MDOKFSTUDIO-CODE-014#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-014#S3
 test("MyST code directives number and emphasize lines relative to their start", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -245,7 +249,7 @@ test("MyST code-cell directives render numbered input without claiming execution
   assert.equal(result.diagnostics[0].severity, "warning");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S1
 test("Mermaid fences and directives preserve diagram source for webview rendering", async () => {
   const sources = [
     "```mermaid\ngraph LR\n  a --> b\n```",
@@ -270,7 +274,8 @@ test("Mermaid fences and directives preserve diagram source for webview renderin
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-023
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S4
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S6
 test("PlantUML fences and directives preserve diagram source for external rendering", async () => {
   const sources = [
     "```plantuml\n@startuml\nAlice -> Bob: hello\n@enduml\n```",
@@ -300,7 +305,8 @@ test("PlantUML fences and directives preserve diagram source for external render
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
 test("Sphinx version admonitions render generated titles and Markdown bodies", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -340,7 +346,7 @@ test("Sphinx version admonitions render generated titles and Markdown bodies", a
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
 test("custom admonition titles preserve inline Markdown and their class", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -365,7 +371,7 @@ test("custom admonition titles preserve inline Markdown and their class", async 
   assert.match(textContent(admonition), /This is a custom title for a tip admonition\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-006
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006#S4
 test("nested backtick and colon delimiters preserve their enclosing Markdown", async () => {
   for (const outerLength of [4, 5]) {
     const outerFence = "`".repeat(outerLength);
@@ -454,7 +460,8 @@ test("GitHub alert syntax preserves an explicit title", async () => {
   assert.match(textContent(admonition), /Keep useful advice concise\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S2
 test("GitHub alert syntax defaults the title when none is provided", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -503,7 +510,7 @@ test("GitHub bold Note, Important, and Warning markers become simple admonitions
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-017
+// @tests_req SwRS-MDOKFSTUDIO-MYST-017#S1
 test("MyST typography renders definitions, abbreviations, scripts, and footnotes", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -538,7 +545,8 @@ test("MyST typography renders definitions, abbreviations, scripts, and footnotes
   assert.match(textContent(footnote), /Heart rate in beats per minute\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
 test("all named MyST admonitions receive their documented default title", async () => {
   const titles: Record<string, string> = {
     note: "Note",
@@ -574,7 +582,8 @@ test("all named MyST admonitions receive their documented default title", async 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S6
 test("a leading bold paragraph or heading supplies the MyST admonition title", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -605,7 +614,8 @@ test("a leading bold paragraph or heading supplies the MyST admonition title", a
   assert.match(textContent(danger), /Body after the heading\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S9
 test("Quarto callout classes render as semantic MyST admonitions", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -628,8 +638,10 @@ test("Quarto callout classes render as semantic MyST admonitions", async () => {
   assert.match(textContent(callout), /This is a Quarto callout\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001
-// @tests_req SwRS-MDOKFSTUDIO-MYST-006
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S8
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006#S4
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006#S5
 test("dropdown admonitions render as openable details with a summary", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -661,7 +673,7 @@ test("dropdown admonitions render as openable details with a summary", async () 
   assert.notEqual(attribute(openOnly, "open"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-006
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006#S5
 test("the dropdown directive keeps its body in both fence styles", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -693,7 +705,7 @@ test("the dropdown directive keeps its body in both fence styles", async () => {
   assert.equal(attribute(colon, "data-end-line"), "3");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-063
+// @tests_req SwRS-MDOKFSTUDIO-MYST-063#S5
 test("MyST GFM and directive tables preserve captions, headers, and alignment", async () => {
   const source = [
     "| left | center | right |",
@@ -766,7 +778,8 @@ test("MyST GFM and directive tables preserve captions, headers, and alignment", 
   assert.match(textContent(csvTable), /line one\s+line two/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-063
+// @tests_req SwRS-MDOKFSTUDIO-MYST-063#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-063#S4
 test("CR038: a list-table renders its title, header rows, widths and alignment as one editable block", async () => {
   const source = [
     "Before",
@@ -821,7 +834,7 @@ test("CR038: a list-table renders its title, header rows, widths and alignment a
   assert.equal(findElements(plain, isTag("col")).length, 0, "no widths, no columns");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-063
+// @tests_req SwRS-MDOKFSTUDIO-MYST-063#S2
 test("CR038: :header-rows: decides how many rows are header cells", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -840,7 +853,7 @@ test("CR038: :header-rows: decides how many rows are header cells", async () => 
   assert.deepEqual(findElements(body, isTag("td")).map((cell) => textContent(cell).trim()), ["b1", "b2"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-063
+// @tests_req SwRS-MDOKFSTUDIO-MYST-063#S3
 test("CR038: list-table widths that do not match the columns or are not numbers are ignored", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -857,7 +870,8 @@ test("CR038: list-table widths that do not match the columns or are not numbers 
   assert.equal(findElements(html, isTag("col")).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-031
+// @tests_req SwRS-MDOKFSTUDIO-GFM-031#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-031#S5
 test("raw HTML tables preserve complex cell spans without active content", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -887,7 +901,8 @@ test("raw HTML tables preserve complex cell spans without active content", async
   assert.doesNotMatch(result.html, /<script|unsafe\(\)/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-031
+// @tests_req SwRS-MDOKFSTUDIO-GFM-031#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-031#S3
 test("raw HTML table cell styles are preserved as safe preview metadata", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -938,7 +953,8 @@ test("raw HTML table cell styles are preserved as safe preview metadata", async 
   assert.doesNotMatch(rewritten.html, /data-myst-table-style/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-034
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034#S4
 test("a colour span inside a raw HTML table keeps named, hex, rgb and hsl colours", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1057,7 +1073,8 @@ test("multiline blocks retain their full mapped source range", async () => {
   assert.equal(attribute(paragraph, "data-end-line"), "2");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-006
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006#S3
 test("MyST admonitions retain the directive range through the closing fence", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1080,7 +1097,8 @@ test("MyST admonitions retain the directive range through the closing fence", as
   assert.equal(attribute(admonition, "data-end-line"), "5");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-013
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S3
 test("standalone hyphenated context tags render as mapped Markdown admonitions", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1120,7 +1138,8 @@ test("standalone hyphenated context tags render as mapped Markdown admonitions",
   assert.doesNotMatch(result.html, /<fullcycle-model-allocation>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-013
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S3
 test("simple and snake_case context tags preserve adjacent fences and source ranges", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1162,7 +1181,8 @@ test("simple and snake_case context tags preserve adjacent fences and source ran
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-013
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S3
 test("nested context tags preserve each wrapper range", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1193,7 +1213,8 @@ test("nested context tags preserve each wrapper range", async () => {
   assert.equal(attribute(contexts[1]!, "data-end-line"), "9");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-013
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S4
 test("unsupported context boundaries stay literal and fenced XML stays code", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1229,7 +1250,8 @@ test("unsupported context boundaries stay literal and fenced XML stays code", as
   assert.doesNotMatch(result.html, /<attribute-context data-mode=/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-013
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S6
 test("standard HTML and inline or fenced XML stay outside context grouping", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1329,7 +1351,8 @@ test("an untrusted workspace refuses to render", async () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-031
+// @tests_req SwRS-MDOKFSTUDIO-MYST-031#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-031#S3
 test("figures and plain images are mapped blocks with their closing source line", async () => {
   const source = "Intro\n\n:::{figure} a.svg\n:alt: x\n\nCap\n:::\n\n"
     + "```{figure} b.svg\n\nCap2\n```\n\n![alt](c.png)\n";
@@ -1375,7 +1398,7 @@ test("image directives are mapped blocks spanning the directive's source lines",
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-008
+// @tests_req SwRS-MDOKFSTUDIO-GFM-008#S1
 test("tilde pairs render as struck-through text only in prose", async () => {
   const includedPath = path.join(fixtureDirectory, "included-strike.md");
   fs.writeFileSync(includedPath, "Included ~~gone~~ text.\n");
@@ -1443,7 +1466,8 @@ test("a table inserted by the edition palette renders as a table with its header
   assert.equal(findElements(rows[2], isTag("td")).length, 4);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-008
+// @tests_req SwRS-MDOKFSTUDIO-GFM-008#S3
+// @tests_req SwRS-MDOKFSTUDIO-GFM-008#S4
 test("a footnote reference with no definition invents no footnote text and the render succeeds", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),

@@ -17,6 +17,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-015
 depends_on: []
+scenarios:
+- id: S1
+  title: Admonitions nest inside each other
+- id: S2
+  title: The fence length decides which fence closes the directive
+- id: S3
+  title: An admonition is one mapped block over its whole directive
+- id: S4
+  title: Dropdown admonitions collapse under their title
+- id: S5
+  title: The dropdown directive keeps its title and body
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,13 +55,13 @@ supersedes:
 
 When an admonition directive contains another directive, the extension SHALL render the inner panel inside its parent panel, keep inner fences as literal code under a longer outer fence, collapse a dropdown under its title (an admonition with `:class: dropdown` or a `{dropdown}` directive, in a colon or a backtick fence), and map each admonition as one block from its opening line to its closing fence.
 
-### Scenario (nominal): Admonitions nest inside each other
+### Scenario S1 (nominal): Admonitions nest inside each other
 
 - GIVEN `::::{note}` around `:::{tip}`, and a palette-written warning around a note
 - WHEN the preview renders
 - THEN the tip panel sits inside the note panel and the note panel stays inside the warning panel, the inner panel being a descendant of the outer one
 
-### Scenario (boundary): The fence length decides which fence closes the directive
+### Scenario S2 (boundary): The fence length decides which fence closes the directive
 
 - GIVEN a four-colon admonition holding a literal `markdown` code fence, and an outer fence not longer than the inner one
 - WHEN the preview renders
@@ -61,13 +72,13 @@ When an admonition directive contains another directive, the extension SHALL ren
 | longer than the inner one | `markdown` code fence or inner admonition | the inner fence shows as literal code inside the panel |
 | not longer than the inner one | any | the inner fence closes the outer one as Markdown defines |
 
-### Scenario (nominal): An admonition is one mapped block over its whole directive
+### Scenario S3 (nominal): An admonition is one mapped block over its whole directive
 
 - GIVEN a three-line admonition at lines 5 to 7, and an admonition nested in another
 - WHEN the preview renders
 - THEN the panel carries data-line 5 and data-end-line 7, and the outer panel of the nested pair spans the whole outer directive
 
-### Scenario (boundary): Dropdown admonitions collapse under their title
+### Scenario S4 (boundary): Dropdown admonitions collapse under their title
 
 - GIVEN an admonition with `:class: dropdown` or with an `:open:` option
 - WHEN the preview renders
@@ -79,7 +90,7 @@ When an admonition directive contains another directive, the extension SHALL ren
 | `:class: dropdown` with `:open: true` | open |
 | `:open: true` without `:class: dropdown` | collapsible section, open |
 
-### Scenario (nominal): The dropdown directive keeps its title and body
+### Scenario S5 (nominal): The dropdown directive keeps its title and body
 
 - GIVEN `:::{dropdown} Title` and a backtick `{dropdown}` fence with `:open:`, each with a body, and one `{dropdown}` with no title
 - WHEN the preview renders

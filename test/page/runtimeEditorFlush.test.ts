@@ -167,7 +167,8 @@ test("CR 025: a host flush request saves the typed text of an open table cell", 
   assert.match(String(harness.messages[before].editedText), /\| typed\s*\|/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-067
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-067#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-067#S3
 test("CR 025: a host flush request saves an open frontmatter field and marks it as a flush", () => {
   const { harness, textarea } = openTextFieldEditor("Alpha");
   textarea.value = "Beta";
@@ -302,7 +303,8 @@ test("CR 025: a normal frontmatter save does not carry the flush flag", () => {
   assert.equal(frontmatterSaves(harness)[0].flush, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S4
 test("CR 025: a number field with a bad number is refused on Enter but sent as typed on a flush", () => {
   const open = () => {
     const harness = createRuntimeHarness();
@@ -377,7 +379,8 @@ test("CR 025: a flushed block save carries the flush flag, a normal save does no
   assert.equal(other.messages.filter((m) => m.type === "previewEditSave").at(-1)?.flush, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024#S5
 test("CR 025: a key typed with surrounding spaces is trimmed on a flush and refused otherwise", () => {
   const open = () => {
     const harness = createRuntimeHarness();
@@ -414,7 +417,8 @@ function traceOf(harness: ReturnType<typeof createRuntimeHarness>): Array<{ even
   return diagnostics.trace();
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
 test("CR 041: the trace records the open, the blur and why the unchanged frontmatter editor closed", () => {
   const { harness, textarea } = openTextFieldEditor("Alpha");
   textarea.dispatch("blur", { relatedTarget: null });

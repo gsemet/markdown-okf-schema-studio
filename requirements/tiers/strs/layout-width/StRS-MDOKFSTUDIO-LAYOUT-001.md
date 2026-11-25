@@ -12,13 +12,18 @@ scope: layout-width
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-17T22:42:16+01:00'
+approved_at: '2026-11-25T15:37:43+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-17T22:42:16+01:00'
+  at: '2026-11-25T15:37:43+01:00'
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: A wide table
+- id: S2
+  title: Long words and URLs
 user_need: As a reader, I never have to scroll the whole page sideways to read a
   document, whatever its content, theme or the size of the pane; I reach every
   column of a wide table without the page moving, I can tell there is more to
@@ -77,14 +82,14 @@ Every branch ends with a page that does not scroll sideways.
 
 ### Main paths
 
-#### Path 1: A wide table
+#### Path S1: A wide table
 
 1. A document holds a table wider than the pane
    - SwRS-MDOKFSTUDIO-LAYOUT-032: the table scrolls sideways inside its own box, limited to the column width
    - Option SwRS-MDOKFSTUDIO-LAYOUT-032 (refusal): a table that fits is left as it is
 2. The table scrolls in its own box and the page does not widen
 
-#### Path 2: Long words and URLs
+#### Path S2: Long words and URLs
 
 1. A document holds long words or long URLs
    - SwRS-MDOKFSTUDIO-LAYOUT-001: the page stays free of sideways scrolling in every width mode, theme and pane width

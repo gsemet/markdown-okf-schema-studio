@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
+scenarios:
+- id: S1
+  title: A vega-lite fence
+- id: S2
+  title: A vega fence
+- id: S3
+  title: Other fences and an unreadable specification
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,7 +46,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a document contains a vega-lite or vega fenced code block, the extension SHALL render it, in every palette mode, as a figure holding the chart specification and a collapsed Chart source section that the preview hides and the HTML export shows, without changing the document source.
 
-### Scenario (nominal): A vega-lite fence
+### Scenario S1 (nominal): A vega-lite fence
 
 - GIVEN a document with a paragraph, a fenced block whose language is vega-lite holding a JSON specification, and a paragraph after it
 - WHEN the preview renders in the Strict, GFM, MyST or Full palette mode
@@ -51,13 +58,13 @@ When a document contains a vega-lite or vega fenced code block, the extension SH
 - WHEN the page is shown, and when the document is exported to HTML
 - THEN in the preview each details myst-vega-source has display none and the find bar does not match its text, and in the exported file each one has display block and stays closed
 
-### Scenario (nominal): A vega fence
+### Scenario S2 (nominal): A vega fence
 
 - GIVEN a fenced block whose language is vega
 - WHEN the preview renders
 - THEN the block is the same figure with data-myst-chart-kind vega
 
-### Scenario (boundary): Other fences and an unreadable specification
+### Scenario S3 (boundary): Other fences and an unreadable specification
 
 - GIVEN a mermaid fence, a json fence and a vega-lite fence whose text is not a specification
 - WHEN the preview renders

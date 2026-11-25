@@ -14,6 +14,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-005
+scenarios:
+- id: S1
+  title: A radio group renders labelled, with one tab stop
+- id: S2
+  title: Which items form a group
+- id: S3
+  title: The sanitized webview HTML keeps the group
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,13 +44,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a list holds at least two consecutive items that start with '( )', '(x)' or '(X)', the extension SHALL render them as one labelled radio group with one tab stop, whose controls replace the markers and the bullets.
 
-### Scenario (nominal): A radio group renders labelled, with one tab stop
+### Scenario S1 (nominal): A radio group renders labelled, with one tab stop
 
 - GIVEN the paragraph 'Fix direction:' followed by the list '- (x) A', '- ( ) B', '- ( ) C'
 - WHEN the document renders, in any palette mode (Strict, GFM, MyST or Full: the mode changes only the palette buttons)
 - THEN the list carries role="radiogroup" and aria-labelledby naming the paragraph, each item shows a round control with role="radio", aria-checked "true" for A and "false" for B and C, its source line and UTF-16 column, and the selected option (else the first) is the only one with tabindex 0; the list, its items and the option paragraphs carry tabindex -1 (focusable by a click or a script, out of the Tab order; the list stays a mapped block), so one Tab from the label paragraph lands on the selected option; the controls replace the markers and the bullets
 
-### Scenario (boundary): Which items form a group
+### Scenario S2 (boundary): Which items form a group
 
 | Input | Outcome |
 | --- | --- |
@@ -59,7 +66,7 @@ When a list holds at least two consecutive items that start with '( )', '(x)' or
 | a nested list of radio items | forms its own group, labelled by its parent item's text |
 | markers in code, in a block quote or after frontmatter, CRLF files | literal in code; elsewhere the line and column are those of the document |
 
-### Scenario (boundary): The sanitized webview HTML keeps the group
+### Scenario S3 (boundary): The sanitized webview HTML keeps the group
 
 - GIVEN a rendered radio group
 - WHEN the HTML is sanitized for the webview

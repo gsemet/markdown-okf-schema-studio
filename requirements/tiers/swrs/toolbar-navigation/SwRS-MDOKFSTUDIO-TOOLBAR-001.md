@@ -28,6 +28,7 @@ implemented_in_files:
 - src/core/preview/styles/pageChromeStyles.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/core/preview/toolbarReq.requirements.test.ts
 - test/visual/capture_final_checks.py
 - test/visual/capture_layout_checks.py

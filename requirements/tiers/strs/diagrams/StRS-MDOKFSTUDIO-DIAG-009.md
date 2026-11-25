@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Include a local file in a diagram
+- id: S2
+  title: Keep a diagram in a PUML file
 user_need: As a writer, I split a diagram into include files or keep it in a
   separate puml file, and the preview shows the assembled picture and follows my
   edits to those files.
@@ -102,7 +107,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Include a local file in a diagram
+#### Path S1: Include a local file in a diagram
 
 1. A diagram includes a local file
    - SwRS-MDOKFSTUDIO-DIAG-046: the page asks the extension for the file and draws the diagram with the text it returns
@@ -114,7 +119,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-DIAG-053 (boundary): while a block editor is open the message is sent after it closes
 3. The diagram is drawn again with the new file text
 
-#### Path 2: Keep a diagram in a PUML file
+#### Path S2: Keep a diagram in a PUML file
 
 1. A uml directive names a PUML file
    - SwRS-MDOKFSTUDIO-DIAG-068: the preview renders the diagram stored in the file
