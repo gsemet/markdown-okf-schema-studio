@@ -390,6 +390,45 @@ test("the shipped slash-menu-grid clip.md reads as the clip the owner reviews", 
   assert.equal(block[1], EXPECTED_GRID);
 });
 
+test("the shipped advanced-renderings-tour clip.md reads as the clip the owner reviews", () => {
+  const tour = parseClip(fileURLToPath(new URL("../../clips/advanced-renderings-tour/clip.md", import.meta.url)));
+  assert.equal(tour.width, 1280);
+  assert.equal(tour.height, 720);
+  assert.equal(tour.fps, 15);
+  assert.ok(tour.length > 12 && tour.length <= 30, `Length ${tour.length} s is past the old 12 s bound and inside 30 s`);
+  assert.deepEqual(
+    tour.captions.map((caption) => caption.text.replaceAll("**", "")),
+    [
+      "Mermaid diagrams, drawn in the page",
+      "PlantUML built in, with no Java",
+      "Vega-Lite charts from a few lines",
+      "Full Vega specs for custom charts",
+      "Math typeset by KaTeX",
+      "SVG drawn in the page colours",
+    ],
+  );
+  assert.equal(tour.captions[0].from, 0);
+  for (let index = 1; index < tour.captions.length; index++) assert.equal(tour.captions[index].from, tour.captions[index - 1].to, `caption ${index + 1} starts where caption ${index} ends`);
+  assert.equal(tour.captions.at(-1).to, tour.length);
+  assert.deepEqual(tour.badges, {});
+  assert.equal(tour.zoom.id, "tour");
+  assert.deepEqual(
+    tour.marks.map((mark) => mark.id),
+    ["1", "2", "3", "4", "5", "6"],
+  );
+  for (const [index, mark] of tour.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= tour.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= tour.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  assert.equal(tour.expectedPaste, null);
+  const filmed = { filmed: tour.length, presses: [], zooms: [{ id: "tour", t: 0.4 }], marks: [1, 2, 3, 4, 5, 6].map((id) => ({ id: String(id) })) };
+  for (const host of [win32, darwin]) {
+    const out = validateStory(tour, filmed, host);
+    assert.equal(out.platform, host.platform);
+    assert.equal(out.fps, 15);
+  }
+});
+
 test("the stage of the theme-switch scenario is the shipped stage file, byte for byte", () => {
   const stageFile = fileURLToPath(new URL("../../clips/theme-switch/stage/handbook.md", import.meta.url));
   assert.equal(STAGE_THEME, readFileSync(stageFile, "utf8"));
