@@ -5,7 +5,7 @@
 - Vega-Lite and Vega charts now draw their legend, axis and title text at a size that follows the page text
   (so the Markdown font size and the zoom), with horizontal discrete x labels and the subtitle in the label
   colour; the preview no longer shows the collapsed **Chart source** section under a chart (the HTML export
-  keeps it); a specification's own `config` still wins (CR-502 vega-charts-readable-legends, PR #TBD)
+  keeps it); a specification's own `config` still wins (CR-502 vega-charts-readable-legends, PR #520)
 - Each screenshot of the published gallery now has its own link, `gallery.html#<capture id>`, that opens it
   directly, stays the same from one CI run to the next, and follows Back and Forward (CR-506 gallery-links, PR #526)
 - New command **Open in Studio at This Line** (Command Palette and the title bar menu of a Markdown text
