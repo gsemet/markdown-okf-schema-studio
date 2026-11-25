@@ -87,6 +87,18 @@ test("the shipped settings page plays the raw copy clip as video", async () => {
   }
 });
 
+test("the shipped editing page plays the list drag clip as video", async () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  const clip = "docs/demo-video/clips/drag-list-item";
+  const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
+  const rendered = await renderMyst(source);
+  const html = clipVideos(rendered.html, "docs/user/editing.md", (repoPath) => fs.existsSync(path.join(EXTENSION_ROOT, repoPath)));
+  assert.ok(html.includes(`<video src="../demo-video/clips/drag-list-item/drag-list-item.webm"`), "the page holds the clip's video");
+  for (const file of ["drag-list-item.webm", "drag-list-item.gif", "poster.png"]) {
+    assert.ok(fs.existsSync(path.join(EXTENSION_ROOT, clip, file)), file);
+  }
+});
+
 test("a clip's storyboard and stage documents are not site pages", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-095
   assert.equal(isClipSource("docs/demo-video/clips/x/clip.md"), true);
