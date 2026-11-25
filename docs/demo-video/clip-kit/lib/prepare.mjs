@@ -36,6 +36,7 @@ export function prepare(ctx) {
     mouse: events.filter((event) => event.type === "m").map((event) => ({ t: rel(event), x: event.x, y: event.y })),
     clicks: events.filter((event) => event.type === "click").map((event) => ({ t: rel(event), x: event.x, y: event.y })),
     presses: events.filter((event) => event.type === "press").map((event) => ({ id: event.id, chord: event.chord, t: rel(event) })),
+    keyFrames: events.filter((event) => event.type === "keyframe").map((event) => ({ name: event.name, t: rel(event) })),
     zooms: events.flatMap((event, i) => (event.type === "zoom" ? [{ id: event.id, t: rel(event), ...event.rect }] : [])),
     marks: events.flatMap((event, i) => (event.type === "mark" ? [{ id: event.id, t: rel(event), until: rel(untilOf(i, "unmark", event.id) ?? endEvent), ...event.rect }] : [])),
   };
