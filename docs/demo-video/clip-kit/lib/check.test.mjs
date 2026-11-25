@@ -57,4 +57,6 @@ test("the shipped scenarios declare their checks: the drag clip edit mode with n
   assert.deepEqual(resolveChecks(drag.checks), { editMode: "on", paste: false });
   const raw = await import(scenarioOf("raw-copy-balance-edges"));
   assert.deepEqual(resolveChecks(raw.checks), { editMode: "off", paste: true });
+  const exported = await import(scenarioOf("export-html"));
+  assert.deepEqual(resolveChecks(exported.checks), { editMode: "off", paste: false });
 });
