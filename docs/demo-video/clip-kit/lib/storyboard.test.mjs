@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { EXPECTED as EXPECTED_DRAG } from "../../clips/drag-list-item/scenario.mjs";
 import { EXPECTED } from "../../clips/raw-copy-balance-edges/scenario.mjs";
+import { EXPECTED as EXPECTED_GRID } from "../../clips/slash-menu-grid/scenario.mjs";
 import { parseClip, parseClipText, parseSections, validateStory } from "./storyboard.mjs";
 
 const clipFile = fileURLToPath(new URL("../../clips/raw-copy-balance-edges/clip.md", import.meta.url));
@@ -314,4 +315,33 @@ test("the shipped diff-side-by-side clip.md reads as the clip the owner reviews"
   const out = validateStory(diff, diffTake, win32);
   assert.equal(out.platform, "win32");
   assert.equal(out.fps, 15);
+});
+
+test("the shipped slash-menu-grid clip.md reads as the clip the owner reviews", () => {
+  const gridFile = fileURLToPath(new URL("../../clips/slash-menu-grid/clip.md", import.meta.url));
+  const grid = parseClip(gridFile);
+  assert.equal(grid.width, 1280);
+  assert.equal(grid.height, 720);
+  assert.equal(grid.fps, 15);
+  assert.equal(grid.length, 11.5);
+  assert.deepEqual(
+    grid.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["Type /grid in a block to insert a card grid", "A MyST card grid, rendered in place"],
+  );
+  assert.equal(grid.captions.length, 2);
+  assert.equal(grid.captions[0].from, 0);
+  assert.equal(grid.captions[0].to, grid.captions[1].from);
+  assert.equal(grid.captions[1].to, grid.length);
+  assert.deepEqual(Object.keys(grid.badges), ["save"]);
+  assert.equal(grid.zoom.id, "grid");
+  assert.equal(grid.marks.length, 1);
+  assert.equal(grid.marks[0].id, "1");
+  assert.ok(grid.marks[0].from >= 0 && grid.marks[0].to <= grid.zoom.holdTo, "mark 1 is inside the zoom hold");
+  const take = { filmed: grid.length, presses: [{ id: "save", t: 5.8 }], zooms: [{ id: "grid", t: 6.5 }], marks: [{ id: "1" }] };
+  assert.equal(validateStory(grid, take, win32).platform, "win32");
+  assert.equal(validateStory(grid, take, darwin).platform, "darwin");
+  // The "Expected result" block of clip.md is the scenario's text, character for character.
+  const block = /^Expected result[^\n]*\n(?:[^\n]*\n)*?```markdown\n([\s\S]*?)\n```/mu.exec(readFileSync(gridFile, "utf8"));
+  assert.ok(block, "clip.md has an Expected result block");
+  assert.equal(block[1], EXPECTED_GRID);
 });
