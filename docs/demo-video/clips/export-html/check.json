@@ -1,47 +1,47 @@
 {
   "clip": "export-html",
   "passed": true,
-  "length": 12,
+  "length": 18,
   "mp4": {
-    "seconds": 12,
+    "seconds": 18,
     "width": 1280,
     "height": 720,
     "fps": 15,
     "codec": "h264",
     "pixFmt": "yuv420p",
     "audioStreams": 0,
-    "bytes": 454461,
+    "bytes": 1051474,
     "crf": "master (crf 18)"
   },
   "webm": {
-    "seconds": 12,
+    "seconds": 18,
     "width": 1280,
     "height": 720,
     "fps": 15,
     "codec": "vp9",
     "audioStreams": 0,
-    "bytes": 345929
+    "bytes": 630271
   },
   "gif": {
     "width": 960,
-    "fps": 12,
-    "bytes": 1490703,
+    "fps": 10,
+    "bytes": 2976631,
     "loopCount": 0,
-    "ladderStep": 0,
+    "ladderStep": 1,
     "colors": 128,
     "step": {
-      "step": 0,
-      "fps": 12,
+      "step": 1,
+      "fps": 10,
       "width": 960,
       "colors": 128
     }
   },
-  "loopSeamSsim": 0.988696,
+  "loopSeamSsim": 0.989751,
   "take": {
-    "rawFps": 8.9,
-    "screencastFrames": 107,
-    "filmedSeconds": 12.041,
-    "playbackRate": 1.003,
+    "rawFps": 28.4,
+    "screencastFrames": 513,
+    "filmedSeconds": 18.075,
+    "playbackRate": 1.004,
     "checks": {
       "editMode": "off",
       "paste": false
@@ -63,15 +63,15 @@
   },
   "checks": [
     {
-      "name": "mp4 duration within 5 to 12 s",
+      "name": "mp4 duration within 5 to 30 s",
       "ok": true,
-      "value": "12.000 s",
+      "value": "18.000 s",
       "detail": ""
     },
     {
       "name": "mp4 duration equals Length within one frame",
       "ok": true,
-      "value": "12.000 s vs 12 s",
+      "value": "18.000 s vs 18 s",
       "detail": ""
     },
     {
@@ -107,7 +107,7 @@
     {
       "name": "mp4 at most 10 MB",
       "ok": true,
-      "value": "0.43 MB",
+      "value": "1.00 MB",
       "detail": "crf master (crf 18)"
     },
     {
@@ -119,7 +119,7 @@
     {
       "name": "webm same size, fps and duration",
       "ok": true,
-      "value": "1280x720 15/1 12.000 s",
+      "value": "1280x720 15/1 18.000 s",
       "detail": ""
     },
     {
@@ -131,19 +131,19 @@
     {
       "name": "webm at most 3 MB",
       "ok": true,
-      "value": "0.33 MB",
+      "value": "0.60 MB",
       "detail": ""
     },
     {
       "name": "gif width and fps are the ladder's",
       "ok": true,
-      "value": "960 px, 12/1",
-      "detail": "ladder step 0"
+      "value": "960 px, 10/1",
+      "detail": "ladder step 1"
     },
     {
       "name": "gif at most 3 MB",
       "ok": true,
-      "value": "1.42 MB",
+      "value": "2.84 MB",
       "detail": ""
     },
     {
@@ -155,7 +155,7 @@
     {
       "name": "loop seam SSIM at least 0.98 and below 1.0",
       "ok": true,
-      "value": "0.98870",
+      "value": "0.98975",
       "detail": ""
     },
     {
@@ -174,12 +174,12 @@
       "name": "screencast at least the storyboard's frame rate after retiming",
       "ok": true,
       "value": "30 (retimed by ffmpeg)",
-      "detail": "raw 8.9 fps, storyboard 15 fps"
+      "detail": "raw 28.4 fps, storyboard 15 fps"
     },
     {
       "name": "playback rate inside 0.77 to 1.3",
       "ok": true,
-      "value": "1.003",
+      "value": "1.004",
       "detail": ""
     }
   ]
