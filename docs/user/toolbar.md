@@ -37,7 +37,7 @@ The Export button, or the command **Export to HTML** of the command palette, sav
 `.html` file that a reader opens in any browser, with no editor and no other file. A save dialog
 proposes the name of the page with the `.html` extension; Cancel writes nothing.
 
-![From a page in the Dark theme, Export saves team-handbook.html; opened in VS Code's Integrated Browser, it shows the same dark page with its flowchart, and a click on a tab shows its panel](../demo-video/clips/export-html/export-html.gif)
+![A long report page in Cream, with a wide table breaking out of the column, diagrams and charts, scrolled in Studio and exported with Export; opened in VS Code's Integrated Browser, the file shows the same page, the wide table and the drawings](../demo-video/clips/export-html/export-html.gif)
 
 - The file keeps the preview's theme (including a forced dark, white or cream mode), content width
   and width mode. The zoom is not kept: the file is written at 100 %.
