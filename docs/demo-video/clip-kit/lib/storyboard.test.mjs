@@ -5,6 +5,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { STAGE as STAGE_MODES } from "../../clips/block-editor-modes/scenario.mjs";
 import { EXPECTED as EXPECTED_DRAG } from "../../clips/drag-list-item/scenario.mjs";
 import { EXPECTED as EXPECTED_RADIO } from "../../clips/radio-buttons/scenario.mjs";
 import { EXPECTED as EXPECTED_FRONTMATTER, STAGE as STAGE_FRONTMATTER } from "../../clips/okf-frontmatter/scenario.mjs";
@@ -55,6 +56,12 @@ const STAGE_TABLE = [
   "| Publish the release | Docs  | Wed   |",
   "",
 ].join("\n");
+/** The marks of the shipped block-editor-modes clip.md: the times of its Mark rows. */
+const MARKS_MODES = [
+  [5.9, 7.5],
+  [7.7, 8.9],
+  [9.1, 10.3],
+];
 const darwin = { platform: "darwin" };
 
 /** A small valid storyboard, to change one thing at a time. */
@@ -639,4 +646,50 @@ test("the okf-frontmatter clip changes the status line only, on a page with no t
   assert.deepEqual(changed, [["status: draft", "status: published"]]);
   assert.ok(!stage.some((line) => line.startsWith("type:")), "the stage has no type field");
   assert.equal(existsSync(`${clipDir}stage/_schema`), false, "the clip folder has no stage/_schema folder");
+});
+
+test("the shipped block-editor-modes clip.md reads as the clip the owner reviews", () => {
+  const modesFile = fileURLToPath(new URL("../../clips/block-editor-modes/clip.md", import.meta.url));
+  const modes = parseClip(modesFile);
+  assert.equal(modes.width, 1280);
+  assert.equal(modes.height, 720);
+  assert.equal(modes.fps, 15);
+  assert.equal(modes.length, 12);
+  assert.deepEqual(
+    modes.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["Click a block: its editor shows the GFM buttons", "MyST adds buttons; the page renders the same"],
+  );
+  assert.equal(modes.captions.length, 2);
+  assert.equal(modes.captions[0].from, 0);
+  assert.equal(modes.captions[0].to, modes.captions[1].from);
+  assert.equal(modes.captions[1].to, modes.length);
+  assert.deepEqual(modes.badges, { mode: "Ctrl+Shift+M / ⇧⌘M", down: "↓" });
+  assert.equal(modes.zoom.id, "modes");
+  assert.equal(modes.zoom.holdTo, 10.4);
+  assert.deepEqual(
+    modes.marks.map((mark) => mark.id),
+    ["1", "2", "3"],
+  );
+  assert.deepEqual(modes.marks.map((mark) => [mark.from, mark.to]), MARKS_MODES);
+  for (const [index, mark] of modes.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= modes.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= modes.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  assert.equal(modes.expectedPaste, null);
+  const take = {
+    filmed: modes.length,
+    presses: [
+      { id: "mode", t: 3.25 },
+      { id: "down", t: 4.54 },
+    ],
+    zooms: [{ id: "modes", t: 5.27 }],
+    marks: [{ id: "1" }, { id: "2" }, { id: "3" }],
+  };
+  assert.equal(validateStory(modes, take, win32).platform, "win32");
+  assert.equal(validateStory(modes, take, darwin).platform, "darwin");
+});
+
+test("the stage of the block-editor-modes scenario is the shipped stage file, byte for byte", () => {
+  const stageFile = fileURLToPath(new URL("../../clips/block-editor-modes/stage/release-plan.md", import.meta.url));
+  assert.equal(STAGE_MODES, readFileSync(stageFile, "utf8"));
 });
