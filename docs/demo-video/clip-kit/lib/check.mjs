@@ -48,6 +48,40 @@ export function gifLoopCount(file) {
   return bytes.readUInt16LE(at + 11 + 2);
 }
 
+const EDIT_MODES = ["off", "on"];
+const CHECK_KEYS = ["editMode", "paste"];
+
+/**
+ * The scenario's `checks` with their defaults: `editMode` ("off", or "on") is the mode Studio is in at the
+ * start of the take, `paste` (true, or false) says whether the clip pastes (so a paste-options widget could
+ * show). Refuses another key or value, naming scenario.mjs.
+ */
+export function resolveChecks(checks) {
+  if (checks !== undefined && (checks === null || typeof checks !== "object" || Array.isArray(checks))) {
+    throw new Error(`scenario.mjs: checks must be an object { editMode, paste }, got ${JSON.stringify(checks)}`);
+  }
+  for (const key of Object.keys(checks ?? {})) {
+    if (!CHECK_KEYS.includes(key)) throw new Error(`scenario.mjs: checks.${key} is not a known check (known: ${CHECK_KEYS.join(", ")})`);
+  }
+  const { editMode = "off", paste = true } = checks ?? {};
+  if (!EDIT_MODES.includes(editMode)) throw new Error(`scenario.mjs: checks.editMode must be "on" or "off", got ${JSON.stringify(editMode)}`);
+  if (typeof paste !== "boolean") throw new Error(`scenario.mjs: checks.paste must be true or false, got ${JSON.stringify(paste)}`);
+  return { editMode, paste };
+}
+
+/**
+ * The take's lines of check.json, from verify.json: { name, ok, value }. A verify.json written before
+ * `checks` existed reads as the defaults.
+ */
+export function takeLines(verify) {
+  const checks = resolveChecks(verify.checks);
+  const mode = verify.notes?.readingMode;
+  const lines = [{ name: "scenario verify passed", ok: verify.passed === true, value: String(verify.passed) }];
+  if (checks.paste) lines.push({ name: "no paste-options widget after the paste", ok: verify.notes?.pasteWidgets === 0, value: String(verify.notes?.pasteWidgets) });
+  lines.push({ name: checks.editMode === "on" ? "Studio in edit mode at the start" : "Studio in reading mode at the start", ok: mode === checks.editMode, value: String(mode) });
+  return lines;
+}
+
 function ssim(first, second) {
   const result = spawnSync(ffmpegBin(), ["-v", "info", "-i", first, "-i", second, "-lavfi", "ssim", "-f", "null", "-"], { encoding: "utf8" });
   const match = /All:([\d.]+)/u.exec(`${result.stderr}`);
@@ -113,9 +147,8 @@ export function checkClip(ctx, story) {
   want("loop seam SSIM at least 0.98 and below 1.0", seam >= 0.98 && seam < 1, seam.toFixed(5));
 
   // The take.
-  want("scenario verify passed", verify.passed === true, String(verify.passed));
-  want("no paste-options widget after the paste", verify.notes?.pasteWidgets === 0, String(verify.notes?.pasteWidgets));
-  want("Studio in reading mode at the start", verify.notes?.readingMode === "off", String(verify.notes?.readingMode));
+  const lines = takeLines(verify);
+  for (const line of lines) want(line.name, line.ok, line.value);
   want("screencast at least the storyboard's frame rate after retiming", story.fps <= 30, "30 (retimed by ffmpeg)", `raw ${take.rawFps} fps, storyboard ${story.fps} fps`);
   want("playback rate inside 0.77 to 1.3", story.rate >= 0.77 && story.rate <= 1.3, story.rate.toFixed(3));
 
@@ -127,7 +160,7 @@ export function checkClip(ctx, story) {
     webm: values.webm,
     gif: { ...values.gif, step: used.gif },
     loopSeamSsim: values.loopSeamSsim,
-    take: { rawFps: take.rawFps, screencastFrames: take.screencastFrames, filmedSeconds: take.filmed, playbackRate: Math.round(story.rate * 1000) / 1000, readingMode: verify.notes?.readingMode, pasteWidgets: verify.notes?.pasteWidgets, verifyPassed: verify.passed },
+    take: { rawFps: take.rawFps, screencastFrames: take.screencastFrames, filmedSeconds: take.filmed, playbackRate: Math.round(story.rate * 1000) / 1000, checks: resolveChecks(verify.checks), readingMode: verify.notes?.readingMode, ...(resolveChecks(verify.checks).paste ? { pasteWidgets: verify.notes?.pasteWidgets } : {}), verifyPassed: verify.passed },
     host,
     checks: results,
   };

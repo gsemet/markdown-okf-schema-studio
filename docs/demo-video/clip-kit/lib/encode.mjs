@@ -47,6 +47,40 @@ export function renderMaster(ctx) {
   return master;
 }
 
+const KEY_FRAME_NAME = /^[a-z][a-z0-9-]*$/u;
+
+/**
+ * The key frames `render` writes into frames/, as { file, at } with `at` in seconds of the clip, in the order
+ * written: `01-selected.png` and `02-pasted.png` (first and last key press, only when the take pressed a
+ * key), `03-zoomed.png` (when there is a zoom), `<NN>-mark-<id>.png` per mark (numbered from 04 in the
+ * storyboard's order, at the middle of its range), then `<name>.png` per key frame the scenario named with
+ * `t.keyFrame(name)`. A key frame name starts with a letter (so it never takes a numbered kit name) and is
+ * unique, else this throws naming it.
+ */
+export function keyFrameTimes(take, story) {
+  const frames = [];
+  const presses = take.presses ?? [];
+  if (presses.length > 0) {
+    frames.push({ file: "01-selected.png", at: presses[0].t / story.rate - 0.05 });
+    frames.push({ file: "02-pasted.png", at: presses.at(-1).t / story.rate + 0.3 });
+  }
+  if (take.zooms?.length > 0 && story.zoom) {
+    const zoomIn = take.zooms[0].t / story.rate + 0.6;
+    frames.push({ file: "03-zoomed.png", at: (zoomIn + story.zoom.holdTo) / 2 });
+  }
+  for (const [index, mark] of story.marks.entries()) {
+    frames.push({ file: `${String(index + 4).padStart(2, "0")}-mark-${mark.id}.png`, at: (mark.from + mark.to) / 2 });
+  }
+  const seen = new Set();
+  for (const { name, t } of take.keyFrames ?? []) {
+    if (!KEY_FRAME_NAME.test(name)) throw new Error(`scenario.mjs: the key frame name "${name}" must match ${KEY_FRAME_NAME} (lowercase, starting with a letter)`);
+    if (seen.has(name)) throw new Error(`scenario.mjs: the key frame "${name}" is named twice`);
+    seen.add(name);
+    frames.push({ file: `${name}.png`, at: t / story.rate });
+  }
+  return frames;
+}
+
 const ff = (args) => run(ffmpegBin(), ["-v", "error", "-y", ...args]);
 const size = (path) => statSync(path).size;
 
@@ -86,17 +120,9 @@ export function encodeAll(ctx, story, take) {
   mkdirSync(frames, { recursive: true });
   const total = Math.round(story.length * story.fps);
   const at = (seconds, file) => ff(["-ss", seconds.toFixed(3), "-i", out("mp4"), "-frames:v", "1", file]);
-  const copy = take.presses[0];
-  const paste = take.presses.at(-1);
+  const wanted = keyFrameTimes(take, story); // refuses a bad key frame name before any picture is written
   at(0, join(ctx.clipDir, "poster.png"));
-  at(copy.t / story.rate - 0.05, join(frames, "01-selected.png"));
-  at(paste.t / story.rate + 0.3, join(frames, "02-pasted.png"));
-  const zoomIn = take.zooms[0].t / story.rate + 0.6;
-  at((zoomIn + story.zoom.holdTo) / 2, join(frames, "03-zoomed.png"));
-  // One frame per mark, at the middle of its range, numbered from 04 in the storyboard's order.
-  for (const [index, mark] of story.marks.entries()) {
-    at((mark.from + mark.to) / 2, join(frames, `${String(index + 4).padStart(2, "0")}-mark-${mark.id}.png`));
-  }
+  for (const { file, at: seconds } of wanted) at(seconds, join(frames, file));
 
   const font = filterPath(fontFile());
   const label = `drawtext=fontfile='${font}':text='%{pts\\:hms}':x=6:y=6:fontsize=18:fontcolor=white:box=1:boxcolor=black@0.6`;

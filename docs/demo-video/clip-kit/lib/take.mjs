@@ -4,6 +4,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { resolveChecks } from "./check.mjs";
 import { WINDOW, checkDisplay, cleanEnv, expandChord, killTree, launch, repoRequire, sleep } from "./platform.mjs";
 import { resolveVSCode } from "./profile.mjs";
 
@@ -144,6 +145,8 @@ function makeHelpers(ctx, page, context, events) {
     unzoom: (id) => ev("unzoom", { id }),
     mark: (id, rect) => ev("mark", { id, rect }),
     unmark: (id) => ev("unmark", { id }),
+    /** Names a moment of the take: `render` writes the picture `frames/<name>.png` of it (a lowercase name, unique). */
+    keyFrame: (name) => ev("keyframe", { name }),
     /** The preview frame of Studio. */
     async frameOf() {
       for (let i = 0; i < 60; i++) {
@@ -169,6 +172,7 @@ function makeHelpers(ctx, page, context, events) {
 
 /** Runs the whole take. Throws on any failure, after writing what it can for diagnosis. */
 export async function runTake(ctx, scenario) {
+  const checks = resolveChecks(scenario.checks); // before the window opens: a wrong declaration costs no take
   const { scale } = checkDisplay();
   const code = await resolveVSCode(ctx);
   // A failed take can never be rendered as a new one.
@@ -218,7 +222,7 @@ export async function runTake(ctx, scenario) {
     await cdp.send("Page.stopScreencast").catch(() => {});
     await Promise.all(pending);
     const outcome = await scenario.verify(t);
-    writeFileSync(join(ctx.take, "verify.json"), JSON.stringify({ passed: true, outcome, notes: t.notes }, null, 2));
+    writeFileSync(join(ctx.take, "verify.json"), JSON.stringify({ passed: true, checks, outcome, notes: t.notes }, null, 2));
     t.finish = true;
   } catch (error) {
     failure = error;
@@ -231,7 +235,7 @@ export async function runTake(ctx, scenario) {
     } catch {
       // no picture of the failure
     }
-    writeFileSync(join(ctx.take, "verify.json"), JSON.stringify({ passed: false, error: String(error?.message ?? error) }, null, 2));
+    writeFileSync(join(ctx.take, "verify.json"), JSON.stringify({ passed: false, checks, error: String(error?.message ?? error) }, null, 2));
   } finally {
     if (cdp) await cdp.send("Page.stopScreencast").catch(() => {});
     await Promise.all(pending).catch(() => {});
