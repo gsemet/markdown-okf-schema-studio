@@ -30,12 +30,12 @@ const THEME_TOGGLE = "[data-sphinx-preview-theme-toggle]";
 const EDIT_TOGGLE = "[data-sphinx-preview-edit-toggle]";
 const CONTENT = "#sphinx-myst-preview-content";
 
-/** What each mark outlines: the drawing itself (the image, the typeset equation, the inline SVG). */
+/** What each mark outlines: the drawing itself (the image, the live chart svg, the typeset equation, the inline SVG). */
 const DRAWINGS = {
   1: `${MERMAID} img.myst-mermaid-image`,
   2: `${PLANTUML} img.myst-plantuml-image`,
-  3: `${VEGA_LITE} img.myst-vega-image`,
-  4: `${VEGA} img.myst-vega-image`,
+  3: `${VEGA_LITE} .myst-vega-view > svg`,
+  4: `${VEGA} .myst-vega-view > svg`,
   5: ".math-display .katex-display",
   6: "figure.myst-svg-figure > svg",
 };
@@ -44,15 +44,15 @@ const DRAWINGS = {
 async function readDrawn(frame) {
   return frame.evaluate(
     ([mermaid, plantuml, vegaLite, vega]) => {
-      const block = (selector) => {
+      const block = (selector, drawing = "img") => {
         const element = document.querySelector(selector);
-        return element ? { state: element.getAttribute("data-render-state"), image: element.querySelector("img") !== null } : null;
+        return element ? { state: element.getAttribute("data-render-state"), image: element.querySelector(drawing) !== null } : null;
       };
       return {
         mermaid: block(mermaid),
         plantuml: block(plantuml),
-        vegaLite: block(vegaLite),
-        vega: block(vega),
+        vegaLite: block(vegaLite, ".myst-vega-view > svg"),
+        vega: block(vega, ".myst-vega-view > svg"),
         katex: document.querySelector(".math-display .katex") !== null,
         svg: document.querySelector("figure.myst-svg-figure svg") !== null,
         plantumlErrors: document.querySelectorAll(".myst-plantuml-error").length,
@@ -107,36 +107,50 @@ async function scrollStep(frame, dy) {
 }
 
 /**
- * Scrolls the page by `dy` pixels (positive goes down) over about `seconds`, with the pointer over the preview:
- * a CDP wheel, or a smooth scrollBy when the wheel did not move the page after its first steps. Then waits until
- * two reads of the Capacity heading, 100 ms apart, are equal. Returns the heading's top before and after.
+ * Off camera, with the pointer over the preview: "wheel" when a few CDP wheel steps move the page, else
+ * "scrollTo". Tried during the take, it would delay the filmed scroll and leave mark 4 over a moving page.
+ */
+async function pickScrollWay(t) {
+  const before = await headingTop(await t.frameOf());
+  for (let step = 0; step < 6; step++) {
+    await t.page.mouse.wheel(0, 20);
+    await t.sleep(50);
+  }
+  return Math.abs((await headingTop(await t.frameOf())) - before) < 1 ? "scrollTo" : "wheel";
+}
+
+/** Puts the preview back at the top, whatever element scrolls it. */
+async function toTop(frame) {
+  await frame.evaluate((content) => {
+    let element = document.querySelector(content);
+    while (element) {
+      element.scrollTop = 0;
+      element = element.parentElement;
+    }
+    document.scrollingElement.scrollTop = 0;
+  }, CONTENT);
+}
+
+/**
+ * Scrolls the page by `dy` pixels (positive goes down) over about `seconds`, the way picked in `setup`: the CDP
+ * wheel, else a smooth scrollBy. Then waits until two reads of the Capacity heading, 100 ms apart, are equal.
+ * Returns the heading's top before and after.
  */
 async function scrollBy(t, dy, seconds) {
   let frame = await t.frameOf();
   const before = await headingTop(frame);
   const steps = Math.max(4, Math.round(seconds / 0.05));
-  const probe = 6;
-  if (scrollWay !== "scrollTo") {
+  if (scrollWay === "wheel") {
     for (let step = 1; step <= steps; step++) {
       await t.page.mouse.wheel(0, dy / steps);
       await t.sleep((seconds * 1000) / steps);
-      if (step === probe && scrollWay === undefined) {
-        const moved = Math.abs((await headingTop(frame)) - before);
-        if (moved < 1) {
-          scrollWay = "scrollTo";
-          break;
-        }
-        scrollWay = "wheel";
-      }
     }
-  }
-  if (scrollWay === "scrollTo") {
+  } else {
     // A smooth scroll in the preview frame: small eased steps, 50 ms apart, so the screencast sees the motion.
-    const rest = dy - (before - (await headingTop(frame)));
     const ease = (k) => (k < 0.5 ? 4 * k ** 3 : 1 - (-2 * k + 2) ** 3 / 2);
     let done = 0;
     for (let step = 1; step <= steps; step++) {
-      const target = rest * ease(step / steps);
+      const target = dy * ease(step / steps);
       await scrollStep(frame, target - done);
       done = target;
       await t.sleep((seconds * 1000) / steps);
@@ -181,14 +195,7 @@ export async function setup(t) {
   }
   if (theme !== "cream") throw new Error(`the page did not reach the Cream theme (data-sphinx-preview-theme-mode is ${theme})`);
   // Scrolled to the top, then wait for the six renderings.
-  await frame.evaluate((content) => {
-    let element = document.querySelector(content);
-    while (element) {
-      element.scrollTop = 0;
-      element = element.parentElement;
-    }
-    document.scrollingElement.scrollTop = 0;
-  }, CONTENT);
+  await toTop(frame);
   const limit = Date.now() + 30000;
   let found = await readDrawn(frame);
   while (!isDrawn(found) && Date.now() < limit) {
@@ -204,6 +211,9 @@ export async function setup(t) {
   const width = await frame.evaluate(() => window.innerWidth);
   const x = Math.min(content.x + content.w + 120, content.x + width - 40);
   await t.moveTo(x, heading.y + heading.h / 2, 0.1);
+  scrollWay = await pickScrollWay(t);
+  await t.sleep(300);
+  await toTop(await t.frameOf());
   await t.sleep(800);
 }
 
@@ -215,7 +225,8 @@ export async function run(t) {
   await drawn(frame, "at the start");
 
   // The zoom rect: the content column, narrowed to the three drawings of the first view (their blocks, so the
-  // collapsed "source" lines are in), padded by 24 px; kept at least half of the window so the zoom stays under 2x.
+  // collapsed "Diagram source" lines of Mermaid and PlantUML are in), padded by 24 px; kept at least half of the
+  // window so the zoom stays under 2x.
   const blocks = [await boxOf(frame, MERMAID), await boxOf(frame, PLANTUML), await boxOf(frame, VEGA_LITE)];
   const column = await boxOf(frame, CONTENT);
   const pad = 24;
@@ -248,15 +259,14 @@ export async function run(t) {
   await showMark(2, 3.0, 5.1);
   await showMark(3, 5.2, 7.3);
 
-  // The scroll: the Capacity heading goes to the top of the zoom rect.
-  await until(7.4);
-  // The Capacity heading goes to the top of the zoom rect, or further when that would leave the SVG drawing below it.
+  // The scroll: the Capacity heading goes to the top of the zoom rect, or further when that would leave the SVG
+  // drawing below it. It takes 0.7 s, so the page is still when mark 4 comes in at 8.2 s.
   const svg0 = await boxOf(await t.frameOf(), DRAWINGS[6]);
   const wanted = Math.max(heading0 - zoomRect.y - 4, svg0.y + svg0.h + 16 - (zoomRect.y + zoomRect.h) + 4);
-  const first = await scrollBy(t, wanted, 0.8);
+  await until(7.4);
+  const first = await scrollBy(t, wanted, 0.7);
   t.record("scroll", scrollWay);
   t.record("scrollMoved", Math.round(first.before - first.after));
-  console.log(`scroll: wanted ${wanted.toFixed(1)}, heading ${first.before} -> ${first.after}, svg0 ${rectText(svg0)}, zoom ${rectText(zoomRect)}, way ${scrollWay}`);
   await showMark(4, 8.2, 9.9);
   await showMark(5, 10.0, 12.1);
   await showMark(6, 12.2, 14.3);

@@ -10,7 +10,7 @@
     "codec": "h264",
     "pixFmt": "yuv420p",
     "audioStreams": 0,
-    "bytes": 545990,
+    "bytes": 568679,
     "crf": "master (crf 18)"
   },
   "webm": {
@@ -20,12 +20,12 @@
     "fps": 15,
     "codec": "vp9",
     "audioStreams": 0,
-    "bytes": 324724
+    "bytes": 334630
   },
   "gif": {
     "width": 960,
     "fps": 12,
-    "bytes": 1936794,
+    "bytes": 2044158,
     "loopCount": 0,
     "ladderStep": 0,
     "colors": 128,
@@ -36,11 +36,11 @@
       "colors": 128
     }
   },
-  "loopSeamSsim": 0.995775,
+  "loopSeamSsim": 0.99506,
   "take": {
     "rawFps": 1.8,
     "screencastFrames": 29,
-    "filmedSeconds": 16.045,
+    "filmedSeconds": 16.043,
     "playbackRate": 1.003,
     "checks": {
       "editMode": "off",
@@ -107,7 +107,7 @@
     {
       "name": "mp4 at most 10 MB",
       "ok": true,
-      "value": "0.52 MB",
+      "value": "0.54 MB",
       "detail": "crf master (crf 18)"
     },
     {
@@ -131,7 +131,7 @@
     {
       "name": "webm at most 3 MB",
       "ok": true,
-      "value": "0.31 MB",
+      "value": "0.32 MB",
       "detail": ""
     },
     {
@@ -143,7 +143,7 @@
     {
       "name": "gif at most 3 MB",
       "ok": true,
-      "value": "1.85 MB",
+      "value": "1.95 MB",
       "detail": ""
     },
     {
@@ -155,7 +155,7 @@
     {
       "name": "loop seam SSIM at least 0.98 and below 1.0",
       "ok": true,
-      "value": "0.99577",
+      "value": "0.99506",
       "detail": ""
     },
     {
