@@ -1,0 +1,186 @@
+{
+  "clip": "diff-side-by-side",
+  "passed": true,
+  "length": 11,
+  "mp4": {
+    "seconds": 11,
+    "width": 1280,
+    "height": 720,
+    "fps": 15,
+    "codec": "h264",
+    "pixFmt": "yuv420p",
+    "audioStreams": 0,
+    "bytes": 471434,
+    "crf": "master (crf 18)"
+  },
+  "webm": {
+    "seconds": 11,
+    "width": 1280,
+    "height": 720,
+    "fps": 15,
+    "codec": "vp9",
+    "audioStreams": 0,
+    "bytes": 345531
+  },
+  "gif": {
+    "width": 960,
+    "fps": 12,
+    "bytes": 1393338,
+    "loopCount": 0,
+    "ladderStep": 0,
+    "colors": 128,
+    "step": {
+      "step": 0,
+      "fps": 12,
+      "width": 960,
+      "colors": 128
+    }
+  },
+  "loopSeamSsim": 0.994073,
+  "take": {
+    "rawFps": 2.3,
+    "screencastFrames": 25,
+    "filmedSeconds": 11.047,
+    "playbackRate": 1.004,
+    "checks": {
+      "editMode": "off",
+      "paste": false
+    },
+    "readingMode": "off",
+    "verifyPassed": true
+  },
+  "host": {
+    "vscodeVersion": "1.147.0",
+    "vscodePinned": true,
+    "extensionVersion": "1.12.1",
+    "extensionSource": "vsix",
+    "deviceScale": 1.75,
+    "workArea": {
+      "width": 3440,
+      "height": 1392
+    },
+    "platform": "win32"
+  },
+  "checks": [
+    {
+      "name": "mp4 duration within 5 to 12 s",
+      "ok": true,
+      "value": "11.000 s",
+      "detail": ""
+    },
+    {
+      "name": "mp4 duration equals Length within one frame",
+      "ok": true,
+      "value": "11.000 s vs 11 s",
+      "detail": ""
+    },
+    {
+      "name": "mp4 size",
+      "ok": true,
+      "value": "1280x720",
+      "detail": "storyboard 1280x720"
+    },
+    {
+      "name": "mp4 15 fps",
+      "ok": true,
+      "value": "15/1",
+      "detail": ""
+    },
+    {
+      "name": "mp4 h264 yuv420p",
+      "ok": true,
+      "value": "h264 yuv420p",
+      "detail": ""
+    },
+    {
+      "name": "mp4 has no audio stream",
+      "ok": true,
+      "value": "0",
+      "detail": ""
+    },
+    {
+      "name": "mp4 faststart",
+      "ok": true,
+      "value": "ftyp,moov,free,mdat",
+      "detail": ""
+    },
+    {
+      "name": "mp4 at most 10 MB",
+      "ok": true,
+      "value": "0.45 MB",
+      "detail": "crf master (crf 18)"
+    },
+    {
+      "name": "webm vp9",
+      "ok": true,
+      "value": "vp9",
+      "detail": ""
+    },
+    {
+      "name": "webm same size, fps and duration",
+      "ok": true,
+      "value": "1280x720 15/1 11.000 s",
+      "detail": ""
+    },
+    {
+      "name": "webm has no audio stream",
+      "ok": true,
+      "value": "0",
+      "detail": ""
+    },
+    {
+      "name": "webm at most 3 MB",
+      "ok": true,
+      "value": "0.33 MB",
+      "detail": ""
+    },
+    {
+      "name": "gif width and fps are the ladder's",
+      "ok": true,
+      "value": "960 px, 12/1",
+      "detail": "ladder step 0"
+    },
+    {
+      "name": "gif at most 3 MB",
+      "ok": true,
+      "value": "1.33 MB",
+      "detail": ""
+    },
+    {
+      "name": "gif NETSCAPE2.0 loop count 0",
+      "ok": true,
+      "value": "0",
+      "detail": ""
+    },
+    {
+      "name": "loop seam SSIM at least 0.98 and below 1.0",
+      "ok": true,
+      "value": "0.99407",
+      "detail": ""
+    },
+    {
+      "name": "scenario verify passed",
+      "ok": true,
+      "value": "true",
+      "detail": ""
+    },
+    {
+      "name": "Studio in reading mode at the start",
+      "ok": true,
+      "value": "off",
+      "detail": ""
+    },
+    {
+      "name": "screencast at least the storyboard's frame rate after retiming",
+      "ok": true,
+      "value": "30 (retimed by ffmpeg)",
+      "detail": "raw 2.3 fps, storyboard 15 fps"
+    },
+    {
+      "name": "playback rate inside 0.77 to 1.3",
+      "ok": true,
+      "value": "1.004",
+      "detail": ""
+    }
+  ]
+}

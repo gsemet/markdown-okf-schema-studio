@@ -249,3 +249,32 @@ test("the shipped export-html clip.md reads as the clip the owner reviews", () =
     assert.equal(out.fps, 15);
   }
 });
+
+test("the shipped diff-side-by-side clip.md reads as the clip the owner reviews", () => {
+  const diff = parseClip(fileURLToPath(new URL("../../clips/diff-side-by-side/clip.md", import.meta.url)));
+  assert.equal(diff.width, 1280);
+  assert.equal(diff.height, 720);
+  assert.equal(diff.fps, 15);
+  assert.deepEqual(
+    diff.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["Diff marks every block changed since the last commit", "Side-by-side shows before and after, word by word"],
+  );
+  assert.equal(diff.captions[0].from, 0);
+  assert.equal(diff.captions[0].to, diff.captions[1].from);
+  assert.equal(diff.captions[1].to, diff.length);
+  assert.deepEqual(diff.badges, {});
+  assert.equal(diff.zoom.id, "card");
+  assert.deepEqual(
+    diff.marks.map((mark) => mark.id),
+    ["1", "2", "3", "4"],
+  );
+  for (const [index, mark] of diff.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= diff.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= diff.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  assert.equal(diff.expectedPaste, null);
+  const diffTake = { filmed: diff.length, presses: [], zooms: [{ id: "card", t: 4.6 }], marks: [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }] };
+  const out = validateStory(diff, diffTake, win32);
+  assert.equal(out.platform, "win32");
+  assert.equal(out.fps, 15);
+});
