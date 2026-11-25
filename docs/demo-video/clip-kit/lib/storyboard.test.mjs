@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { EXPECTED as EXPECTED_DRAG } from "../../clips/drag-list-item/scenario.mjs";
 import { EXPECTED } from "../../clips/raw-copy-balance-edges/scenario.mjs";
@@ -22,6 +22,7 @@ const take = {
   zooms: [{ id: "result", t: 4.4 }],
   marks: [{ id: "1" }, { id: "2" }, { id: "3" }],
 };
+const SHIPPED_PASTE_LENGTH = 10.0; // the Length of clips/paste-spreadsheet-cells/clip.md, set from the take
 const win32 = { platform: "win32" };
 const darwin = { platform: "darwin" };
 
@@ -245,6 +246,42 @@ test("the shipped export-html clip.md reads as the clip the owner reviews", () =
   const filmed = { filmed: clip.length, presses: [{ id: "palette", t: 2.8 }], zooms: [{ id: "page", t: 6 }], marks: [{ id: "1" }, { id: "2" }] };
   for (const host of [win32, darwin]) {
     const out = validateStory(clip, filmed, host);
+    assert.equal(out.platform, host.platform);
+    assert.equal(out.fps, 15);
+  }
+});
+
+test("the shipped paste-spreadsheet-cells clip.md reads as the clip the owner reviews", async () => {
+  const pasteFile = fileURLToPath(new URL("../../clips/paste-spreadsheet-cells/clip.md", import.meta.url));
+  const paste = parseClip(pasteFile);
+  assert.equal(paste.length, SHIPPED_PASTE_LENGTH);
+  assert.equal(paste.width, 1280);
+  assert.equal(paste.height, 720);
+  assert.equal(paste.fps, 15);
+  assert.deepEqual(
+    paste.captions.map((caption) => caption.text),
+    ["Copy cells from a sheet, **paste** into a table", "Cells fill right and down, **rows and columns** added"],
+  );
+  assert.equal(paste.captions[0].from, 0);
+  assert.equal(paste.captions[0].to, paste.captions[1].from);
+  assert.equal(paste.captions[1].to, paste.length);
+  assert.deepEqual(paste.badges, { copy: "Ctrl+C / ⌘C", paste: "Ctrl+V / ⌘V" });
+  assert.equal(paste.zoom.id, "table");
+  assert.deepEqual(
+    paste.marks.map((mark) => mark.id),
+    ["1", "2"],
+  );
+  for (const [index, mark] of paste.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= paste.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= paste.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  // The "Expected paste" block of clip.md is the scenario's text, character for character (the scenario ends with one newline).
+  const scenario = await import(pathToFileURL(fileURLToPath(new URL("../../clips/paste-spreadsheet-cells/scenario.mjs", import.meta.url))).href);
+  assert.equal(typeof paste.expectedPaste, "string");
+  assert.equal(`${paste.expectedPaste}\n`, scenario.EXPECTED);
+  const take = { filmed: paste.length, presses: [{ id: "copy", t: 2 }, { id: "paste", t: 3.8 }], zooms: [{ id: "table", t: 5 }], marks: [{ id: "1" }, { id: "2" }] };
+  for (const host of [win32, darwin]) {
+    const out = validateStory(paste, take, host);
     assert.equal(out.platform, host.platform);
     assert.equal(out.fps, 15);
   }

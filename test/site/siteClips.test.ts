@@ -123,6 +123,18 @@ test("the shipped toolbar page plays the diff clip as video", async () => {
   }
 });
 
+test("the shipped editing page plays the spreadsheet paste clip as video", async () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  const clip = "docs/demo-video/clips/paste-spreadsheet-cells";
+  const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
+  const rendered = await renderMyst(source);
+  const html = clipVideos(rendered.html, "docs/user/editing.md", (repoPath) => fs.existsSync(path.join(EXTENSION_ROOT, repoPath)));
+  assert.ok(html.includes(`<video src="../demo-video/clips/paste-spreadsheet-cells/paste-spreadsheet-cells.webm"`), "the page holds the clip's video");
+  for (const file of ["paste-spreadsheet-cells.webm", "paste-spreadsheet-cells.gif", "poster.png"]) {
+    assert.ok(fs.existsSync(path.join(EXTENSION_ROOT, clip, file)), file);
+  }
+});
+
 test("a clip's storyboard and stage documents are not site pages", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-095
   assert.equal(isClipSource("docs/demo-video/clips/x/clip.md"), true);
