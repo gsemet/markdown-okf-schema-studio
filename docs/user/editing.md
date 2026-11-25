@@ -128,6 +128,9 @@ environments),
   editor of a block inside an admonition keeps these keys at its edges. In the editor of an item,
   Cmd+Alt+Up/Down (Ctrl+Alt elsewhere) saves the item and moves the whole list, whose editor then
   opens.
+
+  ![In edit mode, from the keyboard only: E turns edit mode on, Down selects a note admonition, Enter opens it and Escape closes it, Right goes inside it, Down reaches its list, Right selects the first item, Enter opens the admonition editor, one word of the item is changed and Ctrl+Enter saves](../demo-video/clips/keyboard-navigation/keyboard-navigation.gif)
+
   Block selection: Shift+click selects the blocks between the last clicked block and the one you
   click, Shift+Up/Down extends or shrinks the selection, Escape or a click clears it.
   With a selection, Cmd/Ctrl+C copies its exact Markdown, Cmd/Ctrl+X cuts it (one undo step), and
