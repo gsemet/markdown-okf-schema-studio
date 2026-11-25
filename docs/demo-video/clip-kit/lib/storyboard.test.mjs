@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { EXPECTED as EXPECTED_DRAG } from "../../clips/drag-list-item/scenario.mjs";
+import { EXPECTED as EXPECTED_RADIO } from "../../clips/radio-buttons/scenario.mjs";
 import { EXPECTED } from "../../clips/raw-copy-balance-edges/scenario.mjs";
 import { EXPECTED as EXPECTED_GRID } from "../../clips/slash-menu-grid/scenario.mjs";
 import { STAGE as STAGE_THEME } from "../../clips/theme-switch/scenario.mjs";
@@ -232,6 +233,51 @@ test("the shipped drag-list-item clip.md reads as the clip the owner reviews", (
   const out = validateStory(drag, take, win32);
   assert.equal(out.platform, "win32");
   assert.equal(out.fps, 15);
+});
+
+test("the shipped radio-buttons clip.md reads as the clip the owner reviews", () => {
+  const radioFile = fileURLToPath(new URL("../../clips/radio-buttons/clip.md", import.meta.url));
+  const radio = parseClip(radioFile);
+  assert.equal(radio.width, 1280);
+  assert.equal(radio.height, 720);
+  assert.equal(radio.fps, 15);
+  assert.deepEqual(
+    radio.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["Lists of ( ) and (x) become a radio group", "One click moves the (x) in the file"],
+  );
+  assert.equal(radio.captions[0].from, 0);
+  assert.equal(radio.captions[0].to, radio.captions[1].from);
+  assert.equal(radio.captions[1].to, radio.length);
+  assert.deepEqual(radio.badges, {});
+  assert.equal(radio.zoom.id, "raw");
+  assert.equal(radio.zoom.holdTo, 9.5);
+  assert.deepEqual(
+    radio.marks.map((mark) => mark.id),
+    ["1", "2"],
+  );
+  assert.deepEqual(radio.marks.map((mark) => [mark.from, mark.to]), [[5, 6.6], [6.6, 8.2]]);
+  for (const [index, mark] of radio.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= radio.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= radio.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  // The "Expected result" block of clip.md is the scenario's text, character for character.
+  const block = /^Expected result[^\n]*\n(?:[^\n]*\n)*?```markdown\n([\s\S]*?)\n```/mu.exec(readFileSync(radioFile, "utf8"));
+  assert.ok(block, "clip.md has an Expected result block");
+  assert.equal(`${block[1]}\n`, EXPECTED_RADIO);
+  const take = { filmed: radio.length, presses: [], zooms: [{ id: "raw", t: 4.4 }], marks: [{ id: "1" }, { id: "2" }] };
+  const out = validateStory(radio, take, win32);
+  assert.equal(out.platform, "win32");
+  assert.equal(out.fps, 15);
+});
+
+test("the stage of the radio-buttons clip differs from the expected text by the moved x only", () => {
+  const stage = readFileSync(fileURLToPath(new URL("../../clips/radio-buttons/stage/plan.md", import.meta.url)), "utf8").split("\n");
+  const expected = EXPECTED_RADIO.split("\n");
+  assert.equal(stage.length, expected.length);
+  const changed = stage.map((line, index) => (line === expected[index] ? 0 : index + 1)).filter(Boolean);
+  assert.deepEqual(changed, [7, 8]);
+  assert.equal(stage[6].replace("(x)", "( )"), expected[6]);
+  assert.equal(stage[7].replace("( )", "(x)"), expected[7]);
 });
 
 test("the shipped export-html clip.md reads as the clip the owner reviews", () => {
