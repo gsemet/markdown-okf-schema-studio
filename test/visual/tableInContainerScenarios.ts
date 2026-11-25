@@ -8,7 +8,7 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 
 export const TABLE_IN_CONTAINER_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
     id: "table-editing/v33-cell-editor-in-quote-light-900",
     fixture: "86-table-in-quote-and-admonition",
     theme: "light",
@@ -21,7 +21,7 @@ export const TABLE_IN_CONTAINER_SCENARIOS: ScenarioDefinition[] = [
       + "admonition do the same (the `open` step keeps the editor of the quote).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
     id: "table-editing/v34-cell-editor-in-note-dark-900",
     fixture: "86-table-in-quote-and-admonition",
     theme: "dark",

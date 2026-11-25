@@ -50,7 +50,8 @@ function longRule(): string {
 }
 
 test("every page has its own share title, one set of tags, an absolute url", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S6
   const pages = pagesOf();
   const titles = new Set<string>();
   for (const spec of pages) {
@@ -70,7 +71,8 @@ test("every page has its own share title, one set of tags, an absolute url", () 
 });
 
 test("one picture per category, shared by its use cases and behaviours; the index has its own", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S6
   const pages = pagesOf();
   const image = (spec: PageSpec): string => onlyMeta(viewerDocument(spec, FOOTER), "og:image");
   assert.equal(image(pages[0] as PageSpec), `${SITE_URL}requirements/og/areas-card.png`);
@@ -85,8 +87,9 @@ test("one picture per category, shared by its use cases and behaviours; the inde
 });
 
 test("the text of a category, a use case and a behaviour is written for sharing", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-093
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S6
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-093#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-093#S2
   const raw = JSON.parse(fixtureReport()) as { requirements: unknown[] };
   raw.requirements.push(requirement("StRS-X-020", "StRS", "gfm", { userNeed: `As a writer, ${"I want a very long need. ".repeat(12)}`.trim() }));
   raw.requirements.push(requirement("SwRS-X-021", "SwRS", "gfm", { description: longRule(), derivesFrom: ["StRS-X-020"] }));
@@ -126,7 +129,7 @@ async function chromiumStarts(t: TestContext): Promise<boolean> {
 }
 
 test("the index and category pictures are drawn at 1200 x 630", async (t) => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S2
   if (!await chromiumStarts(t)) return;
   const model = parseRequirementsReport(fixtureReport(), "abc123");
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-viewer-cards-"));
@@ -146,7 +149,8 @@ test("the index and category pictures are drawn at 1200 x 630", async (t) => {
 });
 
 test("the headline of a category card fits above the brand bar, for the title of each group", async (t) => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S3
   if (!await chromiumStarts(t)) return;
   const browser = await chromium.launch();
   try {

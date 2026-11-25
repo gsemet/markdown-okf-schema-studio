@@ -57,7 +57,8 @@ const FIGURE_DOCUMENT = [
 
 const FIGURE_IMAGE = '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60"><rect width="120" height="60" fill="#789"/></svg>\n';
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S2
 /** RI-T32: the Edit figure button opens the form; Apply rewrites the directive, undo restores it, Cmd/Ctrl+Enter saves. */
 export async function scenarioFigureEditor(page: Page, evidence: Evidence): Promise<void> {
   const fixture = createFixture("realinput-t32", { "smoke.md": FIGURE_DOCUMENT, "images/chip.svg": FIGURE_IMAGE });
@@ -382,8 +383,8 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
 
 /**
  * RI-T11: Enter in a nested list continues the list at the same indentation.
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-008
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+ * @accepts_req StRS-MDOKFSTUDIO-BLOCK-008#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S3
  */
 export async function scenarioEnterContinuesList(page: Page, evidence: Evidence): Promise<void> {
   const LIST_DOCUMENT = [
@@ -423,8 +424,9 @@ export async function scenarioEnterContinuesList(page: Page, evidence: Evidence)
 
 /**
  * RI-T32: the edited block keeps its viewport top across the render that follows Save.
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
- * @tests_req StRS-MDOKFSTUDIO-TABLE-001
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S6
+ * @accepts_req StRS-MDOKFSTUDIO-TABLE-001#S1
  */
 export async function scenarioSaveKeepsBlockInPlace(page: Page, evidence: Evidence): Promise<void> {
   const filler = (count: number, label: string): string[] =>
@@ -589,7 +591,8 @@ export async function scenarioSaveKeepsBlockInPlace(page: Page, evidence: Eviden
 
 /**
  * RI-T12: Tab and Shift+Tab indent and outdent in the block editor; Escape then Tab leaves it.
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S2
  */
 export async function scenarioTabIndents(page: Page, evidence: Evidence): Promise<void> {
   const LIST_DOCUMENT = [
@@ -680,9 +683,8 @@ export async function scenarioPreviewKeepsMarkdown(page: Page, evidence: Evidenc
 
 /**
  * RI-T14: clicking a word opens the editor with the caret at that word, not at the block end.
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-003
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-026
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-026#S4
  */
 export async function scenarioCaretAtClick(page: Page, evidence: Evidence): Promise<void> {
   const PARAGRAPH = "Alpha bravo charlie\ndelta echo foxtrot\ngolf hotel india.";
@@ -720,8 +722,7 @@ export async function scenarioCaretAtClick(page: Page, evidence: Evidence): Prom
 
 /**
  * RI-T15: hover outlines what a click edits; Done keeps and Cancel restores the block text.
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-003
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S1
  */
 export async function scenarioEditAffordances(page: Page, evidence: Evidence): Promise<void> {
   const DOCUMENT = "# Affordance document\n\n- outer one\n  - inner a\n  - inner b\n- outer two\n\nAlpha paragraph.\n";
@@ -767,9 +768,10 @@ export async function scenarioEditAffordances(page: Page, evidence: Evidence): P
 
 /**
  * RI-T16: turning edit mode on keeps the reading layout of paragraphs that are not being edited.
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-001
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
- * @tests_req SwRS-MDOKFSTUDIO-LIFE-172
+ * @accepts_req StRS-MDOKFSTUDIO-BLOCK-001#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S3
+ * @tests_req SwRS-MDOKFSTUDIO-LIFE-172#S4
  */
 export async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): Promise<void> {
   const WORDS = "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike november";
@@ -847,9 +849,11 @@ export async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): 
 
 /**
  * RI-T17: Tab moves between table cells, adds a row on the last cell, and focus loss commits.
- * @tests_req StRS-MDOKFSTUDIO-TABLE-006
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-123
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-018
+ * @accepts_req StRS-MDOKFSTUDIO-TABLE-006#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-123#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-123#S7
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-018#S5
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-018#S7
  */
 export async function scenarioTableTab(page: Page, evidence: Evidence): Promise<void> {
   const CELL = "[data-sphinx-preview-table-cell-editor] textarea";
@@ -928,8 +932,8 @@ export async function scenarioTableTab(page: Page, evidence: Evidence): Promise<
 
 /**
  * RI-T18: the table toolbar sits above the table, never covers a cell, and the cell does not jump.
- * @tests_req StRS-MDOKFSTUDIO-TABLE-008
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-048
+ * @accepts_req StRS-MDOKFSTUDIO-TABLE-008#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S1
  */
 export async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<void> {
   const CELL = "[data-sphinx-preview-table-cell-editor] textarea";

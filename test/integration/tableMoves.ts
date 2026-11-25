@@ -188,9 +188,11 @@ async function activeHandle(page: Page, selector: string): Promise<boolean> {
     frame.locator(selector).evaluate((element) => element === element.ownerDocument.activeElement));
 }
 
-// @tests_req StRS-MDOKFSTUDIO-TABLE-013
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @accepts_req StRS-MDOKFSTUDIO-TABLE-013#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S18
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S23
 /** The pipe table becomes a list-table with every cell, stays in view, and comes back as a pipe table. */
 async function scenarioConversionRoundTrip(page: Page): Promise<void> {
   await withTable(page, "tablemoves-convert", PIPE, async (document) => {
@@ -234,7 +236,8 @@ async function scenarioConversionRoundTrip(page: Page): Promise<void> {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S9
 /** A list-table the cell editor cannot model (an extra option) opens its whole directive as raw text, in view. */
 async function scenarioRawListTable(page: Page): Promise<void> {
   const raw = LIST.replace(":header-rows: 1\n", ":header-rows: 1\n:class: wide\n");
@@ -252,8 +255,9 @@ async function scenarioRawListTable(page: Page): Promise<void> {
   });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-TABLE-002
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @accepts_req StRS-MDOKFSTUDIO-TABLE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
 /** A body row moves by mouse and by key, with and without a cell editor open. */
 async function scenarioRowMoves(page: Page, syntax: "pipe" | "list-table"): Promise<void> {
   await withTable(page, `tablemoves-rows-${syntax}`, syntax === "pipe" ? PIPE : LIST, async (document) => {
@@ -297,8 +301,9 @@ async function scenarioRowMoves(page: Page, syntax: "pipe" | "list-table"): Prom
   });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-TABLE-002
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @accepts_req StRS-MDOKFSTUDIO-TABLE-002#S2
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
 /** A column moves by mouse and by key, with and without a cell editor open. */
 async function scenarioColumnMoves(page: Page, syntax: "pipe" | "list-table"): Promise<void> {
   await withTable(page, `tablemoves-columns-${syntax}`, syntax === "pipe" ? PIPE : LIST, async (document) => {
@@ -452,7 +457,8 @@ async function setPreviewTheme(page: Page, mode: "dark" | "cream"): Promise<void
   await page.mouse.move(10, 10);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
 /**
  * CR 128: while a column handle is held, the strip of the handles above the table and every cell
  * of a column are a drop zone (the marker shows on the nearest gap and follows the pointer); a
@@ -510,7 +516,8 @@ async function dragToPoint(page: Page, handle: string, where: () => Promise<{ x:
   await page.mouse.up();
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S4
 /**
  * CR 128: while a row handle is held, the strip of the handles left of the table and every cell
  * of a row are a drop zone (the marker shows on the nearest gap and follows the pointer); a

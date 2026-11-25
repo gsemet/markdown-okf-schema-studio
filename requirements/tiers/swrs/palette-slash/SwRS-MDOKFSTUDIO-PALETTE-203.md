@@ -21,6 +21,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-018
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: A screenshot is saved and inserted
+- id: S2
+  title: What the paste hook takes over
+- id: S3
+  title: The image cannot be read or the host refuses it
+- id: S4
+  title: The reference goes on a paragraph of its own
+- id: S5
+  title: The selection and the positions
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,7 +50,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer pastes into the block text box a clipboard that holds no text and a png, jpeg, gif or webp file of at most 10 MB, the extension SHALL take over the paste, remember the selection, read the first such file as base64, send it to the host with its type, and when the host answers a file name replace the remembered selection with ![name](name) as a paragraph of its own, showing any refusal or read failure in the status line and inserting nothing.
 
-### Scenario (nominal): A screenshot is saved and inserted
+### Scenario S1 (nominal): A screenshot is saved and inserted
 - GIVEN a clipboard with one png file and no text, and a block editor with a selection
 - WHEN the writer pastes
 - THEN the default paste is prevented, the selection is remembered, the status line shows Saving image… and previewPasteImage is posted with the type image/png and the base64 data
@@ -48,7 +59,7 @@ When the writer pastes into the block text box a clipboard that holds no text an
 - THEN the reference is inserted over the remembered selection (not the live one), the edit is autosaved and the status line shows its usual text again
 - The host side of this request is SwRS-MDOKFSTUDIO-PALETTE-196; the answer correlation is SwRS-MDOKFSTUDIO-TRUST-090.
 
-### Scenario (boundary): What the paste hook takes over
+### Scenario S2 (boundary): What the paste hook takes over
 | Clipboard | Outcome |
 | --- | --- |
 | text and an image | the paste stays native and nothing is sent to the host (text wins) |
@@ -58,7 +69,7 @@ When the writer pastes into the block text box a clipboard that holds no text an
 | an image of 1 MB | the image is sent to the host |
 | an image of 11 MB | the paste is prevented, the status line shows The image is larger than 10 MB and was not pasted. and nothing is posted (the limit is 10 times 1024 times 1024 bytes) |
 
-### Scenario (refusal): The image cannot be read or the host refuses it
+### Scenario S3 (refusal): The image cannot be read or the host refuses it
 Each case inserts nothing. The status line changes only while the editor and text box that received the paste are the open ones and not finishing.
 
 | Case | Status line |
@@ -70,7 +81,7 @@ Each case inserts nothing. The status line changes only while the editor and tex
 | the host answers an edit id that is not the pending one | ignored |
 | the editor closed or is finishing when the answer arrives | not touched and nothing is inserted |
 
-### Scenario (nominal): The reference goes on a paragraph of its own
+### Scenario S4 (nominal): The reference goes on a paragraph of its own
 The alternative text equals the file name; no dialog asks for it.
 
 | Text around the selection | Result |
@@ -82,7 +93,7 @@ The alternative text equals the file name; no dialog asks for it.
 | the paragraph ends with a typed space, or spaces and tabs surround the caret | the spaces and tabs around the paste position go with the break, so no line keeps trailing blanks; line breaks are kept |
 | caret directly at the end | the text before it is unchanged |
 
-### Scenario (boundary): The selection and the positions
+### Scenario S5 (boundary): The selection and the positions
 | Remembered selection | Outcome |
 | --- | --- |
 | a selection of two words | the selection is replaced by the paragraph and the file name inside the reference is selected |

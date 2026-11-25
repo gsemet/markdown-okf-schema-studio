@@ -99,7 +99,7 @@ async function renderPalette(markdown: string) {
   return { html: parseHtml(result.html), raw: result.html };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S5
 test("a collapsible section inserted by the edition palette renders as details with a summary", async () => {
   const { html } = await renderPalette(paletteInsert("details", "Intro", 5));
   const details = findElement(html, isTag("details"));
@@ -129,7 +129,7 @@ test("a Mermaid fence inserted by the edition palette renders a diagram containe
   assert.match(textContent(diagram), /flowchart TD/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278#S1
 test("the Vega-Lite and Vega charts inserted by the edition palette render as chart figures", async () => {
   for (const [id, kind] of [["vegaLite", "vega-lite"], ["vega", "vega"]] as const) {
     const { html } = await renderPalette(paletteInsert(id, "Intro", 5));
@@ -378,7 +378,7 @@ test("T30: a {ref} inserted by the edition palette renders as a link to the labe
   assert.match(textContent(link), /Introduction/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-022
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S3
 test("T30: a {cite} inserted by the edition palette renders the citation placeholder", async () => {
   const edit = createEditActions([], createMarkdownTableTools()).byId.get("cite")!.apply({
     value: "Claim ", selectionStart: 6, selectionEnd: 6, scope: "block", arg: "smith2024" })!;

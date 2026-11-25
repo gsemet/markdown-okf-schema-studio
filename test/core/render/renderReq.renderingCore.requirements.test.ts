@@ -45,7 +45,7 @@ async function renderOnDisk(markdown: string, folder: string, requestId = 1) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-034
+// @tests_req SwRS-MDOKFSTUDIO-CORE-034#S2
 test("the content stylesheet lets paragraphs, including CJK text, wrap inside the pane", () => {
   const rule = /#sphinx-myst-preview-content :is\(([^)]*)\)\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS);
   assert.ok(rule, "a wrapping rule for the content blocks exists");
@@ -55,7 +55,7 @@ test("the content stylesheet lets paragraphs, including CJK text, wrap inside th
   assert.doesNotMatch(rule[2], /white-space:\s*nowrap/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-028
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028#S3
 test("the content stylesheet tightens list paragraphs and indents every list level by 2em", () => {
   assert.match(PREVIEW_THEME_CSS, /#sphinx-myst-preview-content :where\(ul, ol\)\s*\{\s*padding-inline-start:\s*2em;/u);
   assert.match(PREVIEW_THEME_CSS, /#sphinx-myst-preview-content li > p\s*\{\s*margin-bottom:\s*0\.3em;/u);
@@ -73,7 +73,8 @@ test("the warm-up loads the engine once, shares it with the render and a warm-up
 });
 
 test("a failed engine load is not cached: the next render retries it", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-001
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-001#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-001#S3
   const engine = { mystParse: () => ({}), mystToHtml: () => "" } as unknown as Awaited<ReturnType<typeof loadEngine>>;
   let calls = 0;
   const load = createEngineLoader(async () => {
@@ -87,7 +88,8 @@ test("a failed engine load is not cached: the next render retries it", async () 
   assert.equal(calls, 2, "a loaded engine is shared, not imported again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S6
 test("an included file over 5 MiB stays a placeholder and a file of exactly 5 MiB is expanded", async () => {
   const folder = fs.mkdtempSync(path.join(os.tmpdir(), "okf-include-limit-"));
   try {
@@ -108,7 +110,7 @@ test("an included file over 5 MiB stays a placeholder and a file of exactly 5 Mi
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-088
+// @tests_req SwRS-MDOKFSTUDIO-CORE-088#S2
 test("the rendered HTML is the same whatever the palette mode: the render takes no mode", async () => {
   const markdown = "# Title\n\n> [!NOTE]\n> Alert.\n\n- [ ] task\n\n$x^2$ and ~~gone~~ and :::{note}\n";
   const outputs: string[] = [];
@@ -127,7 +129,7 @@ test("the rendered HTML is the same whatever the palette mode: the render takes 
   assert.doesNotMatch(outputs[0], /palette-mode|paletteMode/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-012
+// @tests_req SwRS-MDOKFSTUDIO-CORE-012#S7
 test("a GitHub alert in an included file or in a grouped context tag renders as a note panel", async () => {
   const included = await renderMyst("```{include} part.md\n```\n", virtualContext({
     [`${root}/part.md`]: "> [!NOTE]\n> Included alert.\n",
@@ -145,7 +147,8 @@ test("a GitHub alert in an included file or in a grouped context tag renders as 
   assert.match(textContent(note), /Grouped alert\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-012
+// @tests_req SwRS-MDOKFSTUDIO-CORE-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-012#S2
 test("an include with :literal:, an empty argument or an other option stays a placeholder; :class: expands", async () => {
   const files = { [`${root}/part.md`]: "Included-text.\n" };
   const expanded = async (directive: string): Promise<boolean> =>
@@ -165,7 +168,7 @@ test("an include with :literal:, an empty argument or an other option stays a pl
   assert.ok(empty.diagnostics.some((entry) => entry.severity === "warning" && entry.line === 3), "a warning on the directive line");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S2
 test("raw HTML outside the supported subset is dropped and a kbd element is kept", async () => {
   const dropped = await renderMyst('<iframe src="https://example.com/x"></iframe>\n\nAfter.\n');
   assert.doesNotMatch(dropped.html, /iframe/u);

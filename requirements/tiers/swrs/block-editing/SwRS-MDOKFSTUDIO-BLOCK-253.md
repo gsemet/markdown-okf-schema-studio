@@ -15,6 +15,14 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-011
+scenarios:
+- id: S1
+  title: The Start writing button is the keyboard selection and Enter opens the
+    editor
+- id: S2
+  title: Arrow Down opens the editor, Arrow Up keeps the selection
+- id: S3
+  title: The keys do nothing elsewhere
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,7 +41,7 @@ default_owner_email: gaetan@xeberon.net
 
 While edit mode is on and the body of the document is empty, the page SHALL make the Start writing button the keyboard selection, open the new-block editor on Enter or Arrow Down exactly as a click on it does, and show the hint "Enter to create a new block" under it.
 
-### Scenario (nominal): The Start writing button is the keyboard selection and Enter opens the editor
+### Scenario S1 (nominal): The Start writing button is the keyboard selection and Enter opens the editor
 
 - GIVEN a successfully rendered document with an empty body (or only frontmatter) in edit mode, and no editor open
 - WHEN the preview is built
@@ -41,7 +49,7 @@ While edit mode is on and the body of the document is empty, the page SHALL make
 - WHEN the writer presses Enter, with no modifier, while the focus is on the page (the document body, the preview content, the edit-mode toggle or the Start writing button itself)
 - THEN the new-block editor opens as after a click on the button: `previewEditOpen` carries line 1, endLine 1 and insertAfterLine 0, and the key is consumed
 
-### Scenario (nominal): Arrow Down opens the editor, Arrow Up keeps the selection
+### Scenario S2 (nominal): Arrow Down opens the editor, Arrow Up keeps the selection
 
 - GIVEN the same document and the same focus targets
 - WHEN the writer presses Arrow Down
@@ -49,7 +57,7 @@ While edit mode is on and the body of the document is empty, the page SHALL make
 - WHEN the writer presses Arrow Up
 - THEN nothing opens and the Start writing button stays the selection
 
-### Scenario (refusal): The keys do nothing elsewhere
+### Scenario S3 (refusal): The keys do nothing elsewhere
 
 | Input | Outcome |
 | --- | --- |

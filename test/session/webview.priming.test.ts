@@ -24,7 +24,8 @@ function fixture() {
 const build = (files: ReturnType<typeof fixture>, body: string) =>
   buildPreviewWebviewHtml(files, `<p>${body}</p>`, workspace, assets, undefined, workspace);
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S4
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S5
 test("a local image found by the guess is shown, and a link out of the folder is refused", async () => {
   const built = await build(fixture(), '<img src="ok.png"><img src="escape.png">');
   assert.ok(built.html.includes(`src="webview://${path.join(workspace, "ok.png")}"`), built.html);
@@ -32,7 +33,8 @@ test("a local image found by the guess is shown, and a link out of the folder is
   assert.ok(built.diagnostics.some((entry) => entry.code === "symlink-escape"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S4
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S5
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S6
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S7
 test("an image the guess misses (an unquoted attribute) is found by the sanitizer and shown after a second pass", async () => {

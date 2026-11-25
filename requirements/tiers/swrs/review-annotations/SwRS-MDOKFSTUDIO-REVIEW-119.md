@@ -18,6 +18,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-003
 - StRS-MDOKFSTUDIO-REVIEW-008
 depends_on: []
+scenarios:
+- id: S1
+  title: Save after moves
+- id: S2
+  title: Nothing moved
+- id: S3
+  title: Save never creates or repairs a comments file
+- id: S4
+  title: Comments file with unsaved changes
+- id: S5
+  title: Comments file shown or changed outside the editor
+- id: S6
+  title: Document over 8 MiB
+- id: S7
+  title: The document changes while the save writes the lines
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,26 +51,26 @@ default_owner_email: gaetan@xeberon.net
 
 When the document is saved, the extension SHALL write the moved lines of the review threads to the comments file through the same write queue, and write that file only then and only when it exists, is valid and has no unsaved changes in an editor.
 
-### Scenario (nominal): Save after moves
+### Scenario S1 (nominal): Save after moves
 
 - GIVEN three threads that moved while the document was edited
 - WHEN the document is saved
 - THEN the comments file holds the new lines of the three threads and the comments unchanged
 
-### Scenario (boundary): Nothing moved
+### Scenario S2 (boundary): Nothing moved
 
 - GIVEN a save when no thread moved
 - WHEN the document is saved
 - THEN the file is not written
 
-### Scenario (refusal): Save never creates or repairs a comments file
+### Scenario S3 (refusal): Save never creates or repairs a comments file
 
 | Input | Outcome |
 | --- | --- |
 | plain.md with no comments file is saved | No plain.comments.json is created |
 | A comments file holding {bad and the document is saved | The file still holds {bad and no warning is shown |
 
-### Scenario (refusal): Comments file with unsaved changes
+### Scenario S4 (refusal): Comments file with unsaved changes
 
 - GIVEN a comments file open with unsaved changes and threads that moved
 - WHEN the document is saved
@@ -63,21 +78,21 @@ When the document is saved, the extension SHALL write the moved lines of the rev
 - AND a second save with the same reason does not show the warning again
 - AND the same comments file without unsaved changes receives the moved lines on save
 
-### Scenario (nominal): Comments file shown or changed outside the editor
+### Scenario S5 (nominal): Comments file shown or changed outside the editor
 
 - GIVEN a comments file whose stored lines no longer fit the document
 - WHEN the file is shown or read after a change outside this editor
 - THEN every thread is checked against the document text, and the threads are posted with the lines where their quotes are now and orphaned true for those not found
 - AND after a comment just written by the Studio, the lines followed in memory are the starting point of the check
 
-### Scenario (boundary): Document over 8 MiB
+### Scenario S6 (boundary): Document over 8 MiB
 
 | Input | Outcome |
 | --- | --- |
 | A closed document of more than 8 MiB, the threads are read | The stored lines are posted without searching for the quotes |
 | An open document of the same size, the threads are read | The open text is used |
 
-### Scenario (boundary): The document changes while the save writes the lines
+### Scenario S7 (boundary): The document changes while the save writes the lines
 | Input | Outcome |
 | --- | --- |
 | A save that writes a moved thread (line 3 in the saved text) while two lines are added at the top of the buffer, after the comments file was read and before the write ends | The written lines are not shown as they are: the next post checks the anchor against the buffer and the page gets line 5 |

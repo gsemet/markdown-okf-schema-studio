@@ -31,7 +31,7 @@ function makeRoots(): { output: string; outside: string } {
   return { output, outside };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S5
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S3
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S5
 test("canonicalizes local resources and rejects hostile paths", needsSymlinks, async () => {

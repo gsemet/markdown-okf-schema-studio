@@ -16,6 +16,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Open a side preview
+- id: S2
+  title: Open as a tab
 user_need: As a writer, I open a rendered preview of the Markdown file I am
   editing beside the editor, from the command palette, the Explorer, the editor
   title or a keyboard shortcut; as a reader, I open a Markdown file straight as
@@ -71,7 +76,7 @@ flowchart LR
 
 ### Main paths
 
-#### Path 1: Open a side preview
+#### Path S1: Open a side preview
 
 1. A saved Markdown file is the active editor
    - SwRS-MDOKFSTUDIO-LIFE-003: the reader runs Open Preview to Side and a preview opens beside the editor, or is revealed if one is open
@@ -82,7 +87,7 @@ flowchart LR
    - Option SwRS-MDOKFSTUDIO-LIFE-038 (nominal): several previews can be open, each with its own state and only the newest following the active editor
 3. The side preview is open and the editor group is locked
 
-#### Path 2: Open as a tab
+#### Path S2: Open as a tab
 
 1. A saved Markdown file is the active editor
    - SwRS-MDOKFSTUDIO-LIFE-018: the reader opens it through Open With and the file shows in a tab that keeps showing it

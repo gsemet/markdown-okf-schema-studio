@@ -80,8 +80,10 @@ async function focusSide(side: vscode.TextEditor): Promise<void> {
     : "workbench.action.compareEditor.focusPrimarySide");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S11
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S9
 /**
  * CR 460 in the real window, the gaps CR 455 left (owner decisions of CR 455: the real file's side of
  * a diff scrolls the side preview, a diff with no file side opens the working-tree preview and moves

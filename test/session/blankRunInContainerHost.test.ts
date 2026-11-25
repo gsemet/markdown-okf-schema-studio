@@ -38,7 +38,8 @@ async function saved(text: string, run: Run, typed: string): Promise<{ text: str
 }
 
 for (const [name, eol] of EOLS) {
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
   test(`${name}: previewBlankRunDelete on a line of a quote run removes that line only, in one edit`, async () => {
     const text = lines(eol, "# T", "", "> One", ">", ">", ">", "> Two", "");
     const host = fixture({ text });
@@ -48,7 +49,8 @@ for (const [name, eol] of EOLS) {
     assert.match(await render(host.document.getText()), /<blockquote/u);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: "More" typed in a quote run is written in the quote with an empty line on each side`, async () => {
     const text = lines(eol, "# T", "", "> One", ">", ">", ">", "> Two", "");
     const result = await saved(text, { line: 5, endLine: 5 }, "More");
@@ -57,7 +59,7 @@ for (const [name, eol] of EOLS) {
     assert.equal((await render(result.text)).match(/<blockquote/gu)?.length, 1, "still one quote");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "More" typed in an admonition run inside a list item keeps the item and the admonition indent`, async () => {
     const text = lines(eol, "# T", "", "- a", "", "  ```{note}", "  One", "", "", "", "  Two", "  ```", "");
     const result = await saved(text, { line: 8, endLine: 8, containerLine: 5 }, "More");
@@ -66,7 +68,7 @@ for (const [name, eol] of EOLS) {
     assert.match(await render(result.text), /More/u);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "More" typed in a panel, a quote directive, a definition and a footnote run stays inside them`, async () => {
     const panel = lines(eol, "# T", "", "```{note}", "One", "", "", "", "Two", "```", "");
     assert.equal(
@@ -90,7 +92,7 @@ for (const [name, eol] of EOLS) {
     );
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: a block written between two entries is a new definition entry or a new footnote`, async () => {
     const definitions = lines(eol, "# T", "", "A", ": one", "", "", "", "B", ": two", "");
     const entry = await saved(definitions, { line: 6, endLine: 6, containerLine: 4 }, "C\n: three");
@@ -102,7 +104,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(note.text, lines(eol, "# T", "", "Text[^1][^2].", "", "[^1]: One", "", "[^3]: Three", "", "[^2]: Two", ""));
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "- c" typed in a list inside a quote is an item, with the quote markers kept`, async () => {
     const text = lines(eol, "# T", "", "> - a", ">", ">", ">", "> - b", "");
     const result = await saved(text, { line: 5, endLine: 5, itemLine: 3 }, "- c");
@@ -110,7 +112,8 @@ for (const [name, eol] of EOLS) {
     assert.equal(result.text, lines(eol, "# T", "", "> - a", ">", "> - c", ">", "> - b", ""));
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: a save that re-creates the edit, then the cancel, give back the run byte for byte`, async () => {
     const text = lines(eol, "# T", "", "> One", ">", ">", ">", "> Two", "");
     const run = { line: 5, endLine: 5 };
@@ -124,7 +127,7 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(errors(host), []);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: a container line that is not the container's line is refused as stale and nothing changes`, async () => {
     const text = lines(eol, "# T", "", "```{note}", "One", "", "", "", "Two", "```", "");
     const stale = { line: 6, endLine: 6, containerLine: 4 };
@@ -147,7 +150,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(pasted.document.getText(), text);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: a save with another container line than the held edit's is refused as stale`, async () => {
     const text = lines(eol, "# T", "", "```{note}", "One", "", "", "", "Two", "```", "");
     const run = { line: 6, endLine: 6, containerLine: 3 };
@@ -159,7 +162,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(host.document.getText(), written);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
   test(`${name}: a paste with a container line writes "More" in the quote and in the admonition`, async () => {
     const quote = fixture({ text: lines(eol, "# T", "", "> One", ">", ">", ">", "> Two", "") });
     quote.hooks.readClipboard = () => Promise.resolve("More");

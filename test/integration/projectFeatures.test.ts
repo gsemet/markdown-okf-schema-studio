@@ -41,9 +41,12 @@ function replaceDocument(document: vscode.TextDocument, text: string): vscode.Wo
   return edit;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
-// @tests_req SwRS-MDOKFSTUDIO-CORE-022
-// @tests_req SwRS-MDOKFSTUDIO-CORE-043
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S5
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S7
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S5
+// @tests_req SwRS-MDOKFSTUDIO-CORE-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-043#S2
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S5
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S7
 export async function run(): Promise<void> {
@@ -136,7 +139,7 @@ export async function run(): Promise<void> {
     assert.doesNotMatch(rendered.html, /sphinx-myst-liveview-accessibility\.css/u);
     assert.doesNotMatch(rendered.html, /unsafe-inline|default-src \*/iu);
 
-    // @tests_req StRS-MDOKFSTUDIO-CORE-002
+    // @accepts_req StRS-MDOKFSTUDIO-CORE-002#S1
     // A writer composes a document from an included file: the included content is shown in place
     // of the directive, mapped to the directive lines, and the directive itself is not shown.
     assert.doesNotMatch(rendered.html, /:::\{|```\{include\}/u);
@@ -151,7 +154,6 @@ export async function run(): Promise<void> {
       "the readable include produced a diagnostic",
     );
 
-    // @tests_req StRS-MDOKFSTUDIO-CORE-002
     // An include the preview cannot read stays a placeholder and is reported.
     await vscode.window.showTextDocument(missingDocument, vscode.ViewColumn.One);
     await waitFor("the missing-input diagnostic render", () => {

@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-005
+scenarios:
+- id: S1
+  title: A pasted text is applied by the autosave
+- id: S2
+  title: After the guard window
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 While a block editor is open and the autosave applies the text of an edit to the document, the extension SHALL keep the page where it is: the scroll of the text editor to the applied edit does not move the page, from the start of the autosave until 750 ms after it settled.
 
-### Scenario (nominal): A pasted text is applied by the autosave
+### Scenario S1 (nominal): A pasted text is applied by the autosave
 
 - GIVEN an open block editor and a large paste in its text box
 - WHEN the autosave applies the pasted text to the document
 - THEN the editor stays open, the caret stays where the paste ended and the page does not move, from the start of the autosave until 750 ms after it settled (CR 134)
 
-### Scenario (boundary): After the guard window
+### Scenario S2 (boundary): After the guard window
 
 - GIVEN the autosave has settled more than 750 ms ago
 - WHEN the text editor scrolls for another reason

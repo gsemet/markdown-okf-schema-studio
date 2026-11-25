@@ -30,8 +30,9 @@ function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-001
-// @tests_req SwRS-MDOKFSTUDIO-CORE-025
+// @tests_req SwRS-MDOKFSTUDIO-CORE-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S2
 test("the render pipeline retains buffer identity and attaches source diagnostics", async (context) => {
   context.after(resetRenderHooksForTests);
   let observed = "";
@@ -80,7 +81,7 @@ test("renderer failures preserve the stage and original failure message", async 
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-001
+// @tests_req SwRS-MDOKFSTUDIO-CORE-001#S3
 test("cancellation while rendering rejects a late successful result", async (context) => {
   context.after(resetRenderHooksForTests);
   let finish: ((value: { html: string }) => void) | undefined;
@@ -134,7 +135,7 @@ test("MyST syntax missing from the nearest conf.py warns once per extension, ren
   assert.deepEqual(uncertain.diagnostics.filter((entry) => entry.code === "myst-extension"), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("a render whose request was already given up never starts", async (context) => {
   context.after(resetRenderHooksForTests);
   let calls = 0;
@@ -145,7 +146,8 @@ test("a render whose request was already given up never starts", async (context)
   assert.equal(calls, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("the host's source renderer gets plain data and the signal, and its cancellation stays a cancellation", async () => {
   const seen: unknown[] = [];
   const controller = new AbortController();

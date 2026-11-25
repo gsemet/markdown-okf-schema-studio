@@ -36,10 +36,13 @@ function startMode(html: string): string | undefined {
   return /"initialPaletteMode":"([a-z]+)"/u.exec(html)?.[1];
 }
 
-// @tests_req StRS-MDOKFSTUDIO-PALETTE-002
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @accepts_req StRS-MDOKFSTUDIO-PALETTE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S6
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S6
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S5
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S7
 /** Palette mode: the setting gives the start, a choice in the page is stored per workspace. */
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);

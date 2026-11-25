@@ -15,6 +15,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Follow a link and go Back
 user_need: As a reader, I follow a link to another document or a heading, and
   come back to the exact place with Back, then move forward again with Next; as
   a writer, I follow a link or press Back right after typing, and the text I
@@ -73,7 +76,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Follow a link and go Back
+#### Path S1: Follow a link and go Back
 
 1. The reader has typed in an open block editor and clicks a link
    - SwRS-MDOKFSTUDIO-BLOCK-205: the text typed in every open editor is saved before the page goes away

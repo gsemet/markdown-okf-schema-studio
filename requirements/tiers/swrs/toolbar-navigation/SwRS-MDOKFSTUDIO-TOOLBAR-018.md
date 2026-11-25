@@ -20,6 +20,29 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-004
 depends_on: []
+scenarios:
+- id: S1
+  title: Depth 3
+- id: S2
+  title: Skipped level
+- id: S3
+  title: Above the first heading
+- id: S4
+  title: Every heading level
+- id: S5
+  title: Zero-height heading
+- id: S6
+  title: Headings the table of contents leaves out
+- id: S7
+  title: Comment chips
+- id: S8
+  title: Out of range and not a number
+- id: S9
+  title: Page uses the configured depth
+- id: S10
+  title: Setting changed
+- id: S11
+  title: Setting unchanged
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,45 +71,45 @@ supersedes:
 
 When a heading of level h1 to h6 of the running text lies at or above the reading line, the extension SHALL show in the sticky band that heading and its nearest parent headings, one line each, up to the depth setting (markdownOkfSchemaStudio.preview.stickyHeadingDepth, rounded, kept between 1 and 6 and 3 when it is not a number; a change of the setting while a preview is open loads the full page again with the new depth rather than patching the content in place), each line written with its # markers and without comment chips, and hide the band and empty its text when no heading lies at or above the reading line.
 
-### Scenario (nominal): Depth 3
+### Scenario S1 (nominal): Depth 3
 - GIVEN a document with h1, h2 and h3 headings, depth 3 and the reading line inside the h3 section
 - WHEN the page updates the band
 - THEN the band holds three lines such as # Title, ## Section and ### Part
 
-### Scenario (boundary): Skipped level
+### Scenario S2 (boundary): Skipped level
 - GIVEN an h1 followed directly by an h3 and depth 3
 - WHEN the page updates the band
 - THEN the band holds two lines, the h1 and the h3, because a parent must be a shallower level than the line below it
 
-### Scenario (boundary): Above the first heading
+### Scenario S3 (boundary): Above the first heading
 - GIVEN a document whose first heading is below the reading line
 - WHEN the page is scrolled to the top
 - THEN the band is hidden and has no text
 - WHEN the same document is scrolled past the first heading and the page updates the band
 - THEN the band shows
 
-### Scenario (nominal): Every heading level
+### Scenario S4 (nominal): Every heading level
 - GIVEN an h5 heading in a normal section
 - WHEN the reading line passes it
 - THEN the band shows the h5 heading with five # markers
 
-### Scenario (boundary): Zero-height heading
+### Scenario S5 (boundary): Zero-height heading
 - GIVEN a heading with zero height between an h1 and an h3
 - WHEN the page measures headings
 - THEN it is never the current heading and never a parent line, so the band holds the h1 and the h3 only
 
-### Scenario (boundary): Headings the table of contents leaves out
+### Scenario S6 (boundary): Headings the table of contents leaves out
 - GIVEN an h2 inside an admonition and an h4 inside the properties table, between an h1 and an h3
 - WHEN the reading line passes them
 - THEN neither is the current heading nor a parent line, so the band follows the headings of the running text only
 
-### Scenario (nominal): Comment chips
+### Scenario S7 (nominal): Comment chips
 | Heading | Band line |
 | --- | --- |
 | text followed by a comment chip | the heading words only, without the chip and its hidden body |
 | plain heading | the heading text unchanged |
 
-### Scenario (boundary): Out of range and not a number
+### Scenario S8 (boundary): Out of range and not a number
 | Value | Depth |
 | --- | --- |
 | 0 | 1 |
@@ -94,18 +117,18 @@ When a heading of level h1 to h6 of the running text lies at or above the readin
 | 12 | 6 |
 | NaN or a string | 3, the default of the setting |
 
-### Scenario (nominal): Page uses the configured depth
+### Scenario S9 (nominal): Page uses the configured depth
 | Depth | Heading | Band |
 | --- | --- | --- |
 | 1 | a heading with two parents | only the current heading |
 | 6 | a heading with five parents | six lines |
 
-### Scenario (nominal): Setting changed
+### Scenario S10 (nominal): Setting changed
 - GIVEN an open preview and a new stickyHeadingDepth
 - WHEN the next render is sent
 - THEN the context key differs, so no content patch is planned and the whole page is assigned with the new depth
 
-### Scenario (boundary): Setting unchanged
+### Scenario S11 (boundary): Setting unchanged
 - GIVEN an open preview and an unrelated edit
 - WHEN the next render is sent
 - THEN the context key is equal and the content may be patched

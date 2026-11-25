@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Move a row
+- id: S2
+  title: Move a column
 user_need: As a writer, I reorder the rows and the columns of a table by
   dragging a handle, or with the keyboard, without cutting and pasting lines or
   cells, and one undo puts them back.
@@ -64,14 +69,14 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Move a row
+#### Path S1: Move a row
 
 1. A table is shown in edit mode with a handle beside each body row
    - SwRS-MDOKFSTUDIO-TABLE-002: the writer drags the handle onto another row, or presses Alt+Up or Alt+Down, and the row moves as one source edit with the header rows kept
    - Option SwRS-MDOKFSTUDIO-TABLE-002 (refusal): a table or state without a row move
 2. The row is at its new position
 
-#### Path 2: Move a column
+#### Path S2: Move a column
 
 1. A table is shown in edit mode with a handle above each column
    - SwRS-MDOKFSTUDIO-TABLE-007: the writer drags the handle onto another column, or presses Alt+Left or Alt+Right, and the column moves

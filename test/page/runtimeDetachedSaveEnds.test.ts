@@ -34,8 +34,8 @@ function typed(harness: RuntimeHarness): { box: ReturnType<typeof openBlockEdito
   return { box, editId };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-270
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-270#S1
 test("Escape during the final save closes the editor once, cancels nothing and posts no second save", () => {
   const harness = createRuntimeHarness();
   const { box, editId } = typed(harness);
@@ -52,7 +52,8 @@ test("Escape during the final save closes the editor once, cancels nothing and p
   assert.notEqual(harness.mappings[1].getAttribute(SELECTED), null, "the edited block is selected");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
 test("Cancel with no final save posted leaves nothing detached: nothing to cancel without an autosave, a cancel with one", () => {
   for (const autosaved of [false, true]) {
     const harness = createRuntimeHarness();
@@ -95,8 +96,8 @@ const NAVIGATIONS: Array<{ name: string; ask: (harness: RuntimeHarness, box: Ret
 
 for (const navigation of NAVIGATIONS) {
   for (const renderFollows of [false, true]) {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S6
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S3
     test(`${navigation.name} asked before an Escape is dropped, ${renderFollows ? "with a render" : "without a render"}`, () => {
       const harness = createRuntimeHarness();
       const { box, editId } = typed(harness);
@@ -113,7 +114,7 @@ for (const navigation of NAVIGATIONS) {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S6
 test("a Tab at the last cell asked before an Escape is dropped as well", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness, { mapped: true });
@@ -128,8 +129,9 @@ test("a Tab at the last cell asked before an Escape is dropped as well", () => {
   assert.deepEqual(posts(harness, "previewEditOpen", before), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("a patch alone does not end a detached save: a later error still reopens the editor", () => {
   const harness = createRuntimeHarness();
   const { box, editId } = typed(harness);
@@ -144,7 +146,7 @@ test("a patch alone does not end a detached save: a later error still reopens th
   assert.equal(posts(harness, "previewEditOpen", before).length, 0, "the waiting open was dropped by the failure");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S2
 test("after the answer the click waits for one previewEditOpen; with a render it opens after the patch with the new revision", () => {
   const plain = createRuntimeHarness();
   const first = typed(plain);
@@ -190,7 +192,7 @@ const fieldControl = (harness: RuntimeHarness) =>
 
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S12
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("a frontmatter field clicked during a detached save opens only after the save ends", () => {
   const { harness, editId } = fieldAfterDetached();
   assert.equal(fieldControl(harness), undefined, "waits");
@@ -200,7 +202,7 @@ test("a frontmatter field clicked during a detached save opens only after the sa
 
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S12
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("a frontmatter field clicked during a detached save does not open when the save fails", () => {
   const { harness, editId } = fieldAfterDetached();
   harness.dispatchMessage({ type: "previewEditSource", ...IDENTITY, editId, error: "disk full", unsavedText: "Second paragraph, changed.\n" });
@@ -208,8 +210,9 @@ test("a frontmatter field clicked during a detached save does not open when the 
   assert.equal(frontmatterSaves(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S9
 test("a block and a field clicked between the Cancel and the error are both dropped by it", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true, frontmatterRowAttributes: FIELD_ROW });
   const { box, editId } = typed(harness);

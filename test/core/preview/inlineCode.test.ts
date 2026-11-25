@@ -11,7 +11,7 @@ function rule(selectorPattern: string): string {
 
 const INLINE_CODE = rule(String.raw`#sphinx-myst-preview-content :not\(pre\) > code`);
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-089
+// @tests_req SwRS-MDOKFSTUDIO-CORE-089#S1
 test("inline code is a subtle tinted pill derived from the text colour", () => {
   assert.match(INLINE_CODE, /background: color-mix\(in srgb, currentColor (\d+)%, transparent\)/u);
   const tint = Number(/background: color-mix\(in srgb, currentColor (\d+)%/u.exec(INLINE_CODE)?.[1]);
@@ -32,7 +32,8 @@ test("inline code scales with its context and wraps without growing the line", (
   assert.doesNotMatch(INLINE_CODE, /font-size: \d+(\.\d+)?px/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-089
+// @tests_req SwRS-MDOKFSTUDIO-CORE-089#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-089#S2
 test("inline code stays compact in table cells", () => {
   const cell = rule(String.raw`#sphinx-myst-preview-content :is\(td, th\) > code`);
   assert.match(cell, /padding: 0\.05em 0\.3em/u);
@@ -63,7 +64,8 @@ function modeVariables(mode: string): Record<string, string> {
   return Object.fromEntries([...block.matchAll(/(--[\w-]+):\s*([^;]+);/gu)].map((m) => [m[1], m[2].trim()]));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-089
+// @tests_req SwRS-MDOKFSTUDIO-CORE-089#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-089#S3
 test("inline code text keeps 4.5:1 on the tinted background in every forced mode", () => {
   const tint = Number(/background: color-mix\(in srgb, currentColor (\d+)%/u.exec(INLINE_CODE)?.[1]) / 100;
   const linkCoded = /theme-mode="cream"\] #sphinx-myst-preview-content :not\(pre\) > code,\s*html\[data-sphinx-preview-theme-mode="white"\][^{]*\{\s*color: var\(--studio-textLink-foreground/u;

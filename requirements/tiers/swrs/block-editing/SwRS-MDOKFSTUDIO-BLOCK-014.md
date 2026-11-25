@@ -22,6 +22,29 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: Paragraph, image or admonition
+- id: S2
+  title: Enter or Space on a focused block
+- id: S3
+  title: Line range and placement per kind of block
+- id: S4
+  title: A link inside a mapped block
+- id: S5
+  title: The tooltip says how to follow a link in edit mode
+- id: S6
+  title: Targets that open no block editor
+- id: S7
+  title: Reading mode
+- id: S8
+  title: The host answers with previewEditSource
+- id: S9
+  title: An error or a malformed previewEditSource
+- id: S10
+  title: Click above the line
+- id: S11
+  title: Spacing unchanged
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -63,19 +86,19 @@ supersedes:
 
 When a writer clicks a rendered block in edit mode, or presses Enter or Space on a focused mapped block, the page SHALL open the editor of the mapped block under the click with previewEditOpen for its source lines instead of revealing its source, and show in the editor the source text or the error that the host returns in previewEditSource.
 
-### Scenario (nominal): Paragraph, image or admonition
+### Scenario S1 (nominal): Paragraph, image or admonition
 
 - GIVEN edit mode on, a paragraph mapped to lines 5 to 6, a plain image paragraph, an admonition directive (a `{note}` in a backtick or colon fence) and a GitHub alert (`> [!NOTE]`)
 - WHEN the writer clicks the paragraph, the image, the title or the body of the admonition, or the title or the body of the alert
 - THEN the page posts previewEditOpen with the lines of the mapped block (5 and 6 for the paragraph, the complete directive from opening to closing fence for the admonition, whether the click lands on its title or in its body, the whole alert from its marker line to its last quoted line for the alert), hides the block and shows an editor frame after it
 
-### Scenario (nominal): Enter or Space on a focused block
+### Scenario S2 (nominal): Enter or Space on a focused block
 
 - GIVEN edit mode on and a focused paragraph
 - WHEN the writer presses Enter
 - THEN the default action is prevented and the editor of the paragraph opens with the caret at the end, like a click
 
-### Scenario (nominal): Line range and placement per kind of block
+### Scenario S3 (nominal): Line range and placement per kind of block
 
 | Clicked block in edit mode | Editor |
 | --- | --- |
@@ -90,7 +113,7 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 | a block that comes from an {include} | previewEditOpen names the lines of the {include} directive in the edited document and the editor holds the directive text; the included block carries data-sphinx-preview-included true |
 | the words Diagram source of the collapsed disclosure of a Mermaid or PlantUML figure | the default toggle is prevented, the disclosure stays closed and the editor of the figure opens on the lines of the diagram block |
 
-### Scenario (boundary): A link inside a mapped block
+### Scenario S4 (boundary): A link inside a mapped block
 
 A link here is any link inside a mapped block: a link inside a paragraph, a paragraph made only of a link (the closing "Next: Related" line of a chapter), the title, header, body or footer of a `:link:` card (SwRS-MDOKFSTUDIO-BLOCK-258), a linked image, a same-page anchor, a footnote reference or an external URL.
 
@@ -108,7 +131,7 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
 | --- | --- |
 | click, Enter or Space on a link | unchanged: the link is followed and no editor opens |
 
-### Scenario (nominal): The tooltip says how to follow a link in edit mode
+### Scenario S5 (nominal): The tooltip says how to follow a link in edit mode
 
 | Given | When | Then |
 | --- | --- | --- |
@@ -117,7 +140,7 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
 | the same link | edit mode is turned off | the second line is removed and the tooltip is the text it had without it |
 | a link value of the properties table | edit mode is turned on | its tooltip is unchanged |
 
-### Scenario (refusal): Targets that open no block editor
+### Scenario S6 (refusal): Targets that open no block editor
 
 | Input in edit mode | Outcome |
 | --- | --- |
@@ -128,20 +151,20 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
 | click on a cell of the properties table | no block editor opens; the field editor of the cell is specified by SwRS-MDOKFSTUDIO-FMEDIT-001 |
 | click on a paragraph below the properties table | its block editor opens as usual |
 
-### Scenario (refusal): Reading mode
+### Scenario S7 (refusal): Reading mode
 
 | Input in reading mode | Outcome |
 | --- | --- |
 | click on a paragraph | no previewEditOpen is posted and no editor frame appears |
 | click on the words Diagram source of a Mermaid figure | the disclosure opens or closes as usual, no editor opens, and the click reveals the source line |
 
-### Scenario (nominal): The host answers with previewEditSource
+### Scenario S8 (nominal): The host answers with previewEditSource
 
 - GIVEN the page posted previewEditOpen with an edit id and a line range, and no other block is being edited
 - WHEN the host answers with previewEditSource for the same render and the same edit id
 - THEN the answer carries line, endLine and originalText, the exact source text of those lines (originalText is "" and insertAfterLine is set for an insertion editor), and the editor of that edit id fills its text box with originalText and remembers its line ending (CRLF, LF, CR or none)
 
-### Scenario (refusal): An error or a malformed previewEditSource
+### Scenario S9 (refusal): An error or a malformed previewEditSource
 
 | Input | Outcome |
 | --- | --- |
@@ -152,13 +175,13 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
 | previewEditSource with neither an error string nor a string originalText | ignored |
 | previewEditSource that arrives when the text box already exists | ignored |
 
-### Scenario (nominal): Click above the line
+### Scenario S10 (nominal): Click above the line
 
 - GIVEN a rendered page with a horizontal rule and edit mode on
 - WHEN the writer clicks 10 px above or below the line of the rule
 - THEN the click lands on the rule and opens its block editor
 
-### Scenario (boundary): Spacing unchanged
+### Scenario S11 (boundary): Spacing unchanged
 
 - GIVEN the same page
 - WHEN the rule is laid out

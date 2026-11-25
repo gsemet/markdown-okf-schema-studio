@@ -29,7 +29,7 @@ function marked(harness: RuntimeHarness): Array<string | null> {
     .map((element) => element.getAttribute("data-sphinx-insert-after-line"));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 test("files dragged over the page mark the nearest insertion bar and the drop posts their addresses", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;
@@ -48,7 +48,7 @@ test("files dragged over the page mark the nearest insertion bar and the drop po
   assert.equal(sent[0]!.documentId, "file:///active.md");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S3
 test("a drag without files, or outside edit mode is left to the browser", () => {
   const plain = createRuntimeHarness({ savedState: { editMode: true } });
   const text = { dataTransfer: { types: ["text/plain"], getData: () => "x" }, clientY: 0, preventDefault: () => { throw new Error("prevented"); } };
@@ -64,7 +64,7 @@ test("a drag without files, or outside edit mode is left to the browser", () => 
   assert.equal(reading.messages.some((message) => message.type === "previewDropFiles"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 test("leaving the window takes the marker away", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const over = explorerDrag(["file:///w/a.md"], { clientY: 0 });

@@ -15,6 +15,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-019
 depends_on: []
+scenarios:
+- id: S1
+  title: After a paragraph
+- id: S2
+  title: Empty text
+- id: S3
+  title: Caret position and existing blank lines
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,19 +38,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Horizontal rule, the extension SHALL insert --- on its own line, set apart by blank lines, after the line the selection ends on, with the caret after it.
 
-### Scenario (nominal): After a paragraph
+### Scenario S1 (nominal): After a paragraph
 
 - GIVEN the caret in the text para
 - WHEN Horizontal rule is pressed
 - THEN the text becomes para, a blank line, ---, a blank line, with the caret on the last line
 
-### Scenario (nominal): Empty text
+### Scenario S2 (nominal): Empty text
 
 - GIVEN an empty text
 - WHEN Horizontal rule is pressed
 - THEN the text is --- followed by a blank line
 
-### Scenario (boundary): Caret position and existing blank lines
+### Scenario S3 (boundary): Caret position and existing blank lines
 
 In this table `[ ]` marks the selection and `|` marks the caret; the rule is written on the line the selection ends on.
 

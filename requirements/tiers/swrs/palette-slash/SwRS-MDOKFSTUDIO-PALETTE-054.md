@@ -20,6 +20,17 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
 - SwRS-MDOKFSTUDIO-PALETTE-036
+scenarios:
+- id: S1
+  title: Real list
+- id: S2
+  title: Duplicates in the language list
+- id: S3
+  title: A chosen language wraps the lines or inserts an empty fence
+- id: S4
+  title: The fence is longer than any backtick run
+- id: S5
+  title: No language or an invalid language name
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,19 +49,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Code block, the extension SHALL open a menu that lists text first and then each language name and alias that the preview highlights, once and in sorted order, and wrap the touched lines, or an empty fence at the caret, in a fence that names the chosen language, is one backtick longer than the longest backtick run in the code and at least three long, and names no language when none or an invalid name is given.
 
-### Scenario (nominal): Real list
+### Scenario S1 (nominal): Real list
 
 - GIVEN the page built with the languages of the highlighter
 - WHEN the writer presses Code block
 - THEN the entries are text followed by highlightLanguageNames in order, including python, py and yaml, and choosing python writes a python fence
 
-### Scenario (boundary): Duplicates in the language list
+### Scenario S2 (boundary): Duplicates in the language list
 
 - GIVEN a language list that contains text and a name twice
 - WHEN the registry is built
 - THEN text appears once at the start, each other name once, sorted
 
-### Scenario (nominal): A chosen language wraps the lines or inserts an empty fence
+### Scenario S3 (nominal): A chosen language wraps the lines or inserts an empty fence
 
 - GIVEN the selection x = 1
 - WHEN python is chosen
@@ -72,7 +83,7 @@ In this table `[ ]` marks the selection and `|` marks the caret.
 | json | two spaces then `\|` | the fence replaces the blank line, caret inside |
 | text | `x` newline `[a]` newline `y` | the fence wraps the line a only |
 
-### Scenario (boundary): The fence is longer than any backtick run
+### Scenario S4 (boundary): The fence is longer than any backtick run
 
 | Selection | Language | Outcome |
 | --- | --- | --- |
@@ -81,7 +92,7 @@ In this table `[ ]` marks the selection and `|` marks the caret.
 
 The fence width equals the maximum of three and the longest run plus one.
 
-### Scenario (refusal): No language or an invalid language name
+### Scenario S5 (refusal): No language or an invalid language name
 
 - GIVEN the selection x
 - WHEN the action runs without an argument

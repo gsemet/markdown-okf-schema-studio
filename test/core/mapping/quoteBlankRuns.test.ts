@@ -23,7 +23,8 @@ function removed(text: string, line: number): string {
   return text.slice(0, plan.start) + text.slice(plan.end);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S6
 test("an empty quote line is quote markers and nothing else, with its depth, columns and prefix", () => {
   assert.deepEqual(emptyQuoteLine(">"), { depth: 1, columns: [0], prefix: ">" });
   assert.deepEqual(emptyQuoteLine("> "), { depth: 1, columns: [0], prefix: ">" });
@@ -36,7 +37,7 @@ test("an empty quote line is quote markers and nothing else, with its depth, col
   for (const text of ["> a", ">a", "", "   ", "a", "> > a", ">\ta"]) assert.equal(emptyQuoteLine(text), undefined, text);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
 test("the quote content skips the markers and one space, a tab gives its rest as spaces", () => {
   const shape = emptyQuoteLine(">")!;
   assert.equal(quoteContent("> text", shape), "text");
@@ -49,7 +50,8 @@ test("the quote content skips the markers and one space, a tab gives its rest as
 });
 
 for (const [name, eol] of EOLS) {
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
   test(`${name}: runs of two and of three empty quote lines are found, a single one is the separator`, () => {
     assert.deepEqual(quoteBlankRuns(join(eol, ["> a", ">", "> b", ""])), []);
     assert.deepEqual(quoteBlankRuns(join(eol, ["> a", ">", ">", "> b", ""])), [{ line: 2, endLine: 3 }]);
@@ -60,7 +62,8 @@ for (const [name, eol] of EOLS) {
     ]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
   test(`${name}: lines of another depth or other marker columns do not join a run`, () => {
     assert.deepEqual(quoteBlankRuns(join(eol, ["> a", ">", "> >", "> b"])), []);
     assert.deepEqual(quoteBlankRuns(join(eol, ["> > c", "> >", ">", "> > d"])), []);
@@ -74,7 +77,8 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(quoteBlankRuns(join(eol, ["> a", ">>", ">>", "> b"])), [{ line: 2, endLine: 3 }]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
   test(`${name}: a run at the start of a quote and one at the end of the text are found`, () => {
     assert.deepEqual(quoteBlankRuns(join(eol, [">", ">", "> b", ""])), [{ line: 1, endLine: 2 }]);
     assert.deepEqual(quoteBlankRuns(join(eol, ["x", "", ">", ">", "> b"])), [{ line: 3, endLine: 4 }]);
@@ -82,7 +86,8 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(quoteBlankRuns(join(eol, ["> a", ">", ">", ""])), [{ line: 2, endLine: 3 }]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
   test(`${name}: the frontmatter is excluded and a quote run next to a plain run is found beside it`, () => {
     // The frontmatter reader knows LF and CR LF only (a lone CR file has no frontmatter block).
     if (eol !== "\r") {
@@ -95,12 +100,13 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(blankRuns(near), [{ line: 4, endLine: 5 }]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
   test(`${name}: a quote run is listed inside a fence held by a quote, the page decides where it shows`, () => {
     assert.deepEqual(quoteBlankRuns(join(eol, ["> ```", "> a", ">", ">", "> b", "> ```"])), [{ line: 3, endLine: 4 }]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S2
   test(`${name}: checkBlankLine accepts every line of a quote run but its first`, () => {
     const text = join(eol, ["> a", ">", ">", ">", "> b", ""]);
     assert.equal(checkBlankLine(text, 3), undefined);
@@ -114,7 +120,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(checkBlankLine(join(eol, ["> a", ">", "> >", "> >", "> b"]), 4), undefined, "another depth above");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S1
   test(`${name}: checkBlankLine refuses a line that is not a shown blank line of a quote run`, () => {
     const stale = (text: string, line: number, why: string): void => assert.ok(checkBlankLine(text, line), why);
     stale(join(eol, ["> a", ">", ">", "> b"]), 2, "the first empty quote line is the separator");
@@ -127,7 +133,8 @@ for (const [name, eol] of EOLS) {
     if (eol !== "\r") stale(join(eol, ["---", ">", ">", "---", "> a"]), 3, "a line of the frontmatter");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
   test(`${name}: removing a blank line of a quote run removes that line only, the others stay byte for byte`, () => {
     const middle = join(eol, ["> a", "> ", "> ", "> ", "> b", ""]);
     assert.equal(removed(middle, 3), join(eol, ["> a", "> ", "> ", "> b", ""]));
@@ -143,7 +150,8 @@ for (const [name, eol] of EOLS) {
     }
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
   test(`${name}: removing the last blank line of a quote at the end of the text keeps the final line break, or its absence`, () => {
     const withBreak = join(eol, ["> a", ">", ">", ""]);
     assert.equal(removed(withBreak, 3), join(eol, ["> a", ">", ""]));
@@ -156,7 +164,8 @@ for (const [name, eol] of EOLS) {
     assert.equal(removed(join(eol, [">", ">"]), 2), ">", "a text of one quote run keeps its first line");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
   test(`${name}: a shown blank line of a plain run in a directive, a definition and a footnote is removed alone`, () => {
     const directive = join(eol, ["```{note}", "a", "", "", "b", "```", ""]);
     assert.equal(removed(directive, 4), join(eol, ["```{note}", "a", "", "b", "```", ""]));
@@ -169,7 +178,8 @@ for (const [name, eol] of EOLS) {
     }
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: a block written in a quote run stays in the quote`, () => {
     const text = join(eol, ["> a", ">", ">", "> b", ""]);
     const plan = planBlankRunInsertion(text, 3);

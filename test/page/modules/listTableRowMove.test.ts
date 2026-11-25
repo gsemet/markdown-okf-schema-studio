@@ -27,7 +27,7 @@ const SIMPLE = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
 test("moving a list-table row reorders its items and keeps the directive, options and fence", () => {
   assert.equal(tools.moveListTableRow(SIMPLE, 1, 3), [
     "```{list-table} Fruit prices",
@@ -49,7 +49,8 @@ test("moving a list-table row reorders its items and keeps the directive, option
   assert.equal(tools.moveListTableRow(tools.moveListTableRow(SIMPLE, 1, 3)!, 3, 1), SIMPLE);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S8
 test("a list-table item moves with its continuation lines, nested content and inner blank lines", () => {
   const source = [
     "```{list-table}",
@@ -93,7 +94,8 @@ test("a list-table item moves with its continuation lines, nested content and in
   ].join("\n"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S6
 test("the header rows of a list-table never move and nothing moves into them", () => {
   const rows = (headerRows: string): string => [
     "```{list-table}", ...(headerRows === "" ? [] : [`:header-rows: ${headerRows}`]), "",
@@ -115,7 +117,8 @@ test("the header rows of a list-table never move and nothing moves into them", (
   assert.equal(tools.moveListTableRow(rows("3"), 2, 0), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S10
 test("a list-table inside a container keeps its indentation, fence style and line endings", () => {
   const indented = [
     "  :::{list-table}",
@@ -147,7 +150,8 @@ test("a list-table inside a container keeps its indentation, fence style and lin
   assert.equal(tools.moveListTableRow(unclosed, 0, 1), "````{list-table}\n* - b\n  - 2\n* - a\n  - 1");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S8
 test("the list-table move refuses what it cannot read as rows", () => {
   assert.equal(tools.moveListTableRow("| a | b |\n| --- | --- |\n| 1 | 2 |\n", 1, 2), undefined);
   assert.equal(tools.moveListTableRow("```{list-table}\n:header-rows: x\n\n* - a\n* - b\n```\n", 0, 1), undefined);

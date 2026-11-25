@@ -21,7 +21,7 @@ function edit(source: string, rank: number, row: number, column: number, value: 
   return tools.serialize(model);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("the table of a quote is read without its prefix and written back with it", () => {
   const located = containedTable(QUOTE, 0, 1);
   assert.ok(located);
@@ -32,7 +32,7 @@ test("the table of a quote is read without its prefix and written back with it",
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
 test("the table of a GitHub alert keeps the marker line byte for byte", () => {
   assert.equal(
     edit(NOTE, 0, 2, 1, "nb2", 1),
@@ -40,7 +40,7 @@ test("the table of a GitHub alert keeps the marker line byte for byte", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("the table of a MyST directive keeps the fence and the option lines byte for byte", () => {
   assert.equal(
     edit(MYST, 0, 0, 0, "M1x", 1),
@@ -50,20 +50,21 @@ test("the table of a MyST directive keeps the fence and the option lines byte fo
   assert.equal(edit(colon, 0, 2, 0, "11", 1), ":::{note}\n:class: wide\n  | a | b |\n  | - | - |\n  | 11 | 2 |\n:::\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
 test("a nested quote keeps its two markers", () => {
   const nested = "> > | A | B |\n> > | - | - |\n> > | 1 | 2 |\n";
   assert.equal(containedTable(nested, 0)?.tableText, "| A | B |\n| - | - |\n| 1 | 2 |\n");
   assert.equal(edit(nested, 0, 2, 1, "22"), "> > | A | B |\n> > | - | - |\n> > | 1 | 22 |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
 test("a quote marker without a space after it is kept as written", () => {
   const tight = ">| A | B |\n>| - | - |\n>| 1 | 2 |\n";
   assert.equal(edit(tight, 0, 2, 0, "x"), ">| A | B |\n>| - | - |\n>| x | 2 |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("the second of two tables in one quote is edited by its rank, the first stays as it is", () => {
   const second = containedTable(TWO, 1, 2);
   assert.equal(second?.tableText, "| R | S |\n| - | - |\n| u | v |\n");
@@ -74,7 +75,8 @@ test("the second of two tables in one quote is edited by its rank, the first sta
   assert.equal(containedTable(TWO, 0, 2)?.tableText, "| P | Q |\n| - | - |\n| x | y |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S2
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("a new row and a new column line carry the prefix of the table lines", () => {
   const tools = createMarkdownTableTools();
   const located = containedTable(QUOTE, 0)!;
@@ -93,7 +95,7 @@ test("a new row and a new column line carry the prefix of the table lines", () =
   assert.ok(lines.every((line) => line.split("|").length === 5), lines.join("\n"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("Windows line endings stay and the closing line break is kept or absent as in the source", () => {
   const crlf = "> [!NOTE]\r\n> | A | B |\r\n> | - | - |\r\n> | 1 | 2 |\r\n> after\r\n";
   assert.equal(
@@ -104,7 +106,8 @@ test("Windows line endings stay and the closing line break is kept or absent as 
   assert.equal(edit(bare, 0, 2, 1, "3"), "> | A | B |\n> | - | - |\n> | 1 | 3 |");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("a table written back without a change gives the container text byte for byte", () => {
   const tools = createMarkdownTableTools();
   for (const [source, rank] of [[QUOTE, 0], [NOTE, 0], [MYST, 0], [TWO, 0], [TWO, 1]] as const) {
@@ -120,7 +123,8 @@ test("a table written back without a change gives the container text byte for by
   assert.equal(tools.serialize(model), padded);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("a table that cannot be located safely gives nothing", () => {
   // A line without the quote marker among the table lines (a lazy continuation).
   assert.equal(containedTable("> | A | B |\n> | - | - |\n> | 1 | 2 |\n| lazy | row |\n", 0), undefined);

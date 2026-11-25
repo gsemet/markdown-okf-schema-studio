@@ -87,7 +87,7 @@ function fixture(options: { editDelayMs?: number; pagePosts?: boolean } = {}) {
   return { manager, preview, panel, posted, saves, send, typeInto, document, store };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: with no focused preview the save command does nothing", async () => {
   const f = fixture();
   f.panel.active = false;
@@ -98,7 +98,7 @@ test("CR 312: with no focused preview the save command does nothing", async () =
   assert.equal(f.saves.length, 0, "no save");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: the save command asks the focused page, and its save request saves the document", async () => {
   const f = fixture();
   (f.document as { isDirty: boolean }).isDirty = true;
@@ -113,7 +113,8 @@ test("CR 312: the save command asks the focused page, and its save request saves
   assert.equal(f.document.isDirty, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S2
 test("CR 312: an autosave applied slowly is in the document when the save runs, and the editor stays open", async () => {
   const f = fixture({ editDelayMs: 60 });
   void f.typeInto("Second paragraph, typed.\n");
@@ -127,7 +128,7 @@ test("CR 312: an autosave applied slowly is in the document when the save runs, 
   assert.ok(f.preview.edits.active, "the block editor is not closed by the save");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S2
 test("CR 312: an autosave that arrives while another is applied is saved too", async () => {
   const f = fixture({ editDelayMs: 40 });
   void f.typeInto("Second paragraph, one.\n");
@@ -138,7 +139,8 @@ test("CR 312: an autosave that arrives while another is applied is saved too", a
   assert.equal(f.preview.edits.active?.pendingText, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S2
 test("CR 312: a frontmatter save still being applied is in the document when the save runs", async () => {
   const f = fixture();
   const pending = delay(60).then(async () => {
@@ -153,7 +155,7 @@ test("CR 312: a frontmatter save still being applied is in the document when the
   assert.match(f.saves[0]!.text, /^title: Typed\n/u, "the saved text holds the value");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: a page that is not ready, or cannot be reached, has nothing to flush: the document is saved at once", async () => {
   const notReady = fixture();
   notReady.preview.page.readyRequestId = undefined;
@@ -167,7 +169,7 @@ test("CR 312: a page that is not ready, or cannot be reached, has nothing to flu
   assert.equal(unreachable.saves.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: a save that never reaches the document ends the wait, and the document is saved", async () => {
   const f = fixture();
   f.manager.edits.trackPendingSave(f.preview, new Promise<void>(() => undefined));
@@ -177,7 +179,7 @@ test("CR 312: a save that never reaches the document ends the wait, and the docu
   assert.equal(f.saves.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: a page that never answers: the host saves after the bounded wait", async () => {
   const f = fixture();
   (f.document as { isDirty: boolean }).isDirty = true;
@@ -191,7 +193,7 @@ test("CR 312: a page that never answers: the host saves after the bounded wait",
   assert.equal(f.saves.length, 1, "a late request does not save again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: an answer in time cancels the fallback: one save only", async () => {
   const f = fixture();
   f.manager.runSaveCommand();

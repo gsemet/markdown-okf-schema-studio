@@ -18,6 +18,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-003
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: Click toggles the popover of one thread
+- id: S2
+  title: Enter or Space on a focused target
+- id: S3
+  title: The popover lists every comment as text
+- id: S4
+  title: The popover of a resolved thread shows a Resolved note
+- id: S5
+  title: The popover stays inside the pane horizontally
+- id: S6
+  title: Closing the popover
+- id: S7
+  title: The threads are posted again while a popover is open
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,7 +53,7 @@ When a reader clicks, or presses Enter or Space on, a thread highlight, a thread
 
 Exception: while comments are hidden (the Comments button off or the setting preview.showComments false), the marks are plain text and open no popover (SwRS-MDOKFSTUDIO-REVIEW-152).
 
-### Scenario (nominal): Click toggles the popover of one thread
+### Scenario S1 (nominal): Click toggles the popover of one thread
 
 | Given | When | Then |
 | --- | --- | --- |
@@ -47,7 +62,7 @@ Exception: while comments are hidden (the Comments button off or the setting pre
 | a popover open for one thread | the reader clicks the highlight of another thread | the popover of the second thread replaces the first |
 | comments hidden (button off or setting false) | the reader clicks a former highlight | no popover opens and the click acts as on plain text (SwRS-MDOKFSTUDIO-REVIEW-152) |
 
-### Scenario (nominal): Enter or Space on a focused target
+### Scenario S2 (nominal): Enter or Space on a focused target
 
 | Input | Outcome |
 | --- | --- |
@@ -55,7 +70,7 @@ Exception: while comments are hidden (the Comments button off or the setting pre
 | Space on a focused highlight, badge or orphaned comments entry | the popover opens (or closes) and the key does nothing else |
 | any other key on a focused highlight | the popover state does not change |
 
-### Scenario (nominal): The popover lists every comment as text
+### Scenario S3 (nominal): The popover lists every comment as text
 
 - GIVEN a thread with a first comment and a reply
 - WHEN the popover opens
@@ -64,14 +79,14 @@ Exception: while comments are hidden (the Comments button off or the setting pre
 - WHEN the popover opens
 - THEN the tag is shown as text
 
-### Scenario (nominal): The popover of a resolved thread shows a Resolved note
+### Scenario S4 (nominal): The popover of a resolved thread shows a Resolved note
 
 | Given | When | Then |
 | --- | --- | --- |
 | a resolved thread | the popover opens | a Resolved note appears and the popover carries the resolved attribute |
 | an open thread | the popover opens | no Resolved note appears |
 
-### Scenario (boundary): The popover stays inside the pane horizontally
+### Scenario S5 (boundary): The popover stays inside the pane horizontally
 
 | Input | Outcome |
 | --- | --- |
@@ -79,7 +94,7 @@ Exception: while comments are hidden (the Comments button off or the setting pre
 | highlight close to the right edge of a pane at least 216 px wide | the left edge is moved so that the popover ends at least 8 px before the right edge |
 | pane narrower than 376 px | the width is the pane width minus 16 px, never below 200 px |
 
-### Scenario (refusal): Closing the popover
+### Scenario S6 (refusal): Closing the popover
 
 | Input | Outcome |
 | --- | --- |
@@ -89,7 +104,7 @@ Exception: while comments are hidden (the Comments button off or the setting pre
 | click outside a popover that asks "Delete thread?" | the popover closes |
 | Escape, or a press outside, on a popover whose reply box holds text | the popover stays and asks Discard or Keep editing (SwRS-MDOKFSTUDIO-REVIEW-218) |
 
-### Scenario (boundary): The threads are posted again while a popover is open
+### Scenario S7 (boundary): The threads are posted again while a popover is open
 
 | Open state | Thread still posted | Thread no longer posted |
 | --- | --- | --- |

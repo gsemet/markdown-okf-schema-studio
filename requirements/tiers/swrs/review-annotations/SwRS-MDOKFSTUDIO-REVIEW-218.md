@@ -17,6 +17,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-003
+scenarios:
+- id: S1
+  title: Escape and a press outside close a blank editor
+- id: S2
+  title: A changed draft is asked about, inside the editor
+- id: S3
+  title: While the question shows
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,7 +43,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a reader presses Escape, wherever the focus is, or presses outside while the new comment box or the reply box of the thread popover is open, the page SHALL close it at once when its text is blank, and SHALL otherwise ask Discard or Keep editing inside the editor, without window.confirm, and drop the text only on Discard.
 
-### Scenario (nominal): Escape and a press outside close a blank editor
+### Scenario S1 (nominal): Escape and a press outside close a blank editor
 
 | Given | When | Then |
 | --- | --- | --- |
@@ -45,7 +52,7 @@ When a reader presses Escape, wherever the focus is, or presses outside while th
 | an open thread popover whose reply box has no text | the reader presses Escape, or presses outside the popover and outside the highlights | the popover closes |
 | an open box or popover | the reader presses inside it | nothing is asked and nothing closes |
 
-### Scenario (nominal): A changed draft is asked about, inside the editor
+### Scenario S2 (nominal): A changed draft is asked about, inside the editor
 
 - GIVEN an open new comment box, or a thread popover, whose text area holds text that is not blank
 - WHEN the reader presses Escape, wherever the focus is, or presses outside the editor
@@ -54,7 +61,7 @@ When a reader presses Escape, wherever the focus is, or presses outside while th
 - AND WHEN the reader presses Discard, THEN the editor closes and nothing is sent
 - AND `window.confirm` is never called
 
-### Scenario (boundary): While the question shows
+### Scenario S3 (boundary): While the question shows
 
 | Input | Outcome |
 | --- | --- |

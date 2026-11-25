@@ -139,7 +139,7 @@ function render(page: Page): void {
   page.node("td", ["a studio cell"]);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
 test("the field takes the focus back when the window focus returns to the page body", () => {
   const harness = setup();
   render(harness.page);
@@ -155,7 +155,8 @@ test("the field takes the focus back when the window focus returns to the page b
   assert.equal(harness.page.activeElement, other, "another control keeps its focus");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
 test("Ctrl+F opens the bar with the field focused", () => {
   const harness = setup();
   render(harness.page);
@@ -167,7 +168,7 @@ test("Ctrl+F opens the bar with the field focused", () => {
   assert.equal(harness.key({ code: "KeyF", metaKey: true }).prevented, 0, "Cmd+F is not the shortcut on Linux and Windows");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
 // The page used to leave the key to an editor field (the bar then opened one host round trip later,
 // and the keys typed meanwhile went into the field): it now takes the key there too.
 test("Ctrl+F inside an editor field opens the bar at once; Escape gives the focus back to the field", () => {
@@ -196,7 +197,7 @@ test("Ctrl+F inside an editor field opens the bar at once; Escape gives the focu
   assert.deepEqual([alt.prevented, shift.prevented, harness.bar.isOpen()], [0, 0, false], "Ctrl+Alt+F and Ctrl+Shift+F are not the shortcut");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
 test("Escape does not give the focus back to a field the page refuses (an editor whose final save is on its way)", () => {
   let refused = true;
   const harness = setup({ canRestoreFocus: () => !refused });
@@ -215,7 +216,8 @@ test("Escape does not give the focus back to a field the page refuses (an editor
   assert.equal(harness.page.activeElement, inEditor, "an accepted field gets the focus back");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
 test("the query starts with the text selected in the editor field the bar opens from", () => {
   const harness = setup();
   render(harness.page);
@@ -228,7 +230,8 @@ test("the query starts with the text selected in the editor field the bar opens 
   assert.equal(text(harness, COUNT), "1 of 4");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
 test("an open request while the reader is in the bar changes nothing; Ctrl+F in the bar selects the query again", () => {
   const harness = setup();
   render(harness.page);
@@ -262,7 +265,7 @@ test("an open request while the reader is in the bar changes nothing; Ctrl+F in 
   assert.equal(selected, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
 test("typing paints every match of the rendered text, across inline markup, and counts them", () => {
   const harness = setup();
   render(harness.page);
@@ -277,8 +280,8 @@ test("typing paints every match of the rendered text, across inline markup, and 
   assert.equal(harness.painted.at(-1)!.ranges.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
 test("Enter, Shift+Enter and F3 walk the matches and wrap around; Escape closes and clears the paint", () => {
   const harness = setup();
   render(harness.page);
@@ -309,7 +312,7 @@ test("Enter, Shift+Enter and F3 walk the matches and wrap around; Escape closes 
   assert.equal(harness.key({ code: "F3" }).prevented, 0, "F3 is free again once the bar is closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S6
 test("match case, whole word and regular expression narrow the matches; a bad expression shows its reason", () => {
   const harness = setup();
   render(harness.page);
@@ -335,7 +338,7 @@ test("match case, whole word and regular expression narrow the matches; a bad ex
   assert.equal(harness.query("[data-find-regex]").getAttribute("aria-pressed"), "false", "Alt+R toggles the expression");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S2
 test("hidden text, controls and formula markup are not searched, a folded section is", () => {
   const harness = setup();
   const page = harness.page;
@@ -352,7 +355,8 @@ test("hidden text, controls and formula markup are not searched, a folded sectio
   assert.ok(harness.revealed.includes(folded as unknown as Element), "the section of the match is unfolded before it is shown");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S2
 test("a match is scrolled to the middle only when it is outside the pane", () => {
   const inView = setup();
   render(inView.page);
@@ -378,7 +382,7 @@ function wideTable(page: Page, scrollLeft: number) {
   return table as unknown as El & { scrollLeft: number };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S3
 test("a hit left of a sideways-scrolled table box scrolls the box back to it, with a margin", () => {
   const harness = setup({ rect: { top: 100, bottom: 120, height: 20, left: -665, right: -622 } });
   const table = wideTable(harness.page, 864);
@@ -388,7 +392,7 @@ test("a hit left of a sideways-scrolled table box scrolls the box back to it, wi
   assert.equal(harness.page.scrolled.length, 0, "a hit in view vertically is not centred");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S3
 test("a hit right of a sideways-scrolled table box scrolls the box forward to it", () => {
   const harness = setup({ rect: { top: 100, bottom: 120, height: 20, left: 500, right: 560 } });
   const table = wideTable(harness.page, 0);
@@ -397,7 +401,7 @@ test("a hit right of a sideways-scrolled table box scrolls the box forward to it
   assert.equal(table.scrollLeft, 560 - (393 - 16), "the range ends 16 px inside the box");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S3
 test("a hit already inside the table box does not write scrollLeft", () => {
   const harness = setup({ rect: { top: 100, bottom: 120, height: 20, left: 100, right: 160 } });
   const table = wideTable(harness.page, 300);
@@ -408,7 +412,8 @@ test("a hit already inside the table box does not write scrollLeft", () => {
   assert.equal(writes, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("replace all sends the source block, the occurrence and the expanded replacement of each match", () => {
   const block = (line: number, element: Element) => ({ line, endLine: line, element });
   const tag = (node: Element): string => node.tagName;
@@ -441,7 +446,7 @@ test("replace all sends the source block, the occurrence and the expanded replac
   assert.match(text(harness, "[data-find-note]"), /^Replaced 2 matches; 2 matches cannot be replaced from the preview$/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S5
 test("replace replaces the current match only and moves on; a refusal of the host is shown", () => {
   const harness = setup({ sourceOf: (element) => ({ line: 2, endLine: 2, element: element.closest?.("p") ?? element }) });
   harness.page.node("p", ["one studio, two studio, three Studio"]);
@@ -467,7 +472,7 @@ const mapParagraphs = (element: Element): FindSourceBlock | undefined => {
   return undefined;
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S6
 test("with the replace row open, the note counts the matches the host would skip before any click", () => {
   const harness = setup({ sourceOf: mapParagraphs });
   harness.page.node("p", ["Para needle one."]);
@@ -495,7 +500,8 @@ test("with the replace row open, the note counts the matches the host would skip
   assert.equal(harness.asked.length, 2, "and asks again after the content refresh");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S6
 test("no dry run while the replace row is closed; opening it asks, closing it drops the host's count", () => {
   const harness = setup({ sourceOf: mapParagraphs });
   harness.page.node("p", ["Para needle one."]);
@@ -517,7 +523,7 @@ test("no dry run while the replace row is closed; opening it asks, closing it dr
   assert.equal(harness.asked.length, 1, "still nothing asked with the row closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S7
 test("a dry-run answer of an older search is ignored, and a refusal keeps the page's count", () => {
   const harness = setup({ sourceOf: mapParagraphs, holdAnswers: true });
   harness.page.node("p", ["one needle, one pin"]);
@@ -539,7 +545,7 @@ test("a dry-run answer of an older search is ignored, and a refusal keeps the pa
   assert.equal(text(harness, "[data-find-note]"), "2 matches cannot be replaced from the preview");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
 test("the dry run sends no replacement text, so a replacement too long to apply still gets the announcement", () => {
   const harness = setup({ sourceOf: mapParagraphs });
   harness.page.node("p", ["Para needle one."]);
@@ -558,7 +564,8 @@ test("the dry run sends no replacement text, so a replacement too long to apply 
   assert.equal(text(harness, "[data-find-note]"), "The replacement text is too long.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S5
 test("a read-only preview disables replace with the reason and never asks the host", () => {
   const harness = setup({ blocked: "Open a folder to edit.", sourceOf: (element) => ({ line: 1, endLine: 1, element }) });
   render(harness.page);
@@ -575,7 +582,8 @@ test("a read-only preview disables replace with the reason and never asks the ho
   assert.equal(harness.asked.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S4
 test("the matches are searched again when the content changes, keeping the current index", () => {
   const harness = setup();
   render(harness.page);
@@ -592,7 +600,8 @@ test("the matches are searched again when the content changes, keeping the curre
   assert.equal(harness.query("[data-sphinx-preview-find]").hidden, true, "a closed bar stays closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
 test("the native editing keys of the find and replace fields stop at the bar and keep their default action", () => {
   const harness = setup();
   render(harness.page);

@@ -21,6 +21,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-002
 depends_on: []
+scenarios:
+- id: S1
+  title: Fold a section
+- id: S2
+  title: Which headings fold and where a section ends
+- id: S3
+  title: The chevron is shown when it is useful
+- id: S4
+  title: Folded blocks take no room
+- id: S5
+  title: Fold all and unfold all from the toolbar
+- id: S6
+  title: Fold all and unfold all from the command palette
+- id: S7
+  title: No preview, wrong command, open editor
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -51,12 +66,12 @@ supersedes:
 
 When the reader presses the chevron of a heading of the content, or the section shortcut with that heading current, the extension SHALL hide every block after the heading up to the next heading of the same or a higher level, keep the heading shown with its chevron marked folded, and show the blocks again when the chevron is pressed again; and when the reader presses the Fold button of the toolbar, or runs the command Fold All Sections in Preview or Unfold All Sections in Preview, fold every section that has content, or unfold every section, in the preview that has the focus.
 
-### Scenario (nominal): Fold a section
+### Scenario S1 (nominal): Fold a section
 - GIVEN content with an h2 B followed by two paragraphs, an h3 C with a paragraph, and then an h2 D
 - WHEN the reader presses the chevron of B
 - THEN the two paragraphs, C and its paragraph are hidden (data-okf-folded, hidden="until-found"), B and D stay shown, the chevron of B has aria-expanded false and the heading has data-okf-fold="closed"; pressing it again shows the blocks and sets data-okf-fold="open"
 
-### Scenario (boundary): Which headings fold and where a section ends
+### Scenario S2 (boundary): Which headings fold and where a section ends
 | Input | Outcome |
 | --- | --- |
 | A heading directly followed by a heading of the same or a higher level, or by nothing | It has no chevron, because its section is empty |
@@ -67,27 +82,27 @@ When the reader presses the chevron of a heading of the content, or the section 
 | The chevron is pressed while a block editor or the frontmatter editor is open | Nothing folds |
 | The section shortcut (Ctrl+Alt+[, Cmd+Alt+[ on macOS) with focus outside a text box | The section of the focused heading, or of the last heading at the reading line, folds or unfolds; a heading without a section stands for the heading above it; the key typed in a text box does nothing |
 
-### Scenario (nominal): The chevron is shown when it is useful
+### Scenario S3 (nominal): The chevron is shown when it is useful
 - GIVEN a heading with a section
 - WHEN the pointer is over the heading, the chevron has the focus, or the section is folded
 - THEN the chevron is visible; otherwise it is transparent but still reachable by keyboard
 
-### Scenario (boundary): Folded blocks take no room
+### Scenario S4 (boundary): Folded blocks take no room
 - GIVEN a folded section
 - WHEN the page is laid out
 - THEN the hidden blocks have no margin, padding or border, so the folded heading is followed by the next heading at the spacing of two headings
 
-### Scenario (nominal): Fold all and unfold all from the toolbar
+### Scenario S5 (nominal): Fold all and unfold all from the toolbar
 - GIVEN a document with several sections and none folded
 - WHEN the reader presses the Fold button in row 3 of the toolbar
 - THEN every heading that has a section is folded, the button reads Unfold all sections with aria-pressed true; pressing it again unfolds every section and the button reads Fold all sections again
 
-### Scenario (nominal): Fold all and unfold all from the command palette
+### Scenario S6 (nominal): Fold all and unfold all from the command palette
 - GIVEN a preview or the custom editor has the focus
 - WHEN the reader runs Markdown OKF-Schema Studio: Fold All Sections in Preview or Unfold All Sections in Preview
 - THEN the host posts previewFoldCommand with foldAll or unfoldAll to that preview and the page folds or unfolds every section
 
-### Scenario (refusal): No preview, wrong command, open editor
+### Scenario S7 (refusal): No preview, wrong command, open editor
 | Input | Outcome |
 | --- | --- |
 | No preview has the focus | The command does nothing and returns false |

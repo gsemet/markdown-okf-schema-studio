@@ -15,6 +15,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-021
 depends_on: []
+scenarios:
+- id: S1
+  title: New label
+- id: S2
+  title: Already labelled
+- id: S3
+  title: Leading blank lines
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,19 +38,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Label, the extension SHALL write the line `(label-name)=` above the first line of the text with label-name selected, and make no edit when the text already starts with a label line.
 
-### Scenario (nominal): New label
+### Scenario S1 (nominal): New label
 
 - GIVEN the text Para and text
 - WHEN Label is pressed
 - THEN `(label-name)=` is the first line and label-name is selected
 
-### Scenario (refusal): Already labelled
+### Scenario S2 (refusal): Already labelled
 
 - GIVEN a text that starts with (x)=
 - WHEN Label is pressed
 - THEN no edit is produced
 
-### Scenario (boundary): Leading blank lines
+### Scenario S3 (boundary): Leading blank lines
 
 | Input | Outcome |
 | --- | --- |

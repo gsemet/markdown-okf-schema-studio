@@ -18,8 +18,9 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
 annotation_exemption: true
-exemption_reason: "Archived. Another requirement specifies this behaviour, so no marker
-  is expected."
+exemption_reason: "Archived by CR-477: the Opening Files settings are retired and
+  SwRS-MDOKFSTUDIO-LIFE-195 restores the *.md editor association from them once; no
+  marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

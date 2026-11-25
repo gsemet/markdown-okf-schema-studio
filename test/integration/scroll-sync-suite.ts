@@ -270,11 +270,13 @@ async function runBlockNavigation(
   console.log("PASS block keyboard navigation E2E");
 }
 
-// @tests_req StRS-MDOKFSTUDIO-LIFE-010
-// @tests_req StRS-MDOKFSTUDIO-TOOLBAR-013
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+// @accepts_req StRS-MDOKFSTUDIO-LIFE-010#S1
+// @accepts_req StRS-MDOKFSTUDIO-TOOLBAR-013#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S9
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S1
 export async function run(): Promise<void> {
   // Heartbeat and timeout dumps of the hang watchdog (stepWatchdog.ts).
   await withSuiteWatchdog("scroll-sync-suite", runScrollSyncSuite);

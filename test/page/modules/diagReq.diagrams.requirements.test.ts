@@ -48,7 +48,8 @@ function composePage() {
   return { document, select, button: () => document.querySelector("[data-okf-comment-create]") };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-038
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-038#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-038#S4
 test("a selection inside a Mermaid or PlantUML figure offers no comment; one in a paragraph does", () => {
   for (const figureClass of ["myst-mermaid-figure", "myst-plantuml-figure"]) {
     const { document, select, button } = composePage();

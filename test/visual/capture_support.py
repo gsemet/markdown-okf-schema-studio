@@ -606,7 +606,8 @@ TABLE_BAR_STYLE_JS = """element => {
 }"""
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-064
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-064#S1
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-064#S2
 def table_bar_flow_failure(style: dict) -> str | None:
   """Return why the table action bar is not laid out as shipped, or None when it is.
 

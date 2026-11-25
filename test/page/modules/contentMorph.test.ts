@@ -9,7 +9,7 @@ import {
   positionSignature,
 } from "../../../src/page/modules/contentMorph";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S7
 test("PERF-05: unchanged blocks are kept in place, changed and new ones come from the patch", () => {
   assert.deepEqual(planKeyedMorph(["<p>a</p>", "<p>b</p>", "<p>c</p>"], ["<p>a</p>", "<p>B</p>", "<p>c</p>"]), [0, -1, 2]);
   assert.deepEqual(planKeyedMorph(["<p>a</p>"], ["<h1>t</h1>", "<p>a</p>"]), [-1, 0], "an insertion before shifts nothing else");
@@ -96,7 +96,8 @@ const block = (line: number, end: number, id: number, text: string): string =>
   `<p data-line="${line}" data-sphinx-source-line="${line}" data-sphinx-source-end-line="${end}" `
   + `data-sphinx-preview-block="source-block-${id}">${text}</p>`;
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S8
 test("P-07: the key leaves out the source-position attributes and a hash replaces the HTML", () => {
   assert.equal(morphKey(block(3, 4, 2, "x")), "<p>x</p>");
   assert.equal(morphKey(block(10, 11, 7, "x")), morphKey(block(3, 4, 2, "x")));
@@ -108,7 +109,7 @@ test("P-07: the key leaves out the source-position attributes and a hash replace
   assert.ok(hashKey(block(1, 1, 1, "x".repeat(10_000))).length < 30, "the key does not grow with the block");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S9
 test("P-07: a line inserted above keeps every block below it and moves its line attributes in place", () => {
   const blocks = 200;
   const before = Array.from({ length: blocks }, (_, index) => block(index * 2 + 1, index * 2 + 1, index + 1, `block ${index}`)).join("");
@@ -138,7 +139,8 @@ test("P-07: a line inserted above keeps every block below it and moves its line 
   assert.equal(original.reduce((sum, node) => sum + node.writes, 0), writes, "unchanged positions are not rewritten");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S9
 test("P-07: the insertion bars of kept blocks stay with them and bars of dropped blocks go", () => {
   const container = new FakeContainer();
   container.set(block(1, 1, 1, "a") + block(3, 3, 2, "b"));
@@ -157,7 +159,7 @@ test("P-07: the insertion bars of kept blocks stay with them and bars of dropped
   assert.equal(container.childNodes.includes(barB), false, "the bar after a replaced block goes");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S10
 test("a block the page rewrote is rebuilt by the next patch, even when its host HTML is unchanged", () => {
   const container = new FakeContainer();
   container.set(block(1, 1, 1, "a") + block(3, 3, 2, "b"));
@@ -176,7 +178,8 @@ test("a block the page rewrote is rebuilt by the next patch, even when its host 
   assert.equal(morph.replace(container as unknown as Element, block(1, 1, 1, "a") + block(3, 3, 2, "b")).kept, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S8
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S10
 test("invalidating a node outside the recorded blocks changes nothing", () => {
   const container = new FakeContainer();
   container.set(block(1, 1, 1, "a"));

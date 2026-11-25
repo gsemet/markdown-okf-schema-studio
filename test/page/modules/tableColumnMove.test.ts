@@ -18,7 +18,7 @@ function movedPipe(source: string, from: number, to: number): string | undefined
   return tools.moveColumn(model, from, to) === undefined ? undefined : tools.serialize(model);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
 test("moving a pipe table column moves its cells and its alignment colons in every line", () => {
   assert.equal(movedPipe(PIPE, 0, 2),
     "| H2 | H3 | H1 |\n| --- | ---: | :--- |\n| a2 | a3 | a1 |\n| b2 | b3 | b1 |\n");
@@ -28,7 +28,8 @@ test("moving a pipe table column moves its cells and its alignment colons in eve
     "| H2 | H1 | H3 |\n| --- | :--- | ---: |\n| a2 | a1 | a3 |\n| b2 | b1 | b3 |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
 test("a moved pipe column keeps the padding and the outer pipes of every line as written", () => {
   const padded = "  | Name   | Qty |\n  |--------|-----|\n  | apple  | 3   |\n  | banana | 12  |\n";
   assert.equal(movedPipe(padded, 0, 1),
@@ -38,7 +39,8 @@ test("a moved pipe column keeps the padding and the outer pipes of every line as
   assert.equal(movedPipe(bare, 0, 1), " H2|H1 \n ---|--- \n b|a \n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
 test("the pipe table model refuses a column move outside the table or onto the same place", () => {
   for (const [from, to] of [[0, 0], [-1, 1], [0, 3], [3, 0], [0.5, 1]] as const) {
     const model = tools.parse(PIPE)!;
@@ -67,7 +69,7 @@ const LIST = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
 test("moving a list-table column reorders the cells of every row and the :widths: numbers", () => {
   assert.equal(tools.moveListTableColumn(LIST, 0, 2), [
     "```{list-table} Fruit",
@@ -91,7 +93,8 @@ test("moving a list-table column reorders the cells of every row and the :widths
   assert.equal(tools.moveListTableColumn(LIST, 2, 1)?.split("\n").slice(4, 7).join("|"), "* - H1|  - H3|  - H2");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
 test("a moved list-table column keeps empty cells, nested content, indentation, fence and line endings", () => {
   const source = [
     "  :::{list-table}", "  :header-rows: 0", "", "  * - x", "    -", "    - - nested", "      - list",
@@ -106,7 +109,8 @@ test("a moved list-table column keeps empty cells, nested content, indentation, 
   assert.equal(tools.moveListTableColumn(open, 0, 1), "```{list-table}\n\n* - b\n  - a");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
 test("a list-table column move is refused for ragged rows, a bad index or a source that is no list-table", () => {
   const ragged = "```{list-table}\n\n* - a\n  - b\n* - c\n```\n";
   assert.equal(tools.moveListTableColumn(ragged, 0, 1), undefined);
@@ -117,7 +121,8 @@ test("a list-table column move is refused for ragged rows, a bad index or a sour
   assert.equal(tools.moveListTableColumn("```{list-table}\n\n* text\n```\n", 0, 1), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
 test("a :widths: option that does not match the columns stays as written", () => {
   const source = "```{list-table}\n:widths: auto\n\n* - a\n  - b\n```\n";
   assert.equal(tools.moveListTableColumn(source, 0, 1), "```{list-table}\n:widths: auto\n\n* - b\n  - a\n```\n");
@@ -125,7 +130,7 @@ test("a :widths: option that does not match the columns stays as written", () =>
   assert.equal(tools.moveListTableColumn(odd, 0, 1), "```{list-table}\n:widths: 1 2 3\n\n* - b\n  - a\n```\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
 test("converting a pipe table to a list-table and moving a column in each gives the same grid", () => {
   const list = tools.convertTable(PIPE, "list-table");
   assert.ok(list && list.ok);
@@ -141,7 +146,7 @@ test("converting a pipe table to a list-table and moving a column in each gives 
 
 const T2 = "| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | first ^row-b |\n| beta | 2 | second |\n| gamma | 3 | third |\n";
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S3
 test("a column move leaves a block id ending the last cell at the end of its row", () => {
   assert.equal(movedPipe(T2, 2, 1),
     "| Name | Note | Value |\n| --- | --- | --- |\n| alpha | first | 1 | ^row-b\n| beta | second | 2 |\n| gamma | third | 3 |\n");
@@ -154,7 +159,8 @@ test("a column move leaves a block id ending the last cell at the end of its row
     "| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | first | ^row-b\n| beta | 2 | second |\n| gamma | 3 | third |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S3
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
 test("a column move keeps a row tail at the end of its line and an anchor element with its cell", () => {
   const tailed = "| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | first | ^row-a\n| beta | 2 | second |\n";
   assert.equal(movedPipe(tailed, 0, 2),
@@ -164,7 +170,8 @@ test("a column move keeps a row tail at the end of its line and an anchor elemen
     "| Name | Note | Value |\n| --- | --- | --- |\n| alpha | first <a id=\"x\"></a> | 1 |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S3
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
 test("a column inserted after the last also lifts the block id, and a cell holding only the id is emptied", () => {
   const model = tools.parse(T2)!;
   const at = tools.insertColumnAfter(model, 2);
@@ -175,7 +182,7 @@ test("a column inserted after the last also lifts the block id, and a cell holdi
   assert.equal(tools.serialize(only), "| B | A |\n| --- | --- |\n| | x | ^row-b\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S3
 test("a block id is not lifted out of a row that has no closing pipe", () => {
   for (const source of [
     "Name | Value | Note\n--- | --- | ---\nalpha | 1 | first ^row-b\n",
@@ -188,7 +195,8 @@ test("a block id is not lifted out of a row that has no closing pipe", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
 test("a list-table model takes no tail: a column move and an insert keep the id in the written list-table", () => {
   const source = [
     "```{list-table}", ":header-rows: 1", "", "* - H1", "  - H2", "* - a", "  - one ^row-b", "```", "",

@@ -20,6 +20,21 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: Alt+Arrow on a focused block or insert point
+- id: S2
+  title: A key repeat does not move a block twice
+- id: S3
+  title: Other chords and targets do not move a block
+- id: S4
+  title: A refused keyboard move can be retried
+- id: S5
+  title: A keyboard move that never lands is forgotten after five seconds
+- id: S6
+  title: The move chord in the text box moves the block and reopens its editor
+- id: S7
+  title: The move chord is always consumed in the text box
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,7 +56,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses Alt+ArrowUp or Alt+ArrowDown on a focused body block in edit mode, the page SHALL request the move of that block and focus the block at its new place, and the move chord in the text box of a block editor does the same after saving the edit and reopens the editor with the caret where it was.
 
-### Scenario (nominal): Alt+Arrow on a focused block or insert point
+### Scenario S1 (nominal): Alt+Arrow on a focused block or insert point
 
 | Input | Outcome |
 | --- | --- |
@@ -50,14 +65,14 @@ When a writer presses Alt+ArrowUp or Alt+ArrowDown on a focused body block in ed
 | Alt+ArrowUp on the first block | Nothing is posted |
 | Alt+ArrowDown with the bar of the properties table focused | Nothing is posted |
 
-### Scenario (boundary): A key repeat does not move a block twice
+### Scenario S2 (boundary): A key repeat does not move a block twice
 
 | Input | Outcome |
 | --- | --- |
 | The key repeat event arrives while a keyboard move waits for its result and render | No second message is posted |
 | The result and the render of the move have arrived and the writer presses the chord again | A new move is requested |
 
-### Scenario (refusal): Other chords and targets do not move a block
+### Scenario S3 (refusal): Other chords and targets do not move a block
 
 | Input | Outcome |
 | --- | --- |
@@ -66,7 +81,7 @@ When a writer presses Alt+ArrowUp or Alt+ArrowDown on a focused body block in ed
 | Plain Alt+Arrow with the focus in a text box | The key stays with the text box and no move is posted |
 | Alt+Arrow in an input, select or editor, in the properties table, outside edit mode or during an open editor | No block move starts |
 
-### Scenario (refusal): A refused keyboard move can be retried
+### Scenario S4 (refusal): A refused keyboard move can be retried
 
 - GIVEN a keyboard move whose result is ok false
 - WHEN the result arrives
@@ -74,14 +89,14 @@ When a writer presses Alt+ArrowUp or Alt+ArrowDown on a focused body block in ed
 - WHEN the writer presses the chord again
 - THEN a new previewBlockMove is posted
 
-### Scenario (boundary): A keyboard move that never lands is forgotten after five seconds
+### Scenario S5 (boundary): A keyboard move that never lands is forgotten after five seconds
 
 | Input | Outcome |
 | --- | --- |
 | A keyboard move in flight and no result for five seconds | The flight is cleared and a new chord is accepted |
 | The result arrives after one second | The timer has been cleared |
 
-### Scenario (nominal): The move chord in the text box moves the block and reopens its editor
+### Scenario S6 (nominal): The move chord in the text box moves the block and reopens its editor
 
 The move chord is Cmd+Alt with ArrowUp or ArrowDown on macOS and Ctrl+Alt elsewhere.
 
@@ -90,7 +105,7 @@ The move chord is Cmd+Alt with ArrowUp or ArrowDown on macOS and Ctrl+Alt elsewh
 | An editor with typed text and the caret at offset 12, the chord down | The final save is posted, then the block is moved, and the editor of the block at its new place opens with the caret at offset 12 |
 | An editor opened and not changed, the chord | The editor closes, the host drops the edit and previewBlockMove is posted at once |
 
-### Scenario (refusal): The move chord is always consumed in the text box
+### Scenario S7 (refusal): The move chord is always consumed in the text box
 
 | Input | Outcome |
 | --- | --- |

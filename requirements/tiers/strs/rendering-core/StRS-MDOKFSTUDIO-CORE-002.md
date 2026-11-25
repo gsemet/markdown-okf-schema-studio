@@ -14,6 +14,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Show an included file in place
 user_need: Writers need to build a document from several files and still edit
   each file in its own place.
 derived_by:
@@ -66,7 +69,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Show an included file in place
+#### Path S1: Show an included file in place
 
 1. A trusted document holds an include directive
    - SwRS-MDOKFSTUDIO-CORE-012: the preview renders the included Markdown file in place of the directive and maps every included block to the lines of the directive

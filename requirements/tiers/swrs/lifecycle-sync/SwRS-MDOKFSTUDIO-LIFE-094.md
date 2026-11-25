@@ -17,6 +17,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
 - StRS-MDOKFSTUDIO-LIFE-005
 depends_on: []
+scenarios:
+- id: S1
+  title: Agent edit
+- id: S2
+  title: Which changes count as outside
+- id: S3
+  title: The patch carries the changed line ranges
+- id: S4
+  title: No ranges
+- id: S5
+  title: Glow of the updated blocks
+- id: S6
+  title: Skip the glow when it would mislead
+- id: S7
+  title: The glow is readable in three themes
+- id: S8
+  title: The glow moves nothing
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,13 +63,13 @@ supersedes:
 
 When the text of a previewed document changes by an undo, a redo or an edit that is neither the preview's own nor the writer typing, the extension SHALL make the blocks the change updated glow once for about 600 ms, with the text readable and nothing moved. A change is the writer typing only when a key was pressed in a text editor in the last 500 ms and the changed lines are on a cursor or a selection of that document (one line of margin, because VS Code moves the cursor after the change); any other change is foreign, whichever document is in the active editor.
 
-### Scenario (nominal): Agent edit
+### Scenario S1 (nominal): Agent edit
 
 - GIVEN a previewed document that is not the active editor's document
 - WHEN another tool changes it
 - THEN the preview records the revision of the change as an outside change
 
-### Scenario (boundary): Which changes count as outside
+### Scenario S2 (boundary): Which changes count as outside
 
 | Input | Outcome |
 | --- | --- |
@@ -63,13 +80,13 @@ When the text of a previewed document changes by an undo, a redo or an edit that
 | An edit the preview asked for, being applied to that document | No outside change |
 | The writer types in a text editor of the document: a key in the last 500 ms and the change on a cursor | No outside change, but an undo of that typing is |
 
-### Scenario (nominal): The patch carries the changed line ranges
+### Scenario S3 (nominal): The patch carries the changed line ranges
 
 - GIVEN an outside change at revision 5, a page at revision 4 and a patch to revision 6
 - WHEN the patch is posted
 - THEN it carries the line ranges of the changed lines
 
-### Scenario (boundary): No ranges
+### Scenario S4 (boundary): No ranges
 
 | Input | Outcome |
 | --- | --- |
@@ -77,13 +94,13 @@ When the text of a previewed document changes by an undo, a redo or an edit that
 | No outside change between the revisions the patch moves across | The patch carries no ranges |
 | The page is loaded as a whole | No ranges are attached |
 
-### Scenario (nominal): Glow of the updated blocks
+### Scenario S5 (nominal): Glow of the updated blocks
 
 - GIVEN an outside edit changing two blocks
 - WHEN the page updates
 - THEN both blocks glow once for about 600 ms, the glow attribute is set then removed; a changed code block glows on its pre
 
-### Scenario (refusal): Skip the glow when it would mislead
+### Scenario S6 (refusal): Skip the glow when it would mislead
 
 | Input | Outcome |
 | --- | --- |
@@ -92,13 +109,13 @@ When the text of a previewed document changes by an undo, a redo or an edit that
 | A changed block that is included | It does not glow |
 | A changed block with an open editor, or the block being edited | It does not glow |
 
-### Scenario (nominal): The glow is readable in three themes
+### Scenario S7 (nominal): The glow is readable in three themes
 
 - GIVEN a patch after an outside change in the light, dark and cream pages at 900 px
 - WHEN the glow is paused at its start
 - THEN exactly the updated paragraph and bullet carry a translucent wash and their text contrast is at least 4.5:1 (visual scenarios lifecycle-sync/v01-update-glow-light-900, v02-update-glow-dark-900 and v03-update-glow-cream-900)
 
-### Scenario (boundary): The glow moves nothing
+### Scenario S8 (boundary): The glow moves nothing
 
 - GIVEN the same patch, compared at the start and at the end of the glow
 - WHEN the glow plays

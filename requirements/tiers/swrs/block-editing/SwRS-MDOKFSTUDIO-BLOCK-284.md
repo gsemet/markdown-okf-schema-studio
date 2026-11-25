@@ -16,6 +16,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: setting off
+- id: S2
+  title: both edges in one heading
+- id: S3
+  title: boundary crossed at the start
+- id: S4
+  title: boundary crossed at the end
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,25 +43,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the balance-edges setting is on, the raw copy SHALL begin with the heading marker of an ATX heading the selection starts inside, SHALL end with the underline line of a setext heading the selection ends inside, and SHALL copy the text between the edges alone when both edges lie in one heading.
 
-### Scenario: setting off
+### Scenario S1: setting off
 
 - GIVEN the setting is off and `## Hello`
 - WHEN the selection starts inside `Hello` and ends after the heading
 - THEN the copy has no `##`
 
-### Scenario: both edges in one heading
+### Scenario S2: both edges in one heading
 
 - GIVEN the setting is on
 - WHEN the reader copies from `l` to `o` in `Hello`
 - THEN the clipboard holds `llo`
 
-### Scenario: boundary crossed at the start
+### Scenario S3: boundary crossed at the start
 
 - GIVEN the setting is on
 - WHEN the selection starts inside an ATX heading and ends after it
 - THEN `## ` is put before the text
 
-### Scenario: boundary crossed at the end
+### Scenario S4: boundary crossed at the end
 
 - GIVEN the setting is on
 - WHEN the selection starts before a setext heading and ends inside it

@@ -79,7 +79,8 @@ function key(name: string, extra: Record<string, unknown> = {}): { event: Record
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S4
 test("a toggle of edit mode is written to the webview state next to its other fields", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: false, descriptionsCollapsed: true } });
   harness.editModeButton.dispatch("click");
@@ -92,7 +93,8 @@ test("a toggle of edit mode is written to the webview state next to its other fi
   assert.equal(harness.getWebviewState().paletteMode, "gfm");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S2
 test("turning edit mode off closes the label rename field and posts no rename", () => {
   const harness = createRuntimeHarness();
   const create = harness.document.createElement as (tagName: string) => RuntimeElement & { select?: () => void };
@@ -125,7 +127,8 @@ test("turning edit mode off closes the label rename field and posts no rename", 
   assert.deepEqual(quiet.messages.slice(count).map((message) => message.type), ["previewEditModeChanged"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S4
 // CR 217 changed the rule for links: a block inside a link is outlined like any block (a plain click
 // there edits it), where it used to be skipped.
 test("the hover outline skips the properties table and an open editor, and outlines a block inside a link", () => {
@@ -153,7 +156,7 @@ test("the hover outline skips the properties table and an open editor, and outli
   assert.deepEqual(outlined(), [], "nothing is outlined while the pointer is over the open editor");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S5
 // CR 217 changed the rule: the link used to leave the paragraph without outline.
 test("hovering a link inside a paragraph outlines the paragraph, like the text around it", () => {
   const harness = createRuntimeHarness();
@@ -168,7 +171,7 @@ test("hovering a link inside a paragraph outlines the paragraph, like the text a
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-edit-hover"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S6
 test("a click on a cell of the properties table never opens a block editor", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   turnEditModeOn(harness);
@@ -216,7 +219,8 @@ test("a click on a comment chip or an open thread opens no editor, a block insid
   assert.deepEqual(postsOf(linkedHarness, "previewLink"), [], "the link is not followed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
 // CR 217 changed the rule: a plain click on the link used to follow it and open no editor.
 test("a click on a link inside a paragraph opens the paragraph editor; a Cmd click follows the link", () => {
   const harness = createRuntimeHarness();
@@ -274,7 +278,8 @@ test("Enter or Space stays with a text box, a button, a chip, a toggle and an in
   assert.equal(postsOf(reading, "previewReveal").length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S4
 // CR 217 changed the rule: Enter or Space on the link used to open no editor.
 test("Enter or Space on a link inside a paragraph opens the paragraph editor; Cmd+Enter does not", () => {
   for (const name of ["Enter", " "]) {
@@ -317,7 +322,7 @@ test("a click on Diagram source in edit mode opens the editor of the figure and 
   assert.equal(reveals[0]!.line, 50);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S1
 test("the editor frame appears at once, empty, and is filled when the source arrives", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
@@ -340,7 +345,8 @@ test("the editor frame appears at once, empty, and is filled when the source arr
   findButton(harness, DONE);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S7
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S9
 test("the editor frame is a region named Raw Markdown editor and its text box is named Raw Markdown block", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -376,7 +382,8 @@ test("a click inside the editor frame does not reach the document listeners", ()
   assert.equal(stopped, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S7
 test("the status line reads Saving Markdown… from the final save on, and shows an error that refuses it", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -393,7 +400,7 @@ test("the status line reads Saving Markdown… from the final save on, and shows
   assert.equal(status.textContent, "The preview is stale. Reopen the block before saving.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S7
 test("Done, Ctrl+Enter and the blur post one final save while the first is in flight", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -408,7 +415,7 @@ test("Done, Ctrl+Enter and the blur post one final save while the first is in fl
   assert.equal(postsOf(harness, "previewEditSave").filter((message) => message.final === true).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
 test("Cancel and Escape close the editor while the final save is in flight", () => {
   for (const leave of ["Cancel", "Escape"]) {
     const harness = createRuntimeHarness();
@@ -432,7 +439,8 @@ test("Cancel and Escape close the editor while the final save is in flight", () 
   assert.equal(idle.mappings[1].getAttribute("data-sphinx-preview-editing"), null, "before the save Escape cancels");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S4
 test("the Refresh button is disabled while a block editor is open and enabled again when it closes", () => {
   const harness = createRuntimeHarness();
   assert.equal(harness.refreshButton.disabled, false);
@@ -455,8 +463,9 @@ test("a refresh asked from the page over an open block editor shows a message an
   assert.equal(postsOf(idle, "previewRefresh").length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S9
 test("a refused open leaves the frame without a text box and records the error", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
@@ -485,7 +494,8 @@ test("a refused open leaves the frame without a text box and records the error",
   assert.deepEqual(postsOf(harness, "previewEditCancel", posted), [], "nothing was held by the host");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S4
 test("Escape and a click on another block leave the frame of a refused open", () => {
   const refuse = (): ReturnType<typeof createRuntimeHarness> => {
     const harness = createRuntimeHarness();
@@ -544,7 +554,7 @@ test("a refused save keeps the typed text and lets the next input save again", (
   assert.equal(saves[0]!.final, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S8
 test("closing an editor scrolls the page back by the shift applied on opening", () => {
   const shifted = createRuntimeHarness();
   shifted.windowState.scrollY = 200;
@@ -568,7 +578,7 @@ test("closing an editor scrolls the page back by the shift applied on opening", 
   assert.equal(plain.windowState.scrollY, 200, "no scroll on closing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S5
 test("Home and End move the caret to the start and to the end before the last line break", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -607,7 +617,7 @@ test("Shift with Home or End extends the selection from its anchor", () => {
   assert.equal(textarea.selectionDirection, "backward");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S4
 test("arrow keys with a modifier or with a selection stay in the text box", () => {
   const harness = createRuntimeHarness();
   const textarea = openEditorOf(harness, 1, "one\ntwo\n");
@@ -655,7 +665,7 @@ test("arrow navigation stops at the first and at the last block", () => {
   assert.equal(last.mappings[2].getAttribute("data-sphinx-preview-editing"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S5
 test("a keyboard move that never lands is forgotten after five seconds", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true }, virtualClock: true });
   const target = harness.mappings[1];
@@ -681,7 +691,7 @@ test("a keyboard move that never lands is forgotten after five seconds", () => {
   assert.equal(answered.pendingTimerCount(), 0, "nothing is left running");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S7
 test("the paste chord on the insert point of an included block shows a notice and posts nothing", () => {
   const harness = createRuntimeHarness();
   harness.mappings[1].setAttribute("data-sphinx-preview-included", "true");
@@ -717,8 +727,9 @@ function mappedElement(harness: RuntimeHarness, tagName: string, line: number, e
   }, harness.windowState, 0, 20, tagName);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
 test("a list item is outlined and opened on its own lines, the list itself outlines and opens the whole list", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
@@ -754,7 +765,7 @@ test("a list item is outlined and opened on its own lines, the list itself outli
   assert.deepEqual([opens[0]!.line, opens[0]!.endLine], [5, 10], "the item's lines, the blank line before the next item included");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
 test("a click on the list itself, outside its items, opens the whole list", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);

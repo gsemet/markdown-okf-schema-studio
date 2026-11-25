@@ -22,7 +22,7 @@ const SOURCE = [
 const rangeOf = (element: Parameters<typeof attribute>[0]): [number, number] =>
   [Number(attribute(element, "data-line")), Number(attribute(element, "data-end-line"))];
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("the source gives the five runs: between items, in an item, in a fence, ending a list and in an admonition", async () => {
   const { html } = await renderPreviewSource({
     text: SOURCE, documentPath: "/w/doc.md", workspaceRoot: "/w", restrictedReads: false,

@@ -93,7 +93,7 @@ function selectBlock(harness: RuntimeHarness, line: number): void {
   assert.deepEqual(selectedLines(harness), [line]);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S2
 test("CR 157: Right on a selected table selects its first header cell", () => {
   const { harness, cells } = page();
   selectBlock(harness, 60);
@@ -104,7 +104,8 @@ test("CR 157: Right on a selected table selects its first header cell", () => {
   assert.equal(cells[0][0].focusOptions !== undefined, true, "the cell takes the focus");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S2
 test("CR 157: the four arrows move cell to cell and stop at the edges", () => {
   const { harness, cells } = page();
   selectBlock(harness, 60);
@@ -129,7 +130,8 @@ test("CR 157: the four arrows move cell to cell and stop at the edges", () => {
   assert.deepEqual(selectedLines(harness), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S2
 test("CR 157: Escape on a cell returns to the table block, a second Escape leaves the selection", () => {
   const { harness, cells } = page();
   selectBlock(harness, 60);
@@ -142,7 +144,8 @@ test("CR 157: Escape on a cell returns to the table block, a second Escape leave
   assert.deepEqual(selectedLines(harness), [], "Escape at the top level keeps clearing the selection");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S2
 test("CR 157: Enter on a selected cell opens the cell editor like a click", () => {
   const { harness, table, cells } = page();
   selectBlock(harness, 60);
@@ -171,7 +174,7 @@ test("CR 157: Enter on a selected cell opens the cell editor like a click", () =
   assert.deepEqual(focusedCells(cells), [], "the editor replaces the cell highlight");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
 test("CR 157: Right on an admonition selects its first inner block, Left and Escape go back up", () => {
   const { harness, inner } = page();
   selectBlock(harness, 70);
@@ -188,7 +191,7 @@ test("CR 157: Right on an admonition selects its first inner block, Left and Esc
   assert.deepEqual(selectedLines(harness), [], "at the top level Escape clears as before");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
 test("CR 157: Up and Down walk the inner blocks of a container and stop at its edges", () => {
   const { harness } = page();
   selectBlock(harness, 70);
@@ -201,7 +204,7 @@ test("CR 157: Up and Down walk the inner blocks of a container and stop at its e
   assert.deepEqual(selectedLines(harness), [73], "Down at the last inner block stays inside");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
 test("CR 157: Enter on an inner block opens that block's editor", () => {
   const { harness } = page();
   selectBlock(harness, 70);
@@ -213,7 +216,7 @@ test("CR 157: Enter on an inner block opens that block's editor", () => {
   assert.equal(opened[0].line, 71);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
 test("CR 157: Right with the whole page selected selects its first block", () => {
   const { harness } = page();
   assert.deepEqual(selectedLines(harness), []);
@@ -224,7 +227,7 @@ test("CR 157: Right with the whole page selected selects its first block", () =>
   assert.equal(announcement(harness), "1 block selected");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
 test("CR 157: Right on a leaf block does nothing, Left at the top level does nothing", () => {
   const { harness } = page();
   selectBlock(harness, 50);
@@ -235,7 +238,7 @@ test("CR 157: Right on a leaf block does nothing, Left at the top level does not
   assert.equal(announcement(harness), "1 block selected");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
 test("CR 157: Left, Right and Escape with nothing selected, or outside edit mode, do nothing", () => {
   const { harness } = page();
   press(harness, "ArrowLeft");
@@ -246,7 +249,7 @@ test("CR 157: Left, Right and Escape with nothing selected, or outside edit mode
   assert.deepEqual(selectedLines(reading), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S4
 test("CR 157: the structural keys leave an open editor and modifier chords alone", () => {
   const { harness, cells } = page();
   selectBlock(harness, 60);
@@ -279,8 +282,8 @@ function opened(harness: RuntimeHarness, before: number): number[][] {
     .map((message) => [Number(message.line), Number(message.endLine)]);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S2
 test("Right walks a list down to its items and their blocks, Enter edits the selected level, Left goes back up", () => {
   const { harness, list, first, second, paragraphs } = listPage();
   selectBlock(harness, 80);
@@ -334,7 +337,7 @@ function arrowAtEdge(harness: RuntimeHarness, arrow: "ArrowUp" | "ArrowDown"): {
   return { prevented, opened: opened(harness, before) };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S6
 test("the arrow at the edge of an admonition inner block editor stays with the text box", () => {
   for (const [arrow, line] of [["ArrowUp", 71], ["ArrowDown", 73]] as const) {
     const { harness } = page();
@@ -346,7 +349,7 @@ test("the arrow at the edge of an admonition inner block editor stays with the t
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S6
 test("the arrow at the edge of a block inside a list item goes to the sibling item, then past the list", () => {
   const down = listPage();
   [down.first, down.second].forEach((item) => { item.siblingsFromParent = true; });

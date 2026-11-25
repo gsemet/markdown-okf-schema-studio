@@ -48,7 +48,8 @@ function click(harness: RuntimeHarness, target: RuntimeElement): { prevented: bo
 const popovers = (harness: RuntimeHarness): RuntimeElement[] => harness.createdElements
   .filter((element) => element.getAttribute("data-okf-comment-popover") !== null && !element.removed);
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S8
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S9
 test("comments hidden: a click on a former highlight reveals the source line and opens no popover", () => {
   const { harness, mark } = pageWithHighlight(false);
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-comments"), "off");
@@ -62,7 +63,7 @@ test("comments hidden: a click on a former highlight reveals the source line and
   assert.equal(popovers(harness).length, 0, "no thread popover");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021#S1
 test("comments shown: the same click opens the thread popover and reveals nothing", () => {
   const { harness, mark } = pageWithHighlight(true);
   const before = harness.messages.length;
@@ -72,7 +73,8 @@ test("comments shown: the same click opens the thread popover and reveals nothin
   assert.equal(popovers(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S8
 test("the setting false closes the open thread popover and a click on the highlight is plain text; true restores it", () => {
   const { harness, mark } = pageWithHighlight(true);
   click(harness, mark);

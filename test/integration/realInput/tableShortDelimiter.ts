@@ -32,7 +32,8 @@ const CELL = "[data-sphinx-preview-table-cell-editor] textarea";
  * QA replay 271-c3-1: a table whose delimiter row has two dashes (":--", "--:") opens the cell
  * editor and the table bar on a click, not the raw Markdown editor, and a cell edit leaves the
  * delimiter row as written.
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S8
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S9
  */
 export async function scenarioTableShortDelimiter(page: Page): Promise<void> {
   await withDocument("realinput-table-short-delimiter", SHORT_DELIMITER_DOCUMENT, async (document) => {

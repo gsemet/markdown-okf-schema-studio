@@ -257,8 +257,10 @@ function lineOf(element: Parameters<typeof attribute>[0]): [string | undefined, 
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-098#S3
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S5
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S9
 test("a comment and a thread in a tab item keep their own source line range", async () => {
   const { dom } = await render([
     "::::{tab-set}",

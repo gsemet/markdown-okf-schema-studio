@@ -15,6 +15,21 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
+scenarios:
+- id: S1
+  title: Tab indents the lines touched by the selection
+- id: S2
+  title: Shift+Tab outdents the touched lines
+- id: S3
+  title: Enter continues the list marker
+- id: S4
+  title: Enter continues a quote prefix or the indentation
+- id: S5
+  title: Enter on an empty list item or quote line
+- id: S6
+  title: Enter inside a fenced code block
+- id: S7
+  title: The key stays native
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,7 +49,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses Tab, Shift+Tab or Enter in the text box of a block editor, the page SHALL indent or outdent every line touched by the selection, or continue the list marker, quote prefix or indentation of the current line, and leave the key to the text box when no rule applies.
 
-### Scenario (nominal): Tab indents the lines touched by the selection
+### Scenario S1 (nominal): Tab indents the lines touched by the selection
 | Input | Outcome |
 | --- | --- |
 | Selection over the list lines `- a` and `- b` | Each gains two spaces (`  - a`, `  - b`); a numbered `1. a` gains three, `10. a` four |
@@ -42,7 +57,7 @@ When a writer presses Tab, Shift+Tab or Enter in the text box of a block editor,
 | Collapsed caret on the prose line `some prose` after `some` | The text becomes `some    prose` with the caret after the four spaces |
 | Collapsed caret at the end of the list line `- a` | The whole line is indented by the marker width instead: `  - a` |
 
-### Scenario (nominal): Shift+Tab outdents the touched lines
+### Scenario S2 (nominal): Shift+Tab outdents the touched lines
 | Input | Outcome |
 | --- | --- |
 | `    - a` with the caret at its end | The line becomes `  - a` |
@@ -52,7 +67,7 @@ When a writer presses Tab, Shift+Tab or Enter in the text box of a block editor,
 
 Up to one indentation unit, or one tab, is removed from the start of every touched line.
 
-### Scenario (nominal): Enter continues the list marker
+### Scenario S3 (nominal): Enter continues the list marker
 | Input | Outcome |
 | --- | --- |
 | `- a`, `* a` or `+ a` with the caret at the end | The next line starts with the same bullet and a space |
@@ -63,7 +78,7 @@ Up to one indentation unit, or one tab, is removed from the start of every touch
 | `- ( ) a` or `- (x) a` (an option item) | The next item starts with `- ( ) ` (marker reset); a numbered `1. ( ) a` gives `2. ( ) ` |
 | `- ab` with the caret between a and b | The line splits into `- a` and `- b` |
 
-### Scenario (nominal): Enter continues a quote prefix or the indentation
+### Scenario S4 (nominal): Enter continues a quote prefix or the indentation
 | Input | Outcome |
 | --- | --- |
 | `> quote` with the caret at its end | The next line starts with `> ` |
@@ -72,14 +87,14 @@ Up to one indentation unit, or one tab, is removed from the start of every touch
 
 The list marker, the quote prefix and the indentation are the only constructs that Enter continues.
 
-### Scenario (boundary): Enter on an empty list item or quote line
+### Scenario S5 (boundary): Enter on an empty list item or quote line
 | Input | Outcome |
 | --- | --- |
 | The lines `a`, `  - ` and `b` with the caret on the empty item | The item line becomes empty and the caret sits on it |
 | The line `>  ` with the caret at its end | The line becomes empty |
 | The line `- ( ) ` (an option item with no text) with the caret at its end | The line becomes empty, which ends the option list |
 
-### Scenario (boundary): Enter inside a fenced code block
+### Scenario S6 (boundary): Enter inside a fenced code block
 | Input | Outcome |
 | --- | --- |
 | `` ```\n  x `` with the caret after the x, inside the fence | The next line starts with two spaces |
@@ -87,7 +102,7 @@ The list marker, the quote prefix and the indentation are the only constructs th
 
 Only the indentation of the current line is continued while an odd number of fence lines lies above the caret.
 
-### Scenario (refusal): The key stays native
+### Scenario S7 (refusal): The key stays native
 | Input | Outcome |
 | --- | --- |
 | Tab with Ctrl, Cmd or Alt held, or during an IME composition | The page does not handle the key; Ctrl+Tab still reaches VS Code |

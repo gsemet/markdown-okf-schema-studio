@@ -15,6 +15,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Select blocks, copy and paste them
 user_need: "As a writer, I select a run of blocks with Shift+click or Shift+Arrow
   to treat them as one, and I copy, cut and paste whole blocks as their exact Markdown
   while the document stays tidy: no double blank lines, no glued blocks."
@@ -77,7 +80,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Select blocks, copy and paste them
+#### Path S1: Select blocks, copy and paste them
 
 1. Edit mode is on and no editor is open
    - SwRS-MDOKFSTUDIO-BLOCK-140: Shift+click selects the run of body blocks from the anchor and opens no editor

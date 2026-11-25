@@ -52,7 +52,7 @@ function setup(options: { pairing?: boolean; lineCount?: number } = {}) {
   return { scroll, preview, revealed, editor };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S8
 test("a revealed line is clamped between the first and the last line of the document", () => {
   const { scroll, preview, revealed } = setup({ lineCount: 50 });
   scroll.revealFromPage(preview, { type: "previewReveal", line: 400 });
@@ -72,7 +72,8 @@ test("a reveal that names another source file moves nothing", () => {
   assert.deepEqual(revealed.map((entry) => entry.line), [9, 19], "the own file and a message without a file reveal");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S8
 test("a host without text editors reports no pairing", () => {
   const none = setup({ pairing: false });
   assert.equal(none.scroll.visibleEditorFor(none.preview), undefined);
@@ -81,7 +82,7 @@ test("a host without text editors reports no pairing", () => {
   assert.equal(vscode.scroll.visibleEditorFor({ ...vscode.preview, documentUri: "file:///workspace/other.md" }), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S3
 test("a new render starts at the stored anchor, else at the editor's first visible line, else nowhere", () => {
   const { scroll, preview, editor } = setup();
   const anchorOf = (candidate: unknown): number | undefined =>

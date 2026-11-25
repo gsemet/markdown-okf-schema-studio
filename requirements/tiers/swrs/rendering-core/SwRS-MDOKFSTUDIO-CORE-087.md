@@ -16,6 +16,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-014
+scenarios:
+- id: S1
+  title: A diagram under the user need
+- id: S2
+  title: No diagram
+- id: S3
+  title: A fence Mermaid cannot draw
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,19 +41,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a maintainer builds the Pages site and a use case (StRS) has a Use case diagram section holding a Mermaid fence, the build SHALL draw the diagram as an inline SVG in the site's colours on the page of the use case, under the user need, readable without JavaScript, and SHALL stop with the use case id and Mermaid's message when a fence cannot be drawn.
 
-### Scenario (nominal): A diagram under the user need
+### Scenario S1 (nominal): A diagram under the user need
 
 - GIVEN a use case whose file has a `### Use case diagram` section with one Mermaid fence
 - WHEN the site is built
 - THEN the page of the use case shows the diagram as an inline SVG in the site's colours under the user need, before the map, and the page needs no JavaScript to show it
 
-### Scenario (boundary): No diagram
+### Scenario S2 (boundary): No diagram
 
 - GIVEN a use case with no `### Use case diagram` section, or a section with no Mermaid fence
 - WHEN the site is built
 - THEN its page is exactly the page built without this behaviour
 
-### Scenario (refusal): A fence Mermaid cannot draw
+### Scenario S3 (refusal): A fence Mermaid cannot draw
 
 - GIVEN a use case whose Mermaid fence Mermaid cannot draw
 - WHEN the site is built

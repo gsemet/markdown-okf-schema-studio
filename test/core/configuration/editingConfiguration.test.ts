@@ -9,7 +9,7 @@ import {
   type EditingConfigurationSource,
 } from "../../../src/core/configuration/editingConfiguration";
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S7
 test("reads the default palette mode of the editing section", () => {
   const sections: string[] = [];
   for (const mode of ["strict", "gfm", "myst", "full"]) {
@@ -49,7 +49,8 @@ test("a fresh workspace starts the palette in GFM", () => {
   assert.equal(initialPaletteModeOf("html", UNSET), "gfm", "an invalid stored value is ignored");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S7
 test("stored choice wins: a stored palette mode is kept over the default and the setting", () => {
   for (const mode of ["strict", "gfm", "myst", "full"] as const) {
     assert.equal(initialPaletteModeOf(mode, UNSET), mode);

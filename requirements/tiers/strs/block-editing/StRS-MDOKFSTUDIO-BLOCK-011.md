@@ -23,6 +23,13 @@ verified:
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Add a block between two blocks
+- id: S2
+  title: Start an empty document
+- id: S3
+  title: Write on a blank line
 user_need: As a writer, I add a paragraph, a list or a heading between two
   blocks, or after the last one, and I open an empty file, or a file with only
   metadata, and start writing from the preview, without opening the text editor.
@@ -82,7 +89,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Add a block between two blocks
+#### Path S1: Add a block between two blocks
 
 1. Edit mode is on
    - SwRS-MDOKFSTUDIO-BLOCK-087: the writer clicks the plus button of an insert point and an empty insertion editor opens
@@ -92,14 +99,14 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-BLOCK-094 (refusal): a whitespace-only new block writes nothing
 3. The new block is in the document between its neighbours
 
-#### Path 2: Start an empty document
+#### Path S2: Start an empty document
 
 1. Edit mode is on and the body of the document is empty
    - SwRS-MDOKFSTUDIO-BLOCK-102: the writer clicks Start writing and the editor of the first block opens
    - Option SwRS-MDOKFSTUDIO-BLOCK-253 (nominal): Enter on the selected Start writing button opens the same editor
 2. The editor of the first block is open
 
-#### Path 3: Write on a blank line
+#### Path S3: Write on a blank line
 
 1. Edit mode is on and the document has extra blank lines
    - SwRS-MDOKFSTUDIO-BLOCK-266: each extra blank line shows as a blank-line block

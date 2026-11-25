@@ -47,7 +47,8 @@ test("narrow previews default to collapsed descriptions without overriding an ex
   assert.equal(expanded.descriptionButton.getAttribute("aria-expanded"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S5
 test("does not shift sticky headings down when the floating toolbar grows", () => {
   const harness = createRuntimeHarness({ toolbarBottom: 50 });
   harness.toolbar.rectProvider = () => ({ top: 12, height: 38, bottom: 50, width: 130 });
@@ -86,7 +87,8 @@ test("anchors source scrolling below a top-aligned sticky band without a toolbar
   assert.equal(harness.mappings[1].getBoundingClientRect().top, 65);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S5
 test("the top-aligned sticky band grows and shrinks with the active heading hierarchy", () => {
   for (const depth of [1, 2, 3]) {
     const harness = createRuntimeHarness({ stickyHeadingDepth: depth });
@@ -107,7 +109,7 @@ test("the top-aligned sticky band grows and shrinks with the active heading hier
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S9
 test("the sticky band is marked as having content scrolled under it only below the top", () => {
   const harness = createRuntimeHarness();
   harness.stickyHeadings.height = 50;
@@ -161,7 +163,7 @@ test("the sticky band label leaves out comment chips and their hidden bodies", (
   assert.equal(harness.stickyHeadings.textContent, "# Chapter\n## Section\n### Topic");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030#S4
 test("caps sticky heading convergence at three passes", () => {
   const harness = createRuntimeHarness();
   let layoutPass = 0;
@@ -246,7 +248,7 @@ test("maps the frontmatter table for stable top and mid-table scroll round-trips
   assert.equal(harness.windowState.scrollY, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S4
 test("preserves preview scroll when layout changes during sticky heading activation", () => {
   const harness = createRuntimeHarness({ viewportHeight: 800 });
   harness.stickyHeadings.height = 50;
@@ -261,7 +263,7 @@ test("preserves preview scroll when layout changes during sticky heading activat
   assert.equal(harness.windowState.scrollY, 50);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S9
 test("uses the configured sticky heading depth", () => {
   const headings = [
     { depth: 1, expected: "### Topic" },
@@ -359,8 +361,10 @@ test("observes preview content instead of the document body", () => {
 
 // @tests_req SwRS-MDOKFSTUDIO-THEME-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-THEME-001#S3
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S12
 test("cycles preview theme modes and restores the saved selection", () => {
   // A workspace that stored the "current" mode (the fresh default is cream).
   const harness = createRuntimeHarness({}, undefined, "current");
@@ -497,7 +501,7 @@ test("switching frontmatter tooltip links removes the old tooltip and absent ARI
   assert.ok(!harness.body.contains(secondTooltip));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032#S8
 test("refresh preserves viewport state while reverse synchronization stays disabled", () => {
   const harness = createRuntimeHarness({ scrollEditorWithPreview: false });
   harness.windowState.scrollY = 320;
@@ -550,7 +554,7 @@ test("refresh preserves viewport state while reverse synchronization stays disab
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S9
 test("disabling editor anchoring stops preview-to-editor scrolling", () => {
   const harness = createRuntimeHarness({ scrollEditorWithPreview: true });
 
@@ -649,7 +653,8 @@ test("refreshes source anchor geometry after a block editor changes document flo
   assert.equal(harness.windowState.scrollY, 1_000 + 60 - 65);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S4
 test("restores saved editor anchoring when the configured preference changed", () => {
   const harness = createRuntimeHarness({ scrollPreviewWithEditor: false }, undefined, undefined, true);
 
@@ -692,7 +697,8 @@ test("activating a centered block editor preserves scroll before and after layou
   assert.equal(blockEditorOf(harness.mappings[1]).getBoundingClientRect().top, blockTop);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S4
 test("a pending layout-induced scroll does not replace the reading anchor", () => {
   const harness = createRuntimeHarness();
   harness.stickyHeadings.height = 65;
@@ -712,7 +718,7 @@ test("a pending layout-induced scroll does not replace the reading anchor", () =
   assert.equal(harness.mappings[1].getBoundingClientRect().top, before);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S8
 test("a viewport resize fired before the scroll it accompanies does not pull the page back", () => {
   // The same scroll and layout pass, handled in the usual order (scroll first) and in the order
   // of webviews that report a visual viewport resize, with no size change, ahead of each scroll.
@@ -733,8 +739,10 @@ test("a viewport resize fired before the scroll it accompanies does not pull the
   assert.equal(scrollThenLayout(true), expected);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S9
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S7
 test("executes source and preview synchronization across layout changes", () => {
   const harness = createRuntimeHarness({ scrollEditorWithPreview: false });
   harness.stickyHeadings.rectProvider = () => ({
@@ -840,7 +848,8 @@ test("executes source and preview synchronization across layout changes", () => 
   assert.equal(harness.messages.length, messageCount);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S4
 test("marks editor selection without moving the preview when following is disabled", () => {
   const sourceOnlyHarness = createRuntimeHarness({
     scrollPreviewWithEditor: false,
@@ -860,7 +869,8 @@ test("marks editor selection without moving the preview when following is disabl
 
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S4
 test("marks the block that contains the cursor line, not the one that starts nearest", () => {
   const harness = createRuntimeHarness({
     scrollPreviewWithEditor: false,
@@ -880,7 +890,7 @@ test("marks the block that contains the cursor line, not the one that starts nea
   assert.equal(harness.mappings[2].getAttribute("data-sphinx-preview-current"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S4
 test("a selection line between two blocks marks the block with the nearest edge", () => {
   const mark = (selectionLine: number) => {
     const harness = createRuntimeHarness({
@@ -899,7 +909,7 @@ test("a selection line between two blocks marks the block with the nearest edge"
   assert.deepEqual(mark(97), [null, null, "true"], "line 100 is nearer than the end of block 50-90");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S4
 test("a selection line inside two nested blocks marks the innermost one", () => {
   const harness = createRuntimeHarness({
     scrollPreviewWithEditor: false,
@@ -915,7 +925,8 @@ test("a selection line inside two nested blocks marks the innermost one", () => 
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-current"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S9
 test("a history move scrolls the preview even when following the editor is disabled", () => {
   const send = (extra: Record<string, unknown>) => {
     const harness = createRuntimeHarness({ scrollPreviewWithEditor: false });
@@ -960,7 +971,7 @@ test("source scrolling rejects stale identities and invalid line numbers", async
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117#S4
 test("scrolls to host-approved anchors and ignores invalid or stale requests", () => {
   const harness = createRuntimeHarness();
 
@@ -1022,7 +1033,8 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
   assert.equal(harness.windowState.scrollY, 935);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117#S4
 test("an escape left after four decoding rounds is refused, whatever its digits", () => {
   const harness = createRuntimeHarness();
   // Five rounds of encoding: after four rounds the text is still the escape %41 (an element has that id).
@@ -1095,7 +1107,7 @@ test("markWideTables sets the overflow attribute only past a one pixel tolerance
   assert.equal(table.getAttribute("data-sphinx-table-overflow"), null, "the cue goes away when the table fits");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S1
 test("a final block save carries the edited element's pin; an autosave does not", () => {
   const harness = createRuntimeHarness();
   harness.windowState.scrollY = 200;

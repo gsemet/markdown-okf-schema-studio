@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { installFigureEditButton } from "../../src/page/modules/figurePanel";
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
 test("the Edit figure button of a figure under the sticky controls is placed below them", () => {
   const created: Array<{ style: Map<string, string> }> = [];
   const document = {
@@ -42,7 +42,7 @@ test("the Edit figure button of a figure under the sticky controls is placed bel
   assert.equal(created[0].style.get("top"), "86px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S6
 test("a scroll after the hover keeps the Edit figure button on the hovered figure", () => {
   const hidden = new Set<string>(["hidden"]);
   const style = new Map<string, string>();
@@ -74,7 +74,8 @@ test("a scroll after the hover keeps the Edit figure button on the hovered figur
   assert.equal(style.get("top"), "146px", "and follows the figure");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S3
 test("the Edit figure button of a figure shorter than the preview controls sits left of them (CR 161)", () => {
   const style = new Map<string, string>();
   const document = {

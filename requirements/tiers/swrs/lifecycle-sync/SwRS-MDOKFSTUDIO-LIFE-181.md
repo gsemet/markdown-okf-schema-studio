@@ -21,6 +21,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: Nominal case
+- id: S2
+  title: Boundary cases
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,13 +45,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a session (the side preview that follows the editor, or a Studio tab) holds a requested line, the session SHALL post the previewRevealLine message to its page once the page is ready and only once, SHALL post it at once when the page is already ready, and the requested line SHALL win over the reading place the page restored for its document. The requested line SHALL belong to a document and an age, and the session SHALL post it only to a visible page that shows that document, and only within 5 seconds, and the line SHALL take the anchor except in the if-off-screen mode, where the editor leads.
 
-### Scenario (nominal): Nominal case
+### Scenario S1 (nominal): Nominal case
 
 - GIVEN a side preview that follows the editor or a Studio tab, asked to mark line 42 of its document while its page is not ready
 - WHEN the page reports ready
 - THEN previewRevealLine with line 42 is posted once and becomes the anchor of the next render, so the line wins over the restored reading place
 
-### Scenario (boundary): Boundary cases
+### Scenario S2 (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |

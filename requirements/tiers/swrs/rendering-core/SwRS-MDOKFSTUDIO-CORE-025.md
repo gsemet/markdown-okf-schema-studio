@@ -17,6 +17,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Diagnostics listed
+- id: S2
+  title: No diagnostics
+- id: S3
+  title: Failure after a good render
+- id: S4
+  title: Failure of the first render
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,22 +49,22 @@ supersedes:
 
 When a render fails with an exception or yields diagnostics, the extension SHALL list each diagnostic in the status region as a file, a line and a message with a severity, and on a failure keep the failure message and mark the previous page as stale, or show an error page when no previous page exists.
 
-### Scenario (nominal): Diagnostics listed
+### Scenario S1 (nominal): Diagnostics listed
 - GIVEN a render with one warning on line 3
 - WHEN it is displayed
 - THEN the status region shows the file, line 3 and the message with the warning severity
 
-### Scenario (boundary): No diagnostics
+### Scenario S2 (boundary): No diagnostics
 - GIVEN a render without diagnostics
 - WHEN it is displayed
 - THEN the diagnostic list is empty
 
-### Scenario (nominal): Failure after a good render
+### Scenario S3 (nominal): Failure after a good render
 - GIVEN a page rendered earlier and a later render that throws
 - WHEN the failure occurs
 - THEN the old page stays, marked stale ("Preview is stale"), and the failure message is kept ("The latest render failed." when the failure carries no message)
 
-### Scenario (refusal): Failure of the first render
+### Scenario S4 (refusal): Failure of the first render
 - GIVEN a first render that throws
 - WHEN the failure occurs
 - THEN an error page ("Preview unavailable") shows the message ("The render failed." when the failure carries no message)

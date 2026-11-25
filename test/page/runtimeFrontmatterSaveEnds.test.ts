@@ -10,7 +10,7 @@ import { frontmatterSaves, patchMessage } from "./runtimeTestSupport";
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-270
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-270#S1
 test("an unchanged frontmatter save closes the field instead of waiting for a render", () => {
   const harness = createRuntimeHarness({
     mapFrontmatter: true,
@@ -133,7 +133,8 @@ const SAVES: Array<{ name: string; start: () => Saving }> = [
 
 for (const save of SAVES) {
   // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S8
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-270
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-270#S2
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-270#S3
   test(`${save.name}: the control is disabled and Escape is ignored while the save is in flight`, () => {
     const { harness, control, cell } = save.start();
     assert.equal(control.disabled, true, "the control is disabled");
@@ -143,7 +144,7 @@ for (const save of SAVES) {
 
   // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S5
   // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-270
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-270#S2
   test(`${save.name}: an error answer gives the control back and Escape closes the field`, () => {
     const { harness, editId, control, cell } = save.start();
     harness.dispatchMessage({ type: "previewFrontmatterResult", ...IDENTITY, editId, error: "Not saved." });
@@ -154,7 +155,7 @@ for (const save of SAVES) {
   });
 
   // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-270
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-270#S1
   test(`${save.name}: saved, then the content patch closes the field`, () => {
     const { harness, editId, cell } = save.start();
     harness.dispatchMessage({ type: "previewFrontmatterResult", ...IDENTITY, editId, saved: true });

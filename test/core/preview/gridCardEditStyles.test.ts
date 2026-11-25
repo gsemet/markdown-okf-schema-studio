@@ -11,7 +11,8 @@ function rule(selector: string): string {
   return PREVIEW_THEME_CSS.slice(start, PREVIEW_THEME_CSS.indexOf("}", start));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S2
 test("a grid row with an open block editor lets its tracks grow to the minimum width of the card being edited", () => {
   assert.match(rule(`${ROOT} .myst-grid-row:has(.myst-grid-item .sphinx-preview-block-editor)`), /--myst-grid-track-min: auto;/u);
   assert.match(rule(`${ROOT} .myst-grid-item:has(.sphinx-preview-block-editor)`), /min-width: 24em;/u);
@@ -19,12 +20,14 @@ test("a grid row with an open block editor lets its tracks grow to the minimum w
   assert.match(PREVIEW_THEME_CSS, /\.myst-grid-row\.myst-grid-md-3 \{\s*grid-template-columns: repeat\(3, minmax\(var\(--myst-grid-track-min, 0px\), 1fr\)\);/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S2
 test("the card being edited is not clipped, so the palette may leave it", () => {
   assert.match(rule(`${ROOT} .myst-grid-card:has(.sphinx-preview-block-editor-host)`), /overflow: visible;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S2
 test("in a card the palette stays in the flow above the text box with a maximum height and a vertical scroll", () => {
   const bar = rule(`${ROOT} .myst-grid-card .sphinx-preview-block-editor-host > .sphinx-preview-edit-palette`);
   assert.match(bar, /position: relative;/u);
@@ -36,7 +39,8 @@ test("in a card the palette stays in the flow above the text box with a maximum 
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S3
 test("the text box of a block editor in a card keeps a readable minimum width", () => {
   assert.match(rule(`${ROOT} .myst-grid-card .sphinx-preview-block-editor`), /min-width: min\(100%, 18em\);/u);
 });

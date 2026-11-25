@@ -8,13 +8,14 @@ const weighted = (weight: string) => htmlToMarkdown(`<p>a <span style="font-weig
 const linked = (url: string) => htmlToMarkdown(`<p><a href="${url}">t</a></p>`);
 const pictured = (url: string) => htmlToMarkdown(`<p><img src="${url}" alt="i"></p>`);
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217#S9
 test("a span is bold from a numeric weight of 600 up, or the words bold and bolder, and no other weight", () => {
   for (const weight of ["600", "601", "900", "bold", "bolder"]) assert.equal(weighted(weight), "a **x** b", weight);
   for (const weight of ["599", "400", "lighter", "normal", "abc"]) assert.equal(weighted(weight), "a x b", weight);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217#S5
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217#S6
 test("a block is code only when it is both white-space preserving and set in a monospace font", () => {
   assert.equal(htmlToMarkdown('<div style="white-space:pre;font-family:monospace">a\nb</div>'), "a\nb");
   assert.equal(htmlToMarkdown('<p>x</p><div style="white-space:pre;font-family:menlo">a\nb</div>'), "x\n\na\nb");
@@ -22,7 +23,7 @@ test("a block is code only when it is both white-space preserving and set in a m
   assert.equal(htmlToMarkdown('<div style="font-family:monospace">a b</div>'), "a b", "no preserved white space");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-229
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-229#S1
 test("a link or image target is trimmed, and an empty, blank or control-character one is dropped", () => {
   assert.equal(linked(" https://a.b/x "), "[t](https://a.b/x)");
   assert.equal(pictured(" https://a.b/x "), "[i](https://a.b/x)");
@@ -33,7 +34,8 @@ test("a link or image target is trimmed, and an empty, blank or control-characte
   assert.equal(linked("a.md"), "[t](a.md)");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217#S8
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217#S9
 test("a target with a space or an angle bracket is wrapped in angle brackets and escaped, otherwise its parentheses are", () => {
   assert.equal(linked("https://a.b/c d"), "[t](<https://a.b/c%20d>)");
   assert.equal(linked("https://a.b/<x>"), "[t](<https://a.b/%3Cx%3E>)");

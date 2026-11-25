@@ -25,7 +25,8 @@ function convert(source: string, target: "list-table" | "pipe") {
   return result;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S19
 test("a pipe table becomes a list-table with one header row", () => {
   assert.deepEqual(convert(PIPE, "list-table"), { ok: true, text: LIST });
 });
@@ -91,7 +92,8 @@ test("a list-table cell with a pipe is escaped in the pipe table", () => {
   assert.deepEqual(convert(source, "pipe"), { ok: true, text: "| h |\n| --- |\n| a\\|b |" });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S12
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S13
 test("a list-table that would lose content is refused with a reason and nothing is produced", () => {
   const cases: [string, RegExp][] = [
     ["```{list-table}\n:header-rows: 1\n\n* - a\n    more\n  - b\n```", /several lines|block/iu],
@@ -173,7 +175,7 @@ test("an HTML table with spans, markup or no body cells in a row is refused", ()
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S23
 test("a table in another style comes back from the round trip as the canonical table", () => {
   const styled = [
     ["| Name  | Qty |\n| ----- | --- |\n| apple | 3   |", "| Name | Qty |\n| --- | --- |\n| apple | 3 |"],
@@ -189,7 +191,8 @@ test("a table in another style comes back from the round trip as the canonical t
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S9
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S11
 test("a closing pipe after an odd number of backslashes belongs to the last cell", () => {
   const head = "| A | B |\n| --- | --- |\n";
   const odd = tools.parse(head + "| a | b\\|")!;

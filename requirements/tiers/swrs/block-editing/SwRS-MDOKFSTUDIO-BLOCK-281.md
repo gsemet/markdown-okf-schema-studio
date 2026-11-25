@@ -16,6 +16,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: setting off
+- id: S2
+  title: both edges inside one code block
+- id: S3
+  title: boundary crossed at the start
+- id: S4
+  title: boundary crossed at the end
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,25 +42,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the balance-edges setting is on, the raw copy SHALL copy only the code text, with the indentation and prefixes of its containers removed, when both edges lie inside one code block, and SHALL add the code fence's opening line or closing line when the selection starts or ends inside the code block and leaves it.
 
-### Scenario: setting off
+### Scenario S1: setting off
 
 - GIVEN the setting is off and a fenced code block
 - WHEN the selection starts inside the code and ends after the block
 - THEN the copy is the source verbatim
 
-### Scenario: both edges inside one code block
+### Scenario S2: both edges inside one code block
 
 - GIVEN the setting is on and the code block lies in a list item
 - WHEN the reader copies from one code line to another
 - THEN the clipboard holds the code text with the container indentation removed
 
-### Scenario: boundary crossed at the start
+### Scenario S3: boundary crossed at the start
 
 - GIVEN the setting is on
 - WHEN the selection starts inside the code block and ends after it
 - THEN the opening fence line is added
 
-### Scenario: boundary crossed at the end
+### Scenario S4: boundary crossed at the end
 
 - GIVEN the setting is on
 - WHEN the selection starts before the code block and ends inside it

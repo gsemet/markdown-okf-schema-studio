@@ -6,12 +6,13 @@ const TWO = [
   "Intro text.", "", ":::{note}", "First one.", "", "Second line.", ":::", "", ":::{warning}", "Other one.", ":::", "", "After text.", "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S2
 test("both edges in one admonition body: inside only, no fence line", async () => {
   await assertCopy(TWO, at("First one.", 6), at("Second line.", "end"), "one.\n\nSecond line.", "one.\n\nSecond line.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S4
 test("a start in admonition A and an end after it gets A's opening line", async () => {
   await assertCopy(
     TWO,
@@ -22,7 +23,8 @@ test("a start in admonition A and an end after it gets A's opening line", async 
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S4
 test("a start before admonition A and an end in it gets A's closing line", async () => {
   await assertCopy(
     TWO,
@@ -33,7 +35,8 @@ test("a start before admonition A and an end in it gets A's closing line", async
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S4
 test("a start in A and an end in the next admonition B gets A's opening and B's closing", async () => {
   await assertCopy(
     TWO,
@@ -44,14 +47,14 @@ test("a start in A and an end in the next admonition B gets A's opening and B's 
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S3
 test("a blockquote copied inside only loses its prefix, crossed at the start it keeps it on the first line", async () => {
   const source = "> quoted one\n> quoted two\n\nafter\n";
   await assertCopy(source, at("quoted one", 7), at("quoted two", 9), "one\n> quoted tw", "one\nquoted tw");
   await assertCopy(source, at("quoted two", 7), at("after", 3), "two\n\naft", "> two\n\naft");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S3
 test("an alert copied inside only loses its prefix, crossed at the start it gets its type line", async () => {
   const source = "> [!NOTE]\n> alert one\n> alert two\n\nafter\n";
   await assertCopy(source, at("alert one", 6), at("alert two", 8), "one\n> alert tw", "one\nalert tw");
@@ -62,7 +65,7 @@ const NESTED = [
   "Before.", "", "::::{note}", "Outer start.", "", ":::{warning}", "Inner text.", ":::", "", "Outer end.", "::::", "", "After.", "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S2
 test("an admonition in an admonition: inner only, inner opening, both openings, both closings", async () => {
   await assertCopy(NESTED, at("Inner text.", 2), at("Inner text.", 7), "ner t", "ner t");
   await assertCopy(
@@ -88,15 +91,18 @@ test("an admonition in an admonition: inner only, inner opening, both openings, 
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S4
 test("an unclosed colon fence with the end inside it adds nothing", async () => {
   const source = ":::{note}\nOpen one.\n\nOpen two.\n";
   await assertCopy(source, at("Open one.", 2), at("Open two.", 4), "en one.\n\nOpen", "en one.\n\nOpen");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-279
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-284
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-279#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-284#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-284#S4
 test("the base seam cases with the setting on", async () => {
   await assertCopy("Hello **world** again\n", at("world", 1), at(" again", "end"), "orld** again", "**orld** again");
   await assertCopy("## Hello\n", at("Hello", 2), at("Hello", "end"), "llo", "## llo");
@@ -111,7 +117,7 @@ test("the base seam cases with the setting on", async () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S4
 test("an edge in an admonition's title: the end case gets the closing line", async () => {
   const source = ":::{note} Heads up\nInside the note.\n:::\n";
   await assertCopy(source, at("Heads up", 2), at("Inside the note.", "end"), ":::{note} Heads up\nInside the note.", ":::{note} Heads up\nInside the note.\n:::");

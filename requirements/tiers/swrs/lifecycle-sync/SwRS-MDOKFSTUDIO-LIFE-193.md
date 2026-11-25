@@ -19,6 +19,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: A line in the second tab
+- id: S2
+  title: Nested, folded and later cases
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,13 +42,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the line marker is requested on a line inside a tab item that is not shown, the page SHALL select that tab and every hidden tab around the line, outermost first, the way a click does (the sets of the sync group follow, the focus does not move), unfold a folded section or a closed dropdown around the tab set first, and mark the exact paragraph or code line inside the shown tab, and SHALL select no tab for the tab-set line, nor for a later placement of the marker.
 
-### Scenario (nominal): A line in the second tab
+### Scenario S1 (nominal): A line in the second tab
 
 - GIVEN a tab set whose second tab is not shown and holds a soft-wrapped paragraph
 - WHEN the page receives previewRevealLine for the third wrapped line of that paragraph
 - THEN the second tab is shown (aria-selected true, its panel not hidden) and one arrow and band are drawn on that wrapped line
 
-### Scenario (boundary): Nested, folded and later cases
+### Scenario S2 (boundary): Nested, folded and later cases
 
 | Input | Outcome |
 | --- | --- |

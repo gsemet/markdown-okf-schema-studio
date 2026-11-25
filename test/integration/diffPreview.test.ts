@@ -7,9 +7,12 @@ import { COMMAND_ID, getActivePreviewForTests } from "./extensionApi";
 import { focusOriginalSide, LONG, openDiff, previewOf, SCHEME, textTabs, virtualOf, withLayout } from "./diffHelpers";
 import { closeAllEditors, createFixture, waitFor } from "./realInput/harness";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-026
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S10
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S9
 /**
  * CR 455 in the real window: the side preview next to a text diff (a diff whose sides are not both
  * the file: a virtual side shares its path). The real file of the diff is previewed, the command

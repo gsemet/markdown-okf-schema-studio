@@ -20,6 +20,13 @@ derives_from:
 relates_to:
 - SwRS-MDOKFSTUDIO-REVIEW-195
 - SwRS-MDOKFSTUDIO-REVIEW-207
+scenarios:
+- id: S1
+  title: A changed or added field
+- id: S2
+  title: A removed field
+- id: S3
+  title: Rows that are not marked
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,7 +49,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the page receives line ranges that meet the lines of a front matter field, the extension SHALL mark the properties table row of that field with data-sphinx-preview-changed and draw one change bar for that row, like the bar of a changed body block, and when a field present at HEAD is missing from the shown text and no row is marked, it SHALL mark the whole properties table.
 
-### Scenario (nominal): A changed or added field
+### Scenario S1 (nominal): A changed or added field
 
 | Input | Outcome |
 | --- | --- |
@@ -52,7 +59,7 @@ When the page receives line ranges that meet the lines of a front matter field, 
 | A field whose lines are unchanged | its row is not marked |
 | Both a front matter field and a body block changed | one bar per marked row and one per marked block |
 
-### Scenario (boundary): A removed field
+### Scenario S2 (boundary): A removed field
 
 | Input | Outcome |
 | --- | --- |
@@ -60,7 +67,7 @@ When the page receives line ranges that meet the lines of a front matter field, 
 | A removed field together with a changed or added field | the rows of the changed or added fields are marked and the table, which contains them, is not |
 | A body that lost lines but no front matter field | no range is added and the table is not marked |
 
-### Scenario (boundary): Rows that are not marked
+### Scenario S3 (boundary): Rows that are not marked
 
 | Input | Outcome |
 | --- | --- |

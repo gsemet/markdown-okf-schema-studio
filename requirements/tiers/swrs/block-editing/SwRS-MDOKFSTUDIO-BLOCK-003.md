@@ -19,6 +19,11 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
 - StRS-MDOKFSTUDIO-TABLE-006
 depends_on: []
+scenarios:
+- id: S1
+  title: The key bindings run the editing commands on the text box
+- id: S2
+  title: Where the commands apply
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -49,7 +54,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses the VS Code key binding of undo, redo, select all or delete line in an open block or table-cell text box of the focused preview, the page SHALL apply that command to the text box through a command the extension contributes, so the key binding the writer set in VS Code applies.
 
-### Scenario (nominal): The key bindings run the editing commands on the text box
+### Scenario S1 (nominal): The key bindings run the editing commands on the text box
 | Input | Outcome |
 | --- | --- |
 | A block or table-cell editor open in the focused preview, the writer presses Cmd+Z (Ctrl+Z off macOS) | The page cancels the native action, the key reaches VS Code, its binding runs `markdown-okf-schema-studio.editUndo` and the last change of the text box is undone once; the editor stays open and the autosave follows the text |
@@ -58,7 +63,7 @@ When a writer presses the VS Code key binding of undo, redo, select all or delet
 | The same, Cmd+Shift+K (Ctrl+Shift+K off macOS) | `editDeleteLine` removes every line the selection touches with one line break, as one undoable step, keeps the column on the next line (the previous line when the last line goes) and autosaves |
 | The writer rebinds or unbinds one of the four commands in VS Code | The new key runs the command; the page does not run it from its own default key |
 
-### Scenario (boundary): Where the commands apply
+### Scenario S2 (boundary): Where the commands apply
 | Input | Outcome |
 | --- | --- |
 | No editor open in the preview, or the preview does not have the focus | The context `markdownOkfSchemaStudio.previewEditing` is off, the bindings do not apply and VS Code handles the key as before |

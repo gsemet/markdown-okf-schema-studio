@@ -20,6 +20,9 @@ verified:
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Edit a block in place
 user_need: As a writer, I click a paragraph, heading, list, admonition, code
   block or image in the preview and edit its Markdown right there, see exactly
   which lines of the file I am editing, how to finish and how to abandon, and
@@ -100,7 +103,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Edit a block in place
+#### Path S1: Edit a block in place
 
 1. Edit mode is on
    - SwRS-MDOKFSTUDIO-BLOCK-014: the writer clicks a rendered block and its editor opens with the lines of the block

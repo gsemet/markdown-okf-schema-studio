@@ -17,7 +17,7 @@ const indents = (line: string, eol: string, runLine = 3): { item: string; conten
 };
 
 for (const [name, eol] of EOLS) {
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: a bullet and an ordered marker give the item indent and the content column`, () => {
     assert.deepEqual(indents("- a", eol), { item: "", content: "  " });
     assert.deepEqual(indents("  * a", eol), { item: "  ", content: "    " });
@@ -26,25 +26,26 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(indents("  10. a", eol), { item: "  ", content: "      " });
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: a tab after the marker runs to the next tab stop of 4`, () => {
     assert.deepEqual(indents("-\ta", eol), { item: "", content: "    " });
     assert.deepEqual(indents("1.\ta", eol), { item: "", content: "    " });
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: a second marker on the line opens an item inside the first`, () => {
     assert.deepEqual(indents("- - a", eol), { item: "  ", content: "    " });
     assert.deepEqual(indents("1. - a", eol), { item: "   ", content: "     " });
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: the leading spaces and tabs of the item line are kept as they are`, () => {
     assert.deepEqual(indents("\t- a", eol), { item: "\t", content: "\t  " });
     assert.deepEqual(indents(" \t- - a", eol), { item: " \t  ", content: " \t    " });
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: five spaces or more after the marker, or none, put the content column after one space`, () => {
     assert.deepEqual(indents("-     code", eol), { item: "", content: "  " });
     assert.deepEqual(indents("-      code", eol), { item: "", content: "  " });
@@ -52,7 +53,7 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(indents("1.", eol), { item: "", content: "   " });
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: a paragraph, a thematic break, a marker without a space and a line at or after the run give nothing`, () => {
     assert.equal(indents("a paragraph", eol), undefined);
     assert.equal(indents("- - -", eol), undefined);
@@ -64,7 +65,7 @@ for (const [name, eol] of EOLS) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
 test("a line of the frontmatter, a missing line and a line that is not an integer give nothing", () => {
   const text = "---\n- a\n---\n\n- b\n\n\nc\n";
   assert.equal(listItemIndent(text, 2, 6), undefined, "a list line in the frontmatter");

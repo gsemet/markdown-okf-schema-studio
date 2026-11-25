@@ -110,7 +110,8 @@ const ADMONITION: Shape = {
   tag: "aside", line: 10, end: 30, className: "admonition note", children: [{ tag: "p", className: "admonition-title" }, p(12), p(28)],
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a quote run shows inside the quote between its paragraphs, and at its start and end", () => {
   const { harness, elements } = build("12-12 16-16 30-30", QUOTE);
   const blocks = blankBlocks(harness);
@@ -123,7 +124,8 @@ test("a quote run shows inside the quote between its paragraphs, and at its star
   assert.deepEqual(opened(harness, 0), { line: 12, endLine: 12 }, "no container line for a quote");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
 test("a quote run that starts on the first line of the quote shows before its first child", () => {
   const start: Shape = { tag: "blockquote", line: 10, end: 20, children: [p(13)] };
   const { harness, elements } = build("11-11", start);
@@ -132,7 +134,7 @@ test("a quote run that starts on the first line of the quote shows before its fi
   assert.deepEqual(elements[0]!.childElements[0]!.insertedElements, [blank], "right before the first child");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("an alert run shows after the title and before the first block, with no container line", () => {
   const first: Shape = { ...ALERT, children: [{ tag: "p", className: "admonition-title" }, p(14)] };
   const { harness, elements } = build("12-12", first);
@@ -144,8 +146,10 @@ test("an alert run shows after the title and before the first block, with no con
   assert.deepEqual(opened(harness), { line: 12, endLine: 12 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a run in an admonition, a context-tag panel and a quote directive carries the container line", () => {
   const admonition = build("14-14", ADMONITION);
   assert.equal(blankBlocks(admonition.harness)[0]!.parentElement, admonition.elements[0]);
@@ -162,7 +166,7 @@ test("a run in an admonition, a context-tag panel and a quote directive carries 
   assert.deepEqual(opened(directive.harness), { line: 13, endLine: 13, containerLine: 10 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a run in a figure, a card body and a grid item shows inside it; a grid alone shows none", () => {
   const figure = build("13-13", { tag: "figure", line: 10, end: 20, children: [{ tag: "figcaption", children: [p(11)] }, p(16)] });
   assert.equal(blankBlocks(figure.harness)[0]!.parentElement, figure.elements[0]);
@@ -197,8 +201,8 @@ const DEFINITIONS: Shape = {
   ],
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a run in a loose definition shows in its dd; a run between two entries ends the dd above", () => {
   const { harness, elements } = build("13-13 18-18", DEFINITIONS);
   const [first, second] = blankBlocks(harness);
@@ -218,8 +222,8 @@ const footnote = (label: number, ...children: Shape[]): Shape => ({
   tag: "li", attrs: { "data-okf-footnote-line": String(label) }, children,
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a footnote run shows in the footnote: in its body, after a label alone, and between two footnotes", () => {
   const section = FOOTNOTES([footnote(60, p(60), p(64)), footnote(70, p(73)), footnote(80, p(80))]);
   const { harness, elements } = build("62-62 67-67 72-72", section);
@@ -236,7 +240,7 @@ test("a footnote run shows in the footnote: in its body, after a label alone, an
   assert.deepEqual(opened(build("72-72", section).harness), { line: 72, endLine: 72, containerLine: 70 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("a run between a footnote and the body after it shows in the body, after the block above it", () => {
   const section = FOOTNOTES([footnote(20, p(20), p(24))]);
   const { harness } = build("27-27", p(15), section, p(30));
@@ -246,14 +250,16 @@ test("a run between a footnote and the body after it shows in the body, after th
   assert.deepEqual(opened(harness), { line: 27, endLine: 27 }, "no container line");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S6
 test("a run in the body of a footnote written inside a quote shows nothing", () => {
   const quote: Shape = { tag: "blockquote", line: 10, end: 20, children: [p(10)] };
   const section = FOOTNOTES([footnote(12, p(12), p(16))]);
   assert.equal(blankBlocks(build("14-14", quote, section).harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S6
 test("a fence in a quote, a table, a tab panel and a table in an admonition show nothing", () => {
   const fence: Shape = { tag: "blockquote", line: 10, end: 30, children: [p(10), { tag: "pre", line: 12, end: 28 }] };
   assert.equal(blankBlocks(build("21-21", fence).harness).length, 0, "a fence in a quote");
@@ -265,7 +271,8 @@ test("a fence in a quote, a table, a tab panel and a table in an admonition show
   assert.equal(blankBlocks(build("21-21", table).harness).length, 0, "a table in an admonition");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a list in an admonition shows the run in its item, with the item line", () => {
   const list: Shape = {
     ...ADMONITION, children: [
@@ -278,13 +285,14 @@ test("a list in an admonition shows the run in its item, with the item line", ()
   assert.deepEqual(opened(harness), { line: 21, endLine: 21, itemLine: 12 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
 test("a quote run and a plain run next to each other both show", () => {
   const { harness } = build("12-12 14-14", QUOTE);
   assert.equal(blankBlocks(harness).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S6
 test("a run inside a folded quote shows nothing, and unfolding shows it", () => {
   const { harness, elements } = build("12-12", QUOTE);
   assert.equal(blankBlocks(harness).length, 1);
@@ -300,7 +308,8 @@ test("a run inside a folded quote shows nothing, and unfolding shows it", () => 
 
 const DROPDOWN: Shape = { ...ADMONITION, tag: "details", className: "admonition note dropdown" };
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S3
 test("a run in a closed dropdown shows when it opens and goes when it closes", () => {
   const { harness, elements } = build("14-14", DROPDOWN);
   assert.equal(blankBlocks(harness).length, 0, "closed");
@@ -313,7 +322,7 @@ test("a run in a closed dropdown shows when it opens and goes when it closes", (
   assert.equal(blankBlocks(harness).length, 0, "closed again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("an insertion editor opened in a dropdown stays when the dropdown closes", () => {
   const { harness, elements } = build("14-14", { ...DROPDOWN, attrs: { open: "" } });
   const blank = blankBlocks(harness)[0]!;
@@ -329,7 +338,7 @@ test("an insertion editor opened in a dropdown stays when the dropdown closes", 
   assert.deepEqual(blankBlocks(harness), [blank], "the block of the open editor stays");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
 test("a content patch keeps the element of an unchanged quote run", () => {
   const { harness } = build("12-12 16-16", QUOTE);
   const before = blankBlocks(harness);
@@ -337,7 +346,8 @@ test("a content patch keeps the element of an unchanged quote run", () => {
   assert.deepEqual(blankBlocks(harness), before);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("an editor opened from a quote run survives a patch that replaces the quote, and Cancel keeps the run", () => {
   const { harness, elements } = build("12-12 16-16", QUOTE);
   const blank = blankBlocks(harness)[0]!;
@@ -367,7 +377,8 @@ test("an editor opened from a quote run survives a patch that replaces the quote
   assert.deepEqual({ ...(cancel!.replaceBlankRun as object) }, { line: 12, endLine: 12 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S2
 test("a click on a blank-line block in an admonition, a panel and an alert opens its own editor", () => {
   for (const shape of [ADMONITION, { ...ADMONITION, className: "admonition myst-context-admonition" }, ALERT]) {
     const { harness } = build("14-14", shape);
@@ -381,7 +392,7 @@ test("a click on a blank-line block in an admonition, a panel and an alert opens
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
 test("Ctrl+V on a selected blank-line block in a container sends its container line", () => {
   const { harness } = build("14-14", ADMONITION);
   const blank = selectBlank(harness, 0);
@@ -391,7 +402,8 @@ test("Ctrl+V on a selected blank-line block in a container sends its container l
   assert.deepEqual({ ...(paste!.replaceBlankRun as object) }, { line: 14, endLine: 14, containerLine: 10 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S3
 test("Down from a selected quote stops on each blank-line block inside it, then on the next block; Up walks back", () => {
   const { harness, elements } = build("16-16 21-21", QUOTE);
   const walk = (name: string, target: RuntimeElement): void => {
@@ -410,7 +422,7 @@ test("Down from a selected quote stops on each blank-line block inside it, then 
   assert.equal(blankBlocks(harness)[1]!.getAttribute(SELECTED), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S3
 test("a run on the first line of a quote comes after the quote: Down stops on it, Up selects the quote", () => {
   const { harness, elements } = build("11-11", { tag: "blockquote", line: 10, end: 20, children: [p(13)] });
   shiftClick(harness, harness.mappings[0]!);
@@ -438,7 +450,8 @@ function deleteFirst(harness: RuntimeHarness, after: string): void {
 const noneSelected = (harness: RuntimeHarness): boolean =>
   selectedLines(harness).length === 0 && blankBlocks(harness).every((block) => block.getAttribute(SELECTED) === null);
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S3
 test("Delete on the only blank line in a quote, an admonition and a definition list selects nothing", () => {
   for (const [shape, runs] of [[QUOTE, "16-16"], [ADMONITION, "14-14"], [DEFINITIONS, "13-13"]] as const) {
     const { harness } = build(runs, shape);
@@ -453,14 +466,16 @@ test("Delete on the only blank line in a quote, an admonition and a definition l
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("Delete on a blank line of a quote keeps the selection on the block of the same line number in its run", () => {
   const { harness } = build("12-13", QUOTE);
   deleteFirst(harness, "12-12");
   assert.equal(blankBlocks(harness)[0]!.getAttribute(SELECTED), "true", "the next line took the number of the deleted one");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("Delete on a footnote blank line selects nothing when its run has no line left", () => {
   const { harness } = build("62-62", FOOTNOTES([footnote(60, p(60), p(64))]));
   deleteFirst(harness, "");

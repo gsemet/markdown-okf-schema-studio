@@ -73,7 +73,7 @@ for (const [label, line, endLine] of [
   ["a list item with a nested item", 4, 5],
   ["a list's last item", 3, 6],
 ] as const) {
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
   test(`a final save of ${label} of a CR LF file, with no change but LF, is answered and writes nothing`, async (t) => {
     const host = await open(t, CRLF);
     t.after(() => closeHost(t.mock.timers));
@@ -86,7 +86,7 @@ for (const [label, line, endLine] of [
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
 test("a final save equal to the source is answered, on an LF file too", async (t) => {
   const host = await open(t, "# Title\n\nPara one\nPara two\n");
   t.after(() => closeHost(t.mock.timers));
@@ -95,7 +95,7 @@ test("a final save equal to the source is answered, on an LF file too", async (t
   assertOnlyDone(host, from);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S4
 test("a final save with a real change in a CR LF file keeps every other byte and the CR LF", async (t) => {
   const host = await open(t, CRLF);
   t.after(() => closeHost(t.mock.timers));
@@ -105,7 +105,7 @@ test("a final save with a real change in a CR LF file keeps every other byte and
   assert.deepEqual([done.length, patches, errors], [0, 1, 0], "the patch is the answer: one patch, no done, no error");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S4
 test("a final save with no change in a mixed-ending file leaves every byte, with an answer", async (t) => {
   const host = await open(t, MIXED);
   t.after(() => closeHost(t.mock.timers));
@@ -114,7 +114,7 @@ test("a final save with no change in a mixed-ending file leaves every byte, with
   assertOnlyDone(host, from);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S4
 test("a final save with a real change in a mixed-ending file keeps the endings of the other lines", async (t) => {
   const host = await open(t, MIXED);
   t.after(() => closeHost(t.mock.timers));
@@ -145,7 +145,7 @@ async function autosaveThenFinal(
   return from;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
 test("an autosave then a final save that writes nothing more is answered by done, the change being rendered already", async (t) => {
   const host = await open(t, CRLF);
   t.after(() => closeHost(t.mock.timers));
@@ -156,7 +156,7 @@ test("an autosave then a final save that writes nothing more is answered by done
   assert.equal(done.length + patches, 1, "one answer, the patch that shows the change or the done");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
 test("an autosave then a final save with the source file gone is answered by done only", async (t) => {
   const host = await open(t, CRLF);
   t.after(() => closeHost(t.mock.timers));
@@ -164,7 +164,7 @@ test("an autosave then a final save with the source file gone is answered by don
   assertOnlyDone(host, from);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
 test("a final save with nothing to write and the source file gone is answered by done only", async (t) => {
   const host = await open(t, CRLF);
   t.after(() => closeHost(t.mock.timers));

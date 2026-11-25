@@ -92,7 +92,8 @@ test("each rule matches the identity it names, and only that", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S6
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S2
 test("the payload checks refuse what the page used to refuse", () => {
   const refused: Array<[HostToPageType, Record<string, unknown>]> = [
     ["previewPropertiesTable", { markup: 42 }],
@@ -126,7 +127,7 @@ test("the payload checks refuse what the page used to refuse", () => {
   }, page), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181#S1
 test("previewRevealLine needs a 1-based safe integer line and addresses its render", () => {
   const send = (extra: Record<string, unknown>): boolean =>
     filter.accepts({ type: "previewRevealLine", ...page, ...extra }, page);
@@ -138,7 +139,8 @@ test("previewRevealLine needs a 1-based safe integer line and addresses its rend
   assert.equal(filter.accepts({ type: "previewRevealLine", ...page, requestId: 99, line: 3 }, page), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S2
 test("previewRevealLine accepts the two scroll modes or none and refuses any other value", () => {
   const send = (extra: Record<string, unknown>): boolean =>
     filter.accepts({ type: "previewRevealLine", ...page, line: 4, ...extra }, page);
@@ -150,7 +152,7 @@ test("previewRevealLine accepts the two scroll modes or none and refuses any oth
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189#S1
 test("previewLineMarkerClear is accepted with the render envelope only", () => {
   assert.equal(filter.accepts({ type: "previewLineMarkerClear", ...page }, page), true);
   assert.equal(filter.accepts({ type: "previewLineMarkerClear", ...page, requestId: 99 }, page), false);
@@ -165,7 +167,7 @@ test("values that are not host messages are refused", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S3
 test("CR147: a baseline message needs an html string and well-formed hunks", () => {
   const send = (extra: Record<string, unknown>): boolean => filter.accepts({ type: "previewBaselineDiff", ...page, ...extra }, page);
   const hunk = { baseStart: 2, baseEnd: 1, start: 2, end: 3 };
@@ -181,7 +183,7 @@ test("CR147: a baseline message needs an html string and well-formed hunks", () 
   assert.equal(send({ html: "x", hunks: new Array(100_001).fill(hunk) }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("the save command names the render and carries nothing else", () => {
   const send = (identity: Record<string, unknown>): boolean => filter.accepts({ type: "previewSaveCommand", ...identity }, page);
   assert.equal(send({ ...page }), true);
@@ -218,14 +220,15 @@ test("previewEditSource and previewFrontmatterResult refuse a payload of the wro
   assert.equal(filter.accepts({ ...message("previewFrontmatterResult", page), saved: true, unchanged: true }, page), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("the answer to a detached save finds the page after a render moved its identity", () => {
   const moved = { ...page, revision: 9, requestId: 14 };
   assert.equal(filter.accepts({ type: "previewEditSource", ...page, editId: "e", done: true }, moved), true);
   assert.equal(filter.accepts({ type: "previewEditSource", ...page, documentId: "file:///other.md", editId: "e", done: true }, moved), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271#S2
 test("previewSourceText carries the document text for its render: a bounded string, nothing else", () => {
   assert.equal(filter.rules.previewSourceText.addressing, "render");
   const text = (value: unknown, identity: Partial<PageIdentity> = page): boolean =>

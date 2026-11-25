@@ -19,6 +19,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-TABLE-015
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Enter after typing
+- id: S2
+  title: Enter chords and the Done button
+- id: S3
+  title: An unchanged cell closes without a save
+- id: S4
+  title: Focus leaving the cell editor
+- id: S5
+  title: A pointer press in the last 500 ms
+- id: S6
+  title: Focus leaving the cell formatting group
+- id: S7
+  title: A click on a block outside the table
+- id: S8
+  title: A click outside any editable block or on a link
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,38 +59,38 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Enter in the cell text box, with or without Cmd, Ctrl or Shift, presses Done, leaves the cell editor or clicks elsewhere on the page, the extension SHALL insert no line break and commit the cell by posting the table as a final previewEditSave, and post no save when the table text equals the text the host sent and no autosave reached the document.
 
-### Scenario (nominal): Enter after typing
+### Scenario S1 (nominal): Enter after typing
 - GIVEN a cell edited from "a" to "ab"
 - WHEN the writer presses Enter
 - THEN a final previewEditSave with the edited table is posted, the status reads "Saving Markdown…" and the text box value holds no line break
 
-### Scenario (boundary): Enter chords and the Done button
+### Scenario S2 (boundary): Enter chords and the Done button
 | Input | Outcome |
 | --- | --- |
 | Shift+Enter, Cmd+Enter or Ctrl+Enter in the edited cell | the same final save is posted |
 | the pointer pressed on Done after typing, then the button clicked | a final previewEditSave is posted, and the focus stays in the text box until the click, so the loss-of-focus commit does not run first |
 
-### Scenario (boundary): An unchanged cell closes without a save
+### Scenario S3 (boundary): An unchanged cell closes without a save
 | Input | Outcome |
 | --- | --- |
 | a cell opened and not changed, Enter pressed | the editor closes and no previewEditSave is posted |
 | a cell editor with no change, Done clicked | no save is posted and the editor closes |
 | a cell changed, autosaved, then typed back to the original text, Enter pressed | a final previewEditSave is posted, because the document no longer holds the original text |
 
-### Scenario (nominal): Focus leaving the cell editor
+### Scenario S4 (nominal): Focus leaving the cell editor
 | Input | Outcome |
 | --- | --- |
 | a cell edited and the focus moved to another element of the page, more than 500 ms after the last pointer press, when the zero-delay check after the blur runs | a final previewEditSave is posted and the editor closes |
 | a cell edited and the focus moved to a button of the table bar or to Done | nothing is saved and the editor stays open |
 | the whole window lost the focus (the check treats a document without focus as outside) | the cell is committed |
 
-### Scenario (boundary): A pointer press in the last 500 ms
+### Scenario S5 (boundary): A pointer press in the last 500 ms
 | Input | Outcome |
 | --- | --- |
 | a pointer pressed 100 ms ago on another cell and the cell text box blurred | no save is posted by the blur; the click handler of the other cell decides |
 | the last pointer press 600 ms ago and the blur check runs with the focus outside | the cell is committed |
 
-### Scenario (nominal): Focus leaving the cell formatting group
+### Scenario S6 (nominal): Focus leaving the cell formatting group
 - GIVEN the emoji picker open from the cell bar and the focus moved inside the bar
 - WHEN the focus then leaves to nowhere
 - THEN the cell is committed with a final previewEditSave; while the focus was inside the bar nothing was saved
@@ -81,7 +98,7 @@ When the writer presses Enter in the cell text box, with or without Cmd, Ctrl or
 - WHEN the focus leaves the page for the dialog
 - THEN the cell is not committed by the group's leave handler
 
-### Scenario (nominal): A click on a block outside the table
+### Scenario S7 (nominal): A click on a block outside the table
 - GIVEN a cell edited and a paragraph outside the table clicked
 - WHEN the click is handled
 - THEN the final previewEditSave is posted first, the click target is remembered as a pending navigation and the paragraph opens after the re-render
@@ -89,7 +106,7 @@ When the writer presses Enter in the cell text box, with or without Cmd, Ctrl or
 - WHEN the click is handled
 - THEN the cell editor closes without a save and the other block opens at once
 
-### Scenario (nominal): A click outside any editable block or on a link
+### Scenario S8 (nominal): A click outside any editable block or on a link
 - GIVEN a cell edited and edit mode on
 - WHEN the writer clicks an area of the page that belongs to no editable block, or a link
 - THEN a final previewEditSave with the edited table is posted

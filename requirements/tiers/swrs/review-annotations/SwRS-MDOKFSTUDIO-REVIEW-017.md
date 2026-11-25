@@ -21,6 +21,29 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Quote in the block of the line
+- id: S2
+  title: Quote at the start of a text node
+- id: S3
+  title: Regions that are never marked
+- id: S4
+  title: Same text in a figure and in a paragraph
+- id: S5
+  title: Quote across an element boundary
+- id: S6
+  title: Block that takes no children
+- id: S7
+  title: Applied again
+- id: S8
+  title: Resolved style
+- id: S9
+  title: Quote over a wrapped line
+- id: S10
+  title: Long document
+- id: S11
+  title: Another word
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,61 +65,61 @@ supersedes:
 
 When review threads are applied to the page, the extension SHALL wrap the first occurrence of each thread quote, found inside one text node of the innermost mapped block that covers the anchor line, in one highlight, or add a badge to that block when the quote is not found inside one text node, and never mark code, math, diagrams, the properties table, open editors or included content; a run of whitespace of the text node, such as the line break of a paragraph or list item wrapped over several lines of the source, matches a space of the quote, and the matched text is highlighted as one highlight.
 
-### Scenario (nominal): Quote in the block of the line
+### Scenario S1 (nominal): Quote in the block of the line
 - GIVEN two paragraphs holding the same sentence and a thread anchored on the line of the second
 - WHEN the thread is posted
 - THEN only the sentence of the second paragraph is highlighted, in preview and in edit mode
 
-### Scenario (boundary): Quote at the start of a text node
+### Scenario S2 (boundary): Quote at the start of a text node
 - GIVEN a thread whose quote starts a text node
 - WHEN the thread is posted and then cleared
 - THEN no empty text node is left before the highlight and clearing restores the original structure
 
-### Scenario (refusal): Regions that are never marked
+### Scenario S3 (refusal): Regions that are never marked
 | Input | Outcome |
 | --- | --- |
 | Threads anchored on a code block, math, the properties table and a block under an open editor | No highlight is created in any of them |
 | A block that comes from an include directive and carries lines of another file, with a thread anchor line inside it | The block is not chosen for the highlight |
 | A review thread whose quote text also appears inside a Mermaid figure and a PlantUML figure | No comment mark is added inside either figure |
 
-### Scenario (boundary): Same text in a figure and in a paragraph
+### Scenario S4 (boundary): Same text in a figure and in a paragraph
 - GIVEN the same quote text in an ordinary paragraph covering the anchor line
 - WHEN the page applies the threads
 - THEN the paragraph, not the figure, receives the mark
 
-### Scenario (nominal): Quote across an element boundary
+### Scenario S5 (nominal): Quote across an element boundary
 - GIVEN a paragraph whose quote runs through an emphasised word, and a thread with two comments
 - WHEN the thread is posted
 - THEN no highlight is made and the paragraph holds a badge button with the label "Comment thread, 2 comments"
 
-### Scenario (boundary): Block that takes no children
+### Scenario S6 (boundary): Block that takes no children
 - GIVEN a thread anchored on a table, a list, a code block, a details block, an image or a rule
 - WHEN the thread is posted
 - THEN the badge sits after the block
 
-### Scenario (boundary): Applied again
+### Scenario S7 (boundary): Applied again
 | Input | Outcome |
 | --- | --- |
 | The same threads applied a second time to a page with a highlighted quote | The page holds one highlight, as after the first run |
 | A content patch that replaces the blocks, then the threads applied again | The highlight is on the new content and none is left on removed nodes |
 
-### Scenario (nominal): Resolved style
+### Scenario S8 (nominal): Resolved style
 | Input | Outcome |
 | --- | --- |
 | A resolved thread with a highlighted quote | The highlight carries the resolved attribute and is drawn differently from an open one; its badge and orphaned comments entry are drawn in the resolved style too |
 | An open thread | The highlight has no resolved attribute |
 
-### Scenario (nominal): Quote over a wrapped line
+### Scenario S9 (nominal): Quote over a wrapped line
 - GIVEN a paragraph wrapped over several lines of the source, so that its text node holds a line break, and a thread whose quote has a space where the line break is
 - WHEN the thread is posted
 - THEN the text from the first to the last word of the quote is highlighted once, with the line break kept inside the highlight, and the text of the page does not change
 
-### Scenario (boundary): Long document
+### Scenario S10 (boundary): Long document
 - GIVEN a long document with raw HTML, images and tables whose paragraphs, list items and cells are wrapped, and one thread on each text of them, re-anchored by the host
 - WHEN the threads are posted
 - THEN every thread is highlighted on its text, none gets a badge or goes to the Orphaned comments box, and the length of the document changes nothing
 
-### Scenario (refusal): Another word
+### Scenario S11 (refusal): Another word
 - GIVEN a quote with a word that the text node does not hold at that place
 - WHEN the thread is posted
 - THEN no highlight is created and the existing rule applies: a badge on the block of the line

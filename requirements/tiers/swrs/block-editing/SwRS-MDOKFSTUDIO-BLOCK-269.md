@@ -20,6 +20,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-011
 - StRS-MDOKFSTUDIO-BLOCK-025
+scenarios:
+- id: S1
+  title: Removing a blank line
+- id: S2
+  title: The last blank line of a run
+- id: S3
+  title: Removing a blank line inside a list
+- id: S4
+  title: Refusals
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -52,25 +61,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer deletes a blank-line block with Delete, Backspace or its Delete block button, the extension SHALL remove that one blank line, keep the separator and the other blank lines in one text edit and one undo step, keep the line endings, refuse a stale line next to the block, and select the blank-line block now at that place, else the one just above it in the same run, else nothing, so that a further Delete or Backspace removes no text. A run of empty quote lines keeps its first line byte for byte, and the removal keeps the final line break of the text, or its absence.
 
-### Scenario: Removing a blank line
+### Scenario S1: Removing a blank line
 
 - GIVEN a selected blank-line block, one of three shown
 - WHEN the writer presses Delete or Backspace, or clicks its Delete block button
 - THEN the host removes that one line in one text edit and one undo step, keeps the other blank lines, answers previewBlocksResult with op delete-blank-lines, and the blank-line block now at that place is selected (else the one just above it in the same run, else nothing)
 
-### Scenario: The last blank line of a run
+### Scenario S2: The last blank line of a run
 
 - GIVEN a selected blank-line block, the only one of its run
 - WHEN the writer presses Delete, and then Delete or Backspace again
 - THEN the first removes that line and nothing is selected afterwards, so the further key presses post nothing and remove no text
 
-### Scenario: Removing a blank line inside a list
+### Scenario S3: Removing a blank line inside a list
 
 - GIVEN a blank line between two list items, or inside a list item, and its blank-line block selected
 - WHEN the writer presses Delete or Backspace, or clicks its Delete block button
 - THEN only that line goes, nothing else changes, the list is still one list, and the selection goes to the blank-line block now at that place in the same run, else the one just above it, else nothing
 
-### Scenario: Refusals
+### Scenario S4: Refusals
 
 - GIVEN a line the text no longer has as a blank line, a failed edit, or an open block edit on the host
 - WHEN previewBlankRunDelete arrives

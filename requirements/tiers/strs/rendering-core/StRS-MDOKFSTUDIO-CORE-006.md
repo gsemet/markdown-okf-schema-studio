@@ -13,6 +13,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Install the skill and write Markdown
 user_need: A writer working with a coding agent needs the agent to write cards,
   tabs, admonitions, charts and diagrams that Studio renders without error.
 derived_by:
@@ -51,7 +54,7 @@ flowchart LR
 
 ### Main paths
 
-#### Path 1: Install the skill and write Markdown
+#### Path S1: Install the skill and write Markdown
 
 1. The writer installs the Studio plugin in an agent host
    - SwRS-MDOKFSTUDIO-CORE-074: the plugin and the marketplaces resolve to the one skill folder

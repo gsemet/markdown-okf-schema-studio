@@ -26,7 +26,8 @@ const ASSERTIONS: ContentAssertion[] = [
 ];
 
 export const CHANGE_BAR_TOOLTIP_SCENARIOS: ScenarioDefinition[] = (["light", "dark"] as const).map((theme, index) => ({
-  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-220
+  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-220#S1
+  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-220#S2
   id: `review-annotations/v${31 + index}-change-bar-tooltip-${theme}-900`,
   fixture: "44-change-bar",
   theme,

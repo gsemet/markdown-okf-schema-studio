@@ -23,7 +23,8 @@ import {
  * top spacing of the first block (features/blockEditor.ts, textControls.ts).
  */
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S7
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S10
 test("fenced Markdown editors sit outside the rendered pre and preserve source when saving", () => {
   const harness = createRuntimeHarness();
   const code = harness.mappings[1];
@@ -75,7 +76,7 @@ test("fenced Markdown editors sit outside the rendered pre and preserve source w
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-026
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-026#S4
 test("without caretRangeFromPoint a click opens the editor with the caret at the end of the block", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -161,7 +162,7 @@ test("Enter in a list item continues the list, and Shift+Enter stays native", ()
   assert.equal(save?.editedText, "- a\n- \n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S9
 test("Enter in the selected alt text of an image validates it and moves the caret after the image", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -196,7 +197,8 @@ test("Enter in the selected alt text of an image validates it and moves the care
   assert.equal(textarea.value, "![image.png](image.png) tail");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S2
 test("Tab and Shift+Tab indent the block editor without closing it", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -262,7 +264,7 @@ test("Enter on an empty list item empties the line and Enter in plain text stays
   assert.equal(textarea.value, "plain");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S5
 test("Enter after an option item starts the next option, and Enter on an empty option ends the list", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -317,7 +319,8 @@ test("block textareas resize on input and preview layout changes", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S7
 test("edit mode loads raw Markdown and saves changes when the block loses focus", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -362,7 +365,7 @@ test("edit mode loads raw Markdown and saves changes when the block loses focus"
   assert.equal(save?.endLine, 52);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S1
 // A list item is edited on its own, so the hover marks the item, not the list (it marked the whole
 // list before list items were edited one by one).
 test("edit mode hover marks the list item that a click would edit", () => {
@@ -399,7 +402,8 @@ test("edit mode hover marks the list item that a click would edit", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S4
 test("an opened block editor shows its line range, Done and Cancel on one row", () => {
   const harness = createRuntimeHarness();
   const textarea = openRawEditor(harness);
@@ -437,7 +441,7 @@ test("the status line shares one row with the Done and Cancel buttons", () => {
   assert.equal(row.childElements.indexOf(status) < row.childElements.indexOf(buttons), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
 test("Cancel cancels only what reached the document", () => {
   const withAutosave = createRuntimeHarness();
   let textarea = openRawEditor(withAutosave);
@@ -463,7 +467,8 @@ test("Cancel cancels only what reached the document", () => {
   assert.equal(withoutAutosave.pendingTimerCount(), 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S2
 test("Done posts a final save and both buttons keep the textarea focused on press", () => {
   const harness = createRuntimeHarness();
   const textarea = openRawEditor(harness);
@@ -521,7 +526,8 @@ test("raw Markdown block edits autosave on input without disabling the textarea"
   assert.equal(save?.editedText, "Continued typing\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S2
 test("arrow boundaries transfer block editing in every direction", () => {
   const cases = [
     { key: "ArrowLeft", position: 0, line: 1, source: "Previous block\n", caret: "end" },
@@ -630,7 +636,7 @@ test("Cmd+Enter and Ctrl+Enter finish the block editor like Done", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 // CR 119: the undo, redo, select-all and delete-line keys of the block textarea are VS Code key
 // bindings. The page cancels the native action (so the command never runs twice) and lets the key
 // reach VS Code (no stopPropagation), whose `previewEditCommand` answer applies the command.
@@ -667,7 +673,7 @@ test("CR 119: the VS Code editing keys cancel the native action in the block tex
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 test("CR 119: a previewEditCommand from VS Code undoes, redoes, selects all and deletes a line in the focused text box", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -717,7 +723,8 @@ test("Escape in an unchanged Markdown block editor closes it without a message",
   assert.equal(harness.mappings[1].contains(textarea.parentElement as RuntimeElement), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S4
 test("STAB-03: an editor the host watches reports its close; without a watch the close stays silent", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -760,7 +767,8 @@ test("STAB-03: a watch sent while the host already follows another document is s
     [["previewEditClosed", "gone"]], "a closed editor is reported at once");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S2
 test("typing is saved once after the autosave delay, carrying the last text", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -777,7 +785,8 @@ test("typing is saved once after the autosave delay, carrying the last text", ()
   assert.equal(saves[0].editedText, "Second\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S3
 test("pagehide flushes a pending autosave without waiting for the timer", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -877,7 +886,8 @@ test("ArrowUp/ArrowDown leave the block only on the first/last visual line", () 
   assert.equal(harness.messages.at(-1)?.type, "previewEditSave", "the unchanged block moves on");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-123
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-123#S4
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-123#S6
 test("a table cell arrow inside a wrapped cell does not move to another cell", () => {
   const harness = createRuntimeHarness();
   const { cells, input } = openTableCellEditorForTab(harness);
@@ -893,7 +903,7 @@ test("a table cell arrow inside a wrapped cell does not move to another cell", (
   assert.equal(cellEditorOf(harness).parentElement, cells[2][0]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S1
 test("typing * or _ on a selection wraps it, keeps it selected and wraps again on a second press", () => {
   for (const marker of ["*", "_", "`", "~"]) {
     const harness = createRuntimeHarness();
@@ -955,7 +965,7 @@ test("a table cell wraps its selection with the marker too", () => {
   assert.match(String(harness.messages.at(-1)?.editedText ?? ""), /_foo_/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-266
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-266#S3
 test("Cmd/Ctrl+B, Cmd/Ctrl+I and Ctrl+/ (a plain comment) edit the block text box in one native step without saving", () => {
   const cases: [Record<string, unknown>, string, [number, number], string][] = [
     [{ ctrlKey: true, code: "KeyB", key: "b" }, "say foo now", [4, 7], "say **foo** now"],
@@ -1032,7 +1042,7 @@ test("Enter continuation and Tab indentation use the undo-preserving execCommand
   assert.ok(calls.every((call) => call.command === "insertText"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 // CR 119: as in the block textarea, the keys reach VS Code with the native action cancelled.
 test("CR 119: undo and redo keys of the table cell editor cancel the native action and reach VS Code", () => {
   const harness = createRuntimeHarness();
@@ -1086,7 +1096,8 @@ function openEmptyDocumentEditor(harness: RuntimeHarness): void {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-102
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-102#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-102#S5
 test("top spacing: the editor of the first block of the document carries the first-block class", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.dispatchDocument("click", { target: harness.mappings[0], preventDefault: () => undefined });
@@ -1278,7 +1289,8 @@ test("ArrowUp from the first body block under a properties table keeps the edito
   assert.equal(first.getAttribute("data-sphinx-preview-editing"), "true", "the editor stays open");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255#S3
 test("CR 169: a block source that arrives after the find bar took the focus leaves it in the find field", () => {
   const harness = createRuntimeHarness({ trackFocus: true });
   harness.editModeButton.dispatch("click");
@@ -1300,7 +1312,8 @@ test("CR 169: a block source that arrives after the find bar took the focus leav
   assert.equal(textarea.focusOptions, undefined, "the text box was not focused");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255#S3
 test("CR 188: text typed after click, find and a late source goes to the find field, not the Markdown", () => {
   const harness = createRuntimeHarness({ trackFocus: true });
   harness.editModeButton.dispatch("click");
@@ -1336,7 +1349,8 @@ test("CR 188: text typed after click, find and a late source goes to the find fi
     "nothing typed was saved to the Markdown");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255#S3
 test("CR 169: a block source that arrives with the focus still on the page takes the focus", () => {
   const harness = createRuntimeHarness({ trackFocus: true });
   harness.editModeButton.dispatch("click");
@@ -1349,7 +1363,7 @@ test("CR 169: a block source that arrives with the focus still on the page takes
 
 const SAVE_COMMAND = { type: "previewSaveCommand", documentId: "file:///active.md", revision: 7, requestId: 11 };
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: the save command posts the typed text as an autosave, then the save request, and keeps the editor open", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -1369,7 +1383,7 @@ test("CR 312: the save command posts the typed text as an autosave, then the sav
   assert.equal(harness.pendingTimerCount(), 0, "the autosave timer was consumed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: the save command with no pending autosave posts only the save request", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -1384,7 +1398,7 @@ test("CR 312: the save command with no pending autosave posts only the save requ
   assert.deepEqual(noEditor.messages.slice(start).map((message) => message.type), ["previewSaveRequest"], "no editor open");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S2
 test("CR 312: Cmd+S and Ctrl+S in the block text box are left to VS Code (not stopped, nothing posted)", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -1400,7 +1414,8 @@ test("CR 312: Cmd+S and Ctrl+S in the block text box are left to VS Code (not st
   assert.equal(harness.messages.length, before, "the page posts nothing by itself");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S7
 test("the arrows at the edge of a list item editor go to the next or previous item, then past the list", () => {
   // The default page has blocks at lines 1, 50 and 100; a list at line 60 holds two items, 60 to 61
   // and 62 to 63.

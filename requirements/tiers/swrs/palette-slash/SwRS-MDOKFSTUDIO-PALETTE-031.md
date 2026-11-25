@@ -20,6 +20,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
 - StRS-MDOKFSTUDIO-TABLE-016
 depends_on: []
+scenarios:
+- id: S1
+  title: Every popover opens inside the frame
+- id: S2
+  title: One popover at a time and a toggling button
+- id: S3
+  title: Escape or typing closes only the popover
+- id: S4
+  title: Escape with no popover, second Escape, insertion from the popover
+- id: S5
+  title: A popover closed while it holds the focus gives the focus back
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,7 +56,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer opens, leaves or dismisses a popover of the palette, the extension SHALL open it inside the editor frame under its button (under the caret for the alert list), keep at most one open, and close it on Escape or on typing or pressing in the text box, giving the focus back to the text box and keeping the editor open.
 
-### Scenario (nominal): Every popover opens inside the frame
+### Scenario S1 (nominal): Every popover opens inside the frame
 
 - GIVEN an editor at 900 px with the heading list, the table grid, the emoji picker, the alert list and the colour picker opened one after the other
 - WHEN each popover is inspected
@@ -58,7 +69,7 @@ When the writer opens, leaves or dismisses a popover of the palette, the extensi
 | 460 px (emoji picker of the cell formatting group) | emoji picker | its left edge is not left of the viewport and its right edge is not beyond it |
 | 900 px (emoji picker of the cell formatting group) | emoji picker | the picker is inside the viewport |
 
-### Scenario (nominal): One popover at a time and a toggling button
+### Scenario S2 (nominal): One popover at a time and a toggling button
 
 - GIVEN the heading list open
 - WHEN the writer presses the Emoji button
@@ -68,7 +79,7 @@ When the writer opens, leaves or dismisses a popover of the palette, the extensi
 
 A button whose action has a popover has aria-haspopup menu and an aria-expanded that is true exactly while its popover is open; at most one element with the class sphinx-preview-edit-palette-menu exists, and the button of a closed popover has aria-expanded false.
 
-### Scenario (nominal): Escape or typing closes only the popover
+### Scenario S3 (nominal): Escape or typing closes only the popover
 
 - GIVEN a popover open
 - WHEN the writer presses Escape, or types in the text box, or presses the mouse in it
@@ -84,7 +95,7 @@ A button whose action has a popover has aria-haspopup menu and an aria-expanded 
 | Figure form (also Cancel) | the form closes, the text box has the focus and the editor stays open (Cancel writes nothing) | typing closes the form; a mouse press closes the form |
 | Emoji picker of the cell formatting group | the picker closes and the cell editor stays open | not stated |
 
-### Scenario (boundary): Escape with no popover, second Escape, insertion from the popover
+### Scenario S4 (boundary): Escape with no popover, second Escape, insertion from the popover
 
 | Input | Outcome |
 | --- | --- |
@@ -94,7 +105,7 @@ A button whose action has a popover has aria-haspopup menu and an aria-expanded 
 | emoji clicked with Shift held, emoji picker open | the emoji is inserted and the picker stays open (an insertion made by the popover itself does not close it) |
 | emoji chosen without Shift | the emoji is inserted and the focus returns to the text box |
 
-### Scenario (nominal): A popover closed while it holds the focus gives the focus back
+### Scenario S5 (nominal): A popover closed while it holds the focus gives the focus back
 
 - GIVEN the emoji filter has the focus
 - WHEN the popover is closed

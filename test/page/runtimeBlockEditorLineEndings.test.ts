@@ -37,7 +37,7 @@ const saves = (harness: RuntimeHarness): Array<Record<string, unknown>> =>
 const isEditing = (harness: RuntimeHarness): boolean =>
   harness.mappings[1].getAttribute("data-sphinx-preview-editing") === "true";
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S1
 test("the text box of a CR LF block shows LF, as a browser does, and Done without a change closes at once", () => {
   for (const original of [CRLF_PARAGRAPH, CRLF_NESTED_LIST, MIXED]) {
     const harness = createRuntimeHarness();
@@ -50,7 +50,8 @@ test("the text box of a CR LF block shows LF, as a browser does, and Done withou
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S2
 test("typing a letter and deleting it in a CR LF block posts no save, on autosave or on Done", () => {
   const harness = createRuntimeHarness();
   const textarea = openWithSource(harness, CRLF_PARAGRAPH);
@@ -65,7 +66,7 @@ test("typing a letter and deleting it in a CR LF block posts no save, on autosav
   assert.equal(isEditing(harness), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S4
 test("a real edit in a CR LF block posts its text in CR LF, on autosave and on Done", () => {
   const harness = createRuntimeHarness();
   const textarea = openWithSource(harness, CRLF_PARAGRAPH);
@@ -81,7 +82,8 @@ test("a real edit in a CR LF block posts its text in CR LF, on autosave and on D
   assert.equal(final?.originalText, CRLF_PARAGRAPH);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S3
 test("a real edit in a block with mixed line endings keeps the endings of the lines it left alone", () => {
   const harness = createRuntimeHarness();
   const textarea = openWithSource(harness, MIXED);
@@ -91,7 +93,8 @@ test("a real edit in a block with mixed line endings keeps the endings of the li
   assert.equal(saves(harness).at(-1)?.editedText, "one\r\ntwo\nthree!\r\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S3
 // A text box returns LF only (a browser normalises CR and CR LF in `value`), so the only CR the page can
 // hold comes from the trailing line ending it keeps apart from the box: it must not lose it on a mixed block.
 test("a mixed block ending in a CR keeps that CR and the other endings, unchanged or edited", () => {
@@ -108,7 +111,7 @@ test("a mixed block ending in a CR keeps that CR and the other endings, unchange
   assert.deepEqual(saves(other), [], "unchanged: nothing posted");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S1
 test("a block of an LF file posts LF, as before", () => {
   const harness = createRuntimeHarness();
   const textarea = openWithSource(harness, "a\nb\n");
@@ -117,7 +120,8 @@ test("a block of an LF file posts LF, as before", () => {
   assert.equal(saves(harness).at(-1)?.editedText, "a\nB\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S6
 test("the move chord on an unchanged CR LF block closes the editor and moves, with no save", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, CRLF_PARAGRAPH);
@@ -129,7 +133,7 @@ test("the move chord on an unchanged CR LF block closes the editor and moves, wi
   assert.equal(moveMessages(harness, before).length, 1, "the move is requested at once");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
 test("a final save the host answers with done closes the editor", () => {
   const harness = createRuntimeHarness();
   const textarea = openWithSource(harness, "a\nb\n");
@@ -148,7 +152,7 @@ test("a final save the host answers with done closes the editor", () => {
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false, "nothing to cancel");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
 test("a done answer for another edit leaves the open editor alone", () => {
   const harness = createRuntimeHarness();
   const textarea = openWithSource(harness, "a\nb\n");

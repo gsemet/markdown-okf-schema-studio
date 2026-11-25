@@ -17,6 +17,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Text direction of a paragraph
+- id: S2
+  title: Block elements without a dir attribute
+- id: S3
+  title: Author dir attribute
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,19 +41,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a paragraph, heading, list item, block quote or table cell holds text, the extension SHALL give it `dir="auto"` when it has no dir attribute and keep an author's dir attribute only as ltr, rtl or auto, so that Hebrew or Arabic text aligns to the right edge of the column.
 
-### Scenario (nominal): Text direction of a paragraph
+### Scenario S1 (nominal): Text direction of a paragraph
 - GIVEN a Hebrew paragraph, then an English paragraph
 - WHEN they are shown
 - THEN the Hebrew text ends at the right edge of the column
 - AND the English text starts at the left edge
 
-### Scenario (nominal): Block elements without a dir attribute
+### Scenario S2 (nominal): Block elements without a dir attribute
 | Input | Outcome |
 | --- | --- |
 | a heading, a paragraph, a list item, a block quote, a table header cell and a table data cell without dir | each carries dir auto |
 | a div without dir | gets no dir attribute |
 
-### Scenario (refusal): Author dir attribute
+### Scenario S3 (refusal): Author dir attribute
 | Input | Outcome |
 | --- | --- |
 | paragraphs with dir rtl and dir RTL with a trailing space | both read dir rtl (lower case, without spaces) |

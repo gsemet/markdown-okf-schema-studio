@@ -68,7 +68,7 @@ function setup(options: { collapsed?: boolean; reduced?: boolean; state?: Record
 const HINT = "data-sphinx-preview-toolbar-hint";
 const ANIMATING = "data-sphinx-preview-toolbar-animating";
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S1
 test("CR 162: the rows carry the animating mark before hidden changes, and lose it after 200 ms", () => {
   const t = setup({ collapsed: false });
   assert.equal(t.rows.hidden, false);
@@ -89,8 +89,8 @@ test("CR 162: the rows carry the animating mark before hidden changes, and lose 
   assert.deepEqual(t.log.slice(before), ["change hidden=false animating=null"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S6
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S1
 test("the layout is measured after the animation in both directions, once for quick clicks", () => {
   const t = setup({ collapsed: false });
   for (const hidden of [true, false]) {
@@ -109,7 +109,7 @@ test("the layout is measured after the animation in both directions, once for qu
   assert.deepEqual(t.log.slice(before), ["change hidden=false animating=null"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S2
 test("the layout is measured after the load hint rolls up", () => {
   const t = setup();
   t.paint();
@@ -119,7 +119,7 @@ test("the layout is measured after the load hint rolls up", () => {
   assert.deepEqual(t.log.slice(before), ["change hidden=true animating=null"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S2
 test("CR 162: load hint: collapsed toolbar unrolls two frames after the page starts, stays 700 ms, rolls up, preference untouched", () => {
   const t = setup();
   assert.equal(t.rows.hidden, true, "the page starts collapsed");
@@ -141,7 +141,7 @@ test("CR 162: load hint: collapsed toolbar unrolls two frames after the page sta
   assert.equal(t.getState()?.viewToolbarCollapsed, undefined, "the collapsed choice is not saved either");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S2
 test("CR 162: a pointer press or a key press cancels the hint and leaves the toolbar collapsed", () => {
   for (const type of ["pointerdown", "keydown"]) {
     const t = setup();
@@ -162,7 +162,7 @@ test("CR 162: a pointer press or a key press cancels the hint and leaves the too
   assert.equal(early.rows.hidden, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S2
 test("CR 162: the hint plays once per panel, even for another document, never for an expanded toolbar", () => {
   const first = setup({ documentId: "file:///a.md" });
   assert.equal(first.getState()?.viewToolbarHintShown, true);
@@ -193,7 +193,7 @@ test("CR 162: the hint plays once per panel, even for another document, never fo
   assert.equal(saved.root.getAttribute(HINT), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S2
 test("CR 162: a press on the chevron does not cancel the hint, only its click does", () => {
   const t = setup();
   t.paint();
@@ -213,7 +213,8 @@ test("CR 162: a press on the chevron does not cancel the hint, only its click do
   assert.equal(other.rows.hidden, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S2
 test("CR 162: a chevron click or key during the hint keeps the open rows without a new animation", () => {
   for (const key of [false, true]) {
     const t = setup();
@@ -242,7 +243,7 @@ test("CR 162: a chevron click or key during the hint keeps the open rows without
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S2
 test("CR 162: a click during the hint ends it before the toolbar toggles", () => {
   const t = setup();
   t.paint();
@@ -254,7 +255,7 @@ test("CR 162: a click during the hint ends it before the toolbar toggles", () =>
   assert.equal(t.rows.hidden, false, "the pending hint timer does not collapse the rows again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S3
 test("CR 162: with prefers-reduced-motion: reduce there is no hint and no animating mark", () => {
   const t = setup({ reduced: true });
   t.paint();

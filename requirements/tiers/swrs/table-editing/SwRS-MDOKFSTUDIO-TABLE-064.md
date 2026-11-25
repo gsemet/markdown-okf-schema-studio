@@ -19,6 +19,25 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-008
 depends_on: []
+scenarios:
+- id: S1
+  title: Scrolled into a tall table
+- id: S2
+  title: Near the end of the table
+- id: S3
+  title: Size of the bar against the viewport
+- id: S4
+  title: Window resize while the editor is open
+- id: S5
+  title: Bar appearing above the reading offset
+- id: S6
+  title: No scroll into view
+- id: S7
+  title: Bar opening under the preview controls at the top of the page
+- id: S8
+  title: A later layout change hides the bar again
+- id: S9
+  title: A handle on a button of the bar
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,42 +63,42 @@ default_owner_email: gaetan@xeberon.net
 
 When a cell editor is open and the table bar would lie under the sticky band or the preview controls, the extension SHALL keep the bar visible, by translating it down with a tall table to 4 px below the usable top and never past the end of the table, and by scrolling the page up by exactly the missing distance when the bar appears above the reading offset. The bar SHALL paint above the row and column handles, so that no handle takes a press meant for a button of the bar.
 
-### Scenario (nominal): Scrolled into a tall table
+### Scenario S1 (nominal): Scrolled into a tall table
 - GIVEN a table taller than the pane scrolled so that its top is under the sticky band
 - WHEN the page scrolls
 - THEN the bar is translated down to the usable top plus 4 px, the table text does not move, and the bar carries the stuck mark
 
-### Scenario (boundary): Near the end of the table
+### Scenario S2 (boundary): Near the end of the table
 - GIVEN the table's bottom close to the usable top
 - WHEN the page scrolls
 - THEN the translation is limited so that the bar bottom does not pass the table bottom
 
-### Scenario (boundary): Size of the bar against the viewport
+### Scenario S3 (boundary): Size of the bar against the viewport
 | Input | Outcome |
 | --- | --- |
 | A bar taller than 40 percent of the viewport and a table scrolled under the band | The bar stays in its place above the table: the shift stays 0 px and the stuck mark is not set |
 | A bar at most 40 percent of the viewport and the same scroll | The bar rides down |
 
-### Scenario (nominal): Window resize while the editor is open
+### Scenario S4 (nominal): Window resize while the editor is open
 | Input | Outcome |
 | --- | --- |
 | A bar translated down and the window resized (the resize event fires) | The shift is recomputed for the new geometry |
 | The editor closed, then the window scrolls or is resized | The scroll and resize listeners of the bar are gone and nothing is recomputed |
 
-### Scenario (nominal): Bar appearing above the reading offset
+### Scenario S5 (nominal): Bar appearing above the reading offset
 | Input | Outcome |
 | --- | --- |
 | The bar appears 30 px above the usable top with the page scrolled down | The page scrolls up by 30 px as a preview-owned scroll and the edit anchor is moved by the same delta |
 | The page is scrolled to 10 px and the bar is 30 px above the usable top | The scroll is limited to 10 px |
 
-### Scenario (boundary): No scroll into view
+### Scenario S6 (boundary): No scroll into view
 | Input | Outcome |
 | --- | --- |
 | A bar at or below the usable top | No scroll is made |
 | Only the empty part of the bar lies under the preview controls | No scroll is made |
 | A bar above the usable top and a selected cell whose bottom plus the delta passes the viewport height | No scroll is made |
 
-### Scenario (boundary): Bar opening under the preview controls at the top of the page
+### Scenario S7 (boundary): Bar opening under the preview controls at the top of the page
 | Input | Outcome |
 | --- | --- |
 | The bar opens with its top under the preview controls, its box reaching under them, and the page scrolled less than the missing distance (a table right under the first heading, page at its top) | The bar gives up the width from 4 px left of the controls to the right edge of its column (`--sphinx-preview-table-menu-inset`): its buttons wrap left of the controls and every one stays clickable |
@@ -90,13 +109,13 @@ When a cell editor is open and the table bar would lie under the sticky band or 
 
 The inset is measured when the bar is filled, never on a scroll, so a scroll never reflows the page.
 
-### Scenario (nominal): A later layout change hides the bar again
+### Scenario S8 (nominal): A later layout change hides the bar again
 | Input | Outcome |
 | --- | --- |
 | The bar is shown and its status wraps onto a new line, which moves the bar above the usable top, then the edit anchor is restored | The bar is revealed again by the missing distance |
 | The bar size is unchanged and the writer has scrolled, then the edit anchor is restored | The writer's scroll is not undone |
 
-### Scenario (boundary): A handle on a button of the bar
+### Scenario S9 (boundary): A handle on a button of the bar
 | Input | Outcome |
 | --- | --- |
 | A row or column handle whose box lies on a button of the bar | The press on the button reaches the button: the bar is positioned in the flow (no offset) with a z-index above the handle layer, so the handle does not take it |

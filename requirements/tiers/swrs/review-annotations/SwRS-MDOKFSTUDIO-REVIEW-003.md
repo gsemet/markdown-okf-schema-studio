@@ -16,6 +16,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-012
+scenarios:
+- id: S1
+  title: Comment titles
+- id: S2
+  title: Read mode
+- id: S3
+  title: What is a TODO comment
+- id: S4
+  title: Title is data
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,7 +44,7 @@ default_owner_email: gaetan@xeberon.net
 
 While edit mode is on, when the writer opens an HTML comment chip, the preview SHALL title the opened block with the literal opening syntax of the comment, <!-- --> for a comment and <!-- TODO --> for a comment whose text starts with TODO in any case, and the renderer SHALL treat that comment as a TODO comment.
 
-### Scenario (nominal): Comment titles
+### Scenario S1 (nominal): Comment titles
 
 | Source | Title of the opened block in edit mode |
 | --- | --- |
@@ -44,13 +53,13 @@ While edit mode is on, when the writer opens an HTML comment chip, the preview S
 | `<!-- todo lower case -->` | `<!-- TODO -->` in code font |
 | A multi-line comment starting with TODO on its first line | `<!-- TODO -->` in code font |
 
-### Scenario (boundary): Read mode
+### Scenario S2 (boundary): Read mode
 
 - GIVEN the same comments with edit mode off
 - WHEN a chip is opened
 - THEN the title stays the word Comment, or TODO for a TODO comment
 
-### Scenario (boundary): What is a TODO comment
+### Scenario S3 (boundary): What is a TODO comment
 
 | Comment text | Kind |
 | --- | --- |
@@ -58,7 +67,7 @@ While edit mode is on, when the writer opens an HTML comment chip, the preview S
 | Starts with TODOS or TODO_ | comment (gray chip) |
 | Has TODO later in the text, not at the start | comment (gray chip) |
 
-### Scenario (refusal): Title is data
+### Scenario S4 (refusal): Title is data
 
 - GIVEN a comment whose text holds markup
 - WHEN the document is rendered

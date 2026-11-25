@@ -53,7 +53,8 @@ const VARIANTS = [
 
 export const CARD_GRID_FORM_SCENARIOS: ScenarioDefinition[] = VARIANTS.flatMap((variant, index) => [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-270
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-270#S1
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-270#S2
     id: `palette-slash/v${40 + index * 2}-card-form-${variant.name}-900`,
     fixture: "78-card-grid-forms",
     theme: variant.theme,
@@ -68,7 +69,7 @@ export const CARD_GRID_FORM_SCENARIOS: ScenarioDefinition[] = VARIANTS.flatMap((
     description: `Edit mode, ${variant.name} preview, 900 px: the Card button of the MyST edit bar opens the card form (title, header, footer, link) under the bar, filled in.`,
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S1
     id: `palette-slash/v${41 + index * 2}-grid-form-${variant.name}-900`,
     fixture: "78-card-grid-forms",
     theme: variant.theme,

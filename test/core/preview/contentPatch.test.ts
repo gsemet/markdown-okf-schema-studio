@@ -82,7 +82,7 @@ test("T34: extractMainContent returns the inner HTML of the content container of
   assert.equal(extractMainContent("<html><body><p>no container</p></body></html>"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S3
 test("T34: two renders of one document type have equal shell keys despite other text, nonces and identifiers", async () => {
   const first = await page("# Title\n\nFirst paragraph.\n", { requestId: 1, version: 1 });
   const second = await page("# Another title\n\nA different paragraph with **bold** text.\n\n- item\n", {
@@ -123,7 +123,7 @@ test("T34: the shell key ignores the status region and the runtime script, and n
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S2
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S7
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-071
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-071#S1
 test("T34: shell keys differ when Mermaid appears or disappears, and when math appears", async () => {
   const plain = await page("Text only.\n");
   const diagram = await page("Text only.\n\n" + MERMAID);
@@ -199,7 +199,8 @@ test("T34: content that mentions a container inside the content does not change 
   assert.equal(shellKey(nested), shellKey(html));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S10
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S11
 test("T34: the runtime context key covers the startup settings and nothing the page follows itself", () => {
   const base = {
     documentId: "file:///a.md",
@@ -318,7 +319,8 @@ test("the page script is injected verbatim even when it contains replacement pat
   assert.equal(built.html.split("</body>").length, 2, "the closing tag is not duplicated by a replacement pattern");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S6
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S10
 test("P-03: a plan parses the new page only, because the loaded page was analyzed as the previous new page", async () => {
   const first = await page("# Title\n\nFirst.\n", { requestId: 1001 });
   const second = await page("# Title\n\nSecond.\n", { requestId: 1003 });

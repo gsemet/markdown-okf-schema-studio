@@ -1216,7 +1216,8 @@ test("Escape closes the editor after a refused frontmatter value save", () => {
   assert.equal(frontmatterSaves(harness).length, before);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S8
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
 test("a click on another field after a refused value save closes the refused editor and opens the other", () => {
   const { harness, control, click, titleCell, titleDisplay } = refusedNumberEditor();

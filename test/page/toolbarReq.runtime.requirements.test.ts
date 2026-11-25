@@ -18,7 +18,7 @@ const OTHER_RENDERS = [
   { name: "another request", ids: { ...OWN, requestId: 12 } },
 ] as const;
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S7
 test("Back and Next ignore a history state of another document, revision or request, and follow the current render's", () => {
   const harness = createRuntimeHarness();
   for (const { name, ids } of OTHER_RENDERS) {
@@ -36,7 +36,7 @@ test("Back and Next ignore a history state of another document, revision or requ
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S9
 test("the Anchor button ignores a pairing of another document, revision or request, and follows its own document's", () => {
   const harness = createRuntimeHarness();
   assert.equal(harness.anchorButton.disabled, false);

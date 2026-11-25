@@ -86,7 +86,8 @@ function dragTo(harness: RuntimeHarness, item: RuntimeElement, clientY: number, 
   handle.dispatch("dragend");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("edit mode shows a handle beside each item of a list, on its first line, and pushes a list with no room", () => {
   const harness = createRuntimeHarness();
   const { list, items } = fakeList(harness);
@@ -118,7 +119,8 @@ test("edit mode shows a handle beside each item of a list, on its first line, an
   assert.equal(list.getAttribute("data-okf-list-shift"), null, "and the push");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("an item with sub-items keeps its handle on its first line; the nested list has its own handles", () => {
   const harness = createRuntimeHarness();
   const outer = fakeList(harness, { left: 60, tag: "ol" });
@@ -134,7 +136,8 @@ test("an item with sub-items keeps its handle on its first line; the nested list
   assert.equal(outer.list.getAttribute("data-okf-list-shift"), null, "room on the left: no push");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("a one-item list, an included list and a list of the properties table get no handle", () => {
   const harness = createRuntimeHarness();
   fakeList(harness, { count: 1 });
@@ -147,7 +150,8 @@ test("a one-item list, an included list and a list of the properties table get n
   assert.deepEqual(liveHandles(harness).map((handle) => handle.getAttribute("data-okf-list-item-line")), ["60", "61"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S5
 test("the handles of a list in nested admonitions sit left of the outermost box, which is pushed when needed", () => {
   const harness = createRuntimeHarness();
   const outer = container(harness, "aside", { class: "admonition note" }, 40);
@@ -173,7 +177,7 @@ test("the handles of a list in nested admonitions sit left of the outermost box,
   assert.equal(quoted.list.getAttribute("data-okf-list-shift"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
 test("dragging a handle onto a sibling moves the item with one open, one final save and no editor", () => {
   const harness = createRuntimeHarness();
   const { items } = fakeList(harness);
@@ -208,7 +212,7 @@ test("dragging a handle onto a sibling moves the item with one open, one final s
   assert.ok(harness.createdElements.every((element) => element.tagName !== "TEXTAREA"), "no editor opened");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S5
 test("an item of a list in a GitHub alert moves on the list's own lines, its quote prefix kept", () => {
   const harness = createRuntimeHarness();
   const alert = container(harness, "aside", { class: "admonition note", "data-okf-github-alert": "true" }, 40);
@@ -221,7 +225,8 @@ test("an item of a list in a GitHub alert moves on the list's own lines, its quo
   assert.equal(messagesOf(harness, "previewEditSave")[0]?.editedText, "> - a\n> - c\n> - b\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("a drop in place, outside the list or over another list requests nothing", () => {
   const harness = createRuntimeHarness();
   const { items } = fakeList(harness);
@@ -242,7 +247,8 @@ test("a drop in place, outside the list or over another list requests nothing", 
   assert.equal(messagesOf(harness, "previewEditOpen").length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("a drop over a nested item of a sibling lands before or after that sibling, sub-items moving with it", () => {
   const harness = createRuntimeHarness();
   const { items } = fakeList(harness);
@@ -257,7 +263,8 @@ test("a drop over a nested item of a sibling lands before or after that sibling,
   assert.equal(messagesOf(harness, "previewEditSave")[0]?.editedText, "- b\n  - b1\n  - b2\n- a\n- c\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S2
 test("Alt+Down and Alt+Up on a handle move the item by one, nothing at the ends, a repeat waits for the render", () => {
   const harness = createRuntimeHarness();
   const { items } = fakeList(harness, { tag: "ol" });
@@ -288,7 +295,8 @@ test("Alt+Down and Alt+Up on a handle move the item by one, nothing at the ends,
   assert.equal(messagesOf(harness, "previewEditOpen").length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S6
 test("a refused source, a source that does not read as the items or a lost answer leaves the document alone", () => {
   const harness = createRuntimeHarness();
   const { items } = fakeList(harness);
@@ -312,7 +320,8 @@ test("a refused source, a source that does not read as the items or a lost answe
   assert.equal(messagesOf(harness, "previewEditOpen").length, 6);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S7
 test("no move while a block editor or the frontmatter editor is open", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   const { items } = fakeList(harness);
@@ -336,7 +345,8 @@ test("no move while a block editor or the frontmatter editor is open", () => {
   assert.equal(messagesOf(front, "previewEditOpen").length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("a click on a handle opens no editor and the pointer over it outlines the item it moves", () => {
   const harness = createRuntimeHarness();
   const { items } = fakeList(harness);
@@ -350,7 +360,8 @@ test("a click on a handle opens no editor and the pointer over it outlines the i
   assert.equal(items[1]!.getAttribute("data-sphinx-preview-edit-hover"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("placing the handles reads the box of a list once per pass, not once per handle", () => {
   const harness = createRuntimeHarness();
   const { list, items } = fakeList(harness, { count: 12 });

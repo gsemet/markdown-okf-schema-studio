@@ -16,6 +16,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-007
+scenarios:
+- id: S1
+  title: A rejected background task is logged
+- id: S2
+  title: A task that succeeds or does not exist logs nothing
+- id: S3
+  title: A rejected storage write reaches the logger of the host
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,19 +41,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a task the extension starts without waiting for it (a background write, a debounced refresh or a post to the page) is rejected, the extension SHALL report the failure to the logger of the host, the Markdown OKF-Schema Studio output channel in VS Code, instead of leaving an unhandled rejection or writing to the console.
 
-### Scenario (nominal): A rejected background task is logged
+### Scenario S1 (nominal): A rejected background task is logged
 
 - GIVEN a host whose logger records its entries and a background task that rejects with an error
 - WHEN the extension starts the task with fireAndForget under a context such as "Saving the choice"
 - THEN the logger receives one error entry "Saving the choice failed." carrying the error, and no unhandled rejection is raised
 
-### Scenario (boundary): A task that succeeds or does not exist logs nothing
+### Scenario S2 (boundary): A task that succeeds or does not exist logs nothing
 
 - GIVEN a background task that resolves, or an optional call that returned no task
 - WHEN the extension starts it with fireAndForget
 - THEN the logger receives no entry
 
-### Scenario (nominal): A rejected storage write reaches the logger of the host
+### Scenario S3 (nominal): A rejected storage write reaches the logger of the host
 
 - GIVEN workspace storage whose update rejects
 - WHEN the reader changes a view preference

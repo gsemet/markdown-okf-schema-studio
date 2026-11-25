@@ -57,9 +57,9 @@ NATIVE = """({ kind, source }) => {
 CHROME = ("data-okf-comment", "<button", "data-line-number")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-272
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-273
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-274
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-272#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-273#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-274#S1
 def check_raw_copy(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Every case sets a real Range, dispatches a copy event and compares the text/plain with the
   source cut between the two characters under the edges; text/html holds the rendered elements

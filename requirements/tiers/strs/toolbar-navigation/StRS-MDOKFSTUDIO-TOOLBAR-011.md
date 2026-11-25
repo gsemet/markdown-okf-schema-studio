@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: See where a link leads and open it
+- id: S2
+  title: Follow an anchor
 user_need: "As a reader, I click a link and land on the right document, line, heading
   or web page. When a link cannot be followed I am told why. I rest the pointer on
   a link and read where it goes before I click, and a small warning icon next to a
@@ -78,7 +83,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: See where a link leads and open it
+#### Path S1: See where a link leads and open it
 
 1. A link comes into view
    - SwRS-MDOKFSTUDIO-TOOLBAR-079: the page asks the host for the target of its request, and the host answers with its kind and its path or reason
@@ -95,7 +100,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-TOOLBAR-094 (refusal): a path outside every root is blocked
 5. The file is open
 
-#### Path 2: Follow an anchor
+#### Path S2: Follow an anchor
 
 1. A link comes into view
    - SwRS-MDOKFSTUDIO-TOOLBAR-117: the reader follows an anchor, and the page scrolls to the mapped block to the reading line below the band

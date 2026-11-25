@@ -21,6 +21,17 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+scenarios:
+- id: S1
+  title: The label follows the state
+- id: S2
+  title: Pressing the button
+- id: S3
+  title: The host refreshes the marks at once
+- id: S4
+  title: Another preference schedules nothing
+- id: S5
+  title: The setting
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,32 +51,32 @@ default_owner_email: gaetan@xeberon.net
 
 When the page applies the Diff state, the page SHALL set the Diff button to pressed with the label Hide changes since last commit while the marks are shown, and to not pressed with the label Show changes since last commit while they are hidden, hide or show the change bars at once and post the incomingChanges view preference when the reader presses it, and show no change marks and no Diff button when markdownOkfSchemaStudio.preview.showIncomingChanges is false.
 
-### Scenario (nominal): The label follows the state
+### Scenario S1 (nominal): The label follows the state
 
 | Input | Outcome |
 | --- | --- |
 | Marks shown, the page starts | the button has aria-pressed true and its aria-label, title and tooltip read Hide changes since last commit |
 | Marks hidden, the page starts | the button has aria-pressed false and reads Show changes since last commit |
 
-### Scenario (nominal): Pressing the button
+### Scenario S2 (nominal): Pressing the button
 
 - GIVEN bars shown, then bars hidden
 - WHEN the reader presses the Diff button, then presses it again
 - THEN the first press hides the bar layer, posts the preference false and the host stops sending ranges; the second press shows the bars again and posts the preference true
 
-### Scenario (nominal): The host refreshes the marks at once
+### Scenario S3 (nominal): The host refreshes the marks at once
 
 - GIVEN a preview with marks shown
 - WHEN the reader presses the Diff button
 - THEN the host stores incomingChanges false and schedules the incoming-change update with no delay
 
-### Scenario (refusal): Another preference schedules nothing
+### Scenario S4 (refusal): Another preference schedules nothing
 
 - GIVEN a change of the toc preference
 - WHEN the host handles it
 - THEN no incoming-change update is scheduled
 
-### Scenario (boundary): The setting
+### Scenario S5 (boundary): The setting
 
 | Input | Outcome |
 | --- | --- |

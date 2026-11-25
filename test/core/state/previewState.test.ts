@@ -6,7 +6,7 @@ import {
   parsePreviewPanelState,
 } from "../../../src/core/state/previewState";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-127
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-127#S7
 test("parses bounded preview panel state and preserves supported fields", () => {
   const state = parsePreviewPanelState({
     documentId: "file:///workspace/active.md",

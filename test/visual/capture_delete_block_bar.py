@@ -59,7 +59,8 @@ def _check_buttons(scenario: dict, failures: list[Failure], bar: dict) -> None:
     failures.append(Failure(page_name, f"delete block bar: the Delete block button is {gap:.1f} px from the down arrow"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S2
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 def check_delete_block_bar(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """`bar`: hovering the middle paragraph shows + up down and the Delete block button, which touches
   the down arrow (`hover` step). `status`: a refused move shows its reason right of the Delete block

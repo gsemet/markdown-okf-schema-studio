@@ -15,6 +15,17 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-001
+scenarios:
+- id: S1
+  title: Another document replaces the one shown in the panel
+- id: S2
+  title: A fresh panel
+- id: S3
+  title: The same document reloads
+- id: S4
+  title: E switches to edit mode
+- id: S5
+  title: E with a modifier or in a text field
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,31 +44,31 @@ default_owner_email: gaetan@xeberon.net
 
 When a document opens in a panel, the extension SHALL start the page in preview mode, unless the saved state of that same document holds edit mode, and while the page is in preview mode the extension SHALL switch to edit mode when E is pressed alone outside any text field.
 
-### Scenario (nominal): Another document replaces the one shown in the panel
+### Scenario S1 (nominal): Another document replaces the one shown in the panel
 
 - GIVEN a panel whose saved state names document A with edit mode on
 - WHEN document B opens in the same panel
 - THEN B starts in preview mode, whatever the stored workspace edit mode is
 
-### Scenario (nominal): A fresh panel
+### Scenario S2 (nominal): A fresh panel
 
 - GIVEN a panel with no saved state and a workspace whose stored edit mode is true
 - WHEN a document opens
 - THEN the page starts in preview mode
 
-### Scenario (boundary): The same document reloads
+### Scenario S3 (boundary): The same document reloads
 
 - GIVEN a panel whose saved state names the same document with edit mode on
 - WHEN the page reloads
 - THEN the page starts in edit mode (see SwRS-MDOKFSTUDIO-LIFE-170)
 
-### Scenario (nominal): E switches to edit mode
+### Scenario S4 (nominal): E switches to edit mode
 
 - GIVEN a page in preview mode with a working Edit button
 - WHEN E is pressed alone, with focus outside any text field
 - THEN the page switches to edit mode as the Edit button does
 
-### Scenario (boundary): E with a modifier or in a text field
+### Scenario S5 (boundary): E with a modifier or in a text field
 
 - GIVEN a page in preview mode
 - WHEN E is pressed with Ctrl, Cmd, Alt or Shift, or inside an input, a text area, a select or an editable element

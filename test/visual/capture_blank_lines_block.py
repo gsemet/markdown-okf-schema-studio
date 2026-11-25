@@ -37,8 +37,10 @@ READ = """() => {
 }"""
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 def check_blank_lines_block(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """`edit`: two blank-line blocks between the paragraphs (three blank lines, the first is the hidden
   separator), their label drawn by CSS, the button hidden
@@ -170,9 +172,12 @@ EDITOR_HOME = """() => {
 }"""
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S3
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S3
 def check_blank_lines_in_lists(page: Page, scenario: dict, failures: list[Failure], mode: str) -> None:
   """The fixture `93-blank-lines-in-lists`: a run of three blank lines between the first two items and one between the two
   paragraphs of the second item each show two blocks (the first blank line is the separator) inside their item, as wide as the item's text (the first may stop short of the

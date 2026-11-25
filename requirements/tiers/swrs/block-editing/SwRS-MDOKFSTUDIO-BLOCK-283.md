@@ -17,6 +17,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: setting off
+- id: S2
+  title: both edges inside one item
+- id: S3
+  title: boundary crossed at the start
+- id: S4
+  title: boundary crossed at the end
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,25 +44,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the balance-edges setting is on and a selection starts inside a list item it does not entirely contain, the raw copy SHALL begin with that item's marker, shift every copied line of the list left by the indentation of the shallowest copied item and keep the first marker line at most at column 3, and when both edges lie inside one item it SHALL copy its content with the item's indentation removed.
 
-### Scenario: setting off
+### Scenario S1: setting off
 
 - GIVEN the setting is off and a nested list
 - WHEN the selection starts in a nested item
 - THEN the copy is the source verbatim
 
-### Scenario: both edges inside one item
+### Scenario S2: both edges inside one item
 
 - GIVEN the setting is on and both edges lie inside one list item
 - WHEN the reader copies
 - THEN the clipboard holds its content without the marker or the indentation
 
-### Scenario: boundary crossed at the start
+### Scenario S3: boundary crossed at the start
 
 - GIVEN the setting is on and the selection starts inside a list item and ends after it
 - WHEN the reader copies
 - THEN the copy begins with the item's marker, the lines are shifted left by the shallowest copied item and the first marker is at most at column 3
 
-### Scenario: boundary crossed at the end
+### Scenario S4: boundary crossed at the end
 
 - GIVEN the setting is on and the selection starts before a list and ends inside an item
 - WHEN the reader copies

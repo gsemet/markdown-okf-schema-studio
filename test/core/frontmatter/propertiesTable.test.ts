@@ -896,7 +896,8 @@ test("a long key carries its full name as tooltip, a short key keeps the row too
   assert.match(markup, /<span class="okf-name-text">name<\/span>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215#S2
 test("CR 155: with source mapping every field row carries the source lines of its field", () => {
   const sourceText = "---\ntitle: Example\ntags:\n  - a\n  - b\nowner: Team\n---\n\n# Body\n";
   const result = analyzeFrontmatter({
@@ -914,7 +915,7 @@ test("CR 155: with source mapping every field row carries the source lines of it
   assert.doesNotMatch(renderPropertiesTable(result, true), /data-okf-line/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("with source mapping the properties section carries the closing fence line, in LF and CRLF text", () => {
   const endLineOf = (sourceText: string, mapped = true): string | undefined => {
     const result = analyzeFrontmatter({

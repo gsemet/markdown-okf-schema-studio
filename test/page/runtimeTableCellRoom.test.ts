@@ -39,7 +39,8 @@ function openInColumn(layout: Layout, start?: [number, number]) {
   return { harness, roomOf, withRoom, column: opened.cells[0][0].closest("table")!.parentElement!, ...opened };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S6
 test("a cell opened in a 200 px column gets the room of the column less 16 px margins and its own padding and borders", () => {
   const { cells, roomOf, withRoom } = openInColumn({ column: 200 });
   // 200 - 2 x 16 - 2 x 10 - 2 x 1.
@@ -47,19 +48,21 @@ test("a cell opened in a 200 px column gets the room of the column less 16 px ma
   assert.deepEqual(withRoom(), [cells[1][0]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S9
 test("the row-handle shift of the table is subtracted from the room", () => {
   const { cells, roomOf } = openInColumn({ column: 200, shift: "35.2px" });
   assert.equal(roomOf(cells[1][0]), "110.8px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S7
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S8
 test("in a wide column the room is 300 px or more, so the cell keeps its 300 px minimum", () => {
   const { cells, roomOf } = openInColumn({ column: 700 });
   assert.ok(Number.parseFloat(roomOf(cells[1][0])) >= 300);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S6
 test("Tab to the next cell moves the room property to it", () => {
   const { cells, roomOf, input, withRoom } = openInColumn({ column: 200 });
   input().dispatch("keydown", { key: "Tab", preventDefault: () => undefined });
@@ -68,7 +71,8 @@ test("Tab to the next cell moves the room property to it", () => {
   assert.deepEqual(withRoom(), [cells[1][1]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S4
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S5
 test("a window resize under the open editor measures the room again", () => {
   const { harness, cells, roomOf, column } = openInColumn({ column: 200 });
   assert.equal(roomOf(cells[1][0]), "146px");
@@ -78,7 +82,8 @@ test("a window resize under the open editor measures the room again", () => {
   assert.equal(roomOf(cells[1][0]), "206px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S5
 test("closing the cell editor with Escape or Done leaves no cell with the room property", () => {
   const escaped = openInColumn({ column: 200 });
   assert.equal(escaped.withRoom().length, 1);

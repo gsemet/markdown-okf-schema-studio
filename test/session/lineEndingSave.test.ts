@@ -18,7 +18,8 @@ async function save(text: string, line: number, endLine: number, editedText: str
   return { after: run.document.getText(), block };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S3
 test("a saved block of a fixture document keeps every other byte and its own line endings", async () => {
   for (const name of LINE_ENDING_FIXTURE_NAMES) {
     const text = readLineEndingFixture(name);
@@ -35,7 +36,8 @@ test("a saved block of a fixture document keeps every other byte and its own lin
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S3
 test("the last block of a CRLF fixture takes CR LF, with or without a final line break", async () => {
   for (const [name, ending] of [["document.crlf.md", "\r\n"], ["no-final-newline.crlf.md", ""]] as const) {
     const text = readLineEndingFixture(name);

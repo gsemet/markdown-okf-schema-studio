@@ -18,6 +18,11 @@ verified:
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Edit and see the preview follow
+- id: S2
+  title: Read text of any script
 user_need: Writers need to read their Markdown as formatted text, at any length,
   in any script and direction, while they type.
 derived_by:
@@ -112,7 +117,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Edit and see the preview follow
+#### Path S1: Edit and see the preview follow
 
 1. A Markdown file is open beside its preview
    - SwRS-MDOKFSTUDIO-CORE-001: the buffer changes and the extension renders the unsaved text completely
@@ -120,7 +125,7 @@ sequenceDiagram
    - SwRS-MDOKFSTUDIO-LIFE-094: another tool, an undo or a redo changes the text and the updated blocks glow briefly
 3. The updated blocks glow briefly
 
-#### Path 2: Read text of any script
+#### Path S2: Read text of any script
 
 1. The preview shows the unsaved text
    - SwRS-MDOKFSTUDIO-CORE-041: a paragraph, heading, list item, quote or cell without a direction gets automatic direction, so right-to-left text aligns to the right

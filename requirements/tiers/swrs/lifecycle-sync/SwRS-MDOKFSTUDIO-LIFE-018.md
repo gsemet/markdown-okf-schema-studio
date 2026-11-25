@@ -18,6 +18,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Declared editor
+- id: S2
+  title: The tab shows its own file
+- id: S3
+  title: The editor opens before the render ends
+- id: S4
+  title: Other previews stay open
+- id: S5
+  title: A document that is not a saved Markdown file
+- id: S6
+  title: A failure while opening
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,42 +49,42 @@ default_owner_email: gaetan@xeberon.net
 
 When a reader opens a .md file with the optional Markdown OKF-Schema Studio editor through Open With, the extension SHALL resolve the editor at once and show that file in a tab that keeps showing it whatever editor becomes active, leave the other previews open, and show a page that names the refusal or the failure when the document is not a saved .md file or the preview cannot be created.
 
-### Scenario (nominal): Declared editor
+### Scenario S1 (nominal): Declared editor
 
 - GIVEN the package manifest
 - WHEN the custom editors are read
 - THEN one editor has the view type markdown-okf-schema-studio.editor, the display name Markdown OKF-Schema Studio, the selector *.md and the priority option
 - AND a .md file opened with a double click opens in the text editor, never in the Studio (priority option; deduced from VS Code behaviour, not run)
 
-### Scenario (nominal): The tab shows its own file
+### Scenario S2 (nominal): The tab shows its own file
 
 - GIVEN preview.md open in a text editor
 - WHEN the reader runs Open With and chooses Markdown OKF-Schema Studio
 - THEN the tab shows the rendered preview.md and its title is the bare file name preview.md (integration test test/integration/stockCoexistence.test.ts, the optional MyST Open With editor)
 - AND when a text editor of preview-other.md becomes active, the Open With tab keeps showing preview.md
 
-### Scenario (nominal): The editor opens before the render ends
+### Scenario S3 (nominal): The editor opens before the render ends
 
 | Input | Outcome |
 | --- | --- |
 | a first render delayed by two seconds, the file opened with the Studio Open With editor | the open call returns within one second with a pending status page (Preview pending), and the rendered view appears when the render ends (integration test test/integration/stockCoexistence.test.ts) |
 | a render that ends at once | the pending page is replaced by the rendered page without any further action |
 
-### Scenario (nominal): Other previews stay open
+### Scenario S4 (nominal): Other previews stay open
 
 | Input | Outcome |
 | --- | --- |
 | a side preview and the stock Markdown preview open, the same file opened with the Studio Open With editor | the side preview is not disposed and the Open With tab is active (integration test test/integration/stockCoexistence.test.ts) |
 | the Open With tab split to the right | the original tab stays, the side preview is not disposed and the active preview still shows the document |
 
-### Scenario (refusal): A document that is not a saved Markdown file
+### Scenario S5 (refusal): A document that is not a saved Markdown file
 
 | Input | Outcome |
 | --- | --- |
 | a document with a scheme other than file opened with the Studio Open With editor | its page shows Preview source missing and the message Markdown OKF-Schema Studio requires a Markdown file. |
 | a saved .md file | the refusal page is not shown and the file renders |
 
-### Scenario (refusal): A failure while opening
+### Scenario S6 (refusal): A failure while opening
 
 | Input | Outcome |
 | --- | --- |

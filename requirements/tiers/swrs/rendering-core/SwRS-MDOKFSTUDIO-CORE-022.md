@@ -21,6 +21,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-CORE-003
 - StRS-MDOKFSTUDIO-MYST-005
 depends_on: []
+scenarios:
+- id: S1
+  title: Unknown directive
+- id: S2
+  title: Directives that only a build resolves
+- id: S3
+  title: Citations
+- id: S4
+  title: Bibliography directive
+- id: S5
+  title: Notebook output and code cell output
+- id: S6
+  title: Inert styling
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -51,13 +64,13 @@ supersedes:
 
 When a document holds a construct that only a full project build can resolve (an unknown directive, `toc`, an unexpanded `{include}`, `{embed}`, `{glossary}`, a known directive that renders nothing, a `{cite}` role, a `{bibliography}` directive, a `#tbl:` notebook output reference or an unexecuted `{code-cell}` output), the extension SHALL render an inert, muted placeholder that shows the name, arguments and body as text and list a warning for a directive, a notebook output or a code cell output while the render stays successful.
 
-### Scenario (nominal): Unknown directive
+### Scenario S1 (nominal): Unknown directive
 - GIVEN an unknown directive `{foo} bar` with a body, or `{animation}` with a body, on line 4
 - WHEN the preview renders
 - THEN a placeholder shows `{foo} bar` and the body text, mapped to its line
 - AND the status region lists one warning "Directive {foo} is not available outside a full build." with line 4 and the status is "Preview ready"
 
-### Scenario (boundary): Directives that only a build resolves
+### Scenario S2 (boundary): Directives that only a build resolves
 | Input | Outcome |
 | --- | --- |
 | `toc` | the same placeholder and the same warning |
@@ -68,26 +81,26 @@ When a document holds a construct that only a full project build can resolve (an
 | a supported directive (admonitions, figure, image, tables, grid, toctree, math, code family, mermaid, uml, include) | no placeholder and no such warning |
 | a document with no unresolved directive | no such warning is listed |
 
-### Scenario (boundary): Citations
+### Scenario S3 (boundary): Citations
 | Input | Outcome |
 | --- | --- |
 | `{cite}`smith2020`` | `[smith2020]` in muted text with the tooltip "Unresolved citation: smith2020"; an inert citation placeholder; no warning is listed |
 | `{cite}`a,b,c`` in a paragraph, a list and an admonition | the group stays in its paragraph with every key kept and no warning is listed |
 | a document without a `{bibliography}` | no bibliography is appended |
 
-### Scenario (nominal): Bibliography directive
+### Scenario S4 (nominal): Bibliography directive
 - GIVEN a `{bibliography}` directive
 - WHEN the preview renders
 - THEN the placeholder says "Bibliography resolves at build time."
 - AND a document without the directive shows no such note
 
-### Scenario (nominal): Notebook output and code cell output
+### Scenario S5 (nominal): Notebook output and code cell output
 - GIVEN an unexecuted `{code-cell}` output
 - WHEN the preview renders
 - THEN a note "Code cell output is not executed in the active-file preview; it is available in a full project build." is shown with a warning on its line
 - AND a `#tbl:` notebook output reference shows a note "Notebook output #tbl:... is only available in a full project build." with a warning on its line
 
-### Scenario (nominal): Inert styling
+### Scenario S6 (nominal): Inert styling
 | Placeholder | Style |
 | --- | --- |
 | unresolved directive | muted text in a dashed box |

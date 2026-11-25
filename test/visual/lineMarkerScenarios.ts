@@ -193,8 +193,8 @@ const EDIT_TAB_ASSERTIONS: ContentAssertion[] = [
 
 export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
     id: `lifecycle-sync/v0${4 + index}-line-marker-code-line-${theme}-900`,
     fixture: FIXTURE,
     theme,
@@ -207,7 +207,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "that line.",
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S1
     id: "lifecycle-sync/v06-line-marker-edit-mode-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -220,7 +220,8 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "and its arrow overlaps no table row handle, list handle or block action and opens no editor.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
     id: "lifecycle-sync/v07-line-marker-soft-wrapped-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -232,7 +233,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "marks that wrapped line (not the top of the paragraph) with the arrow and the band, inside the viewport.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
     id: "lifecycle-sync/v08-line-marker-table-line-dark-900",
     fixture: FIXTURE,
     theme: "dark",
@@ -243,7 +244,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Dark theme, 900 px pane: the page asked to show the second body row of a table marks that row, within 3 px of its top.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
     id: "lifecycle-sync/v09-line-marker-folded-section-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -259,7 +260,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "marker is drawn on the line.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
     id: "lifecycle-sync/v10-line-marker-closed-dropdown-dark-900",
     fixture: FIXTURE,
     theme: "dark",
@@ -271,7 +272,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "marker is drawn on the line.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S1
     id: "lifecycle-sync/v11-line-marker-edit-mode-list-dark-900",
     fixture: FIXTURE,
     theme: "dark",
@@ -284,7 +285,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "arrow overlaps no list item handle, row handle or block action and opens no editor.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
     id: "lifecycle-sync/v12-line-marker-high-contrast-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -297,7 +298,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "system highlight colour, with no fill.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S1
     id: "lifecycle-sync/v13-line-marker-jump-if-off-screen-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -310,7 +311,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
       + "scroll, draws the arrow and the band on that line and leaves the page scrolled where it was.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
     id: "lifecycle-sync/v14-line-marker-delimiter-line-light-900",
     fixture: PRECISION,
     theme: "light",
@@ -321,7 +322,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Light theme, 900 px pane: the page asked to show the delimiter line of a table marks the header row.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
     id: "lifecycle-sync/v15-line-marker-quoted-table-row-dark-900",
     fixture: PRECISION,
     theme: "dark",
@@ -332,7 +333,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Dark theme, 900 px pane: the page asked to show a body row of a table inside a quote marks that row.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
     id: "lifecycle-sync/v16-line-marker-note-table-row-light-900",
     fixture: PRECISION,
     theme: "light",
@@ -343,7 +344,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Light theme, 900 px pane: the page asked to show a row of a table inside a note marks that row.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-193#S1
     id: "lifecycle-sync/v17-line-marker-hidden-tab-wrapped-line-light-900",
     fixture: PRECISION,
     theme: "light",
@@ -354,7 +355,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Light theme, 900 px pane: the third source line of a wrapped paragraph in a tab that is not shown selects the tab, then marks that wrapped line.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-193#S1
     id: "lifecycle-sync/v18-line-marker-hidden-tab-code-line-dark-900",
     fixture: PRECISION,
     theme: "dark",
@@ -365,7 +366,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Dark theme, 900 px pane: a code line in a tab that is not shown selects the tab, then marks that code line.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-193#S1
     id: "lifecycle-sync/v19-line-marker-nested-hidden-tab-light-900",
     fixture: PRECISION,
     theme: "light",
@@ -376,7 +377,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Light theme, 900 px pane: a line in a tab nested in a tab that is not shown selects the outer then the inner tab and marks the line.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-194
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-194#S1
     id: "lifecycle-sync/v20-line-marker-front-matter-list-value-dark-900",
     fixture: PRECISION,
     theme: "dark",
@@ -387,7 +388,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Dark theme, 900 px pane: a line in the list value of a front matter property marks the row of that property.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-194
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-194#S1
     id: "lifecycle-sync/v21-line-marker-front-matter-comment-light-900",
     fixture: PRECISION,
     theme: "light",
@@ -398,7 +399,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Light theme, 900 px pane: a comment line of the front matter marks the top of the properties table.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S1
     id: "lifecycle-sync/v22-line-marker-edit-mode-property-row-dark-900",
     fixture: PRECISION,
     theme: "dark",
@@ -410,7 +411,7 @@ export const LINE_MARKER_SCENARIOS: ScenarioDefinition[] = [
     description: "Dark theme, 900 px pane, edit mode: a property row is marked, the arrow meets no control and no editor opens.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S1
     id: "lifecycle-sync/v23-line-marker-edit-mode-tab-panel-dark-900",
     fixture: PRECISION,
     theme: "dark",

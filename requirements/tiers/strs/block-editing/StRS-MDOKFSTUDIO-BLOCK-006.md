@@ -16,6 +16,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Type, then finish
+- id: S2
+  title: Leave while typing
 user_need: As a writer, I never lose the text I typed in the preview, saved to
   my Markdown file as I type; I keep it or drop it with one clear action; and I
   leave the block, the file or the window with my last words saved first.
@@ -101,7 +106,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Type, then finish
+#### Path S1: Type, then finish
 
 1. A block editor is open
    - SwRS-MDOKFSTUDIO-BLOCK-042: 400 milliseconds after the last keystroke the text is autosaved as the smallest single replacement
@@ -117,7 +122,7 @@ sequenceDiagram
    - SwRS-MDOKFSTUDIO-BLOCK-058: the preview renders once after the final save
 4. The preview shows the saved block once
 
-#### Path 2: Leave while typing
+#### Path S2: Leave while typing
 
 1. A block editor is open
    - SwRS-MDOKFSTUDIO-BLOCK-205: a followed link, Back or another document saves the typed text first

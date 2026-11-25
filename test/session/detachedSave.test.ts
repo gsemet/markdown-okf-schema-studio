@@ -33,7 +33,7 @@ async function detach(run: Run): Promise<void> {
 const errors = (run: Run) => run.of("previewEditSource").filter((entry) => typeof entry.error === "string");
 const dones = (run: Run) => run.of("previewEditSource").filter((entry) => entry.done === true);
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("a detached save completes with done and renderFollows, and the host edit ends", async () => {
   const { run, open } = heldSave();
   run.manager.sourceAvailable = () => true;
@@ -49,7 +49,7 @@ test("a detached save completes with done and renderFollows, and the host edit e
   assert.equal(run.preview.edits.active, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("a detached save that wrote nothing ends with a plain done", async () => {
   const run = fixture();
   await run.send("previewEditOpen", FIRST);
@@ -59,7 +59,7 @@ test("a detached save that wrote nothing ends with a plain done", async () => {
   assert.equal(dones(run)[0]!.renderFollows, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("an idle edit completes at the detach, with its answer", async () => {
   const run = fixture();
   await run.send("previewEditOpen", FIRST);
@@ -69,7 +69,8 @@ test("an idle edit completes at the detach, with its answer", async () => {
   assert.equal(dones(run).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
 test("a refused final save answers with the writer's text; an open and an autosave give none", async () => {
   const run = fixture();
   await run.send("previewEditOpen", FIRST);
@@ -79,7 +80,8 @@ test("a refused final save answers with the writer's text; an open and an autosa
   assert.equal(errors(run)[1]!.unsavedText, "Changed.\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("a detached save that fails gives the text back and waits for the page", async () => {
   const { run } = heldSave();
   run.hooks.rejectWith = new Error("disk full");
@@ -96,7 +98,7 @@ test("a detached save that fails gives the text back and waits for the page", as
   assert.equal(run.preview.edits.watchedPageEditorId, "e1");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("a Cancel that crosses the error does not detach the edit: the host waits for the reopen", async () => {
   const run = fixture();
   await run.send("previewEditOpen", FIRST);
@@ -106,7 +108,8 @@ test("a Cancel that crosses the error does not detach the edit: the host waits f
   assert.equal(run.preview.edits.unsaved?.editId, "e1");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("a normal close after an error forgets the kept text", async () => {
   const run = fixture();
   await run.send("previewEditOpen", FIRST);
@@ -116,7 +119,8 @@ test("a normal close after an error forgets the kept text", async () => {
   assert.equal(run.preview.edits.lock.pageEditor, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S10
 test("a page that cannot reopen the editor gets a warning that copies the text", async () => {
   const { run } = heldSave();
   run.hooks.rejectWith = new Error("disk full");
@@ -134,7 +138,7 @@ test("a page that cannot reopen the editor gets a warning that copies the text",
   assert.deepEqual(copied, ["Changed.\n"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S4
 test("dismissing the warning writes nothing to the clipboard", async () => {
   const { run } = heldSave();
   run.hooks.rejectWith = new Error("disk full");
@@ -148,7 +152,7 @@ test("dismissing the warning writes nothing to the clipboard", async () => {
   assert.deepEqual(copied, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("previewReady does not release a detached edit, whatever blockEditOpen says", async () => {
   const { run, open } = heldSave();
   Object.assign(run.manager.host, { logger: { error: () => undefined, warn: () => undefined, info: () => undefined } });
@@ -164,7 +168,8 @@ test("previewReady does not release a detached edit, whatever blockEditOpen says
   assert.equal(run.preview.edits.active, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("a release of a detached edit keeps a newer page editor", async () => {
   const { run, open } = heldSave();
   await detach(run);
@@ -175,7 +180,7 @@ test("a release of a detached edit keeps a newer page editor", async () => {
   assert.equal(run.preview.edits.lock.pageEditor, "e2");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("an open that arrives during a detached edit is held, at most one, and handled when it ends", async () => {
   const { run, open } = heldSave();
   await detach(run);
@@ -188,7 +193,8 @@ test("an open that arrives during a detached edit is held, at most one, and hand
   assert.equal(run.of("previewEditSource").filter((entry) => entry.editId === "e3").length, 1, "the held open was handled after the end");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S4
 test("a held open is refused when the detached edit fails", async () => {
   const { run } = heldSave();
   run.hooks.rejectWith = new Error("disk full");
@@ -199,7 +205,7 @@ test("a held open is refused when the detached edit fails", async () => {
   assert.deepEqual(errors(run).filter((entry) => entry.error === BUSY).map((entry) => entry.editId), ["e2"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S11
 test("an outside change while a final save is requested gives the text back and keeps the render waiting", async () => {
   const { run, open } = heldSave();
   await run.send("previewEditOpen", FIRST);
@@ -221,7 +227,8 @@ function followDocument(run: Run): void {
   Object.defineProperty(run.preview.stage, "activeDocumentRevision", { get: () => run.document.revision, configurable: true });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("decision 1 (c): an open held during a detached edit gets no answer and opens no page editor", async () => {
   const { run } = heldSave();
   await detach(run);
@@ -232,7 +239,7 @@ test("decision 1 (c): an open held during a detached edit gets no answer and ope
   assert.equal(run.preview.edits.active?.detached, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S2
 test("decision 1 (a): the held open is handled after the end and opens on the written document", async () => {
   const { run, open } = heldSave();
   followDocument(run);
@@ -247,7 +254,8 @@ test("decision 1 (a): the held open is handled after the end and opens on the wr
   assert.equal(run.preview.edits.heldOpen, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S9
 test("a retry of a reopened editor is accepted, with the same identity, and writes the text", async () => {
   const { run } = heldSave();
   run.hooks.rejectWith = new Error("disk full");
@@ -264,7 +272,8 @@ test("a retry of a reopened editor is accepted, with the same identity, and writ
   assert.equal(errors(run).filter((entry) => entry.error !== "disk full").length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S9
 test("a refusal that arrives before the detaching close keeps the text and the page editor wait", async () => {
   const run = fixture();
   await run.send("previewEditOpen", FIRST);
@@ -278,7 +287,8 @@ test("a refusal that arrives before the detaching close keeps the text and the p
   assert.equal(run.preview.edits.watchedPageEditorId, "e1");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("a source block that changed under a final save gives the text back", async () => {
   const run = fixture();
   await run.send("previewEditOpen", FIRST);
@@ -292,7 +302,7 @@ test("a source block that changed under a final save gives the text back", async
   assert.equal(run.preview.edits.lock.pageEditor, "e1");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
 test("a final save VS Code refuses gives the text back", async () => {
   const run = fixture();
   run.hooks.refuse = true;
@@ -302,7 +312,7 @@ test("a final save VS Code refuses gives the text back", async () => {
   assert.equal(error?.unsavedText, "Changed.\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
 test("a Cancel requested before the close restores the block and is not a detach", async () => {
   const run = fixture();
   await run.send("previewEditOpen", FIRST);
@@ -330,7 +340,7 @@ function outsideChange(run: Run): void {
   } as never);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S11
 test("Q16: an outside change while the editor on a final save is still open gives the text back and keeps the editor", async () => {
   const run = fixture();
   await run.send("previewEditOpen", FIRST);
@@ -347,7 +357,8 @@ test("Q16: an outside change while the editor on a final save is still open give
   assert.equal(dones(run).length, 0, "no done: the save did not end");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S10
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S11
 test("Q13: an outside change during a detached final save gives the text back and the page reopens the editor", async () => {
   const { run } = heldSave();
   await detach(run);

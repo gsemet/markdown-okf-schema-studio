@@ -29,7 +29,7 @@ function temporaryFolder(t: { after(fn: () => void): void }): string {
   return folder;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S6
 test("a rename with overwrite replaces the target in one step, never deleting it first", async (t) => {
   const folder = temporaryFolder(t);
   const source = path.join(folder, "notes.comments.json.1a2b.tmp");
@@ -62,7 +62,7 @@ test("a rename without overwrite refuses an existing target and moves onto a fre
   assert.equal(fs.existsSync(source), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S2
 test("rewriting a review comments file through the VS Code host never leaves it missing", async (t) => {
   const folder = temporaryFolder(t);
   const sidecar = path.join(folder, "moved.comments.json");

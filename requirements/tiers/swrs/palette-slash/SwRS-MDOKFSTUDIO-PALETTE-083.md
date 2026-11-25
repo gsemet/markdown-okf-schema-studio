@@ -18,6 +18,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-019
 depends_on: []
+scenarios:
+- id: S1
+  title: Platform key
+- id: S2
+  title: Typed letter first
+- id: S3
+  title: Tooltip and accessible name
+- id: S4
+  title: Wrong command key
+- id: S5
+  title: Keys that never match
+- id: S6
+  title: Button without a shortcut
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,32 +48,32 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Cmd+B, Cmd+I or Cmd+K on macOS, or Ctrl+B, Ctrl+I or Ctrl+K elsewhere, in the block text box, the extension SHALL run Bold, Italic or the Link panel, matching the typed letter before the physical key, matching no other key press, and naming the shortcut in the tooltip of each palette button.
 
-### Scenario (nominal): Platform key
+### Scenario S1 (nominal): Platform key
 
 - GIVEN a block editor with a selected word on Windows
 - WHEN the writer presses Ctrl+B
 - THEN the word is wrapped in ** and the key does not reach VS Code
 
-### Scenario (nominal): Typed letter first
+### Scenario S2 (nominal): Typed letter first
 
 | Input | Outcome |
 | --- | --- |
 | A Dvorak layout where the physical K key types t, and the writer presses Ctrl+K | No shortcut matches and the key stays with the browser |
 | A layout where the physical K key types a Cyrillic letter, and the writer presses Ctrl+K | The Link shortcut matches through the physical key |
 
-### Scenario (nominal): Tooltip and accessible name
+### Scenario S3 (nominal): Tooltip and accessible name
 
 - GIVEN a palette on Windows
 - WHEN the writer hovers Bold
 - THEN the tooltip reads Bold (Ctrl+B) and the accessible name is Bold; on macOS the tooltip uses Cmd
 
-### Scenario (refusal): Wrong command key
+### Scenario S4 (refusal): Wrong command key
 
 - GIVEN a block editor on macOS
 - WHEN the writer presses Ctrl+K
 - THEN the Link panel does not open
 
-### Scenario (refusal): Keys that never match
+### Scenario S5 (refusal): Keys that never match
 
 | Input | Outcome |
 | --- | --- |
@@ -68,7 +81,7 @@ When the writer presses Cmd+B, Cmd+I or Cmd+K on macOS, or Ctrl+B, Ctrl+I or Ctr
 | An IME composition in progress and the writer presses Ctrl+B | No shortcut matches |
 | A plain key, a key with Alt or AltGraph, a key with neither Cmd nor Ctrl, or B, I or K with Shift | No shortcut matches |
 
-### Scenario (boundary): Button without a shortcut
+### Scenario S6 (boundary): Button without a shortcut
 
 - GIVEN the palette
 - WHEN the writer hovers Strikethrough

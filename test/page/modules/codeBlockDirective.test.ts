@@ -18,7 +18,8 @@ const block = [
   "```",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S3
 test("a code-block directive is read into its form values", () => {
   const model = tools.parse(block);
   assert.ok(model);
@@ -27,7 +28,8 @@ test("a code-block directive is read into its form values", () => {
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S2
 test("an untouched directive is written back byte for byte, in every fence style", () => {
   for (const text of [
     block,
@@ -44,7 +46,7 @@ test("an untouched directive is written back byte for byte, in every fence style
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S4
 test("changing a value rewrites only its line and keeps the other options and the code", () => {
   const model = tools.parse(block)!;
   const next = tools.applyValues(model, {
@@ -62,21 +64,23 @@ test("changing a value rewrites only its line and keeps the other options and th
   ].join("\n"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S4
 test("a new option goes after the existing ones and a blank line keeps the code apart", () => {
   const model = tools.parse("```{code-block} python\nprint(1)\n```")!;
   const next = tools.applyValues(model, { ...tools.valuesOf(model), linenos: true, caption: "A: b" });
   assert.equal(tools.serialize(next), "```{code-block} python\n:linenos:\n:caption: A: b\n\nprint(1)\n```");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S4
 test("a YAML option block and other directives are not understood", () => {
   assert.equal(tools.parse("```{code-block} python\n---\nlinenos: true\n---\nx\n```"), undefined);
   assert.equal(tools.parse("```{figure} a.png\n```"), undefined);
   assert.equal(tools.parse("```python\nx\n```"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S2
 test("the directive at the caret is the outermost one, its code is literal; none outside", () => {
   const text = "Intro\n\n" + block + "\n\nOutro";
   const inside = text.indexOf("print('a')");
@@ -91,7 +95,7 @@ test("the directive at the caret is the outermost one, its code is literal; none
   assert.equal(nested.slice(deep.start, deep.end), nested);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S2
 test("a new directive has an empty body line, or wraps the touched lines, with a fence that outgrows the code", () => {
   assert.equal(tools.serialize(tools.newModel("python", [])), "```{code-block} python\n\n```");
   assert.equal(tools.serialize(tools.newModel("", [])), "```{code-block}\n\n```");
@@ -99,7 +103,7 @@ test("a new directive has an empty body line, or wraps the touched lines, with a
   assert.equal(wrapped, "`````{code-block}\n````\nc\n`````");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S2
 test("insertion replaces a blank line, follows a text line or wraps the selected lines", () => {
   const model = (language: string) => {
     const base = tools.newModel(language, []);
@@ -117,7 +121,8 @@ test("insertion replaces a blank line, follows a text line or wraps the selected
   assert.equal(selected.text, "```{code-block} py\n:linenos:\n\nb\n```");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S3
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S4
 test("the form refuses a bad language, emphasized lines, or a multi-line caption or name", () => {
   const ok = { language: "python", linenos: false, emphasizeLines: "1, 3-4", caption: "x", name: "n" };
   assert.deepEqual(tools.validate(ok), {});

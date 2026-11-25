@@ -51,7 +51,8 @@ const CARD_ASSERTIONS: ContentAssertion[] = [
 
 export const CHANGE_BAR_CARD_SCENARIOS: ScenarioDefinition[] = (["light", "dark"] as const).flatMap((theme, index) => [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-221
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-221#S1
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-221#S2
     id: `review-annotations/v${33 + index}-removed-marker-${theme}-900`,
     fixture: "44-change-bar",
     theme,
@@ -64,7 +65,7 @@ export const CHANGE_BAR_CARD_SCENARIOS: ScenarioDefinition[] = (["light", "dark"
       + "and the pointer over it shows Removed lines 21–23 since last commit in a bubble beside the marker, in the gap, over no text.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S1
     id: `review-annotations/v${35 + index}-change-bar-card-${theme}-900`,
     fixture: "44-change-bar",
     theme,

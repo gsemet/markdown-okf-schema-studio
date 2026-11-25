@@ -11,7 +11,8 @@ import {
 
 const at = (startLine: number, endLine = startLine) => ({ startLine, endLine });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S3
 test("a selection touches a change from one line before it to one line after its last line, counted over the inserted text", () => {
   const change = { startLine: 5, endLine: 5, text: "x" };
   assert.equal(touchesSelection([change], [at(4)]), true, "one line before");
@@ -31,7 +32,8 @@ test("a selection touches a change from one line before it to one line after its
   assert.equal(touchesSelection([removed], [at(11)]), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S3
 test("every changed span must touch some selection, and one touching selection is enough for a span", () => {
   const first = { startLine: 1, endLine: 1, text: "x" };
   const far = { startLine: 50, endLine: 50, text: "x" };
@@ -44,7 +46,8 @@ test("every changed span must touch some selection, and one touching selection i
 
 const lines = (count: number, change: (index: number) => string) => Array.from({ length: count }, (_, index) => change(index)).join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S4
 test("a patch lights up at most 50 ranges, and none when there are more", () => {
   assert.equal(MAX_UPDATED_RANGES, 50);
   const previous = { sourceText: lines(101, (index) => `line ${index}`), version: 1 };

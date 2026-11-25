@@ -6,7 +6,8 @@ import { createRuntimeHarness, RuntimeElement } from "./runtimeHarness";
 const mode = (harness: ReturnType<typeof createRuntimeHarness>): string | null =>
   harness.documentElement.getAttribute("data-sphinx-preview-edit-mode");
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-172
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-172#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-172#S3
 test("a document opened after another one in the same panel starts in preview mode", () => {
   const harness = createRuntimeHarness({
     savedState: { documentId: "file:///other.md", editMode: true },
@@ -14,7 +15,7 @@ test("a document opened after another one in the same panel starts in preview mo
   assert.equal(mode(harness), "off");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-172
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-172#S2
 test("a fresh panel starts in preview mode, whatever the workspace remembers", () => {
   assert.equal(mode(createRuntimeHarness()), "off");
   // A host that still sends the retired initialEditMode choice changes nothing.
@@ -22,13 +23,13 @@ test("a fresh panel starts in preview mode, whatever the workspace remembers", (
   assert.equal(mode(createRuntimeHarness(retired)), "off");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-172
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-172#S3
 test("the same document keeps its edit mode when the page reloads", () => {
   const harness = createRuntimeHarness({ savedState: { documentId: "file:///active.md", editMode: true } });
   assert.equal(mode(harness), "on");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-172
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-172#S4
 test("E alone in the preview switches to edit mode", () => {
   const harness = createRuntimeHarness();
   assert.equal(mode(harness), "off");
@@ -42,7 +43,7 @@ test("E alone in the preview switches to edit mode", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-172
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-172#S5
 test("E with a modifier, or typed in a text field, does not switch the mode", () => {
   const harness = createRuntimeHarness();
   harness.dispatchDocument("keydown", { key: "e", ctrlKey: true, target: harness.previewContent, preventDefault: () => undefined });

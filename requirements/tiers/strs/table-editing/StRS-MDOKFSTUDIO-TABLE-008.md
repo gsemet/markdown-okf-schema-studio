@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Add a row below the selected one
+- id: S2
+  title: Delete a row
 user_need: As a writer, I see the table actions with text labels above the table
   and I always know which header or row and which column I am in; I add or
   delete a row or a column with one button and keep typing where I was; and I
@@ -76,7 +81,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Add a row below the selected one
+#### Path S1: Add a row below the selected one
 
 1. A table is shown in edit mode
    - SwRS-MDOKFSTUDIO-TABLE-001: the writer clicks a cell and the cell editor opens
@@ -92,7 +97,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-TABLE-055 (refusal): disabled buttons and model refusals
 4. An empty row is next to the selected one
 
-#### Path 2: Delete a row
+#### Path S2: Delete a row
 
 1. The table bar is shown above the table
    - SwRS-MDOKFSTUDIO-TABLE-055: the writer presses Row − and the selected row is deleted

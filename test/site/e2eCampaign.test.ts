@@ -102,7 +102,8 @@ test("the visual-only report fails when the visual stage failed or did not run",
   assert.equal(run(root, "report", "--visual-only").status, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-076
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
 test("the report names each failed check of a visual manifest", () => {
   const { root, e2e } = workspace();
   writeCampaign(e2e, "visual", "run-v", hoursAgo(0.1));
@@ -117,7 +118,8 @@ test("the report names each failed check of a visual manifest", () => {
   assert.match(run(root, "report", "--visual-only").stdout, /FAILED visual: first; second/);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-076
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 test("a stage records that its run id was pinned by the CI workflow", () => {
   const { root, e2e } = workspace();
   assert.equal(runWith(root, { STUDIO_E2E_RUN_ID: "4242" }, "begin", "visual").status, 0);
@@ -132,7 +134,8 @@ test("a stage records that its run id was pinned by the CI workflow", () => {
 
 // "Re-run failed jobs" re-runs integration in the same CI run, possibly hours later, while visual
 // (not re-run) keeps its attempt-1 start: one run id pinned by the workflow is one campaign.
-// @tests_req SwRS-MDOKFSTUDIO-CORE-076
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
 test("the report accepts stages started hours apart when both carry the same pinned CI run id", () => {
   const { root, e2e } = workspace();
   writeCampaign(e2e, "visual", "4242", hoursAgo(26), { pinnedRunId: true });
@@ -145,7 +148,8 @@ test("the report accepts stages started hours apart when both carry the same pin
   assert.equal(manifest.runId, "4242");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-076
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 test("the two-hour limit still applies unless both stages carry the same pinned run id", () => {
   for (const [visual, integration] of [
     [{ runId: "4242", pinned: true }, { runId: "4243", pinned: true }],

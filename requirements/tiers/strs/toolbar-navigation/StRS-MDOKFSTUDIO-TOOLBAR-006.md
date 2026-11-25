@@ -16,6 +16,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Open the table of contents and jump
+- id: S2
+  title: Narrow pane
 user_need: "As a reader, I open a table of contents next to a long document when I
   want an overview. I close it when I want the room, and the preview remembers my
   choice. In the table of contents I see where I am, I fold the sections I do not
@@ -68,7 +73,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Open the table of contents and jump
+#### Path S1: Open the table of contents and jump
 
 1. The page is shown without the table of contents
    - SwRS-MDOKFSTUDIO-TOOLBAR-033: the reader presses the Table of contents button and the column opens
@@ -81,7 +86,7 @@ stateDiagram-v2
    - Option SwRS-MDOKFSTUDIO-TOOLBAR-045 (boundary): the parent of the current entry is folded
 4. The reader is at the heading they chose
 
-#### Path 2: Narrow pane
+#### Path S2: Narrow pane
 
 1. The page is shown without the table of contents
    - SwRS-MDOKFSTUDIO-TOOLBAR-033: the reader presses the Table of contents button and the column opens

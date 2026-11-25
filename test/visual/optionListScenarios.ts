@@ -33,8 +33,9 @@ const VARIANTS = [
 
 export const OPTION_LIST_SCENARIOS: ScenarioDefinition[] = [
   ...VARIANTS.map((variant, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-277#S3
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S3
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S5
     id: `palette-slash/v${30 + index}-option-list-enter-${variant.name}-900`,
     fixture: "77-option-list-editing",
     theme: variant.theme,
@@ -47,7 +48,8 @@ export const OPTION_LIST_SCENARIOS: ScenarioDefinition[] = [
     description: `Edit mode, ${variant.name} preview, 900 px: the Option button turns the opened paragraph into an option item, then Enter at its end starts the next option with ( ) already typed.`,
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S3
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S5
     id: "palette-slash/v32-option-list-exit-dark-900",
     fixture: "77-option-list-editing",
     theme: "dark",
@@ -59,7 +61,7 @@ export const OPTION_LIST_SCENARIOS: ScenarioDefinition[] = [
     description: "Edit mode, dark preview, 900 px: the Option button turns the opened paragraph into an option item, Enter starts the next option and a second Enter on that empty option ends the list.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-277#S3
     id: "palette-slash/v33-option-list-button-cream-900",
     fixture: "77-option-list-editing",
     theme: "light",

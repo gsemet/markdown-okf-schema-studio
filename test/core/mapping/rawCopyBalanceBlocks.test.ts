@@ -7,7 +7,7 @@ import { assertCopy, at } from "./rawCopyBalanceSupport";
 
 const CODE_IN_ITEM = ["- item", "", "  ```", "  foo()", "  bar()", "  ```", "", "After.", ""].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-281
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-281#S2
 test("a code block: both edges inside give the code alone, with the container indentation removed", async () => {
   const top = ["Intro.", "", "```", "alpha()", "beta()", "```", "", "After.", ""].join("\n");
   await assertCopy(top, at("alpha()", 2), at("beta()", 5), "pha()\nbeta(", "pha()\nbeta(");
@@ -16,7 +16,8 @@ test("a code block: both edges inside give the code alone, with the container in
   await assertCopy(quoted, at("foo()", 1), at("bar()", 3), "oo()\n> bar", "oo()\nbar");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-281
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-281#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-281#S4
 test("a code block crossed at the start or at the end gets its fence lines", async () => {
   const top = ["Intro.", "", "```", "alpha()", "beta()", "```", "", "After.", ""].join("\n");
   await assertCopy(top, at("alpha()", 2), at("After.", 3), "pha()\nbeta()\n```\n\nAft", "```\npha()\nbeta()\n```\n\nAft");
@@ -37,7 +38,7 @@ test("a code block crossed at the start or at the end gets its fence lines", asy
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-281
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-281#S2
 test("an indented code block crossed gets its four columns back on the first line", async () => {
   const source = ["Para.", "", "    code one", "    code two", "", "After.", ""].join("\n");
   await assertCopy(source, at("code one", 5), at("After.", 3), "one\n    code two\n\nAft", "    one\n    code two\n\nAft");
@@ -47,7 +48,7 @@ const TABLE = [
   "Intro.", "", "| alpha | beta |", "|---|---|", "| gamma | **delta** |", "| epsilon | zeta |", "", "After.", "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-282
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-282#S2
 test("a table: one cell inside only, otherwise the touched rows whole with the header and delimiter rows", async () => {
   await assertCopy(TABLE, at("alpha", 1), at("alpha", 4), "lph", "lph");
   await assertCopy(
@@ -73,12 +74,13 @@ test("a table: one cell inside only, otherwise the touched rows whole with the h
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-282
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-282#S2
 test("a bold word inside one cell crossed copies the bold only", async () => {
   await assertCopy(TABLE, at("delta", 2), at("delta", 5), "lta", "lta");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-282
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-282#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-282#S4
 test("a table in an admonition: crossed gets the opening lines, inside only does not", async () => {
   const source = [":::{note}", "", "| alpha | beta |", "|---|---|", "| gamma | delta |", "", ":::", "", "After.", ""].join("\n");
   await assertCopy(
@@ -97,7 +99,8 @@ test("a table in an admonition: crossed gets the opening lines, inside only does
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-284
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-284#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-284#S4
 test("an ATX heading start crossed gets its marker; an end in it adds nothing", async () => {
   const source = ["Intro.", "", "## Hello world", "", "Next para.", ""].join("\n");
   await assertCopy(source, at("Hello world", 2), at("Hello world", 5), "llo", "llo");
@@ -105,14 +108,15 @@ test("an ATX heading start crossed gets its marker; an end in it adds nothing", 
   await assertCopy(source, at("Intro.", 1), at("Hello world", 5), "ntro.\n\n## Hello", "ntro.\n\n## Hello");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-284
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-284#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-284#S4
 test("a setext heading end crossed gets its underline; a start in it adds nothing", async () => {
   const source = ["Intro.", "", "Title text", "==========", "", "Next para.", ""].join("\n");
   await assertCopy(source, at("Intro.", 1), at("Title text", 5), "ntro.\n\nTitle", "ntro.\n\nTitle\n==========");
   await assertCopy(source, at("Title text", 2), at("Next para.", 3), "tle text\n==========\n\nNex", "tle text\n==========\n\nNex");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-285
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-285#S3
 test("a definition crossed at the start gets its term line and marker", async () => {
   const source = ["Intro.", "", "Term one", ": definition words here", "", "Term two", ": other def", "", "After.", ""].join("\n");
   await assertCopy(source, at("definition words here", 11), at("definition words here", 16), "words", "words");
@@ -125,7 +129,8 @@ test("a definition crossed at the start gets its term line and marker", async ()
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-285
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-285#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-285#S4
 test("a raw HTML block crossed gets its opening tag line or its closing tag", async () => {
   const source = ["Intro.", "", "<div class=\"box\">", "hello world", "more words", "</div>", "", "After.", ""].join("\n");
   await assertCopy(source, at("hello world", 2), at("more words", 4), "llo world\nmore", "llo world\nmore");
@@ -145,7 +150,7 @@ test("a raw HTML block crossed gets its opening tag line or its closing tag", as
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-285
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-285#S3
 test("a footnote definition crossed at the start gets its label", () => {
   // The page shows a footnote at the end of the page, without a source line of its own, so the edges are given placed.
   const source = ["Text[^1] here.", "", "[^1]: Footnote body words.", "", "After.", ""].join("\n");
@@ -164,7 +169,8 @@ const TABS = [
   "::::{tab-set}", ":::{tab-item} One", "First tab.", ":::", ":::{tab-item} Two", "Second tab para.", "", "- list alpha", "- list bravo", ":::", "::::", "", "After.", "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S4
 test("a tab set: the tab set and tab item openings when crossed, nothing when inside only", async () => {
   await assertCopy(TABS, at("Second tab para.", 3), at("Second tab para.", 10), "ond tab", "ond tab");
   await assertCopy(
@@ -176,7 +182,7 @@ test("a tab set: the tab set and tab item openings when crossed, nothing when in
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S3
 test("a list inside a tab item crossed at the start gets the openings and the marker", async () => {
   await assertCopy(
     TABS,
@@ -187,7 +193,7 @@ test("a list inside a tab item crossed at the start gets the openings and the ma
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S1
 test("a CR LF document keeps CR LF in the cut and in every added line", async () => {
   const source = TWO_NOTES.replace(/\n/gu, "\r\n");
   await assertCopy(
@@ -199,7 +205,8 @@ test("a CR LF document keeps CR LF in the cut and in every added line", async ()
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S2
 test("the whole document with the setting on is the source exactly", async () => {
   for (const source of [TWO_NOTES, TABLE, TABS, CODE_IN_ITEM]) {
     const page = await renderPage(source);
@@ -212,7 +219,7 @@ const TWO_NOTES = [
   "Intro text.", "", ":::{note}", "First one.", "", "Second line.", ":::", "", "After text.", "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S2
 test("clean edges: a selection between top-level blocks gives the verbatim slice", async () => {
   const source = "First paragraph.\n\nSecond paragraph.\n\nThird paragraph.\n";
   await assertCopy(source, at("First paragraph.", 1), at("Second paragraph.", "end"), "irst paragraph.\n\nSecond paragraph.", "irst paragraph.\n\nSecond paragraph.");

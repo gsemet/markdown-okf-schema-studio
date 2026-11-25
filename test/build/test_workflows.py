@@ -182,7 +182,8 @@ def _after_a_skippable_job(jobs: dict[str, dict]) -> set[str]:
     return downstream
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S5
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
 def test_every_job_after_a_skippable_job_opts_out_of_the_implicit_success() -> None:
     jobs = _ci_jobs()
     for name in sorted(_after_a_skippable_job(jobs)):
@@ -195,7 +196,7 @@ def test_every_job_after_a_skippable_job_opts_out_of_the_implicit_success() -> N
         assert checked, f"{name}: no explicit needs.<job>.result check in: {condition}"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
 def test_tag_release_runs_on_a_push_to_main_when_the_checks_passed() -> None:
     condition = str(_ci_jobs()["tag-release"]["if"])
     for part in ("!cancelled()", "needs.checks.result == 'success'", "github.event_name == 'push'",
@@ -203,7 +204,7 @@ def test_tag_release_runs_on_a_push_to_main_when_the_checks_passed() -> None:
         assert part in condition, f"tag-release: {part} missing from: {condition}"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
 @pytest.mark.parametrize("name", ["release", "pages"])
 def test_release_and_pages_run_when_a_tag_was_created(name: str) -> None:
     condition = str(_ci_jobs()[name]["if"])
@@ -235,7 +236,8 @@ def _step(name: str) -> dict:
     return steps[0]
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S2
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 def test_release_dispatch_runs_the_notes_script_of_the_workflow_ref() -> None:
     load = _step("Load the release notes script of the workflow ref")
     assert DISPATCH in str(load["if"])
@@ -249,7 +251,8 @@ def test_release_dispatch_runs_the_notes_script_of_the_workflow_ref() -> None:
     assert steps.index(load) < steps.index(step)
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S2
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 def test_release_tag_push_runs_the_notes_script_of_the_tag() -> None:
     step = _step("Prepare the reviewed release notes")
     assert str(step["if"]) == "github.event_name != 'workflow_dispatch'"
@@ -260,7 +263,7 @@ def test_release_tag_push_runs_the_notes_script_of_the_tag() -> None:
     assert checkout[0]["with"]["lfs"] is True, "the images to attach are in Git LFS"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S2
 def test_release_prepares_the_notes_before_publishing_and_attaches_the_images() -> None:
     steps = _release_steps()
     publish = _step("Publish to VS Code Marketplace")
@@ -273,7 +276,7 @@ def test_release_prepares_the_notes_before_publishing_and_attaches_the_images() 
     ]
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 def test_the_repository_check_includes_the_release_notes() -> None:
     justfile = (ROOT / "justfile").read_text()
     check = next(line for line in justfile.splitlines() if line.startswith("check:"))
@@ -500,7 +503,8 @@ def test_release_tag_verification_rejects_a_tag_off_main(released_main: Path) ->
     assert _verify_tag(released_main, "v1.0.0") != 0
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S2
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 def test_release_generates_no_notes() -> None:
     assert "COPILOT" not in RELEASE.read_text()
     assert not (ROOT / ".github/workflows/release-notes.yml").exists()
@@ -628,7 +632,7 @@ def _run_if(condition: object, values: dict) -> object:
     return eval(_expression(str(condition)), {"ctx": values})  # noqa: S307
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_every_needs_reference_names_a_job_the_job_needs() -> None:
     jobs = _ci_jobs()
     for name, job in jobs.items():
@@ -638,7 +642,8 @@ def test_every_needs_reference_names_a_job_the_job_needs() -> None:
             assert referenced in _needs(job), f"{name}: reads needs.{referenced} without needing it"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
 def test_release_check_detects_a_version_change_on_a_push_to_main() -> None:
     job = _ci_jobs()["release-check"]
     assert _run_if(job["if"], _context("push"))
@@ -650,7 +655,8 @@ def test_release_check_detects_a_version_change_on_a_push_to_main() -> None:
     assert step["env"]["BEFORE_SHA"] == "${{ github.event.before }}"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 @pytest.mark.parametrize("name", ["integration", "stress"])
 def test_heavy_jobs_run_on_every_push_to_main_and_on_a_heavy_dispatch(name: str) -> None:
     job = _ci_jobs()[name]
@@ -663,7 +669,8 @@ def test_heavy_jobs_run_on_every_push_to_main_and_on_a_heavy_dispatch(name: str)
     assert not _run_if(condition, _context("workflow_dispatch", heavy=False))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
 def test_gallery_runs_on_a_heavy_dispatch_when_integration_and_report_passed() -> None:
     import yaml
 
@@ -692,7 +699,8 @@ def test_gallery_runs_on_a_heavy_dispatch_when_integration_and_report_passed() -
 XVFB_SCREEN = "2600x1440x24"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_every_xvfb_screen_is_wider_than_the_emulated_viewports() -> None:
     """CR 326: the default 1280x1024 screen dropped clicks past x=1280 (2400 px is the widest viewport)."""
     import re
@@ -705,7 +713,7 @@ def test_every_xvfb_screen_is_wider_than_the_emulated_viewports() -> None:
         assert int(match.group(1)) >= 2600 and int(match.group(2)) >= 1440, call
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_stress_dispatch_inputs_reach_the_stress_recipe_through_env() -> None:
     import yaml
 
@@ -719,7 +727,7 @@ def test_stress_dispatch_inputs_reach_the_stress_recipe_through_env() -> None:
     assert step["env"]["STUDIO_STRESS_SCENARIOS"] == "${{ inputs.stress_scenarios }}"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 def test_ci_stress_recipe_quotes_and_validates_repeat() -> None:
     recipe = (ROOT / "justfile").read_text().split("\nci-stress ", 1)[1].split("\n\n", 1)[0]
     assert "{{ quote(REPEAT) }}" in recipe
@@ -728,14 +736,15 @@ def test_ci_stress_recipe_quotes_and_validates_repeat() -> None:
     assert "exit 2" in recipe
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 def test_ci_stress_recipe_defaults_to_11_rounds_and_leaves_the_deadline_computed() -> None:
     recipe_text = (ROOT / "justfile").read_text().split("\nci-stress ", 1)[1].split("\n\n", 1)[0]
     assert recipe_text.startswith('REPEAT=env("STUDIO_STRESS_REPEAT", "11")')
     assert "STUDIO_LAUNCH_TIMEOUT_MS" not in recipe_text
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_stress_blocks_only_a_version_change() -> None:
     flag = _ci_jobs()["stress"]["continue-on-error"]
     assert _run_if(flag, _context("push", bump="false"))
@@ -743,7 +752,7 @@ def test_stress_blocks_only_a_version_change() -> None:
     assert not _run_if(flag, _context("push", bump="true"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
 def test_report_merges_the_real_window_stage_of_every_push_to_main() -> None:
     job = _ci_jobs()["report"]
     step = next(s for s in job["steps"] if "just ci-report" in str(s.get("run", "")))
@@ -762,7 +771,8 @@ def _tag_steps() -> tuple[dict, dict]:
     return refuse, tag
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
 def test_tag_release_needs_the_heavy_jobs_and_runs_on_every_push_to_main() -> None:
     job = _ci_jobs()["tag-release"]
     assert {"checks", "release-check", "integration", "stress"} <= set(_needs(job))
@@ -786,7 +796,8 @@ def test_tag_release_needs_the_heavy_jobs_and_runs_on_every_push_to_main() -> No
     assert "!cancelled()" in str(job["if"])
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
 @pytest.mark.parametrize(
     ("bump", "checks", "integration", "stress", "tags"),
     [
@@ -814,7 +825,8 @@ def test_tag_step_requires_checks_and_both_heavy_jobs_on_a_version_change(
     assert bool(_run_if(refuse["if"], values)) is not tags
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_every_untagged_version_change_explains_why() -> None:
     """Truth table over every result: on a version change that reaches tag-release, exactly one of
     the two steps runs, and the tag step runs only when checks and both heavy jobs succeeded."""
@@ -835,7 +847,8 @@ def test_every_untagged_version_change_explains_why() -> None:
             assert bool(_run_if(refuse["if"], values)) is (bump == "true" and not green), values
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_refused_tag_names_each_heavy_result_in_the_job_summary(tmp_path: Path) -> None:
     import os
     import subprocess
@@ -864,7 +877,8 @@ def test_refused_tag_names_each_heavy_result_in_the_job_summary(tmp_path: Path) 
     assert "checks: failure, integration: failure, stress: skipped" in result.stdout
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_pages_reuses_the_reports_of_the_release_run_when_its_heavy_jobs_are_green() -> None:
     job = _ci_jobs()["pages"]
     assert {"tag-release", "integration", "stress"} <= set(_needs(job))
@@ -910,7 +924,7 @@ def _downloads(steps: list[dict]) -> list[dict]:
     return [s for s in steps if DOWNLOAD in str(s.get("uses", ""))]
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_every_ci_artifact_name_carries_the_attempt() -> None:
     names = [name for names in _uploads(_ci_jobs()).values() for name in names]
     assert names, "ci.yml uploads no artifact"
@@ -919,7 +933,7 @@ def test_every_ci_artifact_name_carries_the_attempt() -> None:
     assert len(set(names)) == len(names), f"two jobs upload the same name: {names}"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 @pytest.mark.parametrize(("job", "base"), [("visual", "e2e-visual"), ("integration", "e2e-integration"),
                                            ("report", "studio-reports")])
 def test_a_consumed_artifact_is_announced_by_its_job(job: str, base: str) -> None:
@@ -934,7 +948,7 @@ def test_a_consumed_artifact_is_announced_by_its_job(job: str, base: str) -> Non
     assert _ci_jobs()[job]["outputs"]["artifact"] == base + ATTEMPT_SUFFIX
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_every_ci_download_names_the_artifact_of_the_job_it_needs() -> None:
     jobs = _ci_jobs()
     uploads = _uploads(jobs)
@@ -952,7 +966,7 @@ def test_every_ci_download_names_the_artifact_of_the_job_it_needs() -> None:
     assert seen >= 3  # report (visual, integration) and gallery
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_report_merges_each_stage_from_the_attempt_that_produced_it() -> None:
     job = _ci_jobs()["report"]
     steps = _downloads(job["steps"])
@@ -974,7 +988,8 @@ def test_report_merges_each_stage_from_the_attempt_that_produced_it() -> None:
         assert not _run_if(step["if"], {**rerun, f"needs.{producer}.outputs.artifact": ""})
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
 def test_pages_gets_the_reports_artifact_of_the_newest_report_attempt() -> None:
     job = _ci_jobs()["pages"]
     assert "report" in _needs(job)
@@ -1012,7 +1027,8 @@ def _find_reports(tmp_path: Path, **env: str) -> tuple[int, dict[str, str], str]
     return result.returncode, values, calls.read_text()
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
 def test_pages_find_step_outputs_the_run_and_its_reports_artifact(tmp_path: Path) -> None:
     status, values, calls = _find_reports(
         tmp_path, FROM_CALLER="true", CALLER_ARTIFACT="studio-reports-attempt-2")
@@ -1029,7 +1045,7 @@ def test_pages_find_step_outputs_the_run_and_its_reports_artifact(tmp_path: Path
     assert status == 0 and values == {}
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_site_from_run_downloads_the_reports_of_the_newest_attempt() -> None:
     justfile = (ROOT / "justfile").read_text()
     recipe = re.search(r"(?m)^site-from-run RUN_ID:\n((?:    .*\n)+)", justfile)
@@ -1054,7 +1070,7 @@ def yaml_jobs(path: Path) -> dict[str, dict]:
     return yaml.safe_load(path.read_text())["jobs"]
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_toc_loop_inputs_reach_the_recipe_and_leave_the_deadline_computed() -> None:
     import yaml
 

@@ -22,7 +22,8 @@ import {
  * Insertion points and block moves (features/insertPoints.ts, blockMoves.ts).
  */
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-087
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-087#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-087#S8
 test("T28: edit mode adds one insertion point after each top-level block, reading mode none", () => {
   const harness = createRuntimeHarness();
   assert.equal(insertPointsOf(harness).length, 0);
@@ -51,7 +52,8 @@ test("T28: edit mode adds one insertion point after each top-level block, readin
 // T36: move a block up or down from its insertion bar.
 const MOVE_LABELS = ["Move the block above up", "Move the block above down"];
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S7
 test("T36: every body insertion point has up and down buttons, disabled at the ends", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   for (const line of [1, 52, 100]) {
@@ -79,7 +81,8 @@ test("T36: the properties point and the Start writing point have no move buttons
   assert.equal(startPoint.length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S3
 test("T36: a block from an included file disables its own buttons and the ones toward it", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.mappings[1].setAttribute("data-sphinx-preview-included", "true");
@@ -128,7 +131,8 @@ test("T36: a disabled button posts nothing, and the buttons stand down while an 
   assert.equal(harness.messages.slice(opened).some((message) => message.type === "previewBlockMove"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S8
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S11
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S2
 test("T36: a refused move says why next to the bar; a result of another context is ignored", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
@@ -146,7 +150,7 @@ test("T36: a refused move says why next to the bar; a result of another context 
   assert.equal(statusOf()?.getAttribute("role"), "status");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S12
 test("T36: a move refused as stale is sent once more after the next render, before any message", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;
@@ -169,7 +173,7 @@ test("T36: a move refused as stale is sent once more after the next render, befo
   assert.equal(moveMessages(harness, before).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S1
 test("T37: Alt+ArrowDown on a focused block and Alt+ArrowUp on its bar button post the move", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;
@@ -302,7 +306,7 @@ test("T37: on macOS the chord is Cmd+Alt, and Ctrl+Alt does nothing special", ()
   assert.equal(harness.messages.slice(before).find((message) => message.type === "previewEditSave")?.final, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S6
 test("T37: the chord in a list item editor saves the item, then moves the whole list", () => {
   // The default page has blocks at lines 1, 50 and 100; a list at line 60 holds two items, 60 to 61
   // and 62 to 63. The item editor moves the list that holds it, as the list's editor did.
@@ -358,7 +362,8 @@ test("T37: the chord in a list item editor saves the item, then moves the whole 
     [[60, 50, "up"]], "nothing to save: the whole list moves at once");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S7
 test("T37: AltGr with an arrow in the text box is no move chord", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
@@ -397,7 +402,7 @@ test("T28: the properties section gets an insertion point after line 0", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-102
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-102#S1
 test("T28: an empty body shows a single Start writing point after line 0", () => {
   const harness = createRuntimeHarness({
     emptyBody: true,
@@ -427,7 +432,7 @@ test("T28: a frontmatter-only document gets one Start writing point", () => {
   assert.equal(points[0].childElements[0].textContent, "Start writing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-102
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-102#S2
 test("T28: a failed render offers no Start writing point", () => {
   const harness = createRuntimeHarness({
     emptyBody: true,
@@ -484,7 +489,8 @@ test("T28: document-level click and keydown on an insertion point never open a b
     element.getAttribute("data-sphinx-preview-block-editor") !== null), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S5
 test("T28: an empty source reply opens an empty textarea with a placeholder; Done saves the insertion", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   insertPointAfterLine(harness, 52).childElements[0].dispatch("click", {
@@ -517,7 +523,7 @@ test("T28: an empty source reply opens an empty textarea with a placeholder; Don
   assert.equal(save?.final, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S6
 test("T28: Done on an untouched empty insertion closes without saving", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   insertPointAfterLine(harness, 1).childElements[0].dispatch("click", {
@@ -572,7 +578,7 @@ test("T28: ordinary block edits never carry insertAfterLine", () => {
   assert.equal("insertAfterLine" in (harness.messages.at(-1) as object), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S9
 test("the block actions follow whichever moved last: the keyboard selection or the pointer", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const owner = () => harness.documentElement.getAttribute("data-sphinx-preview-actions-owner");

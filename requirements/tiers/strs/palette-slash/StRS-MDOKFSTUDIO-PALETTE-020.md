@@ -17,6 +17,9 @@ tier: StRS
 derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-039
+scenarios:
+- id: S1
+  title: Insert an alert
 user_need: As a writer of GitHub-style documents, I insert an alert, a task
   list, a collapsible section or a footnote from a button without remembering
   the syntax, and take the insertion back with a single undo.
@@ -78,7 +81,7 @@ An alert is one undoable edit followed by a choice of its type.
 
 ### Main paths
 
-#### Path 1: Insert an alert
+#### Path S1: Insert an alert
 
 1. The palette is shown above the text box in the GFM mode
    - SwRS-MDOKFSTUDIO-PALETTE-115: the writer presses Alert and the touched lines are quoted under a note head, with a list of the five types at the caret

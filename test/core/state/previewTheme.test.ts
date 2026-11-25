@@ -38,8 +38,9 @@ test("accepts only complete theme-mode change messages", () => {
   assert.equal(isPreviewThemeModeChangedMessage({ type: "previewThemeModeChanged" }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S5
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S12
 test("restores a valid workspace theme mode and ignores invalid stored values", async () => {
   const storage = createMemoryStorage();
 

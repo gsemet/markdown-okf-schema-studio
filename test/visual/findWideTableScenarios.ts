@@ -6,7 +6,7 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 
 export const FIND_WIDE_TABLE_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S3
     id: "toolbar-navigation/v41-find-hit-in-wide-table-light-393",
     fixture: "85-find-wide-table",
     theme: "light",

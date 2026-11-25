@@ -19,6 +19,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Swap
+- id: S2
+  title: The separator is kept as it is
+- id: S3
+  title: The line breaks of each block are kept
+- id: S4
+  title: A blank line is added where the swap would glue a block
+- id: S5
+  title: Moving down and then up restores the document
+- id: S6
+  title: A list mapped up to its trailing blank line
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,41 +51,41 @@ default_owner_email: gaetan@xeberon.net
 
 When the host moves a block past its neighbour, it SHALL replace only the lines from the first block to the second block with the swapped blocks, keeping the blank separator between them, the final line break and the line breaks of each block where they were, and adding a blank line only where the swap would glue a block to a non-blank line.
 
-### Scenario (nominal): Swap
+### Scenario S1 (nominal): Swap
 
 - GIVEN a document `A`, blank line, `B` with a final line break and a move of B up
 - WHEN the host plans the move
 - THEN the edit replaces the lines of both blocks with `B`, the blank line and `A`, the lines outside are untouched, and the new first line of each block is reported
 
-### Scenario (boundary): The separator is kept as it is
+### Scenario S2 (boundary): The separator is kept as it is
 
 | Input | Outcome |
 | --- | --- |
 | Two blank lines between the blocks | Both blank lines stay between the swapped blocks |
 | One blank line between the blocks | The same blank line stays between them |
 
-### Scenario (boundary): The line breaks of each block are kept
+### Scenario S3 (boundary): The line breaks of each block are kept
 
 | Input | Outcome |
 | --- | --- |
 | A document with CR LF line breaks, two blocks swapped | Every line break of the result is CR LF; no LF appears where the original had CR LF |
 | A block with a list and a block with a paragraph, swapped | Each keeps its own inner line breaks |
 
-### Scenario (boundary): A blank line is added where the swap would glue a block
+### Scenario S4 (boundary): A blank line is added where the swap would glue a block
 
 | Input | Outcome |
 | --- | --- |
 | Two blocks with no blank line between them, swapped | A blank line separates them in the result instead of merging them into one paragraph |
 | A block that touched the block above it, moved down | A blank line is added so that it stays apart from its new neighbour |
 
-### Scenario (nominal): Moving down and then up restores the document
+### Scenario S5 (nominal): Moving down and then up restores the document
 
 | Input | Outcome |
 | --- | --- |
 | Three blank-separated blocks, the first moved down and moved up again | The text equals the original |
 | Blocks without a blank line, the same two moves | The added blank line stays, so the text differs (see the scenario above) |
 
-### Scenario (boundary): A list mapped up to its trailing blank line
+### Scenario S6 (boundary): A list mapped up to its trailing blank line
 
 | Input | Outcome |
 | --- | --- |

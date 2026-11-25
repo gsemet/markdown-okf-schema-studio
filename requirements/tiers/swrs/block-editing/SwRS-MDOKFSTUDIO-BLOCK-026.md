@@ -16,6 +16,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Emphasis and link markup
+- id: S2
+  title: Link label
+- id: S3
+  title: Ambiguous text
+- id: S4
+  title: No caret API
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,25 +45,25 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer clicks rendered text in edit mode, the page SHALL place the caret of the opened text box at the source position of the clicked text, found by matching up to 32 rendered characters on each side of the click, and at the end of the block text without trailing line breaks when no unique place is found.
 
-### Scenario (nominal): Emphasis and link markup
+### Scenario S1 (nominal): Emphasis and link markup
 
 - GIVEN the source `Some **bold** text` and a click after the rendered text `Some bo`
 - WHEN the editor opens
 - THEN the caret sits at `Some **bo|ld** text`; heading marks, list markers, quote prefixes, emphasis marks and link targets are skipped when matching
 
-### Scenario (nominal): Link label
+### Scenario S2 (nominal): Link label
 
 - GIVEN the source `See [the label](https://x.y/z) here` and a click after the rendered text `See the la`
 - WHEN the editor opens
 - THEN the caret sits inside the label at `See [the la|bel](https://x.y/z) here`
 
-### Scenario (boundary): Ambiguous text
+### Scenario S3 (boundary): Ambiguous text
 
 - GIVEN the source `a a a a` and the click context `a a` before and ` a` after
 - WHEN the editor opens
 - THEN the caret sits at the end of the text
 
-### Scenario (boundary): No caret API
+### Scenario S4 (boundary): No caret API
 
 - GIVEN a browser without caretRangeFromPoint and caretPositionFromPoint
 - WHEN the writer clicks a paragraph

@@ -39,7 +39,8 @@ export const LINK_EDIT_MODE_SCENARIOS: ScenarioDefinition[] = cases.flatMap((ent
     { name: "cream", theme: "light", mode: "cream" },
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((theme, themeIndex) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S4
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
     id: `block-editing/v${27 + partIndex * 2 + themeIndex}-link-edit-mode-${entry.part}-${theme.name}-900`,
     fixture: entry.fixture,
     theme: theme.theme,

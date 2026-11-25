@@ -21,7 +21,7 @@ function fixture() {
   return files;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S5
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S3
 test("a link to a file outside the root is refused with symlink-escape, a link inside the root is served", async () => {
   const policy = new ResourcePolicy(fixture(), [{ label: "output", directory: root }]);
@@ -38,7 +38,8 @@ test("a file below a linked folder that leads outside the root is refused", asyn
   assert.ok(policy.diagnostics.some((entry) => entry.code === "symlink-escape"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S4
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S5
 test("the sync path decides from the primed answers only, and a request never primed is refused and listed", async () => {
   const policy = new ResourcePolicy(fixture(), [{ label: "output", directory: root }]);
   const primed = { request: "image.png", baseDirectory: root, options: { image: true } };
@@ -54,7 +55,7 @@ test("the sync path decides from the primed answers only, and a request never pr
   assert.deepEqual(policy.takeUnprimed(), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S5
 test("a policy never primed lists the request instead of refusing it as outside every root", () => {
   const policy = new ResourcePolicy(fixture(), [{ label: "output", directory: root }]);
   assert.equal(policy.resolvePrimed("image.png", root, { image: true }), undefined);

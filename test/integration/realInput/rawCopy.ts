@@ -101,9 +101,9 @@ async function withRawCopyBalanceEdges(enabled: boolean, body: () => Promise<voi
  * CR-480: a real selection and Ctrl/Cmd+C in the preview put the Markdown under the selection on the clipboard, in
  * reading mode and in edit mode; Select all gives the whole document exactly; a selection in an open block editor
  * stays the browser's own.
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-272
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-273
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-275
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-272#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-273#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-275#S1
  */
 export async function scenarioRawCopy(page: Page): Promise<void> {
   await withDocument("realinput-raw-copy", DOCUMENT, async (document) => {
@@ -156,7 +156,7 @@ export async function scenarioRawCopy(page: Page): Promise<void> {
         await waitFor("the ready webview with the new boot context", async () => (await findCurrentFrame(page)) !== undefined);
         // From inside a bold word of an admonition's paragraph to the middle of a table row after the admonition:
         // the admonition's opening line and the bold's delimiters are added; the row is whole.
-        // @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
+        // @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S1
         await selectBetween(page, "bold", "first", 1);
         await copyUntil(page, "the balanced copy of a selection from a bold word to a table row", BALANCED_SELECTED);
         assert.equal(document.getText(), BALANCED_DOCUMENT, "a balanced copy changes nothing in the document");

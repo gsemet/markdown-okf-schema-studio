@@ -17,6 +17,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: setting off
+- id: S2
+  title: both edges inside one element
+- id: S3
+  title: boundary crossed at the start
+- id: S4
+  title: boundary crossed at the end
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,25 +42,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the balance-edges setting is on and a selection starts or ends inside a definition, a raw HTML block or a footnote definition it does not entirely contain, the raw copy SHALL add the term line and the definition marker, the opening tag line or the matching closing tag, or the footnote label, and when both edges lie inside one of them it SHALL copy the text between the edges alone.
 
-### Scenario: setting off
+### Scenario S1: setting off
 
 - GIVEN the setting is off and a definition list
 - WHEN the selection starts inside a definition
 - THEN the copy is the source verbatim
 
-### Scenario: both edges inside one element
+### Scenario S2: both edges inside one element
 
 - GIVEN the setting is on and both edges lie inside one definition, HTML block or footnote
 - WHEN the reader copies
 - THEN the clipboard holds the text between the edges
 
-### Scenario: boundary crossed at the start
+### Scenario S3: boundary crossed at the start
 
 - GIVEN the setting is on
 - WHEN the selection starts inside a definition, an HTML block or a footnote definition and ends after it
 - THEN the term line and marker, the opening tag line or the footnote label are added
 
-### Scenario: boundary crossed at the end
+### Scenario S4: boundary crossed at the end
 
 - GIVEN the setting is on
 - WHEN the selection starts before an HTML block and ends inside it

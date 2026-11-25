@@ -22,6 +22,13 @@ relates_to:
 - SwRS-MDOKFSTUDIO-PALETTE-021
 - SwRS-MDOKFSTUDIO-TABLE-006
 depends_on: []
+scenarios:
+- id: S1
+  title: The body of the second card of a three-column grid
+- id: S2
+  title: The title of a card
+- id: S3
+  title: Other editors and layouts are unchanged
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,19 +47,19 @@ default_owner_email: gaetan@xeberon.net
 
 While a block editor is open in the title, header, body or footer of a grid card or a card, the preview SHALL give that card a minimum width that pushes the other cards of its grid row aside, show the edition palette in the flow above the text box, wider than the card if needed, with a maximum height and a vertical scroll, and keep the text box at a readable minimum width.
 
-### Scenario (nominal): The body of the second card of a three-column grid
+### Scenario S1 (nominal): The body of the second card of a three-column grid
 
 - GIVEN edit mode on a 900 px pane with a `{grid} 1 2 3 3` of three `{grid-item-card}`, and the cards narrower than the palette
 - WHEN the writer clicks the body of the second card and its block editor opens
 - THEN the second card is at least 24em wide and the first and third cards are pushed aside, not overlapped; the edition palette is in the flow above the text box (its bottom is not below the text box top), may extend beyond the card, is at most 9em high (or 30% of the viewport) and scrolls vertically past that height; the text box is at least 18em wide and keeps its typed text visible; the card is not clipped by its rounded border
 
-### Scenario (nominal): The title of a card
+### Scenario S2 (nominal): The title of a card
 
 - GIVEN the same grid
 - WHEN the writer clicks the title of the second card
 - THEN the editor of the title opens with the same layout: the card widens, the palette sits above the text box and the text box is readable
 
-### Scenario (boundary): Other editors and layouts are unchanged
+### Scenario S3 (boundary): Other editors and layouts are unchanged
 
 - GIVEN a block editor outside a card, a table cell editor, or a grid with the `auto` column count
 - WHEN the editor opens

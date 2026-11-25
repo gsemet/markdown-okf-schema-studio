@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
+scenarios:
+- id: S1
+  title: The save key saves what the preview shows
+- id: S2
+  title: Where the key applies
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,7 +50,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses the VS Code save key binding with the focus in the side preview, the extension SHALL write the text typed in an open block or table-cell editor to the document and keep that editor open with its caret, write the value typed in an open frontmatter field of the properties table to the document and close that field, then save the document the preview shows.
 
-### Scenario (nominal): The save key saves what the preview shows
+### Scenario S1 (nominal): The save key saves what the preview shows
 | Input | Outcome |
 | --- | --- |
 | No editor open in the focused side preview, the writer presses Cmd+S (Ctrl+S off macOS) | The key reaches VS Code, its binding runs `markdown-okf-schema-studio.saveDocument`, the page posts a save request and the host saves the document the preview shows; the dirty mark goes |
@@ -54,7 +59,7 @@ When the writer presses the VS Code save key binding with the focus in the side 
 | A frontmatter field of the properties table is open with a typed value | The page writes the value to the document and closes the field, as a navigation does, then the host saves; the saved file holds the value |
 | The writer rebinds or unbinds the command in Keyboard Shortcuts | The new key runs the command; the page does not take the key itself |
 
-### Scenario (boundary): Where the key applies
+### Scenario S2 (boundary): Where the key applies
 | Input | Outcome |
 | --- | --- |
 | No preview has the focus | The `when` clause is false and VS Code handles the key as before; the command does nothing |

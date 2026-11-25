@@ -15,6 +15,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: setting off
+- id: S2
+  title: both edges in one cell
+- id: S3
+  title: boundary crossed at the start
+- id: S4
+  title: boundary crossed at the end
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,25 +41,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the balance-edges setting is on, the raw copy SHALL copy the text between the edges when both edges lie in one table cell, and otherwise SHALL copy the touched rows whole, preceded by the header row and the delimiter row when the selection starts in a body row.
 
-### Scenario: setting off
+### Scenario S1: setting off
 
 - GIVEN the setting is off and a table
 - WHEN the selection runs from one cell to a cell of another row
 - THEN the copy is the source verbatim
 
-### Scenario: both edges in one cell
+### Scenario S2: both edges in one cell
 
 - GIVEN the setting is on and both edges lie in one cell
 - WHEN the reader copies
 - THEN the clipboard holds the text between the edges
 
-### Scenario: boundary crossed at the start
+### Scenario S3: boundary crossed at the start
 
 - GIVEN the setting is on and the selection starts in a body row
 - WHEN the reader copies to a cell of a later row
 - THEN the copy holds the header row, the delimiter row and the touched rows whole
 
-### Scenario: boundary crossed at the end
+### Scenario S4: boundary crossed at the end
 
 - GIVEN the setting is on and the selection starts before the table
 - WHEN the selection ends inside a cell

@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Typing updates the preview
+- id: S2
+  title: A dependency changes
 user_need: As a writer, I see my unsaved changes in the preview as I type, and a
   quick burst of typing does not make the preview flicker; I change an included
   file, rename a file or change a setting and the open preview follows, without
@@ -83,7 +88,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Typing updates the preview
+#### Path S1: Typing updates the preview
 
 1. A preview shows a document
    - SwRS-MDOKFSTUDIO-LIFE-039: the text changes, saved or not, and a render of it is queued after a short pause
@@ -94,7 +99,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-LIFE-094 (nominal): an agent edit makes the updated blocks glow once
 3. The page shows the new content in place
 
-#### Path 2: A dependency changes
+#### Path S2: A dependency changes
 
 1. A preview shows a document
    - SwRS-MDOKFSTUDIO-LIFE-044: a file the render depends on changes, or a Studio, plantuml or frontmatter setting changes, and the page renders again or is brought up to date

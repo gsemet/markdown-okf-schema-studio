@@ -7,7 +7,7 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 
 export const STICKY_LONG_TITLE_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S7
     id: "toolbar-navigation/v45-sticky-long-title-zoom-160-cream-900",
     fixture: "88-sticky-long-title",
     theme: "light",

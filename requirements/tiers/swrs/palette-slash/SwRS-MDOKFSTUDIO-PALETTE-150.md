@@ -17,6 +17,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-039
+scenarios:
+- id: S1
+  title: Picked image
+- id: S2
+  title: Selection becomes the caption
+- id: S3
+  title: Fence and path
+- id: S4
+  title: Missing path
+- id: S5
+  title: Where Figure opens a dialog or the form
+- id: S6
+  title: Form opens after the pick
+- id: S7
+  title: Browse in the figure form
+- id: S8
+  title: Browse refused
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,19 +53,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the host answers a path for the Figure button outside a figure, the extension SHALL write a figure directive with that path, the option :alt: set to the file name without extension and the touched lines, or an empty line, as the caption.
 
-### Scenario (nominal): Picked image
+### Scenario S1 (nominal): Picked image
 
 - GIVEN the path pics/cat.png picked and the caret after Intro
 - WHEN the action runs
 - THEN a directive `:::{figure} pics/cat.png` with `:alt: cat` and an empty caption line is inserted after a blank line, with the caret on the caption line
 
-### Scenario (nominal): Selection becomes the caption
+### Scenario S2 (nominal): Selection becomes the caption
 
 - GIVEN the selected line A cat
 - WHEN Figure runs with a picked path
 - THEN the touched lines are the caption inside the directive
 
-### Scenario (boundary): Fence and path
+### Scenario S3 (boundary): Fence and path
 
 | Input | Outcome |
 | --- | --- |
@@ -56,13 +73,13 @@ When the host answers a path for the Figure button outside a figure, the extensi
 | a selection without a colon fence | the outer fence has three colons (never shorter than three) |
 | the path pics/cat.png | written as picked, with no angle brackets |
 
-### Scenario (refusal): Missing path
+### Scenario S4 (refusal): Missing path
 
 - GIVEN no path
 - WHEN the action runs
 - THEN no edit is produced
 
-### Scenario (boundary): Where Figure opens a dialog or the form
+### Scenario S5 (boundary): Where Figure opens a dialog or the form
 
 | Input | Outcome |
 | --- | --- |
@@ -70,19 +87,19 @@ When the host answers a path for the Figure button outside a figure, the extensi
 | the caret inside a figure directive, or in a Markdown image alone in its paragraph | the figure form opens and no dialog is requested (see SwRS-MDOKFSTUDIO-PALETTE-153) |
 | the caret in nested figures | the deepest directive that holds the caret wins |
 
-### Scenario (nominal): Form opens after the pick
+### Scenario S6 (nominal): Form opens after the pick
 
 - GIVEN the caret in a plain paragraph and the Figure button pressed
 - WHEN the host answers a path and the directive is written
 - THEN the figure form opens at once on the new directive, with the Source and Alt text filled and the focus on the Caption field; Escape closes the form and keeps the inserted directive with its default values
 
-### Scenario (nominal): Browse in the figure form
+### Scenario S7 (nominal): Browse in the figure form
 
 - GIVEN the figure form open
 - WHEN Browse is pressed and the host answers a path
 - THEN the editor stays open, the Source field holds the path and has the focus
 
-### Scenario (refusal): Browse refused
+### Scenario S8 (refusal): Browse refused
 
 - GIVEN the host refuses the pick
 - WHEN the answer arrives

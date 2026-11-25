@@ -15,6 +15,11 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-020
 depends_on: []
+scenarios:
+- id: S1
+  title: Sample
+- id: S2
+  title: Selection
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,13 +36,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Collapsible, the extension SHALL wrap the touched lines, or a sample content, in a details element with a summary, select the summary text and leave a blank line after the summary.
 
-### Scenario (nominal): Sample
+### Scenario S1 (nominal): Sample
 
 - GIVEN the caret in a paragraph
 - WHEN Collapsible is pressed
 - THEN a details block with the summary Summary and the content Content is inserted after the paragraph, set apart by blank lines, with Summary selected
 
-### Scenario (boundary): Selection
+### Scenario S2 (boundary): Selection
 
 - GIVEN two selected lines
 - WHEN Collapsible is pressed

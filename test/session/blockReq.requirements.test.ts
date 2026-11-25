@@ -48,7 +48,7 @@ test("a restricted-reads preview and a writable one both post a flush request be
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
 test("a first save for lines or an insertion point that do not exist is refused as stale", async () => {
   const stale = "The preview is stale. Reopen the block before saving.";
   const lines = fixture();
@@ -88,7 +88,8 @@ test("an open for a document that changed since the render is refused and regist
   assert.equal(current.preview.edits.lock.pageEditorOpen, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S7
 test("a second open while the host holds an edit is refused", async () => {
   const held = fixture();
   await held.send("previewEditSave", { ...SECOND, editedText: "Second A.\n", final: false });
@@ -130,7 +131,7 @@ test("an open, save or cancel from an older page of a preview is answered with a
   assert.deepEqual(restricted.of("previewEditSource").map((entry) => entry.error), [stale]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S6
 test("an edit that VS Code does not apply or rejects is reported and the final request is reset", async () => {
   const refused = fixture();
   refused.store.refuseEdits(true);
@@ -171,7 +172,7 @@ test("a block that changed in the document under the host is reported and the lo
   assert.match(unchanged.document.getText(), /Second B\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S5
 test("the host applies one edit at a time and keeps only the newest text received meanwhile", async () => {
   const running = fixture();
   const gate = deferred<void>();
@@ -280,7 +281,7 @@ test("a cut or paste that VS Code does not apply, and a failing clipboard, are a
   assert.equal(read.of("previewBlocksResult")[0]!.reason, "No clipboard.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174#S7
 test("a paste is refused when the document changed while the clipboard was read", async () => {
   const racing = fixture();
   const clipboard = deferred<string>();
@@ -301,7 +302,8 @@ test("a paste is refused when the document changed while the clipboard was read"
   assert.match(calm.document.getText(), /First paragraph\.\n\nPasted block\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-169#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-169#S7
 test("a cut is refused when the document changed while the clipboard was written", async () => {
   const racing = fixture();
   const write = deferred<void>();
@@ -342,7 +344,8 @@ test("a cut stores a pin for the first line of the span only when a block follow
   assert.equal(last.preview.scroll.pendingPin, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S5
 test("a final save with a pin stores it for five seconds, a save without the two fields stores none", async () => {
   const pinned = fixture();
   const before = Date.now();
@@ -361,7 +364,8 @@ test("a final save with a pin stores it for five seconds, a save without the two
   assert.equal(half.preview.scroll.pendingPin, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S4
 test("the host stores the edit mode a writable preview reports and ignores the other reports", async () => {
   const updates: Array<[string, unknown]> = [];
   const store = {
@@ -382,7 +386,8 @@ test("the host stores the edit mode a writable preview reports and ignores the o
   assert.equal(updates.length, 2, "a restricted-reads preview stores the edit mode like any other");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
 test("a block edit keeps the line ending of the document and the next save is not refused", async () => {
   for (const eol of ["\n", "\r\n", "\r"]) {
     const name = JSON.stringify(eol);
@@ -405,7 +410,8 @@ test("a block edit keeps the line ending of the document and the next save is no
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
 test("a block edit in a document with mixed line endings writes the text box content as it is", async () => {
   const run = fixture({ text: "# Title\r\n\r\n- a\n- b\r\n\r\nLast\n" });
   await run.send("previewEditSave", {
@@ -415,7 +421,8 @@ test("a block edit in a document with mixed line endings writes the text box con
   assert.equal(run.document.getText(), "# Title\r\n\r\n- a\n- b\n- c\r\n\r\nLast\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S3
 test("the last block of a CRLF document without a final line break takes CR LF", async () => {
   const run = fixture({ text: "# Title\r\n\r\nLast" });
   await run.send("previewEditSave", {
@@ -428,7 +435,7 @@ const READ_ONLY = "This file is read-only in VS Code.";
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S3
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S6
 test("a move, a cut and a paste on a file VS Code holds read-only answer the read-only reason, trusted or not", async () => {
   for (const restrictedReads of [false, true]) {
     const readOnly = fixture({ restrictedReads });
@@ -447,7 +454,8 @@ test("a move, a cut and a paste on a file VS Code holds read-only answer the rea
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S8
 test("a block save on a file VS Code holds read-only is told, and the images pasted meanwhile are removed", async () => {
   for (const restrictedReads of [false, true]) {
     const readOnly = fixture({ restrictedReads });
@@ -463,7 +471,7 @@ test("a block save on a file VS Code holds read-only is told, and the images pas
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S2
 test("a cancelled session that autosaved restores the original text as an ordinary edit", async () => {
   const run = fixture();
   await run.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
@@ -487,7 +495,7 @@ async function autosaveThenFinal(
   await edit.send("previewEditSave", { ...SECOND, editedText: "Changed.\n", final: true });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
 test("a final save after an autosave, writing nothing, with the source unavailable is answered by done", async () => {
   const edit = fixture();
   edit.manager.sourceAvailable = () => false;
@@ -497,7 +505,7 @@ test("a final save after an autosave, writing nothing, with the source unavailab
   assert.equal(edit.of("previewEditSource")[1]!.editId, "e1");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
 test("a final save after an autosave, writing nothing, with its revision already rendered is answered by done", async () => {
   const edit = fixture();
   edit.manager.sourceAvailable = () => true;
@@ -508,7 +516,8 @@ test("a final save after an autosave, writing nothing, with its revision already
   assert.deepEqual(edit.of("previewEditSource").map((answer) => answer.done), [undefined, true]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S2
 test("a cancel after an autosave gets no done", async () => {
   const edit = fixture();
   edit.manager.sourceAvailable = () => false;

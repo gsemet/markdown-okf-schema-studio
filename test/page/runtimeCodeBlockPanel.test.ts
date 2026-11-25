@@ -36,7 +36,8 @@ function action(harness: RuntimeHarness, name: string) {
   return button;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S4
 test("the Code-block button with the caret in a directive opens the form filled with its options", () => {
   const { harness, textarea } = figureHarness(source, source.indexOf("print"));
   paletteButton(harness, "codeBlock").dispatch("click", click);
@@ -52,7 +53,7 @@ test("the Code-block button with the caret in a directive opens the form filled 
   assert.equal(field(harness, "name").value, "");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S1
 test("Apply rewrites the directive in one edit and keeps the other options and the code", () => {
   const { harness, textarea, calls } = figureHarness(source, source.indexOf("print"));
   paletteButton(harness, "codeBlock").dispatch("click", click);
@@ -75,7 +76,7 @@ test("Apply rewrites the directive in one edit and keeps the other options and t
   assert.equal(panelOf(harness), undefined, "the form closes");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S4
 test("Apply without a change writes nothing", () => {
   const { harness, textarea, calls } = figureHarness(source, source.indexOf("print"));
   paletteButton(harness, "codeBlock").dispatch("click", click);
@@ -85,7 +86,7 @@ test("Apply without a change writes nothing", () => {
   assert.equal(panelOf(harness), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S4
 test("an invalid value shows an inline error and keeps the form open without editing", () => {
   const { harness, textarea, calls } = figureHarness(source, source.indexOf("print"));
   paletteButton(harness, "codeBlock").dispatch("click", click);
@@ -102,7 +103,7 @@ test("an invalid value shows an inline error and keeps the form open without edi
   assert.equal(textarea.value, source);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S2
 test("the Code-block button outside a directive opens an empty form and Apply inserts a directive", () => {
   const text = "Intro paragraph.";
   const { harness, textarea, calls } = figureHarness(text, 5);

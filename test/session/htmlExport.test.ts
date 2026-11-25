@@ -107,7 +107,8 @@ function harness(options: Options = {}) {
 const LINKS = (targets: string[]): string =>
   targets.map((target, index) => `<a data-sphinx-preview-navigation="${target}">link ${index}</a>`).join(" ");
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("the save dialog proposes notes.html next to the file with the HTML filter, and the bytes written are the builder output", async () => {
   const h = harness();
   const body = "<h1>Notes</h1><p>text</p>";
@@ -124,14 +125,14 @@ test("the save dialog proposes notes.html next to the file with the HTML filter,
   assert.deepEqual(h.calls, ["pickSaveFile"], "no relative link: no warning");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
 test("a document with no local folder proposes the first workspace folder", async () => {
   const h = harness({ local: false });
   await h.request("<p>x</p>");
   assert.match(h.saves[0]!.defaultPath.split("\\").join("/"), /^\/ws\/notes\.html$/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S3
 test("a cancelled save dialog writes nothing and shows no message", async () => {
   const h = harness({ savePath: undefined });
   const result = await h.request("<p>x</p>");
@@ -140,7 +141,7 @@ test("a cancelled save dialog writes nothing and shows no message", async () => 
   assert.deepEqual([result?.ok, result?.cancelled], [true, true]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
 test("a write error shows the error with its reason and the page gets the reason", async () => {
   const h = harness({ failWrite: true });
   const result = await h.request("<p>x</p>");
@@ -151,7 +152,8 @@ test("a write error shows the error with its reason and the page gets the reason
   assert.match(String(result?.reason), /EACCES/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S3
 test("with relative links the warning comes before the save dialog and lists the targets", async () => {
   const h = harness();
   await h.request(LINKS(["other.md", "./sub/x.md#h", "wiki:Page", "other.md"]));
@@ -162,7 +164,7 @@ test("with relative links the warning comes before the save dialog and lists the
   assert.equal(h.written.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S3
 test("cancelling the warning stops the export: no save dialog and no file", async () => {
   const h = harness({ confirm: false });
   const result = await h.request(LINKS(["other.md"]));
@@ -171,7 +173,8 @@ test("cancelling the warning stops the export: no save dialog and no file", asyn
   assert.equal(result?.cancelled, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S3
 test("the warning lists at most 20 targets, then counts the rest", () => {
   const targets = Array.from({ length: 23 }, (_unused, index) => `f${index}.md`);
   const { message, detail } = removedLinksWarning(targets);
@@ -183,7 +186,8 @@ test("the warning lists at most 20 targets, then counts the rest", () => {
   assert.equal(removedLinksWarning(["a.md"]).message, "1 link to another file will be removed from the exported page.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S2
 test("a mapped image is embedded from the file, an unmapped one is counted in the closing message", async () => {
   const h = harness();
   await h.request('<img src="vscode-webview://x/pic.png#a" alt="a"><img src="vscode-webview://x/other.png" alt="b">');
@@ -192,7 +196,8 @@ test("a mapped image is embedded from the file, an unmapped one is counted in th
   assert.deepEqual(h.infos, ["Exported to `notes.html`. 1 image could not be embedded."]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S3
 test("a snapshot with no gesture and no command is refused; one after the command is served once", async () => {
   const h = harness();
   const refused = await h.request("<p>x</p>", false);
@@ -210,7 +215,8 @@ test("a snapshot with no gesture and no command is refused; one after the comman
   assert.equal(h.written.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S3
 test("a snapshot the host cannot read, or one of another document, is answered with a refusal and an error message", () => {
   const h = harness();
   const posted: Array<Record<string, unknown>> = [];

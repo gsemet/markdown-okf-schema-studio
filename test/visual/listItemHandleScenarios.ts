@@ -18,7 +18,8 @@ const PLACED = [
 
 export const LIST_ITEM_HANDLE_SCENARIOS: ScenarioDefinition[] = [
   ...PLACED.map(([version, theme, mode, label]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S5
     id: `block-editing/${version}-list-item-handles-${mode ?? theme}-900`,
     fixture: FIXTURE,
     theme,
@@ -32,7 +33,8 @@ export const LIST_ITEM_HANDLE_SCENARIOS: ScenarioDefinition[] = [
       + "the container lists sit outside the outermost box.",
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
     id: "block-editing/v39-list-item-handles-pushed-light-360",
     fixture: FIXTURE,
     theme: "light",
@@ -44,7 +46,7 @@ export const LIST_ITEM_HANDLE_SCENARIOS: ScenarioDefinition[] = [
       + "and every handle stays inside the pane, centred on its item's first line.",
   },
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
     id: `block-editing/v${40 + index}-list-item-drag-${theme}-900`,
     fixture: FIXTURE,
     theme,

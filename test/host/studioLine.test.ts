@@ -43,7 +43,7 @@ async function resolveStudioTab(studio: Studio, file: string, column = 2): Promi
 const studioTabOf = (studio: Studio, file: string) =>
   studio.manager.latest((session) => session.inStudioTab && session.documentUri === uriOf(file));
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S2
 test("a Studio tab that opens with a pending line asks its page to reveal it, once; without one it asks nothing", async (t) => {
   const studio = start(t);
   const file = writeFile("# One\n\ntext\n");
@@ -60,7 +60,7 @@ test("a Studio tab that opens with a pending line asks its page to reveal it, on
   assert.equal(again?.scroll.pendingRevealLine, undefined, "the line was taken once: a later opening of the file gets none");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S1
 test("a line delivered to the live Studio tab of a revealed file is gone afterwards, so a later opening reveals nothing", async (t) => {
   const studio = start(t);
   const file = writeFile("# One\n\ntext\n");
@@ -74,7 +74,7 @@ test("a line delivered to the live Studio tab of a revealed file is gone afterwa
   assert.equal(created?.scroll.pendingRevealLine, undefined, "a resolve right after reveals nothing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S2
 test("a link from a Studio tab that opens as text reports other and drops the line, and closes no tab", async (t) => {
   const studio = start(t);
   const target = writeFile("# Target\n\nbody\n");
@@ -87,7 +87,7 @@ test("a link from a Studio tab that opens as text reports other and drops the li
   assert.deepEqual(fake.controls.closedTabs, [], "no tab closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S1
 test("a link from a Studio tab that opens a new Studio tab reports studio-created and the new tab reveals the line", async (t) => {
   const studio = start(t);
   const target = writeFile("# Target\n\nbody\n");
@@ -101,7 +101,7 @@ test("a link from a Studio tab that opens a new Studio tab reports studio-create
   assert.equal(studio.activation.studioLines.pending.has(uriOf(target)), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S2
 test("a link, Back or Next to a file whose Studio tab is open in another group reveals that tab in its group, with no second tab", async (t) => {
   const studio = start(t);
   const target = writeFile("# Target\n\nbody\n");
@@ -121,7 +121,7 @@ test("a link, Back or Next to a file whose Studio tab is open in another group r
   assert.equal(studio.activation.studioLines.pending.has(uriOf(target)), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-198
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-198#S2
 test("Open in Studio at This Line opens the Studio view type in the text editor's group at the caret's line and closes no tab", async (t) => {
   const studio = start(t);
   const file = writeFile("# One\n\ntext\nmore\n");
@@ -135,7 +135,7 @@ test("Open in Studio at This Line opens the Studio view type in the text editor'
   assert.deepEqual(fake.controls.closedTabs, [], "the text tab stays");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-198
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-198#S1
 test("Open in Studio at This Line reveals the Studio tab of the file already open in another group and gives it the line", async (t) => {
   const studio = start(t);
   const file = writeFile("# One\n\ntext\nmore\n");
@@ -150,7 +150,7 @@ test("Open in Studio at This Line reveals the Studio tab of the file already ope
   assert.equal(studio.activation.studioLines.pending.has(uriOf(file)), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-198
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-198#S2
 test("Open in Studio at This Line tells the reader and opens nothing on a Studio tab, with no editor and on a file that is not Markdown", async (t) => {
   const studio = start(t);
   const refused = async (): Promise<void> => {

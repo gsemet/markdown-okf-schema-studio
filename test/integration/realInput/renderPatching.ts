@@ -530,8 +530,9 @@ export async function scenarioLargeDocumentPatched(page: Page, evidence: Evidenc
 /**
  * RI-T28: an empty document is written from the preview alone (Start writing), then a block is
  * inserted between two blocks with the + button; turning edit mode on does not move the layout.
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-011
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-087
+ * @accepts_req StRS-MDOKFSTUDIO-BLOCK-011#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-087#S5
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-087#S8
  */
 export async function scenarioInsertBlocksFromPreview(page: Page, evidence: Evidence): Promise<void> {
   const DONE = "button[aria-label='Done editing']";

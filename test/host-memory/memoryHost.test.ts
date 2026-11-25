@@ -113,7 +113,7 @@ test("the memory file system reads, writes, lists and renames files", async () =
   assert.equal(normalizePosixPath("//a/./b/../c/"), "/a/c");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-002
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-002#S1
 test("a rejected background task is logged by the host's logger, not left unhandled", async () => {
   const logger = createMemoryLogger();
   const failure = new Error("disk full");

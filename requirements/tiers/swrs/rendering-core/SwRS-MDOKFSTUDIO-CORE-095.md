@@ -16,6 +16,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-008
+scenarios:
+- id: S1
+  title: "A page shows a feature clip's GIF"
+- id: S2
+  title: No WebM beside the GIF
+- id: S3
+  title: A GIF outside the clips folder
+- id: S4
+  title: No clips folder
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,25 +41,25 @@ default_owner_email: gaetan@xeberon.net
 
 When a maintainer builds the Pages site, an image of a page that shows a feature clip's GIF (docs/demo-video/clips/<clip>/<clip>.gif with <clip>.webm beside it) SHALL become a looping, muted, autoplaying video of the WebM with the poster and the GIF as fallback, and the site SHALL carry the clip's WebM, GIF and poster.
 
-### Scenario (nominal): A page shows a feature clip's GIF
+### Scenario S1 (nominal): A page shows a feature clip's GIF
 
 - GIVEN a docs page with a Markdown image of `docs/demo-video/clips/x/x.gif`, with `x.webm` and `poster.png` in the same folder
 - WHEN the site is built
 - THEN the image becomes a `<video>` of `x.webm` with `poster.png`, autoplay, loop, muted, playsinline and controls, the image's alt text as its `aria-label`, and the GIF as an `<img>` fallback inside it, and the site carries `x.webm`, `x.gif` and `poster.png` under `docs/demo-video/clips/x/`
 
-### Scenario (boundary): No WebM beside the GIF
+### Scenario S2 (boundary): No WebM beside the GIF
 
 - GIVEN a page image of `docs/demo-video/clips/x/x.gif` and no `x.webm` in that folder
 - WHEN the site is built
 - THEN the image stays an image
 
-### Scenario (boundary): A GIF outside the clips folder
+### Scenario S3 (boundary): A GIF outside the clips folder
 
 - GIVEN a page image of a GIF that is not `docs/demo-video/clips/<clip>/<clip>.gif`
 - WHEN the site is built
 - THEN the image is unchanged
 
-### Scenario (boundary): No clips folder
+### Scenario S4 (boundary): No clips folder
 
 - GIVEN a repository with no `docs/demo-video/clips/` folder
 - WHEN the site is built

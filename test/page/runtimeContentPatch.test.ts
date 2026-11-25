@@ -86,7 +86,8 @@ function traceStartup(
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S8
 test("T33: the startup sequence of effects and messages is stable", () => {
   const scenarios: Array<[string, Parameters<typeof createRuntimeHarness>[0], boolean | undefined]> = [
     ["reading mode", {}, undefined],
@@ -675,7 +676,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
   },
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S5
 test("T34: a content patch replaces the content, moves the identifiers and posts previewReady", () => {
   const harness = createRuntimeHarness();
   const before = harness.messages.length;
@@ -891,8 +892,9 @@ test("CR 050: a patch keeps the code of each status line and refuses a malformed
   assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>", "a code that is not a string refuses the patch");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-025
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-059
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-059#S6
 test("T34: the patch rebuilds the status region from plain text", () => {
   const harness = createRuntimeHarness({ previewStatus: "success" });
   const old = harness.statusRegion!;
@@ -980,7 +982,8 @@ test("T34: open disclosures of the old content are open again in the new content
   assert.deepEqual(fresh.map(asOpen), [true, false, true]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S3
 test("T34: a patch with an anchor or a pin positions the page like a loaded page", () => {
   const anchored = createRuntimeHarness({ initialAnchor: 50 });
   assert.ok(anchored.windowState.scrollY > 0, "the reference page scrolls to the anchor");
@@ -1041,7 +1044,7 @@ function linkElement(harness: RuntimeHarness, request: string, attributes: Recor
     harness.windowState, 0, 10, "a");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085#S4
 test("T34: links of the new content keep known target hints and discover new targets", () => {
   const harness = createRuntimeHarness({ intersectionObserver: true });
   const known = linkElement(harness, "Known", {
@@ -1115,7 +1118,7 @@ test("T34: edit mode rebuilds the insertion points for the new content", () => {
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "on", "edit mode stays on");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S9
 test("P-07: edit mode keeps the insertion point of a block that did not change and moves its line", () => {
   const harness = createRuntimeHarness();
   harness.mappings.forEach((mapping) => { mapping.siblingsFollowInsertions = true; });
@@ -1184,7 +1187,8 @@ test("T34: pending block navigation resumes after a content patch", () => {
   assert.deepEqual(next.selectionRange, [0, 0], "the caret is at the start");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S6
 test("a click on another block while the first editor holds changes opens it once the save is rendered", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -1256,7 +1260,8 @@ test("T34: when a patch of a chain is rejected, the later ones are ignored and n
 
 // Editor keyboard bugs (hotkey-editing backlog): wrapped-line Up/Down, undo, wrapping markers.
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
 test("a click on the first item of a list while another editor holds changes opens that item, not the list, once the save is rendered", () => {
   const harness = createRuntimeHarness();
   // A list at line 60 with two items, 60 to 61 and 62 to 63: the list, its first item and the

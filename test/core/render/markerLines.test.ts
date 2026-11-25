@@ -40,8 +40,8 @@ const TABLE = ["| a | b |", "| - | - |", "| 1 | 2 |", "| 3 | 4 |"];
 /** Source lines: the header on `first`, the delimiter on `first + 1`, then body rows at `first + 2`... */
 const expectedRows = (first: number): number[] => [first, first + 2, first + 3];
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
 test("a top-level pipe table marks its header on its first line and body row n on the first line plus n + 1", async () => {
   const { dom } = await render(["Intro.", "", ...TABLE, ""].join("\n"));
   assert.deepEqual(rowLines(dom), expectedRows(3));
@@ -50,20 +50,21 @@ test("a top-level pipe table marks its header on its first line and body row n o
   assert.equal(attribute(table, "data-line"), "3");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table at the end of the file, without a final newline, keeps its row lines", async () => {
   const { dom } = await render(["Intro.", "", ...TABLE].join("\n"));
   assert.deepEqual(rowLines(dom), expectedRows(3));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table after a front matter counts whole-file lines", async () => {
   const { dom } = await render(["---", "title: T", "---", "", ...TABLE, ""].join("\n"));
   assert.deepEqual(rowLines(dom).filter((line) => line !== undefined), expectedRows(5));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
 test("a pipe table in a blockquote marks its rows and itself", async () => {
   const { dom } = await render(["Intro.", "", ...TABLE.map((line) => `> ${line}`), ""].join("\n"));
   assert.deepEqual(rowLines(dom), expectedRows(3));
@@ -72,13 +73,15 @@ test("a pipe table in a blockquote marks its rows and itself", async () => {
   assert.equal(attribute(table, "data-okf-marker-end-line"), "6");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table in a GitHub alert marks its rows", async () => {
   const { dom } = await render(["Intro.", "", "> [!NOTE]", ...TABLE.map((line) => `> ${line}`), ""].join("\n"));
   assert.deepEqual(rowLines(dom), expectedRows(4));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table in a {note} and in an {admonition} marks its rows", async () => {
   const note = await render(["Intro.", "", ":::{note}", ...TABLE, ":::", ""].join("\n"));
   assert.deepEqual(rowLines(note.dom), expectedRows(4));
@@ -88,14 +91,16 @@ test("a pipe table in a {note} and in an {admonition} marks its rows", async () 
   assert.equal(attribute(table, "data-okf-marker-line"), "6");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table in a list item marks its rows", async () => {
   const { dom } = await render(["Intro.", "", "- item", "", ...TABLE.map((line) => `  ${line}`), ""].join("\n"));
   assert.deepEqual(rowLines(dom), expectedRows(5));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
 test("a pipe table in a tab item marks its rows, and a click on the item still edits the whole item", async () => {
   const source = [
     "Intro.",
@@ -117,7 +122,7 @@ test("a pipe table in a tab item marks its rows, and a click on the item still e
   assert.equal(attribute(table, "data-line"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a list-table, a captioned table directive and a raw HTML table carry no row line", async () => {
   const listTable = [
     ":::{list-table}",
@@ -176,7 +181,7 @@ const markerPair = (element: HtmlElement): [number | undefined, number | undefin
   attribute(element, "data-okf-marker-end-line") === undefined ? undefined : Number(attribute(element, "data-okf-marker-end-line")),
 ];
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 // @tests_req SwRS-MDOKFSTUDIO-MYST-098#S2
 // @tests_req SwRS-MDOKFSTUDIO-MYST-098#S3
 test("the content of a tab item carries whole-file marker lines and no source mapping", async () => {
@@ -206,7 +211,7 @@ test("the content of a tab item carries whole-file marker lines and no source ma
   assert.equal(findElements(dom, (element) => attribute(element, "data-sphinx-source-line") !== undefined).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("CRLF text gives the same marker lines as LF text", async () => {
   const lf = await render(TAB_SET);
   const crlf = await render(TAB_SET.replace(/\n/gu, "\r\n"));
@@ -223,7 +228,8 @@ test("CRLF text gives the same marker lines as LF text", async () => {
   assert.deepEqual(rowLines((await render(table.join("\r\n"))).dom), expectedRows(3));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a pipe table with aligned columns (written through the HTML pass) marks its rows too", async () => {
   const aligned = ["| a | b |", "| :- | -: |", "| 1 | 2 |", "| 3 | 4 |"];
   const top = await render(["Intro.", "", ...aligned, ""].join("\n"));

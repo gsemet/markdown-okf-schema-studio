@@ -24,7 +24,7 @@ async function render(markdown: string) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-003
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S6
 test("body source lines stay absolute after a four-line frontmatter with LF, CRLF and CR breaks", async () => {
   const lines = ["---", "type: finding", "status: draft", "---", "Body paragraph.", "", "Second paragraph."];
   for (const [label, eol] of [["LF", "\n"], ["CRLF", "\r\n"], ["CR", "\r"]] as const) {
@@ -38,7 +38,8 @@ test("body source lines stay absolute after a four-line frontmatter with LF, CRL
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-010
+// @tests_req SwRS-MDOKFSTUDIO-CORE-010#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-010#S3
 test("wikilink syntax inside a link, an image, math, raw HTML or an embed is not converted", async () => {
   const result = await render([
     "[see [[InLink]]](target.md)",
@@ -60,7 +61,8 @@ test("wikilink syntax inside a link, an image, math, raw HTML or an embed is not
   assert.doesNotMatch(result.html, /wiki:(InLink|InImage|InMath|InRawBlock|Embedded)/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-010
+// @tests_req SwRS-MDOKFSTUDIO-CORE-010#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-010#S3
 test("a wikilink in the text between two inline HTML tags is converted like any text", async () => {
   // "Raw HTML" is the block or the tag itself; the text between two inline tags is plain text.
   const inline = await render("Before <span>[[InRawInline]]</span> after.\n");
@@ -80,7 +82,7 @@ function virtualContext(files: Record<string, string>): MystRenderContext {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S3
 test("10 Mi characters of included text expand; the next include is a placeholder with one budget warning", async () => {
   const half = INCLUDE_BUDGET_MAX_CHARS / 2;
   const files = {

@@ -159,7 +159,7 @@ async function editTitles(page: Page): Promise<string[]> {
     })));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S1
 /** rendering-core: README HTML renders centred and theme-aware, is titled in edit mode and edits raw. */
 export async function scenarioReadmeHtml(page: Page): Promise<void> {
   await logSideBarState(page, "readme-html");

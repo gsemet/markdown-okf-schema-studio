@@ -28,7 +28,7 @@ test("push, back and forward walk the visited places", () => {
   assert.equal(history.forward(), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S11
 test("a push after going back drops the forward entries", () => {
   const history = new NavigationHistory();
   history.push(place("a", 1));
@@ -40,7 +40,7 @@ test("a push after going back drops the forward entries", () => {
   assert.deepEqual(history.snapshot().entries.map((entry) => entry.uri), ["a", "b", "d"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S12
 test("a duplicate of the current entry is ignored", () => {
   const history = new NavigationHistory();
   history.push(place("a", 1));
@@ -50,7 +50,7 @@ test("a duplicate of the current entry is ignored", () => {
   assert.equal(history.snapshot().entries.length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S9
 test("the history keeps at most 50 entries, the newest", () => {
   const history = new NavigationHistory();
   for (let n = 1; n <= NAVIGATION_HISTORY_CAP + 10; n += 1) history.push(place("a", n));
@@ -61,7 +61,8 @@ test("the history keeps at most 50 entries, the newest", () => {
   assert.equal(history.canForward(), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S5
 test("depart updates the line of the same document and pushes another document", () => {
   const history = new NavigationHistory();
   history.depart(place("a", 4));
@@ -71,7 +72,8 @@ test("depart updates the line of the same document and pushes another document",
   assert.deepEqual(history.snapshot().entries, [place("a", 9), place("b", 2)]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S6
 test("depart without a known line keeps the entry's line and pushes a new document at line 1", () => {
   const history = new NavigationHistory();
   history.push(place("a", 7));

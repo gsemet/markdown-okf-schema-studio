@@ -21,6 +21,11 @@ verified:
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Run a command from the slash menu
+- id: S2
+  title: Find a command by its alternative name
 user_need: As a writer, I get a command menu from the slash without it getting
   in the way of ordinary text such as paths, URLs and code, type a few letters
   after the slash and press Enter to run a command without leaving the keyboard,
@@ -82,7 +87,7 @@ A command is one edit, and Escape leaves the text as it is.
 
 ### Main paths
 
-#### Path 1: Run a command from the slash menu
+#### Path S1: Run a command from the slash menu
 
 1. A block text box is open in edit mode
    - SwRS-MDOKFSTUDIO-PALETTE-232: the writer types a slash at the start of a line or after whitespace and the slash menu opens
@@ -95,7 +100,7 @@ A command is one edit, and Escape leaves the text as it is.
    - Option SwRS-MDOKFSTUDIO-PALETTE-242 (boundary): Escape closes the menu and keeps the typed text
 4. The edit of the command is in the text
 
-#### Path 2: Find a command by its alternative name
+#### Path S2: Find a command by its alternative name
 
 1. The slash menu lists the commands of the mode
    - SwRS-MDOKFSTUDIO-PALETTE-263: the writer types an alternative name and the command that carries it is listed

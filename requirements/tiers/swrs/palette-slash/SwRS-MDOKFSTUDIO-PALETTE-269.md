@@ -15,6 +15,11 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-020
 - StRS-MDOKFSTUDIO-PALETTE-021
+scenarios:
+- id: S1
+  title: Choosing a type
+- id: S2
+  title: Where the list does not open
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,7 +41,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the caret is on the type of a GitHub alert head or of a MyST admonition directive, the extension SHALL show above it a list of the types of that syntax with their icons, and a chosen type replaces the type text only.
 
-### Scenario (nominal): Choosing a type
+### Scenario S1 (nominal): Choosing a type
 
 - GIVEN the caret on the type word of `> [!NOTE]` in GFM, MyST or Full mode, or on the type of `:::{note}` in MyST or Full mode
 - WHEN the caret arrives there (a click, an arrow key, typing)
@@ -44,7 +49,7 @@ When the caret is on the type of a GitHub alert head or of a MyST admonition dir
 - AND choosing a type replaces the type text only, as one more edit; the title, the body and the caret stay in place
 - AND the arrow keys move the lit type, Enter chooses it and Escape closes the list
 
-### Scenario (boundary): Where the list does not open
+### Scenario S2 (boundary): Where the list does not open
 
 | Input | Outcome |
 | --- | --- |

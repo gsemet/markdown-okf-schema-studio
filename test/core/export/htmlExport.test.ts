@@ -28,7 +28,7 @@ const bodyOf = (html: string): string => html.slice(html.indexOf("<body"));
 const build = (contentHtml: string, overrides: Partial<ExportSnapshot> = {}, extra: Partial<HtmlExportInputs> = {}) =>
   buildHtmlExport(snapshot(contentHtml, overrides), inputs(extra));
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
 test("the file is one document with no script, no linked file and no import, and no vscode- name", () => {
   const { html } = build("<h1>Title</h1><p>text</p>");
   assert.match(html, /^<!doctype html>/u);
@@ -37,7 +37,7 @@ test("the file is one document with no script, no linked file and no import, and
   assert.match(html, /<meta charset="utf-8">/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S2
 test("the resolved theme tokens replace the host mapping and the theme kind class goes on the body", () => {
   const { html } = build("<p>x</p>");
   assert.match(html, /--studio-editor-background: #101010;/u);
@@ -47,7 +47,8 @@ test("the resolved theme tokens replace the host mapping and the theme kind clas
   assert.match(html, /color-scheme: dark/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S3
 test("a local image becomes a data URI and an unreadable one is counted and loses its source", () => {
   const { html, missingImages } = build(
     '<img src="vscode-webview://abc/pic.png" alt="a"><img src="vscode-webview://abc/gone.png" alt="b">'
@@ -59,7 +60,7 @@ test("a local image becomes a data URI and an unreadable one is counted and lose
   assert.match(html, /src="data:image\/svg\+xml;base64,PHN2Zz4="/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S1
 test("links keep external and anchor targets and unwrap the others, reporting them once", () => {
   const { html, removedLinks } = build(
     '<p><a data-sphinx-preview-navigation="https://example.com/x">ext</a> '
@@ -76,7 +77,7 @@ test("links keep external and anchor targets and unwrap the others, reporting th
   assert.doesNotMatch(html, /data-sphinx-preview-navigation/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3
 test("folded sections are shown and the fold attributes are gone", () => {
   const { html } = build(
     '<h2 data-okf-fold="1">Head</h2><p data-okf-folded="1" hidden="until-found">was folded</p>',
@@ -85,7 +86,7 @@ test("folded sections are shown and the fold attributes are gone", () => {
   assert.doesNotMatch(bodyOf(html), /hidden|data-okf-fold/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("review comments, controls and editing chrome are left out, find marks keep their text", () => {
   const { html } = build(
     '<p>keep <span class="okf-comment" data-okf-comment-kind="note"><button class="okf-chip">1</button>'
@@ -101,7 +102,7 @@ test("review comments, controls and editing chrome are left out, find marks keep
   assert.doesNotMatch(bodyOf(html), /secret note|Copy|draft|<button|<textarea|<input|insert-point|data-line|contenteditable|onclick|<mark/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a table cell under the cell editor is exported with its content shown and without the editor", () => {
   const { html } = build(
     '<table><tr><td data-sphinx-preview-table-cell-selected="true">'
@@ -113,7 +114,7 @@ test("a table cell under the cell editor is exported with its content shown and 
   assert.doesNotMatch(body, /data-sphinx-table-cell-content|aria-hidden|block-editor|textarea|typed|<button/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3
 test("a paragraph under the block editor is exported, its editor is not", () => {
   const { html } = build(
     '<p data-sphinx-preview-editing="true">Rendered paragraph</p>'
@@ -124,7 +125,7 @@ test("a paragraph under the block editor is exported, its editor is not", () => 
   assert.doesNotMatch(body, /data-sphinx-preview-editing|block-editor|textarea|typed/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a front matter value and a key under their editors are exported shown, without the editor", () => {
   const { html } = build(
     '<section data-okf-properties="true"><table><tbody><tr data-okf-field="status">'
@@ -140,13 +141,15 @@ test("a front matter value and a key under their editors are exported shown, wit
   assert.doesNotMatch(body, /hidden|data-okf-editing|data-okf-key-editing|frontmatter-editor|textarea|typed|<input/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3
 test("a task list checkbox stays, disabled and without its edit attributes", () => {
   const { html } = build('<li><input type="checkbox" checked data-myst-checkbox-line="4"> done</li>');
   assert.match(html, /<input type="checkbox" checked="" disabled="">/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S2
 test("a tab set works without script: radios, labels, and the shown tab is the one the page showed", () => {
   const tabs = '<div class="myst-tab-set"><div class="myst-tab-list" role="tablist">'
     + '<button class="myst-tab" id="t1" aria-controls="p1" aria-selected="true">One</button>'
@@ -162,7 +165,8 @@ test("a tab set works without script: radios, labels, and the shown tab is the o
   assert.match(html, /\.myst-tab-radio\[data-export-tab="2"\]:checked ~ \.myst-tab-panel\[data-export-tab="2"\]/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("the line marker's attributes (marker lines, front matter end line) are left out of the export", () => {
   const { html } = build(
     '<section data-okf-properties data-okf-frontmatter-end-line="4"><table><tr data-okf-marker-line="6">'
@@ -188,13 +192,13 @@ test("the properties table becomes a closed details with a summary and no editin
   assert.match(html, /<title>My page<\/title>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
 test("the title falls back to the first heading, then to the file name", () => {
   assert.match(build("<h1>A <em>big</em> one</h1>").html, /<title>A big one<\/title>/u);
   assert.match(build("<p>none</p>").html, /<title>notes<\/title>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S3
 test("the KaTeX sheet and its fonts are inline, and only for a page with math", () => {
   const css = '@font-face{font-family:KaTeX_Main;src:url(fonts/KaTeX_Main.woff2) format("woff2"),url(fonts/KaTeX_Main.woff) format("woff"),url(fonts/KaTeX_Main.ttf) format("truetype")}.katex{font:normal 1.2em KaTeX_Main}';
   assert.deepEqual(katexFontUrls(css), ["fonts/KaTeX_Main.woff2"]);
@@ -212,7 +216,7 @@ test("the KaTeX sheet and its fonts are inline, and only for a page with math", 
   assert.doesNotMatch(without.html, /KaTeX_Main/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
 test("a style value cannot close the style element and a script URL is dropped", () => {
   const hostile = build(
     '<a href="javascript:alert(1)" data-sphinx-preview-navigation="https://e.com">x</a><img src="javascript:1">',
@@ -221,7 +225,7 @@ test("a style value cannot close the style element and a script URL is dropped",
   assert.doesNotMatch(hostile.html, /<script|javascript:/iu);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
 test("the snapshot guard accepts the page shape and refuses a malformed one", () => {
   assert.equal(isExportSnapshot(snapshot("<p>x</p>")), true);
   assert.equal(isExportSnapshot({ ...snapshot("x"), shownTabs: [-1] }), false);
@@ -230,7 +234,7 @@ test("the snapshot guard accepts the page shape and refuses a malformed one", ()
   assert.equal(isExportSnapshot(null), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S1
 test("a mailto link is kept and a file: link, an invalid anchor and a query-only link are unwrapped and reported", () => {
   const { html, removedLinks } = build(
     '<p><a data-sphinx-preview-navigation="mailto:a@b.c">mail</a> <a data-sphinx-preview-navigation="file:///etc/x">file</a> '
@@ -241,7 +245,7 @@ test("a mailto link is kept and a file: link, an invalid anchor and a query-only
   assert.deepEqual(removedLinks, ["file:///etc/x", "#bad anchor", "?q=1"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
 test("every candidate of a srcset is embedded and an unreadable one is dropped", () => {
   const { html, missingImages } = build(
     '<img src="vscode-webview://abc/pic.png" srcset="vscode-webview://abc/pic.png 1x, vscode-webview://abc/big.png 2x" alt="p">',
@@ -250,7 +254,7 @@ test("every candidate of a srcset is embedded and an unreadable one is dropped",
   assert.equal(missingImages, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S2
 test("the width mode, the width rule and the theme mode go on the file, the zoom and clearance do not", () => {
   const { html } = build("<p>x</p>", {
     rootAttributes: {
@@ -269,7 +273,8 @@ test("the width mode, the width rule and the theme mode go on the file, the zoom
   assert.match(html, /color-scheme: light/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S3
 test("the token rule follows the preview sheet and names every resolved token", () => {
   const tokens = Object.fromEntries(THEME_TOKEN_NAMES.map((name) => [name, `#${name.length}00`]));
   const { html } = build("<p>x</p>", { tokens });
@@ -278,7 +283,7 @@ test("the token rule follows the preview sheet and names every resolved token", 
   assert.ok(html.indexOf("data-studio-export-preview") < html.indexOf("data-studio-export-tokens"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S2
 test("nested tab sets get their own radio names and a dropdown keeps its open state", () => {
   const set = (id: string, inner: string): string => `<div class="myst-tab-set"><div class="myst-tab-list">`
     + `<button class="myst-tab" id="${id}a" aria-selected="true">A</button><button class="myst-tab" id="${id}b" aria-selected="false">B</button></div>`
@@ -293,7 +298,7 @@ test("nested tab sets get their own radio names and a dropdown keeps its open st
   assert.match(bodyOf(html), /<details><summary>Shut/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3
 test("a THREAD chip with its popover, a TODO chip, source-mapping attributes and the tabindex of mapped blocks are left out", () => {
   const { html } = build(
     '<p data-sphinx-source-file="a.md" data-sphinx-source-line="3" data-sphinx-preview-block="1" tabindex="0">mapped</p>'
@@ -340,7 +345,8 @@ test("a properties table without a schema keeps its two columns inside the close
   assert.equal((body.match(/<th>/gu) ?? []).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("the host's list of blank runs and a blank-line block are not exported", () => {
   const { html } = build(
     '<p data-sphinx-source-line="1">A</p><div class="sphinx-preview-blank-lines" data-okf-blank-lines="2-4"></div>' +
@@ -352,7 +358,8 @@ test("the host's list of blank runs and a blank-line block are not exported", ()
   assert.match(body, /B<\/p>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
 test("the page-only definition and footnote lines are not exported", () => {
   const { html } = build(
     '<dl><dt>T</dt><dd data-okf-definition-line="2">one</dd></dl>'

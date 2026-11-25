@@ -17,6 +17,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-011
 depends_on: []
+scenarios:
+- id: S1
+  title: Three blocks
+- id: S2
+  title: Reading mode and rebuilds
+- id: S3
+  title: The properties table
+- id: S4
+  title: The plus button appears on hover and on keyboard focus
+- id: S5
+  title: Clicking the plus opens an empty insertion editor
+- id: S6
+  title: Other input on the bar
+- id: S7
+  title: The insertion editor text box shows a placeholder
+- id: S8
+  title: The insert point follows the whole rendered block
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,12 +55,12 @@ default_owner_email: gaetan@xeberon.net
 
 While edit mode is on, the page SHALL place an insert point holding a plus button labelled "Insert a block here" after every top-level body block and after the properties table, and a click on the plus opens an empty insertion editor at that place.
 
-### Scenario (nominal): Three blocks
+### Scenario S1 (nominal): Three blocks
 - GIVEN a document with three body blocks and edit mode turned on
 - WHEN the page builds the bars
 - THEN three bars exist, one after each block, each with the source line the block ends at
 
-### Scenario (boundary): Reading mode and rebuilds
+### Scenario S2 (boundary): Reading mode and rebuilds
 | Input | Outcome |
 | --- | --- |
 | The same document in reading mode | No insert point exists |
@@ -51,36 +68,36 @@ While edit mode is on, the page SHALL place an insert point holding a plus butto
 | A patch in edit mode whose block and neighbouring blocks are unchanged | The bar of that block is the same element and only its line number moves (SwRS-MDOKFSTUDIO-LIFE-069) |
 | A page that starts or is patched in edit mode | The bars are built for the new content |
 
-### Scenario (boundary): The properties table
+### Scenario S3 (boundary): The properties table
 | Input | Outcome |
 | --- | --- |
 | A document with frontmatter and edit mode on | A bar after the properties table has data-sphinx-insert-after-line 0 and no move buttons, only the plus button |
 | A document without frontmatter | No bar for line 0 exists |
 
-### Scenario (nominal): The plus button appears on hover and on keyboard focus
+### Scenario S4 (nominal): The plus button appears on hover and on keyboard focus
 | Input | Outcome |
 | --- | --- |
 | Edit mode on and the pointer over a block or over the plus button | The plus button is visible (opacity 1) |
 | The plus button has the keyboard focus (focus-visible) | The plus button is visible |
 | No pointer and no focus on the bar | The plus button is transparent (opacity 0) but still reachable by keyboard |
 
-### Scenario (nominal): Clicking the plus opens an empty insertion editor
+### Scenario S5 (nominal): Clicking the plus opens an empty insertion editor
 - GIVEN a bar after a block that ends at line 9
 - WHEN the writer clicks the plus
 - THEN previewEditOpen carries insertAfterLine 9 and line and endLine 9, the bar is replaced by the frame and the empty text box has the focus with the status New block
 
-### Scenario (refusal): Other input on the bar
+### Scenario S6 (refusal): Other input on the bar
 - GIVEN an insert point
 - WHEN a click or key reaches the document handlers of the page
 - THEN no block editor of a rendered block opens
 
-### Scenario (boundary): The insertion editor text box shows a placeholder
+### Scenario S7 (boundary): The insertion editor text box shows a placeholder
 | Input | Outcome |
 | --- | --- |
 | An insertion editor receiving its empty source from the host | The text box is empty and shows the placeholder `Type Markdown, for example "## Heading" or "- item"` |
 | A block editor on existing text | The text box has no placeholder |
 
-### Scenario (boundary): The insert point follows the whole rendered block
+### Scenario S8 (boundary): The insert point follows the whole rendered block
 | Input | Outcome |
 | --- | --- |
 | A document that ends with a figure, edit mode on | The bar follows the figure and its insertAfterLine is the line of the closing fence (9 in the scenario fixture) |

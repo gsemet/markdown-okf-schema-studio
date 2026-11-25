@@ -7,9 +7,9 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 
 export const RAW_COPY_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-273
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-275
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-277
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-273#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-275#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-277#S1
     id: "block-editing/v55-raw-copy-light-900",
     fixture: "97-raw-copy",
     theme: "light",
@@ -23,9 +23,9 @@ export const RAW_COPY_SCENARIOS: ScenarioDefinition[] = [
       + "a field, a comment popover or a render without source text stay native (the `selected` step shows a selection).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-279
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S2
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-279#S2
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S2
     id: "block-editing/v56-raw-copy-balanced-light-900",
     fixture: "97-raw-copy",
     theme: "light",

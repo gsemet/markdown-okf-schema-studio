@@ -18,6 +18,15 @@ derives_from:
 - StRS-MDOKFSTUDIO-TABLE-001
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-216
+scenarios:
+- id: S1
+  title: Refused save
+- id: S2
+  title: Refused open
+- id: S3
+  title: Refused save before leaving the table
+- id: S4
+  title: Enter after the refusal
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,23 +44,23 @@ default_owner_email: gaetan@xeberon.net
 
 When the host answers an open or a save of a cell editor with an error, the extension SHALL show the host's message in the status line of the editor, which is in the table bar once the text box exists, and on a refused save drop the pending navigation, leave the editor open and keep the typed text.
 
-### Scenario (refusal): Refused save
+### Scenario S1 (refusal): Refused save
 - GIVEN a cell edited and the host refusing the final save with a message
 - WHEN the error answer arrives
 - THEN the message shows in the table bar status
 
-### Scenario (refusal): Refused open
+### Scenario S2 (refusal): Refused open
 - GIVEN a cell editor waiting for the table source and the host answering with an error
 - WHEN the answer arrives
 - THEN the message replaces the loading status in the cell editor region and no text box is built
 - The region has a Close button; Escape, Close and a click on any cell or block leave it (see SwRS-MDOKFSTUDIO-BLOCK-216)
 
-### Scenario (refusal): Refused save before leaving the table
+### Scenario S3 (refusal): Refused save before leaving the table
 - GIVEN a cell edited, a click on a block outside the table pending and the host refusing the final save
 - WHEN the error answer arrives
 - THEN the pending navigation is dropped, the editor is no longer finishing and a later click on a cell of the table switches to it with the typed text kept
 
-### Scenario (nominal): Enter after the refusal
+### Scenario S4 (nominal): Enter after the refusal
 - GIVEN the same editor
 - WHEN the writer presses Enter
 - THEN a new final previewEditSave with the typed text is posted

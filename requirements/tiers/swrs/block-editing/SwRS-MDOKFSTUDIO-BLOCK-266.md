@@ -24,6 +24,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-011
 - StRS-MDOKFSTUDIO-BLOCK-025
+scenarios:
+- id: S1
+  title: Blank lines are shown
+- id: S2
+  title: A line of text then six blank lines
+- id: S3
+  title: Frontmatter then three blank lines
+- id: S4
+  title: Quote lines
+- id: S5
+  title: Runs inside a list are shown
+- id: S6
+  title: Nothing is shown
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -63,37 +76,37 @@ default_owner_email: gaetan@xeberon.net
 
 When edit mode is on, the extension SHALL show each shown blank line as one blank-line block: of N blank lines between two blocks it shows N-1, the first being the separator that stays hidden, and it shows every blank line at the end of the body, at the top of a file without frontmatter and in a body of only blank lines; of the empty quote lines of a run it shows all but the first, wherever the run stands. This holds between top-level blocks, between list items, inside a list item, and inside a quote, an alert, an admonition, a definition or a footnote; the blocks are placed from the host's list of shown lines, inside the list item or container that holds them, and nothing is shown for a separator, a blank line inside another block (a fence, an HTML block or a table), next to a folded block, in a folded or included list, in reading mode or in the export.
 
-### Scenario: Blank lines are shown
+### Scenario S1: Blank lines are shown
 
 - GIVEN edit mode on and a source with two blank lines between two blocks, two at the start of a file without frontmatter, and three at the end of the body
 - WHEN the content is rendered or patched
 - THEN the two between the blocks show one blank-line block (the first line is the separator), the two at the start show two, and the three at the end show three, each labelled "Blank line", placed after the insert point of the block above (or first, or before Start writing), and the host's hidden list of shown lines (data-okf-blank-runs) is the only source of them
 
-### Scenario: A line of text then six blank lines
+### Scenario S2: A line of text then six blank lines
 
 - GIVEN edit mode on and a line of text followed by six blank lines at the end of the body
 - WHEN the content is rendered
 - THEN six blank-line blocks show, one for each blank line
 
-### Scenario: Frontmatter then three blank lines
+### Scenario S3: Frontmatter then three blank lines
 
 - GIVEN edit mode on and frontmatter followed by three blank lines and nothing else
 - WHEN the content is rendered
 - THEN three blank-line blocks show, because the body has no block to separate
 
-### Scenario: Quote lines
+### Scenario S4: Quote lines
 
 - GIVEN edit mode on and a quote with three empty quote lines in a row
 - WHEN the content is rendered
 - THEN two blank-line blocks show inside the quote, the first empty quote line being the separator
 
-### Scenario: Runs inside a list are shown
+### Scenario S5: Runs inside a list are shown
 
 - GIVEN edit mode on and a top-level list with a run between two items and a run between two paragraphs of an item
 - WHEN the content is rendered or patched
 - THEN each shown blank line is one blank-line block placed inside the list item that holds it, after the last child that starts before it, and a patch that replaces the list puts the block back in the new item
 
-### Scenario: Nothing is shown
+### Scenario S6: Nothing is shown
 
 - GIVEN a single blank separator, a run inside a code fence, a directive, an HTML block or a table (also in a list item), a run inside a quote, an alert, an admonition or a list they hold, a run next to a folded block, a folded or included list, reading mode, or the export
 - WHEN the content is rendered

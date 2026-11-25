@@ -18,6 +18,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-017
+scenarios:
+- id: S1
+  title: The pointer is over a bar
+- id: S2
+  title: Only the changed lines of the block
+- id: S3
+  title: No bubble away from the bar, with the bars hidden or in edit mode
 annotation_exemption: false
 exemption_reason:
 relates_to:
@@ -40,20 +47,20 @@ default_owner_email: gaetan@xeberon.net
 
 When the pointer is over a change bar itself, the page SHALL show a tooltip in the page's tooltip style reading Changed lines 12–14 since last commit, or Changed line 12 since last commit for a single line, from the source lines of the marked block that meet the changed ranges, and SHALL show no tooltip while the pointer is over the block but not the bar, while the bars are hidden with the Diff button off, or in edit mode.
 
-### Scenario (nominal): The pointer is over a bar
+### Scenario S1 (nominal): The pointer is over a bar
 
 - GIVEN a block of lines 12 to 14 marked as changed, and a block of line 20 only
 - WHEN the pointer rests on the bar of the first block, then on the bar of the second
 - THEN a bubble in the page's tooltip style reads Changed lines 12–14 since last commit, then Changed line 20 since last commit
 
-### Scenario (boundary): Only the changed lines of the block
+### Scenario S2 (boundary): Only the changed lines of the block
 
 | Input | Outcome |
 | --- | --- |
 | A block of lines 20 to 30 and ranges 22 to 23 and 27 to 40 | the bubble reads Changed lines 22–30 since last commit (the first and last changed lines inside the block) |
 | A range that meets the block on one line | the singular form, Changed line N since last commit |
 
-### Scenario (refusal): No bubble away from the bar, with the bars hidden or in edit mode
+### Scenario S3 (refusal): No bubble away from the bar, with the bars hidden or in edit mode
 
 - GIVEN the pointer over the marked block but not over its bar, the Diff button pressed off, or edit mode on
 - WHEN the pointer moves

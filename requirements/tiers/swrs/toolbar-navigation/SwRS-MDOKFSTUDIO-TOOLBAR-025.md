@@ -21,6 +21,29 @@ derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-004
 - StRS-MDOKFSTUDIO-TOOLBAR-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Band grows
+- id: S2
+  title: Pointer
+- id: S3
+  title: Text aligned with the column
+- id: S4
+  title: Text stops before the toolbar
+- id: S5
+  title: Room published for the toolbar
+- id: S6
+  title: Table of contents reserve
+- id: S7
+  title: Long heading cut with an ellipsis
+- id: S8
+  title: Flat, bold style with a rule
+- id: S9
+  title: Text scrolls under the band
+- id: S10
+  title: Page at the top
+- id: S11
+  title: Back to the top
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,41 +68,41 @@ supersedes:
 
 When the band is shown, hidden or changes its number of lines, the extension SHALL keep it fixed to the top of the pane at full width with no gap above it, outside the document flow and ignoring pointer events, with its text aligned to the content column, ending before the toolbar and narrowed by the table of contents reserve, keeping each heading level on one line, cut with an ellipsis when it is too long, and draw it flat and bold, ended by a one pixel rule, with a soft shadow below it, in the colour set of the active theme, only while text scrolls under it, and none at the top of the page.
 
-### Scenario (nominal): Band grows
+### Scenario S1 (nominal): Band grows
 - GIVEN a band that goes from one to three lines
 - WHEN the band is measured
 - THEN its top is 0, its position is fixed and the text below does not shift
 
-### Scenario (nominal): Pointer
+### Scenario S2 (nominal): Pointer
 - GIVEN the pointer over the band
 - WHEN the reader clicks
 - THEN the click reaches the content below, because the band ignores pointer events
 
-### Scenario (boundary): Text aligned with the column
+### Scenario S3 (boundary): Text aligned with the column
 | Pane | Outcome |
 | --- | --- |
 | 900 px in Margin width | the left edges of the band text box and of the content column are equal within 1 px |
 | 460 px | their left edges are equal within 1 px |
 
-### Scenario (boundary): Text stops before the toolbar
+### Scenario S4 (boundary): Text stops before the toolbar
 | Input | Outcome |
 | --- | --- |
 | toolbar's left edge is left of the column's right edge | the text right edge is the toolbar left edge minus 8 px |
 | wide pane where the toolbar is right of the column | the text right edge is the column's right edge |
 
-### Scenario (boundary): Room published for the toolbar
+### Scenario S5 (boundary): Room published for the toolbar
 | Input | Outcome |
 | --- | --- |
 | toolbar grows from collapsed to expanded, then the band position is refreshed | --sphinx-preview-toolbar-width on the band is the new toolbar width plus 22 px |
 | no toolbar, or a toolbar whose width is not finite | the variable is 0 px |
 
-### Scenario (boundary): Table of contents reserve
+### Scenario S6 (boundary): Table of contents reserve
 | Input | Outcome |
 | --- | --- |
 | 900 px pane with the table of contents open | the band is narrowed by 256 px and its right edge is at most the left edge of the column |
 | 460 px pane with the button pressed | the band width is not reduced, because the column is hidden |
 
-### Scenario (boundary): Long heading cut with an ellipsis
+### Scenario S7 (boundary): Long heading cut with an ellipsis
 - GIVEN a 460 px pane and long headings at depth 3
 - WHEN the band is measured
 - THEN it shows three rendered lines, each ended by an ellipsis where the heading does not fit, its height equals three lines and the document flow does not shift
@@ -87,25 +110,25 @@ When the band is shown, hidden or changes its number of lines, the extension SHA
 - WHEN the band is measured
 - THEN the band is one line and the first line of the section is below the band
 
-### Scenario (nominal): Flat, bold style with a rule
+### Scenario S8 (nominal): Flat, bold style with a rule
 - GIVEN a shown band
 - WHEN its style is read
 - THEN the font weight is at least 600 and larger than the body text, the radius is 0, the shadow is none (the page is at the top) and the bottom border is 1 px
 - WHEN the borders of the band and of the first heading of the page are compared
 - THEN the band border and the h1 border have the same colour
 
-### Scenario (nominal): Text scrolls under the band
+### Scenario S9 (nominal): Text scrolls under the band
 - GIVEN a preview scrolled so that the sticky band is shown over text, in the light, dark, cream or white theme or the host's current theme
 - WHEN the page is more than 1 px below the top
 - THEN the band carries the data-scrolled-under marker and a box-shadow offset downward and blurred, in a shadow colour set per theme (darker in dark), which shifts no content and leaves the band fixed at the top
 - AND the toolbar, stacked above the band, is not covered by the shadow
 
-### Scenario (boundary): Page at the top
+### Scenario S10 (boundary): Page at the top
 - GIVEN a preview whose scroll position is 0 or 1 px
 - WHEN the sticky band is updated
 - THEN the band has no data-scrolled-under marker and no shadow, so nothing is drawn under a band over no scrolled text
 
-### Scenario (boundary): Back to the top
+### Scenario S11 (boundary): Back to the top
 - GIVEN a scrolled preview with the shadow shown
 - WHEN the page is scrolled back to the top
 - THEN the marker is removed again

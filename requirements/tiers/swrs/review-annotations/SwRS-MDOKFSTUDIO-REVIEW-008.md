@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-018
+scenarios:
+- id: S1
+  title: The button
+- id: S2
+  title: Edit mode
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,7 +41,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader presses the Side-by-side button of toolbar row 4, the page SHALL toggle the side-by-side diff, set the button pressed state and label to match, post the new state to the host, and, while edit mode is on, disable the button, show no diff and leave the green change bars as they are.
 
-### Scenario (nominal): The button
+### Scenario S1 (nominal): The button
 
 | Input | Outcome |
 | --- | --- |
@@ -44,7 +49,7 @@ When the reader presses the Side-by-side button of toolbar row 4, the page SHALL
 | The reader presses the button | pressed, labelled Hide side-by-side changes since last commit, the attribute is on, and previewSideBySideChanged with on true is posted |
 | The reader presses it again | the state goes back and on false is posted |
 
-### Scenario (boundary): Edit mode
+### Scenario S2 (boundary): Edit mode
 
 | Input | Outcome |
 | --- | --- |

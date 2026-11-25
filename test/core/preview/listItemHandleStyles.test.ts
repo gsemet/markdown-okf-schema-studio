@@ -16,7 +16,8 @@ function listHandleRules(): Array<{ selector: string; body: string }> {
       .test(selector));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("every list item handle rule is scoped to edit mode", () => {
   const rules = listHandleRules();
   assert.ok(rules.length >= 7, `the handle rules ship (${rules.length} found)`);
@@ -25,7 +26,8 @@ test("every list item handle rule is scoped to edit mode", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("the list handle layer sits at the page origin and each handle ends left of its column, on its line", () => {
   const rules = listHandleRules();
   const body = (pattern: RegExp): string => rules.find(({ selector }) => pattern.test(selector))?.body ?? "";
@@ -34,7 +36,8 @@ test("the list handle layer sits at the page origin and each handle ends left of
   assert.match(body(/\.okf-list-item-handle::before$/u), /transform: translate\(-2\.5px, -5px\);/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 test("a block with no room on its left is pushed right by a handle's width, without a max-content width", () => {
   const push = listHandleRules().find(({ selector }) => selector.endsWith('[data-okf-list-shift="true"]'));
   assert.ok(push, "the push rule ships");
@@ -43,7 +46,7 @@ test("a block with no room on its left is pushed right by a handle's width, with
   assert.doesNotMatch(push.body, /max-content/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
 test("the dragged item is dimmed and the drop lines use the theme focus colour", () => {
   const rules = listHandleRules();
   const body = (pattern: RegExp): string => rules.find(({ selector }) => pattern.test(selector))?.body ?? "";

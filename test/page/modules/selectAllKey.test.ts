@@ -6,7 +6,8 @@ import { installSelectAllInControls, isTextSelectAll } from "../../../src/page/m
 const textarea = { tagName: "TEXTAREA" };
 const textInput = { tagName: "INPUT", type: "text" };
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S6
 test("CR 041: Ctrl+A (Cmd+A on macOS) in a text control is the select-all of that control", () => {
   assert.equal(isTextSelectAll({ key: "a", ctrlKey: true, target: textarea }, false), true);
   assert.equal(isTextSelectAll({ key: "A", ctrlKey: true, target: textInput }, false), true, "Caps Lock");
@@ -49,7 +50,7 @@ test("CR 041: the shortcut stops at the document, so VS Code's window listener n
   assert.equal(dispatch({ key: "z", ctrlKey: true, target: textarea }), false, "undo still reaches VS Code");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 test("CR 119: a select-all a text box already cancelled is left to VS Code's key binding", () => {
   const documentListeners: Array<(event: unknown) => void> = [];
   const document = { addEventListener: (_type: string, listener: (event: unknown) => void) => documentListeners.push(listener) };

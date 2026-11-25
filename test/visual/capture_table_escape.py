@@ -7,7 +7,8 @@ from playwright.sync_api import Page
 from capture_support import Failure
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S2
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S3
 def check_cell_escape_keeps_cells_left(page: Page, page_name: str, failures: list[Failure]) -> None:
   """Escape in the open cell drops only that cell's typed text: the table is saved (final) with
   the cell left with ArrowDown, no cancel is posted, and the editor closes on the host's render.

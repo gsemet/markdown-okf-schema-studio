@@ -14,6 +14,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-008
+scenarios:
+- id: S1
+  title: Index entries
+- id: S2
+  title: No report
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a maintainer builds the Pages site, the build SHALL write a search index of the areas, use cases, behaviours and files, with the retired requirements flagged so the page shows them only when History is on.
 
-### Scenario (nominal): Index entries
+### Scenario S1 (nominal): Index entries
 
 - GIVEN a report with an area, a use case, a behaviour and a retired behaviour
 - WHEN the site is built
 - THEN requirements/search-index.js holds one entry for each of them and one per file, a file entry giving the count of behaviours that carry it, the retired entry is flagged, and the entry of a use case or a behaviour carries the full ID of the requirement, shown in its result line
 
-### Scenario (boundary): No report
+### Scenario S2 (boundary): No report
 
 - GIVEN no requirements report
 - WHEN the site is built

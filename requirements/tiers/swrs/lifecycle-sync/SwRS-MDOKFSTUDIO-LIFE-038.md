@@ -18,6 +18,15 @@ derives_from:
 - StRS-MDOKFSTUDIO-LIFE-001
 - StRS-MDOKFSTUDIO-LIFE-014
 depends_on: []
+scenarios:
+- id: S1
+  title: Two previews
+- id: S2
+  title: Same document twice
+- id: S3
+  title: Two restored panels
+- id: S4
+  title: One restored panel
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,25 +45,25 @@ default_owner_email: gaetan@xeberon.net
 
 When several previews are open, the extension SHALL give each its own session with its own document, render queue, file watchers and reading state, and, when VS Code restores several panels, let only the newest follow the active editor, the older ones becoming fixed previews titled with the bare file name.
 
-### Scenario (nominal): Two previews
+### Scenario S1 (nominal): Two previews
 
 - GIVEN a side preview of a.md and an Open With tab of b.md
 - WHEN a.md changes
 - THEN only the side preview renders again and only its queue shows a state
 
-### Scenario (nominal): Same document twice
+### Scenario S2 (nominal): Same document twice
 
 - GIVEN the side preview and an Open With tab both show a.md
 - WHEN a.md changes
 - THEN both render the new text, each on its own schedule
 
-### Scenario (nominal): Two restored panels
+### Scenario S3 (nominal): Two restored panels
 
 - GIVEN two saved panels of the same file
 - WHEN VS Code restores both
 - THEN two sessions are live, the roles are [fixed, following], and the older title does not start with Studio
 
-### Scenario (boundary): One restored panel
+### Scenario S4 (boundary): One restored panel
 
 - GIVEN a single restored panel
 - WHEN VS Code restores it

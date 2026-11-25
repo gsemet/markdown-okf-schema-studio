@@ -20,6 +20,23 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Command declaration
+- id: S2
+  title: Dirty buffer
+- id: S3
+  title: Over an open editor
+- id: S4
+  title: Other document
+- id: S5
+  title: Which preview the command acts on
+- id: S6
+  title: Button pressed
+- id: S7
+  title: Button pressed over an open editor
+- id: S8
+  title: The previewRefresh message
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,33 +62,33 @@ default_owner_email: gaetan@xeberon.net
 
 When a reader runs Refresh Preview, by the command or by the Refresh button, the extension SHALL render the document of the newest live preview again from its buffer, unsaved text included, doing nothing when the active text editor shows another document.
 
-### Scenario (boundary): Command declaration
+### Scenario S1 (boundary): Command declaration
 
 | Input | Outcome |
 | --- | --- |
 | the package manifest, the contributed commands are read | markdown-okf-schema-studio.refreshPreview has the title Refresh Preview, the category Markdown OKF-Schema Studio and the enablement resourceExtname == .md, and no icon |
 | the active resource is not a .md file | the command is disabled (deduced from the when clause, not run) |
 
-### Scenario (nominal): Dirty buffer
+### Scenario S2 (nominal): Dirty buffer
 
 - GIVEN a preview of preview-other.md and a buffer edited by an API edit without a save
 - WHEN the reader runs Refresh Preview
 - THEN a new render with a higher requestId shows the edit marker
 - AND the command completes once the page shows that render (host test test/host/openCompletes.test.ts)
 
-### Scenario (nominal): Over an open editor
+### Scenario S3 (nominal): Over an open editor
 
 - GIVEN an inline editor open in the page
 - WHEN the command runs
 - THEN the render replaces the page even then (see SwRS-MDOKFSTUDIO-BLOCK-041)
 
-### Scenario (refusal): Other document
+### Scenario S4 (refusal): Other document
 
 - GIVEN the newest preview shows preview.md and the active text editor shows preview-other.md
 - WHEN the reader runs Refresh Preview
 - THEN no render starts and no message appears
 
-### Scenario (boundary): Which preview the command acts on
+### Scenario S5 (boundary): Which preview the command acts on
 
 | Input | Outcome |
 | --- | --- |
@@ -79,19 +96,19 @@ When a reader runs Refresh Preview, by the command or by the Refresh button, the
 | a side preview and a later Open With tab of the same file | only the Open With tab, the newer session, renders again |
 | the newest preview is closed | the newest remaining preview is the target |
 
-### Scenario (nominal): Button pressed
+### Scenario S6 (nominal): Button pressed
 
 - GIVEN a page scrolled to line 120 with two open sections, a link tooltip open and nothing being edited
 - WHEN the reader presses Refresh
 - THEN the page closes the tooltip and posts previewRefresh carrying sourceLine, scrollTop, anchorLine, openDisclosures and descriptionsCollapsed
 
-### Scenario (refusal): Button pressed over an open editor
+### Scenario S7 (refusal): Button pressed over an open editor
 
 - GIVEN a block editor is open
 - WHEN the reader presses the button
 - THEN nothing is posted and the editor's status line asks to save or cancel (see SwRS-MDOKFSTUDIO-BLOCK-041)
 
-### Scenario (boundary): The previewRefresh message
+### Scenario S8 (boundary): The previewRefresh message
 
 | Input | Outcome |
 | --- | --- |

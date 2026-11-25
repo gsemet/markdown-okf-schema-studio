@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-007
+scenarios:
+- id: S1
+  title: A line with a reference group and a line without
+- id: S2
+  title: Lines the script leaves alone or refuses
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,13 +36,13 @@ default_owner_email: gaetan@xeberon.net
 
 The release script SHALL add to each line of the Unreleased section of CHANGELOG.md the short SHA-1 of the commit on the base that added it, as the first item of the line's reference group, and SHALL write nothing when a line's commit is not on the base or the file has uncommitted changes.
 
-### Scenario (nominal): A line with a reference group and a line without
+### Scenario S1 (nominal): A line with a reference group and a line without
 
 - GIVEN `## Unreleased` holds one line ending with `(CR-463 change-bar-tooltip, PR #476, issue #413)` and one line with no group, each added by a commit that is on the base
 - WHEN `just changelog-refs` runs
 - THEN the first line's group starts with `commit <short SHA-1 of the commit that added the line>, ` and the second line ends with ` (commit <short SHA-1>)`, written with LF line endings, and the sections of released versions are unchanged
 
-### Scenario (boundary): Lines the script leaves alone or refuses
+### Scenario S2 (boundary): Lines the script leaves alone or refuses
 
 | Input | Outcome |
 | --- | --- |

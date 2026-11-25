@@ -15,7 +15,8 @@ const IMG = '<p><img src="../demo-video/clips/x/x.gif" alt="A &quot;clip&quot;">
 const exists = (...paths: string[]) => (candidate: string) => paths.includes(candidate);
 
 test("a clip's GIF with its WebM and poster becomes a looping video that falls back to the GIF", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S2
   const html = clipVideos(IMG, "docs/user/settings.md", exists(`${CLIP}/x.webm`, `${CLIP}/poster.png`));
   assert.equal(
     html,
@@ -24,19 +25,21 @@ test("a clip's GIF with its WebM and poster becomes a looping video that falls b
 });
 
 test("a clip without poster.png has no poster attribute", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S2
   const html = clipVideos(IMG, "docs/user/settings.md", exists(`${CLIP}/x.webm`));
   assert.ok(html.includes("<video "));
   assert.ok(!html.includes("poster="));
 });
 
 test("a clip GIF with no WebM beside it stays an image", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S4
   assert.equal(clipVideos(IMG, "docs/user/settings.md", exists(`${CLIP}/poster.png`)), IMG);
 });
 
 test("a GIF outside the clips folder, or not named like its folder, is unchanged", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S3
   const everything = (): boolean => true;
   for (const [html, page] of [
     ['<p><img src="../../images/x.gif" alt="a"></p>', "docs/user/settings.md"],
@@ -49,7 +52,8 @@ test("a GIF outside the clips folder, or not named like its folder, is unchanged
 });
 
 test("copyClipMedia copies the WebM, GIF and poster of each clip and nothing else", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S2
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "clip-media-"));
   try {
     const clip = path.join(root, "repo", "docs", "demo-video", "clips", "x");
@@ -65,7 +69,8 @@ test("copyClipMedia copies the WebM, GIF and poster of each clip and nothing els
 });
 
 test("copyClipMedia with no clips folder does nothing", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S4
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "clip-media-"));
   try {
     copyClipMedia(path.join(root, "repo"), path.join(root, "site"));
@@ -76,7 +81,7 @@ test("copyClipMedia with no clips folder does nothing", () => {
 });
 
 test("the shipped settings page plays the raw copy clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/raw-copy-balance-edges";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "settings.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -88,7 +93,7 @@ test("the shipped settings page plays the raw copy clip as video", async () => {
 });
 
 test("the shipped editing page plays the list drag clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/drag-list-item";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -148,7 +153,7 @@ test("the shipped editing page plays the keyboard navigation clip as video", asy
 });
 
 test("the shipped toolbar page plays the export clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/export-html";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "toolbar.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -160,7 +165,7 @@ test("the shipped toolbar page plays the export clip as video", async () => {
 });
 
 test("the shipped toolbar page plays the diff clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/diff-side-by-side";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "toolbar.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -172,7 +177,7 @@ test("the shipped toolbar page plays the diff clip as video", async () => {
 });
 
 test("the shipped editing page plays the spreadsheet paste clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/paste-spreadsheet-cells";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -209,7 +214,7 @@ test("the shipped editing page plays the figure editor clip as video", async () 
 });
 
 test("the shipped slash menu page plays the grid clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/slash-menu-grid";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "slash-menu.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -221,7 +226,7 @@ test("the shipped slash menu page plays the grid clip as video", async () => {
 });
 
 test("the shipped themes page plays the theme switch clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/theme-switch";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "themes-and-motion.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -272,7 +277,7 @@ test("the shipped OKF page plays the schema bundle frontmatter clip as video", a
 });
 
 test("a clip's storyboard and stage documents are not site pages", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   assert.equal(isClipSource("docs/demo-video/clips/x/clip.md"), true);
   assert.equal(isClipSource("docs/demo-video/clips/x/stage/runbook.md"), true);
   assert.equal(isClipSource("docs/user/settings.md"), false);

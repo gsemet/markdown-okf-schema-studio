@@ -18,6 +18,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-011
 - StRS-MDOKFSTUDIO-BLOCK-025
+scenarios:
+- id: S1
+  title: A paragraph in the middle
+- id: S2
+  title: Edges of the deletion
+- id: S3
+  title: One edit before an autosave, two after
+- id: S4
+  title: Cases that keep the placeholder line
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,25 +48,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer erases the whole text of the editor of a top-level body block or of a list item and commits it (Done, Ctrl or Cmd+Enter, or a blur that commits), the host SHALL delete that block with its trailing blank lines and one separator in one edit, instead of writing a placeholder line, and keep the document's line endings and its final line break.
 
-### Scenario: A paragraph in the middle
+### Scenario S1: A paragraph in the middle
 
 - GIVEN the document `# Title`, `First.` and `Second paragraph.` separated by blank lines, and the editor of "First." erased
 - WHEN the writer commits it, before or after the autosave of the empty text reached the document
 - THEN the document is `# Title`, a blank line, `Second paragraph.` and the final line break
 
-### Scenario: Edges of the deletion
+### Scenario S2: Edges of the deletion
 
 - GIVEN an emptied first block, last block, tight list item, loose list item, or a block whose range ends on blank lines, in a document with CR LF or a lone CR
 - WHEN the writer commits it
 - THEN no blank line is left at the start, the block above keeps the final line break, a tight list stays tight, a loose list keeps one blank line between its items, the trailing blank lines go with the block, and the document's line ending is kept
 
-### Scenario: One edit before an autosave, two after
+### Scenario S3: One edit before an autosave, two after
 
 - GIVEN an erased editor
 - WHEN the writer commits it before any autosave reached the document, or after one wrote the placeholder line
 - THEN one edit deletes the block (one undo brings it back), or the autosave and the deletion are two edits (two undos)
 
-### Scenario: Cases that keep the placeholder line
+### Scenario S4: Cases that keep the placeholder line
 
 - GIVEN a block inside a list item, an alert, a quote, an admonition or another container, an item left as `- `, an autosave of an empty text, Escape or Cancel, or held lines that no longer match the block
 - WHEN the writer commits it

@@ -12,7 +12,7 @@ HINT = "[data-sphinx-preview-table-cell-hint]"
 EDITOR = "[data-sphinx-preview-table-cell-editor]"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-124
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-124#S2
 def check_table_tab_hint(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Opened in the first body cell the editor has no hint; opened in the last cell of the last row
   it shows "Tab: new row" inside the editor and the viewport, and Done and Cancel stay in view."""

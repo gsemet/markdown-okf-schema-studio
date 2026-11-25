@@ -48,37 +48,37 @@ default_owner_email: gaetan@xeberon.net
 
 When a maintainer runs the marker check, it SHALL read the scenarios of every requirement and fail, naming the file, the line, the rule and the marker, on a marker whose #S<n> fragment names a scenario its target does not declare, on a marker without a fragment on a target that declares scenarios, on a fragment on a target that declares none, on an @accepts_req outside test/integration/ (except for the StRS of the release, the site and the built VSIX) or on a SwRS, and on a @tests_req StRS marker under test/integration/ that is not on the baseline.
 
-### Scenario (nominal): Every marker names a declared scenario
+### Scenario S1 (nominal): Every marker names a declared scenario
 
 - GIVEN a requirement that declares scenarios S1 and S2, a requirement that declares none, and markers `@tests_req <ID>#S1`, `@tests_req <ID>#S2` and `@tests_req <ID>` placed by these rules
 - WHEN the maintainer runs the marker check
 - THEN it passes, and two fragments of one ID count as one ID in a marker block
 
-### Scenario (refusal): A fragment names an undeclared scenario
+### Scenario S2 (refusal): A fragment names an undeclared scenario
 
 - GIVEN a requirement that declares S1 and S2 and a marker `@tests_req <ID>#S3` (or `#S0`)
 - WHEN the maintainer runs the marker check
 - THEN it fails with `<path>:<line>: fragment-undeclared: @tests_req <ID>#S3` and the declared ids
 
-### Scenario (refusal): A fragment is missing or unexpected
+### Scenario S3 (refusal): A fragment is missing or unexpected
 
 - GIVEN a marker without a fragment on a requirement that declares scenarios, and a marker with a fragment on a requirement that declares none
 - WHEN the maintainer runs the marker check
 - THEN it fails with `fragment-required` on the first and `fragment-unexpected` on the second, each naming the file, the line and the marker
 
-### Scenario (refusal): An acceptance marker sits on the wrong bench
+### Scenario S4 (refusal): An acceptance marker sits on the wrong bench
 
 - GIVEN an `@accepts_req <StRS-ID>#S<n>` in a file outside `test/integration/`, for a StRS other than CORE-007, CORE-008 and TRUST-014
 - WHEN the maintainer runs the marker check
 - THEN it fails with `accepts-placement`, while the same marker under `test/integration/`, and a marker of those three StRS under `test/build`, `test/security`, `test/site` or `test/core`, pass
 
-### Scenario (refusal): An acceptance marker targets a SwRS
+### Scenario S5 (refusal): An acceptance marker targets a SwRS
 
 - GIVEN an `@accepts_req <SwRS-ID>` in any test file
 - WHEN the maintainer runs the marker check
 - THEN it fails with `accepts-on-swrs`
 
-### Scenario (boundary): A StRS tested in real VS Code
+### Scenario S6 (boundary): A StRS tested in real VS Code
 
 - GIVEN a `@tests_req <StRS-ID>#S<n>` under `test/integration/`
 - WHEN the maintainer runs the marker check

@@ -17,6 +17,17 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: Picked file
+- id: S2
+  title: Image under the caret
+- id: S3
+  title: Name and path forms
+- id: S4
+  title: Dialog without a path
+- id: S5
+  title: Path refused
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,20 +47,20 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Image, the extension SHALL ask the host for a native image file dialog, keep the editor open while the dialog is shown, and insert or replace an image reference only when a valid path comes back.
 
-### Scenario (nominal): Picked file
+### Scenario S1 (nominal): Picked file
 
 - GIVEN an open block editor and the path pics/cat.png
 - WHEN the writer presses Image and the host answers the path
 - THEN the text is ![cat](pics/cat.png) with cat selected, and the editor stayed open while the dialog had the focus
 
-### Scenario (nominal): Image under the caret
+### Scenario S2 (nominal): Image under the caret
 
 | Input | Outcome |
 | --- | --- |
 | The caret in ![old](a.png "T") and b.png is picked | The text is ![old](b.png "T") with old selected; the whole image reference is replaced |
 | The caret in ![](a.png) and b.png is picked | The alternative text is the new file name |
 
-### Scenario (boundary): Name and path forms
+### Scenario S3 (boundary): Name and path forms
 
 | Input | Outcome |
 | --- | --- |
@@ -58,13 +69,13 @@ When the writer presses Image, the extension SHALL ask the host for a native ima
 | A path with a blank, an opening parenthesis or a closing parenthesis | The path is written inside angle brackets |
 | A path whose stem is empty after removing brackets | The alternative text is image |
 
-### Scenario (refusal): Dialog without a path
+### Scenario S4 (refusal): Dialog without a path
 
 - GIVEN the dialog is cancelled, fails, or the answer is stale
 - WHEN the host answers
 - THEN nothing is inserted and a refusal reason is shown in the status line; a cancel focuses the text box
 
-### Scenario (refusal): Path refused
+### Scenario S5 (refusal): Path refused
 
 | Input | Outcome |
 | --- | --- |

@@ -50,7 +50,7 @@ COVER_JS = r"""() => {
 }"""
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S4
 def check_toolbar_place_and_focus(page: Page, scenario: dict, failures: list[Failure]) -> None:
     """Every button's tooltip is its title; the toolbar sits 12 px from the top and 14 px from the
     end at the top of the page and once scrolled, covers the text under it, and shows the hover
@@ -105,7 +105,8 @@ def check_toolbar_place_and_focus(page: Page, scenario: dict, failures: list[Fai
         failures.append(Failure(name, f"keyboard focus: the tooltip differs from the hover tooltip: focus {focused}, hover {hovered}"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-006
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-006#S1
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-006#S2
 def check_find_opens_folded_section(page: Page, scenario: dict, failures: list[Failure]) -> None:
     """The browser's find-in-page reaches text hidden in a folded section: a text fragment
     (`#:~:text=`) runs Chromium's own search for hidden="until-found" blocks and fires
@@ -178,7 +179,7 @@ def check_find_opens_folded_section(page: Page, scenario: dict, failures: list[F
         page.wait_for_timeout(100)
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030#S6
 def check_scroll_at_end(page: Page, scenario: dict, failures: list[Failure]) -> None:
     """At the end of the document, more wheel input down keeps the page at the end and the band
     makes no corrective scroll against the reader."""

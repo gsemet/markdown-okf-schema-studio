@@ -34,8 +34,7 @@ async function readEditor(page: Parameters<typeof findCurrentFrame>[0]): Promise
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-008
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 /**
  * CR 119: in the text box of an open block editor, real key presses go through VS Code's key
  * bindings: undo and redo step through several typing chunks, select all selects the whole text of

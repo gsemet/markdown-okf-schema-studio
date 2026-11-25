@@ -181,7 +181,8 @@ test("an invalid or unchanged name is not sent", () => {
   assert.equal(t.popover(), undefined, "an unchanged name just closes");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
 test("an open block editor blocks the rename", () => {
   const t = harness({ blocked: "Save or cancel the open edit before renaming a label." });
   t.click(t.anchor);

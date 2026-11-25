@@ -66,7 +66,8 @@ const EQUIVALENCE_FILES: Record<string, string> = {
   [`${root}/cycle-b.md`]: "Cycle B\n\n```{include} cycle-a.md\n```\n",
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S3
 test("include expansion output is unchanged for ordinary documents", async () => {
   const result = await renderMyst(EQUIVALENCE_MAIN, virtualContext(EQUIVALENCE_FILES));
   const snapshot = `${result.html}\n<!--${JSON.stringify({
@@ -91,7 +92,7 @@ function fanOutFiles(depth: number, fan: number): Record<string, string> {
   return files;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S3
 test("include fan-out stops at the budget with one diagnostic", async () => {
   const reads: string[] = [];
   const files = fanOutFiles(5, 10);
@@ -104,7 +105,7 @@ test("include fan-out stops at the budget with one diagnostic", async () => {
   assert.match(result.html, /myst-unresolved/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-012
+// @tests_req SwRS-MDOKFSTUDIO-CORE-012#S6
 test("an include repeated many times is read once per render", async () => {
   const reads: string[] = [];
   const files: Record<string, string> = {
@@ -135,7 +136,7 @@ test("the included text budget bounds large includes", async () => {
   assert.equal(result.diagnostics.filter((entry) => /include budget/iu.test(entry.message)).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-012
+// @tests_req SwRS-MDOKFSTUDIO-CORE-012#S6
 test("a 60-chapter book with 5 snippets each renders fully within the budget", async () => {
   const files: Record<string, string> = {};
   for (let s = 0; s < 5; s += 1) files[`${root}/snip${s}.md`] = `Snippet ${s} text.\n`;

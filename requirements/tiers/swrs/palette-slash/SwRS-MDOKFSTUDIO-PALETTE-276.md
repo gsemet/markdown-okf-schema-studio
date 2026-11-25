@@ -18,6 +18,25 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-019
 - StRS-MDOKFSTUDIO-PALETTE-020
 - StRS-MDOKFSTUDIO-PALETTE-021
+scenarios:
+- id: S1
+  title: Bold and Italic wrap and unwrap
+- id: S2
+  title: Empty pair
+- id: S3
+  title: Bold and Italic share a run of asterisks
+- id: S4
+  title: Strikethrough wraps and unwraps a double tilde pair
+- id: S5
+  title: Subscript and Superscript wrap the selection in a role
+- id: S6
+  title: Key (MyST) wraps the selection in the kbd role
+- id: S7
+  title: Key wraps the selection in kbd tags
+- id: S8
+  title: A selection that cuts into a marker run, or that a role cannot hold
+- id: S9
+  title: Edges, lines and other markers
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,7 +62,7 @@ When the writer presses Bold, Italic, Strikethrough, Subscript, Superscript, Key
 
 In the tables of this requirement, `[ ]` marks the selection and `|` marks the caret.
 
-### Scenario (nominal): Bold and Italic wrap and unwrap
+### Scenario S1 (nominal): Bold and Italic wrap and unwrap
 
 - GIVEN the text say foo now with foo selected
 - WHEN Bold is pressed twice
@@ -62,7 +81,7 @@ In the tables of this requirement, `[ ]` marks the selection and `|` marks the c
 | Bold | `**foo\|**` | `foo\|` |
 | Bold, then Italic, then Italic, then Bold on `x foo y` with foo selected | | `x ***foo*** y` after the first two presses, then `x foo y` with the same selection |
 
-### Scenario (nominal): Empty pair
+### Scenario S2 (nominal): Empty pair
 
 - GIVEN the caret between two spaces
 - WHEN Italic is pressed
@@ -78,7 +97,7 @@ In the tables of this requirement, `[ ]` marks the selection and `|` marks the c
 | Strikethrough | `say \| now` (caret outside a word) | `say ~~\|~~ now` |
 | Strikethrough | `x ~~\|~~ y` (empty pair) | `x \| y` |
 
-### Scenario (nominal): Bold and Italic share a run of asterisks
+### Scenario S3 (nominal): Bold and Italic share a run of asterisks
 
 - GIVEN the text foo selected inside ***foo***
 - WHEN Bold is pressed and then Italic
@@ -97,7 +116,7 @@ In the tables of this requirement, `[ ]` marks the selection and `|` marks the c
 | Bold | `***fo\|o***` | `*fo\|o*` |
 | Italic | `***fo\|o***` | `**fo\|o**` |
 
-### Scenario (nominal): Strikethrough wraps and unwraps a double tilde pair
+### Scenario S4 (nominal): Strikethrough wraps and unwraps a double tilde pair
 
 - GIVEN the text say foo now with foo selected
 - WHEN Strikethrough is pressed
@@ -117,7 +136,7 @@ In the tables of this requirement, `[ ]` marks the selection and `|` marks the c
 
 The Strikethrough button has no keyboard shortcut.
 
-### Scenario (nominal): Subscript and Superscript wrap the selection in a role
+### Scenario S5 (nominal): Subscript and Superscript wrap the selection in a role
 
 - GIVEN the selected 2 in H2O
 - WHEN Subscript is pressed
@@ -127,7 +146,7 @@ The Strikethrough button has no keyboard shortcut.
 - WHEN Subscript or Superscript is pressed
 - THEN both buttons work as in a block editor
 
-### Scenario (nominal): Key (MyST) wraps the selection in the kbd role
+### Scenario S6 (nominal): Key (MyST) wraps the selection in the kbd role
 
 - GIVEN the selected word Ctrl
 - WHEN Key (MyST) is pressed
@@ -142,7 +161,7 @@ The Strikethrough button has no keyboard shortcut.
 | Key (MyST) pressed in a table cell | The action works |
 | Key (MyST) pressed on text that already has markup | Unlike Key, it never removes existing markup |
 
-### Scenario (nominal): Key wraps the selection in kbd tags
+### Scenario S7 (nominal): Key wraps the selection in kbd tags
 
 - GIVEN a selected word
 - WHEN Key is pressed twice
@@ -153,7 +172,7 @@ The Strikethrough button has no keyboard shortcut.
 | The caret with no selection | A kbd element holding Key is inserted with Key selected |
 | Key pressed in a table cell editor | Key works in a table cell too |
 
-### Scenario (refusal): A selection that cuts into a marker run, or that a role cannot hold
+### Scenario S8 (refusal): A selection that cuts into a marker run, or that a role cannot hold
 
 - GIVEN a selection that starts inside a run of asterisks and ends outside it
 - WHEN Bold is pressed
@@ -175,7 +194,7 @@ The Strikethrough button has no keyboard shortcut.
 | Superscript | a selection that contains a backtick | no edit |
 | Key (MyST) | a selection that contains a backtick | no edit |
 
-### Scenario (boundary): Edges, lines and other markers
+### Scenario S9 (boundary): Edges, lines and other markers
 
 | Action | Input | Outcome |
 | --- | --- | --- |

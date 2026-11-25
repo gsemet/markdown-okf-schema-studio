@@ -18,6 +18,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-020
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
+scenarios:
+- id: S1
+  title: Alert outside an alert
+- id: S2
+  title: Choosing a type
+- id: S3
+  title: Alert with the caret already in an alert
+- id: S4
+  title: Where the list opens
+- id: S5
+  title: Keys in the open list
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,7 +49,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Alert, the extension SHALL quote the touched lines under the head `> [!NOTE]`, or leave the text alone when the caret is already in an alert, and open at the caret a list of Note, Tip, Important, Warning and Caution with none lit, from which a chosen type replaces the type word of the head of the alert at the caret.
 
-### Scenario (nominal): Alert outside an alert
+### Scenario S1 (nominal): Alert outside an alert
 
 | Given | Pressing Alert |
 | --- | --- |
@@ -48,7 +59,7 @@ When the writer presses Alert, the extension SHALL quote the touched lines under
 | The caret on a line right under a block quote line, quoted or lazy (`> quote`, then `Second` with the caret) | A new alert is inserted after a blank line, so it does not join the quote above: `> quote`, blank, `> [!NOTE]`, `> Second`, with the caret after `> ` at its column; in a selection, the quoted lines are selected |
 | The caret on a line right under a plain paragraph | The new alert follows the paragraph directly, without a blank line |
 
-### Scenario (nominal): Choosing a type
+### Scenario S2 (nominal): Choosing a type
 
 - GIVEN the caret in an alert of type NOTE
 - WHEN the writer chooses Warning in the list
@@ -56,7 +67,7 @@ When the writer presses Alert, the extension SHALL quote the touched lines under
 - AND the list acts on the live selection, not the one at opening time
 - Example: the alert action run with the argument CAUTION writes the head with CAUTION
 
-### Scenario (boundary): Alert with the caret already in an alert
+### Scenario S3 (boundary): Alert with the caret already in an alert
 
 | Input | Outcome |
 | --- | --- |
@@ -69,7 +80,7 @@ When the writer presses Alert, the extension SHALL quote the touched lines under
 | Tip chosen with the caret in an alert of type TIP | No edit is made |
 | Alert action with the argument INFO, or any value other than the five upper-case names NOTE, TIP, IMPORTANT, WARNING, CAUTION | No edit is produced (the check is case-sensitive) |
 
-### Scenario (nominal): Where the list opens
+### Scenario S4 (nominal): Where the list opens
 
 | Caret | Outcome |
 | --- | --- |
@@ -78,7 +89,7 @@ When the writer presses Alert, the extension SHALL quote the touched lines under
 
 The five options carry the values NOTE, TIP, IMPORTANT, WARNING and CAUTION. The placement rule shared by all palette popovers is in SwRS-MDOKFSTUDIO-PALETTE-031.
 
-### Scenario (nominal): Keys in the open list
+### Scenario S5 (nominal): Keys in the open list
 
 | Input | Outcome |
 | --- | --- |

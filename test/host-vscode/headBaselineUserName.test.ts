@@ -20,7 +20,8 @@ function extensionWith(getConfig: ((key: string) => Promise<string>) | undefined
 }
 const uri = { scheme: "file", fsPath: "/w/a.md" };
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S5
 test("T43: userName reads user.name through the Git API and trims it", async () => {
   const keys: string[] = [];
   const baseline = createHeadBaseline(() => extensionWith(async (key) => { keys.push(key); return " Ada Lovelace \n"; }));

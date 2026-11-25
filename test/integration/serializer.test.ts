@@ -25,9 +25,6 @@ async function waitFor(
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
-// @tests_req StRS-MDOKFSTUDIO-LIFE-014
-// @tests_req StRS-MDOKFSTUDIO-LIFE-001
-// @tests_req StRS-MDOKFSTUDIO-LIFE-007
 export async function run(): Promise<void> {
   const extensionRoot = path.resolve(__dirname, "../../..");
   const fixturePath = path.join(extensionRoot, "test", "integration", "fixtures", "preview.md");
@@ -47,7 +44,7 @@ export async function run(): Promise<void> {
       scrollTop: 88,
       descriptionsCollapsed: true,
     });
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-127
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-127#S4
     await waitFor("the restored serializer render", () => {
       const preview = getActivePreviewForTests();
       return preview?.phase === "ready"
@@ -79,7 +76,8 @@ export async function run(): Promise<void> {
     });
     const missing = getActivePreviewForTests();
     assert.ok(missing);
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-062
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-062#S2
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-062#S4
     assert.equal(missing.status, "missing-source");
     assert.match(missing.html, /restored Markdown source is unavailable/u);
   } finally {
@@ -110,10 +108,11 @@ export async function run(): Promise<void> {
       sourceFile: fixturePath,
     });
     const roles = getLivePreviewRolesForTests();
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-038
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-038#S3
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-038#S4
     assert.equal(roles.length, 2, "both restored panels keep a live preview session");
     assert.deepEqual(roles.map((role) => role.followsActiveEditor), [false, true]);
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-024
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-024#S2
     assert.doesNotMatch(roles[0].title, /^Studio/u, "the older panel is a fixed preview");
     assert.match(roles[1].title, /^Studio/u);
   } finally {

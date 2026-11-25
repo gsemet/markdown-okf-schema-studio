@@ -18,6 +18,13 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-216
 - SwRS-MDOKFSTUDIO-BLOCK-263
 - SwRS-MDOKFSTUDIO-BLOCK-191
+scenarios:
+- id: S1
+  title: A final save ends in a closed editor
+- id: S2
+  title: A failed final save gives the text back
+- id: S3
+  title: Every save path ends
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,17 +44,17 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer finishes a block or cell editor, the page and the host SHALL end every final save with a closed editor or an error that gives the typed text back, and never leave the editor on its saving state.
 
-### Scenario (nominal): A final save ends in a closed editor
+### Scenario S1 (nominal): A final save ends in a closed editor
 - GIVEN a block or cell editor whose final save is posted
 - WHEN the host answers, whether the text was written, unchanged, or no render follows
 - THEN the editor closes, or its detached save ends with done, and no editor stays on the saving status
 
-### Scenario (refusal): A failed final save gives the text back
+### Scenario S2 (refusal): A failed final save gives the text back
 - GIVEN a final save the host refuses, cannot write, finds changed in the document or meets a change of the file
 - WHEN the answer arrives
 - THEN it carries the writer's text, and the page shows it in the open editor or in a reopened one with the reason, or the host offers it to copy
 
-### Scenario (boundary): Every save path ends
+### Scenario S3 (boundary): Every save path ends
 | Input | Outcome |
 | --- | --- |
 | A frontmatter save whose plan changes no text | The host answers unchanged and the field editor closes |

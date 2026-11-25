@@ -20,6 +20,23 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-LIFE-169
+scenarios:
+- id: S1
+  title: Edit mode turned on
+- id: S2
+  title: Edit mode turned off again
+- id: S3
+  title: Leaving edit mode with an open block editor
+- id: S4
+  title: Block editor still waiting for its source
+- id: S5
+  title: Leaving edit mode removes the edit state
+- id: S6
+  title: Nothing to tidy up
+- id: S7
+  title: Edit mode on keeps the reading layout
+- id: S8
+  title: Hover and click do not reflow
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,31 +56,31 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer clicks the Edit button of a preview, the page SHALL switch edit mode on or off and show the new state on the button as its pressed state and its tooltip, post the new state to the host before it applies it, keep the reading layout unchanged, and on exit save the open block editor, clear the block selection and the hover outline and close the label rename field.
 
-### Scenario (nominal): Edit mode turned on
+### Scenario S1 (nominal): Edit mode turned on
 
 - GIVEN a preview in reading mode
 - WHEN the writer clicks the Edit button
 - THEN the page posts previewEditModeChanged with editMode true for the shown document and then turns edit mode on: the page element carries data-sphinx-preview-edit-mode on, the button carries data-edit-mode on and aria-pressed true, and its tooltip reads "Exit edit mode"
 
-### Scenario (nominal): Edit mode turned off again
+### Scenario S2 (nominal): Edit mode turned off again
 
 - GIVEN a preview in edit mode
 - WHEN the writer clicks the Edit button again
 - THEN data-sphinx-preview-edit-mode and data-edit-mode are off, aria-pressed is false and the tooltip reads "Edit mode"
 
-### Scenario (nominal): Leaving edit mode with an open block editor
+### Scenario S3 (nominal): Leaving edit mode with an open block editor
 
 - GIVEN edit mode on and a block editor whose source is loaded and whose text was changed
 - WHEN the writer clicks the Edit button
 - THEN previewEditModeChanged with editMode false is posted first, then one final previewEditSave with the typed text, so the block save stays the last message, and the editor closes when the next render arrives
 
-### Scenario (boundary): Block editor still waiting for its source
+### Scenario S4 (boundary): Block editor still waiting for its source
 
 - GIVEN edit mode on and a block editor that is still waiting for its source
 - WHEN edit mode is turned off
 - THEN the editor closes at once and no save and no cancel message is posted
 
-### Scenario (nominal): Leaving edit mode removes the edit state
+### Scenario S5 (nominal): Leaving edit mode removes the edit state
 
 | Given edit mode on and | When edit mode is turned off | Then |
 | --- | --- | --- |
@@ -71,7 +88,7 @@ When a writer clicks the Edit button of a preview, the page SHALL switch edit mo
 | the pointer over a list item, so the item is outlined (the list is outlined only when the pointer is on it outside its items) | the writer clicks the Edit button | the item no longer carries data-sphinx-preview-edit-hover |
 | the rename field of an anchor icon open | the writer clicks the Edit button | the field is closed and no previewLabelRename message is posted |
 
-### Scenario (boundary): Nothing to tidy up
+### Scenario S6 (boundary): Nothing to tidy up
 
 | Input | Outcome |
 | --- | --- |
@@ -79,13 +96,13 @@ When a writer clicks the Edit button of a preview, the page SHALL switch edit mo
 | Edit mode turned off with no rename field open | nothing else changes in the page |
 | Edit mode off and the pointer moves over a block | no element receives the hover outline |
 
-### Scenario (nominal): Edit mode on keeps the reading layout
+### Scenario S7 (nominal): Edit mode on keeps the reading layout
 
 - GIVEN a document with a wrapped paragraph in reading mode
 - WHEN edit mode is turned on
 - THEN the paragraph keeps its wrapping and hides the source line breaks; only the cursor, the hover outline and the insert points are added
 
-### Scenario (boundary): Hover and click do not reflow
+### Scenario S8 (boundary): Hover and click do not reflow
 
 - GIVEN edit mode on
 - WHEN the pointer hovers a paragraph and the writer clicks it

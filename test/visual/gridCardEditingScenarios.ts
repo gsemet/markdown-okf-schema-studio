@@ -38,7 +38,8 @@ const variants = [
   { part: "title", click: `${CARD} .myst-grid-card-title`, what: "the title of the second card", editsLine: true },
 ] as const;
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260#S6
 /** The title editor holds the directive line of the clicked card, not line 1 of the document. */
 const TITLE_LINE_ASSERTION: ContentAssertion = {
   message: "the open editor holds the directive line of the second card (:::{grid-item-card} 2. Status projection)",
@@ -51,7 +52,8 @@ export const GRID_CARD_EDITING_SCENARIOS: ScenarioDefinition[] = variants.flatMa
     { name: "cream", theme: "light", mode: "cream" },
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((theme, themeIndex) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-257
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-257#S2
     id: `block-editing/v${23 + partIndex * 2 + themeIndex}-grid-card-${variant.part}-editor-layout-${theme.name}-900`,
     fixture: "73-grid-card-editing",
     theme: theme.theme,

@@ -158,7 +158,8 @@ async function check(reportJson: string, capture: ReadonlySet<string>, diagnosti
 }
 
 test("the six frozen use cases draw their map without an overlap at 1280 px and at 800 px", async (t) => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S3
   const done = await check(frozenReport(), new Set(FROZEN_USE_CASES.map((useCase) => useCase.id)), (message) => t.diagnostic(message), "StRS-MDOKFSTUDIO-BLOCK-014");
   if (!done) return chromiumUnavailable(t);
   assert.equal(done.maps, FROZEN_USE_CASES.length, "every frozen use case has a map");
@@ -166,7 +167,8 @@ test("the six frozen use cases draw their map without an overlap at 1280 px and 
 });
 
 test("a use case with full IDs and shared paths draws its map without an overlap at both widths", async (t) => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S3
   const done = await check(fullIdReport(), new Set(), (message) => t.diagnostic(message));
   if (!done) return chromiumUnavailable(t);
   assert.ok(done.maps >= 2, "the fixture has two use cases with a map");
@@ -174,7 +176,8 @@ test("a use case with full IDs and shared paths draws its map without an overlap
 });
 
 test("every use case of the requirements report draws its map without an overlap at both widths", async (t) => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S3
   const report = REQUIREMENTS_REPORT_PATH(ROOT);
   if (!fs.existsSync(report)) {
     if (process.env.STUDIO_REQUIRE_REQUIREMENTS_REPORT === "1") throw new Error(`the requirements report is required (STUDIO_REQUIRE_REQUIREMENTS_REPORT=1) and is missing: ${report} (run \`just requirements-report\`)`);
@@ -188,7 +191,8 @@ test("every use case of the requirements report draws its map without an overlap
 });
 
 test("Play path 2 on the frozen BLOCK-014 map lights its three steps and four states, and nothing with reduced motion", async (t) => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-091
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-091#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-091#S2
   const { siteRoot, maps } = site(frozenReport());
   const target = maps.find((map) => map.id === "StRS-MDOKFSTUDIO-BLOCK-014");
   assert.ok(target, "the frozen BLOCK-014 has a map");

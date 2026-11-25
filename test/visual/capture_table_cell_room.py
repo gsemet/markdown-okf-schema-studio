@@ -9,7 +9,8 @@ from capture_support import Failure
 TOLERANCE = 1.0
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S6
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S8
 def check_cell_clamped_to_pane(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """At 280 px the edited cell, its field and Done and Cancel are inside the table's scroll box and
   the viewport; the cell is at least 8em wide and narrower than its 300 px minimum (the clamp bites)."""

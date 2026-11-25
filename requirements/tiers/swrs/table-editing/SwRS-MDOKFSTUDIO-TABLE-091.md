@@ -17,6 +17,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-TABLE-015
 depends_on:
 - SwRS-MDOKFSTUDIO-TABLE-102
+scenarios:
+- id: S1
+  title: Typed pipe
+- id: S2
+  title: Pipe in a code span typed in a cell
+- id: S3
+  title: Link text and URL inserted from the bar
+- id: S4
+  title: Escaped pipes and line break pairs in text inserted from the bar
+- id: S5
+  title: Line break pasted into the cell text box
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,22 +48,22 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer types text into a table cell or inserts text into a cell from the table bar, the extension SHALL write the pipes of that text as \| so that the edited row keeps its cell count, and replace every line break of text inserted from the bar or pasted into the cell with a space.
 
-### Scenario (nominal): Typed pipe
+### Scenario S1 (nominal): Typed pipe
 - GIVEN the value a|b typed in a cell
 - WHEN the table is saved
 - THEN the source holds a\|b and the table parses back to the same number of cells
 
-### Scenario (boundary): Pipe in a code span typed in a cell
+### Scenario S2 (boundary): Pipe in a code span typed in a cell
 - GIVEN the value `a|b` typed
 - WHEN the table is saved
 - THEN the source holds `a\|b` and the preview shows a|b in the code span, because a pipe inside a code span splits a cell like any other (see the cell splitting in SwRS-MDOKFSTUDIO-TABLE-094)
 
-### Scenario (nominal): Link text and URL inserted from the bar
+### Scenario S3 (nominal): Link text and URL inserted from the bar
 - GIVEN a link text and a URL that contain a pipe, inserted from the Link panel, a text with a pipe inside a code span, and a link text containing a line break
 - WHEN the text is inserted
 - THEN every unescaped pipe is written \|, also the one inside the code span, each line break is a space, and the row keeps its cell count and stays one line
 
-### Scenario (boundary): Escaped pipes and line break pairs in text inserted from the bar
+### Scenario S4 (boundary): Escaped pipes and line break pairs in text inserted from the bar
 | Inserted text | Outcome |
 | --- | --- |
 | a pipe that is already escaped (\|) | left as it is |
@@ -62,7 +73,7 @@ When the writer types text into a table cell or inserts text into a cell from th
 | a lone line feed or a lone carriage return | one space |
 | the colour inserted from the bar | no test of its own for this rule (untested) |
 
-### Scenario (boundary): Line break pasted into the cell text box
+### Scenario S5 (boundary): Line break pasted into the cell text box
 - GIVEN the clipboard holds "a\nb" (or "a\r\nb"), a text without a tab, and the cell text box is focused
 - WHEN the writer pastes
 - THEN the text box holds "a b", the caret keeps its place after the pasted text and the source row stays one line with the same cell count

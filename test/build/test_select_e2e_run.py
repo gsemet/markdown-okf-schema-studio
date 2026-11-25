@@ -133,7 +133,8 @@ def push(rid: int, created: str, **over: object) -> dict:
     return run(rid, created, **{"event": "push", "head_branch": "main", **over})
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_release_push_run_with_green_heavy_jobs_is_used() -> None:
     assert pick([push(1, "1")], jobs=HEAVY_JOBS) == 1
     assert check(push(1, "1"), jobs=HEAVY_JOBS) is None
@@ -141,7 +142,8 @@ def test_release_push_run_with_green_heavy_jobs_is_used() -> None:
     assert pick([run(1, "1"), push(2, "2")], jobs=HEAVY_JOBS) == 2
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 @pytest.mark.parametrize(
     "jobs",
     [
@@ -158,7 +160,8 @@ def test_push_run_without_both_green_heavy_jobs_is_rejected(jobs: list[dict]) ->
     assert "integration" in problem and "stress" in problem
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_push_run_of_another_commit_branch_or_state_is_rejected() -> None:
     for bad in (push(1, "1", head_sha="b" * 40), push(1, "1", head_branch="feature"),
                 push(1, "1", head_branch=None), push(1, "1", conclusion="failure"),
@@ -169,7 +172,7 @@ def test_push_run_of_another_commit_branch_or_state_is_rejected() -> None:
     assert "artifacts" in (check(push(1, "1"), jobs=HEAVY_JOBS, artifacts=ALL[:2]) or "")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
 def test_main_automatic_selection_queries_dispatch_and_push_runs(monkeypatch, capsys) -> None:
     queried: list[str] = []
 
@@ -199,7 +202,7 @@ def chosen(artifacts: list[dict], jobs=GOOD_JOBS) -> tuple[int, str] | None:
     return None if found is None else (found.run_id, found.artifact)
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_the_reports_of_the_newest_attempt_are_selected() -> None:
     # Integration failed on attempt 1 and passed when re-run: report re-ran in attempt 2.
     rerun = named(*ATTEMPT_1, "e2e-integration-attempt-2", "studio-reports-attempt-2")
@@ -209,19 +212,19 @@ def test_the_reports_of_the_newest_attempt_are_selected() -> None:
     assert problem is None and artifact == "studio-reports-attempt-2"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_attempts_compare_as_numbers() -> None:
     names = [*ATTEMPT_1, *(f"{base}-attempt-{n}" for n in (9, 10) for base in ("e2e-integration", "studio-reports"))]
     assert chosen(named(*names)) == (3, "studio-reports-attempt-10")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
 def test_a_rerun_that_did_not_rerun_the_report_keeps_the_last_report() -> None:
     # Only stress was re-run: the merged report of attempt 1 is still the newest one.
     assert chosen(named(*ATTEMPT_1, "stress-integration-attempt-2")) == (3, "studio-reports-attempt-1")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_an_expired_newest_report_is_not_replaced_by_an_older_attempt() -> None:
     rerun = named(*ATTEMPT_1, "e2e-integration-attempt-2", "studio-reports-attempt-2",
                   expired=("studio-reports-attempt-2",))
@@ -229,7 +232,7 @@ def test_an_expired_newest_report_is_not_replaced_by_an_older_attempt() -> None:
     assert "studio-reports" in (check(run(3, "3"), artifacts=rerun) or "")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_a_report_older_than_a_stage_artifact_is_rejected() -> None:
     # A stage re-ran after the last merged report: that report does not hold it.
     stale = named(*ATTEMPT_1, "e2e-integration-attempt-2")
@@ -237,14 +240,15 @@ def test_a_report_older_than_a_stage_artifact_is_rejected() -> None:
     assert "older" in (check(run(3, "3"), artifacts=stale) or "")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_artifacts_without_an_attempt_suffix_are_not_used() -> None:
     # Before the attempt suffix, a name could hold any attempt: such a run falls back to the suite.
     assert chosen(named("e2e-visual", "e2e-integration", "studio-reports")) is None
     assert chosen(named("studio-reports-attempt-0", "e2e-visual-attempt-1", "e2e-integration-attempt-1")) is None
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_main_prints_the_reports_artifact_of_a_run(monkeypatch, capsys) -> None:
     paths: list[str] = []
 

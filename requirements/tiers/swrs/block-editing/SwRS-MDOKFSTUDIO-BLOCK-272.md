@@ -18,6 +18,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: nominal
+- id: S2
+  title: boundary
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,13 +41,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer copies a non-empty native selection in read or edit mode, the page SHALL take the copy and leave it to the browser when the selection or the focus is in a text control, a block selection is active in edit mode, the page holds no source text for its render, the selection lies only in interface chrome, or an edge lies in an old-side card; an edge that cannot be placed snaps to its element (SwRS-MDOKFSTUDIO-BLOCK-286).
 
-### Scenario: nominal
+### Scenario S1: nominal
 
 - GIVEN source text of the shown render and a native text selection outside any text control
 - WHEN the reader presses the copy chord
 - THEN the page cancels the native copy and takes it as a raw copy, in read and edit mode
 
-### Scenario: boundary
+### Scenario S2: boundary
 
 - GIVEN no source text, a collapsed selection, a text control, an active block selection, or a selection only in chrome
 - WHEN the reader presses the copy chord

@@ -20,6 +20,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
+scenarios:
+- id: S1
+  title: Leaving the frame from a palette control
+- id: S2
+  title: A press on a palette control keeps the focus
+- id: S3
+  title: A press on a text field is not cancelled
+- id: S4
+  title: Moving inside the frame does not save
+- id: S5
+  title: Closing the link panel never produces a save
+- id: S6
+  title: Cmd or Ctrl with Enter finishes the edit
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,7 +56,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses the mouse on a palette control or the focus leaves one, the extension SHALL cancel a press that is not on a text field so that the text box keeps the focus, and run the normal final save once only when the focus goes outside the editor frame.
 
-### Scenario (nominal): Leaving the frame from a palette control
+### Scenario S1 (nominal): Leaving the frame from a palette control
 
 One row per control. The same rule holds for each: a blur toward no target or a target outside the editor frame runs the final save once.
 
@@ -57,7 +70,7 @@ One row per control. The same rule holds for each: a blur toward no target or a 
 | Text box | A blur with no related target, or a target outside the frame | The final save is run |
 | Control of the figure form | A click outside the editor, no file dialog open | The final save is run |
 
-### Scenario (nominal): A press on a palette control keeps the focus
+### Scenario S2 (nominal): A press on a palette control keeps the focus
 
 - GIVEN an open block editor
 - WHEN the writer presses the mouse on a palette button, on the padding of the palette bar or on an item of a popover other than a text field
@@ -65,14 +78,14 @@ One row per control. The same rule holds for each: a blur toward no target or a 
 
 The link panel follows the same rule: a press on its padding or on the Insert button is cancelled and the focus stays in Text.
 
-### Scenario (boundary): A press on a text field is not cancelled
+### Scenario S3 (boundary): A press on a text field is not cancelled
 
 | Press on | Outcome |
 | --- | --- |
 | Emoji filter field | Not cancelled, so the field takes the focus |
 | URL field of the link panel | Not cancelled, the URL field takes the focus (only a mousedown on an INPUT element is left alone) |
 
-### Scenario (refusal): Moving inside the frame does not save
+### Scenario S4 (refusal): Moving inside the frame does not save
 
 | Control holding the focus | Moves to | Outcome |
 | --- | --- | --- |
@@ -83,13 +96,13 @@ The link panel follows the same rule: a press on its padding or on the Insert bu
 | Control of the figure form | A control inside the editor frame | The editor stays open, no save is run |
 | Control of the figure form | The Browse file dialog (a host dialog is open) | No save is posted: a blur while a host dialog is open is ignored |
 
-### Scenario (refusal): Closing the link panel never produces a save
+### Scenario S5 (refusal): Closing the link panel never produces a save
 
 - GIVEN the link panel open
 - WHEN the panel closes by Insert, Cancel, Escape or because the text box was used, whatever blur the browser fires
 - THEN no final save is posted by the panel, a destroyed panel ignores its later blur events, and opening then closing the panel keeps the edited text in place
 
-### Scenario (nominal): Cmd or Ctrl with Enter finishes the edit
+### Scenario S6 (nominal): Cmd or Ctrl with Enter finishes the edit
 
 | Focus in | Key | Outcome |
 | --- | --- | --- |

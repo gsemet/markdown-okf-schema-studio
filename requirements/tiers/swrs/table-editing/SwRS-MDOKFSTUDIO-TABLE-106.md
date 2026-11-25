@@ -19,6 +19,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-016
 depends_on: []
+scenarios:
+- id: S1
+  title: 3 rows and 4 columns
+- id: S2
+  title: Size limits
+- id: S3
+  title: In the middle of a paragraph
+- id: S4
+  title: Caret inside a table
+- id: S5
+  title: After a line break, a blank line or a selection
+- id: S6
+  title: Missing, malformed or out-of-range size
+- id: S7
+  title: Where the Table action is offered
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,34 +53,34 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer runs the Table action with a size of R x C, 1 to 9 each, in a block editor, the extension SHALL insert after the end of the selection a pipe table of C columns with a header row of cells "Column 1" to "Column C", a --- delimiter row and R minus 1 empty body rows, add only the blank lines needed to set it apart, leave the selection untouched and select the first header cell, and insert nothing for a missing, malformed or out-of-range size.
 
-### Scenario (nominal): 3 rows and 4 columns
+### Scenario S1 (nominal): 3 rows and 4 columns
 - GIVEN an empty block and the size 3x4
 - WHEN the action runs
 - THEN the table has 4 header cells, a delimiter row of 4 --- cells and 2 empty body rows, and "Column 1" is selected
 
-### Scenario (boundary): Size limits
+### Scenario S2 (boundary): Size limits
 | Size | Outcome |
 | --- | --- |
 | 1x1 | a header and its delimiter row only |
 | 9x9 | 9 columns and 8 empty body rows |
 | 1x9 | a table is inserted |
 
-### Scenario (nominal): In the middle of a paragraph
+### Scenario S3 (nominal): In the middle of a paragraph
 - GIVEN the caret inside a paragraph
 - WHEN the action runs
 - THEN the paragraph is split and the table sits on its own lines between its two parts
 
-### Scenario (boundary): Caret inside a table
+### Scenario S4 (boundary): Caret inside a table
 - GIVEN the caret in a row of a pipe table, a {list-table} or an HTML table
 - WHEN the action runs
 - THEN the new table goes on its own lines after the last line of that table and the existing table stays whole
 
-### Scenario (boundary): After a line break, a blank line or a selection
+### Scenario S5 (boundary): After a line break, a blank line or a selection
 - GIVEN the caret after a line break, or after a blank line, or with text selected
 - WHEN the action runs
 - THEN only the missing blank lines are added and a selection stays where it is, with the table after it
 
-### Scenario (refusal): Missing, malformed or out-of-range size
+### Scenario S6 (refusal): Missing, malformed or out-of-range size
 | Size | Outcome |
 | --- | --- |
 | none | no edit is produced |
@@ -74,7 +89,7 @@ When the writer runs the Table action with a size of R x C, 1 to 9 each, in a bl
 | "3x10" | no edit is produced |
 | "axb" | no edit is produced |
 
-### Scenario (boundary): Where the Table action is offered
+### Scenario S7 (boundary): Where the Table action is offered
 | Palette mode or editor | Outcome |
 | --- | --- |
 | a block editor | Table is offered |

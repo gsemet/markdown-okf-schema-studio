@@ -18,6 +18,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-001
 - StRS-MDOKFSTUDIO-REVIEW-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Wrong shape of the file
+- id: S2
+  title: One bad thread rejects the whole file
+- id: S3
+  title: Limits of the file
+- id: S4
+  title: First sight of an invalid file
+- id: S5
+  title: Same content again
+- id: S6
+  title: Change while the file is not valid
+- id: S7
+  title: Change when the file is valid
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,7 +55,7 @@ default_owner_email: gaetan@xeberon.net
 
 When any part of the review comments file of a shown document is not valid or goes over one of its limits, the extension SHALL read no thread from it, show one warning naming the file and the first problem once for each distinct content of the file, and refuse every change to it.
 
-### Scenario (refusal): Wrong shape of the file
+### Scenario S1 (refusal): Wrong shape of the file
 | Input | Outcome |
 | --- | --- |
 | An empty file | Error "the sidecar is not valid JSON"; no thread is returned |
@@ -50,12 +65,12 @@ When any part of the review comments file of a shown document is not valid or go
 | A file without a document name | Error "the sidecar needs a document name"; no thread is returned |
 | A file without a threads list | Error "the sidecar needs a threads array"; no thread is returned |
 
-### Scenario (refusal): One bad thread rejects the whole file
+### Scenario S2 (refusal): One bad thread rejects the whole file
 - GIVEN a file with one valid thread and a second thread with an empty id, a non-boolean resolved flag, a non-string body, a creation date that is not an ISO 8601 date-time with a zone ("yesterday", "2026-13-45T99:00:00Z" or "2026-02-30T10:00:00Z", a day that does not exist in its month; 2024-02-29 is a real day, 2026-02-29 is not), no comment, a line of 0, an endLine before its line, or the id of an earlier thread
 - WHEN the file is read
 - THEN an error is reported, the whole file is rejected and the valid thread is not returned either
 
-### Scenario (boundary): Limits of the file
+### Scenario S3 (boundary): Limits of the file
 | Input | Outcome |
 | --- | --- |
 | A text of exactly 2 MiB or less | Read |
@@ -68,22 +83,22 @@ When any part of the review comments file of a shown document is not valid or go
 | A comment body of exactly 10 000 characters | No error |
 | A comment body of 10 001 characters | Error; no thread is returned |
 
-### Scenario (refusal): First sight of an invalid file
+### Scenario S4 (refusal): First sight of an invalid file
 - GIVEN a comments file that is not valid JSON
 - WHEN its document is rendered
 - THEN the warning "The review comments file {name} is not valid and is ignored: the sidecar is not valid JSON." is shown once and no thread is posted
 
-### Scenario (boundary): Same content again
+### Scenario S5 (boundary): Same content again
 - GIVEN the same invalid content read again on the next render
 - WHEN the threads are posted again
 - THEN no second warning appears; changed invalid content warns again
 
-### Scenario (refusal): Change while the file is not valid
+### Scenario S6 (refusal): Change while the file is not valid
 - GIVEN a comments file holding {not json
 - WHEN a comment is saved
 - THEN the page is told the comments file is not valid and is left untouched, and the file text is unchanged
 
-### Scenario (nominal): Change when the file is valid
+### Scenario S7 (nominal): Change when the file is valid
 - GIVEN a valid comments file
 - WHEN a comment is saved
 - THEN the change is written

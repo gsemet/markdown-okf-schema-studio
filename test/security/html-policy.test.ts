@@ -202,7 +202,7 @@ test("keeps the included-block marker next to the source mapping", () => {
   assert.match(result.html, /data-sphinx-source-line="3"[^>]*data-sphinx-source-end-line="4"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260#S4
 test("keeps the single-line marker of a one-line card part next to the source mapping", () => {
   const result = rewriteSphinxHtml(
     '<html><body><main><div class="myst-grid-card-option" data-line="4" data-end-line="4" data-single-line="true">H</div></main></body></html>',
@@ -391,7 +391,8 @@ test("resolves parent-relative figure images through the workspace root", async 
   assert.ok(!rewritten.diagnostics.some((diagnostic) => diagnostic.code === "blocked-resource"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-008
+// @tests_req SwRS-MDOKFSTUDIO-CORE-008#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-008#S4
 test("strips figure images that escape even the workspace root", async () => {
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-figure-test-"));
   temporaryDirectories.push(workspace);
@@ -515,7 +516,7 @@ test("span style keeps only named, hex, rgb and hsl colour and background-color 
   assert.ok(other.diagnostics.length >= 4);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-041
+// @tests_req SwRS-MDOKFSTUDIO-CORE-041#S2
 test("emits dir=auto on block elements and keeps only ltr, rtl and auto", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);

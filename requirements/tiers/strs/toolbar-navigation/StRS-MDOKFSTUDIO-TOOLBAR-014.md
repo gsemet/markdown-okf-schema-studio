@@ -13,6 +13,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Export the page to HTML
 user_need: As a writer, I send a rendered page, with its theme, diagrams and
   properties, to a reader who has no editor, as one file that needs nothing else
   to open.
@@ -61,7 +64,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Export the page to HTML
+#### Path S1: Export the page to HTML
 
 1. A preview page is shown
    - SwRS-MDOKFSTUDIO-TOOLBAR-134: the writer presses Export, and the extension asks where to save the file

@@ -20,6 +20,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Writable preview
+- id: S2
+  title: Visual order
+- id: S3
+  title: Every button has a tooltip equal to its title
+- id: S4
+  title: Tooltip on hover and on keyboard focus
+- id: S5
+  title: Rows stay inside the pane
+- id: S6
+  title: Scrolling
+- id: S7
+  title: Nothing else makes room
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,24 +57,24 @@ default_owner_email: gaetan@xeberon.net
 
 When a preview page is built, the extension SHALL render the toolbar, named Preview controls with the role toolbar, as four rows of four titled buttons, in a fixed order (Refresh, Edit, Export to HTML and the collapse button; Anchor, Theme, Back and Next; Width, Fold, Zoom out and Zoom in; Table of contents, Side-by-side, Diff and Comments), give every button a data-tooltip equal to its title, show that tooltip with a readable contrast on hover and on keyboard focus, and fix the toolbar at the top right of the pane above the page content, inside the pane and without overlap between its rows.
 
-### Scenario (nominal): Writable preview
+### Scenario S1 (nominal): Writable preview
 - GIVEN a preview
 - WHEN the toolbar markup is rendered
 - THEN it holds 16 buttons in the rows main, navigation, view and review, in that order, four buttons in each row, and rows navigation, view and review sit together in one group that follows the main row
 
-### Scenario (nominal): Visual order
+### Scenario S2 (nominal): Visual order
 - GIVEN a 900 px pane in any theme
 - WHEN the page is rendered
 - THEN the toolbar has exactly four rows named main, navigation, view and review with 4 buttons each, the Tab order follows the rows (the main row is Refresh, Edit, Export to HTML, then the collapse button; row 2 starts with Anchor, row 3 with Width, row 4 with Table of contents), and the expanded toolbar is as wide as its first row (four buttons, 134 px, never wider than 134 px)
 
-### Scenario (nominal): Every button has a tooltip equal to its title
+### Scenario S3 (nominal): Every button has a tooltip equal to its title
 - GIVEN the rendered toolbar
 - WHEN its buttons are counted
 - THEN 16 buttons carry data-tooltip, each equal to its title
 - WHEN the attributes of the Theme and Edit buttons are read
 - THEN the aria-label differs from the title (Preview theme: Current theme, Toggle edit mode) while data-tooltip equals the title
 
-### Scenario (nominal): Tooltip on hover and on keyboard focus
+### Scenario S4 (nominal): Tooltip on hover and on keyboard focus
 - GIVEN a toolbar button
 - WHEN the pointer rests on it for 200 ms
 - THEN its tooltip box appears below it with the button's text, the box has content, is not transparent and its text has a contrast ratio of at least 4.5 against its background
@@ -71,7 +86,7 @@ on hover or focus. Disabled Back, Next and zoom controls dim only their icons: t
 background and text remain fully opaque, like enabled controls. Long theme labels keep the same
 anchor rather than moving left by half the label width.
 
-### Scenario (boundary): Rows stay inside the pane
+### Scenario S5 (boundary): Rows stay inside the pane
 | Input | Outcome |
 | --- | --- |
 | 360 px pane, each of the light, dark, white and cream themes, collapsed and expanded | each row ends above the next one, the left edge is not negative and the right edge is not past the pane |
@@ -79,12 +94,12 @@ anchor rather than moving left by half the label width.
 | zoom buttons pressed until 70 percent | the zoom button is disabled, the toolbar stays inside the viewport and does not overlap the sticky heading text |
 | zoom buttons pressed until 200 percent | same outcome |
 
-### Scenario (nominal): Scrolling
+### Scenario S6 (nominal): Scrolling
 - GIVEN a long document
 - WHEN the reader scrolls
 - THEN the toolbar keeps its place at the top right and the text scrolls under it
 
-### Scenario (boundary): Nothing else makes room
+### Scenario S7 (boundary): Nothing else makes room
 - GIVEN text scrolled to the toolbar's place
 - WHEN the text passes the toolbar
 - THEN the text is covered by the toolbar; only the first element of the document gets clearance (layout-width scope)

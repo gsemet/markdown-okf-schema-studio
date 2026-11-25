@@ -19,6 +19,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-021
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
+scenarios:
+- id: S1
+  title: The menu of eleven types
+- id: S2
+  title: Other modes
+- id: S3
+  title: A chosen type wraps the touched lines
+- id: S4
+  title: The fence has one colon more than the longest fence inside
+- id: S5
+  title: Unknown or missing type
+- id: S6
+  title: Custom writes a titled admonition with a class
+- id: S7
+  title: Dropdown writes a note admonition with the dropdown class
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,19 +54,19 @@ supersedes:
 
 When the writer presses Admonition and chooses a type from the menu of Note, Tip, Important, Warning, Caution, Danger, Attention, Error, Hint, See also and Custom…, the extension SHALL wrap the touched lines in a colon fence `:::{type}`, or with no selection insert an empty fence set apart by blank lines with the caret on the empty body line, and make no edit for a missing or unknown type.
 
-### Scenario (nominal): The menu of eleven types
+### Scenario S1 (nominal): The menu of eleven types
 
 - GIVEN the MyST mode
 - WHEN the writer presses Admonition
 - THEN the menu lists the eleven entries Note, Tip, Important, Warning, Caution, Danger, Attention, Error, Hint, See also and Custom… in this order, with the option values note, tip, important, warning, caution, danger, attention, error, hint, seealso and custom
 
-### Scenario (boundary): Other modes
+### Scenario S2 (boundary): Other modes
 
 - GIVEN the strict or GFM mode
 - WHEN the buttons are listed
 - THEN there is no Admonition button
 
-### Scenario (nominal): A chosen type wraps the touched lines
+### Scenario S3 (nominal): A chosen type wraps the touched lines
 
 | Given | Chosen | Outcome |
 | --- | --- | --- |
@@ -60,7 +75,7 @@ When the writer presses Admonition and chooses a type from the menu of Note, Tip
 | No selection | a type | An empty fence set apart by blank lines is inserted, with the caret on the empty body line |
 | A selection with list item lines | a type | The list item lines stay together inside the fence |
 
-### Scenario (nominal): The fence has one colon more than the longest fence inside
+### Scenario S4 (nominal): The fence has one colon more than the longest fence inside
 
 | Selection | Chosen | Outer fence |
 | --- | --- | --- |
@@ -70,7 +85,7 @@ When the writer presses Admonition and chooses a type from the menu of Note, Tip
 
 Only lines that start with three or more colons count as fences.
 
-### Scenario (refusal): Unknown or missing type
+### Scenario S5 (refusal): Unknown or missing type
 
 | Argument | Outcome |
 | --- | --- |
@@ -79,7 +94,7 @@ Only lines that start with three or more colons count as fences.
 
 Only the ten types and custom are accepted.
 
-### Scenario (nominal): Custom writes a titled admonition with a class
+### Scenario S6 (nominal): Custom writes a titled admonition with a class
 
 - GIVEN the selected text Body
 - WHEN Custom is chosen
@@ -93,7 +108,7 @@ Only the ten types and custom are accepted.
 | --- | --- |
 | Custom chosen | The option line `:class: note` is followed by a blank line |
 
-### Scenario (nominal): Dropdown writes a note admonition with the dropdown class
+### Scenario S7 (nominal): Dropdown writes a note admonition with the dropdown class
 
 - GIVEN the caret after intro
 - WHEN Dropdown is pressed

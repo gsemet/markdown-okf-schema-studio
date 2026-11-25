@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: A typed word removes the marker
+- id: S2
+  title: Lifetime
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,13 +43,13 @@ default_owner_email: gaetan@xeberon.net
 
 While the side preview shows a line marker, the host SHALL tell the page to remove it when the text editor edits the marked document or when the side preview switches to another document, and SHALL keep it through scrolls and cursor moves.
 
-### Scenario (nominal): A typed word removes the marker
+### Scenario S1 (nominal): A typed word removes the marker
 
 - GIVEN the side preview showing a line marker on `doc.md`
 - WHEN the text editor edits `doc.md`
 - THEN the host posts previewLineMarkerClear and the page removes the marker
 
-### Scenario (boundary): Lifetime
+### Scenario S2 (boundary): Lifetime
 
 | Input | Outcome |
 | --- | --- |

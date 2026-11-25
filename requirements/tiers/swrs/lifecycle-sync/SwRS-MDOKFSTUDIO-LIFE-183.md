@@ -17,8 +17,8 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
 annotation_exemption: true
-exemption_reason: "Archived. Another requirement specifies this behaviour, so no marker
-  is expected."
+exemption_reason: "Archived by CR-477: the host no longer puts Studio in the place
+  of a text tab, so there is no Studio tab to pick or open; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

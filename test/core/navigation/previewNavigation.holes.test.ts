@@ -11,7 +11,8 @@ import {
 
 const lineOf = (source: string, suffix: string) => markdownFragmentRange(source, suffix)?.startLine;
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S4
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S6
 test("a link with no fragment, or an empty one, selects nothing even when a heading would slug to it", () => {
   const source = "# !!!\n\ntext\n";
   assert.equal(lineOf(source, "#"), undefined);
@@ -19,7 +20,7 @@ test("a link with no fragment, or an empty one, selects nothing even when a head
   assert.equal(lineOf("# heading\n", "heading"), undefined, "a suffix without # has no fragment");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S1
 test("line anchors are exact: one or two numbers, up to the last line, start not after end", () => {
   const source = "1\n2\n3\n4\n5";
   assert.deepEqual(markdownFragmentRange(source, "#L3-L5"), { startLine: 3, endLine: 5 });
@@ -36,7 +37,7 @@ test("line anchors are exact: one or two numbers, up to the last line, start not
   assert.deepEqual(markdownFragmentRange(long, "#L10-L120"), { startLine: 10, endLine: 120 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S2
 test("heading slugs ignore case, punctuation and runs of spaces, but keep digits", () => {
   const source = "intro\n\n# Hello, World!\n\n## Step  2: go\n\n## Straße\n";
   assert.equal(lineOf(source, "#hello-world"), 3);
@@ -47,7 +48,7 @@ test("heading slugs ignore case, punctuation and runs of spaces, but keep digits
   assert.equal(lineOf(source, "#STEP-2-GO"), 5);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S2
 test("a MyST label target is the whole line, at most three spaces in", () => {
   const source = "intro\n(my-label)=\n\nsee (other)=\n\n(spaced)=   \n\n(tail)= extra\n\n    (indented)=\n";
   assert.equal(lineOf(source, "#my-label"), 2);
@@ -57,7 +58,8 @@ test("a MyST label target is the whole line, at most three spaces in", () => {
   assert.equal(lineOf(source, "#indented"), undefined, "four spaces make a code block");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S2
 test("a block id ends its line and may start it", () => {
   const source = "^first\n\ntext ^mid more\n\ntext ^last  \n\ntext ^end\n";
   assert.equal(lineOf(source, "#^first"), 1, "a block id alone on its line");
@@ -68,7 +70,8 @@ test("a block id ends its line and may start it", () => {
   assert.equal(lineOf("text\n", "#end"), undefined, "a block target needs the caret");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S4
 test("an HTML heading id is a target for any level, quote style and attribute order, only when it matches", () => {
   const source = [
     "text",
@@ -91,7 +94,7 @@ test("an HTML heading id is a target for any level, quote style and attribute or
   assert.equal(lineOf('<h7 id="level-seven">x</h7>', "#level-seven"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S2
 test("ATX and setext headings are recognised by their shape", () => {
   assert.equal(lineOf("# Title\n", "#title"), 1, "a single hash");
   assert.equal(lineOf("   ### Title ###\n", "#title"), 1, "indent of three spaces and a closing run");
@@ -105,7 +108,7 @@ test("ATX and setext headings are recognised by their shape", () => {
   assert.equal(lineOf("Title\n    ---\n", "#title"), undefined, "four spaces make a code block");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S2
 test("an explicit heading id wins, hugs the text or follows a space, and only counts at the end", () => {
   assert.equal(lineOf("# Title {#custom-id}\n", "#custom-id"), 1);
   assert.equal(lineOf("# Title{#nospace}\n", "#nospace"), 1, "no space before the id");
@@ -115,7 +118,8 @@ test("an explicit heading id wins, hugs the text or follows a space, and only co
   assert.equal(lineOf("# Title {#id} tail\n", "#title-id-tail"), 1, "and stays in the slug");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S3
 test("an opening fence line is never a target, even when its info text looks like a heading id", () => {
   const source = '```text <h2 id="fenced">\nbody\n```\n';
   assert.equal(lineOf(source, "#fenced"), undefined);
@@ -134,15 +138,15 @@ test("marker lines trim the marker and the identity, and refuse an empty one", (
   assert.equal(markdownMarkerLine("a\n   \nb\n", "   ", "   "), undefined, "both blank");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S1
 test("a link is trimmed before it is classified", () => {
   assert.deepEqual(classifyPreviewReference("  #top  "), { kind: "anchor", value: "#top" });
   assert.deepEqual(classifyPreviewReference("  notes/a.md  "), { kind: "relative", value: "notes/a.md" });
   assert.deepEqual(classifyPreviewReference("  https://example.com/a  "), { kind: "external", value: "https://example.com/a" });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S2
 test("a blocked link says why, and each block has its own reason", () => {
   const reason = (request: string) => {
     const result = classifyPreviewReference(request);
@@ -163,7 +167,7 @@ test("a blocked link says why, and each block has its own reason", () => {
   assert.equal(reason("%2Fetc%2Fpasswd"), "Absolute navigation targets are not allowed.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S2
 test("only http, https and mailto links are external, and never behind wiki:", () => {
   assert.deepEqual(classifyPreviewReference("https://example.com"), { kind: "external", value: "https://example.com" });
   assert.deepEqual(classifyPreviewReference("HTTP://example.com"), { kind: "external", value: "HTTP://example.com" });

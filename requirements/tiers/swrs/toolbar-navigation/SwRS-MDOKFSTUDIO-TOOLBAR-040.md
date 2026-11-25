@@ -16,6 +16,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Four levels
+- id: S2
+  title: Indent, text and excluded headings
+- id: S3
+  title: No headings
+- id: S4
+  title: Landmark
+- id: S5
+  title: Fold
+- id: S6
+  title: Twisty by entry
+- id: S7
+  title: Folded sections are remembered
+- id: S8
+  title: Same text twice
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,12 +51,12 @@ default_owner_email: gaetan@xeberon.net
 
 When the column is built, the extension SHALL list the headings h1 to h4 of the content container that have text, in document order, indented by their level below the shallowest listed heading, with the heading text only, a Table of contents landmark and a twisty on each entry that has deeper entries.
 
-### Scenario (nominal): Four levels
+### Scenario S1 (nominal): Four levels
 - GIVEN headings h1 to h5 in the content
 - WHEN the column is built
 - THEN entries for levels 1 to 4 appear with their level, in order, and the h5 is not listed
 
-### Scenario (boundary): Indent, text and excluded headings
+### Scenario S2 (boundary): Indent, text and excluded headings
 | Input | Outcome |
 | --- | --- |
 | A document whose top heading is an h2 | That h2 is at indent 0 and a following h3 one step deeper (--sphinx-preview-toc-depth = level - shallowest listed level) |
@@ -49,34 +66,34 @@ When the column is built, the extension SHALL list the headings h1 to h4 of the 
 | A heading with a permalink glyph and a comment chip | The entry holds the heading words only, without the glyph, the chip or its hidden body |
 | A heading with a TODO word chip | The TODO word stays in the entry |
 
-### Scenario (refusal): No headings
+### Scenario S3 (refusal): No headings
 | Input | Outcome |
 | --- | --- |
 | A document without headings and the column open | The column shows the text No headings and no entry |
 | A document whose only headings are inside admonitions | The column shows No headings |
 
-### Scenario (nominal): Landmark
+### Scenario S4 (nominal): Landmark
 - GIVEN a page with the column closed
 - WHEN the nav element is read
 - THEN it exists as nav[data-sphinx-preview-toc] with aria-label Table of contents, hidden by the stylesheet; once the column is opened it is the same element and is displayed
 
-### Scenario (nominal): Fold
+### Scenario S5 (nominal): Fold
 - GIVEN a parent entry with two children
 - WHEN its twisty is pressed
 - THEN the children are hidden, aria-expanded is false, the accessible name becomes Unfold followed by the heading, and sibling entries stay shown; pressed again, they show and the name is Fold again
 
-### Scenario (boundary): Twisty by entry
+### Scenario S6 (boundary): Twisty by entry
 | Input | Outcome |
 | --- | --- |
 | An entry with deeper entries below it | It has a twisty button that hides or shows exactly its own subtree, down to the next entry of the same or a shallower level, and sets aria-expanded; its accessible name is Fold followed by the heading while the subtree is shown and Unfold followed by the heading while it is folded |
 | An entry with no deeper entry below it | It has no twisty |
 
-### Scenario (nominal): Folded sections are remembered
+### Scenario S7 (nominal): Folded sections are remembered
 - GIVEN a folded entry and a content update
 - WHEN the column is rebuilt
 - THEN the entry is still folded; the folded entries are kept in the webview state (tocCollapsed), keyed by level, text and occurrence, and applied after every rebuild and reload
 
-### Scenario (boundary): Same text twice
+### Scenario S8 (boundary): Same text twice
 - GIVEN two headings with the same level and text
 - WHEN the first is folded
 - THEN only the first is folded, because the key holds the occurrence number

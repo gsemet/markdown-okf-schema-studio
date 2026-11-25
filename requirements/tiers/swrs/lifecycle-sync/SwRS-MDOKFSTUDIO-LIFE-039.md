@@ -24,6 +24,23 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Unsaved edit
+- id: S2
+  title: Source gone
+- id: S3
+  title: Collecting edits for 40 ms
+- id: S4
+  title: Edits during a render
+- id: S5
+  title: Hidden panels and shared renders
+- id: S6
+  title: Rendering writes nothing
+- id: S7
+  title: Save of a buffer the preview already shows
+- id: S8
+  title: The previewReady message
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -55,19 +72,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the text of a document changes, saved or not, the extension SHALL queue a render of the new text in every preview that shows that document, start it after a pause of 40 ms or of twice the last render time when that is longer (at most 1 s), or at once after a block edit is committed, let a running render finish first unless it has run more than 1 s and more than twice the wall-clock time of the last render when the newer render is due (then abort it), without writing to the shown file or to any build output folder of the workspace. A preview whose panel is hidden SHALL not render until the panel is shown, and previews of the same document, revision and render options SHALL share one render.
 
-### Scenario (nominal): Unsaved edit
+### Scenario S1 (nominal): Unsaved edit
 
 - GIVEN a side preview of preview.md and an edit applied to the buffer without saving
 - WHEN the change event fires
 - THEN the preview renders the edited text and shows the new marker
 
-### Scenario (refusal): Source gone
+### Scenario S2 (refusal): Source gone
 
 - GIVEN the previewed file no longer exists on disk when the change event fires
 - WHEN the change is handled
 - THEN the preview shows Preview source missing instead of rendering
 
-### Scenario (boundary): Collecting edits for 40 ms
+### Scenario S3 (boundary): Collecting edits for 40 ms
 
 | Input | Outcome |
 | --- | --- |
@@ -78,7 +95,7 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 | the last render took 3 s | the next render starts 1 s after the last change (the upper bound) |
 | the last render took 300 ms and the writer commits a block edit (the editor closes on an applied edit) | the render starts at once, without the 600 ms pause; a running render still finishes first |
 
-### Scenario (boundary): Edits during a render
+### Scenario S4 (boundary): Edits during a render
 
 | Input | Outcome |
 | --- | --- |
@@ -88,7 +105,7 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 | the last render took 600 ms of wall-clock time, the running one has run 1.25 s when the newer edit's pause elapses | the running render is aborted (its worker thread stops, see SwRS-MDOKFSTUDIO-LIFE-004), the newest edit renders at once, a late result of the aborted render is dropped, and the time the aborted render ran becomes the estimate of the pause and of the overrun limit until a render completes |
 | a small document: the MyST render takes 2 ms, the whole render 60 ms of wall-clock time, and a newer edit's 40 ms pause elapses during it | the running render finishes and the newer edit renders right after; no render is aborted before it has run 1 s |
 
-### Scenario (boundary): Hidden panels and shared renders
+### Scenario S5 (boundary): Hidden panels and shared renders
 
 | Input | Outcome |
 | --- | --- |
@@ -97,20 +114,20 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 | two previews of the same document at the same revision, workspace root, trust state, restricted-reads state and PlantUML engine | one render serves both; each receives its own stage with its own request id |
 | a file the render may have read changes, a setting changes, files are renamed or a refresh is requested | the next request renders again instead of joining a finished render |
 
-### Scenario (nominal): Rendering writes nothing
+### Scenario S6 (nominal): Rendering writes nothing
 
 - GIVEN a dirty buffer, or a render that throws, and a hash of the file and of the _build folder
 - WHEN the preview renders the buffer, switches document, renders edits, or shows the failure
 - THEN the file hash and the _build tree hash are unchanged
 
-### Scenario (refusal): Save of a buffer the preview already shows
+### Scenario S7 (refusal): Save of a buffer the preview already shows
 
 | Input | Outcome |
 | --- | --- |
 | a ready render of revision 7 and a save of the buffer at revision 7, the file watcher reports the saved file | no render starts (the activePathChanges probe counts the event, the requestId is unchanged) |
 | the buffer is at revision 8 while the page shows revision 7, or the page shows an error, the watcher reports the file | a render starts |
 
-### Scenario (boundary): The previewReady message
+### Scenario S8 (boundary): The previewReady message
 
 | Input | Outcome |
 | --- | --- |

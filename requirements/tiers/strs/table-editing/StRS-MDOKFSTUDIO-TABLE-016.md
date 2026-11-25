@@ -14,6 +14,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Insert a table and shape it
 user_need: As a writer, I insert a table of the size I want, align a column,
   give the table a caption or turn it into an HTML table without typing the
   Markdown by hand.
@@ -66,7 +69,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Insert a table and shape it
+#### Path S1: Insert a table and shape it
 
 1. A block text box is open in edit mode
    - SwRS-MDOKFSTUDIO-TABLE-106: the writer runs Table with a size of R x C and a pipe table is inserted after the end of the selection

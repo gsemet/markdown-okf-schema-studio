@@ -18,6 +18,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-011
 - StRS-MDOKFSTUDIO-BLOCK-025
+scenarios:
+- id: S1
+  title: The button and the keys
+- id: S2
+  title: The button in the bar
+- id: S3
+  title: The keys act on a block selection only
+- id: S4
+  title: Refusals and the selection after the delete
+- id: S5
+  title: A blank-line block
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,32 +57,32 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer clicks the Delete block button of a block, or presses Delete or Backspace on a block selection, the extension SHALL delete the blocks of the selection (or the one block) with their trailing blank lines and one separator in one edit and one undo step, refuse an included block, and select the block that took the place.
 
-### Scenario: The button and the keys
+### Scenario S1: The button and the keys
 
 - GIVEN edit mode on, three blocks and a block selection on the second
 - WHEN the writer presses Delete or Backspace, or clicks the Delete block button of the bar of the second block
 - THEN the page posts previewBlocksDelete for the selected lines, the host deletes them with one separator in one edit, and the selection goes to the block that took their place
 
-### Scenario: The button in the bar
+### Scenario S2: The button in the bar
 
 - GIVEN the bar of a body block
 - WHEN it is shown
 - THEN a "Delete block" button sits right after the down arrow and touches it, the move status sits to its right and never overlaps it, the button is hidden while a block editor is open, and an included block, the properties bar and the Start writing entry have none
 
-### Scenario: The keys act on a block selection only
+### Scenario S3: The keys act on a block selection only
 
 - GIVEN only a focused block, a focused bar button, a text box, an open editor, or the structural cursor on a cell, a list item or an inner block
 - WHEN the writer presses Delete or Backspace
 - THEN nothing is posted
 
-### Scenario: Refusals and the selection after the delete
+### Scenario S4: Refusals and the selection after the delete
 
 - GIVEN a span that opens an {include} directive, lines out of date or in the frontmatter, or an open block edit on the host
 - WHEN the delete is requested
 - THEN the document does not change and the refusal is shown next to the selection ("A block that comes from an included file cannot be deleted." for an include)
 - AND after a successful delete the following block is selected, else the block above, else the Start writing button has the focus
 
-### Scenario: A blank-line block
+### Scenario S5: A blank-line block
 
 - GIVEN a selected blank-line block
 - WHEN the writer presses Delete or Backspace or clicks its Delete block button

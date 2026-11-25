@@ -22,6 +22,11 @@ tier: StRS
 derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: Edit a block and undo it
+- id: S2
+  title: Cut blocks and paste them
 user_need: As a writer, I trust that every change I make from the preview lands
   on the lines I meant, reverts with one undo and keeps the line endings of my
   document, or is refused with a reason, never landing on the wrong text; I am
@@ -119,7 +124,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Edit a block and undo it
+#### Path S1: Edit a block and undo it
 
 1. A block editor is open
    - SwRS-MDOKFSTUDIO-BLOCK-042: the typed text is autosaved as the smallest single replacement
@@ -130,7 +135,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-BLOCK-234: the line endings of the document are kept
 3. The edit is one undo step with the line endings kept
 
-#### Path 2: Cut blocks and paste them
+#### Path S2: Cut blocks and paste them
 
 1. A run of blocks is selected
    - SwRS-MDOKFSTUDIO-BLOCK-169: a cut puts their Markdown on the clipboard and deletes them with one blank separator

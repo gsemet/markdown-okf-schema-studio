@@ -16,6 +16,27 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-005
 depends_on: []
+scenarios:
+- id: S1
+  title: Typing
+- id: S2
+  title: The incrementalUpdates setting
+- id: S3
+  title: One of the exceptions
+- id: S4
+  title: Patches in a chain
+- id: S5
+  title: Ready report after a patch
+- id: S6
+  title: What the page does when it applies a patch
+- id: S7
+  title: Unchanged blocks stay in place
+- id: S8
+  title: Repeated blocks and links
+- id: S9
+  title: A line inserted above keeps the blocks below
+- id: S10
+  title: A block the page rewrote is rebuilt
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,39 +65,39 @@ default_owner_email: gaetan@xeberon.net
 
 When a render finishes and the loaded page can take its content, the extension SHALL send only the new content of the page as a content patch, which the page applies in place and reports ready, instead of a new page document.
 
-### Scenario (nominal): Typing
+### Scenario S1 (nominal): Typing
 
 - GIVEN a ready page of preview.md, incremental updates on, and no condition of the requirement that loads a new page document (SwRS-MDOKFSTUDIO-LIFE-071) met
 - WHEN the writer types and a render finishes
 - THEN the host posts previewContentPatch with the inner HTML of the content container and does not assign a new page document (unit test test/page/runtimeContentPatch.test.ts "T34: a content patch replaces the content, moves the identifiers and posts previewReady")
 
-### Scenario (boundary): The incrementalUpdates setting
+### Scenario S2 (boundary): The incrementalUpdates setting
 
 | Input | Outcome |
 | --- | --- |
 | No stored value for markdownOkfSchemaStudio.preview.incrementalUpdates, preview settings read | incrementalUpdates is true |
 | The setting set to false in the settings editor, a render finishes | The page document is assigned again with the new HTML, without a window reload |
 
-### Scenario (refusal): One of the exceptions
+### Scenario S3 (refusal): One of the exceptions
 
 - GIVEN the new render has another shell, for example math appears
 - WHEN the render finishes
 - THEN the whole page is assigned instead (see SwRS-MDOKFSTUDIO-LIFE-071)
 
-### Scenario (nominal): Patches in a chain
+### Scenario S4 (nominal): Patches in a chain
 
 | Input | Outcome |
 | --- | --- |
 | Two patches addressed to consecutive identifiers, received before the page acknowledged the previous one | Both apply in order and the page ends on the identifiers of the second |
 | A patch with stale fields in the middle of a chain | The later patches are ignored and nothing is acknowledged (a rejected patch stops the chain) |
 
-### Scenario (nominal): Ready report after a patch
+### Scenario S5 (nominal): Ready report after a patch
 
 - GIVEN a patch moving the page from request 1 to request 2
 - WHEN the page applies it
 - THEN it posts previewReady for request 2 with its reading state; if a block editor was open when the patch arrived, the report says no block editor is open (blockEditOpen false)
 
-### Scenario (nominal): What the page does when it applies a patch
+### Scenario S6 (nominal): What the page does when it applies a patch
 
 | Input | Outcome |
 | --- | --- |
@@ -89,25 +110,25 @@ When a render finishes and the loaded page can take its content, the extension S
 | A link tooltip open on the old content | The tooltip is closed |
 | No tooltip | Nothing changes |
 
-### Scenario (nominal): Unchanged blocks stay in place
+### Scenario S7 (nominal): Unchanged blocks stay in place
 
 - GIVEN ten blocks and a patch that changes the fifth
 - WHEN the page replaces the content
 - THEN nine nodes are the same elements as before, with their focus, selection, loaded images and diagrams, and only the fifth comes from the patch (unit test test/page/modules/contentMorph.test.ts "PERF-05: unchanged blocks are kept in place, changed and new ones come from the patch")
 
-### Scenario (boundary): Repeated blocks and links
+### Scenario S8 (boundary): Repeated blocks and links
 
 - GIVEN three identical paragraphs, a paragraph with a link, and a node the page added itself
 - WHEN the page replaces the content
 - THEN equal blocks pair in document order and each kept node is used once, a block with a link has the same key as on the first load, and page-added or text nodes are never kept
 
-### Scenario (nominal): A line inserted above keeps the blocks below
+### Scenario S9 (nominal): A line inserted above keeps the blocks below
 
 - GIVEN a document of 200 blocks and a patch that adds one paragraph at the top, so that every block below it moves down by two source lines
 - WHEN the page replaces the content
 - THEN the 200 existing blocks are the same elements as before, the paragraph is the only new element, and each kept block carries the new `data-line`, `data-sphinx-source-line`, `data-sphinx-source-end-line` and `data-sphinx-preview-block` values (unit test test/page/modules/contentMorph.test.ts "P-07: a line inserted above keeps every block below it and moves its line attributes in place")
 
-### Scenario (boundary): A block the page rewrote is rebuilt
+### Scenario S10 (boundary): A block the page rewrote is rebuilt
 
 - GIVEN a block whose content the page wrote itself (a table cell left with Tab shows the text just typed in it)
 - WHEN a patch carries the same host HTML for that block as the render the page started from

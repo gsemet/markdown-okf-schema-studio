@@ -147,7 +147,8 @@ function setup(): Setup {
 
 const threadsOf = (message: Record<string, any>): Array<Record<string, any>> => message.threads;
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S8
 test("a read of the comments file that a newer read overtook posts nothing", async () => {
   const s = setup();
   s.files.set(DOCUMENT, "a needle here\n");
@@ -182,7 +183,8 @@ test("a read of the comments file that a newer read overtook posts nothing", asy
   assert.equal(single.posted.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S2
 test("a comment for a document that is not a file is refused with 'save the document first.'", async () => {
   const s = setup();
   const router = new Map<string, (message: any, preview: any) => Promise<void>>();
@@ -216,7 +218,8 @@ test("saving writes the moved lines to the comments file when the only preview h
   assert.match(s.files.get(SIDECAR)!, /"line": 3/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S7
 test("a document without unsaved changes that changes drops the followed lines, a dirty one shifts them", () => {
   const s = setup();
   const view = () => ({ diskHash: "h", threads: [thread("t1", 4)], orphaned: new Set<string>() });
@@ -269,7 +272,7 @@ test("a closed document over 8 MiB is not searched: the stored lines are posted"
   assert.equal(threadsOf(opened.posted[0]!)[0]!.anchor.line, 1, "re-anchored on the open text");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-125
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-125#S4
 test("a comments file that names another document stays where it is, without a warning", async () => {
   const other = setup();
   other.files.set(w("move-me.comments.json"), sidecarOf("other.md", [thread("t1", 1)]));
@@ -289,7 +292,8 @@ test("a comments file that names another document stays where it is, without a w
   assert.match(own.files.get(w("moved.comments.json"))!, /"document": "moved\.md"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-125
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-125#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-125#S4
 test("a renamed document takes its comments file along and names itself in it", async () => {
   const s = setup();
   s.files.set(w("move-me.comments.json"), sidecarOf("move-me.md", [thread("t1", 1)]));
@@ -371,7 +375,7 @@ test("a reply, a resolve and a delete are written next to the document in Restri
   assert.deepEqual(s.warnings, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S9
 test("switching the sidecar and clearing a preview release the watcher and its three subscriptions", async () => {
   const s = setup();
   s.files.set(DOCUMENT, "a needle here\n");
@@ -397,7 +401,8 @@ test("switching the sidecar and clearing a preview release the watcher and its t
   assert.deepEqual(s.watching, { watchers: 0, subscriptions: 0 }, "clearing twice is harmless");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S8
 test("a busy or denied read of the comments file posts no empty list", async () => {
   const s = setup();
   s.files.set(DOCUMENT, "a needle here\n");
@@ -427,7 +432,8 @@ test("a busy or denied read of the comments file posts no empty list", async () 
   assert.deepEqual(threadsOf(lastList()).map((value) => [value.id, value.resolved]), [["t1", true]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S8
 test("a comments file that is really gone still clears the threads of the page", async () => {
   const s = setup();
   s.files.set(DOCUMENT, "a needle here\n");
@@ -440,7 +446,7 @@ test("a comments file that is really gone still clears the threads of the page",
   assert.deepEqual(threadsOf(s.posted.at(-1)!), [], "the page is told the threads are gone");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S7
 test("a post overtaken while it checks the anchors leaves the newer post free to show the new thread", async () => {
   const s = setup();
   const text = "a needle here\n\nanother line\n\nthe added thread quotes this text\n";
@@ -472,7 +478,7 @@ test("a post overtaken while it checks the anchors leaves the newer post free to
     [["t_old", 1, false], ["t_new", 5, false]], "the newer post shows the added thread");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S7
 test("lines saved while the document gains lines are checked again against the text", async () => {
   const s = setup();
   let text = "first\n\nsee the needle\n";
@@ -505,7 +511,8 @@ test("lines saved while the document gains lines are checked again against the t
   s.controller.clear(preview);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S5
 test("a clean document that changes is checked again even when the comments file did not change", async () => {
   const s = setup();
   s.files.set(DOCUMENT, "first\n\nsee the needle\n");
@@ -528,7 +535,7 @@ test("a clean document that changes is checked again even when the comments file
   s.controller.clear(preview);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S7
 test("an undo or a redo shifts the followed lines and marks every thread to be checked again", () => {
   const s = setup();
   const view = () => ({ diskHash: "h", threads: [thread("t1", 4)], orphaned: new Set<string>(["t2"]) });
@@ -546,7 +553,8 @@ test("an undo or a redo shifts the followed lines and marks every thread to be c
   s.controller.clear(preview);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S7
 test("an unrelated undo keeps a short-quote thread on its followed line, far beyond the search window", async () => {
   const s = setup();
   const body = Array.from({ length: 12 }, (_, index) => `filler ${index}`);
@@ -585,7 +593,7 @@ function openBuffer(s: Setup, initial: string): { set(text: string): void } {
   return { set: (next) => { text = next; revision += 1; } };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219#S4
 test("an orphaned thread whose quote returns is posted again on its lines, nothing is written", async () => {
   const s = setup();
   const buffer = openBuffer(s, "first\n\nno such word here\n");
@@ -606,7 +614,7 @@ test("an orphaned thread whose quote returns is posted again on its lines, nothi
   s.controller.clear(preview);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219#S3
 test("a short quote that reappears outside the window stays orphaned", async () => {
   const s = setup();
   const filler = Array.from({ length: 80 }, (_, index) => `filler ${index}`).join("\n");
@@ -623,7 +631,7 @@ test("a short quote that reappears outside the window stays orphaned", async () 
   s.controller.clear(preview);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219#S4
 test("without an orphaned thread a text change costs no extra check of the document", async () => {
   const s = setup();
   const buffer = openBuffer(s, "first\n\nsee the needle\n");

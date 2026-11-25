@@ -19,6 +19,31 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
+scenarios:
+- id: S1
+  title: A well-formed message of each type is accepted
+- id: S2
+  title: "previewEditModeChanged: Edit mode that is not a boolean"
+- id: S3
+  title: "previewEditOpen: An open with a wrong range, insert point or extra field"
+- id: S4
+  title: "previewEditSave: Invalid optional fields"
+- id: S5
+  title: "previewEditSave: Insert point of a block edit"
+- id: S6
+  title: "previewEditCancel: A cancel that carries a text or a pin"
+- id: S7
+  title: "previewBlockMove: Invalid lines, direction or pin"
+- id: S8
+  title: "previewBlocksCopy: Invalid lines"
+- id: S9
+  title: "previewBlocksCut: Invalid pin or lines"
+- id: S10
+  title: "previewBlocksPaste: Invalid line or pin"
+- id: S11
+  title: "previewEditClosed: Invalid edit id"
+- id: S12
+  title: "previewEditFlushed: Invalid flush id or flag"
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,7 +72,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the page posts a block-editing message (previewEditModeChanged, previewEditOpen, previewEditSave, previewEditCancel, previewBlockMove, previewBlocksCopy, previewBlocksCut, previewBlocksPaste, previewEditClosed or previewEditFlushed), the host SHALL accept it only with the fields its type requires and SHALL drop a malformed one and change nothing.
 
-### Scenario (nominal): A well-formed message of each type is accepted
+### Scenario S1 (nominal): A well-formed message of each type is accepted
 
 | Message | Required fields |
 | --- | --- |
@@ -66,13 +91,13 @@ When the page posts a block-editing message (previewEditModeChanged, previewEdit
 - WHEN the host validates it
 - THEN it is accepted, also without an optional pin
 
-### Scenario (refusal): previewEditModeChanged: Edit mode that is not a boolean
+### Scenario S2 (refusal): previewEditModeChanged: Edit mode that is not a boolean
 
 - GIVEN a previewEditModeChanged message with editMode "yes" or no editMode
 - WHEN it is validated
 - THEN it is dropped
 
-### Scenario (refusal): previewEditOpen: An open with a wrong range, insert point or extra field
+### Scenario S3 (refusal): previewEditOpen: An open with a wrong range, insert point or extra field
 
 | Input | Outcome |
 | --- | --- |
@@ -82,7 +107,7 @@ When the page posts a block-editing message (previewEditModeChanged, previewEdit
 | a pin field (pinLine with pinViewportTop) or the field final | dropped |
 | a missing or empty editId, or an editId that is not a string | dropped |
 
-### Scenario (refusal): previewEditSave: Invalid optional fields
+### Scenario S4 (refusal): previewEditSave: Invalid optional fields
 
 | Input | Outcome |
 | --- | --- |
@@ -93,7 +118,7 @@ When the page posts a block-editing message (previewEditModeChanged, previewEdit
 | originalText or editedText missing or not a string | dropped |
 | no editId, or no line range with endLine not below line (as for previewEditOpen) | dropped |
 
-### Scenario (boundary): previewEditSave: Insert point of a block edit
+### Scenario S5 (boundary): previewEditSave: Insert point of a block edit
 
 | Input | Outcome |
 | --- | --- |
@@ -102,13 +127,13 @@ When the page posts a block-editing message (previewEditModeChanged, previewEdit
 | previewEditOpen with insertAfterLine 0 | accepted |
 | previewScroll with insertAfterLine 0 | dropped (insertAfterLine is accepted only on previewEditOpen, previewEditSave and previewEditCancel) |
 
-### Scenario (refusal): previewEditCancel: A cancel that carries a text or a pin
+### Scenario S6 (refusal): previewEditCancel: A cancel that carries a text or a pin
 
 - GIVEN a previewEditCancel message that carries a final or pin field
 - WHEN it is validated
 - THEN it is dropped
 
-### Scenario (refusal): previewBlockMove: Invalid lines, direction or pin
+### Scenario S7 (refusal): previewBlockMove: Invalid lines, direction or pin
 
 | Input | Outcome |
 | --- | --- |
@@ -118,7 +143,7 @@ When the page posts a block-editing message (previewEditModeChanged, previewEdit
 | a missing neighbour line | dropped |
 | a NaN pin top or a pin top of 200000 | dropped |
 
-### Scenario (refusal): previewBlocksCopy: Invalid lines
+### Scenario S8 (refusal): previewBlocksCopy: Invalid lines
 
 | Input | Outcome |
 | --- | --- |
@@ -127,14 +152,14 @@ When the page posts a block-editing message (previewEditModeChanged, previewEdit
 | a missing line | dropped |
 | a string endLine | dropped |
 
-### Scenario (refusal): previewBlocksCut: Invalid pin or lines
+### Scenario S9 (refusal): previewBlocksCut: Invalid pin or lines
 
 | Input | Outcome |
 | --- | --- |
 | a NaN pin top | dropped |
 | the invalid lines of a copy (line 0, endLine 1.5, a missing line, a string endLine) | dropped |
 
-### Scenario (refusal): previewBlocksPaste: Invalid line or pin
+### Scenario S10 (refusal): previewBlocksPaste: Invalid line or pin
 
 | Input | Outcome |
 | --- | --- |
@@ -144,7 +169,7 @@ When the page posts a block-editing message (previewEditModeChanged, previewEdit
 | pinLine 0 | dropped |
 | a pin top of 200000 | dropped |
 
-### Scenario (refusal): previewEditClosed: Invalid edit id
+### Scenario S11 (refusal): previewEditClosed: Invalid edit id
 
 | Input | Outcome |
 | --- | --- |
@@ -153,7 +178,7 @@ When the page posts a block-editing message (previewEditModeChanged, previewEdit
 | a numeric editId | dropped |
 | a 101-character editId | dropped (100 characters is the longest accepted) |
 
-### Scenario (refusal): previewEditFlushed: Invalid flush id or flag
+### Scenario S12 (refusal): previewEditFlushed: Invalid flush id or flag
 
 | Input | Outcome |
 | --- | --- |

@@ -22,6 +22,17 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-PALETTE-039
+scenarios:
+- id: S1
+  title: Picked
+- id: S2
+  title: Dialog and path of the host
+- id: S3
+  title: Cancelled
+- id: S4
+  title: Refused answers
+- id: S5
+  title: Selection and path forms in the page
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,25 +54,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Document link, the extension SHALL ask the host through previewPickDocument for a native file dialog on md and markdown files, keep the editor open while it is shown, and write {doc} with the picked path, relative to the document and without its extension, in place of the selection, or nothing when the dialog is cancelled.
 
-### Scenario (nominal): Picked
+### Scenario S1 (nominal): Picked
 
 - GIVEN an open editor and the path ../guide/setup picked
 - WHEN the host answers
 - THEN the text is {doc}`../guide/setup` and the editor stayed open during the dialog
 
-### Scenario (nominal): Dialog and path of the host
+### Scenario S2 (nominal): Dialog and path of the host
 
 - GIVEN a trusted, saved document docs/a.md, previewPickDocument with a valid editId and the file docs/guide/setup.md picked
 - WHEN the host handles it
 - THEN the path is guide/setup; a native dialog opens in the folder of the document, filtered to md and markdown files, with the label Link document, and the answer is the picked file as a path relative to the document with forward slashes and without the md or markdown extension
 
-### Scenario (refusal): Cancelled
+### Scenario S3 (refusal): Cancelled
 
 - GIVEN the dialog cancelled
 - WHEN the host answers
 - THEN the answer is ok true with cancelled true, nothing is inserted, the text box has the focus and the next blur saves again
 
-### Scenario (refusal): Refused answers
+### Scenario S4 (refusal): Refused answers
 
 | Input | Outcome |
 | --- | --- |
@@ -72,7 +83,7 @@ When the writer presses Document link, the extension SHALL ask the host through 
 
 See SwRS-MDOKFSTUDIO-TRUST-052, SwRS-MDOKFSTUDIO-TRUST-005, SwRS-MDOKFSTUDIO-TRUST-065 and SwRS-MDOKFSTUDIO-TRUST-090.
 
-### Scenario (boundary): Selection and path forms in the page
+### Scenario S5 (boundary): Selection and path forms in the page
 
 | Input | Outcome |
 | --- | --- |

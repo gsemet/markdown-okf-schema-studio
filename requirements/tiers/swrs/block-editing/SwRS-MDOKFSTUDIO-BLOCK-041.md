@@ -16,6 +16,24 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Every blocked action, with its exact reason
+- id: S2
+  title: The same requests with no editor open
+- id: S3
+  title: A click on a block while a field editor holds a value
+- id: S4
+  title: Refresh Preview command over an open editor
+- id: S5
+  title: A further edit after the refresh
+- id: S6
+  title: A click on another block while changed text is held
+- id: S7
+  title: No edit gesture runs while an edit is in flight
+- id: S8
+  title: A field clicked while a cancelled block save is in flight opens when it
+    ends, and is dropped if it fails
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -71,7 +89,7 @@ supersedes:
 
 While a block editor or a field editor is open, the extension SHALL refuse every action that would compete with it (a second editor, a block move, a block selection, a copy, a cut or a paste, a label rename, a thread change, a checkbox toggle and a refresh) with the reason of its row in the table below and change nothing.
 
-### Scenario (nominal): Every blocked action, with its exact reason
+### Scenario S1 (nominal): Every blocked action, with its exact reason
 
 The page refuses with the open editor's status line unless the row says otherwise. The host holds an open block edit and answers the request with `ok false` and the reason (or the error of the answer).
 
@@ -97,13 +115,13 @@ The page refuses with the open editor's status line unless the row says otherwis
 | Refresh requested from the page (`refreshPreview`) | block editor or field editor | page | No `previewRefresh` is posted; the editor status shows "Save or cancel this edit before refreshing." |
 | Refresh button of the toolbar | block editor or field editor | page | The button is disabled while the editor is open and enabled again when it closes |
 
-### Scenario (nominal): The same requests with no editor open
+### Scenario S2 (nominal): The same requests with no editor open
 
 - GIVEN no open block editor, no open field editor and no block edit held by the host
 - WHEN a click, an insert point or a key requests an editor, or `previewEditOpen` arrives, or `previewBlockMove` or `previewBlocksCopy` arrives, or a rename, a thread change or a checkbox click is requested, or a refresh is requested
 - THEN the editor opens (the source of the block is sent), the move or the copy is planned, the request is sent (rename, thread change, `previewCheckboxToggle`, `previewRefresh`), the Refresh button is enabled and a delete of an inline thread is applied
 
-### Scenario (boundary): A click on a block while a field editor holds a value
+### Scenario S3 (boundary): A click on a block while a field editor holds a value
 
 - GIVEN a field editor that holds a changed value and the writer clicks a block or a plus insert point
 - WHEN the host saves the value
@@ -111,30 +129,30 @@ The page refuses with the open editor's status line unless the row says otherwis
 - WHEN the host refuses the value instead
 - THEN the field editor closes without a second save, the field shows its saved value and the block editor opens
 
-### Scenario (boundary): Refresh Preview command over an open editor
+### Scenario S4 (boundary): Refresh Preview command over an open editor
 
 - GIVEN an open editor and the Refresh Preview command of the writer
 - WHEN the render finishes
 - THEN the host delivers it to the page even though the editor is open, it replaces the page, the open editor closes without a cancel and `forceNextResult` is reset when the render is delivered
 
-### Scenario (boundary): A further edit after the refresh
+### Scenario S5 (boundary): A further edit after the refresh
 
 - GIVEN a further edit after the Refresh Preview command
 - WHEN its render finishes
 - THEN it waits for the editor again
 
-### Scenario (boundary): A click on another block while changed text is held
+### Scenario S6 (boundary): A click on another block while changed text is held
 
 - GIVEN a block editor that holds changed text
 - WHEN the writer clicks another block
 - THEN the first editor is saved through its blur and stays open until the render of its save arrives, and the second block opens once, when that render arrives, without a second click; the save in flight is not posted again; an editor with unchanged text closes at the blur and the same click opens the second editor
 
-### Scenario (boundary): No edit gesture runs while an edit is in flight
+### Scenario S7 (boundary): No edit gesture runs while an edit is in flight
 - GIVEN an open editor, or a detached save (a final save whose editor the writer closed and the host has not answered)
 - WHEN the writer clicks a block, a field, an insert point, a move handle, a list item or a file drop
 - THEN nothing opens or moves: the open editor keeps its reasons, and the gesture of a detached save waits, as a pending navigation, until the save ends and is dropped if it fails
 
-### Scenario (boundary): A field clicked while a cancelled block save is in flight opens when it ends, and is dropped if it fails
+### Scenario S8 (boundary): A field clicked while a cancelled block save is in flight opens when it ends, and is dropped if it fails
 - GIVEN a detached save and a click on a frontmatter field
 - WHEN the save succeeds the field opens; when it fails the click is dropped and the reopened editor shows the text
 

@@ -67,7 +67,8 @@ test("the Node process runner stops a program on abort", async () => {
   assert.equal(result.stopped, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S6
 test("the Node file system reports a link itself, a dangling one included, and not a missing path", needsSymlinks, async (t) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "okf-node-link-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));

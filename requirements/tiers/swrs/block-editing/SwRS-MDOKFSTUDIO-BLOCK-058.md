@@ -18,6 +18,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: One undo step per edit kind
+- id: S2
+  title: Cancelled session
+- id: S3
+  title: No visible text editor
+- id: S4
+  title: One render after the final save
+- id: S5
+  title: Nothing applied
+- id: S6
+  title: An edit that VS Code does not apply or rejects
+- id: S7
+  title: A block that changed under the host
+- id: S8
+  title: A block that did not change
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,7 +64,7 @@ supersedes:
 
 When the host writes an edit of the source document for the preview, it SHALL make the edit one undo step, refresh the preview once for it, and answer an edit that VS Code does not apply or rejects with a reason that begins "VS Code could not apply" or with the text of the error.
 
-### Scenario (nominal): One undo step per edit kind
+### Scenario S1 (nominal): One undo step per edit kind
 | Edit kind | How it is written | One Undo restores |
 | --- | --- | --- |
 | Text of a block editor session (several autosaves and the final save) | Plain document edits without undo stops of their own, merged by VS Code | The block as it was before the session |
@@ -60,27 +77,27 @@ When the host writes an edit of the source document for the preview, it SHALL ma
 | Frontmatter save (value save, add, rename, remove) | Exactly one text edit passed to the document | The document to its text before the save |
 | Label rename | Own undo stops in the text editor that shows the document | The document before the rename |
 
-### Scenario (nominal): Cancelled session
+### Scenario S2 (nominal): Cancelled session
 - GIVEN an autosaved block edit that was cancelled
 - WHEN the host restores the original text
 - THEN the restore is itself an ordinary edit
 
-### Scenario (nominal): No visible text editor
+### Scenario S3 (nominal): No visible text editor
 - GIVEN a document shown only in the preview, with no text editor showing it
 - WHEN a move, a cut, a paste or a checkbox toggle is applied
 - THEN the edit is applied as a workspace edit, one undoable step, with no undo stops of its own
 
-### Scenario (nominal): One render after the final save
+### Scenario S4 (nominal): One render after the final save
 - GIVEN a block edit whose autosave changed the document and a final save with the same text
 - WHEN the final save completes
 - THEN the preview is refreshed once, with the pin of the save
 
-### Scenario (boundary): Nothing applied
+### Scenario S5 (boundary): Nothing applied
 - GIVEN a held edit for which no autosave changed the document
 - WHEN its final save carries the original text
 - THEN no render is started
 
-### Scenario (refusal): An edit that VS Code does not apply or rejects
+### Scenario S6 (refusal): An edit that VS Code does not apply or rejects
 | Edit kind | VS Code does not apply the edit | VS Code rejects the edit or a clipboard access fails | Held edit |
 | --- | --- | --- | --- |
 | Block save (autosave or final save) | The editor shows "VS Code could not apply the Markdown edit." and the final request is reset | The editor shows the text of the error | Kept for a new save |
@@ -93,12 +110,12 @@ When the host writes an edit of the source document for the preview, it SHALL ma
 | Reply or delete of an inline thread | Answer ok false with "VS Code could not apply the change." | Answer ok false with the message of the error | None |
 | Frontmatter save | Answer "VS Code could not apply the frontmatter edit." | Answer with the error message text | The document stays unchanged and the editor stays open with the message |
 
-### Scenario (refusal): A block that changed under the host
+### Scenario S7 (refusal): A block that changed under the host
 - GIVEN an autosave to write and a block whose text was changed in the document meanwhile
 - WHEN the host is about to write
 - THEN the editor shows "The source block changed while it was being edited." and the lock is released while the editor stays open
 
-### Scenario (boundary): A block that did not change
+### Scenario S8 (boundary): A block that did not change
 - GIVEN the block still equals the last written text
 - WHEN the host writes
 - THEN the replacement is applied

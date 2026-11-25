@@ -17,7 +17,8 @@ async function render(source: string): Promise<{ html: string; doc: ReturnType<t
 
 const chips = (doc: ReturnType<typeof parseHtml>) => findElements(doc, (e) => hasClass(e, "okf-chip"));
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S2
 test("a block comment renders as a positioned gray chip with a hidden body", async () => {
   const { doc } = await render("Before\n\n<!-- remember this -->\n\nAfter\n");
   const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
@@ -37,7 +38,8 @@ test("a block comment renders as a positioned gray chip with a hidden body", asy
   assert.equal(textContent(body), "remember this");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S2
 test("a multi-line block comment spans its source lines", async () => {
   const { doc } = await render("<!--\nline one\nline two\n-->\n\ntext\n");
   const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
@@ -47,7 +49,8 @@ test("a multi-line block comment spans its source lines", async () => {
   assert.equal(attribute(chips(doc)[0], "title"), "line one\nline two");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S7
 test("an inline comment renders as a chip inside its paragraph", async () => {
   const { doc } = await render("a <!-- inline note --> b\n");
   const paragraph = findElement(doc, (e) => e.tagName === "p");
@@ -72,7 +75,7 @@ test("a TODO comment is a green expandable chip", async () => {
   assert.equal(attribute(chip, "title"), "TODO: finish the chapter");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-139
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-139#S4
 test("a TODO comment is detected in any case, with or without a colon, on one or several lines", async () => {
   const sources = [
     "<!-- TODO -->", "<!-- todo cite the slop zone -->", "<!-- Todo: cite -->", "<!--TODO:cite-->",
@@ -92,7 +95,8 @@ test("a TODO comment is detected in any case, with or without a colon, on one or
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S3
 test("a comment body carries its literal edit-mode tag as data", async () => {
   const tagOf = async (source: string): Promise<string | undefined> => {
     const { doc } = await render(`${source}\n`);
@@ -112,7 +116,7 @@ test("a comment body carries its literal edit-mode tag as data", async () => {
   assert.equal(attribute(body, "data-okf-tag"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-139
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-139#S1
 test("the word TODO in prose becomes a green chip and the rest of the sentence is unchanged", async () => {
   const { doc } = await render("We still TODO this part, TODOs and todo stay plain.\n");
   const found = chips(doc);
@@ -232,7 +236,7 @@ const OKFKB_LIST = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S4
 test("comments before and after a list each render as a real comment chip, never as a `<!--` label", async () => {
   const { doc, html } = await render(OKFKB_LIST);
   const found = chips(doc);
@@ -251,7 +255,8 @@ test("comments before and after a list each render as a real comment chip, never
   assert.equal(findElements(list, (e) => hasClass(e, "okf-comment")).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S8
 test("comments written on one line, one after the other, are separate chips", async () => {
   const { doc, html } = await render("<!-- one --> <!-- TODO two -->\n<!-- markdownlint-disable -->\n\ntext\n");
   const found = chips(doc);
@@ -261,7 +266,8 @@ test("comments written on one line, one after the other, are separate chips", as
   assert.equal(findElements(doc, (e) => hasClass(e, "okf-comment-body")).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133#S6
 test("a list item can hold a comment chip between its items", async () => {
   const { doc } = await render("- one\n<!-- between -->\n- two\n");
   assert.deepEqual(chips(doc).map((chip) => textContent(chip)), ["comment"]);
@@ -269,7 +275,8 @@ test("a list item can hold a comment chip between its items", async () => {
 
 const THREAD = "<!-- THREAD\nAda (2026-10-16 10:47):\n  first line\n  second line\nBob (2026-10-16 10:52):\n  a reply\n-->";
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S5
 test("a THREAD comment is a green thread chip with one entry per message", async () => {
   const { doc } = await render(`Before\n\n${THREAD}\n\nAfter\n`);
   const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
@@ -292,7 +299,7 @@ test("a THREAD comment is a green thread chip with one entry per message", async
   assert.equal(textContent(findElement(messages[1], (e) => hasClass(e, "okf-thread-text"))!), "a reply");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S5
 test("a THREAD comment with CRLF line ends and trailing spaces renders the same", async () => {
   const { doc } = await render(`${THREAD.replace(/\n/gu, "  \r\n")}\r\n`);
   const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
@@ -300,7 +307,8 @@ test("a THREAD comment with CRLF line ends and trailing spaces renders the same"
   assert.equal(findElements(doc, (e) => hasClass(e, "okf-thread-message")).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S5
 test("a single-message thread chip shows only the author", async () => {
   const { doc } = await render("<!-- THREAD\nAda (2026-10-16 10:47):\n  one\n-->\n");
   assert.equal(textContent(chips(doc)[0]), "Ada");

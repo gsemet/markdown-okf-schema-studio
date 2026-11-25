@@ -16,6 +16,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
 - StRS-MDOKFSTUDIO-CORE-001
+scenarios:
+- id: S1
+  title: Inline code pill
+- id: S2
+  title: Inline code in links and tables
+- id: S3
+  title: Link colour of inline code in the forced white and cream themes
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the preview shows inline code, the extension SHALL typeset it as a tinted pill derived from the text colour, compact in table cells and readable with a contrast of at least 4.5:1 in links and in the forced themes.
 
-### Scenario (nominal): Inline code pill
+### Scenario S1 (nominal): Inline code pill
 - GIVEN inline code in a paragraph
 - WHEN it is shown
 - THEN it has a tint and a hairline derived from the text colour, a 4 px radius and a size of 0.875em, scaled inside headings
 - AND inline code that wraps over two lines is padded on each line and the line height is unchanged
 
-### Scenario (boundary): Inline code in links and tables
+### Scenario S2 (boundary): Inline code in links and tables
 | Input | Outcome |
 | --- | --- |
 | inline code inside a link | the link colour |
@@ -46,7 +53,7 @@ When the preview shows inline code, the extension SHALL typeset it as a tinted p
 | a short identifier in inline code in a sideways-scrolling table | stays on one line, not split |
 | inline code in a table cell | compact padding |
 
-### Scenario (boundary): Link colour of inline code in the forced white and cream themes
+### Scenario S3 (boundary): Link colour of inline code in the forced white and cream themes
 | Input | Outcome |
 | --- | --- |
 | properties fixture forced to Cream (visual scenario theme-zoom/v05), inline code after the properties table | text is rgb(161, 78, 50) |

@@ -303,7 +303,7 @@ function pasted(text: string, typed: string, row: Row): string {
 
 for (const [name, eol] of EOLS) {
   for (const row of ROWS) {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
     test(`${name}: a block typed or pasted in ${row.name} is written at the container indent and rendered inside it`, async () => {
       const text = eolOf(eol, row.text);
       const expected = eolOf(eol, row.written);
@@ -319,7 +319,8 @@ for (const [name, eol] of EOLS) {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a plain run at the top level, with no container line, is written as before", () => {
   const text = "a\n\n\nb\n";
   const run = onlyRun(text);

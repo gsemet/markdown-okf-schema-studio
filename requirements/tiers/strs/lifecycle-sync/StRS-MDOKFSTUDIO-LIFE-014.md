@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: A reload brings the preview back
+- id: S2
+  title: A view choice is remembered
 user_need: "As a reader, I reload the window and my previews come back on the same
   documents, at the same place, with their open sections. I return to a document and
   find it at its own place, with its own Description choice. The view choices I made
@@ -66,14 +71,14 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: A reload brings the preview back
+#### Path S1: A reload brings the preview back
 
 1. A preview was open when VS Code restored its panel
    - SwRS-MDOKFSTUDIO-LIFE-127: the panel opens the file its saved state names, at the saved reading position and open sections
    - Option SwRS-MDOKFSTUDIO-LIFE-127 (refusal): a saved state that cannot be restored shows Preview source missing with the reason
 2. The panel shows the file at its saved place
 
-#### Path 2: A view choice is remembered
+#### Path S2: A view choice is remembered
 
 1. The reader changes a view choice on the page
    - SwRS-MDOKFSTUDIO-LIFE-169: the page keeps it in its saved state and the host stores it for the workspace

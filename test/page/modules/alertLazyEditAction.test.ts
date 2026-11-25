@@ -28,8 +28,7 @@ function applyTo(
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
-// @tests_req StRS-MDOKFSTUDIO-PALETTE-020
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S3
 test("alert: a caret on a lazy line is in the alert above it", () => {
   const value = "> [!TIP]\n> first\nSecond";
   const caret = value.indexOf("Second") + 2;
@@ -39,7 +38,8 @@ test("alert: a caret on a lazy line is in the alert above it", () => {
   assert.deepEqual(out.selection, [caret + 4, caret + 4], "the caret follows its text");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S3
 test("alert: quoted lines after lazy lines stay in the same alert", () => {
   const value = "> [!TIP]\n> first\nSecond\n> third";
   const caret = value.indexOf("third") + 1;
@@ -47,7 +47,7 @@ test("alert: quoted lines after lazy lines stay in the same alert", () => {
   assert.equal(applyTo("alert", value, [caret, caret], "CAUTION")!.value, "> [!CAUTION]\n> first\nSecond\n> third");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S3
 test("alert: an alert the caret is not in keeps its head", () => {
   const value = "> [!TIP]\n> first\n\nSecond";
   const caret = value.length;
@@ -58,7 +58,8 @@ test("alert: an alert the caret is not in keeps its head", () => {
     "> [!TIP]\n> first\n\n> [!WARNING]\n> - item");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S3
 test("alert: a new alert under a quoted or lazy line starts after a blank line", () => {
   const value = "> quote\nSecond";
   const caret = value.indexOf("Second") + 3;
@@ -78,7 +79,8 @@ test("alert: a new alert under a quoted or lazy line starts after a blank line",
     "a plain paragraph above needs no blank line");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S3
 test("alert: a list item of any number after a quoted line is out of the alert", () => {
   for (const item of ["2. x", "+ b", "1) b"]) {
     const value = `> [!TIP]\n> a\n${item}`;
@@ -87,7 +89,8 @@ test("alert: a list item of any number after a quoted line is out of the alert",
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S3
 test("alert: the line after a table in the alert is out of it", () => {
   const value = "> [!TIP]\n> | a | b |\n> | - | - |\nfoo";
   const caret = value.length;
@@ -99,14 +102,16 @@ test("alert: the line after a table in the alert is out of it", () => {
     "a lazy delimiter row is text of the alert");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S3
 test("alert: a closed HTML comment in the alert leaves the next paragraph's lazy line in it", () => {
   const value = "> [!TIP]\n> <!-- c -->\n> text\nlazy";
   const caret = value.length;
   assert.equal(applyTo("alert", value, [caret, caret], "WARNING")!.value, "> [!WARNING]\n> <!-- c -->\n> text\nlazy");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115#S3
 test("alert: an alert head inside fenced code is not an alert", () => {
   for (const body of ["foo", "> foo"]) {
     const value = "```\n> [!NOTE]\n" + body + "\n```";

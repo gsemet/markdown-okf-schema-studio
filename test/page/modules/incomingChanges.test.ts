@@ -51,7 +51,8 @@ function setup() {
   return { root, main, marks, block, marked };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S2
 test("T16: the innermost mapped elements that meet a changed range are marked", () => {
   const { main, marks, block, marked } = setup();
   const list = block(main, 1, 6);
@@ -99,7 +100,8 @@ test("T16: elements in or under an open editor are skipped", () => {
   assert.deepEqual(marked(), [plain]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S7
 test("T16: malformed ranges are ignored and enabled is reported", () => {
   const { main, marks, block, marked } = setup();
   block(main, 1);
@@ -185,7 +187,8 @@ test("T16: one bar per marked block in a layer, at the block's top and height, n
   assert.deepEqual(bars.map((bar) => bar.hidden), [true, true, true]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215#S3
 test("CR 155: a properties table row is marked by the lines of its field, not the table around it", () => {
   const { main, marks, marked } = setup();
   const table = main.append(new FakeElement("section", { "data-line": "1" }));
@@ -198,7 +201,7 @@ test("CR 155: a properties table row is marked by the lines of its field, not th
   assert.equal(table.hasAttribute("data-sphinx-preview-changed"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215#S3
 test("CR 155: a range on line 1 with no row marked marks the whole properties table", () => {
   const { main, marks, marked } = setup();
   const table = main.append(new FakeElement("section", { "data-line": "1" }));
@@ -207,7 +210,7 @@ test("CR 155: a range on line 1 with no row marked marks the whole properties ta
   assert.deepEqual(marked(), [table]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-220
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-220#S2
 test("CR 463: each bar carries the changed lines of its block as its tooltip", () => {
   class Box extends FakeElement {
     style = { setProperty() {} };
@@ -238,14 +241,14 @@ test("CR 463: each bar carries the changed lines of its block as its tooltip", (
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-220
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-220#S2
 test("CR 463: changedLinesLabel uses the singular for one line and an en dash for a range", () => {
   assert.equal(changedLinesLabel([{ start: 5, end: 5 }], 1, 9), "Changed line 5 since last commit");
   assert.equal(changedLinesLabel([{ start: 12, end: 14 }], 12, 14), "Changed lines 12\u201314 since last commit");
   assert.equal(changedLinesLabel([{ start: 1, end: 3 }, { start: 8, end: 9 }], 2, 8), "Changed lines 2\u20138 since last commit");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221#S1
 test("CR 463: removedLinesLabel names the lines at the last commit, singular for one, with an en dash for a run", () => {
   assert.equal(removedLinesLabel({ baseStart: 12, baseEnd: 12, start: 12 }), "Removed line 12 since last commit");
   assert.equal(removedLinesLabel({ baseStart: 12, baseEnd: 14, start: 12 }), "Removed lines 12–14 since last commit");
@@ -274,7 +277,7 @@ function pageWithLayer(onActivate: (target: ChangeTarget) => void) {
   return { html, marks, layer, first, second };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221#S1
 test("CR 463: a removal between two blocks gets a marker above the next block with the removed lines as tooltip", () => {
   const page = pageWithLayer(() => undefined);
   page.marks.setRanges([{ start: 1, end: 1 }], [{ baseStart: 3, baseEnd: 4, start: 5 }]);
@@ -296,7 +299,8 @@ test("CR 463: a removal between two blocks gets a marker above the next block wi
   assert.equal(end.getAttribute("data-tooltip"), "Removed line 9 since last commit");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S3
 test("CR 463: a click on a bar or a marker passes its target on, except in edit mode", () => {
   const clicked: ChangeTarget[] = [];
   const page = pageWithLayer((target) => clicked.push(target));

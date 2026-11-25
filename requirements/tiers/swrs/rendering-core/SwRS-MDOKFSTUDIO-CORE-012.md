@@ -18,6 +18,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-CORE-002
 - StRS-MDOKFSTUDIO-CORE-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Expand an include in place
+- id: S2
+  title: The class option expands and a missing file stays a placeholder
+- id: S3
+  title: Keep unsupported include forms as placeholders
+- id: S4
+  title: Map included blocks to the include directive
+- id: S5
+  title: Nested includes carry the outer directive line
+- id: S6
+  title: Read a repeated include once per render
+- id: S7
+  title: Expand alerts in included files and context tags
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,19 +58,19 @@ supersedes:
 
 When a trusted document holds an `{include}` directive for a Markdown file inside its folder or the workspace root, the extension SHALL render that file's content in place of the directive, map every included block to the lines of the directive and leave an unsupported include form as an unresolved placeholder.
 
-### Scenario (nominal): Expand an include in place
+### Scenario S1 (nominal): Expand an include in place
 
 - GIVEN a directive including `part.md` that starts with frontmatter
 - WHEN it is rendered
 - THEN the content of `part.md` appears at the directive position without its frontmatter
 
-### Scenario (boundary): The class option expands and a missing file stays a placeholder
+### Scenario S2 (boundary): The class option expands and a missing file stays a placeholder
 
 - GIVEN an include with the `:class:` option, and another naming a missing file
 - WHEN it is rendered
 - THEN the first still expands and the second stays in place as a placeholder
 
-### Scenario (refusal): Keep unsupported include forms as placeholders
+### Scenario S3 (refusal): Keep unsupported include forms as placeholders
 
 | Input | Outcome |
 | --- | --- |
@@ -65,25 +80,25 @@ When a trusted document holds an `{include}` directive for a Markdown file insid
 | an `{include}` with only `:class:` | the file is expanded |
 | a plain include or an include with `:label:` | the file is expanded |
 
-### Scenario (nominal): Map included blocks to the include directive
+### Scenario S4 (nominal): Map included blocks to the include directive
 
 - GIVEN an include on line 7 of the host document
 - WHEN it is rendered
 - THEN every block of the included file carries line 7 and the included mark
 
-### Scenario (boundary): Nested includes carry the outer directive line
+### Scenario S5 (boundary): Nested includes carry the outer directive line
 
 - GIVEN an included file that includes another file
 - WHEN it is rendered
 - THEN blocks of the inner file carry the outer directive line and the included mark
 
-### Scenario (nominal): Read a repeated include once per render
+### Scenario S6 (nominal): Read a repeated include once per render
 
 - GIVEN a file included three times, by directives on different lines
 - WHEN it is rendered
 - THEN the file is read once and each copy maps to its own directive line
 
-### Scenario (nominal): Expand alerts in included files and context tags
+### Scenario S7 (nominal): Expand alerts in included files and context tags
 
 | Input | Outcome |
 | --- | --- |

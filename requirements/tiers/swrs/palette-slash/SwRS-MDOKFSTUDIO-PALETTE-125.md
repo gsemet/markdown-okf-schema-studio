@@ -16,6 +16,11 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-020
 depends_on: []
+scenarios:
+- id: S1
+  title: Next number
+- id: S2
+  title: Named labels
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Footnote, the extension SHALL add `[^n]` after the selection and an empty definition `[^n]:` at the end of the text, after the definitions already there, with the caret in it, where n is one more than the highest numeric label in use.
 
-### Scenario (nominal): Next number
+### Scenario S1 (nominal): Next number
 
 - GIVEN a text that uses the labels [^1] and [^2]
 - WHEN Footnote is pressed
 - THEN the mark `[^3]` and the definition line `[^3]:` are added and the caret is after the definition marker
 
-### Scenario (boundary): Named labels
+### Scenario S2 (boundary): Named labels
 
 - GIVEN a text with only named labels
 - WHEN Footnote is pressed

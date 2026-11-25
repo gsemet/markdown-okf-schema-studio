@@ -36,7 +36,7 @@ async function typeAndPatch(host: HostSession, text: string): Promise<Record<str
   return host.postedSince(from, "previewContentPatch")[0]!;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S4
 test("edits inside the 40 ms render debounce reach the page once, as the last text", async (t) => {
   const host = await readyPreview(t);
   const from = host.posted.length;
@@ -62,7 +62,8 @@ test("edits inside the 40 ms render debounce reach the page once, as the last te
   assert.equal(host.assignments.length, assignments, "a ready page is patched, not reloaded");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049#S4
 test("a render pending for 1500 ms over a ready page shows the overlay, hidden again before the patch", async (t) => {
   const host = await readyPreview(t);
   const from = host.posted.length;
@@ -92,7 +93,8 @@ test("a render that finishes before 1500 ms never shows the overlay", async (t) 
   assert.deepEqual(host.postedSince(from, "previewPendingOverlay"), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-071
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-071#S5
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-071#S6
 test("a patched page that does not report ready within 2000 ms gets the full document", async (t) => {
   const host = await readyPreview(t);
   const assignments = host.assignments.length;
@@ -157,8 +159,10 @@ test("a page reloaded by the webview after patches gets the current document aga
   assert.match(host.assignments.at(-1)!, /First paragraph patched\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S10
 test("renders wait while the page has an inline editor open, and the newest one arrives on its close", async (t) => {
   const host = await readyPreview(t);
   const loaded = host.loadedIdentity();
@@ -206,8 +210,9 @@ test("a close of another editor id releases nothing", async (t) => {
   assert.deepEqual(host.postedSince(from, "previewContentPatch"), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032#S7
 test("Refresh Preview brings the render to the page even over an open inline editor", async (t) => {
   const host = await readyPreview(t);
   const loaded = host.loadedIdentity();
@@ -230,7 +235,7 @@ test("Refresh Preview brings the render to the page even over an open inline edi
   assert.deepEqual(host.postedSince(afterRefresh, "previewContentPatch"), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-143
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143#S1
 test("a preview disposed while its render is debouncing, building or awaiting a patch acknowledgement stays silent", async (t) => {
   for (const moment of ["debouncing", "building", "awaiting acknowledgement"] as const) {
     const host = await openPreview(t.mock.timers, MARKDOWN);
@@ -280,7 +285,7 @@ async function renderFrom(host: HostSession, from: number): Promise<Array<Record
   return host.postedSince(from, "previewContentPatch");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S1
 test("an undo inside the table of an open cell editor reaches the page at once", async (t) => {
   const host = await tablePreview(t);
   const from = host.posted.length;
@@ -292,7 +297,7 @@ test("an undo inside the table of an open cell editor reaches the page at once",
   assert.equal(host.postedSince(from, "previewEditorWatch").length, 0, "nothing waits for the editor to close");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S1
 test("a revert-like change that is neither an undo nor typed also reaches an open cell editor's table", async (t) => {
   const host = await tablePreview(t);
   const from = host.posted.length;
@@ -304,8 +309,9 @@ test("a revert-like change that is neither an undo nor typed also reaches an ope
   assert.match(String(patches[0]!.contentHtml), /restored/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S9
 test("an undo inside the table releases a held host edit without writing and renders", async (t) => {
   const host = await tablePreview(t);
   const loaded = host.loadedIdentity();
@@ -334,7 +340,7 @@ test("an undo inside the table releases a held host edit without writing and ren
   assert.doesNotMatch(String(patches.at(-1)!.contentHtml), /alpha Y/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S8
 test("a change outside the table of an open cell editor still waits for it, and follows the table", async (t) => {
   const host = await tablePreview(t);
   const from = host.posted.length;
@@ -351,8 +357,10 @@ test("a change outside the table of an open cell editor still waits for it, and 
   assert.match(String(patches[0]!.contentHtml), /Part two/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S8
 test("the first character typed in the source table, before any keystroke is seen, keeps the render waiting", async (t) => {
   const host = await tablePreview(t);
   const from = host.posted.length;
@@ -363,7 +371,7 @@ test("the first character typed in the source table, before any keystroke is see
   assert.equal(host.postedSince(from, "previewEditorWatch").length, 1, "the editor is still waited for");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S2
 test("text typed in the source table keeps the render waiting", async (t) => {
   const host = await tablePreview(t);
   const from = host.posted.length;
@@ -373,7 +381,8 @@ test("text typed in the source table keeps the render waiting", async (t) => {
   assert.deepEqual(await renderFrom(host, from), [], "typing in the source does not close the cell editor");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S8
 test("an undo over the block of a prose editor keeps the render waiting (not a cell editor)", async (t) => {
   const host = await tablePreview(t);
   const from = host.posted.length;

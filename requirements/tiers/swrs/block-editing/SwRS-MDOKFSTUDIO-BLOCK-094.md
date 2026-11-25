@@ -18,6 +18,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Between blocks
+- id: S2
+  title: Blocks and the end of the document
+- id: S3
+  title: The first block (after line 0)
+- id: S4
+  title: Line endings
+- id: S5
+  title: A whitespace-only new block
+- id: S6
+  title: Trailing line breaks are dropped
+- id: S7
+  title: An anchor line that is blank
+- id: S8
+  title: A line that does not exist
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,19 +52,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the host writes a new block after a line, it SHALL put one blank line before it and one blank line after it (none after it at the end of the document), in the line endings of the document, (one blank line before it when the line it follows is already blank), drop the leading blank lines of the text, and write nothing for an empty or whitespace-only text or for a line that is not in the document.
 
-### Scenario (nominal): Between blocks
+### Scenario S1 (nominal): Between blocks
 - GIVEN a document with two blocks separated by a blank line and a new block inserted after the first
 - WHEN the host plans the insertion
 - THEN the new text goes at the end of the first block's last line, preceded by a blank line and followed by the existing blank line
 
-### Scenario (boundary): Blocks and the end of the document
+### Scenario S2 (boundary): Blocks and the end of the document
 | Input | Outcome |
 | --- | --- |
 | A block directly followed by a non-blank line, a block inserted after it | A line break is added after the new block so that the next block is not glued to it |
 | A document ending with a figure fence and a final line break, a block inserted after the closing fence | The new block follows the closing fence after one blank line, with no separator after it |
 | A document that ends with an image line and no final line break, a block inserted after that line | The new block follows after one blank line, with no separator after it |
 
-### Scenario (boundary): The first block (after line 0)
+### Scenario S3 (boundary): The first block (after line 0)
 | Input | Outcome |
 | --- | --- |
 | A document that starts with frontmatter | The new text follows the closing fence and the frontmatter text is unchanged |
@@ -55,20 +72,20 @@ When the host writes a new block after a line, it SHALL put one blank line befor
 | An empty document | The document holds the new block followed by one line break |
 | A document that starts with a heading and has no frontmatter | The new block comes first, followed by a blank line and then the heading |
 
-### Scenario (boundary): Line endings
+### Scenario S4 (boundary): Line endings
 | Input | Outcome |
 | --- | --- |
 | A document with CR LF line breaks, a block of two lines inserted | Every line break of the inserted text is CR LF |
 | A document with LF line breaks only, a block inserted | Every line break of the inserted text is LF |
 | A document whose lines end with a lone CR, a block of two lines inserted after line 1 or after a later line | The block goes at the end of that line and every line break of the inserted text is CR; a line after the last CR is refused as missing |
 
-### Scenario (refusal): A whitespace-only new block
+### Scenario S5 (refusal): A whitespace-only new block
 | Input | Outcome |
 | --- | --- |
 | An insertion editor whose text is `  \n`, the final save arrives | The document is unchanged and the edit ends |
 | An insertion editor whose text is `Hello`, the final save arrives | The block is inserted |
 
-### Scenario (boundary): Trailing line breaks are dropped
+### Scenario S6 (boundary): Trailing line breaks are dropped
 | Input | Outcome |
 | --- | --- |
 | A new block typed as `Hello\n\n` | The document holds `Hello` followed by the planned separator only |
@@ -76,13 +93,13 @@ When the host writes a new block after a line, it SHALL put one blank line befor
 | A new block typed as `\n\nHello` (leading blank lines), in LF, CR LF or lone CR | The leading blank lines are dropped and the block starts right after the separator |
 | A new block typed as `  Hello` | The indentation of the first non-blank line is kept |
 
-### Scenario (boundary): An anchor line that is blank
+### Scenario S7 (boundary): An anchor line that is blank
 | Input | Outcome |
 | --- | --- |
 | `- a`, a blank line and `Para`, a block inserted after line 2 (the blank line) | The document is `- a`, a blank line, `New`, a blank line, `Para`: one separator before the block, not two |
 | A block inserted after a non-blank line | The prefix stays two line endings |
 
-### Scenario (refusal): A line that does not exist
+### Scenario S8 (refusal): A line that does not exist
 | Input | Outcome |
 | --- | --- |
 | A previewEditOpen with insertAfterLine beyond the last line | The host registers no editor and the editor shows "The preview is stale. Refresh it before editing this block." |

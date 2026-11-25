@@ -17,6 +17,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: ArrowUp from the first visual line
+- id: S2
+  title: ArrowDown from the last visual line
+- id: S3
+  title: Caret position decides
+- id: S4
+  title: Modifiers or a selection
+- id: S5
+  title: First block, last block and the properties table
+- id: S6
+  title: Items of a list and inner blocks
+- id: S7
+  title: The block to open next is remembered in the webview state
+- id: S8
+  title: Page replaced before the save is rendered
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,17 +57,17 @@ supersedes:
 
 When a writer presses an arrow key with the caret at an edge of the text box of an open block editor, the page SHALL leave the editor, saving a changed text, and open the editor of the previous or next body block with the caret at its end or at its start, and otherwise leave the key to the text box.
 
-### Scenario (nominal): ArrowUp from the first visual line
+### Scenario S1 (nominal): ArrowUp from the first visual line
 - GIVEN an editor on the second of three paragraphs with the caret on its first visual line
 - WHEN the writer presses ArrowUp
 - THEN when the text changed the final save is posted first, and the editor of the first paragraph opens with the caret at its end once the page is patched (at once when nothing changed)
 
-### Scenario (nominal): ArrowDown from the last visual line
+### Scenario S2 (nominal): ArrowDown from the last visual line
 - GIVEN an editor on the first of three paragraphs with the caret on its last visual line
 - WHEN the writer presses ArrowDown
 - THEN when the text changed the final save is posted first, and the editor of the second paragraph opens with the caret at its start once the page is patched (at once when nothing changed)
 
-### Scenario (boundary): Caret position decides
+### Scenario S3 (boundary): Caret position decides
 | Input | Outcome |
 | --- | --- |
 | A long paragraph that wraps over four visual lines, the caret on the third, ArrowUp | The caret moves up one visual line and the editor stays |
@@ -58,14 +75,14 @@ When a writer presses an arrow key with the caret at an edge of the text box of 
 | The caret at offset 0, ArrowLeft | The editor of the previous block opens with the caret at its end |
 | The caret at the end of the text, ArrowRight | The editor of the next block opens with the caret at its start |
 
-### Scenario (refusal): Modifiers or a selection
+### Scenario S4 (refusal): Modifiers or a selection
 | Input | Outcome |
 | --- | --- |
 | The caret on the first visual line, Shift+ArrowUp | The selection extends and the editor stays open |
 | An arrow key with Shift, Ctrl, Cmd or Alt held | The page does not leave the text box |
 | A selected word, ArrowLeft | The text box collapses the selection natively |
 
-### Scenario (boundary): First block, last block and the properties table
+### Scenario S5 (boundary): First block, last block and the properties table
 | Input | Outcome |
 | --- | --- |
 | The editor of the first body block with the caret on its first visual line, ArrowUp | The editor stays open |
@@ -73,7 +90,7 @@ When a writer presses an arrow key with the caret at an edge of the text box of 
 | The editor of the first body block under a properties table (a document with frontmatter), ArrowUp on its first line | The properties table is stepped over, no editor opens on it and the editor stays open |
 | The editor of a block between two body blocks, ArrowUp | The previous body block opens |
 
-### Scenario (nominal): Items of a list and inner blocks
+### Scenario S6 (nominal): Items of a list and inner blocks
 
 | Input | Outcome |
 | --- | --- |
@@ -82,12 +99,12 @@ When a writer presses an arrow key with the caret at an edge of the text box of 
 | ArrowDown at the end of the editor of a block inside a list item (opened from the keyboard, SwRS-MDOKFSTUDIO-BLOCK-254) | The editor of the next item of that list opens; past the last item, the next top-level block opens |
 | ArrowUp or ArrowDown at the edge of the editor of an inner block of an admonition or of another container that is not a list item | The key stays with the text box and the editor stays open |
 
-### Scenario (nominal): The block to open next is remembered in the webview state
+### Scenario S7 (nominal): The block to open next is remembered in the webview state
 - GIVEN an arrow navigation whose save is in flight
 - WHEN the page state is read
 - THEN pendingBlockNavigation holds the block id, source line and caret position (and the table cell if any) until that editor is opened
 
-### Scenario (boundary): Page replaced before the save is rendered
+### Scenario S8 (boundary): Page replaced before the save is rendered
 - GIVEN the page replaced before the save is rendered
 - WHEN the new page starts and receives its content
 - THEN the editor of the remembered block opens and the entry is cleared

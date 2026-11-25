@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-003
+scenarios:
+- id: S1
+  title: Palette pairs
+- id: S2
+  title: Cream page under a dark host theme
+- id: S3
+  title: No dimming
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,19 +41,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a review comment thread is shown in the preview in the Dark, White or Cream theme mode, the extension SHALL draw its author, date, text, placeholder and button text with a contrast of at least 4.5 to 1 on their surface, without dimming text through opacity.
 
-### Scenario (nominal): Palette pairs
+### Scenario S1 (nominal): Palette pairs
 
 - GIVEN the Dark, White and Cream palettes of the preview
 - WHEN the comment text colours (widget foreground, description, editor foreground, input foreground, button and secondary button text, thread green) are compared with their surfaces
 - THEN every pair reaches 4.5 to 1
 
-### Scenario (boundary): Cream page under a dark host theme
+### Scenario S2 (boundary): Cream page under a dark host theme
 
 - GIVEN the Cream mode forced while the VS Code theme is dark
 - WHEN a comment popover is opened
 - THEN its text uses the palette's own widget foreground, never the host's, so it stays dark on the cream surface
 
-### Scenario (boundary): No dimming
+### Scenario S3 (boundary): No dimming
 
 - GIVEN the comment popover, the compose box, the orphaned comments box and the thread panel
 - WHEN their stylesheet rules are read

@@ -20,6 +20,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-018
+scenarios:
+- id: S1
+  title: The baseline follows the shown text
+- id: S2
+  title: No baseline
+- id: S3
+  title: A well-formed switch message
+- id: S4
+  title: Dropped switch messages
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,7 +52,7 @@ supersedes:
 
 While the side-by-side diff is on for a tracked file in a trusted workspace and markdownOkfSchemaStudio.preview.showIncomingChanges is not false, the host SHALL post to the page the text at the last commit rendered like the page content with its blocks numbered by the lines of that text, together with the line hunks between that text and the shown text, again when the shown text or the commit changes, and SHALL post an empty baseline when the file is not known to Git or the text at the last commit cannot be rendered; the switch message previewSideBySideChanged is accepted only with a boolean on field for the current render, and any other is dropped.
 
-### Scenario (nominal): The baseline follows the shown text
+### Scenario S1 (nominal): The baseline follows the shown text
 
 | Input | Outcome |
 | --- | --- |
@@ -53,7 +62,7 @@ While the side-by-side diff is on for a tracked file in a trusted workspace and 
 | The Diff button off | the baseline is still posted |
 | The diff switched off | nothing more is read, rendered or posted |
 
-### Scenario (boundary): No baseline
+### Scenario S2 (boundary): No baseline
 
 | Input | Outcome |
 | --- | --- |
@@ -61,13 +70,13 @@ While the side-by-side diff is on for a tracked file in a trusted workspace and 
 | A HEAD text that cannot be rendered, or whose content would carry a script or a nonce | an empty baseline, so the page keeps the green bars |
 | markdownOkfSchemaStudio.preview.showIncomingChanges off, or an untrusted workspace | nothing is read or posted |
 | Raw scripts in the HEAD text | never part of the posted html |
-### Scenario (nominal): A well-formed switch message
+### Scenario S3 (nominal): A well-formed switch message
 
 | Input | Outcome |
 | --- | --- |
 | previewSideBySideChanged with on true or false for the current render | accepted |
 
-### Scenario (refusal): Dropped switch messages
+### Scenario S4 (refusal): Dropped switch messages
 
 | Input | Outcome |
 | --- | --- |

@@ -87,7 +87,7 @@ function fixture(options: { restrictedReads?: boolean; reject?: boolean; readOnl
   return { document, applyCalls, reads, send, results };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 test("dropped files are written as relative links and images after the line, titled by the first heading", async () => {
   const drop = fixture();
   await drop.send(["file:///w/notes/The%20Guide.md", "file:///w/img/logo.png", "file:///w/notes/plain.md"]);
@@ -99,7 +99,7 @@ test("dropped files are written as relative links and images after the line, tit
   assert.equal(drop.applyCalls.length, 1, "one undo step");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 test("files outside the workspace, other addresses and unreadable files are handled without touching the source", async () => {
   const outside = fixture();
   await outside.send(["file:///outside/other.md", "https://example.com/a.md"]);
@@ -115,7 +115,7 @@ test("files outside the workspace, other addresses and unreadable files are hand
   assert.equal(mixed.document.getText().includes("other"), false, "the outside file is skipped");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S3
 test("a restricted-reads preview takes a drop, and a line past the end of the document refuses it", async () => {
   const restricted = fixture({ restrictedReads: true });
   await restricted.send(["file:///w/img/logo.png"]);

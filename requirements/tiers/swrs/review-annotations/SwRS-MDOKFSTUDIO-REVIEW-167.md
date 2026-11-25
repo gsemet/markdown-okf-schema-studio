@@ -17,6 +17,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-015
 depends_on: []
+scenarios:
+- id: S1
+  title: Chip label
+- id: S2
+  title: Open thread lists one entry for each message
+- id: S3
+  title: A message is a header line followed by indented text
+- id: S4
+  title: Indentation and blank lines
+- id: S5
+  title: A THREAD comment that is not a thread
+- id: S6
+  title: A thread inside a tab item keeps its own source lines
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,29 +52,29 @@ default_owner_email: gaetan@xeberon.net
 
 When a document holds a `<!-- THREAD` comment as its own block, the renderer SHALL write a green chip with a speech bubble, labelled with the author of the first message and, with several messages, followed by their number in parentheses, whose box lists each message with its author, date and text, and write any other THREAD comment as an ordinary comment chip.
 
-### Scenario (nominal): Chip label
+### Scenario S1 (nominal): Chip label
 | Thread | Chip |
 | --- | --- |
 | Two messages, the first by User 1 | The chip reads "User 1 (2)"; its wrapper has the kind thread and the count 2 |
 | One message by Ada | The chip reads Ada |
 
-### Scenario (nominal): Open thread lists one entry for each message
+### Scenario S2 (nominal): Open thread lists one entry for each message
 - GIVEN a thread of two messages
 - WHEN the chip is opened
 - THEN a box titled Thread shows two entries with author, date and text, and the text keeps its line breaks; the same thread written with CRLF line ends and trailing spaces gives the same entries
 
-### Scenario (nominal): A message is a header line followed by indented text
+### Scenario S3 (nominal): A message is a header line followed by indented text
 - GIVEN a thread with the headers "User 1 (2026-10-16 10:47):" and "User 2 (2026-10-16 10:52):", the first text spanning two lines
 - WHEN the body is read
 - THEN two messages are returned with author, date and text; each line after a header up to the next header loses one indentation of up to two spaces or a tab, and blank lines inside a message are kept
 
-### Scenario (boundary): Indentation and blank lines
+### Scenario S4 (boundary): Indentation and blank lines
 | Input | Outcome |
 | --- | --- |
 | A message indented with a tab and holding a blank line | The text is "first\n\nsecond" |
 | A line that is not indented | The line is kept as text |
 
-### Scenario (refusal): A THREAD comment that is not a thread
+### Scenario S5 (refusal): A THREAD comment that is not a thread
 | Input | Outcome |
 | --- | --- |
 | The comments "THREADS", "TODO THREAD", "THREAD" alone | None is a thread; THREADS and THREAD alone are ordinary comment chips, TODO THREAD is a TODO chip |
@@ -69,7 +82,7 @@ When a document holds a `<!-- THREAD` comment as its own block, the renderer SHA
 | A header dated 2026-1-2 3:04 (another date format) | Not a thread |
 | A THREAD comment inside a paragraph | A gray comment chip |
 
-### Scenario (boundary): A thread inside a tab item keeps its own source lines
+### Scenario S6 (boundary): A thread inside a tab item keeps its own source lines
 
 - GIVEN a tab item that holds an inline thread comment from line 7 to line 12
 - WHEN the document is rendered

@@ -13,9 +13,11 @@ export const EXPORT_HTML_SCENARIOS: ScenarioDefinition[] = ([
   { name: "cream", theme: "light", mode: "cream", number: 42 },
   { name: "dark", theme: "dark", mode: undefined, number: 43 },
 ] as const).map((variant) => ({
-  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
-  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
-  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S1
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S2
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S2
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S2
   // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091#S1
   id: `toolbar-navigation/v${variant.number}-export-html-${variant.name}-900`,
   fixture: "87-export-html",
@@ -32,7 +34,7 @@ export const EXPORT_HTML_SCENARIOS: ScenarioDefinition[] = ([
 
 export const EXPORT_EDITED_CELL_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
     id: "toolbar-navigation/v44-export-html-edited-cell-light-900",
     fixture: "88-export-edited-cell",
     theme: "light",

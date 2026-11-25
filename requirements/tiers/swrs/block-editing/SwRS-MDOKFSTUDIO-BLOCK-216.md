@@ -19,6 +19,29 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Requests that match the document are accepted
+- id: S2
+  title: The host refuses what no longer fits the document
+- id: S3
+  title: A refused open leaves the frame without a text box
+- id: S4
+  title: The writer leaves a refused open
+- id: S5
+  title: The answer of another editor
+- id: S6
+  title: A refused save keeps the typed text
+- id: S7
+  title: Typing again saves again
+- id: S8
+  title: A save that fails after Cancel, or meets a change of the file, reopens
+    the editor with the typed text and the reason
+- id: S9
+  title: A change of the file while the editor saves keeps the editor open with
+    the typed text and the reason
+- id: S10
+  title: A failure the preview cannot show offers the text to copy
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,14 +71,14 @@ default_owner_email: gaetan@xeberon.net
 
 When the host refuses to open a block editor or to save its text, the extension SHALL change nothing in the document, answer the page with the reason of the refusal, and let the page show that reason while it keeps the text the writer typed.
 
-### Scenario (nominal): Requests that match the document are accepted
+### Scenario S1 (nominal): Requests that match the document are accepted
 | Input | Outcome |
 | --- | --- |
 | A previewEditOpen for the rendered revision of a document that has not changed | The block's source is sent |
 | A first save whose originalText equals the block in the document | The edit is held and written |
 | A first save for existing lines | The edit is held |
 
-### Scenario (refusal): The host refuses what no longer fits the document
+### Scenario S2 (refusal): The host refuses what no longer fits the document
 | Input | Outcome |
 | --- | --- |
 | previewEditOpen when the lines no longer exist in the document, or the document was edited after the last render | The answer carries "The preview is stale. Refresh it before editing this block." and no page editor is registered |
@@ -65,46 +88,46 @@ When the host refuses to open a block editor or to save its text, the extension 
 | A previewEditOpen that names an older render than the host holds | The answer carries "The preview is out of date. Try again once it has refreshed." and no page editor is registered; the frame of the editor shows the reason |
 | A previewEditCancel with another editId, document, range, original text or revision than the held edit | The answer carries "The preview block edit is stale. Reopen the block before cancelling." and nothing changes |
 
-### Scenario (refusal): A refused open leaves the frame without a text box
+### Scenario S3 (refusal): A refused open leaves the frame without a text box
 - GIVEN an editor frame that shows "Loading Markdown source…" and a previewEditSource answer with the error "Another Markdown block is already being edited."
 - WHEN it reaches the open frame
 - THEN the frame has no text box and its status line, which is in the frame from the start, holds the message
 - The frame gets a Close button, the Refresh button is enabled again, and the frame is the open editor only until the writer leaves it
 
-### Scenario (nominal): The writer leaves a refused open
+### Scenario S4 (nominal): The writer leaves a refused open
 - GIVEN the frame of a refused open
 - WHEN the writer presses Escape, clicks Close, clicks Refresh or clicks another block
 - THEN the frame closes without posting a cancel, and a click on another block opens that block
 
-### Scenario (boundary): The answer of another editor
+### Scenario S5 (boundary): The answer of another editor
 - GIVEN an answer whose editId is not the open editor's
 - WHEN it arrives
 - THEN it is ignored
 
-### Scenario (refusal): A refused save keeps the typed text
+### Scenario S6 (refusal): A refused save keeps the typed text
 - GIVEN an editor whose final save was refused
 - WHEN the error arrives
 - THEN the text box keeps the text, the status line shows the error and the editor is no longer finishing
 
-### Scenario (nominal): Typing again saves again
+### Scenario S7 (nominal): Typing again saves again
 - GIVEN the same editor after a refused save
 - WHEN the writer types again
 - THEN the next autosave is posted and the key hint returns to the status line
 
 
-### Scenario (refusal): A save that fails after Cancel, or meets a change of the file, reopens the editor with the typed text and the reason
+### Scenario S8 (refusal): A save that fails after Cancel, or meets a change of the file, reopens the editor with the typed text and the reason
 - GIVEN an editor whose final save is in flight and that the writer closed with Cancel or Escape
 - WHEN the host answers with an error carrying unsavedText (a refusal, a rejected write, a source block that changed, a change of the file)
 - THEN the page reopens the editor on that block with the same editor id and no previewEditOpen, the text box holds the typed text, the status line shows the reason, and the page posts previewEditReopen with reopened true
 - AND the clicks and field opens that waited for the save are dropped
 - AND until the page answers, the host keeps the editor id as the open page editor, so renders wait, and keeps the text
 
-### Scenario (refusal): A change of the file while the editor saves keeps the editor open with the typed text and the reason
+### Scenario S9 (refusal): A change of the file while the editor saves keeps the editor open with the typed text and the reason
 - GIVEN a final save that is requested and not written, and a change of the document from outside the preview
 - WHEN the change arrives
 - THEN the host writes nothing, answers with the error "The file changed outside the preview before your text was saved. Copy your text, then reopen the block." carrying the text, and keeps the render waiting for the editor
 
-### Scenario (refusal): A failure the preview cannot show offers the text to copy
+### Scenario S10 (refusal): A failure the preview cannot show offers the text to copy
 - GIVEN a failed detached save and a page that answers previewEditReopen with reopened false
 - WHEN the host receives it
 - THEN the host releases the edit, renders, and shows a warning with a "Copy text" action; picking it puts the kept text on the clipboard and dismissing it writes nothing

@@ -18,6 +18,27 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: Edit figure button
+- id: S2
+  title: Edit figure button hidden
+- id: S3
+  title: Edit figure button next to the preview controls
+- id: S4
+  title: Fields of the form
+- id: S5
+  title: Form after inserting a figure
+- id: S6
+  title: Lone Markdown image
+- id: S7
+  title: Directive found for the form
+- id: S8
+  title: Keys that apply the form
+- id: S9
+  title: Problems under the fields
+- id: S10
+  title: Figure that cannot be edited and stale submit
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,13 +64,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer opens the figure form, from the Edit figure button over a hovered figure in edit mode or from Figure with the caret in a figure, the extension SHALL show a dialog with the fields Source, Alt text, Caption, Legend, Width, Align and Name, check them when the form is applied, and show each problem under its field while the form stays open and unchanged.
 
-### Scenario (nominal): Edit figure button
+### Scenario S1 (nominal): Edit figure button
 
 - GIVEN edit mode on and the pointer over a figure
 - WHEN the writer presses Edit figure, shown at the top right of the figure
 - THEN the block editor of the figure opens and, once its source arrives, the figure form; with the figure already being edited the form opens in the open editor
 
-### Scenario (boundary): Edit figure button hidden
+### Scenario S2 (boundary): Edit figure button hidden
 
 | Input | Outcome |
 | --- | --- |
@@ -60,7 +81,7 @@ When the writer opens the figure form, from the Edit figure button over a hovere
 
 The button is a child of the body placed with the CSSOM, so a content patch never removes it.
 
-### Scenario (boundary): Edit figure button next to the preview controls
+### Scenario S3 (boundary): Edit figure button next to the preview controls
 
 - GIVEN edit mode on, a figure whose top right is covered by the fixed preview controls, and no room under them inside the figure (a figure shorter than the controls' bottom edge, in a pane about 420 px wide)
 - WHEN the pointer is over the figure
@@ -68,25 +89,25 @@ The button is a child of the body placed with the CSSOM, so a content patch neve
 
 A figure with room below the controls keeps the button at its top right, below them.
 
-### Scenario (nominal): Fields of the form
+### Scenario S4 (nominal): Fields of the form
 
 - GIVEN the caret in a figure
 - WHEN the form opens
 - THEN the dialog is named Edit figure, the fields Source with a Browse... button, Alt text, Caption, Legend, Width with the placeholder 60% or 300px, Align with None, Left, Center and Right, and Name are filled from the directive, and the Source field has the focus with its text selected; the fields carry the accessible names Source, Alt text, Caption, Legend, Width, Align and Name
 
-### Scenario (nominal): Form after inserting a figure
+### Scenario S5 (nominal): Form after inserting a figure
 
 - GIVEN the Figure button pressed outside a figure and an image picked
 - WHEN the directive is written
 - THEN the form opens on it without another click, and the Caption field has the focus with its text selected
 
-### Scenario (nominal): Lone Markdown image
+### Scenario S6 (nominal): Lone Markdown image
 
 - GIVEN the caret in an image alone in its paragraph
 - WHEN the form opens
 - THEN the dialog is named Convert image to figure, its submit button reads Convert to figure and has the focus
 
-### Scenario (boundary): Directive found for the form
+### Scenario S7 (boundary): Directive found for the form
 
 | Input | Outcome |
 | --- | --- |
@@ -95,7 +116,7 @@ A figure with room below the controls keeps the button at its top right, below t
 | the caret in ![a](b.png) alone in its paragraph | the form converts that image |
 | an image with other text in its paragraph | not a lone image, no figure |
 
-### Scenario (boundary): Keys that apply the form
+### Scenario S8 (boundary): Keys that apply the form
 
 | Input | Outcome |
 | --- | --- |
@@ -105,7 +126,7 @@ A figure with room below the controls keeps the button at its top right, below t
 | Enter on a button | keeps its own effect |
 | Enter during an IME composition | ignored |
 
-### Scenario (refusal): Problems under the fields
+### Scenario S9 (refusal): Problems under the fields
 
 | Input | Outcome |
 | --- | --- |
@@ -123,7 +144,7 @@ A figure with room below the controls keeps the button at its top right, below t
 
 When several fields are invalid the first invalid field gets the focus.
 
-### Scenario (refusal): Figure that cannot be edited and stale submit
+### Scenario S10 (refusal): Figure that cannot be edited and stale submit
 
 | Input | Outcome |
 | --- | --- |

@@ -14,6 +14,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: Arrow keys do not mark
+- id: S2
+  title: Other cursor moves
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -30,13 +35,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader moves the cursor with the keyboard or the mouse, or the editor reports a selection change of no kind, the side preview SHALL NOT show the line marker.
 
-### Scenario (nominal): Arrow keys do not mark
+### Scenario S1 (nominal): Arrow keys do not mark
 
 - GIVEN the side preview with no line marker
 - WHEN the reader moves the cursor over 20 lines with the arrow keys
 - THEN no marker is drawn
 
-### Scenario (boundary): Other cursor moves
+### Scenario S2 (boundary): Other cursor moves
 
 | Input | Outcome |
 | --- | --- |

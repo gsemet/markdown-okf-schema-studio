@@ -67,8 +67,9 @@ async function markedThreads(page: Page): Promise<string[]> {
  * QA replay `scenarios/271-c1b-3-undo-row-delete-keeps-comment-mark.json`: Row - on the row a
  * comment quotes, Escape, then an undo in the editor. The buffer is back and so is the mark of the
  * thread (it is not an orphan), and the comments file is untouched.
- * @tests_req SwRS-MDOKFSTUDIO-REVIEW-219
- * @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+ * @tests_req SwRS-MDOKFSTUDIO-REVIEW-219#S1
+ * @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S4
+ * @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S5
  */
 export async function scenarioUndoRestoresCommentMark(page: Page): Promise<void> {
   await withDocument("realinput-table-comment-undo", DOCUMENT, async (document) => {

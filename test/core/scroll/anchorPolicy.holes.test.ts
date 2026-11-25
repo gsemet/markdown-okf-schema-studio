@@ -9,7 +9,7 @@ const policy = createAnchorPolicy();
 const good: AnchorBlock = { top: 100, height: 40, line: 1, endLine: 1 };
 const withOnly = (overrides: Partial<AnchorBlock>): AnchorBlock => ({ ...good, ...overrides });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S1
 test("a block with a position, a height or a line that is not usable adds nothing to the anchor map", () => {
   const usable = policy.buildAnchorMap([good]);
   assert.deepEqual(usable, [{ y: 0, line: 1 }, { y: 100, line: 1 }, { y: 140, line: 2 }]);
@@ -31,7 +31,7 @@ test("a block with a position, a height or a line that is not usable adds nothin
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S1
 test("a block of height 0 still anchors its line", () => {
   assert.deepEqual(policy.buildAnchorMap([withOnly({ height: 0 })]), [{ y: 0, line: 1 }, { y: 100, line: 1 }, { y: 100, line: 2 }]);
   assert.equal(policy.yAtLine(policy.buildAnchorMap([withOnly({ top: 50, height: 0, line: 3, endLine: 3 })]), 3), 50);

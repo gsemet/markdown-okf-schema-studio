@@ -18,6 +18,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-012
 depends_on: []
+scenarios:
+- id: S1
+  title: Word in a sentence
+- id: S2
+  title: Glued or lower case
+- id: S3
+  title: TODO in code, links and URLs
+- id: S4
+  title: TODO comment
+- id: S5
+  title: Comment word glued to letters
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,19 +45,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a paragraph holds the word TODO not glued to letters, digits or an underscore, or an HTML comment starts with that word in any case (with or without a colon, on one or several lines), the renderer SHALL replace the word by a green TODO chip titled TODO and leave the rest of the sentence unchanged, and leave the word TODO plain in inline code, a fenced code block, link text, a URL and math.
 
-### Scenario (nominal): Word in a sentence
+### Scenario S1 (nominal): Word in a sentence
 
 - GIVEN the text "We still TODO this part, TODOs and todo stay plain."
 - WHEN the document is rendered
 - THEN one green chip replaces the first TODO and the text content of the sentence is unchanged
 
-### Scenario (boundary): Glued or lower case
+### Scenario S2 (boundary): Glued or lower case
 
 - GIVEN the words TODOs and todo
 - WHEN the document is rendered
 - THEN they stay plain text
 
-### Scenario (refusal): TODO in code, links and URLs
+### Scenario S3 (refusal): TODO in code, links and URLs
 
 | Input | Outcome |
 | --- | --- |
@@ -56,13 +67,13 @@ When a paragraph holds the word TODO not glued to letters, digits or an undersco
 | TODO in a fenced block | No chip is written |
 | TODO between dollar signs (math) | No chip is written |
 
-### Scenario (nominal): TODO comment
+### Scenario S4 (nominal): TODO comment
 
 - GIVEN the comment "`<!-- TODO: finish the chapter -->`" or "`<!-- todo finish the chapter -->`"
 - WHEN the document is rendered
 - THEN a wrapper of kind todo holds a green chip reading TODO with the title "TODO: finish the chapter" and a hidden body with the comment text
 
-### Scenario (boundary): Comment word glued to letters
+### Scenario S5 (boundary): Comment word glued to letters
 
 - GIVEN a comment starting with TODOS
 - WHEN the document is rendered

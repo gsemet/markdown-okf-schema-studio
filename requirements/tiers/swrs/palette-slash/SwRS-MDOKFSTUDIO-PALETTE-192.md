@@ -24,6 +24,15 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: Picked image
+- id: S2
+  title: Cancelled
+- id: S3
+  title: Refused picks
+- id: S4
+  title: Shape of the request
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,19 +52,19 @@ default_owner_email: gaetan@xeberon.net
 
 When previewPickImage reaches the host for a saved document, whatever the trust, the extension SHALL open a native dialog in the folder of the document filtered to png, jpg, jpeg, gif, webp and svg with the label Insert image, answer the picked file as a path relative to the document with forward slashes and blanks kept, or cancelled, or refuse a file that is outside the allowed folders (the workspace folders, or the folder of a standalone document), is not a local image or cannot be written in a reference with a reason the page shows, and read or write nothing.
 
-### Scenario (nominal): Picked image
+### Scenario S1 (nominal): Picked image
 
 - GIVEN the document in a folder and the file my pics/a (1).png picked
 - WHEN the host answers
 - THEN the path is my pics/a (1).png, the dialog opened in the folder of the document with the filter Images, and the document is unchanged
 
-### Scenario (refusal): Cancelled
+### Scenario S2 (refusal): Cancelled
 
 - GIVEN the dialog cancelled
 - WHEN the host answers
 - THEN the answer is ok true with cancelled true
 
-### Scenario (refusal): Refused picks
+### Scenario S3 (refusal): Refused picks
 
 | Input | Outcome |
 | --- | --- |
@@ -66,7 +75,7 @@ When previewPickImage reaches the host for a saved document, whatever the trust,
 | a document that is out of date or is not a file | ok false with the reason The preview is out of date, or the document is not a file. |
 | a failed dialog | ok false with the message of the error (a value that is not an Error as its string) |
 
-### Scenario (boundary): Shape of the request
+### Scenario S4 (boundary): Shape of the request
 
 | Input | Outcome |
 | --- | --- |

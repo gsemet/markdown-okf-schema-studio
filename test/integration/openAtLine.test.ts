@@ -8,8 +8,9 @@ import { connectWorkbench, createFixture, findCurrentFrame, waitFor } from "./re
 
 const OPEN_AS_TEXT = "markdown-okf-schema-studio.openAsText";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-177
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 /**
  * CR 477 in the real window: no watcher moves a tab. Without the association a Markdown file opened
  * plainly or at a line (the selection of `vscode.open`, as a search result does) stays a text tab.

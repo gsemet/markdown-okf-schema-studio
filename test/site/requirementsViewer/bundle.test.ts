@@ -32,7 +32,8 @@ function sectionsHoldText(raw: string): boolean[] {
 const text = (html: string): string => html.replace(/<[^>]*>/gu, "").trim();
 
 test("no scenario card of the requirements bundle is empty", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S4
   const root = path.join(process.cwd(), "requirements/tiers");
   const files = [...markdownFiles(path.join(root, "strs")), ...markdownFiles(path.join(root, "swrs"))];
   assert.ok(files.length > 0, "the bundle is found from the repository root");

@@ -19,6 +19,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
+scenarios:
+- id: S1
+  title: Opening
+- id: S2
+  title: Hovering lights the rectangle
+- id: S3
+  title: Cell click
+- id: S4
+  title: Arrows and Enter
+- id: S5
+  title: Choice without a cell
+- id: S6
+  title: Pointer, range and cell editor
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,38 +49,38 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Table, the extension SHALL open a popover with a 9 by 9 grid of 81 cells, each named by its row and column, and a label that reads Table size until a cell is lit, and insert the table of the size the writer chooses by pointer or by keyboard as one undoable step, returning the focus to the text box.
 
-### Scenario (nominal): Opening
+### Scenario S1 (nominal): Opening
 
 - GIVEN an open block editor
 - WHEN the writer presses Table
 - THEN the grid shows 81 cells and the label reads Table size
 
-### Scenario (nominal): Hovering lights the rectangle
+### Scenario S2 (nominal): Hovering lights the rectangle
 
 - GIVEN the grid open
 - WHEN the pointer is over the cell of row 3 and column 4
 - THEN the cells from the top left cell to that cell are lit, 12 of the 81 cells, and the label reads 3 × 4
 
-### Scenario (nominal): Cell click
+### Scenario S3 (nominal): Cell click
 
 - GIVEN the grid open
 - WHEN the writer clicks the cell of row 3 and column 4
 - THEN the table of SwRS-MDOKFSTUDIO-TABLE-106 is inserted in one undo step, the grid closes, the focus returns to the text box and the editor stays open
 
-### Scenario (nominal): Arrows and Enter
+### Scenario S4 (nominal): Arrows and Enter
 
 - GIVEN the grid open and no cell lit
 - WHEN the writer presses ArrowRight twice, ArrowDown and Enter in the text box
 - THEN the first arrow lights 1 by 1, the next ones grow it to 2 by 2 and a table of that size is inserted
 
-### Scenario (refusal): Choice without a cell
+### Scenario S5 (refusal): Choice without a cell
 
 | Input | Outcome |
 | --- | --- |
 | The grid is open and the writer clicks the label | Nothing is inserted and the grid stays open |
 | The grid is open, no cell is lit and the writer presses Enter | Nothing is chosen and the grid stays open |
 
-### Scenario (boundary): Pointer, range and cell editor
+### Scenario S6 (boundary): Pointer, range and cell editor
 
 | Input | Outcome |
 | --- | --- |

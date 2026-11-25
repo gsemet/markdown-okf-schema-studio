@@ -17,6 +17,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-008
+scenarios:
+- id: S1
+  title: Report present
+- id: S2
+  title: Old address
+- id: S3
+  title: Report missing or unreadable
+- id: S4
+  title: Nothing to measure
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,7 +44,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a maintainer builds the Pages site, the build SHALL write the Requirements home at requirements/ that draws the chain from use case to test and shows the figures of active requirements from the okfreq report, or states that the report was not generated when it is missing or unreadable, without failing the build, and SHALL keep requirements.html as a redirect to it.
 
-### Scenario (nominal): Report present
+### Scenario S1 (nominal): Report present
 
 - GIVEN a report with 3 active SwRS (2 need markers, 1 is exempt, only 1 of the 2 has a source
   marker) and 2 retired SwRS, whose lifecycle is written in req_lifecycle
@@ -46,14 +55,14 @@ When a maintainer builds the Pages site, the build SHALL write the Requirements 
   marker targets implemented and 100% tested, counts the retired SwRS apart under "Retired
   requirements", and the Requirements link of every page of the site points to requirements/
 
-### Scenario (nominal): Old address
+### Scenario S2 (nominal): Old address
 
 - GIVEN a site built from any report
 - WHEN a reader opens requirements.html
 - THEN the page redirects to requirements/ with a meta refresh and holds a link and a canonical
   link to it
 
-### Scenario (refusal): Report missing or unreadable
+### Scenario S3 (refusal): Report missing or unreadable
 
 - GIVEN no report file, or a file that is not a requirements report
 - WHEN the site is built
@@ -61,7 +70,7 @@ When a maintainer builds the Pages site, the build SHALL write the Requirements 
   requirements report was not generated", with no figures and no area page; a marker file that
   cannot be read shows its path only
 
-### Scenario (boundary): Nothing to measure
+### Scenario S4 (boundary): Nothing to measure
 
 - GIVEN a report with no SwRS that needs markers
 - WHEN the page is rendered

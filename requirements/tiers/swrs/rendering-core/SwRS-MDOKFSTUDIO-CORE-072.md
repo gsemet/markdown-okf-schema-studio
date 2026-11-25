@@ -18,6 +18,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
+scenarios:
+- id: S1
+  title: Table of contents
+- id: S2
+  title: Depth, duplicates and exclusions
+- id: S3
+  title: Edit mode
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,13 +44,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a paragraph holds only `[TOC]` or `[[_TOC_]]` (case-insensitive), or a MyST `{contents}` directive is written, the preview SHALL render in its place the headings of the document as a nested list of links to the headings, limited to N list levels by the `:depth: N` option and to the section the directive is in by the `:local:` option of the directive, generated at render time and never written to the file, and, in edit mode, SHALL show the block as an admonition-like block titled with the literal marker (`[TOC]`, `[[_TOC_]]` or the `{contents}` opening line) instead of the list. The bracket markers take no depth option.
 
-### Scenario (nominal): Table of contents
+### Scenario S1 (nominal): Table of contents
 
 - GIVEN a document with `[TOC]` (or `[[_TOC_]]`, or `{contents}`) alone in a block and the headings `# A`, `## B`, `## C`, `### D`
 - WHEN the document is rendered
 - THEN the marker is replaced by a `nav` holding a nested list of links `A` > (`B`, `C` > `D`), each pointing to `#` plus the slug of its heading, every heading carries that slug as its `id`, and the saved file still holds only the marker
 
-### Scenario (boundary): Depth, duplicates and exclusions
+### Scenario S2 (boundary): Depth, duplicates and exclusions
 
 | Input | Outcome |
 | --- | --- |
@@ -56,7 +63,7 @@ When a paragraph holds only `[TOC]` or `[[_TOC_]]` (case-insensitive), or a MyST
 | `[TOC]` or `[[_TOC_]]` inside a code block, inline code, or in a paragraph with other text | not a marker; the usual rendering applies |
 | a document without headings | the marker renders nothing in read mode |
 
-### Scenario (nominal): Edit mode
+### Scenario S3 (nominal): Edit mode
 
 - GIVEN edit mode is on
 - WHEN a `[TOC]`, `[[_TOC_]]` or `{contents}` block is rendered

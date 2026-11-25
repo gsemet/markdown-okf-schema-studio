@@ -29,14 +29,14 @@ function detachedHarness(): { harness: RuntimeHarness; editId: string; textarea:
   return { harness, editId, textarea };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("the close of a detached save is reported to the host whether or not it asked to watch", () => {
   const { harness, editId } = detachedHarness();
   assert.deepEqual(posts(harness, "previewEditClosed").map((message) => message.editId), [editId]);
   assert.equal(posts(harness, "previewEditClosed")[0]!.detached, true, "the host learns the save outlives the editor");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("no other edit starts while a detached save is in flight, and the click waits for its end", () => {
   const { harness, editId } = detachedHarness();
   const before = harness.messages.length;
@@ -46,7 +46,7 @@ test("no other edit starts while a detached save is in flight, and the click wai
   assert.equal(posts(harness, "previewEditOpen", before).length, 1, "the answer lets the waiting open go on");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("a detached save the host answers with a render to follow ends when the render is applied", () => {
   const { harness, editId } = detachedHarness();
   harness.dispatchMessage({ type: "previewEditSource", ...IDENTITY, editId, done: true, renderFollows: true });
@@ -55,7 +55,8 @@ test("a detached save the host answers with a render to follow ends when the ren
   assert.deepEqual(posts(harness, "previewEditOpen", before), [], "still in flight until the render");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("a failed detached save reopens the editor on the same edit with the typed text", () => {
   const { harness, editId } = detachedHarness();
   const before = harness.messages.length;
@@ -83,7 +84,8 @@ test("a failed detached save reopens the editor on the same edit with the typed 
   assert.equal(save.revision, 7);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("a failed detached save whose block is gone tells the host nothing was reopened", () => {
   const { harness, editId } = detachedHarness();
   harness.mappings[1].setAttribute("data-sphinx-source-line", "999");
@@ -95,7 +97,7 @@ test("a failed detached save whose block is gone tells the host nothing was reop
   assert.equal(reopen[0]!.reopened, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("an answer that names another edit does not end a detached save", () => {
   const { harness } = detachedHarness();
   harness.dispatchMessage({ type: "previewEditSource", ...IDENTITY, editId: "another", done: true });

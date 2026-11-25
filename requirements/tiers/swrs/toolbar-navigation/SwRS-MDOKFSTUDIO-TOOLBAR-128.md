@@ -18,6 +18,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-013
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: Values of the setting
+- id: S2
+  title: The host sends the cursor line after a render
+- id: S3
+  title: Setting off or no editor
+- id: S4
+  title: The host sends the cursor line when the editor scrolls
+- id: S5
+  title: A cursor move alone
+- id: S6
+  title: Marking and scrolling
+- id: S7
+  title: The outline
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,7 +59,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the setting markdownOkfSchemaStudio.preview.markEditorSelection is true (off by default), the extension SHALL outline in the preview the one block that contains the cursor line of the text editor (the innermost one when blocks nest, the block with the nearest edge when the line lies between blocks), which the host sends after each render and when the editor scrolls, without moving the preview unless it follows the editor.
 
-### Scenario (boundary): Values of the setting
+### Scenario S1 (boundary): Values of the setting
 
 | Input | Outcome |
 | --- | --- |
@@ -52,32 +67,32 @@ When the setting markdownOkfSchemaStudio.preview.markEditorSelection is true (of
 | true | the mark is on |
 | the number 1, the string true or the string yes | the mark stays off, because only the boolean true turns it on |
 
-### Scenario (nominal): The host sends the cursor line after a render
+### Scenario S2 (nominal): The host sends the cursor line after a render
 
 - GIVEN the setting on, a text editor that shows the document and the cursor on line 12
 - WHEN a render is shown
 - THEN the page receives a sourceScroll with selectionLine 12 and no scroll line, so it does not scroll, and exactly the block that starts at line 12 is marked with data-sphinx-preview-current and aria-current location, the mark of the previous block being removed
 
-### Scenario (refusal): Setting off or no editor
+### Scenario S3 (refusal): Setting off or no editor
 
 | Input | Outcome |
 | --- | --- |
 | the setting off, or no visible editor for the file, a render is shown | the host posts nothing |
 | the setting off, a sourceScroll with a selection line reaches the page | no block is marked and a previous mark is removed |
 
-### Scenario (nominal): The host sends the cursor line when the editor scrolls
+### Scenario S4 (nominal): The host sends the cursor line when the editor scrolls
 
 - GIVEN the mark on and following off
 - WHEN the editor scrolls
 - THEN the page receives a sourceScroll with the first visible line and the selection line, the selection line being the editor selection line plus 1
 
-### Scenario (refusal): A cursor move alone
+### Scenario S5 (refusal): A cursor move alone
 
 - GIVEN the cursor moved without a scroll
 - WHEN the editor selection changes
 - THEN no message is posted, because no selection listener exists
 
-### Scenario (boundary): Marking and scrolling
+### Scenario S6 (boundary): Marking and scrolling
 
 | Input | Outcome |
 | --- | --- |
@@ -87,7 +102,7 @@ When the setting markdownOkfSchemaStudio.preview.markEditorSelection is true (of
 | a selection line inside a long block that ends before the next block starts | the long block is marked, not the next one, even when the next block starts closer to the line |
 | a selection line on a blank line between two blocks | the block with the nearest edge is marked |
 
-### Scenario (nominal): The outline
+### Scenario S7 (nominal): The outline
 
 | Input | Outcome |
 | --- | --- |

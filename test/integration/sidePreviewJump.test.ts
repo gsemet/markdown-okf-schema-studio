@@ -17,9 +17,10 @@ const jumpTo = async (file: string, line: number): Promise<void> => {
   await vscode.commands.executeCommand("vscode.open", vscode.Uri.file(file), { selection: new vscode.Range(position, position) });
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-186
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-186#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-186#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189#S1
 /**
  * CR 456 in the real window (trials J1 to J7): a jump into a Markdown file marks its line in the side
  * preview that follows the editor. The selection recorder (`recordSelectionChangesForTests`) tells

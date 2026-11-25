@@ -17,6 +17,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
 - StRS-MDOKFSTUDIO-CORE-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Fit images in the content column
+- id: S2
+  title: A narrow image keeps its natural size
+- id: S3
+  title: Place inline images on the text line
+- id: S4
+  title: Keep an image whose file is missing
+- id: S5
+  title: An existing file loads
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,32 +53,32 @@ supersedes:
 
 When a document shows an image, the extension SHALL size it to at most the content column width and keep its aspect ratio, place it on the text line when it is written inside a line of text, and keep its element and alt text in document order when its local file is missing.
 
-### Scenario (nominal): Fit images in the content column
+### Scenario S1 (nominal): Fit images in the content column
 
 - GIVEN an image wider than the content column
 - WHEN it is rendered
 - THEN its width equals the column width and its height scales
 
-### Scenario (boundary): A narrow image keeps its natural size
+### Scenario S2 (boundary): A narrow image keeps its natural size
 
 - GIVEN an image narrower than the column
 - WHEN it is rendered
 - THEN it keeps its natural size
 
-### Scenario (nominal): Place inline images on the text line
+### Scenario S3 (nominal): Place inline images on the text line
 
 | Input | Outcome |
 | --- | --- |
 | an image written inside a sentence | it is rendered inline and centred on the text line |
 | an image alone in its paragraph | it is a centred figure paragraph |
 
-### Scenario (refusal): Keep an image whose file is missing
+### Scenario S4 (refusal): Keep an image whose file is missing
 
 - GIVEN an image whose local file is absent
 - WHEN it is rendered
 - THEN the element and alt text stay in place in document order, the source is removed and the page shows no broken-image overflow
 
-### Scenario (boundary): An existing file loads
+### Scenario S5 (boundary): An existing file loads
 
 - GIVEN the same image with a file that exists
 - WHEN it is rendered

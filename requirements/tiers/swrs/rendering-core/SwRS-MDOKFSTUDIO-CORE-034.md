@@ -16,6 +16,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Words, URLs and identifiers
+- id: S2
+  title: CJK text
+- id: S3
+  title: Identifier as wide as the viewport
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,7 +47,7 @@ supersedes:
 
 When a word, a URL, an inline code identifier or a Japanese, Chinese or Korean paragraph is longer than the available width, the extension SHALL wrap it inside the column or pane at 900 px and 460 px, without horizontal overflow of the page.
 
-### Scenario (nominal): Words, URLs and identifiers
+### Scenario S1 (nominal): Words, URLs and identifiers
 | Input | Outcome |
 | --- | --- |
 | a 120-character word with no break opportunity at 900 px | wraps inside the column |
@@ -49,13 +56,13 @@ When a word, a URL, an inline code identifier or a Japanese, Chinese or Korean p
 | the pane narrowed to 460 px with that URL | the page has no horizontal overflow |
 | a long identifier in inline code that exceeds the available width at 460 px | wraps inside the viewport |
 
-### Scenario (nominal): CJK text
+### Scenario S2 (nominal): CJK text
 | Input | Outcome |
 | --- | --- |
 | a Japanese paragraph at 900 px | wraps inside the pane |
 | a Korean paragraph at 460 px | wraps inside the pane and no horizontal scrolling appears |
 
-### Scenario (boundary): Identifier as wide as the viewport
+### Scenario S3 (boundary): Identifier as wide as the viewport
 - GIVEN an inline code identifier exactly as wide as the viewport
 - WHEN it is shown
 - THEN it neither overflows nor wraps needlessly

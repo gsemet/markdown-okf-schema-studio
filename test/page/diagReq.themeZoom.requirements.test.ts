@@ -55,7 +55,8 @@ test("an unknown theme mode is ignored: the saved mode comes next, Cream last", 
   assert.equal(theme.mode(), "cream");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-050
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S5
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S6
 test("the page root records whether the system prefers reduced motion", () => {
   const reduced = themePage({ matchMedia: (query) => ({ matches: query === "(prefers-reduced-motion: reduce)" }) });
   reduced.theme.applyTheme(2);
@@ -83,7 +84,7 @@ function zoomAtStart(saved: unknown, initial: unknown): { zoom: number; property
   return { zoom: controls.zoom(), property: root.properties.get("--sphinx-preview-zoom") };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S6
 test("a saved or initial zoom is rounded to the grid, clamped to 70-200, and ignored when not a number", () => {
   assert.equal(zoomAtStart(133, undefined).zoom, 130);
   assert.equal(zoomAtStart(300, undefined).zoom, 200);

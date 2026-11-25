@@ -24,6 +24,23 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-CORE-012
 - SwRS-MDOKFSTUDIO-TRUST-025
+scenarios:
+- id: S1
+  title: Stop include depth
+- id: S2
+  title: Stop include cycles
+- id: S3
+  title: Limit the include budget per render
+- id: S4
+  title: Refuse oversize and unreadable included files
+- id: S5
+  title: Refuse includes outside the allowed roots
+- id: S6
+  title: Warn about a missing included file
+- id: S7
+  title: The warning ends when the file exists
+- id: S8
+  title: A file is checked once per render
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -55,19 +72,19 @@ supersedes:
 
 When a chain of includes reaches the 8th level, an include repeats a file already being included, a render has expanded 2000 includes or 10 Mi characters of included text, an included file is larger than 5 MiB or cannot be read, or an include points outside the allowed roots, uses an absolute path or a URL scheme, has an undecodable path, has a symlink that escapes its root or names a missing file, the extension SHALL leave that directive as an unresolved placeholder and, for a refused or missing file or an exhausted budget, list a warning naming the request without reading a refused file.
 
-### Scenario (nominal): Stop include depth
+### Scenario S1 (nominal): Stop include depth
 
 - GIVEN a chain of eight nested includes
 - WHEN it is rendered
 - THEN the first seven expand and the eighth stays a placeholder
 
-### Scenario (refusal): Stop include cycles
+### Scenario S2 (refusal): Stop include cycles
 
 - GIVEN a file that includes itself
 - WHEN it is rendered
 - THEN the cyclic include stays a placeholder and the render ends
 
-### Scenario (boundary): Limit the include budget per render
+### Scenario S3 (boundary): Limit the include budget per render
 
 | Input | Outcome |
 | --- | --- |
@@ -75,7 +92,7 @@ When a chain of includes reaches the 8th level, an include repeats a file alread
 | 10 Mi characters of included text expanded | the remaining includes are placeholders and one budget warning is listed |
 | a document within both limits | no budget warning is listed |
 
-### Scenario (boundary): Refuse oversize and unreadable included files
+### Scenario S4 (boundary): Refuse oversize and unreadable included files
 
 | Input | Outcome |
 | --- | --- |
@@ -83,26 +100,26 @@ When a chain of includes reaches the 8th level, an include repeats a file alread
 | an included file of exactly 5 MiB | the file is expanded |
 | a file inside the roots that the process cannot read | the directive stays a placeholder and nothing of the file is shown |
 
-### Scenario (refusal): Refuse includes outside the allowed roots
+### Scenario S5 (refusal): Refuse includes outside the allowed roots
 
 | Input | Outcome |
 | --- | --- |
 | an include that the allowed-roots rule (SwRS-MDOKFSTUDIO-TRUST-025) refuses: `../../secret.md` outside the roots, an absolute path, an undecodable path, a symlink that escapes its root | the file is not read and a warning naming the request is listed |
 | an include with an `https:` URL | the URL is not fetched and a warning is listed |
 
-### Scenario (refusal): Warn about a missing included file
+### Scenario S6 (refusal): Warn about a missing included file
 
 - GIVEN an include of `missing.md`
 - WHEN it is rendered
 - THEN a warning for `missing.md` is listed in the status region
 
-### Scenario (boundary): The warning ends when the file exists
+### Scenario S7 (boundary): The warning ends when the file exists
 
 - GIVEN the file `missing.md` is created and the document re-rendered
 - WHEN it is rendered
 - THEN the warning disappears and the content is expanded
 
-### Scenario (boundary): A file is checked once per render
+### Scenario S8 (boundary): A file is checked once per render
 
 - GIVEN a document that references the same image or include several times, existing or missing
 - WHEN the preview renders it

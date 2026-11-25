@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Turn edit mode on and off
+- id: S2
+  title: Reopen a document
 user_need: As a writer, I turn edit mode on to change my document in the preview
   and off to read it again, without losing anything I typed, and I reopen a
   document to find the preview in the edit mode I last chose, never offered
@@ -65,7 +70,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Turn edit mode on and off
+#### Path S1: Turn edit mode on and off
 
 1. The preview shows the document in reading mode
    - SwRS-MDOKFSTUDIO-BLOCK-001: the writer clicks Edit and the page turns edit mode on, shows it on the button and posts it to the host, with the reading layout unchanged
@@ -75,7 +80,7 @@ stateDiagram-v2
    - Option SwRS-MDOKFSTUDIO-LIFE-169 (nominal): the host remembers the edit mode for the workspace
 3. The preview is back in reading mode with the edit state removed
 
-#### Path 2: Reopen a document
+#### Path S2: Reopen a document
 
 1. A document is opened in a new preview
    - SwRS-MDOKFSTUDIO-LIFE-170: the edit mode starts from the saved panel state, else the stored workspace value, else its default

@@ -19,6 +19,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: A save restores the trailing line ending of the block
+- id: S2
+  title: A multi-line block keeps its line ending when saved
+- id: S3
+  title: A CRLF table keeps its line endings
+- id: S4
+  title: A save on a real CRLF, LF or mixed file changes the block only
+- id: S5
+  title: Counting lines
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,7 +59,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension plans or writes back a preview edit, it SHALL treat LF, CR LF and a lone CR as line ends, count one more empty last line after a final line break, and keep the line ending that the edited text ended with, write the line breaks inside an edited multi-line block with the one line ending the block (or, for a block of one line, the document) already uses, including the CR LF endings of a table and the presence or absence of its final line ending.
 
-### Scenario (nominal): A save restores the trailing line ending of the block
+### Scenario S1 (nominal): A save restores the trailing line ending of the block
 
 | Original block text ends with | Text posted by the save |
 | --- | --- |
@@ -57,7 +68,7 @@ When the extension plans or writes back a preview edit, it SHALL treat LF, CR LF
 | CR | the text box content plus the same CR |
 | no line ending (a block at the end of a file without a final line break) | the text box content with no trailing line break either |
 
-### Scenario (nominal): A multi-line block keeps its line ending when saved
+### Scenario S2 (nominal): A multi-line block keeps its line ending when saved
 | Input | Outcome |
 | --- | --- |
 | A block of several lines in a CR LF document, a line added in the text box (which returns LF) | The lines written to the document, the new one included, end with CR LF |
@@ -67,7 +78,7 @@ When the extension plans or writes back a preview edit, it SHALL treat LF, CR LF
 | A block whose line endings are mixed (a text that already holds a CR is written as it is) | The lines the edit left alone keep their line endings; a changed line takes the ending of the line it replaces (the line above when lines were added or removed) |
 | A document with mixed line endings when the block has no line break | The text box content is written as it is |
 
-### Scenario (nominal): A CRLF table keeps its line endings
+### Scenario S3 (nominal): A CRLF table keeps its line endings
 
 | Input | Outcome |
 | --- | --- |
@@ -75,14 +86,14 @@ When the extension plans or writes back a preview edit, it SHALL treat LF, CR LF
 | the same table with one cell edited, then written back | the line endings are unchanged |
 | a CRLF table without a trailing line ending | the absence of the final line ending is kept |
 
-### Scenario (nominal): A save on a real CRLF, LF or mixed file changes the block only
+### Scenario S4 (nominal): A save on a real CRLF, LF or mixed file changes the block only
 | Input | Outcome |
 | --- | --- |
 | A paragraph or a list saved in a document read from a file with CR LF line endings (with or without a final line break), LF line endings, or both | Every byte outside the block is the one of the file; the block keeps its own line ending |
 | Any of these saves in a CR LF file | No bare LF is added |
 | Any of these saves in an LF file | No CR is added |
 
-### Scenario (boundary): Counting lines
+### Scenario S5 (boundary): Counting lines
 
 | Input | Outcome |
 | --- | --- |

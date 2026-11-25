@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-002
+scenarios:
+- id: S1
+  title: A folded block cannot be selected or edited
+- id: S2
+  title: The block stays mapped
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,12 +36,12 @@ default_owner_email: gaetan@xeberon.net
 
 While a section is folded, the extension SHALL leave the blocks of that section out of the block selection and out of the editable blocks, so that no block inside it can be selected or edited until the section is unfolded.
 
-### Scenario (nominal): A folded block cannot be selected or edited
+### Scenario S1 (nominal): A folded block cannot be selected or edited
 - GIVEN a folded section with two paragraphs
 - WHEN the page lists the blocks the keyboard selection and the editors can reach
 - THEN the two paragraphs are not listed and no block is found at their line, so no selection or editor can open on them; after the section is unfolded they are listed again
 
-### Scenario (boundary): The block stays mapped
+### Scenario S2 (boundary): The block stays mapped
 - GIVEN the same folded section
 - WHEN the editor and the preview scroll together
 - THEN the folded blocks stay in the top-level mapped blocks used for the scroll mapping, so the source lines still line up

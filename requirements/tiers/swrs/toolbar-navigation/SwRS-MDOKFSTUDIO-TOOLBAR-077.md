@@ -23,6 +23,27 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-052
+scenarios:
+- id: S1
+  title: Click, middle click and keys are posted
+- id: S2
+  title: Edit mode keeps a plain click for editing
+- id: S3
+  title: Other buttons and keys are not posted
+- id: S4
+  title: The host opens the target
+- id: S5
+  title: The host refuses with a warning
+- id: S6
+  title: With a request
+- id: S7
+  title: No request
+- id: S8
+  title: Malformed frontmatter link request
+- id: S9
+  title: Well-formed frontmatter link request
+- id: S10
+  title: Request that is not a string
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -50,7 +71,7 @@ supersedes:
 
 When the reader clicks, middle-clicks or presses Enter or Space on a link that carries a navigation request, the extension SHALL cancel the default action, post previewLink with that request and have the host open the target or show a warning with the reason when it cannot; the host follows nothing when the message carries no request and refuses a malformed frontmatter link request with the reason The frontmatter link request is invalid.
 
-### Scenario (nominal): Click, middle click and keys are posted
+### Scenario S1 (nominal): Click, middle click and keys are posted
 
 | Given | When | Then |
 | --- | --- | --- |
@@ -58,7 +79,7 @@ When the reader clicks, middle-clicks or presses Enter or Space on a link that c
 | a focused link | Enter is pressed | previewLink is posted |
 | a focused link | Space is pressed | previewLink is posted |
 
-### Scenario (boundary): Edit mode keeps a plain click for editing
+### Scenario S2 (boundary): Edit mode keeps a plain click for editing
 
 | Given, edit mode on | When | Then |
 | --- | --- | --- |
@@ -66,14 +87,14 @@ When the reader clicks, middle-clicks or presses Enter or Space on a link that c
 | the same link | it is clicked with Cmd or Ctrl held, Cmd/Ctrl+Enter is pressed on it, or it is middle-clicked | previewLink is posted |
 | a link value of the properties table, in a comment thread or a label anchor | it is clicked | it keeps its own behaviour, as in reading mode |
 
-### Scenario (refusal): Other buttons and keys are not posted
+### Scenario S3 (refusal): Other buttons and keys are not posted
 
 | Given | When | Then |
 | --- | --- | --- |
 | an auxclick with button 2 | the event arrives | nothing is posted and the default action stays |
 | a focused link | the letter a is pressed | nothing is posted |
 
-### Scenario (nominal): The host opens the target
+### Scenario S4 (nominal): The host opens the target
 
 | Link followed | Outcome |
 | --- | --- |
@@ -82,7 +103,7 @@ When the reader clicks, middle-clicks or presses Enter or Space on a link that c
 | a normal Markdown file | it opens and no warning is shown |
 | https://example.invalid/page (http, https or mailto) | the system opener is called once with the URL and the preview and the history are unchanged |
 
-### Scenario (refusal): The host refuses with a warning
+### Scenario S5 (refusal): The host refuses with a warning
 
 | Link followed | Outcome |
 | --- | --- |
@@ -92,31 +113,31 @@ When the reader clicks, middle-clicks or presses Enter or Space on a link that c
 | a link whose resolution raises an error | the warning "Preview link resolution failed: {error}" is shown and nothing is recorded |
 | a resolvable link | no resolution warning is shown |
 
-### Scenario (nominal): With a request
+### Scenario S6 (nominal): With a request
 
 - GIVEN a previewLink message with a request
 - WHEN the host receives it
 - THEN the link is followed
 
-### Scenario (refusal): No request
+### Scenario S7 (refusal): No request
 
 - GIVEN a previewLink message with no request field
 - WHEN the host receives it
 - THEN only the page's scroll state is recorded, no link is resolved and nothing opens
 
-### Scenario (refusal): Malformed frontmatter link request
+### Scenario S8 (refusal): Malformed frontmatter link request
 
 - GIVEN a navigation request okf-link: followed by text that is not valid JSON
 - WHEN the request is handled
 - THEN the reason reads The frontmatter link request is invalid. and nothing opens
 
-### Scenario (nominal): Well-formed frontmatter link request
+### Scenario S9 (nominal): Well-formed frontmatter link request
 
 - GIVEN a request whose JSON names an existing link
 - WHEN the request is handled
 - THEN the link is followed
 
-### Scenario (refusal): Request that is not a string
+### Scenario S10 (refusal): Request that is not a string
 
 - GIVEN a previewLink message whose request is not a string
 - WHEN the validator runs

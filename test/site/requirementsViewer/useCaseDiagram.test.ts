@@ -9,14 +9,15 @@ import { CREAM_DIAGRAM_THEME, parseUseCaseDiagram, renderUseCaseDiagrams } from 
 const FENCE = (source: string): string => `\`\`\`mermaid\n${source}\n\`\`\``;
 
 test("the diagram source is the first Mermaid fence of the Use case diagram section", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-087
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S3
   const withCaption = `## T\n\n### Use case diagram\n\nThe writer and the preview.\n\n${FENCE(DIAGRAM_SOURCE)}\n\n### Main paths\n\n1. A\n`;
   assert.equal(parseUseCaseDiagram(withCaption), DIAGRAM_SOURCE);
   assert.equal(parseUseCaseDiagram(`### Use case diagram\n${FENCE(`  ${DIAGRAM_SOURCE}  `)}\n<!-- okf:links:start -->\n`), DIAGRAM_SOURCE, "the source is trimmed");
 });
 
 test("no section, or a section without a Mermaid fence, has no diagram", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-087
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S3
   assert.equal(parseUseCaseDiagram("## T\n\n### Main paths\n\n1. A\n"), undefined);
   assert.equal(parseUseCaseDiagram("### Use case diagram\n\nJust words.\n\n```text\nnot mermaid\n```\n"), undefined);
   assert.equal(parseUseCaseDiagram(`### Use case diagram\n\n### Rationale\n\n${FENCE(DIAGRAM_SOURCE)}\n`), undefined, "a fence after the next heading is not in the section");
@@ -24,7 +25,7 @@ test("no section, or a section without a Mermaid fence, has no diagram", () => {
 });
 
 test("with two fences the first is taken, and a section in the links block is ignored", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-087
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S2
   assert.equal(parseUseCaseDiagram(`### Use case diagram\n\n${FENCE("flowchart LR\n  A --> B")}\n\n${FENCE(DIAGRAM_SOURCE)}\n`), "flowchart LR\n  A --> B");
   assert.equal(parseUseCaseDiagram(`## T\n\n<!-- okf:links:start -->\n### Use case diagram\n\n${FENCE(DIAGRAM_SOURCE)}\n`), undefined);
 });
@@ -39,7 +40,7 @@ async function chromiumStarts(): Promise<boolean> {
 }
 
 test("a sequence diagram is drawn as an inline SVG in the cream ink colour, with no script", async (t) => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-087
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S2
   if (!await chromiumStarts()) {
     t.skip("no Chromium can start here (run `just dev` to install it)");
     return;
@@ -54,7 +55,7 @@ test("a sequence diagram is drawn as an inline SVG in the cream ink colour, with
 });
 
 test("a fence Mermaid cannot draw rejects with the StRS id, its file and Mermaid's message", async (t) => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-087
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S3
   if (!await chromiumStarts()) {
     t.skip("no Chromium can start here (run `just dev` to install it)");
     return;

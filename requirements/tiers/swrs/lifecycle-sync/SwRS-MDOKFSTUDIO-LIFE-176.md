@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: An introduction shows once
+- id: S2
+  title: Seen, reset and failing store
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a feature with an introduction first takes effect, the extension SHALL show its introduction notice once across sessions and workspaces, and when the reader runs Show Feature Introductions Again, the extension SHALL forget every shown introduction so that each shows once more.
 
-### Scenario (nominal): An introduction shows once
+### Scenario S1 (nominal): An introduction shows once
 
 - GIVEN a reader who has not seen the introduction of a feature
 - WHEN the feature first takes effect
 - THEN the notice is shown once, and the shown key is stored before the notice appears, so a notice that closes by itself is never shown again, in this or another workspace
 
-### Scenario (boundary): Seen, reset and failing store
+### Scenario S2 (boundary): Seen, reset and failing store
 
 | Input | Outcome |
 | --- | --- |

@@ -17,6 +17,15 @@ derives_from:
 - StRS-MDOKFSTUDIO-TABLE-006
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Tab in the last cell adds a row
+- id: S2
+  title: The last cell shows the Tab hint
+- id: S3
+  title: Final save cannot be posted
+- id: S4
+  title: A table inside a quote or an admonition
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,25 +48,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Tab in the last cell of the last rendered row of a table, the extension SHALL post a final save with an extra empty row at the end and the typed text and, after the re-render, open the editor in the first cell of the new row; and in that last cell, the cell editor SHALL show the hint Tab: new row in its actions row before Done and Cancel, described to the text box with `aria-describedby`.
 
-### Scenario (nominal): Tab in the last cell adds a row
+### Scenario S1 (nominal): Tab in the last cell adds a row
 
 - GIVEN the editor in the last cell of a table with two body rows, with text typed in it
 - WHEN the writer presses Tab
 - THEN a final previewEditSave with an extra empty row at the end and the typed text is posted, and after the re-render the editor opens in the first cell of the new row, which remembers that Tab added its row for that session only (see SwRS-MDOKFSTUDIO-TABLE-025)
 
-### Scenario (nominal): The last cell shows the Tab hint
+### Scenario S2 (nominal): The last cell shows the Tab hint
 
 - GIVEN a table with two body rows, the editor in its first body cell
 - WHEN the writer clicks the last cell of the last row, then presses Shift+Tab
 - THEN the editor of the last cell shows the text Tab: new row (marked `data-sphinx-preview-table-cell-hint`) in its actions row, its text box names the hint with `aria-describedby`; the editor of every other cell shows no hint and no `aria-describedby`; the hint follows the editor when it moves (Tab, Shift+Tab, an arrow key, a click) and, in a narrow pane, wraps without widening the cell beyond the room of SwRS-MDOKFSTUDIO-TABLE-006 or hiding Done and Cancel
 
-### Scenario (refusal): Final save cannot be posted
+### Scenario S3 (refusal): Final save cannot be posted
 
 - GIVEN a final save that cannot be posted
 - WHEN the writer presses Tab in the last cell
 - THEN the pending navigation is cleared
 
-### Scenario (boundary): A table inside a quote or an admonition
+### Scenario S4 (boundary): A table inside a quote or an admonition
 
 | Input | Outcome |
 | --- | --- |

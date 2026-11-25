@@ -20,6 +20,31 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Frame at once, filled when the source arrives
+- id: S2
+  title: Line range in the status line
+- id: S3
+  title: Keys of the editor in the status line
+- id: S4
+  title: Done and Cancel buttons
+- id: S5
+  title: Pressing Done or Cancel keeps the focus in the text box
+- id: S6
+  title: A click inside the frame stays inside it
+- id: S7
+  title: Block editor names
+- id: S8
+  title: Cell that cannot be parsed
+- id: S9
+  title: Text box attributes
+- id: S10
+  title: The rendered block is hidden while its editor is open
+- id: S11
+  title: The frame is a one pixel accent frame with monospace text
+- id: S12
+  title: The text box grows with its text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,7 +69,7 @@ supersedes:
 
 When a writer opens a block editor, the page SHALL insert the editor frame in place of the block at once, expose it as a region named "Raw Markdown editor" around a text box named "Raw Markdown block" that switches off spell check and auto-correction, grows with its text and is drawn in monospace inside a one pixel border in the focus colour, hide the rendered block it replaces, and, when the host sends the block's source, fill the frame with the text box, a status line that shows the line range and the keys of the editor, and a primary Done button beside a Cancel button.
 
-### Scenario (nominal): Frame at once, filled when the source arrives
+### Scenario S1 (nominal): Frame at once, filled when the source arrives
 
 - GIVEN a block editor just opened and previewEditSource not yet received
 - WHEN the frame is inspected
@@ -53,7 +78,7 @@ When a writer opens a block editor, the page SHALL insert the editor frame in pl
 - WHEN it is received
 - THEN the frame holds the text box, the status line and the buttons
 
-### Scenario (nominal): Line range in the status line
+### Scenario S2 (nominal): Line range in the status line
 
 | Input | Outcome |
 | --- | --- |
@@ -63,7 +88,7 @@ When a writer opens a block editor, the page SHALL insert the editor frame in pl
 
 The text before the first separator dot is exactly one of the three forms.
 
-### Scenario (nominal): Keys of the editor in the status line
+### Scenario S3 (nominal): Keys of the editor in the status line
 
 | Platform | The status line ends with |
 | --- | --- |
@@ -72,7 +97,7 @@ The text before the first separator dot is exactly one of the three forms.
 
 The keys before the done key read "Enter: new line · Tab: indent · Esc: cancel". In an editor opened on a one-line card part (a card title, `:header:` or `:footer:` line, SwRS-MDOKFSTUDIO-BLOCK-258), where Enter is done, they read "Enter: done · Esc: cancel": the whole hint is "Line 18 · Enter: done · Esc: cancel · ⌘↩: done" on macOS and ends with "Ctrl+Enter: done" on Windows or Linux.
 
-### Scenario (nominal): Done and Cancel buttons
+### Scenario S4 (nominal): Done and Cancel buttons
 
 - GIVEN an open block editor
 - WHEN the frame is inspected
@@ -81,54 +106,54 @@ The keys before the done key read "Enter: new line · Tab: indent · Esc: cancel
 - WHEN the buttons are listed
 - THEN no button named Save Markdown block or Cancel Markdown edit exists
 
-### Scenario (boundary): Pressing Done or Cancel keeps the focus in the text box
+### Scenario S5 (boundary): Pressing Done or Cancel keeps the focus in the text box
 
 | Input | Outcome |
 | --- | --- |
 | Mouse button pressed on Done, with typed text in the editor | The mousedown default is prevented, the text box keeps the focus and no blur save is posted before the click |
 | Mouse button pressed on Cancel, same editor | The same applies |
 
-### Scenario (boundary): A click inside the frame stays inside it
+### Scenario S6 (boundary): A click inside the frame stays inside it
 
 | Input | Outcome |
 | --- | --- |
 | Click in the text box, the status line or between the buttons | The document click listeners do not run, so no other editor opens and the block selection is not touched |
 | Click on another block while the editor is open | The document listeners run as usual |
 
-### Scenario (nominal): Block editor names
+### Scenario S7 (nominal): Block editor names
 
 - GIVEN edit mode on
 - WHEN a block editor opens on a paragraph
 - THEN the frame has role region and the aria-label Raw Markdown editor, and the text box has the aria-label Raw Markdown block
 
-### Scenario (boundary): Cell that cannot be parsed
+### Scenario S8 (boundary): Cell that cannot be parsed
 
 - GIVEN the editor of a table cell whose source cannot be parsed as a pipe table
 - WHEN it opens
 - THEN the frame falls back to the raw names above, as specified by SwRS-MDOKFSTUDIO-TABLE-001; an ordinary cell editor is named "Markdown table cell editor" by the table editing behaviour
 
-### Scenario (nominal): Text box attributes
+### Scenario S9 (nominal): Text box attributes
 
 | Text box of | Attributes set |
 | --- | --- |
 | a block editor receiving its source | spellcheck is false and autocorrect, autocapitalize and autocomplete are off |
 | an insertion editor | the same four attributes |
 
-### Scenario (nominal): The rendered block is hidden while its editor is open
+### Scenario S10 (nominal): The rendered block is hidden while its editor is open
 
 | Editor | Rendered block |
 | --- | --- |
 | a paragraph in edit mode, its editor opens | the paragraph carries data-sphinx-preview-editing true and is not displayed, with the frame right after it |
 | the open editor closes | the attribute is removed and the paragraph is displayed again; a diagram block follows the same rule, see SwRS-MDOKFSTUDIO-DIAG-001 |
 
-### Scenario (nominal): The frame is a one pixel accent frame with monospace text
+### Scenario S11 (nominal): The frame is a one pixel accent frame with monospace text
 
 | Pane | Measured frame |
 | --- | --- |
 | a paragraph editor open in the dark theme at 900 px | the border is 1 px, the font is monospace one pixel smaller than the editor font size and the tab size is 4 |
 | the same editor at 460 px | the same border, font and tab size apply and the frame stays inside the column |
 
-### Scenario (nominal): The text box grows with its text
+### Scenario S12 (nominal): The text box grows with its text
 
 - GIVEN an open editor, one row high at creation
 - WHEN the writer types more lines, or the preview layout changes, for example a width change

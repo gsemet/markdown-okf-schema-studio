@@ -10,7 +10,7 @@ const FIXTURE = "91-delete-block-bar";
 
 export const DELETE_BLOCK_BAR_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S2
     id: "block-editing/v42-delete-block-bar-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -23,7 +23,8 @@ export const DELETE_BLOCK_BAR_SCENARIOS: ScenarioDefinition[] = [
       + "button touching the down arrow (the `hover` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S2
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
     id: "block-editing/v43-delete-block-bar-status-dark-900",
     fixture: FIXTURE,
     theme: "dark",

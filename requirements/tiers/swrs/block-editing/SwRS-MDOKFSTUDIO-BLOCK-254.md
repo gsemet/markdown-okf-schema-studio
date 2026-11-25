@@ -19,6 +19,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
 depends_on: []
+scenarios:
+- id: S1
+  title: Right goes down, Left and Escape go up
+- id: S2
+  title: Walking the cells of a table
+- id: S3
+  title: Walking a list
+- id: S4
+  title: Keys that belong to other controls
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,7 +52,7 @@ default_owner_email: gaetan@xeberon.net
 
 When edit mode is on and no editor is open, the page SHALL move the keyboard selection one level down with ArrowRight (a table to its first cell, an admonition, card or tab to its first inner block, a list to its first item, a list item to its first inner block, the whole page to its first block) and one level up with ArrowLeft or Escape, move a selected table cell with the four arrow keys without wrapping, and open with Enter the editor of the selected cell, list item or block of a list item.
 
-### Scenario (nominal): Right goes down, Left and Escape go up
+### Scenario S1 (nominal): Right goes down, Left and Escape go up
 
 - GIVEN edit mode on, no editor open and a block selected by the keyboard (or no selection, with the page itself holding the focus)
 - WHEN the writer presses ArrowRight
@@ -58,7 +67,7 @@ When edit mode is on and no editor is open, the page SHALL move the keyboard sel
 | ArrowUp or ArrowDown on a top-level block | The block-to-block selection of BLOCK-004 |
 | A block that comes from an include | It is never entered |
 
-### Scenario (nominal): Walking the cells of a table
+### Scenario S2 (nominal): Walking the cells of a table
 
 - GIVEN a table cell selected by the keyboard
 - WHEN the writer presses ArrowLeft, ArrowRight, ArrowUp or ArrowDown
@@ -66,7 +75,7 @@ When edit mode is on and no editor is open, the page SHALL move the keyboard sel
 
 Escape returns the selection to the table block. Enter opens the cell editor through the same path as a click on the cell, and the cell highlight goes away.
 
-### Scenario (nominal): Walking a list
+### Scenario S3 (nominal): Walking a list
 
 - GIVEN edit mode on, no editor open and a list selected by the keyboard, whose first item (lines 80 to 83, line 83 blank) holds two paragraphs (lines 80 and 82) and whose second item holds one paragraph (lines 84 and 85)
 - WHEN the writer presses ArrowRight, then Enter; or ArrowRight twice, ArrowDown, then Enter; or ArrowRight twice, ArrowLeft twice, then Enter
@@ -74,7 +83,7 @@ Escape returns the selection to the table block. Enter opens the cell editor thr
 
 A click on a list item opens the item, not the block under the click (SwRS-MDOKFSTUDIO-BLOCK-014): only the keyboard reaches a block inside an item.
 
-### Scenario (refusal): Keys that belong to other controls
+### Scenario S4 (refusal): Keys that belong to other controls
 
 | Input | Outcome |
 | --- | --- |

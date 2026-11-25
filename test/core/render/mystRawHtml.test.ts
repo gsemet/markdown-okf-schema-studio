@@ -41,7 +41,7 @@ async function render(text: string, requestId = 1): Promise<ReturnType<typeof pa
   return parseHtml(rewritten.html);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S1
 test("a centred README header renders as a div with the image at its size and the Markdown inside", async () => {
   const html = await render(README);
   const div = findElement(html, (element) => element.tagName === "div" && attribute(element, "align") === "center");
@@ -62,7 +62,7 @@ test("a centred README header renders as a div with the image at its size and th
   assert.equal(textContent(findElement(html, (e) => e.tagName === "p" && textContent(e) === "After.")!), "After.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S4
 test("an HTML block carries its literal opening tag as the edit-mode title", async () => {
   const html = await render(`${README}\n<p align="right" class="x">\n  <img src="a.png">\n</p>\n`);
   const blocks = findElements(html, (element) => hasClass(element, "okf-html-block"));
@@ -74,7 +74,7 @@ test("an HTML block carries its literal opening tag as the edit-mode title", asy
   assert.equal(attribute(blocks[1], "class"), "okf-html-block");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S5
 test("a picture with colour-scheme sources renders one image per theme, not per system", async () => {
   const html = await render([
     "<p align=\"center\">",
@@ -98,7 +98,8 @@ test("a picture with colour-scheme sources renders one image per theme, not per 
   assert.equal(findElements(picture, isTag("source")).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S5
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S6
 test("br, sub, sup, kbd, an image link and details render like on GitHub", async () => {
   const html = await render([
     "Line one<br>line two H<sub>2</sub>O x<sup>2</sup> press <kbd>Ctrl</kbd>.",
@@ -121,7 +122,8 @@ test("br, sub, sup, kbd, an image link and details render like on GitHub", async
   assert.equal(textContent(findElement(details, isTag("em"))!), "text");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S6
 test("raw HTML keeps no script, event handler, style, class or script URL", async () => {
   const html = await render([
     "<div align=\"center\" onclick=\"steal()\" style=\"position:fixed\" class=\"evil\" id=\"x\">",
@@ -153,7 +155,8 @@ test("raw HTML keeps no script, event handler, style, class or script URL", asyn
   assert.doesNotMatch(textContent(div), /steal|frame text/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S2
 test("raw HTML that holds none of the README elements is not turned into elements", async () => {
   const html = await render("<model_allocation>token</model_allocation>\n\n<custom-tag>\n\nAfter.\n");
   assert.equal(findElements(html, (e) => hasClass(e, "okf-html-block")).length, 0);

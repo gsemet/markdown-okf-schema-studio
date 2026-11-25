@@ -17,7 +17,8 @@ const thread = (id: string, body: string): CommentThread => ({
   comments: [{ id: `c${id}`, author: "Ada", createdAt: "2026-10-21T10:00:00Z", body }],
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S5
 test("a change that makes the serialized file larger than 2 MiB is refused before the write", async () => {
   const files = new Map<string, string>();
   let writes = 0;

@@ -22,6 +22,11 @@ tier: StRS
 derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Reply to an inline thread
+- id: S2
+  title: Delete an inline thread
 user_need: As a writer, I keep a discussion in the file itself and answer it
   where I read it, and I never have a thread change collide with the text I am
   typing.
@@ -73,7 +78,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Reply to an inline thread
+#### Path S1: Reply to an inline thread
 
 1. A document holds an inline THREAD comment
    - SwRS-MDOKFSTUDIO-REVIEW-167: the renderer writes a green chip with a label, and the open thread lists one entry for each message
@@ -85,7 +90,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-REVIEW-186 (refusal): lines that are not exactly one thread
 4. The reply is in the thread comment
 
-#### Path 2: Delete an inline thread
+#### Path S2: Delete an inline thread
 
 1. The thread chip is open with its messages
    - SwRS-MDOKFSTUDIO-REVIEW-171: the reader presses Delete thread, which asks no confirmation, and the delete goes to the host

@@ -111,7 +111,7 @@ const indentCases: [string, boolean, string | undefined][] = [
 ];
 
 for (const [input, outdent, expected] of indentCases) {
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061#S1
   test("indentSelection " + (outdent ? "outdent " : "indent ") + JSON.stringify(input), () => {
     assert.equal(indent(input, outdent), expected);
   });
@@ -132,7 +132,7 @@ const caretCases: [string, string, string, string, string | undefined][] = [
 ];
 
 for (const [name, source, before, after, expected] of caretCases) {
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-026
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-026#S4
   test("mapRenderedCaret " + name, () => {
     const caret = createTextEditingTools().mapRenderedCaret(source, before, after);
     if (expected === undefined) {
@@ -144,7 +144,7 @@ for (const [name, source, before, after, expected] of caretCases) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S1
 test("wrapSelection wraps a non-empty selection with the marker and keeps it selected", () => {
   for (const marker of ["*", "_", "`", "~"]) {
     const edit = tools.wrapSelection("a foo b", 2, 5, marker);
@@ -203,7 +203,7 @@ function deleteLine(value: string, start: number, end = start): string | undefin
   return text.slice(0, edit.selectionStart) + "|" + text.slice(edit.selectionStart);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 test("CR 119: deleteLine removes the caret line with its break and keeps the column on the next line", () => {
   assert.equal(deleteLine("one\ntwo\nthree", 5), "one\nt|hree");
   assert.equal(deleteLine("one\ntwo\nthree", 1), "t|wo\nthree");
@@ -211,7 +211,7 @@ test("CR 119: deleteLine removes the caret line with its break and keeps the col
   assert.equal(deleteLine("a\n\nb", 2), "a\n|b", "an empty line goes too");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 test("CR 119: deleteLine on the last line takes the break before it and moves the caret up", () => {
   assert.equal(deleteLine("one\ntwo\nthree", 10), "one\ntw|o");
   assert.equal(deleteLine("one\ntwo\n", 8), "one\n|two", "the empty line after the final break goes");
@@ -219,7 +219,7 @@ test("CR 119: deleteLine on the last line takes the break before it and moves th
   assert.equal(deleteLine("", 0), undefined, "no text, no edit");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S2
 test("CR 119: deleteLine removes every line a selection touches, not the line it ends at the start of", () => {
   assert.equal(deleteLine("a\nb\nc\nd", 2, 5), "a\n|d", "a selection over b and c");
   assert.equal(deleteLine("a\nb\nc\nd", 1, 4), "c|\nd", "from the end of a to the start of c: a and b");

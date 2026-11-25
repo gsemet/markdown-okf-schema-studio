@@ -79,13 +79,16 @@ async function withFixture(
   }
 }
 
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-025
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-016
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-166
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
+// @accepts_req StRS-MDOKFSTUDIO-BLOCK-025#S2
+// @accepts_req StRS-MDOKFSTUDIO-BLOCK-016#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-166#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-166#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S8
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S4
 /** Copy, cut and paste of blocks as Markdown, and every unsafe request refused. */
 export async function run(): Promise<void> {
   await withFixture("block-clipboard", async (document, send) => {
@@ -137,7 +140,7 @@ export async function run(): Promise<void> {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S1
 /** One cut is one undo step, one paste is one undo step. Needs a real keyboard-free undo command. */
 export async function runUndo(): Promise<void> {
   await withFixture("block-clipboard-undo", async (document, send) => {

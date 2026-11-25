@@ -33,7 +33,7 @@ function select(editor: unknown, lines: number[], kind?: number): void {
   fake.controls.events.changeSelection.fire({ textEditor: editor, selections, ...(kind === undefined ? {} : { kind }) });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-186
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-186#S1
 test("only a command selection of one range in a Markdown file is a jump; the recorder sees every change", () => {
   const file = writeFile("# One\n\ntext\n\nmore\n");
   fake.controls.openTab(file, { fire: false });
@@ -57,7 +57,7 @@ test("only a command selection of one range in a Markdown file is a jump; the re
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-186
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-186#S1
 test("a selection Studio asked for is used up by the first matching change and is no jump", () => {
   const file = writeFile("# One\n\ntext\n");
   fake.controls.openTab(file, { fire: false });
@@ -75,7 +75,7 @@ test("a selection Studio asked for is used up by the first matching change and i
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-186
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-186#S1
 test("a file that is not Markdown is no jump target", () => {
   const file = writeFile("plain\n", workspaceRoot, `plain-jump-${process.pid}.txt`);
   fake.controls.openTab(file, { fire: false });
@@ -89,7 +89,7 @@ test("a file that is not Markdown is no jump target", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187#S1
 test("a command selection on either side of a diff is a jump to the real file", () => {
   const file = writeFile("# Real\n\ntext\n");
   const git = Uri.file(file).with({ scheme: "git" });
@@ -109,7 +109,7 @@ test("a command selection on either side of a diff is a jump to the real file", 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187#S1
 test("the activation sends a jump to the following side preview only, and Open as Text sends none", async (t: TestContext) => {
   fake.controls.studioTabs.length = 0;
   const studio = startStudio(t.mock.timers);

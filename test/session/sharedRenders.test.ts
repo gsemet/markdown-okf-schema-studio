@@ -29,7 +29,7 @@ function fakeRun(counter: { runs: number; disposed: number }) {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S5
 test("consumers of one key share one render; the stage is disposed with the last copy", async () => {
   const shared = new SharedRenders();
   const counter = { runs: 0, disposed: 0 };
@@ -48,7 +48,8 @@ test("consumers of one key share one render; the stage is disposed with the last
   assert.equal(counter.disposed, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S5
 test("another revision, or an invalidation, starts its own render", async () => {
   const shared = new SharedRenders();
   const counter = { runs: 0, disposed: 0 };

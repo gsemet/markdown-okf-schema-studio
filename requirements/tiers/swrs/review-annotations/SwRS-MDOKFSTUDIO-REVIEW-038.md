@@ -17,6 +17,19 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: A selection in body blocks shows the button
+- id: S2
+  title: No button for a collapsed selection or for text outside body blocks
+- id: S3
+  title: The button is hidden while busy
+- id: S4
+  title: Pressing the button keeps the selection
+- id: S5
+  title: Copy and Shift+click keep working
+- id: S6
+  title: The keyboard shortcut opens the comment box
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,14 +49,14 @@ supersedes:
 
 When a reader selects text inside mapped body blocks of a preview, the page SHALL show a Comment button near the selection, and open the comment box for that selection on Cmd+Alt+M (macOS) or Ctrl+Alt+M (elsewhere).
 
-### Scenario (nominal): A selection in body blocks shows the button
+### Scenario S1 (nominal): A selection in body blocks shows the button
 
 | Given | When | Then |
 | --- | --- | --- |
 | a preview and a selection inside one paragraph | the selection is made | a button labelled "Add a comment on the selected text" and reading "Comment" appears near the selection range |
 | a selection that starts in one paragraph and ends in another | the selection is made | the button appears |
 
-### Scenario (refusal): No button for a collapsed selection or for text outside body blocks
+### Scenario S2 (refusal): No button for a collapsed selection or for text outside body blocks
 
 | Input | Outcome |
 | --- | --- |
@@ -59,28 +72,28 @@ When a reader selects text inside mapped body blocks of a preview, the page SHAL
 | a selection inside a Mermaid or PlantUML figure | no button is shown |
 | a selection inside an ordinary paragraph | the button is offered |
 
-### Scenario (refusal): The button is hidden while busy
+### Scenario S3 (refusal): The button is hidden while busy
 
 | Given | When | Then |
 | --- | --- | --- |
 | a selection being made with the mouse button held | the selection changes | no button is shown until the mouse button is released |
 | a block editor open, or blocks selected | the selection changes | no button is shown |
 
-### Scenario (nominal): Pressing the button keeps the selection
+### Scenario S4 (nominal): Pressing the button keeps the selection
 
 | Event | Outcome |
 | --- | --- |
 | mousedown on the Comment button | default-prevented and the selection is unchanged |
 | mouseup and click events reaching the page | keep their default behaviour |
 
-### Scenario (nominal): Copy and Shift+click keep working
+### Scenario S5 (nominal): Copy and Shift+click keep working
 
 | Input, with a selection that shows the button | Outcome |
 | --- | --- |
 | Cmd+C or Ctrl+C | the key event is not intercepted |
 | Shift+click in the text | the click is not intercepted |
 
-### Scenario (nominal): The keyboard shortcut opens the comment box
+### Scenario S6 (nominal): The keyboard shortcut opens the comment box
 
 | Input | Outcome |
 | --- | --- |

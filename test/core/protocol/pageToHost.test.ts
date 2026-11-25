@@ -61,7 +61,8 @@ test("previewCopyText needs an edit id and a string; the 1 MB limit is the host'
   assert.equal(isRegisteredPreviewMessage({ ...copy, editId: "" }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("previewExportHtml needs an edit id, a user gesture flag and a snapshot of the page shape", () => {
   const snapshot = { contentHtml: "<main></main>", rootAttributes: {}, tokens: {}, mathStyles: "", shownTabs: [0] };
   const request = { type: "previewExportHtml", documentId: "doc", revision: 1, requestId: 1, editId: "e", snapshot, userGesture: true };
@@ -89,7 +90,8 @@ test("field helpers respect their boundaries", () => {
   assert.equal(isOneOf(1, ["a", "b"] as const), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S5
 test("previewViewPreferenceChanged validates the value per preference", () => {
   const base = { type: "previewViewPreferenceChanged", documentId: "doc", revision: 1, requestId: 1 };
   const ok = (preference: unknown, value: unknown): boolean =>
@@ -119,7 +121,7 @@ test("previewViewPreferenceChanged validates the value per preference", () => {
   assert.equal(ok("__proto__", true), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S8
 test("previewHistoryGo accepts only back or forward", () => {
   const base = { type: "previewHistoryGo", documentId: "doc", revision: 1, requestId: 1 };
   assert.equal(isRegisteredPreviewMessage({ ...base, direction: "back" }), true);
@@ -128,7 +130,7 @@ test("previewHistoryGo accepts only back or forward", () => {
   assert.equal(isRegisteredPreviewMessage({ ...base }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S12
 test("previewPaletteModeChanged accepts only strict, gfm, myst or full", () => {
   const base = { type: "previewPaletteModeChanged", documentId: "doc", revision: 1, requestId: 1 };
   for (const mode of ["strict", "gfm", "myst", "full"]) {
@@ -173,7 +175,8 @@ test("T30: the list and pick messages carry an edit id and no other payload", ()
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S6
 test("previewEditModeChanged, previewEditOpen, previewEditSave and previewEditCancel refuse a malformed message", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
   assert.equal(isRegisteredPreviewMessage({ ...base, type: "previewEditModeChanged", editMode: true }), true);
@@ -213,8 +216,10 @@ test("previewEditModeChanged, previewEditOpen, previewEditSave and previewEditCa
   assert.equal(isRegisteredPreviewMessage({ ...save, final: true, pinLine: 3, pinViewportTop: 10 }), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S7
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S10
 test("previewBlockMove validates both ranges, the direction and the optional pin", () => {
   const move = {
     type: "previewBlockMove", documentId: "doc", revision: 1, requestId: 1,
@@ -231,7 +236,8 @@ test("previewBlockMove validates both ranges, the direction and the optional pin
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S7
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S9
 test("T40: the block clipboard messages validate their lines and the optional pin", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
   for (const type of ["previewBlocksCopy", "previewBlocksCut"]) {
@@ -252,7 +258,7 @@ test("T40: the block clipboard messages validate their lines and the optional pi
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S7
 test("T38: previewPasteImage caps the size and accepts plain base64 of an allowed type only", () => {
   const base = {
     type: "previewPasteImage", documentId: "doc", revision: 1, requestId: 1,
@@ -270,7 +276,7 @@ test("T38: previewPasteImage caps the size and accepts plain base64 of an allowe
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-213
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-213#S3
 test("T1: previewPasteHtml accepts a bounded non-empty HTML string with an edit id", () => {
   const base = { type: "previewPasteHtml", documentId: "doc", revision: 1, requestId: 1, editId: "host-1", html: "<b>x</b>" };
   assert.equal(isRegisteredPreviewMessage(base), true);
@@ -279,8 +285,10 @@ test("T1: previewPasteHtml accepts a bounded non-empty HTML string with an edit 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S9
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S11
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S9
 test("T43: previewCommentCreate and previewCommentReply validate anchor, id and body limits", () => {
   const anchor = { line: 2, endLine: 3, quote: "q", prefix: "p", suffix: "s" };
   const create = { type: "previewCommentCreate", documentId: "doc", revision: 1, requestId: 1, anchor, body: "Why?" };
@@ -303,7 +311,8 @@ test("T43: previewCommentCreate and previewCommentReply validate anchor, id and 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S10
 test("T44: previewCommentResolve and previewCommentDelete validate the thread id and the flag", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1, threadId: "t_0a0b0c0d" };
   const resolve = { type: "previewCommentResolve", ...base, resolved: true };
@@ -320,7 +329,8 @@ test("T44: previewCommentResolve and previewCommentDelete validate the thread id
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S5
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016#S9
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016#S11
 test("previewFrontmatterSave is refused without a field name, an edit id, or a value or a removal", () => {
@@ -337,7 +347,7 @@ test("previewFrontmatterSave is refused without a field name, an edit id, or a v
   assert.equal(isRegisteredPreviewMessage(noValue), false, "neither a value nor a removal");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S12
 test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
   const flushed = {
     type: "previewEditFlushed", documentId: "doc", revision: 1, requestId: 1, flushId: "flush-1", flushed: true,
@@ -350,21 +360,22 @@ test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S11
 test("STAB-03: previewEditClosed carries the id of the closed editor", () => {
   const closed = { type: "previewEditClosed", documentId: "doc", revision: 1, requestId: 1, editId: "edit-3" };
   assert.equal(isRegisteredPreviewMessage(closed), true);
   for (const patch of [{ editId: "" }, { editId: 3 }, { editId: undefined }, { editId: "e".repeat(101) }]) {
     assert.equal(isRegisteredPreviewMessage({ ...closed, ...patch }), false, JSON.stringify(patch));
   }
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
   assert.equal(isRegisteredPreviewMessage({ ...closed, detached: true }), true);
   for (const detached of [false, "yes", 1]) {
     assert.equal(isRegisteredPreviewMessage({ ...closed, detached }), false, String(detached));
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("previewEditReopen carries the id of the detached save and whether an editor reopened", () => {
   const reopen = { type: "previewEditReopen", documentId: "doc", revision: 1, requestId: 1, editId: "edit-3", reopened: false };
   assert.equal(isRegisteredPreviewMessage(reopen), true);
@@ -375,8 +386,10 @@ test("previewEditReopen carries the id of the detached save and whether an edito
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-192
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186#S5
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-192#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-192#S4
 test("previewThreadReply and previewThreadDelete validate the lines, the edit id and the text", () => {
   const reply = {
     type: "previewThreadReply", documentId: "doc", revision: 1, requestId: 1, editId: "host-1",
@@ -395,7 +408,7 @@ test("previewThreadReply and previewThreadDelete validate the lines, the edit id
   assert.equal(isRegisteredPreviewMessage({ ...remove, line: 8 }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
 test("previewFindReplace validates the edit id and every item of the replacement", () => {
   const item = { line: 3, endLine: 4, find: "studio", occurrence: 1, occurrences: 2, replacement: "atelier" };
   const base = { type: "previewFindReplace", documentId: "doc", revision: 1, requestId: 1, editId: "find-1", items: [item] };
@@ -413,7 +426,7 @@ test("previewFindReplace validates the edit id and every item of the replacement
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
 test("previewFindReplace takes an optional boolean dry-run flag", () => {
   const item = { line: 3, endLine: 4, find: "studio", occurrence: 1, occurrences: 2, replacement: "atelier" };
   const base = { type: "previewFindReplace", documentId: "doc", revision: 1, requestId: 1, editId: "find-1", items: [item] };
@@ -465,7 +478,8 @@ test("CR 050: the warning banner messages are registered with a bounded key", ()
   assert.equal(isRegisteredPreviewMessage({ type: "previewShowProblems" }), false, "the envelope is required");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S4
 test("CR147: previewSideBySideChanged carries a boolean and names the current render", () => {
   const base = { type: "previewSideBySideChanged", documentId: "doc", revision: 1, requestId: 1 };
   assert.equal(isRegisteredPreviewMessage({ ...base, on: true }), true);
@@ -474,7 +488,7 @@ test("CR147: previewSideBySideChanged carries a boolean and names the current re
   assert.equal(isRegisteredPreviewMessage({ ...base }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("the save request is registered, needs the envelope and carries nothing else", () => {
   const envelope = { documentId: "file:///chapter.md", revision: 3, requestId: 7 };
   assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewSaveRequest" }), true);
@@ -482,7 +496,8 @@ test("the save request is registered, needs the envelope and carries nothing els
   assert.equal(isRegisteredPreviewMessage({ ...envelope, documentId: 4, type: "previewSaveRequest" }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S9
 test("previewScroll and previewReveal accept a source line, an anchor line and a scroll offset within bounds", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
   for (const type of ["previewScroll", "previewReveal"]) {
@@ -500,7 +515,7 @@ test("previewScroll and previewReveal accept a source line, an anchor line and a
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032#S8
 test("previewRefresh carries the reading state as optional fields and refuses the fields of other types", () => {
   const base = { type: "previewRefresh", documentId: "doc", revision: 1, requestId: 1 };
   const ok = (fields: Record<string, unknown>): boolean => isRegisteredPreviewMessage({ ...base, ...fields });
@@ -520,7 +535,7 @@ test("previewRefresh carries the reading state as optional fields and refuses th
   assert.equal(ok({ fieldValueFormat: "yaml" }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
 test("CR-476: a blank line in a block edit or a paste is one line (endLine equals line) and the insertion point above it", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
   const run = { line: 4, endLine: 4 };
@@ -546,7 +561,7 @@ test("CR-476: a blank line in a block edit or a paste is one line (endLine equal
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
 test("CR-448: the item line of a blank run inside a list is a source line above the run", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
   const withItem = (itemLine: unknown) => ({ line: 4, endLine: 4, itemLine });
@@ -570,7 +585,8 @@ test("CR-448: the item line of a blank run inside a list is a source line above 
   assert.equal(isRegisteredPreviewMessage({ ...frontmatter, replaceBlankRun: withItem(1) }), false, "a type that takes no run");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("CR-476: previewBlankRunDelete validates one line (endLine equals line) and the optional pin", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1, type: "previewBlankRunDelete" };
   const message = { ...base, line: 4, endLine: 4, pinViewportTop: 10 };
@@ -584,7 +600,7 @@ test("CR-476: previewBlankRunDelete validates one line (endLine equals line) and
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("CR-462: the container line of a blank run is a source line above the run, never with an item line", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
   const withContainer = (containerLine: unknown, itemLine?: unknown) => ({ line: 4, endLine: 4, containerLine, itemLine });

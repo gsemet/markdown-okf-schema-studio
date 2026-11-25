@@ -100,7 +100,8 @@ function harness(options: { failWrite?: boolean; beforeWrite?: (files: FileSyste
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S2
 test("a pasted image never shows under its name before all its bytes are written", async () => {
   const { files, seenMidWrite, paste, images } = harness();
   const result = await paste();
@@ -119,7 +120,8 @@ test("a failed write leaves no file, empty or partial, and the page gets the rea
   assert.deepEqual(await images(), [], "the folder keeps no file of the failed paste");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S6
 test("a file created under the chosen name during the write is kept and the paste takes the next name", async () => {
   const other = new TextEncoder().encode("written by someone else");
   const { files, paste, images, pastedImages } = harness({
@@ -134,7 +136,7 @@ test("a file created under the chosen name during the write is kept and the past
   assert.deepEqual(await images(), ["image-1.png", "image.png"], "the hidden file of the paste is removed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S3
 test("the next paste removes old hidden partial files of its own naming and nothing else", async () => {
   const old = Date.now() - 60 * 60 * 1000;
   const { files, paste, images } = harness();

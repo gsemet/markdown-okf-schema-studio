@@ -16,6 +16,17 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
+scenarios:
+- id: S1
+  title: A field of the front matter in the text
+- id: S2
+  title: The value follows the front matter
+- id: S3
+  title: Types of value
+- id: S4
+  title: A field without a value
+- id: S5
+  title: Code that is not the form
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,19 +46,19 @@ default_owner_email: gaetan@xeberon.net
 
 When inline code in the body is exactly = this.field or =this.field and the front matter of the document holds a value for that field, the preview SHALL show that value as plain text in place of the inline code, and SHALL show the inline code as written with a warning style and report a warning when the field is missing.
 
-### Scenario (nominal): A field of the front matter in the text
+### Scenario S1 (nominal): A field of the front matter in the text
 
 - GIVEN a document whose front matter has `title: Hello` and a body line Title: followed by inline code that holds = this.title
 - WHEN the preview renders the document
 - THEN the line reads "Title: Hello", the value is a span of plain text and no code element remains
 
-### Scenario (nominal): The value follows the front matter
+### Scenario S2 (nominal): The value follows the front matter
 
 - GIVEN the same document shown in the preview
 - WHEN the front matter value changes, in the properties table or in the text editor
 - THEN the next render shows the new value, and the source keeps the expression
 
-### Scenario (boundary): Types of value
+### Scenario S3 (boundary): Types of value
 
 | Value of the field | Shown as |
 | --- | --- |
@@ -59,13 +70,13 @@ When inline code in the body is exactly = this.field or =this.field and the fron
 
 The form is inline code that holds exactly = this.field or =this.field, with at most one space after the equals sign. The number of backticks that delimit the inline code does not change its text: to show the form itself as code, keep a backtick inside the code (`` `= this.field` ``, shown with its backticks) or put it in a fenced block. The value is set as text: HTML and Markdown in it are never interpreted. A table of contents entry built from a heading that holds the form reads the value, and the heading anchor and the link of the entry are built from the value too (they agree, and they change when the value changes). An included file is part of the rendered document: its form reads the front matter of the including document. An empty object counts as without a value, like an empty list.
 
-### Scenario (failure): A field without a value
+### Scenario S4 (failure): A field without a value
 
 - GIVEN a field that is absent, empty or null, a path through a scalar, an inherited name such as toString, a document without front matter, or a front matter that is not valid YAML
 - WHEN the preview renders the inline code that names it
 - THEN the inline code stays as written with a dashed warning underline and a title that says why, never an empty string, and the render reports one warning with the line (at most 20 per render)
 
-### Scenario (boundary): Code that is not the form
+### Scenario S5 (boundary): Code that is not the form
 
 - GIVEN inline code such as `= this.title x`, `==this.title`, `= that.title`, `= this.` or `x = this.title`, inline code that keeps a backtick around the form such as `` `= this.title` ``, or a fenced block that holds the expression
 - WHEN the preview renders the document

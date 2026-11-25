@@ -63,8 +63,8 @@ function messagesOf(harness: RuntimeHarness, type: string): Array<Record<string,
   return harness.messages.filter((message) => message.type === type);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S3
 test("Cmd/Ctrl+F in a block editor opens the find bar at once: later keys go to the query, not the Markdown", () => {
   const harness = focusingHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -92,8 +92,9 @@ test("Cmd/Ctrl+F in a block editor opens the find bar at once: later keys go to 
   for (const save of saves) assert.doesNotMatch(String(save.editedText), /X|Y/u, "the keys typed after Cmd/Ctrl+F stay out of the Markdown");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S3
 test("unsaved block edits survive Cmd/Ctrl+F exactly: one final save on the blur, the query holds only the keys typed after", () => {
   const harness = focusingHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -152,7 +153,7 @@ test("unsaved block edits survive Cmd/Ctrl+F exactly: one final save on the blur
   assert.equal(textarea.value, edited);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
 test("the host's find command after the page opened the bar from an editor changes nothing", () => {
   const harness = focusingHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -182,7 +183,8 @@ test("the host's find command after the page opened the bar from an editor chang
   findInput.focusOptions = focusOptions;
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
 test("the find bar opened from a block editor starts with the text selected in the text box", () => {
   const harness = focusingHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -194,8 +196,8 @@ test("the find bar opened from a block editor starts with the text selected in t
   assert.equal(findInput.value, "paragraph");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S6
 // The blur commit closes an unchanged editor at once (a changed one when the host answers its save):
 // Escape then closes the bar and lets the focus go. The bar gives it back to the text box only while
 // that is still in the page (`isConnected`, which this harness does not model).
@@ -220,7 +222,7 @@ test("Escape closes the find bar opened from a block editor; the unchanged edito
   assert.notEqual(harness.document.activeElement, findInput, "the bar closed and its field let the focus go");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
 test("Cmd/Ctrl+F in a table cell editor opens the find bar at once; later keys go to the query", () => {
   const harness = focusingHarness();
   const input = openTableCellEditor(harness);
@@ -237,7 +239,8 @@ test("Cmd/Ctrl+F in a table cell editor opens the find bar at once; later keys g
   for (const save of messagesOf(harness, "previewEditSave")) assert.doesNotMatch(String(save.editedText), /XY/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S4
 test("Cmd/Ctrl+F in a frontmatter field opens the find bar at once; later keys go to the query", () => {
   const harness = createRuntimeHarness({ trackFocus: true, blurOnFocusChange: true });
   harness.frontmatterRow.setAttribute("data-okf-type", "text");

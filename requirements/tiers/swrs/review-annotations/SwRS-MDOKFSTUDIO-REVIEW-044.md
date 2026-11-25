@@ -21,6 +21,39 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: Box content
+- id: S2
+  title: Save or Cmd/Ctrl+Enter sends the comment
+- id: S3
+  title: Empty or blank text is not sent
+- id: S4
+  title: Escape or Cancel closes the box
+- id: S5
+  title: Keys typed in the box stay in the box
+- id: S6
+  title: A saved comment closes the box
+- id: S7
+  title: A refused comment keeps the box and its text
+- id: S8
+  title: No answer from the host after 15 seconds
+- id: S9
+  title: The host answers a blank or invalid comment as empty
+- id: S10
+  title: "Reply box: the popover of a preview ends with the reply box"
+- id: S11
+  title: "Reply box: none without a reply hook"
+- id: S12
+  title: "Reply box: Reply sends the thread id and the trimmed text"
+- id: S13
+  title: "Reply box: keys typed in the box stay in the box"
+- id: S14
+  title: "Reply box: length of the reply"
+- id: S15
+  title: "Reply box: a reply accepted by the host empties the box"
+- id: S16
+  title: "Reply box: a reply the host does not accept keeps its text"
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,7 +76,7 @@ supersedes:
 
 When a reader writes a comment in the comment box or a reply in the reply box of a thread popover, the page SHALL send the typed text to the host only on Save or Reply, Cmd+Enter or Ctrl+Enter with a text that is not blank, and keep the box and its text until the host answers that the text is saved.
 
-### Scenario (nominal): Box content
+### Scenario S1 (nominal): Box content
 
 When the comment box opens, the page shows a dialog named New comment holding the quoted text, a text area labelled Comment with the placeholder Write a comment and a limit of 10 000 characters, and Save and Cancel buttons.
 
@@ -52,19 +85,19 @@ When the comment box opens, the page shows a dialog named New comment holding th
 | A selection of the words "second paragraph" and the box opens | The dialog shows those words, an empty text area with the focus, Save and Cancel |
 | A selection whose text looks like HTML and the box opens | The quote and the typed text are set as text, never as markup |
 
-### Scenario (nominal): Save or Cmd/Ctrl+Enter sends the comment
+### Scenario S2 (nominal): Save or Cmd/Ctrl+Enter sends the comment
 
 - GIVEN a box holding the text "Why?"
 - WHEN the reader presses Save, or presses Cmd+Enter or Ctrl+Enter in the box
 - THEN a create message with the anchor of the selection and the body Why? is sent, exactly one per save, and Save is disabled until the host answers
 
-### Scenario (refusal): Empty or blank text is not sent
+### Scenario S3 (refusal): Empty or blank text is not sent
 
 - GIVEN an empty box, or a box holding only spaces
 - WHEN the reader presses Save, or presses Cmd+Enter
 - THEN no message is sent and the box stays open
 
-### Scenario (nominal): Escape or Cancel closes the box
+### Scenario S4 (nominal): Escape or Cancel closes the box
 
 | Input | Outcome |
 | --- | --- |
@@ -72,14 +105,14 @@ When the comment box opens, the page shows a dialog named New comment holding th
 | An open box with typed text and the reader presses Escape | The box asks Discard or Keep editing and nothing is sent (SwRS-MDOKFSTUDIO-REVIEW-218) |
 | An open box and the reader presses Cancel | The box closes, nothing is sent, and the selection state is looked at again |
 
-### Scenario (boundary): Keys typed in the box stay in the box
+### Scenario S5 (boundary): Keys typed in the box stay in the box
 
 | Input | Outcome |
 | --- | --- |
 | The reader types a letter that is also a shortcut in the open box | The letter goes to the text area, each key event is stopped, and no other key handler of the page acts |
 | A key is pressed outside the box and it is not the comment chord | The event is left alone |
 
-### Scenario (nominal): A saved comment closes the box
+### Scenario S6 (nominal): A saved comment closes the box
 
 | Input | Outcome |
 | --- | --- |
@@ -87,7 +120,7 @@ When the comment box opens, the page shows a dialog named New comment holding th
 | An answer of another kind arrives | The answer is ignored and the box stays |
 | An answer arrives with no save pending | The answer is ignored and the box stays |
 
-### Scenario (refusal): A refused comment keeps the box and its text
+### Scenario S7 (refusal): A refused comment keeps the box and its text
 
 - GIVEN a box waiting for the host
 - WHEN the host answers a create with ok false and the reason "the comments file is full."
@@ -97,14 +130,14 @@ When the comment box opens, the page shows a dialog named New comment holding th
 | --- | --- |
 | The answer ok false has no reason | The alert reads "The comment was not saved." |
 
-### Scenario (refusal): No answer from the host after 15 seconds
+### Scenario S8 (refusal): No answer from the host after 15 seconds
 
 - GIVEN a box waiting for the host
 - WHEN 15 seconds pass without an answer
 - THEN the alert reads "No answer from the editor. Your text is kept: try Save again.", the box and the text stay and Save is enabled
 - AND WHEN the host answers ok true later, THEN the box closes
 
-### Scenario (refusal): The host answers a blank or invalid comment as empty
+### Scenario S9 (refusal): The host answers a blank or invalid comment as empty
 
 When a create or reply message passes the protocol with a body that is blank or over 10 000 characters, the host answers ok false and writes nothing.
 
@@ -114,19 +147,19 @@ When a create or reply message passes the protocol with a body that is blank or 
 | A reply message with the body of three spaces | The page is told "the reply is empty or too long." |
 | A create message whose anchor is not valid (lines, quote of at most 500 characters, prefix and suffix of at most 32 characters) | The page is told "the comment is empty or too long." |
 
-### Scenario (nominal): Reply box: the popover of a preview ends with the reply box
+### Scenario S10 (nominal): Reply box: the popover of a preview ends with the reply box
 
 - GIVEN a preview and a thread
 - WHEN its popover opens
 - THEN the popover ends with the text area (aria-label "Reply to this thread", placeholder Reply, maxlength 10000) and the Reply button
 
-### Scenario (refusal): Reply box: none without a reply hook
+### Scenario S11 (refusal): Reply box: none without a reply hook
 
 - GIVEN a page whose host gave no reply hook (the runtime context carries commentsEnabled false, as in a test host)
 - WHEN the popover opens
 - THEN no reply box is shown
 
-### Scenario (nominal): Reply box: Reply sends the thread id and the trimmed text
+### Scenario S12 (nominal): Reply box: Reply sends the thread id and the trimmed text
 
 - GIVEN a reply box holding "  Thanks  "
 - WHEN the reader presses Reply, or presses Cmd+Enter or Ctrl+Enter in the box
@@ -136,28 +169,28 @@ When a create or reply message passes the protocol with a body that is blank or 
 - WHEN the reader presses Reply, or presses Cmd+Enter or Ctrl+Enter in the box
 - THEN nothing is sent (the body must not be empty)
 
-### Scenario (nominal): Reply box: keys typed in the box stay in the box
+### Scenario S13 (nominal): Reply box: keys typed in the box stay in the box
 
 - GIVEN an open reply box
 - WHEN the reader types a letter that is also a shortcut of the page
 - THEN the letter goes to the text area, the key event is stopped (stopImmediatePropagation) and no other key handler of the page acts
 - AND when the reader presses Cmd+Enter with text, the reply is sent and the event is stopped
 
-### Scenario (boundary): Reply box: length of the reply
+### Scenario S14 (boundary): Reply box: length of the reply
 
 | Input | Outcome |
 | --- | --- |
 | a reply of 10 000 characters | the reply is sent |
 | a text of 10 001 characters forced into the box | nothing is sent (the text area also carries maxlength 10000) |
 
-### Scenario (nominal): Reply box: a reply accepted by the host empties the box
+### Scenario S15 (nominal): Reply box: a reply accepted by the host empties the box
 
 - GIVEN a reply waiting for the host
 - WHEN the host answers ok true
 - THEN the reply box is emptied of the text that was sent
 - AND when the reader typed other text in the box after the reply was sent, the box keeps that new text (the box is cleared only when it still equals the sent text)
 
-### Scenario (refusal): Reply box: a reply the host does not accept keeps its text
+### Scenario S16 (refusal): Reply box: a reply the host does not accept keeps its text
 
 | Input | Outcome |
 | --- | --- |

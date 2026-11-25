@@ -14,7 +14,8 @@ function applyTo(id: string, value: string, selection: [number, number]): { valu
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278#S2
 test("vegaLite inserts a Vega-Lite bar chart fence set apart, its title selected, and the fence renders as a chart", () => {
   const out = applyTo("vegaLite", "Intro\n\nOutro", [5, 5])!;
   assert.match(out.value, /^Intro\n\n```vega-lite\n\{\n {2}"title": "Chart title",/u);
@@ -26,7 +27,7 @@ test("vegaLite inserts a Vega-Lite bar chart fence set apart, its title selected
   assert.equal(applyTo("vegaLite", "", [0, 0])!.value.startsWith("```vega-lite\n"), true, "an empty document gets no leading break");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278#S1
 test("vega inserts a Vega bar chart fence with inline data, its title selected", () => {
   const out = applyTo("vega", "Intro", [5, 5])!;
   assert.match(out.value, /^Intro\n\n```vega\n\{/u);

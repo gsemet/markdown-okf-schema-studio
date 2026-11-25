@@ -9,7 +9,8 @@ import { test } from "node:test";
 import { htmlToMarkdown } from "../../../src/core/paste/htmlToMarkdown";
 import { PREVIEW_THEME_CSS } from "../../../src/core/preview/previewStyles";
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217#S8
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217#S9
 test("elements that are not converted contribute their text only; converted ones keep their conversion", () => {
   assert.equal(
     htmlToMarkdown("<div>First <span>part</span></div><section>Second part</section>"),
@@ -21,7 +22,7 @@ test("elements that are not converted contribute their text only; converted ones
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-252
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-252#S5
 test("in forced-colours mode the slash menu uses Canvas and the lit command Highlight", () => {
   const forced = /@media \(forced-colors: active\) \{[\s\S]*?\.sphinx-preview-slash-menu \{([^}]*)\}\s*\.sphinx-preview-slash-option\[data-active="true"\] \{([^}]*)\}\s*\.sphinx-preview-slash-option\[data-active="true"\] \.sphinx-preview-slash-category,\s*\.sphinx-preview-slash-option\[data-active="true"\] \.sphinx-preview-slash-shortcut \{([^}]*)\}/u
     .exec(PREVIEW_THEME_CSS);

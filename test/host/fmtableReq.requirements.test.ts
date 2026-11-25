@@ -112,7 +112,7 @@ test("a frontmatter save from an older render is answered with a reopen hint; an
   assert.deepEqual(results(host, otherFrom), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S6
 test("a frontmatter save that VS Code does not apply is answered with a message; a thrown error gives its text", async (t) => {
   const originalApply = fakeVscode.workspace.applyEdit;
   t.after(() => { fakeVscode.workspace.applyEdit = originalApply; });

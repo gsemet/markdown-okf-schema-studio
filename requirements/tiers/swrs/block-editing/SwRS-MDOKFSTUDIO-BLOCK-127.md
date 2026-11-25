@@ -23,6 +23,26 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Blocks without an include
+- id: S2
+  title: The host refuses to move an included block
+- id: S3
+  title: The arrows beside an included block are disabled
+- id: S4
+  title: A selection never reaches an included block
+- id: S5
+  title: Copy and cut of an included block
+- id: S6
+  title: The host refuses to delete an included block
+- id: S7
+  title: The page refuses a paste from the insert point of an included block
+- id: S8
+  title: The host refuses a paste after a line that opens an include directive
+- id: S9
+  title: The host refuses a paste after the closing fence of an include
+    directive
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -51,7 +71,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a move, a copy, a cut, a block selection or a paste would involve a block that comes from an {include}, the extension SHALL refuse it, the page by disabling the arrow, ending or emptying the selection or showing a notice and the host by answering with the reason of that case, and change nothing.
 
-### Scenario (nominal): Blocks without an include
+### Scenario S1 (nominal): Blocks without an include
 
 | Input | Outcome |
 | --- | --- |
@@ -61,19 +81,19 @@ When a move, a copy, a cut, a block selection or a paste would involve a block t
 | The focused insert point of a normal block, the writer presses Ctrl+V | previewBlocksPaste is posted |
 | A paste after line 0 or after a line outside the text | The include check does not refuse |
 
-### Scenario (refusal): The host refuses to move an included block
+### Scenario S2 (refusal): The host refuses to move an included block
 
 - GIVEN a block whose first line opens an {include} fence (colon, backtick or tilde fence)
 - WHEN the move is planned
 - THEN it is refused with "A block that comes from an included file cannot be moved." and nothing changes
 
-### Scenario (refusal): The arrows beside an included block are disabled
+### Scenario S3 (refusal): The arrows beside an included block are disabled
 
 - GIVEN a block that comes from an include, with a normal block above it
 - WHEN the bars are built
 - THEN both arrows of the included block's bar are disabled, and the down arrow of the block above is disabled as well
 
-### Scenario (boundary): A selection never reaches an included block
+### Scenario S4 (boundary): A selection never reaches an included block
 
 | Input | Outcome |
 | --- | --- |
@@ -82,31 +102,31 @@ When a move, a copy, a cut, a block selection or a paste would involve a block t
 | An included block clicked first, the writer Shift+clicks another block | Nothing is selected |
 | A focused included block, the writer presses Shift+ArrowDown | Nothing is selected |
 
-### Scenario (refusal): Copy and cut of an included block
+### Scenario S5 (refusal): Copy and cut of an included block
 
 - GIVEN a span that contains an include directive line
 - WHEN the copy or the cut is handled
 - THEN the answer is ok false with "A block that comes from an included file cannot be copied or cut." and the clipboard is untouched
 
-### Scenario (refusal): The host refuses to delete an included block
+### Scenario S6 (refusal): The host refuses to delete an included block
 
 - GIVEN a span whose first line opens an {include} fence, or the Delete block button of an included block
 - WHEN the delete is handled
 - THEN the host answers ok false with "A block that comes from an included file cannot be deleted.", nothing changes, and the bar of an included block has no Delete block button
 
-### Scenario (refusal): The page refuses a paste from the insert point of an included block
+### Scenario S7 (refusal): The page refuses a paste from the insert point of an included block
 
 - GIVEN the focused insert point of an included block and no selection
 - WHEN the writer presses Ctrl+V
 - THEN the selection status shows "Text cannot be pasted next to a block that comes from an included file." for four seconds and no previewBlocksPaste is posted
 
-### Scenario (refusal): The host refuses a paste after a line that opens an include directive
+### Scenario S8 (refusal): The host refuses a paste after a line that opens an include directive
 
 - GIVEN a document whose first block is a fenced {include} directive and a paste after line 1
 - WHEN the host handles it
 - THEN the answer is ok false with "Text cannot be pasted next to a block that comes from an included file." and the document and the clipboard are untouched
 
-### Scenario (refusal): The host refuses a paste after the closing fence of an include directive
+### Scenario S9 (refusal): The host refuses a paste after the closing fence of an include directive
 
 - GIVEN a document whose first block is a fenced {include} directive of two lines and a paste after line 2, the closing fence, which is where the insert point of the included block sits
 - WHEN the host handles it

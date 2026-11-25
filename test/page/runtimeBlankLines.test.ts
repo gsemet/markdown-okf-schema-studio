@@ -73,7 +73,7 @@ function selectBlank(harness: RuntimeHarness, index: number): RuntimeElement {
   return blank;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("edit mode makes one block per run of the host's list, each after the insertion bar above it", () => {
   const harness = harnessWithRuns();
   const blanks = blankBlocks(harness);
@@ -89,7 +89,7 @@ test("edit mode makes one block per run of the host's list, each after the inser
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("reading mode has no blank-line block, and edit mode makes them again", () => {
   const harness = harnessWithRuns();
   harness.editModeButton.dispatch("click");
@@ -98,7 +98,8 @@ test("reading mode has no blank-line block, and edit mode makes them again", () 
   assert.equal(blankBlocks(harness).length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S6
 test("only the last element of the content gives the runs: authored attributes make nothing", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.mappings[1]!.setAttribute("data-okf-blank-runs", "4-4");
@@ -109,19 +110,19 @@ test("only the last element of the content gives the runs: authored attributes m
   assert.equal(blankBlocks(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("malformed or overlapping entries of the list are dropped", () => {
   const harness = harnessWithRuns("4-4 x-9 4-8 0-4 55-55 55-57 junk");
   assert.equal(blankBlocks(harness).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("a run inside a block gets no blank-line block", () => {
   const harness = harnessWithRuns("53-53", { secondBlockEndLine: 60 });
   assert.equal(blankBlocks(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("a run next to a folded block gets no blank-line block, and unfolding makes it", () => {
   const harness = harnessWithRuns();
   harness.mappings[1]!.setAttribute("data-okf-folded", "");
@@ -134,7 +135,7 @@ test("a run next to a folded block gets no blank-line block, and unfolding makes
   assert.equal(blankBlocks(harness).length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("a content patch makes the blank-line blocks of the new list", () => {
   const harness = harnessWithRuns();
   setRuns(harness, "55-55");
@@ -143,7 +144,8 @@ test("a content patch makes the blank-line blocks of the new list", () => {
   assert.ok(insertPointAfterLine(harness, 52).insertedElements.includes(blankAt(harness, 0)));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a click on a blank-line block opens the editor of its run", () => {
   const harness = harnessWithRuns();
   const before = harness.messages.length;
@@ -154,7 +156,8 @@ test("a click on a blank-line block opens the editor of its run", () => {
   assert.deepEqual(runOf(open), [4, 4]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S4
 test("Enter on a selected blank-line block opens its editor", () => {
   const harness = harnessWithRuns();
   const blank = selectBlank(harness, 1);
@@ -164,7 +167,8 @@ test("Enter on a selected blank-line block opens its editor", () => {
   assert.deepEqual(runOf(open), [55, 55]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("Arrow Down and Up walk between blocks and blank-line blocks, and Escape clears", () => {
   const harness = harnessWithRuns();
   shiftClick(harness, harness.mappings[0]!);
@@ -180,7 +184,8 @@ test("Arrow Down and Up walk between blocks and blank-line blocks, and Escape cl
   assert.equal(blankAt(harness, 0).getAttribute(SELECTED), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("Shift+Arrow from a blank-line block starts a block selection on its neighbour", () => {
   const harness = harnessWithRuns();
   const blank = selectBlank(harness, 0);
@@ -192,7 +197,8 @@ test("Shift+Arrow from a blank-line block starts a block selection on its neighb
   assert.deepEqual(selectedLines(harness), [50]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("Shift+click on a blank-line block selects nothing and opens nothing", () => {
   const harness = harnessWithRuns();
   const before = harness.messages.length;
@@ -201,7 +207,8 @@ test("Shift+click on a blank-line block selects nothing and opens nothing", () =
   assert.equal(sent(harness, "previewEditOpen", before).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("Delete and Backspace on a selected blank-line block post previewBlankRunDelete", () => {
   for (const name of ["Delete", "Backspace"]) {
     const harness = harnessWithRuns();
@@ -217,7 +224,8 @@ test("Delete and Backspace on a selected blank-line block post previewBlankRunDe
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("the Delete block button of a blank-line block posts previewBlankRunDelete and opens no editor", () => {
   const harness = harnessWithRuns();
   const button = blankAt(harness, 1).childElements.find((element) =>
@@ -244,7 +252,8 @@ function lineOfBlank(harness: RuntimeHarness, index: number): number | undefined
   return runOf(sent(harness, "previewEditOpen", before)[0])[0];
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("a range of several shown lines makes one block per line, in order, each labelled Blank line", () => {
   const harness = harnessWithRuns("4-6 55-55");
   const blanks = blankBlocks(harness);
@@ -259,14 +268,15 @@ test("a range of several shown lines makes one block per line, in order, each la
   assert.deepEqual([0, 1, 2, 3].map((index) => lineOfBlank(harnessWithRuns("4-6 55-55"), index)), [4, 5, 6, 55]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("a line of text then six blank lines in a list gives six blocks, each its own line", () => {
   const { harness } = listHarness("12-17");
   assert.equal(blankBlocks(harness).length, 6);
   assert.deepEqual([0, 5].map((index) => lineOfBlank(listHarness("12-17").harness, index)), [12, 17]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S4
 test("Enter on the second block of a range opens the editor of that one line", () => {
   const harness = harnessWithRuns("4-6 55-55");
   const blank = selectBlank(harness, 1);
@@ -277,7 +287,7 @@ test("Enter on the second block of a range opens the editor of that one line", (
   assert.deepEqual([open!.line, open!.endLine, open!.insertAfterLine], [5, 5, 4]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("Arrow Down stops on each block of a range, and selecting one says Blank line selected", () => {
   const harness = harnessWithRuns("4-6 55-55");
   selectBlank(harness, 0);
@@ -290,7 +300,8 @@ test("Arrow Down stops on each block of a range, and selecting one says Blank li
   assert.equal(blankAt(harness, 2).getAttribute(SELECTED), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("Delete on the second block of a range posts a one-line previewBlankRunDelete", () => {
   const harness = harnessWithRuns("4-6 55-55");
   const blank = selectBlank(harness, 1);
@@ -300,7 +311,7 @@ test("Delete on the second block of a range posts a one-line previewBlankRunDele
   assert.deepEqual(messages.map((m) => [m.line, m.endLine]), [[5, 5]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("after a delete the block of the same line number in the same run is selected, else the one above, else nothing", () => {
   // Line 5 of 4-6 is deleted: the run is now 4-5 and line 5 (the old line 6) is selected.
   const middle = harnessWithRuns("4-6 55-55");
@@ -332,7 +343,8 @@ test("after a delete the block of the same line number in the same run is select
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S4
 test("a refused blank run delete is announced and the key works again", () => {
   const harness = harnessWithRuns();
   const blank = selectBlank(harness, 0);
@@ -348,7 +360,7 @@ test("a refused blank run delete is announced and the key works again", () => {
   assert.equal(sent(harness, "previewBlankRunDelete", before).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
 test("Ctrl+V on a selected blank-line block pastes in place of its run; Ctrl+C and Ctrl+X do nothing", () => {
   const harness = harnessWithRuns();
   const blank = selectBlank(harness, 1);
@@ -363,7 +375,8 @@ test("Ctrl+V on a selected blank-line block pastes in place of its run; Ctrl+C a
   assert.deepEqual(runOf(paste), [55, 55]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S6
 test("Alt+Arrow on a blank-line block moves nothing", () => {
   const harness = harnessWithRuns();
   const blank = selectBlank(harness, 0);
@@ -374,13 +387,15 @@ test("Alt+Arrow on a blank-line block moves nothing", () => {
   assert.equal(blank.getAttribute(SELECTED), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("an empty body with only blank lines shows its blank-line block before Start writing", () => {
   const harness = harnessWithRuns("2-2", { emptyBody: true });
   assert.equal(blankBlocks(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
 test("an editor opened from a blank-line block stays in its element across a patch without that run", () => {
   const harness = harnessWithRuns();
   const blank = blankAt(harness, 0);
@@ -409,7 +424,8 @@ test("an editor opened from a blank-line block stays in its element across a pat
   assert.deepEqual(runOf(cancel), [4, 4]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("Delete and Backspace post nothing on a blank-line block that is only focused", () => {
   for (const name of ["Delete", "Backspace"]) {
     const harness = harnessWithRuns();
@@ -420,7 +436,8 @@ test("Delete and Backspace post nothing on a blank-line block that is only focus
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("Delete on a focused blank-line block never deletes the selected real blocks", () => {
   for (const name of ["Delete", "Backspace"]) {
     const harness = harnessWithRuns();
@@ -433,7 +450,7 @@ test("Delete on a focused blank-line block never deletes the selected real block
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("a run that starts on the separator line ending a list shows its blank-line block", () => {
   const harness = harnessWithRuns("53-53", { secondBlockEndLine: 52 });
   assert.equal(blankBlocks(harness).length, 1);
@@ -441,7 +458,7 @@ test("a run that starts on the separator line ending a list shows its blank-line
   assert.equal(blankBlocks(list).length, 1, "the list range ends on the run's first line");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("the label is drawn by CSS: it is not in the element's text content", () => {
   const harness = harnessWithRuns();
   for (const blank of blankBlocks(harness)) {
@@ -450,7 +467,7 @@ test("the label is drawn by CSS: it is not in the element's text content", () =>
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a forged runs element placed among the blocks and the insertion bars is ignored", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const forged = (): RuntimeElement =>
@@ -506,7 +523,7 @@ function listHarness(runs: string, shape: Shape = LIST): { harness: RuntimeHarne
 
 const itemsOf = (list: RuntimeElement): RuntimeElement[] => list.childElements.filter((child) => child.tagName === "LI");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a run between two items is shown inside the item above, after its last child, not beside the list", () => {
   const { harness, list } = listHarness("12-12");
   const [blank] = blankBlocks(harness);
@@ -518,7 +535,7 @@ test("a run between two items is shown inside the item above, after its last chi
   assert.equal(itemB!.insertedElements.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a run between two paragraphs of an item is shown inside that item, after the paragraph above", () => {
   const { harness, list } = listHarness("23-23");
   const [blank] = blankBlocks(harness);
@@ -527,7 +544,7 @@ test("a run between two paragraphs of an item is shown inside that item, after t
   assert.equal(blank!.parentElement, itemB);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a run between nested items is shown inside the nested item above", () => {
   const nested: Shape = {
     tag: "ul", line: 10, end: 30, children: [{
@@ -549,7 +566,8 @@ test("a run between nested items is shown inside the nested item above", () => {
   assert.equal(blank!.parentElement, inner, "inside the nested item above");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a run inside a fence in a list item shows no blank-line block", () => {
   const fence: Shape = {
     tag: "ul", line: 10, end: 30, children: [
@@ -559,7 +577,7 @@ test("a run inside a fence in a list item shows no blank-line block", () => {
   assert.equal(blankBlocks(listHarness("21-21", fence).harness).length, 0, "a fence in an item");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("a folded list shows no blank-line block, and unfolding shows them", () => {
   const { harness, list } = listHarness("12-12 23-23");
   assert.equal(blankBlocks(harness).length, 2);
@@ -573,7 +591,7 @@ test("a folded list shows no blank-line block, and unfolding shows them", () => 
   assert.equal(blankBlocks(harness).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a content patch keeps the block of a run inside a list where it was", () => {
   const { harness } = listHarness("12-12 23-23");
   const [first, second] = blankBlocks(harness);
@@ -584,7 +602,7 @@ test("a content patch keeps the block of a run inside a list where it was", () =
   assert.deepEqual(blankBlocks(harness), [second]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S2
 test("a click on a blank-line block inside a list sends the item line and opens no list item editor", () => {
   const { harness } = listHarness("12-12 23-23");
   const before = harness.messages.length;
@@ -599,7 +617,7 @@ test("a click on a blank-line block inside a list sends the item line and opens 
   assert.deepEqual({ ...(sent(top, "previewEditOpen", mark)[0]!.replaceBlankRun as object) }, { line: 4, endLine: 4 }, "no itemLine at the top level");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
 test("an editor opened in a list item survives a patch that replaces the list, and Cancel keeps the item line", () => {
   const { harness, list } = listHarness("12-12 23-23");
   const blank = blankAt(harness, 0);
@@ -633,7 +651,7 @@ test("an editor opened in a list item survives a patch that replaces the list, a
   assert.deepEqual({ ...(cancel!.replaceBlankRun as object) }, { line: 12, endLine: 12, itemLine: 10 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S2
 test("Arrow Down and Up visit the blank-line blocks of a list in source order between the blocks", () => {
   const { harness, list } = listHarness("12-12 23-23");
   shiftClick(harness, harness.mappings[0]!);
@@ -656,7 +674,7 @@ test("Arrow Down and Up visit the blank-line blocks of a list in source order be
   assert.deepEqual(selectedLines(harness), [10]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S2
 test("Shift+Arrow from a blank-line block of a list starts the selection on the list or the block after it", () => {
   const { harness } = listHarness("12-12 23-23");
   const blank = selectBlank(harness, 0);
@@ -667,7 +685,7 @@ test("Shift+Arrow from a blank-line block of a list starts the selection on the 
   assert.deepEqual(selectedLines(harness), [50]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
 test("Ctrl+V on a blank-line block of a list sends the item line with the run", () => {
   const { harness } = listHarness("12-12 23-23");
   const blank = selectBlank(harness, 1);
@@ -678,7 +696,8 @@ test("Ctrl+V on a blank-line block of a list sends the item line with the run", 
   assert.deepEqual({ ...(paste!.replaceBlankRun as object) }, { line: 23, endLine: 23, itemLine: 15 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S3
 test("Delete on a blank-line block of a list posts the removal, then the list holds the selection", () => {
   const { harness } = listHarness("12-12 23-23");
   const blank = selectBlank(harness, 0);
@@ -736,7 +755,7 @@ function pressDone(harness: RuntimeHarness): void {
   assert.ok(savingShown(harness), "Saving Markdown… is shown");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S4
 test("Done in a blank-line block's editor: the patch of its final save closes the editor", () => {
   for (const autosave of [false, true]) {
     const harness = harnessWithRuns("3-3");
@@ -759,7 +778,7 @@ test("Done in a blank-line block's editor: the patch of its final save closes th
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S4
 test("Done in the editor of a run inside a list: the patch closes the editor", () => {
   const { harness } = listHarness("12-12 23-23");
   const blank = blankAt(harness, 0);
@@ -776,7 +795,7 @@ test("Done in the editor of a run inside a list: the patch closes the editor", (
   assert.equal(sent(harness, "previewEditCancel", before).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S4
 test("an error answer to Done keeps the editor open across a patch, and a second Done then a patch closes it", () => {
   const harness = harnessWithRuns("3-3");
   const textarea = openTyped(harness);

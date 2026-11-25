@@ -18,6 +18,9 @@ derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+scenarios:
+- id: S1
+  title: Switch the palette mode and find it again
 user_need: As a writer, I pick the set of buttons that matches the Markdown
   flavour of my project, the next preview remembers it, and I change the mode
   without taking my hands off the keyboard; as a maintainer of a project, I set
@@ -79,7 +82,7 @@ The sets are nested, and a writer moves between them with the mode select or fro
 
 ### Main paths
 
-#### Path 1: Switch the palette mode and find it again
+#### Path S1: Switch the palette mode and find it again
 
 1. A block text box is open in edit mode
    - SwRS-MDOKFSTUDIO-PALETTE-017: the writer presses Cmd+Shift+M, or Ctrl+Shift+M elsewhere, and the focus moves to the mode select

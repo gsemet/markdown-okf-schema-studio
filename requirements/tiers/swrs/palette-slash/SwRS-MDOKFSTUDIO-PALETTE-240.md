@@ -18,6 +18,17 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
+scenarios:
+- id: S1
+  title: Ranking
+- id: S2
+  title: Scattered letters and short queries
+- id: S3
+  title: In MyST mode the MyST command wins a near tie
+- id: S4
+  title: Typing narrows the list and resets the highlight
+- id: S5
+  title: A loose best match leaves Enter and Tab to the text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,7 +45,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer types a query after the slash, the extension SHALL narrow the list at each edit to the commands whose label or alias matches it, ignoring case, ranked exact first, then prefix, word start, contained text and a tight subsequence of three or more letters that starts at a word start (the command of the MyST group first in MyST mode), light the first entry, and leave Enter and Tab to the text when the best match is only a loose one and the highlight was not moved.
 
-### Scenario (nominal): Ranking
+### Scenario S1 (nominal): Ranking
 - GIVEN the entries Zebra Alpha, Alpine and Other with the alias alp
 - WHEN alp is typed
 - THEN the order is Other, Alpine, Zebra Alpha
@@ -48,7 +59,7 @@ When the writer types a query after the slash, the extension SHALL narrow the li
 | tight subsequence of three or more letters that starts at a word start | last |
 | ties | keep the order of the palette |
 
-### Scenario (boundary): Scattered letters and short queries
+### Scenario S2 (boundary): Scattered letters and short queries
 - GIVEN the entry Horizontal rule
 - WHEN hz is typed
 - THEN nothing matches
@@ -58,7 +69,7 @@ When the writer types a query after the slash, the extension SHALL narrow the li
 | one or two letters that are not a prefix, a word start or contained text (hz) | nothing matches; a query of one or two letters never matches by subsequence |
 | three or more letters packed tightly from a word start (cbl for Code block) | matches by subsequence |
 
-### Scenario (nominal): In MyST mode the MyST command wins a near tie
+### Scenario S3 (nominal): In MyST mode the MyST command wins a near tie
 - GIVEN the MyST mode
 - WHEN note is typed, then table is typed
 - THEN the MyST admonition Note is listed before the GitHub alert, and the Table command stays first
@@ -70,7 +81,7 @@ When the writer types a query after the slash, the extension SHALL narrow the li
 | exact label or clearly better prefix of another command (table, tab) | keeps its place |
 | one or two letters (/h, and /h1 for Heading) | no bonus; Heading is found first |
 
-### Scenario (nominal): Typing narrows the list and resets the highlight
+### Scenario S4 (nominal): Typing narrows the list and resets the highlight
 - GIVEN an open menu with the third entry lit
 - WHEN the writer types a letter, then presses Backspace back to the query t
 - THEN the list narrows and the first entry is lit, and with the shorter query the full list shows again and the first entry is lit
@@ -80,7 +91,7 @@ When the writer types a query after the slash, the extension SHALL narrow the li
 | a letter typed after the slash | the list narrows to the matches and the first entry is lit |
 | Backspace inside the query | the list is re-read from the text between the slash and the caret, widens and the first entry is lit |
 
-### Scenario (boundary): A loose best match leaves Enter and Tab to the text
+### Scenario S5 (boundary): A loose best match leaves Enter and Tab to the text
 - GIVEN the text box with / and the query ori
 - WHEN the writer presses Enter, or moves the highlight with an arrow and then presses Enter
 - THEN the menu closes and Enter inserts a line break as usual, or the lit command runs

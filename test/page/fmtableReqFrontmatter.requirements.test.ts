@@ -47,7 +47,7 @@ function openKeyEditor(harness: ReturnType<typeof createRuntimeHarness>): Runtim
   return input;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
 test("an open field editor blocks the key editor and a second value editor; a block editor blocks the field editor", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   openFrontmatterValueEditor(harness);
@@ -184,7 +184,8 @@ test("undo and redo keys in a field editor stop at the control, in the value and
   assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S5
 test("a field save carries the source line and viewport top of the properties section", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.frontmatterProperties.rectProvider = () => ({ top: 120, height: 60, bottom: 180 });
@@ -251,7 +252,8 @@ test("a task-list checkbox click is refused with a message while a field editor 
   assert.equal(free.messages.slice(freeBefore).some((message) => message.type === "previewCheckboxToggle"), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S7
 test("a content patch closes an open field editor without a save and drops the waiting properties update", () => {
   const { harness, textarea } = openTextFieldEditor("original");
   textarea.value = "typed";
@@ -269,7 +271,7 @@ test("a content patch closes an open field editor without a save and drops the w
   assert.equal(free.getWebviewState !== undefined, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S5
 test("ArrowUp at the start of the first body block does not step onto the properties table", () => {
   const harness = createRuntimeHarness({
     firstMappedSourceLine: 5,
@@ -411,7 +413,8 @@ function blurredYamlField(typed: string) {
 const blockEditorOpens = (harness: ReturnType<typeof createRuntimeHarness>): number =>
   harness.messages.filter((message) => message.type === "previewEditOpen").length;
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S8
 test("a refused field value is cancelled and the clicked block opens its editor", () => {
   const { harness, editId } = blurredYamlField("[review");
   harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
@@ -424,7 +427,8 @@ test("a refused field value is cancelled and the clicked block opens its editor"
   assert.equal(frontmatterSaves(harness).length, 1, "the refused text is not saved again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S8
 test("a refused field value is cancelled and a plus insert point opens its editor", () => {
   const { harness, editId } = blurredYamlField("[review");
   const point = harness.createdElements.find((element) =>
@@ -437,7 +441,7 @@ test("a refused field value is cancelled and a plus insert point opens its edito
   assert.equal(blockEditorOpens(harness), 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
 test("a valid field value is saved and the clicked block opens its editor", () => {
   const { harness, editId } = blurredYamlField("a: 2");
   harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });

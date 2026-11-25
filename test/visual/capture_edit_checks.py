@@ -11,7 +11,8 @@ from capture_cell_editor_checks import check_cell_editor_chrome, check_cell_end_
 from capture_table_escape import check_cell_escape_keeps_cells_left
 
 
-# @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S1
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S6
 def check_edit_palette_clearance(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """CR 123: in a narrow pane the palette wraps onto several rows; the text box and the figure form
   inside the frame start below it, at the top of the page and slightly scrolled."""
@@ -147,7 +148,8 @@ TALL_ROW_IN_EDITOR = """(index) => {
 }"""
 
 
-# @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S4
 def check_tall_block_scrolled(page: Page, scenario: dict, failures: list[Failure], close_editor, bring_to_top) -> None:
   """CR 123, the user's rule for a block taller than the pane: opened with its top scrolled above the
   viewport, the row the user clicked stays where it was (the bar sticks at the top of the pane and
@@ -202,7 +204,8 @@ def check_tall_block_scrolled(page: Page, scenario: dict, failures: list[Failure
   close_editor()
 
 
-# @tests_req SwRS-MDOKFSTUDIO-PALETTE-031
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-031#S3
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-031#S5
 def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """T21: the edition palette above an open block editor."""
   if not scenario.get("editPalette"):
@@ -500,8 +503,10 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   page.wait_for_timeout(250)
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-048
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-085
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S1
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S5
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-085#S1
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-085#S2
 def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolbar, failures: list[Failure]) -> None:
   """T35: the inline palette group inside the table cell bar."""
   group = toolbar.locator("[data-sphinx-edit-palette='cell']")

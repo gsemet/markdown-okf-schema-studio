@@ -126,7 +126,8 @@ function fingerprint(): string[] {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-070
+// @tests_req SwRS-MDOKFSTUDIO-CORE-070#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-070#S3
 test("the esbuild plugin patches the MyST packages in memory: one line split per parse, same tightness", async () => {
   const before = fingerprint();
   const root = scratchInstall();
@@ -155,7 +156,8 @@ test("the esbuild plugin patches the MyST packages in memory: one line split per
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-070
+// @tests_req SwRS-MDOKFSTUDIO-CORE-070#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-070#S3
 test("the Node load hook patches the MyST packages for Node-run code without writing them", () => {
   const before = fingerprint();
   const root = scratchInstall();
@@ -177,7 +179,7 @@ test("the Node load hook patches the MyST packages for Node-run code without wri
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-070
+// @tests_req SwRS-MDOKFSTUDIO-CORE-070#S3
 test("a MyST package of another version or with unexpected content fails the build", async () => {
   for (const change of ["version", "content"] as const) {
     const root = scratchInstall();
@@ -202,7 +204,7 @@ test("a MyST package of another version or with unexpected content fails the bui
  * engine (directly or through a relative import): it takes rendered HTML from the bundle built by
  * esbuild.mjs (out/test/bundle/mystRenderer.js), which carries the source patches.
  */
-// @tests_req SwRS-MDOKFSTUDIO-CORE-070
+// @tests_req SwRS-MDOKFSTUDIO-CORE-070#S1
 test("no integration test imports the MyST engine unbundled", () => {
   const engine = /(?:from\s+|import\s*\(\s*|require\s*\(\s*)["'](?:myst-[\w-]+|markdown-it-[\w-]+|unified)["']/u;
   // `import type` is erased by tsc: it never loads the module in the host.

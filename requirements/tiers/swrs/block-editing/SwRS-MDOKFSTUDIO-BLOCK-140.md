@@ -17,6 +17,24 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-016
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: Shift+click selects every body block from the anchor to the clicked
+    block
+- id: S2
+  title: The anchor is the block clicked or opened last
+- id: S3
+  title: Shift+Arrow grows and shrinks the selection
+- id: S4
+  title: Selected blocks are outlined and announced
+- id: S5
+  title: Escape or a plain click clears the selection
+- id: S6
+  title: Reading mode
+- id: S7
+  title: Keys that belong to other controls or chords
+- id: S8
+  title: Shift+mousedown on a block does not extend the browser text selection
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,7 +54,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer Shift+clicks a body block, or presses Shift+ArrowUp or Shift+ArrowDown on a focused body block or on the selection, in edit mode, the page SHALL select a run of body blocks, from the anchor block to the clicked block or to the free end of the selection, and open no editor.
 
-### Scenario (nominal): Shift+click selects every body block from the anchor to the clicked block
+### Scenario S1 (nominal): Shift+click selects every body block from the anchor to the clicked block
 
 - GIVEN edit mode on, a block opened or clicked earlier and another block further down
 - WHEN the writer Shift+clicks the further block
@@ -44,14 +62,14 @@ When a writer Shift+clicks a body block, or presses Shift+ArrowUp or Shift+Arrow
 
 Shift+mousedown on the block is the first half of this gesture; see the mousedown scenario below.
 
-### Scenario (boundary): The anchor is the block clicked or opened last
+### Scenario S2 (boundary): The anchor is the block clicked or opened last
 
 | Input | Outcome |
 | --- | --- |
 | Shift+click with no selection, after a block was opened or clicked earlier, and the number of blocks is unchanged | The range starts at the block opened or clicked earlier |
 | Shift+click with no selection, after blocks were added or removed since the anchor was remembered | The clicked block becomes the anchor |
 
-### Scenario (nominal): Shift+Arrow grows and shrinks the selection
+### Scenario S3 (nominal): Shift+Arrow grows and shrinks the selection
 
 - GIVEN a focused block in the middle of five
 - WHEN the writer presses Shift+ArrowDown twice and Shift+ArrowUp once
@@ -59,7 +77,7 @@ Shift+mousedown on the block is the first half of this gesture; see the mousedow
 
 A first Shift+Arrow from a focused block selects two blocks (the block and its neighbour), not one. At the end of the document the selection stops: with the last block focused, Shift+ArrowDown selects only that block.
 
-### Scenario (nominal): Selected blocks are outlined and announced
+### Scenario S4 (nominal): Selected blocks are outlined and announced
 
 | State | Outcome |
 | --- | --- |
@@ -67,19 +85,19 @@ A first Shift+Arrow from a focused block selects two blocks (the block and its n
 | One block selected | The status region reads "1 block selected" |
 | Selection cleared | No element carries the attribute and the status region is empty |
 
-### Scenario (nominal): Escape or a plain click clears the selection
+### Scenario S5 (nominal): Escape or a plain click clears the selection
 
 - GIVEN a block selection in edit mode
 - WHEN the writer presses Escape outside a text box or field, or clicks a block without Shift
 - THEN the selection is cleared, and on a plain click it is cleared before the block's editor opens; Escape inside an editor or a field keeps its own meaning
 
-### Scenario (refusal): Reading mode
+### Scenario S6 (refusal): Reading mode
 
 - GIVEN edit mode off
 - WHEN the writer Shift+clicks a block
 - THEN nothing is selected
 
-### Scenario (refusal): Keys that belong to other controls or chords
+### Scenario S7 (refusal): Keys that belong to other controls or chords
 
 | Input | Outcome |
 | --- | --- |
@@ -89,7 +107,7 @@ A first Shift+Arrow from a focused block selects two blocks (the block and its n
 | Alt+Shift+ArrowDown, or an arrow with Shift and Ctrl, or with Shift and Cmd, on a focused block | No selection is made, so the Alt+Arrow move chords do not collide |
 | Plain Shift+ArrowDown on the same focused block | The selection is made |
 
-### Scenario (boundary): Shift+mousedown on a block does not extend the browser text selection
+### Scenario S8 (boundary): Shift+mousedown on a block does not extend the browser text selection
 
 | Input | Outcome |
 | --- | --- |

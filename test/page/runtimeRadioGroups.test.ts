@@ -274,7 +274,8 @@ test("a content patch while no option has the focus (an external rewrite) gives 
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
 // @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S6
 test("with a block editor open, a press on an option that blurs the editor before the click writes nothing and keeps the editor open", () => {
   const harness = createRuntimeHarness({
     radioGroup: ["x", " "], captureOrder: true, trackFocus: true, blurOnFocusChange: true,

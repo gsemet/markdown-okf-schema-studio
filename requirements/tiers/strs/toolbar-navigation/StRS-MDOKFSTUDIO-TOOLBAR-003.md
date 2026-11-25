@@ -12,6 +12,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Find a word and replace it
 user_need: Readers and editors of a long document want to locate a word or
   phrase in what they read, see every occurrence, and change it in the document
   without switching to the text editor, with the rest of the file left as it is.
@@ -62,7 +65,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Find a word and replace it
+#### Path S1: Find a word and replace it
 
 1. The preview page has the focus
    - SwRS-MDOKFSTUDIO-TOOLBAR-009: the reader presses Cmd+F or Ctrl+F and a find bar opens with its field focused

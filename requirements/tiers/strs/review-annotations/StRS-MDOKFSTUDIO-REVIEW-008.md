@@ -13,6 +13,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Keep a thread on its text while the document changes
+- id: S2
+  title: Rename a document
 user_need: As a reviewer, I find a discussion on its text after the author
   edited the document around it, and I keep my comments when the author renames
   the document.
@@ -63,7 +68,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Keep a thread on its text while the document changes
+#### Path S1: Keep a thread on its text while the document changes
 
 1. The text of a document with review threads changes
    - SwRS-MDOKFSTUDIO-REVIEW-094: lines inserted or removed above a thread move its stored lines in memory
@@ -75,7 +80,7 @@ stateDiagram-v2
    - Option SwRS-MDOKFSTUDIO-REVIEW-119 (refusal): typing alone writes nothing
 3. The comments file holds the new lines
 
-#### Path 2: Rename a document
+#### Path S2: Rename a document
 
 1. A document is renamed or moved
    - SwRS-MDOKFSTUDIO-REVIEW-125: its comments file is renamed to the new name

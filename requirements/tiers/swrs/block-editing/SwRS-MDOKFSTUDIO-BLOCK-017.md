@@ -20,6 +20,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-003
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-001
+scenarios:
+- id: S1
+  title: Hovering a list item
+- id: S2
+  title: The outlined element per target
+- id: S3
+  title: Pointer or focus leaves
+- id: S4
+  title: Targets that are not outlined
+- id: S5
+  title: Links are outlined like the text around them
+- id: S6
+  title: Links whose click keeps its own behaviour
+- id: S7
+  title: The text cursor over mapped blocks
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,13 +57,13 @@ default_owner_email: gaetan@xeberon.net
 
 While edit mode is on, the page SHALL outline with a dashed line the element that a click at the pointer or focus would edit: the item for a list item, the whole list for the list itself, the cell for a table cell, the code block for a fence and else the mapped block, and the preview shows the text cursor over every element that carries a source file and line and over the links whose plain click opens the block editor, while every other link keeps the pointer cursor and gets no outline.
 
-### Scenario (nominal): Hovering a list item
+### Scenario S1 (nominal): Hovering a list item
 
 - GIVEN edit mode on and a list with an item under the pointer
 - WHEN the pointer moves over the item
 - THEN exactly one element, the item (the nearest one, for an item of a nested list), carries data-sphinx-preview-edit-hover
 
-### Scenario (nominal): The outlined element per target
+### Scenario S2 (nominal): The outlined element per target
 
 | Pointer or focus on | Outlined element |
 | --- | --- |
@@ -58,20 +73,20 @@ While edit mode is on, the page SHALL outline with a dashed line the element tha
 | a fence | the code block |
 | any other mapped block | the mapped block |
 
-### Scenario (boundary): Pointer or focus leaves
+### Scenario S3 (boundary): Pointer or focus leaves
 
 - GIVEN a list item is outlined
 - WHEN the pointer leaves it or the focus leaves the item
 - THEN no element carries the attribute
 
-### Scenario (refusal): Targets that are not outlined
+### Scenario S4 (refusal): Targets that are not outlined
 
 | Pointer over, edit mode on | Outcome |
 | --- | --- |
 | a cell of the properties table | no element receives the outline; the field editors are specified with the frontmatter editing behaviour |
 | an element inside an open block editor, for example its frame | no element receives the outline |
 
-### Scenario (nominal): Links are outlined like the text around them
+### Scenario S5 (nominal): Links are outlined like the text around them
 
 | Pointer over, edit mode on | Outcome |
 | --- | --- |
@@ -79,7 +94,7 @@ While edit mode is on, the page SHALL outline with a dashed line the element tha
 | a mapped block that is itself inside a link | that block is outlined |
 | the title, header, body or footer of a `:link:` card | only the part under the pointer is outlined, as on a card without link, never the whole card |
 
-### Scenario (refusal): Links whose click keeps its own behaviour
+### Scenario S6 (refusal): Links whose click keeps its own behaviour
 
 Only the links whose plain click opens the block editor (SwRS-MDOKFSTUDIO-BLOCK-014) get the outline and the text cursor.
 
@@ -89,7 +104,7 @@ Only the links whose plain click opens the block editor (SwRS-MDOKFSTUDIO-BLOCK-
 | a link value of the properties table | none | pointer |
 | a link inside an open block editor, in the toolbar or outside any mapped block | none | pointer |
 
-### Scenario (nominal): The text cursor over mapped blocks
+### Scenario S7 (nominal): The text cursor over mapped blocks
 
 | Mode | Pointer over a mapped paragraph | Cursor |
 | --- | --- | --- |

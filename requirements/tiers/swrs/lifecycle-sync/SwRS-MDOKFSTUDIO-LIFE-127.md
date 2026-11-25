@@ -19,6 +19,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-LIFE-001
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-001
+scenarios:
+- id: S1
+  title: Restore of a saved reading place
+- id: S2
+  title: File outside a folder
+- id: S3
+  title: A saved state that cannot be restored
+- id: S4
+  title: A restored side preview owns its group lock
+- id: S5
+  title: Older panel after a newer restore
+- id: S6
+  title: Identity of a saved state
+- id: S7
+  title: Optional fields of a saved state
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,20 +53,20 @@ default_owner_email: gaetan@xeberon.net
 
 When VS Code restores a Studio preview panel, the extension SHALL open in it the Markdown file its saved state names, with the saved reading position, open sections and Description column state, or show the status Preview source missing with the reason the panel cannot be restored.
 
-### Scenario (nominal): Restore of a saved reading place
+### Scenario S1 (nominal): Restore of a saved reading place
 
 - GIVEN a saved state with documentId, sourceFile, sourceLine 4, scrollTop 88 and descriptionsCollapsed true
 - WHEN VS Code restores the panel
 - THEN the panel renders the file, the session state holds sourceLine 4 and scrollTop 88 and the boot context holds descriptionsCollapsed true
 - AND the restore completes once the page shows the rendered document (by reading deserializePreviewPanel, which awaits requestDocument)
 
-### Scenario (boundary): File outside a folder
+### Scenario S2 (boundary): File outside a folder
 
 - GIVEN a saved file that lies in no workspace folder
 - WHEN VS Code restores the panel
 - THEN the panel renders it with restricted reads (see SwRS-MDOKFSTUDIO-TRUST-001 and SwRS-MDOKFSTUDIO-TRUST-007)
 
-### Scenario (refusal): A saved state that cannot be restored
+### Scenario S3 (refusal): A saved state that cannot be restored
 
 The page shows the status Preview source missing with the message of the row, and no session is created for the first five rows.
 
@@ -66,19 +81,19 @@ The page shows the status Preview source missing with the message of the row, an
 | A saved document id that parses | No message: the restore continues to the next checks |
 | The missing file is created later | The preview renders it by itself (see SwRS-MDOKFSTUDIO-LIFE-062) |
 
-### Scenario (nominal): A restored side preview owns its group lock
+### Scenario S4 (nominal): A restored side preview owns its group lock
 
 - GIVEN a restored side preview in group two, which follows the active editor
 - WHEN the reader closes it
 - THEN the extension recorded the panel's group as the group it locked, so the lock of the group is released like that of a preview opened by the command
 
-### Scenario (boundary): Older panel after a newer restore
+### Scenario S5 (boundary): Older panel after a newer restore
 
 - GIVEN a restored side preview in group two and a second panel restored later in group three
 - WHEN the second panel is restored
 - THEN the older preview becomes a fixed preview and keeps the group it recorded; every restored panel follows the active editor at the moment it is restored, so each records its group
 
-### Scenario (boundary): Identity of a saved state
+### Scenario S6 (boundary): Identity of a saved state
 
 | Saved state | Outcome |
 | --- | --- |
@@ -87,7 +102,7 @@ The page shows the status Preview source missing with the message of the row, an
 | An empty or non-string documentId | Nothing is returned |
 | An empty or non-string sourceFile | Nothing is returned |
 
-### Scenario (boundary): Optional fields of a saved state
+### Scenario S7 (boundary): Optional fields of a saved state
 
 The identity is kept in every row.
 

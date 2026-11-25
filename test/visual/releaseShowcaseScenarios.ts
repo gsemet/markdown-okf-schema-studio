@@ -12,7 +12,6 @@ const TYPE_LIST = ".sphinx-preview-edit-palette-menu[data-edit-popover-at='caret
 
 export const RELEASE_SHOWCASE_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req StRS-MDOKFSTUDIO-CORE-001
     id: "rendering-core/v26-release-showcase-cream-1200",
     fixture: "70-release-showcase",
     theme: "light",
@@ -44,7 +43,7 @@ export const RELEASE_SHOWCASE_SCENARIOS: ScenarioDefinition[] = [
     ],
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-269
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-269#S2
     id: "rendering-core/v27-release-1-3-showcase-cream-1200",
     fixture: "80-release-1-3-showcase",
     theme: "light",

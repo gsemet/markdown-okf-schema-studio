@@ -19,6 +19,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-005
 depends_on: []
+scenarios:
+- id: S1
+  title: Palette above the frame
+- id: S2
+  title: When a palette exists
+- id: S3
+  title: A small palette sticks over a tall editor
+- id: S4
+  title: A tall palette or a short pane stays in the flow
+- id: S5
+  title: The caret is kept in view
+- id: S6
+  title: Native scrolling keeps clear of the stuck palette
+- id: S7
+  title: A narrow pane
+- id: S8
+  title: A block near the top of the pane keeps its first lines uncovered
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -51,13 +68,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a block editor opens, the extension SHALL place the edition palette as a toolbar named Edition palette on top of the editor frame, outside the frame, inside one host element that holds both, from the arrival of the source of the block until the editor closes, and keep it in reach, sticking or wrapping, while a tall editor scrolls or the pane is narrow, without covering the first lines of an editor that fits in the viewport when it opens or the panels in it (the text box, the figure form, the link panel). The bar of an editor taller than the viewport sticks at the top of the pane and may cover its first lines; the text scrolls under it.
 
-### Scenario (nominal): Palette above the frame
+### Scenario S1 (nominal): Palette above the frame
 
 - GIVEN an open paragraph editor whose source has arrived
 - WHEN the editor is inspected
 - THEN the palette (role toolbar, aria-label Edition palette) and the frame are the two children of one host element marked data-sphinx-preview-block-editor-host, the palette first, and the frame does not contain the palette
 
-### Scenario (boundary): When a palette exists
+### Scenario S2 (boundary): When a palette exists
 
 - GIVEN an editor of the kind of the table
 - WHEN the page is inspected at the moment of the table
@@ -71,7 +88,7 @@ When a block editor opens, the extension SHALL place the edition palette as a to
 | an insertion editor opened from an insert point or from Start writing | an edition palette above it, like above a paragraph editor |
 | a table cell editor or a frontmatter field editor | no block palette is added (the cell editor gets the cell formatting group inside its table bar, see SwRS-MDOKFSTUDIO-TABLE-085; the field editors, see SwRS-MDOKFSTUDIO-FMEDIT-001) |
 
-### Scenario (nominal): A small palette sticks over a tall editor
+### Scenario S3 (nominal): A small palette sticks over a tall editor
 
 - GIVEN an editor taller than one and a half viewports
 - WHEN its top has scrolled out of view, and again when it is scrolled to its end
@@ -84,7 +101,7 @@ When a block editor opens, the extension SHALL place the edition palette as a to
 | the wheel scrolls a frame taller than the viewport down, one notch at a time | the page only goes down and the palette stays on its sticking line until the end of the frame |
 | the end of the editor | it has left with the end of the frame and is not below it |
 
-### Scenario (boundary): A tall palette or a short pane stays in the flow
+### Scenario S4 (boundary): A tall palette or a short pane stays in the flow
 
 - GIVEN an edition palette
 - WHEN the window is resized or scrolled
@@ -96,7 +113,7 @@ When a block editor opens, the extension SHALL place the edition palette as a to
 | the palette shrinks to 30 px | the attribute is removed again |
 | a viewport at most 520 px high | the palette stays in the flow instead of sticking |
 
-### Scenario (nominal): The caret is kept in view
+### Scenario S5 (nominal): The caret is kept in view
 
 - GIVEN a block editor with a stuck palette
 - WHEN the caret moves or text is typed
@@ -111,7 +128,7 @@ When a block editor opens, the extension SHALL place the edition palette as a to
 
 The page does not follow the scroll that an applied edit causes in the text editor: see SwRS-MDOKFSTUDIO-PALETTE-279.
 
-### Scenario (nominal): Native scrolling keeps clear of the stuck palette
+### Scenario S6 (nominal): Native scrolling keeps clear of the stuck palette
 
 - GIVEN a palette, synchronised on every scroll and resize
 - WHEN it is stuck over the box or not
@@ -122,7 +139,7 @@ The page does not follow the scroll that an applied edit causes in the text edit
 | a small palette stuck over the box | the larger of the reading offset and the toolbar bottom, plus the palette height, plus 12 px, so that it covers the palette (for a tall frame's line under the sticky band, that line plus the palette height plus 8 px) |
 | a palette above the frame, or a tall palette | the property is removed |
 
-### Scenario (boundary): A narrow pane
+### Scenario S7 (boundary): A narrow pane
 
 - GIVEN an editor in a pane narrower than the buttons of the palette
 - WHEN the palette is inspected
@@ -133,7 +150,7 @@ The page does not follow the scroll that an applied edit causes in the text edit
 | 360 px, dark theme | the buttons wrap onto several rows, the palette does not exceed the frame and its popups stay inside the pane |
 | 460 px, a very tall editor, scrolled | the palette stays inside the pane and the page has no sideways scroll |
 
-### Scenario (boundary): A block near the top of the pane keeps its first lines uncovered
+### Scenario S8 (boundary): A block near the top of the pane keeps its first lines uncovered
 
 - GIVEN a 900 or 1100 px pane on the cream theme in which the palette wraps onto two rows, and a block (a paragraph, or a figure whose Edit figure form opens in its frame) whose top is 20, 60 or 140 px under the top of the pane, so that its host is above the line where the palette sticks (4 px below the toolbar bottom)
 - WHEN the block editor opens

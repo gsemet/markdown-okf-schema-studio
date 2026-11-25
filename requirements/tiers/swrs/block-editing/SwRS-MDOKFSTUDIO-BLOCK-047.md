@@ -21,6 +21,22 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-PALETTE-036
+scenarios:
+- id: S1
+  title: Done with changes
+- id: S2
+  title: The host refuses the final save
+- id: S3
+  title: Cmd or Ctrl with Enter
+- id: S4
+  title: Leaving the text box
+- id: S5
+  title: Moving the focus inside the editor or into a host dialog does not
+    commit
+- id: S6
+  title: An editor whose text is unchanged closes without a save
+- id: S7
+  title: A second final save is refused while the first is in flight
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,7 +64,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or moves the focus from the text box to something outside the editor frame, the page SHALL post the final previewEditSave of the text of the open editor and close the editor without any message when its text equals the original and nothing was autosaved.
 
-### Scenario (nominal): Done with changes
+### Scenario S1 (nominal): Done with changes
 - GIVEN an open editor whose text differs from the original
 - WHEN the writer presses Done
 - THEN one previewEditSave with final true and the typed text is posted, the status line reads "Saving Markdown…" and the editor waits for the render
@@ -56,26 +72,26 @@ When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or m
 - WHEN the writer presses Done
 - THEN the timer is cleared and the final save carries the latest text
 
-### Scenario (refusal): The host refuses the final save
+### Scenario S2 (refusal): The host refuses the final save
 - GIVEN an editor that posted its final save
 - WHEN the host refuses the save and its error arrives
 - THEN the status line shows the error instead of "Saving Markdown…"
 
-### Scenario (nominal): Cmd or Ctrl with Enter
+### Scenario S3 (nominal): Cmd or Ctrl with Enter
 | Input | Outcome |
 | --- | --- |
 | Ctrl+Enter in the text box with typed text | The default action is prevented and the final save is posted |
 | Cmd+Enter in the same editor | The same final save is posted |
 | Plain Enter | The editor is not finished |
 
-### Scenario (nominal): Leaving the text box
+### Scenario S4 (nominal): Leaving the text box
 | Input | Outcome |
 | --- | --- |
 | Click outside the frame, with typed text | One final save is posted and the autosave timer is cleared |
 | The browser window loses the focus with no related target | The final save is posted as well |
 | Cmd/Ctrl+F in the text box (the find field takes the focus, see SwRS-MDOKFSTUDIO-TOOLBAR-009) | The final save carries the text typed before the key; the keys typed afterwards go to the find query |
 
-### Scenario (boundary): Moving the focus inside the editor or into a host dialog does not commit
+### Scenario S5 (boundary): Moving the focus inside the editor or into a host dialog does not commit
 | Input | Outcome |
 | --- | --- |
 | The focus moves from the text box to a palette button, the link panel or the figure form of the same editor | No final save is posted and the editor stays open |
@@ -83,13 +99,13 @@ When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or m
 | A request marked as a native dialog is pending | A dialog is reported as open, until the request is answered, times out or is cancelled |
 | The dialog was answered, cancelled or timed out; or a list request is pending | No dialog is reported as open; a list request never carries the dialog mark |
 
-### Scenario (boundary): An editor whose text is unchanged closes without a save
+### Scenario S6 (boundary): An editor whose text is unchanged closes without a save
 | Input | Outcome |
 | --- | --- |
 | Done, leaving the text box or Ctrl+Enter on an editor opened and not changed | The editor closes and no previewEditSave and no previewEditCancel is posted (a close report may follow, see SwRS-MDOKFSTUDIO-BLOCK-191) |
 | Done on an insertion editor left empty | The editor closes and nothing is written |
 
-### Scenario (boundary): A second final save is refused while the first is in flight
+### Scenario S7 (boundary): A second final save is refused while the first is in flight
 
 | Input | Outcome |
 | --- | --- |

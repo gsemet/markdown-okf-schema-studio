@@ -105,7 +105,8 @@ test("in edit mode a checkbox click toggles the box without opening a block edit
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S6
 test("a checkbox click is refused while a block editor is open", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -123,7 +124,7 @@ test("a checkbox click is refused while a block editor is open", () => {
 
 const NO_EDITOR_TOOLTIP = "No text editor shows this file";
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S5
 test("T38: an unpaired preview disables the anchor button and a previewPairing message re-enables it", () => {
   const harness = createRuntimeHarness({ pairedTextEditor: false });
   assert.equal(harness.anchorButton.disabled, true);
@@ -169,7 +170,8 @@ test("a page whose pairing and theme messages were lost while it loaded gets bot
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme"), "2");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S8
 test("T38: a paired preview keeps the anchor button enabled, and a foreign previewPairing is ignored", () => {
   const harness = createRuntimeHarness();
   assert.equal(harness.anchorButton.disabled, false);
@@ -183,7 +185,8 @@ test("T38: a paired preview keeps the anchor button enabled, and a foreign previ
   assert.equal(harness.anchorButton.disabled, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S7
 test("T38: edit mode starts off unless the webview holds the saved state of this document", () => {
   const remembered = createRuntimeHarness({ savedState: { editMode: true } });
   assert.equal(remembered.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "on");
@@ -196,7 +199,8 @@ test("T38: edit mode starts off unless the webview holds the saved state of this
   assert.equal(plain.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S2
 test("T38: toggling edit mode posts previewEditModeChanged", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -262,7 +266,7 @@ test("T43: invalid or foreign pending overlay messages are ignored", () => {
 
 // @tests_req SwRS-MDOKFSTUDIO-THEME-038#S3
 // @tests_req SwRS-MDOKFSTUDIO-THEME-038#S4
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S5
 test("T08: zoom buttons set the zoom variable, post the preference and keep the state", () => {
   const harness = createRuntimeHarness();
   const root = harness.documentElement;
@@ -612,7 +616,8 @@ test("T10b: a Mermaid figure is not a code block", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S7
 test("T11: Back and Next post previewHistoryGo and follow previewHistoryState", () => {
   const harness = createRuntimeHarness();
   const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
@@ -632,7 +637,7 @@ test("T11: Back and Next post previewHistoryGo and follow previewHistoryState", 
   assert.equal(harness.messages.at(-1)?.direction, "forward");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S11
 test("T15: previewShowComments sets the show-comments attribute of the page, stale ids are ignored", () => {
   const harness = createRuntimeHarness();
   const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
@@ -645,7 +650,8 @@ test("T15: previewShowComments sets the show-comments attribute of the page, sta
   assert.equal(harness.documentElement.getAttribute("data-okf-show-comments"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S2
 test("T16: previewIncomingChanges marks blocks and reports enabled, stale ids are ignored", () => {
   const harness = createRuntimeHarness();
   const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
@@ -681,7 +687,7 @@ test("T17: the Diff button flips the marks, posts the preference and keeps the s
   assert.equal(harness.messages.at(-1)?.value, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S2
 test("CR147: the Side-by-side button toggles the diff, posts the state and is disabled in edit mode", () => {
   const harness = createRuntimeHarness();
   const root = harness.documentElement;
@@ -712,7 +718,7 @@ test("CR147: the Side-by-side button toggles the diff, posts the state and is di
   assert.equal(posted().at(-1)?.on, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S4
 test("CR147: a baseline sent while the diff is off is answered by telling the host it is off", () => {
   const harness = createRuntimeHarness();
   const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
@@ -724,7 +730,7 @@ test("CR147: a baseline sent while the diff is off is answered by telling the ho
   assert.equal(harness.messages.filter((message) => message.type === "previewSideBySideChanged").length, 1, "a stale one is dropped");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-214
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-214#S2
 test("T17: the initial preference and the saved webview state decide the pressed state", () => {
   const off = createRuntimeHarness({
     initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false, comments: true, toolbarCollapsed: false },
@@ -763,7 +769,8 @@ test("T17: the Diff button is hidden through the document attribute when the set
     /html\[data-sphinx-preview-incoming="off"\] \[data-sphinx-preview-change-layer\] \{\s*display: none;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-007
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-007#S3
 test("P8: the collapse button hides rows 2 to 4, posts the preference and keeps the state", () => {
   // A workspace that stored the expanded toolbar (the fresh default is collapsed).
   const harness = createRuntimeHarness({
@@ -839,7 +846,7 @@ test("stored choice wins: a stored expanded toolbar and a stored theme mode are 
   assert.equal(restored.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "white");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S7
 test("T11: a previewHistoryState of another document version is ignored", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage({
@@ -850,7 +857,7 @@ test("T11: a previewHistoryState of another document version is ignored", () => 
   assert.equal(harness.nextButton.disabled, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S7
 test("T13: a state snapshot keeps the TOC visibility and the folded sections", () => {
   const harness = createRuntimeHarness({
     viewportWidth: 900,

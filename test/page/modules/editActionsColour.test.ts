@@ -36,7 +36,8 @@ test("T34: color is a strict-mode action for blocks and cells with a swatch popo
   assert.equal(new Set(action.colors).size, 16);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-058
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-058#S4
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-058#S5
 test("T34: color wraps the selection in the exact span the renderer keeps", () => {
   assert.equal(colour("color", "say [foo] now", "text:#c00"), 'say <span style="color:#c00">[foo]</span> now');
   assert.equal(colour("color", "say [foo] now", "background:#ff0"),
@@ -131,7 +132,8 @@ test("T34: colorCode is available only with the caret in a colour code", () => {
   assert.equal(action.current!({ value: "plain", selectionStart: 1, selectionEnd: 1, scope: "block" }), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-069
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-069#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-069#S3
 test("T34: colorCode replaces the code under the caret in place, validated", () => {
   assert.equal(colour("colorCode", "a #c0|0 b", "#00f"), "a #00f| b");
   assert.equal(colour("colorCode", "a rgb(1, 2, 3)| b", "#ff8800"), "a #ff8800| b");

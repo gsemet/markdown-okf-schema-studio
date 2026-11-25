@@ -17,6 +17,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Setting wins
+- id: S2
+  title: Order of the sources
+- id: S3
+  title: The name is cleaned and cut
+- id: S4
+  title: The Git user name is read through the built-in Git extension
+- id: S5
+  title: No Git user name
+- id: S6
+  title: The comments.authorName setting
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,13 +53,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the host stores a comment or a reply, the extension SHALL use as author the comments.authorName setting, else the Git user.name of the document repository, else the operating system user name, else Anonymous, with control characters replaced by spaces and the name trimmed and cut at 100 characters.
 
-### Scenario (nominal): Setting wins
+### Scenario S1 (nominal): Setting wins
 
 - GIVEN the setting authorName set to Ada Reviewer and a Git user.name of Bob
 - WHEN a comment is saved
 - THEN the author is Ada Reviewer
 
-### Scenario (boundary): Order of the sources
+### Scenario S2 (boundary): Order of the sources
 
 | Input | Outcome |
 | --- | --- |
@@ -55,26 +68,26 @@ When the host stores a comment or a reply, the extension SHALL use as author the
 | The setting and the Git name are empty and the operating system user name is known | The author is the operating system user name |
 | An empty setting, no Git name and no system user name | The author is Anonymous |
 
-### Scenario (boundary): The name is cleaned and cut
+### Scenario S3 (boundary): The name is cleaned and cut
 
 | Input | Outcome |
 | --- | --- |
 | An author name holding a tab or a line break | Each control character becomes a space and the ends are trimmed |
 | A name of 150 characters | The name is cut at 100 characters |
 
-### Scenario (nominal): The Git user name is read through the built-in Git extension
+### Scenario S4 (nominal): The Git user name is read through the built-in Git extension
 
 - GIVEN a repository whose user.name is "  Ada  "
 - WHEN the host needs the Git user name of the document
 - THEN the name is Ada
 
-### Scenario (refusal): No Git user name
+### Scenario S5 (refusal): No Git user name
 
 - GIVEN no Git extension, no repository, no getConfig or an empty value
 - WHEN the host reads the Git user name
 - THEN no name is returned and the next source is used
 
-### Scenario (boundary): The comments.authorName setting
+### Scenario S6 (boundary): The comments.authorName setting
 
 | Input | Outcome |
 | --- | --- |

@@ -20,6 +20,19 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Scroll burst
+- id: S2
+  title: Hidden page
+- id: S3
+  title: The host records the state of a report
+- id: S4
+  title: Invalid state report
+- id: S5
+  title: Switching back to a document restores its state
+- id: S6
+  title: The 200 most recent documents
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,22 +55,22 @@ default_owner_email: gaetan@xeberon.net
 
 When the page reports its reading state while the reader scrolls, the extension SHALL write the state and post previewState at most once per 100 ms with the last state always reaching the host, record each valid report for the preview's document, and remember the reading state of at most the 200 most recent documents.
 
-### Scenario (nominal): Scroll burst
+### Scenario S1 (nominal): Scroll burst
 - GIVEN forty scroll frames in 100 ms
 - WHEN the state is written
 - THEN the first write goes through at once, one more follows with the last state, and previewScroll messages are never delayed
 
-### Scenario (boundary): Hidden page
+### Scenario S2 (boundary): Hidden page
 - GIVEN a held-back state and the page becoming hidden
 - WHEN the visibility changes
 - THEN the held-back state is written and posted at once
 
-### Scenario (nominal): The host records the state of a report
+### Scenario S3 (nominal): The host records the state of a report
 - GIVEN a previewState with line 4 and scroll 88 for the current render
 - WHEN the host receives it
 - THEN the preview's state holds sourceLine 4 and scrollTop 88; a previewScroll, a previewReveal and a previewRefresh also carry the state and record it the same way
 
-### Scenario (refusal): Invalid state report
+### Scenario S4 (refusal): Invalid state report
 | Input | Outcome |
 | --- | --- |
 | a report whose state does not parse, or names another document | the recorded state is unchanged |
@@ -67,14 +80,14 @@ When the page reports its reading state while the reader scrolls, the extension 
 | openDisclosures | only safe integers from 0 to 9999 are kept, at most the first 100 |
 | descriptionsCollapsed not a boolean | the previous Description state is kept |
 
-### Scenario (nominal): Switching back to a document restores its state
+### Scenario S5 (nominal): Switching back to a document restores its state
 | Input | Outcome |
 | --- | --- |
 | a preview scrolled to line 80 of A, with a focused block and open sections, then switched to B (which reported no scroll anchor) and back to A | A renders again with its scroll line 80 through the stored anchor and with the focused block, the selection, the open sections and the Description state it had |
 | a document never shown in this preview | it starts fresh, with no remembered state |
 | the same sequence, but B's page reported its own scroll anchor | the scroll line of A is not kept; with a following preview the render starts at the editor's first visible line |
 
-### Scenario (boundary): The 200 most recent documents
+### Scenario S6 (boundary): The 200 most recent documents
 | Input | Outcome |
 | --- | --- |
 | 200 remembered documents and a state stored for a 201st | the least recently used entry is gone |

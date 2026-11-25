@@ -21,7 +21,7 @@ async function waitUntil(label: string, condition: () => boolean, timeoutMs: num
   throw new Error(`Timed out waiting for ${label}.`);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 /**
  * CR 477 reverse migration, in a window of its own (the launcher `runReverseMigrationScenario` of
  * run-tests.ts): the user `settings.json` was seeded with the retired setting on, and so was the

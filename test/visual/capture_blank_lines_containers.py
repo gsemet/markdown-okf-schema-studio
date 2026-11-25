@@ -59,8 +59,9 @@ EDITOR_HOME = """() => {
 }"""
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S3
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
 def check_blank_lines_in_containers(page: Page, scenario: dict, failures: list[Failure], mode: str) -> None:
   """The fixture `95-blank-lines-in-containers`: one run of three empty lines in each of a quote, an alert, an admonition, a
   context-tag panel, a definition and a footnote. `containers-edit`: two blocks in each container (the first line is the separator), as wide as

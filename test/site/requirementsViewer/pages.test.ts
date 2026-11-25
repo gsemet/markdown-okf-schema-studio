@@ -23,8 +23,8 @@ function resolved(dir: string, html: string): string[] {
 }
 
 test("one page per active area, use case and behaviour and none for a retired one", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-080
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-083
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-083#S1
   const pages = viewerPages(load(), "/nonexistent-root").map((page) => page.dir);
   assert.deepEqual(pages.slice(0, 3), ["requirements", "requirements/gfm", "requirements/myst"]);
   assert.equal(pages.length, 1 + 2 + 2 + 6);
@@ -34,8 +34,9 @@ test("one page per active area, use case and behaviour and none for a retired on
 });
 
 test("every relative link resolves from every depth", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-080
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S2
   const specs = viewerPages(load(), "/nonexistent-root");
   const folders = new Set(specs.map((spec) => spec.dir));
   const assets = new Set(["requirements/viewer.css", "requirements/viewer.js", "requirements/search-index.js"]);
@@ -54,7 +55,8 @@ test("every relative link resolves from every depth", () => {
 });
 
 test("a use case with paths draws the map, the phone list and the walk count", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S3
   const model = load();
   const page = useCasePage(model, model.byId.get("StRS-X-001")!);
   assert.ok(page.body.includes('<svg class="metro"') || page.body.includes("<svg"));
@@ -72,7 +74,8 @@ test("a use case with paths draws the map, the phone list and the walk count", (
 });
 
 test("an unknown cited id is drawn without a link and a use case without paths says so", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S3
   const raw = JSON.parse(fixtureReport()) as { requirements: unknown[] };
   raw.requirements.push(requirement("StRS-X-004", "StRS", "gfm", { text: "### Main paths\n\n#### Path 1: x\n\n1. A\n   - SwRS-UNKNOWN-999: moves\n2. B\n" }));
   const model = load(JSON.stringify(raw));
@@ -84,8 +87,9 @@ test("an unknown cited id is drawn without a link and a use case without paths s
 });
 
 test("an area page lists its active use cases and keeps retired ones for History", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-080
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-083
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-083#S1
   const model = load();
   const gfm = areaPage(model, model.areas[0]!);
   assert.ok(gfm.body.includes('href="StRS-X-001/"') && gfm.body.includes('href="StRS-X-003/"'));
@@ -96,9 +100,9 @@ test("an area page lists its active use cases and keeps retired ones for History
 });
 
 test("behaviour page: files at the commit, test kinds, retired rows and the where section", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-093
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-083
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-093#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-083#S1
   const model = load();
   const page = behaviourPage(model, model.byId.get("SwRS-X-011")!).body;
   assert.ok(page.includes("https://github.com/gsemet/markdown-okf-schema-studio/blob/abc123/src/a.ts"));
@@ -120,9 +124,10 @@ test("behaviour page: files at the commit, test kinds, retired rows and the wher
 });
 
 test("without JavaScript the search and Play controls are hidden", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-084
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-084#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S2
   for (const page of viewerPages(load(), "/nonexistent-root")) {
     assert.ok(!viewerDocument(page, FOOTER).includes('id="theme"'), "no page has a Theme button");
     const rule = /<noscript><style>([^<]*)<\/style><\/noscript>/u.exec(viewerDocument(page, FOOTER))?.[1] ?? "";
@@ -134,7 +139,7 @@ test("without JavaScript the search and Play controls are hidden", () => {
 });
 
 test("the use case diagram sits under the user need and before the map, and without one the page is unchanged", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-087
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S1
   const model = load();
   const useCase = model.byId.get("StRS-X-001")!;
   const before = useCasePage(model, useCase).body;
@@ -150,7 +155,8 @@ test("the use case diagram sits under the user need and before the map, and with
 });
 
 test("a table scenario shows its table and a mixed scenario shows steps, note and table in order", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S4
   const model = load();
   const page = behaviourPage(model, model.byId.get("SwRS-X-014")!).body;
   const [tableCard = "", mixedCard = ""] = page.split('<details class="scn">').slice(1);
@@ -171,7 +177,7 @@ test("a table scenario shows its table and a mixed scenario shows steps, note an
 });
 
 test("the line above the map names the paths and what they share", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S2
   const single = load();
   const one = useCasePage(single, single.byId.get("StRS-X-001")!).body;
   assert.ok(one.includes('<p class="mapread">') && one.includes("one <b>path</b>") && one.includes("<b>situation</b>") && one.includes("<b>step</b>"));
@@ -184,9 +190,9 @@ test("the line above the map names the paths and what they share", () => {
 });
 
 test("a full ID is the text of every link to a requirement", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-080
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-083
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-083#S1
   const model = load(fullIdReport());
   const useCase = useCasePage(model, model.byId.get(FULL_USE_CASE)!).body;
   assert.ok(useCase.includes(`<span class="id">${FULL_BEHAVIOUR(102)}</span>`), "the list of behaviours");
@@ -202,7 +208,8 @@ test("a full ID is the text of every link to a requirement", () => {
 });
 
 test("a full ID names a requirement on its page", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-093
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-093#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-093#S2
   const model = load(fullIdReport());
   const useCase = model.byId.get(FULL_USE_CASE)!;
   const meta = (html: string, property: string): string[] => [...html.matchAll(new RegExp(`<meta (?:property|name)="${property}" content="([^"]*)"`, "gu"))].map((match) => match[1] ?? "");

@@ -15,6 +15,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-001
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: A thread outside any placeable block is listed
+- id: S2
+  title: An entry shows the quote, the first comment and the count
+- id: S3
+  title: Nothing to list
+- id: S4
+  title: The page writes nothing for an orphaned thread
+- id: S5
+  title: The box adds no scroll height at the end of the document
+- id: S6
+  title: The host verdict decides where a thread goes
+- id: S7
+  title: Without a host verdict the quote is searched elsewhere
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,40 +49,40 @@ default_owner_email: gaetan@xeberon.net
 
 When the page cannot place a review thread, the extension SHALL list it as an entry of an Orphaned comments region placed after the content.
 
-### Scenario (nominal): A thread outside any placeable block is listed
+### Scenario S1 (nominal): A thread outside any placeable block is listed
 
 - GIVEN a thread whose line has no eligible block and whose quote is found nowhere
 - WHEN the thread is posted
 - THEN an Orphaned comments region after the content element lists it and no highlight is made
 
-### Scenario (nominal): An entry shows the quote, the first comment and the count
+### Scenario S2 (nominal): An entry shows the quote, the first comment and the count
 
 | Given | Then the entry shows |
 | --- | --- |
 | an orphaned thread with two comments | the quote, "{author}: {first 120 characters of the first comment}" and "(2 comments)" |
 | a resolved orphaned thread with one comment and no quote | "(no quoted text)" and "(1 comment, resolved)" |
 
-### Scenario (boundary): Nothing to list
+### Scenario S3 (boundary): Nothing to list
 
 - GIVEN all threads placed
 - WHEN the threads are applied
 - THEN no Orphaned comments region exists
 
-### Scenario (refusal): The page writes nothing for an orphaned thread
+### Scenario S4 (refusal): The page writes nothing for an orphaned thread
 
 | Given | When | Then |
 | --- | --- | --- |
 | an orphaned thread | the threads are applied | no comment message is posted to the host |
 | an orphaned thread | its entry is clicked | only the popover opens |
 
-### Scenario (boundary): The box adds no scroll height at the end of the document
+### Scenario S5 (boundary): The box adds no scroll height at the end of the document
 
 | Given | When | Then |
 | --- | --- | --- |
 | a document with one orphan, a box shorter than the bottom padding of the content | the page is measured with and without the box | the scrollable height is the same |
 | a box taller than the padding | the page is measured | the page is exactly as much taller as the box exceeds the padding |
 
-### Scenario (boundary): The host verdict decides where a thread goes
+### Scenario S6 (boundary): The host verdict decides where a thread goes
 
 | Host verdict and situation | Outcome |
 | --- | --- |
@@ -76,7 +91,7 @@ When the page cannot place a review thread, the extension SHALL list it as an en
 | orphaned false, a block at its line | the quote is highlighted in that block as for a thread without verdict |
 | orphaned false, the same quote also present in another block | only the block of the line is searched |
 
-### Scenario (boundary): Without a host verdict the quote is searched elsewhere
+### Scenario S7 (boundary): Without a host verdict the quote is searched elsewhere
 
 | Input | Outcome |
 | --- | --- |

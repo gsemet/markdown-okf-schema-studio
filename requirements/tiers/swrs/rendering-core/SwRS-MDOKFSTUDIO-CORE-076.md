@@ -15,6 +15,19 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-007
+scenarios:
+- id: S1
+  title: Version change on main with a green heavy run
+- id: S2
+  title: Re-run of the failed jobs of a version change
+- id: S3
+  title: Artifact names and attempts
+- id: S4
+  title: Push to main without a version change
+- id: S5
+  title: Failure, cancellation and other events
+- id: S6
+  title: Reports of a later Pages deploy
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,19 +49,19 @@ default_owner_email: gaetan@xeberon.net
 
 Every push to main SHALL run the heavy jobs (`integration` and `stress`); when the push changes the package version, the CI workflow SHALL tag the commit only when they both succeed; a push without a version change SHALL still run the tag step and create no tag. When `checks` or a heavy job of a version change does not succeed, the workflow SHALL say why in the job summary. The Pages site of a tag SHALL reuse the end-to-end reports of that green heavy run. After "Re-run failed jobs" on that run, every job and the Pages site SHALL use the artifacts of the newest attempt of each producing job, never an older attempt's artifact of the same name. A heavy dispatch SHALL build the gallery and the site unless `gallery` is false, and only when `integration` and `report` succeed.
 
-### Scenario (nominal): Version change on main with a green heavy run
+### Scenario S1 (nominal): Version change on main with a green heavy run
 
 - GIVEN a push to main whose `package.json` version differs from the version before the push (`release-check` outputs `bump=true`, the same test `scripts/version.py --tag-before` applies)
 - WHEN the `integration` and `stress` jobs of that push run succeed and `checks` succeeds
 - THEN `tag-release` tags the commit, `release` dispatches the **Release VSIX** workflow with the tag on the default branch, and `pages` builds the site from the merged reports artifact of the same run (`studio-reports-attempt-<n>`, the name the `report` job outputs) instead of running the suite
 
-### Scenario (nominal): Re-run of the failed jobs of a version change
+### Scenario S2 (nominal): Re-run of the failed jobs of a version change
 
 - GIVEN a version-change push run whose `integration` job failed on attempt 1 ("Release not tagged") and whose `visual` job passed
 - WHEN the failed jobs are re-run (`gh run rerun {run-id} --failed`) and pass on attempt 2, hours after attempt 1
 - THEN `report` merges `e2e-visual-attempt-1` (the `visual` output kept from attempt 1) with `e2e-integration-attempt-2`, its stages are accepted as one campaign because both carry the run id pinned by the workflow, `tag-release` tags the commit, and `pages` builds the site from `studio-reports-attempt-2`
 
-### Scenario (boundary): Artifact names and attempts
+### Scenario S3 (boundary): Artifact names and attempts
 
 | Input | Outcome |
 | --- | --- |
@@ -60,13 +73,13 @@ Every push to main SHALL run the heavy jobs (`integration` and `stress`); when t
 | a failed visual manifest lists `{page, detail}` failures | `report` prints each as `{page}: {detail}`, joined with `; `, never `[object Object]`; string failures print as they are; `error` of the manifest keeps its priority |
 | the visual and integration stages started two hours apart or more | `report` fails, unless both campaigns carry the same run id pinned by `STUDIO_E2E_RUN_ID` (`pinnedRunId`) |
 
-### Scenario (nominal): Push to main without a version change
+### Scenario S4 (nominal): Push to main without a version change
 
 - GIVEN a push to main whose `static`, `visual` and `report` jobs succeed and whose version is unchanged (`bump=false`)
 - WHEN the workflow reaches `tag-release`
 - THEN `integration` and `stress` run, with `stress` advisory, `tag-release` runs and outputs no tag, and `release` and `pages` are skipped
 
-### Scenario (boundary): Failure, cancellation and other events
+### Scenario S5 (boundary): Failure, cancellation and other events
 
 | Input | Outcome |
 | --- | --- |
@@ -80,7 +93,7 @@ Every push to main SHALL run the heavy jobs (`integration` and `stress`); when t
 | a dispatch with `heavy` (and `gallery` not false) whose `integration` and `report` succeed | `gallery` runs and uploads the gallery and site as `studio-site-attempt-<n>` |
 | a dispatch with `heavy` whose `integration` or `report` did not succeed, or with `gallery` false | `gallery` is skipped |
 
-### Scenario (boundary): Reports of a later Pages deploy
+### Scenario S6 (boundary): Reports of a later Pages deploy
 
 | Run of the tagged commit | Selected by `scripts/select_e2e_run.py` |
 | --- | --- |

@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Follow the active file
+- id: S2
+  title: Refresh on demand
 user_need: As a writer, I keep one preview beside my editor and it shows the
   Markdown file I am working in, without opening a new preview each time; as a
   reader, I redraw the preview myself when I doubt that it is current, and I
@@ -64,7 +69,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Follow the active file
+#### Path S1: Follow the active file
 
 1. A saved Markdown file is the active editor
    - SwRS-MDOKFSTUDIO-LIFE-003: the reader runs Open Preview to Side and the side preview shows the file
@@ -77,7 +82,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-LIFE-049 (refusal): a failed render is labelled in the status
 4. The status says the render is ready
 
-#### Path 2: Refresh on demand
+#### Path S2: Refresh on demand
 
 1. A side preview shows the file
    - SwRS-MDOKFSTUDIO-LIFE-032: the reader runs Refresh Preview or presses the Refresh button and the document is rendered again from its buffer

@@ -17,6 +17,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-011
 depends_on: []
+scenarios:
+- id: S1
+  title: One match
+- id: S2
+  title: Sibling fallback
+- id: S3
+  title: Name with or without an extension, with or without a folder
+- id: S4
+  title: Several files match
+- id: S5
+  title: No file matches
+- id: S6
+  title: A match outside the workspace does not count
+- id: S7
+  title: One search per name at a time
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,19 +50,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a wikilink is followed, the extension SHALL search every workspace root for a note of that file name (with .md added when the name has no extension) and open it when exactly one valid file matches, or the file of that name next to the document when none is found, and block the link when several match or no file does.
 
-### Scenario (nominal): One match
+### Scenario S1 (nominal): One match
 
 - GIVEN a note named Note.md in one folder of a two-folder workspace
 - WHEN the link [[Note]] is followed
 - THEN that file opens, because the search by name runs before any sibling is accepted
 
-### Scenario (nominal): Sibling fallback
+### Scenario S2 (nominal): Sibling fallback
 
 - GIVEN no file found by name and a Note.md next to the document
 - WHEN the link [[Note]] is followed
 - THEN the sibling opens
 
-### Scenario (boundary): Name with or without an extension, with or without a folder
+### Scenario S3 (boundary): Name with or without an extension, with or without a folder
 
 | Input | Outcome |
 | --- | --- |
@@ -57,25 +72,25 @@ When a wikilink is followed, the extension SHALL search every workspace root for
 | [[sub/Note]] with a file sub/Note.md next to the document | opens it without a name search, because a name with a folder resolves relative only |
 | [[sub/Note]] and no file sub/Note.md next to the document | blocked with The wikilink target is unavailable. |
 
-### Scenario (refusal): Several files match
+### Scenario S4 (refusal): Several files match
 
 - GIVEN Note.md in two folders
 - WHEN [[Note]] is followed
 - THEN it is blocked with The wikilink is ambiguous; use a relative path to choose a note.
 
-### Scenario (refusal): No file matches
+### Scenario S5 (refusal): No file matches
 
 - GIVEN [[Missing]]
 - WHEN it is followed
 - THEN it is blocked with The wikilink target is unavailable.
 
-### Scenario (boundary): A match outside the workspace does not count
+### Scenario S6 (boundary): A match outside the workspace does not count
 
 - GIVEN one match inside the workspace and one outside through a symlink
 - WHEN [[Note]] is followed
 - THEN only the valid match counts and it opens
 
-### Scenario (boundary): One search per name at a time
+### Scenario S7 (boundary): One search per name at a time
 
 | Input | Outcome |
 | --- | --- |

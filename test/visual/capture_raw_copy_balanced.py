@@ -16,9 +16,10 @@ def _lines(*values: str) -> str:
   return "\n".join(values)
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-279
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S2
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S3
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-279#S2
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S2
 def check_raw_copy_balanced(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Every case sets a real Range and compares the balanced text/plain with the exact expected Markdown."""
   name = scenario["page"]
@@ -67,8 +68,10 @@ def check_raw_copy_balanced(page: Page, scenario: dict, failures: list[Failure])
     failures.append(Failure(name, f"Select all then copy with the setting on did not give the whole source exactly: {recorded!r}"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S3
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S3
 def check_nesting_grid(expect: Expect, source: str) -> None:
   """An admonition, a list item and an admonition: a start at each level 0 to 3 by an end at each level 0 to 3."""
   starts = [("Before.", 1), ("Outer a.", 1), ("item a", 1), ("Inner text.", 1)]
@@ -96,9 +99,11 @@ def check_nesting_grid(expect: Expect, source: str) -> None:
       expect(f"nesting grid, start level {row}, end level {column}", _text(start, offset), _text(end, end_offset), on[row][column])
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-281
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-282
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-284
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-281#S2
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-282#S3
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-282#S4
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-284#S3
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-284#S4
 def check_balanced_blocks(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Code blocks, tables, headings and definition lists."""
   name = scenario["page"]
@@ -125,7 +130,8 @@ def check_balanced_blocks(page: Page, scenario: dict, failures: list[Failure]) -
          "Term one\n: words here\n\nTerm two\n: other def\n\nDef")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S3
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S4
 def check_balanced_lists(expect: Expect) -> None:
   """A nested list crossed at the start keeps the start item's marker at its own level (m = 0)."""
   expect("a nested list, m = 0", _text("mighty", 2), _text("next", "end"), "  - **ghty**\n  - sibling\n- next")

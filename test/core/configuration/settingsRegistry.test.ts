@@ -34,7 +34,8 @@ test("the generated settings schema is the package.json one, byte for byte", () 
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S7
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S8
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-156
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-156#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-156#S5
 test("categories keep their titles and order, and settings are sorted by their order", () => {
   const configuration = contributedConfiguration();
   assert.deepEqual(configuration.map((category) => [category.title, category.order]), [
@@ -59,8 +60,9 @@ test("a setting with nothing stored reads as its schema default", () => {
   assert.equal(settingSection("preview"), "markdownOkfSchemaStudio.preview");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S5
 test("the page gets the scroll, reveal, sticky band and comment chip settings in its boot context", () => {
   assert.deepEqual(bootSettingKeys(PREVIEW_SETTINGS), [
     "scrollPreviewWithEditor",
@@ -86,7 +88,8 @@ test("the page gets the scroll, reveal, sticky band and comment chip settings in
   assert.deepEqual(bootSettingKeys(PREVIEW_SETTINGS, "live"), ["showComments"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S3
 test("the host writes the boot settings as configured, in table order", () => {
   const configuration = readPreviewConfiguration({
     get: <T>(key: string, defaultValue: T): T => (key === "stickyHeadingDepth" ? 9 : defaultValue) as T,
@@ -105,8 +108,9 @@ test("the host writes the boot settings as configured, in table order", () => {
   }));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S5
 test("the page reads missing or odd boot entries with the page defaults", () => {
   assert.deepEqual(readPreviewBootSettings({}), {
     scrollPreviewWithEditor: true,
@@ -150,7 +154,7 @@ function sourceFiles(directory: string): string[] {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-149
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-149#S3
 test("the Studio settings live under their own prefix, and no source writes a setting of the built-in Markdown preview", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, "package.json"), "utf8")) as {
     contributes: { configuration: Array<{ properties: Record<string, unknown> }> };
@@ -173,7 +177,7 @@ test("the Studio settings live under their own prefix, and no source writes a se
   assert.deepEqual(writers, ["src/host-vscode/vscodeHost.ts"], "settings are written through one writer, by section name");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-156
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-156#S5
 test("no Opening Files category and no open.* setting is declared: the raw text stays text", () => {
   assert.equal(SETTING_CATEGORIES.some((category) => category.section === "open"), false);
   const configuration = contributedConfiguration();

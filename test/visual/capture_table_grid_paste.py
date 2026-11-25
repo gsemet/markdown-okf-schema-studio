@@ -96,7 +96,8 @@ TABLE_SHAPE = """() => {
 }"""
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S1
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S2
 def check_table_grid_paste(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Two spreadsheet lines pasted into the last cell of the last row send one final save that fills
   four cells and adds one column and one row; once the host renders the table, the cell editor is

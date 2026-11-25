@@ -21,6 +21,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
 - StRS-MDOKFSTUDIO-GFM-002
+scenarios:
+- id: S1
+  title: README header
+- id: S2
+  title: Elements kept
+- id: S3
+  title: The allow-list of tags
+- id: S4
+  title: Edit mode
+- id: S5
+  title: Kbd renders as a key cap
+- id: S6
+  title: Kbd with attributes
+- id: S7
+  title: Nothing active survives
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -51,13 +66,13 @@ supersedes:
 
 When a document holds README-style HTML (div and p with align, br, img with width, height and alt, a around img, picture with colour-scheme sources, sub, sup, kbd), the preview SHALL render those elements like GitHub, keep Markdown after a blank line inside an HTML block rendered, and, in edit mode, show each HTML block as an admonition-like block titled with its literal opening tag, without any script, event handler or style the sanitizer does not already keep. The preview SHALL render a raw details element with an optional open attribute and a plain summary element as a collapsible section, and a kbd element without attributes as a key cap, and SHALL omit raw HTML outside the allow-list of tags and attributes.
 
-### Scenario (nominal): README header
+### Scenario S1 (nominal): README header
 
 - GIVEN a document whose first block is &lt;div align="center"&gt;, then after a blank line an &lt;img src width height alt&gt;, a Markdown heading and a Markdown badge row, then &lt;/div&gt;
 - WHEN the document is rendered
 - THEN the preview holds one `div` with `align="center"` whose content is the image at its width and height, the heading and the badge row, each Markdown block rendered as Markdown
 
-### Scenario (nominal): Elements kept
+### Scenario S2 (nominal): Elements kept
 
 | Source | Rendered as |
 | --- | --- |
@@ -68,7 +83,7 @@ When a document holds README-style HTML (div and p with align, br, img with widt
 | &lt;details&gt; (optionally `open`) with a plain &lt;summary&gt;, in one block or as a head block, the Markdown between and a closing &lt;/details&gt; block | a collapsible section, open when the attribute is set, with the summary as its title and the body rendered; an empty summary reads Details |
 | a &lt;summary&gt; holding markup | not recognised |
 
-### Scenario (nominal): The allow-list of tags
+### Scenario S3 (nominal): The allow-list of tags
 
 | Kind | Tags kept (attributes are kept per tag from a fixed list) |
 | --- | --- |
@@ -76,13 +91,13 @@ When a document holds README-style HTML (div and p with align, br, img with widt
 | inline | span, br, img, a, picture, source, sub, sup, b, i, em, strong, u, s, del, ins, small, kbd, code, mark |
 | dropped with their content | script, style, iframe, object, embed, textarea, noscript, template, svg, math, title, xmp, frameset, applet |
 
-### Scenario (nominal): Edit mode
+### Scenario S4 (nominal): Edit mode
 
 - GIVEN edit mode is on
 - WHEN a `div`, `p` or `picture` block is rendered
 - THEN it is shown as an admonition-like block titled with its literal opening tag in code font, for example &lt;div align="center"&gt; (shortened with an ellipsis when long), and a click on it edits the raw source lines of the block only; read mode shows no frame and no title
 
-### Scenario (nominal): Kbd renders as a key cap
+### Scenario S5 (nominal): Kbd renders as a key cap
 
 | Input | Outcome |
 | --- | --- |
@@ -90,13 +105,13 @@ When a document holds README-style HTML (div and p with align, br, img with widt
 | a kbd block holding Ctrl | a key element shows |
 | a kbd element beside an unsupported tag | kbd is kept and the unsupported tag is absent |
 
-### Scenario (refusal): Kbd with attributes
+### Scenario S6 (refusal): Kbd with attributes
 
 - GIVEN a kbd element with an onclick attribute
 - WHEN the preview is rendered
 - THEN no attributed kbd element is rendered
 
-### Scenario (refusal): Nothing active survives
+### Scenario S7 (refusal): Nothing active survives
 
 - GIVEN raw HTML with &lt;script&gt;, &lt;iframe&gt;, an `onclick` or `onerror` attribute, a `style` or `class` attribute, a `javascript:` link or an unknown element
 - WHEN the document is rendered

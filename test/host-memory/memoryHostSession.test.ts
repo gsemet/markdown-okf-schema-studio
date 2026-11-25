@@ -38,7 +38,8 @@ function memorySession() {
   return { files, ports, store, manager };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-062
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-062#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-062#S5
 test("a session on the memory host decides whether its source exists from the host's paths port", () => {
   const { store, manager, files } = memorySession();
   const document = store.add("file:///ws/docs/a.md", "# A\n", "/ws/docs/a.md");
@@ -65,7 +66,8 @@ test("the memory host's paths port answers from its file system and its user", (
   assert.equal(createMemoryHostPorts(files).paths.userName(), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S6
 test("the memory host's render queue compares changed files with the dependencies in canonical form", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout"] });
   const { ports } = memorySession();

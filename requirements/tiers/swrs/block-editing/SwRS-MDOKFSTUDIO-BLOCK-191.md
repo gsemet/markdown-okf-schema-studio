@@ -20,6 +20,30 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: First and later saves
+- id: S2
+  title: The final save or a cancel releases the lock
+- id: S3
+  title: The host asks once per editor to report its close
+- id: S4
+  title: The page reports the close of a watched editor
+- id: S5
+  title: The close of another editor releases nothing
+- id: S6
+  title: A reloaded page releases the lock
+- id: S7
+  title: A change outside the open block
+- id: S8
+  title: A change inside the open block
+- id: S9
+  title: A table cell editor
+- id: S10
+  title: The page closed the editor during its final save
+- id: S11
+  title: An outside change during a final save keeps the text unwritten and the
+    editor open
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,7 +69,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a block editor saves for the first time, the host SHALL hold an edit lock for that block, and release it, running the page work that waited for it, when the final save is applied, the page reports the close of the editor or a reload, or the block changes in the document; a change inside the open block ends the edit with an error and keeps the text the writer typed.
 
-### Scenario (nominal): First and later saves
+### Scenario S1 (nominal): First and later saves
 
 | Input | Outcome |
 | --- | --- |
@@ -54,20 +78,20 @@ When a block editor saves for the first time, the host SHALL hold an edit lock f
 
 A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-BLOCK-216.
 
-### Scenario (nominal): The final save or a cancel releases the lock
+### Scenario S2 (nominal): The final save or a cancel releases the lock
 
 - GIVEN a held edit with queued page work
 - WHEN the final save is applied, or a cancel writes the original text back
 - THEN the lock is released and the queued work runs, newest render last
 
-### Scenario (nominal): The host asks once per editor to report its close
+### Scenario S3 (nominal): The host asks once per editor to report its close
 
 | Input | Outcome |
 | --- | --- |
 | An open editor and a render to defer, the work is queued | previewEditorWatch with the editor id is posted |
 | More work queued for the same editor | No second watch is posted |
 
-### Scenario (nominal): The page reports the close of a watched editor
+### Scenario S4 (nominal): The page reports the close of a watched editor
 
 | Input | Outcome |
 | --- | --- |
@@ -75,14 +99,14 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 | A watch for an editor that is already closed, also for the next document | previewEditClosed is posted at once |
 | An editor the host does not watch closes | The close stays silent |
 
-### Scenario (boundary): The close of another editor releases nothing
+### Scenario S5 (boundary): The close of another editor releases nothing
 
 | Input | Outcome |
 | --- | --- |
 | An open editor and previewEditClosed of another editor id | The work keeps waiting |
 | previewEditClosed of the open editor | The work runs |
 
-### Scenario (boundary): A reloaded page releases the lock
+### Scenario S6 (boundary): A reloaded page releases the lock
 
 | Input | Outcome |
 | --- | --- |
@@ -92,7 +116,7 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 | A previewReady without a lock | Nothing is released |
 | Time passes with no event | The lock is not released |
 
-### Scenario (boundary): A change outside the open block
+### Scenario S7 (boundary): A change outside the open block
 
 | Input | Outcome |
 | --- | --- |
@@ -100,21 +124,21 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 | A change at or after the end of the block | The offset is unchanged |
 | Several changes in one event | They add up; their offsets refer to the text before the event |
 
-### Scenario (refusal): A change inside the open block
+### Scenario S8 (refusal): A change inside the open block
 
 | Input | Outcome |
 | --- | --- |
 | A change that lies inside or across the block | The editor shows "The source block changed outside the preview while it was being edited. Copy your text, then reopen the block." with the typed text kept, and the lock is free for a new edit |
 | An insertion editor (an empty block) and a change elsewhere | No conflict is reported; only a change at its own offset conflicts |
 
-### Scenario (boundary): A table cell editor
+### Scenario S9 (boundary): A table cell editor
 
 | Input | Outcome |
 | --- | --- |
 | A held edit of a table cell editor and an outside change (undo, redo, revert) that overlaps its table | No error is shown: the edit is released without writing and the render of the buffer reaches the page, whose content patch closes the editor (SwRS-MDOKFSTUDIO-TABLE-119); the text was autosaved live, so the buffer already holds it |
 | The same change over a prose block editor | The conflict above applies |
 
-### Scenario (boundary): The page closed the editor during its final save
+### Scenario S10 (boundary): The page closed the editor during its final save
 | Input | Outcome |
 | --- | --- |
 | previewEditClosed with detached for the editor of the held edit | The edit completes with no restore and is always answered with previewEditSource done |
@@ -124,7 +148,7 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 | The release of a detached edit while a newer page editor is recorded | Only the host hold is freed; the render keeps waiting for the newer editor |
 | A failure or an outside change of a detached edit | The page editor lock of the failed edit is kept until previewEditReopen; with reopened false the edit is released, the preview renders and the Copy text warning is shown |
 
-### Scenario (refusal): An outside change during a final save keeps the text unwritten and the editor open
+### Scenario S11 (refusal): An outside change during a final save keeps the text unwritten and the editor open
 - GIVEN a held edit whose final save is requested and not written
 - WHEN the document changes from outside the preview
 - THEN nothing is written, the page gets the error with the text, the host edit is released with the page editor kept and the render waits

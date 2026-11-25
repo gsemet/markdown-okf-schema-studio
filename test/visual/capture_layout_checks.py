@@ -80,7 +80,8 @@ def toolbar_probe(page: Page) -> dict:
     )
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-007
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-007#S1
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-007#S2
 def check_toolbar_collapse(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
     """P8: the collapse button hides rows 2 to 4 (not focusable), shrinks the toolbar and restores it."""
     button = toolbar.locator('[data-sphinx-preview-toolbar-collapse]')
@@ -167,7 +168,7 @@ FRESH_WORKSPACE_STATE_JS = """() => {
 }"""
 
 
-# @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+# @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S4
 def check_fresh_workspace(page: Page, scenario: dict, failures: list[Failure]) -> None:
     """A workspace that stored nothing opens in the cream theme mode with rows 2 to 4 of the toolbar hidden, before any click."""
     if not (scenario.get("render") or {}).get("freshWorkspace"):
@@ -202,8 +203,8 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
             page.wait_for_timeout(200)
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
-# @tests_req StRS-MDOKFSTUDIO-TOOLBAR-002
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S1
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S2
 def check_heading_fold(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
     """In Chromium the Fold button folds every section with content, a folded block keeps no height, and a chevron folds one section."""
     button = toolbar.locator("[data-sphinx-preview-fold-toggle]")
@@ -260,7 +261,8 @@ def check_heading_fold(page: Page, toolbar, page_name: str, failures: list[Failu
     page.wait_for_timeout(100)
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S1
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S5
 # @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failure]) -> None:
     page_name = scenario["page"]
@@ -1146,7 +1148,7 @@ def check_change_bar(page: Page, scenario: dict, failures: list[Failure]) -> Non
   page.evaluate("window.scrollTo(0, 0)")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-LIFE-094
+# @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S5
 def check_update_glow(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """CR 046: a content patch that carries updated ranges makes exactly those blocks glow, readable and
   without moving anything; with prefers-reduced-motion: reduce nothing glows. The glow is paused at its

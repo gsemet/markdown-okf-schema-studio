@@ -16,7 +16,7 @@ function paste(source: string, row: number, column: number, text: string): strin
   return tools.serialize(model).split("\n");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S6
 test("a text with a tab is a grid, any other text is not", () => {
   assert.deepEqual(spreadsheetGrid("a\tb\tc\n1\t2\t3\n"), [["a", "b", "c"], ["1", "2", "3"]]);
   assert.deepEqual(spreadsheetGrid("a\tb\r\n"), [["a", "b"]]);
@@ -29,14 +29,14 @@ test("a text with a tab is a grid, any other text is not", () => {
   assert.equal(spreadsheetGrid(""), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S2
 test("a grid that fits fills the cells and leaves the others", () => {
   assert.deepEqual(paste(SOURCE, 1, 0, "1\t2\n3\t4"), [
     "| A | B |", "| --- | --- |", "| 1 | 2 |", "| 3 | 4 |", "",
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S2
 test("a grid past the table adds the missing column and row", () => {
   const model = tools.parse(SOURCE)!;
   fillGrid(model, tools, 2, 1, spreadsheetGrid("a\tb\tc\n1\t2\t3\n")!);
@@ -45,7 +45,8 @@ test("a grid past the table adds the missing column and row", () => {
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S2
 test("the QA grid on the cell row five adds one column and one row", () => {
   const source = "| N | Name | Who |\n| --- | --- | --- |\n| Four | dan | dan |\n| Five | row five | erin |\n";
   const model = tools.parse(source)!;
@@ -59,7 +60,7 @@ test("the QA grid on the cell row five adds one column and one row", () => {
   assert.match(text.split("\n")[3]!, /^\| Five +\| a +\| b +\| c +\|$/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S3
 test("a grid started in the header row skips the delimiter row", () => {
   const model = tools.parse(SOURCE)!;
   fillGrid(model, tools, 0, 0, spreadsheetGrid("H1\tH2\nR1\tR2\nR3\tR4\nR5\tR6")!);
@@ -68,7 +69,7 @@ test("a grid started in the header row skips the delimiter row", () => {
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S4
 test("a value with a pipe is written escaped and empty values empty the cell", () => {
   const model = tools.parse(SOURCE)!;
   fillGrid(model, tools, 1, 0, spreadsheetGrid("a|b\t\n")!);
@@ -77,7 +78,7 @@ test("a value with a pipe is written escaped and empty values empty the cell", (
   assert.deepEqual(tools.parse(tools.serialize(model))!.rows[2], ["a\\|b", ""]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S7
 test("a list-table model grows and writes back as a list-table", () => {
   const list = "```{list-table}\n:header-rows: 1\n\n* - Name\n  - Qty\n* - apple\n  - 3\n```";
   const model = tools.parseListTable(list);

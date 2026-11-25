@@ -20,6 +20,17 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+scenarios:
+- id: S1
+  title: Collapse then expand
+- id: S2
+  title: Keyboard order when collapsed
+- id: S3
+  title: Button and root attribute per state
+- id: S4
+  title: At start and after each press
+- id: S5
+  title: The collapsed choice is kept for the workspace
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,17 +48,17 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader presses the collapse button, the extension SHALL toggle the hidden attribute of the group that holds the navigation, view and review rows, which takes them out of the Tab order, set the button label, title and tooltip to Show view controls when collapsed or Hide view controls when expanded with aria-expanded to match, and set the attribute data-sphinx-preview-toolbar-state of the page root to collapsed or expanded.
 
-### Scenario (nominal): Collapse then expand
+### Scenario S1 (nominal): Collapse then expand
 - GIVEN an expanded toolbar
 - WHEN the collapse button is pressed, then pressed again
 - THEN the group is hidden, only the main row stays reachable by Tab, and then the group shows again with the same height
 
-### Scenario (boundary): Keyboard order when collapsed
+### Scenario S2 (boundary): Keyboard order when collapsed
 - GIVEN a collapsed toolbar
 - WHEN the Tab order of the toolbar is read
 - THEN it holds Refresh, Edit, Export to HTML and Show view controls only
 
-### Scenario (boundary): Button and root attribute per state
+### Scenario S3 (boundary): Button and root attribute per state
 | State | aria-expanded | Label, title and tooltip | data-sphinx-preview-toolbar-state of the root |
 | --- | --- | --- | --- |
 | collapsed | false | Show view controls | collapsed |
@@ -55,12 +66,12 @@ When the reader presses the collapse button, the extension SHALL toggle the hidd
 
 The root never carries a data-sphinx-preview-toolbar attribute.
 
-### Scenario (nominal): At start and after each press
+### Scenario S4 (nominal): At start and after each press
 - GIVEN a page that starts expanded
 - WHEN the page starts and the chevron is pressed twice
 - THEN the attribute is expanded at start, collapsed after the first press and expanded after the second
 
-### Scenario (nominal): The collapsed choice is kept for the workspace
+### Scenario S5 (nominal): The collapsed choice is kept for the workspace
 - GIVEN a toolbar the writer collapsed in one preview
 - WHEN a new page opens in the same workspace
 - THEN the new page starts with the toolbar collapsed; the choice is stored for the workspace and read back by the rules of SwRS-MDOKFSTUDIO-LIFE-169 and SwRS-MDOKFSTUDIO-LIFE-170

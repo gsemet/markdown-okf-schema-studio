@@ -154,7 +154,8 @@ const DOCS = {
   [`${root}/chap/b.md`]: "# Chapter B\n",
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-022
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S5
 // @tests_req SwRS-MDOKFSTUDIO-MYST-057#S1
 test("a toctree lists links labelled by the target H1, the file name or an explicit title", async () => {
   const source = "```{toctree}\n:caption: Contents\n\nintro\nsub/deep\nnotitle\nCustom <intro.md>\n```\n";

@@ -18,6 +18,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-011
 depends_on: []
+scenarios:
+- id: S1
+  title: Accepted requests
+- id: S2
+  title: Blocked requests
+- id: S3
+  title: Decoding once
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,7 +46,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a link request is followed or looked up, the extension SHALL classify it before any file access as an anchor, an external link or a relative or wiki path, and block it with a reason when it is an invalid anchor, a query-only target, an undecodable path, a scheme other than http, https or mailto, or an absolute path.
 
-### Scenario (nominal): Accepted requests
+### Scenario S1 (nominal): Accepted requests
 
 | Request | Class |
 | --- | --- |
@@ -50,7 +57,7 @@ When a link request is followed or looked up, the extension SHALL classify it be
 | tmp/secret.md | relative |
 | other.md?view=1 | relative, keeps its query |
 
-### Scenario (refusal): Blocked requests
+### Scenario S2 (refusal): Blocked requests
 
 | Request | Outcome |
 | --- | --- |
@@ -65,7 +72,7 @@ When a link request is followed or looked up, the extension SHALL classify it be
 
 A blocked request causes no file access.
 
-### Scenario (boundary): Decoding once
+### Scenario S3 (boundary): Decoding once
 
 | Request | Outcome |
 | --- | --- |

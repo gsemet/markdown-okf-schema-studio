@@ -16,6 +16,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-007
 depends_on: []
+scenarios:
+- id: S1
+  title: Deleted file
+- id: S2
+  title: Restored panel
+- id: S3
+  title: Reason of each case
+- id: S4
+  title: Recreated source
+- id: S5
+  title: Created file is not the source
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,19 +47,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the source of a preview is not an existing Markdown file inside its root, the extension SHALL replace the page by the status Preview source missing with the reason of the case, and render the source again when its file is created.
 
-### Scenario (nominal): Deleted file
+### Scenario S1 (nominal): Deleted file
 
 - GIVEN a ready preview of a.md and a.md deleted on disk
 - WHEN the watcher reports the deletion
 - THEN the page is replaced by Preview source missing with the message The active Markdown source was deleted.; the queue is cancelled and the old HTML and reading state are gone
 
-### Scenario (nominal): Restored panel
+### Scenario S2 (nominal): Restored panel
 
 - GIVEN a restored panel whose file no longer exists
 - WHEN the panel is restored
 - THEN it shows the same status Preview source missing (integration test test/integration/serializer.test.ts, missing-source status)
 
-### Scenario (boundary): Reason of each case
+### Scenario S3 (boundary): Reason of each case
 
 | Input | Outcome |
 | --- | --- |
@@ -62,13 +73,13 @@ When the source of a preview is not an existing Markdown file inside its root, t
 | An included file (not the shown source) is deleted | The preview renders again instead of showing the status |
 | An included file is renamed | The document renders again (see SwRS-MDOKFSTUDIO-LIFE-044) |
 
-### Scenario (nominal): Recreated source
+### Scenario S4 (nominal): Recreated source
 
 - GIVEN a preview showing Preview source missing for a.md
 - WHEN a.md is created again below the root
 - THEN the preview renders a.md without any command
 
-### Scenario (refusal): Created file is not the source
+### Scenario S5 (refusal): Created file is not the source
 
 - GIVEN a preview showing Preview source missing and a created file that is not the shown source
 - WHEN the file is created

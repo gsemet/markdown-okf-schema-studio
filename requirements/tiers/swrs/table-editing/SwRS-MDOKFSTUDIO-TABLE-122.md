@@ -20,6 +20,55 @@ derives_from:
 - StRS-MDOKFSTUDIO-TABLE-013
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: "List table action: Pipe table"
+- id: S2
+  title: "Pipe table action: List-table from any line"
+- id: S3
+  title: A simple HTML table converts to either form
+- id: S4
+  title: The conversion actions follow the table at the caret
+- id: S5
+  title: Caret elsewhere
+- id: S6
+  title: "Table bar: Convert after typing"
+- id: S7
+  title: "Table bar: Table in a captioned figure"
+- id: S8
+  title: "Table bar: A row with text after its closing pipe"
+- id: S9
+  title: "Table bar: A cell change drops a conversion that was not saved"
+- id: S10
+  title: "Table bar: Line break pasted into the cell"
+- id: S11
+  title: "Table bar: A table inside a quote or an admonition"
+- id: S12
+  title: List-table that would lose content
+- id: S13
+  title: HTML table that would lose content
+- id: S14
+  title: Several header rows
+- id: S15
+  title: Pipe table whose row has text after its closing pipe
+- id: S16
+  title: Table already in the target form
+- id: S17
+  title: Text that is no table
+- id: S18
+  title: Tables that convert
+- id: S19
+  title: Pipe table to list-table
+- id: S20
+  title: Escaped pipes
+- id: S21
+  title: Alignment
+- id: S22
+  title: List-table read in every fence style
+- id: S23
+  title: Canonical round trip
+- id: S24
+  title: Other styles lose their style
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -52,25 +101,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer converts a table between a pipe table, a {list-table} and a simple HTML table, from the table bar (List table, and Pipe table on a list-table), the palette or the slash menu (MyST mode), the extension SHALL replace it in one edit, so one undo step, with the other form, keeping its cells, escaped pipes and header row and carrying the alignment only where the target form has it, and put the caret after it; the table bar button SHALL convert the table including the text typed in the current cell in one final save; and when the conversion would lose content or the table is already in the target form, the extension SHALL change nothing and give a reason ending "Nothing was changed.". The actions are offered only where the caret is in a table of the other form.
 
-### Scenario (nominal): List table action: Pipe table
+### Scenario S1 (nominal): List table action: Pipe table
 
 - GIVEN the caret on the delimiter line of a pipe table with a paragraph before and a table after it
 - WHEN List table is run
 - THEN only the table is replaced by a {list-table} directive in one edit, the neighbouring lines and the other table are kept, and the caret is after the new text
 
-### Scenario (nominal): Pipe table action: List-table from any line
+### Scenario S2 (nominal): Pipe table action: List-table from any line
 
 - GIVEN the caret on the opening fence, on a cell line and on the closing fence of a {list-table}, in turn
 - WHEN Pipe table is run
 - THEN each time the whole directive, fences included, is replaced by a pipe table
 
-### Scenario (nominal): A simple HTML table converts to either form
+### Scenario S3 (nominal): A simple HTML table converts to either form
 
 - GIVEN the caret in a simple HTML table written by the HTML table action
 - WHEN List table or Pipe table is run
 - THEN the table is replaced by the {list-table} form or by a pipe table
 
-### Scenario (nominal): The conversion actions follow the table at the caret
+### Scenario S4 (nominal): The conversion actions follow the table at the caret
 
 | Input | Outcome |
 | --- | --- |
@@ -78,50 +127,50 @@ When the writer converts a table between a pipe table, a {list-table} and a simp
 | The caret on any line of a {list-table} (the opening fence, a cell line or the closing fence) | Pipe table is available and the slash menu lists it; List table is not |
 | The caret in a simple HTML table | Both List table and Pipe table are available |
 
-### Scenario (refusal): Caret elsewhere
+### Scenario S5 (refusal): Caret elsewhere
 
 - GIVEN the caret in a paragraph, or no table tools
 - WHEN the availability of List table and of Pipe table is read, or one of them is run
 - THEN neither is available and running it never throws
 
-### Scenario (nominal): Table bar: Convert after typing
+### Scenario S6 (nominal): Table bar: Convert after typing
 
 - GIVEN a two-column pipe table with text typed in a cell and the editor open
 - WHEN the writer presses List table
 - THEN one final previewEditSave is posted whose editedText is the {list-table} form of the table, typed text included, so the whole change is one undo step
 
-### Scenario (boundary): Table bar: Table in a captioned figure
+### Scenario S7 (boundary): Table bar: Table in a captioned figure
 
 - GIVEN a pipe table inside a {table} directive that renders as a figure
 - WHEN the bar is shown
 - THEN the List table button is disabled
 
-### Scenario (boundary): Table bar: A row with text after its closing pipe
+### Scenario S8 (boundary): Table bar: A row with text after its closing pipe
 
 - GIVEN a pipe table whose row has text after its closing pipe (see SwRS-MDOKFSTUDIO-TABLE-094)
 - WHEN the table bar is shown
 - THEN the List table button is disabled, as the conversion would lose that text
 
-### Scenario (boundary): Table bar: A cell change drops a conversion that was not saved
+### Scenario S9 (boundary): Table bar: A cell change drops a conversion that was not saved
 
 | Input | Outcome |
 | --- | --- |
 | A List table conversion prepared and its save refused by the host, then the writer types in the cell (or presses a row or column button) | The next save carries the pipe table with the typed text, not the prepared conversion |
 | No prepared conversion and the writer types | Saves carry the pipe table as usual |
 
-### Scenario (boundary): Table bar: Line break pasted into the cell
+### Scenario S10 (boundary): Table bar: Line break pasted into the cell
 
 - GIVEN a line break pasted into the cell text box
 - WHEN the writer presses List table
 - THEN the line break is already a space (see SwRS-MDOKFSTUDIO-TABLE-091) and the table converts in one final save
 
-### Scenario (boundary): Table bar: A table inside a quote or an admonition
+### Scenario S11 (boundary): Table bar: A table inside a quote or an admonition
 
 | Input | Outcome |
 | --- | --- |
 | The cell editor of a pipe table inside a blockquote, a GFM alert or a MyST admonition | The List table button is disabled and its title says "Not available for a table inside a quote or an admonition" (see SwRS-MDOKFSTUDIO-TABLE-121) |
 
-### Scenario (refusal): List-table that would lose content
+### Scenario S12 (refusal): List-table that would lose content
 
 | Input ({list-table} converted to a pipe table) | Outcome |
 | --- | --- |
@@ -133,7 +182,7 @@ When the writer converts a table between a pipe table, a {list-table} and a simp
 | Rows of 2 and 3 cells | No edit; reason "The rows do not all have the same number of cells. Nothing was changed." |
 | No rows | No edit; reason "The list-table has no rows. Nothing was changed." |
 
-### Scenario (refusal): HTML table that would lose content
+### Scenario S13 (refusal): HTML table that would lose content
 
 | Input (HTML table converted by List table or Pipe table) | Outcome |
 | --- | --- |
@@ -143,32 +192,32 @@ When the writer converts a table between a pipe table, a {list-table} and a simp
 | An element other than table, thead, tbody, tr, th and td | Same reason form, X names the element |
 | Rows of different lengths | No edit; reason "The rows do not all have the same number of cells. Nothing was changed." |
 
-### Scenario (refusal): Several header rows
+### Scenario S14 (refusal): Several header rows
 
 - GIVEN a {list-table} (or an HTML table) with :header-rows: 2
 - WHEN Pipe table is run
 - THEN no edit is produced and the reason is "A pipe table has one header row; this table has 2. Nothing was changed."
 
-### Scenario (refusal): Pipe table whose row has text after its closing pipe
+### Scenario S15 (refusal): Pipe table whose row has text after its closing pipe
 
 - GIVEN a pipe table with a token after the closing pipe of a row, such as "| alpha | 1 | ^row-a"
 - WHEN it is converted to a list-table (the HTML table action of SwRS-MDOKFSTUDIO-TABLE-117 gives no edit and no reason)
 - THEN no edit is produced and the reason is "A row has text after its closing pipe that would be lost. Nothing was changed."
 
-### Scenario (refusal): Table already in the target form
+### Scenario S16 (refusal): Table already in the target form
 
 - GIVEN a pipe table converted to a pipe table, and a list-table converted to a list-table (directly through the conversion function)
 - WHEN the conversion is requested
 - THEN the result is a refusal with the sentence "This is already a pipe table." or "This is already a list-table."
 
-### Scenario (boundary): Text that is no table
+### Scenario S17 (boundary): Text that is no table
 
 | Input | Outcome |
 | --- | --- |
 | A paragraph of text | The result is neither a conversion nor a reason (undefined) |
 | An empty string | The result is neither a conversion nor a reason (undefined) |
 
-### Scenario (nominal): Tables that convert
+### Scenario S18 (nominal): Tables that convert
 
 | Input | Outcome |
 | --- | --- |
@@ -177,20 +226,20 @@ When the writer converts a table between a pipe table, a {list-table} and a simp
 | The same list-table with :header-rows: 1 | The conversion to a pipe table succeeds |
 | A list-table converted to a pipe table (the other form) | The conversion is done |
 
-### Scenario (nominal): Pipe table to list-table
+### Scenario S19 (nominal): Pipe table to list-table
 
 | Input | Outcome |
 | --- | --- |
 | A pipe table with a header and one body row | The result opens with a three-backtick {list-table} fence, carries :header-rows: 1 and has one "* -" row per row, each further cell on a "  -" line, closed by the same fence |
 | A cell containing a run of three backticks | The fence has four backticks (longer than any backtick run in a cell) |
 
-### Scenario (nominal): Escaped pipes
+### Scenario S20 (nominal): Escaped pipes
 
 - GIVEN a pipe table cell containing x\|y, and a list-table cell containing a|b
 - WHEN the first is converted to a list-table and the second to a pipe table
 - THEN the list-table item holds x|y, and the pipe table cell is written a\|b
 
-### Scenario (boundary): Alignment
+### Scenario S21 (boundary): Alignment
 
 | Input | Outcome |
 | --- | --- |
@@ -199,20 +248,20 @@ When the writer converts a table between a pipe table, a {list-table} and a simp
 | An HTML table with align="left", "center" and "right" cells in its first row, converted to a pipe table | The delimiter row is ":---", ":---:" and "---:" |
 | A column without an align attribute, converted to a pipe table | Its delimiter cell is "---" |
 
-### Scenario (nominal): List-table read in every fence style
+### Scenario S22 (nominal): List-table read in every fence style
 
 | Input | Outcome |
 | --- | --- |
 | List-tables fenced with backticks, tildes and colons, with :widths: and :header-rows: 1, converted to pipe tables | Each gives the same pipe table and the :widths: option is dropped |
 | A list-table without :header-rows: | The pipe table has an empty header row followed by all the rows |
 
-### Scenario (nominal): Canonical round trip
+### Scenario S23 (nominal): Canonical round trip
 
 - GIVEN the canonical pipe tables of the lossless test ("| a | b |" with "---" delimiters, no alignment colons), with escaped pipes and empty cells
 - WHEN each is converted to a list-table and back
 - THEN the result equals the original text
 
-### Scenario (boundary): Other styles lose their style
+### Scenario S24 (boundary): Other styles lose their style
 
 - GIVEN a table that is padded, indented, written with long dashes or with alignment colons
 - WHEN the round trip is made

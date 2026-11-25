@@ -7,7 +7,8 @@ from playwright.sync_api import Page
 from capture_support import Failure, save_step
 
 
-# @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S1
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S2
 def check_edit_figure_button(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """In a pane about 420 px wide a short figure near the top ends above the bottom of the preview
   controls: the press on the Edit figure button must reach the button, the form it opens must start

@@ -16,6 +16,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Quick Open from the preview
+- id: S2
+  title: Preview closed
+- id: S3
+  title: Preview reopened at once
+- id: S4
+  title: Shared group
+- id: S5
+  title: User lock
+- id: S6
+  title: Unlocking never creates a group
+- id: S7
+  title: The recorded column follows the group
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,37 +51,37 @@ default_owner_email: gaetan@xeberon.net
 
 When a new side preview opens in an editor group that holds only that panel, the extension SHALL lock the group and, when that locked preview is closed, unlock the group it left empty, one tick later, only if no live preview occupies it.
 
-### Scenario (nominal): Quick Open from the preview
+### Scenario S1 (nominal): Quick Open from the preview
 
 - GIVEN a locked preview group with the preview focused
 - WHEN the reader opens another file with Quick Open
 - THEN the file opens in the source group, no third group is created and the preview stays the active tab
 
-### Scenario (nominal): Preview closed
+### Scenario S2 (nominal): Preview closed
 
 - GIVEN a locked preview group that holds only the preview
 - WHEN the reader closes the preview
 - THEN the empty group is unlocked and closes, and Quick Open from the reader's group opens a file there
 
-### Scenario (boundary): Preview reopened at once
+### Scenario S3 (boundary): Preview reopened at once
 
 - GIVEN a locked preview that closed, and whose group closed
 - WHEN a new side preview opens at the same column before the unlock of the closed one runs
 - THEN the new group is not unlocked, and the focus stays in the new preview
 
-### Scenario (boundary): Shared group
+### Scenario S4 (boundary): Shared group
 
 - GIVEN a preview that opened in a group that holds another tab
 - WHEN the preview opens
 - THEN the group is not locked and the preview works
 
-### Scenario (boundary): User lock
+### Scenario S5 (boundary): User lock
 
 - GIVEN a group the reader locked that holds other tabs
 - WHEN a preview is closed in another group
 - THEN that group stays locked
 
-### Scenario (boundary): Unlocking never creates a group
+### Scenario S6 (boundary): Unlocking never creates a group
 
 | Group count and position | Outcome |
 | --- | --- |
@@ -74,7 +89,7 @@ When a new side preview opens in an editor group that holds only that panel, the
 | A window with two groups, position three | No command is returned, because VS Code would create a group |
 | A column below 1, past the group count or past 8, or one not known | No command is returned |
 
-### Scenario (boundary): The recorded column follows the group
+### Scenario S7 (boundary): The recorded column follows the group
 
 | Case | Outcome |
 | --- | --- |

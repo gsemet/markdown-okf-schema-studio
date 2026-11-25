@@ -44,7 +44,8 @@ for (const [name, eol] of EOLS) {
     editId: "e1", line: run.line, endLine: run.endLine, insertAfterLine: run.line - 1, replaceBlankRun: run, originalText: "",
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S3
   test(`${name}: previewBlankRunDelete between two items removes that one line and leaves one list`, async () => {
     const host = fixture({ text: between });
     await host.send("previewBlankRunDelete", { line: 5, endLine: 5 });
@@ -54,7 +55,8 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual((await listsOf(expected)).lists, 1);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
   test(`${name}: previewBlankRunDelete removes that one line and keeps the others byte for byte, spaces included`, async () => {
     const text = lines(eol, "# T", "", "- a", "  ", "", "  ", "- b", "");
     const host = fixture({ text });
@@ -63,7 +65,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(host.applyCalls.length, 1);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
   test(`${name}: previewBlankRunDelete between two paragraphs of an item changes nothing else`, async () => {
     const host = fixture({ text: inItem });
     await host.send("previewBlankRunDelete", { line: 7, endLine: 7 });
@@ -73,7 +75,8 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(await listsOf(expected), { lists: 1, items: [[3, "a|p1|p2"]] });
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "More" typed between two items is written in the item with a blank line on each side`, async () => {
     const host = fixture({ text: between });
     await host.send("previewEditOpen", openOf(betweenRun));
@@ -90,7 +93,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(host.document.getText(), between, "the blank line is back byte for byte");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "- c" between two items is an item at the item level, inside an item a nested list`, async () => {
     const top = fixture({ text: between });
     await top.send("previewEditSave", { ...openOf(betweenRun), editedText: "- c", final: true });
@@ -107,7 +110,7 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(items.map(([line]) => line), [3, 7], "a nested item, no new item of the list");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "More" typed inside an item is written between its paragraphs`, async () => {
     const host = fixture({ text: inItem });
     await host.send("previewEditSave", { ...openOf(inItemRun), editedText: "More", final: true });
@@ -116,7 +119,7 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(await listsOf(written), { lists: 1, items: [[3, "a|p1|More|p2"]] });
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
   test(`${name}: a save that re-creates the edit writes the same indent`, async () => {
     const host = fixture({ text: between });
     await host.send("previewEditSave", { ...openOf(betweenRun), editedText: "More", final: true });
@@ -124,7 +127,8 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(errors(host), []);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: an item line that is no list item line is refused as stale and nothing changes`, async () => {
     const paragraph = { ...betweenRun, itemLine: 1 };
     const opened = fixture({ text: between });
@@ -153,7 +157,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(pasted.document.getText(), between);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: a save or cancel with another item line than the held edit's is refused as stale`, async () => {
     const host = fixture({ text: between });
     await host.send("previewEditSave", { ...openOf(betweenRun), editedText: "More", final: false });
@@ -168,7 +172,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(host.document.getText(), written);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
   test(`${name}: a paste with an item line writes "More" in the item`, async () => {
     const host = fixture({ text: between });
     host.hooks.readClipboard = () => Promise.resolve("More");

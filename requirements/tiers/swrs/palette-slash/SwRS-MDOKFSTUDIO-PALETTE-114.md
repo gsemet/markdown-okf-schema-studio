@@ -17,6 +17,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-015
 depends_on: []
+scenarios:
+- id: S1
+  title: After a paragraph
+- id: S2
+  title: Empty block and no author
+- id: S3
+  title: Author name with control characters
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,19 +40,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Thread, the extension SHALL insert after the block at the caret a comment made of the line `<!-- THREAD`, a line with the author and the local date and time, an indented empty line and the line `-->`, with the caret on the empty line.
 
-### Scenario (nominal): After a paragraph
+### Scenario S1 (nominal): After a paragraph
 
 - GIVEN the author Ada Lovelace and the caret in A paragraph.
 - WHEN Thread is pressed
 - THEN after the paragraph and a blank line the thread skeleton with Ada Lovelace and the date as YYYY-MM-DD HH:MM is inserted and the caret is on the indented line
 
-### Scenario (boundary): Empty block and no author
+### Scenario S2 (boundary): Empty block and no author
 
 - GIVEN an empty text and no author name
 - WHEN Thread is pressed
 - THEN the thread starts at the top without blank lines and the author is Anonymous
 
-### Scenario (boundary): Author name with control characters
+### Scenario S3 (boundary): Author name with control characters
 
 | Input | Outcome |
 | --- | --- |

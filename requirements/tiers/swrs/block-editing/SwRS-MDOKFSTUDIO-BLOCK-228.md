@@ -19,6 +19,25 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMEDIT-001
 - StRS-MDOKFSTUDIO-TABLE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: The final save of a block carries the pin
+- id: S2
+  title: Table and properties saves carry the pin
+- id: S3
+  title: Out of range
+- id: S4
+  title: The host stores the pin
+- id: S5
+  title: A save without a pin
+- id: S6
+  title: Opening an editor keeps the clicked text where it was
+- id: S7
+  title: Page at the top
+- id: S8
+  title: Closing an editor scrolls the page back
+- id: S9
+  title: Close without a shift
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,12 +64,12 @@ supersedes:
 
 When a writer opens, saves or closes an editor, the extension SHALL keep the edited block, table or properties section at its screen position: the page scrolls by the palette height on opening and back on closing, and the final save carries the source line and the viewport top (pinLine and pinViewportTop) that the host puts back at the same viewport top on the next render.
 
-### Scenario (nominal): The final save of a block carries the pin
+### Scenario S1 (nominal): The final save of a block carries the pin
 - GIVEN an editor on a paragraph at line 12 whose frame top is at 180 px after a palette shift of 40 px
 - WHEN the final save is posted
 - THEN it carries pinLine 12 and pinViewportTop 220, the top of the frame plus the shift, because the rendered paragraph is hidden; an insertion editor uses the line after its bar
 
-### Scenario (nominal): Table and properties saves carry the pin
+### Scenario S2 (nominal): Table and properties saves carry the pin
 | Input | Outcome |
 | --- | --- |
 | A table visible in the pane, a cell edited and Enter pressed | The final save carries the source line and the viewport top of the table, and after the re-render the table top is within 3 px of its position at the moment of Enter |
@@ -61,37 +80,37 @@ When a writer opens, saves or closes an editor, the extension SHALL keep the edi
 | An add or a remove action of the properties section | It carries the same fields |
 | A properties section with an empty rectangle | No pin fields are sent |
 
-### Scenario (boundary): Out of range
+### Scenario S3 (boundary): Out of range
 - GIVEN a viewport top beyond 100000 px or not finite
 - WHEN the final save is posted
 - THEN it carries no pin fields
 
-### Scenario (nominal): The host stores the pin
+### Scenario S4 (nominal): The host stores the pin
 - GIVEN a final save with pinLine 12 and pinViewportTop 180
 - WHEN the host handles it
 - THEN the pin is stored for five seconds and used by the first render of that version or later, which puts the line back at the same viewport top
 
-### Scenario (boundary): A save without a pin
+### Scenario S5 (boundary): A save without a pin
 - GIVEN a final save without both pin fields
 - WHEN the host handles it
 - THEN no pin is stored
 
-### Scenario (nominal): Opening an editor keeps the clicked text where it was
+### Scenario S6 (nominal): Opening an editor keeps the clicked text where it was
 - GIVEN a paragraph centred in the view and a palette that adds height above the frame
 - WHEN its editor opens and the source arrives
 - THEN the page moves by the palette height only, without overshoot or oscillation, and the clicked text moves by at most 2 px
 
-### Scenario (boundary): Page at the top
+### Scenario S7 (boundary): Page at the top
 - GIVEN a page scrolled to its very top
 - WHEN an editor opens
 - THEN the page is not scrolled
 
-### Scenario (nominal): Closing an editor scrolls the page back
+### Scenario S8 (nominal): Closing an editor scrolls the page back
 - GIVEN an editor that opened with a palette shift of 40 px
 - WHEN it closes
 - THEN the page scrolls back by 40 px, within the scroll bounds of the page, and the anchor line is updated
 
-### Scenario (boundary): Close without a shift
+### Scenario S9 (boundary): Close without a shift
 - GIVEN an editor that opened without a shift
 - WHEN it closes
 - THEN the page is not scrolled

@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-002
+scenarios:
+- id: S1
+  title: The browser find opens the section
+- id: S2
+  title: Navigation opens the section
+- id: S3
+  title: Only the sections around the target open
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,17 +40,17 @@ default_owner_email: gaetan@xeberon.net
 
 When the browser find reaches text inside a folded section, or the page navigates to an anchor, a table-of-contents entry or a link target inside one, the extension SHALL unfold the folded sections that contain the target before it is shown.
 
-### Scenario (nominal): The browser find opens the section
+### Scenario S1 (nominal): The browser find opens the section
 - GIVEN a folded section whose blocks are hidden="until-found"
 - WHEN the browser find (Cmd/Ctrl+F) matches text in one of those blocks and the browser fires beforematch
 - THEN the page unfolds every folded section that holds the block, and the match is shown
 
-### Scenario (nominal): Navigation opens the section
+### Scenario S2 (nominal): Navigation opens the section
 - GIVEN a target inside a folded section
 - WHEN a same-page link, a table-of-contents entry or an editor-to-preview navigation brings the page to the target
 - THEN the folded sections that hold the target are unfolded and the layout is measured again before the page scrolls
 
-### Scenario (boundary): Only the sections around the target open
+### Scenario S3 (boundary): Only the sections around the target open
 | Input | Outcome |
 | --- | --- |
 | A target under a folded h1 and a folded h2 that both hold it | Both open |

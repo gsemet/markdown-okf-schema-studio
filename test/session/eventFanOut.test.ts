@@ -117,7 +117,8 @@ function fixture(sessionCount: number) {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S8
 test("a change of a document no preview depends on costs no realpath call per preview", () => {
   const f = fixture(20);
   try {
@@ -132,7 +133,8 @@ test("a change of a document no preview depends on costs no realpath call per pr
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-044
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S4
 test("a change of a document that a preview depends on still refreshes that preview, the others stay", () => {
   const f = fixture(5);
   try {
@@ -149,7 +151,8 @@ test("a change of a document that a preview depends on still refreshes that prev
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-143
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143#S2
 test("previews of one root share one dependency watcher until the last one closes", () => {
   const f = fixture(3);
   try {
@@ -170,7 +173,7 @@ test("previews of one root share one dependency watcher until the last one close
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-143
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143#S3
 test("a file event on the shared watcher reaches every preview of the root", () => {
   const f = fixture(3);
   try {
@@ -245,7 +248,8 @@ test("linked-target watches are capped: a target past the limit gets none, a rel
   assert.equal(ports.live().length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S12
 test("the link target search skips dependency and VCS folders and stops after a bounded number of files", async () => {
   const searches: Array<{ exclude?: string; maxResults?: number }> = [];
   const root = path.join(os.tmpdir(), "okf-fanout-links");

@@ -8,8 +8,10 @@ import { BREAKOUT_HANDLE_ASSERTIONS, WIDE } from "./scenarioAssertions";
 import type { ScenarioDefinition } from "./scenarioAssertions";
 
 export const BREAKOUT_HANDLE_SCENARIOS: ScenarioDefinition[] = [{
-  // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-  // @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
   id: "table-editing/v26-handles-breakout-table-auto-light-900",
   fixture: "63-breakout-table-handles",
   theme: "light",
@@ -22,8 +24,9 @@ export const BREAKOUT_HANDLE_SCENARIOS: ScenarioDefinition[] = [{
     + "of its column.",
 }, {
   // CR 252: the row is dragged, saved, and the host renders the page again.
-  // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-  // @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S6
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
   id: "table-editing/v27-row-move-breakout-table-auto-light-900",
   fixture: "63-breakout-table-handles",
   theme: "light",

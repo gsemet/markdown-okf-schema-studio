@@ -19,6 +19,25 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Cell editor next to a block editor
+- id: S2
+  title: Long text wraps and the cell grows
+- id: S3
+  title: Unbreakable text
+- id: S4
+  title: Window resize
+- id: S5
+  title: No editor open
+- id: S6
+  title: Buttons in the cell
+- id: S7
+  title: Minimum cell width in edit mode
+- id: S8
+  title: Pane narrower than the cell minimum
+- id: S9
+  title: Wide table
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,39 +62,39 @@ default_owner_email: gaetan@xeberon.net
 
 When a cell editor is open, the extension SHALL style its text box with the same editor font family, font size and line height as the block editor, wrap the cell text inside the cell with the text box fitted to it, and place a Done button and a Cancel button under the text box inside the cell, compact and wrapping within the column.
 
-### Scenario (nominal): Cell editor next to a block editor
+### Scenario S1 (nominal): Cell editor next to a block editor
 | Pane width | Outcome |
 | --- | --- |
 | 900 px: a cell editor and, in another session, a block editor open in the same theme | the computed font family, font size and line height of each text box are equal |
 | 460 px: the same cell editor | the three values are unchanged |
 
-### Scenario (nominal): Long text wraps and the cell grows
+### Scenario S2 (nominal): Long text wraps and the cell grows
 - GIVEN a long cell text in a table of three columns, at 900 px and at 460 px
 - WHEN the cell editor is open
 - THEN the text wraps inside the cell, the text box shows no scrollbar and is as tall as its text, the row is taller, and every column keeps the width it had before the editor opened, except that the column of the edited cell grows to 300 px when it was narrower, or to the room of a narrower pane
 
-### Scenario (boundary): Unbreakable text
+### Scenario S3 (boundary): Unbreakable text
 - GIVEN a cell text with no space, longer than the cell
 - WHEN the cell editor is open
 - THEN the text wraps at any character (overflow-wrap anywhere) instead of widening the column
 
-### Scenario (nominal): Window resize
+### Scenario S4 (nominal): Window resize
 - GIVEN a cell editor open with a long text
 - WHEN the preview width changes
 - THEN the text box height is recomputed from its scroll height
 - AND the room of the edited cell is measured again from the new width of the table's column
 
-### Scenario (boundary): No editor open
+### Scenario S5 (boundary): No editor open
 - GIVEN no cell editor open
 - WHEN the preview is resized
 - THEN no text box is touched
 
-### Scenario (nominal): Buttons in the cell
+### Scenario S6 (nominal): Buttons in the cell
 - GIVEN a cell editor open in a 900 px pane
 - WHEN the cell is inspected
 - THEN a Done button (accessible name "Done editing") and a Cancel button (accessible name "Cancel editing and restore the original text") are inside the cell, below the text box
 
-### Scenario (nominal): Minimum cell width in edit mode
+### Scenario S7 (nominal): Minimum cell width in edit mode
 - GIVEN a table with a column added without a title (an empty header and empty cells), in edit mode
 - WHEN no cell editor is open
 - THEN every header and body cell is at least 8em wide, so the empty column can be clicked
@@ -83,13 +102,13 @@ When a cell editor is open, the extension SHALL style its text box with the same
 - THEN the edited cell is at least 300 px wide, or the room of the table's box in a narrower pane (never under 8em), its editor and buttons are fully inside it, and the table scrolls horizontally instead of clipping the cell
 - AND outside edit mode (reading view) no table cell has a minimum width
 
-### Scenario (boundary): Pane narrower than the cell minimum
+### Scenario S8 (boundary): Pane narrower than the cell minimum
 - GIVEN a pane 280 px wide and a table with row handles, in edit mode
 - WHEN the cell editor opens in the first column
 - THEN the edited cell, its text box and the Done and Cancel buttons are fully inside the table's scroll box and inside the viewport, and the cell is at least 8em wide
 - AND the room is the width of the table's column, less the row-handle shift, 16 px on each side (the margin of the sideways reveal) and the padding and borders of the cell; a pane that leaves 300 px or more keeps the 300 px minimum
 
-### Scenario (boundary): Wide table
+### Scenario S9 (boundary): Wide table
 - GIVEN a sixteen-column table wider than the pane and its far-right cell open
 - WHEN the cell is inspected
 - THEN the buttons wrap within their column and do not widen it

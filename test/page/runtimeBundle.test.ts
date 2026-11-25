@@ -164,7 +164,8 @@ test("the test build of the page bundle gives the pinned trace of a page session
   assert.deepEqual(session(undefined), EXPECTED_TRACE);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S4
 test("the bundled runtime file gives the pinned trace of a page session", () => {
   assert.deepEqual(session(shippedRuntime()), EXPECTED_TRACE);
 });

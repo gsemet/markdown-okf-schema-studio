@@ -27,6 +27,23 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Reply above the closing marker
+- id: S2
+  title: Line break, indentation and text after the marker
+- id: S3
+  title: Author in the header
+- id: S4
+  title: Closing marker position and marker in the text
+- id: S5
+  title: Lines that are not exactly one thread
+- id: S6
+  title: Document changed while the author is resolved
+- id: S7
+  title: Valid reply message
+- id: S8
+  title: Invalid reply message
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -52,25 +69,25 @@ supersedes:
 
 When the host receives a reply to an inline thread, the extension SHALL, if the named lines are still exactly one thread comment and the document has not changed meanwhile, add one message, a header with the author on one line and the local date and time as YYYY-MM-DD HH:MM and the reply text indented by two spaces, above the closing --> and change nothing else, and otherwise answer with the reason and leave the document unchanged; a previewThreadReply message is dropped unless it has an edit id, integer lines with 1 <= line <= endLine and a text of 1 to 10 000 characters that is not blank.
 
-### Scenario (nominal): Reply above the closing marker
+### Scenario S1 (nominal): Reply above the closing marker
 
 - GIVEN a thread whose closing marker is alone on its line, a reply "hi\nthere", the author Bob and text before and after the thread
 - WHEN the reply is applied
 - THEN the lines "Bob (2026-10-17 08:00):", "  hi", "  there" are added above "-->", the date is the local time as YYYY-MM-DD HH:MM, and the text before and after the thread is unchanged byte for byte
 
-### Scenario (nominal): Line break, indentation and text after the marker
+### Scenario S2 (nominal): Line break, indentation and text after the marker
 
 - GIVEN a document with CRLF line ends, or a closing marker indented by two spaces and followed by a space
 - WHEN a reply is applied
 - THEN every new line ends with CRLF and no lone LF appears, and the marker keeps both its two-space indentation and the text after it
 
-### Scenario (nominal): Author in the header
+### Scenario S3 (nominal): Author in the header
 
 - GIVEN the setting authorName set to Bob Reviewer, or an author name holding a line break and a tab
 - WHEN a reply is applied
 - THEN the header reads Bob Reviewer followed by the date, and a name with a line break or a tab is written on one line with single spaces
 
-### Scenario (boundary): Closing marker position and marker in the text
+### Scenario S4 (boundary): Closing marker position and marker in the text
 
 | Input | Outcome |
 | --- | --- |
@@ -79,7 +96,7 @@ When the host receives a reply to an inline thread, the extension SHALL, if the 
 | A reply "a --> b" | the line reads "  a -- > b" and the comment stays open; no reply line contains --> |
 | A reply without the marker | the text is written as typed |
 
-### Scenario (refusal): Lines that are not exactly one thread
+### Scenario S5 (refusal): Lines that are not exactly one thread
 
 | Input | Outcome |
 | --- | --- |
@@ -88,20 +105,20 @@ When the host receives a reply to an inline thread, the extension SHALL, if the 
 | Lines that hold a part of the thread | the answer is "The thread is no longer in the source. Refresh the preview." and the document is unchanged |
 | Lines that hold the thread and more | the answer is "The thread is no longer in the source. Refresh the preview." and the document is unchanged |
 
-### Scenario (refusal): Document changed while the author is resolved
+### Scenario S6 (refusal): Document changed while the author is resolved
 
 | Input | Outcome |
 | --- | --- |
 | A reply whose author lookup is slow and an edit of the document in between | the answer is "The document changed meanwhile. Try again." and nothing is changed |
 | No edit in between | the reply is planned and applied |
 
-### Scenario (nominal): Valid reply message
+### Scenario S7 (nominal): Valid reply message
 
 - GIVEN a previewThreadReply message with an edit id, lines 5 and 8 and the text ok
 - WHEN the message is validated
 - THEN it is accepted
 
-### Scenario (refusal): Invalid reply message
+### Scenario S8 (refusal): Invalid reply message
 
 | Input | Outcome |
 | --- | --- |

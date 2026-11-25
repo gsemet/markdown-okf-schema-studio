@@ -150,7 +150,8 @@ def _check_placement(page: Page, scenario: dict, failures: list[Failure]) -> Non
       failures.append(Failure(page_name, f"list item handles: {where} is {handle['centre']:.1f} px off its first line"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 def check_list_item_handles(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """`place`: every item of a list of two or more items has a handle left of its list (or of the
   outermost container), inside the pane, centred on its first line. `push`: the same in a pane with

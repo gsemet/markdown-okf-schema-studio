@@ -64,7 +64,8 @@ function enterCommitsOneLine(partClass: string, source: string, typed: string): 
   assert.equal(saves[0].editedText, typed + "\n", "the saved text is the single line, no blank line after it");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S2
 test("card :header: option: plain Enter commits the single line and closes the editor", () => {
   enterCommitsOneLine(
     "myst-grid-card-option",
@@ -73,7 +74,8 @@ test("card :header: option: plain Enter commits the single line and closes the e
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S2
 test("card :footer: option: plain Enter commits the single line and closes the editor", () => {
   enterCommitsOneLine(
     "myst-grid-card-option",
@@ -82,7 +84,8 @@ test("card :footer: option: plain Enter commits the single line and closes the e
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S2
 test("card title (directive line): plain Enter commits the single line and closes the editor", () => {
   enterCommitsOneLine(
     "myst-grid-card-title",
@@ -91,7 +94,8 @@ test("card title (directive line): plain Enter commits the single line and close
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S2
 test("card one-line part: Shift+Enter is ignored, no newline and the editor stays open", () => {
   const typed = ":header: Since v2.1.154 Q";
   const { harness, textarea } = openLine(":header: Since v2.1.154\n", typed, { partClass: "myst-grid-card-option" });
@@ -103,7 +107,8 @@ test("card one-line part: Shift+Enter is ignored, no newline and the editor stay
   assert.match(statusText(harness), /^Line 50 /u, "the editor stays open, its hint unchanged");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S2
 for (const [label, modifiers] of [
   ["Alt+Enter", { altKey: true }],
   ["Alt+Shift+Enter", { altKey: true, shiftKey: true }],
@@ -120,7 +125,8 @@ for (const [label, modifiers] of [
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S2
 for (const [label, shiftKey, typed] of [
   ["Tab", false, ":header: H"],
   ["Shift+Tab", true, "  :header: H"],
@@ -136,7 +142,8 @@ for (const [label, shiftKey, typed] of [
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S2
 test("card one-line part: Enter goes to the open slash menu and does not save", () => {
   const typed = ":header: H /";
   const { harness, textarea } = openLine(":header: H\n", ":header: H", { partClass: "myst-grid-card-option" });
@@ -154,8 +161,10 @@ test("card one-line part: Enter goes to the open slash menu and does not save", 
   assert.match(statusText(harness), /^Line 50 /u, "the editor stays open");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S2
 test("card one-line part: the status hint says Enter is done and drops Tab", () => {
   const apple = openLine(":header: H\n", ":header: H", { partClass: "myst-grid-card-option", platform: "MacIntel" });
   assert.equal(statusText(apple.harness), "Line 50 · Enter: done · Esc: cancel · ⌘↩: done");
@@ -163,8 +172,10 @@ test("card one-line part: the status hint says Enter is done and drops Tab", () 
   assert.equal(statusText(other.harness), "Line 50 · Enter: done · Esc: cancel · Ctrl+Enter: done");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S2
 for (const [kind, source] of [["paragraph", "One line paragraph\n"], ["heading", "## One line heading\n"]] as const) {
   test(`a one-line ${kind} (no single-line marker) keeps Enter as a new line and its hint`, () => {
     const typed = source.slice(0, -1);

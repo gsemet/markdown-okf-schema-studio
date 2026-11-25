@@ -24,7 +24,7 @@ function pasteInto(input: RuntimeElement, text: string): { prevented: boolean } 
 const finalSaves = (harness: ReturnType<typeof createRuntimeHarness>) =>
   harness.messages.filter((message) => message.type === "previewEditSave");
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S1
 test("a spreadsheet paste fills the cells in one save and reopens in the start cell", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness, { start: [2, 1] }, QA_TABLE);
@@ -47,7 +47,8 @@ test("a spreadsheet paste fills the cells in one save and reopens in the start c
   assert.equal(pending?.tableColumnIndex, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S2
 test("a spreadsheet paste that fits adds nothing and keeps the other cells", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness, undefined, SMALL);
@@ -55,8 +56,8 @@ test("a spreadsheet paste that fits adds nothing and keeps the other cells", () 
   assert.equal(finalSaves(harness).at(-1)!.editedText, "| A | B |\n| --- | --- |\n| 1 | 2 |\n| 3 | 4 |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-120
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-091
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S6
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-091#S5
 test("a single value or a text without a tab is left to the native paste", () => {
   for (const text of ["x", "a\nb", "a\r\nb\r\n", ""]) {
     const harness = createRuntimeHarness();

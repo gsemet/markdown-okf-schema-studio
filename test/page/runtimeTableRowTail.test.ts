@@ -9,7 +9,8 @@ import { openTableCellEditorForTab } from "./runtimeTestSupport";
  * cell editor, not the raw Markdown editor.
  */
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S8
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S9
 test("a cell of a table whose row has a token after its closing pipe opens the cell editor", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness, {},
@@ -19,7 +20,8 @@ test("a cell of a table whose row has a token after its closing pipe opens the c
     false, "no raw Markdown editor");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S8
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S15
 test("the List table button is disabled on a table whose row has a token after its closing pipe", () => {
   const harness = createRuntimeHarness();
   openTableCellEditorForTab(harness, {}, "| A | B |\n| --- | --- |\n| x | y | ^row-a\n| p | q |\n");

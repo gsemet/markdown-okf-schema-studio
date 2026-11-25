@@ -20,6 +20,19 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: Controls added once
+- id: S2
+  title: Page without controls
+- id: S3
+  title: Reply sends the trimmed text and the source lines
+- id: S4
+  title: Delete thread asks without confirmation
+- id: S5
+  title: Nothing is sent
+- id: S6
+  title: The host refuses the change
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,27 +50,27 @@ default_owner_email: gaetan@xeberon.net
 
 When a preview shows an inline thread, the page SHALL add once to the body of the thread a reply text area labelled "Reply to this thread" with the placeholder Reply, a Reply button and a Delete thread button titled "Delete the whole thread from the document", and send a reply or a delete of the thread to the host with its source lines.
 
-### Scenario (nominal): Controls added once
+### Scenario S1 (nominal): Controls added once
 - GIVEN a thread and the content applied twice
 - WHEN the page runs the controls
 - THEN the thread holds one set of controls (one element with data-okf-thread-actions in its body)
 
-### Scenario (refusal): Page without controls
+### Scenario S2 (refusal): Page without controls
 - GIVEN a page whose host gave the controls disabled (the module is installed with controls off, as in a test host)
 - WHEN the thread is shown
 - THEN the messages show and no control is added; see SwRS-MDOKFSTUDIO-TRUST-001
 
-### Scenario (nominal): Reply sends the trimmed text and the source lines
+### Scenario S3 (nominal): Reply sends the trimmed text and the source lines
 - GIVEN a reply box holding "  Thanks  " in a thread on lines 5 to 8
 - WHEN the writer presses Reply, or Cmd+Enter or Ctrl+Enter in the box
 - THEN the host is asked for a reply with the lines 5 and 8 and the text Thanks, the controls are disabled until the answer and the box is emptied on success; the keys typed in the box never reach the page
 
-### Scenario (nominal): Delete thread asks without confirmation
+### Scenario S4 (nominal): Delete thread asks without confirmation
 - GIVEN a thread on lines 5 to 8
 - WHEN the writer presses Delete thread
 - THEN the host is asked to delete lines 5 to 8 with no text and no question is shown; the writer undoes the deletion in the editor in one undo step
 
-### Scenario (refusal): Nothing is sent
+### Scenario S5 (refusal): Nothing is sent
 | Input | Outcome |
 | --- | --- |
 | Reply with an empty reply box | No request is sent, the message "Write a reply first." appears and the box takes the focus |
@@ -65,7 +78,7 @@ When a preview shows an inline thread, the page SHALL add once to the body of th
 | Reply or Delete thread on a thread element without valid source lines (no data-line) | No request is sent and the status line says "The thread has no source position. Refresh the preview." |
 | Reply or Delete thread while a block or frontmatter editor is open | No request is sent and the status line holds the reason of the open edit, see SwRS-MDOKFSTUDIO-BLOCK-041 |
 
-### Scenario (refusal): The host refuses the change
+### Scenario S6 (refusal): The host refuses the change
 The answer is matched to the request, see SwRS-MDOKFSTUDIO-TRUST-090.
 
 | Input | Outcome |

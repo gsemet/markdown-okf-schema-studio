@@ -22,6 +22,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-LIFE-007
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: Pending page of a new side preview
+- id: S2
+  title: Good render
+- id: S3
+  title: Failed render
+- id: S4
+  title: Pending render
+- id: S5
+  title: Position of the pending notice
+- id: S6
+  title: Show and hide
+- id: S7
+  title: Oversized or malformed field
+- id: S8
+  title: Longest accepted text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -50,13 +67,13 @@ supersedes:
 
 When the preview shows a render state, the extension SHALL label the status Preview pending, Preview ready, Preview is stale, Preview unavailable, Preview source missing or Preview recovered, show a pending notice for a slow render and leave a page that is already shown unchanged while a render is pending, and ignore a pending notice whose visible field is not a boolean or whose label or message is not a string or is longer than 500 characters.
 
-### Scenario (nominal): Pending page of a new side preview
+### Scenario S1 (nominal): Pending page of a new side preview
 
 - GIVEN a new side preview whose group lock is still being set
 - WHEN the panel is created for an existing Markdown file
 - THEN its page holds a status region data-sphinx-preview-status=pending with the label Preview pending and the message Waiting for the first render, until the render starts
 
-### Scenario (nominal): Good render
+### Scenario S2 (nominal): Good render
 
 | Input | Outcome |
 | --- | --- |
@@ -64,7 +81,7 @@ When the preview shows a render state, the extension SHALL label the status Prev
 | a successful render after a failure, for example a stale page after a simulated render failure and the text edited back to a renderable state | the status region says Preview recovered and the page shows the new content |
 | a render after a successful one | the label is Preview ready |
 
-### Scenario (refusal): Failed render
+### Scenario S3 (refusal): Failed render
 
 | Input | Outcome |
 | --- | --- |
@@ -74,7 +91,7 @@ When the preview shows a render state, the extension SHALL label the status Prev
 | a missing source | Preview source missing |
 | waiting for a render | Preview pending |
 
-### Scenario (boundary): Pending render
+### Scenario S4 (boundary): Pending render
 
 | Input | Outcome |
 | --- | --- |
@@ -89,21 +106,21 @@ When the preview shows a render state, the extension SHALL label the status Prev
 | a new page document is assigned over a visible notice and a render that needs a full page load | the notice flags are cleared and the new page shows no notice |
 | an assignment of the identical page string | nothing is cleared, because the host ignores an identical assignment |
 
-### Scenario (boundary): Position of the pending notice
+### Scenario S5 (boundary): Position of the pending notice
 
 | Input | Outcome |
 | --- | --- |
 | the notice shown with the toolbar expanded | the notice is fixed 14 px from the right and 160 px from the top (right under the four rows of the toolbar), with pointer-events none and no effect on the layout |
 | the toolbar collapsed to its first row | the notice sits 62 px from the top |
 
-### Scenario (nominal): Show and hide
+### Scenario S6 (nominal): Show and hide
 
 - GIVEN a valid previewPendingOverlay message with visible true, a label and a message of at most 500 characters
 - WHEN the page applies it
 - THEN the notice appears with the label and the message
 - AND a valid message with visible false removes the notice
 
-### Scenario (refusal): Oversized or malformed field
+### Scenario S7 (refusal): Oversized or malformed field
 
 | previewPendingOverlay field | Outcome |
 | --- | --- |
@@ -112,7 +129,7 @@ When the preview shows a render state, the extension SHALL label the status Prev
 | A visible field that is not a boolean | The page ignores the message |
 | A label or message that is not a string | The page ignores the message |
 
-### Scenario (boundary): Longest accepted text
+### Scenario S8 (boundary): Longest accepted text
 
 | previewPendingOverlay field | Outcome |
 | --- | --- |

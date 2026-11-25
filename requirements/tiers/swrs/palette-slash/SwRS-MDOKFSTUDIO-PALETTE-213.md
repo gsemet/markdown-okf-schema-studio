@@ -23,6 +23,17 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: Rich text becomes Markdown
+- id: S2
+  title: The host converts without touching a file
+- id: S3
+  title: The paste stays with the browser
+- id: S4
+  title: The conversion fails or the editor is gone
+- id: S5
+  title: The message shape
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,7 +55,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer pastes into the block text box a clipboard that holds text/html of 1 to 1,000,000 characters and the paste is not a paste as plain text, the extension SHALL take over the paste, send the HTML to the host for conversion, and replace the selection of the moment of the paste with the Markdown answer in one undo step and autosave it, or with the plain text of the clipboard when the conversion fails or is empty, only if that editor is still open.
 
-### Scenario (nominal): Rich text becomes Markdown
+### Scenario S1 (nominal): Rich text becomes Markdown
 - GIVEN a block editor with a selection and a clipboard that holds HTML with a heading, bold text, a link and a list
 - WHEN the writer pastes
 - THEN the default paste is prevented, previewPasteHtml is posted with the html and the selection of the moment of the paste is remembered
@@ -53,7 +64,7 @@ When the writer pastes into the block text box a clipboard that holds text/html 
 - THEN the selection is replaced by the Markdown in one native edit with the caret after it, one undo restores the text and the edit is autosaved; the conversion rules are those of SwRS-MDOKFSTUDIO-PALETTE-217
 - The envelope, the render gate and the answer correlation (10 seconds) are those of SwRS-MDOKFSTUDIO-TRUST-052, SwRS-MDOKFSTUDIO-TRUST-065 and SwRS-MDOKFSTUDIO-TRUST-090.
 
-### Scenario (nominal): The host converts without touching a file
+### Scenario S2 (nominal): The host converts without touching a file
 - GIVEN an HTML fragment with a heading
 - WHEN previewPasteHtml is accepted, in any preview, whatever the trust, since it edits nothing
 - THEN the answer previewPasteHtmlResult is ok true and holds the Markdown of the heading, and no file is touched
@@ -61,7 +72,7 @@ When the writer pastes into the block text box a clipboard that holds text/html 
 - WHEN the host answers
 - THEN the answer is ok false with the message of the error as the reason
 
-### Scenario (boundary): The paste stays with the browser
+### Scenario S3 (boundary): The paste stays with the browser
 No conversion is requested and the browser pastes the plain text.
 
 | Case | Outcome |
@@ -73,7 +84,7 @@ No conversion is requested and the browser pastes the plain text.
 | clipboard that holds an image only | not converted (the image paste is that of SwRS-MDOKFSTUDIO-PALETTE-203) |
 | text box of a table cell editor, whatever the clipboard holds (an image or html) | native paste; no image is sent and no conversion is requested, since only the text box of the block editor installs the image and rich text paste hooks |
 
-### Scenario (refusal): The conversion fails or the editor is gone
+### Scenario S4 (refusal): The conversion fails or the editor is gone
 | Case | Outcome |
 | --- | --- |
 | answer with ok false or empty Markdown | the plain text of the clipboard is inserted instead, over the remembered selection, in one undo step |
@@ -82,7 +93,7 @@ No conversion is requested and the browser pastes the plain text.
 | answer for another edit | ignored |
 | remembered positions beyond the text | clamped to the length of the text before the insertion |
 
-### Scenario (boundary): The message shape
+### Scenario S5 (boundary): The message shape
 | previewPasteHtml field | Accepted | Otherwise |
 | --- | --- | --- |
 | html | a non-empty string of at most 1,000,000 characters | the protocol rejects the message (an empty text or one over 1,000,000 characters) |

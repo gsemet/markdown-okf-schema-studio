@@ -16,6 +16,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-008
 - StRS-MDOKFSTUDIO-REVIEW-001
+scenarios:
+- id: S1
+  title: A deleted row is restored by an undo
+- id: S2
+  title: A quote retyped in a document with unsaved changes
+- id: S3
+  title: A short quote outside the window stays orphaned
+- id: S4
+  title: No orphaned thread
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,26 +43,26 @@ default_owner_email: gaetan@xeberon.net
 
 When the document text changes while a review thread is orphaned and its quote is found again under the re-anchoring rules, the extension SHALL post the thread on the found lines with orphaned false, without writing the comments file.
 
-### Scenario (nominal): A deleted row is restored by an undo
+### Scenario S1 (nominal): A deleted row is restored by an undo
 
 - GIVEN a thread quoting "beta" on a table row, the row deleted so that the thread is orphaned, and the comments file unchanged
 - WHEN the delete is undone
 - THEN the thread is posted on the line of the restored row with orphaned false, so the page shows its mark
 - AND the comments file on disk is unchanged
 
-### Scenario (nominal): A quote retyped in a document with unsaved changes
+### Scenario S2 (nominal): A quote retyped in a document with unsaved changes
 
 - GIVEN an orphaned thread in a document with unsaved changes
 - WHEN the text gains its quote again (a paste, a retyped word)
 - THEN the thread is posted on the lines where the quote is found with orphaned false
 
-### Scenario (refusal): A short quote outside the window stays orphaned
+### Scenario S3 (refusal): A short quote outside the window stays orphaned
 
 - GIVEN an orphaned thread whose quote has fewer than 12 characters and a document where that word reappears more than 50 lines from the stored line
 - WHEN the document text changes
 - THEN the thread stays orphaned and keeps its stored lines
 
-### Scenario (boundary): No orphaned thread
+### Scenario S4 (boundary): No orphaned thread
 
 - GIVEN threads that are all anchored
 - WHEN the document text changes

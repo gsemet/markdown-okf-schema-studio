@@ -16,6 +16,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-014
+scenarios:
+- id: S1
+  title: The Export button saves the page
+- id: S2
+  title: The command exports the preview in use
+- id: S3
+  title: Cancel, refusal and failure
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,19 +53,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer runs Export to HTML from the command palette or presses the Export button of the preview toolbar, the extension SHALL ask where to save the file, offering the folder and name of the page with an html extension, and write the page there, writing nothing when the dialog is cancelled and telling the writer when the file is written or cannot be.
 
-### Scenario (nominal): The Export button saves the page
+### Scenario S1 (nominal): The Export button saves the page
 
 - GIVEN a preview of `notes/page.md`
 - WHEN the writer presses the Export button, the last button of the main toolbar row but one (Refresh, Edit, Export, collapse), and accepts the save dialog
 - THEN the dialog offers `notes/page.html` with an HTML filter, one HTML file is written at the chosen path, and the extension shows an information message that names the file
 
-### Scenario (nominal): The command exports the preview in use
+### Scenario S2 (nominal): The command exports the preview in use
 
 - GIVEN a focused preview panel, or a Markdown file open in the editor with its preview
 - WHEN the writer runs Export to HTML from the command palette
 - THEN that preview exports its page; with no preview of the active file the extension tells the writer to open it first
 
-### Scenario (boundary): Cancel, refusal and failure
+### Scenario S3 (boundary): Cancel, refusal and failure
 
 | Input | Outcome |
 | --- | --- |

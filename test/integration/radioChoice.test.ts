@@ -186,7 +186,7 @@ async function withPlan(
 
 // @accepts_req StRS-MDOKFSTUDIO-GFM-005#S1
 // @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S4
 export async function run(): Promise<void> {
   const { browser, page } = await bounded("chromium.connectOverCDP to the workbench", connectWorkbench());
   try {

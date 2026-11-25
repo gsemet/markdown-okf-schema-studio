@@ -27,6 +27,21 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Paste after a selection
+- id: S2
+  title: Paste after a focused insert point
+- id: S3
+  title: Padded clipboard
+- id: S4
+  title: Line breaks and a glued neighbour
+- id: S5
+  title: Paste after a list followed by blank lines
+- id: S6
+  title: Empty clipboard
+- id: S7
+  title: The document changed while the clipboard was read
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -49,31 +64,31 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses the platform paste chord with blocks selected, or with an insert point focused, in edit mode and with no editor open, the extension SHALL insert the clipboard text as new blocks after the selection or the insert point, without the blank lines at both ends of the text, in the line breaks of the document, with one blank line before and after and without gluing them to their neighbours (a selection or insert point whose last line is the blank line that ends a block, a list mapped to its blank separator, inserts after that block, using the blank lines already there as separators, so no blank line is gained), and refuse with a reason, changing nothing, when the clipboard has no text or the document changed while it was read.
 
-### Scenario (nominal): Paste after a selection
+### Scenario S1 (nominal): Paste after a selection
 
 - GIVEN two selected blocks ending at line 10
 - WHEN the writer presses Ctrl+V
 - THEN previewBlocksPaste carries insertAfterLine 10 and the first line of the last block as pin
 
-### Scenario (nominal): Paste after a focused insert point
+### Scenario S2 (nominal): Paste after a focused insert point
 
 - GIVEN no selection and the insert point of a block ending at line 6 focused
 - WHEN the writer presses Ctrl+V
 - THEN previewBlocksPaste carries insertAfterLine 6; an insert point for line 0 pastes at the start of the body
 
-### Scenario (nominal): Padded clipboard
+### Scenario S3 (nominal): Padded clipboard
 
 - GIVEN the clipboard text `\n\nIntro.\n\n` pasted at the start of the body
 - WHEN the paste is applied
 - THEN the text `Intro.` follows the frontmatter after one blank line and precedes the next block after one blank line
 
-### Scenario (boundary): Line breaks and a glued neighbour
+### Scenario S4 (boundary): Line breaks and a glued neighbour
 
 - GIVEN a CR LF document where the next block directly follows the paste line
 - WHEN the paste is applied
 - THEN CR LF is used and the new text is not glued to the following block
 
-### Scenario (nominal): Paste after a list followed by blank lines
+### Scenario S5 (nominal): Paste after a list followed by blank lines
 
 Pasting `X`; the page may send the first or the last blank line of a run, and both give the same text.
 
@@ -84,14 +99,14 @@ Pasting `X`; the page may send the first or the last blank line of a run, and bo
 | `Para\n\n- a\n- b\n\n\nNext\n` | 6 | `Para\n\n- a\n- b\n\nX\n\nNext\n` |
 | `Para\n\n- a\n- b\n\n` | 5 | `Para\n\n- a\n- b\n\nX\n` |
 
-### Scenario (refusal): Empty clipboard
+### Scenario S6 (refusal): Empty clipboard
 
 | Input | Outcome |
 | --- | --- |
 | A clipboard that holds `  \n`, a paste is requested | The answer is ok false with "The clipboard has no text to paste." and the document is unchanged |
 | A clipboard with a paragraph, a paste is requested | The paragraph is inserted |
 
-### Scenario (refusal): The document changed while the clipboard was read
+### Scenario S7 (refusal): The document changed while the clipboard was read
 
 | Input | Outcome |
 | --- | --- |

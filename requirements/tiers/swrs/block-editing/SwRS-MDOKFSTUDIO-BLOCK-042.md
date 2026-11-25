@@ -18,6 +18,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-025
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Burst of typing
+- id: S2
+  title: An autosave of unchanged text sends nothing
+- id: S3
+  title: The host writes the smallest replacement
+- id: S4
+  title: Identical text and pair boundaries
+- id: S5
+  title: One save applied at a time, newest text kept
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,7 +53,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer types in a block editor, the extension SHALL autosave the last text 400 milliseconds after the last keystroke, unless it equals the text last posted, posting it as one previewEditSave with final false that the host writes as the smallest single replacement of the text last written.
 
-### Scenario (nominal): Burst of typing
+### Scenario S1 (nominal): Burst of typing
 - GIVEN an open editor
 - WHEN the writer types ten characters within 100 ms and stops
 - THEN exactly one previewEditSave with final false is posted 400 ms after the last key, carrying the whole text
@@ -50,25 +61,25 @@ When a writer types in a block editor, the extension SHALL autosave the last tex
 - WHEN the writer types before the 400 ms elapse
 - THEN the timer restarts and no message is posted yet
 
-### Scenario (boundary): An autosave of unchanged text sends nothing
+### Scenario S2 (boundary): An autosave of unchanged text sends nothing
 | Input | Outcome |
 | --- | --- |
 | The autosave timer fires with the text just posted | No message is posted |
 | The text returned to the last posted text before the timer fired | No message is posted |
 
-### Scenario (nominal): The host writes the smallest replacement
+### Scenario S3 (nominal): The host writes the smallest replacement
 - GIVEN a block `Hello world` written to the document and a new text `Hello brave world`
 - WHEN the host plans the edit
 - THEN the edit replaces the empty range after `Hello ` with `brave `, offset by the start of the block
 
-### Scenario (boundary): Identical text and pair boundaries
+### Scenario S4 (boundary): Identical text and pair boundaries
 | Input | Outcome |
 | --- | --- |
 | New text equal to the last written text | There is no edit and nothing is written |
 | Texts `x\r\n` and `x\n` | The range starts at offset 1, before the CR, never between the CR and the LF |
 | Texts `a😀b` and `a😁b`, whose emoji share the high surrogate | The range is 1 to 3 and replaces both halves of the pair with the new emoji |
 
-### Scenario (boundary): One save applied at a time, newest text kept
+### Scenario S5 (boundary): One save applied at a time, newest text kept
 | Input | Outcome |
 | --- | --- |
 | A save being applied and two further saves received | When the running edit resolves, only the text of the last save is applied next |

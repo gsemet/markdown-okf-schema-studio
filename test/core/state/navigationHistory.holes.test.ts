@@ -5,7 +5,7 @@ import { NAVIGATION_HISTORY_CAP, NavigationHistory } from "../../../src/core/sta
 
 // Tests added by the mutation campaign of src/core (CR-450): they pin the survivors of the first run.
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S12
 test("a history restored with no current place cannot go forward, even with entries to come", () => {
   const history = new NavigationHistory();
   history.restore({ entries: [{ uri: "a", line: 1 }, { uri: "b", line: 2 }], index: -1 });
@@ -18,7 +18,8 @@ test("a history restored with no current place cannot go forward, even with entr
   assert.equal(history.canForward(), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S10
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S13
 test("the oldest place goes only when the cap is passed, never at exactly the cap", () => {
   const history = new NavigationHistory();
   for (let line = 1; line <= NAVIGATION_HISTORY_CAP; line += 1) history.push({ uri: "d", line });

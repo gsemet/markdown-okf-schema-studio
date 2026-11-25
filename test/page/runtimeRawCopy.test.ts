@@ -48,8 +48,8 @@ function copy(harness: RuntimeHarness, selectionExtra: Record<string, unknown> =
 const sourceText = (text: string, extra: Record<string, unknown> = {}): Record<string, unknown> =>
   ({ type: "previewSourceText", ...HARNESS_PAGE, text, ...extra });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-277
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-277#S1
 test("a copy with the source text of the shown render puts the Markdown on the clipboard and cancels the browser's copy", () => {
   const harness = createRuntimeHarness({ emptyBody: true });
   harness.dispatchMessage(sourceText(SOURCE));
@@ -113,14 +113,16 @@ function copyPartOfParagraph(balanceEdges: boolean | undefined): string | undefi
   return data["text/plain"];
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S3
 test("the rawCopy.balanceEdges boot setting makes a copy that starts inside a bold word balanced; off, absent or false it is the exact cut", () => {
   assert.equal(copyPartOfParagraph(true), "**rld** again", "on: the bold's opening delimiters are added");
   assert.equal(copyPartOfParagraph(false), "rld** again", "off");
   assert.equal(copyPartOfParagraph(undefined), "rld** again", "absent: off by default");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S3
 test("with the rawCopy.balanceEdges boot setting on or off, a copy of the whole document is still the whole source", () => {
   for (const enabled of [true, false]) {
     const harness = createRuntimeHarness({ emptyBody: true, "rawCopy.balanceEdges": enabled });
@@ -131,7 +133,7 @@ test("with the rawCopy.balanceEdges boot setting on or off, a copy of the whole 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-272
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-272#S1
 test("a copy before the page received the source text stays native", () => {
   const harness = createRuntimeHarness({ emptyBody: true });
   const taken = copy(harness);
@@ -139,14 +141,14 @@ test("a copy before the page received the source text stays native", () => {
   assert.deepEqual(taken.data, {});
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271#S1
 test("the source text of another render is not kept", () => {
   const harness = createRuntimeHarness({ emptyBody: true });
   harness.dispatchMessage(sourceText(SOURCE, { requestId: 12 }));
   assert.equal(copy(harness).prevented, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271#S1
 test("a content patch drops the source text until the host sends the next one", () => {
   const harness = createRuntimeHarness({ emptyBody: true });
   harness.dispatchMessage(sourceText(SOURCE));
@@ -157,7 +159,7 @@ test("a content patch drops the source text until the host sends the next one", 
   assert.equal(copy(harness).data["text/plain"], "# Next\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-272
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-272#S1
 test("a collapsed selection, a selection outside the content and a selection in a text control stay native", () => {
   const harness = createRuntimeHarness({ emptyBody: true });
   harness.dispatchMessage(sourceText(SOURCE));
@@ -169,7 +171,7 @@ test("a collapsed selection, a selection outside the content and a selection in 
   assert.equal(copy(harness).prevented, false, "the focus is in a text control");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-272
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-272#S1
 test("with a block selection in edit mode the copy is the block copy's; in reading mode a leftover block selection does not block it", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.dispatchMessage(sourceText(SOURCE));

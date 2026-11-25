@@ -83,7 +83,7 @@ const CARD_DOCUMENT = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-261#S1
 /**
  * QA 210 c1-2: Enter in the editor of a card's `:header:` option saves the line and closes the
  * editor. It never adds a line: a blank line after the option would end the card's options.
@@ -167,7 +167,7 @@ const FIND_DOCUMENT = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
 /**
  * QA 210 c4-1: Replace all from the preview find bar replaces the visible matches of a list whose
  * link target repeats the query. The target, which the reader cannot see, is kept.
@@ -442,7 +442,8 @@ const CRLF_DOCUMENT = [
   "",
 ].join("\r\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S3
 /**
  * QA 210 ux-35 (campaign 001 guard): in a CRLF document, two lines typed in an alert editor and
  * saved by a click elsewhere reach the buffer with CRLF line endings, and no stale status shows.

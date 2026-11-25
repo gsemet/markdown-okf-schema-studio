@@ -23,6 +23,19 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: Nearest first
+- id: S2
+  title: Excluded folder
+- id: S3
+  title: Bounds of the scan
+- id: S4
+  title: Entries of the list
+- id: S5
+  title: Duplicates and cap of the list
+- id: S6
+  title: Failed scan, restricted reads and stale preview
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,13 +56,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the host answers previewListCitations, the extension SHALL search the .bib files of the folder of the document first and then of its workspace folder outside the folders node_modules, .git, _build, .venv, venv, out and dist, read at most 20 files within 2 MiB and 5 seconds, and answer the unique entry keys sorted, at most 1000, each with its title, marking the list truncated when any bound cuts it, or answer ok false with the message of the error when the scan fails.
 
-### Scenario (nominal): Nearest first
+### Scenario S1 (nominal): Nearest first
 
 - GIVEN a .bib file next to the document and another in a sibling folder
 - WHEN the scan runs
 - THEN both keys are listed and the file next to the document is read first
 
-### Scenario (refusal): Excluded folder
+### Scenario S2 (refusal): Excluded folder
 
 - GIVEN a .bib file under node_modules
 - WHEN the scan runs
@@ -57,7 +70,7 @@ When the host answers previewListCitations, the extension SHALL search the .bib 
 
 The skipped folders are node_modules, .git, _build, .venv, venv, out and dist; the search uses the glob **/*.bib with that exclusion list.
 
-### Scenario (boundary): Bounds of the scan
+### Scenario S3 (boundary): Bounds of the scan
 
 | Input | Outcome |
 | --- | --- |
@@ -68,20 +81,20 @@ The skipped folders are node_modules, .git, _build, .venv, venv, out and dist; t
 | a search that takes longer than 5 seconds | the search is cancelled, no more file is read, and the list holds the keys read so far with truncated true |
 | a search that ends in time | the timer is cleared |
 
-### Scenario (nominal): Entries of the list
+### Scenario S4 (nominal): Entries of the list
 
 - GIVEN a file with the entries smith2024 and jones-2020 and a comment entry
 - WHEN the keys are read
 - THEN the two keys are listed sorted (English locale comparison) with their titles (clipped to 80 characters), and the comment, string and preamble entries are skipped
 
-### Scenario (boundary): Duplicates and cap of the list
+### Scenario S5 (boundary): Duplicates and cap of the list
 
 | Input | Outcome |
 | --- | --- |
 | the same key in two files | the key appears once and the first file that defines it wins |
 | more than 1000 keys | the list is cut at 1000 with truncated true |
 
-### Scenario (refusal): Failed scan, restricted reads and stale preview
+### Scenario S6 (refusal): Failed scan, restricted reads and stale preview
 
 | Input | Outcome |
 | --- | --- |

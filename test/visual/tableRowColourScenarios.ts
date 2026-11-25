@@ -14,7 +14,8 @@ const PAGE_THEMES = [
 
 export const TABLE_ROW_COLOUR_SCENARIOS: ScenarioDefinition[] = [
   ...PAGE_THEMES.map(([version, mode, theme, label]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-077
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-077#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-077#S2
     id: `rendering-core/${version}-table-row-colours-${mode}-900`,
     fixture: "81-table-row-colours",
     theme,
@@ -27,7 +28,8 @@ export const TABLE_ROW_COLOUR_SCENARIOS: ScenarioDefinition[] = [
       + "table stays without backgrounds.",
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-077
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-077#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-077#S2
     id: "rendering-core/v31-table-row-colours-overflow-dark-460",
     fixture: "81-table-row-colours",
     theme: "dark",
@@ -39,7 +41,8 @@ export const TABLE_ROW_COLOUR_SCENARIOS: ScenarioDefinition[] = [
       + "the translucent heading, even rows and hovered row.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-077
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-077#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-077#S2
     id: "table-editing/v28-table-row-hover-below-handles-light-900",
     fixture: "81-table-row-colours",
     theme: "light",

@@ -15,6 +15,25 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-002
+scenarios:
+- id: S1
+  title: Dragging the handle of a column
+- id: S2
+  title: Keyboard move with Alt+Left and Alt+Right
+- id: S3
+  title: A block id at the end of a row stays at the end of the row
+- id: S4
+  title: The handle above its column
+- id: S5
+  title: "Moving a column of a `{list-table}`"
+- id: S6
+  title: A cell editor of the table is open
+- id: S7
+  title: Tables and states without a column move
+- id: S8
+  title: A table inside a quote or an admonition
+- id: S9
+  title: Handle strip at the top of the page
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,7 +57,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer drags the handle above a column of a pipe table or a list-table in edit mode onto another column, or presses Alt+Left or Alt+Right on that handle, the extension SHALL move that column to the new position in every row as one source edit.
 
-### Scenario (nominal): Dragging the handle of a column
+### Scenario S1 (nominal): Dragging the handle of a column
 
 | Input | Outcome |
 | --- | --- |
@@ -49,7 +68,7 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | The pointer is held anywhere over the columns of the table or over the strip of the handles above the table (over another column's handle too) | The marker shows on the nearest gap: the line on the left of the column when the pointer is on its left half, on the right on its right half; it follows the pointer from column to column and a drop there moves the column |
 | The pointer leaves the table and its handle strip | No marker shows; a drop there requests nothing and the document is not edited |
 
-### Scenario (nominal): Keyboard move with Alt+Left and Alt+Right
+### Scenario S2 (nominal): Keyboard move with Alt+Left and Alt+Right
 
 | Input | Outcome |
 | --- | --- |
@@ -57,7 +76,7 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | Alt+Left on the handle of the first column, or Alt+Right on that of the last | Nothing happens |
 | Alt+Right repeated before the render of the previous move arrived | The repeat is ignored: the cells on the page are stale until the render arrives |
 
-### Scenario (nominal): A block id at the end of a row stays at the end of the row
+### Scenario S3 (nominal): A block id at the end of a row stays at the end of the row
 
 | Input | Outcome |
 | --- | --- |
@@ -66,7 +85,7 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | `<a id="x"></a>` or other text in the last cell | It moves with its cell: only a block id names the row |
 | A table with a token after the closing pipe of one row (`^row-a`, `{#row-c}`, `<!-- keep -->`) | Its handles move it like any table and a click on a cell opens the cell editor |
 
-### Scenario (nominal): The handle above its column
+### Scenario S4 (nominal): The handle above its column
 
 | Input | Outcome |
 | --- | --- |
@@ -77,7 +96,7 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | Edit mode switched off | The handles are gone |
 | A click on a handle | No cell editor opens |
 
-### Scenario (nominal): Moving a column of a `{list-table}`
+### Scenario S5 (nominal): Moving a column of a `{list-table}`
 
 | Input | Outcome |
 | --- | --- |
@@ -86,14 +105,14 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | The directive line, the title, the other options, the indentation, the fence style, the blank lines between items and the line endings | Unchanged |
 | Rows that do not all have the same number of cells, or an item that is not a list of cells | The move is refused and the document is not edited |
 
-### Scenario (nominal): A cell editor of the table is open
+### Scenario S6 (nominal): A cell editor of the table is open
 
 | Input | Outcome |
 | --- | --- |
 | A cell editor of the pipe table is open (its source has arrived) and a column handle is dragged or Alt+Left or Alt+Right is pressed on it | The text of the open cell is part of the table that moves; the column is moved in the editor's model and the editor is saved and closed as one edit, with no request for the table source |
 | The cell editor has not received the source of its table yet | The drag is cancelled and the key is ignored |
 
-### Scenario (refusal): Tables and states without a column move
+### Scenario S7 (refusal): Tables and states without a column move
 
 | Input | Outcome |
 | --- | --- |
@@ -101,13 +120,13 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | A drag or a key while a block editor, a frontmatter editor or a cell editor of another table is open, or while a move waits for its render | The drag is cancelled or the key is ignored and nothing is requested |
 | The host answers the request for the source with an error, or the source is no table that can be read as columns, or the move is refused by the table model (an index outside the table, the same place) | No edit is saved and the page tells the host the move is closed |
 
-### Scenario (boundary): A table inside a quote or an admonition
+### Scenario S8 (boundary): A table inside a quote or an admonition
 
 | Input | Outcome |
 | --- | --- |
 | The handle of a column of a pipe table inside a blockquote, a GFM alert or a MyST admonition, dragged or moved with Alt+Left or Alt+Right | The column moves as for a top-level table and every line of the table keeps its container prefix; a source holding no pipe table or more than one is refused and nothing is saved (see SwRS-MDOKFSTUDIO-TABLE-121) |
 
-### Scenario (boundary): Handle strip at the top of the page
+### Scenario S9 (boundary): Handle strip at the top of the page
 - GIVEN the 1400x900 real VS Code window of the integration suite (preview frame 656 px wide), edit mode and a pipe table or a list-table right under the first heading, page at its top
 - WHEN a column handle is dragged and held in the handle strip at 80 percent of the third column
 - THEN the element at the pointer is not inside the toolbar: the toolbar (x 540 to 642, y 12 to 146 in the frame) ends right of the strip point (x 504 for the pipe table, 453 for the list-table)

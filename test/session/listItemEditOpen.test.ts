@@ -54,7 +54,8 @@ const CHAPTER = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
 test("a click on the first line, a paragraph or the code block of a list item opens that item only", async () => {
   const page = await renderMappedPage(CHAPTER, SOURCE_FILE, DOCUMENT_ID);
   const codeBlocks = page.document.querySelectorAll("code");
@@ -89,7 +90,8 @@ const TIGHT_LIST = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S8
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S9
 test("a wrapped item of a tight list opens on all its lines", async () => {
   const page = await renderMappedPage(TIGHT_LIST, SOURCE_FILE, DOCUMENT_ID);
   const items = page.document.querySelectorAll("li");
@@ -112,7 +114,7 @@ const NESTED_LIST = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
 test("a click in a nested list opens the nested item; the rest of the outer item opens the outer item", async () => {
   const page = await renderMappedPage(NESTED_LIST, SOURCE_FILE, DOCUMENT_ID);
   const nested = editRangeOf(page, page.elementWithText("the pedal channel"));
@@ -121,7 +123,8 @@ test("a click in a nested list opens the nested item; the rest of the outer item
   assert.deepEqual([outer.tagName, outer.line, outer.endLine], ["LI", 1, 7], "the outer item holds its nested list");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S8
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S9
 test("the list itself, outside its items, opens the whole list", async () => {
   const page = await renderMappedPage(CHAPTER, SOURCE_FILE, DOCUMENT_ID);
   const list = page.document.querySelectorAll("ul")[0]!;
@@ -131,7 +134,7 @@ test("the list itself, outside its items, opens the whole list", async () => {
   assert.deepEqual([keyboard.tagName, keyboard.line, keyboard.endLine], ["UL", 3, 18], "the same from the keyboard");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
 test("from the keyboard, an item opens on its lines and a block inside it opens on its own lines", async () => {
   const page = await renderMappedPage(CHAPTER, SOURCE_FILE, DOCUMENT_ID);
   const item = editRangeOf(page, page.document.querySelectorAll("li")[0]!, true);
@@ -161,7 +164,8 @@ const ITEM_SHAPES = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S4
 test("an item opens on all its lines whatever its content: an inline code span, an HTML block, a comment, an empty first line", async () => {
   const page = await renderMappedPage(ITEM_SHAPES, SOURCE_FILE, DOCUMENT_ID);
   const items = page.document.querySelectorAll("li");

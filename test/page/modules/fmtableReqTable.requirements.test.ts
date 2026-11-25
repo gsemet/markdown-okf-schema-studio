@@ -16,7 +16,8 @@ const listTable = (headerRows: number): string => [
   "```",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S14
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S19
 test("a list-table with several header rows is refused as a pipe table with the header-row count", () => {
   assert.deepEqual(tools.convertTable(listTable(2), "pipe"), {
     ok: false,

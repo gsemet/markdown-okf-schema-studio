@@ -17,6 +17,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-LIFE-005
 - StRS-MDOKFSTUDIO-LIFE-007
 depends_on: []
+scenarios:
+- id: S1
+  title: Status with diagnostics
+- id: S2
+  title: Pending notice
+- id: S3
+  title: Markup in a message
+- id: S4
+  title: Quote in a code
+- id: S5
+  title: Status page
+- id: S6
+  title: Patch rebuilds the status region
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,38 +49,38 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension writes a status, it SHALL write an aside with role status and aria-live polite that holds the label in bold, the message in its own element and the diagnostics as a list, with every text as plain text and never as markup.
 
-### Scenario (nominal): Status with diagnostics
+### Scenario S1 (nominal): Status with diagnostics
 
 - GIVEN a stale render with two diagnostics
 - WHEN the status region is written
 - THEN the aside holds a strong label, a message span and a list with one item per diagnostic carrying its severity, and a code attribute when the diagnostic has a code
 
-### Scenario (nominal): Pending notice
+### Scenario S2 (nominal): Pending notice
 
 - GIVEN a pending notice shown over a ready page
 - WHEN the notice is written
 - THEN it is also an aside with role status and aria-live polite, so assistive technology announces it politely
 
-### Scenario (refusal): Markup in a message
+### Scenario S3 (refusal): Markup in a message
 
 - GIVEN an error message that contains an img element with an onerror attribute
 - WHEN it is shown in the status region
 - THEN the characters appear as text and no element is created
 
-### Scenario (boundary): Quote in a code
+### Scenario S4 (boundary): Quote in a code
 
 - GIVEN a diagnostic code that contains a double quote
 - WHEN the attribute is written
 - THEN the quote is escaped in the attribute value
 
-### Scenario (nominal): Status page
+### Scenario S5 (nominal): Status page
 
 | Input | Outcome |
 | --- | --- |
 | a preview with no render yet, its page is built | the body carries data-sphinx-preview-status-page, the status markup follows and the style reads the neutral editor tokens (the nonce is SwRS-MDOKFSTUDIO-TRUST-012) |
 | a preview whose first render failed, its page is built | the same structure shows Preview unavailable |
 
-### Scenario (nominal): Patch rebuilds the status region
+### Scenario S6 (nominal): Patch rebuilds the status region
 
 | Input | Outcome |
 | --- | --- |

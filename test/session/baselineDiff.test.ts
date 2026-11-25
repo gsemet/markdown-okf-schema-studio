@@ -39,7 +39,7 @@ function stubs() {
   return { manager, preview };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S1
 test("CR147: the HEAD text is rendered as the content of the page, its blocks numbered by the lines of that text", async () => {
   const { manager, preview } = stubs();
   const html = await renderBaselineContent(manager, preview, stage, "# Title\n\nOld paragraph.\n\n- one\n- two\n");
@@ -51,7 +51,7 @@ test("CR147: the HEAD text is rendered as the content of the page, its blocks nu
   assert.doesNotMatch(html, /nonce\s*=|<script/iu);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S1
 test("CR147: raw scripts of the HEAD text never reach the page", async () => {
   const { manager, preview } = stubs();
   const html = await renderBaselineContent(manager, preview, stage, "Text\n\n<script>alert(1)</script>\n\nAfter\n");

@@ -121,7 +121,7 @@ async function expectBuffer(document: vscode.TextDocument, expected: string, wha
 
 const ORDERED = lines("# Lists", "", "1. one", "2. two", "3. three", "", "After the list.", "");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S6
 /** The second item of an ordered list dragged after the third: moved, renumbered, one undo restores it. */
 async function scenarioOrderedDragAndUndo(page: Page): Promise<void> {
   await withList(page, "listmoves-ordered", ORDERED, async (document) => {
@@ -135,7 +135,8 @@ async function scenarioOrderedDragAndUndo(page: Page): Promise<void> {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 /** An item with a sub-list moves with it. */
 async function scenarioSubListDrag(page: Page): Promise<void> {
   const source = lines("# Lists", "", "- alpha", "  - alpha one", "  - alpha two", "- beta", "");
@@ -146,7 +147,7 @@ async function scenarioSubListDrag(page: Page): Promise<void> {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S5
 /** An item of a list in a GitHub alert moves inside the alert; the alert's other lines stay. */
 async function scenarioAlertDrag(page: Page): Promise<void> {
   const source = lines("# Lists", "", "> [!NOTE]", "> Pack these:", ">", "> - tent", "> - stove", "");
@@ -157,7 +158,8 @@ async function scenarioAlertDrag(page: Page): Promise<void> {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 /** A drop over an item of another list leaves the document as it was. */
 async function scenarioDropOverAnotherList(page: Page): Promise<void> {
   const source = lines("# Lists", "", "- red", "- green", "", "Between.", "", "- left", "- right", "");
@@ -168,8 +170,10 @@ async function scenarioDropOverAnotherList(page: Page): Promise<void> {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S6
 /** Alt+Down on a focused handle moves its item; the whole-list chord of an item editor is unchanged. */
 async function scenarioKeys(page: Page): Promise<void> {
   await withList(page, "listmoves-keys", ORDERED, async (document) => {

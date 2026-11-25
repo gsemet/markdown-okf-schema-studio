@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Close a preview
+- id: S2
+  title: Remove the folder of a preview
 user_need: As a reader, I close a preview or a document, remove a folder from
   the workspace or turn the extension off, and no work or warning of that
   preview lingers. When the folder of a preview I keep open is removed, the
@@ -55,14 +60,14 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Close a preview
+#### Path S1: Close a preview
 
 1. A preview is open, rendering or idle
    - SwRS-MDOKFSTUDIO-LIFE-143: the reader closes the panel or the document, and the preview stops its render queue, watchers and Problems entries
    - Option SwRS-MDOKFSTUDIO-LIFE-143 (boundary): another live preview of the same root or file keeps its watcher and its Problems entries
 2. The preview has left nothing behind
 
-#### Path 2: Remove the folder of a preview
+#### Path S2: Remove the folder of a preview
 
 1. A preview shows a file of a workspace folder
    - SwRS-MDOKFSTUDIO-LIFE-143: the reader removes the folder, the preview's work is disposed and the same panel shows the file again with restricted reads

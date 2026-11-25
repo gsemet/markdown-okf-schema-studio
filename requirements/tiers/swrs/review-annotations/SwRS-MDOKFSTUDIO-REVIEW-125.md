@@ -16,6 +16,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-008
 depends_on: []
+scenarios:
+- id: S1
+  title: Rename
+- id: S2
+  title: Move to another folder
+- id: S3
+  title: A rename never overwrites a comments file
+- id: S4
+  title: A comments file that names another document
+- id: S5
+  title: Own document
+- id: S6
+  title: Renames that move nothing
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,19 +46,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a document is renamed or moved, the extension SHALL rename its comments file to the new name and set the document name inside it, and leave every comments file where it is, never overwriting one, when the move is not safe.
 
-### Scenario (nominal): Rename
+### Scenario S1 (nominal): Rename
 
 - GIVEN move-me.md with move-me.comments.json holding thread m1
 - WHEN the document is renamed to moved.md
 - THEN moved.comments.json exists with the thread m1 and move-me.comments.json is gone
 
-### Scenario (nominal): Move to another folder
+### Scenario S2 (nominal): Move to another folder
 
 - GIVEN the same document moved to another folder
 - WHEN the move happens
 - THEN the comments file moves with it
 
-### Scenario (refusal): A rename never overwrites a comments file
+### Scenario S3 (refusal): A rename never overwrites a comments file
 
 | Input | Outcome |
 | --- | --- |
@@ -53,19 +66,19 @@ When a document is renamed or moved, the extension SHALL rename its comments fil
 | The old comments file is not valid | The file stays under its old name and the same warning gives the reason |
 | The old comments file is open with unsaved changes | The file stays under its old name and the same warning gives the reason |
 
-### Scenario (refusal): A comments file that names another document
+### Scenario S4 (refusal): A comments file that names another document
 
 - GIVEN move-me.comments.json whose document field says other.md
 - WHEN move-me.md is renamed
 - THEN the file stays and no warning is shown
 
-### Scenario (nominal): Own document
+### Scenario S5 (nominal): Own document
 
 - GIVEN a comments file whose document field names the renamed document
 - WHEN the document is renamed
 - THEN the file moves
 
-### Scenario (boundary): Renames that move nothing
+### Scenario S6 (boundary): Renames that move nothing
 
 | Input | Outcome |
 | --- | --- |

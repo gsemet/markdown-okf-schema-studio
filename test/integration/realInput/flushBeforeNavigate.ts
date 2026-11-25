@@ -233,8 +233,9 @@ export async function selectAllInControl(page: Page, selector: string, label: st
 
 /**
  * CR 025: a link to another file, right after typing.
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-006
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-205
+ * @accepts_req StRS-MDOKFSTUDIO-BLOCK-006#S2
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S2
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S3
  */
 export async function scenarioFlushBeforeLink(page: Page, evidence: Evidence): Promise<void> {
   await withFlushDocuments("realinput-cr25a", async (first, second) => {
@@ -256,7 +257,6 @@ export async function scenarioFlushBeforeLink(page: Page, evidence: Evidence): P
 
 /**
  * CR 025: Back across documents, right after typing.
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-006
  */
 export async function scenarioFlushBeforeBack(page: Page, evidence: Evidence): Promise<void> {
   await withFlushDocuments("realinput-cr25b", async (first, second) => {
@@ -280,7 +280,6 @@ export async function scenarioFlushBeforeBack(page: Page, evidence: Evidence): P
 
 /**
  * CR 025: the preview follows another editor tab, right after typing; the screenshot comes back.
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-006
  */
 export async function scenarioFlushBeforeTabSwitch(page: Page, evidence: Evidence): Promise<void> {
   await withFlushDocuments("realinput-cr25c", async (first, second) => {
@@ -306,7 +305,6 @@ export async function scenarioFlushBeforeTabSwitch(page: Page, evidence: Evidenc
 
 /**
  * CR 025: a table cell and a frontmatter field, right after typing, then a tab switch.
- * @tests_req StRS-MDOKFSTUDIO-TABLE-001
  */
 export async function scenarioFlushCellAndFrontmatter(page: Page, evidence: Evidence): Promise<void> {
   await withFlushDocuments("realinput-cr25d", async (first, second) => {

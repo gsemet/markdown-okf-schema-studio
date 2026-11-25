@@ -99,7 +99,8 @@ test("the next render of a patch is a plain object with safe integers, and its p
 
 const baseline = (extra: Record<string, unknown>) => accepts({ type: "previewBaselineDiff", ...page, ...extra });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S7
 test("a baseline diff is accepted up to 20 MiB of html and 100,000 hunks, with hunk bounds exact", () => {
   const hunk = { baseStart: 2, baseEnd: 1, start: 2, end: 1 };
   assert.equal(baseline({ html: "x".repeat(20 * 1024 * 1024), hunks: [] }), true);

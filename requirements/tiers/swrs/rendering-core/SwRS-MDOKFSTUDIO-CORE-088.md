@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
+scenarios:
+- id: S1
+  title: Render the CommonMark constructs
+- id: S2
+  title: Render identically in every palette mode
+- id: S3
+  title: Render a very long document completely
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,7 +39,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a document holds CommonMark constructs, the extension SHALL render each as its matching HTML element, identically in every palette mode, and render a document of about 6000 lines completely.
 
-### Scenario (nominal): Render the CommonMark constructs
+### Scenario S1 (nominal): Render the CommonMark constructs
 
 - GIVEN a document with a heading of each level, a list, a quote, a thematic break, emphasis, a link, an image, inline code, strikethrough text and an h6 heading
 - WHEN it is rendered
@@ -50,13 +57,13 @@ When a document holds CommonMark constructs, the extension SHALL render each as 
 | inline code | inline code element |
 | strikethrough text | struck through |
 
-### Scenario (nominal): Render identically in every palette mode
+### Scenario S2 (nominal): Render identically in every palette mode
 
 - GIVEN one document
 - WHEN it is rendered once per palette mode (Strict, GFM, MyST), the mode changing buttons only
 - THEN the three HTML outputs are byte-identical and the content HTML is unchanged
 
-### Scenario (boundary): Render a very long document completely
+### Scenario S3 (boundary): Render a very long document completely
 
 - GIVEN a document of about 6000 lines, holding 335 sections and 336 headings
 - WHEN it is rendered and the end of the page is scrolled to

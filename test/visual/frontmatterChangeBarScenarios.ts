@@ -34,7 +34,7 @@ const ASSERTIONS: ContentAssertion[] = [
 ];
 
 export const FRONTMATTER_CHANGE_BAR_SCENARIOS: ScenarioDefinition[] = (["light", "dark"] as const).map((theme, index) => ({
-  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-215
+  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-215#S1
   id: `review-annotations/v${27 + index}-frontmatter-change-bar-${theme}-900`,
   fixture: "69-frontmatter-change-bar",
   theme,

@@ -17,6 +17,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: nominal
+- id: S2
+  title: boundary
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a copied selection touches generated content or an included block (a diagram, a table of contents, the properties table, display or inline math, an image, a figure, a computed role or an included file's block), the page SHALL copy the source construct that produces it whole, from its first character to its last.
 
-### Scenario: nominal
+### Scenario S1: nominal
 
 - GIVEN an edge in a diagram, table of contents, image, math or included block, or in frontmatter
 - WHEN the copy is taken
 - THEN the whole construct is copied from its first to its last source line
 
-### Scenario: boundary
+### Scenario S2: boundary
 
 - GIVEN a generated block whose mapping holds only its first line
 - WHEN the copy is taken

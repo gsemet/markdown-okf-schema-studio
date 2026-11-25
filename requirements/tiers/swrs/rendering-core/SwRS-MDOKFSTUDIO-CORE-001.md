@@ -17,6 +17,13 @@ derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
 - StRS-MDOKFSTUDIO-CORE-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Render the unsaved buffer in process
+- id: S2
+  title: Cancel a superseded render
+- id: S3
+  title: Discard the late result of a canceled render
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,19 +50,19 @@ supersedes:
 
 When the active Markdown buffer changes, the extension SHALL render the buffer text, saved or unsaved, completely to HTML inside the extension process and keep only the result of the newest edit.
 
-### Scenario (nominal): Render the unsaved buffer in process
+### Scenario S1 (nominal): Render the unsaved buffer in process
 
 - GIVEN a Markdown document with unsaved edits is open in the editor and the file on disk holds older text
 - WHEN the preview renders
 - THEN the page shows the unsaved text, the rendered HTML matches the buffer text and not the disk text, and no Sphinx process or temporary file is used
 
-### Scenario (refusal): Cancel a superseded render
+### Scenario S2 (refusal): Cancel a superseded render
 
 - GIVEN a render in progress
 - WHEN a newer edit arrives
 - THEN the old render is canceled with the message "The MyST render was canceled because a newer edit arrived." and its result is not shown
 
-### Scenario (boundary): Discard the late result of a canceled render
+### Scenario S3 (boundary): Discard the late result of a canceled render
 
 - GIVEN a canceled render that completes late
 - WHEN its result arrives

@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
+scenarios:
+- id: S1
+  title: Enter saves a one-line card editor
+- id: S2
+  title: Other one-line editors keep Enter as a new line
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,7 +41,7 @@ default_owner_email: gaetan@xeberon.net
 
 In an editor opened on a card title, `:header:` or `:footer:` line (an editor whose block carries the one-line marker of SwRS-MDOKFSTUDIO-BLOCK-260), plain Enter SHALL save and close the editor as Done does, Shift+Enter and Alt+Enter SHALL insert nothing, save nothing and leave the editor open, and Tab and Shift+Tab SHALL do nothing, so that no blank line ends the options of the card; the status hint of that editor SHALL read "Line N · Enter: done · Esc: cancel · ⌘↩: done".
 
-### Scenario (nominal): Enter saves a one-line card editor
+### Scenario S1 (nominal): Enter saves a one-line card editor
 
 - GIVEN edit mode on a `{card}` whose line 18 is `:header: Since v2.1.154, published 2026-05-28` and line 19 `:footer: Documented in the workflows guide`
 - WHEN the writer clicks the header, presses End, types " Q" and presses Enter
@@ -51,7 +56,7 @@ In an editor opened on a card title, `:header:` or `:footer:` line (an editor wh
 | Tab or Shift+Tab | Nothing happens: the line is neither indented nor outdented and the focus stays in the editor |
 | Enter while the slash menu, a palette popup or the alt text of an image takes the key | That control handles Enter, as in any block editor |
 
-### Scenario (boundary): Other one-line editors keep Enter as a new line
+### Scenario S2 (boundary): Other one-line editors keep Enter as a new line
 
 - GIVEN an editor opened on a one-line paragraph or a one-line heading (its first and last lines are the same)
 - WHEN the writer presses Enter or Shift+Enter

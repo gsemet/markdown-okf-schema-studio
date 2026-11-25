@@ -16,8 +16,9 @@ function load(raw = fixtureReport()) {
 }
 
 test("home: layers, areas, sections and figures", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-080
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S1
   const { body } = homePage(load(), "/nonexistent-root");
   assert.ok(body.includes('class="layers"') && body.includes("StRS · 2") && body.includes("SwRS · 6") && body.includes("75% linked"));
   assert.equal(body.match(/<a class="arow"/gu)?.length, 2);
@@ -38,14 +39,15 @@ test("home: layers, areas, sections and figures", () => {
 });
 
 test("home lists the 16 areas", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-080
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S2
   const raw = JSON.stringify({ requirements: GROUPS.map((group, index) => requirement(`StRS-X-${100 + index}`, "StRS", group.id)) });
   const { body } = homePage(load(raw), "/nonexistent-root");
   assert.equal(body.match(/<a class="arow"/gu)?.length, 16);
 });
 
 test("home degrades without a report", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S3
   const { body } = homePage(undefined, "/nonexistent-root");
   assert.ok(body.includes("The requirements report was not generated"));
   assert.ok(body.includes("<svg"), "the diagram does not depend on the report");
@@ -53,14 +55,14 @@ test("home degrades without a report", () => {
 });
 
 test("an empty report shows n/a", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
   const { body } = homePage(load(JSON.stringify({ requirements: [] })), "/nonexistent-root");
   assert.ok(body.includes("<strong>n/a</strong>") && !body.includes("NaN"));
   assert.ok(!body.includes("A real example"));
 });
 
 test("marker snippets come from the repository files and fall back to the path", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S3
   const source = ["a", "// @implements_req SwRS-X-001", "export function <f>() {}", "1", "2", "3", "4", "5", "6", "7"].join("\n");
   const snippet = extractMarkerSnippet(source, "SwRS-X-001", "src/a.ts");
   assert.equal(snippet?.line, 2);

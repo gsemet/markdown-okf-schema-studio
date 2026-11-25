@@ -70,7 +70,7 @@ function fixture() {
   return { manager, preview, panel, posted, contexts, send, document };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 test("CR 119: the previewEditing context is on while the focused preview has an editor open, and off after", async () => {
   const f = fixture();
   assert.deepEqual(f.contexts, []);
@@ -88,7 +88,8 @@ test("CR 119: the previewEditing context is on while the focused preview has an 
   assert.deepEqual(f.contexts, [true, false, true, false]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S2
 test("CR 119: an editing command goes to the focused preview with an open editor, and to no other", async () => {
   const f = fixture();
   assert.equal(f.manager.runEditCommand("undo"), false, "no editor open");
@@ -107,7 +108,7 @@ test("CR 119: an editing command goes to the focused preview with an open editor
   assert.equal(f.manager.runEditCommand("undo"), false, "the preview is not focused");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
 test("CR 144: the find command goes to the focused preview", async () => {
   const f = fixture();
   f.posted.length = 0;
@@ -120,7 +121,7 @@ test("CR 144: the find command goes to the focused preview", async () => {
   assert.equal(f.posted.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S7
 test("CR 143: a fold command goes to the focused preview, whether an editor is open or not", async () => {
   const f = fixture();
   f.posted.length = 0;

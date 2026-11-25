@@ -97,9 +97,11 @@ async function waitForGitRepository(uri: vscode.Uri): Promise<void> {
     api.getRepository(uri)?.state.HEAD?.commit !== undefined, 30_000);
 }
 
-// @tests_req StRS-MDOKFSTUDIO-REVIEW-018
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @accepts_req StRS-MDOKFSTUDIO-REVIEW-018#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S5
 /**
  * CR 147: the Side-by-side button turns each changed block into a card with the block at HEAD on the
  * left and the current block on the right. Runs on the buffer of {@link scenarioIncomingChanges}
@@ -179,7 +181,7 @@ async function sideBySideSteps(
   assert.equal(fs.readFileSync(INCOMING_FIXTURE, "utf8"), committed, "the source file is never rewritten");
 }
 
-// @tests_req StRS-MDOKFSTUDIO-REVIEW-017
+// @accepts_req StRS-MDOKFSTUDIO-REVIEW-017#S1
 /**
  * review-annotations/r03: a tracked file whose buffer differs from Git HEAD. The buffer is edited,
  * never saved, and reverted at the end, so the working tree does not change.
@@ -553,7 +555,6 @@ export async function scenarioReviewThreads(page: Page, evidence: Evidence): Pro
   }
 }
 
-// @tests_req StRS-MDOKFSTUDIO-PALETTE-018
 /**
  * palette-slash/r09: an image pasted into a block editor. The paste event is dispatched on the
  * editor's textarea with the PNG file in its clipboard data (a test cannot put an image on the
@@ -614,8 +615,9 @@ export async function scenarioImagePaste(page: Page, evidence: Evidence): Promis
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-150#S5
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-150#S7
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S5
 /**
  * CR 117: Figure with a picked image inserts the directive and opens the figure form right away,
  * on the caption field. The native image dialog is stubbed in the host (a test cannot drive it);
@@ -665,7 +667,6 @@ export async function scenarioFigureInsert(page: Page, evidence: Evidence): Prom
     });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-001
 /** trust-security/r01: the side preview of an untrusted workspace, editable (runs in the Restricted Mode window). */
 export async function scenarioRestrictedEdit(page: Page, evidence: Evidence): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, false, "this scenario runs in the Restricted Mode window");

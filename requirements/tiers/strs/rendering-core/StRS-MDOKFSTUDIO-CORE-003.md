@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: A render fails after a good one
+- id: S2
+  title: A construct needs a full build
 user_need: Writers need to know what the preview leaves out, so that a gap is
   never mistaken for an empty result, and need the preview to stay trustworthy
   while they type and when something goes wrong.
@@ -76,7 +81,7 @@ What the writer sees after each render: the page of a good render, the error pag
 
 ### Main paths
 
-#### Path 1: A render fails after a good one
+#### Path S1: A render fails after a good one
 
 1. The preview shows a good render
    - SwRS-MDOKFSTUDIO-CORE-025: the next render fails and the status region lists each diagnostic while the previous page stays
@@ -84,7 +89,7 @@ What the writer sees after each render: the page of a good render, the error pag
    - Option SwRS-MDOKFSTUDIO-CORE-008 (refusal): an image whose file is missing is kept
 2. The last good page stays with the diagnostics listed
 
-#### Path 2: A construct needs a full build
+#### Path S2: A construct needs a full build
 
 1. The preview shows a good render
    - SwRS-MDOKFSTUDIO-CORE-022: an unknown directive or another construct that only a build resolves shows an inert placeholder with a warning

@@ -16,6 +16,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-019
 - StRS-MDOKFSTUDIO-PALETTE-020
+scenarios:
+- id: S1
+  title: Blockquote quotes a list and keeps blank lines
+- id: S2
+  title: Bulleted list and Numbered list from the slash menu
+- id: S3
+  title: No palette button for the list actions
+- id: S4
+  title: Checkbox toggles a task list box
+- id: S5
+  title: Option toggles a choice list marker
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,7 +56,7 @@ When the writer presses Blockquote, Checkbox or Option, or runs Bulleted list or
 
 In the tables of this requirement, `[ ]` marks the selection and `|` marks the caret.
 
-### Scenario (nominal): Blockquote quotes a list and keeps blank lines
+### Scenario S1 (nominal): Blockquote quotes a list and keeps blank lines
 
 - GIVEN the selection of two list lines - a and - b
 - WHEN Blockquote is pressed
@@ -69,7 +80,7 @@ In the tables of this requirement, `[ ]` marks the selection and `|` marks the c
 | `> \|` | `\|` |
 | `[a` newline `]b` (selection ending at a line start) | `[> a` newline `]b` (the line b is not touched) |
 
-### Scenario (nominal): Bulleted list and Numbered list from the slash menu
+### Scenario S2 (nominal): Bulleted list and Numbered list from the slash menu
 
 - GIVEN the selection of a, b and c on three lines
 - WHEN Bulleted list runs
@@ -104,13 +115,13 @@ In the tables of this requirement, `[ ]` marks the selection and `|` marks the c
 | Numbered list: `word` with the caret at its end | `1. word` |
 | Numbered list: `/numbered` typed in the gfm mode, then Tab | the text gets the prefix `1. ` as one edit |
 
-### Scenario (refusal): No palette button for the list actions
+### Scenario S3 (refusal): No palette button for the list actions
 
 - GIVEN the same editor
 - WHEN the buttons of the palette are listed
 - THEN neither Bulleted list nor Numbered list appears as a button, they have no shortcut, and a table cell menu does not list them
 
-### Scenario (nominal): Checkbox toggles a task list box
+### Scenario S4 (nominal): Checkbox toggles a task list box
 
 - GIVEN a plain line and a list item
 - WHEN Checkbox is pressed on each
@@ -128,7 +139,7 @@ In the tables of this requirement, `[ ]` marks the selection and `|` marks the c
 | A list item, Checkbox pressed twice | The text is back as before (its own inverse) |
 | Checkbox pressed in the text box | The text box is edited as one undo step |
 
-### Scenario (nominal): Option toggles a choice list marker
+### Scenario S5 (nominal): Option toggles a choice list marker
 
 - GIVEN a plain line and a list item (the GFM and MyST palettes show the Option button next to Checkbox)
 - WHEN Option is pressed on each

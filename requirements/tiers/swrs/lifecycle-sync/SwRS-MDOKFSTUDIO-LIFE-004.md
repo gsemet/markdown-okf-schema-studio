@@ -16,6 +16,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-005
+scenarios:
+- id: S1
+  title: A long render leaves the host free
+- id: S2
+  title: A superseded render stops
+- id: S3
+  title: No background thread can run
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,13 +45,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a preview renders a document in the VS Code host, the extension SHALL keep the text editor responsive during a long render, stop a render that a newer edit, a cancel or a closed preview supersedes, and still render when no background thread can start.
 
-### Scenario (nominal): A long render leaves the host free
+### Scenario S1 (nominal): A long render leaves the host free
 
 - GIVEN a preview of an 11,000-line document in the VS Code host
 - WHEN an edit triggers a render
 - THEN the text editor stays responsive while the render runs, and the preview shows the same HTML, diagnostics and dependencies as any other render
 
-### Scenario (boundary): A superseded render stops
+### Scenario S2 (boundary): A superseded render stops
 
 | Input | Outcome |
 | --- | --- |
@@ -53,7 +60,7 @@ When a preview renders a document in the VS Code host, the extension SHALL keep 
 | a render whose request was aborted before it started | the render never starts |
 | the extension stops while a render runs | the render rejects as canceled |
 
-### Scenario (refusal): No background thread can run
+### Scenario S3 (refusal): No background thread can run
 
 | Input | Outcome |
 | --- | --- |

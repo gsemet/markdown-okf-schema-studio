@@ -16,6 +16,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-016
 depends_on: []
+scenarios:
+- id: S1
+  title: Wrap the pipe table at the caret
+- id: S2
+  title: Already captioned
+- id: S3
+  title: Caret in a paragraph
+- id: S4
+  title: Caret in another table form
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,22 +42,22 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer runs Table with caption, the extension SHALL wrap the pipe table at the caret in a :::{table} Caption directive, or insert a new captioned 2 x 2 table when the caret is outside a pipe table, and select the word Caption.
 
-### Scenario (nominal): Wrap the pipe table at the caret
+### Scenario S1 (nominal): Wrap the pipe table at the caret
 - GIVEN the caret in a pipe table
 - WHEN Table with caption is run
 - THEN the table is enclosed between :::{table} Caption and a closing fence and the word Caption is selected
 
-### Scenario (refusal): Already captioned
+### Scenario S2 (refusal): Already captioned
 - GIVEN the caret in a pipe table already inside a {table} directive
 - WHEN the action is run
 - THEN no edit is produced
 
-### Scenario (nominal): Caret in a paragraph
+### Scenario S3 (nominal): Caret in a paragraph
 - GIVEN the caret in a paragraph
 - WHEN Table with caption is run
 - THEN a :::{table} Caption directive holding a two-column table with one empty row is inserted on its own lines, after the selection, with the word Caption selected
 
-### Scenario (boundary): Caret in another table form
+### Scenario S4 (boundary): Caret in another table form
 - GIVEN the caret in a {list-table} or an HTML table
 - WHEN the action is run
 - THEN a new captioned table is inserted on its own lines after the last line of that table, which stays whole

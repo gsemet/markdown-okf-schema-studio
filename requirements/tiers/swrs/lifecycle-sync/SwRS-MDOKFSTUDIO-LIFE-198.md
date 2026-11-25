@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: Nominal case
+- id: S2
+  title: Boundary cases
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader runs Open in Studio at This Line on a Markdown text editor, the extension SHALL open a Studio tab of the file in the text editor's group with the caret's line revealed and marked, and SHALL close no tab.
 
-### Scenario (nominal): Nominal case
+### Scenario S1 (nominal): Nominal case
 
 - GIVEN a Markdown text editor of a.md in group 2 with the caret on line 4
 - WHEN the reader runs Open in Studio at This Line
 - THEN a Studio tab of a.md opens in group 2 and reveals and marks line 4, and the text tab stays open
 
-### Scenario (boundary): Boundary cases
+### Scenario S2 (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |

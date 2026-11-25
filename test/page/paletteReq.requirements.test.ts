@@ -9,7 +9,7 @@ import { test } from "node:test";
 import { createRuntimeHarness, type RuntimeHarness } from "./runtimeHarness";
 import { figureHarness, openTableCellEditorForTab, paletteButton } from "./runtimeTestSupport";
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-213
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-213#S3
 test("pasting into the text box of a table cell editor stays a native paste, whatever the clipboard holds", () => {
   const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   const control = openTableCellEditorForTab(harness).input();
@@ -36,7 +36,8 @@ const figureSource = [":::{figure} images/chip.png", ":alt: A chip", ":width: 60
 const live = (harness: RuntimeHarness, attribute: string, name: string) =>
   harness.createdElements.find((element) => element.getAttribute(attribute) === name && !element.removed);
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S5
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S10
 test("a figure form submitted on a text that changed is closed without writing", () => {
   const stale = figureHarness(figureSource, 5);
   paletteButton(stale.harness, "figure").dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined });

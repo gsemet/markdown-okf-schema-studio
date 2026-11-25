@@ -19,6 +19,27 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Scrolling posts the new top line
+- id: S2
+  title: The host reveals the line at the top of the editor
+- id: S3
+  title: Clicking a block reveals its source line
+- id: S4
+  title: Enter or Space on a focused block
+- id: S5
+  title: A text diff shows the file
+- id: S6
+  title: No text editor shows the file
+- id: S7
+  title: A report that names another source file
+- id: S8
+  title: The revealed line stays inside the document
+- id: S9
+  title: Accepted shape of previewScroll and previewReveal
+- id: S10
+  title: Defaults, the setting off and the double click
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,7 +66,7 @@ supersedes:
 
 When the reader scrolls the preview to another source line or activates a rendered block outside edit mode, the extension SHALL reveal that source line in the visible text editor that shows the preview's file (in a text diff, its side of the file scheme only), as the settings allow, and leave every editor unmoved when no visible text editor shows that file or the report names another file.
 
-### Scenario (nominal): Scrolling posts the new top line
+### Scenario S1 (nominal): Scrolling posts the new top line
 - GIVEN anchor mode and scrollEditorWithPreview on and the reader scrolling from line 10 to line 14.6
 - WHEN the scroll frame runs
 - THEN the page posts previewScroll with line 14
@@ -53,7 +74,7 @@ When the reader scrolls the preview to another source line or activates a render
 - WHEN the next frame runs
 - THEN no second previewScroll is posted; with the anchor mode off the page posts only previewState
 
-### Scenario (nominal): The host reveals the line at the top of the editor
+### Scenario S2 (nominal): The host reveals the line at the top of the editor
 - GIVEN a preview and a text editor of the same file, scrollPreviewWithEditor and scrollEditorWithPreview on
 - WHEN the host receives previewScroll with line 14
 - THEN the editor shows line 14 at its top and its caret does not move
@@ -61,28 +82,28 @@ When the reader scrolls the preview to another source line or activates a render
 - WHEN the message arrives
 - THEN the editor is not moved
 
-### Scenario (nominal): Clicking a block reveals its source line
+### Scenario S3 (nominal): Clicking a block reveals its source line
 | Input | Outcome |
 | --- | --- |
 | a click on a paragraph that starts at source line 2, in reading mode, scrollEditorWithPreview on, the text editor scrolled elsewhere | the page posts previewReveal with activation click and the block's source line (line 50 in the unit test); the editor reveals line 2, centred when it was outside the viewport |
 | a click on a link, a checkbox, a comment chip or an insertion control | no source line is revealed |
 | a click while scrollEditorWithPreview is off | no source line is revealed |
 
-### Scenario (nominal): Enter or Space on a focused block
+### Scenario S4 (nominal): Enter or Space on a focused block
 | Input | Outcome |
 | --- | --- |
 | Enter on a focused paragraph in reading mode | the page posts previewReveal with activation keyboard and the host reveals the line |
 | Space on a focused rendered block outside edit mode | the page posts previewReveal with activation keyboard for that block's source line |
 | Enter with the focus in a button, an input, a link or the Description toggle | no reveal is posted |
 
-### Scenario (boundary): A text diff shows the file
+### Scenario S5 (boundary): A text diff shows the file
 
 | Input | Outcome |
 | --- | --- |
 | a diff whose original side is a git or virtual document at the path of the file and whose modified side is the file | the line is revealed in the modified side only |
 | a diff with no side of the file scheme | no editor moves |
 
-### Scenario (refusal): No text editor shows the file
+### Scenario S6 (refusal): No text editor shows the file
 - GIVEN a preview with no visible text editor of its file
 - WHEN the reader scrolls or clicks in the preview
 - THEN no editor is created and the document is unchanged
@@ -90,20 +111,20 @@ When the reader scrolls the preview to another source line or activates a render
 - WHEN the reader scrolls the preview
 - THEN that editor does not move
 
-### Scenario (refusal): A report that names another source file
+### Scenario S7 (refusal): A report that names another source file
 | Input | Outcome |
 | --- | --- |
 | previewReveal whose sourceFile is another path | the editor is not moved |
 | previewScroll that carries a line and no source file | the line is revealed in the editor of the preview's file |
 | previewScroll or previewReveal naming a stale or foreign render | refused before this rule runs, see SwRS-MDOKFSTUDIO-TRUST-065 |
 
-### Scenario (boundary): The revealed line stays inside the document
+### Scenario S8 (boundary): The revealed line stays inside the document
 | Input | Outcome |
 | --- | --- |
 | a document of 50 lines and a reveal of line 400 | line 50 is revealed |
 | a reveal request below line 1 | line 1 is revealed |
 
-### Scenario (boundary): Accepted shape of previewScroll and previewReveal
+### Scenario S9 (boundary): Accepted shape of previewScroll and previewReveal
 | Input | Outcome |
 | --- | --- |
 | line, endLine, sourceLine or selectionLine a safe integer of at least 1 | accepted |
@@ -112,7 +133,7 @@ When the reader scrolls the preview to another source line or activates a render
 | line 0, line 1.5, anchorLine below 1 or a negative scrollTop | malformed: dropped by the envelope check without a visible change, the editor is not moved (see SwRS-MDOKFSTUDIO-TRUST-052) |
 | a well-formed previewScroll while scrollPreviewWithEditor is off | the reading state is recorded, the editor is not moved |
 
-### Scenario (boundary): Defaults, the setting off and the double click
+### Scenario S10 (boundary): Defaults, the setting off and the double click
 
 | Input | Outcome |
 | --- | --- |

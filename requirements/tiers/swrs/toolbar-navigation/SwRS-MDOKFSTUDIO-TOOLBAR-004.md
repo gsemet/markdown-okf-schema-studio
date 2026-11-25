@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-002
+scenarios:
+- id: S1
+  title: The folds survive a reload and a content update
+- id: S2
+  title: Keys, documents and the file
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,12 +39,12 @@ default_owner_email: gaetan@xeberon.net
 
 When a section is folded or unfolded, the extension SHALL keep the folded headings of the document in the webview state by level, text and occurrence, apply them again after every content update and reload, and never change the document text.
 
-### Scenario (nominal): The folds survive a reload and a content update
+### Scenario S1 (nominal): The folds survive a reload and a content update
 - GIVEN a document with its h2 B folded
 - WHEN the content is replaced by a content patch, or the page is loaded again in the same panel
 - THEN B is folded again: the webview state holds headingFolds with the key 2|B|0 under the document id, and apply folds the heading with that key
 
-### Scenario (boundary): Keys, documents and the file
+### Scenario S2 (boundary): Keys, documents and the file
 | Input | Outcome |
 | --- | --- |
 | Two headings with the same level and text | Only the folded one is folded: the key ends with the occurrence number |

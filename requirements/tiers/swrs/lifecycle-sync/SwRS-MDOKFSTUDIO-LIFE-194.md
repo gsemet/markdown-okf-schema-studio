@@ -17,6 +17,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: A property line
+- id: S2
+  title: Values, fences and the collapsed table
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the line marker is requested on a line of the front matter, the page SHALL mark the properties table row of the property that holds the line (a multi-line value included) and expand a collapsed properties table first, and SHALL mark the top of the properties table, leaving a collapsed table collapsed, for a line that is no property line (a fence, a comment, a blank line).
 
-### Scenario (nominal): A property line
+### Scenario S1 (nominal): A property line
 
 - GIVEN a file whose front matter has the line `owner: alice`, rendered with its properties table
 - WHEN the page receives previewRevealLine for that line
 - THEN one arrow and band are drawn on the owner row of the properties table
 
-### Scenario (boundary): Values, fences and the collapsed table
+### Scenario S2 (boundary): Values, fences and the collapsed table
 
 | Input | Outcome |
 | --- | --- |

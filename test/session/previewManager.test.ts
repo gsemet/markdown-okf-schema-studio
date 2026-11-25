@@ -128,7 +128,7 @@ function renderFixture() {
   return { manager, document, newSession, renders, finished, settle, advance, onCleanup, cleanup };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S5
 test("two previews of one document and revision share one render, each with its own request id", async () => {
   const f = renderFixture();
   try {
@@ -197,19 +197,20 @@ async function joinWindowScenario(stallMs: number): Promise<void> {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S5
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032#S8
 test("a page refresh inside the join window renders again instead of joining the shared render", async () => {
   await joinWindowScenario(0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S3
 test("a stalled machine between two requests does not close the join window", async () => {
   // The stall is longer than the window of real time: only the controlled time decides.
   await joinWindowScenario(JOIN_WINDOW_MS + 10);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S5
 test("a hidden panel does not render until it is shown, then renders once", async () => {
   const f = renderFixture();
   try {
@@ -249,7 +250,7 @@ function exportProbe(f: ReturnType<typeof renderFixture>, entry: ReturnType<Retu
   return { posted, expected };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("the Export command asks the focused preview, even when another one shows the active document", () => {
   const f = renderFixture();
   try {
@@ -269,7 +270,7 @@ test("the Export command asks the focused preview, even when another one shows t
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("the Export command falls back to the latest preview of the active document when none has the focus", () => {
   const f = renderFixture();
   try {
@@ -286,7 +287,7 @@ test("the Export command falls back to the latest preview of the active document
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("the Export command returns false and posts nothing without a focused preview, a matching document or a render", () => {
   const f = renderFixture();
   try {
@@ -301,7 +302,7 @@ test("the Export command returns false and posts nothing without a focused previ
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("the Export command returns false for a preview that has not rendered yet", () => {
   const f = renderFixture();
   try {

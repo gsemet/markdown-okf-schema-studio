@@ -102,7 +102,7 @@ const FAMILIES: Array<{ name: string; source: RegExp; html: RegExp }> = [
   { name: "front matter value in the text", source: /`= this\.status`/u, html: /<span class="okf-frontmatter-value"[^>]*>draft<\/span>[\s\S]*export, csv[\s\S]*<span class="okf-frontmatter-value"[^>]*>Ada<\/span>/u },
 ];
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-073
+// @tests_req SwRS-MDOKFSTUDIO-CORE-073#S2
 test("the writing skill is a self-contained folder of the expected shape", () => {
   assert.ok(fs.existsSync(skillFile), `the skill file ${skillFile} does not exist`);
   const text = fs.readFileSync(skillFile, "utf8");
@@ -131,8 +131,7 @@ test("the writing skill is a self-contained folder of the expected shape", () =>
   }
 });
 
-// @tests_req StRS-MDOKFSTUDIO-CORE-006
-// @tests_req SwRS-MDOKFSTUDIO-CORE-073
+// @tests_req SwRS-MDOKFSTUDIO-CORE-073#S1
 test("every example of the writing skill renders without a diagnostic or an unresolved directive", async () => {
   const examples = skillSources().flatMap((file) => examplesOf(file).map((example) => ({ file: path.basename(file), example })));
   assert.ok(examples.length >= 6, `the skill holds ${examples.length} examples, expected at least 6`);
@@ -146,7 +145,7 @@ test("every example of the writing skill renders without a diagnostic or an unre
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-073
+// @tests_req SwRS-MDOKFSTUDIO-CORE-073#S1
 test("the examples of the writing skill cover every syntax family it lists, each rendered as its own element", async () => {
   const examples = skillSources().flatMap((file) => examplesOf(file));
   assert.ok(examples.length > 0, "the skill holds examples");
@@ -158,14 +157,15 @@ test("the examples of the writing skill cover every syntax family it lists, each
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-073
+// @tests_req SwRS-MDOKFSTUDIO-CORE-073#S1
 test("an example with an unknown directive is caught by the same check", async () => {
   const { html, diagnostics } = await renderExample(":::{no-such-directive}\nbody\n:::");
   assert.match(html, /myst-unresolved/u);
   assert.ok(diagnostics.some((entry) => entry.severity === "warning"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S5
 test("the way the skill shows the front matter form itself renders plain code, with no value and no warning", async () => {
   const marker = "The form itself, shown as code:";
   const example = skillSources().flatMap((file) => examplesOf(file)).find((text) => text.includes(marker));
