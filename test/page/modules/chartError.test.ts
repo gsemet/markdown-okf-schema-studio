@@ -40,7 +40,18 @@ test("the reason is plain text, never HTML", () => {
 test("the error styles use the theme error colour and keep long reasons inside the column", () => {
   assert.match(PREVIEW_THEME_CSS, /\.myst-vega-error\s*\{[^}]*color: var\(--studio-errorForeground, #f14c4c\)/u);
   assert.match(PREVIEW_THEME_CSS, /\.myst-vega-error-details pre\s*\{[^}]*(overflow-x: auto|white-space: pre-wrap)/u);
-  assert.match(PREVIEW_THEME_CSS, /\.myst-vega-image\s*\{[^}]*max-width: 100%;[^}]*height: auto;/u);
+  // Changed for CR-503: the chart image no longer exists, the live SVG inside the view takes its rule.
+  assert.match(PREVIEW_THEME_CSS, /\.myst-vega-view > svg\s*\{[^}]*max-width: 100%;[^}]*height: auto;/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("the hover detail is fixed, lets the pointer through and has a stronger border on both dark pages", () => {
+  assert.match(PREVIEW_THEME_CSS, /[/}]\s*\.myst-vega-tooltip\s*\{[^}]*position: fixed;/u);
+  assert.match(PREVIEW_THEME_CSS, /[/}]\s*\.myst-vega-tooltip\s*\{[^}]*pointer-events: none;/u);
+  assert.match(PREVIEW_THEME_CSS, /\.myst-vega-tooltip\[hidden\]\s*\{\s*display: none;/u);
+  assert.match(PREVIEW_THEME_CSS, /html\[data-sphinx-preview-theme-mode="dark"\] \.myst-vega-tooltip,\s*html\[data-sphinx-preview-theme-mode="current"\] body:is\(\.vscode-dark, \.vscode-high-contrast\) \.myst-vega-tooltip\s*\{[^}]*border-color: var\(--studio-descriptionForeground\);/u);
+  assert.match(PREVIEW_THEME_CSS, /\.myst-vega-tooltip-key\s*\{[^}]*var\(--studio-descriptionForeground\)/u);
+  assert.match(PREVIEW_THEME_CSS, /\.myst-vega-tooltip-value\s*\{[^}]*font-weight: bold;/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-121

@@ -79,7 +79,7 @@ sequenceDiagram
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
-  - [SwRS-MDOKFSTUDIO-DIAG-128](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-128.md): Exported diagrams are drawn images in the theme of the file
+  - [SwRS-MDOKFSTUDIO-DIAG-128](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-128.md): Exported diagrams are drawn in the theme of the file
   - [SwRS-MDOKFSTUDIO-FMSCHEMA-091](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-091.md): The exported properties table opens on a click
   - [SwRS-MDOKFSTUDIO-TOOLBAR-134](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-134.md): Export to HTML is a command and a toolbar button that save one file
   - [SwRS-MDOKFSTUDIO-TOOLBAR-135](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-135.md): Export removes links to other files after a warning

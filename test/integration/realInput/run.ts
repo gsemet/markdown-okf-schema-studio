@@ -58,6 +58,7 @@ import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfte
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
 import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioFindWideTable } from "./findWideTable";
+import { scenarioLiveChart } from "./liveChart";
 import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
 import { scenarioLabelRenameAboveTable } from "./labelRenameAboveTable";
 import { scenarioTableTabRow } from "./tableTabRow";
@@ -246,6 +247,7 @@ export async function run(): Promise<void> {
       "table-comment-undo": () => scenarioUndoRestoresCommentMark(page),
       "find-after-click": () => scenarioFindRightAfterClick(page),
       "find-wide-table": () => scenarioFindWideTable(page),
+      "live-chart": () => scenarioLiveChart(page, evidence),
       "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
       "link-edit-mode": () => scenarioLinkClickEditsInEditMode(page, evidence),
       "qa210-replays": async () => {
@@ -349,6 +351,8 @@ export async function run(): Promise<void> {
     await scenarioFlushFrontmatterKeptAsTyped(page, evidence);
     await scenarioFindRightAfterClick(page);
     await scenarioFindWideTable(page);
+    // CR-503: a Vega-Lite chart is a live SVG, its hover detail shows, and the real CSP records no violation.
+    await scenarioLiveChart(page, evidence);
     await scenarioSaveKeepsBlockInPlace(page, evidence);
     await scenarioStatusPageTwoLines(page, evidence);
     await scenarioTitleBarButton(page, evidence);

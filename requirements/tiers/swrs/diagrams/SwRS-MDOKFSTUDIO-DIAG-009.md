@@ -6,12 +6,14 @@ title: Diagrams are drawn once per source and theme and late results are dropped
 description: 'When the page needs a Mermaid diagram, a PlantUML diagram drawn by the
   built-in engine or a chart, the extension SHALL draw only the diagrams whose source
   or theme colours changed or that were never drawn, show an earlier drawing of the
-  same source and theme colours without running the engine again, run the Mermaid
-  and PlantUML draw passes one at a time (so a later Mermaid theme is drawn only after
-  the running pass ends), and, for a PlantUML diagram or a chart, drop a result that
-  arrives for a key the node no longer has. When the JAR pipeline renders a diagram
-  text that an earlier successful render already drew, the extension SHALL reuse that
-  SVG without starting a process.'
+  same source and theme colours without running the engine again (a chart shows an
+  earlier detached view of the same source and theme, never one that is on the page,
+  keeps at most 16 views and finalizes an evicted or replaced one only when detached),
+  run the Mermaid and PlantUML draw passes one at a time (so a later Mermaid theme
+  is drawn only after the running pass ends), and, for a PlantUML diagram or a chart,
+  drop a result that arrives for a key the node no longer has. When the JAR pipeline
+  renders a diagram text that an earlier successful render already drew, the extension
+  SHALL reuse that SVG without starting a process.'
 project: markdown-okf-schema-studio
 scope: diagrams
 req_lifecycle: proposed
@@ -25,10 +27,13 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/render/plantUmlRenderer.ts
+- src/page/modules/chartViewCache.ts
 - src/page/modules/mermaidCache.ts
 - src/page/modules/mermaidPreview.ts
 tested_in_files:
 - test/integration/realInput/renderPatching.ts
+- test/page/chartCsp.test.ts
+- test/page/modules/chartViewCache.test.ts
 - test/page/modules/diagReq.pageDiagrams.requirements.test.ts
 - test/page/modules/mermaidCache.test.ts
 - test/page/modules/mermaidPreviewEntry.test.ts
@@ -45,7 +50,7 @@ supersedes:
 
 ### Normative behavior
 
-When the page needs a Mermaid diagram, a PlantUML diagram drawn by the built-in engine or a chart, the extension SHALL draw only the diagrams whose source or theme colours changed or that were never drawn, show an earlier drawing of the same source and theme colours without running the engine again, run the Mermaid and PlantUML draw passes one at a time (so a later Mermaid theme is drawn only after the running pass ends), and, for a PlantUML diagram or a chart, drop a result that arrives for a key the node no longer has.
+When the page needs a Mermaid diagram, a PlantUML diagram drawn by the built-in engine or a chart, the extension SHALL draw only the diagrams whose source or theme colours changed or that were never drawn, show an earlier drawing of the same source and theme colours without running the engine again (a chart shows an earlier detached view of the same source and theme, never a view that is on the page, keeps at most 16 views and finalizes an evicted or replaced view only when it is detached), run the Mermaid and PlantUML draw passes one at a time (so a later Mermaid theme is drawn only after the running pass ends), and, for a PlantUML diagram or a chart, drop a result that arrives for a key the node no longer has.
 
 When the JAR pipeline renders a diagram text that an earlier successful render already drew, the extension SHALL reuse that SVG without starting a process.
 
@@ -113,6 +118,8 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 ### Verification notes
 
 - Method: test/page/modules/mermaidCache.test.ts (unchanged diagram after a node replacement, changed source or theme: same source and theme give no second run, a different source or theme gives a new run)
+- Method: test/page/modules/chartViewCache.test.ts (the keep, reuse and render plans, an attached view never reused, 16 views, the least recently used one evicted, finalize only when detached)
+- Method: test/page/chartCsp.test.ts (two identical charts get two views, the return to a theme shows the same svg element)
 - Method: test/page/rendererBridge.test.ts (page events reach the diagram renderers: a content patch draws only new diagrams)
 - Method: real VS Code scenario RI-T34 in test/integration/realInput/renderPatching.ts (a Mermaid diagram is drawn again in the same frame)
 - Method: test/core/render/plantUmlCache.test.ts `a second render of the same source starts no process` (the JAR pipeline reuses an earlier render)

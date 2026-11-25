@@ -2,6 +2,11 @@
 
 ## 2026-11-25
 
+### Vega charts: live view with a hover detail (CR-503)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-DIAG-123 (a chart is a live SVG view, no image; a hover box lists the fields of the mark: Vega-Lite by default, a full Vega chart only where its spec encodes a tooltip, none for `"tooltip": null`; no event binding), DIAG-009 (a detached chart view of the same source and theme is shown again, 16 views, finalized only when detached), DIAG-128 (an exported chart is its inline SVG with local gradient references, no hover box, no script), StRS-MDOKFSTUDIO-DIAG-015 (Path 1 step 3 wording)
+- Reason: the owner wants to read the value under a chart mark; the picture was a static image; verified by the real-window scenario `live-chart` (test/integration/realInput/liveChart.ts, DIAG-123 verification notes)
+
 ### Vega charts: readable text, no Chart source in the preview (CR-502)
 
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-DIAG-123 (legend, axis and title sizes follow the body text size, discrete x labels horizontal, subtitle in the label colour, a spec's own config wins; the error message is "Unable to render the chart." and no Chart source is shown in the preview), DIAG-121 (the preview hides the collapsed Chart source section and the HTML export shows it, closed), StRS-MDOKFSTUDIO-DIAG-015 (Path 1 step 1 wording)

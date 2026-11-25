@@ -5,6 +5,7 @@ import {
 import { VSCODE_THEME_TOKEN_CSS } from "./themeTokens";
 import { COMMENT_CSS } from "./styles/commentStyles";
 import { CODE_BLOCK_CSS } from "./styles/codeBlockStyles";
+import { CHART_TOOLTIP_CSS } from "./styles/chartTooltipStyles";
 import { CONTENT_BLOCK_CSS } from "./styles/contentBlockStyles";
 import { FRONTMATTER_VALUE_CSS } from "./styles/frontmatterValueStyles";
 import { SVG_PICTURE_CSS } from "./styles/svgPictureStyles";
@@ -121,6 +122,7 @@ export const PREVIEW_THEME_CSS =
   + HTML_BLOCK_CSS
   + TOC_CSS
   + CONTENT_BLOCK_CSS
+  + CHART_TOOLTIP_CSS
   + SVG_PICTURE_CSS
   + FRONTMATTER_VALUE_CSS
   + GRID_CARD_EDIT_CSS

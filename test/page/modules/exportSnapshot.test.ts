@@ -55,6 +55,16 @@ test("a command of another render is ignored, and a second click while one expor
 // ---------------------------------------------------------------------------------------------
 // The snapshot itself, on hand-built stubs (the harness DOM has no markup or computed style).
 
+/** An element with attributes, as the snapshot reads and sets them. */
+function makeElement(attributes: Record<string, string>) {
+  const attrs = { ...attributes };
+  return {
+    attrs,
+    getAttribute: (name: string) => attrs[name] ?? null,
+    setAttribute(name: string, value: string) { attrs[name] = value; },
+  };
+}
+
 interface Stubs {
   document: Parameters<typeof takeExportSnapshot>[0];
   window: Parameters<typeof takeExportSnapshot>[1];
@@ -67,7 +77,11 @@ function stubs(options: {
   math?: string;
   tabSets?: Array<Array<"true" | "false">>;
   checkboxes?: boolean[];
-} = {}): Stubs {
+  /** The `fill` or `stroke` attributes of the elements of the clone that sit in a chart view, in order. */
+  chartAttributes?: Array<Record<string, string>>;
+  /** The same for elements outside any chart view. */
+  otherAttributes?: Array<Record<string, string>>;
+} = {}): Stubs & { chartElements: ReturnType<typeof makeElement>[]; otherElements: ReturnType<typeof makeElement>[] } {
   const rootAttributes: Record<string, string> = {
     "data-sphinx-preview-theme": "2",
     "data-sphinx-preview-zoom": "150",
@@ -82,6 +96,8 @@ function stubs(options: {
     removeAttribute(name: string) { this.attrs = this.attrs.filter((entry) => entry !== name); },
   });
   const cloneBoxes = checkboxes.map(() => makeBox(false));
+  const chartElements = (options.chartAttributes ?? []).map(makeElement);
+  const otherElements = (options.otherAttributes ?? []).map(makeElement);
   const liveBoxes = checkboxes.map((checked) => makeBox(checked));
   const tabSets = (options.tabSets ?? []).map((states) => ({
     querySelectorAll: () => states.map((state) => ({
@@ -98,7 +114,8 @@ function stubs(options: {
   const content = {
     cloneNode: () => ({
       outerHTML: '<main id="sphinx-myst-preview-content"><p>copy</p></main>',
-      querySelectorAll: () => cloneBoxes,
+      // Only the chart selector gives the elements inside a chart view; the others are not in the stub.
+      querySelectorAll: (selector: string) => selector.startsWith(".myst-vega-view svg") ? chartElements : cloneBoxes,
     }),
     querySelectorAll: (selector: string) => selector === ".myst-tab-set" ? tabSets : liveBoxes,
   };
@@ -106,6 +123,8 @@ function stubs(options: {
     getAttribute: (name: string) => rootAttributes[name] ?? null,
   };
   return {
+    chartElements,
+    otherElements,
     rootAttributes,
     document: {
       documentElement: root,
@@ -242,4 +261,22 @@ test("a page over the size bound tells the user, sends nothing and leaves the bu
   assert.deepEqual(asked, [], "nothing is sent to the host");
   assert.deepEqual(reported, [EXPORT_TOO_LARGE]);
   assert.equal(attributes.has("aria-busy"), false, "the button is free again");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-128
+test("a gradient of a chart view is written local to the file: url(<page URL>#id) becomes url(#id)", () => {
+  const { document, window, chartElements, otherElements } = stubs({
+    chartAttributes: [
+      { fill: "url(vscode-webview://x/index.html#gradient_1)" },
+      { stroke: "url(vscode-webview://x/index.html#gradient_2)", fill: "url(#clip1)" },
+      { fill: "#336699", stroke: "none" },
+    ],
+    otherAttributes: [{ fill: "url(vscode-webview://x/index.html#outside)" }],
+  });
+  takeExportSnapshot(document, window);
+  assert.equal(chartElements[0]!.attrs.fill, "url(#gradient_1)");
+  assert.equal(chartElements[1]!.attrs.stroke, "url(#gradient_2)");
+  assert.equal(chartElements[1]!.attrs.fill, "url(#clip1)", "an already local reference is unchanged");
+  assert.deepEqual(chartElements[2]!.attrs, { fill: "#336699", stroke: "none" });
+  assert.equal(otherElements[0]!.attrs.fill, "url(vscode-webview://x/index.html#outside)", "outside a chart view nothing changes");
 });

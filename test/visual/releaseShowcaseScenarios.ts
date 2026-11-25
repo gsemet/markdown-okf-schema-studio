@@ -37,7 +37,7 @@ export const RELEASE_SHOWCASE_SCENARIOS: ScenarioDefinition[] = [
           + " return small.width <= column + 1 && wide.width > column + 120 && wide.left >= 0 && wide.right <= document.documentElement.clientWidth; })()",
       },
       { message: "the wide table has twelve columns", selector: `${MAIN} > table:nth-of-type(2) thead th`, count: 12 },
-      { message: "the chart is drawn as an image", selector: `${MAIN} .myst-vega-diagram[data-render-state="rendered"] img.myst-vega-image`, count: 1, visible: true },
+      { message: "the chart is drawn as a live SVG", selector: `${MAIN} .myst-vega-diagram[data-render-state="rendered"] .myst-vega-view > svg`, count: 1, visible: true },
       { message: "the Mermaid diagram is drawn as an image", selector: `${MAIN} .myst-mermaid-diagram[data-render-state="rendered"] img.myst-mermaid-image`, count: 1, visible: true },
       { message: "no chart or diagram is in an error state", selector: `${MAIN} [data-render-state="error"]`, count: 0 },
       { message: "the toolbar is collapsed", selector: "html", attr: { name: "data-sphinx-preview-toolbar-state", value: "collapsed" } },

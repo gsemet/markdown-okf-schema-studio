@@ -18,6 +18,7 @@ import { buildPreviewWebviewHtml } from "../../src/session/webview";
 import { THEMES } from "../visual/themes";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
+import { pageRuntimeScript } from "./runtimeHarness";
 
 const EXTENSION_ROOT = path.resolve(__dirname, "../../..");
 
@@ -59,7 +60,7 @@ export const CHART_DOCUMENT = [
     axes: [{ orient: "bottom", scale: "x", title: "Month" }, { orient: "left", scale: "y", title: "Value" }],
     marks: [
       { type: "line", from: { data: "table" }, encode: { enter: { x: { scale: "x", field: "month" }, y: { scale: "y", field: "value" }, strokeWidth: { value: 2 } } } },
-      { type: "symbol", from: { data: "table" }, encode: { enter: { x: { scale: "x", field: "month" }, y: { scale: "y", field: "value" }, size: { signal: "radius * radius * 4" } } } },
+      { type: "symbol", from: { data: "table" }, encode: { enter: { x: { scale: "x", field: "month" }, y: { scale: "y", field: "value" }, size: { signal: "radius * radius * 4" }, tooltip: { signal: "datum" } } } },
     ],
   }, null, 2),
   "```",
@@ -101,14 +102,18 @@ export interface ChartPage {
   readonly browser: Browser;
   readonly page: Page;
   readonly csp: string;
+  /** The page as built, before a chart is drawn: the source of a content patch of the same render. */
+  readonly html: string;
   /** Violations of the Content Security Policy and error messages the page logged. */
   readonly problems: string[];
   close(): Promise<void>;
 }
 
 /** Opens `document` in headless Chromium; undefined when no browser can start (the caller skips). */
-export async function openChartPage(markdown: string, files: Record<string, string>, themeId: string, mode?: string): Promise<ChartPage | undefined> {
-  return openPreviewPage(markdown, files, themeId, mode, "vega");
+export async function openChartPage(
+  markdown: string, files: Record<string, string>, themeId: string, mode?: string, options?: { readonly pageRuntime?: boolean; readonly viewport?: { readonly width: number; readonly height: number } },
+): Promise<ChartPage | undefined> {
+  return openPreviewPage(markdown, files, themeId, mode, "vega", options);
 }
 
 /**
@@ -116,11 +121,18 @@ export async function openChartPage(markdown: string, files: Record<string, stri
  * it: the Vega chart runtime, or the Mermaid runtime (an ES module with chunks, which Chromium
  * loads from file:// only with file access allowed). Undefined when no browser can start; a setup
  * step that fails after the launch closes the browser and throws. `launched` (tests only) sees the
- * browser once it is launched.
+ * browser once it is launched. `pageRuntime` also bundles the page runtime (`pageRuntimeScript()`) and
+ * stubs `acquireVsCodeApi`: the messages the page posts are in `window.__posted`.
  */
 export async function openPreviewPage(
   markdown: string, files: Record<string, string>, themeId: string, mode: string | undefined, runtime: "vega" | "mermaid",
-  options: { readonly launched?: (browser: Browser) => void } = {},
+  options: {
+    readonly launched?: (browser: Browser) => void;
+    /** Also serves the page runtime (`out/bundle/preview.js`) and boots it: the zoom, edit, find and morph. */
+    readonly pageRuntime?: boolean;
+    /** The size of the page viewport (default 900 x 1300): a narrow one scales the charts down. */
+    readonly viewport?: { readonly width: number; readonly height: number };
+  } = {},
 ): Promise<ChartPage | undefined> {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "chart-page-")));
   const workspace = path.join(root, "workspace");
@@ -165,9 +177,21 @@ export async function openPreviewPage(
   });
   const bundle = fakeAssetResolver({ cspSource: "file:", url: (filePath) => pathToFileURL(filePath).href, extensionRoot: root });
   // Only the diagram runtime is bundled here: the page keeps its inline stylesheet and has no KaTeX.
-  const assets = { ...bundle, bundleUri: (...segments: string[]) => segments[0] === runtimeFile ? bundle.bundleUri(...segments) : undefined };
+  const served = options.pageRuntime ? [runtimeFile, "preview.js"] : [runtimeFile];
+  if (options.pageRuntime) {
+    fs.mkdirSync(path.join(root, "out", "bundle"), { recursive: true });
+    fs.writeFileSync(path.join(root, "out", "bundle", "preview.js"), pageRuntimeScript());
+  }
+  const assets = { ...bundle, bundleUri: (...segments: string[]) => served.includes(segments[0]!) ? bundle.bundleUri(...segments) : undefined };
+  const context = options.pageRuntime
+    ? {
+      activeSourceFile: documentPath, documentId: pathToFileURL(documentPath).toString(), revision: 1, requestId: 1,
+      previewThemeMode: "current" as const,
+      initialViewPreferences: { zoom: 100, widthMode: "auto" as const, toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false },
+    }
+    : undefined;
   const built = await buildPreviewWebviewHtml(createNodeFileSystem(),
-    rendered.html, workspace, assets, undefined, workspace, undefined, undefined, true, [], "builtin",
+    rendered.html, workspace, assets, context, workspace, undefined, undefined, true, [], "builtin",
   );
   const pagePath = path.join(root, "page.html");
   fs.writeFileSync(pagePath, built.html);
@@ -181,7 +205,7 @@ export async function openPreviewPage(
   options.launched?.(browser);
   // A step that fails after the launch closes the browser, or its process keeps the test run alive.
   try {
-    const page = await browser.newPage({ viewport: { width: 900, height: 1300 }, deviceScaleFactor: 1 });
+    const page = await browser.newPage({ viewport: options.viewport ?? { width: 900, height: 1300 }, deviceScaleFactor: 1 });
     const problems: string[] = [];
     page.on("console", (message) => {
       if (message.type() === "error") problems.push(`console: ${message.text()}`);
@@ -193,6 +217,15 @@ export async function openPreviewPage(
       });
       (window as unknown as { __violations: string[] }).__violations = [];
     });
+    if (options.pageRuntime) {
+      await page.addInitScript(() => {
+        const posted: unknown[] = [];
+        (window as unknown as { __posted: unknown[] }).__posted = posted;
+        (window as unknown as { acquireVsCodeApi: () => unknown }).acquireVsCodeApi = () => ({
+          getState: () => ({}), setState: () => undefined, postMessage: (message: unknown) => { posted.push(message); },
+        });
+      });
+    }
     await page.goto(pathToFileURL(pagePath).href);
     const theme = THEMES.find((candidate) => candidate.id === themeId)!;
     await page.evaluate(({ variables, themeMode }) => {
@@ -202,6 +235,7 @@ export async function openPreviewPage(
     return {
       browser,
       page,
+      html: built.html,
       csp: /<meta http-equiv="Content-Security-Policy" content="([^"]*)"/u.exec(built.html)?.[1] ?? "",
       problems,
       close: async () => { await browser.close(); },
@@ -214,3 +248,21 @@ export async function openPreviewPage(
 
 /** The same document without the chart that fails (the screenshots of the README and the docs). */
 export const CHART_SHOWCASE_DOCUMENT = CHART_DOCUMENT.slice(0, CHART_DOCUMENT.indexOf("A chart with a broken specification"));
+
+/** The showcase and a Vega-Lite area chart with a linear gradient fill: what the export test opens. */
+export const CHART_EXPORT_DOCUMENT = `${CHART_SHOWCASE_DOCUMENT}A Vega-Lite area chart with a gradient fill:
+
+\`\`\`vega-lite
+${JSON.stringify({
+  title: "Gradient area",
+  width: 360,
+  height: 140,
+  data: { values: [{ x: 1, y: 3 }, { x: 2, y: 7 }, { x: 3, y: 4 }, { x: 4, y: 9 }] },
+  mark: {
+    type: "area",
+    color: { gradient: "linear", x1: 1, y1: 1, x2: 1, y2: 0, stops: [{ offset: 0, color: "#ffffff" }, { offset: 1, color: "#2f6db5" }] },
+  },
+  encoding: { x: { field: "x", type: "quantitative" }, y: { field: "y", type: "quantitative" } },
+}, null, 2)}
+\`\`\`
+`;

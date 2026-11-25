@@ -29,13 +29,13 @@ const T2_CAPTURES = [
   "trust-security/r01-untrusted-read-only",
 ];
 
-test("the real-window registry has 128 captures, 113 with a PNG and 15 assertion-only", () => {
-  assert.equal(CAPTURES.length, 128);
-  assert.equal(CAPTURES.filter((entry) => entry.capture !== false).length, 113);
+test("the real-window registry has 129 captures, 114 with a PNG and 15 assertion-only", () => {
+  assert.equal(CAPTURES.length, 129);
+  assert.equal(CAPTURES.filter((entry) => entry.capture !== false).length, 114);
   assert.equal(CAPTURES.filter((entry) => entry.capture === false).length, 15);
   const bySuite = Object.fromEntries(SUITES.map((suite) => [suite, capturesOfSuite(suite).length]));
   assert.deepEqual(bySuite, {
-    "real-input": 88, checkbox: 4, frontmatter: 26, scroll: 6, reload: 3, untrusted: 1,
+    "real-input": 89, checkbox: 4, frontmatter: 26, scroll: 6, reload: 3, untrusted: 1,
   });
 });
 

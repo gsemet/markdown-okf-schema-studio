@@ -184,6 +184,7 @@ export const CAPTURES: readonly CaptureEntry[] = [
   { id: "lifecycle-sync/r16-before-window-reload", group: "lifecycle-sync", suite: "reload", legacy: "01-before-window-reload", locks: "Collapsed Description and zoom 130 % are set before the window reload.", clip: "window" },
   { id: "lifecycle-sync/r17-after-window-reload", group: "lifecycle-sync", suite: "reload", legacy: "02-after-window-reload", locks: "Collapsed Description and zoom 130 % survive Developer: Reload Window.", clip: "window" },
   { id: "lifecycle-sync/r18-after-close-reopen", group: "lifecycle-sync", suite: "reload", legacy: "03-after-close-reopen", locks: "A closed and reopened preview keeps the collapsed Description state.", clip: "window" },
+  { id: "diagrams/r01-live-chart-hover", group: "diagrams", suite: "real-input", legacy: "cr503-live-chart-hover", locks: "A Vega-Lite chart in the Studio editor is a live SVG that is drawn again after a theme change with no policy violation.", clip: "window" },
   { id: "trust-security/r01-untrusted-read-only", group: "trust-security", suite: "untrusted", legacy: "untrusted-read-only", locks: "In Restricted Mode the side preview is editable: the Edit button is enabled and turns the edit mode on.", clip: "window" },
 ];
 

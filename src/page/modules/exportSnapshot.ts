@@ -49,6 +49,22 @@ function shownTabs(root: ParentNode): number[] {
   });
 }
 
+const PAGE_URL_REFERENCE = /^url\(\s*[^#)]*#([^)\s]+)\s*\)$/u;
+
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-128
+/**
+ * A gradient of a live chart is written as `url(<page URL>#gradient_N)`, which breaks once copied
+ * into another file: every `fill` and `stroke` reference inside a chart view becomes `url(#id)`.
+ */
+function localizeChartReferences(clone: ParentNode): void {
+  for (const element of Array.from(clone.querySelectorAll(".myst-vega-view svg [fill], .myst-vega-view svg [stroke]"))) {
+    for (const attribute of ["fill", "stroke"]) {
+      const id = PAGE_URL_REFERENCE.exec(element.getAttribute(attribute) ?? "")?.[1];
+      if (id !== undefined) element.setAttribute(attribute, `url(#${id})`);
+    }
+  }
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-137
 /** The snapshot of the page now: a copy of the content (the task checkboxes as they are checked) and what the page resolved. */
 export function takeExportSnapshot(document: ExportDocument, window: ExportWindow): ExportSnapshot | undefined {
@@ -60,6 +76,7 @@ export function takeExportSnapshot(document: ExportDocument, window: ExportWindo
     if (live[index]?.checked) box.setAttribute("checked", "");
     else box.removeAttribute("checked");
   });
+  localizeChartReferences(clone);
   const root = document.documentElement;
   const style = window.getComputedStyle(root);
   const tokens: Record<string, string> = {};
