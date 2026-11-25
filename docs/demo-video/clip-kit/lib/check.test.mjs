@@ -5,7 +5,7 @@ import { test } from "node:test";
 import { pathToFileURL } from "node:url";
 import { fileURLToPath } from "node:url";
 
-import { resolveChecks, takeLines } from "./check.mjs";
+import { durationLine, resolveChecks, takeLines } from "./check.mjs";
 
 const scenarioOf = (clip) => pathToFileURL(fileURLToPath(new URL(`../../clips/${clip}/scenario.mjs`, import.meta.url))).href;
 
@@ -21,6 +21,13 @@ test("resolveChecks refuses an unknown key and a value out of range, naming scen
   assert.throws(() => resolveChecks({ editMode: "edit" }), { message: /^scenario\.mjs: checks\.editMode must be "on" or "off", got "edit"/u });
   assert.throws(() => resolveChecks({ paste: "no" }), { message: /^scenario\.mjs: checks\.paste must be true or false, got "no"/u });
   assert.throws(() => resolveChecks("on"), { message: /^scenario\.mjs: checks must be an object/u });
+});
+
+test("durationLine holds from 5 to 30 s, bounds included, and names the bounds", () => {
+  for (const seconds of [5, 16, 30]) assert.equal(durationLine(seconds).ok, true, `${seconds} s is ok`);
+  for (const seconds of [4.9, 30.1]) assert.equal(durationLine(seconds).ok, false, `${seconds} s is not ok`);
+  assert.equal(durationLine(16).name, "mp4 duration within 5 to 30 s");
+  assert.equal(durationLine(16).value, "16.000 s");
 });
 
 test("takeLines on a raw copy take gives the three lines of today, all passing", () => {

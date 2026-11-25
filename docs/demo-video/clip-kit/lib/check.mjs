@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 import { BUDGETS, readEncode } from "./encode.mjs";
 import { ffmpegBin, ffprobeBin, output } from "./platform.mjs";
+import { MAX_LENGTH, MIN_LENGTH } from "./storyboard.mjs";
 
 const MB = 1024 * 1024;
 
@@ -82,6 +83,11 @@ export function takeLines(verify) {
   return lines;
 }
 
+/** The MP4 duration line of check.json: the length must lie within the kit's bounds (inclusive). */
+export function durationLine(seconds) {
+  return { name: `mp4 duration within ${MIN_LENGTH} to ${MAX_LENGTH} s`, ok: seconds >= MIN_LENGTH && seconds <= MAX_LENGTH, value: `${seconds.toFixed(3)} s` };
+}
+
 function ssim(first, second) {
   const result = spawnSync(ffmpegBin(), ["-v", "info", "-i", first, "-i", second, "-lavfi", "ssim", "-f", "null", "-"], { encoding: "utf8" });
   const match = /All:([\d.]+)/u.exec(`${result.stderr}`);
@@ -111,7 +117,8 @@ export function checkClip(ctx, story) {
   const boxes = topLevelBoxes(file("mp4"));
   const mp4Size = statSync(file("mp4")).size;
   values.mp4 = { seconds: Math.round(duration * 1000) / 1000, width: video.width, height: video.height, fps: fraction(video.r_frame_rate), codec: video.codec_name, pixFmt: video.pix_fmt, audioStreams: mp4.streams.filter((s) => s.codec_type === "audio").length, bytes: mp4Size, crf: used.mp4.crf };
-  want("mp4 duration within 5 to 12 s", duration >= 5 && duration <= 12, `${duration.toFixed(3)} s`);
+  const lengthLine = durationLine(duration);
+  want(lengthLine.name, lengthLine.ok, lengthLine.value);
   want("mp4 duration equals Length within one frame", Math.abs(duration - story.length) <= frame + 1e-3, `${duration.toFixed(3)} s vs ${story.length} s`);
   want("mp4 size", video.width === story.width && video.height === story.height, `${video.width}x${video.height}`, `storyboard ${story.width}x${story.height}`);
   want(`mp4 ${story.fps} fps`, fraction(video.r_frame_rate) === story.fps, video.r_frame_rate);

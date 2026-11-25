@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const MIN_LENGTH = 5;
-export const MAX_LENGTH = 12;
+export const MAX_LENGTH = 30;
 export const MIN_FPS = 12;
 export const MAX_FPS = 30;
 export const DEFAULT_WIDTH = 1920;
