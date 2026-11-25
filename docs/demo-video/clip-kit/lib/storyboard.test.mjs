@@ -327,30 +327,58 @@ test("the shipped export-html clip.md reads as the clip the owner reviews", () =
   assert.equal(clip.width, 1280);
   assert.equal(clip.height, 720);
   assert.equal(clip.fps, 15);
-  assert.equal(clip.length, 12);
+  assert.ok(clip.length > 12 && clip.length <= 30, `Length ${clip.length} s is past the old 12 s bound and inside 30 s`);
   assert.deepEqual(
     clip.captions.map((caption) => caption.text.replaceAll("**", "")),
-    ["Export the page to one HTML file", "Any browser shows the same themed page"],
+    ["A long page, with a wide table, diagrams and charts", "Export it to one HTML file", "The browser shows the same page, diagrams drawn"],
   );
   assert.equal(clip.captions[0].from, 0);
-  assert.equal(clip.captions[0].to, clip.captions[1].from);
-  assert.equal(clip.captions[1].to, clip.length);
-  assert.deepEqual(Object.keys(clip.badges), ["palette"]);
-  assert.equal(clip.badges.palette, "Ctrl+Shift+P / ⇧⌘P");
+  for (let index = 1; index < clip.captions.length; index++) assert.equal(clip.captions[index].from, clip.captions[index - 1].to, `caption ${index + 1} starts where caption ${index} ends`);
+  assert.equal(clip.captions.at(-1).to, clip.length);
+  assert.deepEqual(clip.badges, { palette: "Ctrl+Shift+P / ⇧⌘P" });
   assert.equal(clip.expectedPaste, null);
   assert.equal(clip.zoom.id, "page");
-  assert.equal(clip.zoom.holdTo, 11);
-  assert.deepEqual(clip.marks.map((mark) => [mark.id, mark.from, mark.to]), [["1", 6.6, 8], ["2", 8.6, 10.2]]);
+  assert.deepEqual(
+    clip.marks.map((mark) => mark.id),
+    ["1", "2", "3"],
+  );
   for (const [index, mark] of clip.marks.entries()) {
     assert.ok(mark.from >= 0 && mark.to <= clip.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
     if (index > 0) assert.ok(mark.from >= clip.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
   }
-  const filmed = { filmed: clip.length, presses: [{ id: "palette", t: 2.8 }], zooms: [{ id: "page", t: 6 }], marks: [{ id: "1" }, { id: "2" }] };
+  // The committed times of the take: the palette chord and the zoom (the take's values, set with the render).
+  const filmed = { filmed: clip.length, presses: [{ id: "palette", t: 7.6 }], zooms: [{ id: "page", t: 10.2 }], marks: [{ id: "1" }, { id: "2" }, { id: "3" }] };
   for (const host of [win32, darwin]) {
     const out = validateStory(clip, filmed, host);
     assert.equal(out.platform, host.platform);
     assert.equal(out.fps, 15);
   }
+});
+
+test("the stage of the export-html clip holds the page the clip claims", async () => {
+  const stageFile = fileURLToPath(new URL("../../clips/export-html/stage/platform-report.md", import.meta.url));
+  const text = readFileSync(stageFile, "utf8");
+  assert.ok(!text.includes("\r"), "the stage has LF line endings");
+  assert.ok(text.endsWith("\n") && !text.endsWith("\n\n"), "the stage ends with one newline");
+  assert.equal([...text.matchAll(/^:{3,}\{grid\}/gmu)].length, 2, "two grids");
+  const fences = [...text.matchAll(/^```([a-z-]+)\n([\s\S]*?)^```$/gmu)].map((match) => ({ lang: match[1], body: match[2] }));
+  const mermaid = fences.filter((fence) => fence.lang === "mermaid");
+  assert.equal(mermaid.length, 2, "two mermaid fences");
+  assert.equal(mermaid.filter((fence) => fence.body.startsWith("flowchart")).length, 1, "one flowchart");
+  assert.equal(mermaid.filter((fence) => fence.body.startsWith("sequenceDiagram")).length, 1, "one sequence diagram");
+  assert.equal(fences.filter((fence) => fence.lang === "vega-lite").length, 1, "one vega-lite fence");
+  assert.equal(fences.filter((fence) => fence.lang === "vega").length, 1, "one vega fence");
+  const lines = text.split("\n");
+  const headers = lines
+    .filter((line, index) => line.startsWith("|") && /^\|[ :|-]+\|$/u.test(lines[index + 1] ?? ""))
+    .map((line) => line.split("|").slice(1, -1).map((cell) => cell.trim()));
+  const wide = headers.find((cells) => cells[0] === "Service");
+  const small = headers.find((cells) => cells[0] === "Week");
+  assert.ok(wide && wide.length >= 13, "a wide table starting with Service has at least 13 columns");
+  assert.equal(small?.length, 3, "a 3-column table starting with Week");
+  const scenario = await import(pathToFileURL(fileURLToPath(new URL("../../clips/export-html/scenario.mjs", import.meta.url))).href);
+  assert.deepEqual(scenario.stage, { "stage/platform-report.md": "platform-report.md" });
+  assert.equal(scenario.settings["markdownOkfSchemaStudio.preview.maxContentWidth"], 720);
 });
 
 test("the shipped paste-spreadsheet-cells clip.md reads as the clip the owner reviews", async () => {
