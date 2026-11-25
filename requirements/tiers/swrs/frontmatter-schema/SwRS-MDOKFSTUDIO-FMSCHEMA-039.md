@@ -17,6 +17,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-010
 - StRS-MDOKFSTUDIO-FMSCHEMA-014
+scenarios:
+- id: S1
+  title: Errors and warnings
+- id: S2
+  title: Counts of the badge
+- id: S3
+  title: Jump to the issue
+- id: S4
+  title: Info rows only
+- id: S5
+  title: Missing required fields summary
+- id: S6
+  title: No required field missing
+- id: S7
+  title: Link problems count in the badge
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -28,7 +43,7 @@ tested_in_files:
 - test/core/frontmatter/diagReq.frontmatter.requirements.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/propertiesTable.test.ts
-- test/integration/previewEditing.test.ts
+- test/integration/previewEditingSchemaSteps.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
@@ -45,13 +60,13 @@ supersedes:
 
 When the frontmatter has errors or warnings, the extension SHALL show in the table title a badge button with the count of errors then the count of warnings (the count of infos when there is neither), which scrolls to the first row with an issue when pressed, together with a red line under the table that names the missing required fields.
 
-### Scenario (nominal): Errors and warnings
+### Scenario S1 (nominal): Errors and warnings
 
 - GIVEN a document with 1 error and 2 warnings
 - WHEN the preview is rendered
 - THEN the badge, a button labelled "Go to the first frontmatter issue", reads ✖ 1 ⚠ 2
 
-### Scenario (boundary): Counts of the badge
+### Scenario S2 (boundary): Counts of the badge
 
 | Input | Outcome |
 | --- | --- |
@@ -59,31 +74,31 @@ When the frontmatter has errors or warnings, the extension SHALL show in the tab
 | a document with only the no-schema info row | the badge reads ℹ 1 |
 | a document with an error and an info row | the badge reads only the error count |
 
-### Scenario (nominal): Jump to the issue
+### Scenario S3 (nominal): Jump to the issue
 
 - GIVEN a long table whose third row has an error
 - WHEN the writer presses the badge
 - THEN the row is scrolled to the centre, its value cell has focus and the highlight attribute is removed after 1.5 s
 
-### Scenario (refusal): Info rows only
+### Scenario S4 (refusal): Info rows only
 
 - GIVEN a table whose only issue is the info row (no field row carries it)
 - WHEN the writer presses the badge
 - THEN nothing scrolls and nothing is highlighted
 
-### Scenario (nominal): Missing required fields summary
+### Scenario S5 (nominal): Missing required fields summary
 
 - GIVEN a schema requiring title and owner and a document with neither
 - WHEN the preview is rendered
 - THEN a line under the table reads "Missing required fields: title, owner" and has role alert
 
-### Scenario (boundary): No required field missing
+### Scenario S6 (boundary): No required field missing
 
 - GIVEN a document with both fields
 - WHEN the preview is rendered
 - THEN no "Missing required fields" line is shown
 
-### Scenario (nominal): Link problems count in the badge
+### Scenario S7 (nominal): Link problems count in the badge
 
 | Input | Outcome |
 | --- | --- |

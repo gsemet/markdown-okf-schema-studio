@@ -13,6 +13,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: A formula
 user_need: As a writer, I want formulas rendered offline and failures left
   legible so that I can fix them in place.
 derived_by:
@@ -56,7 +59,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: A formula
+#### Path S1: A formula
 
 1. A document holds `$...$`, `$$...$$` or a `{math}` role or directive
    - SwRS-MDOKFSTUDIO-MYST-024: the page typesets it with the KaTeX of the extension bundle, offline

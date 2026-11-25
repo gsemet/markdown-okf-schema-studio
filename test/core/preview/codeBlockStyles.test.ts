@@ -20,7 +20,8 @@ import { PREVIEW_THEME_CSS } from "../../../src/core/preview/previewStyles";
 
 const CONTENT = "#sphinx-myst-preview-content";
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-040
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S4
 test("code blocks are Dark+ editor surfaces unless the dark background setting is off", () => {
   const rule = new RegExp(
     String.raw`html:not\(\[data-okf-code-dark-background="false"\]\) ${CONTENT} pre:has\(> code\)\s*\{([^}]*)\}`,
@@ -32,7 +33,8 @@ test("code blocks are Dark+ editor surfaces unless the dark background setting i
   assert.doesNotMatch(PREVIEW_THEME_CSS, /data-okf-code-dark-background[^{]*:not\(pre\) > code/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-040
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S3
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S4
 test("with the dark background off the Light+ colours apply in the light themes and light VS Code themes", () => {
   const light = PREVIEW_THEME_CSS.match(/html\[data-okf-code-dark-background="false"\][^{]*\.sl-[0-9a-f]{6}[^{]*\{[^}]*\}/gu) ?? [];
   assert.ok(light.length > 10, "the light palette has rules");
@@ -42,7 +44,8 @@ test("with the dark background off the Light+ colours apply in the light themes 
   assert.doesNotMatch(PREVIEW_THEME_CSS, /pre > code\.language-yaml/u, "no per-language override flattens the tokens");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-039
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S2
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S4
 test("line numbers are generated content gated by the setting, and MyST options are not gated", () => {
   const numbered = PREVIEW_THEME_CSS.match(/[^{}]*\.myst-code-line::before\s*\{[^}]*content: attr\(data-line-number\);[^}]*\}/u)?.[0] ?? "";
   assert.match(numbered, /user-select: none;/u, "the number cannot be selected");
@@ -62,7 +65,8 @@ test("line numbers are generated content gated by the setting, and MyST options 
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S4
 test("every token class the highlighter writes has a colour rule", () => {
   const sources = [
     'def f(x):\n    return "a" + str(1)  # note\n',
@@ -87,7 +91,8 @@ test("every token class the highlighter writes has a colour rule", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-040
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S5
 test("code text and line numbers keep WCAG AA contrast on the dark background; light tokens on the cream page", () => {
   for (const color of [...darkPaletteColors(), DARK_CODE_SURFACE.foreground, DARK_LINE_NUMBER_COLOR]) {
     assert.ok(

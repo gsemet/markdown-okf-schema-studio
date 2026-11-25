@@ -19,6 +19,29 @@ derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
 depends_on:
 - SwRS-MDOKFSTUDIO-CORE-003
+scenarios:
+- id: S1
+  title: Each alert type renders
+- id: S2
+  title: Unknown alert type
+- id: S3
+  title: Title from the marker line
+- id: S4
+  title: Legacy bold markers
+- id: S5
+  title: Bold marker with extra text
+- id: S6
+  title: The first body line never becomes the title
+- id: S7
+  title: Fences keep alert markers literal
+- id: S8
+  title: The admonition ends where its block quote ends
+- id: S9
+  title: Every block keeps the lines of the document
+- id: S10
+  title: Alerts inside a colon container
+- id: S11
+  title: CRLF documents
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -52,38 +75,38 @@ supersedes:
 
 When a block quote starts with [!NOTE], [!TIP], [!IMPORTANT], [!WARNING] or [!CAUTION] in any case, the extension SHALL render it as an admonition of that type with the default title and the quoted lines as Markdown body, using the text after the marker as the title and ending the admonition where its block quote ends under CommonMark, lazy paragraph continuation lines included.
 
-### Scenario (nominal): Each alert type renders
+### Scenario S1 (nominal): Each alert type renders
 
 - GIVEN a block quote starting with > [!warning] and a body line (and likewise [!NOTE], [!TIP], [!IMPORTANT] and [!CAUTION] in any case)
 - WHEN the preview is rendered
 - THEN an admonition titled Warning contains the body as Markdown
 
-### Scenario (refusal): Unknown alert type
+### Scenario S2 (refusal): Unknown alert type
 
 - GIVEN a block quote starting with > [!FOO]
 - WHEN the preview is rendered
 - THEN it stays a plain block quote
 
-### Scenario (nominal): Title from the marker line
+### Scenario S3 (nominal): Title from the marker line
 
 | Input | Outcome |
 | --- | --- |
 | `> [!WARNING] Read this` | the admonition title is Read this |
 | `> [!WARNING]` alone | the title is the default Warning |
 
-### Scenario (nominal): Legacy bold markers
+### Scenario S4 (nominal): Legacy bold markers
 
 - GIVEN a block quote whose first line is '> **Note**' (or **Important**, **Warning**, in any case) followed by text
 - WHEN the preview is rendered
 - THEN a simple admonition of the marker's type (Note, Important or Warning) contains the text
 
-### Scenario (refusal): Bold marker with extra text
+### Scenario S5 (refusal): Bold marker with extra text
 
 - GIVEN a block quote line '> **Note** and more'
 - WHEN the preview is rendered
 - THEN it stays a plain block quote
 
-### Scenario (boundary): The first body line never becomes the title
+### Scenario S6 (boundary): The first body line never becomes the title
 
 | Input | Outcome |
 | --- | --- |
@@ -92,14 +115,14 @@ When a block quote starts with [!NOTE], [!TIP], [!IMPORTANT], [!WARNING] or [!CA
 | `> [!WARNING] Read this`, `> ## h` | the title is Read this; `h` is a heading in the body |
 | `> **Note**`, `> # h` | the title is Note; `h` is a heading in the body |
 
-### Scenario (boundary): Fences keep alert markers literal
+### Scenario S7 (boundary): Fences keep alert markers literal
 
 | Input | Outcome |
 | --- | --- |
 | '> [!NOTE]' within a fenced code block | the marker stays literal code and no admonition is produced |
 | a fenced block followed by a real alert | the fence content is literal and the alert after it is an admonition |
 
-### Scenario (boundary): The admonition ends where its block quote ends
+### Scenario S8 (boundary): The admonition ends where its block quote ends
 
 An unquoted line continues the alert only as a lazy continuation line (CommonMark 0.31.2, section
 5.1): the alert's last line leaves a paragraph open (the marker line counts) and the unquoted line
@@ -127,7 +150,7 @@ meaning inside the admonition, where GitHub shows it as paragraph text.
 | `> [!NOTE]`, `> <!-- c -->` (or any HTML block of CommonMark kinds 1 to 5 closed by its end marker), `> text`, then `lazy` | the HTML block ends on its end marker, so `lazy` continues the paragraph `text` inside the admonition |
 | `> [!NOTE]`, `> a`, `> <custom-x>` (a lone tag, which cannot interrupt a paragraph), then `lazy` | `lazy` is inside the admonition; after a blank quoted line the same tag starts an HTML block and `lazy` is outside |
 
-### Scenario (boundary): Every block keeps the lines of the document
+### Scenario S9 (boundary): Every block keeps the lines of the document
 
 The alert is rewritten into an admonition of more lines before parsing; the source lines of the
 blocks (`data-line`, `data-end-line`, which the block editor opens, saves, cuts and moves) are
@@ -144,7 +167,7 @@ rows below are its alert cases.
 | an unclosed fence after an alert | the warning and the opening line shown as code carry the line of the fence |
 | alert markers inside a fenced code block | they stay literal and later lines are unchanged |
 
-### Scenario (boundary): Alerts inside a colon container
+### Scenario S10 (boundary): Alerts inside a colon container
 
 An admonition written with a colon fence closes at the first colon-only line at least as long as
 its own, and a container nested in another must use a shorter fence than the outer one; a
@@ -157,7 +180,7 @@ its own, and a container nested in another must use a shorter fence than the out
 | an alert outside every colon container | it is a colon-fence admonition, as before |
 | an alert whose body holds a colon container (a `::::{grid}` of `:::{card}`) | the admonition's colon fence is longer than every colon fence of its body; the whole container stays inside the admonition and the text after the alert stays outside |
 
-### Scenario (boundary): CRLF documents
+### Scenario S11 (boundary): CRLF documents
 
 | Input | Outcome |
 | --- | --- |

@@ -27,7 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/comments/inlineThread.holes.test.ts
 - test/core/comments/inlineThread.test.ts
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/core/render/cardsTabs.test.ts
 - test/core/render/commentMarkers.test.ts
 default_owner_email: gaetan@xeberon.net

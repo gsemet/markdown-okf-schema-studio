@@ -24,7 +24,7 @@ test("Markdown fragments select headings and source lines, not fenced examples",
   assert.deepEqual(markdownFragmentRange(source, "#L11-L12"), { startLine: 11, endLine: 12 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S4
 test("marker navigation selects exact marker identities", () => {
   const source = [
     "# @implements_req SwRS-1-extra",

@@ -65,7 +65,7 @@ import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
 import { step, withSuiteWatchdog } from "./stepWatchdog";
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S1
 export async function run(): Promise<void> {
   await withSuiteWatchdog("trusted-suite", runTrustedSuite);
 }
@@ -125,9 +125,10 @@ async function runPreviewSmoke(): Promise<void> {
   }
 }
 
-// @tests_req StRS-MDOKFSTUDIO-TRUST-006
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-011
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+// @accepts_req StRS-MDOKFSTUDIO-TRUST-006#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-011#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S5
 /**
  * A reader opens a document with hostile HTML (an inline script, `on*` attributes, an iframe, an
  * object and a `javascript:` link) in the unsaved buffer of preview.md: the page shows the document,

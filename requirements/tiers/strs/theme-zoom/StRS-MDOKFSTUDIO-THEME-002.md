@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Go to the next theme
+- id: S2
+  title: Switch the theme when the system asks for reduced motion
 user_need: As a reader, I click one Theme button to go through Current, Dark,
   White and Cream, and I can tell from the icon, the label and the tooltip which
   theme I am in and which one the next click gives; the preview follows the
@@ -81,7 +86,7 @@ Each theme paints the whole page; Current follows the host.
 
 ### Main paths
 
-#### Path 1: Go to the next theme
+#### Path S1: Go to the next theme
 
 1. The page is shown in one theme mode
    - SwRS-MDOKFSTUDIO-THEME-001: the reader presses the Theme button, and the button names the new mode and the next one
@@ -92,7 +97,7 @@ Each theme paints the whole page; Current follows the host.
    - Option SwRS-MDOKFSTUDIO-THEME-025 (boundary): the colours are the same on a dark and on a light VS Code theme
 3. The whole page is painted in the colours of the mode
 
-#### Path 2: Switch the theme when the system asks for reduced motion
+#### Path S2: Switch the theme when the system asks for reduced motion
 
 1. The page is shown in one theme mode
    - SwRS-MDOKFSTUDIO-CORE-050: the reader presses the Theme button and the preview applies no motion

@@ -31,7 +31,8 @@ function applied(text: string, plan: { edit: TextEdit } | { refused: string } | 
 
 const THREAD = ["<!-- THREAD", "Ada (2026-10-16 10:47):", "  hello", "-->"];
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S5
 test("a checkbox toggle changes the one character between the brackets", () => {
   const text = "# Tasks\r\n\r\n- [ ] one\r\n- [x] two\r\n";
   const toggle = planCheckboxToggle(text, 3, 2, true);
@@ -48,7 +49,8 @@ test("a checkbox already in the asked state is unchanged, a missing one is refus
   assert.deepEqual(planCheckboxToggle(text, 0, 2, true), { refused: CHECKBOX_GONE });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-045
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S3
 test("a label rename changes the label line only and counts the remaining references", () => {
   const text = "(old)=\n# Title\n\nSee {ref}`old` and {ref}`text <old>`.\n";
   const rename = planLabelRename(text, 1, "old", "new");

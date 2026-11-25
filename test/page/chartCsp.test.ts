@@ -16,10 +16,11 @@ import type { ExportSnapshot } from "../../src/core/export/exportSnapshot";
 import { buildHtmlExport } from "../../src/core/export/htmlExport";
 import { CHART_DATA, CHART_DOCUMENT, CHART_EXPORT_DOCUMENT, CHART_SHOWCASE_DOCUMENT, openChartPage, openPreviewPage } from "./chartPage";
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-124
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-124#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-124#S2
 test("a Vega-Lite and a Vega chart are drawn under the page's Content Security Policy, with no eval violation", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, { "data/series.csv": CHART_DATA }, "light", "cream");
   if (!opened) {
@@ -117,7 +118,7 @@ const hiddenTooltip = (page: Page): Promise<unknown> => page.waitForFunction(() 
   return box === null || box.hasAttribute("hidden");
 }, undefined, { timeout: 5_000 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S2
 test("a theme change draws the charts again in the new colours, and changing back shows the same view", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light");
   if (!opened) {

@@ -16,6 +16,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
 depends_on: []
+scenarios:
+- id: S1
+  title: Each missing extension is detected once at its first use
+- id: S2
+  title: The same syntax twice gives one warning
+- id: S3
+  title: The warning carries the line of the syntax
+- id: S4
+  title: The status list shows the fixed wording
+- id: S5
+  title: Nothing is reported for look-alikes, code, includes or a missing conf
+- id: S6
+  title: At most 10 warnings are kept
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,18 +58,18 @@ supersedes:
 
 When a document uses syntax of a MyST extension that the governing conf.py does not enable, the extension SHALL list one `myst-extension` warning per extension, at the first use of that syntax and with the line of the syntax itself, at most 10 per render, and leave the rendering unchanged.
 
-### Scenario (nominal): Each missing extension is detected once at its first use
+### Scenario S1 (nominal): Each missing extension is detected once at its first use
 The detected extensions are colon_fence, dollarmath, amsmath, deflist, fieldlist, tasklist, strikethrough, substitution, attrs_inline, html_image and html_admonition.
 - GIVEN `:::` and `$x$` in a document whose conf.py enables neither
 - WHEN the document is checked
 - THEN colon_fence and dollarmath are detected once each, ordered by line, and the rendering is unchanged
 
-### Scenario (boundary): The same syntax twice gives one warning
+### Scenario S2 (boundary): The same syntax twice gives one warning
 - GIVEN a document using the same syntax twice
 - WHEN the document is checked
 - THEN one detection per extension, the first use
 
-### Scenario (nominal): The warning carries the line of the syntax
+### Scenario S3 (nominal): The warning carries the line of the syntax
 - GIVEN a document with frontmatter and syntax on its ninth line
 - WHEN the document is checked
 - THEN the warning line is 9, the frontmatter lines being counted
@@ -67,7 +80,7 @@ The detected extensions are colon_fence, dollarmath, amsmath, deflist, fieldlist
 | CRLF line breaks | lines are split like LF |
 | CR line breaks | lines are split like LF |
 
-### Scenario (nominal): The status list shows the fixed wording
+### Scenario S4 (nominal): The status list shows the fixed wording
 - GIVEN a missing dollarmath
 - WHEN the preview renders
 - THEN the status area lists one warning as file:line: message, severity warning and code myst-extension, reading: `SYNTAX` is used but this needs the MyST extension `EXTENSION`, which is not enabled in your conf.py. Add "EXTENSION" to `myst_enable_extensions`. (SYNTAX is the used syntax, EXTENSION the missing extension), and the rendering is unchanged
@@ -75,7 +88,7 @@ The detected extensions are colon_fence, dollarmath, amsmath, deflist, fieldlist
 - WHEN the preview renders
 - THEN it is coded myst-diagnostic
 
-### Scenario (refusal): Nothing is reported for look-alikes, code, includes or a missing conf
+### Scenario S5 (refusal): Nothing is reported for look-alikes, code, includes or a missing conf
 | Input | Outcome |
 | --- | --- |
 | No conf.py | no warning is listed |
@@ -87,7 +100,7 @@ The detected extensions are colon_fence, dollarmath, amsmath, deflist, fieldlist
 | An included file (`{include}`) using colon fences without colon_fence enabled | no warning is raised for the included text |
 | The same syntax in the document's own text | the warning is raised |
 
-### Scenario (boundary): At most 10 warnings are kept
+### Scenario S6 (boundary): At most 10 warnings are kept
 | Input | Outcome |
 | --- | --- |
 | 11 missing extensions | 10 warnings are kept |

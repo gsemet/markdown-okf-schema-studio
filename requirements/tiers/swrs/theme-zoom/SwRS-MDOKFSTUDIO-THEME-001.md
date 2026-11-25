@@ -19,6 +19,17 @@ depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TRUST-005
+scenarios:
+- id: S1
+  title: Four clicks
+- id: S2
+  title: Wrap-around from Cream
+- id: S3
+  title: The button names the active mode and the next one
+- id: S4
+  title: One icon per mode
+- id: S5
+  title: Icon set is well formed
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,19 +51,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader presses the Theme button, the extension SHALL switch the preview theme mode in the order Current, Dark, White, Cream and back to Current, and show the active mode and the next one on the button.
 
-### Scenario (nominal): Four clicks
+### Scenario S1 (nominal): Four clicks
 
 - GIVEN the page in Current mode (a workspace that stored Current) and the Theme button on toolbar row 2
 - WHEN the button is clicked four times
 - THEN the attribute data-sphinx-preview-theme-mode of the html element reads dark, white, cream and current in turn, and the attribute data-theme-mode of the button follows it
 
-### Scenario (boundary): Wrap-around from Cream
+### Scenario S2 (boundary): Wrap-around from Cream
 
 - GIVEN the page in Cream mode (the default of a fresh workspace)
 - WHEN the button is clicked once
 - THEN the mode is Current again; the cycle never stops at Cream and never skips a mode
 
-### Scenario (nominal): The button names the active mode and the next one
+### Scenario S3 (nominal): The button names the active mode and the next one
 
 - GIVEN the page in any theme mode
 - WHEN the button attributes are read
@@ -65,13 +76,13 @@ When the reader presses the Theme button, the extension SHALL switch the preview
 | White | Preview theme: White theme | White theme (click for cream theme) |
 | Cream (fresh workspace) | Preview theme: Cream theme | Cream theme (click for current theme) |
 
-### Scenario (nominal): One icon per mode
+### Scenario S4 (nominal): One icon per mode
 
 - GIVEN the toolbar markup and the page in Cream mode on a dark VS Code theme (visual scenario theme-zoom/v02)
 - WHEN the visible icons of the Theme button are listed
 - THEN exactly one icon is displayed and its data-theme-icon is cream; on a light host forced to Dark (visual scenario theme-zoom/v08) it is dark
 
-### Scenario (boundary): Icon set is well formed
+### Scenario S5 (boundary): Icon set is well formed
 
 - GIVEN the markup of the Theme button
 - WHEN its children are read

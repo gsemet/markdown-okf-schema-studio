@@ -4,7 +4,8 @@ import { test } from "node:test";
 import { chartDataUrls, chartKindOf, isRemoteDataUrl, parseChartSource } from "../../../src/core/render/chartData";
 import { inlineChartFiles, parseDelimited } from "../../../src/core/render/chartInline";
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S2
 test("chartKindOf names the chart of a vega-lite or vega fence and nothing else", () => {
   assert.equal(chartKindOf({ type: "code", lang: "vega-lite" }), "vega-lite");
   assert.equal(chartKindOf({ type: "code", lang: "Vega" }), "vega");
@@ -13,7 +14,7 @@ test("chartKindOf names the chart of a vega-lite or vega fence and nothing else"
   assert.equal(chartKindOf({ type: "mystDirective", name: "vega-lite" }), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S1
 test("parseChartSource reads a JSON or YAML object and gives the reason for anything else", () => {
   const json = parseChartSource('{ "mark": "bar", "data": { "values": [{ "a": 1 }] } }');
   assert.ok(json.ok && json.spec.mark === "bar");
@@ -27,7 +28,8 @@ test("parseChartSource reads a JSON or YAML object and gives the reason for anyt
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S2
 test("chartDataUrls lists the url of every data source, nested views and lookups included", () => {
   const spec = {
     data: { url: "data/main.csv" },
@@ -40,7 +42,8 @@ test("chartDataUrls lists the url of every data source, nested views and lookups
   assert.deepEqual(chartDataUrls({ data: { values: [{ x: 1 }] } }), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S2
 test("isRemoteDataUrl is true for a scheme or a protocol-relative url and false for a path", () => {
   for (const url of ["https://example.com/a.csv", "http://x/y", "file:///etc/passwd", "//cdn/x.json", "data:text/csv,a", "HTTPS://X"]) {
     assert.equal(isRemoteDataUrl(url), true, url);
@@ -50,7 +53,7 @@ test("isRemoteDataUrl is true for a scheme or a protocol-relative url and false 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
 test("parseDelimited reads quoted fields, CRLF and a byte order mark, and types numbers and booleans", () => {
   const rows = parseDelimited('﻿name,count,flag,note\r\n"Smith, J",3,true,"say ""hi"""\r\nLee,4.5e1,false,\r\n\r\n', ",");
   assert.deepEqual(rows, [
@@ -61,7 +64,8 @@ test("parseDelimited reads quoted fields, CRLF and a byte order mark, and types 
   assert.deepEqual(parseDelimited("", ","), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S2
 test("inlineChartFiles puts the rows of each read file into values and leaves no url", () => {
   const spec = { data: { url: "d.csv" }, layer: [{ data: { url: "j.json", format: { type: "json", property: "rows" } } }] };
   const out = inlineChartFiles(spec, { files: { "d.csv": "x,y\n1,2\n", "j.json": '{"rows":[{"k":1}]}' } }) as typeof spec & Record<string, never>;
@@ -71,7 +75,7 @@ test("inlineChartFiles puts the rows of each read file into values and leaves no
   assert.equal(spec.data.url, "d.csv", "the parsed spec is not changed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S2
 test("inlineChartFiles refuses a remote url, a refused file, an unread file and a format it does not read", () => {
   assert.throws(() => inlineChartFiles({ data: { url: "https://example.com/a.csv" } }, {}), /Remote chart data is not loaded: https:\/\/example\.com\/a\.csv/u);
   assert.throws(() => inlineChartFiles({ data: { url: "//cdn/a.json" } }, { files: { "//cdn/a.json": "[]" } }), /Remote chart data is not loaded/u);

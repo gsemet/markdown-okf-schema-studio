@@ -66,7 +66,7 @@ test("repeated analyses reuse one compiled schema and keep the Ajv cache bounded
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-027
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-027#S1
 test("editing the schema is picked up and the previous compile is released", () => {
   const { root, schemaPath, analyze } = fixture();
   try {
@@ -159,7 +159,7 @@ test("setSchemaFileReaderForTests overrides content and drops cached schemas", (
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S8
 test("an invalid schema reports the same compile error on every analysis", () => {
   const { root, schemaPath, analyze } = fixture();
   try {

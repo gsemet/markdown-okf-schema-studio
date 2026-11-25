@@ -126,7 +126,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-017
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-017#S3
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("P6: the real registry shows the MyST-specific buttons in MyST mode only, per mode", () => {
   const ids = (mode: EditActionMode): string[] => {
@@ -826,7 +826,8 @@ test("T30: Enter in the filter picks the first match; Escape closes", () => {
   assert.equal(popover(h.root), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S9
 test("T30: an empty list or a host error is said in the popover; a late answer after closing is ignored", () => {
   const empty = openHost({ requestList: (_kind, done) => done({ items: [] }) });
   button(empty.root, "ref").dispatch("click", click);

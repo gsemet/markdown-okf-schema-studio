@@ -24,7 +24,8 @@ const GUTTER = 78;
 const picture = (width: string): string => `\`\`\`svg\n<svg viewBox="0 0 900 100" width="${width}"><rect width="900" height="100" fill="var(--surface)"/></svg>\n\`\`\`\n`;
 const MARKDOWN = `${picture("900")}\n${picture("300")}\n${picture("90%")}`;
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
 test("Auto breaks an svg picture out when its declared width is larger than the column", async (t) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "svg-breakout-")));
   const workspace = path.join(root, "workspace");

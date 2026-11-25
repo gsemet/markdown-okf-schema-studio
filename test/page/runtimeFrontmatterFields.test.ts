@@ -97,7 +97,7 @@ function recordFocus<T>(body: (focused: RuntimeElement[]) => T): T {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S3
 test("T21: Enter in a list item inserts an empty item after it, focuses it, and does not save", () => {
   recordFocus((focused) => {
     const list = openListEditor('["one","two"]');
@@ -227,7 +227,8 @@ test("T22: an unknown value warns, a known or empty value clears the warning", (
   assert.equal(status.getAttribute("data-state"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S7
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S10
 test("T220: a known stem outside the dropdown suggestions does not warn, an unknown one still does", () => {
   const list = openListEditor('[""]', '["StRS-A"]', '["StRS-A","related-target"]');
   const input = list.inputs()[0]!;
@@ -246,7 +247,8 @@ test("T220: a known stem outside the dropdown suggestions does not warn, an unkn
   assert.equal(status.textContent, 'No Markdown file named "zzz.md" was found. It will be saved as typed.');
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S7
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S8
 test("T220: invalid JSON in the known-stems attribute falls back to the suggestions", () => {
   const list = openListEditor('[""]', '["StRS-A"]', "{not json");
   const input = list.inputs()[0]!;
@@ -285,7 +287,8 @@ test("T24: Remove field is disabled with a tooltip on a required row", () => {
   assert.equal(removeButton.getAttribute("data-tooltip"), tooltip);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029#S4
 test("T24: Remove field stays enabled on an optional row", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   openFrontmatterValueEditor(harness);
@@ -296,7 +299,8 @@ test("T24: Remove field stays enabled on an optional row", () => {
   assert.equal(removeButton.getAttribute("title"), "Remove frontmatter field");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S2
 test("T24: choosing a field in the picker adds it right after the open row", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   openFrontmatterValueEditor(harness);
@@ -316,7 +320,8 @@ test("T24: choosing a field in the picker adds it right after the open row", () 
   assert.equal(confirm?.hidden, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S3
 test("T24: the text-input picker adds on Enter with afterField", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.frontmatterRow.closest("[data-okf-properties]")?.setAttribute("data-okf-available-fields", "[]");
@@ -353,7 +358,8 @@ function customKeyHarness(attributes: Record<string, string> = {}) {
   return { harness, select, options, customInput, status };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S6
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S7
 test("T25: the picker offers Custom key only when additional properties are allowed", () => {
   const allowed = customKeyHarness();
   assert.deepEqual(allowed.options().map((option) => option.value).slice(-1), ["__custom__"]);
@@ -362,7 +368,8 @@ test("T25: the picker offers Custom key only when additional properties are allo
   assert.equal(forbidden.options().some((option) => option.value === "__custom__"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S6
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S8
 test("T25: choosing Custom key shows the name input and posts nothing", () => {
   const { harness, select, customInput } = customKeyHarness();
   const before = harness.messages.length;
@@ -372,7 +379,8 @@ test("T25: choosing Custom key shows the name input and posts nothing", () => {
   assert.equal(harness.messages.length, before);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028#S8
 test("T25: Enter in the custom key input adds the field with an empty value", () => {
   const { harness, select, customInput } = customKeyHarness();
   select.value = "__custom__";
@@ -406,7 +414,7 @@ test("T25: an invalid custom key shows an error and posts nothing", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037#S4
 test("T25: a pending frontmatter edit opens the editor of the new field and clears the state once it closes", () => {
   const harness = createRuntimeHarness({
     mapFrontmatter: true,
@@ -500,7 +508,7 @@ test("T25: a later render does not reopen an editor that was already opened for 
   assert.equal(second.getWebviewState().pendingFrontmatterEdit, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043#S3
 test("T30: previewPropertiesTable replaces the properties section in place", () => {
   const harness = createRuntimeHarness();
   const old = harness.currentProperties();
@@ -516,7 +524,7 @@ test("T30: previewPropertiesTable replaces the properties section in place", () 
   assert.deepEqual(harness.previewContent.childElements, contentBefore, "nothing else in the content moved");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043#S3
 test("T30: previewPropertiesTable inserts the section when it is absent and removes it on empty markup", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage(propertiesMessage(""));
@@ -543,7 +551,8 @@ test("T30: previewPropertiesTable is ignored for another request, version, docum
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043#S3
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043#S4
 test("T30: previewPropertiesTable is deferred while a frontmatter editor is open, then applied on close", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   openFrontmatterValueEditor(harness);
@@ -566,7 +575,7 @@ test("T30: previewPropertiesTable is deferred while a frontmatter editor is open
   assert.deepEqual(harness.htmlInsertions.map((entry) => entry.position), ["beforebegin"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001#S2
 test("T30: a replaced section gets edit-cell tabindex in edit mode and none outside it", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -603,7 +612,7 @@ test("T30: a replacement closes the link tooltip, re-measures and keeps the desc
   assert.equal(harness.descriptionButton.getAttribute("aria-expanded"), "false");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S1
 test("the frontmatter toggle collapses the table, survives a content patch and starts expanded on a fresh page", () => {
   const harness = createRuntimeHarness({ viewportWidth: 900 });
   assert.notEqual(harness.documentElement.getAttribute("data-okf-frontmatter-collapsed"), "true");

@@ -14,6 +14,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Choose a radio option
 user_need: As a reviewer of an agent's plan, I pick one of the '( )'/'(x)'
   options in the preview and at most two source lines change in one undo step;
   on GitHub the text stays readable.
@@ -61,7 +64,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Choose a radio option
+#### Path S1: Choose a radio option
 
 1. A list holds consecutive items that start with '( )' or '(x)'
    - SwRS-MDOKFSTUDIO-GFM-040: the page renders them as one radio group

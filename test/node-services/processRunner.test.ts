@@ -74,7 +74,7 @@ test("reports the signal that ended the program", posixOnly, async () => {
   assert.equal(result.stopped, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S8
 test("a timeout kills the whole process group, not only the program", posixOnly, async () => {
   // The program starts a grandchild in its own group, as a launcher script starts a JVM.
   const result = await node(
@@ -88,7 +88,7 @@ test("a timeout kills the whole process group, not only the program", posixOnly,
   assert.equal(await waitUntilDead(grandchild), true, "the grandchild is still running");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S8
 test("an abort kills the whole process group", posixOnly, async () => {
   const controller = new AbortController();
   const pending = node(
@@ -119,7 +119,8 @@ test("decodes a multibyte character split across chunks", async () => {
   assert.equal(result.stdout, "a\u00e9\u{1F600}z");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S4
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S5
 test("stops a program that writes more than maxStdoutBytes", async () => {
   const result = await node(
     "setInterval(()=>process.stdout.write('x'.repeat(65536)),1)",
@@ -143,7 +144,7 @@ test("keeps an output within maxStdoutBytes whole", async () => {
   assert.equal(result.exitCode, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S1
 test("cuts the standard error at maxStderrChars and lets the program finish", async () => {
   const result = await node("process.stderr.write('e'.repeat(10000));process.exit(1)", { maxStderrChars: 100 });
   assert.equal(result.stderr, "e".repeat(100));

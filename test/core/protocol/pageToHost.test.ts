@@ -26,7 +26,8 @@ test("rejects missing or non-integer ids and oversize documentId", () => {
   assert.equal(check({ ...valid, requestId: 2 ** 53 }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-052
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S5
 test("rejects non-objects, unregistered and prototype-key types", () => {
   assert.equal(check(null), false);
   assert.equal(check("sample"), false);
@@ -44,7 +45,8 @@ test("the shipped registry rejects an unregistered type", () => {
   assert.equal(isRegisteredPreviewMessage(valid), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S8
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019#S10
 test("previewCopyText needs an edit id and a string; the 1 MB limit is the host's to answer", () => {
   const copy = { type: "previewCopyText", documentId: "doc", revision: 1, requestId: 1, editId: "e", text: "code", userGesture: true };
   assert.equal(isRegisteredPreviewMessage(copy), true);
@@ -138,8 +140,10 @@ test("previewPaletteModeChanged accepts only strict, gfm, myst or full", () => {
   assert.equal(isRegisteredPreviewMessage({ ...base }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
-// @tests_req SwRS-MDOKFSTUDIO-MYST-045
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S5
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S6
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S3
 test("previewLabelRename validates the line and both label names", () => {
   const rename = {
     type: "previewLabelRename", documentId: "doc", revision: 1, requestId: 1, editId: "e",
@@ -156,7 +160,8 @@ test("previewLabelRename validates the line and both label names", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S7
 test("T30: the list and pick messages carry an edit id and no other payload", () => {
   for (const type of ["previewListTargets", "previewListCitations", "previewPickDocument", "previewPickImage"]) {
     const base = { type, documentId: "doc", revision: 1, requestId: 1, editId: "host-1" };
@@ -316,7 +321,8 @@ test("T44: previewCommentResolve and previewCommentDelete validate the thread id
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016#S9
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016#S11
 test("previewFrontmatterSave is refused without a field name, an edit id, or a value or a removal", () => {
   const save = {
     type: "previewFrontmatterSave", documentId: "doc", revision: 1, requestId: 1,
@@ -418,7 +424,8 @@ test("previewFindReplace takes an optional boolean dry-run flag", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-050
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-050#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-050#S3
 test("previewPlantUmlInclude carries a bounded file name, the including file id or null, and an edit id", () => {
   const base = { type: "previewPlantUmlInclude", documentId: "doc", revision: 1, requestId: 1, editId: "plantuml-1", path: "styles/common.puml", from: null };
   assert.equal(isRegisteredPreviewMessage(base), true);
@@ -434,7 +441,8 @@ test("previewPlantUmlInclude carries a bounded file name, the including file id 
   assert.equal(isRegisteredPreviewMessage({ ...base, editId: undefined }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-050
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-050#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-050#S2
 test("previewPlantUmlInclude accepts an edit id of 100 characters and a from of 4096; one character more is refused", () => {
   const base = { type: "previewPlantUmlInclude", documentId: "doc", revision: 1, requestId: 1, editId: "plantuml-1", path: "styles/common.puml", from: null };
   assert.equal(isRegisteredPreviewMessage({ ...base, editId: "e".repeat(100) }), true);
@@ -443,8 +451,10 @@ test("previewPlantUmlInclude accepts an edit id of 100 characters and a from of 
   assert.equal(isRegisteredPreviewMessage({ ...base, from: "/" + "f".repeat(4096) }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-086
-// @tests_req SwRS-MDOKFSTUDIO-MYST-081
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-086#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-086#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081#S7
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081#S8
 test("CR 050: the warning banner messages are registered with a bounded key", () => {
   const envelope = { documentId: "file:///chapter.md", revision: 3, requestId: 7 };
   assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewShowProblems" }), true);

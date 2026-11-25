@@ -18,6 +18,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-001
 - StRS-MDOKFSTUDIO-LIFE-014
 depends_on: []
+scenarios:
+- id: S1
+  title: Collapse
+- id: S2
+  title: Restore
+- id: S3
+  title: The choice is stored for the workspace
+- id: S4
+  title: Start state of the column
+- id: S5
+  title: At most 200 documents
+- id: S6
+  title: Old one-key-per-document choices
+- id: S7
+  title: Malformed stored value
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,25 +61,25 @@ supersedes:
 
 When a writer presses the toggle in a column header of a schema table, the extension SHALL collapse or restore the Description column while keeping Name and Value readable, and store the choice for that document in the workspace state so that a refresh or a new preview of the document restores it.
 
-### Scenario (nominal): Collapse
+### Scenario S1 (nominal): Collapse
 
 - GIVEN a schema table with the Description column shown
 - WHEN the writer presses the toggle labelled Collapse Description column
 - THEN the column is hidden, the toggle label becomes Expand Description column and alert rows span two columns
 
-### Scenario (nominal): Restore
+### Scenario S2 (nominal): Restore
 
 - GIVEN the same table with the column collapsed
 - WHEN the writer presses the toggle labelled Expand Description column
 - THEN the column is shown again and alert rows span three columns
 
-### Scenario (nominal): The choice is stored for the workspace
+### Scenario S3 (nominal): The choice is stored for the workspace
 
 - GIVEN a writer collapsed the Description column of a.md
 - WHEN the page reports its state, then the preview is refreshed or reopened for a.md
 - THEN the workspace state holds a.md as collapsed and the column is still collapsed in a new preview of a.md
 
-### Scenario (boundary): Start state of the column
+### Scenario S4 (boundary): Start state of the column
 
 | Input | Outcome |
 | --- | --- |
@@ -74,21 +89,21 @@ When a writer presses the toggle in a column header of a schema table, the exten
 | A restored panel state with descriptionsCollapsed false, and a stored choice of true for the document | The saved panel value is used and the stored one is not applied |
 | A new session for a document without a saved panel value | The stored choice of the document is read and applied |
 
-### Scenario (boundary): At most 200 documents
+### Scenario S5 (boundary): At most 200 documents
 
 | Input | Outcome |
 | --- | --- |
 | Choices stored for 201 documents, the oldest document opened again | Its choice is forgotten and the default applies |
 | A choice read or written again, then a 201st choice stored | The choice used last is kept |
 
-### Scenario (boundary): Old one-key-per-document choices
+### Scenario S6 (boundary): Old one-key-per-document choices
 
 | Input | Outcome |
 | --- | --- |
 | Three legacy keys of the form descriptionsCollapsed:{uri} and an empty map | The map holds the three documents and the legacy keys are deleted |
 | A legacy key for a document that the map already holds | The map's value is kept |
 
-### Scenario (refusal): Malformed stored value
+### Scenario S7 (refusal): Malformed stored value
 
 | Input | Outcome |
 | --- | --- |

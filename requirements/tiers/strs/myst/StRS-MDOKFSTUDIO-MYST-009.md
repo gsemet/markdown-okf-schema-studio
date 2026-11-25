@@ -17,6 +17,11 @@ tier: StRS
 derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: Reference a label
+- id: S2
+  title: Rename a label
 user_need: As a writer, I want to see where each cross-reference points, reuse
   each label and rename it safely, so that cross-references are easy and
   references do not silently break.
@@ -86,7 +91,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Reference a label
+#### Path S1: Reference a label
 
 1. A document holds a `(name)=` label
    - SwRS-MDOKFSTUDIO-MYST-036: the page shows a faint anchor icon on the next paragraph or heading, without moving the text
@@ -96,7 +101,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-MYST-019 (boundary): explicit text and paragraph labels
 3. The reference is an in-page link
 
-#### Path 2: Rename a label
+#### Path S2: Rename a label
 
 1. The label shows an anchor icon
    - SwRS-MDOKFSTUDIO-MYST-038: in edit mode a click on the icon opens a Rename label popover with the name selected

@@ -29,7 +29,7 @@ tested_in_files:
 - test/page/runtimeTableRowMove.test.ts
 - test/visual/breakoutHandleScenarios.ts
 - test/visual/capture_table_move.py
-- test/visual/scenarioDefinitions2.ts
+- test/visual/scenarioDefinitions3.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

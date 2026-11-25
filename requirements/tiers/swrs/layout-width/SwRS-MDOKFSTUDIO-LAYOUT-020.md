@@ -18,6 +18,15 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+scenarios:
+- id: S1
+  title: Three clicks
+- id: S2
+  title: Label of every mode
+- id: S3
+  title: Scrolled document
+- id: S4
+  title: No anchor yet
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,22 +48,22 @@ supersedes:
 
 When the reader presses the Width button, the extension SHALL switch the width mode in the order Margin, Auto, Full width and back to Margin, update its icon, label and tooltip, and keep the line at the reading position of the page.
 
-### Scenario (nominal): Three clicks
+### Scenario S1 (nominal): Three clicks
 - GIVEN the page in Margin width mode with the Width button reading Width: Margin
 - WHEN the button is clicked three times
 - THEN the root attribute data-sphinx-preview-width reads auto, full, margin in turn and the button label reads Width: Auto, Width: Full width and Width: Margin
 
-### Scenario (nominal): Label of every mode
+### Scenario S2 (nominal): Label of every mode
 - GIVEN the button after one and two clicks
 - WHEN its attributes are read
 - THEN aria-label, title and data-tooltip all read Width: Auto, then Width: Full width, and the icon of the mode is the only one shown
 
-### Scenario (nominal): Scrolled document
+### Scenario S3 (nominal): Scrolled document
 - GIVEN a long document scrolled to a position and a width mode change
 - WHEN the Width button is clicked
 - THEN the line at the reading position is taken as the anchor and the page is stabilised, so the same line stays at the reading position after the layout change
 
-### Scenario (boundary): No anchor yet
+### Scenario S4 (boundary): No anchor yet
 - GIVEN a page without an anchor
 - WHEN the Width button is clicked
 - THEN the anchor is taken from the line at the current scroll position, when that line is known

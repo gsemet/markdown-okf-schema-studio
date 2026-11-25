@@ -20,6 +20,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-014
 depends_on:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-063
+scenarios:
+- id: S1
+  title: Follow with a marker
+- id: S2
+  title: Follow without a marker line
+- id: S3
+  title: Edit mode
+- id: S4
+  title: Unusable link
+- id: S5
+  title: Link result without a message
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,26 +51,26 @@ supersedes:
 
 When a writer activates a frontmatter link (click or Enter in read mode, Cmd or Ctrl and click in edit mode), the extension SHALL open a resolving target in the editor at the marker line when the annotation has a `basename_marker`, keeping the query and fragment and recording the jump in the Back and Next history, and otherwise open nothing and show the warning "Markdown OKF-Schema Studio could not follow the link: {reason}" with the problem message as the reason.
 
-### Scenario (nominal): Follow with a marker
+### Scenario S1 (nominal): Follow with a marker
 
 - GIVEN a valid link whose annotation has a basename_marker found at line 10 of the target
 - WHEN the writer presses Enter on it in read mode
 - THEN the target opens in the editor at line 10 and the history gains an entry
 
-### Scenario (nominal): Follow without a marker line
+### Scenario S2 (nominal): Follow without a marker line
 
 | Input | Outcome |
 | --- | --- |
 | A valid link whose marker is carried by no line of the target | The target still opens, at the top |
 | A filename-stem link | Re-resolved at click time, then opened |
 
-### Scenario (nominal): Edit mode
+### Scenario S3 (nominal): Edit mode
 
 - GIVEN the preview is in edit mode and the link sits in an editable value cell
 - WHEN the writer clicks the link without a modifier
 - THEN the field editor opens and the link is not followed; Cmd or Ctrl and click follows it
 
-### Scenario (refusal): Unusable link
+### Scenario S4 (refusal): Unusable link
 
 | Input | Outcome |
 | --- | --- |
@@ -67,7 +78,7 @@ When a writer activates a frontmatter link (click or Enter in read mode, Cmd or 
 | A document-relative link outside the workspace with allowOutsideWorkspaceLinks false | No editor is opened |
 | An invalid or unavailable link | Not followed |
 
-### Scenario (boundary): Link result without a message
+### Scenario S5 (boundary): Link result without a message
 
 - GIVEN a link result without a message
 - WHEN the request is handled

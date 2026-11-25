@@ -44,7 +44,8 @@ function replaceDocument(document: vscode.TextDocument, text: string): vscode.Wo
 // @tests_req SwRS-MDOKFSTUDIO-CORE-013
 // @tests_req SwRS-MDOKFSTUDIO-CORE-022
 // @tests_req SwRS-MDOKFSTUDIO-CORE-043
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S7
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const featurePath = path.join(fixtureDirectory, "feature-contract.md");

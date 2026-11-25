@@ -23,6 +23,17 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-017
 - SwRS-MDOKFSTUDIO-FMEDIT-001
 - SwRS-MDOKFSTUDIO-TABLE-001
+scenarios:
+- id: S1
+  title: Restricted reads at creation
+- id: S2
+  title: Every editing affordance is present
+- id: S3
+  title: What stays off because it needs trust
+- id: S4
+  title: Trust granted or a folder added while a preview is open
+- id: S5
+  title: The manifest declares limited support for untrusted workspaces
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -66,7 +77,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a preview is created for a document that lies in no workspace folder, or while the workspace is untrusted, the extension SHALL keep every affordance that edits, comments or changes the document, exactly as in a trusted workspace (the Edit button, the edition palette, the Comment button and thread controls, the editable properties table and the block, cell and field editors), and SHALL narrow only what the preview reads (includes, resources, schema files; see SwRS-MDOKFSTUDIO-TRUST-002 and SwRS-MDOKFSTUDIO-TRUST-007). Trust never makes a document read-only. A feature that needs trust stays disabled and gives its reason where it is used.
 
-### Scenario (nominal): Restricted reads at creation
+### Scenario S1 (nominal): Restricted reads at creation
 
 - GIVEN a Markdown document and a window
 - WHEN the reader opens the preview with the Open Preview to Side command or with Open With
@@ -79,7 +90,7 @@ When a preview is created for a document that lies in no workspace folder, or wh
 | Markdown file that lies in no workspace folder of a trusted window (standalone file) | Restricted reads, editable |
 | A file that VS Code holds read-only (files.readonlyInclude, or made read-only in the session) | The preview offers the same controls; every write path (label rename, thread reply and delete, find and replace, block save, move, cut, paste, drop, checkbox and radio toggle, metadata save) checks that VS Code wrote the edit, and answers "This file is read-only in VS Code." when it accepted the edit and left the text unchanged; a pasted image whose block save fails that way is deleted again |
 
-### Scenario (nominal): Every editing affordance is present
+### Scenario S2 (nominal): Every editing affordance is present
 
 - GIVEN a preview with restricted reads of a document with at least five frontmatter fields, a table and a paragraph
 - WHEN the reader looks at the page and acts on it
@@ -97,7 +108,7 @@ When a preview is created for a document that lies in no workspace folder, or wh
 | Click on a paragraph, a table cell, a frontmatter value | The block, cell or field editor opens (see SwRS-MDOKFSTUDIO-TABLE-001 and SwRS-MDOKFSTUDIO-FMEDIT-001) |
 | Checkboxes and radio options | Enabled; a click is written to the source |
 
-### Scenario (boundary): What stays off because it needs trust
+### Scenario S3 (boundary): What stays off because it needs trust
 
 - GIVEN a preview with restricted reads
 - WHEN the reader uses a feature of the table
@@ -113,7 +124,7 @@ When a preview is created for a document that lies in no workspace folder, or wh
 | MyST extension warnings in the Problems view, and the incoming-change marks | Published only for a trusted workspace (see SwRS-MDOKFSTUDIO-MYST-078); the incoming-change marks are posted for a trusted, tracked file only |
 | Workspace values of the restricted settings | Ignored (see the manifest scenario) |
 
-### Scenario (boundary): Trust granted or a folder added while a preview is open
+### Scenario S4 (boundary): Trust granted or a folder added while a preview is open
 
 | Input | Outcome |
 | --- | --- |
@@ -125,7 +136,7 @@ When a preview is created for a document that lies in no workspace folder, or wh
 
 A preview whose folder is removed gets restricted reads on the same panel: see SwRS-MDOKFSTUDIO-LIFE-143.
 
-### Scenario (boundary): The manifest declares limited support for untrusted workspaces
+### Scenario S5 (boundary): The manifest declares limited support for untrusted workspaces
 
 - GIVEN the package.json of the extension, which has a main entry point
 - WHEN VS Code decides whether the extension runs in a window in Restricted Mode

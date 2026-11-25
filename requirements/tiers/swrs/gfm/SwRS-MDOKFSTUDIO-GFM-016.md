@@ -17,6 +17,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Markers become checkboxes
+- id: S2
+  title: Line and column counting
+- id: S3
+  title: Task-list checkboxes sit in the bullet gutter
+- id: S4
+  title: Markers stay literal where they have another meaning
+- id: S5
+  title: Defined reference label
+- id: S6
+  title: The webview keeps checkbox inputs
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,13 +54,13 @@ supersedes:
 
 When a task-list item, paragraph, table cell, directive body or admonition title contains [ ], [x] or [X], the extension SHALL render a checkbox carrying its source line and UTF-16 column, marking a task-list item so that the checkbox replaces the bullet and keeping the checkbox input and its attributes in the sanitized webview HTML.
 
-### Scenario (nominal): Markers become checkboxes
+### Scenario S1 (nominal): Markers become checkboxes
 
 - GIVEN '- [ ] a' in a list, '[x]' in a table cell, and a document with frontmatter
 - WHEN the preview is rendered
 - THEN each marker is a checkbox whose line and column equal the marker position, frontmatter lines included
 
-### Scenario (boundary): Line and column counting
+### Scenario S2 (boundary): Line and column counting
 
 | Input | Outcome |
 | --- | --- |
@@ -55,14 +68,14 @@ When a task-list item, paragraph, table cell, directive body or admonition title
 | a CRLF task list | each checkbox column equals its marker column, the same line and column as in the LF document |
 | a document mixing LF and CRLF lines | line numbers count each line break once |
 
-### Scenario (nominal): Task-list checkboxes sit in the bullet gutter
+### Scenario S3 (nominal): Task-list checkboxes sit in the bullet gutter
 
 | Input | Outcome |
 | --- | --- |
 | '- [ ] a' and '- [x] b' | the items have task-list-item and the list has contains-task-list |
 | '- a' without a marker | no task-list class is added |
 
-### Scenario (refusal): Markers stay literal where they have another meaning
+### Scenario S4 (refusal): Markers stay literal where they have another meaning
 
 | Input | Outcome |
 | --- | --- |
@@ -72,13 +85,13 @@ When a task-list item, paragraph, table cell, directive body or admonition title
 | `## [ ] h` (ATX heading) | no checkbox |
 | [ ] or [x] in code, math, diagrams, URLs, images, raw HTML, directive arguments, wikilink or reference syntax | literal text, no checkbox |
 
-### Scenario (boundary): Defined reference label
+### Scenario S5 (boundary): Defined reference label
 
 - GIVEN a document defining '[x]: url' and using '[x]' and '[ ]'
 - WHEN the preview is rendered
 - THEN [x] stays a link and [ ] is a checkbox
 
-### Scenario (nominal): The webview keeps checkbox inputs
+### Scenario S6 (nominal): The webview keeps checkbox inputs
 
 - GIVEN rendered HTML with a checkbox input, and a checked checkbox input with line and column attributes
 - WHEN it is sanitized for the webview

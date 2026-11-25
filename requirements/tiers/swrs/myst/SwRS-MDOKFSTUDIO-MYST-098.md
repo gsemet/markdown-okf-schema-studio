@@ -16,6 +16,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-016
+scenarios:
+- id: S1
+  title: A tab set renders a tab bar and the selected panel
+- id: S2
+  title: Tab set options and contents
+- id: S3
+  title: In edit mode a tab item is edited on its own lines
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,13 +44,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a document holds a {tab-set} with {tab-item} children, the extension SHALL render a tab bar with ARIA tab roles and the tab-item titles, show only the panel of the selected tab (the :selected: item, else the first), keep every tab item a block that edit mode edits on its own source lines, and keep :sync: keys on the tabs.
 
-### Scenario (nominal): A tab set renders a tab bar and the selected panel
+### Scenario S1 (nominal): A tab set renders a tab bar and the selected panel
 
 - GIVEN a `{tab-set}` of the `{tab-item}`s Python, Node (with `:selected:`) and Shell, each with a body
 - WHEN the preview renders
 - THEN a `tablist` holds one `tab` button per item, each wired by `aria-controls` and `aria-labelledby` to its `tabpanel`, the Node tab has `aria-selected="true"` and `tabindex="0"` (the others `false` and `-1`), and only the Node panel is shown (the others carry `hidden`)
 
-### Scenario (boundary): Tab set options and contents
+### Scenario S2 (boundary): Tab set options and contents
 
 | Input | Outcome |
 | --- | --- |
@@ -54,7 +61,7 @@ When a document holds a {tab-set} with {tab-item} children, the extension SHALL 
 | a grid, a card, code or another tab set in an item | rendered in the panel; a nested set keeps its own tabs |
 | the content of a tab item | its blocks carry marker lines (`data-okf-marker-line`, never a mapped block), so the line marker finds a line inside the panel; a click still edits the whole item |
 
-### Scenario (nominal): In edit mode a tab item is edited on its own lines
+### Scenario S3 (nominal): In edit mode a tab item is edited on its own lines
 
 - GIVEN edit mode is on
 - WHEN a tab is clicked and then its panel

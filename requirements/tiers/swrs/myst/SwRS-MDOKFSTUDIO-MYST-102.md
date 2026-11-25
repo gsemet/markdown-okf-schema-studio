@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-006
+scenarios:
+- id: S1
+  title: Dollar amounts in a sentence stay text
+- id: S2
+  title: Bold dollar prices preserve emphasis
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -24,7 +29,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/mathRenderer.test.ts
 - test/visual/mathScenarios.ts
-- test/visual/scenarioDefinitions2.ts
+- test/visual/scenarioDefinitions3.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a sentence holds dollar amounts such as `$5 and $6` or bold prices such as `**$671**`, the extension SHALL keep them as text with their dollar signs and their emphasis, and typeset as maths only a span whose opening `$` is not followed by whitespace and whose closing `$` neither follows whitespace nor precedes a digit.
 
-### Scenario (nominal): Dollar amounts in a sentence stay text
+### Scenario S1 (nominal): Dollar amounts in a sentence stay text
 
 - GIVEN sentences with `$19 base subscription ... ($200)`, `$5 and $6` and `$100–$380`, and a real `$x$` span
 - WHEN the preview renders
 - THEN each price sentence stays text with its dollar signs and holds no typeset span, and only the real span is typeset as maths, following the Sphinx rule that an opening `$` is not followed by whitespace and a closing `$` neither follows whitespace nor precedes a digit
 
-### Scenario (boundary): Bold dollar prices preserve emphasis
+### Scenario S2 (boundary): Bold dollar prices preserve emphasis
 
 - GIVEN `**$671** cache reads + **$402** 5-min cache writes + **$85** 1-h cache writes + **$216** output`
 - WHEN the preview renders

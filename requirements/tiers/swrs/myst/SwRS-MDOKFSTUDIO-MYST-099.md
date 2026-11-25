@@ -15,6 +15,25 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-016
+scenarios:
+- id: S1
+  title: The arrow, Home and End keys select a tab and move the focus
+- id: S2
+  title: A click selects a tab
+- id: S3
+  title: The selection wraps around
+- id: S4
+  title: Other keys change nothing
+- id: S5
+  title: Tabs with the same sync key follow each other
+- id: S6
+  title: A nested tab set selects within its own set
+- id: S7
+  title: A re-render keeps the chosen tabs
+- id: S8
+  title: The line marker selects a tab the way a click does
+- id: S9
+  title: After a patch each set shows its latest choice
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,56 +53,56 @@ default_owner_email: gaetan@xeberon.net
 
 When a tab of a tab set is clicked, or has the focus and receives an arrow, Home or End key, the extension SHALL select the target tab, show only its panel, move the focus to it for keys, and select the tabs with the same sync key in the other tab sets of the same sync group.
 
-### Scenario (nominal): The arrow, Home and End keys select a tab and move the focus
+### Scenario S1 (nominal): The arrow, Home and End keys select a tab and move the focus
 
 - GIVEN a tab set with the tabs Python, Node and Shell and the focus on the Node tab
 - WHEN ArrowRight, ArrowLeft, Home and End are pressed in turn
 - THEN the selection and the focus go to Shell, Node, Python and Shell, only the panel of the selected tab is shown, and the keys are consumed
 
-### Scenario (nominal): A click selects a tab
+### Scenario S2 (nominal): A click selects a tab
 
 - GIVEN a tab set with the tabs Python, Node and Shell
 - WHEN the reader clicks the Shell tab
 - THEN the Shell tab is selected and only its panel is shown, without moving the focus by script
 
-### Scenario (boundary): The selection wraps around
+### Scenario S3 (boundary): The selection wraps around
 
 - GIVEN a tab set whose last tab has the focus
 - WHEN ArrowRight is pressed, then ArrowLeft on the first tab
 - THEN the selection wraps around to the first tab, then to the last
 
-### Scenario (refusal): Other keys change nothing
+### Scenario S4 (refusal): Other keys change nothing
 
 | Input | Outcome |
 | --- | --- |
 | ArrowUp, ArrowDown, a letter, or any key with Shift, Alt, Ctrl or Meta, or during composition | nothing changes and the key is not consumed |
 | ArrowLeft or ArrowRight pressed in a panel or in text outside a tab | no tab changes and the key is not consumed |
 
-### Scenario (nominal): Tabs with the same sync key follow each other
+### Scenario S5 (nominal): Tabs with the same sync key follow each other
 
 - GIVEN two tab sets of the same sync group whose tabs carry the sync keys `py` and `js`, and a third set of another group
 - WHEN the reader selects the `js` tab of the first set
 - THEN the `js` tab of the second set is selected too, without taking the focus, and the set of the other group is untouched
 
-### Scenario (boundary): A nested tab set selects within its own set
+### Scenario S6 (boundary): A nested tab set selects within its own set
 
 - GIVEN a tab set inside a panel of another tab set
 - WHEN a tab of the inner set is selected
 - THEN only the inner set changes
 
-### Scenario (boundary): A re-render keeps the chosen tabs
+### Scenario S7 (boundary): A re-render keeps the chosen tabs
 
 - GIVEN a reader who selected tabs in several sets
 - WHEN a content patch renders the sets again
 - THEN the page puts back the choices it remembers, by position of the set, unless the set lost tabs
 
-### Scenario (nominal): The line marker selects a tab the way a click does
+### Scenario S8 (nominal): The line marker selects a tab the way a click does
 
 - GIVEN a tab set whose second tab is not shown
 - WHEN the line marker is requested on a line of that tab item
 - THEN the tab is selected as a click selects it (the sets of its sync group follow, the choice is remembered, the focus does not move) and the layout is measured again
 
-### Scenario (boundary): After a patch each set shows its latest choice
+### Scenario S9 (boundary): After a patch each set shows its latest choice
 
 - GIVEN a set the reader selected by click and a sync choice made later in its group
 - WHEN a content patch renders the sets again

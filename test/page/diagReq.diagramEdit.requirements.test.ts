@@ -9,7 +9,7 @@ import { EDIT_MODE_CSS } from "../../src/core/preview/styles/editModeStyles";
 import { createRuntimeHarness } from "./runtimeHarness";
 import { openBlockEditorWithSource } from "./runtimeTestSupport";
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S7
 test("a diagram block is hidden while its editor is open and shown again when it closes", () => {
   assert.match(EDIT_MODE_CSS, /\[data-sphinx-preview-editing="true"\]\s*\{\s*display: none !important;\s*\}/u);
 

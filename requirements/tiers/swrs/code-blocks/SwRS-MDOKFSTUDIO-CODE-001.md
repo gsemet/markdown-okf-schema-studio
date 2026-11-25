@@ -18,6 +18,25 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: A supported language is highlighted by its grammar
+- id: S2
+  title: The fence label selects the grammar
+- id: S3
+  title: Unknown or absent language leaves the block as plain text
+- id: S4
+  title: Inline code is never highlighted
+- id: S5
+  title: Fenced code text is shown literally
+- id: S6
+  title: A shorter backtick line does not close the fence
+- id: S7
+  title: A failing grammar falls back to escaped text lines
+- id: S8
+  title: Special characters are shown once
+- id: S9
+  title: An unknown named reference is kept as written
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -49,13 +68,13 @@ supersedes:
 
 When a document contains a fenced code block, the extension SHALL highlight a block in a supported language with the grammar selected from the fence label, and leave a block of an unknown or absent language, inline code and the text of every code block as literal text, each special character shown once.
 
-### Scenario (nominal): A supported language is highlighted by its grammar
+### Scenario S1 (nominal): A supported language is highlighted by its grammar
 
 - GIVEN a document with a fenced `rust` block and a `python` block
 - WHEN the preview renders the document
 - THEN the keywords, strings, numbers and comments of each block are split into token spans by the Shiki TextMate grammar of its language, and the block gets the `shiki` class; the colours of the tokens are those of SwRS-MDOKFSTUDIO-CODE-040
 
-### Scenario (boundary): The fence label selects the grammar
+### Scenario S2 (boundary): The fence label selects the grammar
 
 | Fence label | Outcome |
 | --- | --- |
@@ -66,43 +85,43 @@ When a document contains a fenced code block, the extension SHALL highlight a bl
 | `yaml`, `bash`, `json`, `sql`, `toml`, `c`, `cpp`, `go`, `java`, `html`, `css`, `diff`, `markdown`, `dockerfile` and the other bundled languages | The block is coloured by its grammar |
 | `python` block with no content | An empty highlighted block is shown without error |
 
-### Scenario (refusal): Unknown or absent language leaves the block as plain text
+### Scenario S3 (refusal): Unknown or absent language leaves the block as plain text
 
 - GIVEN a block fenced as `wobblescript`, and a block with no language label
 - WHEN the preview renders them
 - THEN each block is plain monospace text with no token spans, its text is unchanged and no `shiki` class is added; a block of two or more lines is still wrapped into numbered lines (SwRS-MDOKFSTUDIO-CODE-039)
 
-### Scenario (nominal): Inline code is never highlighted
+### Scenario S4 (nominal): Inline code is never highlighted
 
 - GIVEN a paragraph with inline `code` and a one-line fenced block
 - WHEN the preview renders it
 - THEN the inline code has no token spans and only the fenced block is highlighted
 
-### Scenario (nominal): Fenced code text is shown literally
+### Scenario S5 (nominal): Fenced code text is shown literally
 
 - GIVEN a `markdown` fence containing a table, a link and an inner fence under a longer outer fence
 - WHEN the preview renders the document
 - THEN the table, link and inner fence appear as literal text and no table or anchor element is created inside the block
 
-### Scenario (boundary): A shorter backtick line does not close the fence
+### Scenario S6 (boundary): A shorter backtick line does not close the fence
 
 - GIVEN a fence whose content has a line of backticks shorter than the outer fence
 - WHEN the preview renders the document
 - THEN that line stays part of the code and does not close the block
 
-### Scenario (refusal): A failing grammar falls back to escaped text lines
+### Scenario S7 (refusal): A failing grammar falls back to escaped text lines
 
 - GIVEN a numbered, emphasized or diff block whose grammar throws while highlighting
 - WHEN the preview renders it
 - THEN a block that is wrapped into lines shows the escaped source text in wrapped lines, and an unwrapped block is returned unchanged
 
-### Scenario (nominal): Special characters are shown once
+### Scenario S8 (nominal): Special characters are shown once
 
 - GIVEN a highlighted block containing `a < b && c` and `&#60;`
 - WHEN the preview renders it
 - THEN the page shows `a < b && c` and `<` exactly once each, with no double escaping
 
-### Scenario (boundary): An unknown named reference is kept as written
+### Scenario S9 (boundary): An unknown named reference is kept as written
 
 - GIVEN a highlighted block containing an unknown named reference such as `&bogus;`
 - WHEN the preview renders it

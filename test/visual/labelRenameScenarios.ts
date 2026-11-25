@@ -7,7 +7,7 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 
 export const LABEL_RENAME_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-038
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-038#S2
     id: "myst/v46-label-rename-above-table-light-290",
     fixture: "84-label-above-table",
     theme: "light",

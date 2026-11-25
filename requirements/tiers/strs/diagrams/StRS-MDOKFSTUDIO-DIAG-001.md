@@ -14,13 +14,18 @@ scope: diagrams
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-17T19:27:51+01:00'
+approved_at: '2026-11-25T15:37:43+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-17T19:27:51+01:00'
+  at: '2026-11-25T15:37:43+01:00'
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Insert a diagram and read it
+- id: S2
+  title: Break a diagram
 user_need: As a writer, I put a Mermaid diagram in my document, or insert one in
   a single step, and see the drawn diagram in the preview in the colours of my
   theme, with the source one click away.
@@ -103,7 +108,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Insert a diagram and read it
+#### Path S1: Insert a diagram and read it
 
 1. Edit mode is on with the GFM palette
    - SwRS-MDOKFSTUDIO-DIAG-017: the writer picks Mermaid and a starter flowchart fence is inserted with Start selected
@@ -117,7 +122,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-DIAG-009 (nominal): a content update that replaces the node keeps the earlier picture
 4. The diagram is redrawn in the new theme, labels kept
 
-#### Path 2: Break a diagram
+#### Path S2: Break a diagram
 
 1. A Mermaid fence holds invalid syntax
    - SwRS-MDOKFSTUDIO-DIAG-015: the page cannot draw it and shows one message with a collapsed "Show the parser error" section

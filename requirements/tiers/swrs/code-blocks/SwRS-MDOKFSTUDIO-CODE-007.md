@@ -17,6 +17,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Fenced blocks share one style
+- id: S2
+  title: A nested block has the same style
+- id: S3
+  title: A long line scrolls inside its block
+- id: S4
+  title: An exact-fit line needs no scrollbar
+- id: S5
+  title: Forced white and cream themes
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,31 +50,31 @@ supersedes:
 
 When a code block is shown, the extension SHALL style the block with the editor foreground colour, a font size of 0.92em, a 4 px radius, a border and the code-block background, scroll a line wider than the block inside it outside Auto width mode, and keep the background soft and readable in the forced white and cream themes.
 
-### Scenario (nominal): Fenced blocks share one style
+### Scenario S1 (nominal): Fenced blocks share one style
 
 - GIVEN any fenced block in the preview
 - WHEN the page renders
 - THEN the block has the editor foreground colour, a font size of 0.92em, the code-block background, border and a 4 px radius, and the inner code has no own box
 
-### Scenario (boundary): A nested block has the same style
+### Scenario S2 (boundary): A nested block has the same style
 
 - GIVEN a block nested in a list or admonition
 - WHEN the page renders
 - THEN it uses the same style as a top-level block
 
-### Scenario (nominal): A long line scrolls inside its block
+### Scenario S3 (nominal): A long line scrolls inside its block
 
 - GIVEN a Python block with a very long line in a 460 px panel outside Auto width mode
 - WHEN the reader scrolls the block to the right
 - THEN the line's far end becomes visible and the page has no horizontal overflow
 
-### Scenario (boundary): An exact-fit line needs no scrollbar
+### Scenario S4 (boundary): An exact-fit line needs no scrollbar
 
 - GIVEN a block whose longest line is exactly as wide as the block
 - WHEN the preview renders it
 - THEN the block shows no horizontal scrollbar and the page has no overflow
 
-### Scenario (boundary): Forced white and cream themes
+### Scenario S5 (boundary): Forced white and cream themes
 
 | Forced theme | Outcome |
 | --- | --- |

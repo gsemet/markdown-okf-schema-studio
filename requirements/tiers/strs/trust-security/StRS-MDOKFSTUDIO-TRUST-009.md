@@ -16,6 +16,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: The page asks the host to act
+- id: S2
+  title: The host answers the page
 user_need: As a reader or writer, I rely on what the preview page asks of the
   extension being checked before any file or setting changes, and I never see an
   answer, an edit, a move or a request meant for another document or for an
@@ -74,7 +79,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: The page asks the host to act
+#### Path S1: The page asks the host to act
 
 1. The page sends a message to the host
    - SwRS-MDOKFSTUDIO-TRUST-052: the host hands the value to a handler only if it is a registered message type with a valid envelope
@@ -84,7 +89,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-TRUST-065 (refusal): an older render is answered as out of date, and a foreign render is dropped
 3. The message reaches the handler of its type
 
-#### Path 2: The host answers the page
+#### Path S2: The host answers the page
 
 1. The page receives a message from the host
    - SwRS-MDOKFSTUDIO-TRUST-059: the page treats it as a host message only if its type is registered and it is addressed to the page

@@ -22,6 +22,29 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-014
 depends_on:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-046
+scenarios:
+- id: S1
+  title: Targets that resolve from their root
+- id: S2
+  title: Default bundle and project roots
+- id: S3
+  title: Missing file
+- id: S4
+  title: Absolute target
+- id: S5
+  title: Bundle or project target leaves its root
+- id: S6
+  title: Root unavailable
+- id: S7
+  title: Configured root
+- id: S8
+  title: Configured root that cannot be used
+- id: S9
+  title: Accepted values of the settings
+- id: S10
+  title: allowOutsideWorkspaceLinks false
+- id: S11
+  title: allowOutsideWorkspaceLinks true or target inside the workspace
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -52,7 +75,7 @@ supersedes:
 
 When a link annotation has the resolution `document-relative`, `bundle-relative`, `bundle-relative-stem` or `project-relative`, the extension SHALL resolve the target from the folder of the document, the bundle root or the project root respectively, refuse an absolute target, and accept the target only when it names an existing file inside that root, a document-relative target being limited to the workspace folders unless `allowOutsideWorkspaceLinks` is true; a non-empty markdownOkfSchemaStudio.frontmatter.bundleRoot or projectRoot replaces the default root, a relative path being taken from the first workspace folder, and markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks decides whether a document-relative link may leave every workspace folder.
 
-### Scenario (nominal): Targets that resolve from their root
+### Scenario S1 (nominal): Targets that resolve from their root
 
 | Resolution | Setup | Outcome |
 | --- | --- | --- |
@@ -61,20 +84,20 @@ When a link annotation has the resolution `document-relative`, `bundle-relative`
 | bundle-relative-stem | The same bundle root and the value docs/t (`.md` is added to the target for the stem form) | The link is valid |
 | project-relative | A project root and the value bundle/docs/t.md naming an existing file below it | The link is valid |
 
-### Scenario (nominal): Default bundle and project roots
+### Scenario S2 (nominal): Default bundle and project roots
 
 | Setting | Layout | Outcome |
 | --- | --- | --- |
 | `markdownOkfSchemaStudio.frontmatter.bundleRoot` empty | A schema folder bundle/_schema, a document in bundle/docs and a file bundle/index.md (`log.md` serves too) | A bundle-relative link resolves from the bundle folder: the parent of the schema folder is the bundle root when it contains the document and an `index.md` or `log.md` |
 | `markdownOkfSchemaStudio.frontmatter.projectRoot` empty | A `.git` entry in a workspace folder above the document | A project-relative link resolves from the folder holding `.git`: the nearest folder with a `.git` entry above the document is the project root when it lies inside a workspace folder |
 
-### Scenario (refusal): Missing file
+### Scenario S3 (refusal): Missing file
 
 - GIVEN a document-relative link nope.md that does not exist
 - WHEN the document is analysed
 - THEN the field carries [E10] target 'nope.md' does not resolve to a file at 'ref' and the label reads File not found
 
-### Scenario (refusal): Absolute target
+### Scenario S4 (refusal): Absolute target
 
 | Value | Resolution | Outcome |
 | --- | --- | --- |
@@ -82,7 +105,7 @@ When a link annotation has the resolution `document-relative`, `bundle-relative`
 | C:/x.md (drive letter) | any | The same refusal is reported for the drive-letter path |
 | A target starting with two backslashes (UNC) | any | Refused as UNC with the same error |
 
-### Scenario (refusal): Bundle or project target leaves its root
+### Scenario S5 (refusal): Bundle or project target leaves its root
 
 | Input | Outcome |
 | --- | --- |
@@ -90,7 +113,7 @@ When a link annotation has the resolution `document-relative`, `bundle-relative`
 | A file inside the root that is a symbolic link to a file outside it | Refused with the same kind of error ("escapes its {resolution} root") |
 | A project-relative value that resolves outside the project root | Refused with the E10 error "escapes its project-relative root" |
 
-### Scenario (boundary): Root unavailable
+### Scenario S6 (boundary): Root unavailable
 
 | Input | Outcome |
 | --- | --- |
@@ -98,14 +121,14 @@ When a link annotation has the resolution `document-relative`, `bundle-relative`
 | A project-relative link, no configured project root, and no folder with a `.git` entry above the document inside a workspace folder | The same warning W15 with "project-relative root is unavailable" |
 | A project-relative link, no configured project root, and the nearest `.git` lies above the workspace folders | The same warning: an auto-detected git root outside the workspace is ignored |
 
-### Scenario (nominal): Configured root
+### Scenario S7 (nominal): Configured root
 
 | Setting | Value | Link | Outcome |
 | --- | --- | --- | --- |
 | bundleRoot | bundle | A bundle-relative link docs/t.md | The link resolves from the bundle folder |
 | projectRoot | The workspace folder | A project-relative link bundle/docs/t.md | The link is valid |
 
-### Scenario (refusal): Configured root that cannot be used
+### Scenario S8 (refusal): Configured root that cannot be used
 
 | Setting | Value | Outcome |
 | --- | --- | --- |
@@ -113,20 +136,20 @@ When a link annotation has the resolution `document-relative`, `bundle-relative`
 | projectRoot | A folder that does not exist | The field carries the warning W15 "project-relative root is unavailable", with no fall back to the git root |
 | either | Any value that is not a folder | Treated as unavailable, with the same warning |
 
-### Scenario (boundary): Accepted values of the settings
+### Scenario S9 (boundary): Accepted values of the settings
 
 | Setting | Rule |
 | --- | --- |
 | bundleRoot, projectRoot | String, default empty string; the value is trimmed; a relative path is taken from the first workspace folder; an absolute path is used as it is |
 | allowOutsideWorkspaceLinks | Boolean, default false; only document-relative links are affected by it |
 
-### Scenario (refusal): allowOutsideWorkspaceLinks false
+### Scenario S10 (refusal): allowOutsideWorkspaceLinks false
 
 - GIVEN a document-relative link ../../outside.md whose target is outside the workspace folder and the setting at its default false
 - WHEN the document is analysed
 - THEN the field carries [E10] target '../../outside.md' escapes its navigation root at 'ref' and the label reads Outside the allowed folder
 
-### Scenario (nominal): allowOutsideWorkspaceLinks true or target inside the workspace
+### Scenario S11 (nominal): allowOutsideWorkspaceLinks true or target inside the workspace
 
 | Setting | Link | Outcome |
 | --- | --- | --- |

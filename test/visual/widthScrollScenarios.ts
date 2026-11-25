@@ -8,7 +8,8 @@
 import type { ScenarioDefinition } from "./scenarioAssertions";
 
 export const WIDTH_SCROLL_SCENARIOS: ScenarioDefinition[] = [{
-  // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+  // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S1
+  // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S7
   id: "layout-width/v91-auto-wide-table-keeps-scroll-light-656",
   fixture: "58-wide-table-row-handles",
   theme: "light",

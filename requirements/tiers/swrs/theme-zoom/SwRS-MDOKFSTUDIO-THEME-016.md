@@ -22,6 +22,25 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-THEME-013
+scenarios:
+- id: S1
+  title: Current mode on a dark and a light VS Code theme
+- id: S2
+  title: High-contrast host
+- id: S3
+  title: The page root records the theme kind
+- id: S4
+  title: The host tells every open preview
+- id: S5
+  title: Preview without a render
+- id: S6
+  title: A Markdown document is drawn again
+- id: S7
+  title: Redraw by document and editor state
+- id: S8
+  title: A page that missed the theme message gets it with the ready answer
+- id: S9
+  title: The page reports the theme mode it was given
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,19 +65,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the Current theme mode is shown or the active VS Code colour theme changes, the extension SHALL keep the preview in the colours of the VS Code theme: it colours the page, the toolbar and its pressed button with the VS Code theme variables for every host theme kind, high contrast included, tells every open preview that has a render the new theme kind, and draws a Markdown document again once no block editor is open.
 
-### Scenario (nominal): Current mode on a dark and a light VS Code theme
+### Scenario S1 (nominal): Current mode on a dark and a light VS Code theme
 
 - GIVEN the preview in Current mode on a dark VS Code theme (real-input capture theme-zoom/r02) and on a light VS Code theme (capture theme-zoom/r06)
 - WHEN the page is rendered
 - THEN the body background equals --vscode-editor-background, the toolbar background equals --vscode-editorWidget-background, the toolbar text equals --vscode-icon-foreground and the pressed button background equals --vscode-button-background, with the values of the variables of each host theme
 
-### Scenario (boundary): High-contrast host
+### Scenario S2 (boundary): High-contrast host
 
 - GIVEN the Current mode on a high-contrast VS Code theme (theme kind 3 or 4)
 - WHEN the page is rendered
 - THEN the same four colours come from the high-contrast theme's variables; no rule of the page palette overrides them
 
-### Scenario (nominal): The page root records the theme kind
+### Scenario S3 (nominal): The page root records the theme kind
 
 - GIVEN a page and a themeChanged message with a theme kind, or a boot context without one
 - WHEN the page starts or handles the message
@@ -71,25 +90,25 @@ When the Current theme mode is shown or the active VS Code colour theme changes,
 | themeChanged with theme kind 3 (high contrast), then 4 (high contrast light) | 3, then 4 |
 | Boot context without a theme kind | default |
 
-### Scenario (nominal): The host tells every open preview
+### Scenario S4 (nominal): The host tells every open preview
 
 - GIVEN two open previews with a render and a switch of the VS Code theme from dark to light
 - WHEN VS Code reports the change
 - THEN each preview receives one themeChanged message with the new kind and the identity of its render (the page accepts it under SwRS-MDOKFSTUDIO-TRUST-059)
 
-### Scenario (boundary): Preview without a render
+### Scenario S5 (boundary): Preview without a render
 
 - GIVEN an open preview that has not rendered yet
 - WHEN VS Code reports the change
 - THEN no themeChanged message is posted to it
 
-### Scenario (nominal): A Markdown document is drawn again
+### Scenario S6 (nominal): A Markdown document is drawn again
 
 - GIVEN an open preview of a .md file and a switch of the VS Code theme
 - WHEN VS Code reports the change
 - THEN one bounded render follows, with a request number higher than the previous one, and no second render follows after 300 ms
 
-### Scenario (boundary): Redraw by document and editor state
+### Scenario S7 (boundary): Redraw by document and editor state
 
 - GIVEN a theme change reported by VS Code
 - WHEN the preview document or the editor state is as in the table
@@ -101,13 +120,13 @@ When the Current theme mode is shown or the active VS Code colour theme changes,
 | A block editor open in edit mode | The page changes its theme marker at once, the document is not drawn again, and the redraw runs after the editor closes (see SwRS-MDOKFSTUDIO-BLOCK-041) |
 | No editor open | The redraw starts at once |
 
-### Scenario (nominal): A page that missed the theme message gets it with the ready answer
+### Scenario S8 (nominal): A page that missed the theme message gets it with the ready answer
 
 - GIVEN a page whose runtime started after the host's themeChanged message was delivered, and the host's answer to a ready report of render 11
 - WHEN the page reports previewReady and the host answers
 - THEN the page receives themeChanged with kind 2 and data-sphinx-preview-theme reads 2; the document, revision and request number of the answer are those of the report, so a page that has moved on ignores it
 
-### Scenario (boundary): The page reports the theme mode it was given
+### Scenario S9 (boundary): The page reports the theme mode it was given
 
 - GIVEN a press of the Theme button (see SwRS-MDOKFSTUDIO-THEME-001)
 - WHEN the page reports the new mode

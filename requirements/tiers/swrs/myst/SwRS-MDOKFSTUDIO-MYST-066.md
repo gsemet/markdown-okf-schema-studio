@@ -18,6 +18,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
 depends_on: []
+scenarios:
+- id: S1
+  title: The nearest conf.py governs
+- id: S2
+  title: The workspace root bounds the search
+- id: S3
+  title: A single common-folder conf.py is the fallback
+- id: S4
+  title: A conf.py listing a MyST parser is read as text
+- id: S5
+  title: Without a certain MyST list nothing is reported
+- id: S6
+  title: List literal forms are read completely
+- id: S7
+  title: Mutations are applied in written order
+- id: S8
+  title: Computed values make the list uncertain
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,17 +61,17 @@ supersedes:
 
 When a document is checked, the extension SHALL take its enabled MyST extensions from the governing `conf.py`, found as the nearest one in the document's folder or any folder up to the workspace root (never one above the root, and for a document outside the workspace only its own folder) or else as the single conf.py of a common Sphinx folder at the root, read as text and never run, and report nothing when no certain list results.
 
-### Scenario (nominal): The nearest conf.py governs
+### Scenario S1 (nominal): The nearest conf.py governs
 - GIVEN conf.py in two ancestor folders
 - WHEN a document below both is checked
 - THEN the nearer one governs
 
-### Scenario (boundary): The workspace root bounds the search
+### Scenario S2 (boundary): The workspace root bounds the search
 - GIVEN a conf.py above the workspace root, or a document outside the workspace
 - WHEN a document is checked
 - THEN the root-outside file is not used and the outside document gets no fallback, only its own folder is looked at
 
-### Scenario (boundary): A single common-folder conf.py is the fallback
+### Scenario S3 (boundary): A single common-folder conf.py is the fallback
 Applies when no conf.py is found above the document. The common folders at the workspace root are docs/, doc/, sphinx/, source/ and docs/source/.
 
 | Input | Outcome |
@@ -63,12 +80,12 @@ Applies when no conf.py is found above the document. The common folders at the w
 | Two or more candidate conf.py files in the common folders | no conf governs |
 | An ancestor conf.py and a common-folder candidate | the ancestor wins |
 
-### Scenario (nominal): A conf.py listing a MyST parser is read as text
+### Scenario S4 (nominal): A conf.py listing a MyST parser is read as text
 - GIVEN a conf.py whose `extensions` contains myst_parser or myst_nb
 - WHEN a document is checked
 - THEN missing extensions are reported, and the conf.py is never executed
 
-### Scenario (refusal): Without a certain MyST list nothing is reported
+### Scenario S5 (refusal): Without a certain MyST list nothing is reported
 | Input | Outcome |
 | --- | --- |
 | No conf.py | nothing is reported and rendering is unchanged |
@@ -76,7 +93,7 @@ Applies when no conf.py is found above the document. The common folders at the w
 | An uncertain list | nothing is reported and rendering is unchanged |
 | An I/O error reading the file | nothing is reported and rendering is unchanged |
 
-### Scenario (nominal): List literal forms are read completely
+### Scenario S6 (nominal): List literal forms are read completely
 - GIVEN `extensions` or `myst_enable_extensions` written as list or tuple literals with single, double and triple quotes, comments, trailing commas, implicit string joins, and backslash or bracket continuations
 - WHEN the file is read
 - THEN the element list is complete and correct
@@ -86,14 +103,14 @@ Applies when no conf.py is found above the document. The common folders at the w
 | CRLF line endings | the same elements result |
 | r or u string prefixes | the same elements result |
 
-### Scenario (nominal): Mutations are applied in written order
+### Scenario S7 (nominal): Mutations are applied in written order
 - GIVEN `extensions = ["a"]`, then `.append("b")` and `+= ["c"]`
 - WHEN the file is read
 - THEN the list is a, b, c in that order
 
 The forms `=`, `+=`, `.append`, `.extend` and list addition are applied in order; `.extend([...])` followed by a later `=` reassignment gives the later assignment as the result.
 
-### Scenario (refusal): Computed values make the list uncertain
+### Scenario S8 (refusal): Computed values make the list uncertain
 | Input | Outcome |
 | --- | --- |
 | `extensions = load()` (computed value) | the result is uncertain and no warning is shown |

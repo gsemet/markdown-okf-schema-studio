@@ -17,6 +17,15 @@ derives_from:
 - StRS-MDOKFSTUDIO-THEME-002
 depends_on:
 - SwRS-MDOKFSTUDIO-THEME-025
+scenarios:
+- id: S1
+  title: Variables of the stylesheet
+- id: S2
+  title: Rendered pages
+- id: S3
+  title: Gallery on Cream
+- id: S4
+  title: Other themes
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,25 +44,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the Cream theme mode is shown, the extension SHALL give the foreground, description, link, six chart and error text colours a contrast of at least 4.5 to 1 on each of the editor, code block, block quote, hover widget, widget and input surfaces, and draw the paragraph after an admonition in the body text colour.
 
-### Scenario (nominal): Variables of the stylesheet
+### Scenario S1 (nominal): Variables of the stylesheet
 
 - GIVEN the Cream colour variables
 - WHEN every text colour is compared with every surface
 - THEN all 60 pairs reach 4.5 to 1, and so do the button, secondary button, hover widget, input and icon pairs
 
-### Scenario (nominal): Rendered pages
+### Scenario S2 (nominal): Rendered pages
 
 - GIVEN the Cream scenarios theme-zoom/v02 to v06
 - WHEN the page, note, inline code, fenced block, link and toolbar text colours are compared with their backgrounds, translucent ones flattened over the page
 - THEN every pair reaches 4.5 to 1
 
-### Scenario (nominal): Gallery on Cream
+### Scenario S3 (nominal): Gallery on Cream
 
 - GIVEN the admonition gallery forced to Cream in a 900 px pane (visual scenario theme-zoom/v03)
 - WHEN the preview is rendered
 - THEN the paragraph after each admonition has the body text colour
 
-### Scenario (boundary): Other themes
+### Scenario S4 (boundary): Other themes
 
 - GIVEN the admonition gallery in a light or a dark theme
 - WHEN the same page-wide gallery check runs

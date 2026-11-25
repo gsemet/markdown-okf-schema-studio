@@ -31,7 +31,8 @@ function writeFile(root: string, relative: string, content: string): void {
   fs.writeFileSync(target, content);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S7
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S8
 test("T220: a sibling past the 500th stem is known, and the suggestions start with the document's folder", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-suggestions-"));
   try {
@@ -78,7 +79,8 @@ test("T220: a sibling past the 500th stem is known, and the suggestions start wi
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S7
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S8
 test("T220: a stem found in several folders is suggested once, at its closest distance", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-suggestions-"));
   try {

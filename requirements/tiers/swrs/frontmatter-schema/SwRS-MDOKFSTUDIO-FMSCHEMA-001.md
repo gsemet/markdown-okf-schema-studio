@@ -18,6 +18,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Closing with three dashes or three dots
+- id: S2
+  title: Where the closing fence is recognised
+- id: S3
+  title: Opening fence without a closing fence
+- id: S4
+  title: Invalid YAML
+- id: S5
+  title: A block that is not a mapping
+- id: S6
+  title: The body renders when the YAML is invalid
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,13 +60,13 @@ supersedes:
 
 When a document starts with a `---` line, the extension SHALL take the lines up to the first later `---` or `...` line that stands alone on its line, with LF or CRLF endings, as the frontmatter block and show it as a properties table when it parses to a YAML mapping, or as one error row "Invalid frontmatter YAML: {parser message}" with an error badge of 1 when it does not, and render the Markdown body below the table or the error row in both cases.
 
-### Scenario (nominal): Closing with three dashes or three dots
+### Scenario S1 (nominal): Closing with three dashes or three dots
 
 - GIVEN a document starting with `---`, a line `title: Hello` and a closing line `...` followed by a heading
 - WHEN the preview is rendered
 - THEN a properties table at the top lists the field title with the value Hello and the heading follows it
 
-### Scenario (boundary): Where the closing fence is recognised
+### Scenario S2 (boundary): Where the closing fence is recognised
 
 | Input | Outcome |
 | --- | --- |
@@ -63,7 +76,7 @@ When a document starts with a `---` line, the extension SHALL take the lines up 
 | A CRLF document closed by a `...` line | The block closes at the `...` line and the table lists the fields above it |
 | A document with only the two fence lines | The block is valid and empty; it parses to null and gets the not-a-mapping error row (see the scenario on a block that is not a mapping) |
 
-### Scenario (refusal): Opening fence without a closing fence
+### Scenario S3 (refusal): Opening fence without a closing fence
 
 - GIVEN a document with `---`, the lines `title: Open` and `status: draft`, a heading and no closing fence line
 - WHEN the preview is rendered
@@ -71,14 +84,14 @@ When a document starts with a `---` line, the extension SHALL take the lines up 
 - WHEN a closing `---` line is inserted after the two fields and the preview refreshes
 - THEN the table appears with the fields title and status
 
-### Scenario (refusal): Invalid YAML
+### Scenario S4 (refusal): Invalid YAML
 
 | Input | Outcome |
 | --- | --- |
 | A document whose frontmatter is the single line `k: [a` followed by a heading | The table holds one alert row starting with "Invalid frontmatter YAML:" and the badge reads 1 error |
 | A broken frontmatter that also names a type with a schema | No schema is applied, no field row is listed and the single error row is shown |
 
-### Scenario (refusal): A block that is not a mapping
+### Scenario S5 (refusal): A block that is not a mapping
 
 | Input | Outcome |
 | --- | --- |
@@ -86,7 +99,7 @@ When a document starts with a `---` line, the extension SHALL take the lines up 
 | A document whose frontmatter is only the two fence lines | The same error row is shown, because an empty block parses to null |
 | A block that parses to a scalar | The same error row is shown |
 
-### Scenario (nominal): The body renders when the YAML is invalid
+### Scenario S6 (nominal): The body renders when the YAML is invalid
 
 | Input | Outcome |
 | --- | --- |

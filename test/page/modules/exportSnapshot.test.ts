@@ -182,7 +182,7 @@ test("taking a snapshot changes nothing on the page", () => {
   assert.equal(after, before);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-128
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-128#S1
 test("a diagram that is still drawing is awaited, then the export goes ahead", () => {
   const diagram = new RuntimeElement({ "data-render-state": "rendering" }, { scrollY: 0 }, 0, 10);
   const harness = createRuntimeHarness();
@@ -195,7 +195,7 @@ test("a diagram that is still drawing is awaited, then the export goes ahead", (
   assert.equal(exportRequests(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-128
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-128#S1
 test("a diagram in error does not hold the export, and a diagram that never settles is given up after 10 s", () => {
   const failed = new RuntimeElement({ "data-render-state": "error" }, { scrollY: 0 }, 0, 10);
   const first = createRuntimeHarness();
@@ -214,14 +214,15 @@ test("a diagram in error does not hold the export, and a diagram that never sett
   assert.equal(exportRequests(second).length, 1, "the wait is bounded");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-128
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-128#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-128#S2
 test("whenDiagramsSettled calls back at once with no diagram", () => {
   let called = 0;
   whenDiagramsSettled({ querySelectorAll: () => [] } as never, { setTimeout: () => 0 } as never, 10_000, () => { called += 1; });
   assert.equal(called, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-128
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-128#S1
 test("a diagram that is unavailable is settled and does not hold the export", () => {
   const unavailable = new RuntimeElement({ "data-render-state": "unavailable" }, { scrollY: 0 }, 0, 10);
   const harness = createRuntimeHarness();

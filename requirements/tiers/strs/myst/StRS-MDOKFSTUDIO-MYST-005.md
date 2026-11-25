@@ -12,6 +12,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: A construct only a build resolves
+- id: S2
+  title: A fence the parser cannot build
 user_need: As a writer, I want to know which constructs need a full project
   build so that I do not mistake a placeholder for a result.
 derived_by:
@@ -57,14 +62,14 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: A construct only a build resolves
+#### Path S1: A construct only a build resolves
 
 1. A document holds a construct that only a full project build can resolve
    - SwRS-MDOKFSTUDIO-CORE-022: the page renders an inert, muted placeholder with its name, arguments and body, and lists a warning for a directive
    - Option SwRS-MDOKFSTUDIO-CORE-022 (boundary): a citation
 2. A muted placeholder is drawn and the render stays successful
 
-#### Path 2: A fence the parser cannot build
+#### Path S2: A fence the parser cannot build
 
 1. A document holds a directive or fence the parser cannot build
    - SwRS-MDOKFSTUDIO-MYST-096: the page renders its raw source lines as a code block and renders the rest of the document

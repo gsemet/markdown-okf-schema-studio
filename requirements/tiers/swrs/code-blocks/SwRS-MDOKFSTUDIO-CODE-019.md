@@ -23,6 +23,33 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: The clipboard holds the code lines only
+- id: S2
+  title: A diff block keeps its markers
+- id: S3
+  title: The button confirms with Copied for 1.5 seconds
+- id: S4
+  title: The button never claims a copy that did not happen
+- id: S5
+  title: A second click restarts the confirmation
+- id: S6
+  title: An open block editor keeps the focus
+- id: S7
+  title: Edit mode opens and commits no editor
+- id: S8
+  title: A copy request of 1 000 000 characters is written
+- id: S9
+  title: An oversized or non-string request is refused
+- id: S10
+  title: Accepted shape of the copy request
+- id: S11
+  title: A copy request without a click of the user is refused
+- id: S12
+  title: Every handled request is answered
+- id: S13
+  title: A stale page or a preview with restricted reads
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,61 +74,61 @@ supersedes:
 
 When the reader clicks the copy button, the extension SHALL put the block's code only on the clipboard, without file name or line numbers, lines joined with newlines and a trailing newline, label the button Copied with a check mark for 1.5 s only after the host confirms the copy, show the host's reason instead when it refuses, and keep the focus and the editors untouched; the host SHALL refuse a copy request whose text is not a string, is longer than 1 000 000 characters or does not follow a click of the user, without writing the clipboard, and answer every copy request it handles.
 
-### Scenario (nominal): The clipboard holds the code lines only
+### Scenario S1 (nominal): The clipboard holds the code lines only
 
 - GIVEN a numbered, emphasized block with a file name
 - WHEN the reader clicks Copy code
 - THEN the clipboard holds the code lines only, joined by newlines with a trailing newline (the page sends the text in a `previewCopyText` request, which the host writes to the clipboard)
 
-### Scenario (boundary): A diff block keeps its markers
+### Scenario S2 (boundary): A diff block keeps its markers
 
 - GIVEN a diff block
 - WHEN the reader clicks Copy code
 - THEN the clipboard holds the lines with their `+` and `-` markers and nothing else
 
-### Scenario (nominal): The button confirms with Copied for 1.5 seconds
+### Scenario S3 (nominal): The button confirms with Copied for 1.5 seconds
 
 - GIVEN the reader has clicked Copy code
 - WHEN 1.5 s pass
 - THEN the button was labelled Copied with a check mark from the host's confirmation and returns to Copy code without the check mark
 
-### Scenario (refusal): The button never claims a copy that did not happen
+### Scenario S4 (refusal): The button never claims a copy that did not happen
 
 - GIVEN the host answers a copy request with a refusal and a reason (for example "Too large to copy.")
 - WHEN the answer arrives
 - THEN the button shows a cross and the reason as its label and title for 3 s instead of Copied, then returns to Copy code; before any answer, and for an answer to an older click, it keeps the label Copy code
 
-### Scenario (boundary): A second click restarts the confirmation
+### Scenario S5 (boundary): A second click restarts the confirmation
 
 - GIVEN the reader clicks the button twice within 1.5 s
 - WHEN the host confirms the second click
 - THEN the Copied state lasts 1.5 s from that confirmation
 
-### Scenario (nominal): An open block editor keeps the focus
+### Scenario S6 (nominal): An open block editor keeps the focus
 
 - GIVEN a block editor is open elsewhere
 - WHEN the reader presses the copy button
 - THEN the editor keeps the focus
 
-### Scenario (refusal): Edit mode opens and commits no editor
+### Scenario S7 (refusal): Edit mode opens and commits no editor
 
 - GIVEN edit mode is on
 - WHEN the reader clicks the copy button of a block
 - THEN the code is copied and no editor opens or commits, and the click does not reach the block's own click handling
 
-### Scenario (boundary): A copy request of 1 000 000 characters is written
+### Scenario S8 (boundary): A copy request of 1 000 000 characters is written
 
 - GIVEN a `previewCopyText` request with 1 000 000 characters
 - WHEN the host receives it
 - THEN the text is written to the clipboard
 
-### Scenario (refusal): An oversized or non-string request is refused
+### Scenario S9 (refusal): An oversized or non-string request is refused
 
 - GIVEN a `previewCopyText` request with 1 000 001 characters or a numeric text
 - WHEN the host receives it
 - THEN the clipboard is unchanged; a text of 1 000 001 to 20 000 000 characters is answered `ok: false` with "Too large to copy."; anything else that fails the shape check is dropped without an answer, and the page shows its "did not answer" refusal after 6 s
 
-### Scenario (refusal): Accepted shape of the copy request
+### Scenario S10 (refusal): Accepted shape of the copy request
 
 A `previewCopyText` message has the identity fields of every page message (see SwRS-MDOKFSTUDIO-TRUST-052) an `editId` (non-empty) a boolean `userGesture` and one field `text`:
 
@@ -117,19 +144,19 @@ A `previewCopyText` message has the identity fields of every page message (see S
 
 A request is answered by `editId` (see SwRS-MDOKFSTUDIO-TRUST-090). The shape check accepts a string of up to 20 000 000 characters, so that the host can answer the size limit; a non-string is dropped: nothing is written to the clipboard.
 
-### Scenario (refusal): A copy request without a click of the user is refused
+### Scenario S11 (refusal): A copy request without a click of the user is refused
 
 - GIVEN a well-formed `previewCopyText` message whose `userGesture` is false (the page sets it true only when it sends the request from a click event the user made, `isTrusted`)
 - WHEN the host receives it
 - THEN it is answered `ok: false`, "Copy needs a click on the copy button.", and the clipboard is unchanged; a message without a boolean `userGesture` is rejected by the shape check
 
-### Scenario (nominal): Every handled request is answered
+### Scenario S12 (nominal): Every handled request is answered
 
 - GIVEN a copy request the host handles
 - WHEN the clipboard write succeeds or fails
 - THEN the host sends `previewCopyTextResult` with the request's `editId` and `ok: true`, or `ok: false` with "Could not copy."
 
-### Scenario (boundary): A stale page or a preview with restricted reads
+### Scenario S13 (boundary): A stale page or a preview with restricted reads
 
 - GIVEN a `previewCopyText` message that passes the shape check
 - WHEN its document version or render request is stale, or the preview has restricted reads

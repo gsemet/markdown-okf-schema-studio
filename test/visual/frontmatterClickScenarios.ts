@@ -7,7 +7,8 @@ import { WIDE, type ScenarioDefinition } from "./scenarioAssertions";
 
 export const FRONTMATTER_CLICK_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S3
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S5
     id: "frontmatter-editing/v09-click-field-below-open-editor-light-900",
     fixture: "08-okf-schema",
     theme: "light",

@@ -8,7 +8,7 @@ import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const yaml = require("yaml") as typeof import("yaml");
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S6
 test("a document's frontmatter is parsed once for the render and every analysis of that text", async () => {
   const source = "---\ntitle: Parsed once\ntags: [a, b]\n---\n\n# Body\n";
   const parse = mock.method(yaml, "parseDocument");

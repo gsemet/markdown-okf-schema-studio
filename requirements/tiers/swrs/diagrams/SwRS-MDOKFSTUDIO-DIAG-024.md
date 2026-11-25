@@ -17,6 +17,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-006
 - StRS-MDOKFSTUDIO-DIAG-007
 depends_on: []
+scenarios:
+- id: S1
+  title: Default and true
+- id: S2
+  title: Value that is not the boolean true
+- id: S3
+  title: Trust of the workspace
+- id: S4
+  title: The built-in engine starts no process
+- id: S5
+  title: The built-in engine needs nothing outside the extension
+- id: S6
+  title: jarPath is ignored until useJar is on
+- id: S7
+  title: A PlantUML setting change renders the open document again
+- id: S8
+  title: The settings are contributed with an explanation
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -53,49 +70,49 @@ supersedes:
 
 When PlantUML diagrams are drawn, the extension SHALL select the built-in engine unless the setting markdownOkfSchemaStudio.plantuml.useJar is exactly true, and the JAR pipeline, which uses markdownOkfSchemaStudio.plantuml.jarPath, when it is true.
 
-### Scenario (nominal): Default and true
+### Scenario S1 (nominal): Default and true
 - GIVEN the setting markdownOkfSchemaStudio.plantuml.useJar unset, then set to true in a trusted workspace
 - WHEN a preview is rendered
 - THEN when useJar is not exactly true the extension draws PlantUML diagrams with the built-in engine, and when it is true in a trusted workspace it selects the JAR pipeline
 - AND the unset setting selects the built-in engine and true selects the JAR pipeline
 
-### Scenario (refusal): Value that is not the boolean true
+### Scenario S2 (refusal): Value that is not the boolean true
 | Input | Outcome |
 | --- | --- |
 | useJar holding the text true | the built-in engine is selected and no process is started |
 | useJar holding the number 1 | the built-in engine is selected and no process is started |
 
-### Scenario (boundary): Trust of the workspace
+### Scenario S3 (boundary): Trust of the workspace
 | Input | Outcome |
 | --- | --- |
 | useJar true in an untrusted workspace | the JAR pipeline is still selected, which refuses to start a process; no diagram is drawn by the built-in engine and the choice never falls back to the built-in engine |
 | useJar false in the same untrusted workspace | the built-in engine draws the diagrams |
 
-### Scenario (nominal): The built-in engine starts no process
+### Scenario S4 (nominal): The built-in engine starts no process
 - GIVEN useJar off, in a trusted workspace with a jarPath set, and in an untrusted workspace
 - WHEN a preview with PlantUML diagrams is rendered
 - THEN no process is spawned and no PlantUML executable or JAR is read in either trust state
 - AND in the trusted workspace the host reports no PlantUML diagram result, and in the untrusted workspace the diagrams are left to the page
 
-### Scenario (nominal): The built-in engine needs nothing outside the extension
+### Scenario S5 (nominal): The built-in engine needs nothing outside the extension
 | Input | Outcome |
 | --- | --- |
 | a diagram that selects a theme of the bundled library and uses an OpenIconic icon | the picture is drawn and nothing is fetched |
 | a class diagram on a machine without Graphviz | the picture is drawn with PlantUML's own Smetana layout, with no network access and no Graphviz installation |
 
-### Scenario (boundary): jarPath is ignored until useJar is on
+### Scenario S6 (boundary): jarPath is ignored until useJar is on
 | Input | Outcome |
 | --- | --- |
 | jarPath holding a JAR path and useJar off | the built-in engine draws the diagrams and the JAR is neither checked nor started; the value is kept |
 | the same jarPath after useJar is turned on and the preview is rendered again | the JAR pipeline uses that path without it being entered again |
 
-### Scenario (nominal): A PlantUML setting change renders the open document again
+### Scenario S7 (nominal): A PlantUML setting change renders the open document again
 | Input | Outcome |
 | --- | --- |
 | a change of plantuml.useJar (or any other markdownOkfSchemaStudio.plantuml setting) with a preview open | the preview settings are read again for every open preview and the document is rendered with the other engine, without reopening the preview |
 | a change of a setting outside the preview, plantuml and frontmatter sections | nothing is re-read and nothing is rendered again |
 
-### Scenario (boundary): The settings are contributed with an explanation
+### Scenario S8 (boundary): The settings are contributed with an explanation
 | Input | Outcome |
 | --- | --- |
 | the extension manifest, markdownOkfSchemaStudio.plantuml.useJar | a boolean with default false and order 79, with a Markdown description of the engine choice of at most 700 characters |

@@ -18,6 +18,27 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMEDIT-001
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: A list field shows one input per item
+- id: S2
+  title: What saves the list and what does not
+- id: S3
+  title: Enter inserts an empty item after the caret item
+- id: S4
+  title: Enter and Backspace on empty items
+- id: S5
+  title: Items reorder by keyboard
+- id: S6
+  title: Items reorder by drag
+- id: S7
+  title: Link lists suggest the known Markdown file stems
+- id: S8
+  title: The suggestions start with the stems closest to the document
+- id: S9
+  title: An item matching no stem is warned about and still saved
+- id: S10
+  title: The warning checks every known stem, not only the dropdown
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,13 +69,13 @@ supersedes:
 
 When a writer opens the editor of a list field, the extension SHALL show one text input per item, each with a drag handle and a remove button, an Add item button and no Save or Cancel button, and let the writer add, remove, reorder and save the items from the keyboard or by drag, with the known Markdown file stems offered on a list of filename-stem links.
 
-### Scenario (nominal): A list field shows one input per item
+### Scenario S1 (nominal): A list field shows one input per item
 
 - GIVEN a list field with items a and b
 - WHEN the writer opens its editor
 - THEN two inputs labelled List item 1 and List item 2 appear with a handle and a remove button each, plus "+ Add item" and no Save or Cancel button
 
-### Scenario (boundary): What saves the list and what does not
+### Scenario S2 (boundary): What saves the list and what does not
 
 | Input | Outcome |
 | --- | --- |
@@ -64,13 +85,13 @@ When a writer opens the editor of a list field, the extension SHALL show one tex
 | A drag in progress (focus change of the drag) | No save |
 | Enter with Shift, or Enter during IME composition, in an item | The list is not touched and nothing is posted |
 
-### Scenario (nominal): Enter inserts an empty item after the caret item
+### Scenario S3 (nominal): Enter inserts an empty item after the caret item
 
 - GIVEN a list editor with items a and b and the caret in a
 - WHEN the writer presses Enter
 - THEN an empty item is inserted after a and focused, nothing is posted
 
-### Scenario (boundary): Enter and Backspace on empty items
+### Scenario S4 (boundary): Enter and Backspace on empty items
 
 | Input | Outcome |
 | --- | --- |
@@ -81,37 +102,37 @@ When a writer opens the editor of a list field, the extension SHALL show one tex
 | Backspace in the only item | The item is removed and the Add item button is focused |
 | Backspace in a non-empty item | The key is left to the browser and the item stays |
 
-### Scenario (nominal): Items reorder by keyboard
+### Scenario S5 (nominal): Items reorder by keyboard
 
 - GIVEN a list editor with items a, b and c
 - WHEN the writer presses ArrowDown on the handle of a
 - THEN the order becomes b, a, c and the labels are renumbered
 
-### Scenario (boundary): Items reorder by drag
+### Scenario S6 (boundary): Items reorder by drag
 
 - GIVEN a drag of the handle of a over c
 - WHEN the item is dropped
 - THEN an insertion line shows during the drag, the order changes, and no save is triggered by the focus change of the drag
 
-### Scenario (nominal): Link lists suggest the known Markdown file stems
+### Scenario S7 (nominal): Link lists suggest the known Markdown file stems
 
 - GIVEN a list field of filename-stem links whose row carries link suggestions
 - WHEN the writer opens its editor and adds an item
 - THEN each input, the new one included, references the datalist of the stems
 
-### Scenario (nominal): The suggestions start with the stems closest to the document
+### Scenario S8 (nominal): The suggestions start with the stems closest to the document
 
 - GIVEN a list field of filename-stem links in a workspace of more than 500 Markdown files
 - WHEN the link suggestions of its row are computed
 - THEN the stems of the document's own folder come first, then the others by the number of folder steps between the document's folder and the file's folder, then alphabetically; a stem found in several folders appears once, at its closest folder, and the list stops at 500 stems
 
-### Scenario (boundary): An item matching no stem is warned about and still saved
+### Scenario S9 (boundary): An item matching no stem is warned about and still saved
 
 - GIVEN an item whose value matches no known stem
 - WHEN the writer types it
 - THEN the status warns 'No Markdown file named "x.md" was found. It will be saved as typed.' and saving still posts the value; a missing or invalid suggestion attribute gives no datalist
 
-### Scenario (boundary): The warning checks every known stem, not only the dropdown
+### Scenario S10 (boundary): The warning checks every known stem, not only the dropdown
 
 - GIVEN a row whose known stems (every Markdown file stem of the index the table resolves links with, sent uncapped, and only when the dropdown was capped) include a stem that is not among the 500 dropdown suggestions
 - WHEN the writer types that stem in an item

@@ -37,7 +37,8 @@ function fakeEngine(answer: (call: EngineCall) => { svg: string } | { error: str
   return { engine, calls };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-032
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-032#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-032#S3
 test("finds the PlantUML directives the built-in engine cannot serve, with their line", () => {
   const cases: Array<[string, string]> = [
     ["@startuml\n  !include <C4/C4_Context>\n@enduml", "!include <C4/C4_Context>"],
@@ -83,7 +84,8 @@ test("a diagram with a standard-library include shows the useJar hint, keeps its
   assert.match(message.textContent, /markdownOkfSchemaStudio\.plantuml\.useJar/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-023
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S4
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S6
 test("a rendered diagram becomes an inert data-URI image, in the theme asked for", async () => {
   const doc = new FakeDocument();
   const element = diagram(doc, SEQUENCE);
@@ -102,7 +104,8 @@ test("a rendered diagram becomes an inert data-URI image, in the theme asked for
   assert.equal(element.querySelectorAll(".myst-plantuml-error").length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-039
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-039#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-039#S3
 test("the same source in the same theme renders once; a theme change renders again from the kept source", async () => {
   const doc = new FakeDocument();
   const first = diagram(doc, SEQUENCE);
@@ -121,7 +124,7 @@ test("the same source in the same theme renders once; a theme change renders aga
   assert.equal(first.getAttribute("data-plantuml-dark"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-039
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-039#S5
 test("ten patches of one block run the engine at most twice: queued runs are superseded, the latest wins", async () => {
   const doc = new FakeDocument();
   const element = diagram(doc, SEQUENCE);
@@ -247,7 +250,8 @@ function messageOf(element: FakeElement): string {
   return element.querySelector(".myst-plantuml-error")?.textContent ?? "";
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-046
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-046#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-046#S3
 test("a local include is asked of the host and drawn; a nested include resolves next to the including file", async () => {
   const doc = new FakeDocument();
   const element = diagram(doc, "@startuml\n!include styles/common.puml\nAlice -> Carol\n@enduml");
@@ -266,7 +270,8 @@ test("a local include is asked of the host and drawn; a nested include resolves 
   assert.match(svgOf(element), /participant "Included Carol" as Carol/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-068
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S8
 test("the top-level includes of a {uml} diagram file resolve next to that file", async () => {
   const doc = new FakeDocument();
   const element = diagram(doc, "@startuml\n!include common.puml\nA -> B\n@enduml");
@@ -298,7 +303,7 @@ test("an include cycle is stopped with a message, also back to the diagram's own
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-061
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-061#S3
 test("includes nested deeper than 8 files are refused", async () => {
   const files: Record<string, string> = {};
   for (let level = 1; level <= 10; level += 1) {
@@ -386,7 +391,7 @@ test("a local theme folder is refused by the loader even past the pre-scan", asy
   assert.match(messageOf(element), /!theme \.\.\. from themes\/puml-theme-corp\.puml is not available/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-053
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-053#S7
 test("after an included file changed, the diagrams that read files are drawn again from the host", async () => {
   const doc = new FakeDocument();
   const including = diagram(doc, "@startuml\n!include part.puml\n@enduml");

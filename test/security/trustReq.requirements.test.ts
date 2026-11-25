@@ -46,7 +46,8 @@ const CSP_SOURCE = "vscode-webview://csp";
 // ---------------------------------------------------------------------------------------------
 // The policy of a page
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S4
 test("fonts and media load only from the webview source", () => {
   const policy = createContentSecurityPolicy(CSP_SOURCE, "abc");
   assert.equal(directive(policy, "font-src"), CSP_SOURCE);
@@ -66,7 +67,7 @@ test("the page may not change its base address or submit a form", () => {
   assert.equal(directive(policy, "form-action"), "'none'");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-022
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S1
 test("each nonce is 18 random bytes as 24 base64url characters, fresh for every page", () => {
   const nonces = Array.from({ length: 20 }, () => createNonce());
   for (const nonce of nonces) {
@@ -102,7 +103,7 @@ test("a status page carries the policy and its own nonce and no script", () => {
 // ---------------------------------------------------------------------------------------------
 // The resource policy
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S3
 test("a resource must be an existing regular file", async () => {
   const root = makeDirectory();
   fs.writeFileSync(path.join(root, "image.png"), "image");
@@ -196,7 +197,7 @@ test("an include that cannot be read is left unresolved", async (t) => {
   assert.doesNotMatch(result.html, /Secret text/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S7
 test("a read-only preview reads includes from the folder of its document", async () => {
   const root = makeDirectory();
   const folder = path.join(root, "docs");
@@ -236,7 +237,7 @@ function sanitize(html: string): string {
   }).html;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S2
 test("the sanitizer removes style elements and records blocked-inline-style", () => {
   const result = rewriteSphinxHtml(
     "<html><head></head><body><style>p { color: red }</style><p>Text</p></body></html>",
@@ -280,7 +281,7 @@ test("the sanitizer reports a removed element and a removed attribute", () => {
   assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-attribute"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S4
 test("an ignored linked stylesheet is reported and its link element is removed", () => {
   const ignored: string[] = [];
   const result = rewriteSphinxHtml(
@@ -298,7 +299,7 @@ test("an ignored linked stylesheet is reported and its link element is removed",
   assert.doesNotMatch(result.html, /<link|theme\.css/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S1
 test("an anchor or external link keeps its address and the original request", async () => {
   const assets = fakeAssetResolver({ cspSource: CSP_SOURCE, url: (filePath) => `webview:/${filePath}` });
   const directoryPath = makeDirectory();
@@ -343,7 +344,7 @@ test("each removal or rewrite is recorded with its code, message and value", asy
   assert.doesNotMatch(built.html, /<iframe/iu);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S5
 test("the manifest declares limited support for untrusted workspaces", () => {
   const manifest = JSON.parse(
     fs.readFileSync(path.join(path.resolve(__dirname, "../../.."), "package.json"), "utf8"),

@@ -27,7 +27,8 @@ const PICTURE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" wi
 const figures = (dom: ReturnType<typeof parseHtml>) => findElements(dom, (element) => hasClass(element, "myst-svg-figure"));
 const svgs = (dom: ReturnType<typeof parseHtml>) => findElements(dom, (element) => element.tagName === "svg");
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
 test("an svg fence is drawn inline as a picture with its source lines", async () => {
   const { dom, diagnostics } = await render(`# T\n\n\`\`\`svg\n${PICTURE}\n\`\`\`\n\nAfter.\n`);
   assert.equal(diagnostics.length, 0);
@@ -44,7 +45,8 @@ test("an svg fence is drawn inline as a picture with its source lines", async ()
   assert.equal(findElements(dom, (element) => element.tagName === "pre").length, 0, "no code block is left");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
 test("a raw svg that fills a block is drawn inline, one line or many, with the lines of the document", async () => {
   const many = "<svg viewBox=\"0 0 10 10\">\n\n  <circle r=\"4\" cx=\"5\" cy=\"5\" fill=\"var(--accent)\"/>\n</svg>";
   const { dom, diagnostics } = await render(`# T\n\n${PICTURE}\n\nMiddle paragraph.\n\n${many}\n\nEnd.\n`);
@@ -58,21 +60,22 @@ test("a raw svg that fills a block is drawn inline, one line or many, with the l
   assert.equal(diagnostics.filter((entry) => entry.severity === "error").length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
 test("an svg inside a sentence stays dropped", async () => {
   const { dom } = await render(`A sentence with ${PICTURE} inside, then more text.\n`);
   assert.equal(svgs(dom).length, 0);
   assert.equal(figures(dom).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
 test("an svg line that opens a paragraph's continuation or sits in a code block is not a raw block", async () => {
   const { dom } = await render(`Some text\n${PICTURE}\n\n\`\`\`\n\n${PICTURE}\n\`\`\`\n`);
   assert.equal(figures(dom).length, 0);
   assert.equal(svgs(dom).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S2
 test("hostile content of a picture never reaches the page", async () => {
   const hostile = '<svg viewBox="0 0 10 10" onload="alert(1)"><script>alert(2)</script><foreignObject><div>x</div></foreignObject><a href="https://example.com"><rect width="3" height="3" onclick="x()"/></a><style>rect{fill:red}</style><use href="https://example.com/a.svg#b"/><rect width="4" height="4" fill="url(javascript:alert(3))"/></svg>';
   const { html, dom, diagnostics } = await render(`\`\`\`svg\n${hostile}\n\`\`\`\n`);
@@ -81,7 +84,8 @@ test("hostile content of a picture never reaches the page", async () => {
   assert.ok(diagnostics.some((entry) => /removed from the SVG: .*<script>/u.test(entry.message) && entry.severity === "warning"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S2
 test("two pictures with the same ids keep distinct ids and their own references", async () => {
   const source = '<svg viewBox="0 0 10 10"><defs><linearGradient id="g"><stop offset="0" stop-color="var(--blue)"/></linearGradient></defs><rect width="9" height="9" fill="url(#g)"/></svg>';
   const { dom } = await render(`\`\`\`svg\n${source}\n\`\`\`\n\n${source}\n`);
@@ -92,7 +96,7 @@ test("two pictures with the same ids keep distinct ids and their own references"
   assert.deepEqual(fills, ids.map((id) => `url(#${id})`));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
 test("an svg fence with no svg element stays a code block and warns", async () => {
   const { dom, diagnostics } = await render("```svg\nnot a picture\n```\n");
   assert.equal(figures(dom).length, 0);
@@ -100,7 +104,7 @@ test("an svg fence with no svg element stays a code block and warns", async () =
   assert.ok(diagnostics.some((entry) => /holds no <svg> element/u.test(entry.message)));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-126
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-126#S1
 test("the preview stylesheet gives a picture the theme vocabulary, from the --studio tokens", () => {
   const rule = /figure\.myst-svg-figure \{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   for (const name of ["surface", "background", "bg", "border", "text", "foreground", "fg", "muted", "accent", "primary", "red", "green", "blue", "orange"]) {
@@ -111,7 +115,7 @@ test("the preview stylesheet gives a picture the theme vocabulary, from the --st
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
 test("a raw svg inside an HTML comment or a math block is left alone", async () => {
   const { dom, html } = await render(`Before\n\n<!--\n\n${PICTURE}\n\n-->\n\nAfter\n\n$$\n\n${PICTURE}\n$$\n\nEnd\n`);
   assert.equal(figures(dom).length, 0);
@@ -119,28 +123,31 @@ test("a raw svg inside an HTML comment or a math block is left alone", async () 
   assert.doesNotMatch(html, /okf-svg:/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
 test("a document cannot forge the placeholder of a picture", async () => {
   const { dom } = await render(`<!--okf-svg:0-->\n\n${PICTURE}\n\n<!--okf-svg:abc:0-->\n`);
   assert.equal(figures(dom).length, 1, "only the real block is a picture");
   assert.equal(findElements(dom, (element) => hasClass(element, "okf-comment")).length, 2, "both forged comments stay comments");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
 test("an unclosed svg never swallows a later fence", async () => {
   const { dom } = await render(`<svg viewBox="0 0 1 1">\n<rect/>\n\n\`\`\`js\nlet a = 1;\n\`\`\`\n\nTail paragraph.\n\n</svg>\n\n\`\`\`svg\n${PICTURE}\n\`\`\`\n`);
   assert.ok(findElement(dom, (element) => element.tagName === "pre"), "the js fence stays code");
   assert.equal(figures(dom).length, 1, "the fenced picture after it is still drawn");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
 test("a raw svg in a table cell stays dropped (SwRS-GFM-031)", async () => {
   const { dom } = await render(`<table><tr><td>\n\n${PICTURE}\n\n</td></tr></table>\n\nAfter.\n`);
   assert.equal(figures(dom).length, 0);
   assert.equal(svgs(dom).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
 test("a <!-- or $$ inside a sentence or a code span never hides a later code block's svg line", async () => {
   const sources = [
     "Write `<!--` to open.\n\n```html\n<!-- note -->\n```\n\n```\nText\n\n<svg viewBox=\"0 0 1 1\"><rect/></svg>\n```\n",
@@ -155,7 +162,8 @@ test("a <!-- or $$ inside a sentence or a code span never hides a later code blo
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
 test("an inline $$ or a code span holding <!-- does not stop a later raw svg block", async () => {
   for (const before of ["Costs $$5 here.", "Write `<!--` to start a comment.", "<!-- one line -->", "$$ x = 1 $$"]) {
     const { dom } = await render(`${before}\n\n${PICTURE}\n`);
@@ -163,7 +171,7 @@ test("an inline $$ or a code span holding <!-- does not stop a later raw svg blo
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S1
 test("an author's aria-label with parentheses is kept on the picture", async () => {
   const { dom } = await render(`<svg viewBox="0 0 1 1" aria-label="Revenue (EUR) &quot;Q1&quot; &amp; <more>"><rect width="1" height="1"/></svg>\n`);
   const [svg] = svgs(dom);

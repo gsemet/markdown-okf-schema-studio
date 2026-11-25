@@ -22,14 +22,14 @@ const patch = (extra: Record<string, unknown> = {}): Record<string, unknown> => 
 const accepts = (message: Record<string, unknown>) => filter.accepts(message, page);
 const diagnosticsOf = (...entries: unknown[]) => accepts(patch({ diagnostics: entries }));
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S3
 test("a value that is not an object is never a host message", () => {
   for (const value of [null, undefined, "previewContentPatch", 5, true]) assert.equal(filter.accepts(value, page), false, String(value));
   assert.equal(filter.accepts({}, page), false);
   assert.equal(filter.accepts({ type: 5, ...page }, page), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S4
 test("the patch content and its text fields are accepted up to their cap and refused one past it", () => {
   assert.equal(accepts(patch({ contentHtml: "x".repeat(20 * 1024 * 1024) })), true, "20 MiB of content");
   assert.equal(accepts(patch({ contentHtml: "x".repeat(20 * 1024 * 1024 + 1) })), false);
@@ -42,7 +42,7 @@ test("the patch content and its text fields are accepted up to their cap and ref
   assert.equal(accepts(patch({ contentHtml: 3 })), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S4
 test("a patch status is one of the six known ones", () => {
   for (const status of ["pending", "success", "stale", "error", "missing-source", "recovery"]) {
     assert.equal(accepts(patch({ status })), true, status);
@@ -50,7 +50,7 @@ test("a patch status is one of the six known ones", () => {
   for (const status of ["", "done", "Success", undefined, 1]) assert.equal(accepts(patch({ status })), false, String(status));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S6
 test("a patch carries at most 500 diagnostics, each with bounded severity, text and code", () => {
   const entry = { severity: "error", text: "t" };
   assert.equal(accepts(patch({ diagnostics: Array.from({ length: 500 }, () => entry) })), true);
@@ -76,7 +76,8 @@ test("a patch carries at most 500 diagnostics, each with bounded severity, text 
   assert.equal(diagnosticsOf(entry, { severity: "error" }), false, "every entry is checked, not only the first");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S4
 test("the next render of a patch is a plain object with safe integers, and its pin and anchor are finite", () => {
   const nonObject = (value: Record<string, unknown>) => Object.assign(() => undefined, value);
   assert.equal(accepts(patch({ next: null })), false);

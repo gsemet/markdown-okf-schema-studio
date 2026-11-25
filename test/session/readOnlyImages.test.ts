@@ -77,8 +77,9 @@ async function page(text: string, documentDirectory: string, root = documentDire
   return built.html;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
 test("a restricted-reads preview shows an image with spaces in its name, next to the document or in a subfolder", async () => {
   const docs = path.join(home, "docs");
   const html = await page(
@@ -91,8 +92,10 @@ test("a restricted-reads preview shows an image with spaces in its name, next to
   assert.doesNotMatch(html, /blocked-resource/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S2
 test("a restricted-reads preview of a document in the home folder shows the images of its own folder only", async () => {
   const html = await page("![a](home.png)\n\n![b](other/b.png)\n\n![c](.ssh/c.png)\n", home);
   assert.ok(html.includes(path.join(home, "home.png")));
@@ -100,8 +103,9 @@ test("a restricted-reads preview of a document in the home folder shows the imag
   assert.equal(html.includes("c.png"), false, "a dot-directory stays refused");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
 test("a restricted-reads preview refuses an image outside the document folder when the workspace root is the home folder", async () => {
   const docs = path.join(home, "docs");
   const html = await page("![a](../other/b.png)\n\n![b](../home.png)\n\n![c](.hidden/a.png)\n", docs, home);
@@ -110,8 +114,8 @@ test("a restricted-reads preview refuses an image outside the document folder wh
   assert.equal(html.includes("a.png"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
 test("a restricted-reads preview reaches the images of the workspace root, not its includes or other files", async () => {
   const guide = path.join(sandbox, "ws", "docs", "guide");
   fs.mkdirSync(guide, { recursive: true });
@@ -132,8 +136,8 @@ test("a restricted-reads preview reaches the images of the workspace root, not i
   assert.equal(html.includes(SECRET), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
 test("the policy of a restricted-reads preview serves an image of the workspace root and nothing else there", async () => {
   const ws = path.join(sandbox, "ws");
   const guide = path.join(ws, "docs", "guide");
@@ -151,8 +155,8 @@ test("the policy of a restricted-reads preview serves an image of the workspace 
   assert.deepEqual(await policy.resolveResourceDetailed("../../images/x.png", guide), { refusal: "resource-outside-root" }, "without the image option");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
 test("a link named .png that leads to another kind of file is not served from the workspace root", async (context) => {
   const ws = path.join(sandbox, "ws");
   const guide = path.join(ws, "docs");
@@ -173,8 +177,9 @@ test("a link named .png that leads to another kind of file is not served from th
   assert.deepEqual(await policy.resolveResourceDetailed("../images/alias.png", guide, image), { path: path.join(ws, "images", "real.png") });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-091
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S2
 test("a restricted-reads preview still refuses an include in the home folder", async () => {
   fs.writeFileSync(path.join(home, "part.md"), `${SECRET}\n`);
   const inHome = await page("```{include} part.md\n```\n", home);

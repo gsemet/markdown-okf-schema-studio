@@ -16,6 +16,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-009
 depends_on: []
+scenarios:
+- id: S1
+  title: A reference to a heading shows the heading text
+- id: S2
+  title: Explicit text and paragraph labels
+- id: S3
+  title: Captions decide the link text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,19 +43,19 @@ supersedes:
 
 When a document uses `{ref}` to a heading, figure, table, equation or `(name)=` label, the extension SHALL render an in-page link showing the target text or the given text, and for a figure or table without a caption a readable link, not an empty one.
 
-### Scenario (nominal): A reference to a heading shows the heading text
+### Scenario S1 (nominal): A reference to a heading shows the heading text
 
 - GIVEN ``{ref}`name` `` to a heading
 - WHEN the preview renders
 - THEN a link shows the heading text without the anchor icon
 
-### Scenario (boundary): Explicit text and paragraph labels
+### Scenario S2 (boundary): Explicit text and paragraph labels
 
 - GIVEN `{ref}` with explicit text and a target name, and a `{ref}` to a label on a paragraph
 - WHEN the preview renders
 - THEN the given text is shown and the paragraph label becomes a plain #name link
 
-### Scenario (boundary): Captions decide the link text
+### Scenario S3 (boundary): Captions decide the link text
 
 - GIVEN a `{numref}` or `{ref}` that points to a figure or table without a caption, and a `{ref}` to a captioned table
 - WHEN the preview renders

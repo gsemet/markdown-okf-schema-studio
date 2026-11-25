@@ -29,7 +29,7 @@ async function withoutEval<T>(action: () => Promise<T>): Promise<T> {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S2
 test("a Vega-Lite spec draws an SVG whose text, bars and axes use the colours of the page", async () => {
   const light = await drawChart("vega-lite", JSON.stringify(BARS), LIGHT);
   assert.match(light, /^<svg[^>]*>/u);
@@ -41,13 +41,13 @@ test("a Vega-Lite spec draws an SVG whose text, bars and axes use the colours of
   assert.doesNotMatch(light, /<script|onload=|javascript:/iu);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S2
 test("a YAML spec draws like its JSON twin", async () => {
   const yaml = "data:\n  values:\n    - {category: A, amount: 28}\n    - {category: B, amount: 55}\nmark: bar\nencoding:\n  x: {field: category, type: nominal}\n  y: {field: amount, type: quantitative}\n";
   assert.equal(await drawChart("vega-lite", yaml, LIGHT), await drawChart("vega-lite", JSON.stringify(BARS), LIGHT));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S2
 test("a Vega spec draws an SVG too", async () => {
   const spec = {
     width: 120, height: 80,
@@ -64,7 +64,7 @@ test("a Vega spec draws an SVG too", async () => {
   assert.match(svg, /#ddeeff/u, "the axis labels follow the page foreground");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-124
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-124#S1
 test("charts with expressions draw with eval and new Function refused (the interpreter evaluates them)", async () => {
   const withExpressions = {
     data: { values: [{ a: 1 }, { a: 2 }, { a: 3 }] },
@@ -86,7 +86,7 @@ test("charts with expressions draw with eval and new Function refused (the inter
   });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S3
 test("an invalid spec rejects with the reason, and the draw of the next chart is not affected", async () => {
   await assert.rejects(drawChart("vega-lite", "{ not a spec", LIGHT), /neither valid JSON nor valid YAML/u);
   await assert.rejects(drawChart("vega-lite", "", LIGHT), /no specification/u);
@@ -95,7 +95,7 @@ test("an invalid spec rejects with the reason, and the draw of the next chart is
   assert.match(await drawChart("vega-lite", JSON.stringify(BARS), LIGHT), /^<svg/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
 test("a chart draws the rows of a file the host read, even a CSV, with new Function refused", async () => {
   const spec = { data: { url: "data/rows.csv" }, mark: "bar", encoding: { x: { field: "category", type: "nominal" }, y: { field: "amount", type: "quantitative" } } };
   const files = { files: { "data/rows.csv": "category,amount\nAlpha,28\nBeta,55\n" } };
@@ -104,7 +104,7 @@ test("a chart draws the rows of a file the host read, even a CSV, with new Funct
   assert.match(svg, /Beta/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S2
 test("a remote url, a refused file and a file the host did not read each fail with a message", async () => {
   const draw = (url: string, chart = {}) => drawChart("vega-lite", JSON.stringify({ data: { url }, mark: "bar" }), LIGHT, chart);
   await assert.rejects(draw("https://example.com/a.csv"), /Remote chart data is not loaded: https:\/\/example\.com\/a\.csv/u);
@@ -112,7 +112,7 @@ test("a remote url, a refused file and a file the host did not read each fail wi
   await assert.rejects(draw("rows.csv"), /was not read by the preview/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-122
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-122#S1
 test("the loader serves only the files it was given and only data images", async () => {
   const loader = createChartLoader({ files: { "a.csv": "x\n1" }, errors: { "b.csv": "refused" } });
   assert.equal(await loader.load("a.csv"), "x\n1");
@@ -123,7 +123,7 @@ test("the loader serves only the files it was given and only data images", async
   await assert.rejects(loader.sanitize("https://example.com/i.png", CONTEXT), /Remote chart images are not loaded/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S1
 test("the chart config follows the theme: dark and light palettes, page font and accent first", () => {
   const light = chartConfig(LIGHT) as { range: { category: string[] }; mark: { color: string }; font: string };
   const dark = chartConfig(DARK) as { range: { category: string[] } };

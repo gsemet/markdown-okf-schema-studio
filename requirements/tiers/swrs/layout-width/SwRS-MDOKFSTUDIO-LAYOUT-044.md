@@ -17,6 +17,21 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LAYOUT-003
+scenarios:
+- id: S1
+  title: Tables that fit stay in the column
+- id: S2
+  title: Tables that do not fit break out
+- id: S3
+  title: Content that cannot shrink
+- id: S4
+  title: Tables without a plain grid and other width modes
+- id: S5
+  title: Table measured uncapped and rounded up
+- id: S6
+  title: Table with row handles in edit mode
+- id: S7
+  title: A cell editor keeps the breakout of its table
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,42 +48,42 @@ default_owner_email: gaetan@xeberon.net
 
 When the width mode is Auto, the extension SHALL keep a table inside the text column when the sum of its column minimums fits the column, with a token column never wrapping at the width of its widest cell and a prose column keeping about 24 characters of the body font, and SHALL break the table out to its natural width, capped by the available area, when the minimums do not fit or a cell holds content that cannot shrink.
 
-### Scenario (nominal): Tables that fit stay in the column
+### Scenario S1 (nominal): Tables that fit stay in the column
 - GIVEN Auto mode and a column of 688 px
 - WHEN a table is rendered with two columns (a code name and long prose), two prose columns, a short ID, a short status and prose, a task, owner, date and long notes, five columns of short numbers, or eight columns of numbers
 - THEN no data-sphinx-preview-wide mark is set and the table is not wider than the column
 - AND every cell of a token column (every body cell at most three words: inline code, a number, a date, an identifier) carries data-sphinx-preview-token, keeps its text on one line and has no minimum width of its own
 
-### Scenario (nominal): Tables that do not fit break out
+### Scenario S2 (nominal): Tables that do not fit break out
 - GIVEN Auto mode, a column of 688 px and a pane of 1100 px
 - WHEN a table is rendered with four prose columns, a long code path column, a long URL column, ten columns of tick marks, six mixed columns with code names, or identifiers in inline code longer than the column allows
 - THEN the table is marked data-sphinx-preview-wide and takes its natural width, capped by the available area, and the page does not scroll sideways
 
-### Scenario (nominal): Content that cannot shrink
+### Scenario S3 (nominal): Content that cannot shrink
 - GIVEN Auto mode and a MyST list table inside a figure
 - WHEN a cell holds a code block, an admonition with a code block, or a word longer than the column allows
 - THEN the table breaks out, measured through the table inside its figure
 
-### Scenario (boundary): Tables without a plain grid and other width modes
+### Scenario S4 (boundary): Tables without a plain grid and other width modes
 | Input | Outcome |
 | --- | --- |
 | A table with merged cells, a nested table or no rows | Keeps the natural width rule of SwRS-MDOKFSTUDIO-LAYOUT-023 |
 | The width mode leaves Auto | Every data-sphinx-preview-token and data-sphinx-preview-wide mark is removed |
 | Margin or Full width | The rule does not apply |
 
-### Scenario (nominal): Table measured uncapped and rounded up
+### Scenario S5 (nominal): Table measured uncapped and rounded up
 - GIVEN a table whose scroll width is 900 and whose box is 900.4 px wide, in a 700 px column
 - WHEN the width mode is set to Auto
 - THEN the breakout is 201 px, not 200 px, so that no cell wraps in the broken-out table
 - AND during the measurement the table carries data-sphinx-preview-measuring, which lifts its max-width, and the attribute is removed afterwards
 
-### Scenario (nominal): Table with row handles in edit mode
+### Scenario S6 (nominal): Table with row handles in edit mode
 - GIVEN Auto mode, edit mode, a column of 700 px, a pane of 1000 px and a table carrying data-okf-row-handles that needs 1600 px
 - WHEN the elements are measured
 - THEN the breakout is 232 px (1000 minus two 34 px handle gutters minus 700), so the table keeps room for its row handles on its left and never takes the row shift
 - AND the measurement lifts the !important row-handle cap too, so the measured width, the breakout and the scroll position stay stable while the reader scrolls
 
-### Scenario (nominal): A cell editor keeps the breakout of its table
+### Scenario S7 (nominal): A cell editor keeps the breakout of its table
 
 - GIVEN Auto mode and a wide table with an open cell editor (a textarea inside a table cell frame, the table stays rendered)
 - WHEN the editor moves to another cell (Tab, arrows, click) or the page resizes

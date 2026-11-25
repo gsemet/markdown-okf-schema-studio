@@ -99,7 +99,8 @@ async function withThreadPreview(
 
 // @tests_req StRS-MDOKFSTUDIO-REVIEW-015
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-186
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-192
 /**

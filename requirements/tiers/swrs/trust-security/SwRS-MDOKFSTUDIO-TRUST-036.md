@@ -20,6 +20,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Active elements are removed with their content
+- id: S2
+  title: Style elements are removed
+- id: S3
+  title: Automatic refresh
+- id: S4
+  title: Event, srcdoc and style attributes
+- id: S5
+  title: Alternative text of an image
+- id: S6
+  title: Elements and attributes outside the allow-list
+- id: S7
+  title: Many removals and deep nesting
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,7 +56,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the sanitizer processes a page, it SHALL remove every embed, foreignObject, form, iframe, object and style element, every meta element whose http-equiv is refresh, and every attribute whose name starts with on or is srcdoc or style (except the style of a span and the table style attribute that other rules handle), give an img without an alt attribute an empty alt, and remove every element and attribute that is not on its list of supported ones, in time linear in the size of the page, and cut content nested deeper than 256 levels with a visible marker (an allow-list: the elements and attributes of the supported rendering, the aria-* attributes and the data attributes of the preview).
 
-### Scenario (nominal): Active elements are removed with their content
+### Scenario S1 (nominal): Active elements are removed with their content
 
 | Input | Outcome |
 | --- | --- |
@@ -50,7 +65,7 @@ When the sanitizer processes a page, it SHALL remove every embed, foreignObject,
 | an embed, an object, a form | removed with their content (the five names embed, foreignObject, form, iframe and object are covered; embed, object and form are untested) |
 | an image and a link beside the iframe and the foreignObject | the image and the link stay |
 
-### Scenario (nominal): Style elements are removed
+### Scenario S2 (nominal): Style elements are removed
 
 - GIVEN a page with a style element in the content
 - WHEN the page is sanitized
@@ -59,7 +74,7 @@ When the sanitizer processes a page, it SHALL remove every embed, foreignObject,
 - WHEN the page is sanitized
 - THEN the style survives only as the nonce stylesheet of SwRS-MDOKFSTUDIO-GFM-031
 
-### Scenario (boundary): Automatic refresh
+### Scenario S3 (boundary): Automatic refresh
 
 | Input | Outcome |
 | --- | --- |
@@ -67,7 +82,7 @@ When the sanitizer processes a page, it SHALL remove every embed, foreignObject,
 | a meta element whose http-equiv is refresh in any other letter case | removed |
 | a meta element that sets the viewport | stays |
 
-### Scenario (refusal): Event, srcdoc and style attributes
+### Scenario S4 (refusal): Event, srcdoc and style attributes
 
 | Input | Outcome |
 | --- | --- |
@@ -79,14 +94,14 @@ When the sanitizer processes a page, it SHALL remove every embed, foreignObject,
 
 The diagnostic blocked-event-attribute is recorded for each removal.
 
-### Scenario (boundary): Alternative text of an image
+### Scenario S5 (boundary): Alternative text of an image
 
 | Input | Outcome |
 | --- | --- |
 | an img element with no alt attribute | it carries alt with an empty value |
 | an img element with alt set to image | the alt text is kept |
 
-### Scenario (refusal): Elements and attributes outside the allow-list
+### Scenario S6 (refusal): Elements and attributes outside the allow-list
 
 | Input | Outcome |
 | --- | --- |
@@ -97,7 +112,7 @@ The diagnostic blocked-event-attribute is recorded for each removal.
 
 The list holds the elements and attributes the supported rendering needs: the HTML text, list, table, media and form elements, the basic SVG and MathML elements, the aria-* attributes and the data attributes written by the renderer (data-line, data-end-line, data-line-number, data-footnote*, data-plantuml-* and the prefixes data-sphinx-, data-okf- and data-myst-).
 
-### Scenario (boundary): Many removals and deep nesting
+### Scenario S7 (boundary): Many removals and deep nesting
 
 | Input | Outcome |
 | --- | --- |

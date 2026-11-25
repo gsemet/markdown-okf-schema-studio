@@ -41,7 +41,7 @@ test("the book's conf.py lists are read in full", () => {
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S3
 test("comments, tuples, single quotes, trailing commas and string joins are understood", () => {
   const conf = parseConf([
     "extensions = ('myst_parser',  # the parser",
@@ -54,7 +54,7 @@ test("comments, tuples, single quotes, trailing commas and string joins are unde
   assert.deepEqual(conf.mystExtensions, ["x#y", "z"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S7
 test("+=, append, extend and later assignments are applied in order", () => {
   const conf = parseConf([
     "extensions = ['myst_parser']",
@@ -82,7 +82,7 @@ test("a missing myst_enable_extensions is an empty, certain list", () => {
   assert.deepEqual(conf, { extensions: ["sphinx.ext.autodoc"], mystExtensions: [], certain: true });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S8
 test("anything that is not a plain string list is uncertain", () => {
   const cases = [
     "extensions = base + ['myst_parser']",

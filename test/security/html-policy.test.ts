@@ -22,9 +22,10 @@ afterEach(() => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S6
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S6
 test("rewrites local resources and removes active HTML content", async () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -79,7 +80,7 @@ test("rewrites local resources and removes active HTML content", async () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-011
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-011#S1
 test("reduced previews remove external scripts while retaining contained media", async () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -107,7 +108,7 @@ test("reduced previews remove external scripts while retaining contained media",
   assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-script"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-011
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-011#S2
 test("trusted previews also remove scripts and a nonce attribute of the document", async () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -142,7 +143,8 @@ const bareContext = {
   resolveNavigation: () => ({ kind: "blocked" as const }),
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S2
 test("removes tens of thousands of siblings in linear time", () => {
   const count = 50_000;
   const html = `<html><body><main>${"<foo>x</foo>".repeat(count)}<p>kept</p></main></body></html>`;
@@ -155,7 +157,7 @@ test("removes tens of thousands of siblings in linear time", () => {
   assert.ok(elapsed < 2000, `50k removals took ${elapsed.toFixed(0)} ms`);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S7
 test("cuts very deep nesting with a visible marker instead of throwing", () => {
   const depth = 10_000;
   const html = `<html><body><main>${"<ul><li>".repeat(depth)}deep${"</li></ul>".repeat(depth)}</main></body></html>`;
@@ -235,7 +237,8 @@ test("CR038: a column width in percent becomes a stylesheet rule; other widths a
   assert.doesNotMatch(result.html, /400px|calc|data-myst-table-style|style="/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-022
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S2
 test("rewrites sanitized table styles into a nonce-bearing stylesheet", () => {
   const result = rewriteSphinxHtml(
     '<html><head></head><body><table><tr>'
@@ -275,7 +278,7 @@ test("blocks hostile CSS imports, schemes, and URLs while preserving local asset
   assert.doesNotMatch(sanitized, /https:\/\/example|data:image|javascript:/iu);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S3
 test("generates a restrictive nonce-bearing CSP", () => {
   const csp = createContentSecurityPolicy("vscode-webview://unit", "nonce-value");
 
@@ -330,7 +333,8 @@ test("keeps deferred relative navigation inert and host-routable", () => {
   assert.match(result.html, /href="#"[^>]+data-sphinx-preview-navigation="chapter-two\.md"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-040
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040#S3
 test("a mapped block that already carries a tabindex keeps it, so a radio group list stays out of the Tab order", () => {
   const result = rewriteSphinxHtml(
     '<html><body><ul role="radiogroup" tabindex="-1" data-sphinx-source-file="/workspace/active.md" data-sphinx-source-line="3" data-sphinx-preview-block="list">'
@@ -349,7 +353,8 @@ test("a mapped block that already carries a tabindex keeps it, so a radio group 
   assert.match(result.html, /data-sphinx-source-line="6"[^>]+tabindex="0"/u, "a mapped block without one still gets a tab stop");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-031
+// @tests_req SwRS-MDOKFSTUDIO-MYST-031#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-031#S3
 test("resolves parent-relative figure images through the workspace root", async () => {
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-figure-test-"));
   temporaryDirectories.push(workspace);
@@ -435,7 +440,8 @@ test("data-okf-width keeps a plain length and nothing else", () => {
   assert.doesNotMatch(result.html, /position:fixed|url\(x\)/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-031
+// @tests_req SwRS-MDOKFSTUDIO-GFM-031#S3
+// @tests_req SwRS-MDOKFSTUDIO-GFM-031#S4
 test("table styles share the colour grammar and refuse every injection shape", () => {
   assert.equal(
     sanitizeTableStyle("td", "color: Red; background-color: hsl(10, 20%, 30%); -webkit-text-fill-color: rgba(1,2,3,.5)"),
@@ -459,7 +465,7 @@ test("table styles share the colour grammar and refuse every injection shape", (
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-034
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034#S1
 test("span style keeps only named, hex, rgb and hsl colour and background-color as data attributes", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -537,7 +543,7 @@ test("emits dir=auto on block elements and keeps only ltr, rtl and auto", () => 
   assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-dir"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S3
 test("a blocked link has no href and names the reason in its title", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -556,7 +562,8 @@ test("a blocked link has no href and names the reason in its title", () => {
   assert.match(result.html, /title="The navigation scheme is not allowed in the preview\."/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S6
 test("the SVG presentation attributes pass the final sanitizer only with a local value", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -577,7 +584,7 @@ test("the SVG presentation attributes pass the final sanitizer only with a local
   assert.match(result.html, /font-style="italic"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S6
 test("the SVG value check never touches aria attributes nor an HTML element", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);

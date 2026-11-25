@@ -19,6 +19,19 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: A value edit changes only its field
+- id: S2
+  title: Line endings, fences and values that look like a fence
+- id: S3
+  title: "An added field is one inserted line in the file's line endings"
+- id: S4
+  title: An added list uses the compact sequence style
+- id: S5
+  title: Anchored or aliased values rewrite the whole block with the right data
+- id: S6
+  title: An edit that loses or corrupts a key is refused
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,35 +60,35 @@ supersedes:
 
 When a writer saves a value, the extension SHALL change only the lines of that field and keep comments, quoting style, spacing, fences, body and line endings byte-identical, and refuse an edit that would leave a block that does not parse or whose keys are not exactly the expected ones.
 
-### Scenario (nominal): A value edit changes only its field
+### Scenario S1 (nominal): A value edit changes only its field
 - GIVEN a document with a trailing comment on the title line and other fields
 - WHEN title is changed from Alpha to Beta
 - THEN only the title line changes and its comment is kept
 
-### Scenario (boundary): Line endings, fences and values that look like a fence
+### Scenario S2 (boundary): Line endings, fences and values that look like a fence
 | Document | Edit | Outcome |
 | --- | --- | --- |
 | CRLF endings | a value is changed | only the named field's lines change; the fences, body and line endings stay identical |
 | closing fence of three dots | a value is changed | the closing fence is kept and only the edited line changes |
 | title: To be continued... and status: draft | status is changed | exactly the status line changes and the block keeps its three keys (a value ending in ... or --- stays inside the block) |
 
-### Scenario (nominal): An added field is one inserted line in the file's line endings
+### Scenario S3 (nominal): An added field is one inserted line in the file's line endings
 - GIVEN a CRLF document with the fields title and status
 - WHEN owner is added after title
 - THEN the edit inserts exactly one line ended by CRLF
 
-### Scenario (boundary): An added list uses the compact sequence style
+### Scenario S4 (boundary): An added list uses the compact sequence style
 - GIVEN an added list value
 - WHEN the field is written
 - THEN the list uses the compact sequence style
 
-### Scenario (boundary): Anchored or aliased values rewrite the whole block with the right data
+### Scenario S5 (boundary): Anchored or aliased values rewrite the whole block with the right data
 | Block | Edit | Outcome |
 | --- | --- | --- |
 | a: &x 1 and b: 3 | a is set to 2 | the block parses to a: 2 and b: 3 |
 | a value that is edited as an object | saved | the written block parses to the same data |
 
-### Scenario (refusal): An edit that loses or corrupts a key is refused
+### Scenario S6 (refusal): An edit that loses or corrupts a key is refused
 | Patch checked by the patch guard | Outcome |
 | --- | --- |
 | deletes the author key | refused, no edit is applied; the host answers "The frontmatter YAML could not be updated." |

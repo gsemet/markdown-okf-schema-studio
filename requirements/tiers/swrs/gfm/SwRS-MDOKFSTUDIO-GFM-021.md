@@ -24,6 +24,23 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Toggle in reading mode
+- id: S2
+  title: Toggle in a table cell in edit mode
+- id: S3
+  title: Uppercase marker rewritten
+- id: S4
+  title: Clicks that send no message
+- id: S5
+  title: The host refuses the toggle
+- id: S6
+  title: Content patches clear pending toggles
+- id: S7
+  title: Invalid toggle messages
+- id: S8
+  title: A rejected message is answered
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -57,32 +74,32 @@ supersedes:
 
 When a writer clicks a checkbox in reading or edit mode, the extension SHALL edit only the character between its brackets, without opening a block editor, and revert the checkbox and show the reason next to it for a few seconds (and as its tooltip) when the host refuses the toggle; the host SHALL accept a previewCheckboxToggle message only with a safe non-negative integer column, a boolean checked state and a single line.
 
-### Scenario (nominal): Toggle in reading mode
+### Scenario S1 (nominal): Toggle in reading mode
 
 - GIVEN a trusted preview with '- [ ] a'
 - WHEN the checkbox is clicked
 - THEN the source becomes '- [x] a' and no block editor opens
 
-### Scenario (nominal): Toggle in a table cell in edit mode
+### Scenario S2 (nominal): Toggle in a table cell in edit mode
 
 - GIVEN edit mode and '[ ]' in a table cell
 - WHEN the checkbox is clicked
 - THEN only that character changes and no block editor opens
 
-### Scenario (boundary): Uppercase marker rewritten
+### Scenario S3 (boundary): Uppercase marker rewritten
 
 - GIVEN a checked '[X]' marker
 - WHEN the checkbox is clicked to uncheck and clicked again to check
 - THEN the marker is written back as lowercase '[x]'
 
-### Scenario (refusal): Clicks that send no message
+### Scenario S4 (refusal): Clicks that send no message
 
 | Input | Outcome |
 | --- | --- |
 | a click while a toggle awaits the host result | only one toggle message was sent and the checkbox is aria-busy until the result arrives |
 | a checkbox without valid line or column attributes | the click is prevented and no message is sent |
 
-### Scenario (refusal): The host refuses the toggle
+### Scenario S5 (refusal): The host refuses the toggle
 
 For the open editor and the stale render, see SwRS-MDOKFSTUDIO-BLOCK-041, SwRS-MDOKFSTUDIO-TRUST-065 and SwRS-MDOKFSTUDIO-TRUST-005. The reasons of the toggle are:
 
@@ -97,14 +114,14 @@ For the open editor and the stale render, see SwRS-MDOKFSTUDIO-BLOCK-041, SwRS-M
 
 The reason appears in a status note right after the box and disappears after about six seconds; a second refusal of the same box replaces the note.
 
-### Scenario (boundary): Content patches clear pending toggles
+### Scenario S6 (boundary): Content patches clear pending toggles
 
 | Input | Outcome |
 | --- | --- |
 | a pending toggle of old content, then an in-place patch and the old result | the new content checkbox is unchanged |
 | no pending toggle, then a patch | patching succeeds without effect on checkboxes |
 
-### Scenario (refusal): Invalid toggle messages
+### Scenario S7 (refusal): Invalid toggle messages
 
 A previewCheckboxToggle message with line 3, endLine 3, column 4, checked true is accepted. Column, checked and radioGroup are accepted on no other message type: a previewEditCancel message with column 4, or a previewScroll message with a radioGroup, is refused.
 
@@ -116,7 +133,7 @@ A previewCheckboxToggle message with line 3, endLine 3, column 4, checked true i
 | line different from endLine | rejected, no edit is made |
 | a radioGroup (the options of a radio choice) that is not an array of 2 to 256 distinct line and column positions including the message's own, or that comes with checked false | rejected, no edit is made |
 
-### Scenario (refusal): A rejected message is answered
+### Scenario S8 (refusal): A rejected message is answered
 
 | Input | Outcome |
 | --- | --- |

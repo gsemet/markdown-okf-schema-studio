@@ -36,7 +36,7 @@ interface LabelFit {
   readonly box: { readonly width: number; readonly right: number; readonly bottom: number };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S4
 test("every Mermaid label fits its box in the shown image, not only in the page", async (t) => {
   for (const themeId of ["light", "dark"]) {
     const opened = await openPreviewPage(FLOWCHART_DOCUMENT, {}, themeId, undefined, "mermaid");

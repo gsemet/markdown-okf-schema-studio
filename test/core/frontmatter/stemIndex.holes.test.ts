@@ -31,7 +31,7 @@ function bumpRoot(root: string, seconds: number): void {
   fs.utimesSync(root, when, when);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
 test("only files named like a stem and .md are indexed, whatever their directory, and a directory named like a file is walked", async () => {
   const root = makeRoot();
   try {
@@ -57,7 +57,8 @@ test("only files named like a stem and .md are indexed, whatever their directory
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
 test("a symbolic link to a Markdown file is indexed under its own stem", async (context) => {
   const root = makeRoot();
   try {
@@ -76,7 +77,8 @@ test("a symbolic link to a Markdown file is indexed under its own stem", async (
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S6
 test("the cached index is rebuilt when its root changes and not otherwise, and each root set has its own", async () => {
   const first = makeRoot();
   const second = makeRoot();
@@ -105,7 +107,8 @@ test("the cached index is rebuilt when its root changes and not otherwise, and e
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S6
 test("a root that is gone is indexed as empty, and indexed again once it exists", async () => {
   const parent = makeRoot();
   const missing = path.join(parent, "later");
@@ -123,7 +126,8 @@ test("a root that is gone is indexed as empty, and indexed again once it exists"
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S6
 test("invalidating a root drops only the cached indexes that contain it, and invalidating nothing in particular drops all", async () => {
   const first = makeRoot();
   const second = makeRoot();

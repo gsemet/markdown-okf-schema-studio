@@ -27,7 +27,7 @@ SECOND_PANEL = f"{TAB_SET} .myst-tab-panel[data-export-tab='2']"
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
-# @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091
+# @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091#S1
 def check_export_html(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Opens `<scenario>.export.html` (next to the page) in a context with JavaScript disabled and checks what
   a reader of the single file gets: no script, the preview's page colour and column width, a properties

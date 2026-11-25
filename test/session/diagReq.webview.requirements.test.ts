@@ -29,7 +29,7 @@ const build = async (content: string, engine: "builtin" | "host"): Promise<strin
     page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, [], engine,
   )).html;
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-023
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S3
 test("the built-in PlantUML script is added once with the page nonce, only for the built-in engine and a figure", async () => {
   const html = await build(FIGURE, "builtin");
   const tags = html.match(/<script[^>]*data-sphinx-preview-plantuml[^>]*><\/script>/gu) ?? [];
@@ -45,7 +45,7 @@ test("the built-in PlantUML script is added once with the page nonce, only for t
 
 const REPO = path.resolve(__dirname, "../../..");
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S5
 test("the built-in engine is bundled into the extension's page script and the page loads nothing from outside for it", async () => {
   // The engine, its themes and its icons are bundled at build time into out/bundle/plantumlPreview.js.
   const entry = fs.readFileSync(path.join(REPO, "src/page/modules/plantumlPreview.ts"), "utf8");

@@ -39,7 +39,7 @@ test("CR 025: LatestRequest applies only the latest request, so A to B to A ends
   assert.equal(latest.settle(), "B");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-067
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-067#S6
 test("CR 025: the flush refusal warning names the field and says the text was not saved", () => {
   const text = flushRefusalMessage('the frontmatter field "title"', "A frontmatter field named \"x\" already exists.");
   assert.match(text, /the frontmatter field "title"/u);

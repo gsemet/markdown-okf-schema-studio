@@ -25,6 +25,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-TRUST-009
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
+scenarios:
+- id: S1
+  title: Current render passes the render gate
+- id: S2
+  title: The five gates
+- id: S3
+  title: Older render is answered, foreign render is dropped
+- id: S4
+  title: Gates that accept an older revision
+- id: S5
+  title: Stale write answered out of date or with a reopen hint
+- id: S6
+  title: No stale answer where none is owed
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -61,13 +74,13 @@ supersedes:
 
 When a page message reaches the host, the extension SHALL pass it only to the handler of its type after it matches the render or document the host holds by the gate of that type (render, comment, document, own-id or page-state), drop a message that fails the gate without an answer (except a request that waits for an answer, which it answers with "The preview is out of date. Try again once it has refreshed." when it names an older render), and answer a write whose document is newer than the render with "The preview is out of date. Try again once it has refreshed." or a reopen hint.
 
-### Scenario (nominal): Current render passes the render gate
+### Scenario S1 (nominal): Current render passes the render gate
 
 - GIVEN a preview that holds revision 4, request 9 and a previewBlockMove message that names them
 - WHEN the message arrives
 - THEN its handler runs
 
-### Scenario (boundary): The five gates
+### Scenario S2 (boundary): The five gates
 
 Every page message type has one gate. A message with a registered type and a valid envelope (see SwRS-MDOKFSTUDIO-TRUST-052) is matched by it:
 
@@ -81,7 +94,7 @@ Every page message type has one gate. A message with a registered type and a val
 
 The page-state exceptions are the ready reports (see SwRS-MDOKFSTUDIO-LIFE-071), the save or cancel of the block editor the host has open for exactly the render that message names (same editId, document, revision and request), and the stale save, cancel or frontmatter save of the second table.
 
-### Scenario (refusal): Older render is answered, foreign render is dropped
+### Scenario S3 (refusal): Older render is answered, foreign render is dropped
 
 | Input | Outcome |
 | --- | --- |
@@ -102,7 +115,7 @@ The page-state exceptions are the ready reports (see SwRS-MDOKFSTUDIO-LIFE-071),
 | previewPlantUmlInclude, previewShowProblems or previewWarningBannerClosed naming another document | dropped without an answer |
 | previewEditFlushed or previewEditClosed on a disposed preview | dropped |
 
-### Scenario (nominal): Gates that accept an older revision
+### Scenario S4 (nominal): Gates that accept an older revision
 
 | Input | Outcome |
 | --- | --- |
@@ -113,7 +126,7 @@ The page-state exceptions are the ready reports (see SwRS-MDOKFSTUDIO-LIFE-071),
 | previewEditSave of the block editor opened on revision 3 after the document moved to revision 4, same editId | accepted |
 | previewListTargets, previewListCitations, previewPickDocument or previewPickImage naming render 3 while the block editor the host holds is open on render 3 and its own saves moved the document to revision 4 | the request is answered as for a current preview (the preview refreshes only when the editor closes) |
 
-### Scenario (refusal): Stale write answered out of date or with a reopen hint
+### Scenario S5 (refusal): Stale write answered out of date or with a reopen hint
 
 A message that passes its gate but writes for a document newer than the render is answered with a reason and changes nothing. The page-state gate answers a stale save or cancel of a live preview instead of dropping it:
 
@@ -130,7 +143,7 @@ A message that passes its gate but writes for a document newer than the render i
 | previewEditSave, previewEditCancel (block editor) | the editor was opened on an older page than the host holds | "The preview changed while this block was being edited. Copy your text, then reopen the block." |
 | previewFrontmatterSave | the editor was opened on an older render (render 1 while the host shows render 2 of the same document) | "The preview changed while this field was being edited. Reopen the field." and the document is unchanged |
 
-### Scenario (refusal): No stale answer where none is owed
+### Scenario S6 (refusal): No stale answer where none is owed
 
 | Input | Outcome |
 | --- | --- |

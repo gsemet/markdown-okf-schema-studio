@@ -20,6 +20,19 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LAYOUT-001
+scenarios:
+- id: S1
+  title: Service-level table at 460 px
+- id: S2
+  title: Sixteen-column table at 900 px
+- id: S3
+  title: Table with many columns
+- id: S4
+  title: Table that fits
+- id: S5
+  title: Overflow mark
+- id: S6
+  title: Short identifiers
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,27 +57,27 @@ supersedes:
 
 When a table is wider than the pane outside Auto breakout, the extension SHALL let it scroll sideways inside its own box, limited to the column width, without widening the page, mark it as overflowing when it is more than 1 px wider than its box so that the theme shades its edges, and keep a cell holding a single word of at most 24 characters on one line. The extension SHALL also give every cell of a content table (not the frontmatter properties table) a minimum width of 5em, so that columns never wrap words letter by letter and a table that no longer fits uses this wide-table behaviour.
 
-### Scenario (nominal): Service-level table at 460 px
+### Scenario S1 (nominal): Service-level table at 460 px
 - GIVEN a service-level table in a 460 px pane in dark theme, Margin mode
 - WHEN the table is scrolled to its end
 - THEN the far-right column is reachable and the page has no sideways scroll
 
-### Scenario (nominal): Sixteen-column table at 900 px
+### Scenario S2 (nominal): Sixteen-column table at 900 px
 - GIVEN a table with sixteen columns in a 900 px pane in dark theme
 - WHEN the table is scrolled to its end
 - THEN the far-right column is reachable and the page has no sideways scroll
 
-### Scenario (nominal): Table with many columns
+### Scenario S3 (nominal): Table with many columns
 - GIVEN a seven-column table whose header words "document" and "parse" would otherwise be squeezed to one or two letters per line, in Margin mode
 - WHEN it is shown
 - THEN every cell has a computed minimum width of at least 5em, the words stay whole, and the table scrolls sideways when the columns no longer fit
 
-### Scenario (refusal): Table that fits
+### Scenario S4 (refusal): Table that fits
 - GIVEN a table that fits
 - WHEN it is shown
 - THEN no scroll bar appears
 
-### Scenario (boundary): Overflow mark
+### Scenario S5 (boundary): Overflow mark
 | Input | Outcome |
 | --- | --- |
 | Table with a scroll width of 900 and a client width of 400 (not a properties table) | The table carries data-sphinx-table-overflow=true |
@@ -74,7 +87,7 @@ When a table is wider than the pane outside Auto breakout, the extension SHALL l
 | A properties table with an overflow | Never marked |
 | A second pass over the same table | Writes no attribute |
 
-### Scenario (boundary): Short identifiers
+### Scenario S6 (boundary): Short identifiers
 | Input | Outcome |
 | --- | --- |
 | Overflowing table with the cells nw-02 and North | Both are marked data-sphinx-short-cell and set to nowrap |

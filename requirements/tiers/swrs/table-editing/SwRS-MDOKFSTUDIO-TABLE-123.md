@@ -29,7 +29,7 @@ tested_in_files:
 - test/integration/realInput/editorWidgets.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeTableCellEditor.test.ts
-- test/visual/capture_edit_checks.py
+- test/visual/capture_cell_editor_checks.py
 default_owner_email: gaetan@xeberon.net
 ---
 

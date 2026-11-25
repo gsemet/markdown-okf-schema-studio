@@ -36,7 +36,8 @@ async function view(source: string): Promise<AlertView> {
   return { alerts, ranges, outside: collapse(all) };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("a lazy continuation line renders inside the alert, which ends on that line", async () => {
   const result = await renderMyst("> [!NOTE]\n> a\nb\n");
   const document = parseHtml(result.html);
@@ -108,26 +109,30 @@ const GITHUB_CASES: { source: string; alerts: string[]; ranges: [number, number]
 ];
 
 for (const { source, alerts, ranges, outside } of GITHUB_CASES) {
-  // @tests_req SwRS-MDOKFSTUDIO-GFM-009
+  // @tests_req SwRS-MDOKFSTUDIO-GFM-009#S2
+  // @tests_req SwRS-MDOKFSTUDIO-GFM-009#S3
   test(`an unquoted line joins the alert only as a lazy continuation of its open paragraph: ${JSON.stringify(source)}`,
     async () => {
       assert.deepEqual(await view(source), { alerts, ranges, outside }, JSON.stringify(source));
     });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S3
 test("a lazy line of an alert nested in a list item stays in the alert", async () => {
   const result = await view("- item\n\n  > [!TIP]\n  > a\n  b\n\nAfter.\n");
   assert.deepEqual(result, { alerts: ["a b"], ranges: [[3, 5]], outside: "item After." });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S11
 test("a lazy line of a CRLF alert stays in the alert", async () => {
   assert.deepEqual(await view("> [!NOTE]\r\n> a\r\nb\r\n\r\nAfter.\r\n"),
     { alerts: ["a b"], ranges: [[1, 3]], outside: "After." });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S2
 test("a lazy setext underline or delimiter row adds no heading or table to the alert", async () => {
   for (const source of ["> [!NOTE]\n> a\n===\n", "> [!NOTE]\n> a\n--\n", "> [!NOTE]\n> | a | b |\n| - | - |\n"]) {
     const document = parseHtml((await renderMyst(source)).html);

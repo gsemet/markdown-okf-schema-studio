@@ -38,11 +38,12 @@ const readThreads = (file: string): any[] => JSON.parse(fs.readFileSync(file, "u
 // @tests_req StRS-MDOKFSTUDIO-REVIEW-003
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
 /**
  * T43: creating a thread and replying write the sidecar next to the document through the host
  * queue. Two creates sent together both land; the author comes from the setting; an invalid
@@ -118,7 +119,6 @@ export async function run(): Promise<void> {
     assert.deepEqual([result?.ok, result?.kind], [true, "create"]);
     assert.ok(readThreads(sidecarPath).some((thread: any) => thread.comments[0].body === "Sent with an old version"),
       "a create with an old documentVersion must still be written");
-    // @tests_req StRS-MDOKFSTUDIO-TRUST-009
     // A request meant for another document never lands in this one: it is dropped and nothing is written.
     let before = fs.readFileSync(sidecarPath, "utf8");
     await sendPreviewMessageForTests({
@@ -219,9 +219,10 @@ export async function run(): Promise<void> {
   }
 }
 
-// @tests_req StRS-MDOKFSTUDIO-TRUST-001
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @accepts_req StRS-MDOKFSTUDIO-TRUST-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
 /** T43: a preview in Restricted Mode offers comments and writes the sidecar next to the document. */
 export async function runUntrusted(preview: PreviewForTests, document: vscode.TextDocument): Promise<void> {
   assert.match(preview.html, /"commentsEnabled":true/u, "Restricted Mode offers the Comment button");

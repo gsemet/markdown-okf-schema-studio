@@ -71,7 +71,8 @@ function openPreview(text: string) {
   return { posted, send };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
 test("the paragraph of the second alert of a document is mapped to its own lines and the host returns them", async () => {
   const source = fs.readFileSync(LAYOUT_FIXTURE, "utf8");
   const lines = source.split("\n");
@@ -287,7 +288,7 @@ const CONTEXT_TAG = [
 ].join("\n");
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
-// @tests_req SwRS-MDOKFSTUDIO-MYST-013
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013#S2
 test("a click in the body of a context-tag panel still opens the clicked paragraph only", async () => {
   const opened = await openByClick(CONTEXT_TAG, "The first paragraph of the instructions.");
   assert.deepEqual([opened.line, opened.endLine], [5, 5]);

@@ -14,6 +14,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-012
 depends_on: []
+scenarios:
+- id: S1
+  title: Icon
+- id: S2
+  title: Icon file
+- id: S3
+  title: Contract broken
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,19 +39,19 @@ supersedes:
 
 The package SHALL declare images/logo.png, a PNG of 256 by 256 pixels, as its extension icon.
 
-### Scenario (nominal): Icon
+### Scenario S1 (nominal): Icon
 
 - GIVEN the icon key of the manifest
 - WHEN it is read
 - THEN it is images/logo.png
 
-### Scenario (nominal): Icon file
+### Scenario S2 (nominal): Icon file
 
 - GIVEN the file images/logo.png
 - WHEN its header is read
 - THEN it has the PNG signature and the width and height fields are both 256
 
-### Scenario (refusal): Contract broken
+### Scenario S3 (refusal): Contract broken
 
 | Input | Outcome |
 | --- | --- |

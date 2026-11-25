@@ -36,11 +36,9 @@ async function waitForDocument(documentUri: string): Promise<void> {
   throw new Error(`Timed out waiting for preview document ${documentUri}.`);
 }
 
-// @tests_req StRS-MDOKFSTUDIO-TRUST-001
-// @tests_req StRS-MDOKFSTUDIO-TRUST-004
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S1
 export async function run(): Promise<void> {
   // Heartbeat and timeout dumps of the hang watchdog (stepWatchdog.ts).
   await withSuiteWatchdog("standalone-suite", runStandaloneSuite);

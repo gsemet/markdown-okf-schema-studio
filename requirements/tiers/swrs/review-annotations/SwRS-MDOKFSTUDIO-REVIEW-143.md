@@ -25,7 +25,7 @@ implemented_in_files:
 - src/page/modules/chipToggle.ts
 tested_in_files:
 - test/core/preview/commentStyles.test.ts
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/page/modules/chipToggle.test.ts
 - test/page/modules/reviewReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net

@@ -20,6 +20,23 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: Served file and missing file are remembered
+- id: S2
+  title: Outside the folders
+- id: S3
+  title: "The engine is not the built-in one, or the file id is not the host's"
+- id: S4
+  title: A changed file tells the page
+- id: S5
+  title: Editor open
+- id: S6
+  title: Shape of previewPlantUmlIncludesChanged
+- id: S7
+  title: Only diagrams that read files are drawn again
+- id: S8
+  title: The include watch is bounded and cleared
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,38 +65,38 @@ supersedes:
 
 When the host serves an include file, or refuses one that does not exist inside the allowed folders, it SHALL remember the canonical path of that file and, when the file changes on disk, tell the page with previewPlantUmlIncludesChanged so that the diagrams that read files are drawn again.
 
-### Scenario (nominal): Served file and missing file are remembered
+### Scenario S1 (nominal): Served file and missing file are remembered
 - GIVEN an include request that the host serves, and an include of a file that does not exist inside the allowed folders
 - WHEN the host answers
 - THEN the canonical path of the served file, and the candidate path of the missing one, are in the include watch
 
-### Scenario (refusal): Outside the folders
+### Scenario S2 (refusal): Outside the folders
 - GIVEN an include request for a path outside the allowed folders
 - WHEN the host refuses it
 - THEN nothing is remembered for it
 
-### Scenario (refusal): The engine is not the built-in one, or the file id is not the host's
+### Scenario S3 (refusal): The engine is not the built-in one, or the file id is not the host's
 - GIVEN a previewPlantUmlInclude request
 - WHEN the Java engine is selected (useJar on, trusted or not), or the request names a `from` that the host never gave in an answer of this document
 - THEN the host answers ok false and reads no file; a `from` of null (the document itself) and a `from` the host issued are served as before
 
-### Scenario (nominal): A changed file tells the page
+### Scenario S4 (nominal): A changed file tells the page
 - GIVEN an include file remembered by the watch
 - WHEN it changes on disk
 - THEN the page receives previewPlantUmlIncludesChanged and draws the diagrams that read files again
 
-### Scenario (boundary): Editor open
+### Scenario S5 (boundary): Editor open
 - GIVEN an open block editor
 - WHEN an included file changes
 - THEN the message is sent after the editor closes (see SwRS-MDOKFSTUDIO-BLOCK-041)
 
-### Scenario (boundary): Shape of previewPlantUmlIncludesChanged
+### Scenario S6 (boundary): Shape of previewPlantUmlIncludesChanged
 | Input | Outcome |
 | --- | --- |
 | { type: previewPlantUmlIncludesChanged, documentId } for the document the page shows | accepted; it carries no other field and the page draws again |
 | The same type naming another document, or any other value that is not a registered host message | not handled by the page (see SwRS-MDOKFSTUDIO-TRUST-059, addressing by document) |
 
-### Scenario (nominal): Only diagrams that read files are drawn again
+### Scenario S7 (nominal): Only diagrams that read files are drawn again
 - GIVEN a diagram that includes a file and a diagram that includes none
 - WHEN the includes-changed event reaches the page
 - THEN the first diagram asks the host again and is drawn with the new file text, and the kept results that read files are forgotten
@@ -88,7 +105,7 @@ When the host serves an include file, or refuses one that does not exist inside 
 - WHEN the same event arrives
 - THEN it keeps its picture and its kept result
 
-### Scenario (boundary): The include watch is bounded and cleared
+### Scenario S8 (boundary): The include watch is bounded and cleared
 | Input | Outcome |
 | --- | --- |
 | 1025 remembered files, the last one just remembered | the set holds 1024 and the first is gone |

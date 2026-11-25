@@ -666,7 +666,6 @@ export async function scenarioFigureInsert(page: Page, evidence: Evidence): Prom
 }
 
 // @tests_req StRS-MDOKFSTUDIO-BLOCK-001
-// @tests_req StRS-MDOKFSTUDIO-TRUST-001
 /** trust-security/r01: the side preview of an untrusted workspace, editable (runs in the Restricted Mode window). */
 export async function scenarioRestrictedEdit(page: Page, evidence: Evidence): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, false, "this scenario runs in the Restricted Mode window");

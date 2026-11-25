@@ -19,6 +19,25 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: The button appears on hover
+- id: S2
+  title: No button before the first hover
+- id: S3
+  title: Some blocks never get a button
+- id: S4
+  title: The button stays clear of the sticky band and toolbar
+- id: S5
+  title: The button follows the visible part of the block
+- id: S6
+  title: Events that hide the button
+- id: S7
+  title: The Copied state is reset by another block
+- id: S8
+  title: The keyboard reaches the button
+- id: S9
+  title: Blocks that are not tab stops
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,19 +67,19 @@ supersedes:
 
 When the pointer is over a code block of the preview content, or the block holds keyboard focus, the extension SHALL show a 26 px Copy code button 6 px inside the block's top-right corner, below the sticky heading band and the floating toolbar when they cover that corner, and hide it whenever the pointer, a click, scrolling, a resize or a content patch makes it unusable.
 
-### Scenario (nominal): The button appears on hover
+### Scenario S1 (nominal): The button appears on hover
 
 - GIVEN a code block under the pointer
 - WHEN the pointer enters the block
 - THEN a 26 px Copy code button appears 6 px inside its top-right corner
 
-### Scenario (boundary): No button before the first hover
+### Scenario S2 (boundary): No button before the first hover
 
 - GIVEN no code block has been hovered yet
 - WHEN the page is loaded
 - THEN no copy button exists in the page
 
-### Scenario (refusal): Some blocks never get a button
+### Scenario S3 (refusal): Some blocks never get a button
 
 | Block | Outcome |
 | --- | --- |
@@ -69,13 +88,13 @@ When the pointer is over a code block of the preview content, or the block holds
 | the source of a Mermaid or PlantUML diagram | no copy button appears |
 | a code block in the toolbar or a panel outside the preview content | no copy button appears |
 
-### Scenario (nominal): The button stays clear of the sticky band and toolbar
+### Scenario S4 (nominal): The button stays clear of the sticky band and toolbar
 
 - GIVEN a block whose top edge is under the sticky heading band, or whose default button position would overlap the floating toolbar
 - WHEN the pointer enters the block
 - THEN the button is placed below the band or below the toolbar
 
-### Scenario (boundary): The button follows the visible part of the block
+### Scenario S5 (boundary): The button follows the visible part of the block
 
 | Situation | Outcome |
 | --- | --- |
@@ -85,7 +104,7 @@ When the pointer is over a code block of the preview content, or the block holds
 | the resize leaves less than 30 px of the block visible | the button is hidden |
 | several scroll events arrive before the next animation frame | the button is placed once, in that frame, for the block's position then |
 
-### Scenario (boundary): Events that hide the button
+### Scenario S6 (boundary): Events that hide the button
 
 | Event | Outcome |
 | --- | --- |
@@ -97,14 +116,14 @@ When the pointer is over a code block of the preview content, or the block holds
 | a content patch updates the preview in place while the button is shown | the button is hidden |
 | a content patch is applied while no button is shown | nothing changes and no error occurs |
 
-### Scenario (boundary): The Copied state is reset by another block
+### Scenario S7 (boundary): The Copied state is reset by another block
 
 | Situation | Outcome |
 | --- | --- |
 | the button shows Copied on block A and the pointer enters block B | the button on block B reads Copy code with no check mark |
 | the button shows Copied and the pointer stays in the same block | the Copied state is kept until the 1.5 s end |
 
-### Scenario (nominal): The keyboard reaches the button
+### Scenario S8 (nominal): The keyboard reaches the button
 
 | Step | Outcome |
 | --- | --- |
@@ -114,7 +133,7 @@ When the pointer is over a code block of the preview content, or the block holds
 | Shift+Tab is pressed on the button | focus returns to the block and the button stays shown |
 | focus leaves the block and the button | the button is hidden |
 
-### Scenario (refusal): Blocks that are not tab stops
+### Scenario S9 (refusal): Blocks that are not tab stops
 
 - GIVEN a block being edited, a code block inside a block editor, or the source of a Mermaid or PlantUML diagram
 - WHEN the reader tabs through the page

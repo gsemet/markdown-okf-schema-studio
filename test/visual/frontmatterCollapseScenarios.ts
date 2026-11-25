@@ -28,7 +28,7 @@ const EXPANDED: ContentAssertion[] = [
 
 export const FRONTMATTER_COLLAPSE_SCENARIOS: ScenarioDefinition[] = (["light", "dark"] as const).flatMap((theme, index) => [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S1
     id: `frontmatter-schema/v${28 + index * 2}-frontmatter-collapsed-${theme}-900`,
     fixture: "07-frontmatter",
     theme,
@@ -41,7 +41,8 @@ export const FRONTMATTER_COLLAPSE_SCENARIOS: ScenarioDefinition[] = (["light", "
       + "the title and the toggle stay, the table is hidden and the toggle is labelled Expand frontmatter properties.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S1
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S4
     id: `frontmatter-schema/v${29 + index * 2}-frontmatter-expanded-again-${theme}-900`,
     fixture: "07-frontmatter",
     theme,

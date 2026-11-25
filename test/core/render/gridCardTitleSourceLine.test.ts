@@ -103,7 +103,7 @@ test("a linked grid card title maps to its directive line and keeps its link", a
   assert.equal(attribute(link, "href"), "targets/alpha.md");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-100
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S1
 test("a standalone card header option maps to its own option line and keeps its leading number", async () => {
   const source = ["# Doc", "", ":::{card} Title", ":header: 4. Header text", "Body text.", ":::", ""].join("\n");
   const html = (await renderMyst(source)).html;

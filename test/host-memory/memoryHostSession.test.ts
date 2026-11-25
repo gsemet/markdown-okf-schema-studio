@@ -83,7 +83,8 @@ test("the memory host's render queue compares changed files with the dependencie
   assert.equal(queue.dependsOn("/ws/other.md"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S6
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S8
 test("linked-target watches of the memory host are shared, fired by the host and closed with the last preview", () => {
   const { ports } = memorySession();
   const watchers = new SharedWatchers({

@@ -11,7 +11,7 @@ import {
 
 // Tests added by the mutation campaign of src/core (CR-450): they pin the survivors of the first run.
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S5
 test("a boolean schema decides alone, and a schema that is not an object accepts nothing", () => {
   assert.equal(validateWithCachedValidator(true, "anything"), true);
   assert.equal(validateWithCachedValidator(false, "anything"), false);
@@ -20,7 +20,7 @@ test("a boolean schema decides alone, and a schema that is not an object accepts
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S5
 test("an object schema validates a value, and a schema that answers later is not a pass", () => {
   const schema = { type: "object", required: ["name"], properties: { name: { type: "string" } } };
   assert.equal(validateWithCachedValidator(schema, { name: "x" }), true);
@@ -30,7 +30,7 @@ test("an object schema validates a value, and a schema that answers later is not
   assert.equal(validateWithCachedValidator({ $async: true, type: "string" }, "x"), false, "a promise is not true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S5
 test("a branch validator is compiled once per branch and root, and released with its root", () => {
   const root = { type: "object" };
   const otherRoot = { type: "object" };
@@ -52,7 +52,7 @@ test("a branch validator is compiled once per branch and root, and released with
   assert.equal(schemaValidatorCacheSizeForTests(), base);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S5
 test("releasing a root forgets its compiled sub-schemas and a failed compile is forgotten at once", () => {
   const sub = { type: "string" };
   const root = { type: "object", properties: { name: sub } };

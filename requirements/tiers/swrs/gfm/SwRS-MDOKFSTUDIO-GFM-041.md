@@ -21,6 +21,13 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: A click moves the selection in the source
+- id: S2
+  title: Clicks and keys that write nothing or normalise
+- id: S3
+  title: An open editor and refused choices
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -49,13 +56,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer clicks or presses Space or Enter on an unselected option of a radio group, the extension SHALL write '(x)' on that option and '( )' on the previously selected one as one undo step, and restore the previous selection with the reason next to the option when the host refuses the choice.
 
-### Scenario (nominal): A click moves the selection in the source
+### Scenario S1 (nominal): A click moves the selection in the source
 
 - GIVEN a trusted preview of '- (x) A', '- ( ) B', '- ( ) C'
 - WHEN the writer clicks the control of C, in reading or edit mode
 - THEN the preview shows C selected at once, the source becomes '- ( ) A', '- ( ) B', '- (x) C' (one character on each of two lines), one undo in the text editor restores the source, and no block editor opens
 
-### Scenario (boundary): Clicks and keys that write nothing or normalise
+### Scenario S2 (boundary): Clicks and keys that write nothing or normalise
 
 | Input | Outcome |
 | --- | --- |
@@ -67,7 +74,7 @@ When a writer clicks or presses Space or Enter on an unselected option of a radi
 | a click while a choice of the group waits for the host | prevented, no second message |
 | an option without a valid line or column, or a group of fewer than two options | prevented, no message |
 
-### Scenario (refusal): An open editor and refused choices
+### Scenario S3 (refusal): An open editor and refused choices
 
 The choice takes the path of the checkbox toggle (SwRS-MDOKFSTUDIO-GFM-021): the same message type with the group's options, the same gates (SwRS-MDOKFSTUDIO-TRUST-005, SwRS-MDOKFSTUDIO-TRUST-065, SwRS-MDOKFSTUDIO-BLOCK-041), the same answer and the same refusal note.
 

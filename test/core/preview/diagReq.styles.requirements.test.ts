@@ -17,14 +17,14 @@ function ruleOf(selector: string): string {
 
 const CONTENT = "#sphinx-myst-preview-content";
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-032
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-032#S7
 test("a PlantUML message uses the theme error colour with a red fallback, in italics", () => {
   const rule = ruleOf(`${CONTENT} .myst-plantuml-error`);
   assert.match(rule, /color: var\(--studio-errorForeground, #f14c4c\);/u);
   assert.match(rule, /font-style: italic;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-023
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S7
 test("the PlantUML source disclosure has the rules of the Mermaid one", () => {
   const summary = ruleOf(`${CONTENT} .myst-plantuml-source summary`);
   assert.match(summary, /color: var\(--studio-descriptionForeground, inherit\);/u);
@@ -52,7 +52,7 @@ test("a PlantUML picture is scaled down to the column and never set to a fixed w
   assert.doesNotMatch(rule, /(?:^|[\s;])width:/u, "a narrow picture keeps its natural size");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-THEME-025
+// @tests_req SwRS-MDOKFSTUDIO-THEME-025#S6
 test("the sticky heading band takes the page colours of the forced mode", () => {
   const band = ruleOf("[data-sphinx-preview-sticky-headings]");
   assert.match(band, /background: var\(--studio-editor-background, Canvas\);/u);

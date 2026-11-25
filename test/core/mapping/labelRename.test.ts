@@ -8,7 +8,8 @@ function apply(text: string, line: number, oldName: string, newName: string): st
   return edit ? text.slice(0, edit.start) + edit.text + text.slice(edit.end) : undefined;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S5
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S6
 test("label names follow the MyST pattern and the length limit", () => {
   for (const good of ["a", "intro", "A1", "_a", ".a", "-a", "sec_2.x:y-z", "x".repeat(100)]) {
     assert.equal(isValidLabelName(good), true, good);
@@ -29,7 +30,8 @@ test("keeps CRLF line endings and surrounding whitespace", () => {
   assert.equal(apply("  (old)=  \r\nb", 1, "old", "new"), "  (new)=  \r\nb");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-045
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S3
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S4
 test("refuses a line that is not exactly the old label, never guessing another line", () => {
   const text = "(other)=\n(old)=\nPara\n";
   assert.equal(renameLabelLine(text, 1, "old", "new"), undefined);

@@ -70,7 +70,7 @@ test("an open field editor blocks the key editor and a second value editor; a bl
     element.getAttribute("aria-label") === "Frontmatter key lifecycle"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S3
 test("number, date and time fields get native inputs; a date-time field stays a text input", () => {
   const expectations: Array<[string, string, string, string | undefined]> = [
     ["number", "3", "3", "number"],
@@ -92,7 +92,8 @@ test("number, date and time fields get native inputs; a date-time field stays a 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S7
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019#S11
 test("turning edit mode off closes a field editor without a save but saves a changed block editor", () => {
   const { harness, textarea } = openTextFieldEditor("original");
   textarea.value = "typed and not saved";
@@ -321,7 +322,7 @@ test("ArrowUp at the start of the first body block does not step onto the proper
   assert.ok(second.messages.length > secondBefore, "the previous body block is the target");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001#S5
 test("typing in a field or key editor opens neither the slash menu nor the edition palette", () => {
   const slashMenus = (harness: ReturnType<typeof createRuntimeHarness>): RuntimeElement[] =>
     harness.createdElements.filter((element) => element.getAttribute("data-slash-menu") === "true");

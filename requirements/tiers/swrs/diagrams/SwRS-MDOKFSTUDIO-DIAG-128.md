@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-014
+scenarios:
+- id: S1
+  title: Drawn diagrams are exported as drawn
+- id: S2
+  title: Slow and failed diagrams
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,13 +40,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the exported page has Mermaid, PlantUML or Vega diagrams, the extension SHALL wait for the pending diagrams to draw, write each drawn Mermaid or PlantUML diagram as an image and each chart as the inline SVG of its live view, with every gradient reference local to the file (`url(#id)`) and no hover box and no script, in the theme of the file, and write a diagram in error as its error box.
 
-### Scenario (nominal): Drawn diagrams are exported as drawn
+### Scenario S1 (nominal): Drawn diagrams are exported as drawn
 
 - GIVEN a page with a Mermaid, a PlantUML and a Vega diagram still drawing when Export is pressed
 - WHEN the diagrams settle
 - THEN the snapshot is taken after they settled, and the file holds each diagram as the picture the preview shows in the theme of the file; a chart is its inline svg, and an area chart with a gradient fill keeps its gradient when the file is opened on its own
 
-### Scenario (boundary): Slow and failed diagrams
+### Scenario S2 (boundary): Slow and failed diagrams
 
 | Input | Outcome |
 | --- | --- |

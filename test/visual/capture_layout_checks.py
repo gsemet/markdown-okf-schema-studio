@@ -261,7 +261,7 @@ def check_heading_fold(page: Page, toolbar, page_name: str, failures: list[Failu
 
 
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
-# @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+# @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failure]) -> None:
     page_name = scenario["page"]
     toolbar = page.locator('[data-sphinx-preview-toolbar][role="toolbar"]')
@@ -760,7 +760,7 @@ def check_top_spacing(page: Page, scenario: dict, failures: list[Failure]) -> No
     failures.append(Failure(page_name, f"{selector} overlaps the floating toolbar"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-020
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-020#S3
 def check_width_modes(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The Width button cycles margin, auto and full; only Auto lets wide blocks leave the column."""
   if not scenario.get("widthModeChecks"):
@@ -918,9 +918,11 @@ def apply_width_shot(page: Page, scenario: dict, failures: list[Failure]) -> Non
 WIDTH_BREAK_REPORT_DIR = VISUAL_REPORT_DIR / "width-margins"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001
-# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022
-# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001#S1
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022#S1
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022#S2
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S3
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S5
 def check_width_mode_break(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """P2/P7: side margins of text, table, code block and figure in one width mode.
 

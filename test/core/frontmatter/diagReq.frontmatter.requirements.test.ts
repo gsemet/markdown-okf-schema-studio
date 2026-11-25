@@ -50,8 +50,7 @@ function analyze(root: string, sourceText: string): FrontmatterResult {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
-// @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001#S5
 test("frontmatter that is a list or an empty block gives the not-a-mapping error row and one error", () => {
   const root = temporaryRoot();
   for (const source of ["---\n- a\n- b\n---\n\nBody.\n", "---\n---\n\nBody.\n"]) {
@@ -69,7 +68,8 @@ test("frontmatter that is a list or an empty block gives the not-a-mapping error
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S5
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S6
 test("a JSON5 schema that cannot be parsed gives the generic table and one warning row; a YAML error is not reported as such", () => {
   const root = temporaryRoot();
   fs.mkdirSync(path.join(root, "_schema"));
@@ -94,7 +94,7 @@ test("a JSON5 schema that cannot be parsed gives the generic table and one warni
   assert.equal(messages.some((message) => message.startsWith("Schema could not be parsed")), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S7
 test("an empty or comment-only YAML schema is reported as empty: generic table, one info note, no throw", () => {
   const source = "---\ntype: Note\ntitle: Hello\n---\n";
   for (const content of ["", "\n  \n", "# TODO: write the schema\n"]) {
@@ -116,7 +116,7 @@ const linkSchema = (annotation: Record<string, unknown> = LINK): Record<string, 
   properties: { ref: { type: "string", "x-okf-link": annotation } },
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050#S4
 test("an absolute link target is refused with an E10 error in POSIX, drive-letter and UNC form", async () => {
   const root = temporaryRoot();
   for (const resolution of ["document-relative", "bundle-relative", "project-relative"]) {
@@ -176,7 +176,8 @@ test("the registry keeps 64 resolved schemas and drops the oldest at the 65th", 
   assert.equal(builds.get("schema-0"), 2, "the oldest schema by insertion was dropped, whatever its later hits, and is read again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039#S2
 test("the title badge counts infos only when there is no error and no warning", () => {
   const result = (summary: FrontmatterResult["summary"]): FrontmatterResult => ({
     present: true,

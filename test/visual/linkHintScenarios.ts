@@ -41,7 +41,8 @@ const ASSERTIONS: ContentAssertion[] = [
 ];
 
 export const LINK_HINT_SCENARIOS: ScenarioDefinition[] = ([["cream", "light"], ["dark", "dark"]] as const).map(([name, theme], index) => ({
-  // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+  // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S7
+  // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S10
   id: `frontmatter-editing/v${String(7 + index).padStart(2, "0")}-link-hint-known-stem-${name}-900`,
   fixture: "gen-link-hint",
   theme,

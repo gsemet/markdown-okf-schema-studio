@@ -27,7 +27,8 @@ afterEach(() => {
   clearPlantUmlCacheForTests();
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S4
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S6
 test("a second render of the same source starts no process", async () => {
   const ws = workspace();
   const runner = fakeRunner();
@@ -65,7 +66,8 @@ test("a second render of the same source starts no process", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S6
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S8
 test("at most two PlantUML processes run at once", async () => {
   const ws = workspace();
   const finishers: Array<() => void> = [];

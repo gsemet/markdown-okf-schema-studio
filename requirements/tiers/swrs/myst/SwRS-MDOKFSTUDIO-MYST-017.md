@@ -17,6 +17,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-018
 depends_on: []
+scenarios:
+- id: S1
+  title: Definition lists render
+- id: S2
+  title: Inline roles sub, sup, abbr and kbd
+- id: S3
+  title: Doc and download roles are plain links
+- id: S4
+  title: Numbered references stay inert placeholders
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,25 +47,25 @@ supersedes:
 
 When a document holds a term followed by `: Definition` lines or an inline `{sub}`, `{sup}`, `{abbr}`, `{kbd}`, `{doc}`, `{download}` or `{numref}` role, the extension SHALL render a definition list, subscript, superscript, an abbreviation with its expansion as title, a keyboard key, a plain link to the written target, or an inert placeholder for the numbered reference.
 
-### Scenario (nominal): Definition lists render
+### Scenario S1 (nominal): Definition lists render
 
 - GIVEN a term line and a `: Definition` line, and a definition list written by the palette Definition list button
 - WHEN the preview renders
 - THEN a definition list with the term and the definition is shown (term and definition become dt and dd), the palette form rendering the same list form
 
-### Scenario (nominal): Inline roles sub, sup, abbr and kbd
+### Scenario S2 (nominal): Inline roles sub, sup, abbr and kbd
 
 - GIVEN ``{abbr}`HR (Heart Rate)` ``, and the roles `{sub}`, `{sup}` and `{kbd}`
 - WHEN the preview renders
 - THEN HR is shown with the title Heart Rate, and subscript, superscript and a keyboard key appear, each role mapping to its element (a `{kbd}` role inserted by the edition palette renders a kbd element)
 
-### Scenario (boundary): Doc and download roles are plain links
+### Scenario S3 (boundary): Doc and download roles are plain links
 
 - GIVEN a doc role and a download role, each written with a label and a target in angle brackets, and a doc role written with a bare target
 - WHEN the preview renders
 - THEN each is a plain link whose `href` is the written target, with the label as text; a role written without a label shows the written target as text (the file name for a download role)
 
-### Scenario (refusal): Numbered references stay inert placeholders
+### Scenario S4 (refusal): Numbered references stay inert placeholders
 
 - GIVEN ``{numref}`fig-x` `` where `(fig-x)=` labels a heading in the same buffer, and the same role with an explicit title
 - WHEN the preview renders

@@ -19,6 +19,19 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-050
 - SwRS-MDOKFSTUDIO-TRUST-025
+scenarios:
+- id: S1
+  title: Includes resolve next to the including file
+- id: S2
+  title: Trust state and files that are served
+- id: S3
+  title: Names that are never read
+- id: S4
+  title: Reasons by kind of name
+- id: S5
+  title: A forged relative from is refused
+- id: S6
+  title: A missing file or a file the rules reject
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,7 +55,7 @@ supersedes:
 
 When the built-in engine asks the host for an include file, the host SHALL read it only next to the including file inside the allowed folders and refuse every other request with a reason.
 
-### Scenario (nominal): Includes resolve next to the including file
+### Scenario S1 (nominal): Includes resolve next to the including file
 The base folder follows from.
 
 | Input | Outcome |
@@ -50,7 +63,7 @@ The base folder follows from.
 | Include request with from null (top-level include) | the name is resolved from the previewed document's folder; a from of null is accepted |
 | Include request whose from is the absolute path of an included file in a sub folder (nested include) | the name is resolved from that sub folder |
 
-### Scenario (boundary): Trust state and files that are served
+### Scenario S2 (boundary): Trust state and files that are served
 The folders an include may read follow the trust of the workspace.
 
 | Input | Outcome |
@@ -60,12 +73,12 @@ The folders an include may read follow the trust of the workspace.
 | Include file of a few kilobytes | served |
 | Symbolic link whose target stays inside the allowed folders | the file is served |
 
-### Scenario (refusal): Names that are never read
+### Scenario S3 (refusal): Names that are never read
 - GIVEN an include request for C4/C4_Context in angle brackets, a URL, or a name that is only spaces
 - WHEN the host resolves it
 - THEN it is refused without reading the disk
 
-### Scenario (refusal): Reasons by kind of name
+### Scenario S4 (refusal): Reasons by kind of name
 | Input | Outcome |
 | --- | --- |
 | Library name in angle brackets (C4/C4_Context) | reason saying the built-in engine reads no URL and no standard library |
@@ -73,12 +86,12 @@ The folders an include may read follow the trust of the workspace.
 | Name that is empty after trimming (only spaces) | The include names no file. |
 | Absolute path (leading slash, or on Windows a drive or UNC path such as C:\diagrams\a.puml) | PlantUML file followed by the name and must be a relative path to a local file |
 
-### Scenario (refusal): A forged relative from is refused
+### Scenario S5 (refusal): A forged relative from is refused
 - GIVEN an include request with from equal to a relative path
 - WHEN the host resolves it
 - THEN it is refused with the reason PlantUML file followed by the name and could not be read
 
-### Scenario (refusal): A missing file or a file the rules reject
+### Scenario S6 (refusal): A missing file or a file the rules reject
 | Input | Outcome |
 | --- | --- |
 | File that does not exist in the document's folder | refused with the reason PlantUML file not found followed by the name, and the candidate path is reported for watching |

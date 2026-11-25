@@ -125,7 +125,8 @@ const ALERT_DOCUMENT = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 /**
  * QA 210 c3-1: an unquoted line that continues the paragraph of a GitHub alert (CommonMark lazy
  * continuation) renders inside the alert, and a click in the alert opens an editor that holds it.
@@ -284,7 +285,8 @@ async function assertTargetBeyondDropdownCap(filePath: string, target: string): 
     + `(${position}); the test no longer proves the fix`);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S7
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010#S9
 /**
  * QA 210 c6-2: the list editor of a filename-stem link field does not warn "No Markdown file
  * named ..." for a value the properties table resolves, in a workspace with more stems than its
@@ -334,7 +336,8 @@ const VAULT_DOCUMENT = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003#S2
 /**
  * QA 210 c6-3: in a file without a schema, a number typed in the YAML box of a number field is
  * saved by Cmd/Ctrl+Enter, and the editor closes.
@@ -398,7 +401,8 @@ const EDGE_SCHEMA = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S3
 /**
  * QA 210 ux-16 (campaign 001 guard): a title typed in its field editor and saved by a click
  * elsewhere changes the title line only; comments, folded and literal blocks and flow sequences
@@ -516,7 +520,8 @@ async function clickToolbarCollapse(page: Page, wanted: "expanded" | "collapsed"
   await waitFor(`the view controls to be ${wanted}`, async () => await toolbarState(page) === wanted);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043#S4
 /**
  * QA 210 c7-1: in a side preview about 430 px wide, a click on Show view controls unrolls the
  * toolbar's rows over the top of the document, and the first heading and paragraph wrap around

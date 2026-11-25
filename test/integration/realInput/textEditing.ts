@@ -80,7 +80,7 @@ const REQ_DOCUMENT = [
 ].join("\n");
 
 /** RI-T05: one frontmatter value edit changes only that field's line. */
-// @tests_req StRS-MDOKFSTUDIO-FMEDIT-008
+// @accepts_req StRS-MDOKFSTUDIO-FMEDIT-008#S1
 export async function scenarioFrontmatterValueMinimalPatch(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t05", REQ_DOCUMENT, async (document) => {
     await openSidePreview(document);
@@ -122,7 +122,6 @@ export async function scenarioFrontmatterValueMinimalPatch(page: Page, evidence:
 }
 
 /** RI-T06: renaming and removing a frontmatter field change only that field's lines. */
-// @tests_req StRS-MDOKFSTUDIO-FMEDIT-008
 export async function scenarioFrontmatterStructuralMinimalPatch(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t06", REQ_DOCUMENT, async (document) => {
     await openSidePreview(document);
@@ -188,7 +187,7 @@ function frontmatterOf(text: string): Record<string, unknown> {
  * RI-T07: Enter saves a one-line text field in place (QA 210 ux-17: one line changed); Shift+Enter
  * then Cmd/Ctrl+Enter saves two lines.
  */
-// @tests_req StRS-MDOKFSTUDIO-FMEDIT-001
+// @accepts_req StRS-MDOKFSTUDIO-FMEDIT-001#S1
 export async function scenarioEnterCommitsTextField(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t07", REQ_DOCUMENT, async (document) => {
     await openSidePreview(document);

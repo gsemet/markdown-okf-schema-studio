@@ -127,7 +127,8 @@ function harness(options: HarnessOptions = {}) {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S3
 test("a click on the anchor in edit mode opens a prefilled, selected field before the block handlers", () => {
   const t = harness();
   const event = t.click(t.anchor);
@@ -210,7 +211,7 @@ test("a refusal is shown and the field can be edited again", () => {
   assert.equal(t.input()!.disabled, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S2
 test("an icon in an anchor row opens the field above the icon, anchored by its bottom edge", () => {
   const t = harness({ row: true, iconTop: 300 });
   t.click(t.anchor);
@@ -220,7 +221,8 @@ test("an icon in an anchor row opens the field above the icon, anchored by its b
   assert.deepEqual(t.scrolls, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S2
 test("with too little room above, the page scrolls up by the missing height, then the field opens above", () => {
   // Room above the icon: 50 - 6 - 8 = 36; the field is 80 high, so 44 are missing.
   const t = harness({ row: true, iconTop: 50, scrollY: 200 });
@@ -230,7 +232,8 @@ test("with too little room above, the page scrolls up by the missing height, the
   assert.equal(t.popover()!.styles.has("top"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S3
 test("the preview toolbar band counts as the top obstruction", () => {
   // Top inset 60 + 8 = 68; room 100 - 6 - 68 = 26; 54 are missing.
   const t = harness({ row: true, iconTop: 100, scrollY: 300, toolbarBottom: 60 });
@@ -239,7 +242,8 @@ test("the preview toolbar band counts as the top obstruction", () => {
   assert.equal(t.popover()!.styles.get("bottom"), `${800 - (154 - 6)}px`);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S2
 test("a toolbar that floats beside the field, not over it, is no top obstruction", () => {
   // The field spans 40..340; the toolbar sits at 400..500 and reaches down to 178: room 168 - 6 - 8 = 154 >= 80.
   const t = harness({ row: true, iconTop: 168, scrollY: 0, toolbarBottom: 178, toolbarSpan: [400, 500] });
@@ -252,7 +256,8 @@ test("a toolbar that floats beside the field, not over it, is no top obstruction
   assert.equal(over.popover()!.getAttribute("data-okf-label-rename-side"), "below");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S2
 test("when the page cannot scroll up by the missing height, the field opens below the icon", () => {
   for (const scrollY of [0, 43]) {
     const t = harness({ row: true, iconTop: 50, scrollY });
@@ -263,7 +268,7 @@ test("when the page cannot scroll up by the missing height, the field opens belo
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S2
 test("an icon held by a paragraph or a heading keeps the placement under the icon", () => {
   const t = harness({ iconTop: 300 });
   t.click(t.anchor);
@@ -272,7 +277,7 @@ test("an icon held by a paragraph or a heading keeps the placement under the ico
   assert.deepEqual(t.scrolls, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S8
 test("a press on an element outside the popover (a table cell) closes it; a press inside keeps it", () => {
   const t = harness({ row: true, iconTop: 300 });
   t.click(t.anchor);

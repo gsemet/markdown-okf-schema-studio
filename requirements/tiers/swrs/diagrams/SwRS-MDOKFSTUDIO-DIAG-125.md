@@ -17,6 +17,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
+scenarios:
+- id: S1
+  title: A fence and a raw block are pictures
+- id: S2
+  title: Active content and shared ids
+- id: S3
+  title: Inline svg and unreadable source
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,19 +44,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a document holds an svg fence or a raw svg element that fills a whole block, the preview SHALL draw it inline as a picture rebuilt from an allow-list of drawing elements and presentation attributes, with every id and reference renamed per picture, and SHALL draw an svg element inside a sentence, a comment, a math block, a code block or a raw HTML table as nothing. No reference of a picture (url(#id), href) SHALL point at an id the picture does not declare, and a value SHALL hold only a colour, var(), url(#id) or transform function and no scheme.
 
-### Scenario (nominal): A fence and a raw block are pictures
+### Scenario S1 (nominal): A fence and a raw block are pictures
 
 - GIVEN a document with an svg fence and, after a blank line, a raw svg element that holds its whole block (one line or several)
 - WHEN the preview renders it
 - THEN each is one figure of the class myst-svg-figure that holds one svg element with its viewBox and declared width, carries the data-line of its first line and the data-end-line of its last line, and no code block is left
 
-### Scenario (refusal): Active content and shared ids
+### Scenario S2 (refusal): Active content and shared ids
 
 - GIVEN an svg with a script element, an on-handler, a foreignObject, a link to an https page, a style element, a use that points at another file, a javascript: or data: URL and a gradient whose id another picture also uses, an image-set() or src() value, and a use or url() that points at an id of another picture or of the page
 - WHEN the preview renders it
 - THEN none of these reaches the page, the render carries one warning that names what was removed, and each picture keeps its own ids with every url(#id) and href="#id" reference renamed with them
 
-### Scenario (boundary): Inline svg and unreadable source
+### Scenario S3 (boundary): Inline svg and unreadable source
 
 - GIVEN an svg element inside a sentence, and an svg fence that holds no svg element
 - WHEN the preview renders them

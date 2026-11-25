@@ -16,6 +16,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-007
 depends_on: []
+scenarios:
+- id: S1
+  title: An existing JAR file is run
+- id: S2
+  title: The jarPath does not exist
+- id: S3
+  title: The jarPath is a directory
+- id: S4
+  title: Restricted Mode disables the JAR pipeline
+- id: S5
+  title: The command to run is missing
+- id: S6
+  title: The process fails or returns no picture
+- id: S7
+  title: Each failure is also a status-line warning
+- id: S8
+  title: The host cannot run programs
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,28 +63,28 @@ supersedes:
 
 When the JAR pipeline cannot draw a PlantUML diagram, the extension SHALL show on that diagram the message of the cause with the state error or unavailable, and report a warning with the code plantuml-render and the document path in addition to the message on the diagram.
 
-### Scenario (nominal): An existing JAR file is run
+### Scenario S1 (nominal): An existing JAR file is run
 - GIVEN jarPath naming a regular file
 - WHEN the preview is rendered
 - THEN the JAR is run
 - AND when every diagram is rendered no PlantUML warning is reported
 
-### Scenario (refusal): The jarPath does not exist
+### Scenario S2 (refusal): The jarPath does not exist
 - GIVEN jarPath naming missing.jar and two PlantUML diagrams
 - WHEN the preview is rendered
 - THEN both diagrams show The PlantUML JAR could not be found followed by the resolved path, with state error, and no process starts
 
-### Scenario (refusal): The jarPath is a directory
+### Scenario S3 (refusal): The jarPath is a directory
 - GIVEN jarPath naming a directory
 - WHEN the preview is rendered
 - THEN every diagram shows The PlantUML JAR path is not a file followed by the path, with state error, and no process starts
 
-### Scenario (refusal): Restricted Mode disables the JAR pipeline
+### Scenario S4 (refusal): Restricted Mode disables the JAR pipeline
 - GIVEN an untrusted workspace, useJar true and two PlantUML diagrams
 - WHEN the preview is rendered
 - THEN both diagrams show PlantUML preview is disabled in an untrusted workspace. with state unavailable and no process starts
 
-### Scenario (refusal): The command to run is missing
+### Scenario S5 (refusal): The command to run is missing
 | Input | Outcome |
 | --- | --- |
 | useJar true, an empty jarPath and no plantuml command on the PATH | the diagram shows PlantUML executable "plantuml" was not found on PATH. Set markdownOkfSchemaStudio.plantuml.jarPath to a valid JAR path. with state unavailable, shows no picture and keeps its source disclosure |
@@ -77,7 +94,7 @@ When the JAR pipeline cannot draw a PlantUML diagram, the extension SHALL show o
 | the spawn call throws an error with a message | the diagram shows that message with state error and a warning |
 | the spawn call throws a not-found error | the diagram shows the missing-executable message with state unavailable |
 
-### Scenario (refusal): The process fails or returns no picture
+### Scenario S6 (refusal): The process fails or returns no picture
 | Input | Outcome |
 | --- | --- |
 | a process that exits with code 1 and error output Syntax Error | the diagram shows PlantUML exited with code 1: Syntax Error with state error |
@@ -86,14 +103,14 @@ When the JAR pipeline cannot draw a PlantUML diagram, the extension SHALL show o
 | a process that exits 0 and prints plain text | the diagram shows PlantUML did not return SVG output. with state error |
 | output with an svg start tag and no end tag | the same message appears |
 
-### Scenario (boundary): Each failure is also a status-line warning
+### Scenario S7 (boundary): Each failure is also a status-line warning
 | Input | Outcome |
 | --- | --- |
 | a missing JAR, a disabled workspace, a missing command and a failing process, one per diagram | the status line gets one warning with code plantuml-render and the document path per failing diagram |
 | all diagrams rendered | no PlantUML warning is reported |
 | a document without PlantUML diagrams, with any jarPath or in an untrusted workspace | nothing is reported: no message and no warning |
 
-### Scenario (refusal): The host cannot run programs
+### Scenario S8 (refusal): The host cannot run programs
 - GIVEN a host without the processes capability and the JAR pipeline chosen
 - WHEN the preview is rendered
 - THEN every diagram shows PlantUML needs a host that can run programs; the built-in engine draws diagrams without one. with state unavailable and no process starts

@@ -73,7 +73,7 @@ function controller(options: { text?: string; blockEditOpen?: boolean; applyWrit
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("a radio choice is applied as one undo step that changes the old and the new option", async () => {
   const host = controller();
   await host.run(choice());
@@ -85,7 +85,8 @@ test("a radio choice is applied as one undo step that changes the old and the ne
     [["previewCheckboxResult", "checkbox-9-1", true]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("a choice of the selected option applies nothing and is answered as saved", async () => {
   const host = controller();
   await host.run(choice({ line: 3, endLine: 3 }));
@@ -93,7 +94,7 @@ test("a choice of the selected option applies nothing and is answered as saved",
   assert.equal(host.posted[0].saved, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("a choice whose group moved, or that races an open editor, is refused and changes nothing", async () => {
   const moved = controller({ text: TEXT.replace("- ( ) leave", "leave") });
   await moved.run(choice());
@@ -106,7 +107,7 @@ test("a choice whose group moved, or that races an open editor, is refused and c
   assert.equal(editing.posted[0].error, "Save or cancel the open Markdown edit before choosing an option.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("a forged choice that names the options of two groups is refused and changes nothing", async () => {
   const text = `${TEXT}\nTests:\n\n- (x) unit\n- ( ) e2e\n`;
   const host = controller({ text });
@@ -146,8 +147,8 @@ function dispatcher(options: { restrictedReads?: boolean } = {}) {
   return { session, answers, handled, dispatcher: new PageMessageDispatcher(manager as unknown as PreviewManager, router as never) };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S8
 test("a malformed radio group is answered as not understood, and a restricted-reads preview takes the choice", () => {
   const gate = dispatcher();
   const malformed = [
@@ -175,7 +176,7 @@ test("a malformed radio group is answered as not understood, and a restricted-re
   assert.deepEqual(restricted.handled, ["previewCheckboxToggle"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("a choice whose apply resolves but leaves the document unchanged (a read-only file) is answered with an error, not as saved", async () => {
   const host = controller({ applyWritesNothing: true });
   await host.run(choice());
@@ -185,8 +186,9 @@ test("a choice whose apply resolves but leaves the document unchanged (a read-on
   assert.equal(typeof host.posted[0].error, "string", "the page shows why next to the option");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S5
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S7
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("on a file VS Code keeps read-only, a choice and a plain checkbox toggle are answered with the read-only reason", async () => {
   const radio = controller({ applyWritesNothing: true });
   await radio.run(choice());
@@ -204,7 +206,7 @@ test("on a file VS Code keeps read-only, a choice and a plain checkbox toggle ar
   assert.deepEqual(writable.posted.map((answer) => answer.saved), [true], "a toggle that writes is saved");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S5
 test("the host refuses a checkbox toggle whose marker is gone, that races an open editor, or that VS Code cannot apply", async () => {
   const text = "Tasks:\n\n- [ ] write the fix\n";
   const toggle = choice({ line: 3, endLine: 3, column: 2, checked: true, radioGroup: undefined });

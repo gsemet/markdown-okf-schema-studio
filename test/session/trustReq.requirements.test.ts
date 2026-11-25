@@ -77,7 +77,8 @@ const blockMove = (identity: { documentId?: string; revision: number; requestId:
   ...identity,
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
 test("a render-gated page message must name the render the host holds", () => {
   const { dispatcher, session, handled, state } = harness();
 
@@ -99,8 +100,8 @@ test("a render-gated page message must name the render the host holds", () => {
   assert.deepEqual(bare.handled, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S7
 test("a label rename from an older render is answered with the stale-line refusal", () => {
   const { dispatcher, session, handled, state } = harness();
   const posted: Array<Record<string, unknown>> = [];
@@ -128,7 +129,7 @@ test("a label rename from an older render is answered with the stale-line refusa
   assert.equal(posted.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-081
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081#S6
 test("a document-gated page message must name the shown document", () => {
   const { dispatcher, session, handled, state } = harness();
   const banner = { type: "previewWarningBannerClosed", key: "ab-0123abcd", revision: 1, requestId: 1 };
@@ -214,7 +215,7 @@ function renderedSession(roots: string[][]): PreviewSession {
   } as unknown as PreviewSession;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S6
 test("the pending page that clears the content and the missing-source page allow no local file", () => {
   const roots: string[][] = [];
   const controller = new RenderingController({} as unknown as PreviewManager);
@@ -232,7 +233,8 @@ test("the pending page that clears the content and the missing-source page allow
   assert.match(missing.panel.html, /data-sphinx-preview-status="missing-source"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
 test("every request of the render gate from an older render is answered with the out-of-date reason", () => {
   const { dispatcher, session, handled, errors } = harness();
   const posted: Array<Record<string, unknown>> = [];

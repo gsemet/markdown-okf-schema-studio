@@ -15,6 +15,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Preview a document that carries scripts and unsafe HTML
 user_need: As a reader, and as a reviewer of an untrusted repository, I open any
   Markdown file, even one with hostile HTML, knowing that its preview cannot run
   its code, call out to the network or read my other files.
@@ -66,7 +69,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Preview a document that carries scripts and unsafe HTML
+#### Path S1: Preview a document that carries scripts and unsafe HTML
 
 1. A document carries a script and raw HTML
    - SwRS-MDOKFSTUDIO-TRUST-011: the sanitizer removes every script element of the document, inline or with a source

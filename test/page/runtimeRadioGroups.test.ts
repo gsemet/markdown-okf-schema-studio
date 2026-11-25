@@ -52,7 +52,7 @@ function result(editId: unknown, outcome: { saved: true } | { error: string }): 
   return { type: "previewCheckboxResult", documentId: "file:///active.md", revision: 7, requestId: 11, editId, ...outcome };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S1
 test("clicking an unselected radio option selects it at once and asks the host to move the x", () => {
   const harness = createRuntimeHarness({ radioGroup: ["x", " ", " "] });
   const { radios } = harness;
@@ -77,7 +77,8 @@ test("clicking an unselected radio option selects it at once and asks the host t
   assert.equal(states(radios), "  x");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
 test("clicking the selected option writes nothing", () => {
   const harness = createRuntimeHarness({ radioGroup: [" ", "x", " "] });
   const before = harness.messages.length;
@@ -86,7 +87,7 @@ test("clicking the selected option writes nothing", () => {
   assert.equal(states(harness.radios), " x ");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S1
 test("with two selected options in the source, a click on one of them normalises the group", () => {
   const harness = createRuntimeHarness({ radioGroup: ["x", " ", "x"] });
   const before = harness.messages.length;
@@ -98,7 +99,7 @@ test("with two selected options in the source, a click on one of them normalises
   assert.equal(states(harness.radios), "  x");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("a refused choice restores the previous selection and shows the reason next to the option", () => {
   const harness = createRuntimeHarness({ radioGroup: ["x", " ", " "] });
   const { radios } = harness;
@@ -117,7 +118,7 @@ test("a refused choice restores the previous selection and shows the reason next
   assert.equal(note.parentElement, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
 test("a second click while a choice waits for the host sends nothing", () => {
   const harness = createRuntimeHarness({ radioGroup: ["x", " ", " "] });
   harness.dispatchDocument("click", fakeEvent(harness.radios[1]));
@@ -129,7 +130,7 @@ test("a second click while a choice waits for the host sends nothing", () => {
   assert.equal(states(harness.radios), " x ");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
 test("Space and Enter select the focused option and write; neither reaches the page's keys", () => {
   const harness = createRuntimeHarness({ radioGroup: ["x", " ", " "], captureOrder: true });
   const { radios } = harness;
@@ -152,7 +153,7 @@ test("Space and Enter select the focused option and write; neither reaches the p
   assert.equal(states(radios), "  x");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
 test("the arrow keys move the focus between the options and write nothing", () => {
   const harness = createRuntimeHarness({ radioGroup: ["x", " ", " "], captureOrder: true, trackFocus: true });
   const { radios } = harness;
@@ -179,7 +180,7 @@ test("the arrow keys move the focus between the options and write nothing", () =
   assert.equal(states(radios), "x  ", "moving the focus selects nothing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("a radio choice is refused while a block editor is open", () => {
   const harness = createRuntimeHarness({ radioGroup: ["x", " "] });
   harness.editModeButton.dispatch("click");
@@ -193,7 +194,7 @@ test("a radio choice is refused while a block editor is open", () => {
   assert.match(status?.textContent ?? "", /before choosing an option/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S1
 test("in edit mode and in every palette mode a radio click selects the option without opening a block editor", () => {
   for (const initialPaletteMode of ["strict", "gfm", "myst", "full"] as const) {
     const harness = createRuntimeHarness({ radioGroup: ["x", " "], initialPaletteMode });
@@ -225,8 +226,10 @@ function dropFocusOnContentPatch(harness: ReturnType<typeof createRuntimeHarness
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-040
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-040#S3
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
 test("after a choice with Space or a click and the content patch that follows, the option of the same line and column has the focus", () => {
   for (const way of ["space", "click"] as const) {
     const harness = createRuntimeHarness({ radioGroup: ["x", " ", " "], captureOrder: true, trackFocus: true });
@@ -259,7 +262,8 @@ test("after a choice with Space or a click and the content patch that follows, t
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("a content patch while no option has the focus (an external rewrite) gives the focus to no option", () => {
   const harness = createRuntimeHarness({ radioGroup: ["x", " "], trackFocus: true });
   const focused = (): unknown => (harness.document as { activeElement?: unknown }).activeElement;
@@ -268,7 +272,8 @@ test("a content patch while no option has the focus (an external rewrite) gives 
   assert.equal(harness.radios.includes(focused() as RuntimeElement), false, "the focus stays where the author left it");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
+// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
 test("with a block editor open, a press on an option that blurs the editor before the click writes nothing and keeps the editor open", () => {
   const harness = createRuntimeHarness({

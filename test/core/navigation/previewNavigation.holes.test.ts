@@ -123,7 +123,7 @@ test("an opening fence line is never a target, even when its info text looks lik
   assert.equal(lineOf("```\n# Inside\n```\n# Outside\n", "#outside"), 4);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S4
 test("marker lines trim the marker and the identity, and refuse an empty one", () => {
   const source = "@tests_req REQ-1\nother\n";
   assert.equal(markdownMarkerLine(source, "@tests_req", "REQ-1"), 1, "the first line is line 1");

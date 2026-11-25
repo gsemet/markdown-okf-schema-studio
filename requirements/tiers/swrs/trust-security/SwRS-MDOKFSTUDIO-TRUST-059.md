@@ -26,6 +26,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-011
 - StRS-MDOKFSTUDIO-BLOCK-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Registered type, current render
+- id: S2
+  title: A message from another window or frame
+- id: S3
+  title: Values that are not host messages
+- id: S4
+  title: A render that is not the shown one
+- id: S5
+  title: Addressing by the rule of the type
+- id: S6
+  title: The payload of a type is within its bounds
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -53,31 +66,31 @@ supersedes:
 
 When the page receives a window message event, it SHALL hand its value to the host message filter only if the event comes from the frame that hosts the page, from another frame with the page's own origin that is not the window that opened it, from the page's own window with its own origin, or is dispatched inside the page without a sender; a message posted by any other window or frame SHALL be dropped. When the page receives a value from the host, it SHALL treat it as a host message only if it is an object whose type is an own key of the table of host message rules and it is addressed to the page by that rule, which names the document, revision and request of the render the page shows, or the document alone, or no render identity but an identifier of its own, and whose payload is within the bounds of its type (table of the payload checks).
 
-### Scenario (nominal): Registered type, current render
+### Scenario S1 (nominal): Registered type, current render
 
 - GIVEN a page that shows revision 2, request 5 of a document and a themeChanged message that names them
 - WHEN the message arrives
 - THEN it is accepted and reaches its handler
 
-### Scenario (refusal): A message from another window or frame
+### Scenario S2 (refusal): A message from another window or frame
 
 - GIVEN a page in a webview whose parent frame hosts it, a message event sent by the parent frame, one sent by another frame of the webview host with the page's origin, one sent by another window, one sent by a window with a foreign origin, and one sent by the opener
 - WHEN each event arrives
 - THEN only the ones from the parent frame and from the same-origin host frame (and one dispatched in the page without a sender) reach the host message filter; the others are dropped
 
-### Scenario (refusal): Values that are not host messages
+### Scenario S3 (refusal): Values that are not host messages
 
 - GIVEN a string, null, an unknown type and the types __proto__ and constructor
 - WHEN each is checked
 - THEN none is accepted
 
-### Scenario (refusal): A render that is not the shown one
+### Scenario S4 (refusal): A render that is not the shown one
 
 - GIVEN the same page and a message that names revision 1 and request 4, and a page whose render identity moved to revision 3 by a content patch
 - WHEN the messages arrive
 - THEN the older ones go to unhandled and a message for revision 3 reaches its handler
 
-### Scenario (boundary): Addressing by the rule of the type
+### Scenario S5 (boundary): Addressing by the rule of the type
 
 | Addressing | Message must name | Types |
 | --- | --- | --- |
@@ -85,7 +98,7 @@ When the page receives a window message event, it SHALL hand its value to the ho
 | document | the document id only; the render may differ | previewPlantUmlIncludesChanged |
 | own-id | no render identity; matched by an identifier of its own (editId, flushId), because the host may already follow the next document or render | the results of the host round trips, previewFlushEdit and previewEditorWatch |
 
-### Scenario (refusal): The payload of a type is within its bounds
+### Scenario S6 (refusal): The payload of a type is within its bounds
 
 | Message | Accepted only if | Otherwise |
 | --- | --- | --- |

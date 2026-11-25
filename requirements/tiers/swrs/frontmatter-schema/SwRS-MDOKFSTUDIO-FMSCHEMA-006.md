@@ -17,6 +17,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Value kinds
+- id: S2
+  title: List limit
+- id: S3
+  title: Lean frame
+- id: S4
+  title: Contrast thresholds
+- id: S5
+  title: Narrow preview
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,7 +52,7 @@ supersedes:
 
 When the properties table is displayed, the extension SHALL show each frontmatter value in the Value cell as YAML reads it, a mapping without a link as a YAML code block, a boolean as a read-only checkbox, a list as at most 50 dash-marked items and an empty list or null as `[]` or `null`, inside a table drawn without outer border that fits a preview 640 px wide or less.
 
-### Scenario (nominal): Value kinds
+### Scenario S1 (nominal): Value kinds
 
 | Input | Outcome |
 | --- | --- |
@@ -52,14 +63,14 @@ When the properties table is displayed, the extension SHALL show each frontmatte
 | `empty: []` | The Value cell reads [] |
 | `none:` with no value | The Value cell reads null |
 
-### Scenario (boundary): List limit
+### Scenario S2 (boundary): List limit
 
 | Input | Outcome |
 | --- | --- |
 | A list field with 52 items | 50 items are listed, one dash-marked item per line, and the text "+ 2 more" follows them |
 | A list field with exactly 50 items | All 50 items are listed and no "more" text appears |
 
-### Scenario (nominal): Lean frame
+### Scenario S3 (nominal): Lean frame
 
 - GIVEN a document with frontmatter in a dark, a white and a cream theme
 - WHEN the preview is rendered
@@ -67,7 +78,7 @@ When the properties table is displayed, the extension SHALL show each frontmatte
 - WHEN the header row is inspected
 - THEN the header cells show the translucent grey background and the data cells do not, and an error row has the red background
 
-### Scenario (boundary): Contrast thresholds
+### Scenario S4 (boundary): Contrast thresholds
 
 | Input | Outcome |
 | --- | --- |
@@ -75,7 +86,7 @@ When the properties table is displayed, the extension SHALL show each frontmatte
 | The description text | It reaches 2.2:1 and is smaller than the value text |
 | The value text | It reaches 4:1 |
 
-### Scenario (boundary): Narrow preview
+### Scenario S5 (boundary): Narrow preview
 
 | Input | Outcome |
 | --- | --- |

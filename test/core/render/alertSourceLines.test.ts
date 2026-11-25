@@ -57,18 +57,20 @@ const TWO_ALERTS_BLOCKS: Block[] = [
   ["p", 10, 10],
 ];
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
 // @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("two consecutive alerts and the blocks after them carry the lines of the document", async () => {
   assert.deepEqual(await blocks(TWO_ALERTS), TWO_ALERTS_BLOCKS);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S11
 test("the same document with CRLF line breaks carries the same lines", async () => {
   assert.deepEqual(await blocks(TWO_ALERTS.replaceAll("\n", "\r\n")), TWO_ALERTS_BLOCKS);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S3
 test("an alert followed by a blank line and a paragraph keeps the paragraph on its line", async () => {
   assert.deepEqual(await blocks("> [!NOTE]\n> alert body\n\nAfter paragraph.\n"), [
     ["aside", 1, 2],
@@ -77,7 +79,8 @@ test("an alert followed by a blank line and a paragraph keeps the paragraph on i
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S7
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
 test("every alert type, the bold markers and a titled alert keep the lines of the document", async () => {
   const markers = [
     "> [!TIP]",
@@ -101,7 +104,8 @@ test("every alert type, the bold markers and a titled alert keep the lines of th
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S8
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
 test("an alert followed directly by a lazy line ends on that line and keeps the next blocks in place", async () => {
   assert.deepEqual(await blocks("> [!NOTE]\n> body\nAfter text.\n\nLast.\n"), [
     ["aside", 1, 3],
@@ -110,7 +114,7 @@ test("an alert followed directly by a lazy line ends on that line and keeps the 
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S8
 test("an alert followed directly by a list item ends on its last quoted line and keeps the list in place", async () => {
   assert.deepEqual(await blocks("> [!NOTE]\n> body\n- item\n\nLast.\n"), [
     ["aside", 1, 2],
@@ -122,7 +126,8 @@ test("an alert followed directly by a list item ends on its last quoted line and
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S8
 test("an alert at the end of a file without a final line break ends on the last line", async () => {
   assert.deepEqual(await blocks("Intro.\n\n> [!NOTE]\n> last line"), [
     ["p", 1, 1],
@@ -131,7 +136,7 @@ test("an alert at the end of a file without a final line break ends on the last 
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
 // @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("an alert after a frontmatter block carries the absolute lines of the file", async () => {
   assert.deepEqual(await blocks("---\ntitle: x\n---\n\n> [!NOTE]\n> fm body\n\nAfter.\n"), [
@@ -141,7 +146,8 @@ test("an alert after a frontmatter block carries the absolute lines of the file"
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S7
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("alert markers inside a fenced code block stay untouched and do not move later lines", async () => {
   const source = "```md\n> [!NOTE]\n> fenced\n```\n\n> [!TIP]\n> real\n\nAfter.\n";
   const result = await renderMyst(source);
@@ -154,7 +160,8 @@ test("alert markers inside a fenced code block stay untouched and do not move la
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("an alert inside a list item keeps the lines of the item, the alert and the next blocks", async () => {
   assert.deepEqual(await blocks("- item\n\n  > [!NOTE]\n  > inside list\n\n- next\n\nAfter.\n"), [
     ["ul", 1, 7],
@@ -168,7 +175,7 @@ test("an alert inside a list item keeps the lines of the item, the alert and the
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
 test("a quote nested in an alert (no nested alert) keeps its lines", async () => {
   assert.deepEqual(await blocks("> [!NOTE]\n> outer\n> > [!TIP]\n> > inner\n\nAfter.\n"), [
     ["aside", 1, 4],
@@ -179,7 +186,8 @@ test("a quote nested in an alert (no nested alert) keeps its lines", async () =>
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("an alert inside a grid card keeps the lines of the grid, the card, the alert and the next blocks", async () => {
   const source = ":::::{grid} 1\n::::{grid-item-card} Title\n> [!NOTE]\n> in card\n\n::::\n:::::\n\nAfter.\n";
   assert.deepEqual(await blocks(source), [
@@ -193,7 +201,8 @@ test("an alert inside a grid card keeps the lines of the grid, the card, the ale
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("an alert inside a tab item keeps the lines of the tab set, its panels and the next blocks", async () => {
   const source = [
     ":::::{tab-set}",
@@ -218,7 +227,7 @@ test("an alert inside a tab item keeps the lines of the tab set, its panels and 
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
 test("an alert between context tags keeps the lines of the tag group, the alert and the next blocks", async () => {
   assert.deepEqual(await blocks("<example-ctx>\n\n> [!NOTE]\n> Grouped alert.\n\n</example-ctx>\n\nAfter.\n"), [
     ["aside", 1, 6],
@@ -235,7 +244,8 @@ test("an alert between context tags keeps the lines of the tag group, the alert 
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
 test("a context tag group re-parsed from raw HTML maps the alert of its body to the lines of the block", async () => {
   const { mystParse } = await loadEngine();
   const root: MystNode = {
@@ -262,7 +272,7 @@ test("a context tag group re-parsed from raw HTML maps the alert of its body to 
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
 // @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("the document with an important alert then a note alert maps every block to its own lines", async () => {
   const source = fs.readFileSync(LAYOUT_FIXTURE, "utf8");
@@ -295,8 +305,8 @@ test("the document with an important alert then a note alert maps every block to
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
-// @tests_req SwRS-MDOKFSTUDIO-MYST-096
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S7
+// @tests_req SwRS-MDOKFSTUDIO-MYST-096#S2
 test("an unclosed fence after an alert is reported and shown with its own line", async () => {
   const source = "> [!NOTE]\n> body\n\n```{note}\nunclosed\n\n# Heading\n\nText\n";
   const result = await renderMyst(source);

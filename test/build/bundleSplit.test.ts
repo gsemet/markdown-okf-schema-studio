@@ -43,8 +43,8 @@ async function metafileOf(options: BuildOptions): Promise<Metafile> {
   return result.metafile;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
-// @tests_req SwRS-MDOKFSTUDIO-MYST-024
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S3
+// @tests_req SwRS-MDOKFSTUDIO-MYST-024#S5
 test("the extension bundle leaves Shiki, KaTeX and js-yaml out and loads the first two from lazy files", async () => {
   const meta = await metafileOf(bundles.extensionBundleOptions());
   const [file, output] = Object.entries(meta.outputs)[0];
@@ -60,7 +60,8 @@ test("the extension bundle leaves Shiki, KaTeX and js-yaml out and loads the fir
   assert.deepEqual(lazyNames, ["lazy/highlight.js", "lazy/katex.js"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S7
 test("the Mermaid renderer is an ES module whose entry is small and whose diagram types are chunks", async () => {
   const meta = await metafileOf(bundles.mermaidBundleOptions());
   const entries = Object.entries(meta.outputs).filter(([name]) => name.endsWith("/mermaidPreview.js"));
@@ -72,8 +73,9 @@ test("the Mermaid renderer is an ES module whose entry is small and whose diagra
   assert.ok(total > 1024 * 1024, "the whole of Mermaid is still shipped");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
-// @tests_req SwRS-MDOKFSTUDIO-MYST-024
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-MYST-024#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-024#S3
 test("the split bundle still highlights code, typesets maths and reads YAML directive options", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "studio-split-"));
   try {

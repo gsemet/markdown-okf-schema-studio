@@ -21,6 +21,28 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: The answer is matched by edit id and result type
+- id: S2
+  title: An answer that does not match is ignored
+- id: S3
+  title: The host answers with the type followed by Result and the identity of
+    the request
+- id: S4
+  title: A refused request is still answered
+- id: S5
+  title: Timeouts and the readable error
+- id: S6
+  title: Each request type, its result and its refusals
+- id: S7
+  title: The comment actions are answered by a result without an edit id
+- id: S8
+  title: Closing the editor forgets the pending requests
+- id: S9
+  title: Answers for another or a closed editor are ignored
+- id: S10
+  title: A request of an older render is answered
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -62,34 +84,34 @@ supersedes:
 
 When the page sends a request to the host, the extension SHALL answer it once with the matching result or end it with a readable error after its timeout.
 
-### Scenario (nominal): The answer is matched by edit id and result type
+### Scenario S1 (nominal): The answer is matched by edit id and result type
 
 - GIVEN a pending previewListTargets request with the edit id host-1, a fresh edit id of 1 to 100 characters
 - WHEN the host answers previewListTargetsResult with the edit id host-1
 - THEN the request is answered once, and a second answer with the same edit id is ignored
 - Example: a previewPlantUmlInclude request with the edit id plantuml-1 in flight, and an ok answer with that edit id, delivers the file id and the text to the PlantUML bundle
 
-### Scenario (refusal): An answer that does not match is ignored
+### Scenario S2 (refusal): An answer that does not match is ignored
 
 - GIVEN the same pending request
 - WHEN an answer arrives with another edit id, or of another result type such as previewListCitationsResult with host-1
 - THEN it is ignored and the request stays pending until its own answer or its timeout
 - Example: with plantuml-1 in flight, an answer for plantuml-99 is ignored, and so is a second answer for plantuml-1 after the first one was delivered
 
-### Scenario (nominal): The host answers with the type followed by Result and the identity of the request
+### Scenario S3 (nominal): The host answers with the type followed by Result and the identity of the request
 
 - GIVEN a list, pick, paste, thread or include request of the table below
 - WHEN the host handles it
 - THEN it posts the request type followed by Result, repeating the document id, the revision, the request id and the edit id of the request
 - AND a success carries ok true with the payload of the table, and a refusal or a failure carries ok false and a reason
 
-### Scenario (refusal): A refused request is still answered
+### Scenario S4 (refusal): A refused request is still answered
 
 - GIVEN a previewPickImage request refused by the host, or a previewListTargets request for a preview that is out of date
 - WHEN the host answers
 - THEN previewPickImageResult carries ok false, the reason and the identity of the request, and the page shows the reason
 
-### Scenario (boundary): Timeouts and the readable error
+### Scenario S5 (boundary): Timeouts and the readable error
 
 | Request | Timeout | End without an answer |
 | --- | --- | --- |
@@ -104,7 +126,7 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 - A request that ended on its timeout is forgotten, so an answer that arrives later is ignored.
 - While a dialog request is pending, the block editor does not treat the focus loss as leaving; this holds also until its timeout.
 
-### Scenario (boundary): Each request type, its result and its refusals
+### Scenario S6 (boundary): Each request type, its result and its refusals
 
 | Request | Result message | Success payload | Refusals and failures, as the reason text of ok false |
 | --- | --- | --- | --- |
@@ -123,7 +145,7 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 - The page matches these results by the edit id only, because the edit itself can move the document revision. The host-to-page rule of these result types is the own-id addressing, see SwRS-MDOKFSTUDIO-TRUST-059.
 - The writes among them are handled in every preview, trust included; only the citation list is refused for restricted reads, see SwRS-MDOKFSTUDIO-TRUST-005.
 
-### Scenario (boundary): The comment actions are answered by a result without an edit id
+### Scenario S7 (boundary): The comment actions are answered by a result without an edit id
 
 | Request | Result message | Content | Page timeout |
 | --- | --- | --- | --- |
@@ -135,21 +157,21 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 - A previewCommentResult is addressed to the shown render and has no edit id; the page gives it to the compose box (kind create) or to the thread that waits.
 - A late previewCommentResult after the 15 seconds still counts for the compose box that waits (Save stays awaiting).
 
-### Scenario (refusal): Closing the editor forgets the pending requests
+### Scenario S8 (refusal): Closing the editor forgets the pending requests
 
 - GIVEN a pending list request and its timeout
 - WHEN the block editor is torn down, and the answer arrives later or the timeout would have elapsed
 - THEN nothing is inserted, nothing is shown and no failure result is produced
 - AND the PlantUML include requests are not cancelled by this, because the bridge keeps its own pending table
 
-### Scenario (refusal): Answers for another or a closed editor are ignored
+### Scenario S9 (refusal): Answers for another or a closed editor are ignored
 
 - GIVEN an answer for a pasted image or a rich text paste whose edit id is not pending, or whose editor is closed or replaced, or a list answer for a popover that is closed or replaced
 - WHEN it arrives
 - THEN it is ignored: nothing is shown and nothing is inserted
 - AND an answer that arrives for the editor still open is used (the entries are shown, the Markdown is inserted)
 
-### Scenario (refusal): A request of an older render is answered
+### Scenario S10 (refusal): A request of an older render is answered
 
 - GIVEN a list, picker, paste or thread request that names an older render than the host holds
 - WHEN the host receives it

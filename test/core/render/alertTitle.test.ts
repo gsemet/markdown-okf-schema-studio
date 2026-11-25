@@ -52,7 +52,8 @@ function childElements(element: HtmlElement): HtmlElement[] {
   return element.childNodes.filter((n: HtmlNode): n is HtmlElement => "tagName" in n);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S3
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S6
 test("an alert whose first body line is a heading keeps the default title and the heading", async () => {
   const doc = await render("> [!NOTE]\n> # h\n> b\n");
   const note = admonitionOf(doc, "note");
@@ -68,7 +69,8 @@ test("an alert whose first body line is a heading keeps the default title and th
   assert.equal(note.tagName, "aside");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S3
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S6
 test("an alert whose first body line is a lone bold line keeps the default title and the bold line", async () => {
   const note = admonitionOf(await render("> [!NOTE]\n> **Bold first**\n>\n> b\n"), "note");
   assert.equal(titleOf(note), "Note");
@@ -77,28 +79,30 @@ test("an alert whose first body line is a lone bold line keeps the default title
   assert.ok(first && findElement(first, (e) => e.tagName === "strong"), "the bold line stays bold");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S3
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S5
 test("an alert with marker text keeps it as the title and keeps a heading in the body", async () => {
   const warning = admonitionOf(await render("> [!WARNING] Read this\n> ## h\n> b\n"), "warning");
   assert.equal(titleOf(warning), "Read this");
   assert.deepEqual(bodyOf(warning), [["h2", "h"], ["p", "b"]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S4
 test("a legacy bold-marker alert keeps a heading in the body", async () => {
   const note = admonitionOf(await render("> **Note**\n> # h\n> b\n"), "note");
   assert.equal(titleOf(note), "Note");
   assert.deepEqual(bodyOf(note), [["h1", "h"], ["p", "b"]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S2
 test("an alert between context tags keeps a heading in the body", async () => {
   const tip = admonitionOf(await render("<example-ctx>\n\n> [!TIP]\n> ### h\n\n</example-ctx>\n"), "tip");
   assert.equal(titleOf(tip), "Tip");
   assert.deepEqual(bodyOf(tip), [["h3", "h"]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 test("the heading inside an alert sits in the admonition, which the TOC column and sticky band exclude", async () => {
   const doc = await render("# Top\n\n> [!NOTE]\n> ## Inside\n");
   const inside = findElement(doc, (e) => e.tagName === "h2");
@@ -123,7 +127,8 @@ function githubBody(fixture: string): { title: string; body: Array<[string, stri
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-009
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S3
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009#S6
 test("Studio and GitHub agree on the title and the body order of the committed GitHub fixtures", async () => {
   const cases: Array<[string, string]> = [
     ["heading-first-line.github.html", "> [!NOTE]\n> # h\n> b\n"],
@@ -137,7 +142,8 @@ test("Studio and GitHub agree on the title and the body order of the committed G
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-001
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001#S6
 test("a MyST admonition still takes its title from a leading heading", async () => {
   const note = admonitionOf(await render(":::{note}\n# h\nb\n:::\n"), "note");
   assert.equal(titleOf(note), "h");

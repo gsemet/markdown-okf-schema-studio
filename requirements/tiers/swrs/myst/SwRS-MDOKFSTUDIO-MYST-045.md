@@ -25,6 +25,21 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: A valid rename edits only the label text
+- id: S2
+  title: The uses of the old name are counted, not rewritten
+- id: S3
+  title: The label line changed
+- id: S4
+  title: The same label on another line is not touched
+- id: S5
+  title: A valid message is answered with its edit id
+- id: S6
+  title: Accepted shape of the rename message
+- id: S7
+  title: A message from a stale render
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -51,32 +66,32 @@ supersedes:
 
 When the host receives a label rename, the extension SHALL change only the `(old)=` text of the stated line as one undo step of the source editor, keeping surrounding whitespace and CRLF endings, and when that line is no longer exactly `(old)=` change nothing and answer The label is no longer on that line. Refresh the preview, without searching other lines; it SHALL accept a previewLabelRename message only with a source line, two valid label names and the current render, and answer previewLabelRenameResult with the same edit id.
 
-### Scenario (nominal): A valid rename edits only the label text
+### Scenario S1 (nominal): A valid rename edits only the label text
 - GIVEN the line `  (old)=` with CRLF
 - WHEN a valid rename to `new` is accepted
 - THEN only the label text changes, whitespace and CRLF stay, and one undo restores it
 
-### Scenario (nominal): The uses of the old name are counted, not rewritten
+### Scenario S2 (nominal): The uses of the old name are counted, not rewritten
 - GIVEN `{ref}` uses of the old name
 - WHEN a rename is accepted
 - THEN they are not rewritten and their count is returned as remainingRefs
 
-### Scenario (refusal): The label line changed
+### Scenario S3 (refusal): The label line changed
 - GIVEN the line edited to something else
 - WHEN a rename request arrives
 - THEN the refusal The label is no longer on that line. Refresh the preview is returned and nothing changes
 
-### Scenario (boundary): The same label on another line is not touched
+### Scenario S4 (boundary): The same label on another line is not touched
 - GIVEN the same label present on another line
 - WHEN a rename request arrives
 - THEN that other line is not touched; only the stated line is checked and no other line is searched
 
-### Scenario (nominal): A valid message is answered with its edit id
+### Scenario S5 (nominal): A valid message is answered with its edit id
 - GIVEN a previewLabelRename with line, old name, new name and edit id for the current render
 - WHEN the host receives it
 - THEN previewLabelRenameResult carries the same edit id with ok, remainingRefs or reason
 
-### Scenario (refusal): Accepted shape of the rename message
+### Scenario S6 (refusal): Accepted shape of the rename message
 | Field of previewLabelRename | Accepted | Otherwise |
 | --- | --- | --- |
 | line | A source line (a safe integer, 1 or more) | The validator rejects the message |
@@ -87,7 +102,7 @@ When the host receives a label rename, the extension SHALL change only the `(old
 
 A message rejected by the validator changes nothing in the document.
 
-### Scenario (refusal): A message from a stale render
+### Scenario S7 (refusal): A message from a stale render
 - GIVEN a previewLabelRename from a stale render
 - WHEN the host receives it
 - THEN the host answers with ok false and the reason The label is no longer on that line. Refresh the preview., and nothing in the document changes

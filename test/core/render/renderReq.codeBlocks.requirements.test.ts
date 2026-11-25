@@ -26,7 +26,7 @@ async function render(markdown: string): Promise<string> {
   return result.html;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S2
 test("the leading word of the fence label, lower-cased, selects the grammar; an empty word selects none", async () => {
   for (const label of ["Python", "PYTHON", "python,linenos", "python{linenos}", "Py"]) {
     const html = highlightCodeBlocks(block(`class="language-${label}"`, "x = &quot;a&quot;\n"));
@@ -41,7 +41,8 @@ test("the leading word of the fence label, lower-cased, selects the grammar; an 
   assert.match(rendered, /<code class="language-,"[^>]*>x = 1\n<\/code>/u, "the block stays plain");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-039
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S5
 test("numbered, emphasized and diff blocks are wrapped into lines, and an unknown language gets no shiki class", () => {
   const numbered = highlightCodeBlocks(
     block('class="language-wobblescript" data-myst-line-numbers="true"', "one\ntwo\n"),
@@ -76,7 +77,7 @@ test("inline code is never highlighted; only pre and code pairs are processed", 
   assert.doesNotMatch(html.slice(0, inline.length), /shiki|sd-/u, "the inline code has no token spans");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S7
 test("a block the highlighter cannot process falls back to escaped lines when wrapped and to the original otherwise", () => {
   // A language that is registered but whose grammar throws is simulated by forcing the grammar call to fail.
   const highlighter = getHighlighter();
@@ -99,7 +100,7 @@ test("a block the highlighter cannot process falls back to escaped lines when wr
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-001
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001#S5
 test("a markdown fence shows its table, link and inner fence as literal text", async () => {
   const source = [
     "| a | b |",

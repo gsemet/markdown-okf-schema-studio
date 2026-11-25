@@ -89,7 +89,7 @@ function identifierResult(cell: unknown): GeometryCheck {
   return check;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001#S1
 test("geometry checks define one function that reports the four check ids", () => {
   const run = loadChecks({ querySelectorAll: () => [] });
   const result = JSON.parse(JSON.stringify(run({})));

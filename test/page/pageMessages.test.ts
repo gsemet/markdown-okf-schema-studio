@@ -171,7 +171,7 @@ const CASES: readonly MessageCase[] = [
     badPayloads: [{ editId: "another-edit" }],
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-053
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-053#S6
     type: "previewPlantUmlIncludesChanged",
     rule: "document",
     message: () => ({ type: "previewPlantUmlIncludesChanged", ...IDS }),

@@ -11,6 +11,7 @@ import type { ScenarioRenderOptions } from "./renderOptions";
 import type { ScenarioDefinition } from "./scenarioAssertions";
 import { SCENARIO_DEFINITIONS_1 } from "./scenarioDefinitions1";
 import { SCENARIO_DEFINITIONS_2 } from "./scenarioDefinitions2";
+import { SCENARIO_DEFINITIONS_3 } from "./scenarioDefinitions3";
 import { ASSERTION_ONLY_IDS, LOCKS_BY_ID, README_BY_ID, REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID, STEPS_BY_ID } from "./scenarioIds";
 
 export type ScrollMode =
@@ -315,7 +316,7 @@ export interface Scenario {
 }
 
 /** Every scenario as written, in campaign order. */
-const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [...SCENARIO_DEFINITIONS_1, ...SCENARIO_DEFINITIONS_2];
+const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [...SCENARIO_DEFINITIONS_1, ...SCENARIO_DEFINITIONS_2, ...SCENARIO_DEFINITIONS_3];
 
 /**
  * Every scenario with its permanent id and group. A definition whose id is not a legacy id must

@@ -26,7 +26,8 @@ const MERMAID = '<figure class="myst-mermaid-figure"><div class="myst-mermaid-di
 const build = async (content: string) =>
   (await buildPreviewWebviewHtml(createNodeFileSystem(), page(content), os.tmpdir(), assets, undefined, undefined, undefined, undefined, true, [], "builtin")).html;
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-129
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-129#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-129#S2
 test("the chart runtime script is added once with the page nonce, only when the content holds a chart", async () => {
   const html = await build(CHART + CHART);
   const tags = html.match(/<script[^>]*data-sphinx-preview-vega[^>]*><\/script>/gu) ?? [];
@@ -45,7 +46,7 @@ test("the chart runtime script is added once with the page nonce, only when the 
   assert.match(both, /data-sphinx-preview-vega/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-124
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-124#S1
 test("the page policy of a chart page has no eval and no network", async () => {
   const csp = /<meta http-equiv="Content-Security-Policy" content="([^"]*)"/u.exec(await build(CHART))?.[1] ?? "";
   assert.ok(csp);

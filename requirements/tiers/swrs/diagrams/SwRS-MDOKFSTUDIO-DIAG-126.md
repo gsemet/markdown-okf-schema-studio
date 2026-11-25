@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-015
+scenarios:
+- id: S1
+  title: The vocabulary follows the theme
+- id: S2
+  title: A variable of another name
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,13 +40,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the preview draws an svg picture, it SHALL define the variables surface, background, bg, border, text, foreground, fg, muted, accent, primary, red, green, blue and orange from the theme of the page (Cream, White, Dark or the VS Code theme), and SHALL give a variable of another name that has no fallback the text colour.
 
-### Scenario (nominal): The vocabulary follows the theme
+### Scenario S1 (nominal): The vocabulary follows the theme
 
 - GIVEN a picture that fills shapes with var(--surface), var(--border), var(--accent), var(--green) and writes text in var(--text)
 - WHEN the page is in Cream, White, Dark or the VS Code theme
 - THEN each variable resolves to the matching --studio token of that theme (surface, background and bg to the code block background, border to the panel border, text, foreground and fg to the editor foreground, muted to the description foreground, accent and primary to the link colour, red, green, blue and orange to the chart colours)
 
-### Scenario (boundary): A variable of another name
+### Scenario S2 (boundary): A variable of another name
 
 - GIVEN a picture that writes fill="var(--nope)" and fill="var(--nope, #123456)"
 - WHEN the preview renders it

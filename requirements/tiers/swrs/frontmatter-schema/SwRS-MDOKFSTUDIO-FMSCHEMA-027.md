@@ -14,6 +14,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-006
+scenarios:
+- id: S1
+  title: Edited schema
+- id: S2
+  title: Reverted and deleted
+- id: S3
+  title: No refresh by itself
+- id: S4
+  title: Document edited afterwards
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,26 +42,26 @@ supersedes:
 
 When a schema file or a file it refers to changes content, the extension SHALL use the new content at the next analysis, comparing content rather than modification time, without refreshing an open preview by itself.
 
-### Scenario (nominal): Edited schema
+### Scenario S1 (nominal): Edited schema
 
 - GIVEN a document analysed once against a schema, then the schema file edited
 - WHEN the document is analysed again
 - THEN the new schema content is applied and the old compiled validator is released
 
-### Scenario (boundary): Reverted and deleted
+### Scenario S2 (boundary): Reverted and deleted
 
 | Input | Outcome |
 | --- | --- |
 | a schema edited and then restored to its previous text | the restored text is reused without error |
 | a schema deleted | the no-schema info row is shown |
 
-### Scenario (refusal): No refresh by itself
+### Scenario S3 (refusal): No refresh by itself
 
 - GIVEN a preview open on a typed document and its schema edited and saved
 - WHEN nothing else happens
 - THEN the table still shows the previous validation result
 
-### Scenario (nominal): Document edited afterwards
+### Scenario S4 (nominal): Document edited afterwards
 
 - GIVEN the same preview after any edit of the document
 - WHEN the frontmatter is re-analysed

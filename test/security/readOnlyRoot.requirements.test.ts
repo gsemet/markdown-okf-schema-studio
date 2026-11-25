@@ -43,7 +43,7 @@ afterEach(() => {
   fs.rmSync(sandbox, { recursive: true, force: true });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S4
 test("the home folder, its ancestors and file-system roots are broad roots", async () => {
   assert.equal(await isBroadRestrictedRoot(createNodeFileSystem(), home), true);
   assert.equal(await isBroadRestrictedRoot(createNodeFileSystem(), sandbox), true);
@@ -51,7 +51,7 @@ test("the home folder, its ancestors and file-system roots are broad roots", asy
   assert.equal(await isBroadRestrictedRoot(createNodeFileSystem(), path.join(home, "project")), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
 test("a restricted-reads policy in the home folder reads nothing", async () => {
   const policy = createPreviewResourcePolicy(createNodeFileSystem(), home, home, true);
   const read = await readBoundedText(policy, "part.md", home);
@@ -60,7 +60,8 @@ test("a restricted-reads policy in the home folder reads nothing", async () => {
   assert.equal((await readBoundedText(policy, ".ssh/id_rsa", home)).ok, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S3
 test("a restricted-reads policy refuses dot-segments but a trusted policy keeps them", async () => {
   const project = path.join(home, "project");
   const restrictedReads = createPreviewResourcePolicy(createNodeFileSystem(), project, project, true);
@@ -72,7 +73,7 @@ test("a restricted-reads policy refuses dot-segments but a trusted policy keeps 
   assert.equal((await readBoundedText(trusted, ".agents/rule.md", project)).ok, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S3
 test("a restricted-reads dot-directory is refused through a symbolic link as well", needsSymlinks, async () => {
   const project = path.join(home, "project");
   fs.symlinkSync(path.join(project, ".agents"), path.join(project, "visible"));
@@ -99,7 +100,7 @@ async function render(text: string, documentDirectory: string, restrictedReads: 
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
 test("an include of a document in the home folder is refused with a diagnostic", async () => {
   const result = await render("```{include} .ssh/id_rsa\n```\n\n```{include} part.md\n```\n", home, true);
   assert.equal(result.html.includes(SECRET), false);
@@ -107,7 +108,8 @@ test("an include of a document in the home folder is refused with a diagnostic",
   assert.ok(result.diagnostics.some((entry) => entry.code === "restricted-root"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S3
 test("a restricted-reads preview includes a plain file but not a dot-directory file", async () => {
   const project = path.join(home, "project");
   const result = await render("```{include} part.md\n```\n\n```{include} .agents/rule.md\n```\n", project, true);
@@ -116,14 +118,16 @@ test("a restricted-reads preview includes a plain file but not a dot-directory f
   assert.ok(result.diagnostics.some((entry) => entry.code === "hidden-path"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S5
 test("a trusted workspace still includes from a dot-directory", async () => {
   const project = path.join(home, "project");
   const result = await render("```{include} .agents/rule.md\n```\n", project, false);
   assert.ok(result.html.includes(SECRET));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S3
 test("a standalone file (no workspace root) includes a plain sibling, refuses dot-directories and non-image files outside its folder", async () => {
   const project = path.join(home, "project");
   const sub = path.join(project, "sub");
@@ -141,13 +145,13 @@ test("a standalone file (no workspace root) includes a plain sibling, refuses do
   assert.equal(await standalone.resolveResource("../image.png", sub, { image: true }), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S4
 test("the home folder is found with another letter case on case-insensitive systems", async () => {
   const insensitive = process.platform === "win32" || process.platform === "darwin";
   assert.equal(await isBroadRestrictedRoot(createNodeFileSystem(), home.toUpperCase()), insensitive);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S4
 test("on Windows USERPROFILE wins over HOME, elsewhere HOME wins", async () => {
   const other = path.join(sandbox, "other");
   fs.mkdirSync(other);

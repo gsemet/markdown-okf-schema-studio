@@ -122,7 +122,8 @@ export const GFM_GALLERY_ASSERTIONS: ContentAssertion[] = [
   { message: "two footnote references and their texts", selector: `${MAIN} a[data-footnote-ref]`, count: 2, expr: "document.querySelector('#sphinx-myst-preview-content section.footnotes').textContent.includes('Second footnote text.')" },
   { message: "three task list checkboxes, one checked", selector: `${MAIN} input.myst-checkbox`, count: 3, expr: "document.querySelectorAll('#sphinx-myst-preview-content input.myst-checkbox:checked').length === 1" },
   { message: "the table honours column alignment", selector: `${MAIN} table:not(.myst-raw-html-table table) th:nth-child(3)`, css: { textAlign: "right" } },
-  // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032
+  // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S3
+  // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S4
   {
     message: "every cell of the table keeps a computed minimum width of 5em",
     selector: `${MAIN} table:not(.myst-raw-html-table table) :where(th, td)`,
@@ -670,7 +671,6 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
   // (h3 at 460 px renders exactly like h2: the harness rejects identical screenshots.)
   ...FIRST_GAP_CASES.flatMap(([name, fixture, kind]) => [WIDE, NARROW, XLARGE]
     .filter((viewport) => !(name === "h3" && viewport.width === NARROW.width)).map((viewport) => ({
-    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-004
     id: `first-element-gap-${name}-${viewport.width}`,
     fixture,
     theme: (name === "empty" ? "dark" : "light") as "light" | "dark",
@@ -733,7 +733,8 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
   // Collapsed toolbar: the first element clears the shorter toolbar (P3) at 360 px.
   ...FIRST_GAP_CASES.filter(([name]) => ["paragraph", "table"].includes(name))
     .map(([name, fixture, kind]) => ({
-      // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
+      // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011#S2
+      // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011#S3
       id: `first-element-gap-${name}-360-collapsed`,
       fixture,
       theme: "light" as const,

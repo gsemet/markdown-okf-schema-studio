@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: An admonition
+- id: S2
+  title: A pasted context tag
 user_need: As a writer, I want admonitions and pasted context tags to look like
   the callouts readers will see, without building, so that I can review notes,
   warnings and prompts in VS Code.
@@ -64,7 +69,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: An admonition
+#### Path S1: An admonition
 
 1. A document holds an admonition directive
    - SwRS-MDOKFSTUDIO-MYST-001: the page renders a panel with the title, accent colour, badge and Markdown body of its kind
@@ -74,7 +79,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-MYST-006 (boundary): a dropdown admonition collapses under its title
 3. Nested directives are drawn as panels inside their parent
 
-#### Path 2: A pasted context tag
+#### Path S2: A pasted context tag
 
 1. A document holds a lower-case context tag alone on its line, with its closing tag
    - SwRS-MDOKFSTUDIO-MYST-013: the page renders a panel titled with the literal tag around the Markdown between the tags

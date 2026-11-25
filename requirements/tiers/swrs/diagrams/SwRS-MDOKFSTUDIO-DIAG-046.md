@@ -20,6 +20,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-009
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: Nested include and diagram file include
+- id: S2
+  title: The from field of the request
+- id: S3
+  title: The host refuses an include
+- id: S4
+  title: Silence and malformed answers
+- id: S5
+  title: Malformed include requests are ignored
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,33 +57,33 @@ supersedes:
 
 When a built-in diagram contains !include, !include_many, !include_once or !includesub of a local file, the page SHALL ask the extension host for the file with a previewPlantUmlInclude message, draw the diagram with the text returned, make no network request, and give the engine the reason exactly once when the host refuses, does not answer within 10 seconds or sends an answer that is not well formed.
 
-### Scenario (nominal): Nested include and diagram file include
+### Scenario S1 (nominal): Nested include and diagram file include
 - GIVEN a diagram that includes a file which includes another file, and a {uml} diagram whose file includes a style file
 - WHEN the diagram is drawn
 - THEN the host is asked for the first file with from null and for the nested file with from equal to the id of the first, and the picture shows the nested content
 - AND for the {uml} diagram the style file is asked with from equal to the id of the diagram file
 - AND no network request is made
 
-### Scenario (boundary): The from field of the request
+### Scenario S2 (boundary): The from field of the request
 | Input | Outcome |
 | --- | --- |
 | a request with a string path and from set to a number | the host message carries from null |
 | a request with from equal to an absolute path | the host message carries that path |
 | a request for the diagram's own include | from is null |
 
-### Scenario (refusal): The host refuses an include
+### Scenario S3 (refusal): The host refuses an include
 | Input | Outcome |
 | --- | --- |
 | a host answer ok false with a reason | the engine receives that reason once |
 | a second answer for the same request | it is ignored and the engine still received the reason once |
 
-### Scenario (refusal): Silence and malformed answers
+### Scenario S4 (refusal): Silence and malformed answers
 | Input | Outcome |
 | --- | --- |
 | no answer from the host for 10 seconds | the engine receives The editor did not answer. Try again. |
 | an ok answer without a text | the engine receives the file name followed by could not be read |
 
-### Scenario (refusal): Malformed include requests are ignored
+### Scenario S5 (refusal): Malformed include requests are ignored
 | Input | Outcome |
 | --- | --- |
 | a request whose path is not a string | no host message is sent and the request is not marked accepted |

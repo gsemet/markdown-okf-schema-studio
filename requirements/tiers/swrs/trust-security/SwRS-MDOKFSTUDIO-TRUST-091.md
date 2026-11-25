@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-004
+scenarios:
+- id: S1
+  title: Images of the document folder and of the workspace folder
+- id: S2
+  title: Images in a broad folder
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,13 +40,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a preview with restricted reads shows an image (a file named .png, .jpg, .jpeg, .gif, .webp or .svg, whatever element loads it, and leading to a file of those kinds), the extension SHALL load it from the folder of the document, even when that folder is broad, and from the workspace folder unless that is broad, never from below a dot-segment, and SHALL grant the webview those folders as local resource roots.
 
-### Scenario (nominal): Images of the document folder and of the workspace folder
+### Scenario S1 (nominal): Images of the document folder and of the workspace folder
 
 - GIVEN a preview with restricted reads of a document in a subfolder of a workspace folder that is not broad, whose images have spaces in their names (written with %20 or between angle brackets), lie in a subfolder of the document folder, or lie in the workspace folder outside the document folder
 - WHEN the document shows them as images (png, jpg, jpeg, gif, webp or svg)
 - THEN every image loads, and the webview has the folder of the document and the workspace folder as local resource roots
 
-### Scenario (boundary): Images in a broad folder
+### Scenario S2 (boundary): Images in a broad folder
 
 - GIVEN a preview with restricted reads whose document is in the home folder (or in a folder that contains it, or in a file-system root), and a workspace folder that may be the home folder too
 - WHEN the document shows an image next to it or below its folder, and an image of the workspace folder outside the document folder

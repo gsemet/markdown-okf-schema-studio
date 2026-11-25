@@ -30,7 +30,7 @@ tested_in_files:
 - test/integration/realInput/editorWidgets.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/visual/capture_edit_checks.py
-- test/visual/scenarioDefinitions2.ts
+- test/visual/scenarioDefinitions3.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

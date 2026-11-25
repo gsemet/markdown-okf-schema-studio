@@ -16,6 +16,21 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-010
+scenarios:
+- id: S1
+  title: Schema order
+- id: S2
+  title: Required but absent field
+- id: S3
+  title: Type icon and label
+- id: S4
+  title: Displayed field type
+- id: S5
+  title: Row tooltip
+- id: S6
+  title: Composed schemas
+- id: S7
+  title: Names equal to object members
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -25,7 +40,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/propertiesTable.test.ts
-- test/integration/previewEditing.test.ts
+- test/integration/previewEditingSchemaSteps.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -42,25 +57,25 @@ supersedes:
 
 When a document's type has a schema, the extension SHALL show a table with the columns Name, Value and Description that lists the declared fields present in the document in schema order, then the other keys in source order, each with a type icon and label before its name, a tooltip on its row, and the properties of composed schemas merged into one field list.
 
-### Scenario (nominal): Schema order
+### Scenario S1 (nominal): Schema order
 
 - GIVEN a schema declaring type, title and owner (in that order) and a document writing type, owner, title and an extra key zz
 - WHEN the preview is rendered
 - THEN the rows read type, title, owner, zz and the Description column shows each schema description
 
-### Scenario (boundary): Required but absent field
+### Scenario S2 (boundary): Required but absent field
 
 - GIVEN the same schema requiring a field that the document lacks
 - WHEN the preview is rendered
 - THEN an empty row for the field is appended after the other rows
 
-### Scenario (nominal): Type icon and label
+### Scenario S3 (nominal): Type icon and label
 
 - GIVEN a schema table with a boolean field
 - WHEN the preview is rendered
 - THEN the name cell holds, before the name, the checkbox icon titled Checkbox (at most 1.5 em) and, after the name, the label (boolean)
 
-### Scenario (boundary): Displayed field type
+### Scenario S4 (boundary): Displayed field type
 
 | Input | Outcome |
 | --- | --- |
@@ -70,21 +85,21 @@ When a document's type has a schema, the extension SHALL show a table with the c
 | a field declared as type object, a field declared only by anyOf, or a field with no usable type declaration | labelled (unknown), with the icon titled Unknown type |
 | a field with enum or const | labelled enum |
 
-### Scenario (nominal): Row tooltip
+### Scenario S5 (nominal): Row tooltip
 
 - GIVEN a field with title Status, description Lifecycle and enum draft and active
 - WHEN the preview is rendered
 - THEN the row tooltip reads Status, Lifecycle and Allowed: draft, active on separate lines
 - AND the same field holding the value retired ends the tooltip with the validation message of the enum
 
-### Scenario (boundary): Composed schemas
+### Scenario S6 (boundary): Composed schemas
 
 | Input | Outcome |
 | --- | --- |
 | a schema with allOf adding x (required), and if kind is a then ifa (required) else ifb, and a document with kind a | the missing required fields are x and ifa |
 | the same document with kind b | the missing required fields are only x, because the then branch is not visited |
 
-### Scenario (refusal): Names equal to object members
+### Scenario S7 (refusal): Names equal to object members
 
 | Input | Outcome |
 | --- | --- |

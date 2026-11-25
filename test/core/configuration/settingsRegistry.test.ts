@@ -32,7 +32,8 @@ test("the generated settings schema is the package.json one, byte for byte", () 
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S7
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S8
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-156
 test("categories keep their titles and order, and settings are sorted by their order", () => {
   const configuration = contributedConfiguration();

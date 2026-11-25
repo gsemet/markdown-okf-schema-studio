@@ -14,6 +14,17 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-016
+scenarios:
+- id: S1
+  title: Columns per pane size
+- id: S2
+  title: Column arguments
+- id: S3
+  title: Columns follow the pane width
+- id: S4
+  title: Grids nest and keep absolute source lines
+- id: S5
+  title: Grids deeper than 8 levels
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,12 +46,12 @@ supersedes:
 
 When a document holds a `{grid}` with `{grid-item-card}` items, the extension SHALL lay out its items in the columns of its argument, such as `1 1 2 2`, for the extra-small, small, medium and large panes, chosen by the pane width.
 
-### Scenario (nominal): Columns per pane size
+### Scenario S1 (nominal): Columns per pane size
 - GIVEN `{grid} 1 1 2 2`
 - WHEN the preview renders
 - THEN the columns per pane size are 1, 1, 2 and 2, one class per breakpoint
 
-### Scenario (boundary): Column arguments
+### Scenario S2 (boundary): Column arguments
 | Input | Outcome |
 | --- | --- |
 | Fewer than four values | The missing sizes inherit the last value |
@@ -48,7 +59,7 @@ When a document holds a `{grid}` with `{grid-item-card}` items, the extension SH
 | More than 12 | At most 12 columns |
 | An invalid value | 1 column |
 
-### Scenario (nominal): Columns follow the pane width
+### Scenario S3 (nominal): Columns follow the pane width
 | Input | Outcome |
 | --- | --- |
 | Four items at 900 px | They form 2 columns |
@@ -56,12 +67,12 @@ When a document holds a `{grid}` with `{grid-item-card}` items, the extension SH
 
 The columns are picked by the container width (480, 640 and 800 px), not by the window width.
 
-### Scenario (nominal): Grids nest and keep absolute source lines
+### Scenario S4 (nominal): Grids nest and keep absolute source lines
 - GIVEN grids with backtick, tilde or colon fences, nested up to 8 levels, such as a grid in a card
 - WHEN the preview renders
 - THEN everything inside, blank lines included, keeps absolute source lines, which scroll sync and block selection rely on
 
-### Scenario (refusal): Grids deeper than 8 levels
+### Scenario S5 (refusal): Grids deeper than 8 levels
 - GIVEN a grid deeper than 8 levels
 - WHEN the preview renders
 - THEN it stays an unexpanded directive placeholder

@@ -190,7 +190,7 @@ export function parseScenarios(raw: string): Scenario[] {
   let prose = false;
   let table: { header: string[]; rows: string[][] } | undefined;
   for (const line of bodyOf(raw).split("\n")) {
-    const heading = /^###\s+Scenario(?:\s*\(([^)]*)\))?\s*:\s*(.*?)\s*$/u.exec(line);
+    const heading = /^###\s+Scenario(?:\s+S\d+)?(?:\s*\(([^)]*)\))?\s*:\s*(.*?)\s*$/u.exec(line);
     if (heading) {
       current = { kind: (heading[1] ?? "").trim() || "nominal", name: heading[2] ?? "", steps: [], blocks: [] };
       scenarios.push(current);

@@ -5,8 +5,10 @@ import { CONTENT_REPLACED_EVENT, installRendererBridge } from "../../src/page/fe
 import { createPageBus, type PageEvents } from "../../src/page/pageBus";
 import { PLANTUML_INCLUDES_CHANGED_EVENT } from "../../src/page/modules/plantumlFileRequests";
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-039
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-039#S4
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-039#S5
 test("page events reach the diagram renderers as the DOM events they listen for", () => {
   const bus = createPageBus<PageEvents>();
   const dispatched: string[] = [];

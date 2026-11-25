@@ -17,6 +17,25 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMEDIT-001
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Enum fields show a select of the schema values
+- id: S2
+  title: The enum select and its commit
+- id: S3
+  title: Input type per field type
+- id: S4
+  title: An invalid number is refused in the editor
+- id: S5
+  title: Schema limits are left to the check at save time
+- id: S6
+  title: A boolean field toggles with one click
+- id: S7
+  title: Boolean cells reached by other inputs
+- id: S8
+  title: Nullable fields offer Set to null
+- id: S9
+  title: Set to null on lists and on fields that are not nullable
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,13 +63,13 @@ supersedes:
 
 When a writer opens the editor of a schema enum, number, date, time, boolean or nullable field, the extension SHALL show the control that fits the type: a select offering the schema values for an enum, a native number, date or time input, a one-click toggle for a boolean and a Set to null button for a nullable field.
 
-### Scenario (nominal): Enum fields show a select of the schema values
+### Scenario S1 (nominal): Enum fields show a select of the schema values
 
 - GIVEN a schema enum field lifecycle with the values draft and active, currently draft
 - WHEN the writer opens its editor
 - THEN the select holds the empty "Choose a value..." entry, draft and active, with draft selected; the entry is always the first option and Escape cancels
 
-### Scenario (boundary): The enum select and its commit
+### Scenario S2 (boundary): The enum select and its commit
 
 | Input | Outcome |
 | --- | --- |
@@ -60,7 +79,7 @@ When a writer opens the editor of a schema enum, number, date, time, boolean or 
 | A value picked and nothing else happens | Nothing is posted: a pick alone does not save (there is no change listener on the select) |
 | Value left unchanged | The editor closes without a post |
 
-### Scenario (boundary): Input type per field type
+### Scenario S3 (boundary): Input type per field type
 
 | Input | Outcome |
 | --- | --- |
@@ -70,7 +89,7 @@ When a writer opens the editor of a schema enum, number, date, time, boolean or 
 | Schema date-time field | A plain text input, not a date-time picker |
 | Any other field type | A text input |
 
-### Scenario (refusal): An invalid number is refused in the editor
+### Scenario S4 (refusal): An invalid number is refused in the editor
 
 | Input | Outcome |
 | --- | --- |
@@ -81,19 +100,19 @@ When a writer opens the editor of a schema enum, number, date, time, boolean or 
 | Number field without a schema, YAML box holding 3.5 and a line break, Cmd or Ctrl+Enter pressed | The YAML text is posted and the host writes rating: 3.5 |
 | Same box holding text that is not a number | The same message and no post |
 
-### Scenario (refusal): Schema limits are left to the check at save time
+### Scenario S5 (refusal): Schema limits are left to the check at save time
 
 - GIVEN a schema number field with minimum 0 and maximum 10
 - WHEN its editor opens, and the writer saves the value 11
 - THEN the input has no min or max attribute and accepts 11 (only step any is set), and the host refuses the save with a message starting "Schema validation failed: " (see SwRS-MDOKFSTUDIO-FMEDIT-016); the schema length and pattern limits are not applied to text controls either
 
-### Scenario (nominal): A boolean field toggles with one click
+### Scenario S6 (nominal): A boolean field toggles with one click
 
 - GIVEN a schema boolean field set to true, edit mode on
 - WHEN the writer clicks its value cell
 - THEN one save with fieldValue false is posted and the checkbox uses the preview checkbox style
 
-### Scenario (boundary): Boolean cells reached by other inputs
+### Scenario S7 (boundary): Boolean cells reached by other inputs
 
 | Input | Outcome |
 | --- | --- |
@@ -101,13 +120,13 @@ When a writer opens the editor of a schema enum, number, date, time, boolean or 
 | Click on the name cell of the boolean field | The key editor opens instead |
 | Boolean field without a schema | The YAML editor opens, there is no one-click toggle |
 
-### Scenario (nominal): Nullable fields offer Set to null
+### Scenario S8 (nominal): Nullable fields offer Set to null
 
 - GIVEN a nullable scalar field with its editor open
 - WHEN the writer presses "Set to null" (aria-label "Set {name} value to null")
 - THEN a save with fieldValue null is posted
 
-### Scenario (boundary): Set to null on lists and on fields that are not nullable
+### Scenario S9 (boundary): Set to null on lists and on fields that are not nullable
 
 | Input | Outcome |
 | --- | --- |

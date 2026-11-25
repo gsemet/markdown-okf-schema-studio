@@ -36,7 +36,8 @@ async function openPreview(document: vscode.TextDocument): Promise<NonNullable<R
 // @tests_req StRS-MDOKFSTUDIO-BLOCK-025
 // @tests_req StRS-MDOKFSTUDIO-BLOCK-014
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-117
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-156
@@ -75,7 +76,6 @@ export async function run(): Promise<void> {
       }
     };
 
-    // @tests_req StRS-MDOKFSTUDIO-TRUST-009
     // A move the page sends about an older version of the document is never applied to the
     // current one: the request is checked first and the document stays as it is.
     await move(7, 7, 9, 10, "down", document.version - 1);
@@ -219,7 +219,8 @@ export async function runUndo(): Promise<void> {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S3
 /** A preview in Restricted Mode moves a block like a trusted one: one swap, undone here. */
 export async function runUntrusted(preview: { documentUri: string; documentVersion?: number; requestId?: number }, document: vscode.TextDocument): Promise<void> {
   const before = document.getText();

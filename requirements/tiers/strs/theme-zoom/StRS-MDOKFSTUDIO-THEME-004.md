@@ -19,6 +19,9 @@ derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+scenarios:
+- id: S1
+  title: Pick a theme and find it again
 user_need: As a reader, I pick a theme once and every preview of this workspace
   opens in it afterwards, also after a window reload; when I open the preview
   for the first time in a workspace, I see a calm warm paper page without having
@@ -78,7 +81,7 @@ An unknown mode is dropped and the stored mode stays.
 
 ### Main paths
 
-#### Path 1: Pick a theme and find it again
+#### Path S1: Pick a theme and find it again
 
 1. The page is shown in one theme mode
    - SwRS-MDOKFSTUDIO-LIFE-169: the reader picks a mode, and the host validates it and stores it for the workspace

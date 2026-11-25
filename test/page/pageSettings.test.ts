@@ -37,8 +37,10 @@ test("the sticky heading depth is rounded and clamped to 1..6, else 3", () => {
   assert.equal(stickyHeadingDepthOf({ ...BASE, stickyHeadingDepth: Number.NaN }), 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-039
-// @tests_req SwRS-MDOKFSTUDIO-CODE-040
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-039#S5
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S1
+// @tests_req SwRS-MDOKFSTUDIO-CODE-040#S4
 test("the code block settings reach the stylesheet as attributes of the root element, on by default", () => {
   const read = (context: PreviewRuntimeContext): Record<string, string> => {
     const attributes: Record<string, string> = {};

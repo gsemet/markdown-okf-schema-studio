@@ -47,7 +47,8 @@ const CONSUMERS: Consumer[] = [
   },
 ];
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-097
+// @tests_req SwRS-MDOKFSTUDIO-MYST-097#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-097#S2
 test("every consumer reads code fences the same way", () => {
   const FENCES: Array<{ name: string; before: string; after?: string; seen: boolean }> = [
     { name: "open backtick fence hides the rest", before: "```\ncode", seen: false },
@@ -69,7 +70,7 @@ test("every consumer reads code fences the same way", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-097
+// @tests_req SwRS-MDOKFSTUDIO-MYST-097#S3
 test("every consumer reads front matter the same way", () => {
   const FRONT: Array<{ name: string; before: string; after: string; seen: boolean }> = [
     { name: "content inside closed front matter is skipped", before: "---\ntitle: x", after: "---", seen: false },
@@ -87,7 +88,7 @@ test("every consumer reads front matter the same way", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-097
+// @tests_req SwRS-MDOKFSTUDIO-MYST-097#S3
 test("frontmatterRange returns the lines taken by the front matter", () => {
   assert.equal(frontmatterRange(["---", "a: 1", "---", "text"]), 3);
   assert.equal(frontmatterRange(["---", "a: 1", "...", "text"]), 3);
@@ -96,7 +97,7 @@ test("frontmatterRange returns the lines taken by the front matter", () => {
   assert.equal(frontmatterRange([]), 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-097
+// @tests_req SwRS-MDOKFSTUDIO-MYST-097#S1
 test("advanceFence tracks one fence at a time, with colon fences on request", () => {
   assert.equal(advanceFence("```ts", undefined), "```");
   assert.equal(advanceFence("code", "```"), "```");

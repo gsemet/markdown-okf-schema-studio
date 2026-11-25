@@ -63,7 +63,8 @@ const GRID = [
   "::::",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-053
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053#S2
 test("a grid renders its items in a column container with one class per breakpoint", async () => {
   const { dom, diagnostics } = await render(GRID);
   const grid = findElement(dom, (element) => hasClass(element, "myst-grid"));
@@ -86,7 +87,8 @@ test("the grid breakpoints inherit the last given column count", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-100
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-100#S3
 test("a grid-item-card renders header, body, footer and a stretched link", async () => {
   const { dom } = await render(GRID);
   const card = findElement(dom, (element) => hasClass(element, "myst-grid-card"));
@@ -112,7 +114,7 @@ test("a card title is the argument and a card without link or parts has only a b
   assert.match(textContent(card), /Only body\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-053
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053#S4
 test("a grid also works with backtick fences, and grids nest inside items with colon fences", async () => {
   const source = [
     "```{grid} 1 2 2 2",
@@ -136,7 +138,8 @@ test("grid content keeps source lines for scroll sync", async () => {
   assert.match(html, /class="myst-grid"[^>]*data-line="3"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-053
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053#S3
 test("the grid stylesheet collapses to one column in a narrow pane", () => {
   assert.match(PREVIEW_THEME_CSS, /\.myst-grid\s*\{[^}]*container-type:\s*inline-size/u);
   assert.match(PREVIEW_THEME_CSS, /@container \(min-width: \d+px\)\s*\{[^@]*\.myst-grid-row\.myst-grid-md-2/u);
@@ -152,7 +155,7 @@ const DOCS = {
 };
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-022
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S1
 test("a toctree lists links labelled by the target H1, the file name or an explicit title", async () => {
   const source = "```{toctree}\n:caption: Contents\n\nintro\nsub/deep\nnotitle\nCustom <intro.md>\n```\n";
   const { dom, html } = await render(source, DOCS);
@@ -177,7 +180,8 @@ test("a toctree lists links labelled by the target H1, the file name or an expli
   assert.doesNotMatch(html, /not available outside a full build/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S3
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S4
 test("a hidden toctree shows no list", async () => {
   const { dom } = await render("```{toctree}\n:hidden:\n:caption: Secret\n\nintro\n```\n", DOCS);
   const nav = findElement(dom, (element) => hasClass(element, "myst-toctree"));
@@ -187,7 +191,7 @@ test("a hidden toctree shows no list", async () => {
   assert.doesNotMatch(textContent(nav), /Secret|Introduction/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S4
 test("a glob entry lists the matching documents sorted", async () => {
   const { dom } = await render("```{toctree}\n:glob:\n\nchap/*\n```\n", DOCS);
   const links = findElements(dom, (element) => element.tagName === "a" && attribute(element, "href")?.startsWith("chap/") === true);
@@ -195,7 +199,7 @@ test("a glob entry lists the matching documents sorted", async () => {
   assert.deepEqual(links.map((link) => attribute(link, "href")), ["chap/a.md", "chap/b.md"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-057
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057#S6
 test("a missing target is shown with the warning style and no link", async () => {
   const { dom } = await render("```{toctree}\n\nintro\nghost\n```\n", DOCS);
   const missing = findElements(dom, (element) => hasClass(element, "myst-toctree-missing"));
@@ -253,7 +257,7 @@ test("listGlobDocuments returns the sorted matching Markdown documents below the
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-053
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053#S5
 test("grids nest up to 8 levels; a ninth level stays an unexpanded directive placeholder", async () => {
   const levels = 10;
   const fence = (level: number): string => "`".repeat(4 + levels - level);

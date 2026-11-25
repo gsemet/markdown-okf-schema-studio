@@ -17,6 +17,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-001
+scenarios:
+- id: S1
+  title: Collapse and expand
+- id: S2
+  title: The state holds while the document stays open
+- id: S3
+  title: Page load and newly opened document
+- id: S4
+  title: Keyboard and the Description column
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,19 +46,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses the toggle next to the Frontmatter properties title, the extension SHALL hide the table below the header, show it again on the next press, keep the state across content patches and edits of the open document, and show the table expanded whenever the page loads or a document is opened.
 
-### Scenario (nominal): Collapse and expand
+### Scenario S1 (nominal): Collapse and expand
 
 - GIVEN a document with a frontmatter properties table shown
 - WHEN the writer presses the toggle next to the title Frontmatter properties
 - THEN the table is hidden while the title and the toggle stay, the toggle reports aria-expanded false and is labelled Expand frontmatter properties, and a second press shows the table again with aria-expanded true
 
-### Scenario (nominal): The state holds while the document stays open
+### Scenario S2 (nominal): The state holds while the document stays open
 
 - GIVEN the table collapsed
 - WHEN the properties section is replaced by a content patch or an edit
 - THEN the table stays collapsed and the toggle keeps reporting aria-expanded false
 
-### Scenario (boundary): Page load and newly opened document
+### Scenario S3 (boundary): Page load and newly opened document
 
 | Input | Outcome |
 | --- | --- |
@@ -59,7 +68,7 @@ When a writer presses the toggle next to the Frontmatter properties title, the e
 | The line marker is requested on a property line while the table is collapsed | The table is expanded first and the row is marked (SwRS-MDOKFSTUDIO-LIFE-194) |
 | The line marker is requested on any other front matter line (a fence, a comment) | The table stays collapsed; a later placement of the marker never expands it |
 
-### Scenario (boundary): Keyboard and the Description column
+### Scenario S4 (boundary): Keyboard and the Description column
 
 | Input | Outcome |
 | --- | --- |

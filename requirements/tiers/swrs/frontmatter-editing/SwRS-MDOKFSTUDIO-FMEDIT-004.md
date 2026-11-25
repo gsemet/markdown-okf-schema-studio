@@ -18,6 +18,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMEDIT-001
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Enter saves a one-line text value
+- id: S2
+  title: In a multi-line value Enter adds a line and Cmd or Ctrl+Enter saves
+- id: S3
+  title: Keys that do not save a text value
+- id: S4
+  title: Trailing line breaks of the typed value
+- id: S5
+  title: A multi-line value is written as a literal block
+- id: S6
+  title: Fields without a schema type are edited as YAML text
+- id: S7
+  title: A field just added opens an empty box
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,19 +57,19 @@ supersedes:
 
 When a writer edits the value of a text field, the extension SHALL show a text box in which Enter saves a one-line value, Enter adds a line in a multi-line value, Cmd or Ctrl+Enter saves, and the saved value keeps no trailing line break unless the original had one and is written as a YAML literal block when it holds line breaks.
 
-### Scenario (nominal): Enter saves a one-line text value
+### Scenario S1 (nominal): Enter saves a one-line text value
 
 - GIVEN a text field title holding a one-line value, its editor open in the one-row text box
 - WHEN the writer presses Enter
 - THEN one previewFrontmatterSave is posted with the typed value
 
-### Scenario (nominal): In a multi-line value Enter adds a line and Cmd or Ctrl+Enter saves
+### Scenario S2 (nominal): In a multi-line value Enter adds a line and Cmd or Ctrl+Enter saves
 
 - GIVEN a text field editor whose value has two lines
 - WHEN the writer presses Enter, then Cmd or Ctrl+Enter
 - THEN Enter adds a line and posts nothing, and Cmd or Ctrl+Enter posts one previewFrontmatterSave with the typed value
 
-### Scenario (refusal): Keys that do not save a text value
+### Scenario S3 (refusal): Keys that do not save a text value
 
 | Input | Outcome |
 | --- | --- |
@@ -62,26 +77,26 @@ When a writer edits the value of a text field, the extension SHALL show a text b
 | Shift+Enter in the text box of a text field | The key is left to the text box, which adds a line, and nothing is posted |
 | Alt+Enter in the same editor | Nothing is posted |
 
-### Scenario (boundary): Trailing line breaks of the typed value
+### Scenario S4 (boundary): Trailing line breaks of the typed value
 
 | Input | Outcome |
 | --- | --- |
 | Original value without a trailing line break, two empty lines typed after the text, then save | The posted fieldValue has no trailing line break |
 | Original value ending with a line break, saved without removing it | The trailing line break is kept in the posted value |
 
-### Scenario (nominal): A multi-line value is written as a literal block
+### Scenario S5 (nominal): A multi-line value is written as a literal block
 
 - GIVEN a plain frontmatter field description holding one line, followed by the field b: 2
 - WHEN the value "a\nb" (two lines) is saved for description
 - THEN the field is written as a literal block (description: |- then the lines a and b indented), and the line b: 2 and the fences stay unchanged
 
-### Scenario (nominal): Fields without a schema type are edited as YAML text
+### Scenario S6 (nominal): Fields without a schema type are edited as YAML text
 
 - GIVEN a document without a schema and a field tags holding an object (the same box serves a field of unknown type, a list-typed field with a non-list value and an object value)
 - WHEN the writer opens its editor
 - THEN a text box labelled "Frontmatter tags" shows the value as YAML, its rows between 1 and 20; Enter adds a line and Cmd or Ctrl+Enter saves
 
-### Scenario (boundary): A field just added opens an empty box
+### Scenario S7 (boundary): A field just added opens an empty box
 
 - GIVEN a field just added, whose value is the empty string
 - WHEN its editor opens

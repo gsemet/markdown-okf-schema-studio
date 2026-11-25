@@ -13,7 +13,8 @@ function fakeElement(attributes: Record<string, string>) {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-034
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034#S2
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034#S5
 test("data-okf-color and data-okf-background become inline styles, invalid values are ignored", () => {
   const good = fakeElement({ "data-okf-color": "#c00", "data-okf-background": "rgba(1,2,3,0.5)" });
   const bad = fakeElement({ "data-okf-color": "url(x)", "data-okf-background": "red !important" });

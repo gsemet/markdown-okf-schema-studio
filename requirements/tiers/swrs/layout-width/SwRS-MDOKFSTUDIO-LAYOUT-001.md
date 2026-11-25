@@ -14,6 +14,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LAYOUT-001
+scenarios:
+- id: S1
+  title: Each width mode at 460 px
+- id: S2
+  title: Long words and URLs wrap
+- id: S3
+  title: GitHub Flavored Markdown gallery
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -21,7 +28,7 @@ implemented_in_files:
 - src/core/preview/styles/contentBlockStyles.markers.ts
 - src/core/preview/styles/contentLayoutStyles.markers.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
+- test/core/preview/previewStylesGutter.test.ts
 - test/page/geometryChecks.test.ts
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions1.ts
@@ -36,17 +43,17 @@ supersedes:
 
 When a document holds wide content, long words or long URLs, the extension SHALL keep the preview page free of sideways scrolling in every width mode, theme and pane width.
 
-### Scenario (nominal): Each width mode at 460 px
+### Scenario S1 (nominal): Each width mode at 460 px
 - GIVEN the light theme, a 460 px pane and a document with a table, a code block and a figure wider than the column (visual scenarios v78, v79 and v80)
 - WHEN the preview is rendered in Margin, Auto and Full width
 - THEN the page does not scroll horizontally (horizontal overflow of at most 1 px) in all three modes
 
-### Scenario (nominal): Long words and URLs wrap
+### Scenario S2 (nominal): Long words and URLs wrap
 - GIVEN text blocks, links and table cells holding long words or bare URLs
 - WHEN the preview is rendered
 - THEN the text blocks, links and table cells carry overflow-wrap anywhere so that long words and URLs wrap and the page does not widen (a table wider than the pane scrolls inside its own box, see SwRS-MDOKFSTUDIO-LAYOUT-032)
 
-### Scenario (nominal): GitHub Flavored Markdown gallery
+### Scenario S3 (nominal): GitHub Flavored Markdown gallery
 - GIVEN the GFM gallery document (five alerts, strikethrough, two footnotes, three task checkboxes, a right-aligned column, a raw HTML table, a raw details block and an autolink) in dark at 900 px, light at 900 px and light at 460 px (visual scenarios gfm/v02, gfm/v03 and gfm/v04)
 - WHEN the preview is rendered
 - THEN the page has no horizontal overflow in all three cases

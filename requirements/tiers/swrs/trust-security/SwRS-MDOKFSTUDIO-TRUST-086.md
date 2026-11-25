@@ -16,6 +16,11 @@ derives_from:
 - StRS-MDOKFSTUDIO-TRUST-009
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
+scenarios:
+- id: S1
+  title: Valid key
+- id: S2
+  title: Invalid key
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the host receives previewWarningBannerClosed, it SHALL accept it only if its key has at most 32 characters and is made of lower-case letters and digits, a hyphen and eight hexadecimal digits.
 
-### Scenario (nominal): Valid key
+### Scenario S1 (nominal): Valid key
 
 - GIVEN a previewWarningBannerClosed message with key abc12-0123abcd
 - WHEN it is checked
 - THEN it is accepted
 
-### Scenario (refusal): Invalid key
+### Scenario S2 (refusal): Invalid key
 
 | Input | Outcome |
 | --- | --- |

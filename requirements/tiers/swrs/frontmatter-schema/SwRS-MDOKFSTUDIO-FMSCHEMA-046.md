@@ -18,6 +18,21 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-014
+scenarios:
+- id: S1
+  title: Array items
+- id: S2
+  title: Annotation positions
+- id: S3
+  title: oneOf with two matching branches
+- id: S4
+  title: Invalid annotation
+- id: S5
+  title: Accepted annotation values
+- id: S6
+  title: Invalid link value
+- id: S7
+  title: Query and fragment
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,13 +55,13 @@ supersedes:
 
 When a schema annotates a property with `x-okf-link`, the extension SHALL find the annotation on top-level and nested properties, array items and prefixItems, patternProperties, additionalProperties, local `$ref`s, every allOf branch, the matching anyOf branches, the single matching oneOf branch and the selected if/then/else branch, mark the field with an E10 error when the annotation or a link value is invalid, and resolve a link target apart from its `?query` and `#fragment`.
 
-### Scenario (nominal): Array items
+### Scenario S1 (nominal): Array items
 
 - GIVEN a schema whose list property has items annotated with x-okf-link and a document listing two targets
 - WHEN the document is analysed
 - THEN two link results are produced for the field, one per item, with their array indexes
 
-### Scenario (nominal): Annotation positions
+### Scenario S2 (nominal): Annotation positions
 
 | Input | Outcome |
 | --- | --- |
@@ -58,13 +73,13 @@ When a schema annotates a property with `x-okf-link`, the extension SHALL find t
 | an anyOf branch that does not match its value | it contributes none |
 | a then branch annotating a, a document where the if condition holds, then one where it does not | a gets a link result only in the first document |
 
-### Scenario (boundary): oneOf with two matching branches
+### Scenario S3 (boundary): oneOf with two matching branches
 
 - GIVEN a schema whose oneOf has two branches that both match the value and carry annotations
 - WHEN the document is analysed
 - THEN no annotation of that oneOf is collected
 
-### Scenario (refusal): Invalid annotation
+### Scenario S4 (refusal): Invalid annotation
 
 | Input | Outcome |
 | --- | --- |
@@ -72,13 +87,13 @@ When a schema annotates a property with `x-okf-link`, the extension SHALL find t
 | an annotation with a resolution and no syntax | the field row carries [E10] x-okf-link syntax is invalid at 'a' |
 | an annotation that is not an object, a non-string marker, display field lists that are not lists of names, or a non-boolean show_line_number | the field is marked with an error "[E10] x-okf-link ... at '{field}'" |
 
-### Scenario (boundary): Accepted annotation values
+### Scenario S5 (boundary): Accepted annotation values
 
 - GIVEN annotations using each of document-relative, bundle-relative, bundle-relative-stem, project-relative and filename-stem with syntax plain or wikilink
 - WHEN the document is analysed
 - THEN none of them is reported as invalid
 
-### Scenario (refusal): Invalid link value
+### Scenario S6 (refusal): Invalid link value
 
 | Input | Outcome |
 | --- | --- |
@@ -86,7 +101,7 @@ When a schema annotates a property with `x-okf-link`, the extension SHALL find t
 | an empty string value | the message reads file-link target is empty |
 | a number value | the message reads file-link value must be a string |
 
-### Scenario (nominal): Query and fragment
+### Scenario S7 (nominal): Query and fragment
 
 | Input | Outcome |
 | --- | --- |

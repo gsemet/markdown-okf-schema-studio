@@ -16,6 +16,13 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-009
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-046
+scenarios:
+- id: S1
+  title: Eighth level
+- id: S2
+  title: Limits of one diagram
+- id: S3
+  title: Include cycle
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,12 +43,12 @@ supersedes:
 
 When a built-in diagram includes files, the page SHALL refuse the include that passes 8 levels of nesting, 64 distinct files or 1 MiB of text, and stop at an include cycle, with a reason shown on the diagram.
 
-### Scenario (nominal): Eighth level
+### Scenario S1 (nominal): Eighth level
 - GIVEN a chain of eight nested includes
 - WHEN the diagram is drawn
 - THEN all eight files are read and the picture is drawn
 
-### Scenario (boundary): Limits of one diagram
+### Scenario S2 (boundary): Limits of one diagram
 Each limit refuses the include that crosses it; the reason is shown on the diagram.
 
 | Input | Outcome |
@@ -52,7 +59,7 @@ Each limit refuses the include that crosses it; the reason is shown on the diagr
 | Included files that together pass 1 MiB of text (the diagram's own text counts toward the limit) | the include that crosses the limit is refused with the reason that the diagram with its included files exceeds the 1 MiB preview limit |
 | One large file included twice | its text is counted once |
 
-### Scenario (refusal): Include cycle
+### Scenario S3 (refusal): Include cycle
 | Input | Outcome |
 | --- | --- |
 | File a includes file b which includes file a | the diagram shows the reason that the file includes itself (an include cycle), naming the file, and does not loop |

@@ -18,6 +18,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-014
 depends_on:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-050
+scenarios:
+- id: S1
+  title: Unique stem
+- id: S2
+  title: Ambiguous or unknown stem
+- id: S3
+  title: Unreadable candidate
+- id: S4
+  title: Candidate becomes readable
+- id: S5
+  title: Folders and files that the stem index covers
+- id: S6
+  title: Index follows the workspace
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,7 +58,7 @@ supersedes:
 
 When a link annotation has the resolution `filename-stem`, the extension SHALL look the stem up among the Markdown files under the workspace folders and the bundle root and accept it when exactly one file matches, reporting the E10 error "is ambiguous" or "was not found" for several files or none and the warning W15 for an unreadable candidate.
 
-### Scenario (nominal): Unique stem
+### Scenario S1 (nominal): Unique stem
 
 | Value | Setup | Outcome |
 | --- | --- | --- |
@@ -53,7 +66,7 @@ When a link annotation has the resolution `filename-stem`, the extension SHALL l
 | t#h | The same file | The link is valid and keeps the fragment h |
 | t | A file t.md created in a workspace folder after the stem was not found | The link is valid when the document is analysed again (the stem index is rebuilt) |
 
-### Scenario (refusal): Ambiguous or unknown stem
+### Scenario S2 (refusal): Ambiguous or unknown stem
 
 | Value | Setup | Outcome |
 | --- | --- | --- |
@@ -61,19 +74,19 @@ When a link annotation has the resolution `filename-stem`, the extension SHALL l
 | zzz | No such file | [E10] filename stem 'zzz' was not found at 'ref'; label File not found |
 | same | A file Same.md only (stems are case-sensitive) | The stem is not found |
 
-### Scenario (refusal): Unreadable candidate
+### Scenario S3 (refusal): Unreadable candidate
 
 - GIVEN a symbolic link ghost.md that points to a missing file and the value ghost
 - WHEN the document is analysed
 - THEN the field carries [W15] Skipped file-link check at 'ref': filename stem 'ghost' could not be resolved because the workspace may be unavailable and the label reads Link unavailable
 
-### Scenario (nominal): Candidate becomes readable
+### Scenario S4 (nominal): Candidate becomes readable
 
 - GIVEN the target of the symbolic link ghost.md is created
 - WHEN the document is analysed again
 - THEN the link is valid
 
-### Scenario (boundary): Folders and files that the stem index covers
+### Scenario S5 (boundary): Folders and files that the stem index covers
 
 | Input | Outcome |
 | --- | --- |
@@ -81,7 +94,7 @@ When a link annotation has the resolution `filename-stem`, the extension SHALL l
 | A file in an ordinary folder | Its stem is found |
 | A file whose name does not end in lowercase `.md`, or a symbolic link to a folder | Not indexed; symbolic links to folders are not entered |
 
-### Scenario (nominal): Index follows the workspace
+### Scenario S6 (nominal): Index follows the workspace
 
 | Event | Outcome |
 | --- | --- |

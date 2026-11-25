@@ -21,7 +21,8 @@ function setup() {
   return { requests, posted, timers };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S3
 test("ask posts the type and payload with a fresh edit id and answers by edit id", () => {
   const { requests, posted } = setup();
   const results: unknown[] = [];
@@ -70,7 +71,8 @@ test("a list request never suspends the blur", () => {
   assert.equal(requests.isDialogOpen(), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S5
 test("with no timeout given, a list request waits 6 seconds and a dialog request 10 minutes", () => {
   const { requests, timers } = setup();
   requests.ask("previewListTargets", {}, {}, () => undefined);
@@ -78,7 +80,8 @@ test("with no timeout given, a list request waits 6 seconds and a dialog request
   assert.deepEqual(timers.map((timer) => timer.at), [6000, 600000]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S3
 test("an answer that comes after the timeout is not taken and calls nothing again", () => {
   const { requests, timers } = setup();
   const results: Array<Record<string, unknown>> = [];
@@ -89,7 +92,8 @@ test("an answer that comes after the timeout is not taken and calls nothing agai
   assert.equal(results.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S3
 test("after cancelAll no callback runs, for an answer or for a timer", () => {
   const { requests, timers } = setup();
   let calls = 0;

@@ -57,7 +57,7 @@ function setup(
   return { clearance, published };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011#S1
 test("nothing is pushed when the toolbar is beside the column", () => {
   const { clearance, published } = setup(rect(0, 100, 600, 2000), rect(12, 800, 150, 72), { kind: "frame" });
   assert.equal(clearance.value(), 0);
@@ -238,7 +238,7 @@ test("the leading properties table is observed itself, also after it is replaced
   assert.deepEqual(sectionObserver.targets, [page.currentSection()]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011#S7
 test("a late load or font settlement measures again", (context) => {
   const page = dynamicPage();
   context.after(page.restore);
@@ -329,7 +329,8 @@ test("CR 041: describe() tells a stale published clearance from the layout it me
   assert.equal(after.lastChangeTrigger, "window resize");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-043#S4
 test("CR 226: the part of the toolbar inside a narrow column is published as the size of the text float", () => {
   // A 393 px pane: column 0..393 (content box 16..377), expanded toolbar 277..379 from 12 to 178.
   const narrow = setup(rect(0, 0, 393, 2000), rect(12, 277, 102, 166));
@@ -390,7 +391,8 @@ test("CR 226: no float is published when the page's CSS hides it (a document wit
   assert.equal(hidden.published.get("--sphinx-preview-toolbar-float-height"), "0px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011#S4
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011#S5
 test("a leading properties table too narrow to be shortened is pushed down instead (inset 0)", () => {
   // 460 px column, toolbar from 200 px reaching down to 84 px, a right-aligned toggle under it:
   // narrowing the table would leave less than 320 px, so the clearance moves it down.

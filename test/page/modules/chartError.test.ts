@@ -12,7 +12,7 @@ function chartWithSource(doc: FakeDocument): FakeElement {
   return chart;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S3
 test("an invalid chart shown several times has exactly one error with one details and the reason", () => {
   const doc = new FakeDocument();
   const chart = chartWithSource(doc);
@@ -27,7 +27,7 @@ test("an invalid chart shown several times has exactly one error with one detail
   assert.doesNotMatch(chart.querySelector("details")!.textContent, /Unknown mark/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S1
 test("the reason is plain text, never HTML", () => {
   const doc = new FakeDocument();
   const chart = chartWithSource(doc);
@@ -36,7 +36,8 @@ test("the reason is plain text, never HTML", () => {
   assert.ok(chart.querySelector("details")!.textContent.includes("<img src=x"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S2
 test("the error styles use the theme error colour and keep long reasons inside the column", () => {
   assert.match(PREVIEW_THEME_CSS, /\.myst-vega-error\s*\{[^}]*color: var\(--studio-errorForeground, #f14c4c\)/u);
   assert.match(PREVIEW_THEME_CSS, /\.myst-vega-error-details pre\s*\{[^}]*(overflow-x: auto|white-space: pre-wrap)/u);

@@ -18,6 +18,13 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: A well-formed include request
+- id: S2
+  title: A malformed include request
+- id: S3
+  title: Bounds of the fields
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,18 +41,18 @@ default_owner_email: gaetan@xeberon.net
 
 When the host receives a previewPlantUmlInclude message, it SHALL accept it only with a file name that is not blank and at most 4096 characters, a from that is null or a non-empty string of at most 4096 characters, and a non-empty bounded edit id.
 
-### Scenario (nominal): A well-formed include request
+### Scenario S1 (nominal): A well-formed include request
 - GIVEN a previewPlantUmlInclude message with a 4096-character name, from null and an edit id (see SwRS-MDOKFSTUDIO-TRUST-052 for the envelope)
 - WHEN the host validates it
 - THEN it is accepted
 - AND the same message with from set to a non-empty file id is accepted
 
-### Scenario (refusal): A malformed include request
+### Scenario S2 (refusal): A malformed include request
 - GIVEN a previewPlantUmlInclude message with a blank name, a 4097-character name, a name that is not a string, an empty from, a from that is missing or not a string, or a missing or empty edit id
 - WHEN the host validates it
 - THEN it is refused, ignored like any value that is not a registered page message, and nothing changes on screen
 
-### Scenario (boundary): Bounds of the fields
+### Scenario S3 (boundary): Bounds of the fields
 | Input | Outcome |
 | --- | --- |
 | name of 4096 characters | accepted |

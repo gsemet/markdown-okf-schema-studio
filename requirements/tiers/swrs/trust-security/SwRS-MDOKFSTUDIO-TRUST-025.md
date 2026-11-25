@@ -18,6 +18,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-004
 depends_on: []
+scenarios:
+- id: S1
+  title: Accepted references
+- id: S2
+  title: Reference that is not a safe relative path
+- id: S3
+  title: Reference that leaves the roots or names no regular file
+- id: S4
+  title: Query and fragment of a reference
+- id: S5
+  title: Roots of a page
+- id: S6
+  title: The src, poster and data attributes of a page
+- id: S7
+  title: The srcset attribute of a page
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,7 +56,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension resolves a resource reference of a page, it SHALL give the page the webview address of the file only if the reference is a relative path that decodes safely, names an existing regular file whose real path lies inside the folder of the document or the resource root of the preview, and otherwise refuse it with the code of the failed check and remove the attribute that held it.
 
-### Scenario (nominal): Accepted references
+### Scenario S1 (nominal): Accepted references
 
 | Input | Outcome |
 | --- | --- |
@@ -53,7 +68,7 @@ When the extension resolves a resource reference of a page, it SHALL give the pa
 | a document in book/chapters, an image in book/external-img and the workspace folder as resource root | the image address is rewritten to a webview address (parent-relative figure image) |
 | a file of a second, existing root, next to a root that is not on disk | the file is found |
 
-### Scenario (refusal): Reference that is not a safe relative path
+### Scenario S2 (refusal): Reference that is not a safe relative path
 
 | Input | Outcome |
 | --- | --- |
@@ -68,7 +83,7 @@ When the extension resolves a resource reference of a page, it SHALL give the pa
 | %00 (NUL character) | refused with the code invalid-resource-path |
 | an escape nested so deep that one remains after four decodings | refused with the code invalid-resource-path (percent escapes are decoded at most four times) |
 
-### Scenario (refusal): Reference that leaves the roots or names no regular file
+### Scenario S3 (refusal): Reference that leaves the roots or names no regular file
 
 | Input | Outcome |
 | --- | --- |
@@ -79,14 +94,14 @@ When the extension resolves a resource reference of a page, it SHALL give the pa
 | sub, a folder of the root | refused with the code missing-resource (not a regular file) |
 | a symbolic link in the root that points to a file outside it | refused with the code symlink-escape |
 
-### Scenario (boundary): Query and fragment of a reference
+### Scenario S4 (boundary): Query and fragment of a reference
 
 | Input | Outcome |
 | --- | --- |
 | image.png?v=1#preview | the lookup ignores ?v=1#preview and the webview address of the file ends with ?v=1#preview, unchanged |
 | image.png#a?b | the suffix is #a?b, the whole part from the first hash |
 
-### Scenario (boundary): Roots of a page
+### Scenario S5 (boundary): Roots of a page
 
 - GIVEN a policy with a root that is not on disk and a second, existing root
 - WHEN the policy is created
@@ -95,7 +110,7 @@ When the extension resolves a resource reference of a page, it SHALL give the pa
 - WHEN a parent-relative figure image is resolved
 - THEN it is refused, because both roots are the folder of the document
 
-### Scenario (nominal): The src, poster and data attributes of a page
+### Scenario S6 (nominal): The src, poster and data attributes of a page
 
 - GIVEN an image, a video with a poster and a source, all inside the roots
 - WHEN the page is sanitized
@@ -104,7 +119,7 @@ When the extension resolves a resource reference of a page, it SHALL give the pa
 - WHEN the page is sanitized
 - THEN the src attribute is removed and the diagnostic blocked-resource is recorded
 
-### Scenario (boundary): The srcset attribute of a page
+### Scenario S7 (boundary): The srcset attribute of a page
 
 | Input | Outcome |
 | --- | --- |

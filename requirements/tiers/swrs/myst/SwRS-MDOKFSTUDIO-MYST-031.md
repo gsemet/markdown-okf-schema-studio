@@ -17,6 +17,21 @@ derives_from:
 - StRS-MDOKFSTUDIO-MYST-017
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-025
+scenarios:
+- id: S1
+  title: A figure renders with image, alt, caption and id
+- id: S2
+  title: Fence form and caption source
+- id: S3
+  title: A figure image outside the document folder loads
+- id: S4
+  title: A valid width is kept
+- id: S5
+  title: An invalid width is dropped
+- id: S6
+  title: The page applies the width, also after updates
+- id: S7
+  title: Alignment sets an align class and float
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,30 +62,30 @@ supersedes:
 
 When a document holds a `{figure}` directive with colon or backtick fences, the extension SHALL render a figure with its image, `:alt:`, caption, `:name:` as id, a validated width and a validated alignment, mapped as one block from opening line to closing fence.
 
-### Scenario (nominal): A figure renders with image, alt, caption and id
+### Scenario S1 (nominal): A figure renders with image, alt, caption and id
 - GIVEN a `{figure}` with alt, name and a caption body
 - WHEN the preview renders
 - THEN the figure shows image, alt, caption and id, the figure styles apply and the figure editor action is offered
 
-### Scenario (boundary): Fence form and caption source
+### Scenario S2 (boundary): Fence form and caption source
 | Input | Outcome |
 | --- | --- |
 | The same figure with backtick fences | it maps from opening to closing fence as one block, rendering like the colon form |
 | A figure whose body supplies the text | the text appears as caption, equal to the body |
 | A figure without body | no caption is added |
 
-### Scenario (nominal): A figure image outside the document folder loads
+### Scenario S3 (nominal): A figure image outside the document folder loads
 - GIVEN the long chapter with a figure whose image path is a sibling folder such as `../external-img/depot-graph.svg`
 - WHEN the preview renders
 - THEN the image has a natural size above zero, and when the chapter is scrolled to the landmark it stays in the frame
 
-### Scenario (nominal): A valid width is kept
+### Scenario S4 (nominal): A valid width is kept
 Applies to `{figure}` and `{image}`: a number, or a number with px, %, em or rem, is kept as data-okf-width; a plain number means pixels.
 - GIVEN `:width: 60%` (or `50%` with align center)
 - WHEN the preview renders
 - THEN data-okf-width is 60% (both width and alignment kept) and the width attribute is removed
 
-### Scenario (refusal): An invalid width is dropped
+### Scenario S5 (refusal): An invalid width is dropped
 | Input | Outcome |
 | --- | --- |
 | `:width: calc(1px)` | the width is dropped |
@@ -80,7 +95,7 @@ Applies to `{figure}` and `{image}`: a number, or a number with px, %, em or rem
 
 The figure still renders when its width is dropped.
 
-### Scenario (nominal): The page applies the width, also after updates
+### Scenario S6 (nominal): The page applies the width, also after updates
 - GIVEN an image with `:width: 300`
 - WHEN the page runs
 - THEN the image gets that width, applied from the page without inline styles, including after every in-place content update
@@ -89,7 +104,7 @@ The figure still renders when its width is dropped.
 | --- | --- |
 | A left-floated figure with `:width: 50%` and a content update | the figure takes the width, its image fills it and the percentage stays relative to the column |
 
-### Scenario (nominal): Alignment sets an align class and float
+### Scenario S7 (nominal): Alignment sets an align class and float
 | Input | Outcome |
 | --- | --- |
 | `:align: left` | the figure and image get an align class and float left beside the text |

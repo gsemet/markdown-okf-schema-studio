@@ -19,6 +19,21 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-129
 - SwRS-MDOKFSTUDIO-DIAG-009
+scenarios:
+- id: S1
+  title: Three forms
+- id: S2
+  title: Text kept as written
+- id: S3
+  title: The JAR pipeline loads no built-in engine script
+- id: S4
+  title: A valid diagram is drawn as a picture
+- id: S5
+  title: SVG with a script
+- id: S6
+  title: Light or dark rendering follows the preview
+- id: S7
+  title: Picture width, centring and source disclosure style
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -51,37 +66,37 @@ supersedes:
 
 When a document contains a plantuml fence, or a {plantuml} or {uml} directive with a body, the extension SHALL render a figure whose diagram element is labelled "PlantUML diagram" and holds the diagram text for the engine, with the same text in a collapsed "Diagram source" disclosure, which the built-in engine draws as one inert centred picture in the light or dark variant of the preview.
 
-### Scenario (nominal): Three forms
+### Scenario S1 (nominal): Three forms
 
 - GIVEN a plantuml fence, a {plantuml} directive and a {uml} directive, each with a body
 - WHEN the preview is rendered
 - THEN three PlantUML figures appear, each with a diagram element labelled "PlantUML diagram" holding the text and a collapsed "Diagram source" disclosure with the same text
 
-### Scenario (boundary): Text kept as written
+### Scenario S2 (boundary): Text kept as written
 
 - GIVEN a body without an @startuml line
 - WHEN the preview is rendered
 - THEN the diagram text is exactly the body; the extension adds no wrapper
 
-### Scenario (boundary): The JAR pipeline loads no built-in engine script
+### Scenario S3 (boundary): The JAR pipeline loads no built-in engine script
 
 - GIVEN the JAR pipeline and content with a PlantUML figure
 - WHEN the page is built
 - THEN the page holds no built-in engine script (the script of the built-in engine follows SwRS-MDOKFSTUDIO-DIAG-129)
 
-### Scenario (nominal): A valid diagram is drawn as a picture
+### Scenario S4 (nominal): A valid diagram is drawn as a picture
 
 - GIVEN a valid PlantUML sequence diagram
 - WHEN the page draws it with the built-in engine
 - THEN the diagram element holds one image of class myst-plantuml-image with alt text "PlantUML diagram", a data:image/svg+xml source and data-render-state rendered; the source disclosure stays below
 
-### Scenario (boundary): SVG with a script
+### Scenario S5 (boundary): SVG with a script
 
 - GIVEN engine output that contains a script element and a link
 - WHEN the page shows it
 - THEN the output is an image, so the script does not run and the link cannot be followed
 
-### Scenario (nominal): Light or dark rendering follows the preview
+### Scenario S6 (nominal): Light or dark rendering follows the preview
 
 | Preview background | Outcome |
 | --- | --- |
@@ -91,7 +106,7 @@ When a document contains a plantuml fence, or a {plantuml} or {uml} directive wi
 | Theme change from a dark to a light background | Every diagram is drawn again with the light rendering |
 | Theme change that keeps the background dark | No diagram is drawn again |
 
-### Scenario (boundary): Picture width, centring and source disclosure style
+### Scenario S7 (boundary): Picture width, centring and source disclosure style
 
 | Case | Outcome |
 | --- | --- |

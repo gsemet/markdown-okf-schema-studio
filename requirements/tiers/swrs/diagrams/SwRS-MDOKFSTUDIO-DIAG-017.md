@@ -19,6 +19,15 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Insert after text
+- id: S2
+  title: Empty document
+- id: S3
+  title: GFM mode offers Mermaid
+- id: S4
+  title: Other palette modes do not offer Mermaid
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,25 +51,25 @@ supersedes:
 
 When a writer picks the Mermaid action of the edition palette or the Mermaid slash entry, which the extension offers in GFM mode only, the extension SHALL insert a fenced mermaid block with a top-down flowchart from a node labelled Start to a node labelled End, set apart from the text around it and placed after the selection, with the label Start selected.
 
-### Scenario (nominal): Insert after text
+### Scenario S1 (nominal): Insert after text
 
 - GIVEN the caret at the end of a paragraph
 - WHEN the writer picks Mermaid
 - THEN a blank line and the fenced mermaid flowchart are inserted after the selection and the word Start is selected
 
-### Scenario (boundary): Empty document
+### Scenario S2 (boundary): Empty document
 
 - GIVEN an empty document
 - WHEN the writer picks Mermaid
 - THEN the fence is inserted with no leading blank line and the word Start is selected
 
-### Scenario (nominal): GFM mode offers Mermaid
+### Scenario S3 (nominal): GFM mode offers Mermaid
 
 - GIVEN the edition palette in GFM mode on a block selection
 - WHEN the palette is shown and the writer types /diagram in the slash menu
 - THEN a one-click Mermaid button with the tooltip "Mermaid diagram" is in the GitHub group and the slash menu finds Mermaid first; the slash aliases are diagram, chart, graph and flowchart
 
-### Scenario (refusal): Other palette modes do not offer Mermaid
+### Scenario S4 (refusal): Other palette modes do not offer Mermaid
 
 - GIVEN the palette in Strict or MyST mode
 - WHEN the palette is shown

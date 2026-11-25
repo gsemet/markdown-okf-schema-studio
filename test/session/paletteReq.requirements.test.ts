@@ -216,7 +216,7 @@ function setup(options: SetupOptions = {}): Setup {
   }) as Setup;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
 test("a label request for a stale preview is answered with the out-of-date error, a current one with the labels", async () => {
   const stale = setup({ stageRevision: 2 });
   assert.deepEqual(await stale.ask("previewListTargets"), {
@@ -228,7 +228,7 @@ test("a label request for a stale preview is answered with the out-of-date error
   assert.deepEqual((current.items as Array<{ value: string }>).map((item) => item.value), ["intro", "next"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
 test("the label list is answered in a preview with restricted reads, the citation list is refused", async () => {
   const restrictedReads = setup({ restrictedReads: true });
   const labels = await restrictedReads.ask("previewListTargets");
@@ -238,7 +238,7 @@ test("the label list is answered in a preview with restricted reads, the citatio
   assert.equal(citations.ok, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S4
 test("the citation list needs a trusted workspace folder: refused with its reason in a restricted-reads preview, no file read", async () => {
   const restrictedReads = setup({ restrictedReads: true });
   const answer = await restrictedReads.ask("previewListCitations");
@@ -277,7 +277,7 @@ test("the document picker opens in a restricted-reads preview and in a writable 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-192
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S4
 test("the image picker of a standalone file accepts an image of the document folder and refuses one elsewhere", async () => {
   const picked = (path: string): { picked: PickedFile } => ({ picked: { path, local: true } as PickedFile });
   const inside = setup({ restrictedReads: true, workspaceFolder: undefined, ...picked("/ws/docs/pic.png") });
@@ -308,7 +308,8 @@ test("the image picker does not open for a stale preview or an unsaved document"
   assert.equal(untitled.dialogs, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S6
 test("while the block editor is open, palette requests are answered after its autosave moved the document", async () => {
   // The editor opened on render 3 and saved: the document is at revision 4, the preview still shows render 3.
   const open = () => setup({ revision: 4, stageRevision: 3, editorOpenOn: 3, picked: { path: "/ws/docs/a.md", local: true } as PickedFile });
@@ -354,7 +355,7 @@ test("an image paste is refused for a folder outside the workspace, links resolv
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
 test("an image paste is saved next to a standalone file and in Restricted Mode", async () => {
   const standalone = setup({ restrictedReads: true, workspaceFolder: undefined });
   assert.equal((await standalone.ask("previewPasteImage", paste)).ok, true);

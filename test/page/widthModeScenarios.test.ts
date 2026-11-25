@@ -32,7 +32,8 @@ function measure(harness: Harness): void {
   harness.flushFrames();
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S3
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S4
 test("an image sized in %, em or rem asks for a size relative to the column and never breaks out", () => {
   for (const width of ["50%", "20em", "3rem"]) {
     const harness = autoFixture();
@@ -46,7 +47,8 @@ test("an image sized in %, em or rem asks for a size relative to the column and 
   assert.equal(plain.getAttribute("data-sphinx-preview-wide"), "", "an image without a declared width breaks out");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S3
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S4
 test("a Mermaid diagram wrapper wider than the column breaks out in Auto", () => {
   const harness = autoFixture();
   const diagram = new RuntimeElement({}, harness.windowState, 0, 40, "div");
@@ -58,7 +60,7 @@ test("a Mermaid diagram wrapper wider than the column breaks out in Auto", () =>
   assert.equal(diagram.style.getPropertyValue("--sphinx-preview-breakout"), "200px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S6
 test("a layout trigger (a pane resize, the toolbar collapse) measures the wide elements again", () => {
   const harness = autoFixture();
   const table = new RuntimeElement({}, harness.windowState, 0, 40, "table");
@@ -82,7 +84,7 @@ function paragraphOf(harness: Harness, children: RuntimeElement[], text = ""): R
   return paragraph;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022#S5
 test("a paragraph with an image and a sentence, or with two images, is not a figure, and a stale mark is removed", () => {
   const harness = createRuntimeHarness();
   const lone = paragraphOf(harness, [new RuntimeElement({}, harness.windowState, 0, 40, "img")]);

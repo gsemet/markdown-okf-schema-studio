@@ -16,6 +16,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Save a value without side effects
 user_need: As a writer or reviewer, I expect a metadata edit to leave comments,
   quoting, line endings and the rest of the document unchanged, with the diff
   containing only the edited field; I am protected from saving metadata that the
@@ -108,7 +111,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Save a value without side effects
+#### Path S1: Save a value without side effects
 
 1. A field editor is open
    - SwRS-MDOKFSTUDIO-FMEDIT-043: the save changes only the lines of its field and keeps comments, quoting, spacing and line endings

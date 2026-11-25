@@ -48,7 +48,7 @@ function scripted(answer: (input: string, call: RunCall) => ProcessResult | Prom
 
 const wait = (milliseconds: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-105
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S1
 test("JAR results come back in document order with the source line of their diagram", async () => {
   const { root, jarPath } = workspace();
   const delays: Record<string, number> = { first: 30, second: 5, third: 15 };
@@ -70,7 +70,7 @@ test("JAR results come back in document order with the source line of their diag
 // The renderer stats the JAR through the file port before it starts a process, so one turn of the loop is not enough.
 const settle = (): Promise<void> => wait(50);
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084#S8
 test("the JAR pipeline runs one process per diagram, at most 2 at once, results in document order", async () => {
   const { root, jarPath } = workspace();
   clearPlantUmlCacheForTests();
@@ -116,7 +116,8 @@ test("the JAR pipeline runs one process per diagram, at most 2 at once, results 
   assert.equal(none.calls.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S5
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S8
 test("a run that rejects is reported on the diagram like any other failure", async () => {
   const { root } = workspace();
   const thrown = await renderPlantUmlDiagrams(figure("@startuml\n@enduml", 4), {
@@ -167,7 +168,8 @@ test("a missing java is reported like a missing command; other spawn errors keep
   assert.deepEqual(denied.diagrams, [{ status: "error", message: "spawn java EACCES", line: 2 }]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-097
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097#S8
 test("a diagram text over 1 MiB is refused without a process, a text of exactly 1 MiB is rendered", async () => {
   const { root, jarPath } = workspace();
   const runner = scripted(() => exited(svgFor("ok")));
@@ -256,7 +258,8 @@ test("a jarPath naming a directory is refused on every diagram before any proces
   assert.equal(runner.calls.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089#S3
 test("a JAR process that ends on a signal names the signal, with its error output or the no-diagnostic text", async () => {
   const { root, jarPath } = workspace();
   clearPlantUmlCacheForTests();

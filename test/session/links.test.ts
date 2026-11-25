@@ -14,7 +14,8 @@ import { LinkController } from "../../src/session/features/links";
 import type { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073#S4
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
 test("a frontmatter link finds its marker with the identity of the text it was analysed from", async () => {
   const root = path.join(os.tmpdir(), "okf-links-snapshot");

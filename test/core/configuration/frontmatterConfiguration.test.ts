@@ -7,7 +7,8 @@ import {
   readFrontmatterConfiguration,
 } from "../../../src/core/configuration/frontmatterConfiguration";
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050#S9
 test("frontmatter settings use their own section and defaults", () => {
   assert.equal(FRONTMATTER_CONFIGURATION_SECTION, "markdownOkfSchemaStudio.frontmatter");
   const keys: string[] = [];

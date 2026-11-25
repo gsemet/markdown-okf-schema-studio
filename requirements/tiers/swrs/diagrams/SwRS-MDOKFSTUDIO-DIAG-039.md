@@ -18,6 +18,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-DIAG-009
 depends_on:
 - SwRS-MDOKFSTUDIO-DIAG-009
+scenarios:
+- id: S1
+  title: Patch and switch back
+- id: S2
+  title: Same text, different base
+- id: S3
+  title: Which results are kept
+- id: S4
+  title: One diagram at a time
+- id: S5
+  title: Queued runs of a superseded render are dropped
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,31 +53,31 @@ supersedes:
 
 When the page needs built-in diagrams, it SHALL show the kept result without running the engine when the source, include base and light or dark variant equal those of an earlier result, and otherwise run the engine for one diagram at a time in the order requested and skip a queued run whose renders were all superseded.
 
-### Scenario (nominal): Patch and switch back
+### Scenario S1 (nominal): Patch and switch back
 - GIVEN a drawn diagram, a content patch that keeps its source, and a theme switch to dark and back
 - WHEN the page draws the diagram again
 - THEN when the source, include base and light or dark variant equal those of an earlier result, the page shows that result without running the engine
 - AND the engine runs once for the light variant and once for the dark variant, not again on the switch back
 
-### Scenario (boundary): Same text, different base
+### Scenario S2 (boundary): Same text, different base
 - GIVEN two diagrams with the same text and different include bases
 - WHEN the page draws both
 - THEN the engine runs for each
 
-### Scenario (boundary): Which results are kept
+### Scenario S3 (boundary): Which results are kept
 | Input | Outcome |
 | --- | --- |
 | a diagram whose include the host refuses, drawn twice | the result is not kept: the host is asked again at the second render and a fixed file then shows the picture |
 | a diagram whose included file holds an unsupported directive | the result is not kept, so the next render asks again |
 | a diagram with a syntax error and no include problem, drawn twice with the same source | the second drawing shows the kept error without running the engine |
 
-### Scenario (nominal): One diagram at a time
+### Scenario S4 (nominal): One diagram at a time
 - GIVEN two diagrams that each include a file, and a diagram waiting for the host's answer when a second one is requested
 - WHEN both are drawn
 - THEN the engine runs for one diagram at a time in the order requested, and the second starts after the first finished
 - AND each include request belongs to the diagram that is drawing, and the second diagram does not read the first one's includes
 
-### Scenario (boundary): Queued runs of a superseded render are dropped
+### Scenario S5 (boundary): Queued runs of a superseded render are dropped
 | Input | Outcome |
 | --- | --- |
 | ten renders of one diagram element requested in a row, each with a different include base | the engine runs at most twice; runs still waiting in the queue whose only renders were superseded (or whose element left the page) are not started |

@@ -20,6 +20,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Rendered page starts from none
+- id: S2
+  title: Directive table
+- id: S3
+  title: No wildcard, unsafe-inline or unsafe-eval
+- id: S4
+  title: The policy of the document is replaced
+- id: S5
+  title: Status page
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,12 +54,12 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension builds the policy of a page, it SHALL set its default source to none and open only the named kinds of source of the policy table (scripts and styles from the webview source or with the page nonce, images from the webview source and data URIs, fonts and media from the webview source), set connect, frame, object and worker sources, the base address and form action to none, put no bare wildcard source, unsafe-inline or unsafe-eval in it, and place it as the first meta of the head in place of any policy of the document.
 
-### Scenario (nominal): Rendered page starts from none
+### Scenario S1 (nominal): Rendered page starts from none
 - GIVEN a rendered preview page, or a policy built for any webview source and nonce
 - WHEN its policy is read
 - THEN it starts with default-src 'none' and every other directive narrows or opens a named kind of source
 
-### Scenario (nominal): Directive table
+### Scenario S2 (nominal): Directive table
 | Directive | Value | Effect |
 | --- | --- | --- |
 | script-src | the webview source and 'nonce-' followed by the page nonce, nothing else | A script from the webview source runs without a nonce (an alternative, not both required); a script element with no nonce and a source outside the webview source is not allowed |
@@ -59,19 +70,19 @@ When the extension builds the policy of a page, it SHALL set its default source 
 | connect-src, frame-src, object-src, worker-src | 'none' | A fetch call to a network address is blocked |
 | base-uri, form-action | 'none' | A base element does not rebase relative addresses and a form cannot submit |
 
-### Scenario (boundary): No wildcard, unsafe-inline or unsafe-eval
+### Scenario S3 (boundary): No wildcard, unsafe-inline or unsafe-eval
 | Input | Outcome |
 | --- | --- |
 | The webview source vscode-webview://unit and a nonce | The policy holds no bare asterisk source, no unsafe-inline and no unsafe-eval |
 | The webview source that VS Code supplies, 'self' https://*.vscode-cdn.net | No source is a bare asterisk; the asterisk of the subdomain wildcard stays inside the host name |
 
-### Scenario (refusal): The policy of the document is replaced
+### Scenario S4 (refusal): The policy of the document is replaced
 | Input | Outcome |
 | --- | --- |
 | A page whose head holds a meta policy default-src * | One policy remains, the extension's, as the first child of the head, and the weaker text is gone |
 | A page with a Content-Security-Policy meta element in its body | The element in the body is not removed; only the policy of the head is replaced |
 
-### Scenario (nominal): Status page
+### Scenario S5 (nominal): Status page
 - GIVEN a preview waiting for its first render, or a preview whose render failed (the pending, error and missing-source pages)
 - WHEN the status page is built
 - THEN it holds the policy meta with a nonce of its own (a fresh nonce for the error page), a style element that carries the nonce, and no script element

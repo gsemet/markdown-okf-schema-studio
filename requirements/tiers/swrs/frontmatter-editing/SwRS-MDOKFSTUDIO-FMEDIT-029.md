@@ -19,6 +19,19 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Every field editor has a Remove field button
+- id: S2
+  title: Remove deletes exactly the lines of the field
+- id: S3
+  title: Removal leaves a valid block
+- id: S4
+  title: Remove is disabled for a schema-required field
+- id: S5
+  title: The host refuses to remove a required field
+- id: S6
+  title: Only a newly missing required field blocks a remove
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,35 +59,35 @@ supersedes:
 
 When a field editor is open, the extension SHALL show in its field action menu a "Remove field" button for the edited row, which deletes exactly the lines of that field and keeps the comment lines above it, and which is disabled and refused by the host for a field the schema requires.
 
-### Scenario (nominal): Every field editor has a Remove field button
+### Scenario S1 (nominal): Every field editor has a Remove field button
 | Editor open on the row | Outcome |
 | --- | --- |
 | a value editor on an optional field | the menu has an enabled button "Remove frontmatter field" labelled Remove field |
 | a key editor | the same Remove field button appears in its menu |
 
-### Scenario (nominal): Remove deletes exactly the lines of the field
+### Scenario S2 (nominal): Remove deletes exactly the lines of the field
 - GIVEN frontmatter with a comment line above the field legacy followed by another field
 - WHEN legacy is removed
 - THEN only the legacy line is deleted and the comment lines stay
 
-### Scenario (boundary): Removal leaves a valid block
+### Scenario S3 (boundary): Removal leaves a valid block
 | Field removed | Outcome |
 | --- | --- |
 | the only field of the block | the block becomes a valid empty mapping ({}) between the fences |
 | tags (a list) | exactly the sequence lines are deleted |
 
-### Scenario (refusal): Remove is disabled for a schema-required field
+### Scenario S4 (refusal): Remove is disabled for a schema-required field
 | Row whose editor opens | Remove button |
 | --- | --- |
 | marked required by the schema | disabled, its title reads "Required by the schema; it cannot be removed" |
 | optional | enabled |
 
-### Scenario (refusal): The host refuses to remove a required field
+### Scenario S5 (refusal): The host refuses to remove a required field
 - GIVEN a document with a schema in which count is required
 - WHEN a remove of count arrives
 - THEN the answer is 'Cannot remove required frontmatter field "count".' and the document is unchanged
 
-### Scenario (boundary): Only a newly missing required field blocks a remove
+### Scenario S6 (boundary): Only a newly missing required field blocks a remove
 | Remove request | Outcome |
 | --- | --- |
 | an optional field, while a required field was already missing before the remove | accepted |

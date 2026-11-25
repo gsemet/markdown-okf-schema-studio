@@ -15,6 +15,17 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
+scenarios:
+- id: S1
+  title: Colours come from the theme variables
+- id: S2
+  title: The theme changes
+- id: S3
+  title: The theme colours stay the same
+- id: S4
+  title: Built-in fallbacks
+- id: S5
+  title: Edge labels stay readable
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,7 +48,7 @@ supersedes:
 
 When the page draws a Mermaid diagram, the extension SHALL take its colours from the preview theme variables, use a built-in fallback for any variable that is missing, empty or a CSS system colour keyword, and draw it again when the theme colours change.
 
-### Scenario (nominal): Colours come from the theme variables
+### Scenario S1 (nominal): Colours come from the theme variables
 
 | Part of the picture | Source | Checked |
 | --- | --- | --- |
@@ -51,19 +62,19 @@ When the page draws a Mermaid diagram, the extension SHALL take its colours from
 - WHEN the page draws a Mermaid diagram
 - THEN each part takes its value from the variable in the table: the drawn node fill equals --studio-textCodeBlock-background and the picture background is transparent, and the other colours are the values given to Mermaid (the Mermaid base theme uses the secondary and tertiary colours only for clusters and for the derived edge-label background, which the visual fixture does not draw as such, and its nodes carry their own border)
 
-### Scenario (nominal): The theme changes
+### Scenario S2 (nominal): The theme changes
 
 - GIVEN a drawn Mermaid diagram on a dark preview
 - WHEN the data-sphinx-preview-theme-mode, data-sphinx-preview-theme, class or style attribute of the html element, or the class or style attribute of the body element, changes and the theme mode becomes white
 - THEN the page checks every Mermaid diagram, draws again each one whose theme colours differ from those it was drawn with, and keeps its node labels
 
-### Scenario (boundary): The theme colours stay the same
+### Scenario S3 (boundary): The theme colours stay the same
 
 - GIVEN a drawn Mermaid diagram
 - WHEN an observed attribute changes and leaves the theme colours as they were
 - THEN the diagram is not drawn again and keeps its picture
 
-### Scenario (boundary): Built-in fallbacks
+### Scenario S4 (boundary): Built-in fallbacks
 
 The built-in fallbacks are #f0f0f0, #1f1f1f, #808080 and #ffffff. The font is not a theme value; SwRS-MDOKFSTUDIO-DIAG-001 pins it.
 
@@ -73,7 +84,7 @@ The built-in fallbacks are #f0f0f0, #1f1f1f, #808080 and #ffffff. The font is no
 | --studio-textCodeBlock-background has the value Canvas in any letter case (a CSS system colour keyword) | The node colour is the fallback #f0f0f0 instead of the keyword |
 | A variable is empty | Its built-in fallback is used |
 
-### Scenario (nominal): Edge labels stay readable
+### Scenario S5 (nominal): Edge labels stay readable
 
 | Theme | Outcome |
 | --- | --- |

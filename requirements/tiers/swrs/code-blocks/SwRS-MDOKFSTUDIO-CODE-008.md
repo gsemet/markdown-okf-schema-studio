@@ -16,6 +16,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Additions and deletions are marked
+- id: S2
+  title: The first character decides the mark
+- id: S3
+  title: The panel is full width, square and borderless
+- id: S4
+  title: A nested diff block keeps the look
+- id: S5
+  title: Forced-colours mode uses system colours
+- id: S6
+  title: Outside forced-colours mode the theme colours apply
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,13 +52,13 @@ supersedes:
 
 When a `diff` or `patch` block is shown, the extension SHALL mark each line starting with `+` as an addition and each line starting with `-` as a deletion, keeping the literal markers, and display the block as a full-width panel with square corners and no border.
 
-### Scenario (nominal): Additions and deletions are marked
+### Scenario S1 (nominal): Additions and deletions are marked
 
 - GIVEN a `diff` block with one `+` line, one `-` line and one context line
 - WHEN the preview renders it
 - THEN the `+` line shows as an addition, the `-` line as a deletion and the context line is unmarked, all with their markers
 
-### Scenario (boundary): The first character decides the mark
+### Scenario S2 (boundary): The first character decides the mark
 
 | Line | Outcome |
 | --- | --- |
@@ -60,25 +73,25 @@ When a `diff` or `patch` block is shown, the extension SHALL mark each line star
 
 A two-file diff has two deletion and two addition lines; `patch` blocks are marked the same way as `diff` blocks.
 
-### Scenario (nominal): The panel is full width, square and borderless
+### Scenario S3 (nominal): The panel is full width, square and borderless
 
 - GIVEN a `diff` block in a prose paragraph context
 - WHEN the preview renders it
 - THEN the panel spans the block width with square corners and no border
 
-### Scenario (boundary): A nested diff block keeps the look
+### Scenario S4 (boundary): A nested diff block keeps the look
 
 - GIVEN a `diff` block nested in a list or admonition
 - WHEN the preview renders it
 - THEN the panel spans its container width with the same square, borderless look
 
-### Scenario (nominal): Forced-colours mode uses system colours
+### Scenario S5 (nominal): Forced-colours mode uses system colours
 
 - GIVEN forced-colours mode is active and a diff block is shown
 - WHEN the preview renders it
 - THEN additions use the system Mark colours and deletions the system Highlight colours
 
-### Scenario (boundary): Outside forced-colours mode the theme colours apply
+### Scenario S6 (boundary): Outside forced-colours mode the theme colours apply
 
 - GIVEN forced-colours mode is inactive
 - WHEN the preview renders the same block

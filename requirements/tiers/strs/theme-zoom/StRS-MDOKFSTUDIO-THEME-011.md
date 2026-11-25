@@ -17,6 +17,9 @@ derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+scenarios:
+- id: S1
+  title: Zoom in and keep the zoom
 user_need: As a reader, I enlarge or shrink the text with two buttons, the
   column grows or shrinks with it, I always see the zoom the next click gives,
   and I stay on the text I was reading; I set the text size once and the
@@ -69,7 +72,7 @@ Zoom moves in steps of 10 points between the two limits.
 
 ### Main paths
 
-#### Path 1: Zoom in and keep the zoom
+#### Path S1: Zoom in and keep the zoom
 
 1. The page is shown at a zoom
    - SwRS-MDOKFSTUDIO-THEME-038: the reader presses Zoom in, which changes the zoom by 10 points

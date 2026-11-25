@@ -15,6 +15,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Edit in an untrusted workspace
 user_need: As a writer, I open a document in Restricted Mode, or a file from
   outside my workspace, and edit it as I do anywhere else; the preview reads no
   more than the folder of the document, and I am told why a feature that needs
@@ -57,7 +60,7 @@ flowchart LR
 
 ### Main paths
 
-#### Path 1: Edit in an untrusted workspace
+#### Path S1: Edit in an untrusted workspace
 
 1. A preview is created for a document in no workspace folder, or in an untrusted workspace
    - SwRS-MDOKFSTUDIO-TRUST-001: every affordance that edits, comments or changes the document is kept, as in a trusted workspace

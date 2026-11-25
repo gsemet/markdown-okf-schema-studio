@@ -14,6 +14,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Text constructs
 user_need: As a writer, I want definition lists and inline roles typeset as
   readers will see them, without building, so that I can check my text in VS
   Code.
@@ -61,7 +64,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Text constructs
+#### Path S1: Text constructs
 
 1. A document holds a definition list or an inline role
    - SwRS-MDOKFSTUDIO-MYST-017: the page renders a definition list, subscript, superscript, an abbreviation or a key

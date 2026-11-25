@@ -186,7 +186,8 @@ test("a file event on the shared watcher reaches every preview of the root", () 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S1
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
 test("saving a Markdown file keeps the stem index, creating or deleting one rebuilds it", async () => {
   const f = fixture(0);
   try {
@@ -207,7 +208,7 @@ test("saving a Markdown file keeps the stem index, creating or deleting one rebu
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S6
 test("previews linking one target share its watches, which end with the last preview", () => {
   const ports = fakeWatcherPort();
   const shared = new SharedLinkedTargetWatches(new SharedWatchers(ports.port as never));
@@ -227,7 +228,7 @@ test("previews linking one target share its watches, which end with the last pre
   assert.equal(b.direct.state().status, "closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S6
 test("linked-target watches are capped: a target past the limit gets none, a released slot is reusable", () => {
   const ports = fakeWatcherPort();
   const shared = new SharedLinkedTargetWatches(new SharedWatchers(ports.port as never), 2);

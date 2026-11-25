@@ -18,6 +18,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-009
 depends_on: []
+scenarios:
+- id: S1
+  title: Registered type with a valid envelope
+- id: S2
+  title: Value that is not a registered message
+- id: S3
+  title: Identity fields and size bound of the envelope
+- id: S4
+  title: Shared optional fields of a page-state message
+- id: S5
+  title: Fields accepted only on the type that owns them
+- id: S6
+  title: Block edit and checkbox request names its editor and its lines
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,19 +51,19 @@ supersedes:
 
 When the host receives a value from the page, it SHALL hand it to a handler only if it is an object whose type is an own key of the table of registered message types and whose envelope fields (documentId, revision, requestId and the shared optional fields) are of their kind and within their bounds, ignoring any other value without a visible change.
 
-### Scenario (nominal): Registered type with a valid envelope
+### Scenario S1 (nominal): Registered type with a valid envelope
 
 - GIVEN a previewCopyText message with a valid envelope
 - WHEN it is checked
 - THEN it is accepted as a message and the host acts on it
 
-### Scenario (refusal): Value that is not a registered message
+### Scenario S2 (refusal): Value that is not a registered message
 
 - GIVEN null, a string, an array, a message of an unregistered type, and messages whose type is __proto__, constructor or toString
 - WHEN each is checked
 - THEN none is accepted, it is ignored and nothing changes on screen
 
-### Scenario (boundary): Identity fields and size bound of the envelope
+### Scenario S3 (boundary): Identity fields and size bound of the envelope
 
 | Input | Outcome |
 | --- | --- |
@@ -63,7 +76,7 @@ When the host receives a value from the page, it SHALL hand it to a handler only
 | the same message with requestId the string 3 | refused |
 | the same message with a revision beyond the largest safe integer | refused |
 
-### Scenario (boundary): Shared optional fields of a page-state message
+### Scenario S4 (boundary): Shared optional fields of a page-state message
 
 | Input | Outcome |
 | --- | --- |
@@ -75,7 +88,7 @@ When the host receives a value from the page, it SHALL hand it to a handler only
 | a previewThemeMode that is not a known mode | refused (the theme mode is a known one) |
 | a request that is not a string | refused (request is a string) |
 
-### Scenario (boundary): Fields accepted only on the type that owns them
+### Scenario S5 (boundary): Fields accepted only on the type that owns them
 
 | Input | Outcome |
 | --- | --- |
@@ -89,7 +102,7 @@ When the host receives a value from the page, it SHALL hand it to a handler only
 | previewScroll with blockEditOpen true | refused |
 | previewEditCancel with flush true | refused (flush is true only on previewEditSave or previewFrontmatterSave) |
 
-### Scenario (boundary): Block edit and checkbox request names its editor and its lines
+### Scenario S6 (boundary): Block edit and checkbox request names its editor and its lines
 
 | Input | Outcome |
 | --- | --- |

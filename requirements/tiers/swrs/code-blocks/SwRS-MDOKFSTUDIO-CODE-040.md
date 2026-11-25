@@ -17,6 +17,19 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
+scenarios:
+- id: S1
+  title: The dark background is on by default
+- id: S2
+  title: Tokens of a supported language are coloured
+- id: S3
+  title: The colours do not depend on the VS Code theme
+- id: S4
+  title: The setting off keeps the theme background
+- id: S5
+  title: Token text stays readable
+- id: S6
+  title: Strict policy of the page
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,25 +52,25 @@ default_owner_email: gaetan@xeberon.net
 
 When a code block is shown and the setting preview.codeBlocks.darkBackground is on, the extension SHALL draw it on the Dark+ dark background with the Dark+ token colours in every preview theme, and when the setting is off, SHALL keep the preview theme background and draw the tokens in the Light+ colours.
 
-### Scenario (nominal): The dark background is on by default
+### Scenario S1 (nominal): The dark background is on by default
 
 - GIVEN a document with Python, YAML and shell blocks and the preview in the cream, the white or the dark theme
 - WHEN the preview renders it with the setting on (the default)
 - THEN each block has the Dark+ editor background (`#1e1e1e`) and default text colour (`#d4d4d4`) and its tokens use the Dark+ colours
 
-### Scenario (nominal): Tokens of a supported language are coloured
+### Scenario S2 (nominal): Tokens of a supported language are coloured
 
 - GIVEN a document with a fenced `rust` block and a `python` block, in any VS Code theme
 - WHEN the preview renders the document
 - THEN keywords, strings, numbers, additions, titles, attributes, deletions and comments of each block get the token colours of the VS Code editor (comments in green with Dark+), written as colour classes (`sd-` followed by the hex colour) that a stylesheet rule defines, never as an inline style
 
-### Scenario (boundary): The colours do not depend on the VS Code theme
+### Scenario S3 (boundary): The colours do not depend on the VS Code theme
 
 - GIVEN a VS Code theme that defines no chart colours
 - WHEN the preview renders a highlighted block
 - THEN the token colours are the same fixed colours, because the stylesheet carries them
 
-### Scenario (boundary): The setting off keeps the theme background
+### Scenario S4 (boundary): The setting off keeps the theme background
 
 | Input | Outcome |
 | --- | --- |
@@ -66,13 +79,13 @@ When a code block is shown and the setting preview.codeBlocks.darkBackground is 
 | setting off, dark theme | tokens use the Dark+ colours on the dark code-block background |
 | inline code, any setting | unchanged |
 
-### Scenario (nominal): Token text stays readable
+### Scenario S5 (nominal): Token text stays readable
 
 - GIVEN every token colour the highlighter can write
 - WHEN it is drawn on its background (Dark+ on `#1e1e1e`, Light+ on the cream, grey and white code backgrounds)
 - THEN its contrast ratio is at least 4.5:1, a token colour of the Dark+ or Light+ theme below that is moved to the nearest tint that reaches it, and the line numbers on the dark background use `#9d9d9d`
 
-### Scenario (refusal): Strict policy of the page
+### Scenario S6 (refusal): Strict policy of the page
 
 - GIVEN the page content security policy, which allows no WebAssembly, no `eval` and no inline style
 - WHEN a block is highlighted

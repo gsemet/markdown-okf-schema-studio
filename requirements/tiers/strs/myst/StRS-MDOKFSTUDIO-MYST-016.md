@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: A grid of cards
+- id: S2
+  title: Tabs
 user_need: As a writer, I want my card layouts and tab sets to look and behave
   as readers will see them, also in a narrow pane, so that I can lay out my
   document in VS Code.
@@ -65,7 +70,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: A grid of cards
+#### Path S1: A grid of cards
 
 1. A document holds a grid with grid-item-card items
    - SwRS-MDOKFSTUDIO-MYST-053: the page lays out the items in the columns of its argument, chosen by the pane width
@@ -75,7 +80,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-MYST-100 (refusal): reserved or malformed class names are dropped
 3. The grid shows its cards
 
-#### Path 2: Tabs
+#### Path S2: Tabs
 
 1. A document holds a tab set with tab items
    - SwRS-MDOKFSTUDIO-MYST-098: the page renders a tab bar with the tab-item titles and shows the panel of the selected tab

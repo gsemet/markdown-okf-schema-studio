@@ -139,7 +139,8 @@ function harness() {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S3
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S5
 test("a resize moves the button to the new top-right corner of the block and hides it when too little shows", () => {
   const t = harness();
   const { pre, code } = t.makePre("a\n", 100);

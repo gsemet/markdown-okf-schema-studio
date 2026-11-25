@@ -5,7 +5,8 @@ import { countRefUses, renameLabelLine } from "../../../src/core/mapping/labelRe
 
 // Tests added by the mutation campaign of src/core (CR-450): they pin the survivors of the first run.
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-045
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S3
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S4
 test("the edit covers exactly the label, whatever whitespace is on each side and whatever the line ending", () => {
   assert.deepEqual(renameLabelLine("(old)=", 1, "old", "new"), { start: 0, end: 6, text: "(new)=" });
   assert.deepEqual(renameLabelLine("   (old)= ", 1, "old", "new"), { start: 3, end: 9, text: "(new)=" }, "more space before than after");
@@ -16,7 +17,8 @@ test("the edit covers exactly the label, whatever whitespace is on each side and
   assert.deepEqual(renameLabelLine("\n\n(old)=\n", 3, "old", "new"), { start: 2, end: 8, text: "(new)=" }, "empty lines before count");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-045
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S1
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045#S2
 test("a line number counts the lines before it, and a name or a line that is not valid refuses the rename", () => {
   assert.equal(renameLabelLine("(old)=\n", 2, "old", "new"), undefined, "the empty last line");
   assert.equal(renameLabelLine("a\nb\n(old)=", 2, "old", "new"), undefined);
@@ -31,7 +33,8 @@ test("a line number counts the lines before it, and a name or a line that is not
   assert.equal(renameLabelLine("(old)=", 1, "", "new"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S2
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S6
 test("uses of a label are counted only for a valid name, and only for the ref role", () => {
   assert.equal(countRefUses("{ref}`a` and {ref}`a`", "a"), 2);
   assert.equal(countRefUses("{ref}`a`", "a b"), 0, "an invalid name has no uses");

@@ -42,7 +42,8 @@ const cases: Array<[string, unknown[]]> = [
   ["objects", [{ a: 1, b: 2 }, { b: 2, a: 1 }, { a: 1 }, { a: 1, b: undefined }, { a: undefined }, { b: undefined }, { a: { b: [1] } }, { a: { b: [2] } }]],
 ];
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S2
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S5
 test("isSameData decides like util.isDeepStrictEqual on every pair of the same family", () => {
   let compared = 0;
   for (const [family, values] of cases) {
@@ -56,7 +57,7 @@ test("isSameData decides like util.isDeepStrictEqual on every pair of the same f
   assert.ok(compared > 800);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S5
 test("isSameData matches the members of a set or the keys of a map whatever their order, using each match once", () => {
   assert.equal(isSameData(new Set([{ a: 1 }, { a: 2 }]), new Set([{ a: 2 }, { a: 1 }])), true);
   assert.equal(isSameData(new Set([{ a: 1 }, { a: 1 }]), new Set([{ a: 1 }, { a: 2 }])), false, "one match cannot serve two members");

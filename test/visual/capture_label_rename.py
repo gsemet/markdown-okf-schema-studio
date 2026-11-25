@@ -11,7 +11,7 @@ ANCHOR = '.okf-anchor[data-okf-label="table-label"]'
 POPOVER = "[data-okf-label-rename]"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-MYST-038
+# @tests_req SwRS-MDOKFSTUDIO-MYST-038#S2
 def check_label_rename_above_table(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """A real click on the anchor icon of `table-label` opens the field: its box is inside the viewport
   and does not intersect (1 px tolerance) the box of any table cell."""

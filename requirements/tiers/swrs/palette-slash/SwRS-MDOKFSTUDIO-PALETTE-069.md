@@ -25,7 +25,7 @@ derived_by: []
 implemented_in_files:
 - src/page/modules/colourEditActions.ts
 tested_in_files:
-- test/page/modules/editActions.test.ts
+- test/page/modules/editActionsColour.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
 default_owner_email: gaetan@xeberon.net

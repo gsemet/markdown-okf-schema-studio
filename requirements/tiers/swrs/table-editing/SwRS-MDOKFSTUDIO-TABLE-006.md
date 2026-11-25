@@ -31,7 +31,7 @@ tested_in_files:
 - test/integration/tableEmptyColumn.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/page/runtimeTableCellRoom.test.ts
-- test/visual/capture_edit_checks.py
+- test/visual/capture_cell_editor_checks.py
 - test/visual/capture_table_cell_room.py
 - test/visual/tableCellRoomScenarios.ts
 default_owner_email: gaetan@xeberon.net

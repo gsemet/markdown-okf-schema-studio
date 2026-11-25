@@ -15,6 +15,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-016
+scenarios:
+- id: S1
+  title: A standalone card shows its parts in order
+- id: S2
+  title: A grid card shows its parts
+- id: S3
+  title: Card parts, link and classes
+- id: S4
+  title: Empty cards and unsafe class names
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,19 +45,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a document holds a {card} directive, or a {grid-item-card} in a grid, the extension SHALL render a card showing its :header: and ^^^ header above its title, its body, and its :footer: and +++ footer, make the title one link when :link: is given and add the safe names of :class-card: to the card.
 
-### Scenario (nominal): A standalone card shows its parts in order
+### Scenario S1 (nominal): A standalone card shows its parts in order
 
 - GIVEN a `{card}` titled "Claude Code" with `:header: Since v2.1.154`, `:footer: Documented in the guide` and a body holding a list
 - WHEN the preview renders
 - THEN one card shows the header line, then the title, then the body with its list, then the footer line, with the grid card look, and a click on it in edit mode edits the lines of the directive
 
-### Scenario (nominal): A grid card shows its parts
+### Scenario S2 (nominal): A grid card shows its parts
 
 - GIVEN a `{grid-item-card}` with title, a header before `^^^`, body and a footer after `+++`
 - WHEN the preview renders
 - THEN all four parts show
 
-### Scenario (boundary): Card parts, link and classes
+### Scenario S3 (boundary): Card parts, link and classes
 
 | Input | Outcome |
 | --- | --- |
@@ -62,7 +71,7 @@ When a document holds a {card} directive, or a {grid-item-card} in a grid, the e
 | the option text of `:header:` and `:footer:` | inline Markdown, rendered in the part as inline text only (a leading "4." stays literal) and mapped to its own option line, so a click opens the editor on it (see SwRS-MDOKFSTUDIO-BLOCK-258) |
 | a card inside a grid item, a tab item or another card | renders the same way |
 
-### Scenario (refusal): Empty cards and unsafe class names
+### Scenario S4 (refusal): Empty cards and unsafe class names
 
 | Input | Outcome |
 | --- | --- |

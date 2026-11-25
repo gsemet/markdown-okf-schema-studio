@@ -23,7 +23,8 @@ test("the comment author setting is read for the resource of the document, so a 
   assert.equal(choices.threadAuthor, "Folder Alias");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-081
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081#S6
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081#S8
 test("the closed warning banners of a session are bounded to the most recent documents", () => {
   const choices = new WorkspaceChoices({} as HostServices);
   const capacity = choices.dismissedWarningBanners.capacity;
