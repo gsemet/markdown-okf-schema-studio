@@ -2,6 +2,11 @@
 
 ## 2026-11-25
 
+### Gallery: a stable link for each screenshot (CR-506)
+
+- Added (`proposed`): SwRS-MDOKFSTUDIO-CORE-096 (each screenshot of the site gallery has its own stable URL, `gallery.html#<capture id>`), derived from StRS-MDOKFSTUDIO-CORE-008
+- Reason: a screenshot of the gallery could not be linked, bookmarked or reloaded, and Back left the gallery
+
 ### Auto width: a code block fits its longest line (CR-508)
 
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-LAYOUT-023 (in Auto a code block is widened until its longest line fits, its border and a caption bar included; an overflowing code block has no 1 px tolerance; nested code blocks stay a Known issue)

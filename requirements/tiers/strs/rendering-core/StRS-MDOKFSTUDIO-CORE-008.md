@@ -28,6 +28,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-092
 - SwRS-MDOKFSTUDIO-CORE-093
 - SwRS-MDOKFSTUDIO-CORE-095
+- SwRS-MDOKFSTUDIO-CORE-096
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -94,4 +95,5 @@ flowchart LR
   - [SwRS-MDOKFSTUDIO-CORE-092](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-092.md): The site requirements viewer finds a requirement by its ID
   - [SwRS-MDOKFSTUDIO-CORE-093](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-093.md): The site requirements viewer names every requirement by its full ID
   - [SwRS-MDOKFSTUDIO-CORE-095](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-095.md): The published site plays a feature clip as a looping video
+  - [SwRS-MDOKFSTUDIO-CORE-096](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-096.md): Each screenshot of the site gallery has its own stable link
 <!-- okf:links:end -->

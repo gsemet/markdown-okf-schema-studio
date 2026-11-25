@@ -6,6 +6,7 @@ import { parseFragment, serialize } from "parse5";
 
 import { renderMyst } from "../../src/core/render/mystRenderer";
 import { E2E_SCREENSHOT_ROOT, EXTENSION_ROOT, REPORTS_ROOT } from "../reportPaths";
+import { buildGallery, listCaptures } from "./galleryPage";
 import { clipVideos, copyClipMedia, isClipSource } from "./siteClips";
 import { outputPathForMarkdown, rewriteLinkTarget } from "./siteLinks";
 import { headTags } from "./siteHead";
@@ -79,8 +80,9 @@ video { max-width: 100%; height: auto; }
 .gallery h2 { margin: 0 0 .35rem; font-size: 1.05rem; }
 .gallery p { margin: 0; font-family: var(--sans); color: var(--soft); font-size: .94rem; }
 .gallery h2 { overflow-wrap: anywhere; }
-.capture-open { display: block; width: 100%; padding: 0; border: 0; background: var(--code-bg); cursor: zoom-in; }
-.capture-open:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+a.capture-open { display: block; width: 100%; padding: 0; border: 0; background: var(--code-bg); text-decoration: none; cursor: zoom-in; }
+a.capture-open:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+[data-capture-missing][hidden] { display: none; }
 .capture-viewer { width: 96vw; height: 94vh; max-width: none; max-height: 96vh; padding: 1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font-family: var(--sans); }
 .capture-viewer :is(h2, h3, p, li) { font-family: var(--sans); }
 .capture-viewer[open] { display: flex; flex-direction: column; }
@@ -168,20 +170,6 @@ function simpleCardFor(relativeSource: string): SimpleCardEntry | undefined {
   return Object.hasOwn(SIMPLE_CARDS, relativeSource) ? SIMPLE_CARDS[relativeSource] : undefined;
 }
 
-/** The images (png, jpg, jpeg, webp) under the screenshot root, in name order. */
-export function listCaptures(screenshotRoot = E2E_SCREENSHOT_ROOT): string[] {
-  const captures: string[] = [];
-  const visit = (directory: string): void => {
-    for (const entry of fs.readdirSync(directory, { withFileTypes: true }).sort((left, right) => left.name.localeCompare(right.name))) {
-      const filename = path.join(directory, entry.name);
-      if (entry.isDirectory()) visit(filename);
-      else if (entry.isFile() && /\.(png|jpe?g|webp)$/iu.test(entry.name)) captures.push(filename);
-    }
-  };
-  if (fs.existsSync(screenshotRoot)) visit(screenshotRoot);
-  return captures;
-}
-
 /** Body of the gallery card: the live count and a mosaic of curated captures (image URLs). */
 export function galleryCard(captureCount: number, mosaic: string[]): string {
   const text = `<div class="text"><p class="eyebrow">Screenshot gallery</p><h1 class="headline">${captureCount} screenshots</h1><p class="line">End-to-end captures, each with the test that took it</p></div>`;
@@ -196,154 +184,6 @@ function curatedMosaic(): string[] {
   if (!fs.existsSync(file)) return [];
   const curated = JSON.parse(fs.readFileSync(file, "utf8")) as { captures?: { image: string }[] };
   return (curated.captures ?? []).slice(0, 3).map((capture) => pathToFileURL(path.join(EXTENSION_ROOT, capture.image)).toString());
-}
-
-export function buildGallery(screenshotRoot = E2E_SCREENSHOT_ROOT): string {
-  const captures = listCaptures(screenshotRoot);
-  const cards = captures.map((filename) => {
-    const relative = path.relative(screenshotRoot, filename).split(path.sep).join("/");
-    const stem = filename.replace(/\.[^.]+$/u, "");
-    const notePath = [".json", ".md", ".txt"].map((extension) => stem + extension).find((candidate) => fs.existsSync(candidate));
-    const raw = notePath ? fs.readFileSync(notePath, "utf8") : "No sidecar metadata was recorded for this capture.";
-    const metadata = notePath?.endsWith(".json") ? JSON.parse(raw) as { summary?: string } : undefined;
-    const summary = metadata?.summary ?? (notePath ? "Legacy capture: see the full sidecar for expected content and checks." : raw);
-    const asset = "reports/e2e/screenshots/" + relative.split("/").map(encodeURIComponent).join("/");
-    return `<figure><button type="button" class="capture-open" aria-label="Inspect ${escapeHtml(relative)}"><img loading="lazy" src="${escapeHtml(asset)}" alt="${escapeHtml(relative)}"></button><figcaption><h2>${escapeHtml(relative)}</h2><p>${escapeHtml(summary)}</p></figcaption><template class="capture-sidecar">${escapeHtml(raw)}</template></figure>`;
-  }).join("\n");
-  return `<h1>Screenshot gallery</h1><p>${captures.length} E2E screenshots. Open a capture to inspect the visual evidence and its readable test context.</p><section class="gallery">${cards}</section>
-<dialog class="capture-viewer" aria-labelledby="capture-title"><header><h2 id="capture-title"></h2><nav class="capture-nav" aria-label="Screenshot navigation"><button type="button" data-capture-previous aria-label="Previous screenshot">&larr; Previous</button><span class="capture-position" data-capture-position aria-live="polite"></span><button type="button" data-capture-next aria-label="Next screenshot">Next &rarr;</button></nav><button type="button" class="capture-close" aria-label="Close screenshot" title="Close screenshot">&#215;</button></header><div class="capture-detail"><section class="capture-meta" aria-label="Screenshot details"></section><div class="capture-image"><img alt=""></div></div></dialog>
-<script>
-const viewer = document.querySelector('.capture-viewer');
-const captureCards = [...document.querySelectorAll('.capture-open')];
-const previousButton = viewer.querySelector('[data-capture-previous]');
-const nextButton = viewer.querySelector('[data-capture-next]');
-const closeButton = viewer.querySelector('.capture-close');
-const capturePosition = viewer.querySelector('[data-capture-position]');
-const captureMeta = viewer.querySelector('.capture-meta');
-let activeIndex = -1;
-
-const appendText = (parent, tag, value, className) => {
-  const element = document.createElement(tag);
-  if (className) element.className = className;
-  element.textContent = value == null ? '' : String(value);
-  parent.append(element);
-  return element;
-};
-const objectValue = value => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-const displayValue = value => typeof value === 'string' ? value : JSON.stringify(value);
-const addFacts = (parent, values) => {
-  const facts = document.createElement('dl');
-  facts.className = 'capture-facts';
-  Object.entries(values).forEach(([label, value]) => {
-    if (value == null || value === '') return;
-    appendText(facts, 'dt', label);
-    appendText(facts, 'dd', displayValue(value));
-  });
-  if (facts.children.length) parent.append(facts);
-};
-const addSection = (parent, title) => {
-  const section = document.createElement('section');
-  section.className = 'capture-section';
-  appendText(section, 'h3', title);
-  parent.append(section);
-  return section;
-};
-const renderMetadata = raw => {
-  captureMeta.replaceChildren();
-  let data;
-  try {
-    data = JSON.parse(raw);
-  } catch {
-    appendText(captureMeta, 'p', raw || 'No sidecar metadata was recorded for this capture.', 'capture-summary');
-    return;
-  }
-  const info = objectValue(data.info);
-  appendText(captureMeta, 'p', data.summary || 'No summary was recorded for this capture.', 'capture-summary');
-  const status = info.status || data.status;
-  if (status) {
-    const badge = appendText(captureMeta, 'p', status, 'capture-status');
-    badge.dataset.status = String(status).toLowerCase();
-  }
-  const viewport = objectValue(info.viewport);
-  addFacts(captureMeta, {
-    'Capture ID': info.id || data.id,
-    'Fixture': info.fixture || data.fixture,
-    'Theme': info.theme || data.theme,
-    'Viewport': viewport.width && viewport.height ? String(viewport.width) + ' x ' + String(viewport.height) : undefined,
-    'Scroll': info.scroll || data.scroll,
-    'Run': info.runId || data.runId,
-  });
-  const actions = Array.isArray(data.actions) ? data.actions : [];
-  if (actions.length) {
-    const section = addSection(captureMeta, 'Actions recorded');
-    const list = document.createElement('ul');
-    list.className = 'capture-actions';
-    actions.forEach(action => appendText(list, 'li', action));
-    section.append(list);
-  }
-  const capturedState = objectValue(data.capturedState);
-  if (Object.keys(capturedState).length) {
-    const section = addSection(captureMeta, 'Captured state');
-    addFacts(section, {
-      'Edit mode': capturedState.editMode,
-      'Preview theme': capturedState.previewTheme,
-      'Scroll Y': capturedState.scrollY,
-      'Editors': Array.isArray(capturedState.editors) ? capturedState.editors.length : undefined,
-      'Visible content': Array.isArray(capturedState.visibleContent) ? capturedState.visibleContent.length : undefined,
-    });
-  }
-  const checks = Array.isArray(data.checks) ? data.checks : [];
-  if (checks.length) {
-    const section = addSection(captureMeta, 'Machine checks');
-    const list = document.createElement('ul');
-    list.className = 'capture-checks';
-    checks.forEach(check => {
-      const item = appendText(list, 'li', (check.pass ? 'PASS ' : 'FAIL ') + (check.id || 'unnamed check') + (check.detail ? ': ' + check.detail : ''), 'capture-check');
-      item.dataset.pass = String(Boolean(check.pass));
-    });
-    section.append(list);
-  }
-  const technical = document.createElement('details');
-  technical.className = 'capture-technical';
-  appendText(technical, 'summary', 'Technical sidecar');
-  const pre = appendText(technical, 'pre', raw);
-  pre.setAttribute('aria-label', 'Complete screenshot sidecar');
-  captureMeta.append(technical);
-};
-const renderCapture = index => {
-  activeIndex = Math.max(0, Math.min(index, captureCards.length - 1));
-  const figure = captureCards[activeIndex].closest('figure');
-  const image = captureCards[activeIndex].querySelector('img');
-  viewer.querySelector('h2').textContent = image.alt;
-  capturePosition.textContent = String(activeIndex + 1) + ' of ' + String(captureCards.length);
-  previousButton.disabled = activeIndex === 0;
-  nextButton.disabled = activeIndex === captureCards.length - 1;
-  renderMetadata(figure.querySelector('template').content.textContent);
-  const targetImage = viewer.querySelector('.capture-image img');
-  targetImage.src = image.src;
-  targetImage.alt = image.alt;
-};
-const openCapture = index => {
-  renderCapture(index);
-  viewer.showModal();
-  (activeIndex > 0 ? previousButton : nextButton).focus();
-};
-captureCards.forEach((button, index) => button.addEventListener('click', () => openCapture(index)));
-previousButton.addEventListener('click', () => openCapture(activeIndex - 1));
-nextButton.addEventListener('click', () => openCapture(activeIndex + 1));
-document.addEventListener('keydown', event => {
-  if (!viewer.open) return;
-  if (event.key === 'ArrowLeft' && activeIndex > 0) {
-    event.preventDefault();
-    openCapture(activeIndex - 1);
-  } else if (event.key === 'ArrowRight' && activeIndex < captureCards.length - 1) {
-    event.preventDefault();
-    openCapture(activeIndex + 1);
-  }
-});
-closeButton.addEventListener('click', () => viewer.close());
-viewer.addEventListener('click', event => { if (event.target === viewer) viewer.close(); });
-</script>`;
 }
 
 /** The Markdown files the site renders: the README, Contributing and the docs pages, never a clip's own production files. */
