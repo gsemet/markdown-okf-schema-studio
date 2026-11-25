@@ -251,6 +251,8 @@ can refer to "option 2". Radio groups render in every palette mode and follow th
 as checkboxes: refused while a block editor is open. On
 GitHub and in plain editors the `( )` and `(x)` text stays readable.
 
+![A plan asks to pick one of three options: a click on the second option selects it in the page, and in the raw Markdown beside the x moves from the first option to the second](../demo-video/clips/radio-buttons/radio-buttons.gif)
+
 An inline block editor that is open in the preview keeps its text and caret while you save the
 file, switch the colour theme or a diagram finishes drawing; the preview shows the newer render
 when you close the editor. A change made in the text editor outside the block you edit leaves the
