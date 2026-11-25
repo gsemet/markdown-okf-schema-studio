@@ -126,10 +126,13 @@ Expected result, the scenario's check (read from the preview after each press, a
   `src/page/features/mappedBlocks.ts`), and SwRS-MDOKFSTUDIO-BLOCK-254 says "its first inner
   block". If the take shows the title selected first, it is a finding against the feature, reported
   with what was selected, and the clip waits.
-- **Changing one word.** The editor opens with the caret at the end of the item's text
-  (`focusTextControlAtLastContent` in `src/page/features/textControls.ts`), so the changed word is
-  the last one: Ctrl+Backspace on Windows deletes it (a native text box key; Studio does not take
-  it). On macOS the same key is Option+Backspace: the scenario presses `Control+Backspace` on
+- **Changing one word.** Enter on the selected first item opens the whole admonition in its editor
+  (Lines 3-11; the deviation above, a finding filed apart), with the caret at the end of the
+  admonition text (`focusTextControlAtLastContent` in `src/page/features/textControls.ts`), not at
+  the end of the item. The scene reaches the item's line with real key presses (Up five times, then
+  Right to the end of the line) and edits the item's last word, "Friday", there: Ctrl+Backspace on
+  Windows deletes it (a native text box key; Studio does not take it). On macOS the same key is
+  Option+Backspace: the scenario presses `Control+Backspace` on
   Windows and `Alt+Backspace` on macOS, never `ControlOrMeta`, which would be Cmd+Backspace (delete
   to the line start) on macOS. The letters of "Thursday" are typed with no badge, as the address of
   `export-html` was: the typed word shows in the editor (keyboard-nav-Q9).
