@@ -180,7 +180,6 @@ async function sideBySideSteps(
   assert.equal(fs.readFileSync(INCOMING_FIXTURE, "utf8"), committed, "the source file is never rewritten");
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-REVIEW-017#S1
 /**
  * review-annotations/r03: a tracked file whose buffer differs from Git HEAD. The buffer is edited,
  * never saved, and reverted at the end, so the working tree does not change.
@@ -559,6 +558,7 @@ export async function scenarioReviewThreads(page: Page, evidence: Evidence): Pro
  * editor's textarea with the PNG file in its clipboard data (a test cannot put an image on the
  * system clipboard of the CI display); everything after it is the product's own path: the page
  * reads the file, the host writes it next to the document, the page inserts the reference.
+ * @accepts_req StRS-MDOKFSTUDIO-PALETTE-018#S1
  */
 export async function scenarioImagePaste(page: Page, evidence: Evidence): Promise<void> {
   const png = fs.readFileSync(path.join(extensionRoot, "test", "integration", "fixtures", "markdown-logo.png"));

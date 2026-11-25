@@ -35,7 +35,6 @@ async function openPreview(uri: vscode.Uri): Promise<void> {
   });
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-REVIEW-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S2
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S6
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S7

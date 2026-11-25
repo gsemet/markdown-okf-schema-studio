@@ -23,7 +23,6 @@ async function waitFor(description: string, predicate: () => boolean, timeoutMs 
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-PALETTE-018#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S1

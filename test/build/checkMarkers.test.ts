@@ -269,7 +269,7 @@ test("rule 4: a marker on a target with scenarios: has a fragment, on a target w
   assert.equal(check({ ...files, "test/a.test.ts": `// @tests_req ${id}#S1\n// @tests_req ${bare}\n` }).status, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-097#S7
 test("rule 4: an @implements_req never has a fragment", () => {
   const [id] = ids(1);
   const files: Files = requirementFiles(id, scenarios("S1"));

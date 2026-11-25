@@ -602,6 +602,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   ] as const).flatMap(([theme, viewport]) => (viewport.width >= 760
     ? (["margin", "auto", "full"] as const)
     : (["margin"] as const)).map((mode) => ({
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-006#S2
     id: `toc-column-${theme}-${viewport.width}${mode === "margin" ? "" : `-${mode}`}`,
     fixture: "30-toc",
     theme,
@@ -776,6 +777,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the last paragraph is reachable inside the frame with its bottom padding.",
   },
   ...([["dark", 900], ["light", 900], ["light", 460]] as const).map(([theme, width], index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-GFM-002#S1
     id: `gfm/v0${index + 2}-gfm-gallery-full-${theme}-${width}`,
     fixture: "37-gfm-gallery",
     theme,
@@ -786,6 +788,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Every GFM construct on one page (five alerts, strikethrough, footnotes, task list, aligned table, raw HTML table and details, colour span, autolink), ${theme}, ${width} px pane.`,
   })),
   ...(["dark", "light"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-MYST-018#S1
     id: `myst/v${20 + index}-myst-gallery-full-${theme}-900`,
     fixture: "38-myst-gallery",
     theme,
@@ -807,6 +810,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `A {grid} of items and cards with header, body, footer, link and a nested grid, ${theme}, ${width} px pane (${columns} column${columns === 1 ? "" : "s"}).`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-MYST-012#S1
     id: `myst/v${25 + index}-toctree-caption-full-${theme}-900`,
     fixture: "47-toctree",
     theme,
@@ -1121,6 +1125,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   {
     // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S3
     // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S5
+    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-003#S2
     id: "layout-width/v85-max-width-setting-light-2000",
     fixture: "05-long-chapter",
     theme: "light",

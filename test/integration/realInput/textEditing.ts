@@ -80,7 +80,6 @@ const REQ_DOCUMENT = [
 ].join("\n");
 
 /** RI-T05: one frontmatter value edit changes only that field's line. */
-// @accepts_req StRS-MDOKFSTUDIO-FMEDIT-008#S1
 export async function scenarioFrontmatterValueMinimalPatch(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t05", REQ_DOCUMENT, async (document) => {
     await openSidePreview(document);
@@ -187,7 +186,6 @@ function frontmatterOf(text: string): Record<string, unknown> {
  * RI-T07: Enter saves a one-line text field in place (QA 210 ux-17: one line changed); Shift+Enter
  * then Cmd/Ctrl+Enter saves two lines.
  */
-// @accepts_req StRS-MDOKFSTUDIO-FMEDIT-001#S1
 export async function scenarioEnterCommitsTextField(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t07", REQ_DOCUMENT, async (document) => {
     await openSidePreview(document);
@@ -496,7 +494,6 @@ export async function scenarioShortcuts(page: Page, evidence: Evidence): Promise
   });
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-PALETTE-015#S1
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-232#S5
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-232#S6
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S5
@@ -619,8 +616,6 @@ export async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise
   });
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-PALETTE-019#S1
-// @accepts_req StRS-MDOKFSTUDIO-PALETTE-005#S1
 /** RI-T21: palette buttons edit the text box without closing it, and one undo reverts each. */
 export async function scenarioPalette(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t21", async (source) => {

@@ -120,7 +120,6 @@ async function stepDescriptionColumn(ctx: EditingContext): Promise<void> {
 }
 
 /** Each frontmatter link opens its target at its fragment or marker line; the line badge follows the file. */
-// @accepts_req StRS-MDOKFSTUDIO-FMSCHEMA-014#S1
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073#S1
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S2
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S7
@@ -620,7 +619,6 @@ async function stepFrontmatterRefusals(ctx: EditingContext, initial: ReturnType<
 }
 
 /** A body block is edited, autosaved and saved; a save whose original text no longer matches is refused. */
-// @accepts_req StRS-MDOKFSTUDIO-BLOCK-003#S1
 async function stepBodyEdits(ctx: EditingContext): Promise<void> {
   const { document } = ctx;
   const bodyEditContext = currentContext(document);

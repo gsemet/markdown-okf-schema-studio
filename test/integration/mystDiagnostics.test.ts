@@ -44,7 +44,6 @@ export async function runUntrusted(): Promise<void> {
   assert.deepEqual(mystEntries(document.uri), [], "an untrusted workspace published diagnostics");
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-MYST-007#S1
 // @tests_req SwRS-MDOKFSTUDIO-MYST-078#S5
 // @tests_req SwRS-MDOKFSTUDIO-MYST-078#S6
 export async function run(): Promise<void> {

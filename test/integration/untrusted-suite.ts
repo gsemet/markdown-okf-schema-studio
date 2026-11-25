@@ -86,7 +86,6 @@ async function runCaptures(): Promise<void> {
   }
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-TRUST-004#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S3
 /**
@@ -152,7 +151,6 @@ async function runRestrictedImages(): Promise<void> {
   }
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-TRUST-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S3
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 export async function run(): Promise<void> {

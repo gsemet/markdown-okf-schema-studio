@@ -73,6 +73,7 @@ function markdownExtensionManifest(): {
   return manifest.contributes;
 }
 
+// @accepts_req StRS-MDOKFSTUDIO-LIFE-001#S2
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   // @tests_req SwRS-MDOKFSTUDIO-LIFE-059#S5

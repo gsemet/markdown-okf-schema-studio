@@ -1372,6 +1372,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((variant, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-MYST-096#S1
+    // @tests_req StRS-MDOKFSTUDIO-MYST-005#S2
     id: `myst/v${37 + index}-unclosed-directives-${variant.name}-900`,
     fixture: "64-unclosed-directives",
     theme: variant.theme,
@@ -1388,6 +1389,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((variant, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-MYST-096#S2
+    // @tests_req StRS-MDOKFSTUDIO-MYST-005#S2
     id: `myst/v${39 + index}-unclosed-fence-mid-document-${variant.name}-900`,
     fixture: "65-unclosed-fence-mid-document",
     theme: variant.theme,

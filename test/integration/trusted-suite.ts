@@ -125,7 +125,6 @@ async function runPreviewSmoke(): Promise<void> {
   }
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-TRUST-006#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-011#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S4

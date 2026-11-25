@@ -277,7 +277,6 @@ export async function scenarioCtrlEnterCommit(page: Page, evidence: Evidence): P
 
 /**
  * T37: Alt+Up/Down on a focused block, and Cmd/Ctrl+Alt+Up/Down inside its text box.
- * @accepts_req StRS-MDOKFSTUDIO-BLOCK-014#S2
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S2
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S6
  */
@@ -344,7 +343,6 @@ export async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Pro
 /**
  * T39: Shift+click across three blocks, Shift+Up shrinks, Cmd or Ctrl+C copies, Escape clears; CR 157: Right and Escape walk into and out of a table; nothing is edited.
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
- * @accepts_req StRS-MDOKFSTUDIO-BLOCK-016#S1
  */
 export async function scenarioBlockSelection(page: Page, evidence: Evidence): Promise<void> {
   const text = ["# Selection", "", "Alpha paragraph.", "", "Beta paragraph.", "", "Gamma paragraph.", "",
@@ -549,7 +547,6 @@ export async function scenarioBlockMoveSelection(page: Page, evidence: Evidence)
   });
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-BLOCK-008#S2
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S2
 export async function scenarioArrowNavigation(page: Page, evidence: Evidence): Promise<void> {
@@ -607,7 +604,6 @@ export async function scenarioTableCellEnter(page: Page, evidence: Evidence): Pr
 
 /**
  * RI-T35: Cmd/Ctrl+B in a table cell bolds the selection and Enter saves the cell.
- * @accepts_req StRS-MDOKFSTUDIO-TABLE-015#S1
  * @tests_req SwRS-MDOKFSTUDIO-TABLE-085#S1
  * @tests_req SwRS-MDOKFSTUDIO-TABLE-085#S2
  */

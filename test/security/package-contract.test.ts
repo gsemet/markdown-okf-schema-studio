@@ -17,7 +17,6 @@ function contributedSettings(categories: ConfigurationCategory[]): Record<string
   return Object.assign({}, ...categories.map((category) => category.properties)) as Record<string, Record<string, unknown>>;
 }
 
-// @tests_req StRS-MDOKFSTUDIO-TRUST-012#S2
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-074#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-074#S2
 test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the shared logo", () => {
@@ -386,7 +385,6 @@ test("CR 144: Cmd/Ctrl+F runs the find command on the focused preview only", () 
   assert.match(bindings[0].when, /!editorTextFocus/u, "the text editor keeps its own find");
 });
 
-// @accepts_req StRS-MDOKFSTUDIO-TRUST-014#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-092#S3
 test("CR 135: the VSIX leaves out source maps, internal docs, agent files and the Python project file", () => {
   const ignore = fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8")
