@@ -35,6 +35,8 @@ environments),
   Mermaid, PlantUML, images and figures with their `:width:` and `:align:`, media, `(label)=`
   anchors (shown as a small icon; in edit mode a click on it renames the label), and permitted
   external links render in the preview.
+
+  ![One design note in reading mode, zoomed: a Mermaid flowchart, a PlantUML sequence, a Vega-Lite line chart, then after a scroll a Vega bar chart, a KaTeX equation and an inline SVG drawing, each outlined in turn and named by a caption](../demo-video/clips/advanced-renderings-tour/advanced-renderings-tour.gif)
 - **OpenKnowledge Format and OKF-Schema properties:** frontmatter field can be shown as a
   schema-aware properties table,
   with validation diagnostics, enum controls, typed scalar editors,
