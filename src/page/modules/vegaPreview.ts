@@ -4,18 +4,32 @@
  * costs nothing on any other page. The page's Content Security Policy is unchanged: no eval (see
  * `vegaChart.ts`), no network (`connect-src 'none'`), a plain script from the extension.
  */
+import type { View } from "vega";
+
 import type { ChartFiles, ChartKind } from "../../core/render/chartData";
 import { chartThemeFrom } from "./chartTheme";
 import { showChartError } from "./chartError";
-import { createMermaidCache, diagramKey } from "./mermaidCache";
-import { drawChart } from "./vegaChart";
+import { chartTooltip, hideChartTooltip } from "./chartTooltip";
+import { createChartViewCache, type ChartViewEntry } from "./chartViewCache";
+import { diagramKey } from "./mermaidCache";
+import { mountChart } from "./vegaView";
+
+/** A live chart view and the host it is drawn in. */
+interface LiveChart extends ChartViewEntry {
+  readonly view: View;
+  readonly host: HTMLElement;
+  /** The key the view was drawn for. */
+  readonly key: string;
+}
 
 const chartSelector = ".myst-vega-diagram";
-// The key (theme, source and data) each chart node was last drawn with, and the drawings by key
-// (PERF-07): unchanged charts are not drawn again by a content update or an attribute change.
+// The key (theme, source and data) each chart node was last drawn with, the view each node shows,
+// and the views by key (PERF-07): unchanged charts are not drawn again by a content update or an
+// attribute change, and a detached view is reused (DIAG-009).
 const chartSources = new WeakMap<HTMLElement, string>();
 const drawnKeys = new WeakMap<HTMLElement, string>();
-const drawings = createMermaidCache();
+const shownViews = new WeakMap<HTMLElement, LiveChart>();
+const views = createChartViewCache<LiveChart>();
 
 function readJsonAttribute(chart: HTMLElement, name: string): Record<string, string> {
   try {
@@ -26,12 +40,30 @@ function readJsonAttribute(chart: HTMLElement, name: string): Record<string, str
   }
 }
 
-function showImage(chart: HTMLElement, src: string): void {
-  const image = document.createElement("img");
-  image.className = "myst-vega-image";
-  image.alt = "Chart";
-  image.src = src;
-  chart.replaceChildren(image);
+const liveChart = (view: View, host: HTMLElement, key: string): LiveChart => ({
+  view,
+  host,
+  key,
+  isDetached: () => !host.isConnected,
+  finalize: () => view.finalize(),
+});
+
+/**
+ * The view a chart node showed is replaced (call it once the node no longer holds the old host):
+ * it stays when it is the cache entry of its key, ready for reuse, else it is finalized.
+ */
+function releaseShown(chart: HTMLElement, next: LiveChart | undefined): void {
+  const previous = shownViews.get(chart);
+  hideChartTooltip();
+  if (next === undefined) shownViews.delete(chart);
+  else shownViews.set(chart, next);
+  if (previous === undefined || previous === next) return;
+  if (!views.holds(previous.key, previous)) previous.finalize();
+}
+
+function showView(chart: HTMLElement, live: LiveChart): void {
+  chart.replaceChildren(live.host);
+  releaseShown(chart, live);
   chart.dataset.renderState = "rendered";
 }
 
@@ -52,23 +84,25 @@ async function renderCharts(pending: readonly HTMLElement[]): Promise<void> {
       errors: readJsonAttribute(chart, "data-myst-chart-errors"),
     };
     const key = diagramKey({ theme: JSON.stringify(theme) }, JSON.stringify([kind, source, files]));
-    const plan = drawings.plan(chart.dataset.renderState === undefined ? undefined : drawnKeys.get(chart), key);
+    const previousKey = chart.dataset.renderState === undefined ? undefined : drawnKeys.get(chart);
+    const plan = views.plan(previousKey, key);
     if (plan.action === "keep") return;
     drawnKeys.set(chart, key);
     if (plan.action === "reuse") {
-      showImage(chart, plan.image);
+      showView(chart, plan.entry);
       return;
     }
     try {
-      const svg = await drawChart(kind, source, theme, files);
-      const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-      drawings.store(key, src);
+      const mounted = await mountChart(kind, source, theme, files, chartTooltip);
+      const live = liveChart(mounted.view, mounted.host, key);
+      views.store(key, live);
       // A later pass (a newer theme) may have planned this node while the chart was drawn: the
-      // drawing stays in the cache, but only the drawing of the node's current key is shown.
-      if (drawnKeys.get(chart) === key) showImage(chart, src);
+      // view stays in the cache, detached, but only the view of the node's current key is shown.
+      if (drawnKeys.get(chart) === key) showView(chart, live);
     } catch (error) {
       if (drawnKeys.get(chart) !== key) return;
       showChartError(chart, error instanceof Error ? error.message : String(error));
+      releaseShown(chart, undefined);
       chart.dataset.renderState = "error";
     }
   }));

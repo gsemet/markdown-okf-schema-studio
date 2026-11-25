@@ -66,8 +66,8 @@ changed):
 
 - After the four clicks the page's theme mode is current, Dark, White, then Cream (the theme
   button's label reads "Cream theme (click for current theme)" at the end).
-- After each click, the Mermaid diagram and the Vega-Lite chart were drawn again: the `src` of each
-  drawing differs from the one of the mode before.
+- After each click, the Mermaid diagram and the Vega-Lite chart were drawn again: the `src` of the
+  diagram and the `svg` markup of the chart differ from the ones of the mode before.
 - `handbook.md` on disk is byte for byte `stage/handbook.md`.
 
 ## Review notes

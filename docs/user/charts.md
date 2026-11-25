@@ -4,11 +4,15 @@
 are drawn by the Vega runtime bundled with the extension: no executable, no server and no network,
 so they also work in Restricted Mode. The runtime is loaded only on a page that holds a chart, and
 the page keeps its strict Content Security Policy (no `unsafe-eval`: expressions run in the Vega
-interpreter). The chart is an SVG picture that follows the preview theme (Cream, White, Dark or the
+interpreter). The chart is a live SVG drawing that follows the preview theme (Cream, White, Dark or the
 VS Code theme): background, text, axes and marks take the colours of the page, and a theme switch
 draws the charts again. The legend, axis and title text follows the size of the page text, so it also
 follows the Markdown font size setting and the preview zoom. The syntax is the one of
 [Markdown Preview Enhanced](https://shd101wyy.github.io/markdown-preview-enhanced/#/diagrams?id=vega-and-vega-lite).
+
+Hovering a Vega-Lite mark (a bar, a point, a line) shows its fields as key and value rows in a small
+box in the page colours; the box follows the text size and the zoom. Put `"tooltip": null` on a mark
+to turn it off for that mark. A full `vega` specification shows only the tooltips its marks define.
 
 The specification is JSON or YAML. A first chart, with its data in the document:
 
@@ -86,7 +90,8 @@ the file next to the document, or paste the rows into `values`.
 A specification that is not valid JSON or YAML, a Vega or Vega-Lite error, or a data file that
 cannot be read shows its message in place of the chart (like a Mermaid error). The preview shows no
 **Chart source** section under a chart, since the source is the document itself; the HTML export
-keeps it, closed, under each chart. The document is never changed.
+keeps it, closed, under each chart. The HTML export holds the drawn chart as it was, with no hover
+detail and no script. The document is never changed.
 
 ## Your own `config`
 
@@ -105,6 +110,7 @@ the charts of a document are drawn in Strict, GFM and MyST too.
 
 ## Limits
 
-- Vega interactions (tooltips, selections, links) and `image` marks that load a URL are not
-  available: the chart is a static picture. Images given as `data:image/...` URIs are drawn.
+- Input bindings (`bind`) and links (`href`) are not available, and `image` marks that load a URL
+  are not drawn (images given as `data:image/...` URIs are). Selections, zoom and pan defined by
+  the specification work.
 - Remote data and remote fonts are never loaded.

@@ -79,7 +79,7 @@ sequenceDiagram
 2. The page has a chart figure
    - SwRS-MDOKFSTUDIO-DIAG-124: the chart runtime loads with the chart and needs no eval
 3. The chart is drawn in the colours of the page
-   - SwRS-MDOKFSTUDIO-DIAG-123: the chart is a themed SVG picture, or the error shows in its place
+   - SwRS-MDOKFSTUDIO-DIAG-123: the chart is a themed live SVG with a hover detail, or the error shows in its place
 
 #### Path 2: Read a drawing in the page
 
@@ -98,7 +98,7 @@ sequenceDiagram
 - Derived by:
   - [SwRS-MDOKFSTUDIO-DIAG-121](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-121.md): Vega-Lite and Vega fences become chart figures
   - [SwRS-MDOKFSTUDIO-DIAG-122](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-122.md): Chart data files are read through the resource policy
-  - [SwRS-MDOKFSTUDIO-DIAG-123](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-123.md): Charts are drawn as themed SVG pictures with errors in place
+  - [SwRS-MDOKFSTUDIO-DIAG-123](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-123.md): Charts are live themed SVG views with a hover detail and errors in place
   - [SwRS-MDOKFSTUDIO-DIAG-124](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-124.md): Chart expressions are evaluated without eval under an unchanged policy
   - [SwRS-MDOKFSTUDIO-DIAG-125](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-125.md): SVG blocks are drawn inline after the sanitizer rebuilt them
   - [SwRS-MDOKFSTUDIO-DIAG-126](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-126.md): A picture takes its colours from the preview theme

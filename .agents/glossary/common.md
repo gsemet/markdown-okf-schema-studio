@@ -49,11 +49,13 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **First-element gap**: fixed 40 px space above the first rendered element; `--sphinx-preview-first-clearance` (`src/page/modules/firstClearance.ts`) adds room only under the toolbar.
 - **Host adapter**: the implementation of the ports for one host, the only code that calls that host's API (`src/host-vscode/` for VS Code).
 - **Host API**: the host-neutral interfaces (ports) the core and the extension reach the host through: documents, files, settings, workspace, UI, Git, diagnostics, watchers, processes, assets and navigation (`src/host-api/`); no host API, DOM or Node imports.
+- **Hover detail**: the themed box shown over a chart mark, with the mark's fields as key and value rows (`div.myst-vega-tooltip`, `src/page/modules/chartTooltip.ts`); shown for every Vega-Lite mark unless it has `"tooltip": null`, and for a Vega mark only when its `encode` defines a tooltip.
 - **Included block**: rendered block that comes from an `{include}`; maps to the directive lines and carries `data-sphinx-preview-included`.
 - **Incoming-change mark**: green left bar on a block changed since HEAD (`data-sphinx-preview-changed`), from `src/page/modules/incomingChanges.ts`; ranges come from `src/core/mapping/lineDiff.ts` and `src/host-vscode/headBaseline.ts`.
 - **Insert point**: "+" bar after each top-level block that opens an insertion editor (`.sphinx-preview-insert-point`).
 - **Insertion editor**: block editor opened from an insert point or from "Start writing".
 - **Link panel**: two-field Text/URL panel under the palette, opened by the Link button or Cmd/Ctrl+K (`src/page/modules/linkPanel.ts`).
+- **Live chart view**: the Vega SVG view of a Vega-Lite or Vega chart, drawn in `div.myst-vega-view` inside the chart's `div.myst-vega-diagram` (`mountChart` in `src/page/modules/vegaView.ts`); its detached views are kept by `src/page/modules/chartViewCache.ts`.
 - **List item editor**: block editor opened on one list item, on the lines the renderer gives the item, by a click on the item or Enter on the item selected with Right from its list (`editingElementFor` in `src/page/features/mappedBlocks.ts`); the list itself opens the whole list.
 - **List item handle**: handle shown in edit mode left of each item of a list of two items or more (left of the outermost alert, quote or admonition that holds the list); a drag onto a sibling item or Alt+Up/Alt+Down on it moves the item with its sub-items among its siblings in one edit (`installListItemMove` in `src/page/features/listItemMove.ts`, `moveListItem` in `src/page/modules/listItemMove.ts`).
 - **Mapped block**: rendered element carrying its source location (`[data-sphinx-source-file][data-sphinx-source-line]`).

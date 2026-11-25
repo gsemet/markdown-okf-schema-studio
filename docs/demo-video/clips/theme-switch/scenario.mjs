@@ -57,11 +57,11 @@ const NEXT = { current: "dark", dark: "white", white: "cream", cream: "current" 
 
 const THEME_BUTTON = "[data-sphinx-preview-theme-toggle]";
 const DIAGRAM = ".myst-mermaid-diagram img.myst-mermaid-image";
-const CHART = ".myst-vega-diagram img.myst-vega-image";
+const CHART = ".myst-vega-diagram .myst-vega-view > svg";
 
 /**
  * The page's state, read from a fresh preview frame (the webview reloads while the layout changes): the
- * theme mode, the edit mode, the toolbar state, the theme button's title and the `src` of both drawings.
+ * theme mode, the edit mode, the toolbar state, the theme button's title and the `src` of the diagram and the markup of the chart.
  */
 async function pageState(t) {
   for (let attempt = 0; attempt < 20; attempt++) {
@@ -74,7 +74,7 @@ async function pageState(t) {
           toolbar: document.documentElement.getAttribute("data-sphinx-preview-toolbar-state"),
           title: document.querySelector("[data-sphinx-preview-theme-toggle]")?.getAttribute("title") ?? null,
           diagram: document.querySelector(diagram)?.getAttribute("src") ?? null,
-          chart: document.querySelector(chart)?.getAttribute("src") ?? null,
+          chart: document.querySelector(chart)?.outerHTML ?? null,
         }),
         [DIAGRAM, CHART],
       );
@@ -110,7 +110,7 @@ async function themeButton(frame) {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 }
 
-/** The box of a drawing's `img`, in page coordinates. */
+/** The box of a drawing (the diagram `img` or the chart `svg`), in page coordinates. */
 async function drawingBox(frame, selector) {
   const box = await frame.locator(selector).first().boundingBox();
   if (!box) throw new Error(`no box for ${selector}`);

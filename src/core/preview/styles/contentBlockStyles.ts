@@ -353,7 +353,7 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   white-space: pre-wrap;
 }
 
-/* Charts (Vega-Lite, Vega) are drawn like Mermaid diagrams: one contained picture, the source and
+/* Charts (Vega-Lite, Vega) are drawn like Mermaid diagrams: one contained live SVG, the source and
    the error in place. */
 #sphinx-myst-preview-content .myst-vega-diagram {
   min-height: 1.5em;
@@ -363,7 +363,13 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   white-space: pre-wrap;
 }
 
-#sphinx-myst-preview-content .myst-vega-image {
+#sphinx-myst-preview-content .myst-vega-view {
+  display: block;
+  white-space: normal;
+  text-align: center;
+}
+
+#sphinx-myst-preview-content .myst-vega-view > svg {
   display: block;
   max-width: 100%;
   height: auto;

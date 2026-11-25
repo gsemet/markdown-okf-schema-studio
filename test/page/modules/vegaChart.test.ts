@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { chartThemeFrom } from "../../../src/page/modules/chartTheme";
 import { loadVegaChart } from "./vegaBundle";
 
-const { chartConfig, createChartLoader, drawChart } = loadVegaChart();
+const { chartConfig, chartRuntime, createChartLoader, drawChart, sceneTooltips, vegaConfig, vegaLiteConfig } = loadVegaChart();
 
 const LIGHT = chartThemeFrom((name) => ({ "--studio-editor-foreground": "#112233", "--studio-textLink-foreground": "#aa5500" })[name] ?? "", "rgb(255, 255, 255)");
 const DARK = chartThemeFrom((name) => ({ "--studio-editor-foreground": "#ddeeff", "--studio-textLink-foreground": "#55aaff" })[name] ?? "", "rgb(30, 30, 30)");
@@ -230,4 +230,53 @@ test("a Vega legend takes the page-relative size, and a size of its own spec win
   });
   assert.deepEqual([...new Set(sizesOf(await drawChart("vega", JSON.stringify(spec({})), AT_14), "Legend entry"))], ["13"]);
   assert.deepEqual([...new Set(sizesOf(await drawChart("vega", JSON.stringify(spec({ labelFontSize: 9 })), AT_14), "Legend entry"))], ["9"]);
+});
+
+type Marked = { mark: Record<string, unknown>; events: Record<string, unknown> };
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("the Vega-Lite config gives every mark a tooltip, the Vega config none, and neither creates input widgets", () => {
+  const lite = vegaLiteConfig(AT_14) as Marked;
+  const full = vegaConfig(AT_14) as Marked;
+  assert.equal(lite.mark.tooltip, true);
+  assert.equal("tooltip" in full.mark, false, "the key cannot leak into the Vega config");
+  assert.equal("tooltip" in (chartConfig(AT_14) as Marked).mark, false);
+  assert.deepEqual(lite.events, { bind: "none" });
+  assert.deepEqual(full.events, { bind: "none" });
+  assert.equal(full.mark.color, AT_14.accent, "the Vega config keeps its mark colours");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("a Vega-Lite mark shows its encoded fields, and \"tooltip\": null on the mark shows none", async () => {
+  const shown = await sceneTooltips("vega-lite", JSON.stringify(BARS), AT_14, "rect");
+  assert.deepEqual(shown, [{ category: "A", amount: "28" }, { category: "B", amount: "55" }]);
+  const off = await sceneTooltips("vega-lite", JSON.stringify({ ...BARS, mark: { type: "bar", tooltip: null } }), AT_14, "rect");
+  assert.deepEqual(off, [null, null]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("a full Vega mark shows only the tooltip its encode defines", async () => {
+  const mark = (type: string, encode: Record<string, unknown>) => ({
+    type, from: { data: "t" }, encode: { enter: { x: { scale: "x", field: "k" }, y: { scale: "y", field: "v" }, ...encode } },
+  });
+  const spec = {
+    width: 120, height: 80,
+    data: [{ name: "t", values: [{ k: "a", v: 3 }, { k: "b", v: 7 }] }],
+    scales: [
+      { name: "x", type: "point", domain: { data: "t", field: "k" }, range: "width" },
+      { name: "y", domain: { data: "t", field: "v" }, range: "height" },
+    ],
+    marks: [mark("symbol", { tooltip: { signal: "datum" } }), mark("line", {})],
+  };
+  const symbols = await sceneTooltips("vega", JSON.stringify(spec), AT_14, "symbol");
+  assert.equal(symbols.length, 2);
+  assert.ok(symbols.every((tooltip) => (tooltip as { k: string }).k !== undefined), "the symbol mark shows its datum");
+  assert.deepEqual(await sceneTooltips("vega", JSON.stringify(spec), AT_14, "line"), [null, null], "the line mark defines none and shows none");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+test("the runtime of a chart is the AST the headless drawing and the live view both run", async () => {
+  const runtime = chartRuntime("vega-lite", JSON.stringify(BARS), AT_14);
+  assert.ok(Array.isArray(runtime.operators), "a parsed runtime");
+  await assert.rejects(async () => chartRuntime("vega-lite", "{ not a spec", AT_14), /neither valid JSON nor valid YAML/u);
 });

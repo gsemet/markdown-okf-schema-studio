@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Charts in the preview are live: hovering a Vega-Lite mark shows its values in a themed box (`"tooltip": null`
+  on a mark turns it off; a Vega chart shows only the tooltips it defines), and the HTML export keeps the drawn
+  chart as a static inline SVG (CR-503 vega-charts-live-view, PR #523)
 - Vega-Lite and Vega charts now draw their legend, axis and title text at a size that follows the page text
   (so the Markdown font size and the zoom), with horizontal discrete x labels and the subtitle in the label
   colour; the preview no longer shows the collapsed **Chart source** section under a chart (the HTML export

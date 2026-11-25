@@ -1,6 +1,6 @@
 /**
- * Draws one Vega-Lite or Vega chart to an SVG string, for the chart runtime of the preview page
- * (`vegaPreview.ts`, bundled by esbuild into `out/bundle/vegaPreview.js`).
+ * The config and the loader of the charts of the preview page (`vegaView.ts` draws them, and
+ * `vegaPreview.ts` is bundled by esbuild into `out/bundle/vegaPreview.js`).
  *
  * The page's Content Security Policy has no `unsafe-eval`: the spec is parsed to an expression
  * AST (`ast: true`) and `vega-interpreter` evaluates it, so no expression is compiled to
@@ -8,12 +8,9 @@
  * `values` or from the files the host read and handed over (`ChartFiles`), through a loader that
  * serves nothing else.
  */
-import * as vega from "vega";
-import * as vegaLite from "vega-lite";
-import { expressionInterpreter } from "vega-interpreter";
+import type * as vega from "vega";
 
-import { type ChartFiles, type ChartKind, isRemoteDataUrl, parseChartSource } from "../../core/render/chartData";
-import { inlineChartFiles } from "../../core/render/chartInline";
+import { type ChartFiles, isRemoteDataUrl } from "../../core/render/chartData";
 
 /** The page colours a chart follows. */
 export interface ChartTheme {
@@ -110,7 +107,24 @@ export function chartConfig(theme: ChartTheme): Record<string, unknown> {
     mark: { color: theme.accent },
     text,
     range: { category: categories, ordinal: { scheme: "blues" } },
+    // The preview creates no input widget of a spec's `bind` (live view, no host element for them).
+    events: { bind: "none" },
   };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-123
+/**
+ * The config given to Vega-Lite: {@link chartConfig} and the tooltip of every mark (its encoded
+ * fields). A spec's own `tooltip` encoding, or `"tooltip": null` on a mark, wins over it.
+ */
+export function vegaLiteConfig(theme: ChartTheme): Record<string, unknown> {
+  const config = chartConfig(theme);
+  return { ...config, mark: { ...(config.mark as Record<string, unknown>), tooltip: true } };
+}
+
+/** The config given to `vega.parse` for a full Vega chart: no mark tooltip, a spec defines its own. */
+export function vegaConfig(theme: ChartTheme): Record<string, unknown> {
+  return { ...chartConfig(theme), ...vegaMarkColours(theme) };
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-122
@@ -137,34 +151,4 @@ export function createChartLoader(chart: Partial<ChartFiles>): vega.Loader {
       ? Promise.resolve({ href: uri.trim() })
       : Promise.reject(new Error(`Remote chart images are not loaded: ${uri}.`)),
   } as unknown as vega.Loader;
-}
-
-/** Draws the chart of `source` (JSON or YAML) to SVG text; rejects with the reason when it cannot. */
-export async function drawChart(
-  kind: ChartKind,
-  source: string,
-  theme: ChartTheme,
-  chart: Partial<ChartFiles> = {},
-): Promise<string> {
-  const parsed = parseChartSource(source);
-  if (!parsed.ok) throw new Error(parsed.error);
-  const config = chartConfig(theme);
-  const spec = inlineChartFiles(parsed.spec, chart);
-  const vegaSpec = kind === "vega-lite"
-    ? vegaLite.compile(spec as unknown as vegaLite.TopLevelSpec, { config: config as vegaLite.Config }).spec
-    : spec;
-  // @implements_req SwRS-MDOKFSTUDIO-DIAG-124
-  const runtime = vega.parse(vegaSpec as vega.Spec, kind === "vega" ? { ...config, ...vegaMarkColours(theme) } : undefined, { ast: true });
-  const view = new vega.View(runtime, {
-    expr: expressionInterpreter,
-    loader: createChartLoader(chart),
-    renderer: "none",
-    logLevel: vega.Error,
-  });
-  try {
-    await view.runAsync();
-    return await view.toSVG();
-  } finally {
-    view.finalize();
-  }
 }

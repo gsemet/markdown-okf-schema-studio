@@ -310,7 +310,8 @@ test("CR 149: the chart runtime ships pinned in its own bundle and evaluates exp
   const esbuild = fs.readFileSync(path.join(extensionRoot, "esbuild.mjs"), "utf8");
   assert.match(esbuild, /src\/page\/modules\/vegaPreview\.ts/u);
   assert.match(esbuild, /out\/bundle\/vegaPreview\.js/u);
-  const chart = fs.readFileSync(path.join(extensionRoot, "src/page/modules/vegaChart.ts"), "utf8");
+  // Changed for CR-503: the parse and the view live in vegaView.ts, the config and the loader stay in vegaChart.ts.
+  const chart = ["vegaChart.ts", "vegaView.ts"].map((name) => fs.readFileSync(path.join(extensionRoot, "src/page/modules", name), "utf8")).join("\n");
   assert.match(chart, /ast: true/u, "the spec is parsed to an expression AST");
   assert.match(chart, /expr: expressionInterpreter/u, "the view evaluates it with vega-interpreter");
   assert.doesNotMatch(chart, /\beval\(|new Function/u);

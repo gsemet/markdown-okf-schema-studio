@@ -20,7 +20,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/page/modules/vegaChart.ts
+- src/page/modules/vegaView.ts
 tested_in_files:
 - test/core/preview/contentPatch.test.ts
 - test/page/chartCsp.test.ts
