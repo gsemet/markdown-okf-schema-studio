@@ -78,13 +78,20 @@ only, no Python and no symbolic link.
   `scenario.verify(t)`: a failed check fails the take.
 - **`scenario.mjs`** exports `stage` (files copied to the workspace), `settings` (added to the
   profile), `setup(t)` (the layout, off camera), `run(t)` (the filmed action) and `verify(t)` (the
-  expected result, read from disk). The helpers `t` gives: `moveTo(x, y, dur)` (eased, logged),
+  expected result, read from disk), and may export `checks = { editMode, paste }`: `editMode` is the
+  mode Studio is in at the start, `"off"` (default, reading mode) or `"on"` (edit mode), and `paste`
+  says whether the clip pastes, `true` (default) or `false`. The kit refuses another key or value
+  before the window opens, and `check` reads its start mode line and its paste widget line from
+  them. The helpers `t` gives: `moveTo(x, y, dur)` (eased, logged),
   `click()`, `selectText(frame, from, to)` (a mouse drag from the left edge of the first character
   of `from` to the right edge of the last character of `to`, located with a DOM `Range`,
   non-breaking spaces normalised), `press(chord, badgeId)` (the key chord through CDP,
   `ControlOrMeta` for the platform modifier, logged with the badge id), `zoom(id, rect)`,
   `unzoom(id)`, `mark(id, rect)`, `unmark(id)`, `sleep(ms)`, `frameOf()` (the preview frame) and
-  `workspaceFile(name)` (read a workspace file from disk).
+  `keyFrame(name)` (names a moment of the take: `render` writes `frames/<name>.png` at it; the name
+  is lowercase, starts with a letter and is unique) and `workspaceFile(name)` (read a workspace file
+  from disk). A scenario may drive a drag with the exposed `ev("click", ...)`, `page.mouse.down()`,
+  `moveTo` and `page.mouse.up()`.
 - **Pacing**: cursor moves of 600 to 900 ms, eased; 400 ms pause before a click or a chord; zoom in
   and out over 600 ms, at most 2x.
 - **VS Code**: the kit downloads a pinned version (`DEFAULT_CODE_VERSION` in `lib/platform.mjs`)
@@ -109,7 +116,8 @@ the storyboard's frame rate after retiming (`prepare` prints it). If (b) fails, 
 selection made by script (`Selection.addRange`) is not what the clip shows. If (a) fails, a
 `Page.captureScreenshot` loop replaces the screencast; if (c) fails, `Input.dispatchKeyEvent` with
 its `commands` field (`copy`, `paste`) replaces the plain key press; if either still fails, stop and
-report. Never an OS-level screen capture or OS-level input.
+report. Never an OS-level screen capture or OS-level input. For a clip that shows a drag, (b) reads
+"the CDP drag moves what the clip shows" and (c) reads "the result shows on screen".
 
 A take opens a real VS Code window: it does not run while another change runs app-window tests on
 the same machine ([local-worktree.guidelines.md](../../../.agents/guidelines/local-worktree.guidelines.md)),
@@ -132,7 +140,8 @@ The contract of the file:
   (`top right` by default), `Setting filmed`, `Filmed on` and `Stage` (free text);
 - then one `## <n>. <beat>` section per beat, each with its pictures (one per key moment: the
   kit's `frames/` files) and a table with `Time` (`<from> to <to> s`, then free text), `Shot *(filmed)*`
-  (free text), at most one `Text <n> *(on screen)*` (one line; `**bold**` takes the accent colour)
+  (free text; a picture of a section may be a key frame the scenario names with `keyFrame`,
+  `frames/<name>.png`), at most one `Text <n> *(on screen)*` (one line; `**bold**` takes the accent colour)
   and, where they belong, `Badge <id>` (the keycap text of each `press(…, id)`, for example
   `Badge copy | Ctrl+C / ⌘C`), `Zoom` (the id of the one zoom and its hold, `result, hold to 8.8 s`)
   and `Mark <id>` (`<what>, <from> to <to> s`: a brief orange outline around what the feature
@@ -249,7 +258,7 @@ failure on a large screen.
   10 MB; WebM `vp9`, same size, fps and duration, at most 3 MB; GIF at 960 px (or the ladder's
   width), 12 fps (or the ladder's), at most 3 MB, a NETSCAPE2.0 loop extension with a count of 0;
   SSIM between frame 0 and the last frame of the MP4 at least 0.98 and below 1.0 (the last frame
-  is never a copy of frame 0); no paste-options widget; the scenario's `verify` passed; at least the
+  is never a copy of frame 0); no paste-options widget when the scenario pastes; Studio in the mode the scenario declares at the start; the scenario's `verify` passed; at least the
   storyboard's frame rate after retiming; the playback rate inside 0.77 to 1.3. It writes every measured
   value, the VS Code and extension versions, the device scale, the display work area and the
   platform in `check.json`, with no absolute path and no user name.
@@ -259,7 +268,8 @@ failure on a large screen.
 - The outputs, the poster and the evidence files are committed together with `clip.md`, so the
   storyboard, the clip and its pictures always match. The key frames are the pictures of `clip.md`:
   `frames/01-selected.png`, `02-pasted.png`, `03-zoomed.png`, then `04-mark-<id>.png` for each mark in
-  the storyboard's order, each at the middle of its range. A render empties `frames/` first.
+  the storyboard's order, each at the middle of its range, and `<name>.png` for each key frame the
+  scenario names (a clip with no key press has no `01-selected` and `02-pasted`). A render empties `frames/` first.
 - The pull request of a clip shows the GIF inline in its body, from the file committed at the PR's
   head, and links the MP4 and the WebM by their raw URLs at the same head, so the maintainer watches
   the clip without checking out the branch. Each render pushed updates the three links to the new
