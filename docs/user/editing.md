@@ -173,7 +173,11 @@ environments),
   definition lists, math (inline, display, aligned), subscript, superscript, `(name)=` labels,
   `{ref}` and `{doc}` references, `{cite}` citations from the workspace `.bib` files, dropdowns,
   tables with a caption, figures and `{kbd}` keys; Full mode adds, on top of MyST, the
-  [Vega-Lite and Vega chart](charts.md) commands. In edit mode, hovering a figure shows Edit figure
+  [Vega-Lite and Vega chart](charts.md) commands.
+
+  ![In edit mode, a click on a paragraph opens its editor with the GFM buttons; Ctrl+Shift+M then Down switch the palette to MyST, which adds the MyST buttons, while the GitHub alert and the MyST tip around the paragraph render the same](../demo-video/clips/block-editor-modes/block-editor-modes.gif)
+
+  In edit mode, hovering a figure shows Edit figure
   (or press Figure with the caret in a `{figure}`): a form edits the source (with Browse), alt text,
   caption, legend, width, alignment and name, and leaves every other option as it was. Figure on a plain paragraph picks an image, writes the
   `{figure}` and opens the same form at once on the caption; Escape keeps the figure as inserted.
