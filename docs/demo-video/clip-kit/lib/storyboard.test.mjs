@@ -217,3 +217,35 @@ test("the shipped drag-list-item clip.md reads as the clip the owner reviews", (
   assert.equal(out.platform, "win32");
   assert.equal(out.fps, 15);
 });
+
+test("the shipped export-html clip.md reads as the clip the owner reviews", () => {
+  const exportFile = fileURLToPath(new URL("../../clips/export-html/clip.md", import.meta.url));
+  const clip = parseClip(exportFile);
+  assert.equal(clip.width, 1280);
+  assert.equal(clip.height, 720);
+  assert.equal(clip.fps, 15);
+  assert.equal(clip.length, 12);
+  assert.deepEqual(
+    clip.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["Export the page to one HTML file", "Any browser shows the same themed page"],
+  );
+  assert.equal(clip.captions[0].from, 0);
+  assert.equal(clip.captions[0].to, clip.captions[1].from);
+  assert.equal(clip.captions[1].to, clip.length);
+  assert.deepEqual(Object.keys(clip.badges), ["palette"]);
+  assert.equal(clip.badges.palette, "Ctrl+Shift+P / ⇧⌘P");
+  assert.equal(clip.expectedPaste, null);
+  assert.equal(clip.zoom.id, "page");
+  assert.equal(clip.zoom.holdTo, 11);
+  assert.deepEqual(clip.marks.map((mark) => [mark.id, mark.from, mark.to]), [["1", 6.6, 8], ["2", 8.6, 10.2]]);
+  for (const [index, mark] of clip.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= clip.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= clip.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  const filmed = { filmed: clip.length, presses: [{ id: "palette", t: 2.8 }], zooms: [{ id: "page", t: 6 }], marks: [{ id: "1" }, { id: "2" }] };
+  for (const host of [win32, darwin]) {
+    const out = validateStory(clip, filmed, host);
+    assert.equal(out.platform, host.platform);
+    assert.equal(out.fps, 15);
+  }
+});
