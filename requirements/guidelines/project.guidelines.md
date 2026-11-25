@@ -32,8 +32,8 @@ an entry goes in a `### Topic` sub-heading under its date, never in the date hea
 
 A StRS describes a whole use case: A, then B, then C gives D. Testing every way through it end to
 end is too combinatorial; its SwRS are the options at each state, each tested on its own. A StRS
-may therefore carry a `### Main paths` section that names one to three paths through the use case,
-step by step, each step backed by the SwRS that moves the user to the next state.
+therefore carries a `### Main paths` section that names the main paths through the use case, step
+by step, each step backed by the SwRS that moves the user to the next state.
 
 ```markdown
 ### Main paths
@@ -55,7 +55,19 @@ step by step, each step backed by the SwRS that moves the user to the next state
 ```
 
 - A path heading is `#### Path S<n>: <name>`, numbered S1, S2, S3 in order: the id is how a test
-  names the path (`@accepts_req StRS-<ID>#S<n>`, see "Scenario and path markers").
+  names the path (`@tests_req StRS-<ID>#S<n>` or `@accepts_req StRS-<ID>#S<n>`, see "Benches").
+- The frontmatter declares the same paths in `scenarios:`, one entry per path heading, with the same
+  id and the name as `title` (the two keys of an entry are `id` and `title`; the list is never
+  empty). An id is never reused, and a path keeps its id when another one is removed:
+
+  ```yaml
+  scenarios:
+  - id: S1
+    title: <short name of path S1>
+  - id: S2
+    title: <name of path S2>
+  ```
+
 - A state is the same state in every path when its text is the same.
 - The first bullet without `Option` is the step to the next state; it is drawn on the path.
 - `Option` bullets are the other outcomes at that state; the scenario kind in brackets, when
@@ -63,7 +75,10 @@ step by step, each step backed by the SwRS that moves the user to the next state
 - The last state of a path has no bullet.
 - A SwRS that derives from the StRS and appears in no path is read as "also serves this need"; it
   is not written in the StRS.
-- One to three paths per StRS. A StRS whose SwRS do not form a path has no section.
+- Every in-force StRS has at least one path, with no exception, so it has the section and its
+  `scenarios:`. A StRS whose SwRS do not follow one another still names a short path to the result
+  the user wants. Keep the paths few: usually one or two, more only when the use case has more main
+  ways through (StRS-MDOKFSTUDIO-LIFE-023 has four).
 - Every cited SwRS exists, is active (`req_lifecycle` is `draft`, `proposed` or `approved`, not
   `deprecated` nor `superseded`; a `draft` SwRS may be cited) and has that StRS in its
   `derives_from`, or is listed in that StRS's `depends_on` (a shared rule the use case relies on).
@@ -118,6 +133,65 @@ page of the requirements site.
 - On the site the diagram is drawn once, in the cream colours of the site (the site has no dark
   mode); a fence that Mermaid cannot draw fails the site build with the StRS id and Mermaid's
   message.
+
+## Scenarios of a SwRS
+
+Each scenario of a SwRS has a stable id, written in its body heading and declared in the
+`scenarios:` of its frontmatter:
+
+```yaml
+scenarios:
+- id: S1
+  title: Report present
+- id: S2
+  title: Old address
+```
+
+```markdown
+### Scenario S1 (nominal): Report present
+
+- GIVEN <the starting state>
+- WHEN <the action>
+- THEN <the observable result>
+
+### Scenario S2 (nominal): Old address
+
+...
+```
+
+- The heading is `### Scenario S<n> (<kind>): <title>`, the kind being `nominal`, `boundary`,
+  `refusal` or `failure`; a scenario without a kind is `### Scenario S<n>: <title>`. This project
+  form **overrides** the `### Scenario S<n>: <title>` of the shared guideline
+  (`requirements.guidelines.md`): for this project, this file ranks above it. The requirements site
+  shows the kind, and an `Option` bullet of a main path picks the scenarios of that kind.
+- `scenarios:` has one entry per heading, with the same id; `title` is the text after the colon.
+- Ids start at `S1`, in body order. An id is never reused, and a scenario keeps its id when another
+  one is removed.
+- Only an in-force SwRS that is not exempt declares `scenarios:`. A retired SwRS (`deprecated`,
+  `superseded`) or an exempt one declares none, and a marker on it has no fragment.
+
+## Benches
+
+Which marker a test of a StRS path carries depends on where the test runs. This is a convention of
+this project: okfreq counts markers by their verb and knows no bench.
+
+| Marker | The test walks the path | Where it sits | When it runs |
+| --- | --- | --- | --- |
+| `@tests_req <StRS-ID>#S<n>` | on the simulated bench | outside `test/integration/` | on every pull request |
+| `@accepts_req <StRS-ID>#S<n>` | end to end in real VS Code | `test/integration/` | on every push to `main` |
+
+- The only exceptions are the StRS whose product is not the editor. StRS-MDOKFSTUDIO-CORE-007 (the
+  release), StRS-MDOKFSTUDIO-CORE-008 (the site) and StRS-MDOKFSTUDIO-TRUST-014 (the built VSIX)
+  take `@accepts_req` on the test closest to that product, under `test/build`, `test/security`,
+  `test/site` or `test/core`. Every other StRS, StRS-MDOKFSTUDIO-CORE-006 (the writing skill) and
+  StRS-MDOKFSTUDIO-TRUST-012 included, is accepted in real VS Code.
+- `@accepts_req` never targets a SwRS, and no `@tests_req StRS-...` sits under `test/integration/`:
+  a walk in real VS Code is an acceptance.
+- `just check-markers` holds these placement rules. Its list of exceptions is
+  `ACCEPTANCE_OUTSIDE_VSCODE` in `scripts/check-marker-companions.mjs`; it and this section change
+  together.
+- The acceptance layout (the files and the CI job of the acceptance walks) is added by the
+  acceptance CR.
 
 ## During a change
 
@@ -177,17 +251,18 @@ checks. `just check-markers` holds these rules (`fragment-undeclared`, `fragment
 `fragment-unexpected`, `implements-fragment`, `accepts-placement`, `accepts-on-swrs`,
 `strs-tests-in-integration`):
 
-- A SwRS lists its scenarios in the `scenarios:` of its frontmatter, and each has a heading
-  `### Scenario S<n> (<nominal|boundary|refusal>): <title>` with the same id. A StRS lists its paths
-  in `scenarios:` and writes `#### Path S<n>: <name>`.
+- A SwRS declares its scenarios (see "Scenarios of a SwRS") and a StRS its paths (see "Main paths
+  of a StRS"), both in the `scenarios:` of their frontmatter.
 - A test names the scenario it checks with `@tests_req <SwRS-ID>#S<n>`, one marker line per
   scenario (a test that checks two scenarios has two lines). A test that exercises no declared
   scenario has no marker for that SwRS: never pick a fragment by guess, the scenario stays
   uncovered and is reported as such.
+- A `@tests_req` or `@accepts_req` marker on a requirement that declares `scenarios:` has a
+  fragment, and the fragment names a declared id.
 - A StRS path walked end to end in real VS Code, under `test/integration/`, is
   `@accepts_req <StRS-ID>#S<n>`. Only CORE-007, CORE-008 and TRUST-014 may sit under `test/build`,
   `test/security`, `test/site` or `test/core`. `@accepts_req` never targets a SwRS, and no
-  `@tests_req StRS-...` sits under `test/integration/`.
+  `@tests_req StRS-...` sits under `test/integration/` (see "Benches").
 - `@implements_req <SwRS-ID>` has no fragment: the code implements the requirement as a whole.
 - A marker on a requirement that declares no `scenarios:` has no fragment either.
 - The 3-ID cap of a marker block counts requirement IDs: the fragments of one ID count once.

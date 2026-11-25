@@ -4,6 +4,8 @@ Shared vocabulary for the Studio's UI parts and code concepts, so people and age
 words. Add new terms here, alphabetical, one line each; keep code names in backticks. Terms marked
 "(planned)" do not exist in the code yet; drop the marker when one is built.
 
+- **Acceptance test**: an automated end-to-end test of one nominal StRS path; it carries `@accepts_req <StRS-ID>#S<n>` and lives under `test/integration/`, except for the StRS of the release, the site and the built VSIX (`just check-markers`, "Scenario and path markers" of `requirements/guidelines/project.guidelines.md`). A walk of a path on the simulated bench is a test, `@tests_req <StRS-ID>#S<n>`, not an acceptance test.
+- **Accepted**: a StRS path with at least one counting `@accepts_req <StRS-ID>#S<n>` marker, the path walked end to end in real VS Code (or on the bench of its product, for CORE-007, CORE-008 and TRUST-014); counted by marker, as okfreq counts, and shown on the Requirements viewer as "StRS paths accepted".
 - **Agents window**: the VS Code companion window for agent sessions; it mounts the working folder of the active session as the workspace folder (`updateWorkspaceFolders`) and replaces or removes it on each session switch. Studio declares its support (`capabilities.agentsWindow` in `package.json`); a folder change promotes or demotes previews (`onFoldersChanged` in `src/session/hostEvents.ts`).
 - **Alert**: GitHub `> [!TYPE]` callout; inserted by the Alert button of the GFM group, whose type list opens at the caret (`popoverAtCaret` in `src/page/modules/editActions.ts`).
 - **Anchor icon**: marker rendered for a MyST `(label)=` target (`span.okf-anchor`, tooltip "Anchor: name"; first child of the next paragraph or heading, else in a `div.okf-anchor-row`).
@@ -69,6 +71,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Open-With editor**: the custom editor offered through "Open With" (`markdown-okf-schema-studio.editor`).
 - **Orphaned thread**: comment thread whose quote can no longer be found; listed in the "Orphaned comments" box, never deleted (`src/page/modules/commentThreads.ts`).
 - **Palette mode**: Strict / GFM / MyST button set of the edition palette, per workspace (`PALETTE_MODE_STORAGE_KEY` in `src/session/workspaceChoices.ts`, select in `src/page/modules/editPalette.ts`).
+- **Path (StRS)**: a main path of a use case, declared as `{id: S<n>, title}` in the `scenarios:` of the StRS and written as `#### Path S<n>: <title>` in its `### Main paths`; it is tested (`@tests_req`) and accepted (`@accepts_req`) by marker, and listed with its files on the use case page of the Requirements viewer.
 - **Preview panel**: the webview panel that shows the rendered preview.
 - **Properties table**: rendered frontmatter table at the top of a document (`[data-okf-properties]`).
 - **Protocol**: the typed messages between host and page, both directions, as discriminated unions with their validators (`src/core/protocol/`); no host API, DOM or Node imports.
@@ -77,6 +80,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Revision**: the protocol's name for one state of the document text (`revision` on the wire, `src/core/protocol/revision.ts`); compared for equality only. The VS Code host uses `TextDocument.version`; a host without versions counts with `RevisionCounter`.
 - **Runtime**: the page script injected into the preview, bundled from `src/page/main.ts` into `out/bundle/preview.js`; it reads its boot context from an inert JSON element.
 - **Runtime context**: the settings and ids the host passes to the runtime (`PreviewRuntimeContext`).
+- **Scenario (SwRS)**: a transition scenario of a behaviour, declared as `{id: S<n>, title}` in the `scenarios:` of the SwRS and written as `### Scenario S<n> (<kind>): <title>`; a test names it with `@tests_req <SwRS-ID>#S<n>`, and the behaviour page of the Requirements viewer marks one with no test as "missing".
 - **Scroll anchor**: the block and offset that keep the reading position stable across re-renders (`docs/scroll-anchoring.md`).
 - **Shell**: the part of the preview page outside the content container; unchanged between renders of one document.
 - **Shell key**: string identifying the shell, compared to decide whether a content patch is possible (`shellKey` in `src/core/preview/contentPatch.ts`).
@@ -99,6 +103,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Top-level block**: mapped block that is a direct child of the content container (`topLevelMappedBlocks` in `src/page/features/mappedBlocks.ts`).
 - **Update glow**: one brief wash of the focus colour on the blocks a content patch updated after a change made outside the preview and not in the active text editor, or an undo/redo (`data-sphinx-preview-updated`); the host sends `updatedRanges` (`src/core/preview/updatedRanges.ts`), the page marks them (`src/page/modules/motion.ts`).
 - **View preference**: per-workspace preview setting changed from toolbar rows 2 to 4, `src/core/state/previewViewPreferences.ts`.
+- **Waiver**: `acceptance_exemption: true` with an `acceptance_exemption_reason` on a whole StRS that no automated test can accept; the use case page shows a "waived" badge with the reason. Distinct from the SwRS `annotation_exemption` (no marker needed); it needs the owner's agreement and none is set today.
 - **Warning banner**: one-line notice at the top of a successfully rendered page counting the `conf.py` MyST extension warnings, with Open Problems and close buttons; out of the flow, closed per document for the session (`[data-sphinx-preview-warning-banner]`, `src/page/modules/warningBanner.ts`).
 - **Width mode**: Margin / Auto / Full width preview column state (`data-sphinx-preview-width`); Auto lets wide tables and figures break out of the column.
 - **Detached save**: a final save whose editor the writer closed with Cancel or Escape while it was in flight; the host answers it with `done` or an error that gives the typed text back (`src/page/features/detachedSave.ts`, `src/session/features/detachedEdits.ts`).

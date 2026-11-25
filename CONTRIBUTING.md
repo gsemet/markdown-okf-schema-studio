@@ -139,6 +139,17 @@ Tests mirror this tree under `test/` (`test/core/render/` tests `src/core/render
   shrink; when one shrinks, lower its entry with `node scripts/check-marker-companions.mjs --update`
   (the check says so). Never add a file to the baseline. See "Marker placement" in
   `requirements/guidelines/project.guidelines.md`.
+- Benches: which marker a test carries depends on where it runs, a convention of the Studio (okfreq
+  only counts markers by verb). `@tests_req <StRS-ID>#S<n>` is a path walked on the simulated bench,
+  run on every pull request; `@accepts_req <StRS-ID>#S<n>` is a path walked end to end in real
+  VS Code under `test/integration/`, run on pushes to `main`. The only exceptions are the StRS of the
+  release (CORE-007), the site (CORE-008) and the built VSIX (TRUST-014), whose `@accepts_req` sits on the
+  test closest to that product under `test/build`, `test/security`, `test/site` or `test/core`.
+  `just check-markers` fails an `@accepts_req` elsewhere, one on a SwRS, and a `@tests_req StRS-...`
+  under `test/integration/`. It also fails a `@tests_req` or `@accepts_req` that has no `#S<n>` on a
+  requirement that declares `scenarios:` (such a marker needs a fragment), one that has a fragment on
+  a requirement that declares none (such a marker has none), and a fragment that names an undeclared
+  id. A `@tests_req <SwRS-ID>#S<n>` names the scenario it checks.
 - `just check-settings` fails when the `contributes.configuration` of `package.json` differs from
   what the settings registry generates (see "Add a setting").
 
@@ -339,10 +350,18 @@ are not certified as part of the latest passing campaign.
 and the published `out/site/requirements/` ("Requirements" in the site navigation) is built from
 it, written by `test/site/requirementsViewer/`. The home holds the three layers, the areas, the
 chain from use case to test as a diagram, one real requirement as an example and the counts of
-active requirements (per scope, marker coverage, exemptions, known issues; retired ones apart).
+active requirements (per scope, marker coverage, exemptions, known issues; retired ones apart),
+with the cards "StRS paths tested", "StRS paths accepted", "StRS covered" (it follows okfreq's current
+coverage mode) and "SwRS scenarios tested", and the columns "Paths tested" and "Paths accepted" of
+the area table. The paths and scenarios are counted from the `scenarios:` of each requirement; the
+files that test or accept each one come from `out/reports/requirements/requirements-trace.json`
+(`okfreq trace requirements --json`, written by `just requirements-report` and
+`just requirements-report-json` next to the report). Without that file the cards read "n/a" for the
+tested and accepted counts and no file is listed.
 Each area, use case and behaviour has its own page (`requirements/<area>/<requirement id>/`): a use
-case with a `### Main paths` section is drawn as a map, a behaviour lists its scenarios and the
-files that implement and test it, and the retired requirements show behind the History button.
+case with a `### Main paths` section is drawn as a map and lists each path with its tested and accepted
+files (with a "waived" badge when the StRS has an acceptance waiver), a behaviour lists its scenarios with their
+tests (an untested one is marked "missing") and the files that implement and test it, and the retired requirements show behind the History button.
 The old address `out/site/requirements.html` redirects there. Without the report the site still
 builds and the home says it was not generated. The pages follow the reader's light or dark colour
 scheme, and the viewer has its own search.

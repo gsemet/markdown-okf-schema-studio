@@ -5,9 +5,9 @@ import * as path from "node:path";
 import { test } from "node:test";
 
 import { GROUPS } from "../../shared/e2eGroups";
-import { fixtureReport, requirement } from "./fixture";
+import { fixtureReport, fixtureTrace, requirement } from "./fixture";
 import { homePage, extractMarkerSnippet } from "./home";
-import { EXAMPLE_SWRS_ID, parseRequirementsReport } from "./model";
+import { EXAMPLE_SWRS_ID, parseRequirementsReport, parseTraceMarkers } from "./model";
 
 function load(raw = fixtureReport()) {
   const model = parseRequirementsReport(raw, "abc123");
@@ -29,7 +29,7 @@ test("home: layers, areas, sections and figures", () => {
   assert.ok(body.includes("<svg") && body.includes("@implements_req") && body.includes("@tests_req"));
   assert.ok(body.includes("<strong>80%</strong><span>implemented (4 of 5)"));
   assert.ok(body.includes("<strong>100%</strong><span>tested (5 of 5)"));
-  assert.ok(body.includes("2 of 2") && body.includes("StRS with a stakeholder validation test"));
+  assert.ok(!body.includes("stakeholder validation test"), "the validation card is gone");
   assert.ok(body.includes("okfreq validate") && body.includes("okfreq update-coverage --check"));
   assert.ok(body.includes("<td>archived</td><td>0</td><td>1</td>") && body.includes("<td>superseded</td><td>1</td><td>1</td>"));
   assert.ok(body.includes("Scenario: Toggle &lt;b&gt;") && !body.includes("Toggle <b>"), "text from the report is escaped");
@@ -80,4 +80,30 @@ test("marker snippets come from the repository files and fall back to the path",
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("home: the cards of paths, StRS covered and scenarios, and the area columns", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S5
+  const model = parseRequirementsReport(fixtureReport(), "abc123", parseTraceMarkers(fixtureTrace()));
+  assert.ok(model);
+  const { body } = homePage(model, "/nonexistent-root");
+  assert.ok(body.includes("<strong>2/3</strong><span>StRS paths tested</span>"));
+  assert.ok(body.includes("<strong>1/3</strong><span>StRS paths accepted</span>"));
+  assert.ok(body.includes("<strong>1/2</strong><span>StRS covered</span>"));
+  assert.ok(body.includes("<strong>4/5</strong><span>SwRS scenarios tested</span>"));
+  assert.ok(body.includes("counts as tested only where a simulated walk of it exists"), "the Paths tested card carries the D9 note");
+  assert.ok(body.includes("Follows okfreq&#39;s current coverage mode."));
+  assert.ok(body.includes("<th>Tested</th><th>Paths tested</th><th>Paths accepted</th>"));
+  assert.ok(body.includes("<td>2 / 3</td><td>1 / 3</td>"), "the gfm row and the total carry the path counts");
+  assert.ok(body.includes("<td>0 / 0</td><td>0 / 0</td>"), "an area with no path shows 0 / 0");
+});
+
+test("home: without the trace file the path and scenario counts read n/a", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S6
+  const { body } = homePage(load(), "/nonexistent-root");
+  assert.ok(body.includes("<strong>n/a/3</strong><span>StRS paths tested</span>"));
+  assert.ok(body.includes("<strong>n/a/3</strong><span>StRS paths accepted</span>"));
+  assert.ok(body.includes("<strong>n/a/5</strong><span>SwRS scenarios tested</span>"));
+  assert.ok(body.includes("<strong>1/2</strong><span>StRS covered</span>"), "the covered status comes from the report");
+  assert.ok(body.includes("<td>n/a / 3</td><td>n/a / 3</td>") && body.includes("The trace file was not generated"));
 });

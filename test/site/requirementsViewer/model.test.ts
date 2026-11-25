@@ -1,8 +1,8 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { DIAGRAM_SOURCE, fixtureReport } from "./fixture";
-import { EXAMPLE_SWRS_ID, behavioursOf, parseKnownIssues, parseRequirementsReport, parseScenarios, replacementsOf } from "./model";
+import { DIAGRAM_SOURCE, fixtureReport, fixtureTrace } from "./fixture";
+import { EXAMPLE_SWRS_ID, behavioursOf, parseKnownIssues, parseRequirementsReport, parseScenarios, parseTraceMarkers, replacementsOf } from "./model";
 
 function model() {
   const parsed = parseRequirementsReport(fixtureReport(), "abc123");
@@ -37,7 +37,7 @@ test("the model counts the figures of active requirements and the areas", () => 
   assert.equal(stats.exemptions, 1);
   assert.equal(stats.knownIssues, 2, "the notes of a retired SwRS are not counted");
   assert.equal(stats.swrsWithKnownIssue, 1);
-  assert.equal(stats.strsValidated, 2);
+  assert.equal(stats.strsCovered, 1, "the StRS status covered of the report, not a validation test: StRS-X-003 is missing");
   assert.deepEqual(areas.map((a) => [a.id, a.useCases, a.behaviours, a.linkedPercent]), [["gfm", 2, 5, 80], ["myst", 0, 1, undefined]]);
   assert.deepEqual(stats.scopes.map((s) => s.scope), ["gfm", "myst"]);
   for (const raw of ["", "not json", "[]", '{"requirements": 3}']) assert.equal(parseRequirementsReport(raw), undefined);
@@ -99,4 +99,55 @@ test("a scenario heading carries its S<n> id, and the older heading has none", (
   assert.equal(withId?.name, "Twice");
   assert.equal(older?.id, "");
   assert.equal(older?.kind, "refusal");
+});
+
+function traced() {
+  const trace = parseTraceMarkers(fixtureTrace());
+  assert.ok(trace);
+  const parsed = parseRequirementsReport(fixtureReport(), "abc123", trace);
+  assert.ok(parsed);
+  return parsed;
+}
+
+test("paths and scenarios are read from the frontmatter and joined with the trace markers", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S5
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S3
+  const m = traced();
+  const first = m.byId.get("StRS-X-001")!;
+  assert.deepEqual(first.declared.map((d) => [d.id, d.title]), [["S1", "Do it"], ["S2", "Do it <twice>"]]);
+  assert.deepEqual(first.declared[0]?.testedIn, ["test/a.test.ts"], "one file once, though the trace holds two lines of it");
+  assert.deepEqual(first.declared[0]?.acceptedIn, ["test/integration/a.test.ts"]);
+  assert.deepEqual(first.declared[1]?.testedIn, ["test/b.test.ts"]);
+  assert.deepEqual(first.declared[1]?.acceptedIn, []);
+  const { stats } = m;
+  assert.equal(stats.hasTrace, true);
+  assert.deepEqual([stats.pathsTotal, stats.pathsTested, stats.pathsAccepted, stats.strsCovered], [3, 2, 1, 1]);
+  assert.deepEqual([stats.scenariosTotal, stats.scenariosTested], [5, 4]);
+  const gfm = stats.scopes.find((scope) => scope.scope === "gfm")!;
+  assert.deepEqual([gfm.pathsTotal, gfm.pathsTested, gfm.pathsAccepted, gfm.strsCovered, gfm.scenariosTotal, gfm.scenariosTested], [3, 2, 1, 1, 5, 4]);
+  const myst = stats.scopes.find((scope) => scope.scope === "myst")!;
+  assert.deepEqual([myst.pathsTotal, myst.scenariosTotal], [0, 0]);
+  const twelve = m.byId.get("SwRS-X-012")!;
+  assert.deepEqual(twelve.declared.map((d) => [d.id, d.testedIn]), [["S1", ["test/integration/a.test.ts"]], ["S2", ["test/a.test.ts"]]], "a fragmentless marker names no scenario");
+  assert.deepEqual(m.byId.get("SwRS-X-011")?.declared.map((d) => d.testedIn.length), [1, 0]);
+});
+
+test("without the trace the declared counts stay and no file is listed", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S6
+  const { stats, byId } = model();
+  assert.equal(stats.hasTrace, false);
+  assert.deepEqual([stats.pathsTotal, stats.pathsTested, stats.pathsAccepted, stats.scenariosTotal, stats.scenariosTested], [3, 0, 0, 5, 0]);
+  assert.deepEqual(byId.get("StRS-X-001")?.declared.map((d) => [d.testedIn.length, d.acceptedIn.length]), [[0, 0], [0, 0]]);
+  for (const raw of ["", "not json", "[]", '{"scenario_markers": 3}']) assert.equal(parseTraceMarkers(raw), undefined);
+});
+
+test("the acceptance waiver of a StRS is read with its reason", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S4
+  const report = JSON.parse(fixtureReport()) as { requirements: { id: string; frontmatter: Record<string, unknown> }[] };
+  const waived = report.requirements.find((entry) => entry.id === "StRS-X-003")!;
+  waived.frontmatter.acceptance_exemption = true;
+  waived.frontmatter.acceptance_exemption_reason = "No step can be automated";
+  const m = parseRequirementsReport(JSON.stringify(report))!;
+  assert.deepEqual([m.byId.get("StRS-X-003")?.acceptanceExemption, m.byId.get("StRS-X-003")?.acceptanceExemptionReason], [true, "No step can be automated"]);
+  assert.equal(m.byId.get("StRS-X-001")?.acceptanceExemption, false);
 });

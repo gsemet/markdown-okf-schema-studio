@@ -25,8 +25,8 @@ export const MAIN_PATHS =`### Main paths
 3. State C
 `;
 
-const SCENARIO = (kind: string, name: string): string =>
-  `### Scenario (${kind}): ${name}\n\n- GIVEN a box\n- WHEN it is <clicked>\n- THEN it flips\n  and stays\n\n`;
+const SCENARIO = (kind: string, name: string, id = ""): string =>
+  `### Scenario${id ? ` ${id}` : ""} (${kind}): ${name}\n\n- GIVEN a box\n- WHEN it is <clicked>\n- THEN it flips\n  and stays\n\n`;
 
 /** SwRS-X-014: a table scenario, and a scenario mixing steps, a note, a bullet and a table. */
 const TABLE_SCENARIOS_TEXT = [
@@ -68,6 +68,11 @@ export interface FixtureOptions {
   readonly userNeed?: string;
   /** The frontmatter description (the rule of a behaviour). */
   readonly description?: string;
+  /** The `scenarios:` frontmatter: the paths of a StRS or the scenarios of a SwRS. */
+  readonly scenarios?: { id: string; title: string }[];
+  /** The StRS status of the report (`covered` by default). */
+  readonly covered?: boolean;
+  readonly acceptanceExemption?: string;
 }
 
 export function requirement(id: string, tier: "StRS" | "SwRS", scope: string, options: FixtureOptions = {}): unknown {
@@ -93,11 +98,14 @@ export function requirement(id: string, tier: "StRS" | "SwRS", scope: string, op
       exemption_reason: options.exempt ? "Documentation only" : "",
       implemented_in_files: options.implementedIn ?? ["src/a.ts"],
       tested_in_files: options.testedIn ?? ["test/a.test.ts", "test/integration/a.test.ts"],
+      scenarios: options.scenarios,
+      acceptance_exemption: options.acceptanceExemption === undefined ? undefined : true,
+      acceptance_exemption_reason: options.acceptanceExemption,
     },
     coverage_target: target,
     implementation: { status: options.implemented === false ? "missing" : "covered" },
     tests: { status: options.tested === false ? "missing" : "covered" },
-    stakeholder_test_coverage: tier === "StRS" ? { status: "covered" } : undefined,
+    stakeholder_test_coverage: tier === "StRS" ? { status: options.covered === false ? "missing" : "covered" } : undefined,
   };
 }
 
@@ -113,12 +121,21 @@ export function fixtureReport(overrides: { generatedAt?: string } = {}): string 
     totals: { combined_coverage_percent: 75 },
     scopes: { gfm: { combined_coverage_percent: 80 } },
     requirements: [
-      requirement("StRS-X-001", "StRS", "gfm", { text: `## T\n\n${DIAGRAM_SECTION}${MAIN_PATHS}\n<!-- okf:links:start -->\n`, userNeed: "As a writer, I do <b>a</b> thing." }),
+      requirement("StRS-X-001", "StRS", "gfm", {
+        text: `## T\n\n${DIAGRAM_SECTION}${MAIN_PATHS}\n<!-- okf:links:start -->\n`, userNeed: "As a writer, I do <b>a</b> thing.",
+        scenarios: [{ id: "S1", title: "Do it" }, { id: "S2", title: "Do it <twice>" }],
+      }),
       requirement("StRS-X-002", "StRS", "myst", { lifecycle: "superseded", supersededBy: ["StRS-X-001"] }),
-      requirement("StRS-X-003", "StRS", "gfm"),
-      requirement("SwRS-X-010", "SwRS", "gfm", { text: SCENARIO("nominal", "Start") }),
-      requirement("SwRS-X-011", "SwRS", "gfm", { implemented: false, text: SCENARIO("nominal", "Go on") + SCENARIO("boundary", "Go on twice") + KNOWN_ISSUES_TEXT }),
-      requirement("SwRS-X-012", "SwRS", "gfm", { text: SCENARIO("refusal", "Refused") + SCENARIO("nominal", "Not refused") }),
+      requirement("StRS-X-003", "StRS", "gfm", { covered: false, scenarios: [{ id: "S1", title: "Only path" }] }),
+      requirement("SwRS-X-010", "SwRS", "gfm", { text: SCENARIO("nominal", "Start", "S1"), scenarios: [{ id: "S1", title: "Start" }] }),
+      requirement("SwRS-X-011", "SwRS", "gfm", {
+        implemented: false, text: SCENARIO("nominal", "Go on", "S1") + SCENARIO("boundary", "Go on twice", "S2") + KNOWN_ISSUES_TEXT,
+        scenarios: [{ id: "S1", title: "Go on" }, { id: "S2", title: "Go on twice" }],
+      }),
+      requirement("SwRS-X-012", "SwRS", "gfm", {
+        text: SCENARIO("refusal", "Refused", "S1") + SCENARIO("nominal", "Not refused", "S2"),
+        scenarios: [{ id: "S1", title: "Refused" }, { id: "S2", title: "Not refused" }],
+      }),
       requirement("SwRS-X-013", "SwRS", "myst", { exempt: true, target: false, derivesFrom: ["StRS-X-001", "StRS-X-003"], implementedIn: [], testedIn: [] }),
       requirement("SwRS-X-014", "SwRS", "gfm", { derivesFrom: ["StRS-X-003"], lifecycleKey: "lifecycle", text: TABLE_SCENARIOS_TEXT }),
       requirement("SwRS-X-015", "SwRS", "gfm", { lifecycle: "superseded", supersededBy: ["SwRS-X-014"], derivesFrom: ["StRS-X-003"], text: KNOWN_ISSUES_TEXT }),
@@ -169,4 +186,26 @@ export function fullIdReport(): string {
     requirement(FULL_BEHAVIOUR(109), "SwRS", "gfm", { ...own, lifecycle: "superseded", supersededBy: [FULL_BEHAVIOUR(101)] }),
   );
   return JSON.stringify(report);
+}
+
+/**
+ * The `okfreq trace requirements --json` output for `fixtureReport`: StRS-X-001 has path S1 tested and accepted and
+ * path S2 tested only, StRS-X-003 has its path untested; SwRS-X-010, SwRS-X-011 S1 and SwRS-X-012 S1 and S2 are
+ * tested, SwRS-X-011 S2 is not. `tests` and `accepts` markers of one file and one fragment appear once per file.
+ */
+export function fixtureTrace(): string {
+  const marker = (kind: "tests" | "accepts", id: string, fragment: string, file: string, line = 1) => ({ marker: kind, id, fragment, file, line });
+  return JSON.stringify({
+    scenario_markers: [
+      marker("tests", "StRS-X-001", "S1", "test/a.test.ts"),
+      marker("tests", "StRS-X-001", "S1", "test/a.test.ts", 9),
+      marker("accepts", "StRS-X-001", "S1", "test/integration/a.test.ts"),
+      marker("tests", "StRS-X-001", "S2", "test/b.test.ts"),
+      marker("tests", "SwRS-X-010", "S1", "test/a.test.ts"),
+      marker("tests", "SwRS-X-011", "S1", "test/a.test.ts"),
+      marker("tests", "SwRS-X-012", "S1", "test/integration/a.test.ts"),
+      marker("tests", "SwRS-X-012", "S2", "test/a.test.ts"),
+      marker("tests", "SwRS-X-012", "", "test/c.test.ts"),
+    ],
+  });
 }

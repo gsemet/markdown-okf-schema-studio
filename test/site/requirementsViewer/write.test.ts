@@ -6,7 +6,7 @@ import { test } from "node:test";
 
 import { pageDocument } from "../buildSite";
 import { SITE_URL } from "../socialCard";
-import { fixtureReport } from "./fixture";
+import { fixtureReport, fixtureTrace } from "./fixture";
 import { parseRequirementsReport } from "./model";
 import { shareCard, viewerDocument } from "./shell";
 import { redirectDocument, viewerPages, writeViewerPages } from "./write";
@@ -100,4 +100,27 @@ test("the History checkbox sits inside the header landmark", () => {
   const header = html.slice(html.indexOf('<header class="top">'), html.indexOf("</header>"));
   assert.ok(header.includes('id="history"'));
   assert.ok(html.indexOf('id="history"') > html.indexOf("<header"));
+});
+
+test("the trace file next to the report feeds the path and scenario counts; without it the build still passes", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S5
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S6
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-requirements-"));
+  try {
+    const reportPath = path.join(root, "requirements-report.json");
+    fs.writeFileSync(reportPath, fixtureReport());
+    const without = writeViewerPages(path.join(root, "site-a"), reportPath, EXTENSION_ROOT);
+    assert.equal(without?.stats.hasTrace, false);
+    fs.writeFileSync(path.join(root, "requirements-trace.json"), fixtureTrace());
+    const site = path.join(root, "site-b");
+    const withTrace = writeViewerPages(site, reportPath, EXTENSION_ROOT);
+    assert.equal(withTrace?.stats.hasTrace, true);
+    assert.deepEqual([withTrace?.stats.pathsTested, withTrace?.stats.pathsAccepted, withTrace?.stats.scenariosTested], [2, 1, 4]);
+    const home = fs.readFileSync(path.join(site, "requirements", "index.html"), "utf8");
+    assert.ok(home.includes("<strong>2/3</strong><span>StRS paths tested</span>"));
+    fs.writeFileSync(path.join(root, "requirements-trace.json"), "{");
+    assert.equal(writeViewerPages(path.join(root, "site-c"), reportPath, EXTENSION_ROOT)?.stats.hasTrace, false, "a broken trace file is no trace file");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });

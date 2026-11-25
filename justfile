@@ -195,17 +195,19 @@ requirements-update:
     {{ okfreq }} update-coverage requirements
     {{ okfreq }} lint requirements --prose --check-links --project-root .
 
-# Write only the JSON requirements traceability report (no Markdown summary, no status) under out/reports/requirements.
+# Write only the JSON requirements traceability report and the trace (no Markdown summary, no status) under out/reports/requirements.
 requirements-report-json:
     mkdir -p out/reports/requirements
     {{ okfreq }} generate-report requirements --output-json out/reports/requirements/requirements-report.json
+    {{ okfreq }} trace requirements --json > out/reports/requirements/requirements-trace.json
 
-# Write the requirements traceability report (JSON and Markdown) under out/reports/requirements.
+# Write the requirements traceability report (JSON and Markdown) and the trace (requirements-trace.json) under out/reports/requirements.
 requirements-report:
     mkdir -p out/reports/requirements
     {{ okfreq }} generate-report requirements \
         --output-json out/reports/requirements/requirements-report.json \
         --output-summary-md out/reports/requirements/requirements-report.md
+    {{ okfreq }} trace requirements --json > out/reports/requirements/requirements-trace.json
     {{ okfreq }} status requirements
 
 # Test version updates, automatic tagging, and release-note validation in isolation.

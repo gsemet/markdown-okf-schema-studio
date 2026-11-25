@@ -1,9 +1,9 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { FULL_BEHAVIOUR, FULL_USE_CASE, fixtureReport, fullIdReport, requirement } from "./fixture";
+import { FULL_BEHAVIOUR, FULL_USE_CASE, fixtureReport, fixtureTrace, fullIdReport, requirement } from "./fixture";
 import { walkCount } from "./layout";
-import { parseRequirementsReport, type ViewerModel } from "./model";
+import { parseRequirementsReport, parseTraceMarkers, type ViewerModel } from "./model";
 import { areaPage, behaviourPage, testKind, useCasePage } from "./pages";
 import { viewerDocument } from "./shell";
 import { viewerPages } from "./write";
@@ -238,4 +238,66 @@ test("a full ID names a requirement on its page", () => {
     const rest = html.replace(/(?:StRS|SwRS)-MDOKFSTUDIO-(?:GFM|MYST)-\d+/gu, "");
     assert.ok(!/(?:GFM|MYST)-\d+/u.test(rest), "a short ID is left in the document");
   }
+});
+
+function loadTraced(raw = fixtureReport()): ViewerModel {
+  const model = parseRequirementsReport(raw, "abc123", parseTraceMarkers(fixtureTrace()));
+  assert.ok(model);
+  return model;
+}
+
+test("a use case page lists each path with its tested and accepted files", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S3
+  const model = loadTraced();
+  const { body } = useCasePage(model, model.byId.get("StRS-X-001")!);
+  const rows = body.split('<div class="path-row">').slice(1);
+  assert.equal(rows.length, 2);
+  assert.ok(rows[0]?.includes('<span class="sid">S1</span>Do it</p>'));
+  assert.ok(rows[0]?.includes("Tested by <small>1</small>") && rows[0]?.includes("a.test.ts"));
+  assert.ok(rows[0]?.includes("Accepted by <small>1</small>") && rows[0]?.includes("integration/"), "S1 is accepted by the integration file");
+  assert.ok(rows[1]?.includes("Do it &lt;twice&gt;") && rows[1]?.includes("b.test.ts"), "the title is escaped, S2 is tested by b.test.ts");
+  assert.ok(rows[1]?.includes("Accepted by <small>0</small>") && !rows[1]?.includes("waived"));
+  assert.ok(!body.includes("trace file was not generated"));
+  const plain = useCasePage(load(), load().byId.get("StRS-X-001")!).body;
+  assert.ok(plain.includes("trace file was not generated") && !plain.includes("Tested by <small>"), "no file is listed without the trace");
+  assert.ok(!useCasePage(model, model.byId.get("StRS-X-002")!).body.includes("path-row"), "a use case with no declared path has no list");
+});
+
+/** `fixtureReport` with an acceptance waiver on StRS-X-001. */
+function waivedReport(): string {
+  const raw = JSON.parse(fixtureReport()) as { requirements: { id: string; frontmatter: Record<string, unknown> }[] };
+  const entry = raw.requirements.find((candidate) => candidate.id === "StRS-X-001")!;
+  entry.frontmatter.acceptance_exemption = true;
+  entry.frontmatter.acceptance_exemption_reason = "Needs <a human>";
+  return JSON.stringify(raw);
+}
+
+test("a waived StRS shows the waiver and its reason on each path", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S4
+  const model = loadTraced(waivedReport());
+  const { body } = useCasePage(model, model.byId.get("StRS-X-001")!);
+  assert.equal(body.match(/<span class="tag waived">waived<\/span>/gu)?.length, 4, "a badge on each of the two paths and in each accepted block");
+  assert.ok(body.includes("Needs &lt;a human&gt;"));
+  assert.ok(!body.includes("Accepted by <small>1</small>"));
+});
+
+test("a waived StRS shows the waiver and its reason on each path without a trace file", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S4
+  const model = load(waivedReport());
+  const { body } = useCasePage(model, model.byId.get("StRS-X-001")!);
+  const rows = body.split('<div class="path-row">').slice(1);
+  assert.equal(rows.length, 2);
+  for (const row of rows) assert.ok(row.includes('<span class="tag waived">waived</span> Needs &lt;a human&gt;</p>'), "the reason is on the path");
+  assert.ok(!body.includes("Accepted by <small>"), "no file block without the trace");
+});
+
+test("a behaviour page lists the tests of each scenario and marks the untested one missing", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S5
+  const model = loadTraced();
+  const { body } = behaviourPage(model, model.byId.get("SwRS-X-011")!);
+  const [first, second] = body.split('<details class="scn">').slice(1);
+  assert.ok(first?.includes('<span class="sid">S1</span>') && first.includes("a.test.ts") && !first.includes(">missing<"));
+  assert.ok(second?.includes('<span class="sid">S2</span>') && second.includes('<span class="tag missing">missing</span>') && second.includes("None."));
+  const plain = behaviourPage(load(), load().byId.get("SwRS-X-011")!).body;
+  assert.ok(!plain.includes("missing</span>") && !plain.includes("scn-tests"), "without the trace nothing is marked");
 });
