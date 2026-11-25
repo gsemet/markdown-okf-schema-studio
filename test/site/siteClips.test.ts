@@ -135,6 +135,18 @@ test("the shipped editing page plays the block editor modes clip as video", asyn
   }
 });
 
+test("the shipped editing page plays the keyboard navigation clip as video", async () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  const clip = "docs/demo-video/clips/keyboard-navigation";
+  const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
+  const rendered = await renderMyst(source);
+  const html = clipVideos(rendered.html, "docs/user/editing.md", (repoPath) => fs.existsSync(path.join(EXTENSION_ROOT, repoPath)));
+  assert.ok(html.includes(`<video src="../demo-video/clips/keyboard-navigation/keyboard-navigation.webm"`), "the page holds the clip's video");
+  for (const file of ["keyboard-navigation.webm", "keyboard-navigation.gif", "poster.png"]) {
+    assert.ok(fs.existsSync(path.join(EXTENSION_ROOT, clip, file)), file);
+  }
+});
+
 test("the shipped toolbar page plays the export clip as video", async () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-095
   const clip = "docs/demo-video/clips/export-html";
