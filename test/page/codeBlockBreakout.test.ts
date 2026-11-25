@@ -349,6 +349,9 @@ async function checkCell(t: TestContext, cell: Cell): Promise<void> {
     await nextWidthMode(page, "auto");
     const auto = await measure(page);
     report(t, `${cell.name} auto`, auto);
+    // A captioned block without its figure and figcaption would skip the caption bar width check.
+    assert.equal(auto.blocks.filter((block) => block.kind === "captioned" && block.captionWidth !== null).length, LENGTHS.length,
+      `${cell.name}: every captioned block renders as a figure with a figcaption`);
     const checked = checkAuto(margin, auto);
     problems.push(...checked.problems);
     // The lengths cross the column and the available area for every kind, so no case goes unchecked.
