@@ -144,6 +144,14 @@ test("prepared refusals: size, frame rate, cards", () => {
   refused(variant("| Cards | none |", "| Cards | opening |"), /^clip\.md: Cards is "opening": the kit renders no card/u);
 });
 
+test("prepared refusals: a length outside 5 to 30 s; 30.0 s is accepted", () => {
+  refused(variant("| Length | 9.8 s |", "| Length | 4.9 s |"), /^clip\.md: Length .* s is outside 5 to 30 s/u);
+  refused(variant("| Length | 9.8 s |", "| Length | 30.1 s |"), /^clip\.md: Length .* s is outside 5 to 30 s/u);
+  const longest = parseClipText(variant("| Length | 9.8 s |", "| Length | 30.0 s |").replace("| Time | 4.4 to 9.8 s |", "| Time | 4.4 to 30.0 s |"));
+  assert.equal(longest.length, 30);
+  assert.equal(longest.captions[1].to, 30);
+});
+
 test("prepared refusals: captions", () => {
   refused(variant("| Text 2 *(on screen)* | Second text |", "| Text 3 *(on screen)* | Another |\n| Text 2 *(on screen)* | Second text |"), /^clip\.md: the section "2\. Result" has more than one Text row/u);
   refused(variant("| Time | 4.4 to 9.8 s |", "| Time | 4.9 to 9.8 s |"), /^clip\.md: the captions must run end to end/u);

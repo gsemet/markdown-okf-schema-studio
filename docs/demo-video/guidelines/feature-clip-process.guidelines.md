@@ -7,7 +7,7 @@ makes the clip with the maintainer, who decides. It follows the same method as
 source of the colours, type, caption pill, cursor and zoom rules that clips reuse; this guideline
 holds what a clip does differently, with the reason for each rule.
 
-A feature clip has no title or end card, plays 5 to 12 seconds, starts on the action and loops. It may
+A feature clip has no title or end card, plays 5 to 30 seconds, starts on the action and loops. Most clips run under 12 seconds; a clip may run up to 30 seconds when its story needs it, and its storyboard says why in its review notes. It may
 show one caption per beat, in turn, and several marks, in turn, on what the feature changed. It
 comes in three files: an MP4 for X and the published GitHub release, a WebM for the published docs
 site, and a light GIF for the release-note file in the repository and the feature's docs page. The
@@ -134,7 +134,7 @@ picture per key moment and its on-screen texts, so the maintainer reads and edit
 The contract of the file:
 
 - front matter `title`, `status`, `date`;
-- a `## Clip` table `| Field | Content |` with `Length` (seconds, 5 to 12), `Size` (`<width>x<height>`,
+- a `## Clip` table `| Field | Content |` with `Length` (seconds, 5 to 30), `Size` (`<width>x<height>`,
   both even, 16:9, for example `1280x720 16:9`; absent: 1920x1080), `Frame rate` (`<n> fps`, 12 to 30;
   absent: 30), `Outputs` (free text), `Cards` (`none`, or no row: the kit renders no card), `Logo`
   (`top right` by default), `Setting filmed`, `Filmed on` and `Stage` (free text);
@@ -164,7 +164,7 @@ still refused.
 
 `storyboard.mjs` refuses, each message starting with `clip.md:`:
 
-- a `Length` missing or outside 5 to 12 s;
+- a `Length` missing or outside 5 to 30 s;
 - a `Size` that is not `<width>x<height>`, has an odd side, or is not 16:9; a `Frame rate` that is
   not an integer `<n> fps` from 12 to 30; a `Cards` row that is not `none`;
 - no `Text` row at all; a `Text` row in a section with no readable `Time`; more than one `Text` row in
@@ -253,7 +253,7 @@ failure on a large screen.
   tooltip, a personal name or path, a dirty tab. Say what was not checked: motion, rhythm and the
   loop as watched are the maintainer's to judge. The loop seam is a number (SSIM) that does not
   prove the fade-out reads well.
-- The `check` step fails unless every line holds: MP4 duration 5 to 12 s equal to `clip.md`'s
+- The `check` step fails unless every line holds: MP4 duration 5 to 30 s equal to `clip.md`'s
   `Length` within one frame, the storyboard's size and frame rate, `h264` `yuv420p`, no audio, `faststart`, at most
   10 MB; WebM `vp9`, same size, fps and duration, at most 3 MB; GIF at 960 px (or the ladder's
   width), 12 fps (or the ladder's), at most 3 MB, a NETSCAPE2.0 loop extension with a count of 0;
